@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CesiumForUnity", "CesiumForUnity\CesiumForUnity.csproj", "{BC2A5189-B596-4874-BBAE-7B815CAEAA07}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cesium-native-sharp", "cesium-native-sharp", "{9AC083FF-0554-420A-9ADD-3D5AF432F353}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CesiumNativeSharp", "cesium-native-sharp\CesiumNativeSharp\CesiumNativeSharp.csproj", "{A3CB7CF1-F115-4C51-BB64-DE65DEA21A93}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CesiumNativeSharpTests", "cesium-native-sharp\CesiumNativeSharpTests\CesiumNativeSharpTests.csproj", "{46D4AF84-6DE1-4970-A579-FC02FBF11F7A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BC2A5189-B596-4874-BBAE-7B815CAEAA07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC2A5189-B596-4874-BBAE-7B815CAEAA07}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC2A5189-B596-4874-BBAE-7B815CAEAA07}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC2A5189-B596-4874-BBAE-7B815CAEAA07}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3CB7CF1-F115-4C51-BB64-DE65DEA21A93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3CB7CF1-F115-4C51-BB64-DE65DEA21A93}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3CB7CF1-F115-4C51-BB64-DE65DEA21A93}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3CB7CF1-F115-4C51-BB64-DE65DEA21A93}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46D4AF84-6DE1-4970-A579-FC02FBF11F7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46D4AF84-6DE1-4970-A579-FC02FBF11F7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46D4AF84-6DE1-4970-A579-FC02FBF11F7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46D4AF84-6DE1-4970-A579-FC02FBF11F7A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A3CB7CF1-F115-4C51-BB64-DE65DEA21A93} = {9AC083FF-0554-420A-9ADD-3D5AF432F353}
+		{46D4AF84-6DE1-4970-A579-FC02FBF11F7A} = {9AC083FF-0554-420A-9ADD-3D5AF432F353}
+	EndGlobalSection
+EndGlobal
