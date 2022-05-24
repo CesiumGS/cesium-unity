@@ -17,7 +17,11 @@ namespace CesiumForUnity
             }
         }
 
-        private UnityTilesetExternals() : base(new UnityAsyncSystem(), new UnityAssetAccessor(), new UnityLogger())
+        private UnityTilesetExternals() : base(
+            new UnityAsyncSystem(),
+            new UnityAssetAccessor(),
+            new UnityLogger(),
+            new UnityPrepareRendererResources())
         {
 
         }

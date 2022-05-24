@@ -37,7 +37,7 @@ namespace CesiumForUnity
             if (this._tileset == null) return;
 
             // TODO: Maybe add a "Cesium Camera" behavior that can be added to arbitrary cameras, and handle its
-            // OnPreCull event to accumulate cameras to use for tile selection. By probably fall back on the
+            // OnPreCull event to accumulate cameras to use for tile selection. But probably fall back on the
             // main camera when no cameras have been explicitly tagged.
             Camera camera = Camera.main;
 
