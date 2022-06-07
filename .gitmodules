@@ -1,0 +1,3 @@
+[submodule "UnityNativeScripting"]
+	path = UnityNativeScripting
+	url = https://github.com/CesiumGS/UnityNativeScripting.git

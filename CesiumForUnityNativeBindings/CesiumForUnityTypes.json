@@ -1,0 +1,344 @@
+{
+	"Assemblies": [
+	],
+	"Types": [
+		{
+			"Name": " System.IFormattable"
+		},
+		{
+			"Name": " System.IConvertible"
+		},
+		{
+			"Name": " System.IComparable"
+		},
+		{
+			"Name": "System.IEquatable`1",
+			"GenericParams": [
+				{
+					"Types": [
+						"System.Boolean"
+					]
+				},
+				{
+					"Types": [
+						"System.Char"
+					]
+				},
+				{
+					"Types": [
+						"System.SByte"
+					]
+				},
+				{
+					"Types": [
+						"System.Byte"
+					]
+				},
+				{
+					"Types": [
+						"System.Int16"
+					]
+				},
+				{
+					"Types": [
+						"System.UInt16"
+					]
+				},
+				{
+					"Types": [
+						"System.Int32"
+					]
+				},
+				{
+					"Types": [
+						"System.UInt32"
+					]
+				},
+				{
+					"Types": [
+						"System.Int64"
+					]
+				},
+				{
+					"Types": [
+						"System.UInt64"
+					]
+				},
+				{
+					"Types": [
+						"System.Single"
+					]
+				},
+				{
+					"Types": [
+						"System.Double"
+					]
+				},
+				{
+					"Types": [
+						"System.Decimal"
+					]
+				},
+				{
+					"Types": [
+						"UnityEngine.Vector3"
+					]
+				}
+			]
+		},
+		{
+			"Name": "System.IComparable`1",
+			"GenericParams": [
+				{
+					"Types": [
+						"System.Boolean"
+					]
+				},
+				{
+					"Types": [
+						"System.Char"
+					]
+				},
+				{
+					"Types": [
+						"System.SByte"
+					]
+				},
+				{
+					"Types": [
+						"System.Byte"
+					]
+				},
+				{
+					"Types": [
+						"System.Int16"
+					]
+				},
+				{
+					"Types": [
+						"System.UInt16"
+					]
+				},
+				{
+					"Types": [
+						"System.Int32"
+					]
+				},
+				{
+					"Types": [
+						"System.UInt32"
+					]
+				},
+				{
+					"Types": [
+						"System.Int64"
+					]
+				},
+				{
+					"Types": [
+						"System.UInt64"
+					]
+				},
+				{
+					"Types": [
+						"System.Single"
+					]
+				},
+				{
+					"Types": [
+						"System.Double"
+					]
+				},
+				{
+					"Types": [
+						"System.Decimal"
+					]
+				}
+			]
+		},
+		{
+			"Name": " System.Runtime.Serialization.IDeserializationCallback"
+		},
+		{
+			"Name": "System.Decimal",
+			"Constructors": [
+				{
+					"ParamTypes": [
+						"System.Double"
+					]
+				},
+				{
+					"ParamTypes": [
+						"System.UInt64"
+					]
+				}
+			]
+		},
+		{
+			"Name": "UnityEngine.Vector3",
+			"Constructors": [
+				{
+					"ParamTypes": [
+						"System.Single",
+						"System.Single",
+						"System.Single"
+					]
+				}
+			],
+			"Methods": [
+				{
+					"Name": "x+y",
+					"ParamTypes": [
+						"UnityEngine.Vector3",
+						"UnityEngine.Vector3"
+					]
+				}
+			]
+		},
+		{
+			"Name": "UnityEngine.Object",
+			"Properties": [
+				{
+					"Name": "name",
+					"Get": {},
+					"Set": {}
+				}
+			]
+		},
+		{
+			"Name": "UnityEngine.Component",
+			"Properties": [
+				{
+					"Name": "transform",
+					"Get": {}
+				}
+			]
+		},
+		{
+			"Name": "UnityEngine.Transform",
+			"Properties": [
+				{
+					"Name": "position",
+					"Get": {},
+					"Set": {
+						"Exceptions": [
+							"System.NullReferenceException"
+						]
+					}
+				}
+			]
+		},
+		{
+			"Name": "System.Collections.IEnumerator",
+			"Methods": [
+				{
+					"Name": "MoveNext",
+					"ParamTypes": []
+				}
+			],
+			"Properties": [
+				{
+					"Name": "Current",
+					"Get": {},
+					"Set": {}
+				}
+			]
+		},
+		{
+			"Name": "System.Runtime.Serialization.ISerializable"
+		},
+		{
+			"Name": "System.Runtime.InteropServices._Exception"
+		},
+		{
+			"Name": "UnityEngine.GameObject",
+			"Constructors": [
+			],
+			"Methods": [
+				{
+					"Name": "AddComponent",
+					"ParamTypes": [],
+					"GenericParams": [
+						{
+							"Types": [
+								"CesiumForUnity.Cesium3DTileset"
+							]
+						}
+					]
+				},
+				{
+					"Name": "CreatePrimitive",
+					"ParamTypes": [
+						"UnityEngine.PrimitiveType"
+					]
+				}
+			]
+		},
+		{
+			"Name": "UnityEngine.Debug",
+			"Methods": [
+				{
+					"Name": "Log",
+					"ParamTypes": [
+						"System.Object"
+					]
+				}
+			]
+		},
+		{
+			"Name": "UnityEngine.Behaviour"
+		},
+		{
+			"Name": "UnityEngine.MonoBehaviour",
+			"Properties": [
+				{
+					"Name": "transform",
+					"Get": {},
+					"Set": {}
+				}
+			]
+		},
+		{
+			"Name": "System.Exception",
+			"Constructors": [
+				{
+					"ParamTypes": [
+						"System.String"
+					]
+				}
+			]
+		},
+		{
+			"Name": "System.SystemException"
+		},
+		{
+			"Name": "System.NullReferenceException"
+		},
+		{
+			"Name": "UnityEngine.PrimitiveType"
+		},
+		{
+			"Name": "UnityEngine.Time",
+			"Properties": [
+				{
+					"Name": "deltaTime",
+					"Get": {},
+					"Set": {}
+				}
+			]
+		},
+		{
+			"Name": "CesiumForUnity.AbstractBaseCesium3DTileset",
+			"BaseTypes": [
+				{
+					"BaseName": "CesiumForUnity.BaseCesium3DTileset",
+					"DerivedName": "CesiumForUnity.Cesium3DTileset"
+				}
+			]
+		}
+	],
+	"Arrays": [
+	],
+	"Delegates": [
+	]
+}
