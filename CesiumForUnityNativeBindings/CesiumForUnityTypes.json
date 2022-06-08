@@ -1,5 +1,6 @@
 {
 	"Assemblies": [
+		"UNITY_ASSETS/CesiumForUnity.dll"
 	],
 	"Types": [
 		{
@@ -261,7 +262,7 @@
 					"GenericParams": [
 						{
 							"Types": [
-								"CesiumForUnity.Cesium3DTileset"
+								"CesiumForUnity.BaseCesium3DTileset"
 							]
 						}
 					]

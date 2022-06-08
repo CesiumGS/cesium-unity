@@ -4,7 +4,7 @@
 The Unity / C# types and methods to expose to C++ are defined in `CesiumForUnityNativeBindings/CesiumForUnityTypes.json`. To generate the C# and C++ code that connects the two languages, run:
 
 ```
-./UnitNativeScripting/generate-bindings.bat
+./UnityNativeScripting/generate-bindings.bat
 ```
 
 The C# code is written to `CesiumForUnityNativeBindings/generated`. The C++ code is written to `CesiumForUnityNative/generated/src`.

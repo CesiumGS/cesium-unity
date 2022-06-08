@@ -288,15 +288,290 @@ namespace System
 }
 
 /*BEGIN TEMPLATE DECLARATIONS*/
+namespace System
+{
+	template<typename TT0> struct IEquatable_1;
+}
 
+namespace System
+{
+	template<typename TT0> struct IComparable_1;
+}
 /*END TEMPLATE DECLARATIONS*/
 
 /*BEGIN TYPE DECLARATIONS*/
+namespace System
+{
+	struct IFormattable;
+}
 
+namespace System
+{
+	struct IConvertible;
+}
+
+namespace System
+{
+	struct IComparable;
+}
+
+namespace System
+{
+	namespace Runtime
+	{
+		namespace Serialization
+		{
+			struct IDeserializationCallback;
+		}
+	}
+}
+
+namespace System
+{
+	struct Decimal;
+}
+
+namespace UnityEngine
+{
+	struct Vector3;
+}
+
+namespace UnityEngine
+{
+	struct Object;
+}
+
+namespace UnityEngine
+{
+	struct Component;
+}
+
+namespace UnityEngine
+{
+	struct Transform;
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		struct IEnumerator;
+	}
+}
+
+namespace System
+{
+	namespace Runtime
+	{
+		namespace Serialization
+		{
+			struct ISerializable;
+		}
+	}
+}
+
+namespace System
+{
+	namespace Runtime
+	{
+		namespace InteropServices
+		{
+			struct _Exception;
+		}
+	}
+}
+
+namespace UnityEngine
+{
+	struct GameObject;
+}
+
+namespace UnityEngine
+{
+	struct Debug;
+}
+
+namespace UnityEngine
+{
+	struct Behaviour;
+}
+
+namespace UnityEngine
+{
+	struct MonoBehaviour;
+}
+
+namespace System
+{
+	struct Exception;
+}
+
+namespace System
+{
+	struct SystemException;
+}
+
+namespace System
+{
+	struct NullReferenceException;
+}
+
+namespace UnityEngine
+{
+	struct PrimitiveType;
+}
+
+namespace UnityEngine
+{
+	struct Time;
+}
+
+namespace CesiumForUnity
+{
+	struct AbstractBaseCesium3DTileset;
+}
+
+namespace CesiumForUnity
+{
+	struct BaseCesium3DTileset;
+}
 /*END TYPE DECLARATIONS*/
 
 /*BEGIN TEMPLATE SPECIALIZATION DECLARATIONS*/
+namespace System
+{
+	template<> struct IEquatable_1<System::Boolean>;
+}
 
+namespace System
+{
+	template<> struct IEquatable_1<System::Char>;
+}
+
+namespace System
+{
+	template<> struct IEquatable_1<System::SByte>;
+}
+
+namespace System
+{
+	template<> struct IEquatable_1<System::Byte>;
+}
+
+namespace System
+{
+	template<> struct IEquatable_1<System::Int16>;
+}
+
+namespace System
+{
+	template<> struct IEquatable_1<System::UInt16>;
+}
+
+namespace System
+{
+	template<> struct IEquatable_1<System::Int32>;
+}
+
+namespace System
+{
+	template<> struct IEquatable_1<System::UInt32>;
+}
+
+namespace System
+{
+	template<> struct IEquatable_1<System::Int64>;
+}
+
+namespace System
+{
+	template<> struct IEquatable_1<System::UInt64>;
+}
+
+namespace System
+{
+	template<> struct IEquatable_1<System::Single>;
+}
+
+namespace System
+{
+	template<> struct IEquatable_1<System::Double>;
+}
+
+namespace System
+{
+	template<> struct IEquatable_1<System::Decimal>;
+}
+
+namespace System
+{
+	template<> struct IEquatable_1<UnityEngine::Vector3>;
+}
+
+namespace System
+{
+	template<> struct IComparable_1<System::Boolean>;
+}
+
+namespace System
+{
+	template<> struct IComparable_1<System::Char>;
+}
+
+namespace System
+{
+	template<> struct IComparable_1<System::SByte>;
+}
+
+namespace System
+{
+	template<> struct IComparable_1<System::Byte>;
+}
+
+namespace System
+{
+	template<> struct IComparable_1<System::Int16>;
+}
+
+namespace System
+{
+	template<> struct IComparable_1<System::UInt16>;
+}
+
+namespace System
+{
+	template<> struct IComparable_1<System::Int32>;
+}
+
+namespace System
+{
+	template<> struct IComparable_1<System::UInt32>;
+}
+
+namespace System
+{
+	template<> struct IComparable_1<System::Int64>;
+}
+
+namespace System
+{
+	template<> struct IComparable_1<System::UInt64>;
+}
+
+namespace System
+{
+	template<> struct IComparable_1<System::Single>;
+}
+
+namespace System
+{
+	template<> struct IComparable_1<System::Double>;
+}
+
+namespace System
+{
+	template<> struct IComparable_1<System::Decimal>;
+}
 /*END TEMPLATE SPECIALIZATION DECLARATIONS*/
 
 ////////////////////////////////////////////////////////////////
@@ -316,7 +591,21 @@ namespace System
 		virtual void ThrowReferenceToThis();
 		
 		/*BEGIN UNBOXING METHOD DECLARATIONS*/
-
+		explicit operator System::Decimal();
+		explicit operator UnityEngine::Vector3();
+		explicit operator UnityEngine::PrimitiveType();
+		explicit operator System::Boolean();
+		explicit operator System::SByte();
+		explicit operator System::Byte();
+		explicit operator System::Int16();
+		explicit operator System::UInt16();
+		explicit operator System::Int32();
+		explicit operator System::UInt32();
+		explicit operator System::Int64();
+		explicit operator System::UInt64();
+		explicit operator System::Char();
+		explicit operator System::Single();
+		explicit operator System::Double();
 		/*END UNBOXING METHOD DECLARATIONS*/
 	};
 	
@@ -392,11 +681,959 @@ namespace Plugin
 }
 
 /*BEGIN TYPE DEFINITIONS*/
+namespace System
+{
+	struct IFormattable : virtual System::Object
+	{
+		IFormattable(decltype(nullptr));
+		IFormattable(Plugin::InternalUse, int32_t handle);
+		IFormattable(const IFormattable& other);
+		IFormattable(IFormattable&& other);
+		virtual ~IFormattable();
+		IFormattable& operator=(const IFormattable& other);
+		IFormattable& operator=(decltype(nullptr));
+		IFormattable& operator=(IFormattable&& other);
+		bool operator==(const IFormattable& other) const;
+		bool operator!=(const IFormattable& other) const;
+	};
+}
 
+namespace System
+{
+	struct IConvertible : virtual System::Object
+	{
+		IConvertible(decltype(nullptr));
+		IConvertible(Plugin::InternalUse, int32_t handle);
+		IConvertible(const IConvertible& other);
+		IConvertible(IConvertible&& other);
+		virtual ~IConvertible();
+		IConvertible& operator=(const IConvertible& other);
+		IConvertible& operator=(decltype(nullptr));
+		IConvertible& operator=(IConvertible&& other);
+		bool operator==(const IConvertible& other) const;
+		bool operator!=(const IConvertible& other) const;
+	};
+}
+
+namespace System
+{
+	struct IComparable : virtual System::Object
+	{
+		IComparable(decltype(nullptr));
+		IComparable(Plugin::InternalUse, int32_t handle);
+		IComparable(const IComparable& other);
+		IComparable(IComparable&& other);
+		virtual ~IComparable();
+		IComparable& operator=(const IComparable& other);
+		IComparable& operator=(decltype(nullptr));
+		IComparable& operator=(IComparable&& other);
+		bool operator==(const IComparable& other) const;
+		bool operator!=(const IComparable& other) const;
+	};
+}
+
+namespace System
+{
+	template<> struct IEquatable_1<System::Boolean> : virtual System::Object
+	{
+		IEquatable_1(decltype(nullptr));
+		IEquatable_1(Plugin::InternalUse, int32_t handle);
+		IEquatable_1(const IEquatable_1<System::Boolean>& other);
+		IEquatable_1(IEquatable_1<System::Boolean>&& other);
+		virtual ~IEquatable_1();
+		IEquatable_1<System::Boolean>& operator=(const IEquatable_1<System::Boolean>& other);
+		IEquatable_1<System::Boolean>& operator=(decltype(nullptr));
+		IEquatable_1<System::Boolean>& operator=(IEquatable_1<System::Boolean>&& other);
+		bool operator==(const IEquatable_1<System::Boolean>& other) const;
+		bool operator!=(const IEquatable_1<System::Boolean>& other) const;
+	};
+}
+
+namespace System
+{
+	template<> struct IEquatable_1<System::Char> : virtual System::Object
+	{
+		IEquatable_1(decltype(nullptr));
+		IEquatable_1(Plugin::InternalUse, int32_t handle);
+		IEquatable_1(const IEquatable_1<System::Char>& other);
+		IEquatable_1(IEquatable_1<System::Char>&& other);
+		virtual ~IEquatable_1();
+		IEquatable_1<System::Char>& operator=(const IEquatable_1<System::Char>& other);
+		IEquatable_1<System::Char>& operator=(decltype(nullptr));
+		IEquatable_1<System::Char>& operator=(IEquatable_1<System::Char>&& other);
+		bool operator==(const IEquatable_1<System::Char>& other) const;
+		bool operator!=(const IEquatable_1<System::Char>& other) const;
+	};
+}
+
+namespace System
+{
+	template<> struct IEquatable_1<System::SByte> : virtual System::Object
+	{
+		IEquatable_1(decltype(nullptr));
+		IEquatable_1(Plugin::InternalUse, int32_t handle);
+		IEquatable_1(const IEquatable_1<System::SByte>& other);
+		IEquatable_1(IEquatable_1<System::SByte>&& other);
+		virtual ~IEquatable_1();
+		IEquatable_1<System::SByte>& operator=(const IEquatable_1<System::SByte>& other);
+		IEquatable_1<System::SByte>& operator=(decltype(nullptr));
+		IEquatable_1<System::SByte>& operator=(IEquatable_1<System::SByte>&& other);
+		bool operator==(const IEquatable_1<System::SByte>& other) const;
+		bool operator!=(const IEquatable_1<System::SByte>& other) const;
+	};
+}
+
+namespace System
+{
+	template<> struct IEquatable_1<System::Byte> : virtual System::Object
+	{
+		IEquatable_1(decltype(nullptr));
+		IEquatable_1(Plugin::InternalUse, int32_t handle);
+		IEquatable_1(const IEquatable_1<System::Byte>& other);
+		IEquatable_1(IEquatable_1<System::Byte>&& other);
+		virtual ~IEquatable_1();
+		IEquatable_1<System::Byte>& operator=(const IEquatable_1<System::Byte>& other);
+		IEquatable_1<System::Byte>& operator=(decltype(nullptr));
+		IEquatable_1<System::Byte>& operator=(IEquatable_1<System::Byte>&& other);
+		bool operator==(const IEquatable_1<System::Byte>& other) const;
+		bool operator!=(const IEquatable_1<System::Byte>& other) const;
+	};
+}
+
+namespace System
+{
+	template<> struct IEquatable_1<System::Int16> : virtual System::Object
+	{
+		IEquatable_1(decltype(nullptr));
+		IEquatable_1(Plugin::InternalUse, int32_t handle);
+		IEquatable_1(const IEquatable_1<System::Int16>& other);
+		IEquatable_1(IEquatable_1<System::Int16>&& other);
+		virtual ~IEquatable_1();
+		IEquatable_1<System::Int16>& operator=(const IEquatable_1<System::Int16>& other);
+		IEquatable_1<System::Int16>& operator=(decltype(nullptr));
+		IEquatable_1<System::Int16>& operator=(IEquatable_1<System::Int16>&& other);
+		bool operator==(const IEquatable_1<System::Int16>& other) const;
+		bool operator!=(const IEquatable_1<System::Int16>& other) const;
+	};
+}
+
+namespace System
+{
+	template<> struct IEquatable_1<System::UInt16> : virtual System::Object
+	{
+		IEquatable_1(decltype(nullptr));
+		IEquatable_1(Plugin::InternalUse, int32_t handle);
+		IEquatable_1(const IEquatable_1<System::UInt16>& other);
+		IEquatable_1(IEquatable_1<System::UInt16>&& other);
+		virtual ~IEquatable_1();
+		IEquatable_1<System::UInt16>& operator=(const IEquatable_1<System::UInt16>& other);
+		IEquatable_1<System::UInt16>& operator=(decltype(nullptr));
+		IEquatable_1<System::UInt16>& operator=(IEquatable_1<System::UInt16>&& other);
+		bool operator==(const IEquatable_1<System::UInt16>& other) const;
+		bool operator!=(const IEquatable_1<System::UInt16>& other) const;
+	};
+}
+
+namespace System
+{
+	template<> struct IEquatable_1<System::Int32> : virtual System::Object
+	{
+		IEquatable_1(decltype(nullptr));
+		IEquatable_1(Plugin::InternalUse, int32_t handle);
+		IEquatable_1(const IEquatable_1<System::Int32>& other);
+		IEquatable_1(IEquatable_1<System::Int32>&& other);
+		virtual ~IEquatable_1();
+		IEquatable_1<System::Int32>& operator=(const IEquatable_1<System::Int32>& other);
+		IEquatable_1<System::Int32>& operator=(decltype(nullptr));
+		IEquatable_1<System::Int32>& operator=(IEquatable_1<System::Int32>&& other);
+		bool operator==(const IEquatable_1<System::Int32>& other) const;
+		bool operator!=(const IEquatable_1<System::Int32>& other) const;
+	};
+}
+
+namespace System
+{
+	template<> struct IEquatable_1<System::UInt32> : virtual System::Object
+	{
+		IEquatable_1(decltype(nullptr));
+		IEquatable_1(Plugin::InternalUse, int32_t handle);
+		IEquatable_1(const IEquatable_1<System::UInt32>& other);
+		IEquatable_1(IEquatable_1<System::UInt32>&& other);
+		virtual ~IEquatable_1();
+		IEquatable_1<System::UInt32>& operator=(const IEquatable_1<System::UInt32>& other);
+		IEquatable_1<System::UInt32>& operator=(decltype(nullptr));
+		IEquatable_1<System::UInt32>& operator=(IEquatable_1<System::UInt32>&& other);
+		bool operator==(const IEquatable_1<System::UInt32>& other) const;
+		bool operator!=(const IEquatable_1<System::UInt32>& other) const;
+	};
+}
+
+namespace System
+{
+	template<> struct IEquatable_1<System::Int64> : virtual System::Object
+	{
+		IEquatable_1(decltype(nullptr));
+		IEquatable_1(Plugin::InternalUse, int32_t handle);
+		IEquatable_1(const IEquatable_1<System::Int64>& other);
+		IEquatable_1(IEquatable_1<System::Int64>&& other);
+		virtual ~IEquatable_1();
+		IEquatable_1<System::Int64>& operator=(const IEquatable_1<System::Int64>& other);
+		IEquatable_1<System::Int64>& operator=(decltype(nullptr));
+		IEquatable_1<System::Int64>& operator=(IEquatable_1<System::Int64>&& other);
+		bool operator==(const IEquatable_1<System::Int64>& other) const;
+		bool operator!=(const IEquatable_1<System::Int64>& other) const;
+	};
+}
+
+namespace System
+{
+	template<> struct IEquatable_1<System::UInt64> : virtual System::Object
+	{
+		IEquatable_1(decltype(nullptr));
+		IEquatable_1(Plugin::InternalUse, int32_t handle);
+		IEquatable_1(const IEquatable_1<System::UInt64>& other);
+		IEquatable_1(IEquatable_1<System::UInt64>&& other);
+		virtual ~IEquatable_1();
+		IEquatable_1<System::UInt64>& operator=(const IEquatable_1<System::UInt64>& other);
+		IEquatable_1<System::UInt64>& operator=(decltype(nullptr));
+		IEquatable_1<System::UInt64>& operator=(IEquatable_1<System::UInt64>&& other);
+		bool operator==(const IEquatable_1<System::UInt64>& other) const;
+		bool operator!=(const IEquatable_1<System::UInt64>& other) const;
+	};
+}
+
+namespace System
+{
+	template<> struct IEquatable_1<System::Single> : virtual System::Object
+	{
+		IEquatable_1(decltype(nullptr));
+		IEquatable_1(Plugin::InternalUse, int32_t handle);
+		IEquatable_1(const IEquatable_1<System::Single>& other);
+		IEquatable_1(IEquatable_1<System::Single>&& other);
+		virtual ~IEquatable_1();
+		IEquatable_1<System::Single>& operator=(const IEquatable_1<System::Single>& other);
+		IEquatable_1<System::Single>& operator=(decltype(nullptr));
+		IEquatable_1<System::Single>& operator=(IEquatable_1<System::Single>&& other);
+		bool operator==(const IEquatable_1<System::Single>& other) const;
+		bool operator!=(const IEquatable_1<System::Single>& other) const;
+	};
+}
+
+namespace System
+{
+	template<> struct IEquatable_1<System::Double> : virtual System::Object
+	{
+		IEquatable_1(decltype(nullptr));
+		IEquatable_1(Plugin::InternalUse, int32_t handle);
+		IEquatable_1(const IEquatable_1<System::Double>& other);
+		IEquatable_1(IEquatable_1<System::Double>&& other);
+		virtual ~IEquatable_1();
+		IEquatable_1<System::Double>& operator=(const IEquatable_1<System::Double>& other);
+		IEquatable_1<System::Double>& operator=(decltype(nullptr));
+		IEquatable_1<System::Double>& operator=(IEquatable_1<System::Double>&& other);
+		bool operator==(const IEquatable_1<System::Double>& other) const;
+		bool operator!=(const IEquatable_1<System::Double>& other) const;
+	};
+}
+
+namespace System
+{
+	template<> struct IEquatable_1<System::Decimal> : virtual System::Object
+	{
+		IEquatable_1(decltype(nullptr));
+		IEquatable_1(Plugin::InternalUse, int32_t handle);
+		IEquatable_1(const IEquatable_1<System::Decimal>& other);
+		IEquatable_1(IEquatable_1<System::Decimal>&& other);
+		virtual ~IEquatable_1();
+		IEquatable_1<System::Decimal>& operator=(const IEquatable_1<System::Decimal>& other);
+		IEquatable_1<System::Decimal>& operator=(decltype(nullptr));
+		IEquatable_1<System::Decimal>& operator=(IEquatable_1<System::Decimal>&& other);
+		bool operator==(const IEquatable_1<System::Decimal>& other) const;
+		bool operator!=(const IEquatable_1<System::Decimal>& other) const;
+	};
+}
+
+namespace System
+{
+	template<> struct IEquatable_1<UnityEngine::Vector3> : virtual System::Object
+	{
+		IEquatable_1(decltype(nullptr));
+		IEquatable_1(Plugin::InternalUse, int32_t handle);
+		IEquatable_1(const IEquatable_1<UnityEngine::Vector3>& other);
+		IEquatable_1(IEquatable_1<UnityEngine::Vector3>&& other);
+		virtual ~IEquatable_1();
+		IEquatable_1<UnityEngine::Vector3>& operator=(const IEquatable_1<UnityEngine::Vector3>& other);
+		IEquatable_1<UnityEngine::Vector3>& operator=(decltype(nullptr));
+		IEquatable_1<UnityEngine::Vector3>& operator=(IEquatable_1<UnityEngine::Vector3>&& other);
+		bool operator==(const IEquatable_1<UnityEngine::Vector3>& other) const;
+		bool operator!=(const IEquatable_1<UnityEngine::Vector3>& other) const;
+	};
+}
+
+namespace System
+{
+	template<> struct IComparable_1<System::Boolean> : virtual System::Object
+	{
+		IComparable_1(decltype(nullptr));
+		IComparable_1(Plugin::InternalUse, int32_t handle);
+		IComparable_1(const IComparable_1<System::Boolean>& other);
+		IComparable_1(IComparable_1<System::Boolean>&& other);
+		virtual ~IComparable_1();
+		IComparable_1<System::Boolean>& operator=(const IComparable_1<System::Boolean>& other);
+		IComparable_1<System::Boolean>& operator=(decltype(nullptr));
+		IComparable_1<System::Boolean>& operator=(IComparable_1<System::Boolean>&& other);
+		bool operator==(const IComparable_1<System::Boolean>& other) const;
+		bool operator!=(const IComparable_1<System::Boolean>& other) const;
+	};
+}
+
+namespace System
+{
+	template<> struct IComparable_1<System::Char> : virtual System::Object
+	{
+		IComparable_1(decltype(nullptr));
+		IComparable_1(Plugin::InternalUse, int32_t handle);
+		IComparable_1(const IComparable_1<System::Char>& other);
+		IComparable_1(IComparable_1<System::Char>&& other);
+		virtual ~IComparable_1();
+		IComparable_1<System::Char>& operator=(const IComparable_1<System::Char>& other);
+		IComparable_1<System::Char>& operator=(decltype(nullptr));
+		IComparable_1<System::Char>& operator=(IComparable_1<System::Char>&& other);
+		bool operator==(const IComparable_1<System::Char>& other) const;
+		bool operator!=(const IComparable_1<System::Char>& other) const;
+	};
+}
+
+namespace System
+{
+	template<> struct IComparable_1<System::SByte> : virtual System::Object
+	{
+		IComparable_1(decltype(nullptr));
+		IComparable_1(Plugin::InternalUse, int32_t handle);
+		IComparable_1(const IComparable_1<System::SByte>& other);
+		IComparable_1(IComparable_1<System::SByte>&& other);
+		virtual ~IComparable_1();
+		IComparable_1<System::SByte>& operator=(const IComparable_1<System::SByte>& other);
+		IComparable_1<System::SByte>& operator=(decltype(nullptr));
+		IComparable_1<System::SByte>& operator=(IComparable_1<System::SByte>&& other);
+		bool operator==(const IComparable_1<System::SByte>& other) const;
+		bool operator!=(const IComparable_1<System::SByte>& other) const;
+	};
+}
+
+namespace System
+{
+	template<> struct IComparable_1<System::Byte> : virtual System::Object
+	{
+		IComparable_1(decltype(nullptr));
+		IComparable_1(Plugin::InternalUse, int32_t handle);
+		IComparable_1(const IComparable_1<System::Byte>& other);
+		IComparable_1(IComparable_1<System::Byte>&& other);
+		virtual ~IComparable_1();
+		IComparable_1<System::Byte>& operator=(const IComparable_1<System::Byte>& other);
+		IComparable_1<System::Byte>& operator=(decltype(nullptr));
+		IComparable_1<System::Byte>& operator=(IComparable_1<System::Byte>&& other);
+		bool operator==(const IComparable_1<System::Byte>& other) const;
+		bool operator!=(const IComparable_1<System::Byte>& other) const;
+	};
+}
+
+namespace System
+{
+	template<> struct IComparable_1<System::Int16> : virtual System::Object
+	{
+		IComparable_1(decltype(nullptr));
+		IComparable_1(Plugin::InternalUse, int32_t handle);
+		IComparable_1(const IComparable_1<System::Int16>& other);
+		IComparable_1(IComparable_1<System::Int16>&& other);
+		virtual ~IComparable_1();
+		IComparable_1<System::Int16>& operator=(const IComparable_1<System::Int16>& other);
+		IComparable_1<System::Int16>& operator=(decltype(nullptr));
+		IComparable_1<System::Int16>& operator=(IComparable_1<System::Int16>&& other);
+		bool operator==(const IComparable_1<System::Int16>& other) const;
+		bool operator!=(const IComparable_1<System::Int16>& other) const;
+	};
+}
+
+namespace System
+{
+	template<> struct IComparable_1<System::UInt16> : virtual System::Object
+	{
+		IComparable_1(decltype(nullptr));
+		IComparable_1(Plugin::InternalUse, int32_t handle);
+		IComparable_1(const IComparable_1<System::UInt16>& other);
+		IComparable_1(IComparable_1<System::UInt16>&& other);
+		virtual ~IComparable_1();
+		IComparable_1<System::UInt16>& operator=(const IComparable_1<System::UInt16>& other);
+		IComparable_1<System::UInt16>& operator=(decltype(nullptr));
+		IComparable_1<System::UInt16>& operator=(IComparable_1<System::UInt16>&& other);
+		bool operator==(const IComparable_1<System::UInt16>& other) const;
+		bool operator!=(const IComparable_1<System::UInt16>& other) const;
+	};
+}
+
+namespace System
+{
+	template<> struct IComparable_1<System::Int32> : virtual System::Object
+	{
+		IComparable_1(decltype(nullptr));
+		IComparable_1(Plugin::InternalUse, int32_t handle);
+		IComparable_1(const IComparable_1<System::Int32>& other);
+		IComparable_1(IComparable_1<System::Int32>&& other);
+		virtual ~IComparable_1();
+		IComparable_1<System::Int32>& operator=(const IComparable_1<System::Int32>& other);
+		IComparable_1<System::Int32>& operator=(decltype(nullptr));
+		IComparable_1<System::Int32>& operator=(IComparable_1<System::Int32>&& other);
+		bool operator==(const IComparable_1<System::Int32>& other) const;
+		bool operator!=(const IComparable_1<System::Int32>& other) const;
+	};
+}
+
+namespace System
+{
+	template<> struct IComparable_1<System::UInt32> : virtual System::Object
+	{
+		IComparable_1(decltype(nullptr));
+		IComparable_1(Plugin::InternalUse, int32_t handle);
+		IComparable_1(const IComparable_1<System::UInt32>& other);
+		IComparable_1(IComparable_1<System::UInt32>&& other);
+		virtual ~IComparable_1();
+		IComparable_1<System::UInt32>& operator=(const IComparable_1<System::UInt32>& other);
+		IComparable_1<System::UInt32>& operator=(decltype(nullptr));
+		IComparable_1<System::UInt32>& operator=(IComparable_1<System::UInt32>&& other);
+		bool operator==(const IComparable_1<System::UInt32>& other) const;
+		bool operator!=(const IComparable_1<System::UInt32>& other) const;
+	};
+}
+
+namespace System
+{
+	template<> struct IComparable_1<System::Int64> : virtual System::Object
+	{
+		IComparable_1(decltype(nullptr));
+		IComparable_1(Plugin::InternalUse, int32_t handle);
+		IComparable_1(const IComparable_1<System::Int64>& other);
+		IComparable_1(IComparable_1<System::Int64>&& other);
+		virtual ~IComparable_1();
+		IComparable_1<System::Int64>& operator=(const IComparable_1<System::Int64>& other);
+		IComparable_1<System::Int64>& operator=(decltype(nullptr));
+		IComparable_1<System::Int64>& operator=(IComparable_1<System::Int64>&& other);
+		bool operator==(const IComparable_1<System::Int64>& other) const;
+		bool operator!=(const IComparable_1<System::Int64>& other) const;
+	};
+}
+
+namespace System
+{
+	template<> struct IComparable_1<System::UInt64> : virtual System::Object
+	{
+		IComparable_1(decltype(nullptr));
+		IComparable_1(Plugin::InternalUse, int32_t handle);
+		IComparable_1(const IComparable_1<System::UInt64>& other);
+		IComparable_1(IComparable_1<System::UInt64>&& other);
+		virtual ~IComparable_1();
+		IComparable_1<System::UInt64>& operator=(const IComparable_1<System::UInt64>& other);
+		IComparable_1<System::UInt64>& operator=(decltype(nullptr));
+		IComparable_1<System::UInt64>& operator=(IComparable_1<System::UInt64>&& other);
+		bool operator==(const IComparable_1<System::UInt64>& other) const;
+		bool operator!=(const IComparable_1<System::UInt64>& other) const;
+	};
+}
+
+namespace System
+{
+	template<> struct IComparable_1<System::Single> : virtual System::Object
+	{
+		IComparable_1(decltype(nullptr));
+		IComparable_1(Plugin::InternalUse, int32_t handle);
+		IComparable_1(const IComparable_1<System::Single>& other);
+		IComparable_1(IComparable_1<System::Single>&& other);
+		virtual ~IComparable_1();
+		IComparable_1<System::Single>& operator=(const IComparable_1<System::Single>& other);
+		IComparable_1<System::Single>& operator=(decltype(nullptr));
+		IComparable_1<System::Single>& operator=(IComparable_1<System::Single>&& other);
+		bool operator==(const IComparable_1<System::Single>& other) const;
+		bool operator!=(const IComparable_1<System::Single>& other) const;
+	};
+}
+
+namespace System
+{
+	template<> struct IComparable_1<System::Double> : virtual System::Object
+	{
+		IComparable_1(decltype(nullptr));
+		IComparable_1(Plugin::InternalUse, int32_t handle);
+		IComparable_1(const IComparable_1<System::Double>& other);
+		IComparable_1(IComparable_1<System::Double>&& other);
+		virtual ~IComparable_1();
+		IComparable_1<System::Double>& operator=(const IComparable_1<System::Double>& other);
+		IComparable_1<System::Double>& operator=(decltype(nullptr));
+		IComparable_1<System::Double>& operator=(IComparable_1<System::Double>&& other);
+		bool operator==(const IComparable_1<System::Double>& other) const;
+		bool operator!=(const IComparable_1<System::Double>& other) const;
+	};
+}
+
+namespace System
+{
+	template<> struct IComparable_1<System::Decimal> : virtual System::Object
+	{
+		IComparable_1(decltype(nullptr));
+		IComparable_1(Plugin::InternalUse, int32_t handle);
+		IComparable_1(const IComparable_1<System::Decimal>& other);
+		IComparable_1(IComparable_1<System::Decimal>&& other);
+		virtual ~IComparable_1();
+		IComparable_1<System::Decimal>& operator=(const IComparable_1<System::Decimal>& other);
+		IComparable_1<System::Decimal>& operator=(decltype(nullptr));
+		IComparable_1<System::Decimal>& operator=(IComparable_1<System::Decimal>&& other);
+		bool operator==(const IComparable_1<System::Decimal>& other) const;
+		bool operator!=(const IComparable_1<System::Decimal>& other) const;
+	};
+}
+
+namespace System
+{
+	namespace Runtime
+	{
+		namespace Serialization
+		{
+			struct IDeserializationCallback : virtual System::Object
+			{
+				IDeserializationCallback(decltype(nullptr));
+				IDeserializationCallback(Plugin::InternalUse, int32_t handle);
+				IDeserializationCallback(const IDeserializationCallback& other);
+				IDeserializationCallback(IDeserializationCallback&& other);
+				virtual ~IDeserializationCallback();
+				IDeserializationCallback& operator=(const IDeserializationCallback& other);
+				IDeserializationCallback& operator=(decltype(nullptr));
+				IDeserializationCallback& operator=(IDeserializationCallback&& other);
+				bool operator==(const IDeserializationCallback& other) const;
+				bool operator!=(const IDeserializationCallback& other) const;
+			};
+		}
+	}
+}
+
+namespace System
+{
+	struct Decimal : Plugin::ManagedType
+	{
+		Decimal(decltype(nullptr));
+		Decimal(Plugin::InternalUse, int32_t handle);
+		Decimal(const Decimal& other);
+		Decimal(Decimal&& other);
+		virtual ~Decimal();
+		Decimal& operator=(const Decimal& other);
+		Decimal& operator=(decltype(nullptr));
+		Decimal& operator=(Decimal&& other);
+		bool operator==(const Decimal& other) const;
+		bool operator!=(const Decimal& other) const;
+		Decimal(System::Double value);
+		Decimal(System::UInt64 value);
+		explicit operator System::ValueType();
+		explicit operator System::Object();
+		explicit operator System::Runtime::Serialization::IDeserializationCallback();
+		explicit operator System::IFormattable();
+		explicit operator System::ISpanFormattable();
+		explicit operator System::IComparable();
+		explicit operator System::IComparable_1<System::Decimal>();
+		explicit operator System::IConvertible();
+		explicit operator System::IEquatable_1<System::Decimal>();
+	};
+}
+
+namespace UnityEngine
+{
+	struct Vector3
+	{
+		Vector3();
+		Vector3(System::Single x, System::Single y, System::Single z);
+		System::Single x;
+		System::Single y;
+		System::Single z;
+		virtual UnityEngine::Vector3 operator+(UnityEngine::Vector3& a);
+		explicit operator System::ValueType();
+		explicit operator System::Object();
+		explicit operator System::IFormattable();
+		explicit operator System::IEquatable_1<UnityEngine::Vector3>();
+	};
+}
+
+namespace UnityEngine
+{
+	struct Object : virtual System::Object
+	{
+		Object(decltype(nullptr));
+		Object(Plugin::InternalUse, int32_t handle);
+		Object(const Object& other);
+		Object(Object&& other);
+		virtual ~Object();
+		Object& operator=(const Object& other);
+		Object& operator=(decltype(nullptr));
+		Object& operator=(Object&& other);
+		bool operator==(const Object& other) const;
+		bool operator!=(const Object& other) const;
+		System::String GetName();
+		void SetName(System::String& value);
+	};
+}
+
+namespace UnityEngine
+{
+	struct Component : virtual UnityEngine::Object
+	{
+		Component(decltype(nullptr));
+		Component(Plugin::InternalUse, int32_t handle);
+		Component(const Component& other);
+		Component(Component&& other);
+		virtual ~Component();
+		Component& operator=(const Component& other);
+		Component& operator=(decltype(nullptr));
+		Component& operator=(Component&& other);
+		bool operator==(const Component& other) const;
+		bool operator!=(const Component& other) const;
+		UnityEngine::Transform GetTransform();
+	};
+}
+
+namespace UnityEngine
+{
+	struct Transform : virtual UnityEngine::Component, virtual System::Collections::IEnumerable
+	{
+		Transform(decltype(nullptr));
+		Transform(Plugin::InternalUse, int32_t handle);
+		Transform(const Transform& other);
+		Transform(Transform&& other);
+		virtual ~Transform();
+		Transform& operator=(const Transform& other);
+		Transform& operator=(decltype(nullptr));
+		Transform& operator=(Transform&& other);
+		bool operator==(const Transform& other) const;
+		bool operator!=(const Transform& other) const;
+		UnityEngine::Vector3 GetPosition();
+		void SetPosition(UnityEngine::Vector3& value);
+	};
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		struct IEnumerator : virtual System::Object
+		{
+			IEnumerator(decltype(nullptr));
+			IEnumerator(Plugin::InternalUse, int32_t handle);
+			IEnumerator(const IEnumerator& other);
+			IEnumerator(IEnumerator&& other);
+			virtual ~IEnumerator();
+			IEnumerator& operator=(const IEnumerator& other);
+			IEnumerator& operator=(decltype(nullptr));
+			IEnumerator& operator=(IEnumerator&& other);
+			bool operator==(const IEnumerator& other) const;
+			bool operator!=(const IEnumerator& other) const;
+			System::Object GetCurrent();
+			virtual System::Boolean MoveNext();
+		};
+	}
+}
+
+namespace System
+{
+	namespace Runtime
+	{
+		namespace Serialization
+		{
+			struct ISerializable : virtual System::Object
+			{
+				ISerializable(decltype(nullptr));
+				ISerializable(Plugin::InternalUse, int32_t handle);
+				ISerializable(const ISerializable& other);
+				ISerializable(ISerializable&& other);
+				virtual ~ISerializable();
+				ISerializable& operator=(const ISerializable& other);
+				ISerializable& operator=(decltype(nullptr));
+				ISerializable& operator=(ISerializable&& other);
+				bool operator==(const ISerializable& other) const;
+				bool operator!=(const ISerializable& other) const;
+			};
+		}
+	}
+}
+
+namespace System
+{
+	namespace Runtime
+	{
+		namespace InteropServices
+		{
+			struct _Exception : virtual System::Object
+			{
+				_Exception(decltype(nullptr));
+				_Exception(Plugin::InternalUse, int32_t handle);
+				_Exception(const _Exception& other);
+				_Exception(_Exception&& other);
+				virtual ~_Exception();
+				_Exception& operator=(const _Exception& other);
+				_Exception& operator=(decltype(nullptr));
+				_Exception& operator=(_Exception&& other);
+				bool operator==(const _Exception& other) const;
+				bool operator!=(const _Exception& other) const;
+			};
+		}
+	}
+}
+
+namespace UnityEngine
+{
+	struct GameObject : virtual UnityEngine::Object
+	{
+		GameObject(decltype(nullptr));
+		GameObject(Plugin::InternalUse, int32_t handle);
+		GameObject(const GameObject& other);
+		GameObject(GameObject&& other);
+		virtual ~GameObject();
+		GameObject& operator=(const GameObject& other);
+		GameObject& operator=(decltype(nullptr));
+		GameObject& operator=(GameObject&& other);
+		bool operator==(const GameObject& other) const;
+		bool operator!=(const GameObject& other) const;
+		template<typename MT0> MT0 AddComponent();
+		static UnityEngine::GameObject CreatePrimitive(UnityEngine::PrimitiveType type);
+	};
+}
+
+namespace UnityEngine
+{
+	struct Debug : virtual System::Object
+	{
+		Debug(decltype(nullptr));
+		Debug(Plugin::InternalUse, int32_t handle);
+		Debug(const Debug& other);
+		Debug(Debug&& other);
+		virtual ~Debug();
+		Debug& operator=(const Debug& other);
+		Debug& operator=(decltype(nullptr));
+		Debug& operator=(Debug&& other);
+		bool operator==(const Debug& other) const;
+		bool operator!=(const Debug& other) const;
+		static void Log(System::Object& message);
+	};
+}
+
+namespace UnityEngine
+{
+	struct Behaviour : virtual UnityEngine::Component
+	{
+		Behaviour(decltype(nullptr));
+		Behaviour(Plugin::InternalUse, int32_t handle);
+		Behaviour(const Behaviour& other);
+		Behaviour(Behaviour&& other);
+		virtual ~Behaviour();
+		Behaviour& operator=(const Behaviour& other);
+		Behaviour& operator=(decltype(nullptr));
+		Behaviour& operator=(Behaviour&& other);
+		bool operator==(const Behaviour& other) const;
+		bool operator!=(const Behaviour& other) const;
+	};
+}
+
+namespace UnityEngine
+{
+	struct MonoBehaviour : virtual UnityEngine::Behaviour
+	{
+		MonoBehaviour(decltype(nullptr));
+		MonoBehaviour(Plugin::InternalUse, int32_t handle);
+		MonoBehaviour(const MonoBehaviour& other);
+		MonoBehaviour(MonoBehaviour&& other);
+		virtual ~MonoBehaviour();
+		MonoBehaviour& operator=(const MonoBehaviour& other);
+		MonoBehaviour& operator=(decltype(nullptr));
+		MonoBehaviour& operator=(MonoBehaviour&& other);
+		bool operator==(const MonoBehaviour& other) const;
+		bool operator!=(const MonoBehaviour& other) const;
+		UnityEngine::Transform GetTransform();
+	};
+}
+
+namespace System
+{
+	struct Exception : virtual System::Runtime::InteropServices::_Exception, virtual System::Runtime::Serialization::ISerializable
+	{
+		Exception(decltype(nullptr));
+		Exception(Plugin::InternalUse, int32_t handle);
+		Exception(const Exception& other);
+		Exception(Exception&& other);
+		virtual ~Exception();
+		Exception& operator=(const Exception& other);
+		Exception& operator=(decltype(nullptr));
+		Exception& operator=(Exception&& other);
+		bool operator==(const Exception& other) const;
+		bool operator!=(const Exception& other) const;
+		Exception(System::String& message);
+	};
+}
+
+namespace System
+{
+	struct SystemException : virtual System::Exception, virtual System::Runtime::InteropServices::_Exception, virtual System::Runtime::Serialization::ISerializable
+	{
+		SystemException(decltype(nullptr));
+		SystemException(Plugin::InternalUse, int32_t handle);
+		SystemException(const SystemException& other);
+		SystemException(SystemException&& other);
+		virtual ~SystemException();
+		SystemException& operator=(const SystemException& other);
+		SystemException& operator=(decltype(nullptr));
+		SystemException& operator=(SystemException&& other);
+		bool operator==(const SystemException& other) const;
+		bool operator!=(const SystemException& other) const;
+	};
+}
+
+namespace System
+{
+	struct NullReferenceException : virtual System::SystemException, virtual System::Runtime::InteropServices::_Exception, virtual System::Runtime::Serialization::ISerializable
+	{
+		NullReferenceException(decltype(nullptr));
+		NullReferenceException(Plugin::InternalUse, int32_t handle);
+		NullReferenceException(const NullReferenceException& other);
+		NullReferenceException(NullReferenceException&& other);
+		virtual ~NullReferenceException();
+		NullReferenceException& operator=(const NullReferenceException& other);
+		NullReferenceException& operator=(decltype(nullptr));
+		NullReferenceException& operator=(NullReferenceException&& other);
+		bool operator==(const NullReferenceException& other) const;
+		bool operator!=(const NullReferenceException& other) const;
+	};
+}
+
+namespace UnityEngine
+{
+	struct PrimitiveType
+	{
+		int32_t Value;
+		static const UnityEngine::PrimitiveType Sphere;
+		static const UnityEngine::PrimitiveType Capsule;
+		static const UnityEngine::PrimitiveType Cylinder;
+		static const UnityEngine::PrimitiveType Cube;
+		static const UnityEngine::PrimitiveType Plane;
+		static const UnityEngine::PrimitiveType Quad;
+		explicit PrimitiveType(int32_t value);
+		explicit operator int32_t() const;
+		bool operator==(PrimitiveType other);
+		bool operator!=(PrimitiveType other);
+		explicit operator System::Enum();
+		explicit operator System::ValueType();
+		explicit operator System::Object();
+		explicit operator System::IFormattable();
+		explicit operator System::IComparable();
+		explicit operator System::IConvertible();
+	};
+}
+
+namespace UnityEngine
+{
+	struct Time : virtual System::Object
+	{
+		Time(decltype(nullptr));
+		Time(Plugin::InternalUse, int32_t handle);
+		Time(const Time& other);
+		Time(Time&& other);
+		virtual ~Time();
+		Time& operator=(const Time& other);
+		Time& operator=(decltype(nullptr));
+		Time& operator=(Time&& other);
+		bool operator==(const Time& other) const;
+		bool operator!=(const Time& other) const;
+		static System::Single GetDeltaTime();
+	};
+}
+
+namespace CesiumForUnity
+{
+	struct AbstractBaseCesium3DTileset : virtual UnityEngine::MonoBehaviour
+	{
+		AbstractBaseCesium3DTileset(decltype(nullptr));
+		AbstractBaseCesium3DTileset(Plugin::InternalUse, int32_t handle);
+		AbstractBaseCesium3DTileset(const AbstractBaseCesium3DTileset& other);
+		AbstractBaseCesium3DTileset(AbstractBaseCesium3DTileset&& other);
+		virtual ~AbstractBaseCesium3DTileset();
+		AbstractBaseCesium3DTileset& operator=(const AbstractBaseCesium3DTileset& other);
+		AbstractBaseCesium3DTileset& operator=(decltype(nullptr));
+		AbstractBaseCesium3DTileset& operator=(AbstractBaseCesium3DTileset&& other);
+		bool operator==(const AbstractBaseCesium3DTileset& other) const;
+		bool operator!=(const AbstractBaseCesium3DTileset& other) const;
+	};
+}
+
+namespace CesiumForUnity
+{
+	struct BaseCesium3DTileset : virtual CesiumForUnity::AbstractBaseCesium3DTileset
+	{
+		BaseCesium3DTileset(decltype(nullptr));
+		BaseCesium3DTileset(Plugin::InternalUse, int32_t handle);
+		BaseCesium3DTileset(const BaseCesium3DTileset& other);
+		BaseCesium3DTileset(BaseCesium3DTileset&& other);
+		virtual ~BaseCesium3DTileset();
+		BaseCesium3DTileset& operator=(const BaseCesium3DTileset& other);
+		BaseCesium3DTileset& operator=(decltype(nullptr));
+		BaseCesium3DTileset& operator=(BaseCesium3DTileset&& other);
+		bool operator==(const BaseCesium3DTileset& other) const;
+		bool operator!=(const BaseCesium3DTileset& other) const;
+		int32_t CppHandle;
+		BaseCesium3DTileset();
+		virtual void Update();
+	};
+}
 /*END TYPE DEFINITIONS*/
 
 /*BEGIN MACROS*/
-
+#define CESIUM_FOR_UNITY_CESIUM3DTILESET_DEFAULT_CONSTRUCTOR_DECLARATION \
+	Cesium3DTileset(Plugin::InternalUse iu, int32_t handle);
+	
+#define CESIUM_FOR_UNITY_CESIUM3DTILESET_DEFAULT_CONSTRUCTOR_DEFINITION \
+	Cesium3DTileset::Cesium3DTileset(Plugin::InternalUse iu, int32_t handle) \
+		: UnityEngine::Object(nullptr) \
+		, UnityEngine::Component(nullptr) \
+		, UnityEngine::Behaviour(nullptr) \
+		, UnityEngine::MonoBehaviour(nullptr) \
+		, CesiumForUnity::AbstractBaseCesium3DTileset(nullptr) \
+		, CesiumForUnity::BaseCesium3DTileset(iu, handle) \
+	{ \
+	}
+	
+#define CESIUM_FOR_UNITY_CESIUM3DTILESET_DEFAULT_CONSTRUCTOR \
+	Cesium3DTileset(Plugin::InternalUse iu, int32_t handle) \
+		: UnityEngine::Object(nullptr) \
+		, UnityEngine::Component(nullptr) \
+		, UnityEngine::Behaviour(nullptr) \
+		, UnityEngine::MonoBehaviour(nullptr) \
+		, CesiumForUnity::AbstractBaseCesium3DTileset(nullptr) \
+		, CesiumForUnity::BaseCesium3DTileset(iu, handle) \
+	{ \
+	}
+	
+#define CESIUM_FOR_UNITY_CESIUM3DTILESET_DEFAULT_CONTENTS_DECLARATION \
+	void* operator new(size_t, void* p) noexcept; \
+	void operator delete(void*, size_t) noexcept; \
+	
+#define CESIUM_FOR_UNITY_CESIUM3DTILESET_DEFAULT_CONTENTS_DEFINITION \
+	void* Cesium3DTileset::operator new(size_t, void* p) noexcept\
+	{ \
+		return p; \
+	} \
+	void Cesium3DTileset::operator delete(void*, size_t) noexcept \
+	{ \
+	}
+	
+#define CESIUM_FOR_UNITY_CESIUM3DTILESET_DEFAULT_CONTENTS\
+	void* operator new(size_t, void* p) noexcept \
+	{ \
+		return p; \
+	} \
+	void operator delete(void*, size_t) noexcept \
+	{ \
+	}
 /*END MACROS*/
 
 ////////////////////////////////////////////////////////////////
