@@ -317,6 +317,11 @@ namespace System
 
 namespace System
 {
+	struct ISpanFormattable;
+}
+
+namespace System
+{
 	namespace Runtime
 	{
 		namespace Serialization
@@ -729,6 +734,23 @@ namespace System
 		IComparable& operator=(IComparable&& other);
 		bool operator==(const IComparable& other) const;
 		bool operator!=(const IComparable& other) const;
+	};
+}
+
+namespace System
+{
+	struct ISpanFormattable : virtual System::Object
+	{
+		ISpanFormattable(decltype(nullptr));
+		ISpanFormattable(Plugin::InternalUse, int32_t handle);
+		ISpanFormattable(const ISpanFormattable& other);
+		ISpanFormattable(ISpanFormattable&& other);
+		virtual ~ISpanFormattable();
+		ISpanFormattable& operator=(const ISpanFormattable& other);
+		ISpanFormattable& operator=(decltype(nullptr));
+		ISpanFormattable& operator=(ISpanFormattable&& other);
+		bool operator==(const ISpanFormattable& other) const;
+		bool operator!=(const ISpanFormattable& other) const;
 	};
 }
 

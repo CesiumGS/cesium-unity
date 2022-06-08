@@ -4,12 +4,17 @@
     <ProjectReference Include="..\CesiumForUnity\CesiumForUnity.csproj" />
     <Reference Include="UnityEngine">
       <HintPath>C:\Program Files\Unity\Hub\Editor\2021.3.2f1\Editor\Data\Managed\UnityEngine.dll</HintPath>
+      <Private>false</Private>
     </Reference>
   </ItemGroup>
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <Nullable>enable</Nullable>
+    <Nullable>disable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="native/Windows/CesiumForUnityNative.dll" CopyToOutputDirectory="Always" TargetPath="%(Filename)%(Extension)" />
+  </ItemGroup>
 
 </Project>

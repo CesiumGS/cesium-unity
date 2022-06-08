@@ -9,8 +9,7 @@
 /// MIT
 /// </license>
 
-// Game type definitions
-#include "Game.h"
+#include "Cesium3DTileset.h"
 
 // Type definitions
 #include "Bindings.h"
@@ -1424,6 +1423,87 @@ namespace System
 	}
 	
 	bool IComparable::operator!=(const IComparable& other) const
+	{
+		return Handle != other.Handle;
+	}
+}
+
+namespace System
+{
+	ISpanFormattable::ISpanFormattable(decltype(nullptr))
+	{
+	}
+	
+	ISpanFormattable::ISpanFormattable(Plugin::InternalUse, int32_t handle)
+	{
+		Handle = handle;
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+		}
+	}
+	
+	ISpanFormattable::ISpanFormattable(const ISpanFormattable& other)
+		: ISpanFormattable(Plugin::InternalUse::Only, other.Handle)
+	{
+	}
+	
+	ISpanFormattable::ISpanFormattable(ISpanFormattable&& other)
+		: ISpanFormattable(Plugin::InternalUse::Only, other.Handle)
+	{
+		other.Handle = 0;
+	}
+	
+	ISpanFormattable::~ISpanFormattable()
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+	}
+	
+	ISpanFormattable& ISpanFormattable::operator=(const ISpanFormattable& other)
+	{
+		if (this->Handle)
+		{
+			Plugin::DereferenceManagedClass(this->Handle);
+		}
+		this->Handle = other.Handle;
+		if (this->Handle)
+		{
+			Plugin::ReferenceManagedClass(this->Handle);
+		}
+		return *this;
+	}
+	
+	ISpanFormattable& ISpanFormattable::operator=(decltype(nullptr))
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+		return *this;
+	}
+	
+	ISpanFormattable& ISpanFormattable::operator=(ISpanFormattable&& other)
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+		}
+		Handle = other.Handle;
+		other.Handle = 0;
+		return *this;
+	}
+	
+	bool ISpanFormattable::operator==(const ISpanFormattable& other) const
+	{
+		return Handle == other.Handle;
+	}
+	
+	bool ISpanFormattable::operator!=(const ISpanFormattable& other) const
 	{
 		return Handle != other.Handle;
 	}

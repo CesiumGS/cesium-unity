@@ -13,6 +13,9 @@
 			"Name": " System.IComparable"
 		},
 		{
+			"Name": "System.ISpanFormattable"
+		},
+		{
 			"Name": "System.IEquatable`1",
 			"GenericParams": [
 				{

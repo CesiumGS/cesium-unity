@@ -1,3 +1,6 @@
 [submodule "UnityNativeScripting"]
 	path = UnityNativeScripting
 	url = https://github.com/CesiumGS/UnityNativeScripting.git
+[submodule "CesiumForUnityNative/extern/cesium-native"]
+	path = CesiumForUnityNative/extern/cesium-native
+	url = git@github.com:CesiumGS/cesium-native.git
