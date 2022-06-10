@@ -263,17 +263,17 @@ namespace NativeScript
 #if !UNITY_EDITOR && UNITY_IOS
 		const string PLUGIN_NAME = "__Internal";
 #else
-		const string PLUGIN_NAME = "NativeScript";
+		const string PLUGIN_NAME = "CesiumForUnityNative";
 #endif
 		
 		// Path to load the plugin from when running inside the editor
 #if UNITY_EDITOR_OSX
-		const string PLUGIN_PATH = "/Plugins/Editor/NativeScript.bundle/Contents/MacOS/NativeScript";
+		const string PLUGIN_PATH = "/Plugins/Editor/CesiumForUnityNative.bundle/Contents/MacOS/CesiumForUnityNative";
 #elif UNITY_EDITOR_LINUX
-		const string PLUGIN_PATH = "/Plugins/Editor/libNativeScript.so";
+		const string PLUGIN_PATH = "/Plugins/Editor/libCesiumForUnityNative.so";
 #elif UNITY_EDITOR_WIN
-		const string PLUGIN_PATH = "/Plugins/Editor/NativeScript.dll";
-		const string PLUGIN_TEMP_PATH = "/Plugins/Editor/NativeScript_temp.dll";
+		const string PLUGIN_PATH = "/CesiumForUnityNative.dll";
+		const string PLUGIN_TEMP_PATH = "/CesiumForUnityNative_temp.dll";
 #endif
 
 		enum InitMode : byte
@@ -703,7 +703,12 @@ namespace NativeScript
 			string loadPath;
 #if UNITY_EDITOR_WIN
 			// Copy native library to temporary file
-			File.Copy(pluginPath, pluginTempPath, true);
+			try {
+				File.Copy(pluginPath, pluginTempPath, true);
+			} catch (Exception e)
+			{
+				Debug.Log("Failed to copy a new native DLL. If you changed it, please restart the Unity Editor or application. Error was: " + e.ToString());
+			}
 			loadPath = pluginTempPath;
 #else
 			loadPath = pluginPath;
@@ -2118,8 +2123,16 @@ namespace CesiumForUnity
 		
 		public BaseCesium3DTileset()
 		{
-			int handle = NativeScript.Bindings.ObjectStore.Store(this);
-			CppHandle = NativeScript.Bindings.NewBaseCesium3DTileset(handle);
+		}
+		
+		public void Awake()
+		{
+			Plugin.Init();
+			if (CppHandle == 0)
+			{
+				int handle = NativeScript.Bindings.ObjectStore.Store(this);
+				CppHandle = NativeScript.Bindings.NewBaseCesium3DTileset(handle);
+			}
 		}
 		
 		~BaseCesium3DTileset()

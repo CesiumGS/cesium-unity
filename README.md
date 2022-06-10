@@ -21,10 +21,10 @@ cmake --build build --target install
 
 ## Build the C# code
 
-Build the C# code using `dotnet`:
+Build the C# code and publish it into your Unity project's Assets directory using `dotnet`. If `cesium-unity` is in a subdirectory of a Unity project, the command below is all you need:
 
 ```
-dotnet build cesium-unity.sln
+dotnet publish CesiumForUnityNativeBindings -o ..\Assets
 ```
 
-If the parent directory contains an `Assets` folder, this step will also copy the built assembly and its dependencies there so that they can be loaded by Unity.
+If your Unity project is in another location, change `..\Assets` to the full path to the project's Assets directory.
