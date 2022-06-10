@@ -305,6 +305,10 @@ namespace NativeScript
 		public static DestroyBaseCesium3DTilesetDelegateType DestroyBaseCesium3DTileset;
 		
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		public delegate void CesiumForUnityAbstractBaseCesium3DTilesetStartDelegateType(int thisHandle);
+		public static CesiumForUnityAbstractBaseCesium3DTilesetStartDelegateType CesiumForUnityAbstractBaseCesium3DTilesetStart;
+		
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		public delegate void CesiumForUnityAbstractBaseCesium3DTilesetUpdateDelegateType(int thisHandle);
 		public static CesiumForUnityAbstractBaseCesium3DTilesetUpdateDelegateType CesiumForUnityAbstractBaseCesium3DTilesetUpdate;
 		
@@ -417,6 +421,9 @@ namespace NativeScript
 		
 		[DllImport(PLUGIN_NAME, CallingConvention = CallingConvention.Cdecl)]
 		public static extern void DestroyBaseCesium3DTileset(int thisHandle);
+		
+		[DllImport(PLUGIN_NAME, CallingConvention = CallingConvention.Cdecl)]
+		public static extern void CesiumForUnityAbstractBaseCesium3DTilesetStart(int thisHandle);
 		
 		[DllImport(PLUGIN_NAME, CallingConvention = CallingConvention.Cdecl)]
 		public static extern void CesiumForUnityAbstractBaseCesium3DTilesetUpdate(int thisHandle);
@@ -724,6 +731,7 @@ namespace NativeScript
 			/*BEGIN GETDELEGATE CALLS*/
 			NewBaseCesium3DTileset = GetDelegate<NewBaseCesium3DTilesetDelegateType>(libraryHandle, "NewBaseCesium3DTileset");
 			DestroyBaseCesium3DTileset = GetDelegate<DestroyBaseCesium3DTilesetDelegateType>(libraryHandle, "DestroyBaseCesium3DTileset");
+			CesiumForUnityAbstractBaseCesium3DTilesetStart = GetDelegate<CesiumForUnityAbstractBaseCesium3DTilesetStartDelegateType>(libraryHandle, "CesiumForUnityAbstractBaseCesium3DTilesetStart");
 			CesiumForUnityAbstractBaseCesium3DTilesetUpdate = GetDelegate<CesiumForUnityAbstractBaseCesium3DTilesetUpdateDelegateType>(libraryHandle, "CesiumForUnityAbstractBaseCesium3DTilesetUpdate");
 			SetCsharpExceptionSystemNullReferenceException = GetDelegate<SetCsharpExceptionSystemNullReferenceExceptionDelegateType>(libraryHandle, "SetCsharpExceptionSystemNullReferenceException");
 			/*END GETDELEGATE CALLS*/
@@ -2150,6 +2158,21 @@ namespace CesiumForUnity
 			CppHandle = cppHandle;
 		}
 		
+		public override void Start()
+		{
+			if (CppHandle != 0)
+			{
+				int thisHandle = CppHandle;
+				NativeScript.Bindings.CesiumForUnityAbstractBaseCesium3DTilesetStart(thisHandle);
+				if (NativeScript.Bindings.UnhandledCppException != null)
+				{
+					Exception ex = NativeScript.Bindings.UnhandledCppException;
+					NativeScript.Bindings.UnhandledCppException = null;
+					throw ex;
+				}
+			}
+		}
+	
 		public override void Update()
 		{
 			if (CppHandle != 0)

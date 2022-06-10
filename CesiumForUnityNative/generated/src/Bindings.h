@@ -1604,6 +1604,7 @@ namespace CesiumForUnity
 		bool operator!=(const BaseCesium3DTileset& other) const;
 		int32_t CppHandle;
 		BaseCesium3DTileset();
+		virtual void Start();
 		virtual void Update();
 	};
 }

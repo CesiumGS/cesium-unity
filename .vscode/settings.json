@@ -1,3 +1,11 @@
 {
-    "cmake.sourceDirectory": "${workspaceFolder}/CesiumForUnityNative"
+    "cmake.sourceDirectory": "${workspaceFolder}/CesiumForUnityNative",
+    "files.associations": {
+        "iosfwd": "cpp",
+        "algorithm": "cpp",
+        "format": "cpp",
+        "xiosbase": "cpp",
+        "xlocale": "cpp",
+        "xutility": "cpp"
+    }
 }

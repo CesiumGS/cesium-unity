@@ -5997,6 +5997,28 @@ namespace CesiumForUnity
 		instance->~BaseCesium3DTileset();
 	}
 
+	void CesiumForUnity::BaseCesium3DTileset::Start()
+	{
+	}
+	
+	DLLEXPORT void CesiumForUnityAbstractBaseCesium3DTilesetStart(int32_t cppHandle)
+	{
+		try
+		{
+			Plugin::GetBaseCesium3DTileset(cppHandle)->Start();
+		}
+		catch (System::Exception ex)
+		{
+			Plugin::SetException(ex.Handle);
+		}
+		catch (...)
+		{
+			System::String msg = "Unhandled exception invoking CesiumForUnity::AbstractBaseCesium3DTileset";
+			System::Exception ex(msg);
+			Plugin::SetException(ex.Handle);
+		}
+	}
+	
 	void CesiumForUnity::BaseCesium3DTileset::Update()
 	{
 	}
