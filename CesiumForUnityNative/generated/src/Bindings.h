@@ -32,30 +32,30 @@ namespace Plugin
 	{
 		Only
 	};
-	
+
 	struct ManagedType
 	{
 		int32_t Handle;
-		
+
 		ManagedType();
 		ManagedType(decltype(nullptr));
 		ManagedType(InternalUse, int32_t handle);
 	};
-	
+
 	template <typename TElement> struct ArrayElementProxy1_1;
-	
+
 	template <typename TElement> struct ArrayElementProxy1_2;
 	template <typename TElement> struct ArrayElementProxy2_2;
-	
+
 	template <typename TElement> struct ArrayElementProxy1_3;
 	template <typename TElement> struct ArrayElementProxy2_3;
 	template <typename TElement> struct ArrayElementProxy3_3;
-	
+
 	template <typename TElement> struct ArrayElementProxy1_4;
 	template <typename TElement> struct ArrayElementProxy2_4;
 	template <typename TElement> struct ArrayElementProxy3_4;
 	template <typename TElement> struct ArrayElementProxy4_4;
-	
+
 	template <typename TElement> struct ArrayElementProxy1_5;
 	template <typename TElement> struct ArrayElementProxy2_5;
 	template <typename TElement> struct ArrayElementProxy3_5;
@@ -84,13 +84,13 @@ namespace System
 	template <typename TElement> struct IEquatable_1;
 	struct IFormattable;
 	struct IConvertible;
-	
+
 	// .NET booleans are four bytes long
 	// This struct makes them feel like C++'s bool, int32_t, and uint32_t types
 	struct Boolean
 	{
 		int32_t Value;
-		
+
 		Boolean();
 		Boolean(bool value);
 		Boolean(int32_t value);
@@ -106,13 +106,13 @@ namespace System
 		explicit operator IComparable_1<Boolean>() const;
 		explicit operator IEquatable_1<Boolean>() const;
 	};
-	
+
 	// .NET chars are two bytes long
 	// This struct helps them interoperate with C++'s char and int16_t types
 	struct Char
 	{
 		int16_t Value;
-		
+
 		Char();
 		Char(char value);
 		Char(int16_t value);
@@ -125,11 +125,11 @@ namespace System
 		explicit operator IComparable_1<Char>() const;
 		explicit operator IEquatable_1<Char>() const;
 	};
-	
+
 	struct SByte
 	{
 		int8_t Value;
-		
+
 		SByte();
 		SByte(int8_t value);
 		operator int8_t() const;
@@ -141,11 +141,11 @@ namespace System
 		explicit operator IComparable_1<SByte>() const;
 		explicit operator IEquatable_1<SByte>() const;
 	};
-	
+
 	struct Byte
 	{
 		uint8_t Value;
-		
+
 		Byte();
 		Byte(uint8_t value);
 		operator uint8_t() const;
@@ -157,11 +157,11 @@ namespace System
 		explicit operator IComparable_1<Byte>() const;
 		explicit operator IEquatable_1<Byte>() const;
 	};
-	
+
 	struct Int16
 	{
 		int16_t Value;
-		
+
 		Int16();
 		Int16(int16_t value);
 		operator int16_t() const;
@@ -173,11 +173,11 @@ namespace System
 		explicit operator IComparable_1<Int16>() const;
 		explicit operator IEquatable_1<Int16>() const;
 	};
-	
+
 	struct UInt16
 	{
 		uint16_t Value;
-		
+
 		UInt16();
 		UInt16(uint16_t value);
 		operator uint16_t() const;
@@ -189,11 +189,11 @@ namespace System
 		explicit operator IComparable_1<UInt16>() const;
 		explicit operator IEquatable_1<UInt16>() const;
 	};
-	
+
 	struct Int32
 	{
 		int32_t Value;
-		
+
 		Int32();
 		Int32(int32_t value);
 		operator int32_t() const;
@@ -205,11 +205,11 @@ namespace System
 		explicit operator IComparable_1<Int32>() const;
 		explicit operator IEquatable_1<Int32>() const;
 	};
-	
+
 	struct UInt32
 	{
 		uint32_t Value;
-		
+
 		UInt32();
 		UInt32(uint32_t value);
 		operator uint32_t() const;
@@ -221,11 +221,11 @@ namespace System
 		explicit operator IComparable_1<UInt32>() const;
 		explicit operator IEquatable_1<UInt32>() const;
 	};
-	
+
 	struct Int64
 	{
 		int64_t Value;
-		
+
 		Int64();
 		Int64(int64_t value);
 		operator int64_t() const;
@@ -237,11 +237,11 @@ namespace System
 		explicit operator IComparable_1<Int64>() const;
 		explicit operator IEquatable_1<Int64>() const;
 	};
-	
+
 	struct UInt64
 	{
 		uint64_t Value;
-		
+
 		UInt64();
 		UInt64(uint64_t value);
 		operator uint64_t() const;
@@ -253,11 +253,11 @@ namespace System
 		explicit operator IComparable_1<UInt64>() const;
 		explicit operator IEquatable_1<UInt64>() const;
 	};
-	
+
 	struct Single
 	{
 		float Value;
-		
+
 		Single();
 		Single(float value);
 		operator float() const;
@@ -269,11 +269,11 @@ namespace System
 		explicit operator IComparable_1<Single>() const;
 		explicit operator IEquatable_1<Single>() const;
 	};
-	
+
 	struct Double
 	{
 		double Value;
-		
+
 		Double();
 		Double(double value);
 		operator double() const;
@@ -297,6 +297,11 @@ namespace System
 {
 	template<typename TT0> struct IComparable_1;
 }
+
+namespace System
+{
+	template<typename TT0> struct Action_1;
+}
 /*END TEMPLATE DECLARATIONS*/
 
 /*BEGIN TYPE DECLARATIONS*/
@@ -318,6 +323,11 @@ namespace System
 namespace System
 {
 	struct ISpanFormattable;
+}
+
+namespace System
+{
+	struct IDisposable;
 }
 
 namespace System
@@ -431,6 +441,81 @@ namespace UnityEngine
 	struct Time;
 }
 
+namespace UnityEngine
+{
+	struct Camera;
+}
+
+namespace UnityEngine
+{
+	struct YieldInstruction;
+}
+
+namespace UnityEngine
+{
+	struct AsyncOperation;
+}
+
+namespace UnityEngine
+{
+	namespace Networking
+	{
+		struct DownloadHandler;
+	}
+}
+
+namespace UnityEngine
+{
+	namespace Networking
+	{
+		struct DownloadHandlerScript;
+	}
+}
+
+namespace CesiumForUnity
+{
+	struct RawDownloadedData;
+}
+
+namespace CesiumForUnity
+{
+	struct AbstractBaseNativeDownloadHandler;
+}
+
+namespace CesiumForUnity
+{
+	struct BaseNativeDownloadHandler;
+}
+
+namespace UnityEngine
+{
+	namespace Networking
+	{
+		struct UnityWebRequest;
+	}
+}
+
+namespace UnityEngine
+{
+	namespace Networking
+	{
+		struct UnityWebRequestAsyncOperation;
+	}
+}
+
+namespace System
+{
+	namespace Runtime
+	{
+		namespace InteropServices
+		{
+			namespace Marshal
+			{
+			}
+		}
+	}
+}
+
 namespace CesiumForUnity
 {
 	struct AbstractBaseCesium3DTileset;
@@ -439,6 +524,35 @@ namespace CesiumForUnity
 namespace CesiumForUnity
 {
 	struct BaseCesium3DTileset;
+}
+
+namespace System
+{
+	struct IAsyncResult;
+}
+
+namespace System
+{
+	namespace Threading
+	{
+		struct IThreadPoolWorkItem;
+	}
+}
+
+namespace System
+{
+	namespace Threading
+	{
+		namespace Tasks
+		{
+			struct Task;
+		}
+	}
+}
+
+namespace System
+{
+	struct Action;
 }
 /*END TYPE DECLARATIONS*/
 
@@ -577,6 +691,11 @@ namespace System
 {
 	template<> struct IComparable_1<System::Decimal>;
 }
+
+namespace System
+{
+	template<> struct Action_1<UnityEngine::AsyncOperation>;
+}
 /*END TEMPLATE SPECIALIZATION DECLARATIONS*/
 
 ////////////////////////////////////////////////////////////////
@@ -594,11 +713,12 @@ namespace System
 		bool operator==(decltype(nullptr)) const;
 		bool operator!=(decltype(nullptr)) const;
 		virtual void ThrowReferenceToThis();
-		
+
 		/*BEGIN UNBOXING METHOD DECLARATIONS*/
 		explicit operator System::Decimal();
 		explicit operator UnityEngine::Vector3();
 		explicit operator UnityEngine::PrimitiveType();
+		explicit operator CesiumForUnity::RawDownloadedData();
 		explicit operator System::Boolean();
 		explicit operator System::SByte();
 		explicit operator System::Byte();
@@ -613,19 +733,19 @@ namespace System
 		explicit operator System::Double();
 		/*END UNBOXING METHOD DECLARATIONS*/
 	};
-	
+
 	struct ValueType : virtual Object
 	{
 		ValueType(Plugin::InternalUse iu, int32_t handle);
 		ValueType(decltype(nullptr));
 	};
-	
+
 	struct Enum : virtual ValueType
 	{
 		Enum(Plugin::InternalUse iu, int32_t handle);
 		Enum(decltype(nullptr));
 	};
-	
+
 	struct String : virtual Object
 	{
 		String(Plugin::InternalUse iu, int32_t handle);
@@ -638,13 +758,13 @@ namespace System
 		String& operator=(String&& other);
 		String(const char* chars);
 	};
-	
+
 	struct ICloneable : virtual Object
 	{
 		ICloneable(Plugin::InternalUse iu, int32_t handle);
 		ICloneable(decltype(nullptr));
 	};
-	
+
 	namespace Collections
 	{
 		struct IEnumerable : virtual Object
@@ -653,20 +773,20 @@ namespace System
 			IEnumerable(decltype(nullptr));
 			IEnumerator GetEnumerator();
 		};
-		
+
 		struct ICollection : virtual IEnumerable
 		{
 			ICollection(Plugin::InternalUse iu, int32_t handle);
 			ICollection(decltype(nullptr));
 		};
-		
+
 		struct IList : virtual ICollection, virtual IEnumerable
 		{
 			IList(Plugin::InternalUse iu, int32_t handle);
 			IList(decltype(nullptr));
 		};
 	}
-	
+
 	struct Array : virtual ICloneable, virtual Collections::IList
 	{
 		Array(Plugin::InternalUse iu, int32_t handle);
@@ -751,6 +871,23 @@ namespace System
 		ISpanFormattable& operator=(ISpanFormattable&& other);
 		bool operator==(const ISpanFormattable& other) const;
 		bool operator!=(const ISpanFormattable& other) const;
+	};
+}
+
+namespace System
+{
+	struct IDisposable : virtual System::Object
+	{
+		IDisposable(decltype(nullptr));
+		IDisposable(Plugin::InternalUse, int32_t handle);
+		IDisposable(const IDisposable& other);
+		IDisposable(IDisposable&& other);
+		virtual ~IDisposable();
+		IDisposable& operator=(const IDisposable& other);
+		IDisposable& operator=(decltype(nullptr));
+		IDisposable& operator=(IDisposable&& other);
+		bool operator==(const IDisposable& other) const;
+		bool operator!=(const IDisposable& other) const;
 	};
 }
 
@@ -1571,6 +1708,223 @@ namespace UnityEngine
 	};
 }
 
+namespace UnityEngine
+{
+	struct Camera : virtual UnityEngine::Behaviour
+	{
+		Camera(decltype(nullptr));
+		Camera(Plugin::InternalUse, int32_t handle);
+		Camera(const Camera& other);
+		Camera(Camera&& other);
+		virtual ~Camera();
+		Camera& operator=(const Camera& other);
+		Camera& operator=(decltype(nullptr));
+		Camera& operator=(Camera&& other);
+		bool operator==(const Camera& other) const;
+		bool operator!=(const Camera& other) const;
+		static UnityEngine::Camera GetMain();
+		System::Single GetFieldOfView();
+		void SetFieldOfView(System::Single value);
+		System::Single GetAspect();
+		void SetAspect(System::Single value);
+		System::Int32 GetPixelWidth();
+		System::Int32 GetPixelHeight();
+	};
+}
+
+namespace UnityEngine
+{
+	struct YieldInstruction : virtual System::Object
+	{
+		YieldInstruction(decltype(nullptr));
+		YieldInstruction(Plugin::InternalUse, int32_t handle);
+		YieldInstruction(const YieldInstruction& other);
+		YieldInstruction(YieldInstruction&& other);
+		virtual ~YieldInstruction();
+		YieldInstruction& operator=(const YieldInstruction& other);
+		YieldInstruction& operator=(decltype(nullptr));
+		YieldInstruction& operator=(YieldInstruction&& other);
+		bool operator==(const YieldInstruction& other) const;
+		bool operator!=(const YieldInstruction& other) const;
+	};
+}
+
+namespace UnityEngine
+{
+	struct AsyncOperation : virtual UnityEngine::YieldInstruction
+	{
+		AsyncOperation(decltype(nullptr));
+		AsyncOperation(Plugin::InternalUse, int32_t handle);
+		AsyncOperation(const AsyncOperation& other);
+		AsyncOperation(AsyncOperation&& other);
+		virtual ~AsyncOperation();
+		AsyncOperation& operator=(const AsyncOperation& other);
+		AsyncOperation& operator=(decltype(nullptr));
+		AsyncOperation& operator=(AsyncOperation&& other);
+		bool operator==(const AsyncOperation& other) const;
+		bool operator!=(const AsyncOperation& other) const;
+	};
+}
+
+namespace UnityEngine
+{
+	namespace Networking
+	{
+		struct DownloadHandler : virtual System::IDisposable
+		{
+			DownloadHandler(decltype(nullptr));
+			DownloadHandler(Plugin::InternalUse, int32_t handle);
+			DownloadHandler(const DownloadHandler& other);
+			DownloadHandler(DownloadHandler&& other);
+			virtual ~DownloadHandler();
+			DownloadHandler& operator=(const DownloadHandler& other);
+			DownloadHandler& operator=(decltype(nullptr));
+			DownloadHandler& operator=(DownloadHandler&& other);
+			bool operator==(const DownloadHandler& other) const;
+			bool operator!=(const DownloadHandler& other) const;
+		};
+	}
+}
+
+namespace UnityEngine
+{
+	namespace Networking
+	{
+		struct DownloadHandlerScript : virtual UnityEngine::Networking::DownloadHandler, virtual System::IDisposable
+		{
+			DownloadHandlerScript(decltype(nullptr));
+			DownloadHandlerScript(Plugin::InternalUse, int32_t handle);
+			DownloadHandlerScript(const DownloadHandlerScript& other);
+			DownloadHandlerScript(DownloadHandlerScript&& other);
+			virtual ~DownloadHandlerScript();
+			DownloadHandlerScript& operator=(const DownloadHandlerScript& other);
+			DownloadHandlerScript& operator=(decltype(nullptr));
+			DownloadHandlerScript& operator=(DownloadHandlerScript&& other);
+			bool operator==(const DownloadHandlerScript& other) const;
+			bool operator!=(const DownloadHandlerScript& other) const;
+		};
+	}
+}
+
+namespace CesiumForUnity
+{
+	struct RawDownloadedData
+	{
+		RawDownloadedData();
+		void* pointer;
+		System::Int32 length;
+		explicit operator System::ValueType();
+		explicit operator System::Object();
+	};
+}
+
+namespace CesiumForUnity
+{
+	struct AbstractBaseNativeDownloadHandler : virtual UnityEngine::Networking::DownloadHandlerScript, virtual System::IDisposable
+	{
+		AbstractBaseNativeDownloadHandler(decltype(nullptr));
+		AbstractBaseNativeDownloadHandler(Plugin::InternalUse, int32_t handle);
+		AbstractBaseNativeDownloadHandler(const AbstractBaseNativeDownloadHandler& other);
+		AbstractBaseNativeDownloadHandler(AbstractBaseNativeDownloadHandler&& other);
+		virtual ~AbstractBaseNativeDownloadHandler();
+		AbstractBaseNativeDownloadHandler& operator=(const AbstractBaseNativeDownloadHandler& other);
+		AbstractBaseNativeDownloadHandler& operator=(decltype(nullptr));
+		AbstractBaseNativeDownloadHandler& operator=(AbstractBaseNativeDownloadHandler&& other);
+		bool operator==(const AbstractBaseNativeDownloadHandler& other) const;
+		bool operator!=(const AbstractBaseNativeDownloadHandler& other) const;
+	};
+}
+
+namespace CesiumForUnity
+{
+	struct BaseNativeDownloadHandler : virtual CesiumForUnity::AbstractBaseNativeDownloadHandler
+	{
+		BaseNativeDownloadHandler(decltype(nullptr));
+		BaseNativeDownloadHandler(Plugin::InternalUse, int32_t handle);
+		BaseNativeDownloadHandler(const BaseNativeDownloadHandler& other);
+		BaseNativeDownloadHandler(BaseNativeDownloadHandler&& other);
+		virtual ~BaseNativeDownloadHandler();
+		BaseNativeDownloadHandler& operator=(const BaseNativeDownloadHandler& other);
+		BaseNativeDownloadHandler& operator=(decltype(nullptr));
+		BaseNativeDownloadHandler& operator=(BaseNativeDownloadHandler&& other);
+		bool operator==(const BaseNativeDownloadHandler& other) const;
+		bool operator!=(const BaseNativeDownloadHandler& other) const;
+		int32_t CppHandle;
+		BaseNativeDownloadHandler();
+		virtual System::Boolean ReceiveDataNative(void* data, System::Int32 dataLength);
+	};
+}
+
+namespace UnityEngine
+{
+	namespace Networking
+	{
+		struct UnityWebRequest : virtual System::IDisposable
+		{
+			UnityWebRequest(decltype(nullptr));
+			UnityWebRequest(Plugin::InternalUse, int32_t handle);
+			UnityWebRequest(const UnityWebRequest& other);
+			UnityWebRequest(UnityWebRequest&& other);
+			virtual ~UnityWebRequest();
+			UnityWebRequest& operator=(const UnityWebRequest& other);
+			UnityWebRequest& operator=(decltype(nullptr));
+			UnityWebRequest& operator=(UnityWebRequest&& other);
+			bool operator==(const UnityWebRequest& other) const;
+			bool operator!=(const UnityWebRequest& other) const;
+			System::String GetError();
+			System::Boolean GetIsDone();
+			System::Int64 GetResponseCode();
+			System::String GetUrl();
+			void SetUrl(System::String& value);
+			System::String GetMethod();
+			void SetMethod(System::String& value);
+			UnityEngine::Networking::DownloadHandler GetDownloadHandler();
+			void SetDownloadHandler(UnityEngine::Networking::DownloadHandler& value);
+			static UnityEngine::Networking::UnityWebRequest Get(System::String& uri);
+			virtual void SetRequestHeader(System::String& name, System::String& value);
+			virtual UnityEngine::Networking::UnityWebRequestAsyncOperation SendWebRequest();
+			virtual System::String GetResponseHeader(System::String& name);
+		};
+	}
+}
+
+namespace UnityEngine
+{
+	namespace Networking
+	{
+		struct UnityWebRequestAsyncOperation : virtual UnityEngine::AsyncOperation
+		{
+			UnityWebRequestAsyncOperation(decltype(nullptr));
+			UnityWebRequestAsyncOperation(Plugin::InternalUse, int32_t handle);
+			UnityWebRequestAsyncOperation(const UnityWebRequestAsyncOperation& other);
+			UnityWebRequestAsyncOperation(UnityWebRequestAsyncOperation&& other);
+			virtual ~UnityWebRequestAsyncOperation();
+			UnityWebRequestAsyncOperation& operator=(const UnityWebRequestAsyncOperation& other);
+			UnityWebRequestAsyncOperation& operator=(decltype(nullptr));
+			UnityWebRequestAsyncOperation& operator=(UnityWebRequestAsyncOperation&& other);
+			bool operator==(const UnityWebRequestAsyncOperation& other) const;
+			bool operator!=(const UnityWebRequestAsyncOperation& other) const;
+			void AddCompleted(System::Action_1<UnityEngine::AsyncOperation>& del);
+			void RemoveCompleted(System::Action_1<UnityEngine::AsyncOperation>& del);
+		};
+	}
+}
+
+namespace System
+{
+	namespace Runtime
+	{
+		namespace InteropServices
+		{
+			namespace Marshal
+			{
+				void* StringToCoTaskMemUTF8(System::String& s);
+				void FreeCoTaskMem(void* ptr);
+			}
+		}
+	}
+}
+
 namespace CesiumForUnity
 {
 	struct AbstractBaseCesium3DTileset : virtual UnityEngine::MonoBehaviour
@@ -1608,9 +1962,163 @@ namespace CesiumForUnity
 		virtual void Update();
 	};
 }
+
+namespace System
+{
+	struct IAsyncResult : virtual System::Object
+	{
+		IAsyncResult(decltype(nullptr));
+		IAsyncResult(Plugin::InternalUse, int32_t handle);
+		IAsyncResult(const IAsyncResult& other);
+		IAsyncResult(IAsyncResult&& other);
+		virtual ~IAsyncResult();
+		IAsyncResult& operator=(const IAsyncResult& other);
+		IAsyncResult& operator=(decltype(nullptr));
+		IAsyncResult& operator=(IAsyncResult&& other);
+		bool operator==(const IAsyncResult& other) const;
+		bool operator!=(const IAsyncResult& other) const;
+	};
+}
+
+namespace System
+{
+	namespace Threading
+	{
+		struct IThreadPoolWorkItem : virtual System::Object
+		{
+			IThreadPoolWorkItem(decltype(nullptr));
+			IThreadPoolWorkItem(Plugin::InternalUse, int32_t handle);
+			IThreadPoolWorkItem(const IThreadPoolWorkItem& other);
+			IThreadPoolWorkItem(IThreadPoolWorkItem&& other);
+			virtual ~IThreadPoolWorkItem();
+			IThreadPoolWorkItem& operator=(const IThreadPoolWorkItem& other);
+			IThreadPoolWorkItem& operator=(decltype(nullptr));
+			IThreadPoolWorkItem& operator=(IThreadPoolWorkItem&& other);
+			bool operator==(const IThreadPoolWorkItem& other) const;
+			bool operator!=(const IThreadPoolWorkItem& other) const;
+		};
+	}
+}
+
+namespace System
+{
+	namespace Threading
+	{
+		namespace Tasks
+		{
+			struct Task : virtual System::IAsyncResult, virtual System::IDisposable, virtual System::Threading::IThreadPoolWorkItem
+			{
+				Task(decltype(nullptr));
+				Task(Plugin::InternalUse, int32_t handle);
+				Task(const Task& other);
+				Task(Task&& other);
+				virtual ~Task();
+				Task& operator=(const Task& other);
+				Task& operator=(decltype(nullptr));
+				Task& operator=(Task&& other);
+				bool operator==(const Task& other) const;
+				bool operator!=(const Task& other) const;
+				static System::Threading::Tasks::Task Run(System::Action& action);
+			};
+		}
+	}
+}
+
+namespace System
+{
+	struct Action : virtual System::Object
+	{
+		Action(decltype(nullptr));
+		Action(Plugin::InternalUse, int32_t handle);
+		Action(const Action& other);
+		Action(Action&& other);
+		virtual ~Action();
+		Action& operator=(const Action& other);
+		Action& operator=(decltype(nullptr));
+		Action& operator=(Action&& other);
+		bool operator==(const Action& other) const;
+		bool operator!=(const Action& other) const;
+		int32_t CppHandle;
+		int32_t ClassHandle;
+		Action();
+		void operator+=(System::Action& del);
+		void operator-=(System::Action& del);
+		virtual void operator()();
+		void Invoke();
+	};
+}
+
+namespace System
+{
+	template<> struct Action_1<UnityEngine::AsyncOperation> : virtual System::Object
+	{
+		Action_1(decltype(nullptr));
+		Action_1(Plugin::InternalUse, int32_t handle);
+		Action_1(const Action_1<UnityEngine::AsyncOperation>& other);
+		Action_1(Action_1<UnityEngine::AsyncOperation>&& other);
+		virtual ~Action_1();
+		Action_1<UnityEngine::AsyncOperation>& operator=(const Action_1<UnityEngine::AsyncOperation>& other);
+		Action_1<UnityEngine::AsyncOperation>& operator=(decltype(nullptr));
+		Action_1<UnityEngine::AsyncOperation>& operator=(Action_1<UnityEngine::AsyncOperation>&& other);
+		bool operator==(const Action_1<UnityEngine::AsyncOperation>& other) const;
+		bool operator!=(const Action_1<UnityEngine::AsyncOperation>& other) const;
+		int32_t CppHandle;
+		int32_t ClassHandle;
+		Action_1();
+		void operator+=(System::Action_1<UnityEngine::AsyncOperation>& del);
+		void operator-=(System::Action_1<UnityEngine::AsyncOperation>& del);
+		virtual void operator()(UnityEngine::AsyncOperation& obj);
+		void Invoke(UnityEngine::AsyncOperation& obj);
+	};
+}
 /*END TYPE DEFINITIONS*/
 
 /*BEGIN MACROS*/
+#define CESIUM_FOR_UNITY_NATIVE_DOWNLOAD_HANDLER_DEFAULT_CONSTRUCTOR_DECLARATION \
+	NativeDownloadHandler(Plugin::InternalUse iu, int32_t handle);
+	
+#define CESIUM_FOR_UNITY_NATIVE_DOWNLOAD_HANDLER_DEFAULT_CONSTRUCTOR_DEFINITION \
+	NativeDownloadHandler::NativeDownloadHandler(Plugin::InternalUse iu, int32_t handle) \
+		: System::IDisposable(nullptr) \
+		, UnityEngine::Networking::DownloadHandler(nullptr) \
+		, UnityEngine::Networking::DownloadHandlerScript(nullptr) \
+		, CesiumForUnity::AbstractBaseNativeDownloadHandler(nullptr) \
+		, CesiumForUnity::BaseNativeDownloadHandler(iu, handle) \
+	{ \
+	}
+	
+#define CESIUM_FOR_UNITY_NATIVE_DOWNLOAD_HANDLER_DEFAULT_CONSTRUCTOR \
+	NativeDownloadHandler(Plugin::InternalUse iu, int32_t handle) \
+		: System::IDisposable(nullptr) \
+		, UnityEngine::Networking::DownloadHandler(nullptr) \
+		, UnityEngine::Networking::DownloadHandlerScript(nullptr) \
+		, CesiumForUnity::AbstractBaseNativeDownloadHandler(nullptr) \
+		, CesiumForUnity::BaseNativeDownloadHandler(iu, handle) \
+	{ \
+	}
+	
+#define CESIUM_FOR_UNITY_NATIVE_DOWNLOAD_HANDLER_DEFAULT_CONTENTS_DECLARATION \
+	void* operator new(size_t, void* p) noexcept; \
+	void operator delete(void*, size_t) noexcept; \
+	
+#define CESIUM_FOR_UNITY_NATIVE_DOWNLOAD_HANDLER_DEFAULT_CONTENTS_DEFINITION \
+	void* NativeDownloadHandler::operator new(size_t, void* p) noexcept\
+	{ \
+		return p; \
+	} \
+	void NativeDownloadHandler::operator delete(void*, size_t) noexcept \
+	{ \
+	}
+	
+#define CESIUM_FOR_UNITY_NATIVE_DOWNLOAD_HANDLER_DEFAULT_CONTENTS\
+	void* operator new(size_t, void* p) noexcept \
+	{ \
+		return p; \
+	} \
+	void operator delete(void*, size_t) noexcept \
+	{ \
+	}
+	
 #define CESIUM_FOR_UNITY_CESIUM3DTILESET_DEFAULT_CONSTRUCTOR_DECLARATION \
 	Cesium3DTileset(Plugin::InternalUse iu, int32_t handle);
 	

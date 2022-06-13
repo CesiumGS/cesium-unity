@@ -10,6 +10,7 @@
 /// </license>
 
 #include "Cesium3DTileset.h"
+#include "NativeDownloadHandler.h"
 
 // Type definitions
 #include "Bindings.h"
@@ -38,7 +39,7 @@ namespace Plugin
 	void (*SetException)(int32_t handle);
 	int32_t (*ArrayGetLength)(int32_t handle);
 	int32_t (*EnumerableGetEnumerator)(int32_t handle);
-	
+
 	/*BEGIN FUNCTION POINTERS*/
 	void (*ReleaseSystemDecimal)(int32_t handle);
 	int32_t (*SystemDecimalConstructorSystemDouble)(double value);
@@ -64,8 +65,37 @@ namespace Plugin
 	int32_t (*BoxPrimitiveType)(UnityEngine::PrimitiveType val);
 	UnityEngine::PrimitiveType (*UnboxPrimitiveType)(int32_t valHandle);
 	float (*UnityEngineTimePropertyGetDeltaTime)();
+	int32_t (*UnityEngineCameraPropertyGetMain)();
+	float (*UnityEngineCameraPropertyGetFieldOfView)(int32_t thisHandle);
+	void (*UnityEngineCameraPropertySetFieldOfView)(int32_t thisHandle, float value);
+	float (*UnityEngineCameraPropertyGetAspect)(int32_t thisHandle);
+	void (*UnityEngineCameraPropertySetAspect)(int32_t thisHandle, float value);
+	int32_t (*UnityEngineCameraPropertyGetPixelWidth)(int32_t thisHandle);
+	int32_t (*UnityEngineCameraPropertyGetPixelHeight)(int32_t thisHandle);
+	int32_t (*BoxRawDownloadedData)(CesiumForUnity::RawDownloadedData& val);
+	CesiumForUnity::RawDownloadedData (*UnboxRawDownloadedData)(int32_t valHandle);
+	void (*ReleaseBaseNativeDownloadHandler)(int32_t handle);
+	void (*BaseNativeDownloadHandlerConstructor)(int32_t cppHandle, int32_t* handle);
+	int32_t (*UnityEngineNetworkingUnityWebRequestPropertyGetError)(int32_t thisHandle);
+	int32_t (*UnityEngineNetworkingUnityWebRequestPropertyGetIsDone)(int32_t thisHandle);
+	int64_t (*UnityEngineNetworkingUnityWebRequestPropertyGetResponseCode)(int32_t thisHandle);
+	int32_t (*UnityEngineNetworkingUnityWebRequestPropertyGetUrl)(int32_t thisHandle);
+	void (*UnityEngineNetworkingUnityWebRequestPropertySetUrl)(int32_t thisHandle, int32_t valueHandle);
+	int32_t (*UnityEngineNetworkingUnityWebRequestPropertyGetMethod)(int32_t thisHandle);
+	void (*UnityEngineNetworkingUnityWebRequestPropertySetMethod)(int32_t thisHandle, int32_t valueHandle);
+	int32_t (*UnityEngineNetworkingUnityWebRequestPropertyGetDownloadHandler)(int32_t thisHandle);
+	void (*UnityEngineNetworkingUnityWebRequestPropertySetDownloadHandler)(int32_t thisHandle, int32_t valueHandle);
+	int32_t (*UnityEngineNetworkingUnityWebRequestMethodGetSystemString)(int32_t uriHandle);
+	void (*UnityEngineNetworkingUnityWebRequestMethodSetRequestHeaderSystemString_SystemString)(int32_t thisHandle, int32_t nameHandle, int32_t valueHandle);
+	int32_t (*UnityEngineNetworkingUnityWebRequestMethodSendWebRequest)(int32_t thisHandle);
+	int32_t (*UnityEngineNetworkingUnityWebRequestMethodGetResponseHeaderSystemString)(int32_t thisHandle, int32_t nameHandle);
+	void (*UnityEngineNetworkingUnityWebRequestAsyncOperationAddEventCompleted)(int32_t thisHandle, int32_t delHandle);
+	void (*UnityEngineNetworkingUnityWebRequestAsyncOperationRemoveEventCompleted)(int32_t thisHandle, int32_t delHandle);
+	void* (*SystemRuntimeInteropServicesMarshalMethodStringToCoTaskMemUTF8SystemString)(int32_t sHandle);
+	void (*SystemRuntimeInteropServicesMarshalMethodFreeCoTaskMemSystemIntPtr)(void* ptr);
 	void (*ReleaseBaseCesium3DTileset)(int32_t handle);
 	void (*BaseCesium3DTilesetConstructor)(int32_t cppHandle, int32_t* handle);
+	int32_t (*SystemThreadingTasksTaskMethodRunSystemAction)(int32_t actionHandle);
 	int32_t (*BoxBoolean)(uint32_t val);
 	int32_t (*UnboxBoolean)(int32_t valHandle);
 	int32_t (*BoxSByte)(int8_t val);
@@ -90,6 +120,16 @@ namespace Plugin
 	float (*UnboxSingle)(int32_t valHandle);
 	int32_t (*BoxDouble)(double val);
 	double (*UnboxDouble)(int32_t valHandle);
+	void (*ReleaseSystemAction)(int32_t handle, int32_t classHandle);
+	void (*SystemActionConstructor)(int32_t cppHandle, int32_t* handle, int32_t* classHandle);
+	void (*SystemActionAdd)(int32_t thisHandle, int32_t delHandle);
+	void (*SystemActionRemove)(int32_t thisHandle, int32_t delHandle);
+	void (*SystemActionInvoke)(int32_t thisHandle);
+	void (*ReleaseSystemActionUnityEngineAsyncOperation)(int32_t handle, int32_t classHandle);
+	void (*SystemActionUnityEngineAsyncOperationConstructor)(int32_t cppHandle, int32_t* handle, int32_t* classHandle);
+	void (*SystemActionUnityEngineAsyncOperationAdd)(int32_t thisHandle, int32_t delHandle);
+	void (*SystemActionUnityEngineAsyncOperationRemove)(int32_t thisHandle, int32_t delHandle);
+	void (*SystemActionUnityEngineAsyncOperationInvoke)(int32_t thisHandle, int32_t objHandle);
 	/*END FUNCTION POINTERS*/
 }
 
@@ -112,12 +152,12 @@ namespace Plugin
 		: Handle(0)
 	{
 	}
-	
+
 	ManagedType::ManagedType(decltype(nullptr))
 		: Handle(0)
 	{
 	}
-	
+
 	ManagedType::ManagedType(Plugin::InternalUse iu, int32_t handle)
 		: Handle(handle)
 	{
@@ -134,122 +174,122 @@ namespace System
 		: Value(0)
 	{
 	}
-	
+
 	Boolean::Boolean(bool value)
 		: Value((int32_t)value)
 	{
 	}
-	
+
 	Boolean::Boolean(int32_t value)
 		: Value(value)
 	{
 	}
-	
+
 	Boolean::Boolean(uint32_t value)
 		: Value(value)
 	{
 	}
-	
+
 	Boolean::operator bool() const
 	{
 		return (bool)Value;
 	}
-	
+
 	Boolean::operator int32_t() const
 	{
 		return Value;
 	}
-	
+
 	Boolean::operator uint32_t() const
 	{
 		return Value;
 	}
-	
+
 	Boolean::operator Object() const
 	{
 		return Object(Plugin::InternalUse::Only, Plugin::BoxBoolean(Value));
 	}
-	
+
 	Boolean::operator ValueType() const
 	{
 		return ValueType(Plugin::InternalUse::Only, Plugin::BoxBoolean(Value));
 	}
-	
+
 	Boolean::operator IComparable() const
 	{
 		return IComparable(Plugin::InternalUse::Only, Plugin::BoxBoolean(Value));
 	}
-	
+
 	Boolean::operator IFormattable() const
 	{
 		return IFormattable(Plugin::InternalUse::Only, Plugin::BoxBoolean(Value));
 	}
-	
+
 	Boolean::operator IConvertible() const
 	{
 		return IConvertible(Plugin::InternalUse::Only, Plugin::BoxBoolean(Value));
 	}
-	
+
 	Boolean::operator IComparable_1<Boolean>() const
 	{
 		return IComparable_1<Boolean>(Plugin::InternalUse::Only, Plugin::BoxBoolean(Value));
 	}
-	
+
 	Boolean::operator IEquatable_1<Boolean>() const
 	{
 		return IEquatable_1<Boolean>(Plugin::InternalUse::Only, Plugin::BoxBoolean(Value));
 	}
-	
+
 	Char::Char()
 		: Value(0)
 	{
 	}
-	
+
 	Char::Char(char value)
 		: Value(value)
 	{
 	}
-	
+
 	Char::Char(int16_t value)
 		: Value(value)
 	{
 	}
-	
+
 	Char::operator int16_t() const
 	{
 		return Value;
 	}
-	
+
 	Char::operator Object() const
 	{
 		return Object(Plugin::InternalUse::Only, Plugin::BoxChar(Value));
 	}
-	
+
 	Char::operator ValueType() const
 	{
 		return ValueType(Plugin::InternalUse::Only, Plugin::BoxChar(Value));
 	}
-	
+
 	Char::operator IComparable() const
 	{
 		return IComparable(Plugin::InternalUse::Only, Plugin::BoxChar(Value));
 	}
-	
+
 	Char::operator IFormattable() const
 	{
 		return IFormattable(Plugin::InternalUse::Only, Plugin::BoxChar(Value));
 	}
-	
+
 	Char::operator IConvertible() const
 	{
 		return IConvertible(Plugin::InternalUse::Only, Plugin::BoxChar(Value));
 	}
-	
+
 	Char::operator IComparable_1<Char>() const
 	{
 		return IComparable_1<Char>(Plugin::InternalUse::Only, Plugin::BoxChar(Value));
 	}
-	
+
 	Char::operator IEquatable_1<Char>() const
 	{
 		return IEquatable_1<Char>(Plugin::InternalUse::Only, Plugin::BoxChar(Value));
@@ -259,47 +299,47 @@ namespace System
 		: Value(0)
 	{
 	}
-	
+
 	SByte::SByte(int8_t val)
 		: Value(val)
 	{
 	}
-	
+
 	SByte::operator int8_t() const
 	{
 		return Value;
 	}
-	
+
 	SByte::operator Object() const
 	{
 		return Object(Plugin::InternalUse::Only, Plugin::BoxSByte(Value));
 	}
-	
+
 	SByte::operator ValueType() const
 	{
 		return ValueType(Plugin::InternalUse::Only, Plugin::BoxSByte(Value));
 	}
-	
+
 	SByte::operator IComparable() const
 	{
 		return IComparable(Plugin::InternalUse::Only, Plugin::BoxSByte(Value));
 	}
-	
+
 	SByte::operator IFormattable() const
 	{
 		return IFormattable(Plugin::InternalUse::Only, Plugin::BoxSByte(Value));
 	}
-	
+
 	SByte::operator IConvertible() const
 	{
 		return IConvertible(Plugin::InternalUse::Only, Plugin::BoxSByte(Value));
 	}
-	
+
 	SByte::operator IComparable_1<SByte>() const
 	{
 		return IComparable_1<SByte>(Plugin::InternalUse::Only, Plugin::BoxSByte(Value));
 	}
-	
+
 	SByte::operator IEquatable_1<SByte>() const
 	{
 		return IEquatable_1<SByte>(Plugin::InternalUse::Only, Plugin::BoxSByte(Value));
@@ -309,47 +349,47 @@ namespace System
 		: Value(0)
 	{
 	}
-	
+
 	Byte::Byte(uint8_t value)
 		: Value(value)
 	{
 	}
-	
+
 	Byte::operator uint8_t() const
 	{
 		return Value;
 	}
-	
+
 	Byte::operator Object() const
 	{
 		return Object(Plugin::InternalUse::Only, Plugin::BoxByte(Value));
 	}
-	
+
 	Byte::operator ValueType() const
 	{
 		return ValueType(Plugin::InternalUse::Only, Plugin::BoxByte(Value));
 	}
-	
+
 	Byte::operator IComparable() const
 	{
 		return IComparable(Plugin::InternalUse::Only, Plugin::BoxByte(Value));
 	}
-	
+
 	Byte::operator IFormattable() const
 	{
 		return IFormattable(Plugin::InternalUse::Only, Plugin::BoxByte(Value));
 	}
-	
+
 	Byte::operator IConvertible() const
 	{
 		return IConvertible(Plugin::InternalUse::Only, Plugin::BoxByte(Value));
 	}
-	
+
 	Byte::operator IComparable_1<Byte>() const
 	{
 		return IComparable_1<Byte>(Plugin::InternalUse::Only, Plugin::BoxByte(Value));
 	}
-	
+
 	Byte::operator IEquatable_1<Byte>() const
 	{
 		return IEquatable_1<Byte>(Plugin::InternalUse::Only, Plugin::BoxByte(Value));
@@ -359,47 +399,47 @@ namespace System
 		: Value(0)
 	{
 	}
-	
+
 	Int16::Int16(int16_t value)
 		: Value(value)
 	{
 	}
-	
+
 	Int16::operator int16_t() const
 	{
 		return Value;
 	}
-	
+
 	Int16::operator Object() const
 	{
 		return Object(Plugin::InternalUse::Only, Plugin::BoxInt16(Value));
 	}
-	
+
 	Int16::operator ValueType() const
 	{
 		return ValueType(Plugin::InternalUse::Only, Plugin::BoxInt16(Value));
 	}
-	
+
 	Int16::operator IComparable() const
 	{
 		return IComparable(Plugin::InternalUse::Only, Plugin::BoxInt16(Value));
 	}
-	
+
 	Int16::operator IFormattable() const
 	{
 		return IFormattable(Plugin::InternalUse::Only, Plugin::BoxInt16(Value));
 	}
-	
+
 	Int16::operator IConvertible() const
 	{
 		return IConvertible(Plugin::InternalUse::Only, Plugin::BoxInt16(Value));
 	}
-	
+
 	Int16::operator IComparable_1<Int16>() const
 	{
 		return IComparable_1<Int16>(Plugin::InternalUse::Only, Plugin::BoxInt16(Value));
 	}
-	
+
 	Int16::operator IEquatable_1<Int16>() const
 	{
 		return IEquatable_1<Int16>(Plugin::InternalUse::Only, Plugin::BoxInt16(Value));
@@ -409,47 +449,47 @@ namespace System
 		: Value(0)
 	{
 	}
-	
+
 	UInt16::UInt16(uint16_t value)
 		: Value(value)
 	{
 	}
-	
+
 	UInt16::operator uint16_t() const
 	{
 		return Value;
 	}
-	
+
 	UInt16::operator Object() const
 	{
 		return Object(Plugin::InternalUse::Only, Plugin::BoxUInt16(Value));
 	}
-	
+
 	UInt16::operator ValueType() const
 	{
 		return ValueType(Plugin::InternalUse::Only, Plugin::BoxUInt16(Value));
 	}
-	
+
 	UInt16::operator IComparable() const
 	{
 		return IComparable(Plugin::InternalUse::Only, Plugin::BoxUInt16(Value));
 	}
-	
+
 	UInt16::operator IFormattable() const
 	{
 		return IFormattable(Plugin::InternalUse::Only, Plugin::BoxUInt16(Value));
 	}
-	
+
 	UInt16::operator IConvertible() const
 	{
 		return IConvertible(Plugin::InternalUse::Only, Plugin::BoxUInt16(Value));
 	}
-	
+
 	UInt16::operator IComparable_1<UInt16>() const
 	{
 		return IComparable_1<UInt16>(Plugin::InternalUse::Only, Plugin::BoxUInt16(Value));
 	}
-	
+
 	UInt16::operator IEquatable_1<UInt16>() const
 	{
 		return IEquatable_1<UInt16>(Plugin::InternalUse::Only, Plugin::BoxUInt16(Value));
@@ -459,47 +499,47 @@ namespace System
 		: Value(0)
 	{
 	}
-	
+
 	Int32::Int32(int32_t value)
 		: Value(value)
 	{
 	}
-	
+
 	Int32::operator int32_t() const
 	{
 		return Value;
 	}
-	
+
 	Int32::operator Object() const
 	{
 		return Object(Plugin::InternalUse::Only, Plugin::BoxInt32(Value));
 	}
-	
+
 	Int32::operator ValueType() const
 	{
 		return ValueType(Plugin::InternalUse::Only, Plugin::BoxInt32(Value));
 	}
-	
+
 	Int32::operator IComparable() const
 	{
 		return IComparable(Plugin::InternalUse::Only, Plugin::BoxInt32(Value));
 	}
-	
+
 	Int32::operator IFormattable() const
 	{
 		return IFormattable(Plugin::InternalUse::Only, Plugin::BoxInt32(Value));
 	}
-	
+
 	Int32::operator IConvertible() const
 	{
 		return IConvertible(Plugin::InternalUse::Only, Plugin::BoxInt32(Value));
 	}
-	
+
 	Int32::operator IComparable_1<Int32>() const
 	{
 		return IComparable_1<Int32>(Plugin::InternalUse::Only, Plugin::BoxInt32(Value));
 	}
-	
+
 	Int32::operator IEquatable_1<Int32>() const
 	{
 		return IEquatable_1<Int32>(Plugin::InternalUse::Only, Plugin::BoxInt32(Value));
@@ -509,47 +549,47 @@ namespace System
 		: Value(0)
 	{
 	}
-	
+
 	UInt32::UInt32(uint32_t value)
 		: Value(value)
 	{
 	}
-	
+
 	UInt32::operator uint32_t() const
 	{
 		return Value;
 	}
-	
+
 	UInt32::operator Object() const
 	{
 		return Object(Plugin::InternalUse::Only, Plugin::BoxUInt32(Value));
 	}
-	
+
 	UInt32::operator ValueType() const
 	{
 		return ValueType(Plugin::InternalUse::Only, Plugin::BoxUInt32(Value));
 	}
-	
+
 	UInt32::operator IComparable() const
 	{
 		return IComparable(Plugin::InternalUse::Only, Plugin::BoxUInt32(Value));
 	}
-	
+
 	UInt32::operator IFormattable() const
 	{
 		return IFormattable(Plugin::InternalUse::Only, Plugin::BoxUInt32(Value));
 	}
-	
+
 	UInt32::operator IConvertible() const
 	{
 		return IConvertible(Plugin::InternalUse::Only, Plugin::BoxUInt32(Value));
 	}
-	
+
 	UInt32::operator IComparable_1<UInt32>() const
 	{
 		return IComparable_1<UInt32>(Plugin::InternalUse::Only, Plugin::BoxUInt32(Value));
 	}
-	
+
 	UInt32::operator IEquatable_1<UInt32>() const
 	{
 		return IEquatable_1<UInt32>(Plugin::InternalUse::Only, Plugin::BoxUInt32(Value));
@@ -559,47 +599,47 @@ namespace System
 		: Value(0)
 	{
 	}
-	
+
 	Int64::Int64(int64_t value)
 		: Value(value)
 	{
 	}
-	
+
 	Int64::operator int64_t() const
 	{
 		return Value;
 	}
-	
+
 	Int64::operator Object() const
 	{
 		return Object(Plugin::InternalUse::Only, Plugin::BoxInt64(Value));
 	}
-	
+
 	Int64::operator ValueType() const
 	{
 		return ValueType(Plugin::InternalUse::Only, Plugin::BoxInt64(Value));
 	}
-	
+
 	Int64::operator IComparable() const
 	{
 		return IComparable(Plugin::InternalUse::Only, Plugin::BoxInt64(Value));
 	}
-	
+
 	Int64::operator IFormattable() const
 	{
 		return IFormattable(Plugin::InternalUse::Only, Plugin::BoxInt64(Value));
 	}
-	
+
 	Int64::operator IConvertible() const
 	{
 		return IConvertible(Plugin::InternalUse::Only, Plugin::BoxInt64(Value));
 	}
-	
+
 	Int64::operator IComparable_1<Int64>() const
 	{
 		return IComparable_1<Int64>(Plugin::InternalUse::Only, Plugin::BoxInt64(Value));
 	}
-	
+
 	Int64::operator IEquatable_1<Int64>() const
 	{
 		return IEquatable_1<Int64>(Plugin::InternalUse::Only, Plugin::BoxInt64(Value));
@@ -609,47 +649,47 @@ namespace System
 		: Value(0)
 	{
 	}
-	
+
 	UInt64::UInt64(uint64_t value)
 		: Value(value)
 	{
 	}
-	
+
 	UInt64::operator uint64_t() const
 	{
 		return Value;
 	}
-	
+
 	UInt64::operator Object() const
 	{
 		return Object(Plugin::InternalUse::Only, Plugin::BoxUInt64(Value));
 	}
-	
+
 	UInt64::operator ValueType() const
 	{
 		return ValueType(Plugin::InternalUse::Only, Plugin::BoxUInt64(Value));
 	}
-	
+
 	UInt64::operator IComparable() const
 	{
 		return IComparable(Plugin::InternalUse::Only, Plugin::BoxUInt64(Value));
 	}
-	
+
 	UInt64::operator IFormattable() const
 	{
 		return IFormattable(Plugin::InternalUse::Only, Plugin::BoxUInt64(Value));
 	}
-	
+
 	UInt64::operator IConvertible() const
 	{
 		return IConvertible(Plugin::InternalUse::Only, Plugin::BoxUInt64(Value));
 	}
-	
+
 	UInt64::operator IComparable_1<UInt64>() const
 	{
 		return IComparable_1<UInt64>(Plugin::InternalUse::Only, Plugin::BoxUInt64(Value));
 	}
-	
+
 	UInt64::operator IEquatable_1<UInt64>() const
 	{
 		return IEquatable_1<UInt64>(Plugin::InternalUse::Only, Plugin::BoxUInt64(Value));
@@ -659,47 +699,47 @@ namespace System
 		: Value(0.0f)
 	{
 	}
-	
+
 	Single::Single(float value)
 		: Value(value)
 	{
 	}
-	
+
 	Single::operator float() const
 	{
 		return Value;
 	}
-	
+
 	Single::operator Object() const
 	{
 		return Object(Plugin::InternalUse::Only, Plugin::BoxSingle(Value));
 	}
-	
+
 	Single::operator ValueType() const
 	{
 		return ValueType(Plugin::InternalUse::Only, Plugin::BoxSingle(Value));
 	}
-	
+
 	Single::operator IComparable() const
 	{
 		return IComparable(Plugin::InternalUse::Only, Plugin::BoxSingle(Value));
 	}
-	
+
 	Single::operator IFormattable() const
 	{
 		return IFormattable(Plugin::InternalUse::Only, Plugin::BoxSingle(Value));
 	}
-	
+
 	Single::operator IConvertible() const
 	{
 		return IConvertible(Plugin::InternalUse::Only, Plugin::BoxSingle(Value));
 	}
-	
+
 	Single::operator IComparable_1<Single>() const
 	{
 		return IComparable_1<Single>(Plugin::InternalUse::Only, Plugin::BoxSingle(Value));
 	}
-	
+
 	Single::operator IEquatable_1<Single>() const
 	{
 		return IEquatable_1<Single>(Plugin::InternalUse::Only, Plugin::BoxSingle(Value));
@@ -709,47 +749,47 @@ namespace System
 		: Value(0.0)
 	{
 	}
-	
+
 	Double::Double(double value)
 		: Value(value)
 	{
 	}
-	
+
 	Double::operator double() const
 	{
 		return Value;
 	}
-	
+
 	Double::operator Object() const
 	{
 		return Object(Plugin::InternalUse::Only, Plugin::BoxDouble(Value));
 	}
-	
+
 	Double::operator ValueType() const
 	{
 		return ValueType(Plugin::InternalUse::Only, Plugin::BoxDouble(Value));
 	}
-	
+
 	Double::operator IComparable() const
 	{
 		return IComparable(Plugin::InternalUse::Only, Plugin::BoxDouble(Value));
 	}
-	
+
 	Double::operator IFormattable() const
 	{
 		return IFormattable(Plugin::InternalUse::Only, Plugin::BoxDouble(Value));
 	}
-	
+
 	Double::operator IConvertible() const
 	{
 		return IConvertible(Plugin::InternalUse::Only, Plugin::BoxDouble(Value));
 	}
-	
+
 	Double::operator IComparable_1<Double>() const
 	{
 		return IComparable_1<Double>(Plugin::InternalUse::Only, Plugin::BoxDouble(Value));
 	}
-	
+
 	Double::operator IEquatable_1<Double>() const
 	{
 		return IEquatable_1<Double>(Plugin::InternalUse::Only, Plugin::BoxDouble(Value));
@@ -768,7 +808,7 @@ namespace Plugin
 		, hasMore(false)
 	{
 	}
-	
+
 	// Begin iterators keep track of an IEnumerator
 	EnumerableIterator::EnumerableIterator(
 		System::Collections::IEnumerable& enumerable)
@@ -776,18 +816,18 @@ namespace Plugin
 	{
 		hasMore = enumerator.MoveNext();
 	}
-	
+
 	EnumerableIterator& EnumerableIterator::operator++()
 	{
 		hasMore = enumerator.MoveNext();
 		return *this;
 	}
-	
+
 	bool EnumerableIterator::operator!=(const EnumerableIterator& other)
 	{
 		return hasMore;
 	}
-	
+
 	System::Object EnumerableIterator::operator*()
 	{
 		return enumerator.GetCurrent();
@@ -838,7 +878,7 @@ namespace Plugin
 			}
 		}
 	}
-	
+
 	bool DereferenceManagedClassNoRelease(int32_t handle)
 	{
 		assert(handle >= 0 && handle < RefCountsLenClass);
@@ -852,7 +892,7 @@ namespace Plugin
 		}
 		return false;
 	}
-	
+
 	/*BEGIN GLOBAL STATE AND FUNCTIONS*/
 	int32_t RefCountsLenSystemDecimal;
 	int32_t* RefCountsSystemDecimal;
@@ -876,6 +916,63 @@ namespace Plugin
 			{
 				ReleaseSystemDecimal(handle);
 			}
+		}
+	}
+	
+	// Free list for CesiumForUnity::BaseNativeDownloadHandler pointers
+	
+	int32_t BaseNativeDownloadHandlerFreeListSize;
+	CesiumForUnity::BaseNativeDownloadHandler** BaseNativeDownloadHandlerFreeList;
+	CesiumForUnity::BaseNativeDownloadHandler** NextFreeBaseNativeDownloadHandler;
+	
+	int32_t StoreBaseNativeDownloadHandler(CesiumForUnity::BaseNativeDownloadHandler* del)
+	{
+		assert(NextFreeBaseNativeDownloadHandler != nullptr);
+		CesiumForUnity::BaseNativeDownloadHandler** pNext = NextFreeBaseNativeDownloadHandler;
+		NextFreeBaseNativeDownloadHandler = (CesiumForUnity::BaseNativeDownloadHandler**)*pNext;
+		*pNext = del;
+		return (int32_t)(pNext - BaseNativeDownloadHandlerFreeList);
+	}
+	
+	CesiumForUnity::BaseNativeDownloadHandler* GetBaseNativeDownloadHandler(int32_t handle)
+	{
+		assert(handle >= 0 && handle < BaseNativeDownloadHandlerFreeListSize);
+		return BaseNativeDownloadHandlerFreeList[handle];
+	}
+	
+	void RemoveBaseNativeDownloadHandler(int32_t handle)
+	{
+		CesiumForUnity::BaseNativeDownloadHandler** pRelease = BaseNativeDownloadHandlerFreeList + handle;
+		*pRelease = (CesiumForUnity::BaseNativeDownloadHandler*)NextFreeBaseNativeDownloadHandler;
+		NextFreeBaseNativeDownloadHandler = pRelease;
+	}
+	
+	// Free list for whole CesiumForUnity::BaseNativeDownloadHandler objects
+	
+	union BaseNativeDownloadHandlerFreeWholeListEntry
+	{
+		BaseNativeDownloadHandlerFreeWholeListEntry* Next;
+		CesiumForUnity::BaseNativeDownloadHandler Value;
+	};
+	int32_t BaseNativeDownloadHandlerFreeWholeListSize;
+	BaseNativeDownloadHandlerFreeWholeListEntry* BaseNativeDownloadHandlerFreeWholeList;
+	BaseNativeDownloadHandlerFreeWholeListEntry* NextFreeWholeBaseNativeDownloadHandler;
+	
+	CesiumForUnity::BaseNativeDownloadHandler* StoreWholeBaseNativeDownloadHandler()
+	{
+		assert(NextFreeWholeBaseNativeDownloadHandler != nullptr);
+		BaseNativeDownloadHandlerFreeWholeListEntry* pNext = NextFreeWholeBaseNativeDownloadHandler;
+		NextFreeWholeBaseNativeDownloadHandler = pNext->Next;
+		return &pNext->Value;
+	}
+	
+	void RemoveWholeBaseNativeDownloadHandler(CesiumForUnity::BaseNativeDownloadHandler* instance)
+	{
+		BaseNativeDownloadHandlerFreeWholeListEntry* pRelease = (BaseNativeDownloadHandlerFreeWholeListEntry*)instance;
+		if (pRelease >= BaseNativeDownloadHandlerFreeWholeList && pRelease < BaseNativeDownloadHandlerFreeWholeList + (BaseNativeDownloadHandlerFreeWholeListSize - 1))
+		{
+			pRelease->Next = NextFreeWholeBaseNativeDownloadHandler;
+			NextFreeWholeBaseNativeDownloadHandler = pRelease->Next;
 		}
 	}
 	
@@ -935,6 +1032,62 @@ namespace Plugin
 			NextFreeWholeBaseCesium3DTileset = pRelease->Next;
 		}
 	}
+	
+	// Free list for System::Action pointers
+	
+	int32_t SystemActionFreeListSize;
+	System::Action** SystemActionFreeList;
+	System::Action** NextFreeSystemAction;
+	
+	int32_t StoreSystemAction(System::Action* del)
+	{
+		assert(NextFreeSystemAction != nullptr);
+		System::Action** pNext = NextFreeSystemAction;
+		NextFreeSystemAction = (System::Action**)*pNext;
+		*pNext = del;
+		return (int32_t)(pNext - SystemActionFreeList);
+	}
+	
+	System::Action* GetSystemAction(int32_t handle)
+	{
+		assert(handle >= 0 && handle < SystemActionFreeListSize);
+		return SystemActionFreeList[handle];
+	}
+	
+	void RemoveSystemAction(int32_t handle)
+	{
+		System::Action** pRelease = SystemActionFreeList + handle;
+		*pRelease = (System::Action*)NextFreeSystemAction;
+		NextFreeSystemAction = pRelease;
+	}
+	
+	// Free list for System::Action_1<UnityEngine::AsyncOperation> pointers
+	
+	int32_t SystemActionUnityEngineAsyncOperationFreeListSize;
+	System::Action_1<UnityEngine::AsyncOperation>** SystemActionUnityEngineAsyncOperationFreeList;
+	System::Action_1<UnityEngine::AsyncOperation>** NextFreeSystemActionUnityEngineAsyncOperation;
+	
+	int32_t StoreSystemActionUnityEngineAsyncOperation(System::Action_1<UnityEngine::AsyncOperation>* del)
+	{
+		assert(NextFreeSystemActionUnityEngineAsyncOperation != nullptr);
+		System::Action_1<UnityEngine::AsyncOperation>** pNext = NextFreeSystemActionUnityEngineAsyncOperation;
+		NextFreeSystemActionUnityEngineAsyncOperation = (System::Action_1<UnityEngine::AsyncOperation>**)*pNext;
+		*pNext = del;
+		return (int32_t)(pNext - SystemActionUnityEngineAsyncOperationFreeList);
+	}
+	
+	System::Action_1<UnityEngine::AsyncOperation>* GetSystemActionUnityEngineAsyncOperation(int32_t handle)
+	{
+		assert(handle >= 0 && handle < SystemActionUnityEngineAsyncOperationFreeListSize);
+		return SystemActionUnityEngineAsyncOperationFreeList[handle];
+	}
+	
+	void RemoveSystemActionUnityEngineAsyncOperation(int32_t handle)
+	{
+		System::Action_1<UnityEngine::AsyncOperation>** pRelease = SystemActionUnityEngineAsyncOperationFreeList + handle;
+		*pRelease = (System::Action_1<UnityEngine::AsyncOperation>*)NextFreeSystemActionUnityEngineAsyncOperation;
+		NextFreeSystemActionUnityEngineAsyncOperation = pRelease;
+	}
 	/*END GLOBAL STATE AND FUNCTIONS*/
 }
 
@@ -955,12 +1108,12 @@ namespace System
 		: Plugin::ManagedType(nullptr)
 	{
 	}
-	
+
 	Object::Object(Plugin::InternalUse iu, int32_t handle)
 		: ManagedType(Plugin::InternalUse::Only, handle)
 	{
 	}
-	
+
 	Object::Object(decltype(nullptr))
 		: ManagedType(nullptr)
 	{
@@ -969,47 +1122,47 @@ namespace System
 	Object::~Object()
 	{
 	}
-	
+
 	bool Object::operator==(decltype(nullptr)) const
 	{
 		return Handle == 0;
 	}
-	
+
 	bool Object::operator!=(decltype(nullptr)) const
 	{
 		return Handle != 0;
 	}
-	
+
 	void Object::ThrowReferenceToThis()
 	{
 		throw *this;
 	}
-	
+
 	ValueType::ValueType(Plugin::InternalUse iu, int32_t handle)
 		: Object(iu, handle)
 	{
 	}
-	
+
 	ValueType::ValueType(decltype(nullptr))
 		: Object(nullptr)
 	{
 	}
-	
+
 	Enum::Enum(Plugin::InternalUse iu, int32_t handle)
 		: ValueType(iu, handle)
 	{
 	}
-	
+
 	Enum::Enum(decltype(nullptr))
 		: ValueType(nullptr)
 	{
 	}
-	
+
 	String::String(decltype(nullptr))
 		: Object(Plugin::InternalUse::Only, 0)
 	{
 	}
-	
+
 	String::String(Plugin::InternalUse iu, int32_t handle)
 		: Object(iu, handle)
 	{
@@ -1018,7 +1171,7 @@ namespace System
 			Plugin::ReferenceManagedClass(handle);
 		}
 	}
-	
+
 	String::String(const String& other)
 		: Object(Plugin::InternalUse::Only, other.Handle)
 	{
@@ -1027,13 +1180,13 @@ namespace System
 			Plugin::ReferenceManagedClass(Handle);
 		}
 	}
-	
+
 	String::String(String&& other)
 		: Object(Plugin::InternalUse::Only, other.Handle)
 	{
 		other.Handle = 0;
 	}
-	
+
 	String::~String()
 	{
 		if (Handle)
@@ -1042,7 +1195,7 @@ namespace System
 			Handle = 0;
 		}
 	}
-	
+
 	String& String::operator=(const String& other)
 	{
 		if (Handle != other.Handle)
@@ -1059,7 +1212,7 @@ namespace System
 		}
 		return *this;
 	}
-	
+
 	String& String::operator=(decltype(nullptr))
 	{
 		if (Handle)
@@ -1069,7 +1222,7 @@ namespace System
 		}
 		return *this;
 	}
-	
+
 	String& String::operator=(String&& other)
 	{
 		if (Handle)
@@ -1080,73 +1233,73 @@ namespace System
 		other.Handle = 0;
 		return *this;
 	}
-	
+
 	String::String(const char* chars)
 		: Object(Plugin::InternalUse::Only, Plugin::StringNew(chars))
 	{
 		Plugin::ReferenceManagedClass(Handle);
 	}
-	
+
 	ICloneable::ICloneable(Plugin::InternalUse iu, int32_t handle)
 		: Object(iu, handle)
 	{
 	}
-	
+
 	ICloneable::ICloneable(decltype(nullptr))
 		: Object(nullptr)
 	{
 	}
-	
+
 	namespace Collections
 	{
 		IEnumerable::IEnumerable(Plugin::InternalUse iu, int32_t handle)
 			: Object(iu, handle)
 		{
 		}
-		
+
 		IEnumerable::IEnumerable(decltype(nullptr))
 			: Object(nullptr)
 		{
 		}
-		
+
 		IEnumerator IEnumerable::GetEnumerator()
 		{
 			return IEnumerator(
 				Plugin::InternalUse::Only,
 				Plugin::EnumerableGetEnumerator(Handle));
 		}
-		
+
 		Plugin::EnumerableIterator begin(
 			System::Collections::IEnumerable& enumerable)
 		{
 			return Plugin::EnumerableIterator(enumerable);
 		}
-		
+
 		Plugin::EnumerableIterator end(
 			System::Collections::IEnumerable& enumerable)
 		{
 			return Plugin::EnumerableIterator(nullptr);
 		}
-		
+
 		ICollection::ICollection(Plugin::InternalUse iu, int32_t handle)
 			: Object(iu, handle)
 			, IEnumerable(nullptr)
 		{
 		}
-		
+
 		ICollection::ICollection(decltype(nullptr))
 			: Object(nullptr)
 			, IEnumerable(nullptr)
 		{
 		}
-		
+
 		IList::IList(Plugin::InternalUse iu, int32_t handle)
 			: Object(iu, handle)
 			, IEnumerable(nullptr)
 			, ICollection(nullptr)
 		{
 		}
-		
+
 		IList::IList(decltype(nullptr))
 			: Object(nullptr)
 			, IEnumerable(nullptr)
@@ -1154,7 +1307,7 @@ namespace System
 		{
 		}
 	}
-	
+
 	Array::Array(Plugin::InternalUse iu, int32_t handle)
 		: Object(iu, handle)
 		, ICloneable(nullptr)
@@ -1163,7 +1316,7 @@ namespace System
 		, Collections::IList(nullptr)
 	{
 	}
-	
+
 	Array::Array(decltype(nullptr))
 		: Object(nullptr)
 		, ICloneable(nullptr)
@@ -1172,12 +1325,12 @@ namespace System
 		, Collections::IList(nullptr)
 	{
 	}
-	
+
 	int32_t Array::GetLength()
 	{
 		return Plugin::ArrayGetLength(Handle);
 	}
-	
+
 	int32_t Array::GetRank()
 	{
 		return 0;
@@ -1504,6 +1657,87 @@ namespace System
 	}
 	
 	bool ISpanFormattable::operator!=(const ISpanFormattable& other) const
+	{
+		return Handle != other.Handle;
+	}
+}
+
+namespace System
+{
+	IDisposable::IDisposable(decltype(nullptr))
+	{
+	}
+	
+	IDisposable::IDisposable(Plugin::InternalUse, int32_t handle)
+	{
+		Handle = handle;
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+		}
+	}
+	
+	IDisposable::IDisposable(const IDisposable& other)
+		: IDisposable(Plugin::InternalUse::Only, other.Handle)
+	{
+	}
+	
+	IDisposable::IDisposable(IDisposable&& other)
+		: IDisposable(Plugin::InternalUse::Only, other.Handle)
+	{
+		other.Handle = 0;
+	}
+	
+	IDisposable::~IDisposable()
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+	}
+	
+	IDisposable& IDisposable::operator=(const IDisposable& other)
+	{
+		if (this->Handle)
+		{
+			Plugin::DereferenceManagedClass(this->Handle);
+		}
+		this->Handle = other.Handle;
+		if (this->Handle)
+		{
+			Plugin::ReferenceManagedClass(this->Handle);
+		}
+		return *this;
+	}
+	
+	IDisposable& IDisposable::operator=(decltype(nullptr))
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+		return *this;
+	}
+	
+	IDisposable& IDisposable::operator=(IDisposable&& other)
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+		}
+		Handle = other.Handle;
+		other.Handle = 0;
+		return *this;
+	}
+	
+	bool IDisposable::operator==(const IDisposable& other) const
+	{
+		return Handle == other.Handle;
+	}
+	
+	bool IDisposable::operator!=(const IDisposable& other) const
 	{
 		return Handle != other.Handle;
 	}
@@ -5710,6 +5944,1282 @@ namespace UnityEngine
 	}
 }
 
+namespace UnityEngine
+{
+	Camera::Camera(decltype(nullptr))
+		: UnityEngine::Object(nullptr)
+		, UnityEngine::Component(nullptr)
+		, UnityEngine::Behaviour(nullptr)
+	{
+	}
+	
+	Camera::Camera(Plugin::InternalUse, int32_t handle)
+		: UnityEngine::Object(nullptr)
+		, UnityEngine::Component(nullptr)
+		, UnityEngine::Behaviour(nullptr)
+	{
+		Handle = handle;
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+		}
+	}
+	
+	Camera::Camera(const Camera& other)
+		: Camera(Plugin::InternalUse::Only, other.Handle)
+	{
+	}
+	
+	Camera::Camera(Camera&& other)
+		: Camera(Plugin::InternalUse::Only, other.Handle)
+	{
+		other.Handle = 0;
+	}
+	
+	Camera::~Camera()
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+	}
+	
+	Camera& Camera::operator=(const Camera& other)
+	{
+		if (this->Handle)
+		{
+			Plugin::DereferenceManagedClass(this->Handle);
+		}
+		this->Handle = other.Handle;
+		if (this->Handle)
+		{
+			Plugin::ReferenceManagedClass(this->Handle);
+		}
+		return *this;
+	}
+	
+	Camera& Camera::operator=(decltype(nullptr))
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+		return *this;
+	}
+	
+	Camera& Camera::operator=(Camera&& other)
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+		}
+		Handle = other.Handle;
+		other.Handle = 0;
+		return *this;
+	}
+	
+	bool Camera::operator==(const Camera& other) const
+	{
+		return Handle == other.Handle;
+	}
+	
+	bool Camera::operator!=(const Camera& other) const
+	{
+		return Handle != other.Handle;
+	}
+	
+	UnityEngine::Camera UnityEngine::Camera::GetMain()
+	{
+		auto returnValue = Plugin::UnityEngineCameraPropertyGetMain();
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return UnityEngine::Camera(Plugin::InternalUse::Only, returnValue);
+	}
+	
+	System::Single UnityEngine::Camera::GetFieldOfView()
+	{
+		auto returnValue = Plugin::UnityEngineCameraPropertyGetFieldOfView(Handle);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return returnValue;
+	}
+	
+	void UnityEngine::Camera::SetFieldOfView(System::Single value)
+	{
+		Plugin::UnityEngineCameraPropertySetFieldOfView(Handle, value);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+	}
+	
+	System::Single UnityEngine::Camera::GetAspect()
+	{
+		auto returnValue = Plugin::UnityEngineCameraPropertyGetAspect(Handle);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return returnValue;
+	}
+	
+	void UnityEngine::Camera::SetAspect(System::Single value)
+	{
+		Plugin::UnityEngineCameraPropertySetAspect(Handle, value);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+	}
+	
+	System::Int32 UnityEngine::Camera::GetPixelWidth()
+	{
+		auto returnValue = Plugin::UnityEngineCameraPropertyGetPixelWidth(Handle);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return returnValue;
+	}
+	
+	System::Int32 UnityEngine::Camera::GetPixelHeight()
+	{
+		auto returnValue = Plugin::UnityEngineCameraPropertyGetPixelHeight(Handle);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return returnValue;
+	}
+}
+
+namespace UnityEngine
+{
+	YieldInstruction::YieldInstruction(decltype(nullptr))
+	{
+	}
+	
+	YieldInstruction::YieldInstruction(Plugin::InternalUse, int32_t handle)
+	{
+		Handle = handle;
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+		}
+	}
+	
+	YieldInstruction::YieldInstruction(const YieldInstruction& other)
+		: YieldInstruction(Plugin::InternalUse::Only, other.Handle)
+	{
+	}
+	
+	YieldInstruction::YieldInstruction(YieldInstruction&& other)
+		: YieldInstruction(Plugin::InternalUse::Only, other.Handle)
+	{
+		other.Handle = 0;
+	}
+	
+	YieldInstruction::~YieldInstruction()
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+	}
+	
+	YieldInstruction& YieldInstruction::operator=(const YieldInstruction& other)
+	{
+		if (this->Handle)
+		{
+			Plugin::DereferenceManagedClass(this->Handle);
+		}
+		this->Handle = other.Handle;
+		if (this->Handle)
+		{
+			Plugin::ReferenceManagedClass(this->Handle);
+		}
+		return *this;
+	}
+	
+	YieldInstruction& YieldInstruction::operator=(decltype(nullptr))
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+		return *this;
+	}
+	
+	YieldInstruction& YieldInstruction::operator=(YieldInstruction&& other)
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+		}
+		Handle = other.Handle;
+		other.Handle = 0;
+		return *this;
+	}
+	
+	bool YieldInstruction::operator==(const YieldInstruction& other) const
+	{
+		return Handle == other.Handle;
+	}
+	
+	bool YieldInstruction::operator!=(const YieldInstruction& other) const
+	{
+		return Handle != other.Handle;
+	}
+}
+
+namespace UnityEngine
+{
+	AsyncOperation::AsyncOperation(decltype(nullptr))
+		: UnityEngine::YieldInstruction(nullptr)
+	{
+	}
+	
+	AsyncOperation::AsyncOperation(Plugin::InternalUse, int32_t handle)
+		: UnityEngine::YieldInstruction(nullptr)
+	{
+		Handle = handle;
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+		}
+	}
+	
+	AsyncOperation::AsyncOperation(const AsyncOperation& other)
+		: AsyncOperation(Plugin::InternalUse::Only, other.Handle)
+	{
+	}
+	
+	AsyncOperation::AsyncOperation(AsyncOperation&& other)
+		: AsyncOperation(Plugin::InternalUse::Only, other.Handle)
+	{
+		other.Handle = 0;
+	}
+	
+	AsyncOperation::~AsyncOperation()
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+	}
+	
+	AsyncOperation& AsyncOperation::operator=(const AsyncOperation& other)
+	{
+		if (this->Handle)
+		{
+			Plugin::DereferenceManagedClass(this->Handle);
+		}
+		this->Handle = other.Handle;
+		if (this->Handle)
+		{
+			Plugin::ReferenceManagedClass(this->Handle);
+		}
+		return *this;
+	}
+	
+	AsyncOperation& AsyncOperation::operator=(decltype(nullptr))
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+		return *this;
+	}
+	
+	AsyncOperation& AsyncOperation::operator=(AsyncOperation&& other)
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+		}
+		Handle = other.Handle;
+		other.Handle = 0;
+		return *this;
+	}
+	
+	bool AsyncOperation::operator==(const AsyncOperation& other) const
+	{
+		return Handle == other.Handle;
+	}
+	
+	bool AsyncOperation::operator!=(const AsyncOperation& other) const
+	{
+		return Handle != other.Handle;
+	}
+}
+
+namespace UnityEngine
+{
+	namespace Networking
+	{
+		DownloadHandler::DownloadHandler(decltype(nullptr))
+			: System::IDisposable(nullptr)
+		{
+		}
+		
+		DownloadHandler::DownloadHandler(Plugin::InternalUse, int32_t handle)
+			: System::IDisposable(nullptr)
+		{
+			Handle = handle;
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+			}
+		}
+		
+		DownloadHandler::DownloadHandler(const DownloadHandler& other)
+			: DownloadHandler(Plugin::InternalUse::Only, other.Handle)
+		{
+		}
+		
+		DownloadHandler::DownloadHandler(DownloadHandler&& other)
+			: DownloadHandler(Plugin::InternalUse::Only, other.Handle)
+		{
+			other.Handle = 0;
+		}
+		
+		DownloadHandler::~DownloadHandler()
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedClass(Handle);
+				Handle = 0;
+			}
+		}
+		
+		DownloadHandler& DownloadHandler::operator=(const DownloadHandler& other)
+		{
+			if (this->Handle)
+			{
+				Plugin::DereferenceManagedClass(this->Handle);
+			}
+			this->Handle = other.Handle;
+			if (this->Handle)
+			{
+				Plugin::ReferenceManagedClass(this->Handle);
+			}
+			return *this;
+		}
+		
+		DownloadHandler& DownloadHandler::operator=(decltype(nullptr))
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedClass(Handle);
+				Handle = 0;
+			}
+			return *this;
+		}
+		
+		DownloadHandler& DownloadHandler::operator=(DownloadHandler&& other)
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedClass(Handle);
+			}
+			Handle = other.Handle;
+			other.Handle = 0;
+			return *this;
+		}
+		
+		bool DownloadHandler::operator==(const DownloadHandler& other) const
+		{
+			return Handle == other.Handle;
+		}
+		
+		bool DownloadHandler::operator!=(const DownloadHandler& other) const
+		{
+			return Handle != other.Handle;
+		}
+	}
+}
+
+namespace UnityEngine
+{
+	namespace Networking
+	{
+		DownloadHandlerScript::DownloadHandlerScript(decltype(nullptr))
+			: System::IDisposable(nullptr)
+			, UnityEngine::Networking::DownloadHandler(nullptr)
+		{
+		}
+		
+		DownloadHandlerScript::DownloadHandlerScript(Plugin::InternalUse, int32_t handle)
+			: System::IDisposable(nullptr)
+			, UnityEngine::Networking::DownloadHandler(nullptr)
+		{
+			Handle = handle;
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+			}
+		}
+		
+		DownloadHandlerScript::DownloadHandlerScript(const DownloadHandlerScript& other)
+			: DownloadHandlerScript(Plugin::InternalUse::Only, other.Handle)
+		{
+		}
+		
+		DownloadHandlerScript::DownloadHandlerScript(DownloadHandlerScript&& other)
+			: DownloadHandlerScript(Plugin::InternalUse::Only, other.Handle)
+		{
+			other.Handle = 0;
+		}
+		
+		DownloadHandlerScript::~DownloadHandlerScript()
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedClass(Handle);
+				Handle = 0;
+			}
+		}
+		
+		DownloadHandlerScript& DownloadHandlerScript::operator=(const DownloadHandlerScript& other)
+		{
+			if (this->Handle)
+			{
+				Plugin::DereferenceManagedClass(this->Handle);
+			}
+			this->Handle = other.Handle;
+			if (this->Handle)
+			{
+				Plugin::ReferenceManagedClass(this->Handle);
+			}
+			return *this;
+		}
+		
+		DownloadHandlerScript& DownloadHandlerScript::operator=(decltype(nullptr))
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedClass(Handle);
+				Handle = 0;
+			}
+			return *this;
+		}
+		
+		DownloadHandlerScript& DownloadHandlerScript::operator=(DownloadHandlerScript&& other)
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedClass(Handle);
+			}
+			Handle = other.Handle;
+			other.Handle = 0;
+			return *this;
+		}
+		
+		bool DownloadHandlerScript::operator==(const DownloadHandlerScript& other) const
+		{
+			return Handle == other.Handle;
+		}
+		
+		bool DownloadHandlerScript::operator!=(const DownloadHandlerScript& other) const
+		{
+			return Handle != other.Handle;
+		}
+	}
+}
+
+namespace CesiumForUnity
+{
+	RawDownloadedData::RawDownloadedData()
+	{
+	}
+	
+	CesiumForUnity::RawDownloadedData::operator System::ValueType()
+	{
+		int32_t handle = Plugin::BoxRawDownloadedData(*this);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+			return System::ValueType(Plugin::InternalUse::Only, handle);
+		}
+		return nullptr;
+	}
+	
+	CesiumForUnity::RawDownloadedData::operator System::Object()
+	{
+		int32_t handle = Plugin::BoxRawDownloadedData(*this);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+			return System::Object(Plugin::InternalUse::Only, handle);
+		}
+		return nullptr;
+	}
+}
+
+namespace System
+{
+	System::Object::operator CesiumForUnity::RawDownloadedData()
+	{
+		CesiumForUnity::RawDownloadedData returnVal(Plugin::UnboxRawDownloadedData(Handle));
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return returnVal;
+	}
+}
+
+namespace CesiumForUnity
+{
+	AbstractBaseNativeDownloadHandler::AbstractBaseNativeDownloadHandler(decltype(nullptr))
+		: System::IDisposable(nullptr)
+		, UnityEngine::Networking::DownloadHandler(nullptr)
+		, UnityEngine::Networking::DownloadHandlerScript(nullptr)
+	{
+	}
+	
+	AbstractBaseNativeDownloadHandler::AbstractBaseNativeDownloadHandler(Plugin::InternalUse, int32_t handle)
+		: System::IDisposable(nullptr)
+		, UnityEngine::Networking::DownloadHandler(nullptr)
+		, UnityEngine::Networking::DownloadHandlerScript(nullptr)
+	{
+		Handle = handle;
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+		}
+	}
+	
+	AbstractBaseNativeDownloadHandler::AbstractBaseNativeDownloadHandler(const AbstractBaseNativeDownloadHandler& other)
+		: AbstractBaseNativeDownloadHandler(Plugin::InternalUse::Only, other.Handle)
+	{
+	}
+	
+	AbstractBaseNativeDownloadHandler::AbstractBaseNativeDownloadHandler(AbstractBaseNativeDownloadHandler&& other)
+		: AbstractBaseNativeDownloadHandler(Plugin::InternalUse::Only, other.Handle)
+	{
+		other.Handle = 0;
+	}
+	
+	AbstractBaseNativeDownloadHandler::~AbstractBaseNativeDownloadHandler()
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+	}
+	
+	AbstractBaseNativeDownloadHandler& AbstractBaseNativeDownloadHandler::operator=(const AbstractBaseNativeDownloadHandler& other)
+	{
+		if (this->Handle)
+		{
+			Plugin::DereferenceManagedClass(this->Handle);
+		}
+		this->Handle = other.Handle;
+		if (this->Handle)
+		{
+			Plugin::ReferenceManagedClass(this->Handle);
+		}
+		return *this;
+	}
+	
+	AbstractBaseNativeDownloadHandler& AbstractBaseNativeDownloadHandler::operator=(decltype(nullptr))
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+		return *this;
+	}
+	
+	AbstractBaseNativeDownloadHandler& AbstractBaseNativeDownloadHandler::operator=(AbstractBaseNativeDownloadHandler&& other)
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+		}
+		Handle = other.Handle;
+		other.Handle = 0;
+		return *this;
+	}
+	
+	bool AbstractBaseNativeDownloadHandler::operator==(const AbstractBaseNativeDownloadHandler& other) const
+	{
+		return Handle == other.Handle;
+	}
+	
+	bool AbstractBaseNativeDownloadHandler::operator!=(const AbstractBaseNativeDownloadHandler& other) const
+	{
+		return Handle != other.Handle;
+	}
+}
+
+namespace CesiumForUnity
+{
+	CesiumForUnity::BaseNativeDownloadHandler::BaseNativeDownloadHandler()
+		: System::IDisposable(nullptr)
+		, UnityEngine::Networking::DownloadHandler(nullptr)
+		, UnityEngine::Networking::DownloadHandlerScript(nullptr)
+		, CesiumForUnity::AbstractBaseNativeDownloadHandler(nullptr)
+	{
+		CppHandle = Plugin::StoreBaseNativeDownloadHandler(this);
+		System::Int32* handle = (System::Int32*)&Handle;
+		int32_t cppHandle = CppHandle;
+		Plugin::BaseNativeDownloadHandlerConstructor(cppHandle, &handle->Value);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		if (Handle)
+		{
+			Plugin::ReferenceManagedClass(Handle);
+		}
+		else
+		{
+			Plugin::RemoveBaseNativeDownloadHandler(CppHandle);
+			CppHandle = 0;
+		}
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+	}
+	
+	BaseNativeDownloadHandler::BaseNativeDownloadHandler(decltype(nullptr))
+		: System::IDisposable(nullptr)
+		, UnityEngine::Networking::DownloadHandler(nullptr)
+		, UnityEngine::Networking::DownloadHandlerScript(nullptr)
+		, CesiumForUnity::AbstractBaseNativeDownloadHandler(nullptr)
+	{
+		CppHandle = Plugin::StoreBaseNativeDownloadHandler(this);
+	}
+	
+	CesiumForUnity::BaseNativeDownloadHandler::BaseNativeDownloadHandler(const CesiumForUnity::BaseNativeDownloadHandler& other)
+		: System::IDisposable(nullptr)
+		, UnityEngine::Networking::DownloadHandler(nullptr)
+		, UnityEngine::Networking::DownloadHandlerScript(nullptr)
+		, CesiumForUnity::AbstractBaseNativeDownloadHandler(nullptr)
+	{
+		Handle = other.Handle;
+		CppHandle = Plugin::StoreBaseNativeDownloadHandler(this);
+		if (Handle)
+		{
+			Plugin::ReferenceManagedClass(Handle);
+		}
+	}
+	
+	CesiumForUnity::BaseNativeDownloadHandler::BaseNativeDownloadHandler(CesiumForUnity::BaseNativeDownloadHandler&& other)
+		: System::IDisposable(nullptr)
+		, UnityEngine::Networking::DownloadHandler(nullptr)
+		, UnityEngine::Networking::DownloadHandlerScript(nullptr)
+		, CesiumForUnity::AbstractBaseNativeDownloadHandler(nullptr)
+	{
+		Handle = other.Handle;
+		CppHandle = other.CppHandle;
+		other.Handle = 0;
+		other.CppHandle = 0;
+	}
+	
+	CesiumForUnity::BaseNativeDownloadHandler::BaseNativeDownloadHandler(Plugin::InternalUse, int32_t handle)
+		: System::IDisposable(nullptr)
+		, UnityEngine::Networking::DownloadHandler(nullptr)
+		, UnityEngine::Networking::DownloadHandlerScript(nullptr)
+		, CesiumForUnity::AbstractBaseNativeDownloadHandler(nullptr)
+	{
+		Handle = handle;
+		CppHandle = Plugin::StoreBaseNativeDownloadHandler(this);
+		if (Handle)
+		{
+			Plugin::ReferenceManagedClass(Handle);
+		}
+	}
+	
+	CesiumForUnity::BaseNativeDownloadHandler::~BaseNativeDownloadHandler()
+	{
+		Plugin::RemoveWholeBaseNativeDownloadHandler(this);
+		Plugin::RemoveBaseNativeDownloadHandler(CppHandle);
+		CppHandle = 0;
+		if (Handle)
+		{
+			int32_t handle = Handle;
+			Handle = 0;
+			if (Plugin::DereferenceManagedClassNoRelease(handle))
+			{
+				Plugin::ReleaseBaseNativeDownloadHandler(handle);
+				if (Plugin::unhandledCsharpException)
+				{
+					System::Exception* ex = Plugin::unhandledCsharpException;
+					Plugin::unhandledCsharpException = nullptr;
+					ex->ThrowReferenceToThis();
+					delete ex;
+				}
+			}
+		}
+	}
+	
+	CesiumForUnity::BaseNativeDownloadHandler& CesiumForUnity::BaseNativeDownloadHandler::operator=(const CesiumForUnity::BaseNativeDownloadHandler& other)
+	{
+		if (this->Handle)
+		{
+			Plugin::DereferenceManagedClass(this->Handle);
+		}
+		this->Handle = other.Handle;
+		if (this->Handle)
+		{
+			Plugin::ReferenceManagedClass(this->Handle);
+		}
+		return *this;
+	}
+	
+	CesiumForUnity::BaseNativeDownloadHandler& CesiumForUnity::BaseNativeDownloadHandler::operator=(decltype(nullptr))
+	{
+		if (Handle)
+		{
+			int32_t handle = Handle;
+			Handle = 0;
+			if (Plugin::DereferenceManagedClassNoRelease(handle))
+			{
+				Plugin::ReleaseBaseNativeDownloadHandler(handle);
+				if (Plugin::unhandledCsharpException)
+				{
+					System::Exception* ex = Plugin::unhandledCsharpException;
+					Plugin::unhandledCsharpException = nullptr;
+					ex->ThrowReferenceToThis();
+					delete ex;
+				}
+			}
+		}
+		Handle = 0;
+		return *this;
+	}
+	
+	CesiumForUnity::BaseNativeDownloadHandler& CesiumForUnity::BaseNativeDownloadHandler::operator=(CesiumForUnity::BaseNativeDownloadHandler&& other)
+	{
+		Plugin::RemoveBaseNativeDownloadHandler(CppHandle);
+		CppHandle = 0;
+		if (Handle)
+		{
+			int32_t handle = Handle;
+			Handle = 0;
+			if (Plugin::DereferenceManagedClassNoRelease(handle))
+			{
+				Plugin::ReleaseBaseNativeDownloadHandler(handle);
+				if (Plugin::unhandledCsharpException)
+				{
+					System::Exception* ex = Plugin::unhandledCsharpException;
+					Plugin::unhandledCsharpException = nullptr;
+					ex->ThrowReferenceToThis();
+					delete ex;
+				}
+			}
+		}
+		Handle = other.Handle;
+		other.Handle = 0;
+		return *this;
+	}
+	
+	bool CesiumForUnity::BaseNativeDownloadHandler::operator==(const CesiumForUnity::BaseNativeDownloadHandler& other) const
+	{
+		return Handle == other.Handle;
+	}
+	
+	bool CesiumForUnity::BaseNativeDownloadHandler::operator!=(const CesiumForUnity::BaseNativeDownloadHandler& other) const
+	{
+		return Handle != other.Handle;
+	}
+	
+	DLLEXPORT int32_t NewBaseNativeDownloadHandler(int32_t handle)
+	{
+		CesiumForUnity::BaseNativeDownloadHandler* memory = Plugin::StoreWholeBaseNativeDownloadHandler();
+		CesiumForUnity::NativeDownloadHandler* thiz = new (memory) CesiumForUnity::NativeDownloadHandler(Plugin::InternalUse::Only, handle);
+		return thiz->CppHandle;
+	}
+
+	DLLEXPORT void DestroyBaseNativeDownloadHandler(int32_t cppHandle)
+	{
+		CesiumForUnity::BaseNativeDownloadHandler* instance = Plugin::GetBaseNativeDownloadHandler(cppHandle);
+		instance->~BaseNativeDownloadHandler();
+	}
+
+	System::Boolean CesiumForUnity::BaseNativeDownloadHandler::ReceiveDataNative(void* data, System::Int32 dataLength)
+	{
+		return {};
+	}
+	
+	DLLEXPORT int32_t CesiumForUnityAbstractBaseNativeDownloadHandlerReceiveDataNative(int32_t cppHandle, void* data, int32_t dataLength)
+	{
+		try
+		{
+			return Plugin::GetBaseNativeDownloadHandler(cppHandle)->ReceiveDataNative(data, dataLength);
+		}
+		catch (System::Exception ex)
+		{
+			Plugin::SetException(ex.Handle);
+			return {};
+		}
+		catch (...)
+		{
+			System::String msg = "Unhandled exception invoking CesiumForUnity::AbstractBaseNativeDownloadHandler";
+			System::Exception ex(msg);
+			Plugin::SetException(ex.Handle);
+			return {};
+		}
+	}
+}
+
+namespace UnityEngine
+{
+	namespace Networking
+	{
+		UnityWebRequest::UnityWebRequest(decltype(nullptr))
+			: System::IDisposable(nullptr)
+		{
+		}
+		
+		UnityWebRequest::UnityWebRequest(Plugin::InternalUse, int32_t handle)
+			: System::IDisposable(nullptr)
+		{
+			Handle = handle;
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+			}
+		}
+		
+		UnityWebRequest::UnityWebRequest(const UnityWebRequest& other)
+			: UnityWebRequest(Plugin::InternalUse::Only, other.Handle)
+		{
+		}
+		
+		UnityWebRequest::UnityWebRequest(UnityWebRequest&& other)
+			: UnityWebRequest(Plugin::InternalUse::Only, other.Handle)
+		{
+			other.Handle = 0;
+		}
+		
+		UnityWebRequest::~UnityWebRequest()
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedClass(Handle);
+				Handle = 0;
+			}
+		}
+		
+		UnityWebRequest& UnityWebRequest::operator=(const UnityWebRequest& other)
+		{
+			if (this->Handle)
+			{
+				Plugin::DereferenceManagedClass(this->Handle);
+			}
+			this->Handle = other.Handle;
+			if (this->Handle)
+			{
+				Plugin::ReferenceManagedClass(this->Handle);
+			}
+			return *this;
+		}
+		
+		UnityWebRequest& UnityWebRequest::operator=(decltype(nullptr))
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedClass(Handle);
+				Handle = 0;
+			}
+			return *this;
+		}
+		
+		UnityWebRequest& UnityWebRequest::operator=(UnityWebRequest&& other)
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedClass(Handle);
+			}
+			Handle = other.Handle;
+			other.Handle = 0;
+			return *this;
+		}
+		
+		bool UnityWebRequest::operator==(const UnityWebRequest& other) const
+		{
+			return Handle == other.Handle;
+		}
+		
+		bool UnityWebRequest::operator!=(const UnityWebRequest& other) const
+		{
+			return Handle != other.Handle;
+		}
+		
+		System::String UnityEngine::Networking::UnityWebRequest::GetError()
+		{
+			auto returnValue = Plugin::UnityEngineNetworkingUnityWebRequestPropertyGetError(Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			return System::String(Plugin::InternalUse::Only, returnValue);
+		}
+		
+		System::Boolean UnityEngine::Networking::UnityWebRequest::GetIsDone()
+		{
+			auto returnValue = Plugin::UnityEngineNetworkingUnityWebRequestPropertyGetIsDone(Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			return returnValue;
+		}
+		
+		System::Int64 UnityEngine::Networking::UnityWebRequest::GetResponseCode()
+		{
+			auto returnValue = Plugin::UnityEngineNetworkingUnityWebRequestPropertyGetResponseCode(Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			return returnValue;
+		}
+		
+		System::String UnityEngine::Networking::UnityWebRequest::GetUrl()
+		{
+			auto returnValue = Plugin::UnityEngineNetworkingUnityWebRequestPropertyGetUrl(Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			return System::String(Plugin::InternalUse::Only, returnValue);
+		}
+		
+		void UnityEngine::Networking::UnityWebRequest::SetUrl(System::String& value)
+		{
+			Plugin::UnityEngineNetworkingUnityWebRequestPropertySetUrl(Handle, value.Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+		}
+		
+		System::String UnityEngine::Networking::UnityWebRequest::GetMethod()
+		{
+			auto returnValue = Plugin::UnityEngineNetworkingUnityWebRequestPropertyGetMethod(Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			return System::String(Plugin::InternalUse::Only, returnValue);
+		}
+		
+		void UnityEngine::Networking::UnityWebRequest::SetMethod(System::String& value)
+		{
+			Plugin::UnityEngineNetworkingUnityWebRequestPropertySetMethod(Handle, value.Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+		}
+		
+		UnityEngine::Networking::DownloadHandler UnityEngine::Networking::UnityWebRequest::GetDownloadHandler()
+		{
+			auto returnValue = Plugin::UnityEngineNetworkingUnityWebRequestPropertyGetDownloadHandler(Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			return UnityEngine::Networking::DownloadHandler(Plugin::InternalUse::Only, returnValue);
+		}
+		
+		void UnityEngine::Networking::UnityWebRequest::SetDownloadHandler(UnityEngine::Networking::DownloadHandler& value)
+		{
+			Plugin::UnityEngineNetworkingUnityWebRequestPropertySetDownloadHandler(Handle, value.Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+		}
+		
+		UnityEngine::Networking::UnityWebRequest UnityEngine::Networking::UnityWebRequest::Get(System::String& uri)
+		{
+			auto returnValue = Plugin::UnityEngineNetworkingUnityWebRequestMethodGetSystemString(uri.Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			return UnityEngine::Networking::UnityWebRequest(Plugin::InternalUse::Only, returnValue);
+		}
+	
+		void UnityEngine::Networking::UnityWebRequest::SetRequestHeader(System::String& name, System::String& value)
+		{
+			Plugin::UnityEngineNetworkingUnityWebRequestMethodSetRequestHeaderSystemString_SystemString(Handle, name.Handle, value.Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+		}
+	
+		UnityEngine::Networking::UnityWebRequestAsyncOperation UnityEngine::Networking::UnityWebRequest::SendWebRequest()
+		{
+			auto returnValue = Plugin::UnityEngineNetworkingUnityWebRequestMethodSendWebRequest(Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			return UnityEngine::Networking::UnityWebRequestAsyncOperation(Plugin::InternalUse::Only, returnValue);
+		}
+	
+		System::String UnityEngine::Networking::UnityWebRequest::GetResponseHeader(System::String& name)
+		{
+			auto returnValue = Plugin::UnityEngineNetworkingUnityWebRequestMethodGetResponseHeaderSystemString(Handle, name.Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			return System::String(Plugin::InternalUse::Only, returnValue);
+		}
+	}
+}
+
+namespace UnityEngine
+{
+	namespace Networking
+	{
+		UnityWebRequestAsyncOperation::UnityWebRequestAsyncOperation(decltype(nullptr))
+			: UnityEngine::YieldInstruction(nullptr)
+			, UnityEngine::AsyncOperation(nullptr)
+		{
+		}
+		
+		UnityWebRequestAsyncOperation::UnityWebRequestAsyncOperation(Plugin::InternalUse, int32_t handle)
+			: UnityEngine::YieldInstruction(nullptr)
+			, UnityEngine::AsyncOperation(nullptr)
+		{
+			Handle = handle;
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+			}
+		}
+		
+		UnityWebRequestAsyncOperation::UnityWebRequestAsyncOperation(const UnityWebRequestAsyncOperation& other)
+			: UnityWebRequestAsyncOperation(Plugin::InternalUse::Only, other.Handle)
+		{
+		}
+		
+		UnityWebRequestAsyncOperation::UnityWebRequestAsyncOperation(UnityWebRequestAsyncOperation&& other)
+			: UnityWebRequestAsyncOperation(Plugin::InternalUse::Only, other.Handle)
+		{
+			other.Handle = 0;
+		}
+		
+		UnityWebRequestAsyncOperation::~UnityWebRequestAsyncOperation()
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedClass(Handle);
+				Handle = 0;
+			}
+		}
+		
+		UnityWebRequestAsyncOperation& UnityWebRequestAsyncOperation::operator=(const UnityWebRequestAsyncOperation& other)
+		{
+			if (this->Handle)
+			{
+				Plugin::DereferenceManagedClass(this->Handle);
+			}
+			this->Handle = other.Handle;
+			if (this->Handle)
+			{
+				Plugin::ReferenceManagedClass(this->Handle);
+			}
+			return *this;
+		}
+		
+		UnityWebRequestAsyncOperation& UnityWebRequestAsyncOperation::operator=(decltype(nullptr))
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedClass(Handle);
+				Handle = 0;
+			}
+			return *this;
+		}
+		
+		UnityWebRequestAsyncOperation& UnityWebRequestAsyncOperation::operator=(UnityWebRequestAsyncOperation&& other)
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedClass(Handle);
+			}
+			Handle = other.Handle;
+			other.Handle = 0;
+			return *this;
+		}
+		
+		bool UnityWebRequestAsyncOperation::operator==(const UnityWebRequestAsyncOperation& other) const
+		{
+			return Handle == other.Handle;
+		}
+		
+		bool UnityWebRequestAsyncOperation::operator!=(const UnityWebRequestAsyncOperation& other) const
+		{
+			return Handle != other.Handle;
+		}
+		
+		void UnityEngine::Networking::UnityWebRequestAsyncOperation::AddCompleted(System::Action_1<UnityEngine::AsyncOperation>& del)
+		{
+			Plugin::UnityEngineNetworkingUnityWebRequestAsyncOperationAddEventCompleted(Handle, del.Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+		}
+	
+		void UnityEngine::Networking::UnityWebRequestAsyncOperation::RemoveCompleted(System::Action_1<UnityEngine::AsyncOperation>& del)
+		{
+			Plugin::UnityEngineNetworkingUnityWebRequestAsyncOperationRemoveEventCompleted(Handle, del.Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+		}
+	}
+}
+
+namespace System
+{
+	namespace Runtime
+	{
+		namespace InteropServices
+		{
+			void* System::Runtime::InteropServices::Marshal::StringToCoTaskMemUTF8(System::String& s)
+			{
+				auto returnValue = Plugin::SystemRuntimeInteropServicesMarshalMethodStringToCoTaskMemUTF8SystemString(s.Handle);
+				if (Plugin::unhandledCsharpException)
+				{
+					System::Exception* ex = Plugin::unhandledCsharpException;
+					Plugin::unhandledCsharpException = nullptr;
+					ex->ThrowReferenceToThis();
+					delete ex;
+				}
+				return returnValue;
+			}
+	
+			void System::Runtime::InteropServices::Marshal::FreeCoTaskMem(void* ptr)
+			{
+				Plugin::SystemRuntimeInteropServicesMarshalMethodFreeCoTaskMemSystemIntPtr(ptr);
+				if (Plugin::unhandledCsharpException)
+				{
+					System::Exception* ex = Plugin::unhandledCsharpException;
+					Plugin::unhandledCsharpException = nullptr;
+					ex->ThrowReferenceToThis();
+					delete ex;
+				}
+			}
+		}
+	}
+}
+
 namespace CesiumForUnity
 {
 	AbstractBaseCesium3DTileset::AbstractBaseCesium3DTileset(decltype(nullptr))
@@ -6044,6 +7554,277 @@ namespace CesiumForUnity
 
 namespace System
 {
+	IAsyncResult::IAsyncResult(decltype(nullptr))
+	{
+	}
+	
+	IAsyncResult::IAsyncResult(Plugin::InternalUse, int32_t handle)
+	{
+		Handle = handle;
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+		}
+	}
+	
+	IAsyncResult::IAsyncResult(const IAsyncResult& other)
+		: IAsyncResult(Plugin::InternalUse::Only, other.Handle)
+	{
+	}
+	
+	IAsyncResult::IAsyncResult(IAsyncResult&& other)
+		: IAsyncResult(Plugin::InternalUse::Only, other.Handle)
+	{
+		other.Handle = 0;
+	}
+	
+	IAsyncResult::~IAsyncResult()
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+	}
+	
+	IAsyncResult& IAsyncResult::operator=(const IAsyncResult& other)
+	{
+		if (this->Handle)
+		{
+			Plugin::DereferenceManagedClass(this->Handle);
+		}
+		this->Handle = other.Handle;
+		if (this->Handle)
+		{
+			Plugin::ReferenceManagedClass(this->Handle);
+		}
+		return *this;
+	}
+	
+	IAsyncResult& IAsyncResult::operator=(decltype(nullptr))
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+		return *this;
+	}
+	
+	IAsyncResult& IAsyncResult::operator=(IAsyncResult&& other)
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+		}
+		Handle = other.Handle;
+		other.Handle = 0;
+		return *this;
+	}
+	
+	bool IAsyncResult::operator==(const IAsyncResult& other) const
+	{
+		return Handle == other.Handle;
+	}
+	
+	bool IAsyncResult::operator!=(const IAsyncResult& other) const
+	{
+		return Handle != other.Handle;
+	}
+}
+
+namespace System
+{
+	namespace Threading
+	{
+		IThreadPoolWorkItem::IThreadPoolWorkItem(decltype(nullptr))
+		{
+		}
+		
+		IThreadPoolWorkItem::IThreadPoolWorkItem(Plugin::InternalUse, int32_t handle)
+		{
+			Handle = handle;
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+			}
+		}
+		
+		IThreadPoolWorkItem::IThreadPoolWorkItem(const IThreadPoolWorkItem& other)
+			: IThreadPoolWorkItem(Plugin::InternalUse::Only, other.Handle)
+		{
+		}
+		
+		IThreadPoolWorkItem::IThreadPoolWorkItem(IThreadPoolWorkItem&& other)
+			: IThreadPoolWorkItem(Plugin::InternalUse::Only, other.Handle)
+		{
+			other.Handle = 0;
+		}
+		
+		IThreadPoolWorkItem::~IThreadPoolWorkItem()
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedClass(Handle);
+				Handle = 0;
+			}
+		}
+		
+		IThreadPoolWorkItem& IThreadPoolWorkItem::operator=(const IThreadPoolWorkItem& other)
+		{
+			if (this->Handle)
+			{
+				Plugin::DereferenceManagedClass(this->Handle);
+			}
+			this->Handle = other.Handle;
+			if (this->Handle)
+			{
+				Plugin::ReferenceManagedClass(this->Handle);
+			}
+			return *this;
+		}
+		
+		IThreadPoolWorkItem& IThreadPoolWorkItem::operator=(decltype(nullptr))
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedClass(Handle);
+				Handle = 0;
+			}
+			return *this;
+		}
+		
+		IThreadPoolWorkItem& IThreadPoolWorkItem::operator=(IThreadPoolWorkItem&& other)
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedClass(Handle);
+			}
+			Handle = other.Handle;
+			other.Handle = 0;
+			return *this;
+		}
+		
+		bool IThreadPoolWorkItem::operator==(const IThreadPoolWorkItem& other) const
+		{
+			return Handle == other.Handle;
+		}
+		
+		bool IThreadPoolWorkItem::operator!=(const IThreadPoolWorkItem& other) const
+		{
+			return Handle != other.Handle;
+		}
+	}
+}
+
+namespace System
+{
+	namespace Threading
+	{
+		namespace Tasks
+		{
+			Task::Task(decltype(nullptr))
+				: System::IAsyncResult(nullptr)
+				, System::IDisposable(nullptr)
+				, System::Threading::IThreadPoolWorkItem(nullptr)
+			{
+			}
+			
+			Task::Task(Plugin::InternalUse, int32_t handle)
+				: System::IAsyncResult(nullptr)
+				, System::IDisposable(nullptr)
+				, System::Threading::IThreadPoolWorkItem(nullptr)
+			{
+				Handle = handle;
+				if (handle)
+				{
+					Plugin::ReferenceManagedClass(handle);
+				}
+			}
+			
+			Task::Task(const Task& other)
+				: Task(Plugin::InternalUse::Only, other.Handle)
+			{
+			}
+			
+			Task::Task(Task&& other)
+				: Task(Plugin::InternalUse::Only, other.Handle)
+			{
+				other.Handle = 0;
+			}
+			
+			Task::~Task()
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+					Handle = 0;
+				}
+			}
+			
+			Task& Task::operator=(const Task& other)
+			{
+				if (this->Handle)
+				{
+					Plugin::DereferenceManagedClass(this->Handle);
+				}
+				this->Handle = other.Handle;
+				if (this->Handle)
+				{
+					Plugin::ReferenceManagedClass(this->Handle);
+				}
+				return *this;
+			}
+			
+			Task& Task::operator=(decltype(nullptr))
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+					Handle = 0;
+				}
+				return *this;
+			}
+			
+			Task& Task::operator=(Task&& other)
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+				}
+				Handle = other.Handle;
+				other.Handle = 0;
+				return *this;
+			}
+			
+			bool Task::operator==(const Task& other) const
+			{
+				return Handle == other.Handle;
+			}
+			
+			bool Task::operator!=(const Task& other) const
+			{
+				return Handle != other.Handle;
+			}
+			
+			System::Threading::Tasks::Task System::Threading::Tasks::Task::Run(System::Action& action)
+			{
+				auto returnValue = Plugin::SystemThreadingTasksTaskMethodRunSystemAction(action.Handle);
+				if (Plugin::unhandledCsharpException)
+				{
+					System::Exception* ex = Plugin::unhandledCsharpException;
+					Plugin::unhandledCsharpException = nullptr;
+					ex->ThrowReferenceToThis();
+					delete ex;
+				}
+				return System::Threading::Tasks::Task(Plugin::InternalUse::Only, returnValue);
+			}
+		}
+	}
+}
+
+namespace System
+{
 	System::Object::operator System::Boolean()
 	{
 		System::Boolean returnVal(Plugin::UnboxBoolean(Handle));
@@ -6236,6 +8017,477 @@ namespace System
 
 namespace System
 {
+	System::Action::Action()
+	{
+		CppHandle = Plugin::StoreSystemAction(this);
+		System::Int32* handle = (System::Int32*)&Handle;
+		int32_t cppHandle = CppHandle;
+		System::Int32* classHandle = (System::Int32*)&ClassHandle;
+		Plugin::SystemActionConstructor(cppHandle, &handle->Value, &classHandle->Value);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		if (Handle)
+		{
+			Plugin::ReferenceManagedClass(Handle);
+		}
+		else
+		{
+			Plugin::RemoveSystemAction(CppHandle);
+			ClassHandle = 0;
+			CppHandle = 0;
+		}
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+	}
+	
+	Action::Action(decltype(nullptr))
+	{
+		CppHandle = Plugin::StoreSystemAction(this);
+		ClassHandle = 0;
+	}
+	
+	System::Action::Action(const System::Action& other)
+	{
+		Handle = other.Handle;
+		CppHandle = Plugin::StoreSystemAction(this);
+		if (Handle)
+		{
+			Plugin::ReferenceManagedClass(Handle);
+		}
+		ClassHandle = other.ClassHandle;
+	}
+	
+	System::Action::Action(System::Action&& other)
+	{
+		Handle = other.Handle;
+		CppHandle = other.CppHandle;
+		ClassHandle = other.ClassHandle;
+		other.Handle = 0;
+		other.CppHandle = 0;
+		other.ClassHandle = 0;
+	}
+	
+	System::Action::Action(Plugin::InternalUse, int32_t handle)
+	{
+		Handle = handle;
+		CppHandle = Plugin::StoreSystemAction(this);
+		if (Handle)
+		{
+			Plugin::ReferenceManagedClass(Handle);
+		}
+		ClassHandle = 0;
+	}
+	
+	System::Action::~Action()
+	{
+		Plugin::RemoveSystemAction(CppHandle);
+		CppHandle = 0;
+		if (Handle)
+		{
+			int32_t handle = Handle;
+			int32_t classHandle = ClassHandle;
+			Handle = 0;
+			ClassHandle = 0;
+			if (Plugin::DereferenceManagedClassNoRelease(handle))
+			{
+				Plugin::ReleaseSystemAction(handle, classHandle);
+				if (Plugin::unhandledCsharpException)
+				{
+					System::Exception* ex = Plugin::unhandledCsharpException;
+					Plugin::unhandledCsharpException = nullptr;
+					ex->ThrowReferenceToThis();
+					delete ex;
+				}
+			}
+		}
+	}
+	
+	System::Action& System::Action::operator=(const System::Action& other)
+	{
+		if (this->Handle)
+		{
+			Plugin::DereferenceManagedClass(this->Handle);
+		}
+		this->Handle = other.Handle;
+		if (this->Handle)
+		{
+			Plugin::ReferenceManagedClass(this->Handle);
+		}
+		ClassHandle = other.ClassHandle;
+		return *this;
+	}
+	
+	System::Action& System::Action::operator=(decltype(nullptr))
+	{
+		if (Handle)
+		{
+			int32_t handle = Handle;
+			int32_t classHandle = ClassHandle;
+			Handle = 0;
+			ClassHandle = 0;
+			if (Plugin::DereferenceManagedClassNoRelease(handle))
+			{
+				Plugin::ReleaseSystemAction(handle, classHandle);
+				if (Plugin::unhandledCsharpException)
+				{
+					System::Exception* ex = Plugin::unhandledCsharpException;
+					Plugin::unhandledCsharpException = nullptr;
+					ex->ThrowReferenceToThis();
+					delete ex;
+				}
+			}
+		}
+		ClassHandle = 0;
+		Handle = 0;
+		return *this;
+	}
+	
+	System::Action& System::Action::operator=(System::Action&& other)
+	{
+		Plugin::RemoveSystemAction(CppHandle);
+		CppHandle = 0;
+		if (Handle)
+		{
+			int32_t handle = Handle;
+			int32_t classHandle = ClassHandle;
+			Handle = 0;
+			ClassHandle = 0;
+			if (Plugin::DereferenceManagedClassNoRelease(handle))
+			{
+				Plugin::ReleaseSystemAction(handle, classHandle);
+				if (Plugin::unhandledCsharpException)
+				{
+					System::Exception* ex = Plugin::unhandledCsharpException;
+					Plugin::unhandledCsharpException = nullptr;
+					ex->ThrowReferenceToThis();
+					delete ex;
+				}
+			}
+		}
+		ClassHandle = other.ClassHandle;
+		other.ClassHandle = 0;
+		Handle = other.Handle;
+		other.Handle = 0;
+		return *this;
+	}
+	
+	bool System::Action::operator==(const System::Action& other) const
+	{
+		return Handle == other.Handle;
+	}
+	
+	bool System::Action::operator!=(const System::Action& other) const
+	{
+		return Handle != other.Handle;
+	}
+	
+	void System::Action::operator+=(System::Action& del)
+	{
+		Plugin::SystemActionAdd(Handle, del.Handle);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+	}
+	
+	void System::Action::operator-=(System::Action& del)
+	{
+		Plugin::SystemActionRemove(Handle, del.Handle);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+	}
+	
+	void System::Action::operator()()
+	{
+	}
+	
+	DLLEXPORT void SystemActionNativeInvoke(int32_t cppHandle)
+	{
+		try
+		{
+			Plugin::GetSystemAction(cppHandle)->operator()();
+		}
+		catch (System::Exception ex)
+		{
+			Plugin::SetException(ex.Handle);
+		}
+		catch (...)
+		{
+			System::String msg = "Unhandled exception invoking System::Action";
+			System::Exception ex(msg);
+			Plugin::SetException(ex.Handle);
+		}
+	}
+	
+	void System::Action::Invoke()
+	{
+		Plugin::SystemActionInvoke(Handle);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+	}
+}
+
+namespace System
+{
+	System::Action_1<UnityEngine::AsyncOperation>::Action_1()
+	{
+		CppHandle = Plugin::StoreSystemActionUnityEngineAsyncOperation(this);
+		System::Int32* handle = (System::Int32*)&Handle;
+		int32_t cppHandle = CppHandle;
+		System::Int32* classHandle = (System::Int32*)&ClassHandle;
+		Plugin::SystemActionUnityEngineAsyncOperationConstructor(cppHandle, &handle->Value, &classHandle->Value);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		if (Handle)
+		{
+			Plugin::ReferenceManagedClass(Handle);
+		}
+		else
+		{
+			Plugin::RemoveSystemActionUnityEngineAsyncOperation(CppHandle);
+			ClassHandle = 0;
+			CppHandle = 0;
+		}
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+	}
+	
+	Action_1<UnityEngine::AsyncOperation>::Action_1(decltype(nullptr))
+	{
+		CppHandle = Plugin::StoreSystemActionUnityEngineAsyncOperation(this);
+		ClassHandle = 0;
+	}
+	
+	System::Action_1<UnityEngine::AsyncOperation>::Action_1(const System::Action_1<UnityEngine::AsyncOperation>& other)
+	{
+		Handle = other.Handle;
+		CppHandle = Plugin::StoreSystemActionUnityEngineAsyncOperation(this);
+		if (Handle)
+		{
+			Plugin::ReferenceManagedClass(Handle);
+		}
+		ClassHandle = other.ClassHandle;
+	}
+	
+	System::Action_1<UnityEngine::AsyncOperation>::Action_1(System::Action_1<UnityEngine::AsyncOperation>&& other)
+	{
+		Handle = other.Handle;
+		CppHandle = other.CppHandle;
+		ClassHandle = other.ClassHandle;
+		other.Handle = 0;
+		other.CppHandle = 0;
+		other.ClassHandle = 0;
+	}
+	
+	System::Action_1<UnityEngine::AsyncOperation>::Action_1(Plugin::InternalUse, int32_t handle)
+	{
+		Handle = handle;
+		CppHandle = Plugin::StoreSystemActionUnityEngineAsyncOperation(this);
+		if (Handle)
+		{
+			Plugin::ReferenceManagedClass(Handle);
+		}
+		ClassHandle = 0;
+	}
+	
+	System::Action_1<UnityEngine::AsyncOperation>::~Action_1<UnityEngine::AsyncOperation>()
+	{
+		Plugin::RemoveSystemActionUnityEngineAsyncOperation(CppHandle);
+		CppHandle = 0;
+		if (Handle)
+		{
+			int32_t handle = Handle;
+			int32_t classHandle = ClassHandle;
+			Handle = 0;
+			ClassHandle = 0;
+			if (Plugin::DereferenceManagedClassNoRelease(handle))
+			{
+				Plugin::ReleaseSystemActionUnityEngineAsyncOperation(handle, classHandle);
+				if (Plugin::unhandledCsharpException)
+				{
+					System::Exception* ex = Plugin::unhandledCsharpException;
+					Plugin::unhandledCsharpException = nullptr;
+					ex->ThrowReferenceToThis();
+					delete ex;
+				}
+			}
+		}
+	}
+	
+	System::Action_1<UnityEngine::AsyncOperation>& System::Action_1<UnityEngine::AsyncOperation>::operator=(const System::Action_1<UnityEngine::AsyncOperation>& other)
+	{
+		if (this->Handle)
+		{
+			Plugin::DereferenceManagedClass(this->Handle);
+		}
+		this->Handle = other.Handle;
+		if (this->Handle)
+		{
+			Plugin::ReferenceManagedClass(this->Handle);
+		}
+		ClassHandle = other.ClassHandle;
+		return *this;
+	}
+	
+	System::Action_1<UnityEngine::AsyncOperation>& System::Action_1<UnityEngine::AsyncOperation>::operator=(decltype(nullptr))
+	{
+		if (Handle)
+		{
+			int32_t handle = Handle;
+			int32_t classHandle = ClassHandle;
+			Handle = 0;
+			ClassHandle = 0;
+			if (Plugin::DereferenceManagedClassNoRelease(handle))
+			{
+				Plugin::ReleaseSystemActionUnityEngineAsyncOperation(handle, classHandle);
+				if (Plugin::unhandledCsharpException)
+				{
+					System::Exception* ex = Plugin::unhandledCsharpException;
+					Plugin::unhandledCsharpException = nullptr;
+					ex->ThrowReferenceToThis();
+					delete ex;
+				}
+			}
+		}
+		ClassHandle = 0;
+		Handle = 0;
+		return *this;
+	}
+	
+	System::Action_1<UnityEngine::AsyncOperation>& System::Action_1<UnityEngine::AsyncOperation>::operator=(System::Action_1<UnityEngine::AsyncOperation>&& other)
+	{
+		Plugin::RemoveSystemActionUnityEngineAsyncOperation(CppHandle);
+		CppHandle = 0;
+		if (Handle)
+		{
+			int32_t handle = Handle;
+			int32_t classHandle = ClassHandle;
+			Handle = 0;
+			ClassHandle = 0;
+			if (Plugin::DereferenceManagedClassNoRelease(handle))
+			{
+				Plugin::ReleaseSystemActionUnityEngineAsyncOperation(handle, classHandle);
+				if (Plugin::unhandledCsharpException)
+				{
+					System::Exception* ex = Plugin::unhandledCsharpException;
+					Plugin::unhandledCsharpException = nullptr;
+					ex->ThrowReferenceToThis();
+					delete ex;
+				}
+			}
+		}
+		ClassHandle = other.ClassHandle;
+		other.ClassHandle = 0;
+		Handle = other.Handle;
+		other.Handle = 0;
+		return *this;
+	}
+	
+	bool System::Action_1<UnityEngine::AsyncOperation>::operator==(const System::Action_1<UnityEngine::AsyncOperation>& other) const
+	{
+		return Handle == other.Handle;
+	}
+	
+	bool System::Action_1<UnityEngine::AsyncOperation>::operator!=(const System::Action_1<UnityEngine::AsyncOperation>& other) const
+	{
+		return Handle != other.Handle;
+	}
+	
+	void System::Action_1<UnityEngine::AsyncOperation>::operator+=(System::Action_1<UnityEngine::AsyncOperation>& del)
+	{
+		Plugin::SystemActionUnityEngineAsyncOperationAdd(Handle, del.Handle);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+	}
+	
+	void System::Action_1<UnityEngine::AsyncOperation>::operator-=(System::Action_1<UnityEngine::AsyncOperation>& del)
+	{
+		Plugin::SystemActionUnityEngineAsyncOperationRemove(Handle, del.Handle);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+	}
+	
+	void System::Action_1<UnityEngine::AsyncOperation>::operator()(UnityEngine::AsyncOperation& obj)
+	{
+	}
+	
+	DLLEXPORT void SystemActionUnityEngineAsyncOperationNativeInvoke(int32_t cppHandle, int32_t objHandle)
+	{
+		try
+		{
+			auto obj = UnityEngine::AsyncOperation(Plugin::InternalUse::Only, objHandle);
+			Plugin::GetSystemActionUnityEngineAsyncOperation(cppHandle)->operator()(obj);
+		}
+		catch (System::Exception ex)
+		{
+			Plugin::SetException(ex.Handle);
+		}
+		catch (...)
+		{
+			System::String msg = "Unhandled exception invoking System::Action_1<UnityEngine::AsyncOperation>";
+			System::Exception ex(msg);
+			Plugin::SetException(ex.Handle);
+		}
+	}
+	
+	void System::Action_1<UnityEngine::AsyncOperation>::Invoke(UnityEngine::AsyncOperation& obj)
+	{
+		Plugin::SystemActionUnityEngineAsyncOperationInvoke(Handle, obj.Handle);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+	}
+}
+
+namespace System
+{
 	struct NullReferenceExceptionThrower : System::NullReferenceException
 	{
 		NullReferenceExceptionThrower(int32_t handle)
@@ -6288,7 +8540,7 @@ DLLEXPORT void Init(
 	InitMode initMode)
 {
 	uint8_t* curMemory = memory;
-	
+
 	// Read fixed parameters
 	Plugin::ReleaseObject = *(void (**)(int32_t handle))curMemory;
 	curMemory += sizeof(Plugin::ReleaseObject);
@@ -6300,7 +8552,7 @@ DLLEXPORT void Init(
 	curMemory += sizeof(Plugin::ArrayGetLength);
 	Plugin::EnumerableGetEnumerator = *(int32_t (**)(int32_t))curMemory;
 	curMemory += sizeof(Plugin::EnumerableGetEnumerator);
-	
+
 	// Read generated parameters
 	int32_t maxManagedObjects = *(int32_t*)curMemory;
 	curMemory += sizeof(int32_t);
@@ -6353,10 +8605,68 @@ DLLEXPORT void Init(
 	curMemory += sizeof(Plugin::UnboxPrimitiveType);
 	Plugin::UnityEngineTimePropertyGetDeltaTime = *(float (**)())curMemory;
 	curMemory += sizeof(Plugin::UnityEngineTimePropertyGetDeltaTime);
+	Plugin::UnityEngineCameraPropertyGetMain = *(int32_t (**)())curMemory;
+	curMemory += sizeof(Plugin::UnityEngineCameraPropertyGetMain);
+	Plugin::UnityEngineCameraPropertyGetFieldOfView = *(float (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineCameraPropertyGetFieldOfView);
+	Plugin::UnityEngineCameraPropertySetFieldOfView = *(void (**)(int32_t thisHandle, float value))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineCameraPropertySetFieldOfView);
+	Plugin::UnityEngineCameraPropertyGetAspect = *(float (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineCameraPropertyGetAspect);
+	Plugin::UnityEngineCameraPropertySetAspect = *(void (**)(int32_t thisHandle, float value))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineCameraPropertySetAspect);
+	Plugin::UnityEngineCameraPropertyGetPixelWidth = *(int32_t (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineCameraPropertyGetPixelWidth);
+	Plugin::UnityEngineCameraPropertyGetPixelHeight = *(int32_t (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineCameraPropertyGetPixelHeight);
+	Plugin::BoxRawDownloadedData = *(int32_t (**)(CesiumForUnity::RawDownloadedData& val))curMemory;
+	curMemory += sizeof(Plugin::BoxRawDownloadedData);
+	Plugin::UnboxRawDownloadedData = *(CesiumForUnity::RawDownloadedData (**)(int32_t valHandle))curMemory;
+	curMemory += sizeof(Plugin::UnboxRawDownloadedData);
+	Plugin::ReleaseBaseNativeDownloadHandler = *(void (**)(int32_t handle))curMemory;
+	curMemory += sizeof(Plugin::ReleaseBaseNativeDownloadHandler);
+	Plugin::BaseNativeDownloadHandlerConstructor = *(void (**)(int32_t cppHandle, int32_t* handle))curMemory;
+	curMemory += sizeof(Plugin::BaseNativeDownloadHandlerConstructor);
+	Plugin::UnityEngineNetworkingUnityWebRequestPropertyGetError = *(int32_t (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineNetworkingUnityWebRequestPropertyGetError);
+	Plugin::UnityEngineNetworkingUnityWebRequestPropertyGetIsDone = *(int32_t (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineNetworkingUnityWebRequestPropertyGetIsDone);
+	Plugin::UnityEngineNetworkingUnityWebRequestPropertyGetResponseCode = *(int64_t (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineNetworkingUnityWebRequestPropertyGetResponseCode);
+	Plugin::UnityEngineNetworkingUnityWebRequestPropertyGetUrl = *(int32_t (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineNetworkingUnityWebRequestPropertyGetUrl);
+	Plugin::UnityEngineNetworkingUnityWebRequestPropertySetUrl = *(void (**)(int32_t thisHandle, int32_t valueHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineNetworkingUnityWebRequestPropertySetUrl);
+	Plugin::UnityEngineNetworkingUnityWebRequestPropertyGetMethod = *(int32_t (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineNetworkingUnityWebRequestPropertyGetMethod);
+	Plugin::UnityEngineNetworkingUnityWebRequestPropertySetMethod = *(void (**)(int32_t thisHandle, int32_t valueHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineNetworkingUnityWebRequestPropertySetMethod);
+	Plugin::UnityEngineNetworkingUnityWebRequestPropertyGetDownloadHandler = *(int32_t (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineNetworkingUnityWebRequestPropertyGetDownloadHandler);
+	Plugin::UnityEngineNetworkingUnityWebRequestPropertySetDownloadHandler = *(void (**)(int32_t thisHandle, int32_t valueHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineNetworkingUnityWebRequestPropertySetDownloadHandler);
+	Plugin::UnityEngineNetworkingUnityWebRequestMethodGetSystemString = *(int32_t (**)(int32_t uriHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineNetworkingUnityWebRequestMethodGetSystemString);
+	Plugin::UnityEngineNetworkingUnityWebRequestMethodSetRequestHeaderSystemString_SystemString = *(void (**)(int32_t thisHandle, int32_t nameHandle, int32_t valueHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineNetworkingUnityWebRequestMethodSetRequestHeaderSystemString_SystemString);
+	Plugin::UnityEngineNetworkingUnityWebRequestMethodSendWebRequest = *(int32_t (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineNetworkingUnityWebRequestMethodSendWebRequest);
+	Plugin::UnityEngineNetworkingUnityWebRequestMethodGetResponseHeaderSystemString = *(int32_t (**)(int32_t thisHandle, int32_t nameHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineNetworkingUnityWebRequestMethodGetResponseHeaderSystemString);
+	Plugin::UnityEngineNetworkingUnityWebRequestAsyncOperationAddEventCompleted = *(void (**)(int32_t thisHandle, int32_t delHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineNetworkingUnityWebRequestAsyncOperationAddEventCompleted);
+	Plugin::UnityEngineNetworkingUnityWebRequestAsyncOperationRemoveEventCompleted = *(void (**)(int32_t thisHandle, int32_t delHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineNetworkingUnityWebRequestAsyncOperationRemoveEventCompleted);
+	Plugin::SystemRuntimeInteropServicesMarshalMethodStringToCoTaskMemUTF8SystemString = *(void* (**)(int32_t sHandle))curMemory;
+	curMemory += sizeof(Plugin::SystemRuntimeInteropServicesMarshalMethodStringToCoTaskMemUTF8SystemString);
+	Plugin::SystemRuntimeInteropServicesMarshalMethodFreeCoTaskMemSystemIntPtr = *(void (**)(void* ptr))curMemory;
+	curMemory += sizeof(Plugin::SystemRuntimeInteropServicesMarshalMethodFreeCoTaskMemSystemIntPtr);
 	Plugin::ReleaseBaseCesium3DTileset = *(void (**)(int32_t handle))curMemory;
 	curMemory += sizeof(Plugin::ReleaseBaseCesium3DTileset);
 	Plugin::BaseCesium3DTilesetConstructor = *(void (**)(int32_t cppHandle, int32_t* handle))curMemory;
 	curMemory += sizeof(Plugin::BaseCesium3DTilesetConstructor);
+	Plugin::SystemThreadingTasksTaskMethodRunSystemAction = *(int32_t (**)(int32_t actionHandle))curMemory;
+	curMemory += sizeof(Plugin::SystemThreadingTasksTaskMethodRunSystemAction);
 	Plugin::BoxBoolean = *(int32_t (**)(uint32_t val))curMemory;
 	curMemory += sizeof(Plugin::BoxBoolean);
 	Plugin::UnboxBoolean = *(int32_t (**)(int32_t valHandle))curMemory;
@@ -6405,17 +8715,45 @@ DLLEXPORT void Init(
 	curMemory += sizeof(Plugin::BoxDouble);
 	Plugin::UnboxDouble = *(double (**)(int32_t valHandle))curMemory;
 	curMemory += sizeof(Plugin::UnboxDouble);
+	Plugin::ReleaseSystemAction = *(void (**)(int32_t handle, int32_t classHandle))curMemory;
+	curMemory += sizeof(Plugin::ReleaseSystemAction);
+	Plugin::SystemActionConstructor = *(void (**)(int32_t cppHandle, int32_t* handle, int32_t* classHandle))curMemory;
+	curMemory += sizeof(Plugin::SystemActionConstructor);
+	Plugin::SystemActionAdd = *(void (**)(int32_t thisHandle, int32_t delHandle))curMemory;
+	curMemory += sizeof(Plugin::SystemActionAdd);
+	Plugin::SystemActionRemove = *(void (**)(int32_t thisHandle, int32_t delHandle))curMemory;
+	curMemory += sizeof(Plugin::SystemActionRemove);
+	Plugin::SystemActionInvoke = *(void (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::SystemActionInvoke);
+	Plugin::ReleaseSystemActionUnityEngineAsyncOperation = *(void (**)(int32_t handle, int32_t classHandle))curMemory;
+	curMemory += sizeof(Plugin::ReleaseSystemActionUnityEngineAsyncOperation);
+	Plugin::SystemActionUnityEngineAsyncOperationConstructor = *(void (**)(int32_t cppHandle, int32_t* handle, int32_t* classHandle))curMemory;
+	curMemory += sizeof(Plugin::SystemActionUnityEngineAsyncOperationConstructor);
+	Plugin::SystemActionUnityEngineAsyncOperationAdd = *(void (**)(int32_t thisHandle, int32_t delHandle))curMemory;
+	curMemory += sizeof(Plugin::SystemActionUnityEngineAsyncOperationAdd);
+	Plugin::SystemActionUnityEngineAsyncOperationRemove = *(void (**)(int32_t thisHandle, int32_t delHandle))curMemory;
+	curMemory += sizeof(Plugin::SystemActionUnityEngineAsyncOperationRemove);
+	Plugin::SystemActionUnityEngineAsyncOperationInvoke = *(void (**)(int32_t thisHandle, int32_t objHandle))curMemory;
+	curMemory += sizeof(Plugin::SystemActionUnityEngineAsyncOperationInvoke);
 	/*END INIT BODY PARAMETER READS*/
-	
+
 	// Init managed object ref counting
 	Plugin::RefCountsLenClass = maxManagedObjects;
 	Plugin::RefCountsClass = (int32_t*)curMemory;
 	curMemory += maxManagedObjects * sizeof(int32_t);
-	
+
 	/*BEGIN INIT BODY ARRAYS*/
 	Plugin::RefCountsSystemDecimal = (int32_t*)curMemory;
 	curMemory += 1000 * sizeof(int32_t);
 	Plugin::RefCountsLenSystemDecimal = 1000;
+	
+	Plugin::BaseNativeDownloadHandlerFreeListSize = 1000;
+	Plugin::BaseNativeDownloadHandlerFreeList = (CesiumForUnity::BaseNativeDownloadHandler**)curMemory;
+	curMemory += 1000 * sizeof(CesiumForUnity::BaseNativeDownloadHandler*);
+	
+	Plugin::BaseNativeDownloadHandlerFreeWholeListSize = 1000;
+	Plugin::BaseNativeDownloadHandlerFreeWholeList = (Plugin::BaseNativeDownloadHandlerFreeWholeListEntry*)curMemory;
+	curMemory += 1000 * sizeof(Plugin::BaseNativeDownloadHandlerFreeWholeListEntry);
 	
 	Plugin::BaseCesium3DTilesetFreeListSize = 1000;
 	Plugin::BaseCesium3DTilesetFreeList = (CesiumForUnity::BaseCesium3DTileset**)curMemory;
@@ -6424,8 +8762,16 @@ DLLEXPORT void Init(
 	Plugin::BaseCesium3DTilesetFreeWholeListSize = 1000;
 	Plugin::BaseCesium3DTilesetFreeWholeList = (Plugin::BaseCesium3DTilesetFreeWholeListEntry*)curMemory;
 	curMemory += 1000 * sizeof(Plugin::BaseCesium3DTilesetFreeWholeListEntry);
-	/*END INIT BODY ARRAYS*/
 	
+	Plugin::SystemActionFreeListSize = 1000;
+	Plugin::SystemActionFreeList = (System::Action**)curMemory;
+	curMemory += 1000 * sizeof(System::Action*);
+	
+	Plugin::SystemActionUnityEngineAsyncOperationFreeListSize = 1000;
+	Plugin::SystemActionUnityEngineAsyncOperationFreeList = (System::Action_1<UnityEngine::AsyncOperation>**)curMemory;
+	curMemory += 1000 * sizeof(System::Action_1<UnityEngine::AsyncOperation>*);
+	/*END INIT BODY ARRAYS*/
+
 	// Make sure there was enough memory
 	int32_t usedMemory = (int32_t)(curMemory - (uint8_t*)memory);
 	if (usedMemory > memorySize)
@@ -6435,13 +8781,27 @@ DLLEXPORT void Init(
 		Plugin::SetException(ex.Handle);
 		return;
 	}
-	
+
 	if (initMode == InitMode::FirstBoot)
 	{
 		// Clear memory
 		memset(memory, 0, memorySize);
-		
+
 		/*BEGIN INIT BODY FIRST BOOT*/
+		for (int32_t i = 0, end = Plugin::BaseNativeDownloadHandlerFreeListSize - 1; i < end; ++i)
+		{
+			Plugin::BaseNativeDownloadHandlerFreeList[i] = (CesiumForUnity::BaseNativeDownloadHandler*)(Plugin::BaseNativeDownloadHandlerFreeList + i + 1);
+		}
+		Plugin::BaseNativeDownloadHandlerFreeList[Plugin::BaseNativeDownloadHandlerFreeListSize - 1] = nullptr;
+		Plugin::NextFreeBaseNativeDownloadHandler = Plugin::BaseNativeDownloadHandlerFreeList + 1;
+		
+		for (int32_t i = 0, end = Plugin::BaseNativeDownloadHandlerFreeWholeListSize - 1; i < end; ++i)
+		{
+			Plugin::BaseNativeDownloadHandlerFreeWholeList[i].Next = Plugin::BaseNativeDownloadHandlerFreeWholeList + i + 1;
+		}
+		Plugin::BaseNativeDownloadHandlerFreeWholeList[Plugin::BaseNativeDownloadHandlerFreeWholeListSize - 1].Next = nullptr;
+		Plugin::NextFreeWholeBaseNativeDownloadHandler = Plugin::BaseNativeDownloadHandlerFreeWholeList + 1;
+		
 		for (int32_t i = 0, end = Plugin::BaseCesium3DTilesetFreeListSize - 1; i < end; ++i)
 		{
 			Plugin::BaseCesium3DTilesetFreeList[i] = (CesiumForUnity::BaseCesium3DTileset*)(Plugin::BaseCesium3DTilesetFreeList + i + 1);
@@ -6455,9 +8815,23 @@ DLLEXPORT void Init(
 		}
 		Plugin::BaseCesium3DTilesetFreeWholeList[Plugin::BaseCesium3DTilesetFreeWholeListSize - 1].Next = nullptr;
 		Plugin::NextFreeWholeBaseCesium3DTileset = Plugin::BaseCesium3DTilesetFreeWholeList + 1;
+		
+		for (int32_t i = 0, end = Plugin::SystemActionFreeListSize - 1; i < end; ++i)
+		{
+			Plugin::SystemActionFreeList[i] = (System::Action*)(Plugin::SystemActionFreeList + i + 1);
+		}
+		Plugin::SystemActionFreeList[Plugin::SystemActionFreeListSize - 1] = nullptr;
+		Plugin::NextFreeSystemAction = Plugin::SystemActionFreeList + 1;
+		
+		for (int32_t i = 0, end = Plugin::SystemActionUnityEngineAsyncOperationFreeListSize - 1; i < end; ++i)
+		{
+			Plugin::SystemActionUnityEngineAsyncOperationFreeList[i] = (System::Action_1<UnityEngine::AsyncOperation>*)(Plugin::SystemActionUnityEngineAsyncOperationFreeList + i + 1);
+		}
+		Plugin::SystemActionUnityEngineAsyncOperationFreeList[Plugin::SystemActionUnityEngineAsyncOperationFreeListSize - 1] = nullptr;
+		Plugin::NextFreeSystemActionUnityEngineAsyncOperation = Plugin::SystemActionUnityEngineAsyncOperationFreeList + 1;
 		/*END INIT BODY FIRST BOOT*/
 	}
-	
+
 	try
 	{
 		PluginMain(

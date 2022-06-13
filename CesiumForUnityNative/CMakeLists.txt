@@ -36,4 +36,12 @@ target_link_libraries(
         Cesium3DTilesSelection
 )
 
+set_target_properties(
+    CesiumForUnityNative
+    PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED YES
+        CXX_EXTENSIONS NO
+)
+
 install(FILES $<TARGET_FILE:CesiumForUnityNative> DESTINATION ${CMAKE_SYSTEM_NAME})

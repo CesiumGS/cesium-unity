@@ -16,6 +16,9 @@
 			"Name": "System.ISpanFormattable"
 		},
 		{
+			"Name": "System.IDisposable"
+		},
+		{
 			"Name": "System.IEquatable`1",
 			"GenericParams": [
 				{
@@ -161,7 +164,7 @@
 			]
 		},
 		{
-			"Name": " System.Runtime.Serialization.IDeserializationCallback"
+			"Name": "System.Runtime.Serialization.IDeserializationCallback"
 		},
 		{
 			"Name": "System.Decimal",
@@ -332,6 +335,135 @@
 			]
 		},
 		{
+			"Name": "UnityEngine.Camera",
+			"Properties": [
+				{
+					"Name": "main",
+					"Get": {}
+				},
+				{
+					"Name": "fieldOfView",
+					"Get": {}
+				},
+				{
+					"Name": "aspect",
+					"Get": {}
+				},
+				{
+					"Name": "pixelWidth",
+					"Get": {}
+				},
+				{
+					"Name": "pixelHeight",
+					"Get": {}
+				}
+			]
+		},
+		{
+			"Name": "UnityEngine.YieldInstruction"
+		},
+		{
+			"Name": "UnityEngine.AsyncOperation"
+		},
+		{
+			"Name": "UnityEngine.Networking.DownloadHandler"
+		},
+		{
+			"Name": "UnityEngine.Networking.DownloadHandlerScript"
+		},
+		{
+			"Name": "CesiumForUnity.RawDownloadedData"
+		},
+		{
+			"Name": "CesiumForUnity.AbstractBaseNativeDownloadHandler",
+			"BaseTypes": [
+				{
+					"BaseName": "CesiumForUnity.BaseNativeDownloadHandler",
+					"DerivedName": "CesiumForUnity.NativeDownloadHandler",
+					"Constructors": [
+						{
+							"ParamTypes": [
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"Name": "UnityEngine.Networking.UnityWebRequest",
+			"Methods": [
+				{
+					"Name": "Get",
+					"ParamTypes": [
+						"System.String"
+					]
+				},
+				{
+					"Name": "SetRequestHeader",
+					"ParamTypes": [
+						"System.String",
+						"System.String"
+					]
+				},
+				{
+					"Name": "SendWebRequest",
+					"ParamTypes": [
+					]
+				},
+				{
+					"Name": "GetResponseHeader",
+					"ParamTypes": [
+						"System.String"
+					]
+				}
+			],
+			"Properties": [
+				{
+					"Name": "error"
+				},
+				{
+					"Name": "isDone"
+				},
+				{
+					"Name": "responseCode"
+				},
+				{
+					"Name": "url"
+				},
+				{
+					"Name": "method"
+				},
+				{
+					"Name": "downloadHandler"
+				}
+			]
+		},
+		{
+			"Name": "UnityEngine.Networking.UnityWebRequestAsyncOperation",
+			"Events": [
+				{
+					"Name": "completed"
+				}
+			]
+		},
+		{
+			"Name": "System.Runtime.InteropServices.Marshal",
+			"Methods": [
+				{
+					"Name": "StringToCoTaskMemUTF8",
+					"ParamTypes": [
+						"System.String"
+					]
+				},
+				{
+					"Name": "FreeCoTaskMem",
+					"ParamTypes": [
+						"System.IntPtr"
+					]
+				}
+			]
+		},
+		{
 			"Name": "CesiumForUnity.AbstractBaseCesium3DTileset",
 			"BaseTypes": [
 				{
@@ -339,10 +471,40 @@
 					"DerivedName": "CesiumForUnity.Cesium3DTileset"
 				}
 			]
+		},
+		{
+			"Name": "System.IAsyncResult"
+		},
+		{
+			"Name": "System.Threading.IThreadPoolWorkItem"
+		},
+		{
+			"Name": "System.Threading.Tasks.Task",
+			"Methods": [
+				{
+					"Name": "Run",
+					"ParamTypes": [
+						"System.Action"
+					]
+				}
+			]
 		}
 	],
 	"Arrays": [
 	],
 	"Delegates": [
+		{
+			"Type": "System.Action"
+		},
+		{
+			"Type": "System.Action`1",
+			"GenericParams": [
+				{
+					"Types": [
+						"UnityEngine.AsyncOperation"
+					]
+				}
+			]
+		}
 	]
 }
