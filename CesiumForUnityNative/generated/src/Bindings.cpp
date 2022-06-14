@@ -41,26 +41,57 @@ namespace Plugin
 	int32_t (*EnumerableGetEnumerator)(int32_t handle);
 
 	/*BEGIN FUNCTION POINTERS*/
+	void (*SystemIDisposableMethodDispose)(int32_t thisHandle);
 	void (*ReleaseSystemDecimal)(int32_t handle);
 	int32_t (*SystemDecimalConstructorSystemDouble)(double value);
 	int32_t (*SystemDecimalConstructorSystemUInt64)(uint64_t value);
 	int32_t (*BoxDecimal)(int32_t valHandle);
 	int32_t (*UnboxDecimal)(int32_t valHandle);
 	UnityEngine::Vector3 (*UnityEngineVector3ConstructorSystemSingle_SystemSingle_SystemSingle)(float x, float y, float z);
-	UnityEngine::Vector3 (*UnityEngineVector3Methodop_AdditionUnityEngineVector3_UnityEngineVector3)(UnityEngine::Vector3& a, UnityEngine::Vector3& b);
 	int32_t (*BoxVector3)(UnityEngine::Vector3& val);
 	UnityEngine::Vector3 (*UnboxVector3)(int32_t valHandle);
+	UnityEngine::Vector4 (*UnityEngineVector4ConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingle)(float x, float y, float z, float w);
+	int32_t (*BoxVector4)(UnityEngine::Vector4& val);
+	UnityEngine::Vector4 (*UnboxVector4)(int32_t valHandle);
+	int32_t (*BoxQuaternion)(UnityEngine::Quaternion& val);
+	UnityEngine::Quaternion (*UnboxQuaternion)(int32_t valHandle);
+	UnityEngine::Matrix4x4 (*UnityEngineMatrix4x4ConstructorUnityEngineVector4_UnityEngineVector4_UnityEngineVector4_UnityEngineVector4)(UnityEngine::Vector4& column0, UnityEngine::Vector4& column1, UnityEngine::Vector4& column2, UnityEngine::Vector4& column3);
+	UnityEngine::Quaternion (*UnityEngineMatrix4x4PropertyGetRotation)(UnityEngine::Matrix4x4* thiz);
+	UnityEngine::Vector3 (*UnityEngineMatrix4x4PropertyGetLossyScale)(UnityEngine::Matrix4x4* thiz);
+	UnityEngine::Vector3 (*UnityEngineMatrix4x4MethodGetPosition)(UnityEngine::Matrix4x4* thiz);
+	int32_t (*BoxMatrix4x4)(UnityEngine::Matrix4x4& val);
+	UnityEngine::Matrix4x4 (*UnboxMatrix4x4)(int32_t valHandle);
 	int32_t (*UnityEngineObjectPropertyGetName)(int32_t thisHandle);
 	void (*UnityEngineObjectPropertySetName)(int32_t thisHandle, int32_t valueHandle);
 	int32_t (*UnityEngineComponentPropertyGetTransform)(int32_t thisHandle);
 	UnityEngine::Vector3 (*UnityEngineTransformPropertyGetPosition)(int32_t thisHandle);
 	void (*UnityEngineTransformPropertySetPosition)(int32_t thisHandle, UnityEngine::Vector3& value);
+	UnityEngine::Quaternion (*UnityEngineTransformPropertyGetRotation)(int32_t thisHandle);
+	void (*UnityEngineTransformPropertySetRotation)(int32_t thisHandle, UnityEngine::Quaternion& value);
+	UnityEngine::Vector3 (*UnityEngineTransformPropertyGetLocalScale)(int32_t thisHandle);
+	void (*UnityEngineTransformPropertySetLocalScale)(int32_t thisHandle, UnityEngine::Vector3& value);
+	int32_t (*UnityEngineTransformPropertyGetParent)(int32_t thisHandle);
+	void (*UnityEngineTransformPropertySetParent)(int32_t thisHandle, int32_t valueHandle);
 	int32_t (*SystemCollectionsIEnumeratorPropertyGetCurrent)(int32_t thisHandle);
 	int32_t (*SystemCollectionsIEnumeratorMethodMoveNext)(int32_t thisHandle);
+	int32_t (*UnityEngineGameObjectConstructorSystemString)(int32_t nameHandle);
+	int32_t (*UnityEngineGameObjectPropertyGetTransform)(int32_t thisHandle);
 	int32_t (*UnityEngineGameObjectMethodAddComponentCesiumForUnityBaseCesium3DTileset)(int32_t thisHandle);
+	int32_t (*UnityEngineGameObjectMethodAddComponentUnityEngineMeshFilter)(int32_t thisHandle);
+	int32_t (*UnityEngineGameObjectMethodAddComponentUnityEngineMeshRenderer)(int32_t thisHandle);
 	int32_t (*UnityEngineGameObjectMethodCreatePrimitiveUnityEnginePrimitiveType)(UnityEngine::PrimitiveType type);
 	void (*UnityEngineDebugMethodLogSystemObject)(int32_t messageHandle);
 	int32_t (*UnityEngineMonoBehaviourPropertyGetTransform)(int32_t thisHandle);
+	int32_t (*UnityEngineMonoBehaviourPropertyGetGameObject)(int32_t thisHandle);
+	UnityEngine::Vector3 (*SystemCollectionsGenericIEnumeratorUnityEngineVector3PropertyGetCurrent)(int32_t thisHandle);
+	int32_t (*SystemCollectionsGenericIEnumeratorSystemInt32PropertyGetCurrent)(int32_t thisHandle);
+	int32_t (*SystemCollectionsGenericIEnumerableUnityEngineVector3MethodGetEnumerator)(int32_t thisHandle);
+	int32_t (*SystemCollectionsGenericIEnumerableSystemInt32MethodGetEnumerator)(int32_t thisHandle);
+	int32_t (*UnityEngineMeshConstructor)();
+	void (*UnityEngineMeshMethodSetVerticesUnityEngineVector3Array1)(int32_t thisHandle, int32_t inVerticesHandle);
+	void (*UnityEngineMeshMethodSetTrianglesSystemInt32Array1_SystemInt32_SystemBoolean_SystemInt32)(int32_t thisHandle, int32_t trianglesHandle, int32_t submesh, uint32_t calculateBounds, int32_t baseVertex);
+	int32_t (*UnityEngineMeshFilterPropertyGetMesh)(int32_t thisHandle);
+	void (*UnityEngineMeshFilterPropertySetMesh)(int32_t thisHandle, int32_t valueHandle);
 	int32_t (*SystemExceptionConstructorSystemString)(int32_t messageHandle);
 	int32_t (*BoxPrimitiveType)(UnityEngine::PrimitiveType val);
 	UnityEngine::PrimitiveType (*UnboxPrimitiveType)(int32_t valHandle);
@@ -120,6 +151,12 @@ namespace Plugin
 	float (*UnboxSingle)(int32_t valHandle);
 	int32_t (*BoxDouble)(double val);
 	double (*UnboxDouble)(int32_t valHandle);
+	int32_t (*UnityEngineUnityEngineVector3Array1Constructor1)(int32_t length0);
+	UnityEngine::Vector3 (*UnityEngineVector3Array1GetItem1)(int32_t thisHandle, int32_t index0);
+	int32_t (*UnityEngineVector3Array1SetItem1)(int32_t thisHandle, int32_t index0, UnityEngine::Vector3& item);
+	int32_t (*SystemSystemInt32Array1Constructor1)(int32_t length0);
+	int32_t (*SystemInt32Array1GetItem1)(int32_t thisHandle, int32_t index0);
+	int32_t (*SystemInt32Array1SetItem1)(int32_t thisHandle, int32_t index0, int32_t item);
 	void (*ReleaseSystemAction)(int32_t handle, int32_t classHandle);
 	void (*SystemActionConstructor)(int32_t cppHandle, int32_t* handle, int32_t* classHandle);
 	void (*SystemActionAdd)(int32_t thisHandle, int32_t delHandle);
@@ -1741,6 +1778,186 @@ namespace System
 	{
 		return Handle != other.Handle;
 	}
+	
+	void System::IDisposable::Dispose()
+	{
+		Plugin::SystemIDisposableMethodDispose(Handle);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		IStructuralEquatable::IStructuralEquatable(decltype(nullptr))
+		{
+		}
+		
+		IStructuralEquatable::IStructuralEquatable(Plugin::InternalUse, int32_t handle)
+		{
+			Handle = handle;
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+			}
+		}
+		
+		IStructuralEquatable::IStructuralEquatable(const IStructuralEquatable& other)
+			: IStructuralEquatable(Plugin::InternalUse::Only, other.Handle)
+		{
+		}
+		
+		IStructuralEquatable::IStructuralEquatable(IStructuralEquatable&& other)
+			: IStructuralEquatable(Plugin::InternalUse::Only, other.Handle)
+		{
+			other.Handle = 0;
+		}
+		
+		IStructuralEquatable::~IStructuralEquatable()
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedClass(Handle);
+				Handle = 0;
+			}
+		}
+		
+		IStructuralEquatable& IStructuralEquatable::operator=(const IStructuralEquatable& other)
+		{
+			if (this->Handle)
+			{
+				Plugin::DereferenceManagedClass(this->Handle);
+			}
+			this->Handle = other.Handle;
+			if (this->Handle)
+			{
+				Plugin::ReferenceManagedClass(this->Handle);
+			}
+			return *this;
+		}
+		
+		IStructuralEquatable& IStructuralEquatable::operator=(decltype(nullptr))
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedClass(Handle);
+				Handle = 0;
+			}
+			return *this;
+		}
+		
+		IStructuralEquatable& IStructuralEquatable::operator=(IStructuralEquatable&& other)
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedClass(Handle);
+			}
+			Handle = other.Handle;
+			other.Handle = 0;
+			return *this;
+		}
+		
+		bool IStructuralEquatable::operator==(const IStructuralEquatable& other) const
+		{
+			return Handle == other.Handle;
+		}
+		
+		bool IStructuralEquatable::operator!=(const IStructuralEquatable& other) const
+		{
+			return Handle != other.Handle;
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		IStructuralComparable::IStructuralComparable(decltype(nullptr))
+		{
+		}
+		
+		IStructuralComparable::IStructuralComparable(Plugin::InternalUse, int32_t handle)
+		{
+			Handle = handle;
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+			}
+		}
+		
+		IStructuralComparable::IStructuralComparable(const IStructuralComparable& other)
+			: IStructuralComparable(Plugin::InternalUse::Only, other.Handle)
+		{
+		}
+		
+		IStructuralComparable::IStructuralComparable(IStructuralComparable&& other)
+			: IStructuralComparable(Plugin::InternalUse::Only, other.Handle)
+		{
+			other.Handle = 0;
+		}
+		
+		IStructuralComparable::~IStructuralComparable()
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedClass(Handle);
+				Handle = 0;
+			}
+		}
+		
+		IStructuralComparable& IStructuralComparable::operator=(const IStructuralComparable& other)
+		{
+			if (this->Handle)
+			{
+				Plugin::DereferenceManagedClass(this->Handle);
+			}
+			this->Handle = other.Handle;
+			if (this->Handle)
+			{
+				Plugin::ReferenceManagedClass(this->Handle);
+			}
+			return *this;
+		}
+		
+		IStructuralComparable& IStructuralComparable::operator=(decltype(nullptr))
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedClass(Handle);
+				Handle = 0;
+			}
+			return *this;
+		}
+		
+		IStructuralComparable& IStructuralComparable::operator=(IStructuralComparable&& other)
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedClass(Handle);
+			}
+			Handle = other.Handle;
+			other.Handle = 0;
+			return *this;
+		}
+		
+		bool IStructuralComparable::operator==(const IStructuralComparable& other) const
+		{
+			return Handle == other.Handle;
+		}
+		
+		bool IStructuralComparable::operator!=(const IStructuralComparable& other) const
+		{
+			return Handle != other.Handle;
+		}
+	}
 }
 
 namespace System
@@ -2872,6 +3089,249 @@ namespace System
 	}
 	
 	bool IEquatable_1<UnityEngine::Vector3>::operator!=(const IEquatable_1<UnityEngine::Vector3>& other) const
+	{
+		return Handle != other.Handle;
+	}
+}
+
+namespace System
+{
+	IEquatable_1<UnityEngine::Vector4>::IEquatable_1(decltype(nullptr))
+	{
+	}
+	
+	IEquatable_1<UnityEngine::Vector4>::IEquatable_1(Plugin::InternalUse, int32_t handle)
+	{
+		Handle = handle;
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+		}
+	}
+	
+	IEquatable_1<UnityEngine::Vector4>::IEquatable_1(const IEquatable_1<UnityEngine::Vector4>& other)
+		: IEquatable_1(Plugin::InternalUse::Only, other.Handle)
+	{
+	}
+	
+	IEquatable_1<UnityEngine::Vector4>::IEquatable_1(IEquatable_1<UnityEngine::Vector4>&& other)
+		: IEquatable_1(Plugin::InternalUse::Only, other.Handle)
+	{
+		other.Handle = 0;
+	}
+	
+	IEquatable_1<UnityEngine::Vector4>::~IEquatable_1<UnityEngine::Vector4>()
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+	}
+	
+	IEquatable_1<UnityEngine::Vector4>& IEquatable_1<UnityEngine::Vector4>::operator=(const IEquatable_1<UnityEngine::Vector4>& other)
+	{
+		if (this->Handle)
+		{
+			Plugin::DereferenceManagedClass(this->Handle);
+		}
+		this->Handle = other.Handle;
+		if (this->Handle)
+		{
+			Plugin::ReferenceManagedClass(this->Handle);
+		}
+		return *this;
+	}
+	
+	IEquatable_1<UnityEngine::Vector4>& IEquatable_1<UnityEngine::Vector4>::operator=(decltype(nullptr))
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+		return *this;
+	}
+	
+	IEquatable_1<UnityEngine::Vector4>& IEquatable_1<UnityEngine::Vector4>::operator=(IEquatable_1<UnityEngine::Vector4>&& other)
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+		}
+		Handle = other.Handle;
+		other.Handle = 0;
+		return *this;
+	}
+	
+	bool IEquatable_1<UnityEngine::Vector4>::operator==(const IEquatable_1<UnityEngine::Vector4>& other) const
+	{
+		return Handle == other.Handle;
+	}
+	
+	bool IEquatable_1<UnityEngine::Vector4>::operator!=(const IEquatable_1<UnityEngine::Vector4>& other) const
+	{
+		return Handle != other.Handle;
+	}
+}
+
+namespace System
+{
+	IEquatable_1<UnityEngine::Quaternion>::IEquatable_1(decltype(nullptr))
+	{
+	}
+	
+	IEquatable_1<UnityEngine::Quaternion>::IEquatable_1(Plugin::InternalUse, int32_t handle)
+	{
+		Handle = handle;
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+		}
+	}
+	
+	IEquatable_1<UnityEngine::Quaternion>::IEquatable_1(const IEquatable_1<UnityEngine::Quaternion>& other)
+		: IEquatable_1(Plugin::InternalUse::Only, other.Handle)
+	{
+	}
+	
+	IEquatable_1<UnityEngine::Quaternion>::IEquatable_1(IEquatable_1<UnityEngine::Quaternion>&& other)
+		: IEquatable_1(Plugin::InternalUse::Only, other.Handle)
+	{
+		other.Handle = 0;
+	}
+	
+	IEquatable_1<UnityEngine::Quaternion>::~IEquatable_1<UnityEngine::Quaternion>()
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+	}
+	
+	IEquatable_1<UnityEngine::Quaternion>& IEquatable_1<UnityEngine::Quaternion>::operator=(const IEquatable_1<UnityEngine::Quaternion>& other)
+	{
+		if (this->Handle)
+		{
+			Plugin::DereferenceManagedClass(this->Handle);
+		}
+		this->Handle = other.Handle;
+		if (this->Handle)
+		{
+			Plugin::ReferenceManagedClass(this->Handle);
+		}
+		return *this;
+	}
+	
+	IEquatable_1<UnityEngine::Quaternion>& IEquatable_1<UnityEngine::Quaternion>::operator=(decltype(nullptr))
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+		return *this;
+	}
+	
+	IEquatable_1<UnityEngine::Quaternion>& IEquatable_1<UnityEngine::Quaternion>::operator=(IEquatable_1<UnityEngine::Quaternion>&& other)
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+		}
+		Handle = other.Handle;
+		other.Handle = 0;
+		return *this;
+	}
+	
+	bool IEquatable_1<UnityEngine::Quaternion>::operator==(const IEquatable_1<UnityEngine::Quaternion>& other) const
+	{
+		return Handle == other.Handle;
+	}
+	
+	bool IEquatable_1<UnityEngine::Quaternion>::operator!=(const IEquatable_1<UnityEngine::Quaternion>& other) const
+	{
+		return Handle != other.Handle;
+	}
+}
+
+namespace System
+{
+	IEquatable_1<UnityEngine::Matrix4x4>::IEquatable_1(decltype(nullptr))
+	{
+	}
+	
+	IEquatable_1<UnityEngine::Matrix4x4>::IEquatable_1(Plugin::InternalUse, int32_t handle)
+	{
+		Handle = handle;
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+		}
+	}
+	
+	IEquatable_1<UnityEngine::Matrix4x4>::IEquatable_1(const IEquatable_1<UnityEngine::Matrix4x4>& other)
+		: IEquatable_1(Plugin::InternalUse::Only, other.Handle)
+	{
+	}
+	
+	IEquatable_1<UnityEngine::Matrix4x4>::IEquatable_1(IEquatable_1<UnityEngine::Matrix4x4>&& other)
+		: IEquatable_1(Plugin::InternalUse::Only, other.Handle)
+	{
+		other.Handle = 0;
+	}
+	
+	IEquatable_1<UnityEngine::Matrix4x4>::~IEquatable_1<UnityEngine::Matrix4x4>()
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+	}
+	
+	IEquatable_1<UnityEngine::Matrix4x4>& IEquatable_1<UnityEngine::Matrix4x4>::operator=(const IEquatable_1<UnityEngine::Matrix4x4>& other)
+	{
+		if (this->Handle)
+		{
+			Plugin::DereferenceManagedClass(this->Handle);
+		}
+		this->Handle = other.Handle;
+		if (this->Handle)
+		{
+			Plugin::ReferenceManagedClass(this->Handle);
+		}
+		return *this;
+	}
+	
+	IEquatable_1<UnityEngine::Matrix4x4>& IEquatable_1<UnityEngine::Matrix4x4>::operator=(decltype(nullptr))
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+		return *this;
+	}
+	
+	IEquatable_1<UnityEngine::Matrix4x4>& IEquatable_1<UnityEngine::Matrix4x4>::operator=(IEquatable_1<UnityEngine::Matrix4x4>&& other)
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+		}
+		Handle = other.Handle;
+		other.Handle = 0;
+		return *this;
+	}
+	
+	bool IEquatable_1<UnityEngine::Matrix4x4>::operator==(const IEquatable_1<UnityEngine::Matrix4x4>& other) const
+	{
+		return Handle == other.Handle;
+	}
+	
+	bool IEquatable_1<UnityEngine::Matrix4x4>::operator!=(const IEquatable_1<UnityEngine::Matrix4x4>& other) const
 	{
 		return Handle != other.Handle;
 	}
@@ -4329,19 +4789,6 @@ namespace UnityEngine
 		*this = returnValue;
 	}
 	
-	UnityEngine::Vector3 UnityEngine::Vector3::operator+(UnityEngine::Vector3& a)
-	{
-		auto returnValue = Plugin::UnityEngineVector3Methodop_AdditionUnityEngineVector3_UnityEngineVector3(*this, a);
-		if (Plugin::unhandledCsharpException)
-		{
-			System::Exception* ex = Plugin::unhandledCsharpException;
-			Plugin::unhandledCsharpException = nullptr;
-			ex->ThrowReferenceToThis();
-			delete ex;
-		}
-		return returnValue;
-	}
-	
 	UnityEngine::Vector3::operator System::ValueType()
 	{
 		int32_t handle = Plugin::BoxVector3(*this);
@@ -4420,6 +4867,356 @@ namespace System
 	System::Object::operator UnityEngine::Vector3()
 	{
 		UnityEngine::Vector3 returnVal(Plugin::UnboxVector3(Handle));
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return returnVal;
+	}
+}
+
+namespace UnityEngine
+{
+	Vector4::Vector4()
+	{
+	}
+	
+	UnityEngine::Vector4::Vector4(System::Single x, System::Single y, System::Single z, System::Single w)
+	{
+		auto returnValue = Plugin::UnityEngineVector4ConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingle(x, y, z, w);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		*this = returnValue;
+	}
+	
+	UnityEngine::Vector4::operator System::ValueType()
+	{
+		int32_t handle = Plugin::BoxVector4(*this);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+			return System::ValueType(Plugin::InternalUse::Only, handle);
+		}
+		return nullptr;
+	}
+	
+	UnityEngine::Vector4::operator System::Object()
+	{
+		int32_t handle = Plugin::BoxVector4(*this);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+			return System::Object(Plugin::InternalUse::Only, handle);
+		}
+		return nullptr;
+	}
+	
+	UnityEngine::Vector4::operator System::IFormattable()
+	{
+		int32_t handle = Plugin::BoxVector4(*this);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+			return System::IFormattable(Plugin::InternalUse::Only, handle);
+		}
+		return nullptr;
+	}
+	
+	UnityEngine::Vector4::operator System::IEquatable_1<UnityEngine::Vector4>()
+	{
+		int32_t handle = Plugin::BoxVector4(*this);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+			return System::IEquatable_1<UnityEngine::Vector4>(Plugin::InternalUse::Only, handle);
+		}
+		return nullptr;
+	}
+}
+
+namespace System
+{
+	System::Object::operator UnityEngine::Vector4()
+	{
+		UnityEngine::Vector4 returnVal(Plugin::UnboxVector4(Handle));
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return returnVal;
+	}
+}
+
+namespace UnityEngine
+{
+	Quaternion::Quaternion()
+	{
+	}
+	
+	UnityEngine::Quaternion::operator System::ValueType()
+	{
+		int32_t handle = Plugin::BoxQuaternion(*this);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+			return System::ValueType(Plugin::InternalUse::Only, handle);
+		}
+		return nullptr;
+	}
+	
+	UnityEngine::Quaternion::operator System::Object()
+	{
+		int32_t handle = Plugin::BoxQuaternion(*this);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+			return System::Object(Plugin::InternalUse::Only, handle);
+		}
+		return nullptr;
+	}
+	
+	UnityEngine::Quaternion::operator System::IFormattable()
+	{
+		int32_t handle = Plugin::BoxQuaternion(*this);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+			return System::IFormattable(Plugin::InternalUse::Only, handle);
+		}
+		return nullptr;
+	}
+	
+	UnityEngine::Quaternion::operator System::IEquatable_1<UnityEngine::Quaternion>()
+	{
+		int32_t handle = Plugin::BoxQuaternion(*this);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+			return System::IEquatable_1<UnityEngine::Quaternion>(Plugin::InternalUse::Only, handle);
+		}
+		return nullptr;
+	}
+}
+
+namespace System
+{
+	System::Object::operator UnityEngine::Quaternion()
+	{
+		UnityEngine::Quaternion returnVal(Plugin::UnboxQuaternion(Handle));
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return returnVal;
+	}
+}
+
+namespace UnityEngine
+{
+	Matrix4x4::Matrix4x4()
+	{
+	}
+	
+	UnityEngine::Matrix4x4::Matrix4x4(UnityEngine::Vector4& column0, UnityEngine::Vector4& column1, UnityEngine::Vector4& column2, UnityEngine::Vector4& column3)
+	{
+		auto returnValue = Plugin::UnityEngineMatrix4x4ConstructorUnityEngineVector4_UnityEngineVector4_UnityEngineVector4_UnityEngineVector4(column0, column1, column2, column3);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		*this = returnValue;
+	}
+	
+	UnityEngine::Quaternion UnityEngine::Matrix4x4::GetRotation()
+	{
+		auto returnValue = Plugin::UnityEngineMatrix4x4PropertyGetRotation(this);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return returnValue;
+	}
+	
+	UnityEngine::Vector3 UnityEngine::Matrix4x4::GetLossyScale()
+	{
+		auto returnValue = Plugin::UnityEngineMatrix4x4PropertyGetLossyScale(this);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return returnValue;
+	}
+	
+	UnityEngine::Vector3 UnityEngine::Matrix4x4::GetPosition()
+	{
+		auto returnValue = Plugin::UnityEngineMatrix4x4MethodGetPosition(this);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return returnValue;
+	}
+	
+	UnityEngine::Matrix4x4::operator System::ValueType()
+	{
+		int32_t handle = Plugin::BoxMatrix4x4(*this);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+			return System::ValueType(Plugin::InternalUse::Only, handle);
+		}
+		return nullptr;
+	}
+	
+	UnityEngine::Matrix4x4::operator System::Object()
+	{
+		int32_t handle = Plugin::BoxMatrix4x4(*this);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+			return System::Object(Plugin::InternalUse::Only, handle);
+		}
+		return nullptr;
+	}
+	
+	UnityEngine::Matrix4x4::operator System::IFormattable()
+	{
+		int32_t handle = Plugin::BoxMatrix4x4(*this);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+			return System::IFormattable(Plugin::InternalUse::Only, handle);
+		}
+		return nullptr;
+	}
+	
+	UnityEngine::Matrix4x4::operator System::IEquatable_1<UnityEngine::Matrix4x4>()
+	{
+		int32_t handle = Plugin::BoxMatrix4x4(*this);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+			return System::IEquatable_1<UnityEngine::Matrix4x4>(Plugin::InternalUse::Only, handle);
+		}
+		return nullptr;
+	}
+}
+
+namespace System
+{
+	System::Object::operator UnityEngine::Matrix4x4()
+	{
+		UnityEngine::Matrix4x4 returnVal(Plugin::UnboxMatrix4x4(Handle));
 		if (Plugin::unhandledCsharpException)
 		{
 			System::Exception* ex = Plugin::unhandledCsharpException;
@@ -4735,6 +5532,81 @@ namespace UnityEngine
 	void UnityEngine::Transform::SetPosition(UnityEngine::Vector3& value)
 	{
 		Plugin::UnityEngineTransformPropertySetPosition(Handle, value);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+	}
+	
+	UnityEngine::Quaternion UnityEngine::Transform::GetRotation()
+	{
+		auto returnValue = Plugin::UnityEngineTransformPropertyGetRotation(Handle);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return returnValue;
+	}
+	
+	void UnityEngine::Transform::SetRotation(UnityEngine::Quaternion& value)
+	{
+		Plugin::UnityEngineTransformPropertySetRotation(Handle, value);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+	}
+	
+	UnityEngine::Vector3 UnityEngine::Transform::GetLocalScale()
+	{
+		auto returnValue = Plugin::UnityEngineTransformPropertyGetLocalScale(Handle);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return returnValue;
+	}
+	
+	void UnityEngine::Transform::SetLocalScale(UnityEngine::Vector3& value)
+	{
+		Plugin::UnityEngineTransformPropertySetLocalScale(Handle, value);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+	}
+	
+	UnityEngine::Transform UnityEngine::Transform::GetParent()
+	{
+		auto returnValue = Plugin::UnityEngineTransformPropertyGetParent(Handle);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return UnityEngine::Transform(Plugin::InternalUse::Only, returnValue);
+	}
+	
+	void UnityEngine::Transform::SetParent(UnityEngine::Transform& value)
+	{
+		Plugin::UnityEngineTransformPropertySetParent(Handle, value.Handle);
 		if (Plugin::unhandledCsharpException)
 		{
 			System::Exception* ex = Plugin::unhandledCsharpException;
@@ -5111,6 +5983,37 @@ namespace UnityEngine
 		return Handle != other.Handle;
 	}
 	
+	UnityEngine::GameObject::GameObject(System::String& name)
+		: UnityEngine::Object(nullptr)
+	{
+		auto returnValue = Plugin::UnityEngineGameObjectConstructorSystemString(name.Handle);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		Handle = returnValue;
+		if (returnValue)
+		{
+			Plugin::ReferenceManagedClass(returnValue);
+		}
+	}
+	
+	UnityEngine::Transform UnityEngine::GameObject::GetTransform()
+	{
+		auto returnValue = Plugin::UnityEngineGameObjectPropertyGetTransform(Handle);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return UnityEngine::Transform(Plugin::InternalUse::Only, returnValue);
+	}
+	
 	template<> CesiumForUnity::BaseCesium3DTileset UnityEngine::GameObject::AddComponent<CesiumForUnity::BaseCesium3DTileset>()
 	{
 		auto returnValue = Plugin::UnityEngineGameObjectMethodAddComponentCesiumForUnityBaseCesium3DTileset(Handle);
@@ -5122,6 +6025,32 @@ namespace UnityEngine
 			delete ex;
 		}
 		return CesiumForUnity::BaseCesium3DTileset(Plugin::InternalUse::Only, returnValue);
+	}
+	
+	template<> UnityEngine::MeshFilter UnityEngine::GameObject::AddComponent<UnityEngine::MeshFilter>()
+	{
+		auto returnValue = Plugin::UnityEngineGameObjectMethodAddComponentUnityEngineMeshFilter(Handle);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return UnityEngine::MeshFilter(Plugin::InternalUse::Only, returnValue);
+	}
+	
+	template<> UnityEngine::MeshRenderer UnityEngine::GameObject::AddComponent<UnityEngine::MeshRenderer>()
+	{
+		auto returnValue = Plugin::UnityEngineGameObjectMethodAddComponentUnityEngineMeshRenderer(Handle);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return UnityEngine::MeshRenderer(Plugin::InternalUse::Only, returnValue);
 	}
 	
 	UnityEngine::GameObject UnityEngine::GameObject::CreatePrimitive(UnityEngine::PrimitiveType type)
@@ -5413,6 +6342,2038 @@ namespace UnityEngine
 			delete ex;
 		}
 		return UnityEngine::Transform(Plugin::InternalUse::Only, returnValue);
+	}
+	
+	UnityEngine::GameObject UnityEngine::MonoBehaviour::GetGameObject()
+	{
+		auto returnValue = Plugin::UnityEngineMonoBehaviourPropertyGetGameObject(Handle);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return UnityEngine::GameObject(Plugin::InternalUse::Only, returnValue);
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			IEnumerator_1<UnityEngine::Vector3>::IEnumerator_1(decltype(nullptr))
+				: System::IDisposable(nullptr)
+				, System::Collections::IEnumerator(nullptr)
+			{
+			}
+			
+			IEnumerator_1<UnityEngine::Vector3>::IEnumerator_1(Plugin::InternalUse, int32_t handle)
+				: System::IDisposable(nullptr)
+				, System::Collections::IEnumerator(nullptr)
+			{
+				Handle = handle;
+				if (handle)
+				{
+					Plugin::ReferenceManagedClass(handle);
+				}
+			}
+			
+			IEnumerator_1<UnityEngine::Vector3>::IEnumerator_1(const IEnumerator_1<UnityEngine::Vector3>& other)
+				: IEnumerator_1(Plugin::InternalUse::Only, other.Handle)
+			{
+			}
+			
+			IEnumerator_1<UnityEngine::Vector3>::IEnumerator_1(IEnumerator_1<UnityEngine::Vector3>&& other)
+				: IEnumerator_1(Plugin::InternalUse::Only, other.Handle)
+			{
+				other.Handle = 0;
+			}
+			
+			IEnumerator_1<UnityEngine::Vector3>::~IEnumerator_1<UnityEngine::Vector3>()
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+					Handle = 0;
+				}
+			}
+			
+			IEnumerator_1<UnityEngine::Vector3>& IEnumerator_1<UnityEngine::Vector3>::operator=(const IEnumerator_1<UnityEngine::Vector3>& other)
+			{
+				if (this->Handle)
+				{
+					Plugin::DereferenceManagedClass(this->Handle);
+				}
+				this->Handle = other.Handle;
+				if (this->Handle)
+				{
+					Plugin::ReferenceManagedClass(this->Handle);
+				}
+				return *this;
+			}
+			
+			IEnumerator_1<UnityEngine::Vector3>& IEnumerator_1<UnityEngine::Vector3>::operator=(decltype(nullptr))
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+					Handle = 0;
+				}
+				return *this;
+			}
+			
+			IEnumerator_1<UnityEngine::Vector3>& IEnumerator_1<UnityEngine::Vector3>::operator=(IEnumerator_1<UnityEngine::Vector3>&& other)
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+				}
+				Handle = other.Handle;
+				other.Handle = 0;
+				return *this;
+			}
+			
+			bool IEnumerator_1<UnityEngine::Vector3>::operator==(const IEnumerator_1<UnityEngine::Vector3>& other) const
+			{
+				return Handle == other.Handle;
+			}
+			
+			bool IEnumerator_1<UnityEngine::Vector3>::operator!=(const IEnumerator_1<UnityEngine::Vector3>& other) const
+			{
+				return Handle != other.Handle;
+			}
+			
+			UnityEngine::Vector3 System::Collections::Generic::IEnumerator_1<UnityEngine::Vector3>::GetCurrent()
+			{
+				auto returnValue = Plugin::SystemCollectionsGenericIEnumeratorUnityEngineVector3PropertyGetCurrent(Handle);
+				if (Plugin::unhandledCsharpException)
+				{
+					System::Exception* ex = Plugin::unhandledCsharpException;
+					Plugin::unhandledCsharpException = nullptr;
+					ex->ThrowReferenceToThis();
+					delete ex;
+				}
+				return returnValue;
+			}
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			IEnumerator_1<System::Int32>::IEnumerator_1(decltype(nullptr))
+				: System::IDisposable(nullptr)
+				, System::Collections::IEnumerator(nullptr)
+			{
+			}
+			
+			IEnumerator_1<System::Int32>::IEnumerator_1(Plugin::InternalUse, int32_t handle)
+				: System::IDisposable(nullptr)
+				, System::Collections::IEnumerator(nullptr)
+			{
+				Handle = handle;
+				if (handle)
+				{
+					Plugin::ReferenceManagedClass(handle);
+				}
+			}
+			
+			IEnumerator_1<System::Int32>::IEnumerator_1(const IEnumerator_1<System::Int32>& other)
+				: IEnumerator_1(Plugin::InternalUse::Only, other.Handle)
+			{
+			}
+			
+			IEnumerator_1<System::Int32>::IEnumerator_1(IEnumerator_1<System::Int32>&& other)
+				: IEnumerator_1(Plugin::InternalUse::Only, other.Handle)
+			{
+				other.Handle = 0;
+			}
+			
+			IEnumerator_1<System::Int32>::~IEnumerator_1<System::Int32>()
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+					Handle = 0;
+				}
+			}
+			
+			IEnumerator_1<System::Int32>& IEnumerator_1<System::Int32>::operator=(const IEnumerator_1<System::Int32>& other)
+			{
+				if (this->Handle)
+				{
+					Plugin::DereferenceManagedClass(this->Handle);
+				}
+				this->Handle = other.Handle;
+				if (this->Handle)
+				{
+					Plugin::ReferenceManagedClass(this->Handle);
+				}
+				return *this;
+			}
+			
+			IEnumerator_1<System::Int32>& IEnumerator_1<System::Int32>::operator=(decltype(nullptr))
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+					Handle = 0;
+				}
+				return *this;
+			}
+			
+			IEnumerator_1<System::Int32>& IEnumerator_1<System::Int32>::operator=(IEnumerator_1<System::Int32>&& other)
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+				}
+				Handle = other.Handle;
+				other.Handle = 0;
+				return *this;
+			}
+			
+			bool IEnumerator_1<System::Int32>::operator==(const IEnumerator_1<System::Int32>& other) const
+			{
+				return Handle == other.Handle;
+			}
+			
+			bool IEnumerator_1<System::Int32>::operator!=(const IEnumerator_1<System::Int32>& other) const
+			{
+				return Handle != other.Handle;
+			}
+			
+			System::Int32 System::Collections::Generic::IEnumerator_1<System::Int32>::GetCurrent()
+			{
+				auto returnValue = Plugin::SystemCollectionsGenericIEnumeratorSystemInt32PropertyGetCurrent(Handle);
+				if (Plugin::unhandledCsharpException)
+				{
+					System::Exception* ex = Plugin::unhandledCsharpException;
+					Plugin::unhandledCsharpException = nullptr;
+					ex->ThrowReferenceToThis();
+					delete ex;
+				}
+				return returnValue;
+			}
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			IEnumerable_1<UnityEngine::Vector3>::IEnumerable_1(decltype(nullptr))
+				: System::Collections::IEnumerable(nullptr)
+			{
+			}
+			
+			IEnumerable_1<UnityEngine::Vector3>::IEnumerable_1(Plugin::InternalUse, int32_t handle)
+				: System::Collections::IEnumerable(nullptr)
+			{
+				Handle = handle;
+				if (handle)
+				{
+					Plugin::ReferenceManagedClass(handle);
+				}
+			}
+			
+			IEnumerable_1<UnityEngine::Vector3>::IEnumerable_1(const IEnumerable_1<UnityEngine::Vector3>& other)
+				: IEnumerable_1(Plugin::InternalUse::Only, other.Handle)
+			{
+			}
+			
+			IEnumerable_1<UnityEngine::Vector3>::IEnumerable_1(IEnumerable_1<UnityEngine::Vector3>&& other)
+				: IEnumerable_1(Plugin::InternalUse::Only, other.Handle)
+			{
+				other.Handle = 0;
+			}
+			
+			IEnumerable_1<UnityEngine::Vector3>::~IEnumerable_1<UnityEngine::Vector3>()
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+					Handle = 0;
+				}
+			}
+			
+			IEnumerable_1<UnityEngine::Vector3>& IEnumerable_1<UnityEngine::Vector3>::operator=(const IEnumerable_1<UnityEngine::Vector3>& other)
+			{
+				if (this->Handle)
+				{
+					Plugin::DereferenceManagedClass(this->Handle);
+				}
+				this->Handle = other.Handle;
+				if (this->Handle)
+				{
+					Plugin::ReferenceManagedClass(this->Handle);
+				}
+				return *this;
+			}
+			
+			IEnumerable_1<UnityEngine::Vector3>& IEnumerable_1<UnityEngine::Vector3>::operator=(decltype(nullptr))
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+					Handle = 0;
+				}
+				return *this;
+			}
+			
+			IEnumerable_1<UnityEngine::Vector3>& IEnumerable_1<UnityEngine::Vector3>::operator=(IEnumerable_1<UnityEngine::Vector3>&& other)
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+				}
+				Handle = other.Handle;
+				other.Handle = 0;
+				return *this;
+			}
+			
+			bool IEnumerable_1<UnityEngine::Vector3>::operator==(const IEnumerable_1<UnityEngine::Vector3>& other) const
+			{
+				return Handle == other.Handle;
+			}
+			
+			bool IEnumerable_1<UnityEngine::Vector3>::operator!=(const IEnumerable_1<UnityEngine::Vector3>& other) const
+			{
+				return Handle != other.Handle;
+			}
+			
+			System::Collections::Generic::IEnumerator_1<UnityEngine::Vector3> System::Collections::Generic::IEnumerable_1<UnityEngine::Vector3>::GetEnumerator()
+			{
+				auto returnValue = Plugin::SystemCollectionsGenericIEnumerableUnityEngineVector3MethodGetEnumerator(Handle);
+				if (Plugin::unhandledCsharpException)
+				{
+					System::Exception* ex = Plugin::unhandledCsharpException;
+					Plugin::unhandledCsharpException = nullptr;
+					ex->ThrowReferenceToThis();
+					delete ex;
+				}
+				return System::Collections::Generic::IEnumerator_1<UnityEngine::Vector3>(Plugin::InternalUse::Only, returnValue);
+			}
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			IEnumerable_1<System::Int32>::IEnumerable_1(decltype(nullptr))
+				: System::Collections::IEnumerable(nullptr)
+			{
+			}
+			
+			IEnumerable_1<System::Int32>::IEnumerable_1(Plugin::InternalUse, int32_t handle)
+				: System::Collections::IEnumerable(nullptr)
+			{
+				Handle = handle;
+				if (handle)
+				{
+					Plugin::ReferenceManagedClass(handle);
+				}
+			}
+			
+			IEnumerable_1<System::Int32>::IEnumerable_1(const IEnumerable_1<System::Int32>& other)
+				: IEnumerable_1(Plugin::InternalUse::Only, other.Handle)
+			{
+			}
+			
+			IEnumerable_1<System::Int32>::IEnumerable_1(IEnumerable_1<System::Int32>&& other)
+				: IEnumerable_1(Plugin::InternalUse::Only, other.Handle)
+			{
+				other.Handle = 0;
+			}
+			
+			IEnumerable_1<System::Int32>::~IEnumerable_1<System::Int32>()
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+					Handle = 0;
+				}
+			}
+			
+			IEnumerable_1<System::Int32>& IEnumerable_1<System::Int32>::operator=(const IEnumerable_1<System::Int32>& other)
+			{
+				if (this->Handle)
+				{
+					Plugin::DereferenceManagedClass(this->Handle);
+				}
+				this->Handle = other.Handle;
+				if (this->Handle)
+				{
+					Plugin::ReferenceManagedClass(this->Handle);
+				}
+				return *this;
+			}
+			
+			IEnumerable_1<System::Int32>& IEnumerable_1<System::Int32>::operator=(decltype(nullptr))
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+					Handle = 0;
+				}
+				return *this;
+			}
+			
+			IEnumerable_1<System::Int32>& IEnumerable_1<System::Int32>::operator=(IEnumerable_1<System::Int32>&& other)
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+				}
+				Handle = other.Handle;
+				other.Handle = 0;
+				return *this;
+			}
+			
+			bool IEnumerable_1<System::Int32>::operator==(const IEnumerable_1<System::Int32>& other) const
+			{
+				return Handle == other.Handle;
+			}
+			
+			bool IEnumerable_1<System::Int32>::operator!=(const IEnumerable_1<System::Int32>& other) const
+			{
+				return Handle != other.Handle;
+			}
+			
+			System::Collections::Generic::IEnumerator_1<System::Int32> System::Collections::Generic::IEnumerable_1<System::Int32>::GetEnumerator()
+			{
+				auto returnValue = Plugin::SystemCollectionsGenericIEnumerableSystemInt32MethodGetEnumerator(Handle);
+				if (Plugin::unhandledCsharpException)
+				{
+					System::Exception* ex = Plugin::unhandledCsharpException;
+					Plugin::unhandledCsharpException = nullptr;
+					ex->ThrowReferenceToThis();
+					delete ex;
+				}
+				return System::Collections::Generic::IEnumerator_1<System::Int32>(Plugin::InternalUse::Only, returnValue);
+			}
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			ICollection_1<UnityEngine::Vector3>::ICollection_1(decltype(nullptr))
+				: System::Collections::IEnumerable(nullptr)
+				, System::Collections::Generic::IEnumerable_1<UnityEngine::Vector3>(nullptr)
+			{
+			}
+			
+			ICollection_1<UnityEngine::Vector3>::ICollection_1(Plugin::InternalUse, int32_t handle)
+				: System::Collections::IEnumerable(nullptr)
+				, System::Collections::Generic::IEnumerable_1<UnityEngine::Vector3>(nullptr)
+			{
+				Handle = handle;
+				if (handle)
+				{
+					Plugin::ReferenceManagedClass(handle);
+				}
+			}
+			
+			ICollection_1<UnityEngine::Vector3>::ICollection_1(const ICollection_1<UnityEngine::Vector3>& other)
+				: ICollection_1(Plugin::InternalUse::Only, other.Handle)
+			{
+			}
+			
+			ICollection_1<UnityEngine::Vector3>::ICollection_1(ICollection_1<UnityEngine::Vector3>&& other)
+				: ICollection_1(Plugin::InternalUse::Only, other.Handle)
+			{
+				other.Handle = 0;
+			}
+			
+			ICollection_1<UnityEngine::Vector3>::~ICollection_1<UnityEngine::Vector3>()
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+					Handle = 0;
+				}
+			}
+			
+			ICollection_1<UnityEngine::Vector3>& ICollection_1<UnityEngine::Vector3>::operator=(const ICollection_1<UnityEngine::Vector3>& other)
+			{
+				if (this->Handle)
+				{
+					Plugin::DereferenceManagedClass(this->Handle);
+				}
+				this->Handle = other.Handle;
+				if (this->Handle)
+				{
+					Plugin::ReferenceManagedClass(this->Handle);
+				}
+				return *this;
+			}
+			
+			ICollection_1<UnityEngine::Vector3>& ICollection_1<UnityEngine::Vector3>::operator=(decltype(nullptr))
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+					Handle = 0;
+				}
+				return *this;
+			}
+			
+			ICollection_1<UnityEngine::Vector3>& ICollection_1<UnityEngine::Vector3>::operator=(ICollection_1<UnityEngine::Vector3>&& other)
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+				}
+				Handle = other.Handle;
+				other.Handle = 0;
+				return *this;
+			}
+			
+			bool ICollection_1<UnityEngine::Vector3>::operator==(const ICollection_1<UnityEngine::Vector3>& other) const
+			{
+				return Handle == other.Handle;
+			}
+			
+			bool ICollection_1<UnityEngine::Vector3>::operator!=(const ICollection_1<UnityEngine::Vector3>& other) const
+			{
+				return Handle != other.Handle;
+			}
+		}
+	}
+}
+
+namespace Plugin
+{
+	SystemCollectionsGenericICollectionUnityEngineVector3Iterator::SystemCollectionsGenericICollectionUnityEngineVector3Iterator(decltype(nullptr))
+		: enumerator(nullptr)
+		, hasMore(false)
+	{
+	}
+	
+	SystemCollectionsGenericICollectionUnityEngineVector3Iterator::SystemCollectionsGenericICollectionUnityEngineVector3Iterator(System::Collections::Generic::ICollection_1<UnityEngine::Vector3>& enumerable)
+		: enumerator(enumerable.GetEnumerator())
+	{
+		hasMore = enumerator.MoveNext();
+	}
+	
+	SystemCollectionsGenericICollectionUnityEngineVector3Iterator::~SystemCollectionsGenericICollectionUnityEngineVector3Iterator()
+	{
+		if (enumerator != nullptr)
+		{
+			enumerator.Dispose();
+		}
+	}
+	
+	SystemCollectionsGenericICollectionUnityEngineVector3Iterator& SystemCollectionsGenericICollectionUnityEngineVector3Iterator::operator++()
+	{
+		hasMore = enumerator.MoveNext();
+		return *this;
+	}
+	
+	bool SystemCollectionsGenericICollectionUnityEngineVector3Iterator::operator!=(const SystemCollectionsGenericICollectionUnityEngineVector3Iterator& other)
+	{
+		return hasMore;
+	}
+	
+	UnityEngine::Vector3 SystemCollectionsGenericICollectionUnityEngineVector3Iterator::operator*()
+	{
+		return enumerator.GetCurrent();
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			Plugin::SystemCollectionsGenericICollectionUnityEngineVector3Iterator begin(System::Collections::Generic::ICollection_1<UnityEngine::Vector3>& enumerable)
+			{
+				return Plugin::SystemCollectionsGenericICollectionUnityEngineVector3Iterator(enumerable);
+			}
+			
+			Plugin::SystemCollectionsGenericICollectionUnityEngineVector3Iterator end(System::Collections::Generic::ICollection_1<UnityEngine::Vector3>& enumerable)
+			{
+				return Plugin::SystemCollectionsGenericICollectionUnityEngineVector3Iterator(nullptr);
+			}
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			ICollection_1<System::Int32>::ICollection_1(decltype(nullptr))
+				: System::Collections::IEnumerable(nullptr)
+				, System::Collections::Generic::IEnumerable_1<System::Int32>(nullptr)
+			{
+			}
+			
+			ICollection_1<System::Int32>::ICollection_1(Plugin::InternalUse, int32_t handle)
+				: System::Collections::IEnumerable(nullptr)
+				, System::Collections::Generic::IEnumerable_1<System::Int32>(nullptr)
+			{
+				Handle = handle;
+				if (handle)
+				{
+					Plugin::ReferenceManagedClass(handle);
+				}
+			}
+			
+			ICollection_1<System::Int32>::ICollection_1(const ICollection_1<System::Int32>& other)
+				: ICollection_1(Plugin::InternalUse::Only, other.Handle)
+			{
+			}
+			
+			ICollection_1<System::Int32>::ICollection_1(ICollection_1<System::Int32>&& other)
+				: ICollection_1(Plugin::InternalUse::Only, other.Handle)
+			{
+				other.Handle = 0;
+			}
+			
+			ICollection_1<System::Int32>::~ICollection_1<System::Int32>()
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+					Handle = 0;
+				}
+			}
+			
+			ICollection_1<System::Int32>& ICollection_1<System::Int32>::operator=(const ICollection_1<System::Int32>& other)
+			{
+				if (this->Handle)
+				{
+					Plugin::DereferenceManagedClass(this->Handle);
+				}
+				this->Handle = other.Handle;
+				if (this->Handle)
+				{
+					Plugin::ReferenceManagedClass(this->Handle);
+				}
+				return *this;
+			}
+			
+			ICollection_1<System::Int32>& ICollection_1<System::Int32>::operator=(decltype(nullptr))
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+					Handle = 0;
+				}
+				return *this;
+			}
+			
+			ICollection_1<System::Int32>& ICollection_1<System::Int32>::operator=(ICollection_1<System::Int32>&& other)
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+				}
+				Handle = other.Handle;
+				other.Handle = 0;
+				return *this;
+			}
+			
+			bool ICollection_1<System::Int32>::operator==(const ICollection_1<System::Int32>& other) const
+			{
+				return Handle == other.Handle;
+			}
+			
+			bool ICollection_1<System::Int32>::operator!=(const ICollection_1<System::Int32>& other) const
+			{
+				return Handle != other.Handle;
+			}
+		}
+	}
+}
+
+namespace Plugin
+{
+	SystemCollectionsGenericICollectionSystemInt32Iterator::SystemCollectionsGenericICollectionSystemInt32Iterator(decltype(nullptr))
+		: enumerator(nullptr)
+		, hasMore(false)
+	{
+	}
+	
+	SystemCollectionsGenericICollectionSystemInt32Iterator::SystemCollectionsGenericICollectionSystemInt32Iterator(System::Collections::Generic::ICollection_1<System::Int32>& enumerable)
+		: enumerator(enumerable.GetEnumerator())
+	{
+		hasMore = enumerator.MoveNext();
+	}
+	
+	SystemCollectionsGenericICollectionSystemInt32Iterator::~SystemCollectionsGenericICollectionSystemInt32Iterator()
+	{
+		if (enumerator != nullptr)
+		{
+			enumerator.Dispose();
+		}
+	}
+	
+	SystemCollectionsGenericICollectionSystemInt32Iterator& SystemCollectionsGenericICollectionSystemInt32Iterator::operator++()
+	{
+		hasMore = enumerator.MoveNext();
+		return *this;
+	}
+	
+	bool SystemCollectionsGenericICollectionSystemInt32Iterator::operator!=(const SystemCollectionsGenericICollectionSystemInt32Iterator& other)
+	{
+		return hasMore;
+	}
+	
+	System::Int32 SystemCollectionsGenericICollectionSystemInt32Iterator::operator*()
+	{
+		return enumerator.GetCurrent();
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			Plugin::SystemCollectionsGenericICollectionSystemInt32Iterator begin(System::Collections::Generic::ICollection_1<System::Int32>& enumerable)
+			{
+				return Plugin::SystemCollectionsGenericICollectionSystemInt32Iterator(enumerable);
+			}
+			
+			Plugin::SystemCollectionsGenericICollectionSystemInt32Iterator end(System::Collections::Generic::ICollection_1<System::Int32>& enumerable)
+			{
+				return Plugin::SystemCollectionsGenericICollectionSystemInt32Iterator(nullptr);
+			}
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			IReadOnlyCollection_1<UnityEngine::Vector3>::IReadOnlyCollection_1(decltype(nullptr))
+				: System::Collections::IEnumerable(nullptr)
+				, System::Collections::Generic::IEnumerable_1<UnityEngine::Vector3>(nullptr)
+			{
+			}
+			
+			IReadOnlyCollection_1<UnityEngine::Vector3>::IReadOnlyCollection_1(Plugin::InternalUse, int32_t handle)
+				: System::Collections::IEnumerable(nullptr)
+				, System::Collections::Generic::IEnumerable_1<UnityEngine::Vector3>(nullptr)
+			{
+				Handle = handle;
+				if (handle)
+				{
+					Plugin::ReferenceManagedClass(handle);
+				}
+			}
+			
+			IReadOnlyCollection_1<UnityEngine::Vector3>::IReadOnlyCollection_1(const IReadOnlyCollection_1<UnityEngine::Vector3>& other)
+				: IReadOnlyCollection_1(Plugin::InternalUse::Only, other.Handle)
+			{
+			}
+			
+			IReadOnlyCollection_1<UnityEngine::Vector3>::IReadOnlyCollection_1(IReadOnlyCollection_1<UnityEngine::Vector3>&& other)
+				: IReadOnlyCollection_1(Plugin::InternalUse::Only, other.Handle)
+			{
+				other.Handle = 0;
+			}
+			
+			IReadOnlyCollection_1<UnityEngine::Vector3>::~IReadOnlyCollection_1<UnityEngine::Vector3>()
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+					Handle = 0;
+				}
+			}
+			
+			IReadOnlyCollection_1<UnityEngine::Vector3>& IReadOnlyCollection_1<UnityEngine::Vector3>::operator=(const IReadOnlyCollection_1<UnityEngine::Vector3>& other)
+			{
+				if (this->Handle)
+				{
+					Plugin::DereferenceManagedClass(this->Handle);
+				}
+				this->Handle = other.Handle;
+				if (this->Handle)
+				{
+					Plugin::ReferenceManagedClass(this->Handle);
+				}
+				return *this;
+			}
+			
+			IReadOnlyCollection_1<UnityEngine::Vector3>& IReadOnlyCollection_1<UnityEngine::Vector3>::operator=(decltype(nullptr))
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+					Handle = 0;
+				}
+				return *this;
+			}
+			
+			IReadOnlyCollection_1<UnityEngine::Vector3>& IReadOnlyCollection_1<UnityEngine::Vector3>::operator=(IReadOnlyCollection_1<UnityEngine::Vector3>&& other)
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+				}
+				Handle = other.Handle;
+				other.Handle = 0;
+				return *this;
+			}
+			
+			bool IReadOnlyCollection_1<UnityEngine::Vector3>::operator==(const IReadOnlyCollection_1<UnityEngine::Vector3>& other) const
+			{
+				return Handle == other.Handle;
+			}
+			
+			bool IReadOnlyCollection_1<UnityEngine::Vector3>::operator!=(const IReadOnlyCollection_1<UnityEngine::Vector3>& other) const
+			{
+				return Handle != other.Handle;
+			}
+		}
+	}
+}
+
+namespace Plugin
+{
+	SystemCollectionsGenericIReadOnlyCollectionUnityEngineVector3Iterator::SystemCollectionsGenericIReadOnlyCollectionUnityEngineVector3Iterator(decltype(nullptr))
+		: enumerator(nullptr)
+		, hasMore(false)
+	{
+	}
+	
+	SystemCollectionsGenericIReadOnlyCollectionUnityEngineVector3Iterator::SystemCollectionsGenericIReadOnlyCollectionUnityEngineVector3Iterator(System::Collections::Generic::IReadOnlyCollection_1<UnityEngine::Vector3>& enumerable)
+		: enumerator(enumerable.GetEnumerator())
+	{
+		hasMore = enumerator.MoveNext();
+	}
+	
+	SystemCollectionsGenericIReadOnlyCollectionUnityEngineVector3Iterator::~SystemCollectionsGenericIReadOnlyCollectionUnityEngineVector3Iterator()
+	{
+		if (enumerator != nullptr)
+		{
+			enumerator.Dispose();
+		}
+	}
+	
+	SystemCollectionsGenericIReadOnlyCollectionUnityEngineVector3Iterator& SystemCollectionsGenericIReadOnlyCollectionUnityEngineVector3Iterator::operator++()
+	{
+		hasMore = enumerator.MoveNext();
+		return *this;
+	}
+	
+	bool SystemCollectionsGenericIReadOnlyCollectionUnityEngineVector3Iterator::operator!=(const SystemCollectionsGenericIReadOnlyCollectionUnityEngineVector3Iterator& other)
+	{
+		return hasMore;
+	}
+	
+	UnityEngine::Vector3 SystemCollectionsGenericIReadOnlyCollectionUnityEngineVector3Iterator::operator*()
+	{
+		return enumerator.GetCurrent();
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			Plugin::SystemCollectionsGenericIReadOnlyCollectionUnityEngineVector3Iterator begin(System::Collections::Generic::IReadOnlyCollection_1<UnityEngine::Vector3>& enumerable)
+			{
+				return Plugin::SystemCollectionsGenericIReadOnlyCollectionUnityEngineVector3Iterator(enumerable);
+			}
+			
+			Plugin::SystemCollectionsGenericIReadOnlyCollectionUnityEngineVector3Iterator end(System::Collections::Generic::IReadOnlyCollection_1<UnityEngine::Vector3>& enumerable)
+			{
+				return Plugin::SystemCollectionsGenericIReadOnlyCollectionUnityEngineVector3Iterator(nullptr);
+			}
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			IReadOnlyCollection_1<System::Int32>::IReadOnlyCollection_1(decltype(nullptr))
+				: System::Collections::IEnumerable(nullptr)
+				, System::Collections::Generic::IEnumerable_1<System::Int32>(nullptr)
+			{
+			}
+			
+			IReadOnlyCollection_1<System::Int32>::IReadOnlyCollection_1(Plugin::InternalUse, int32_t handle)
+				: System::Collections::IEnumerable(nullptr)
+				, System::Collections::Generic::IEnumerable_1<System::Int32>(nullptr)
+			{
+				Handle = handle;
+				if (handle)
+				{
+					Plugin::ReferenceManagedClass(handle);
+				}
+			}
+			
+			IReadOnlyCollection_1<System::Int32>::IReadOnlyCollection_1(const IReadOnlyCollection_1<System::Int32>& other)
+				: IReadOnlyCollection_1(Plugin::InternalUse::Only, other.Handle)
+			{
+			}
+			
+			IReadOnlyCollection_1<System::Int32>::IReadOnlyCollection_1(IReadOnlyCollection_1<System::Int32>&& other)
+				: IReadOnlyCollection_1(Plugin::InternalUse::Only, other.Handle)
+			{
+				other.Handle = 0;
+			}
+			
+			IReadOnlyCollection_1<System::Int32>::~IReadOnlyCollection_1<System::Int32>()
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+					Handle = 0;
+				}
+			}
+			
+			IReadOnlyCollection_1<System::Int32>& IReadOnlyCollection_1<System::Int32>::operator=(const IReadOnlyCollection_1<System::Int32>& other)
+			{
+				if (this->Handle)
+				{
+					Plugin::DereferenceManagedClass(this->Handle);
+				}
+				this->Handle = other.Handle;
+				if (this->Handle)
+				{
+					Plugin::ReferenceManagedClass(this->Handle);
+				}
+				return *this;
+			}
+			
+			IReadOnlyCollection_1<System::Int32>& IReadOnlyCollection_1<System::Int32>::operator=(decltype(nullptr))
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+					Handle = 0;
+				}
+				return *this;
+			}
+			
+			IReadOnlyCollection_1<System::Int32>& IReadOnlyCollection_1<System::Int32>::operator=(IReadOnlyCollection_1<System::Int32>&& other)
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+				}
+				Handle = other.Handle;
+				other.Handle = 0;
+				return *this;
+			}
+			
+			bool IReadOnlyCollection_1<System::Int32>::operator==(const IReadOnlyCollection_1<System::Int32>& other) const
+			{
+				return Handle == other.Handle;
+			}
+			
+			bool IReadOnlyCollection_1<System::Int32>::operator!=(const IReadOnlyCollection_1<System::Int32>& other) const
+			{
+				return Handle != other.Handle;
+			}
+		}
+	}
+}
+
+namespace Plugin
+{
+	SystemCollectionsGenericIReadOnlyCollectionSystemInt32Iterator::SystemCollectionsGenericIReadOnlyCollectionSystemInt32Iterator(decltype(nullptr))
+		: enumerator(nullptr)
+		, hasMore(false)
+	{
+	}
+	
+	SystemCollectionsGenericIReadOnlyCollectionSystemInt32Iterator::SystemCollectionsGenericIReadOnlyCollectionSystemInt32Iterator(System::Collections::Generic::IReadOnlyCollection_1<System::Int32>& enumerable)
+		: enumerator(enumerable.GetEnumerator())
+	{
+		hasMore = enumerator.MoveNext();
+	}
+	
+	SystemCollectionsGenericIReadOnlyCollectionSystemInt32Iterator::~SystemCollectionsGenericIReadOnlyCollectionSystemInt32Iterator()
+	{
+		if (enumerator != nullptr)
+		{
+			enumerator.Dispose();
+		}
+	}
+	
+	SystemCollectionsGenericIReadOnlyCollectionSystemInt32Iterator& SystemCollectionsGenericIReadOnlyCollectionSystemInt32Iterator::operator++()
+	{
+		hasMore = enumerator.MoveNext();
+		return *this;
+	}
+	
+	bool SystemCollectionsGenericIReadOnlyCollectionSystemInt32Iterator::operator!=(const SystemCollectionsGenericIReadOnlyCollectionSystemInt32Iterator& other)
+	{
+		return hasMore;
+	}
+	
+	System::Int32 SystemCollectionsGenericIReadOnlyCollectionSystemInt32Iterator::operator*()
+	{
+		return enumerator.GetCurrent();
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			Plugin::SystemCollectionsGenericIReadOnlyCollectionSystemInt32Iterator begin(System::Collections::Generic::IReadOnlyCollection_1<System::Int32>& enumerable)
+			{
+				return Plugin::SystemCollectionsGenericIReadOnlyCollectionSystemInt32Iterator(enumerable);
+			}
+			
+			Plugin::SystemCollectionsGenericIReadOnlyCollectionSystemInt32Iterator end(System::Collections::Generic::IReadOnlyCollection_1<System::Int32>& enumerable)
+			{
+				return Plugin::SystemCollectionsGenericIReadOnlyCollectionSystemInt32Iterator(nullptr);
+			}
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			IList_1<UnityEngine::Vector3>::IList_1(decltype(nullptr))
+				: System::Collections::IEnumerable(nullptr)
+				, System::Collections::Generic::IEnumerable_1<UnityEngine::Vector3>(nullptr)
+				, System::Collections::Generic::ICollection_1<UnityEngine::Vector3>(nullptr)
+			{
+			}
+			
+			IList_1<UnityEngine::Vector3>::IList_1(Plugin::InternalUse, int32_t handle)
+				: System::Collections::IEnumerable(nullptr)
+				, System::Collections::Generic::IEnumerable_1<UnityEngine::Vector3>(nullptr)
+				, System::Collections::Generic::ICollection_1<UnityEngine::Vector3>(nullptr)
+			{
+				Handle = handle;
+				if (handle)
+				{
+					Plugin::ReferenceManagedClass(handle);
+				}
+			}
+			
+			IList_1<UnityEngine::Vector3>::IList_1(const IList_1<UnityEngine::Vector3>& other)
+				: IList_1(Plugin::InternalUse::Only, other.Handle)
+			{
+			}
+			
+			IList_1<UnityEngine::Vector3>::IList_1(IList_1<UnityEngine::Vector3>&& other)
+				: IList_1(Plugin::InternalUse::Only, other.Handle)
+			{
+				other.Handle = 0;
+			}
+			
+			IList_1<UnityEngine::Vector3>::~IList_1<UnityEngine::Vector3>()
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+					Handle = 0;
+				}
+			}
+			
+			IList_1<UnityEngine::Vector3>& IList_1<UnityEngine::Vector3>::operator=(const IList_1<UnityEngine::Vector3>& other)
+			{
+				if (this->Handle)
+				{
+					Plugin::DereferenceManagedClass(this->Handle);
+				}
+				this->Handle = other.Handle;
+				if (this->Handle)
+				{
+					Plugin::ReferenceManagedClass(this->Handle);
+				}
+				return *this;
+			}
+			
+			IList_1<UnityEngine::Vector3>& IList_1<UnityEngine::Vector3>::operator=(decltype(nullptr))
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+					Handle = 0;
+				}
+				return *this;
+			}
+			
+			IList_1<UnityEngine::Vector3>& IList_1<UnityEngine::Vector3>::operator=(IList_1<UnityEngine::Vector3>&& other)
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+				}
+				Handle = other.Handle;
+				other.Handle = 0;
+				return *this;
+			}
+			
+			bool IList_1<UnityEngine::Vector3>::operator==(const IList_1<UnityEngine::Vector3>& other) const
+			{
+				return Handle == other.Handle;
+			}
+			
+			bool IList_1<UnityEngine::Vector3>::operator!=(const IList_1<UnityEngine::Vector3>& other) const
+			{
+				return Handle != other.Handle;
+			}
+		}
+	}
+}
+
+namespace Plugin
+{
+	SystemCollectionsGenericIListUnityEngineVector3Iterator::SystemCollectionsGenericIListUnityEngineVector3Iterator(decltype(nullptr))
+		: enumerator(nullptr)
+		, hasMore(false)
+	{
+	}
+	
+	SystemCollectionsGenericIListUnityEngineVector3Iterator::SystemCollectionsGenericIListUnityEngineVector3Iterator(System::Collections::Generic::IList_1<UnityEngine::Vector3>& enumerable)
+		: enumerator(enumerable.GetEnumerator())
+	{
+		hasMore = enumerator.MoveNext();
+	}
+	
+	SystemCollectionsGenericIListUnityEngineVector3Iterator::~SystemCollectionsGenericIListUnityEngineVector3Iterator()
+	{
+		if (enumerator != nullptr)
+		{
+			enumerator.Dispose();
+		}
+	}
+	
+	SystemCollectionsGenericIListUnityEngineVector3Iterator& SystemCollectionsGenericIListUnityEngineVector3Iterator::operator++()
+	{
+		hasMore = enumerator.MoveNext();
+		return *this;
+	}
+	
+	bool SystemCollectionsGenericIListUnityEngineVector3Iterator::operator!=(const SystemCollectionsGenericIListUnityEngineVector3Iterator& other)
+	{
+		return hasMore;
+	}
+	
+	UnityEngine::Vector3 SystemCollectionsGenericIListUnityEngineVector3Iterator::operator*()
+	{
+		return enumerator.GetCurrent();
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			Plugin::SystemCollectionsGenericIListUnityEngineVector3Iterator begin(System::Collections::Generic::IList_1<UnityEngine::Vector3>& enumerable)
+			{
+				return Plugin::SystemCollectionsGenericIListUnityEngineVector3Iterator(enumerable);
+			}
+			
+			Plugin::SystemCollectionsGenericIListUnityEngineVector3Iterator end(System::Collections::Generic::IList_1<UnityEngine::Vector3>& enumerable)
+			{
+				return Plugin::SystemCollectionsGenericIListUnityEngineVector3Iterator(nullptr);
+			}
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			IList_1<System::Int32>::IList_1(decltype(nullptr))
+				: System::Collections::IEnumerable(nullptr)
+				, System::Collections::Generic::IEnumerable_1<System::Int32>(nullptr)
+				, System::Collections::Generic::ICollection_1<System::Int32>(nullptr)
+			{
+			}
+			
+			IList_1<System::Int32>::IList_1(Plugin::InternalUse, int32_t handle)
+				: System::Collections::IEnumerable(nullptr)
+				, System::Collections::Generic::IEnumerable_1<System::Int32>(nullptr)
+				, System::Collections::Generic::ICollection_1<System::Int32>(nullptr)
+			{
+				Handle = handle;
+				if (handle)
+				{
+					Plugin::ReferenceManagedClass(handle);
+				}
+			}
+			
+			IList_1<System::Int32>::IList_1(const IList_1<System::Int32>& other)
+				: IList_1(Plugin::InternalUse::Only, other.Handle)
+			{
+			}
+			
+			IList_1<System::Int32>::IList_1(IList_1<System::Int32>&& other)
+				: IList_1(Plugin::InternalUse::Only, other.Handle)
+			{
+				other.Handle = 0;
+			}
+			
+			IList_1<System::Int32>::~IList_1<System::Int32>()
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+					Handle = 0;
+				}
+			}
+			
+			IList_1<System::Int32>& IList_1<System::Int32>::operator=(const IList_1<System::Int32>& other)
+			{
+				if (this->Handle)
+				{
+					Plugin::DereferenceManagedClass(this->Handle);
+				}
+				this->Handle = other.Handle;
+				if (this->Handle)
+				{
+					Plugin::ReferenceManagedClass(this->Handle);
+				}
+				return *this;
+			}
+			
+			IList_1<System::Int32>& IList_1<System::Int32>::operator=(decltype(nullptr))
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+					Handle = 0;
+				}
+				return *this;
+			}
+			
+			IList_1<System::Int32>& IList_1<System::Int32>::operator=(IList_1<System::Int32>&& other)
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+				}
+				Handle = other.Handle;
+				other.Handle = 0;
+				return *this;
+			}
+			
+			bool IList_1<System::Int32>::operator==(const IList_1<System::Int32>& other) const
+			{
+				return Handle == other.Handle;
+			}
+			
+			bool IList_1<System::Int32>::operator!=(const IList_1<System::Int32>& other) const
+			{
+				return Handle != other.Handle;
+			}
+		}
+	}
+}
+
+namespace Plugin
+{
+	SystemCollectionsGenericIListSystemInt32Iterator::SystemCollectionsGenericIListSystemInt32Iterator(decltype(nullptr))
+		: enumerator(nullptr)
+		, hasMore(false)
+	{
+	}
+	
+	SystemCollectionsGenericIListSystemInt32Iterator::SystemCollectionsGenericIListSystemInt32Iterator(System::Collections::Generic::IList_1<System::Int32>& enumerable)
+		: enumerator(enumerable.GetEnumerator())
+	{
+		hasMore = enumerator.MoveNext();
+	}
+	
+	SystemCollectionsGenericIListSystemInt32Iterator::~SystemCollectionsGenericIListSystemInt32Iterator()
+	{
+		if (enumerator != nullptr)
+		{
+			enumerator.Dispose();
+		}
+	}
+	
+	SystemCollectionsGenericIListSystemInt32Iterator& SystemCollectionsGenericIListSystemInt32Iterator::operator++()
+	{
+		hasMore = enumerator.MoveNext();
+		return *this;
+	}
+	
+	bool SystemCollectionsGenericIListSystemInt32Iterator::operator!=(const SystemCollectionsGenericIListSystemInt32Iterator& other)
+	{
+		return hasMore;
+	}
+	
+	System::Int32 SystemCollectionsGenericIListSystemInt32Iterator::operator*()
+	{
+		return enumerator.GetCurrent();
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			Plugin::SystemCollectionsGenericIListSystemInt32Iterator begin(System::Collections::Generic::IList_1<System::Int32>& enumerable)
+			{
+				return Plugin::SystemCollectionsGenericIListSystemInt32Iterator(enumerable);
+			}
+			
+			Plugin::SystemCollectionsGenericIListSystemInt32Iterator end(System::Collections::Generic::IList_1<System::Int32>& enumerable)
+			{
+				return Plugin::SystemCollectionsGenericIListSystemInt32Iterator(nullptr);
+			}
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			IReadOnlyList_1<UnityEngine::Vector3>::IReadOnlyList_1(decltype(nullptr))
+				: System::Collections::IEnumerable(nullptr)
+				, System::Collections::Generic::IEnumerable_1<UnityEngine::Vector3>(nullptr)
+				, System::Collections::Generic::IReadOnlyCollection_1<UnityEngine::Vector3>(nullptr)
+			{
+			}
+			
+			IReadOnlyList_1<UnityEngine::Vector3>::IReadOnlyList_1(Plugin::InternalUse, int32_t handle)
+				: System::Collections::IEnumerable(nullptr)
+				, System::Collections::Generic::IEnumerable_1<UnityEngine::Vector3>(nullptr)
+				, System::Collections::Generic::IReadOnlyCollection_1<UnityEngine::Vector3>(nullptr)
+			{
+				Handle = handle;
+				if (handle)
+				{
+					Plugin::ReferenceManagedClass(handle);
+				}
+			}
+			
+			IReadOnlyList_1<UnityEngine::Vector3>::IReadOnlyList_1(const IReadOnlyList_1<UnityEngine::Vector3>& other)
+				: IReadOnlyList_1(Plugin::InternalUse::Only, other.Handle)
+			{
+			}
+			
+			IReadOnlyList_1<UnityEngine::Vector3>::IReadOnlyList_1(IReadOnlyList_1<UnityEngine::Vector3>&& other)
+				: IReadOnlyList_1(Plugin::InternalUse::Only, other.Handle)
+			{
+				other.Handle = 0;
+			}
+			
+			IReadOnlyList_1<UnityEngine::Vector3>::~IReadOnlyList_1<UnityEngine::Vector3>()
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+					Handle = 0;
+				}
+			}
+			
+			IReadOnlyList_1<UnityEngine::Vector3>& IReadOnlyList_1<UnityEngine::Vector3>::operator=(const IReadOnlyList_1<UnityEngine::Vector3>& other)
+			{
+				if (this->Handle)
+				{
+					Plugin::DereferenceManagedClass(this->Handle);
+				}
+				this->Handle = other.Handle;
+				if (this->Handle)
+				{
+					Plugin::ReferenceManagedClass(this->Handle);
+				}
+				return *this;
+			}
+			
+			IReadOnlyList_1<UnityEngine::Vector3>& IReadOnlyList_1<UnityEngine::Vector3>::operator=(decltype(nullptr))
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+					Handle = 0;
+				}
+				return *this;
+			}
+			
+			IReadOnlyList_1<UnityEngine::Vector3>& IReadOnlyList_1<UnityEngine::Vector3>::operator=(IReadOnlyList_1<UnityEngine::Vector3>&& other)
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+				}
+				Handle = other.Handle;
+				other.Handle = 0;
+				return *this;
+			}
+			
+			bool IReadOnlyList_1<UnityEngine::Vector3>::operator==(const IReadOnlyList_1<UnityEngine::Vector3>& other) const
+			{
+				return Handle == other.Handle;
+			}
+			
+			bool IReadOnlyList_1<UnityEngine::Vector3>::operator!=(const IReadOnlyList_1<UnityEngine::Vector3>& other) const
+			{
+				return Handle != other.Handle;
+			}
+		}
+	}
+}
+
+namespace Plugin
+{
+	SystemCollectionsGenericIReadOnlyListUnityEngineVector3Iterator::SystemCollectionsGenericIReadOnlyListUnityEngineVector3Iterator(decltype(nullptr))
+		: enumerator(nullptr)
+		, hasMore(false)
+	{
+	}
+	
+	SystemCollectionsGenericIReadOnlyListUnityEngineVector3Iterator::SystemCollectionsGenericIReadOnlyListUnityEngineVector3Iterator(System::Collections::Generic::IReadOnlyList_1<UnityEngine::Vector3>& enumerable)
+		: enumerator(enumerable.GetEnumerator())
+	{
+		hasMore = enumerator.MoveNext();
+	}
+	
+	SystemCollectionsGenericIReadOnlyListUnityEngineVector3Iterator::~SystemCollectionsGenericIReadOnlyListUnityEngineVector3Iterator()
+	{
+		if (enumerator != nullptr)
+		{
+			enumerator.Dispose();
+		}
+	}
+	
+	SystemCollectionsGenericIReadOnlyListUnityEngineVector3Iterator& SystemCollectionsGenericIReadOnlyListUnityEngineVector3Iterator::operator++()
+	{
+		hasMore = enumerator.MoveNext();
+		return *this;
+	}
+	
+	bool SystemCollectionsGenericIReadOnlyListUnityEngineVector3Iterator::operator!=(const SystemCollectionsGenericIReadOnlyListUnityEngineVector3Iterator& other)
+	{
+		return hasMore;
+	}
+	
+	UnityEngine::Vector3 SystemCollectionsGenericIReadOnlyListUnityEngineVector3Iterator::operator*()
+	{
+		return enumerator.GetCurrent();
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			Plugin::SystemCollectionsGenericIReadOnlyListUnityEngineVector3Iterator begin(System::Collections::Generic::IReadOnlyList_1<UnityEngine::Vector3>& enumerable)
+			{
+				return Plugin::SystemCollectionsGenericIReadOnlyListUnityEngineVector3Iterator(enumerable);
+			}
+			
+			Plugin::SystemCollectionsGenericIReadOnlyListUnityEngineVector3Iterator end(System::Collections::Generic::IReadOnlyList_1<UnityEngine::Vector3>& enumerable)
+			{
+				return Plugin::SystemCollectionsGenericIReadOnlyListUnityEngineVector3Iterator(nullptr);
+			}
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			IReadOnlyList_1<System::Int32>::IReadOnlyList_1(decltype(nullptr))
+				: System::Collections::IEnumerable(nullptr)
+				, System::Collections::Generic::IEnumerable_1<System::Int32>(nullptr)
+				, System::Collections::Generic::IReadOnlyCollection_1<System::Int32>(nullptr)
+			{
+			}
+			
+			IReadOnlyList_1<System::Int32>::IReadOnlyList_1(Plugin::InternalUse, int32_t handle)
+				: System::Collections::IEnumerable(nullptr)
+				, System::Collections::Generic::IEnumerable_1<System::Int32>(nullptr)
+				, System::Collections::Generic::IReadOnlyCollection_1<System::Int32>(nullptr)
+			{
+				Handle = handle;
+				if (handle)
+				{
+					Plugin::ReferenceManagedClass(handle);
+				}
+			}
+			
+			IReadOnlyList_1<System::Int32>::IReadOnlyList_1(const IReadOnlyList_1<System::Int32>& other)
+				: IReadOnlyList_1(Plugin::InternalUse::Only, other.Handle)
+			{
+			}
+			
+			IReadOnlyList_1<System::Int32>::IReadOnlyList_1(IReadOnlyList_1<System::Int32>&& other)
+				: IReadOnlyList_1(Plugin::InternalUse::Only, other.Handle)
+			{
+				other.Handle = 0;
+			}
+			
+			IReadOnlyList_1<System::Int32>::~IReadOnlyList_1<System::Int32>()
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+					Handle = 0;
+				}
+			}
+			
+			IReadOnlyList_1<System::Int32>& IReadOnlyList_1<System::Int32>::operator=(const IReadOnlyList_1<System::Int32>& other)
+			{
+				if (this->Handle)
+				{
+					Plugin::DereferenceManagedClass(this->Handle);
+				}
+				this->Handle = other.Handle;
+				if (this->Handle)
+				{
+					Plugin::ReferenceManagedClass(this->Handle);
+				}
+				return *this;
+			}
+			
+			IReadOnlyList_1<System::Int32>& IReadOnlyList_1<System::Int32>::operator=(decltype(nullptr))
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+					Handle = 0;
+				}
+				return *this;
+			}
+			
+			IReadOnlyList_1<System::Int32>& IReadOnlyList_1<System::Int32>::operator=(IReadOnlyList_1<System::Int32>&& other)
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+				}
+				Handle = other.Handle;
+				other.Handle = 0;
+				return *this;
+			}
+			
+			bool IReadOnlyList_1<System::Int32>::operator==(const IReadOnlyList_1<System::Int32>& other) const
+			{
+				return Handle == other.Handle;
+			}
+			
+			bool IReadOnlyList_1<System::Int32>::operator!=(const IReadOnlyList_1<System::Int32>& other) const
+			{
+				return Handle != other.Handle;
+			}
+		}
+	}
+}
+
+namespace Plugin
+{
+	SystemCollectionsGenericIReadOnlyListSystemInt32Iterator::SystemCollectionsGenericIReadOnlyListSystemInt32Iterator(decltype(nullptr))
+		: enumerator(nullptr)
+		, hasMore(false)
+	{
+	}
+	
+	SystemCollectionsGenericIReadOnlyListSystemInt32Iterator::SystemCollectionsGenericIReadOnlyListSystemInt32Iterator(System::Collections::Generic::IReadOnlyList_1<System::Int32>& enumerable)
+		: enumerator(enumerable.GetEnumerator())
+	{
+		hasMore = enumerator.MoveNext();
+	}
+	
+	SystemCollectionsGenericIReadOnlyListSystemInt32Iterator::~SystemCollectionsGenericIReadOnlyListSystemInt32Iterator()
+	{
+		if (enumerator != nullptr)
+		{
+			enumerator.Dispose();
+		}
+	}
+	
+	SystemCollectionsGenericIReadOnlyListSystemInt32Iterator& SystemCollectionsGenericIReadOnlyListSystemInt32Iterator::operator++()
+	{
+		hasMore = enumerator.MoveNext();
+		return *this;
+	}
+	
+	bool SystemCollectionsGenericIReadOnlyListSystemInt32Iterator::operator!=(const SystemCollectionsGenericIReadOnlyListSystemInt32Iterator& other)
+	{
+		return hasMore;
+	}
+	
+	System::Int32 SystemCollectionsGenericIReadOnlyListSystemInt32Iterator::operator*()
+	{
+		return enumerator.GetCurrent();
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			Plugin::SystemCollectionsGenericIReadOnlyListSystemInt32Iterator begin(System::Collections::Generic::IReadOnlyList_1<System::Int32>& enumerable)
+			{
+				return Plugin::SystemCollectionsGenericIReadOnlyListSystemInt32Iterator(enumerable);
+			}
+			
+			Plugin::SystemCollectionsGenericIReadOnlyListSystemInt32Iterator end(System::Collections::Generic::IReadOnlyList_1<System::Int32>& enumerable)
+			{
+				return Plugin::SystemCollectionsGenericIReadOnlyListSystemInt32Iterator(nullptr);
+			}
+		}
+	}
+}
+
+namespace UnityEngine
+{
+	Mesh::Mesh(decltype(nullptr))
+		: UnityEngine::Object(nullptr)
+	{
+	}
+	
+	Mesh::Mesh(Plugin::InternalUse, int32_t handle)
+		: UnityEngine::Object(nullptr)
+	{
+		Handle = handle;
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+		}
+	}
+	
+	Mesh::Mesh(const Mesh& other)
+		: Mesh(Plugin::InternalUse::Only, other.Handle)
+	{
+	}
+	
+	Mesh::Mesh(Mesh&& other)
+		: Mesh(Plugin::InternalUse::Only, other.Handle)
+	{
+		other.Handle = 0;
+	}
+	
+	Mesh::~Mesh()
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+	}
+	
+	Mesh& Mesh::operator=(const Mesh& other)
+	{
+		if (this->Handle)
+		{
+			Plugin::DereferenceManagedClass(this->Handle);
+		}
+		this->Handle = other.Handle;
+		if (this->Handle)
+		{
+			Plugin::ReferenceManagedClass(this->Handle);
+		}
+		return *this;
+	}
+	
+	Mesh& Mesh::operator=(decltype(nullptr))
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+		return *this;
+	}
+	
+	Mesh& Mesh::operator=(Mesh&& other)
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+		}
+		Handle = other.Handle;
+		other.Handle = 0;
+		return *this;
+	}
+	
+	bool Mesh::operator==(const Mesh& other) const
+	{
+		return Handle == other.Handle;
+	}
+	
+	bool Mesh::operator!=(const Mesh& other) const
+	{
+		return Handle != other.Handle;
+	}
+	
+	UnityEngine::Mesh::Mesh()
+		: UnityEngine::Object(nullptr)
+	{
+		auto returnValue = Plugin::UnityEngineMeshConstructor();
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		Handle = returnValue;
+		if (returnValue)
+		{
+			Plugin::ReferenceManagedClass(returnValue);
+		}
+	}
+	
+	void UnityEngine::Mesh::SetVertices(System::Array1<UnityEngine::Vector3>& inVertices)
+	{
+		Plugin::UnityEngineMeshMethodSetVerticesUnityEngineVector3Array1(Handle, inVertices.Handle);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+	}
+	
+	void UnityEngine::Mesh::SetTriangles(System::Array1<System::Int32>& triangles, System::Int32 submesh, System::Boolean calculateBounds, System::Int32 baseVertex)
+	{
+		Plugin::UnityEngineMeshMethodSetTrianglesSystemInt32Array1_SystemInt32_SystemBoolean_SystemInt32(Handle, triangles.Handle, submesh, calculateBounds, baseVertex);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+	}
+}
+
+namespace UnityEngine
+{
+	MeshFilter::MeshFilter(decltype(nullptr))
+		: UnityEngine::Object(nullptr)
+		, UnityEngine::Component(nullptr)
+	{
+	}
+	
+	MeshFilter::MeshFilter(Plugin::InternalUse, int32_t handle)
+		: UnityEngine::Object(nullptr)
+		, UnityEngine::Component(nullptr)
+	{
+		Handle = handle;
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+		}
+	}
+	
+	MeshFilter::MeshFilter(const MeshFilter& other)
+		: MeshFilter(Plugin::InternalUse::Only, other.Handle)
+	{
+	}
+	
+	MeshFilter::MeshFilter(MeshFilter&& other)
+		: MeshFilter(Plugin::InternalUse::Only, other.Handle)
+	{
+		other.Handle = 0;
+	}
+	
+	MeshFilter::~MeshFilter()
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+	}
+	
+	MeshFilter& MeshFilter::operator=(const MeshFilter& other)
+	{
+		if (this->Handle)
+		{
+			Plugin::DereferenceManagedClass(this->Handle);
+		}
+		this->Handle = other.Handle;
+		if (this->Handle)
+		{
+			Plugin::ReferenceManagedClass(this->Handle);
+		}
+		return *this;
+	}
+	
+	MeshFilter& MeshFilter::operator=(decltype(nullptr))
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+		return *this;
+	}
+	
+	MeshFilter& MeshFilter::operator=(MeshFilter&& other)
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+		}
+		Handle = other.Handle;
+		other.Handle = 0;
+		return *this;
+	}
+	
+	bool MeshFilter::operator==(const MeshFilter& other) const
+	{
+		return Handle == other.Handle;
+	}
+	
+	bool MeshFilter::operator!=(const MeshFilter& other) const
+	{
+		return Handle != other.Handle;
+	}
+	
+	UnityEngine::Mesh UnityEngine::MeshFilter::GetMesh()
+	{
+		auto returnValue = Plugin::UnityEngineMeshFilterPropertyGetMesh(Handle);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return UnityEngine::Mesh(Plugin::InternalUse::Only, returnValue);
+	}
+	
+	void UnityEngine::MeshFilter::SetMesh(UnityEngine::Mesh& value)
+	{
+		Plugin::UnityEngineMeshFilterPropertySetMesh(Handle, value.Handle);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+	}
+}
+
+namespace UnityEngine
+{
+	Renderer::Renderer(decltype(nullptr))
+		: UnityEngine::Object(nullptr)
+		, UnityEngine::Component(nullptr)
+	{
+	}
+	
+	Renderer::Renderer(Plugin::InternalUse, int32_t handle)
+		: UnityEngine::Object(nullptr)
+		, UnityEngine::Component(nullptr)
+	{
+		Handle = handle;
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+		}
+	}
+	
+	Renderer::Renderer(const Renderer& other)
+		: Renderer(Plugin::InternalUse::Only, other.Handle)
+	{
+	}
+	
+	Renderer::Renderer(Renderer&& other)
+		: Renderer(Plugin::InternalUse::Only, other.Handle)
+	{
+		other.Handle = 0;
+	}
+	
+	Renderer::~Renderer()
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+	}
+	
+	Renderer& Renderer::operator=(const Renderer& other)
+	{
+		if (this->Handle)
+		{
+			Plugin::DereferenceManagedClass(this->Handle);
+		}
+		this->Handle = other.Handle;
+		if (this->Handle)
+		{
+			Plugin::ReferenceManagedClass(this->Handle);
+		}
+		return *this;
+	}
+	
+	Renderer& Renderer::operator=(decltype(nullptr))
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+		return *this;
+	}
+	
+	Renderer& Renderer::operator=(Renderer&& other)
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+		}
+		Handle = other.Handle;
+		other.Handle = 0;
+		return *this;
+	}
+	
+	bool Renderer::operator==(const Renderer& other) const
+	{
+		return Handle == other.Handle;
+	}
+	
+	bool Renderer::operator!=(const Renderer& other) const
+	{
+		return Handle != other.Handle;
+	}
+}
+
+namespace UnityEngine
+{
+	MeshRenderer::MeshRenderer(decltype(nullptr))
+		: UnityEngine::Object(nullptr)
+		, UnityEngine::Component(nullptr)
+		, UnityEngine::Renderer(nullptr)
+	{
+	}
+	
+	MeshRenderer::MeshRenderer(Plugin::InternalUse, int32_t handle)
+		: UnityEngine::Object(nullptr)
+		, UnityEngine::Component(nullptr)
+		, UnityEngine::Renderer(nullptr)
+	{
+		Handle = handle;
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+		}
+	}
+	
+	MeshRenderer::MeshRenderer(const MeshRenderer& other)
+		: MeshRenderer(Plugin::InternalUse::Only, other.Handle)
+	{
+	}
+	
+	MeshRenderer::MeshRenderer(MeshRenderer&& other)
+		: MeshRenderer(Plugin::InternalUse::Only, other.Handle)
+	{
+		other.Handle = 0;
+	}
+	
+	MeshRenderer::~MeshRenderer()
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+	}
+	
+	MeshRenderer& MeshRenderer::operator=(const MeshRenderer& other)
+	{
+		if (this->Handle)
+		{
+			Plugin::DereferenceManagedClass(this->Handle);
+		}
+		this->Handle = other.Handle;
+		if (this->Handle)
+		{
+			Plugin::ReferenceManagedClass(this->Handle);
+		}
+		return *this;
+	}
+	
+	MeshRenderer& MeshRenderer::operator=(decltype(nullptr))
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+		return *this;
+	}
+	
+	MeshRenderer& MeshRenderer::operator=(MeshRenderer&& other)
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+		}
+		Handle = other.Handle;
+		other.Handle = 0;
+		return *this;
+	}
+	
+	bool MeshRenderer::operator==(const MeshRenderer& other) const
+	{
+		return Handle == other.Handle;
+	}
+	
+	bool MeshRenderer::operator!=(const MeshRenderer& other) const
+	{
+		return Handle != other.Handle;
 	}
 }
 
@@ -8015,6 +10976,478 @@ namespace System
 	}
 }
 
+namespace Plugin
+{
+	ArrayElementProxy1_1<UnityEngine::Vector3>::ArrayElementProxy1_1(Plugin::InternalUse, int32_t handle, int32_t index0)
+	{
+		Handle = handle;
+		Index0 = index0;
+	}
+	
+	void ArrayElementProxy1_1<UnityEngine::Vector3>::operator=(UnityEngine::Vector3 item)
+	{
+		Plugin::UnityEngineVector3Array1SetItem1(Handle, Index0, item);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+	}
+	
+	ArrayElementProxy1_1<UnityEngine::Vector3>::operator UnityEngine::Vector3()
+	{
+		auto returnValue = Plugin::UnityEngineVector3Array1GetItem1(Handle, Index0);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return returnValue;
+	}
+}
+
+namespace System
+{
+	Array1<UnityEngine::Vector3>::Array1(decltype(nullptr))
+		: System::ICloneable(nullptr)
+		, System::Collections::IEnumerable(nullptr)
+		, System::Collections::ICollection(nullptr)
+		, System::Collections::IList(nullptr)
+		, System::Collections::IStructuralComparable(nullptr)
+		, System::Collections::IStructuralEquatable(nullptr)
+		, System::Array(nullptr)
+		, System::Collections::Generic::IEnumerable_1<UnityEngine::Vector3>(nullptr)
+		, System::Collections::Generic::ICollection_1<UnityEngine::Vector3>(nullptr)
+		, System::Collections::Generic::IList_1<UnityEngine::Vector3>(nullptr)
+		, System::Collections::Generic::IReadOnlyCollection_1<UnityEngine::Vector3>(nullptr)
+		, System::Collections::Generic::IReadOnlyList_1<UnityEngine::Vector3>(nullptr)
+	{
+		this->InternalLength = 0;
+	}
+	
+	Array1<UnityEngine::Vector3>::Array1(Plugin::InternalUse, int32_t handle)
+		: System::ICloneable(nullptr)
+		, System::Collections::IEnumerable(nullptr)
+		, System::Collections::ICollection(nullptr)
+		, System::Collections::IList(nullptr)
+		, System::Collections::IStructuralComparable(nullptr)
+		, System::Collections::IStructuralEquatable(nullptr)
+		, System::Array(nullptr)
+		, System::Collections::Generic::IEnumerable_1<UnityEngine::Vector3>(nullptr)
+		, System::Collections::Generic::ICollection_1<UnityEngine::Vector3>(nullptr)
+		, System::Collections::Generic::IList_1<UnityEngine::Vector3>(nullptr)
+		, System::Collections::Generic::IReadOnlyCollection_1<UnityEngine::Vector3>(nullptr)
+		, System::Collections::Generic::IReadOnlyList_1<UnityEngine::Vector3>(nullptr)
+	{
+		Handle = handle;
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+		}
+		this->InternalLength = 0;
+	}
+	
+	Array1<UnityEngine::Vector3>::Array1(const Array1<UnityEngine::Vector3>& other)
+		: Array1(Plugin::InternalUse::Only, other.Handle)
+	{
+		InternalLength = other.InternalLength;
+	}
+	
+	Array1<UnityEngine::Vector3>::Array1(Array1<UnityEngine::Vector3>&& other)
+		: Array1(Plugin::InternalUse::Only, other.Handle)
+	{
+		other.Handle = 0;
+		InternalLength = other.InternalLength;
+		other.InternalLength = 0;
+	}
+	
+	Array1<UnityEngine::Vector3>::~Array1<UnityEngine::Vector3>()
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+	}
+	
+	Array1<UnityEngine::Vector3>& Array1<UnityEngine::Vector3>::operator=(const Array1<UnityEngine::Vector3>& other)
+	{
+		if (this->Handle)
+		{
+			Plugin::DereferenceManagedClass(this->Handle);
+		}
+		this->Handle = other.Handle;
+		if (this->Handle)
+		{
+			Plugin::ReferenceManagedClass(this->Handle);
+		}
+		InternalLength = other.InternalLength;
+		return *this;
+	}
+	
+	Array1<UnityEngine::Vector3>& Array1<UnityEngine::Vector3>::operator=(decltype(nullptr))
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+		return *this;
+	}
+	
+	Array1<UnityEngine::Vector3>& Array1<UnityEngine::Vector3>::operator=(Array1<UnityEngine::Vector3>&& other)
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+		}
+		Handle = other.Handle;
+		InternalLength = other.InternalLength;
+		other.Handle = 0;
+		other.InternalLength = 0;
+		return *this;
+	}
+	
+	bool Array1<UnityEngine::Vector3>::operator==(const Array1<UnityEngine::Vector3>& other) const
+	{
+		return Handle == other.Handle;
+	}
+	
+	bool Array1<UnityEngine::Vector3>::operator!=(const Array1<UnityEngine::Vector3>& other) const
+	{
+		return Handle != other.Handle;
+	}
+	
+	System::Array1<UnityEngine::Vector3>::Array1(System::Int32 length0)
+		: System::ICloneable(nullptr)
+		, System::Collections::IEnumerable(nullptr)
+		, System::Collections::ICollection(nullptr)
+		, System::Collections::IList(nullptr)
+		, System::Collections::IStructuralComparable(nullptr)
+		, System::Collections::IStructuralEquatable(nullptr)
+		, System::Array(nullptr)
+		, System::Collections::Generic::IEnumerable_1<UnityEngine::Vector3>(nullptr)
+		, System::Collections::Generic::ICollection_1<UnityEngine::Vector3>(nullptr)
+		, System::Collections::Generic::IList_1<UnityEngine::Vector3>(nullptr)
+		, System::Collections::Generic::IReadOnlyCollection_1<UnityEngine::Vector3>(nullptr)
+		, System::Collections::Generic::IReadOnlyList_1<UnityEngine::Vector3>(nullptr)
+	{
+		auto returnValue = Plugin::UnityEngineUnityEngineVector3Array1Constructor1(length0);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		Handle = returnValue;
+		if (returnValue)
+		{
+			Plugin::ReferenceManagedClass(returnValue);
+			InternalLength = length0;
+		}
+	}
+	
+	System::Int32 System::Array1<UnityEngine::Vector3>::GetLength()
+	{
+		int32_t returnVal = InternalLength;
+		if (returnVal == 0)
+		{
+			returnVal = Array::GetLength();
+			InternalLength = returnVal;
+		};
+		return returnVal;
+	}
+	
+	System::Int32 System::Array1<UnityEngine::Vector3>::GetRank()
+	{
+		return 1;
+	}
+	
+	Plugin::ArrayElementProxy1_1<UnityEngine::Vector3> System::Array1<UnityEngine::Vector3>::operator[](int32_t index)
+	{
+		return Plugin::ArrayElementProxy1_1<UnityEngine::Vector3>(Plugin::InternalUse::Only, Handle, index);
+	}
+}
+
+namespace Plugin
+{
+	UnityEngineVector3Array1Iterator::UnityEngineVector3Array1Iterator(System::Array1<UnityEngine::Vector3>& array, int32_t index)
+		: array(array)
+		, index(index)
+	{
+	}
+	
+	UnityEngineVector3Array1Iterator& UnityEngineVector3Array1Iterator::operator++()
+	{
+		index++;
+		return *this;
+	}
+	
+	bool UnityEngineVector3Array1Iterator::operator!=(const UnityEngineVector3Array1Iterator& other)
+	{
+		return index != other.index;
+	}
+	
+	UnityEngine::Vector3 UnityEngineVector3Array1Iterator::operator*()
+	{
+		return array[index];
+	}
+}
+
+namespace System
+{
+	Plugin::UnityEngineVector3Array1Iterator begin(System::Array1<UnityEngine::Vector3>& array)
+	{
+		return Plugin::UnityEngineVector3Array1Iterator(array, 0);
+	}
+	
+	Plugin::UnityEngineVector3Array1Iterator end(System::Array1<UnityEngine::Vector3>& array)
+	{
+		return Plugin::UnityEngineVector3Array1Iterator(array, array.GetLength() - 1);
+	}
+}
+
+namespace Plugin
+{
+	ArrayElementProxy1_1<System::Int32>::ArrayElementProxy1_1(Plugin::InternalUse, int32_t handle, int32_t index0)
+	{
+		Handle = handle;
+		Index0 = index0;
+	}
+	
+	void ArrayElementProxy1_1<System::Int32>::operator=(System::Int32 item)
+	{
+		Plugin::SystemInt32Array1SetItem1(Handle, Index0, item);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+	}
+	
+	ArrayElementProxy1_1<System::Int32>::operator System::Int32()
+	{
+		auto returnValue = Plugin::SystemInt32Array1GetItem1(Handle, Index0);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return returnValue;
+	}
+}
+
+namespace System
+{
+	Array1<System::Int32>::Array1(decltype(nullptr))
+		: System::ICloneable(nullptr)
+		, System::Collections::IEnumerable(nullptr)
+		, System::Collections::ICollection(nullptr)
+		, System::Collections::IList(nullptr)
+		, System::Collections::IStructuralComparable(nullptr)
+		, System::Collections::IStructuralEquatable(nullptr)
+		, System::Array(nullptr)
+		, System::Collections::Generic::IEnumerable_1<System::Int32>(nullptr)
+		, System::Collections::Generic::ICollection_1<System::Int32>(nullptr)
+		, System::Collections::Generic::IList_1<System::Int32>(nullptr)
+		, System::Collections::Generic::IReadOnlyCollection_1<System::Int32>(nullptr)
+		, System::Collections::Generic::IReadOnlyList_1<System::Int32>(nullptr)
+	{
+		this->InternalLength = 0;
+	}
+	
+	Array1<System::Int32>::Array1(Plugin::InternalUse, int32_t handle)
+		: System::ICloneable(nullptr)
+		, System::Collections::IEnumerable(nullptr)
+		, System::Collections::ICollection(nullptr)
+		, System::Collections::IList(nullptr)
+		, System::Collections::IStructuralComparable(nullptr)
+		, System::Collections::IStructuralEquatable(nullptr)
+		, System::Array(nullptr)
+		, System::Collections::Generic::IEnumerable_1<System::Int32>(nullptr)
+		, System::Collections::Generic::ICollection_1<System::Int32>(nullptr)
+		, System::Collections::Generic::IList_1<System::Int32>(nullptr)
+		, System::Collections::Generic::IReadOnlyCollection_1<System::Int32>(nullptr)
+		, System::Collections::Generic::IReadOnlyList_1<System::Int32>(nullptr)
+	{
+		Handle = handle;
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+		}
+		this->InternalLength = 0;
+	}
+	
+	Array1<System::Int32>::Array1(const Array1<System::Int32>& other)
+		: Array1(Plugin::InternalUse::Only, other.Handle)
+	{
+		InternalLength = other.InternalLength;
+	}
+	
+	Array1<System::Int32>::Array1(Array1<System::Int32>&& other)
+		: Array1(Plugin::InternalUse::Only, other.Handle)
+	{
+		other.Handle = 0;
+		InternalLength = other.InternalLength;
+		other.InternalLength = 0;
+	}
+	
+	Array1<System::Int32>::~Array1<System::Int32>()
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+	}
+	
+	Array1<System::Int32>& Array1<System::Int32>::operator=(const Array1<System::Int32>& other)
+	{
+		if (this->Handle)
+		{
+			Plugin::DereferenceManagedClass(this->Handle);
+		}
+		this->Handle = other.Handle;
+		if (this->Handle)
+		{
+			Plugin::ReferenceManagedClass(this->Handle);
+		}
+		InternalLength = other.InternalLength;
+		return *this;
+	}
+	
+	Array1<System::Int32>& Array1<System::Int32>::operator=(decltype(nullptr))
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+		return *this;
+	}
+	
+	Array1<System::Int32>& Array1<System::Int32>::operator=(Array1<System::Int32>&& other)
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+		}
+		Handle = other.Handle;
+		InternalLength = other.InternalLength;
+		other.Handle = 0;
+		other.InternalLength = 0;
+		return *this;
+	}
+	
+	bool Array1<System::Int32>::operator==(const Array1<System::Int32>& other) const
+	{
+		return Handle == other.Handle;
+	}
+	
+	bool Array1<System::Int32>::operator!=(const Array1<System::Int32>& other) const
+	{
+		return Handle != other.Handle;
+	}
+	
+	System::Array1<System::Int32>::Array1(System::Int32 length0)
+		: System::ICloneable(nullptr)
+		, System::Collections::IEnumerable(nullptr)
+		, System::Collections::ICollection(nullptr)
+		, System::Collections::IList(nullptr)
+		, System::Collections::IStructuralComparable(nullptr)
+		, System::Collections::IStructuralEquatable(nullptr)
+		, System::Array(nullptr)
+		, System::Collections::Generic::IEnumerable_1<System::Int32>(nullptr)
+		, System::Collections::Generic::ICollection_1<System::Int32>(nullptr)
+		, System::Collections::Generic::IList_1<System::Int32>(nullptr)
+		, System::Collections::Generic::IReadOnlyCollection_1<System::Int32>(nullptr)
+		, System::Collections::Generic::IReadOnlyList_1<System::Int32>(nullptr)
+	{
+		auto returnValue = Plugin::SystemSystemInt32Array1Constructor1(length0);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		Handle = returnValue;
+		if (returnValue)
+		{
+			Plugin::ReferenceManagedClass(returnValue);
+			InternalLength = length0;
+		}
+	}
+	
+	System::Int32 System::Array1<System::Int32>::GetLength()
+	{
+		int32_t returnVal = InternalLength;
+		if (returnVal == 0)
+		{
+			returnVal = Array::GetLength();
+			InternalLength = returnVal;
+		};
+		return returnVal;
+	}
+	
+	System::Int32 System::Array1<System::Int32>::GetRank()
+	{
+		return 1;
+	}
+	
+	Plugin::ArrayElementProxy1_1<System::Int32> System::Array1<System::Int32>::operator[](int32_t index)
+	{
+		return Plugin::ArrayElementProxy1_1<System::Int32>(Plugin::InternalUse::Only, Handle, index);
+	}
+}
+
+namespace Plugin
+{
+	SystemInt32Array1Iterator::SystemInt32Array1Iterator(System::Array1<System::Int32>& array, int32_t index)
+		: array(array)
+		, index(index)
+	{
+	}
+	
+	SystemInt32Array1Iterator& SystemInt32Array1Iterator::operator++()
+	{
+		index++;
+		return *this;
+	}
+	
+	bool SystemInt32Array1Iterator::operator!=(const SystemInt32Array1Iterator& other)
+	{
+		return index != other.index;
+	}
+	
+	System::Int32 SystemInt32Array1Iterator::operator*()
+	{
+		return array[index];
+	}
+}
+
+namespace System
+{
+	Plugin::SystemInt32Array1Iterator begin(System::Array1<System::Int32>& array)
+	{
+		return Plugin::SystemInt32Array1Iterator(array, 0);
+	}
+	
+	Plugin::SystemInt32Array1Iterator end(System::Array1<System::Int32>& array)
+	{
+		return Plugin::SystemInt32Array1Iterator(array, array.GetLength() - 1);
+	}
+}
+
 namespace System
 {
 	System::Action::Action()
@@ -8557,6 +11990,8 @@ DLLEXPORT void Init(
 	int32_t maxManagedObjects = *(int32_t*)curMemory;
 	curMemory += sizeof(int32_t);
 	/*BEGIN INIT BODY PARAMETER READS*/
+	Plugin::SystemIDisposableMethodDispose = *(void (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::SystemIDisposableMethodDispose);
 	Plugin::ReleaseSystemDecimal = *(void (**)(int32_t handle))curMemory;
 	curMemory += sizeof(Plugin::ReleaseSystemDecimal);
 	Plugin::SystemDecimalConstructorSystemDouble = *(int32_t (**)(double value))curMemory;
@@ -8569,12 +12004,32 @@ DLLEXPORT void Init(
 	curMemory += sizeof(Plugin::UnboxDecimal);
 	Plugin::UnityEngineVector3ConstructorSystemSingle_SystemSingle_SystemSingle = *(UnityEngine::Vector3 (**)(float x, float y, float z))curMemory;
 	curMemory += sizeof(Plugin::UnityEngineVector3ConstructorSystemSingle_SystemSingle_SystemSingle);
-	Plugin::UnityEngineVector3Methodop_AdditionUnityEngineVector3_UnityEngineVector3 = *(UnityEngine::Vector3 (**)(UnityEngine::Vector3& a, UnityEngine::Vector3& b))curMemory;
-	curMemory += sizeof(Plugin::UnityEngineVector3Methodop_AdditionUnityEngineVector3_UnityEngineVector3);
 	Plugin::BoxVector3 = *(int32_t (**)(UnityEngine::Vector3& val))curMemory;
 	curMemory += sizeof(Plugin::BoxVector3);
 	Plugin::UnboxVector3 = *(UnityEngine::Vector3 (**)(int32_t valHandle))curMemory;
 	curMemory += sizeof(Plugin::UnboxVector3);
+	Plugin::UnityEngineVector4ConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingle = *(UnityEngine::Vector4 (**)(float x, float y, float z, float w))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineVector4ConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingle);
+	Plugin::BoxVector4 = *(int32_t (**)(UnityEngine::Vector4& val))curMemory;
+	curMemory += sizeof(Plugin::BoxVector4);
+	Plugin::UnboxVector4 = *(UnityEngine::Vector4 (**)(int32_t valHandle))curMemory;
+	curMemory += sizeof(Plugin::UnboxVector4);
+	Plugin::BoxQuaternion = *(int32_t (**)(UnityEngine::Quaternion& val))curMemory;
+	curMemory += sizeof(Plugin::BoxQuaternion);
+	Plugin::UnboxQuaternion = *(UnityEngine::Quaternion (**)(int32_t valHandle))curMemory;
+	curMemory += sizeof(Plugin::UnboxQuaternion);
+	Plugin::UnityEngineMatrix4x4ConstructorUnityEngineVector4_UnityEngineVector4_UnityEngineVector4_UnityEngineVector4 = *(UnityEngine::Matrix4x4 (**)(UnityEngine::Vector4& column0, UnityEngine::Vector4& column1, UnityEngine::Vector4& column2, UnityEngine::Vector4& column3))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineMatrix4x4ConstructorUnityEngineVector4_UnityEngineVector4_UnityEngineVector4_UnityEngineVector4);
+	Plugin::UnityEngineMatrix4x4PropertyGetRotation = *(UnityEngine::Quaternion (**)(UnityEngine::Matrix4x4* thiz))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineMatrix4x4PropertyGetRotation);
+	Plugin::UnityEngineMatrix4x4PropertyGetLossyScale = *(UnityEngine::Vector3 (**)(UnityEngine::Matrix4x4* thiz))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineMatrix4x4PropertyGetLossyScale);
+	Plugin::UnityEngineMatrix4x4MethodGetPosition = *(UnityEngine::Vector3 (**)(UnityEngine::Matrix4x4* thiz))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineMatrix4x4MethodGetPosition);
+	Plugin::BoxMatrix4x4 = *(int32_t (**)(UnityEngine::Matrix4x4& val))curMemory;
+	curMemory += sizeof(Plugin::BoxMatrix4x4);
+	Plugin::UnboxMatrix4x4 = *(UnityEngine::Matrix4x4 (**)(int32_t valHandle))curMemory;
+	curMemory += sizeof(Plugin::UnboxMatrix4x4);
 	Plugin::UnityEngineObjectPropertyGetName = *(int32_t (**)(int32_t thisHandle))curMemory;
 	curMemory += sizeof(Plugin::UnityEngineObjectPropertyGetName);
 	Plugin::UnityEngineObjectPropertySetName = *(void (**)(int32_t thisHandle, int32_t valueHandle))curMemory;
@@ -8585,18 +12040,58 @@ DLLEXPORT void Init(
 	curMemory += sizeof(Plugin::UnityEngineTransformPropertyGetPosition);
 	Plugin::UnityEngineTransformPropertySetPosition = *(void (**)(int32_t thisHandle, UnityEngine::Vector3& value))curMemory;
 	curMemory += sizeof(Plugin::UnityEngineTransformPropertySetPosition);
+	Plugin::UnityEngineTransformPropertyGetRotation = *(UnityEngine::Quaternion (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineTransformPropertyGetRotation);
+	Plugin::UnityEngineTransformPropertySetRotation = *(void (**)(int32_t thisHandle, UnityEngine::Quaternion& value))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineTransformPropertySetRotation);
+	Plugin::UnityEngineTransformPropertyGetLocalScale = *(UnityEngine::Vector3 (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineTransformPropertyGetLocalScale);
+	Plugin::UnityEngineTransformPropertySetLocalScale = *(void (**)(int32_t thisHandle, UnityEngine::Vector3& value))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineTransformPropertySetLocalScale);
+	Plugin::UnityEngineTransformPropertyGetParent = *(int32_t (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineTransformPropertyGetParent);
+	Plugin::UnityEngineTransformPropertySetParent = *(void (**)(int32_t thisHandle, int32_t valueHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineTransformPropertySetParent);
 	Plugin::SystemCollectionsIEnumeratorPropertyGetCurrent = *(int32_t (**)(int32_t thisHandle))curMemory;
 	curMemory += sizeof(Plugin::SystemCollectionsIEnumeratorPropertyGetCurrent);
 	Plugin::SystemCollectionsIEnumeratorMethodMoveNext = *(int32_t (**)(int32_t thisHandle))curMemory;
 	curMemory += sizeof(Plugin::SystemCollectionsIEnumeratorMethodMoveNext);
+	Plugin::UnityEngineGameObjectConstructorSystemString = *(int32_t (**)(int32_t nameHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineGameObjectConstructorSystemString);
+	Plugin::UnityEngineGameObjectPropertyGetTransform = *(int32_t (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineGameObjectPropertyGetTransform);
 	Plugin::UnityEngineGameObjectMethodAddComponentCesiumForUnityBaseCesium3DTileset = *(int32_t (**)(int32_t thisHandle))curMemory;
 	curMemory += sizeof(Plugin::UnityEngineGameObjectMethodAddComponentCesiumForUnityBaseCesium3DTileset);
+	Plugin::UnityEngineGameObjectMethodAddComponentUnityEngineMeshFilter = *(int32_t (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineGameObjectMethodAddComponentUnityEngineMeshFilter);
+	Plugin::UnityEngineGameObjectMethodAddComponentUnityEngineMeshRenderer = *(int32_t (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineGameObjectMethodAddComponentUnityEngineMeshRenderer);
 	Plugin::UnityEngineGameObjectMethodCreatePrimitiveUnityEnginePrimitiveType = *(int32_t (**)(UnityEngine::PrimitiveType type))curMemory;
 	curMemory += sizeof(Plugin::UnityEngineGameObjectMethodCreatePrimitiveUnityEnginePrimitiveType);
 	Plugin::UnityEngineDebugMethodLogSystemObject = *(void (**)(int32_t messageHandle))curMemory;
 	curMemory += sizeof(Plugin::UnityEngineDebugMethodLogSystemObject);
 	Plugin::UnityEngineMonoBehaviourPropertyGetTransform = *(int32_t (**)(int32_t thisHandle))curMemory;
 	curMemory += sizeof(Plugin::UnityEngineMonoBehaviourPropertyGetTransform);
+	Plugin::UnityEngineMonoBehaviourPropertyGetGameObject = *(int32_t (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineMonoBehaviourPropertyGetGameObject);
+	Plugin::SystemCollectionsGenericIEnumeratorUnityEngineVector3PropertyGetCurrent = *(UnityEngine::Vector3 (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::SystemCollectionsGenericIEnumeratorUnityEngineVector3PropertyGetCurrent);
+	Plugin::SystemCollectionsGenericIEnumeratorSystemInt32PropertyGetCurrent = *(int32_t (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::SystemCollectionsGenericIEnumeratorSystemInt32PropertyGetCurrent);
+	Plugin::SystemCollectionsGenericIEnumerableUnityEngineVector3MethodGetEnumerator = *(int32_t (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::SystemCollectionsGenericIEnumerableUnityEngineVector3MethodGetEnumerator);
+	Plugin::SystemCollectionsGenericIEnumerableSystemInt32MethodGetEnumerator = *(int32_t (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::SystemCollectionsGenericIEnumerableSystemInt32MethodGetEnumerator);
+	Plugin::UnityEngineMeshConstructor = *(int32_t (**)())curMemory;
+	curMemory += sizeof(Plugin::UnityEngineMeshConstructor);
+	Plugin::UnityEngineMeshMethodSetVerticesUnityEngineVector3Array1 = *(void (**)(int32_t thisHandle, int32_t inVerticesHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineMeshMethodSetVerticesUnityEngineVector3Array1);
+	Plugin::UnityEngineMeshMethodSetTrianglesSystemInt32Array1_SystemInt32_SystemBoolean_SystemInt32 = *(void (**)(int32_t thisHandle, int32_t trianglesHandle, int32_t submesh, uint32_t calculateBounds, int32_t baseVertex))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineMeshMethodSetTrianglesSystemInt32Array1_SystemInt32_SystemBoolean_SystemInt32);
+	Plugin::UnityEngineMeshFilterPropertyGetMesh = *(int32_t (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineMeshFilterPropertyGetMesh);
+	Plugin::UnityEngineMeshFilterPropertySetMesh = *(void (**)(int32_t thisHandle, int32_t valueHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineMeshFilterPropertySetMesh);
 	Plugin::SystemExceptionConstructorSystemString = *(int32_t (**)(int32_t messageHandle))curMemory;
 	curMemory += sizeof(Plugin::SystemExceptionConstructorSystemString);
 	Plugin::BoxPrimitiveType = *(int32_t (**)(UnityEngine::PrimitiveType val))curMemory;
@@ -8715,6 +12210,18 @@ DLLEXPORT void Init(
 	curMemory += sizeof(Plugin::BoxDouble);
 	Plugin::UnboxDouble = *(double (**)(int32_t valHandle))curMemory;
 	curMemory += sizeof(Plugin::UnboxDouble);
+	Plugin::UnityEngineUnityEngineVector3Array1Constructor1 = *(int32_t (**)(int32_t length0))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineUnityEngineVector3Array1Constructor1);
+	Plugin::UnityEngineVector3Array1GetItem1 = *(UnityEngine::Vector3 (**)(int32_t thisHandle, int32_t index0))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineVector3Array1GetItem1);
+	Plugin::UnityEngineVector3Array1SetItem1 = *(int32_t (**)(int32_t thisHandle, int32_t index0, UnityEngine::Vector3& item))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineVector3Array1SetItem1);
+	Plugin::SystemSystemInt32Array1Constructor1 = *(int32_t (**)(int32_t length0))curMemory;
+	curMemory += sizeof(Plugin::SystemSystemInt32Array1Constructor1);
+	Plugin::SystemInt32Array1GetItem1 = *(int32_t (**)(int32_t thisHandle, int32_t index0))curMemory;
+	curMemory += sizeof(Plugin::SystemInt32Array1GetItem1);
+	Plugin::SystemInt32Array1SetItem1 = *(int32_t (**)(int32_t thisHandle, int32_t index0, int32_t item))curMemory;
+	curMemory += sizeof(Plugin::SystemInt32Array1SetItem1);
 	Plugin::ReleaseSystemAction = *(void (**)(int32_t handle, int32_t classHandle))curMemory;
 	curMemory += sizeof(Plugin::ReleaseSystemAction);
 	Plugin::SystemActionConstructor = *(void (**)(int32_t cppHandle, int32_t* handle, int32_t* classHandle))curMemory;

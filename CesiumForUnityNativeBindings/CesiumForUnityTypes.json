@@ -16,7 +16,19 @@
 			"Name": "System.ISpanFormattable"
 		},
 		{
-			"Name": "System.IDisposable"
+			"Name": "System.IDisposable",
+			"Methods": [
+				{
+					"Name": "Dispose",
+					"ParamTypes": []
+				}
+			]
+		},
+		{
+			"Name": "System.Collections.IStructuralEquatable"
+		},
+		{
+			"Name": "System.Collections.IStructuralComparable"
 		},
 		{
 			"Name": "System.IEquatable`1",
@@ -89,6 +101,21 @@
 				{
 					"Types": [
 						"UnityEngine.Vector3"
+					]
+				},
+				{
+					"Types": [
+						"UnityEngine.Vector4"
+					]
+				},
+				{
+					"Types": [
+						"UnityEngine.Quaternion"
+					]
+				},
+				{
+					"Types": [
+						"UnityEngine.Matrix4x4"
 					]
 				}
 			]
@@ -191,14 +218,44 @@
 						"System.Single"
 					]
 				}
+			]
+		},
+		{
+			"Name": "UnityEngine.Vector4",
+			"Constructors": [
+				{
+					"ParamTypes": [
+						"System.Single",
+						"System.Single",
+						"System.Single",
+						"System.Single"
+					]
+				}
+			]
+		},
+		{
+			"Name": "UnityEngine.Quaternion"
+		},
+		{
+			"Name": "UnityEngine.Matrix4x4",
+			"Constructors": [
+				{
+					"ParamTypes": [
+						"UnityEngine.Vector4",
+						"UnityEngine.Vector4",
+						"UnityEngine.Vector4",
+						"UnityEngine.Vector4"
+					]
+				}
+			],
+			"Properties": [
+				{ "Name": "rotation" },
+				{ "Name": "lossyScale" }
 			],
 			"Methods": [
 				{
-					"Name": "x+y",
-					"ParamTypes": [
-						"UnityEngine.Vector3",
-						"UnityEngine.Vector3"
-					]
+					"Name": "GetPosition",
+					"ParamTypes": []
 				}
 			]
 		},
@@ -232,6 +289,29 @@
 							"System.NullReferenceException"
 						]
 					}
+				},
+				{
+					"Name": "rotation",
+					"Get": {},
+					"Set": {
+						"Exceptions": [
+							"System.NullReferenceException"
+						]
+					}
+				},
+				{
+					"Name": "localScale",
+					"Get": {},
+					"Set": {
+						"Exceptions": [
+							"System.NullReferenceException"
+						]
+					}
+				},
+				{
+					"Name": "parent",
+					"Get": {},
+					"Set": {}
 				}
 			]
 		},
@@ -260,17 +340,20 @@
 		{
 			"Name": "UnityEngine.GameObject",
 			"Constructors": [
+				{
+					"ParamTypes": [
+						"System.String"
+					]
+				}
 			],
 			"Methods": [
 				{
 					"Name": "AddComponent",
 					"ParamTypes": [],
 					"GenericParams": [
-						{
-							"Types": [
-								"CesiumForUnity.BaseCesium3DTileset"
-							]
-						}
+						{ "Types": ["CesiumForUnity.BaseCesium3DTileset"] },
+						{ "Types": ["UnityEngine.MeshFilter"] },
+						{ "Types": ["UnityEngine.MeshRenderer"] }
 					]
 				},
 				{
@@ -278,6 +361,13 @@
 					"ParamTypes": [
 						"UnityEngine.PrimitiveType"
 					]
+				}
+			],
+			"Properties": [
+				{
+					"Name": "transform",
+					"Get": {},
+					"Set": {}
 				}
 			]
 		},
@@ -302,8 +392,128 @@
 					"Name": "transform",
 					"Get": {},
 					"Set": {}
+				},
+				{
+					"Name": "gameObject",
+					"Get": {}
 				}
 			]
+		},
+		{
+			"Name": "System.Collections.Generic.IEnumerator`1",
+			"GenericParams": [
+				{
+					"Types": ["UnityEngine.Vector3"]
+				},
+				{
+					"Types": ["System.Int32"]
+				}
+			],
+			"Properties": [
+				{
+					"Name": "Current",
+					"Get": {}
+				}
+			]
+		},
+		{
+			"Name": "System.Collections.Generic.IEnumerable`1",
+			"GenericParams": [
+				{
+					"Types": ["UnityEngine.Vector3"]
+				},
+				{
+					"Types": ["System.Int32"]
+				}
+			],
+			"Methods": [
+				{
+					"Name": "GetEnumerator",
+					"ParamTypes": []
+				}
+			]
+		},
+		{
+			"Name": "System.Collections.Generic.ICollection`1",
+			"GenericParams": [
+				{
+					"Types": ["UnityEngine.Vector3"]
+				},
+				{
+					"Types": ["System.Int32"]
+				}
+			]
+		},
+		{
+			"Name": "System.Collections.Generic.IReadOnlyCollection`1",
+			"GenericParams": [
+				{
+					"Types": ["UnityEngine.Vector3"]
+				},
+				{
+					"Types": ["System.Int32"]
+				}			]
+		},
+		{
+			"Name": "System.Collections.Generic.IList`1",
+			"GenericParams": [
+				{
+					"Types": ["UnityEngine.Vector3"]
+				},
+				{
+					"Types": ["System.Int32"]
+				}
+			]
+		},
+		{
+			"Name": "System.Collections.Generic.IReadOnlyList`1",
+			"GenericParams": [
+				{
+					"Types": ["UnityEngine.Vector3"]
+				},
+				{
+					"Types": ["System.Int32"]
+				}
+			]
+		},
+		{
+			"Name": "UnityEngine.Mesh",
+			"Methods": [
+				{
+					"Name": "SetVertices",
+					"ParamTypes": [
+						"UnityEngine.Vector3[]"
+					]
+				},
+				{
+					"Name": "SetTriangles",
+					"ParamTypes": [
+						"System.Int32[]",
+						"System.Int32",
+						"System.Boolean",
+						"System.Int32"
+					]
+				}
+			],
+			"Constructors": [
+				{
+					"ParamTypes": []
+				}
+			]
+		},
+		{
+			"Name": "UnityEngine.MeshFilter",
+			"Properties": [
+				{
+					"Name": "mesh"
+				}
+			]
+		},
+		{
+			"Name": "UnityEngine.Renderer"
+		},
+		{
+			"Name": "UnityEngine.MeshRenderer"
 		},
 		{
 			"Name": "System.Exception",
@@ -491,6 +701,12 @@
 		}
 	],
 	"Arrays": [
+		{
+			"Type": "UnityEngine.Vector3"
+		},
+		{
+			"Type": "System.Int32"
+		}
 	],
 	"Delegates": [
 		{

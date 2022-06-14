@@ -4,12 +4,15 @@
 #include "UnityTilesetExternals.h"
 
 #include <Cesium3DTilesSelection/Tileset.h>
+#include <CesiumGeospatial/Ellipsoid.h>
+#include <CesiumGeospatial/Transforms.h>
 #include <CesiumUtility/Math.h>
 
 #include <memory>
 
 using namespace Cesium3DTilesSelection;
 using namespace CesiumForUnity;
+using namespace CesiumGeospatial;
 using namespace CesiumUtility;
 using namespace UnityEngine;
 
@@ -18,10 +21,11 @@ CESIUM_FOR_UNITY_CESIUM3DTILESET_DEFAULT_CONSTRUCTOR_DEFINITION
 
 void Cesium3DTileset::Start() {
   TilesetOptions options{};
+  options.enableFrustumCulling = false;
 
   this->_lastUpdateResult = ViewUpdateResult();
   this->_pTileset = std::make_unique<Tileset>(
-      getUnityTilesetExternals(),
+      createTilesetExternals(this->GetGameObject()),
       1,
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
       "eyJqdGkiOiJjZmUzNjE3MC0wZmUwLTQzODItODMwZC01ZjE1Yzg1N2Y1MDIiLCJpZCI6MjU4"
@@ -40,7 +44,8 @@ void Cesium3DTileset::Update() {
 
   std::vector<ViewState> viewStates;
   viewStates.emplace_back(ViewState::create(
-      glm::dvec3(7378137.0, 0.0, 0.0),
+      Ellipsoid::WGS84.cartographicToCartesian(
+          Cartographic::fromDegrees(-105.25737, 39.736401, 2250.0)),
       glm::dvec3(-1.0, 0.0, 0.0),
       glm::dvec3(0.0, 0.0, 1.0),
       glm::dvec2(camera.GetPixelWidth(), camera.GetPixelHeight()),

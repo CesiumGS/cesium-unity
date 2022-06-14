@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Bindings.h"
+
 #include <Cesium3DTilesSelection/IPrepareRendererResources.h>
 
 namespace CesiumForUnity {
@@ -7,6 +9,8 @@ namespace CesiumForUnity {
 class UnityPrepareRendererResources
     : public Cesium3DTilesSelection::IPrepareRendererResources {
 public:
+  UnityPrepareRendererResources(UnityEngine::GameObject& tileset);
+
   virtual void* prepareInLoadThread(
       const CesiumGltf::Model& model,
       const glm::dmat4& transform) override;
@@ -46,6 +50,9 @@ public:
       int32_t overlayTextureCoordinateID,
       const Cesium3DTilesSelection::RasterOverlayTile& rasterTile,
       void* pMainThreadRendererResources) noexcept override;
+
+private:
+  UnityEngine::GameObject _tileset;
 };
 
 } // namespace CesiumForUnity

@@ -18,8 +18,6 @@ namespace {
 
 std::unique_ptr<TilesetExternals> pExternals = nullptr;
 std::shared_ptr<UnityAssetAccessor> pAccessor = nullptr;
-std::shared_ptr<UnityPrepareRendererResources> pPrepareRendererResources =
-    nullptr;
 std::shared_ptr<UnityTaskProcessor> pTaskProcessor = nullptr;
 std::shared_ptr<CreditSystem> pCreditSystem = nullptr;
 
@@ -28,15 +26,6 @@ const std::shared_ptr<UnityAssetAccessor>& getAssetAccessor() {
     pAccessor = std::make_shared<UnityAssetAccessor>();
   }
   return pAccessor;
-}
-
-const std::shared_ptr<UnityPrepareRendererResources>&
-getPrepareRendererResources() {
-  if (!pPrepareRendererResources) {
-    pPrepareRendererResources =
-        std::make_shared<UnityPrepareRendererResources>();
-  }
-  return pPrepareRendererResources;
 }
 
 const std::shared_ptr<UnityTaskProcessor>& getTaskProcessor() {
@@ -55,16 +44,14 @@ const std::shared_ptr<CreditSystem>& getCreditSystem() {
 
 } // namespace
 
-const TilesetExternals& getUnityTilesetExternals() {
-  if (!pExternals) {
-    pExternals = std::make_unique<TilesetExternals>(TilesetExternals{
-        getAssetAccessor(),
-        getPrepareRendererResources(),
-        AsyncSystem(getTaskProcessor()),
-        getCreditSystem(),
-        spdlog::default_logger()});
-  }
-  return *pExternals;
+Cesium3DTilesSelection::TilesetExternals
+createTilesetExternals(UnityEngine::GameObject& tileset) {
+  return TilesetExternals{
+      getAssetAccessor(),
+      std::make_shared<UnityPrepareRendererResources>(tileset),
+      AsyncSystem(getTaskProcessor()),
+      getCreditSystem(),
+      spdlog::default_logger()};
 }
 
 } // namespace CesiumForUnity

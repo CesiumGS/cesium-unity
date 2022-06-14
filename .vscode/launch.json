@@ -14,8 +14,7 @@
       ],
       "stopAtEntry": false,
       "cwd": "${fileDirname}",
-      "environment": [],
-      "console": "externalTerminal"
+      "environment": []
     },
     {
       "name": "(Windows) Attach",
