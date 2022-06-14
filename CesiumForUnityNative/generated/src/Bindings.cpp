@@ -53,6 +53,7 @@ namespace Plugin
 	UnityEngine::Vector4 (*UnityEngineVector4ConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingle)(float x, float y, float z, float w);
 	int32_t (*BoxVector4)(UnityEngine::Vector4& val);
 	UnityEngine::Vector4 (*UnboxVector4)(int32_t valHandle);
+	UnityEngine::Quaternion (*UnityEngineQuaternionConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingle)(float x, float y, float z, float w);
 	int32_t (*BoxQuaternion)(UnityEngine::Quaternion& val);
 	UnityEngine::Quaternion (*UnboxQuaternion)(int32_t valHandle);
 	UnityEngine::Matrix4x4 (*UnityEngineMatrix4x4ConstructorUnityEngineVector4_UnityEngineVector4_UnityEngineVector4_UnityEngineVector4)(UnityEngine::Vector4& column0, UnityEngine::Vector4& column1, UnityEngine::Vector4& column2, UnityEngine::Vector4& column3);
@@ -70,6 +71,7 @@ namespace Plugin
 	void (*UnityEngineTransformPropertySetRotation)(int32_t thisHandle, UnityEngine::Quaternion& value);
 	UnityEngine::Vector3 (*UnityEngineTransformPropertyGetLocalScale)(int32_t thisHandle);
 	void (*UnityEngineTransformPropertySetLocalScale)(int32_t thisHandle, UnityEngine::Vector3& value);
+	UnityEngine::Matrix4x4 (*UnityEngineTransformPropertyGetLocalToWorldMatrix)(int32_t thisHandle);
 	int32_t (*UnityEngineTransformPropertyGetParent)(int32_t thisHandle);
 	void (*UnityEngineTransformPropertySetParent)(int32_t thisHandle, int32_t valueHandle);
 	int32_t (*SystemCollectionsIEnumeratorPropertyGetCurrent)(int32_t thisHandle);
@@ -80,6 +82,7 @@ namespace Plugin
 	int32_t (*UnityEngineGameObjectMethodAddComponentUnityEngineMeshFilter)(int32_t thisHandle);
 	int32_t (*UnityEngineGameObjectMethodAddComponentUnityEngineMeshRenderer)(int32_t thisHandle);
 	int32_t (*UnityEngineGameObjectMethodCreatePrimitiveUnityEnginePrimitiveType)(UnityEngine::PrimitiveType type);
+	void (*UnityEngineGameObjectMethodSetActiveSystemBoolean)(int32_t thisHandle, uint32_t value);
 	void (*UnityEngineDebugMethodLogSystemObject)(int32_t messageHandle);
 	int32_t (*UnityEngineMonoBehaviourPropertyGetTransform)(int32_t thisHandle);
 	int32_t (*UnityEngineMonoBehaviourPropertyGetGameObject)(int32_t thisHandle);
@@ -4992,6 +4995,19 @@ namespace UnityEngine
 	{
 	}
 	
+	UnityEngine::Quaternion::Quaternion(System::Single x, System::Single y, System::Single z, System::Single w)
+	{
+		auto returnValue = Plugin::UnityEngineQuaternionConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingle(x, y, z, w);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		*this = returnValue;
+	}
+	
 	UnityEngine::Quaternion::operator System::ValueType()
 	{
 		int32_t handle = Plugin::BoxQuaternion(*this);
@@ -5591,6 +5607,19 @@ namespace UnityEngine
 		}
 	}
 	
+	UnityEngine::Matrix4x4 UnityEngine::Transform::GetLocalToWorldMatrix()
+	{
+		auto returnValue = Plugin::UnityEngineTransformPropertyGetLocalToWorldMatrix(Handle);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return returnValue;
+	}
+	
 	UnityEngine::Transform UnityEngine::Transform::GetParent()
 	{
 		auto returnValue = Plugin::UnityEngineTransformPropertyGetParent(Handle);
@@ -6064,6 +6093,18 @@ namespace UnityEngine
 			delete ex;
 		}
 		return UnityEngine::GameObject(Plugin::InternalUse::Only, returnValue);
+	}
+	
+	void UnityEngine::GameObject::SetActive(System::Boolean value)
+	{
+		Plugin::UnityEngineGameObjectMethodSetActiveSystemBoolean(Handle, value);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
 	}
 }
 
@@ -12014,6 +12055,8 @@ DLLEXPORT void Init(
 	curMemory += sizeof(Plugin::BoxVector4);
 	Plugin::UnboxVector4 = *(UnityEngine::Vector4 (**)(int32_t valHandle))curMemory;
 	curMemory += sizeof(Plugin::UnboxVector4);
+	Plugin::UnityEngineQuaternionConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingle = *(UnityEngine::Quaternion (**)(float x, float y, float z, float w))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineQuaternionConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingle);
 	Plugin::BoxQuaternion = *(int32_t (**)(UnityEngine::Quaternion& val))curMemory;
 	curMemory += sizeof(Plugin::BoxQuaternion);
 	Plugin::UnboxQuaternion = *(UnityEngine::Quaternion (**)(int32_t valHandle))curMemory;
@@ -12048,6 +12091,8 @@ DLLEXPORT void Init(
 	curMemory += sizeof(Plugin::UnityEngineTransformPropertyGetLocalScale);
 	Plugin::UnityEngineTransformPropertySetLocalScale = *(void (**)(int32_t thisHandle, UnityEngine::Vector3& value))curMemory;
 	curMemory += sizeof(Plugin::UnityEngineTransformPropertySetLocalScale);
+	Plugin::UnityEngineTransformPropertyGetLocalToWorldMatrix = *(UnityEngine::Matrix4x4 (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineTransformPropertyGetLocalToWorldMatrix);
 	Plugin::UnityEngineTransformPropertyGetParent = *(int32_t (**)(int32_t thisHandle))curMemory;
 	curMemory += sizeof(Plugin::UnityEngineTransformPropertyGetParent);
 	Plugin::UnityEngineTransformPropertySetParent = *(void (**)(int32_t thisHandle, int32_t valueHandle))curMemory;
@@ -12068,6 +12113,8 @@ DLLEXPORT void Init(
 	curMemory += sizeof(Plugin::UnityEngineGameObjectMethodAddComponentUnityEngineMeshRenderer);
 	Plugin::UnityEngineGameObjectMethodCreatePrimitiveUnityEnginePrimitiveType = *(int32_t (**)(UnityEngine::PrimitiveType type))curMemory;
 	curMemory += sizeof(Plugin::UnityEngineGameObjectMethodCreatePrimitiveUnityEnginePrimitiveType);
+	Plugin::UnityEngineGameObjectMethodSetActiveSystemBoolean = *(void (**)(int32_t thisHandle, uint32_t value))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineGameObjectMethodSetActiveSystemBoolean);
 	Plugin::UnityEngineDebugMethodLogSystemObject = *(void (**)(int32_t messageHandle))curMemory;
 	curMemory += sizeof(Plugin::UnityEngineDebugMethodLogSystemObject);
 	Plugin::UnityEngineMonoBehaviourPropertyGetTransform = *(int32_t (**)(int32_t thisHandle))curMemory;

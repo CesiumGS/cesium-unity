@@ -10,6 +10,7 @@
 #include <CesiumGltf/AccessorView.h>
 
 #include <glm/gtc/matrix_inverse.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 using namespace Cesium3DTilesSelection;
 using namespace CesiumForUnity;
@@ -68,8 +69,10 @@ void* UnityPrepareRendererResources::prepareInMainThread(
     name = urlIt->second.getStringOrDefault("glTF");
   }
 
-  UnityEngine::GameObject modelGameObject(String(name.c_str()));
-  modelGameObject.GetTransform().SetParent(this->_tileset.GetTransform());
+  auto pModelGameObject =
+      std::make_unique<UnityEngine::GameObject>(String(name.c_str()));
+  pModelGameObject->GetTransform().SetParent(this->_tileset.GetTransform());
+  pModelGameObject->SetActive(false);
 
   glm::dmat4 tileTransform = tile.getTransform();
   tileTransform = GltfContent::applyRtcCenter(model, tileTransform);
@@ -77,7 +80,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
   model.forEachPrimitiveInScene(
       -1,
-      [&modelGameObject, &tileTransform](
+      [&pModelGameObject, &tileTransform](
           const Model& gltf,
           const Node& node,
           const Mesh& mesh,
@@ -106,7 +109,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         // TODO: better name (index of mesh and primitive?)
         UnityEngine::GameObject primitiveGameObject(String("Primitive"));
         primitiveGameObject.GetTransform().SetParent(
-            modelGameObject.GetTransform());
+            pModelGameObject->GetTransform());
 
         // Hard-coded "georeference" to put the Unity origin at a default
         // location in Denver and adjust for Unity left-handed, Y-up
@@ -121,44 +124,45 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             glm::dvec4(0.0, 1.0, 0.0, 0.0),
             glm::dvec4(0.0, 0.0, 0.0, 1.0));
 
-        glm::dmat4 fullTransform =
-            swapYandZ * (fixedToEnu * (tileTransform * transform));
+        glm::dmat4 fullTransform = fixedToEnu * (tileTransform * transform);
+        fullTransform = swapYandZ * fullTransform;
 
-        // Unity transforms can't be assigned a simple 4x4 matrix, because
-        // that would be too easy. So we need to decompose the matrix into
-        // position, rotation, and scale.
-        // TODO: the approach here might not be perfect in all cases. See
-        // https://pixel.engineer/posts/matrix-decomposition-unity/.
-        static_assert(sizeof(UnityEngine::Matrix4x4) == sizeof(glm::mat4));
-        UnityEngine::Matrix4x4 unityMatrix(
-            UnityEngine::Vector4(
-                fullTransform[0].x,
-                fullTransform[0].y,
-                fullTransform[0].z,
-                fullTransform[0].w),
-            UnityEngine::Vector4(
-                fullTransform[1].x,
-                fullTransform[1].y,
-                fullTransform[1].z,
-                fullTransform[1].w),
-            UnityEngine::Vector4(
-                fullTransform[2].x,
-                fullTransform[2].y,
-                fullTransform[2].z,
-                fullTransform[2].w),
-            UnityEngine::Vector4(
-                fullTransform[3].x,
-                fullTransform[3].y,
-                fullTransform[3].z,
-                fullTransform[3].w));
+        glm::dvec3 translation = glm::dvec3(fullTransform[3]);
+        glm::dmat3 rotationScale = glm::dmat3(fullTransform);
+        double lengthColumn0 = glm::length(rotationScale[0]);
+        double lengthColumn1 = glm::length(rotationScale[1]);
+        double lengthColumn2 = glm::length(rotationScale[2]);
+        glm::dmat3 rotationMatrix(
+            rotationScale[0] / lengthColumn0,
+            rotationScale[1] / lengthColumn1,
+            rotationScale[2] / lengthColumn2);
 
-        UnityEngine::Vector3 position = unityMatrix.GetPosition();
-        UnityEngine::Quaternion rotation = unityMatrix.GetRotation();
-        UnityEngine::Vector3 scale = unityMatrix.GetLossyScale();
+        glm::dvec3 scale(lengthColumn0, lengthColumn1, lengthColumn2);
 
-        primitiveGameObject.GetTransform().SetPosition(position);
-        primitiveGameObject.GetTransform().SetRotation(rotation);
-        primitiveGameObject.GetTransform().SetLocalScale(scale);
+        glm::dvec3 cross = glm::cross(rotationScale[0], rotationScale[1]);
+        if (glm::dot(cross, rotationScale[2]) < 0.0) {
+          rotationMatrix *= -1.0;
+          scale *= -1.0;
+        }
+
+        rotationMatrix[0] = glm::normalize(rotationMatrix[0]);
+        rotationMatrix[1] = glm::normalize(rotationMatrix[1]);
+        rotationMatrix[2] = glm::normalize(rotationMatrix[2]);
+
+        glm::dquat rotation = glm::quat_cast(rotationMatrix);
+
+        primitiveGameObject.GetTransform().SetPosition(
+            UnityEngine::Vector3(translation.x, translation.y, translation.z));
+        primitiveGameObject.GetTransform().SetRotation(UnityEngine::Quaternion(
+            rotation.x,
+            rotation.y,
+            rotation.z,
+            rotation.w));
+        primitiveGameObject.GetTransform().SetLocalScale(
+            UnityEngine::Vector3(scale.x, scale.y, scale.z));
+
+        UnityEngine::Matrix4x4 compare =
+            primitiveGameObject.GetTransform().GetLocalToWorldMatrix();
 
         UnityEngine::MeshFilter meshFilter =
             primitiveGameObject.AddComponent<UnityEngine::MeshFilter>();
@@ -191,7 +195,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         meshFilter.SetMesh(unityMesh);
       });
 
-  return nullptr;
+  return pModelGameObject.release();
 }
 
 void UnityPrepareRendererResources::free(

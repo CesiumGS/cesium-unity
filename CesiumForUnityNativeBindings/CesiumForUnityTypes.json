@@ -234,7 +234,17 @@
 			]
 		},
 		{
-			"Name": "UnityEngine.Quaternion"
+			"Name": "UnityEngine.Quaternion",
+			"Constructors": [
+				{
+					"ParamTypes": [
+						"System.Single",
+						"System.Single",
+						"System.Single",
+						"System.Single"
+					]
+				}
+			]
 		},
 		{
 			"Name": "UnityEngine.Matrix4x4",
@@ -309,6 +319,10 @@
 					}
 				},
 				{
+					"Name": "localToWorldMatrix",
+					"Get": {}
+				},
+				{
 					"Name": "parent",
 					"Get": {},
 					"Set": {}
@@ -360,6 +374,12 @@
 					"Name": "CreatePrimitive",
 					"ParamTypes": [
 						"UnityEngine.PrimitiveType"
+					]
+				},
+				{
+					"Name": "SetActive",
+					"ParamTypes": [
+						"System.Boolean"
 					]
 				}
 			],

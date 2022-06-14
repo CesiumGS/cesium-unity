@@ -55,6 +55,30 @@ void Cesium3DTileset::Update() {
   const ViewUpdateResult& updateResult =
       this->_pTileset->updateView(viewStates);
   this->updateLastViewUpdateResultState(updateResult);
+
+  for (auto pTile : updateResult.tilesToNoLongerRenderThisFrame) {
+    if (pTile->getState() != Tile::LoadState::Done) {
+      continue;
+    }
+
+    UnityEngine::GameObject* pTileGO =
+        static_cast<UnityEngine::GameObject*>(pTile->getRendererResources());
+    if (pTileGO) {
+      pTileGO->SetActive(false);
+    }
+  }
+
+  for (auto pTile : updateResult.tilesToRenderThisFrame) {
+    if (pTile->getState() != Tile::LoadState::Done) {
+      continue;
+    }
+
+    UnityEngine::GameObject* pTileGO =
+        static_cast<UnityEngine::GameObject*>(pTile->getRendererResources());
+    if (pTileGO) {
+      pTileGO->SetActive(true);
+    }
+  }
 }
 
 void Cesium3DTileset::updateLastViewUpdateResultState(

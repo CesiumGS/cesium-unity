@@ -510,6 +510,8 @@ namespace NativeScript
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		delegate UnityEngine.Vector4 UnboxVector4DelegateType(int valHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		delegate UnityEngine.Quaternion UnityEngineQuaternionConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingleDelegateType(float x, float y, float z, float w);
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		delegate int BoxQuaternionDelegateType(ref UnityEngine.Quaternion val);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		delegate UnityEngine.Quaternion UnboxQuaternionDelegateType(int valHandle);
@@ -544,6 +546,8 @@ namespace NativeScript
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		delegate void UnityEngineTransformPropertySetLocalScaleDelegateType(int thisHandle, ref UnityEngine.Vector3 value);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		delegate UnityEngine.Matrix4x4 UnityEngineTransformPropertyGetLocalToWorldMatrixDelegateType(int thisHandle);
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		delegate int UnityEngineTransformPropertyGetParentDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		delegate void UnityEngineTransformPropertySetParentDelegateType(int thisHandle, int valueHandle);
@@ -563,6 +567,8 @@ namespace NativeScript
 		delegate int UnityEngineGameObjectMethodAddComponentUnityEngineMeshRendererDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		delegate int UnityEngineGameObjectMethodCreatePrimitiveUnityEnginePrimitiveTypeDelegateType(UnityEngine.PrimitiveType type);
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		delegate void UnityEngineGameObjectMethodSetActiveSystemBooleanDelegateType(int thisHandle, bool value);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		delegate void UnityEngineDebugMethodLogSystemObjectDelegateType(int messageHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -775,6 +781,7 @@ namespace NativeScript
 		static readonly UnityEngineVector4ConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingleDelegateType UnityEngineVector4ConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingleDelegate = new UnityEngineVector4ConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingleDelegateType(UnityEngineVector4ConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingle);
 		static readonly BoxVector4DelegateType BoxVector4Delegate = new BoxVector4DelegateType(BoxVector4);
 		static readonly UnboxVector4DelegateType UnboxVector4Delegate = new UnboxVector4DelegateType(UnboxVector4);
+		static readonly UnityEngineQuaternionConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingleDelegateType UnityEngineQuaternionConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingleDelegate = new UnityEngineQuaternionConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingleDelegateType(UnityEngineQuaternionConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingle);
 		static readonly BoxQuaternionDelegateType BoxQuaternionDelegate = new BoxQuaternionDelegateType(BoxQuaternion);
 		static readonly UnboxQuaternionDelegateType UnboxQuaternionDelegate = new UnboxQuaternionDelegateType(UnboxQuaternion);
 		static readonly UnityEngineMatrix4x4ConstructorUnityEngineVector4_UnityEngineVector4_UnityEngineVector4_UnityEngineVector4DelegateType UnityEngineMatrix4x4ConstructorUnityEngineVector4_UnityEngineVector4_UnityEngineVector4_UnityEngineVector4Delegate = new UnityEngineMatrix4x4ConstructorUnityEngineVector4_UnityEngineVector4_UnityEngineVector4_UnityEngineVector4DelegateType(UnityEngineMatrix4x4ConstructorUnityEngineVector4_UnityEngineVector4_UnityEngineVector4_UnityEngineVector4);
@@ -792,6 +799,7 @@ namespace NativeScript
 		static readonly UnityEngineTransformPropertySetRotationDelegateType UnityEngineTransformPropertySetRotationDelegate = new UnityEngineTransformPropertySetRotationDelegateType(UnityEngineTransformPropertySetRotation);
 		static readonly UnityEngineTransformPropertyGetLocalScaleDelegateType UnityEngineTransformPropertyGetLocalScaleDelegate = new UnityEngineTransformPropertyGetLocalScaleDelegateType(UnityEngineTransformPropertyGetLocalScale);
 		static readonly UnityEngineTransformPropertySetLocalScaleDelegateType UnityEngineTransformPropertySetLocalScaleDelegate = new UnityEngineTransformPropertySetLocalScaleDelegateType(UnityEngineTransformPropertySetLocalScale);
+		static readonly UnityEngineTransformPropertyGetLocalToWorldMatrixDelegateType UnityEngineTransformPropertyGetLocalToWorldMatrixDelegate = new UnityEngineTransformPropertyGetLocalToWorldMatrixDelegateType(UnityEngineTransformPropertyGetLocalToWorldMatrix);
 		static readonly UnityEngineTransformPropertyGetParentDelegateType UnityEngineTransformPropertyGetParentDelegate = new UnityEngineTransformPropertyGetParentDelegateType(UnityEngineTransformPropertyGetParent);
 		static readonly UnityEngineTransformPropertySetParentDelegateType UnityEngineTransformPropertySetParentDelegate = new UnityEngineTransformPropertySetParentDelegateType(UnityEngineTransformPropertySetParent);
 		static readonly SystemCollectionsIEnumeratorPropertyGetCurrentDelegateType SystemCollectionsIEnumeratorPropertyGetCurrentDelegate = new SystemCollectionsIEnumeratorPropertyGetCurrentDelegateType(SystemCollectionsIEnumeratorPropertyGetCurrent);
@@ -802,6 +810,7 @@ namespace NativeScript
 		static readonly UnityEngineGameObjectMethodAddComponentUnityEngineMeshFilterDelegateType UnityEngineGameObjectMethodAddComponentUnityEngineMeshFilterDelegate = new UnityEngineGameObjectMethodAddComponentUnityEngineMeshFilterDelegateType(UnityEngineGameObjectMethodAddComponentUnityEngineMeshFilter);
 		static readonly UnityEngineGameObjectMethodAddComponentUnityEngineMeshRendererDelegateType UnityEngineGameObjectMethodAddComponentUnityEngineMeshRendererDelegate = new UnityEngineGameObjectMethodAddComponentUnityEngineMeshRendererDelegateType(UnityEngineGameObjectMethodAddComponentUnityEngineMeshRenderer);
 		static readonly UnityEngineGameObjectMethodCreatePrimitiveUnityEnginePrimitiveTypeDelegateType UnityEngineGameObjectMethodCreatePrimitiveUnityEnginePrimitiveTypeDelegate = new UnityEngineGameObjectMethodCreatePrimitiveUnityEnginePrimitiveTypeDelegateType(UnityEngineGameObjectMethodCreatePrimitiveUnityEnginePrimitiveType);
+		static readonly UnityEngineGameObjectMethodSetActiveSystemBooleanDelegateType UnityEngineGameObjectMethodSetActiveSystemBooleanDelegate = new UnityEngineGameObjectMethodSetActiveSystemBooleanDelegateType(UnityEngineGameObjectMethodSetActiveSystemBoolean);
 		static readonly UnityEngineDebugMethodLogSystemObjectDelegateType UnityEngineDebugMethodLogSystemObjectDelegate = new UnityEngineDebugMethodLogSystemObjectDelegateType(UnityEngineDebugMethodLogSystemObject);
 		static readonly UnityEngineMonoBehaviourPropertyGetTransformDelegateType UnityEngineMonoBehaviourPropertyGetTransformDelegate = new UnityEngineMonoBehaviourPropertyGetTransformDelegateType(UnityEngineMonoBehaviourPropertyGetTransform);
 		static readonly UnityEngineMonoBehaviourPropertyGetGameObjectDelegateType UnityEngineMonoBehaviourPropertyGetGameObjectDelegate = new UnityEngineMonoBehaviourPropertyGetGameObjectDelegateType(UnityEngineMonoBehaviourPropertyGetGameObject);
@@ -1060,6 +1069,8 @@ namespace NativeScript
 			curMemory += IntPtr.Size;
 			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(UnboxVector4Delegate));
 			curMemory += IntPtr.Size;
+			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(UnityEngineQuaternionConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingleDelegate));
+			curMemory += IntPtr.Size;
 			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(BoxQuaternionDelegate));
 			curMemory += IntPtr.Size;
 			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(UnboxQuaternionDelegate));
@@ -1094,6 +1105,8 @@ namespace NativeScript
 			curMemory += IntPtr.Size;
 			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(UnityEngineTransformPropertySetLocalScaleDelegate));
 			curMemory += IntPtr.Size;
+			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(UnityEngineTransformPropertyGetLocalToWorldMatrixDelegate));
+			curMemory += IntPtr.Size;
 			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(UnityEngineTransformPropertyGetParentDelegate));
 			curMemory += IntPtr.Size;
 			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(UnityEngineTransformPropertySetParentDelegate));
@@ -1113,6 +1126,8 @@ namespace NativeScript
 			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(UnityEngineGameObjectMethodAddComponentUnityEngineMeshRendererDelegate));
 			curMemory += IntPtr.Size;
 			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(UnityEngineGameObjectMethodCreatePrimitiveUnityEnginePrimitiveTypeDelegate));
+			curMemory += IntPtr.Size;
+			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(UnityEngineGameObjectMethodSetActiveSystemBooleanDelegate));
 			curMemory += IntPtr.Size;
 			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(UnityEngineDebugMethodLogSystemObjectDelegate));
 			curMemory += IntPtr.Size;
@@ -1688,6 +1703,28 @@ namespace NativeScript
 			}
 		}
 		
+		[MonoPInvokeCallback(typeof(UnityEngineQuaternionConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingleDelegateType))]
+		static UnityEngine.Quaternion UnityEngineQuaternionConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingle(float x, float y, float z, float w)
+		{
+			try
+			{
+				var returnValue = new UnityEngine.Quaternion(x, y, z, w);
+				return returnValue;
+			}
+			catch (System.NullReferenceException ex)
+			{
+				UnityEngine.Debug.LogException(ex);
+				NativeScript.Bindings.SetCsharpExceptionSystemNullReferenceException(NativeScript.Bindings.ObjectStore.Store(ex));
+				return default(UnityEngine.Quaternion);
+			}
+			catch (System.Exception ex)
+			{
+				UnityEngine.Debug.LogException(ex);
+				NativeScript.Bindings.SetCsharpException(NativeScript.Bindings.ObjectStore.Store(ex));
+				return default(UnityEngine.Quaternion);
+			}
+		}
+		
 		[MonoPInvokeCallback(typeof(BoxQuaternionDelegateType))]
 		static int BoxQuaternion(ref UnityEngine.Quaternion val)
 		{
@@ -2062,6 +2099,29 @@ namespace NativeScript
 			}
 		}
 		
+		[MonoPInvokeCallback(typeof(UnityEngineTransformPropertyGetLocalToWorldMatrixDelegateType))]
+		static UnityEngine.Matrix4x4 UnityEngineTransformPropertyGetLocalToWorldMatrix(int thisHandle)
+		{
+			try
+			{
+				var thiz = (UnityEngine.Transform)NativeScript.Bindings.ObjectStore.Get(thisHandle);
+				var returnValue = thiz.localToWorldMatrix;
+				return returnValue;
+			}
+			catch (System.NullReferenceException ex)
+			{
+				UnityEngine.Debug.LogException(ex);
+				NativeScript.Bindings.SetCsharpExceptionSystemNullReferenceException(NativeScript.Bindings.ObjectStore.Store(ex));
+				return default(UnityEngine.Matrix4x4);
+			}
+			catch (System.Exception ex)
+			{
+				UnityEngine.Debug.LogException(ex);
+				NativeScript.Bindings.SetCsharpException(NativeScript.Bindings.ObjectStore.Store(ex));
+				return default(UnityEngine.Matrix4x4);
+			}
+		}
+		
 		[MonoPInvokeCallback(typeof(UnityEngineTransformPropertyGetParentDelegateType))]
 		static int UnityEngineTransformPropertyGetParent(int thisHandle)
 		{
@@ -2286,6 +2346,26 @@ namespace NativeScript
 				UnityEngine.Debug.LogException(ex);
 				NativeScript.Bindings.SetCsharpException(NativeScript.Bindings.ObjectStore.Store(ex));
 				return default(int);
+			}
+		}
+		
+		[MonoPInvokeCallback(typeof(UnityEngineGameObjectMethodSetActiveSystemBooleanDelegateType))]
+		static void UnityEngineGameObjectMethodSetActiveSystemBoolean(int thisHandle, bool value)
+		{
+			try
+			{
+				var thiz = (UnityEngine.GameObject)NativeScript.Bindings.ObjectStore.Get(thisHandle);
+				thiz.SetActive(value);
+			}
+			catch (System.NullReferenceException ex)
+			{
+				UnityEngine.Debug.LogException(ex);
+				NativeScript.Bindings.SetCsharpExceptionSystemNullReferenceException(NativeScript.Bindings.ObjectStore.Store(ex));
+			}
+			catch (System.Exception ex)
+			{
+				UnityEngine.Debug.LogException(ex);
+				NativeScript.Bindings.SetCsharpException(NativeScript.Bindings.ObjectStore.Store(ex));
 			}
 		}
 		

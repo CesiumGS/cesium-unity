@@ -1818,6 +1818,7 @@ namespace UnityEngine
 	struct Quaternion
 	{
 		Quaternion();
+		Quaternion(System::Single x, System::Single y, System::Single z, System::Single w);
 		System::Single x;
 		System::Single y;
 		System::Single z;
@@ -1918,6 +1919,7 @@ namespace UnityEngine
 		void SetRotation(UnityEngine::Quaternion& value);
 		UnityEngine::Vector3 GetLocalScale();
 		void SetLocalScale(UnityEngine::Vector3& value);
+		UnityEngine::Matrix4x4 GetLocalToWorldMatrix();
 		UnityEngine::Transform GetParent();
 		void SetParent(UnityEngine::Transform& value);
 	};
@@ -2009,6 +2011,7 @@ namespace UnityEngine
 		UnityEngine::Transform GetTransform();
 		template<typename MT0> MT0 AddComponent();
 		static UnityEngine::GameObject CreatePrimitive(UnityEngine::PrimitiveType type);
+		virtual void SetActive(System::Boolean value);
 	};
 }
 
