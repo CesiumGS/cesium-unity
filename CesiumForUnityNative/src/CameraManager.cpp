@@ -20,7 +20,7 @@ ViewState unityCameraToViewState(Camera& camera) {
   Transform transform = camera.GetTransform();
 
   glm::dvec3 origin = Ellipsoid::WGS84.cartographicToCartesian(
-      Cartographic::fromDegrees(-105.25737, 39.736401, 2250.0));
+      Cartographic::fromDegrees(144.96133, -37.81510, 2250.0));
   glm::dmat4 enuToFixed = Transforms::eastNorthUpToFixedFrame(origin);
   glm::dmat4 swapYandZ(
       glm::dvec4(1.0, 0.0, 0.0, 0.0),

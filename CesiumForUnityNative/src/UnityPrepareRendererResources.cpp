@@ -115,7 +115,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         // location in Denver and adjust for Unity left-handed, Y-up
         // convention.
         glm::dvec3 origin = Ellipsoid::WGS84.cartographicToCartesian(
-            Cartographic::fromDegrees(-105.25737, 39.736401, 2250.0));
+            Cartographic::fromDegrees(144.96133, -37.81510, 2250.0));
         glm::dmat4 enuToFixed = Transforms::eastNorthUpToFixedFrame(origin);
         glm::dmat4 fixedToEnu = glm::affineInverse(enuToFixed);
         glm::dmat4 swapYandZ(
@@ -219,7 +219,13 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 void UnityPrepareRendererResources::free(
     Cesium3DTilesSelection::Tile& tile,
     void* pLoadThreadResult,
-    void* pMainThreadResult) noexcept {}
+    void* pMainThreadResult) noexcept {
+  if (pMainThreadResult) {
+    UnityEngine::GameObject* pGameObject =
+        static_cast<UnityEngine::GameObject*>(pMainThreadResult);
+    delete pGameObject;
+  }
+}
 
 void* UnityPrepareRendererResources::prepareRasterInLoadThread(
     const CesiumGltf::ImageCesium& image,

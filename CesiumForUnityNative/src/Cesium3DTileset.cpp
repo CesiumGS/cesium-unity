@@ -24,12 +24,11 @@ CESIUM_FOR_UNITY_CESIUM3DTILESET_DEFAULT_CONSTRUCTOR_DEFINITION
 
 void Cesium3DTileset::Start() {
   TilesetOptions options{};
-  options.enableFrustumCulling = false;
 
   this->_lastUpdateResult = ViewUpdateResult();
   this->_pTileset = std::make_unique<Tileset>(
       createTilesetExternals(this->GetGameObject()),
-      1,
+      69380,
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
       "eyJqdGkiOiJjZmUzNjE3MC0wZmUwLTQzODItODMwZC01ZjE1Yzg1N2Y1MDIiLCJpZCI6MjU4"
       "LCJpYXQiOjE1MTczNTg0ODF9.Yv10hy_E1N0Ccc4y23fMlNkBtxiFc852wAfUSwmVUaA",
