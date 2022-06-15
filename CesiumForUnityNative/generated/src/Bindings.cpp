@@ -92,9 +92,12 @@ namespace Plugin
 	int32_t (*SystemCollectionsGenericIEnumerableSystemInt32MethodGetEnumerator)(int32_t thisHandle);
 	int32_t (*UnityEngineMeshConstructor)();
 	void (*UnityEngineMeshMethodSetVerticesUnityEngineVector3Array1)(int32_t thisHandle, int32_t inVerticesHandle);
+	void (*UnityEngineMeshMethodSetNormalsUnityEngineVector3Array1)(int32_t thisHandle, int32_t inNormalsHandle);
 	void (*UnityEngineMeshMethodSetTrianglesSystemInt32Array1_SystemInt32_SystemBoolean_SystemInt32)(int32_t thisHandle, int32_t trianglesHandle, int32_t submesh, uint32_t calculateBounds, int32_t baseVertex);
 	int32_t (*UnityEngineMeshFilterPropertyGetMesh)(int32_t thisHandle);
 	void (*UnityEngineMeshFilterPropertySetMesh)(int32_t thisHandle, int32_t valueHandle);
+	int32_t (*UnityEngineMeshRendererPropertyGetMaterial)(int32_t thisHandle);
+	void (*UnityEngineMeshRendererPropertySetMaterial)(int32_t thisHandle, int32_t valueHandle);
 	int32_t (*SystemExceptionConstructorSystemString)(int32_t messageHandle);
 	int32_t (*BoxPrimitiveType)(UnityEngine::PrimitiveType val);
 	UnityEngine::PrimitiveType (*UnboxPrimitiveType)(int32_t valHandle);
@@ -130,6 +133,7 @@ namespace Plugin
 	void (*ReleaseBaseCesium3DTileset)(int32_t handle);
 	void (*BaseCesium3DTilesetConstructor)(int32_t cppHandle, int32_t* handle);
 	int32_t (*SystemThreadingTasksTaskMethodRunSystemAction)(int32_t actionHandle);
+	int32_t (*UnityEngineResourcesMethodLoadUnityEngineMaterialSystemString)(int32_t pathHandle);
 	int32_t (*BoxBoolean)(uint32_t val);
 	int32_t (*UnboxBoolean)(int32_t valHandle);
 	int32_t (*BoxSByte)(int8_t val);
@@ -8123,6 +8127,18 @@ namespace UnityEngine
 		}
 	}
 	
+	void UnityEngine::Mesh::SetNormals(System::Array1<UnityEngine::Vector3>& inNormals)
+	{
+		Plugin::UnityEngineMeshMethodSetNormalsUnityEngineVector3Array1(Handle, inNormals.Handle);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+	}
+	
 	void UnityEngine::Mesh::SetTriangles(System::Array1<System::Int32>& triangles, System::Int32 submesh, System::Boolean calculateBounds, System::Int32 baseVertex)
 	{
 		Plugin::UnityEngineMeshMethodSetTrianglesSystemInt32Array1_SystemInt32_SystemBoolean_SystemInt32(Handle, triangles.Handle, submesh, calculateBounds, baseVertex);
@@ -8415,6 +8431,31 @@ namespace UnityEngine
 	bool MeshRenderer::operator!=(const MeshRenderer& other) const
 	{
 		return Handle != other.Handle;
+	}
+	
+	UnityEngine::Material UnityEngine::MeshRenderer::GetMaterial()
+	{
+		auto returnValue = Plugin::UnityEngineMeshRendererPropertyGetMaterial(Handle);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return UnityEngine::Material(Plugin::InternalUse::Only, returnValue);
+	}
+	
+	void UnityEngine::MeshRenderer::SetMaterial(UnityEngine::Material& value)
+	{
+		Plugin::UnityEngineMeshRendererPropertySetMaterial(Handle, value.Handle);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
 	}
 }
 
@@ -10825,6 +10866,183 @@ namespace System
 	}
 }
 
+namespace UnityEngine
+{
+	Material::Material(decltype(nullptr))
+		: UnityEngine::Object(nullptr)
+	{
+	}
+	
+	Material::Material(Plugin::InternalUse, int32_t handle)
+		: UnityEngine::Object(nullptr)
+	{
+		Handle = handle;
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+		}
+	}
+	
+	Material::Material(const Material& other)
+		: Material(Plugin::InternalUse::Only, other.Handle)
+	{
+	}
+	
+	Material::Material(Material&& other)
+		: Material(Plugin::InternalUse::Only, other.Handle)
+	{
+		other.Handle = 0;
+	}
+	
+	Material::~Material()
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+	}
+	
+	Material& Material::operator=(const Material& other)
+	{
+		if (this->Handle)
+		{
+			Plugin::DereferenceManagedClass(this->Handle);
+		}
+		this->Handle = other.Handle;
+		if (this->Handle)
+		{
+			Plugin::ReferenceManagedClass(this->Handle);
+		}
+		return *this;
+	}
+	
+	Material& Material::operator=(decltype(nullptr))
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+		return *this;
+	}
+	
+	Material& Material::operator=(Material&& other)
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+		}
+		Handle = other.Handle;
+		other.Handle = 0;
+		return *this;
+	}
+	
+	bool Material::operator==(const Material& other) const
+	{
+		return Handle == other.Handle;
+	}
+	
+	bool Material::operator!=(const Material& other) const
+	{
+		return Handle != other.Handle;
+	}
+}
+
+namespace UnityEngine
+{
+	Resources::Resources(decltype(nullptr))
+	{
+	}
+	
+	Resources::Resources(Plugin::InternalUse, int32_t handle)
+	{
+		Handle = handle;
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+		}
+	}
+	
+	Resources::Resources(const Resources& other)
+		: Resources(Plugin::InternalUse::Only, other.Handle)
+	{
+	}
+	
+	Resources::Resources(Resources&& other)
+		: Resources(Plugin::InternalUse::Only, other.Handle)
+	{
+		other.Handle = 0;
+	}
+	
+	Resources::~Resources()
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+	}
+	
+	Resources& Resources::operator=(const Resources& other)
+	{
+		if (this->Handle)
+		{
+			Plugin::DereferenceManagedClass(this->Handle);
+		}
+		this->Handle = other.Handle;
+		if (this->Handle)
+		{
+			Plugin::ReferenceManagedClass(this->Handle);
+		}
+		return *this;
+	}
+	
+	Resources& Resources::operator=(decltype(nullptr))
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+		return *this;
+	}
+	
+	Resources& Resources::operator=(Resources&& other)
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+		}
+		Handle = other.Handle;
+		other.Handle = 0;
+		return *this;
+	}
+	
+	bool Resources::operator==(const Resources& other) const
+	{
+		return Handle == other.Handle;
+	}
+	
+	bool Resources::operator!=(const Resources& other) const
+	{
+		return Handle != other.Handle;
+	}
+	
+	template<> UnityEngine::Material UnityEngine::Resources::Load<UnityEngine::Material>(System::String& path)
+	{
+		auto returnValue = Plugin::UnityEngineResourcesMethodLoadUnityEngineMaterialSystemString(path.Handle);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return UnityEngine::Material(Plugin::InternalUse::Only, returnValue);
+	}
+}
+
 namespace System
 {
 	System::Object::operator System::Boolean()
@@ -12133,12 +12351,18 @@ DLLEXPORT void Init(
 	curMemory += sizeof(Plugin::UnityEngineMeshConstructor);
 	Plugin::UnityEngineMeshMethodSetVerticesUnityEngineVector3Array1 = *(void (**)(int32_t thisHandle, int32_t inVerticesHandle))curMemory;
 	curMemory += sizeof(Plugin::UnityEngineMeshMethodSetVerticesUnityEngineVector3Array1);
+	Plugin::UnityEngineMeshMethodSetNormalsUnityEngineVector3Array1 = *(void (**)(int32_t thisHandle, int32_t inNormalsHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineMeshMethodSetNormalsUnityEngineVector3Array1);
 	Plugin::UnityEngineMeshMethodSetTrianglesSystemInt32Array1_SystemInt32_SystemBoolean_SystemInt32 = *(void (**)(int32_t thisHandle, int32_t trianglesHandle, int32_t submesh, uint32_t calculateBounds, int32_t baseVertex))curMemory;
 	curMemory += sizeof(Plugin::UnityEngineMeshMethodSetTrianglesSystemInt32Array1_SystemInt32_SystemBoolean_SystemInt32);
 	Plugin::UnityEngineMeshFilterPropertyGetMesh = *(int32_t (**)(int32_t thisHandle))curMemory;
 	curMemory += sizeof(Plugin::UnityEngineMeshFilterPropertyGetMesh);
 	Plugin::UnityEngineMeshFilterPropertySetMesh = *(void (**)(int32_t thisHandle, int32_t valueHandle))curMemory;
 	curMemory += sizeof(Plugin::UnityEngineMeshFilterPropertySetMesh);
+	Plugin::UnityEngineMeshRendererPropertyGetMaterial = *(int32_t (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineMeshRendererPropertyGetMaterial);
+	Plugin::UnityEngineMeshRendererPropertySetMaterial = *(void (**)(int32_t thisHandle, int32_t valueHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineMeshRendererPropertySetMaterial);
 	Plugin::SystemExceptionConstructorSystemString = *(int32_t (**)(int32_t messageHandle))curMemory;
 	curMemory += sizeof(Plugin::SystemExceptionConstructorSystemString);
 	Plugin::BoxPrimitiveType = *(int32_t (**)(UnityEngine::PrimitiveType val))curMemory;
@@ -12209,6 +12433,8 @@ DLLEXPORT void Init(
 	curMemory += sizeof(Plugin::BaseCesium3DTilesetConstructor);
 	Plugin::SystemThreadingTasksTaskMethodRunSystemAction = *(int32_t (**)(int32_t actionHandle))curMemory;
 	curMemory += sizeof(Plugin::SystemThreadingTasksTaskMethodRunSystemAction);
+	Plugin::UnityEngineResourcesMethodLoadUnityEngineMaterialSystemString = *(int32_t (**)(int32_t pathHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineResourcesMethodLoadUnityEngineMaterialSystemString);
 	Plugin::BoxBoolean = *(int32_t (**)(uint32_t val))curMemory;
 	curMemory += sizeof(Plugin::BoxBoolean);
 	Plugin::UnboxBoolean = *(int32_t (**)(int32_t valHandle))curMemory;

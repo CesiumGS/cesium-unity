@@ -168,6 +168,10 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             primitiveGameObject.AddComponent<UnityEngine::MeshFilter>();
         UnityEngine::MeshRenderer meshRenderer =
             primitiveGameObject.AddComponent<UnityEngine::MeshRenderer>();
+        UnityEngine::Material material =
+            UnityEngine::Resources::Load<UnityEngine::Material>(
+                String("CesiumDefaultMaterial"));
+        meshRenderer.SetMaterial(material);
 
         UnityEngine::Mesh unityMesh{};
 
@@ -176,6 +180,20 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           vertices[i] = positionView[i];
         }
         unityMesh.SetVertices(vertices);
+
+        auto normalAccessorIt = primitive.attributes.find("NORMAL");
+        if (normalAccessorIt != primitive.attributes.end()) {
+          int32_t normalAccessorID = normalAccessorIt->second;
+          AccessorView<UnityEngine::Vector3> normalView(gltf, normalAccessorID);
+
+          Array1<UnityEngine::Vector3> normals(normalView.size());
+          if (normalView.status() == AccessorViewStatus::Valid) {
+            for (int64_t i = 0; i < normalView.size(); ++i) {
+              normals[i] = normalView[i];
+            }
+            unityMesh.SetNormals(normals);
+          }
+        }
 
         AccessorView<uint8_t> indices8(gltf, primitive.indices);
         if (indices8.status() == AccessorViewStatus::Valid) {

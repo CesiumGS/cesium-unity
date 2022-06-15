@@ -667,6 +667,16 @@ namespace System
 	}
 }
 
+namespace UnityEngine
+{
+	struct Material;
+}
+
+namespace UnityEngine
+{
+	struct Resources;
+}
+
 namespace System
 {
 	struct Action;
@@ -2581,6 +2591,7 @@ namespace UnityEngine
 		bool operator!=(const Mesh& other) const;
 		Mesh();
 		virtual void SetVertices(System::Array1<UnityEngine::Vector3>& inVertices);
+		virtual void SetNormals(System::Array1<UnityEngine::Vector3>& inNormals);
 		virtual void SetTriangles(System::Array1<System::Int32>& triangles, System::Int32 submesh, System::Boolean calculateBounds, System::Int32 baseVertex);
 	};
 }
@@ -2635,6 +2646,8 @@ namespace UnityEngine
 		MeshRenderer& operator=(MeshRenderer&& other);
 		bool operator==(const MeshRenderer& other) const;
 		bool operator!=(const MeshRenderer& other) const;
+		UnityEngine::Material GetMaterial();
+		void SetMaterial(UnityEngine::Material& value);
 	};
 }
 
@@ -3046,6 +3059,41 @@ namespace System
 			};
 		}
 	}
+}
+
+namespace UnityEngine
+{
+	struct Material : virtual UnityEngine::Object
+	{
+		Material(decltype(nullptr));
+		Material(Plugin::InternalUse, int32_t handle);
+		Material(const Material& other);
+		Material(Material&& other);
+		virtual ~Material();
+		Material& operator=(const Material& other);
+		Material& operator=(decltype(nullptr));
+		Material& operator=(Material&& other);
+		bool operator==(const Material& other) const;
+		bool operator!=(const Material& other) const;
+	};
+}
+
+namespace UnityEngine
+{
+	struct Resources : virtual System::Object
+	{
+		Resources(decltype(nullptr));
+		Resources(Plugin::InternalUse, int32_t handle);
+		Resources(const Resources& other);
+		Resources(Resources&& other);
+		virtual ~Resources();
+		Resources& operator=(const Resources& other);
+		Resources& operator=(decltype(nullptr));
+		Resources& operator=(Resources&& other);
+		bool operator==(const Resources& other) const;
+		bool operator!=(const Resources& other) const;
+		template<typename MT0> static MT0 Load(System::String& path);
+	};
 }
 
 namespace Plugin

@@ -588,11 +588,17 @@ namespace NativeScript
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		delegate void UnityEngineMeshMethodSetVerticesUnityEngineVector3Array1DelegateType(int thisHandle, int inVerticesHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		delegate void UnityEngineMeshMethodSetNormalsUnityEngineVector3Array1DelegateType(int thisHandle, int inNormalsHandle);
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		delegate void UnityEngineMeshMethodSetTrianglesSystemInt32Array1_SystemInt32_SystemBoolean_SystemInt32DelegateType(int thisHandle, int trianglesHandle, int submesh, bool calculateBounds, int baseVertex);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		delegate int UnityEngineMeshFilterPropertyGetMeshDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		delegate void UnityEngineMeshFilterPropertySetMeshDelegateType(int thisHandle, int valueHandle);
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		delegate int UnityEngineMeshRendererPropertyGetMaterialDelegateType(int thisHandle);
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		delegate void UnityEngineMeshRendererPropertySetMaterialDelegateType(int thisHandle, int valueHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		delegate int SystemExceptionConstructorSystemStringDelegateType(int messageHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -663,6 +669,8 @@ namespace NativeScript
 		delegate void ReleaseBaseCesium3DTilesetDelegateType(int handle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		delegate int SystemThreadingTasksTaskMethodRunSystemActionDelegateType(int actionHandle);
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		delegate int UnityEngineResourcesMethodLoadUnityEngineMaterialSystemStringDelegateType(int pathHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		delegate int BoxBooleanDelegateType(bool val);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -820,9 +828,12 @@ namespace NativeScript
 		static readonly SystemCollectionsGenericIEnumerableSystemInt32MethodGetEnumeratorDelegateType SystemCollectionsGenericIEnumerableSystemInt32MethodGetEnumeratorDelegate = new SystemCollectionsGenericIEnumerableSystemInt32MethodGetEnumeratorDelegateType(SystemCollectionsGenericIEnumerableSystemInt32MethodGetEnumerator);
 		static readonly UnityEngineMeshConstructorDelegateType UnityEngineMeshConstructorDelegate = new UnityEngineMeshConstructorDelegateType(UnityEngineMeshConstructor);
 		static readonly UnityEngineMeshMethodSetVerticesUnityEngineVector3Array1DelegateType UnityEngineMeshMethodSetVerticesUnityEngineVector3Array1Delegate = new UnityEngineMeshMethodSetVerticesUnityEngineVector3Array1DelegateType(UnityEngineMeshMethodSetVerticesUnityEngineVector3Array1);
+		static readonly UnityEngineMeshMethodSetNormalsUnityEngineVector3Array1DelegateType UnityEngineMeshMethodSetNormalsUnityEngineVector3Array1Delegate = new UnityEngineMeshMethodSetNormalsUnityEngineVector3Array1DelegateType(UnityEngineMeshMethodSetNormalsUnityEngineVector3Array1);
 		static readonly UnityEngineMeshMethodSetTrianglesSystemInt32Array1_SystemInt32_SystemBoolean_SystemInt32DelegateType UnityEngineMeshMethodSetTrianglesSystemInt32Array1_SystemInt32_SystemBoolean_SystemInt32Delegate = new UnityEngineMeshMethodSetTrianglesSystemInt32Array1_SystemInt32_SystemBoolean_SystemInt32DelegateType(UnityEngineMeshMethodSetTrianglesSystemInt32Array1_SystemInt32_SystemBoolean_SystemInt32);
 		static readonly UnityEngineMeshFilterPropertyGetMeshDelegateType UnityEngineMeshFilterPropertyGetMeshDelegate = new UnityEngineMeshFilterPropertyGetMeshDelegateType(UnityEngineMeshFilterPropertyGetMesh);
 		static readonly UnityEngineMeshFilterPropertySetMeshDelegateType UnityEngineMeshFilterPropertySetMeshDelegate = new UnityEngineMeshFilterPropertySetMeshDelegateType(UnityEngineMeshFilterPropertySetMesh);
+		static readonly UnityEngineMeshRendererPropertyGetMaterialDelegateType UnityEngineMeshRendererPropertyGetMaterialDelegate = new UnityEngineMeshRendererPropertyGetMaterialDelegateType(UnityEngineMeshRendererPropertyGetMaterial);
+		static readonly UnityEngineMeshRendererPropertySetMaterialDelegateType UnityEngineMeshRendererPropertySetMaterialDelegate = new UnityEngineMeshRendererPropertySetMaterialDelegateType(UnityEngineMeshRendererPropertySetMaterial);
 		static readonly SystemExceptionConstructorSystemStringDelegateType SystemExceptionConstructorSystemStringDelegate = new SystemExceptionConstructorSystemStringDelegateType(SystemExceptionConstructorSystemString);
 		static readonly BoxPrimitiveTypeDelegateType BoxPrimitiveTypeDelegate = new BoxPrimitiveTypeDelegateType(BoxPrimitiveType);
 		static readonly UnboxPrimitiveTypeDelegateType UnboxPrimitiveTypeDelegate = new UnboxPrimitiveTypeDelegateType(UnboxPrimitiveType);
@@ -858,6 +869,7 @@ namespace NativeScript
 		static readonly ReleaseBaseCesium3DTilesetDelegateType ReleaseBaseCesium3DTilesetDelegate = new ReleaseBaseCesium3DTilesetDelegateType(ReleaseBaseCesium3DTileset);
 		static readonly BaseCesium3DTilesetConstructorDelegateType BaseCesium3DTilesetConstructorDelegate = new BaseCesium3DTilesetConstructorDelegateType(BaseCesium3DTilesetConstructor);
 		static readonly SystemThreadingTasksTaskMethodRunSystemActionDelegateType SystemThreadingTasksTaskMethodRunSystemActionDelegate = new SystemThreadingTasksTaskMethodRunSystemActionDelegateType(SystemThreadingTasksTaskMethodRunSystemAction);
+		static readonly UnityEngineResourcesMethodLoadUnityEngineMaterialSystemStringDelegateType UnityEngineResourcesMethodLoadUnityEngineMaterialSystemStringDelegate = new UnityEngineResourcesMethodLoadUnityEngineMaterialSystemStringDelegateType(UnityEngineResourcesMethodLoadUnityEngineMaterialSystemString);
 		static readonly BoxBooleanDelegateType BoxBooleanDelegate = new BoxBooleanDelegateType(BoxBoolean);
 		static readonly UnboxBooleanDelegateType UnboxBooleanDelegate = new UnboxBooleanDelegateType(UnboxBoolean);
 		static readonly BoxSByteDelegateType BoxSByteDelegate = new BoxSByteDelegateType(BoxSByte);
@@ -1147,11 +1159,17 @@ namespace NativeScript
 			curMemory += IntPtr.Size;
 			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(UnityEngineMeshMethodSetVerticesUnityEngineVector3Array1Delegate));
 			curMemory += IntPtr.Size;
+			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(UnityEngineMeshMethodSetNormalsUnityEngineVector3Array1Delegate));
+			curMemory += IntPtr.Size;
 			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(UnityEngineMeshMethodSetTrianglesSystemInt32Array1_SystemInt32_SystemBoolean_SystemInt32Delegate));
 			curMemory += IntPtr.Size;
 			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(UnityEngineMeshFilterPropertyGetMeshDelegate));
 			curMemory += IntPtr.Size;
 			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(UnityEngineMeshFilterPropertySetMeshDelegate));
+			curMemory += IntPtr.Size;
+			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(UnityEngineMeshRendererPropertyGetMaterialDelegate));
+			curMemory += IntPtr.Size;
+			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(UnityEngineMeshRendererPropertySetMaterialDelegate));
 			curMemory += IntPtr.Size;
 			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(SystemExceptionConstructorSystemStringDelegate));
 			curMemory += IntPtr.Size;
@@ -1222,6 +1240,8 @@ namespace NativeScript
 			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(BaseCesium3DTilesetConstructorDelegate));
 			curMemory += IntPtr.Size;
 			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(SystemThreadingTasksTaskMethodRunSystemActionDelegate));
+			curMemory += IntPtr.Size;
+			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(UnityEngineResourcesMethodLoadUnityEngineMaterialSystemStringDelegate));
 			curMemory += IntPtr.Size;
 			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(BoxBooleanDelegate));
 			curMemory += IntPtr.Size;
@@ -2570,6 +2590,27 @@ namespace NativeScript
 			}
 		}
 		
+		[MonoPInvokeCallback(typeof(UnityEngineMeshMethodSetNormalsUnityEngineVector3Array1DelegateType))]
+		static void UnityEngineMeshMethodSetNormalsUnityEngineVector3Array1(int thisHandle, int inNormalsHandle)
+		{
+			try
+			{
+				var thiz = (UnityEngine.Mesh)NativeScript.Bindings.ObjectStore.Get(thisHandle);
+				var inNormals = (UnityEngine.Vector3[])NativeScript.Bindings.ObjectStore.Get(inNormalsHandle);
+				thiz.SetNormals(inNormals);
+			}
+			catch (System.NullReferenceException ex)
+			{
+				UnityEngine.Debug.LogException(ex);
+				NativeScript.Bindings.SetCsharpExceptionSystemNullReferenceException(NativeScript.Bindings.ObjectStore.Store(ex));
+			}
+			catch (System.Exception ex)
+			{
+				UnityEngine.Debug.LogException(ex);
+				NativeScript.Bindings.SetCsharpException(NativeScript.Bindings.ObjectStore.Store(ex));
+			}
+		}
+		
 		[MonoPInvokeCallback(typeof(UnityEngineMeshMethodSetTrianglesSystemInt32Array1_SystemInt32_SystemBoolean_SystemInt32DelegateType))]
 		static void UnityEngineMeshMethodSetTrianglesSystemInt32Array1_SystemInt32_SystemBoolean_SystemInt32(int thisHandle, int trianglesHandle, int submesh, bool calculateBounds, int baseVertex)
 		{
@@ -2622,6 +2663,50 @@ namespace NativeScript
 				var thiz = (UnityEngine.MeshFilter)NativeScript.Bindings.ObjectStore.Get(thisHandle);
 				var value = (UnityEngine.Mesh)NativeScript.Bindings.ObjectStore.Get(valueHandle);
 				thiz.mesh = value;
+			}
+			catch (System.NullReferenceException ex)
+			{
+				UnityEngine.Debug.LogException(ex);
+				NativeScript.Bindings.SetCsharpExceptionSystemNullReferenceException(NativeScript.Bindings.ObjectStore.Store(ex));
+			}
+			catch (System.Exception ex)
+			{
+				UnityEngine.Debug.LogException(ex);
+				NativeScript.Bindings.SetCsharpException(NativeScript.Bindings.ObjectStore.Store(ex));
+			}
+		}
+		
+		[MonoPInvokeCallback(typeof(UnityEngineMeshRendererPropertyGetMaterialDelegateType))]
+		static int UnityEngineMeshRendererPropertyGetMaterial(int thisHandle)
+		{
+			try
+			{
+				var thiz = (UnityEngine.MeshRenderer)NativeScript.Bindings.ObjectStore.Get(thisHandle);
+				var returnValue = thiz.material;
+				return NativeScript.Bindings.ObjectStore.GetHandle(returnValue);
+			}
+			catch (System.NullReferenceException ex)
+			{
+				UnityEngine.Debug.LogException(ex);
+				NativeScript.Bindings.SetCsharpExceptionSystemNullReferenceException(NativeScript.Bindings.ObjectStore.Store(ex));
+				return default(int);
+			}
+			catch (System.Exception ex)
+			{
+				UnityEngine.Debug.LogException(ex);
+				NativeScript.Bindings.SetCsharpException(NativeScript.Bindings.ObjectStore.Store(ex));
+				return default(int);
+			}
+		}
+		
+		[MonoPInvokeCallback(typeof(UnityEngineMeshRendererPropertySetMaterialDelegateType))]
+		static void UnityEngineMeshRendererPropertySetMaterial(int thisHandle, int valueHandle)
+		{
+			try
+			{
+				var thiz = (UnityEngine.MeshRenderer)NativeScript.Bindings.ObjectStore.Get(thisHandle);
+				var value = (UnityEngine.Material)NativeScript.Bindings.ObjectStore.Get(valueHandle);
+				thiz.material = value;
 			}
 			catch (System.NullReferenceException ex)
 			{
@@ -3400,6 +3485,29 @@ namespace NativeScript
 			{
 				var action = (System.Action)NativeScript.Bindings.ObjectStore.Get(actionHandle);
 				var returnValue = System.Threading.Tasks.Task.Run(action);
+				return NativeScript.Bindings.ObjectStore.GetHandle(returnValue);
+			}
+			catch (System.NullReferenceException ex)
+			{
+				UnityEngine.Debug.LogException(ex);
+				NativeScript.Bindings.SetCsharpExceptionSystemNullReferenceException(NativeScript.Bindings.ObjectStore.Store(ex));
+				return default(int);
+			}
+			catch (System.Exception ex)
+			{
+				UnityEngine.Debug.LogException(ex);
+				NativeScript.Bindings.SetCsharpException(NativeScript.Bindings.ObjectStore.Store(ex));
+				return default(int);
+			}
+		}
+		
+		[MonoPInvokeCallback(typeof(UnityEngineResourcesMethodLoadUnityEngineMaterialSystemStringDelegateType))]
+		static int UnityEngineResourcesMethodLoadUnityEngineMaterialSystemString(int pathHandle)
+		{
+			try
+			{
+				var path = (string)NativeScript.Bindings.ObjectStore.Get(pathHandle);
+				var returnValue = UnityEngine.Resources.Load<UnityEngine.Material>(path);
 				return NativeScript.Bindings.ObjectStore.GetHandle(returnValue);
 			}
 			catch (System.NullReferenceException ex)

@@ -506,6 +506,12 @@
 					]
 				},
 				{
+					"Name": "SetNormals",
+					"ParamTypes": [
+						"UnityEngine.Vector3[]"
+					]
+				},
+				{
 					"Name": "SetTriangles",
 					"ParamTypes": [
 						"System.Int32[]",
@@ -533,7 +539,12 @@
 			"Name": "UnityEngine.Renderer"
 		},
 		{
-			"Name": "UnityEngine.MeshRenderer"
+			"Name": "UnityEngine.MeshRenderer",
+			"Properties": [
+				{
+					"Name": "material"
+				}
+			]
 		},
 		{
 			"Name": "System.Exception",
@@ -715,6 +726,21 @@
 					"Name": "Run",
 					"ParamTypes": [
 						"System.Action"
+					]
+				}
+			]
+		},
+		{
+			"Name": "UnityEngine.Material"
+		},
+		{
+			"Name": "UnityEngine.Resources",
+			"Methods": [
+				{
+					"Name": "Load",
+					"ParamTypes": ["System.String"],
+					"GenericParams": [
+						{ "Types": ["UnityEngine.Material"] }
 					]
 				}
 			]
