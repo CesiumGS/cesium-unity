@@ -1,6 +1,7 @@
 #include "UnityPrepareRendererResources.h"
 
 #include "Bindings.h"
+#include "TextureLoader.h"
 
 #include <Cesium3DTilesSelection/GltfContent.h>
 #include <Cesium3DTilesSelection/Tile.h>
@@ -112,7 +113,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             pModelGameObject->GetTransform());
 
         // Hard-coded "georeference" to put the Unity origin at a default
-        // location in Denver and adjust for Unity left-handed, Y-up
+        // location in Melbourne and adjust for Unity left-handed, Y-up
         // convention.
         glm::dvec3 origin = Ellipsoid::WGS84.cartographicToCartesian(
             Cartographic::fromDegrees(144.96133, -37.81510, 2250.0));
@@ -168,10 +169,27 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             primitiveGameObject.AddComponent<UnityEngine::MeshFilter>();
         UnityEngine::MeshRenderer meshRenderer =
             primitiveGameObject.AddComponent<UnityEngine::MeshRenderer>();
-        UnityEngine::Material material =
+
+        UnityEngine::Material sharedMaterial =
             UnityEngine::Resources::Load<UnityEngine::Material>(
                 String("CesiumDefaultMaterial"));
-        meshRenderer.SetMaterial(material);
+        meshRenderer.SetMaterial(sharedMaterial);
+
+        UnityEngine::Material material = meshRenderer.GetMaterial();
+
+        const Material* pMaterial =
+            Model::getSafe(&gltf.materials, primitive.material);
+        if (pMaterial && pMaterial->pbrMetallicRoughness) {
+          const std::optional<TextureInfo>& baseColorTexture =
+              pMaterial->pbrMetallicRoughness->baseColorTexture;
+          if (baseColorTexture) {
+            UnityEngine::Texture texture =
+                TextureLoader::loadTexture(gltf, baseColorTexture->index);
+            if (texture != nullptr) {
+              material.SetTexture(String("_MainTex"), texture);
+            }
+          }
+        }
 
         UnityEngine::Mesh unityMesh{};
 
@@ -192,6 +210,22 @@ void* UnityPrepareRendererResources::prepareInMainThread(
               normals[i] = normalView[i];
             }
             unityMesh.SetNormals(normals);
+          }
+        }
+
+        auto texCoord0AccessorIt = primitive.attributes.find("TEXCOORD_0");
+        if (texCoord0AccessorIt != primitive.attributes.end()) {
+          int32_t texCoord0AccessorID = texCoord0AccessorIt->second;
+          AccessorView<UnityEngine::Vector2> texCoord0View(
+              gltf,
+              texCoord0AccessorID);
+
+          Array1<UnityEngine::Vector2> texCoord0s(texCoord0View.size());
+          if (texCoord0View.status() == AccessorViewStatus::Valid) {
+            for (int64_t i = 0; i < texCoord0View.size(); ++i) {
+              texCoord0s[i] = texCoord0View[i];
+            }
+            unityMesh.SetUVs(0, texCoord0s);
           }
         }
 

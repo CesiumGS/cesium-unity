@@ -430,6 +430,11 @@ namespace System
 
 namespace UnityEngine
 {
+	struct Vector2;
+}
+
+namespace UnityEngine
+{
 	struct Vector3;
 }
 
@@ -710,6 +715,21 @@ namespace UnityEditor
 	struct SceneView;
 }
 
+namespace UnityEngine
+{
+	struct Texture;
+}
+
+namespace UnityEngine
+{
+	struct TextureFormat;
+}
+
+namespace UnityEngine
+{
+	struct Texture2D;
+}
+
 namespace System
 {
 	struct Action;
@@ -780,6 +800,11 @@ namespace System
 namespace System
 {
 	template<> struct IEquatable_1<System::Decimal>;
+}
+
+namespace System
+{
+	template<> struct IEquatable_1<UnityEngine::Vector2>;
 }
 
 namespace System
@@ -873,7 +898,29 @@ namespace System
 	{
 		namespace Generic
 		{
+			template<> struct IEnumerator_1<UnityEngine::Vector2>;
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
 			template<> struct IEnumerator_1<UnityEngine::Vector3>;
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			template<> struct IEnumerator_1<System::Byte>;
 		}
 	}
 }
@@ -895,7 +942,29 @@ namespace System
 	{
 		namespace Generic
 		{
+			template<> struct IEnumerable_1<UnityEngine::Vector2>;
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
 			template<> struct IEnumerable_1<UnityEngine::Vector3>;
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			template<> struct IEnumerable_1<System::Byte>;
 		}
 	}
 }
@@ -917,6 +986,17 @@ namespace System
 	{
 		namespace Generic
 		{
+			template<> struct ICollection_1<UnityEngine::Vector2>;
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
 			template<> struct ICollection_1<UnityEngine::Vector3>;
 		}
 	}
@@ -928,7 +1008,29 @@ namespace System
 	{
 		namespace Generic
 		{
+			template<> struct ICollection_1<System::Byte>;
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
 			template<> struct ICollection_1<System::Int32>;
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			template<> struct IReadOnlyCollection_1<UnityEngine::Vector2>;
 		}
 	}
 }
@@ -961,7 +1063,40 @@ namespace System
 	{
 		namespace Generic
 		{
+			template<> struct IReadOnlyCollection_1<System::Byte>;
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			template<> struct IList_1<UnityEngine::Vector2>;
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
 			template<> struct IList_1<UnityEngine::Vector3>;
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			template<> struct IList_1<System::Byte>;
 		}
 	}
 }
@@ -983,7 +1118,29 @@ namespace System
 	{
 		namespace Generic
 		{
+			template<> struct IReadOnlyList_1<UnityEngine::Vector2>;
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
 			template<> struct IReadOnlyList_1<UnityEngine::Vector3>;
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			template<> struct IReadOnlyList_1<System::Byte>;
 		}
 	}
 }
@@ -1001,12 +1158,32 @@ namespace System
 
 namespace Plugin
 {
+	template<> struct ArrayElementProxy1_1<UnityEngine::Vector2>;
+}
+
+namespace System
+{
+	template<> struct Array1<UnityEngine::Vector2>;
+}
+
+namespace Plugin
+{
 	template<> struct ArrayElementProxy1_1<UnityEngine::Vector3>;
 }
 
 namespace System
 {
 	template<> struct Array1<UnityEngine::Vector3>;
+}
+
+namespace Plugin
+{
+	template<> struct ArrayElementProxy1_1<System::Byte>;
+}
+
+namespace System
+{
+	template<> struct Array1<System::Byte>;
 }
 
 namespace Plugin
@@ -1043,12 +1220,14 @@ namespace System
 
 		/*BEGIN UNBOXING METHOD DECLARATIONS*/
 		explicit operator System::Decimal();
+		explicit operator UnityEngine::Vector2();
 		explicit operator UnityEngine::Vector3();
 		explicit operator UnityEngine::Vector4();
 		explicit operator UnityEngine::Quaternion();
 		explicit operator UnityEngine::Matrix4x4();
 		explicit operator UnityEngine::PrimitiveType();
 		explicit operator CesiumForUnity::RawDownloadedData();
+		explicit operator UnityEngine::TextureFormat();
 		explicit operator System::Boolean();
 		explicit operator System::SByte();
 		explicit operator System::Byte();
@@ -1485,6 +1664,23 @@ namespace System
 
 namespace System
 {
+	template<> struct IEquatable_1<UnityEngine::Vector2> : virtual System::Object
+	{
+		IEquatable_1(decltype(nullptr));
+		IEquatable_1(Plugin::InternalUse, int32_t handle);
+		IEquatable_1(const IEquatable_1<UnityEngine::Vector2>& other);
+		IEquatable_1(IEquatable_1<UnityEngine::Vector2>&& other);
+		virtual ~IEquatable_1();
+		IEquatable_1<UnityEngine::Vector2>& operator=(const IEquatable_1<UnityEngine::Vector2>& other);
+		IEquatable_1<UnityEngine::Vector2>& operator=(decltype(nullptr));
+		IEquatable_1<UnityEngine::Vector2>& operator=(IEquatable_1<UnityEngine::Vector2>&& other);
+		bool operator==(const IEquatable_1<UnityEngine::Vector2>& other) const;
+		bool operator!=(const IEquatable_1<UnityEngine::Vector2>& other) const;
+	};
+}
+
+namespace System
+{
 	template<> struct IEquatable_1<UnityEngine::Vector3> : virtual System::Object
 	{
 		IEquatable_1(decltype(nullptr));
@@ -1825,6 +2021,21 @@ namespace System
 
 namespace UnityEngine
 {
+	struct Vector2
+	{
+		Vector2();
+		Vector2(System::Single x, System::Single y);
+		System::Single x;
+		System::Single y;
+		explicit operator System::ValueType();
+		explicit operator System::Object();
+		explicit operator System::IFormattable();
+		explicit operator System::IEquatable_1<UnityEngine::Vector2>();
+	};
+}
+
+namespace UnityEngine
+{
 	struct Vector3
 	{
 		Vector3();
@@ -2122,6 +2333,30 @@ namespace System
 	{
 		namespace Generic
 		{
+			template<> struct IEnumerator_1<UnityEngine::Vector2> : virtual System::IDisposable, virtual System::Collections::IEnumerator
+			{
+				IEnumerator_1(decltype(nullptr));
+				IEnumerator_1(Plugin::InternalUse, int32_t handle);
+				IEnumerator_1(const IEnumerator_1<UnityEngine::Vector2>& other);
+				IEnumerator_1(IEnumerator_1<UnityEngine::Vector2>&& other);
+				virtual ~IEnumerator_1();
+				IEnumerator_1<UnityEngine::Vector2>& operator=(const IEnumerator_1<UnityEngine::Vector2>& other);
+				IEnumerator_1<UnityEngine::Vector2>& operator=(decltype(nullptr));
+				IEnumerator_1<UnityEngine::Vector2>& operator=(IEnumerator_1<UnityEngine::Vector2>&& other);
+				bool operator==(const IEnumerator_1<UnityEngine::Vector2>& other) const;
+				bool operator!=(const IEnumerator_1<UnityEngine::Vector2>& other) const;
+				UnityEngine::Vector2 GetCurrent();
+			};
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
 			template<> struct IEnumerator_1<UnityEngine::Vector3> : virtual System::IDisposable, virtual System::Collections::IEnumerator
 			{
 				IEnumerator_1(decltype(nullptr));
@@ -2135,6 +2370,30 @@ namespace System
 				bool operator==(const IEnumerator_1<UnityEngine::Vector3>& other) const;
 				bool operator!=(const IEnumerator_1<UnityEngine::Vector3>& other) const;
 				UnityEngine::Vector3 GetCurrent();
+			};
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			template<> struct IEnumerator_1<System::Byte> : virtual System::IDisposable, virtual System::Collections::IEnumerator
+			{
+				IEnumerator_1(decltype(nullptr));
+				IEnumerator_1(Plugin::InternalUse, int32_t handle);
+				IEnumerator_1(const IEnumerator_1<System::Byte>& other);
+				IEnumerator_1(IEnumerator_1<System::Byte>&& other);
+				virtual ~IEnumerator_1();
+				IEnumerator_1<System::Byte>& operator=(const IEnumerator_1<System::Byte>& other);
+				IEnumerator_1<System::Byte>& operator=(decltype(nullptr));
+				IEnumerator_1<System::Byte>& operator=(IEnumerator_1<System::Byte>&& other);
+				bool operator==(const IEnumerator_1<System::Byte>& other) const;
+				bool operator!=(const IEnumerator_1<System::Byte>& other) const;
+				System::Byte GetCurrent();
 			};
 		}
 	}
@@ -2170,6 +2429,30 @@ namespace System
 	{
 		namespace Generic
 		{
+			template<> struct IEnumerable_1<UnityEngine::Vector2> : virtual System::Collections::IEnumerable
+			{
+				IEnumerable_1(decltype(nullptr));
+				IEnumerable_1(Plugin::InternalUse, int32_t handle);
+				IEnumerable_1(const IEnumerable_1<UnityEngine::Vector2>& other);
+				IEnumerable_1(IEnumerable_1<UnityEngine::Vector2>&& other);
+				virtual ~IEnumerable_1();
+				IEnumerable_1<UnityEngine::Vector2>& operator=(const IEnumerable_1<UnityEngine::Vector2>& other);
+				IEnumerable_1<UnityEngine::Vector2>& operator=(decltype(nullptr));
+				IEnumerable_1<UnityEngine::Vector2>& operator=(IEnumerable_1<UnityEngine::Vector2>&& other);
+				bool operator==(const IEnumerable_1<UnityEngine::Vector2>& other) const;
+				bool operator!=(const IEnumerable_1<UnityEngine::Vector2>& other) const;
+				virtual System::Collections::Generic::IEnumerator_1<UnityEngine::Vector2> GetEnumerator();
+			};
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
 			template<> struct IEnumerable_1<UnityEngine::Vector3> : virtual System::Collections::IEnumerable
 			{
 				IEnumerable_1(decltype(nullptr));
@@ -2183,6 +2466,30 @@ namespace System
 				bool operator==(const IEnumerable_1<UnityEngine::Vector3>& other) const;
 				bool operator!=(const IEnumerable_1<UnityEngine::Vector3>& other) const;
 				virtual System::Collections::Generic::IEnumerator_1<UnityEngine::Vector3> GetEnumerator();
+			};
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			template<> struct IEnumerable_1<System::Byte> : virtual System::Collections::IEnumerable
+			{
+				IEnumerable_1(decltype(nullptr));
+				IEnumerable_1(Plugin::InternalUse, int32_t handle);
+				IEnumerable_1(const IEnumerable_1<System::Byte>& other);
+				IEnumerable_1(IEnumerable_1<System::Byte>&& other);
+				virtual ~IEnumerable_1();
+				IEnumerable_1<System::Byte>& operator=(const IEnumerable_1<System::Byte>& other);
+				IEnumerable_1<System::Byte>& operator=(decltype(nullptr));
+				IEnumerable_1<System::Byte>& operator=(IEnumerable_1<System::Byte>&& other);
+				bool operator==(const IEnumerable_1<System::Byte>& other) const;
+				bool operator!=(const IEnumerable_1<System::Byte>& other) const;
+				virtual System::Collections::Generic::IEnumerator_1<System::Byte> GetEnumerator();
 			};
 		}
 	}
@@ -2208,6 +2515,56 @@ namespace System
 				bool operator!=(const IEnumerable_1<System::Int32>& other) const;
 				virtual System::Collections::Generic::IEnumerator_1<System::Int32> GetEnumerator();
 			};
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			template<> struct ICollection_1<UnityEngine::Vector2> : virtual System::Collections::Generic::IEnumerable_1<UnityEngine::Vector2>
+			{
+				ICollection_1(decltype(nullptr));
+				ICollection_1(Plugin::InternalUse, int32_t handle);
+				ICollection_1(const ICollection_1<UnityEngine::Vector2>& other);
+				ICollection_1(ICollection_1<UnityEngine::Vector2>&& other);
+				virtual ~ICollection_1();
+				ICollection_1<UnityEngine::Vector2>& operator=(const ICollection_1<UnityEngine::Vector2>& other);
+				ICollection_1<UnityEngine::Vector2>& operator=(decltype(nullptr));
+				ICollection_1<UnityEngine::Vector2>& operator=(ICollection_1<UnityEngine::Vector2>&& other);
+				bool operator==(const ICollection_1<UnityEngine::Vector2>& other) const;
+				bool operator!=(const ICollection_1<UnityEngine::Vector2>& other) const;
+			};
+		}
+	}
+}
+
+namespace Plugin
+{
+	struct SystemCollectionsGenericICollectionUnityEngineVector2Iterator
+	{
+		System::Collections::Generic::IEnumerator_1<UnityEngine::Vector2> enumerator;
+		bool hasMore;
+		SystemCollectionsGenericICollectionUnityEngineVector2Iterator(decltype(nullptr));
+		SystemCollectionsGenericICollectionUnityEngineVector2Iterator(System::Collections::Generic::ICollection_1<UnityEngine::Vector2>& enumerable);
+		~SystemCollectionsGenericICollectionUnityEngineVector2Iterator();
+		SystemCollectionsGenericICollectionUnityEngineVector2Iterator& operator++();
+		bool operator!=(const SystemCollectionsGenericICollectionUnityEngineVector2Iterator& other);
+		UnityEngine::Vector2 operator*();
+	};
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			Plugin::SystemCollectionsGenericICollectionUnityEngineVector2Iterator begin(System::Collections::Generic::ICollection_1<UnityEngine::Vector2>& enumerable);
+			Plugin::SystemCollectionsGenericICollectionUnityEngineVector2Iterator end(System::Collections::Generic::ICollection_1<UnityEngine::Vector2>& enumerable);
 		}
 	}
 }
@@ -2268,6 +2625,56 @@ namespace System
 	{
 		namespace Generic
 		{
+			template<> struct ICollection_1<System::Byte> : virtual System::Collections::Generic::IEnumerable_1<System::Byte>
+			{
+				ICollection_1(decltype(nullptr));
+				ICollection_1(Plugin::InternalUse, int32_t handle);
+				ICollection_1(const ICollection_1<System::Byte>& other);
+				ICollection_1(ICollection_1<System::Byte>&& other);
+				virtual ~ICollection_1();
+				ICollection_1<System::Byte>& operator=(const ICollection_1<System::Byte>& other);
+				ICollection_1<System::Byte>& operator=(decltype(nullptr));
+				ICollection_1<System::Byte>& operator=(ICollection_1<System::Byte>&& other);
+				bool operator==(const ICollection_1<System::Byte>& other) const;
+				bool operator!=(const ICollection_1<System::Byte>& other) const;
+			};
+		}
+	}
+}
+
+namespace Plugin
+{
+	struct SystemCollectionsGenericICollectionSystemByteIterator
+	{
+		System::Collections::Generic::IEnumerator_1<System::Byte> enumerator;
+		bool hasMore;
+		SystemCollectionsGenericICollectionSystemByteIterator(decltype(nullptr));
+		SystemCollectionsGenericICollectionSystemByteIterator(System::Collections::Generic::ICollection_1<System::Byte>& enumerable);
+		~SystemCollectionsGenericICollectionSystemByteIterator();
+		SystemCollectionsGenericICollectionSystemByteIterator& operator++();
+		bool operator!=(const SystemCollectionsGenericICollectionSystemByteIterator& other);
+		System::Byte operator*();
+	};
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			Plugin::SystemCollectionsGenericICollectionSystemByteIterator begin(System::Collections::Generic::ICollection_1<System::Byte>& enumerable);
+			Plugin::SystemCollectionsGenericICollectionSystemByteIterator end(System::Collections::Generic::ICollection_1<System::Byte>& enumerable);
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
 			template<> struct ICollection_1<System::Int32> : virtual System::Collections::Generic::IEnumerable_1<System::Int32>
 			{
 				ICollection_1(decltype(nullptr));
@@ -2308,6 +2715,56 @@ namespace System
 		{
 			Plugin::SystemCollectionsGenericICollectionSystemInt32Iterator begin(System::Collections::Generic::ICollection_1<System::Int32>& enumerable);
 			Plugin::SystemCollectionsGenericICollectionSystemInt32Iterator end(System::Collections::Generic::ICollection_1<System::Int32>& enumerable);
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			template<> struct IReadOnlyCollection_1<UnityEngine::Vector2> : virtual System::Collections::Generic::IEnumerable_1<UnityEngine::Vector2>
+			{
+				IReadOnlyCollection_1(decltype(nullptr));
+				IReadOnlyCollection_1(Plugin::InternalUse, int32_t handle);
+				IReadOnlyCollection_1(const IReadOnlyCollection_1<UnityEngine::Vector2>& other);
+				IReadOnlyCollection_1(IReadOnlyCollection_1<UnityEngine::Vector2>&& other);
+				virtual ~IReadOnlyCollection_1();
+				IReadOnlyCollection_1<UnityEngine::Vector2>& operator=(const IReadOnlyCollection_1<UnityEngine::Vector2>& other);
+				IReadOnlyCollection_1<UnityEngine::Vector2>& operator=(decltype(nullptr));
+				IReadOnlyCollection_1<UnityEngine::Vector2>& operator=(IReadOnlyCollection_1<UnityEngine::Vector2>&& other);
+				bool operator==(const IReadOnlyCollection_1<UnityEngine::Vector2>& other) const;
+				bool operator!=(const IReadOnlyCollection_1<UnityEngine::Vector2>& other) const;
+			};
+		}
+	}
+}
+
+namespace Plugin
+{
+	struct SystemCollectionsGenericIReadOnlyCollectionUnityEngineVector2Iterator
+	{
+		System::Collections::Generic::IEnumerator_1<UnityEngine::Vector2> enumerator;
+		bool hasMore;
+		SystemCollectionsGenericIReadOnlyCollectionUnityEngineVector2Iterator(decltype(nullptr));
+		SystemCollectionsGenericIReadOnlyCollectionUnityEngineVector2Iterator(System::Collections::Generic::IReadOnlyCollection_1<UnityEngine::Vector2>& enumerable);
+		~SystemCollectionsGenericIReadOnlyCollectionUnityEngineVector2Iterator();
+		SystemCollectionsGenericIReadOnlyCollectionUnityEngineVector2Iterator& operator++();
+		bool operator!=(const SystemCollectionsGenericIReadOnlyCollectionUnityEngineVector2Iterator& other);
+		UnityEngine::Vector2 operator*();
+	};
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			Plugin::SystemCollectionsGenericIReadOnlyCollectionUnityEngineVector2Iterator begin(System::Collections::Generic::IReadOnlyCollection_1<UnityEngine::Vector2>& enumerable);
+			Plugin::SystemCollectionsGenericIReadOnlyCollectionUnityEngineVector2Iterator end(System::Collections::Generic::IReadOnlyCollection_1<UnityEngine::Vector2>& enumerable);
 		}
 	}
 }
@@ -2418,6 +2875,106 @@ namespace System
 	{
 		namespace Generic
 		{
+			template<> struct IReadOnlyCollection_1<System::Byte> : virtual System::Collections::Generic::IEnumerable_1<System::Byte>
+			{
+				IReadOnlyCollection_1(decltype(nullptr));
+				IReadOnlyCollection_1(Plugin::InternalUse, int32_t handle);
+				IReadOnlyCollection_1(const IReadOnlyCollection_1<System::Byte>& other);
+				IReadOnlyCollection_1(IReadOnlyCollection_1<System::Byte>&& other);
+				virtual ~IReadOnlyCollection_1();
+				IReadOnlyCollection_1<System::Byte>& operator=(const IReadOnlyCollection_1<System::Byte>& other);
+				IReadOnlyCollection_1<System::Byte>& operator=(decltype(nullptr));
+				IReadOnlyCollection_1<System::Byte>& operator=(IReadOnlyCollection_1<System::Byte>&& other);
+				bool operator==(const IReadOnlyCollection_1<System::Byte>& other) const;
+				bool operator!=(const IReadOnlyCollection_1<System::Byte>& other) const;
+			};
+		}
+	}
+}
+
+namespace Plugin
+{
+	struct SystemCollectionsGenericIReadOnlyCollectionSystemByteIterator
+	{
+		System::Collections::Generic::IEnumerator_1<System::Byte> enumerator;
+		bool hasMore;
+		SystemCollectionsGenericIReadOnlyCollectionSystemByteIterator(decltype(nullptr));
+		SystemCollectionsGenericIReadOnlyCollectionSystemByteIterator(System::Collections::Generic::IReadOnlyCollection_1<System::Byte>& enumerable);
+		~SystemCollectionsGenericIReadOnlyCollectionSystemByteIterator();
+		SystemCollectionsGenericIReadOnlyCollectionSystemByteIterator& operator++();
+		bool operator!=(const SystemCollectionsGenericIReadOnlyCollectionSystemByteIterator& other);
+		System::Byte operator*();
+	};
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			Plugin::SystemCollectionsGenericIReadOnlyCollectionSystemByteIterator begin(System::Collections::Generic::IReadOnlyCollection_1<System::Byte>& enumerable);
+			Plugin::SystemCollectionsGenericIReadOnlyCollectionSystemByteIterator end(System::Collections::Generic::IReadOnlyCollection_1<System::Byte>& enumerable);
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			template<> struct IList_1<UnityEngine::Vector2> : virtual System::Collections::Generic::ICollection_1<UnityEngine::Vector2>
+			{
+				IList_1(decltype(nullptr));
+				IList_1(Plugin::InternalUse, int32_t handle);
+				IList_1(const IList_1<UnityEngine::Vector2>& other);
+				IList_1(IList_1<UnityEngine::Vector2>&& other);
+				virtual ~IList_1();
+				IList_1<UnityEngine::Vector2>& operator=(const IList_1<UnityEngine::Vector2>& other);
+				IList_1<UnityEngine::Vector2>& operator=(decltype(nullptr));
+				IList_1<UnityEngine::Vector2>& operator=(IList_1<UnityEngine::Vector2>&& other);
+				bool operator==(const IList_1<UnityEngine::Vector2>& other) const;
+				bool operator!=(const IList_1<UnityEngine::Vector2>& other) const;
+			};
+		}
+	}
+}
+
+namespace Plugin
+{
+	struct SystemCollectionsGenericIListUnityEngineVector2Iterator
+	{
+		System::Collections::Generic::IEnumerator_1<UnityEngine::Vector2> enumerator;
+		bool hasMore;
+		SystemCollectionsGenericIListUnityEngineVector2Iterator(decltype(nullptr));
+		SystemCollectionsGenericIListUnityEngineVector2Iterator(System::Collections::Generic::IList_1<UnityEngine::Vector2>& enumerable);
+		~SystemCollectionsGenericIListUnityEngineVector2Iterator();
+		SystemCollectionsGenericIListUnityEngineVector2Iterator& operator++();
+		bool operator!=(const SystemCollectionsGenericIListUnityEngineVector2Iterator& other);
+		UnityEngine::Vector2 operator*();
+	};
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			Plugin::SystemCollectionsGenericIListUnityEngineVector2Iterator begin(System::Collections::Generic::IList_1<UnityEngine::Vector2>& enumerable);
+			Plugin::SystemCollectionsGenericIListUnityEngineVector2Iterator end(System::Collections::Generic::IList_1<UnityEngine::Vector2>& enumerable);
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
 			template<> struct IList_1<UnityEngine::Vector3> : virtual System::Collections::Generic::ICollection_1<UnityEngine::Vector3>
 			{
 				IList_1(decltype(nullptr));
@@ -2458,6 +3015,56 @@ namespace System
 		{
 			Plugin::SystemCollectionsGenericIListUnityEngineVector3Iterator begin(System::Collections::Generic::IList_1<UnityEngine::Vector3>& enumerable);
 			Plugin::SystemCollectionsGenericIListUnityEngineVector3Iterator end(System::Collections::Generic::IList_1<UnityEngine::Vector3>& enumerable);
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			template<> struct IList_1<System::Byte> : virtual System::Collections::Generic::ICollection_1<System::Byte>
+			{
+				IList_1(decltype(nullptr));
+				IList_1(Plugin::InternalUse, int32_t handle);
+				IList_1(const IList_1<System::Byte>& other);
+				IList_1(IList_1<System::Byte>&& other);
+				virtual ~IList_1();
+				IList_1<System::Byte>& operator=(const IList_1<System::Byte>& other);
+				IList_1<System::Byte>& operator=(decltype(nullptr));
+				IList_1<System::Byte>& operator=(IList_1<System::Byte>&& other);
+				bool operator==(const IList_1<System::Byte>& other) const;
+				bool operator!=(const IList_1<System::Byte>& other) const;
+			};
+		}
+	}
+}
+
+namespace Plugin
+{
+	struct SystemCollectionsGenericIListSystemByteIterator
+	{
+		System::Collections::Generic::IEnumerator_1<System::Byte> enumerator;
+		bool hasMore;
+		SystemCollectionsGenericIListSystemByteIterator(decltype(nullptr));
+		SystemCollectionsGenericIListSystemByteIterator(System::Collections::Generic::IList_1<System::Byte>& enumerable);
+		~SystemCollectionsGenericIListSystemByteIterator();
+		SystemCollectionsGenericIListSystemByteIterator& operator++();
+		bool operator!=(const SystemCollectionsGenericIListSystemByteIterator& other);
+		System::Byte operator*();
+	};
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			Plugin::SystemCollectionsGenericIListSystemByteIterator begin(System::Collections::Generic::IList_1<System::Byte>& enumerable);
+			Plugin::SystemCollectionsGenericIListSystemByteIterator end(System::Collections::Generic::IList_1<System::Byte>& enumerable);
 		}
 	}
 }
@@ -2518,6 +3125,56 @@ namespace System
 	{
 		namespace Generic
 		{
+			template<> struct IReadOnlyList_1<UnityEngine::Vector2> : virtual System::Collections::Generic::IReadOnlyCollection_1<UnityEngine::Vector2>
+			{
+				IReadOnlyList_1(decltype(nullptr));
+				IReadOnlyList_1(Plugin::InternalUse, int32_t handle);
+				IReadOnlyList_1(const IReadOnlyList_1<UnityEngine::Vector2>& other);
+				IReadOnlyList_1(IReadOnlyList_1<UnityEngine::Vector2>&& other);
+				virtual ~IReadOnlyList_1();
+				IReadOnlyList_1<UnityEngine::Vector2>& operator=(const IReadOnlyList_1<UnityEngine::Vector2>& other);
+				IReadOnlyList_1<UnityEngine::Vector2>& operator=(decltype(nullptr));
+				IReadOnlyList_1<UnityEngine::Vector2>& operator=(IReadOnlyList_1<UnityEngine::Vector2>&& other);
+				bool operator==(const IReadOnlyList_1<UnityEngine::Vector2>& other) const;
+				bool operator!=(const IReadOnlyList_1<UnityEngine::Vector2>& other) const;
+			};
+		}
+	}
+}
+
+namespace Plugin
+{
+	struct SystemCollectionsGenericIReadOnlyListUnityEngineVector2Iterator
+	{
+		System::Collections::Generic::IEnumerator_1<UnityEngine::Vector2> enumerator;
+		bool hasMore;
+		SystemCollectionsGenericIReadOnlyListUnityEngineVector2Iterator(decltype(nullptr));
+		SystemCollectionsGenericIReadOnlyListUnityEngineVector2Iterator(System::Collections::Generic::IReadOnlyList_1<UnityEngine::Vector2>& enumerable);
+		~SystemCollectionsGenericIReadOnlyListUnityEngineVector2Iterator();
+		SystemCollectionsGenericIReadOnlyListUnityEngineVector2Iterator& operator++();
+		bool operator!=(const SystemCollectionsGenericIReadOnlyListUnityEngineVector2Iterator& other);
+		UnityEngine::Vector2 operator*();
+	};
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			Plugin::SystemCollectionsGenericIReadOnlyListUnityEngineVector2Iterator begin(System::Collections::Generic::IReadOnlyList_1<UnityEngine::Vector2>& enumerable);
+			Plugin::SystemCollectionsGenericIReadOnlyListUnityEngineVector2Iterator end(System::Collections::Generic::IReadOnlyList_1<UnityEngine::Vector2>& enumerable);
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
 			template<> struct IReadOnlyList_1<UnityEngine::Vector3> : virtual System::Collections::Generic::IReadOnlyCollection_1<UnityEngine::Vector3>
 			{
 				IReadOnlyList_1(decltype(nullptr));
@@ -2558,6 +3215,56 @@ namespace System
 		{
 			Plugin::SystemCollectionsGenericIReadOnlyListUnityEngineVector3Iterator begin(System::Collections::Generic::IReadOnlyList_1<UnityEngine::Vector3>& enumerable);
 			Plugin::SystemCollectionsGenericIReadOnlyListUnityEngineVector3Iterator end(System::Collections::Generic::IReadOnlyList_1<UnityEngine::Vector3>& enumerable);
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			template<> struct IReadOnlyList_1<System::Byte> : virtual System::Collections::Generic::IReadOnlyCollection_1<System::Byte>
+			{
+				IReadOnlyList_1(decltype(nullptr));
+				IReadOnlyList_1(Plugin::InternalUse, int32_t handle);
+				IReadOnlyList_1(const IReadOnlyList_1<System::Byte>& other);
+				IReadOnlyList_1(IReadOnlyList_1<System::Byte>&& other);
+				virtual ~IReadOnlyList_1();
+				IReadOnlyList_1<System::Byte>& operator=(const IReadOnlyList_1<System::Byte>& other);
+				IReadOnlyList_1<System::Byte>& operator=(decltype(nullptr));
+				IReadOnlyList_1<System::Byte>& operator=(IReadOnlyList_1<System::Byte>&& other);
+				bool operator==(const IReadOnlyList_1<System::Byte>& other) const;
+				bool operator!=(const IReadOnlyList_1<System::Byte>& other) const;
+			};
+		}
+	}
+}
+
+namespace Plugin
+{
+	struct SystemCollectionsGenericIReadOnlyListSystemByteIterator
+	{
+		System::Collections::Generic::IEnumerator_1<System::Byte> enumerator;
+		bool hasMore;
+		SystemCollectionsGenericIReadOnlyListSystemByteIterator(decltype(nullptr));
+		SystemCollectionsGenericIReadOnlyListSystemByteIterator(System::Collections::Generic::IReadOnlyList_1<System::Byte>& enumerable);
+		~SystemCollectionsGenericIReadOnlyListSystemByteIterator();
+		SystemCollectionsGenericIReadOnlyListSystemByteIterator& operator++();
+		bool operator!=(const SystemCollectionsGenericIReadOnlyListSystemByteIterator& other);
+		System::Byte operator*();
+	};
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			Plugin::SystemCollectionsGenericIReadOnlyListSystemByteIterator begin(System::Collections::Generic::IReadOnlyList_1<System::Byte>& enumerable);
+			Plugin::SystemCollectionsGenericIReadOnlyListSystemByteIterator end(System::Collections::Generic::IReadOnlyList_1<System::Byte>& enumerable);
 		}
 	}
 }
@@ -2630,6 +3337,7 @@ namespace UnityEngine
 		virtual void SetVertices(System::Array1<UnityEngine::Vector3>& inVertices);
 		virtual void SetNormals(System::Array1<UnityEngine::Vector3>& inNormals);
 		virtual void SetTriangles(System::Array1<System::Int32>& triangles, System::Int32 submesh, System::Boolean calculateBounds, System::Int32 baseVertex);
+		virtual void SetUVs(System::Int32 channel, System::Array1<UnityEngine::Vector2>& uvs);
 	};
 }
 
@@ -3112,6 +3820,7 @@ namespace UnityEngine
 		Material& operator=(Material&& other);
 		bool operator==(const Material& other) const;
 		bool operator!=(const Material& other) const;
+		virtual void SetTexture(System::String& name, UnityEngine::Texture& value);
 	};
 }
 
@@ -3240,6 +3949,190 @@ namespace UnityEditor
 	};
 }
 
+namespace UnityEngine
+{
+	struct Texture : virtual UnityEngine::Object
+	{
+		Texture(decltype(nullptr));
+		Texture(Plugin::InternalUse, int32_t handle);
+		Texture(const Texture& other);
+		Texture(Texture&& other);
+		virtual ~Texture();
+		Texture& operator=(const Texture& other);
+		Texture& operator=(decltype(nullptr));
+		Texture& operator=(Texture&& other);
+		bool operator==(const Texture& other) const;
+		bool operator!=(const Texture& other) const;
+	};
+}
+
+namespace UnityEngine
+{
+	struct TextureFormat
+	{
+		int32_t Value;
+		static const UnityEngine::TextureFormat Alpha8;
+		static const UnityEngine::TextureFormat ARGB4444;
+		static const UnityEngine::TextureFormat RGB24;
+		static const UnityEngine::TextureFormat RGBA32;
+		static const UnityEngine::TextureFormat ARGB32;
+		static const UnityEngine::TextureFormat RGB565;
+		static const UnityEngine::TextureFormat R16;
+		static const UnityEngine::TextureFormat DXT1;
+		static const UnityEngine::TextureFormat DXT5;
+		static const UnityEngine::TextureFormat RGBA4444;
+		static const UnityEngine::TextureFormat BGRA32;
+		static const UnityEngine::TextureFormat RHalf;
+		static const UnityEngine::TextureFormat RGHalf;
+		static const UnityEngine::TextureFormat RGBAHalf;
+		static const UnityEngine::TextureFormat RFloat;
+		static const UnityEngine::TextureFormat RGFloat;
+		static const UnityEngine::TextureFormat RGBAFloat;
+		static const UnityEngine::TextureFormat YUY2;
+		static const UnityEngine::TextureFormat RGB9e5Float;
+		static const UnityEngine::TextureFormat BC4;
+		static const UnityEngine::TextureFormat BC5;
+		static const UnityEngine::TextureFormat BC6H;
+		static const UnityEngine::TextureFormat BC7;
+		static const UnityEngine::TextureFormat DXT1Crunched;
+		static const UnityEngine::TextureFormat DXT5Crunched;
+		static const UnityEngine::TextureFormat PVRTC_RGB2;
+		static const UnityEngine::TextureFormat PVRTC_RGBA2;
+		static const UnityEngine::TextureFormat PVRTC_RGB4;
+		static const UnityEngine::TextureFormat PVRTC_RGBA4;
+		static const UnityEngine::TextureFormat ETC_RGB4;
+		static const UnityEngine::TextureFormat ATC_RGB4;
+		static const UnityEngine::TextureFormat ATC_RGBA8;
+		static const UnityEngine::TextureFormat EAC_R;
+		static const UnityEngine::TextureFormat EAC_R_SIGNED;
+		static const UnityEngine::TextureFormat EAC_RG;
+		static const UnityEngine::TextureFormat EAC_RG_SIGNED;
+		static const UnityEngine::TextureFormat ETC2_RGB;
+		static const UnityEngine::TextureFormat ETC2_RGBA1;
+		static const UnityEngine::TextureFormat ETC2_RGBA8;
+		static const UnityEngine::TextureFormat ASTC_4x4;
+		static const UnityEngine::TextureFormat ASTC_5x5;
+		static const UnityEngine::TextureFormat ASTC_6x6;
+		static const UnityEngine::TextureFormat ASTC_8x8;
+		static const UnityEngine::TextureFormat ASTC_10x10;
+		static const UnityEngine::TextureFormat ASTC_12x12;
+		static const UnityEngine::TextureFormat ETC_RGB4_3DS;
+		static const UnityEngine::TextureFormat ETC_RGBA8_3DS;
+		static const UnityEngine::TextureFormat RG16;
+		static const UnityEngine::TextureFormat R8;
+		static const UnityEngine::TextureFormat ETC_RGB4Crunched;
+		static const UnityEngine::TextureFormat ETC2_RGBA8Crunched;
+		static const UnityEngine::TextureFormat ASTC_HDR_4x4;
+		static const UnityEngine::TextureFormat ASTC_HDR_5x5;
+		static const UnityEngine::TextureFormat ASTC_HDR_6x6;
+		static const UnityEngine::TextureFormat ASTC_HDR_8x8;
+		static const UnityEngine::TextureFormat ASTC_HDR_10x10;
+		static const UnityEngine::TextureFormat ASTC_HDR_12x12;
+		static const UnityEngine::TextureFormat RG32;
+		static const UnityEngine::TextureFormat RGB48;
+		static const UnityEngine::TextureFormat RGBA64;
+		static const UnityEngine::TextureFormat ASTC_RGB_4x4;
+		static const UnityEngine::TextureFormat ASTC_RGB_5x5;
+		static const UnityEngine::TextureFormat ASTC_RGB_6x6;
+		static const UnityEngine::TextureFormat ASTC_RGB_8x8;
+		static const UnityEngine::TextureFormat ASTC_RGB_10x10;
+		static const UnityEngine::TextureFormat ASTC_RGB_12x12;
+		static const UnityEngine::TextureFormat ASTC_RGBA_4x4;
+		static const UnityEngine::TextureFormat ASTC_RGBA_5x5;
+		static const UnityEngine::TextureFormat ASTC_RGBA_6x6;
+		static const UnityEngine::TextureFormat ASTC_RGBA_8x8;
+		static const UnityEngine::TextureFormat ASTC_RGBA_10x10;
+		static const UnityEngine::TextureFormat ASTC_RGBA_12x12;
+		static const UnityEngine::TextureFormat PVRTC_2BPP_RGB;
+		static const UnityEngine::TextureFormat PVRTC_2BPP_RGBA;
+		static const UnityEngine::TextureFormat PVRTC_4BPP_RGB;
+		static const UnityEngine::TextureFormat PVRTC_4BPP_RGBA;
+		explicit TextureFormat(int32_t value);
+		explicit operator int32_t() const;
+		bool operator==(TextureFormat other);
+		bool operator!=(TextureFormat other);
+		explicit operator System::Enum();
+		explicit operator System::ValueType();
+		explicit operator System::Object();
+		explicit operator System::IFormattable();
+		explicit operator System::IComparable();
+		explicit operator System::IConvertible();
+	};
+}
+
+namespace UnityEngine
+{
+	struct Texture2D : virtual UnityEngine::Texture
+	{
+		Texture2D(decltype(nullptr));
+		Texture2D(Plugin::InternalUse, int32_t handle);
+		Texture2D(const Texture2D& other);
+		Texture2D(Texture2D&& other);
+		virtual ~Texture2D();
+		Texture2D& operator=(const Texture2D& other);
+		Texture2D& operator=(decltype(nullptr));
+		Texture2D& operator=(Texture2D&& other);
+		bool operator==(const Texture2D& other) const;
+		bool operator!=(const Texture2D& other) const;
+		Texture2D(System::Int32 width, System::Int32 height, UnityEngine::TextureFormat textureFormat, System::Boolean mipChain, System::Boolean linear);
+		template<typename MT0> void SetPixelData(System::Array1<System::Byte>& data, System::Int32 mipLevel, System::Int32 sourceDataStartIndex = 0);
+		virtual void Apply(System::Boolean updateMipmaps, System::Boolean makeNoLongerReadable);
+	};
+}
+
+namespace Plugin
+{
+	template<> struct ArrayElementProxy1_1<UnityEngine::Vector2>
+	{
+		int32_t Handle;
+		int32_t Index0;
+		ArrayElementProxy1_1<UnityEngine::Vector2>(Plugin::InternalUse, int32_t handle, int32_t index0);
+		void operator=(UnityEngine::Vector2 item);
+		operator UnityEngine::Vector2();
+	};
+}
+
+namespace System
+{
+	template<> struct Array1<UnityEngine::Vector2> : virtual System::Array, virtual System::ICloneable, virtual System::Collections::IList, virtual System::Collections::Generic::IList_1<UnityEngine::Vector2>, virtual System::Collections::Generic::IReadOnlyList_1<UnityEngine::Vector2>, virtual System::Collections::IStructuralComparable, virtual System::Collections::IStructuralEquatable
+	{
+		Array1(decltype(nullptr));
+		Array1(Plugin::InternalUse, int32_t handle);
+		Array1(const Array1<UnityEngine::Vector2>& other);
+		Array1(Array1<UnityEngine::Vector2>&& other);
+		virtual ~Array1();
+		Array1<UnityEngine::Vector2>& operator=(const Array1<UnityEngine::Vector2>& other);
+		Array1<UnityEngine::Vector2>& operator=(decltype(nullptr));
+		Array1<UnityEngine::Vector2>& operator=(Array1<UnityEngine::Vector2>&& other);
+		bool operator==(const Array1<UnityEngine::Vector2>& other) const;
+		bool operator!=(const Array1<UnityEngine::Vector2>& other) const;
+		int32_t InternalLength;
+		Array1(System::Int32 length0);
+		System::Int32 GetLength();
+		System::Int32 GetRank();
+		Plugin::ArrayElementProxy1_1<UnityEngine::Vector2> operator[](int32_t index);
+	};
+}
+
+namespace Plugin
+{
+	struct UnityEngineVector2Array1Iterator
+	{
+		System::Array1<UnityEngine::Vector2>& array;
+		int index;
+		UnityEngineVector2Array1Iterator(System::Array1<UnityEngine::Vector2>& array, int32_t index);
+		UnityEngineVector2Array1Iterator& operator++();
+		bool operator!=(const UnityEngineVector2Array1Iterator& other);
+		UnityEngine::Vector2 operator*();
+	};
+}
+
+namespace System
+{
+	Plugin::UnityEngineVector2Array1Iterator begin(System::Array1<UnityEngine::Vector2>& array);
+	Plugin::UnityEngineVector2Array1Iterator end(System::Array1<UnityEngine::Vector2>& array);
+}
+
 namespace Plugin
 {
 	template<> struct ArrayElementProxy1_1<UnityEngine::Vector3>
@@ -3291,6 +4184,59 @@ namespace System
 {
 	Plugin::UnityEngineVector3Array1Iterator begin(System::Array1<UnityEngine::Vector3>& array);
 	Plugin::UnityEngineVector3Array1Iterator end(System::Array1<UnityEngine::Vector3>& array);
+}
+
+namespace Plugin
+{
+	template<> struct ArrayElementProxy1_1<System::Byte>
+	{
+		int32_t Handle;
+		int32_t Index0;
+		ArrayElementProxy1_1<System::Byte>(Plugin::InternalUse, int32_t handle, int32_t index0);
+		void operator=(System::Byte item);
+		operator System::Byte();
+	};
+}
+
+namespace System
+{
+	template<> struct Array1<System::Byte> : virtual System::Array, virtual System::ICloneable, virtual System::Collections::IList, virtual System::Collections::Generic::IList_1<System::Byte>, virtual System::Collections::Generic::IReadOnlyList_1<System::Byte>, virtual System::Collections::IStructuralComparable, virtual System::Collections::IStructuralEquatable
+	{
+		Array1(decltype(nullptr));
+		Array1(Plugin::InternalUse, int32_t handle);
+		Array1(const Array1<System::Byte>& other);
+		Array1(Array1<System::Byte>&& other);
+		virtual ~Array1();
+		Array1<System::Byte>& operator=(const Array1<System::Byte>& other);
+		Array1<System::Byte>& operator=(decltype(nullptr));
+		Array1<System::Byte>& operator=(Array1<System::Byte>&& other);
+		bool operator==(const Array1<System::Byte>& other) const;
+		bool operator!=(const Array1<System::Byte>& other) const;
+		int32_t InternalLength;
+		Array1(System::Int32 length0);
+		System::Int32 GetLength();
+		System::Int32 GetRank();
+		Plugin::ArrayElementProxy1_1<System::Byte> operator[](int32_t index);
+	};
+}
+
+namespace Plugin
+{
+	struct SystemByteArray1Iterator
+	{
+		System::Array1<System::Byte>& array;
+		int index;
+		SystemByteArray1Iterator(System::Array1<System::Byte>& array, int32_t index);
+		SystemByteArray1Iterator& operator++();
+		bool operator!=(const SystemByteArray1Iterator& other);
+		System::Byte operator*();
+	};
+}
+
+namespace System
+{
+	Plugin::SystemByteArray1Iterator begin(System::Array1<System::Byte>& array);
+	Plugin::SystemByteArray1Iterator end(System::Array1<System::Byte>& array);
 }
 
 namespace Plugin

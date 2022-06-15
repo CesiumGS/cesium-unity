@@ -100,6 +100,11 @@
 				},
 				{
 					"Types": [
+						"UnityEngine.Vector2"
+					]
+				},
+				{
+					"Types": [
 						"UnityEngine.Vector3"
 					]
 				},
@@ -204,6 +209,17 @@
 				{
 					"ParamTypes": [
 						"System.UInt64"
+					]
+				}
+			]
+		},
+		{
+			"Name": "UnityEngine.Vector2",
+			"Constructors": [
+				{
+					"ParamTypes": [
+						"System.Single",
+						"System.Single"
 					]
 				}
 			]
@@ -431,7 +447,13 @@
 			"Name": "System.Collections.Generic.IEnumerator`1",
 			"GenericParams": [
 				{
+					"Types": ["UnityEngine.Vector2"]
+				},
+				{
 					"Types": ["UnityEngine.Vector3"]
+				},
+				{
+					"Types": ["System.Byte"]
 				},
 				{
 					"Types": ["System.Int32"]
@@ -448,7 +470,13 @@
 			"Name": "System.Collections.Generic.IEnumerable`1",
 			"GenericParams": [
 				{
+					"Types": ["UnityEngine.Vector2"]
+				},
+				{
 					"Types": ["UnityEngine.Vector3"]
+				},
+				{
+					"Types": ["System.Byte"]
 				},
 				{
 					"Types": ["System.Int32"]
@@ -465,7 +493,13 @@
 			"Name": "System.Collections.Generic.ICollection`1",
 			"GenericParams": [
 				{
+					"Types": ["UnityEngine.Vector2"]
+				},
+				{
 					"Types": ["UnityEngine.Vector3"]
+				},
+				{
+					"Types": ["System.Byte"]
 				},
 				{
 					"Types": ["System.Int32"]
@@ -476,17 +510,30 @@
 			"Name": "System.Collections.Generic.IReadOnlyCollection`1",
 			"GenericParams": [
 				{
+					"Types": ["UnityEngine.Vector2"]
+				},
+				{
 					"Types": ["UnityEngine.Vector3"]
 				},
 				{
 					"Types": ["System.Int32"]
-				}			]
+				},
+				{
+					"Types": ["System.Byte"]
+				}
+			]
 		},
 		{
 			"Name": "System.Collections.Generic.IList`1",
 			"GenericParams": [
 				{
+					"Types": ["UnityEngine.Vector2"]
+				},
+				{
 					"Types": ["UnityEngine.Vector3"]
+				},
+				{
+					"Types": ["System.Byte"]
 				},
 				{
 					"Types": ["System.Int32"]
@@ -497,7 +544,13 @@
 			"Name": "System.Collections.Generic.IReadOnlyList`1",
 			"GenericParams": [
 				{
+					"Types": ["UnityEngine.Vector2"]
+				},
+				{
 					"Types": ["UnityEngine.Vector3"]
+				},
+				{
+					"Types": ["System.Byte"]
 				},
 				{
 					"Types": ["System.Int32"]
@@ -526,6 +579,13 @@
 						"System.Int32",
 						"System.Boolean",
 						"System.Int32"
+					]
+				},
+				{
+					"Name": "SetUVs",
+					"ParamTypes": [
+						"System.Int32",
+						"UnityEngine.Vector2[]"
 					]
 				}
 			],
@@ -739,7 +799,16 @@
 			]
 		},
 		{
-			"Name": "UnityEngine.Material"
+			"Name": "UnityEngine.Material",
+			"Methods": [
+				{
+					"Name": "SetTexture",
+					"ParamTypes": [
+						"System.String",
+						"UnityEngine.Texture"
+					]
+				}
+			]
 		},
 		{
 			"Name": "UnityEngine.Resources",
@@ -778,11 +847,61 @@
 					"Name": "camera"
 				}
 			]
+		},
+		{
+			"Name": "UnityEngine.Texture"
+		},
+		{
+			"Name": "UnityEngine.TextureFormat"
+		},
+		{
+			"Name": "UnityEngine.Texture2D",
+			"Constructors": [
+				{
+					"ParamTypes": [
+						"System.Int32",
+						"System.Int32",
+						"UnityEngine.TextureFormat",
+						"System.Boolean",
+						"System.Boolean"
+					]
+				}
+			],
+			"Methods": [
+				{
+					"Name": "SetPixelData",
+					"GenericParams": [
+						{
+							"Types": [
+								"System.Byte"
+							]
+						}
+					],
+					"ParamTypes": [
+						"UnityEngine.T[]",
+						"System.Int32",
+						"System.Int32"
+					]
+				},
+				{
+					"Name": "Apply",
+					"ParamTypes": [
+						"System.Boolean",
+						"System.Boolean"
+					]
+				}
+			]
 		}
 	],
 	"Arrays": [
 		{
+			"Type": "UnityEngine.Vector2"
+		},
+		{
 			"Type": "UnityEngine.Vector3"
+		},
+		{
+			"Type": "System.Byte"
 		},
 		{
 			"Type": "System.Int32"
