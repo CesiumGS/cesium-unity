@@ -74,6 +74,10 @@ namespace Plugin
 	UnityEngine::Matrix4x4 (*UnityEngineTransformPropertyGetLocalToWorldMatrix)(int32_t thisHandle);
 	int32_t (*UnityEngineTransformPropertyGetParent)(int32_t thisHandle);
 	void (*UnityEngineTransformPropertySetParent)(int32_t thisHandle, int32_t valueHandle);
+	UnityEngine::Vector3 (*UnityEngineTransformPropertyGetForward)(int32_t thisHandle);
+	void (*UnityEngineTransformPropertySetForward)(int32_t thisHandle, UnityEngine::Vector3& value);
+	UnityEngine::Vector3 (*UnityEngineTransformPropertyGetUp)(int32_t thisHandle);
+	void (*UnityEngineTransformPropertySetUp)(int32_t thisHandle, UnityEngine::Vector3& value);
 	int32_t (*SystemCollectionsIEnumeratorPropertyGetCurrent)(int32_t thisHandle);
 	int32_t (*SystemCollectionsIEnumeratorMethodMoveNext)(int32_t thisHandle);
 	int32_t (*UnityEngineGameObjectConstructorSystemString)(int32_t nameHandle);
@@ -134,6 +138,8 @@ namespace Plugin
 	void (*BaseCesium3DTilesetConstructor)(int32_t cppHandle, int32_t* handle);
 	int32_t (*SystemThreadingTasksTaskMethodRunSystemAction)(int32_t actionHandle);
 	int32_t (*UnityEngineResourcesMethodLoadUnityEngineMaterialSystemString)(int32_t pathHandle);
+	int32_t (*UnityEditorSceneViewPropertyGetLastActiveSceneView)();
+	int32_t (*UnityEditorSceneViewPropertyGetCamera)(int32_t thisHandle);
 	int32_t (*BoxBoolean)(uint32_t val);
 	int32_t (*UnboxBoolean)(int32_t valHandle);
 	int32_t (*BoxSByte)(int8_t val);
@@ -5648,6 +5654,56 @@ namespace UnityEngine
 			delete ex;
 		}
 	}
+	
+	UnityEngine::Vector3 UnityEngine::Transform::GetForward()
+	{
+		auto returnValue = Plugin::UnityEngineTransformPropertyGetForward(Handle);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return returnValue;
+	}
+	
+	void UnityEngine::Transform::SetForward(UnityEngine::Vector3& value)
+	{
+		Plugin::UnityEngineTransformPropertySetForward(Handle, value);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+	}
+	
+	UnityEngine::Vector3 UnityEngine::Transform::GetUp()
+	{
+		auto returnValue = Plugin::UnityEngineTransformPropertyGetUp(Handle);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return returnValue;
+	}
+	
+	void UnityEngine::Transform::SetUp(UnityEngine::Vector3& value)
+	{
+		Plugin::UnityEngineTransformPropertySetUp(Handle, value);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+	}
 }
 
 namespace System
@@ -11043,6 +11099,545 @@ namespace UnityEngine
 	}
 }
 
+namespace UnityEngine
+{
+	ScriptableObject::ScriptableObject(decltype(nullptr))
+		: UnityEngine::Object(nullptr)
+	{
+	}
+	
+	ScriptableObject::ScriptableObject(Plugin::InternalUse, int32_t handle)
+		: UnityEngine::Object(nullptr)
+	{
+		Handle = handle;
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+		}
+	}
+	
+	ScriptableObject::ScriptableObject(const ScriptableObject& other)
+		: ScriptableObject(Plugin::InternalUse::Only, other.Handle)
+	{
+	}
+	
+	ScriptableObject::ScriptableObject(ScriptableObject&& other)
+		: ScriptableObject(Plugin::InternalUse::Only, other.Handle)
+	{
+		other.Handle = 0;
+	}
+	
+	ScriptableObject::~ScriptableObject()
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+	}
+	
+	ScriptableObject& ScriptableObject::operator=(const ScriptableObject& other)
+	{
+		if (this->Handle)
+		{
+			Plugin::DereferenceManagedClass(this->Handle);
+		}
+		this->Handle = other.Handle;
+		if (this->Handle)
+		{
+			Plugin::ReferenceManagedClass(this->Handle);
+		}
+		return *this;
+	}
+	
+	ScriptableObject& ScriptableObject::operator=(decltype(nullptr))
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+		return *this;
+	}
+	
+	ScriptableObject& ScriptableObject::operator=(ScriptableObject&& other)
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+		}
+		Handle = other.Handle;
+		other.Handle = 0;
+		return *this;
+	}
+	
+	bool ScriptableObject::operator==(const ScriptableObject& other) const
+	{
+		return Handle == other.Handle;
+	}
+	
+	bool ScriptableObject::operator!=(const ScriptableObject& other) const
+	{
+		return Handle != other.Handle;
+	}
+}
+
+namespace UnityEditor
+{
+	EditorWindow::EditorWindow(decltype(nullptr))
+		: UnityEngine::Object(nullptr)
+		, UnityEngine::ScriptableObject(nullptr)
+	{
+	}
+	
+	EditorWindow::EditorWindow(Plugin::InternalUse, int32_t handle)
+		: UnityEngine::Object(nullptr)
+		, UnityEngine::ScriptableObject(nullptr)
+	{
+		Handle = handle;
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+		}
+	}
+	
+	EditorWindow::EditorWindow(const EditorWindow& other)
+		: EditorWindow(Plugin::InternalUse::Only, other.Handle)
+	{
+	}
+	
+	EditorWindow::EditorWindow(EditorWindow&& other)
+		: EditorWindow(Plugin::InternalUse::Only, other.Handle)
+	{
+		other.Handle = 0;
+	}
+	
+	EditorWindow::~EditorWindow()
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+	}
+	
+	EditorWindow& EditorWindow::operator=(const EditorWindow& other)
+	{
+		if (this->Handle)
+		{
+			Plugin::DereferenceManagedClass(this->Handle);
+		}
+		this->Handle = other.Handle;
+		if (this->Handle)
+		{
+			Plugin::ReferenceManagedClass(this->Handle);
+		}
+		return *this;
+	}
+	
+	EditorWindow& EditorWindow::operator=(decltype(nullptr))
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+		return *this;
+	}
+	
+	EditorWindow& EditorWindow::operator=(EditorWindow&& other)
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+		}
+		Handle = other.Handle;
+		other.Handle = 0;
+		return *this;
+	}
+	
+	bool EditorWindow::operator==(const EditorWindow& other) const
+	{
+		return Handle == other.Handle;
+	}
+	
+	bool EditorWindow::operator!=(const EditorWindow& other) const
+	{
+		return Handle != other.Handle;
+	}
+}
+
+namespace UnityEditor
+{
+	SearchableEditorWindow::SearchableEditorWindow(decltype(nullptr))
+		: UnityEngine::Object(nullptr)
+		, UnityEngine::ScriptableObject(nullptr)
+		, UnityEditor::EditorWindow(nullptr)
+	{
+	}
+	
+	SearchableEditorWindow::SearchableEditorWindow(Plugin::InternalUse, int32_t handle)
+		: UnityEngine::Object(nullptr)
+		, UnityEngine::ScriptableObject(nullptr)
+		, UnityEditor::EditorWindow(nullptr)
+	{
+		Handle = handle;
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+		}
+	}
+	
+	SearchableEditorWindow::SearchableEditorWindow(const SearchableEditorWindow& other)
+		: SearchableEditorWindow(Plugin::InternalUse::Only, other.Handle)
+	{
+	}
+	
+	SearchableEditorWindow::SearchableEditorWindow(SearchableEditorWindow&& other)
+		: SearchableEditorWindow(Plugin::InternalUse::Only, other.Handle)
+	{
+		other.Handle = 0;
+	}
+	
+	SearchableEditorWindow::~SearchableEditorWindow()
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+	}
+	
+	SearchableEditorWindow& SearchableEditorWindow::operator=(const SearchableEditorWindow& other)
+	{
+		if (this->Handle)
+		{
+			Plugin::DereferenceManagedClass(this->Handle);
+		}
+		this->Handle = other.Handle;
+		if (this->Handle)
+		{
+			Plugin::ReferenceManagedClass(this->Handle);
+		}
+		return *this;
+	}
+	
+	SearchableEditorWindow& SearchableEditorWindow::operator=(decltype(nullptr))
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+		return *this;
+	}
+	
+	SearchableEditorWindow& SearchableEditorWindow::operator=(SearchableEditorWindow&& other)
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+		}
+		Handle = other.Handle;
+		other.Handle = 0;
+		return *this;
+	}
+	
+	bool SearchableEditorWindow::operator==(const SearchableEditorWindow& other) const
+	{
+		return Handle == other.Handle;
+	}
+	
+	bool SearchableEditorWindow::operator!=(const SearchableEditorWindow& other) const
+	{
+		return Handle != other.Handle;
+	}
+}
+
+namespace UnityEditor
+{
+	IHasCustomMenu::IHasCustomMenu(decltype(nullptr))
+	{
+	}
+	
+	IHasCustomMenu::IHasCustomMenu(Plugin::InternalUse, int32_t handle)
+	{
+		Handle = handle;
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+		}
+	}
+	
+	IHasCustomMenu::IHasCustomMenu(const IHasCustomMenu& other)
+		: IHasCustomMenu(Plugin::InternalUse::Only, other.Handle)
+	{
+	}
+	
+	IHasCustomMenu::IHasCustomMenu(IHasCustomMenu&& other)
+		: IHasCustomMenu(Plugin::InternalUse::Only, other.Handle)
+	{
+		other.Handle = 0;
+	}
+	
+	IHasCustomMenu::~IHasCustomMenu()
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+	}
+	
+	IHasCustomMenu& IHasCustomMenu::operator=(const IHasCustomMenu& other)
+	{
+		if (this->Handle)
+		{
+			Plugin::DereferenceManagedClass(this->Handle);
+		}
+		this->Handle = other.Handle;
+		if (this->Handle)
+		{
+			Plugin::ReferenceManagedClass(this->Handle);
+		}
+		return *this;
+	}
+	
+	IHasCustomMenu& IHasCustomMenu::operator=(decltype(nullptr))
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+		return *this;
+	}
+	
+	IHasCustomMenu& IHasCustomMenu::operator=(IHasCustomMenu&& other)
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+		}
+		Handle = other.Handle;
+		other.Handle = 0;
+		return *this;
+	}
+	
+	bool IHasCustomMenu::operator==(const IHasCustomMenu& other) const
+	{
+		return Handle == other.Handle;
+	}
+	
+	bool IHasCustomMenu::operator!=(const IHasCustomMenu& other) const
+	{
+		return Handle != other.Handle;
+	}
+}
+
+namespace UnityEditor
+{
+	namespace Overlays
+	{
+		ISupportsOverlays::ISupportsOverlays(decltype(nullptr))
+		{
+		}
+		
+		ISupportsOverlays::ISupportsOverlays(Plugin::InternalUse, int32_t handle)
+		{
+			Handle = handle;
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+			}
+		}
+		
+		ISupportsOverlays::ISupportsOverlays(const ISupportsOverlays& other)
+			: ISupportsOverlays(Plugin::InternalUse::Only, other.Handle)
+		{
+		}
+		
+		ISupportsOverlays::ISupportsOverlays(ISupportsOverlays&& other)
+			: ISupportsOverlays(Plugin::InternalUse::Only, other.Handle)
+		{
+			other.Handle = 0;
+		}
+		
+		ISupportsOverlays::~ISupportsOverlays()
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedClass(Handle);
+				Handle = 0;
+			}
+		}
+		
+		ISupportsOverlays& ISupportsOverlays::operator=(const ISupportsOverlays& other)
+		{
+			if (this->Handle)
+			{
+				Plugin::DereferenceManagedClass(this->Handle);
+			}
+			this->Handle = other.Handle;
+			if (this->Handle)
+			{
+				Plugin::ReferenceManagedClass(this->Handle);
+			}
+			return *this;
+		}
+		
+		ISupportsOverlays& ISupportsOverlays::operator=(decltype(nullptr))
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedClass(Handle);
+				Handle = 0;
+			}
+			return *this;
+		}
+		
+		ISupportsOverlays& ISupportsOverlays::operator=(ISupportsOverlays&& other)
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedClass(Handle);
+			}
+			Handle = other.Handle;
+			other.Handle = 0;
+			return *this;
+		}
+		
+		bool ISupportsOverlays::operator==(const ISupportsOverlays& other) const
+		{
+			return Handle == other.Handle;
+		}
+		
+		bool ISupportsOverlays::operator!=(const ISupportsOverlays& other) const
+		{
+			return Handle != other.Handle;
+		}
+	}
+}
+
+namespace UnityEditor
+{
+	SceneView::SceneView(decltype(nullptr))
+		: UnityEngine::Object(nullptr)
+		, UnityEngine::ScriptableObject(nullptr)
+		, UnityEditor::EditorWindow(nullptr)
+		, UnityEditor::SearchableEditorWindow(nullptr)
+		, UnityEditor::IHasCustomMenu(nullptr)
+		, UnityEditor::Overlays::ISupportsOverlays(nullptr)
+	{
+	}
+	
+	SceneView::SceneView(Plugin::InternalUse, int32_t handle)
+		: UnityEngine::Object(nullptr)
+		, UnityEngine::ScriptableObject(nullptr)
+		, UnityEditor::EditorWindow(nullptr)
+		, UnityEditor::SearchableEditorWindow(nullptr)
+		, UnityEditor::IHasCustomMenu(nullptr)
+		, UnityEditor::Overlays::ISupportsOverlays(nullptr)
+	{
+		Handle = handle;
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+		}
+	}
+	
+	SceneView::SceneView(const SceneView& other)
+		: SceneView(Plugin::InternalUse::Only, other.Handle)
+	{
+	}
+	
+	SceneView::SceneView(SceneView&& other)
+		: SceneView(Plugin::InternalUse::Only, other.Handle)
+	{
+		other.Handle = 0;
+	}
+	
+	SceneView::~SceneView()
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+	}
+	
+	SceneView& SceneView::operator=(const SceneView& other)
+	{
+		if (this->Handle)
+		{
+			Plugin::DereferenceManagedClass(this->Handle);
+		}
+		this->Handle = other.Handle;
+		if (this->Handle)
+		{
+			Plugin::ReferenceManagedClass(this->Handle);
+		}
+		return *this;
+	}
+	
+	SceneView& SceneView::operator=(decltype(nullptr))
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+		return *this;
+	}
+	
+	SceneView& SceneView::operator=(SceneView&& other)
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+		}
+		Handle = other.Handle;
+		other.Handle = 0;
+		return *this;
+	}
+	
+	bool SceneView::operator==(const SceneView& other) const
+	{
+		return Handle == other.Handle;
+	}
+	
+	bool SceneView::operator!=(const SceneView& other) const
+	{
+		return Handle != other.Handle;
+	}
+	
+	UnityEditor::SceneView UnityEditor::SceneView::GetLastActiveSceneView()
+	{
+		auto returnValue = Plugin::UnityEditorSceneViewPropertyGetLastActiveSceneView();
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return UnityEditor::SceneView(Plugin::InternalUse::Only, returnValue);
+	}
+	
+	UnityEngine::Camera UnityEditor::SceneView::GetCamera()
+	{
+		auto returnValue = Plugin::UnityEditorSceneViewPropertyGetCamera(Handle);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return UnityEngine::Camera(Plugin::InternalUse::Only, returnValue);
+	}
+}
+
 namespace System
 {
 	System::Object::operator System::Boolean()
@@ -12315,6 +12910,14 @@ DLLEXPORT void Init(
 	curMemory += sizeof(Plugin::UnityEngineTransformPropertyGetParent);
 	Plugin::UnityEngineTransformPropertySetParent = *(void (**)(int32_t thisHandle, int32_t valueHandle))curMemory;
 	curMemory += sizeof(Plugin::UnityEngineTransformPropertySetParent);
+	Plugin::UnityEngineTransformPropertyGetForward = *(UnityEngine::Vector3 (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineTransformPropertyGetForward);
+	Plugin::UnityEngineTransformPropertySetForward = *(void (**)(int32_t thisHandle, UnityEngine::Vector3& value))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineTransformPropertySetForward);
+	Plugin::UnityEngineTransformPropertyGetUp = *(UnityEngine::Vector3 (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineTransformPropertyGetUp);
+	Plugin::UnityEngineTransformPropertySetUp = *(void (**)(int32_t thisHandle, UnityEngine::Vector3& value))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineTransformPropertySetUp);
 	Plugin::SystemCollectionsIEnumeratorPropertyGetCurrent = *(int32_t (**)(int32_t thisHandle))curMemory;
 	curMemory += sizeof(Plugin::SystemCollectionsIEnumeratorPropertyGetCurrent);
 	Plugin::SystemCollectionsIEnumeratorMethodMoveNext = *(int32_t (**)(int32_t thisHandle))curMemory;
@@ -12435,6 +13038,10 @@ DLLEXPORT void Init(
 	curMemory += sizeof(Plugin::SystemThreadingTasksTaskMethodRunSystemAction);
 	Plugin::UnityEngineResourcesMethodLoadUnityEngineMaterialSystemString = *(int32_t (**)(int32_t pathHandle))curMemory;
 	curMemory += sizeof(Plugin::UnityEngineResourcesMethodLoadUnityEngineMaterialSystemString);
+	Plugin::UnityEditorSceneViewPropertyGetLastActiveSceneView = *(int32_t (**)())curMemory;
+	curMemory += sizeof(Plugin::UnityEditorSceneViewPropertyGetLastActiveSceneView);
+	Plugin::UnityEditorSceneViewPropertyGetCamera = *(int32_t (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEditorSceneViewPropertyGetCamera);
 	Plugin::BoxBoolean = *(int32_t (**)(uint32_t val))curMemory;
 	curMemory += sizeof(Plugin::BoxBoolean);
 	Plugin::UnboxBoolean = *(int32_t (**)(int32_t valHandle))curMemory;

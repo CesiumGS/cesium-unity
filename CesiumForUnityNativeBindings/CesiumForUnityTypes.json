@@ -326,6 +326,14 @@
 					"Name": "parent",
 					"Get": {},
 					"Set": {}
+				},
+				{
+					"Name": "forward",
+					"Get": {}
+				},
+				{
+					"Name": "up",
+					"Get": {}
 				}
 			]
 		},
@@ -742,6 +750,32 @@
 					"GenericParams": [
 						{ "Types": ["UnityEngine.Material"] }
 					]
+				}
+			]
+		},
+		{
+			"Name": "UnityEngine.ScriptableObject"
+		},
+		{
+			"Name": "UnityEditor.EditorWindow"
+		},
+		{
+			"Name": "UnityEditor.SearchableEditorWindow"
+		},
+		{
+			"Name": "UnityEditor.IHasCustomMenu"
+		},
+		{
+			"Name": "UnityEditor.Overlays.ISupportsOverlays"
+		},
+		{
+			"Name": "UnityEditor.SceneView",
+			"Properties": [
+				{
+					"Name": "lastActiveSceneView"
+				},
+				{
+					"Name": "camera"
 				}
 			]
 		}

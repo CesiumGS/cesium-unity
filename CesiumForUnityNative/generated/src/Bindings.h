@@ -677,6 +677,39 @@ namespace UnityEngine
 	struct Resources;
 }
 
+namespace UnityEngine
+{
+	struct ScriptableObject;
+}
+
+namespace UnityEditor
+{
+	struct EditorWindow;
+}
+
+namespace UnityEditor
+{
+	struct SearchableEditorWindow;
+}
+
+namespace UnityEditor
+{
+	struct IHasCustomMenu;
+}
+
+namespace UnityEditor
+{
+	namespace Overlays
+	{
+		struct ISupportsOverlays;
+	}
+}
+
+namespace UnityEditor
+{
+	struct SceneView;
+}
+
 namespace System
 {
 	struct Action;
@@ -1932,6 +1965,10 @@ namespace UnityEngine
 		UnityEngine::Matrix4x4 GetLocalToWorldMatrix();
 		UnityEngine::Transform GetParent();
 		void SetParent(UnityEngine::Transform& value);
+		UnityEngine::Vector3 GetForward();
+		void SetForward(UnityEngine::Vector3& value);
+		UnityEngine::Vector3 GetUp();
+		void SetUp(UnityEngine::Vector3& value);
 	};
 }
 
@@ -3093,6 +3130,113 @@ namespace UnityEngine
 		bool operator==(const Resources& other) const;
 		bool operator!=(const Resources& other) const;
 		template<typename MT0> static MT0 Load(System::String& path);
+	};
+}
+
+namespace UnityEngine
+{
+	struct ScriptableObject : virtual UnityEngine::Object
+	{
+		ScriptableObject(decltype(nullptr));
+		ScriptableObject(Plugin::InternalUse, int32_t handle);
+		ScriptableObject(const ScriptableObject& other);
+		ScriptableObject(ScriptableObject&& other);
+		virtual ~ScriptableObject();
+		ScriptableObject& operator=(const ScriptableObject& other);
+		ScriptableObject& operator=(decltype(nullptr));
+		ScriptableObject& operator=(ScriptableObject&& other);
+		bool operator==(const ScriptableObject& other) const;
+		bool operator!=(const ScriptableObject& other) const;
+	};
+}
+
+namespace UnityEditor
+{
+	struct EditorWindow : virtual UnityEngine::ScriptableObject
+	{
+		EditorWindow(decltype(nullptr));
+		EditorWindow(Plugin::InternalUse, int32_t handle);
+		EditorWindow(const EditorWindow& other);
+		EditorWindow(EditorWindow&& other);
+		virtual ~EditorWindow();
+		EditorWindow& operator=(const EditorWindow& other);
+		EditorWindow& operator=(decltype(nullptr));
+		EditorWindow& operator=(EditorWindow&& other);
+		bool operator==(const EditorWindow& other) const;
+		bool operator!=(const EditorWindow& other) const;
+	};
+}
+
+namespace UnityEditor
+{
+	struct SearchableEditorWindow : virtual UnityEditor::EditorWindow
+	{
+		SearchableEditorWindow(decltype(nullptr));
+		SearchableEditorWindow(Plugin::InternalUse, int32_t handle);
+		SearchableEditorWindow(const SearchableEditorWindow& other);
+		SearchableEditorWindow(SearchableEditorWindow&& other);
+		virtual ~SearchableEditorWindow();
+		SearchableEditorWindow& operator=(const SearchableEditorWindow& other);
+		SearchableEditorWindow& operator=(decltype(nullptr));
+		SearchableEditorWindow& operator=(SearchableEditorWindow&& other);
+		bool operator==(const SearchableEditorWindow& other) const;
+		bool operator!=(const SearchableEditorWindow& other) const;
+	};
+}
+
+namespace UnityEditor
+{
+	struct IHasCustomMenu : virtual System::Object
+	{
+		IHasCustomMenu(decltype(nullptr));
+		IHasCustomMenu(Plugin::InternalUse, int32_t handle);
+		IHasCustomMenu(const IHasCustomMenu& other);
+		IHasCustomMenu(IHasCustomMenu&& other);
+		virtual ~IHasCustomMenu();
+		IHasCustomMenu& operator=(const IHasCustomMenu& other);
+		IHasCustomMenu& operator=(decltype(nullptr));
+		IHasCustomMenu& operator=(IHasCustomMenu&& other);
+		bool operator==(const IHasCustomMenu& other) const;
+		bool operator!=(const IHasCustomMenu& other) const;
+	};
+}
+
+namespace UnityEditor
+{
+	namespace Overlays
+	{
+		struct ISupportsOverlays : virtual System::Object
+		{
+			ISupportsOverlays(decltype(nullptr));
+			ISupportsOverlays(Plugin::InternalUse, int32_t handle);
+			ISupportsOverlays(const ISupportsOverlays& other);
+			ISupportsOverlays(ISupportsOverlays&& other);
+			virtual ~ISupportsOverlays();
+			ISupportsOverlays& operator=(const ISupportsOverlays& other);
+			ISupportsOverlays& operator=(decltype(nullptr));
+			ISupportsOverlays& operator=(ISupportsOverlays&& other);
+			bool operator==(const ISupportsOverlays& other) const;
+			bool operator!=(const ISupportsOverlays& other) const;
+		};
+	}
+}
+
+namespace UnityEditor
+{
+	struct SceneView : virtual UnityEditor::SearchableEditorWindow, virtual UnityEditor::IHasCustomMenu, virtual UnityEditor::Overlays::ISupportsOverlays
+	{
+		SceneView(decltype(nullptr));
+		SceneView(Plugin::InternalUse, int32_t handle);
+		SceneView(const SceneView& other);
+		SceneView(SceneView&& other);
+		virtual ~SceneView();
+		SceneView& operator=(const SceneView& other);
+		SceneView& operator=(decltype(nullptr));
+		SceneView& operator=(SceneView&& other);
+		bool operator==(const SceneView& other) const;
+		bool operator!=(const SceneView& other) const;
+		static UnityEditor::SceneView GetLastActiveSceneView();
+		UnityEngine::Camera GetCamera();
 	};
 }
 

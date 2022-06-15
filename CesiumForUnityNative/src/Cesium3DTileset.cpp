@@ -1,12 +1,15 @@
 #include "Cesium3DTileset.h"
 
 #include "Bindings.h"
+#include "CameraManager.h"
 #include "UnityTilesetExternals.h"
 
 #include <Cesium3DTilesSelection/Tileset.h>
 #include <CesiumGeospatial/Ellipsoid.h>
 #include <CesiumGeospatial/Transforms.h>
 #include <CesiumUtility/Math.h>
+
+#include <glm/gtc/matrix_inverse.hpp>
 
 #include <memory>
 
@@ -38,19 +41,8 @@ void Cesium3DTileset::Update() {
     return;
   }
 
-  Camera camera = Camera::GetMain();
-
-  double verticalFOV = Math::degreesToRadians(camera.GetFieldOfView());
-
-  std::vector<ViewState> viewStates;
-  viewStates.emplace_back(ViewState::create(
-      Ellipsoid::WGS84.cartographicToCartesian(
-          Cartographic::fromDegrees(-105.25737, 39.736401, 2250.0)),
-      glm::dvec3(-1.0, 0.0, 0.0),
-      glm::dvec3(0.0, 0.0, 1.0),
-      glm::dvec2(camera.GetPixelWidth(), camera.GetPixelHeight()),
-      verticalFOV * camera.GetAspect(),
-      verticalFOV));
+  std::vector<ViewState> viewStates =
+      CameraManager::getAllCameras(this->GetGameObject());
 
   const ViewUpdateResult& updateResult =
       this->_pTileset->updateView(viewStates);

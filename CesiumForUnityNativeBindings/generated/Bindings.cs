@@ -552,6 +552,14 @@ namespace NativeScript
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		delegate void UnityEngineTransformPropertySetParentDelegateType(int thisHandle, int valueHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		delegate UnityEngine.Vector3 UnityEngineTransformPropertyGetForwardDelegateType(int thisHandle);
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		delegate void UnityEngineTransformPropertySetForwardDelegateType(int thisHandle, ref UnityEngine.Vector3 value);
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		delegate UnityEngine.Vector3 UnityEngineTransformPropertyGetUpDelegateType(int thisHandle);
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		delegate void UnityEngineTransformPropertySetUpDelegateType(int thisHandle, ref UnityEngine.Vector3 value);
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		delegate int SystemCollectionsIEnumeratorPropertyGetCurrentDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		delegate bool SystemCollectionsIEnumeratorMethodMoveNextDelegateType(int thisHandle);
@@ -671,6 +679,10 @@ namespace NativeScript
 		delegate int SystemThreadingTasksTaskMethodRunSystemActionDelegateType(int actionHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		delegate int UnityEngineResourcesMethodLoadUnityEngineMaterialSystemStringDelegateType(int pathHandle);
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		delegate int UnityEditorSceneViewPropertyGetLastActiveSceneViewDelegateType();
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		delegate int UnityEditorSceneViewPropertyGetCameraDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		delegate int BoxBooleanDelegateType(bool val);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -810,6 +822,10 @@ namespace NativeScript
 		static readonly UnityEngineTransformPropertyGetLocalToWorldMatrixDelegateType UnityEngineTransformPropertyGetLocalToWorldMatrixDelegate = new UnityEngineTransformPropertyGetLocalToWorldMatrixDelegateType(UnityEngineTransformPropertyGetLocalToWorldMatrix);
 		static readonly UnityEngineTransformPropertyGetParentDelegateType UnityEngineTransformPropertyGetParentDelegate = new UnityEngineTransformPropertyGetParentDelegateType(UnityEngineTransformPropertyGetParent);
 		static readonly UnityEngineTransformPropertySetParentDelegateType UnityEngineTransformPropertySetParentDelegate = new UnityEngineTransformPropertySetParentDelegateType(UnityEngineTransformPropertySetParent);
+		static readonly UnityEngineTransformPropertyGetForwardDelegateType UnityEngineTransformPropertyGetForwardDelegate = new UnityEngineTransformPropertyGetForwardDelegateType(UnityEngineTransformPropertyGetForward);
+		static readonly UnityEngineTransformPropertySetForwardDelegateType UnityEngineTransformPropertySetForwardDelegate = new UnityEngineTransformPropertySetForwardDelegateType(UnityEngineTransformPropertySetForward);
+		static readonly UnityEngineTransformPropertyGetUpDelegateType UnityEngineTransformPropertyGetUpDelegate = new UnityEngineTransformPropertyGetUpDelegateType(UnityEngineTransformPropertyGetUp);
+		static readonly UnityEngineTransformPropertySetUpDelegateType UnityEngineTransformPropertySetUpDelegate = new UnityEngineTransformPropertySetUpDelegateType(UnityEngineTransformPropertySetUp);
 		static readonly SystemCollectionsIEnumeratorPropertyGetCurrentDelegateType SystemCollectionsIEnumeratorPropertyGetCurrentDelegate = new SystemCollectionsIEnumeratorPropertyGetCurrentDelegateType(SystemCollectionsIEnumeratorPropertyGetCurrent);
 		static readonly SystemCollectionsIEnumeratorMethodMoveNextDelegateType SystemCollectionsIEnumeratorMethodMoveNextDelegate = new SystemCollectionsIEnumeratorMethodMoveNextDelegateType(SystemCollectionsIEnumeratorMethodMoveNext);
 		static readonly UnityEngineGameObjectConstructorSystemStringDelegateType UnityEngineGameObjectConstructorSystemStringDelegate = new UnityEngineGameObjectConstructorSystemStringDelegateType(UnityEngineGameObjectConstructorSystemString);
@@ -870,6 +886,8 @@ namespace NativeScript
 		static readonly BaseCesium3DTilesetConstructorDelegateType BaseCesium3DTilesetConstructorDelegate = new BaseCesium3DTilesetConstructorDelegateType(BaseCesium3DTilesetConstructor);
 		static readonly SystemThreadingTasksTaskMethodRunSystemActionDelegateType SystemThreadingTasksTaskMethodRunSystemActionDelegate = new SystemThreadingTasksTaskMethodRunSystemActionDelegateType(SystemThreadingTasksTaskMethodRunSystemAction);
 		static readonly UnityEngineResourcesMethodLoadUnityEngineMaterialSystemStringDelegateType UnityEngineResourcesMethodLoadUnityEngineMaterialSystemStringDelegate = new UnityEngineResourcesMethodLoadUnityEngineMaterialSystemStringDelegateType(UnityEngineResourcesMethodLoadUnityEngineMaterialSystemString);
+		static readonly UnityEditorSceneViewPropertyGetLastActiveSceneViewDelegateType UnityEditorSceneViewPropertyGetLastActiveSceneViewDelegate = new UnityEditorSceneViewPropertyGetLastActiveSceneViewDelegateType(UnityEditorSceneViewPropertyGetLastActiveSceneView);
+		static readonly UnityEditorSceneViewPropertyGetCameraDelegateType UnityEditorSceneViewPropertyGetCameraDelegate = new UnityEditorSceneViewPropertyGetCameraDelegateType(UnityEditorSceneViewPropertyGetCamera);
 		static readonly BoxBooleanDelegateType BoxBooleanDelegate = new BoxBooleanDelegateType(BoxBoolean);
 		static readonly UnboxBooleanDelegateType UnboxBooleanDelegate = new UnboxBooleanDelegateType(UnboxBoolean);
 		static readonly BoxSByteDelegateType BoxSByteDelegate = new BoxSByteDelegateType(BoxSByte);
@@ -1123,6 +1141,14 @@ namespace NativeScript
 			curMemory += IntPtr.Size;
 			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(UnityEngineTransformPropertySetParentDelegate));
 			curMemory += IntPtr.Size;
+			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(UnityEngineTransformPropertyGetForwardDelegate));
+			curMemory += IntPtr.Size;
+			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(UnityEngineTransformPropertySetForwardDelegate));
+			curMemory += IntPtr.Size;
+			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(UnityEngineTransformPropertyGetUpDelegate));
+			curMemory += IntPtr.Size;
+			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(UnityEngineTransformPropertySetUpDelegate));
+			curMemory += IntPtr.Size;
 			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(SystemCollectionsIEnumeratorPropertyGetCurrentDelegate));
 			curMemory += IntPtr.Size;
 			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(SystemCollectionsIEnumeratorMethodMoveNextDelegate));
@@ -1242,6 +1268,10 @@ namespace NativeScript
 			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(SystemThreadingTasksTaskMethodRunSystemActionDelegate));
 			curMemory += IntPtr.Size;
 			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(UnityEngineResourcesMethodLoadUnityEngineMaterialSystemStringDelegate));
+			curMemory += IntPtr.Size;
+			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(UnityEditorSceneViewPropertyGetLastActiveSceneViewDelegate));
+			curMemory += IntPtr.Size;
+			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(UnityEditorSceneViewPropertyGetCameraDelegate));
 			curMemory += IntPtr.Size;
 			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(BoxBooleanDelegate));
 			curMemory += IntPtr.Size;
@@ -2173,6 +2203,92 @@ namespace NativeScript
 				var thiz = (UnityEngine.Transform)NativeScript.Bindings.ObjectStore.Get(thisHandle);
 				var value = (UnityEngine.Transform)NativeScript.Bindings.ObjectStore.Get(valueHandle);
 				thiz.parent = value;
+			}
+			catch (System.NullReferenceException ex)
+			{
+				UnityEngine.Debug.LogException(ex);
+				NativeScript.Bindings.SetCsharpExceptionSystemNullReferenceException(NativeScript.Bindings.ObjectStore.Store(ex));
+			}
+			catch (System.Exception ex)
+			{
+				UnityEngine.Debug.LogException(ex);
+				NativeScript.Bindings.SetCsharpException(NativeScript.Bindings.ObjectStore.Store(ex));
+			}
+		}
+		
+		[MonoPInvokeCallback(typeof(UnityEngineTransformPropertyGetForwardDelegateType))]
+		static UnityEngine.Vector3 UnityEngineTransformPropertyGetForward(int thisHandle)
+		{
+			try
+			{
+				var thiz = (UnityEngine.Transform)NativeScript.Bindings.ObjectStore.Get(thisHandle);
+				var returnValue = thiz.forward;
+				return returnValue;
+			}
+			catch (System.NullReferenceException ex)
+			{
+				UnityEngine.Debug.LogException(ex);
+				NativeScript.Bindings.SetCsharpExceptionSystemNullReferenceException(NativeScript.Bindings.ObjectStore.Store(ex));
+				return default(UnityEngine.Vector3);
+			}
+			catch (System.Exception ex)
+			{
+				UnityEngine.Debug.LogException(ex);
+				NativeScript.Bindings.SetCsharpException(NativeScript.Bindings.ObjectStore.Store(ex));
+				return default(UnityEngine.Vector3);
+			}
+		}
+		
+		[MonoPInvokeCallback(typeof(UnityEngineTransformPropertySetForwardDelegateType))]
+		static void UnityEngineTransformPropertySetForward(int thisHandle, ref UnityEngine.Vector3 value)
+		{
+			try
+			{
+				var thiz = (UnityEngine.Transform)NativeScript.Bindings.ObjectStore.Get(thisHandle);
+				thiz.forward = value;
+			}
+			catch (System.NullReferenceException ex)
+			{
+				UnityEngine.Debug.LogException(ex);
+				NativeScript.Bindings.SetCsharpExceptionSystemNullReferenceException(NativeScript.Bindings.ObjectStore.Store(ex));
+			}
+			catch (System.Exception ex)
+			{
+				UnityEngine.Debug.LogException(ex);
+				NativeScript.Bindings.SetCsharpException(NativeScript.Bindings.ObjectStore.Store(ex));
+			}
+		}
+		
+		[MonoPInvokeCallback(typeof(UnityEngineTransformPropertyGetUpDelegateType))]
+		static UnityEngine.Vector3 UnityEngineTransformPropertyGetUp(int thisHandle)
+		{
+			try
+			{
+				var thiz = (UnityEngine.Transform)NativeScript.Bindings.ObjectStore.Get(thisHandle);
+				var returnValue = thiz.up;
+				return returnValue;
+			}
+			catch (System.NullReferenceException ex)
+			{
+				UnityEngine.Debug.LogException(ex);
+				NativeScript.Bindings.SetCsharpExceptionSystemNullReferenceException(NativeScript.Bindings.ObjectStore.Store(ex));
+				return default(UnityEngine.Vector3);
+			}
+			catch (System.Exception ex)
+			{
+				UnityEngine.Debug.LogException(ex);
+				NativeScript.Bindings.SetCsharpException(NativeScript.Bindings.ObjectStore.Store(ex));
+				return default(UnityEngine.Vector3);
+			}
+		}
+		
+		[MonoPInvokeCallback(typeof(UnityEngineTransformPropertySetUpDelegateType))]
+		static void UnityEngineTransformPropertySetUp(int thisHandle, ref UnityEngine.Vector3 value)
+		{
+			try
+			{
+				var thiz = (UnityEngine.Transform)NativeScript.Bindings.ObjectStore.Get(thisHandle);
+				thiz.up = value;
 			}
 			catch (System.NullReferenceException ex)
 			{
@@ -3508,6 +3624,51 @@ namespace NativeScript
 			{
 				var path = (string)NativeScript.Bindings.ObjectStore.Get(pathHandle);
 				var returnValue = UnityEngine.Resources.Load<UnityEngine.Material>(path);
+				return NativeScript.Bindings.ObjectStore.GetHandle(returnValue);
+			}
+			catch (System.NullReferenceException ex)
+			{
+				UnityEngine.Debug.LogException(ex);
+				NativeScript.Bindings.SetCsharpExceptionSystemNullReferenceException(NativeScript.Bindings.ObjectStore.Store(ex));
+				return default(int);
+			}
+			catch (System.Exception ex)
+			{
+				UnityEngine.Debug.LogException(ex);
+				NativeScript.Bindings.SetCsharpException(NativeScript.Bindings.ObjectStore.Store(ex));
+				return default(int);
+			}
+		}
+		
+		[MonoPInvokeCallback(typeof(UnityEditorSceneViewPropertyGetLastActiveSceneViewDelegateType))]
+		static int UnityEditorSceneViewPropertyGetLastActiveSceneView()
+		{
+			try
+			{
+				var returnValue = UnityEditor.SceneView.lastActiveSceneView;
+				return NativeScript.Bindings.ObjectStore.GetHandle(returnValue);
+			}
+			catch (System.NullReferenceException ex)
+			{
+				UnityEngine.Debug.LogException(ex);
+				NativeScript.Bindings.SetCsharpExceptionSystemNullReferenceException(NativeScript.Bindings.ObjectStore.Store(ex));
+				return default(int);
+			}
+			catch (System.Exception ex)
+			{
+				UnityEngine.Debug.LogException(ex);
+				NativeScript.Bindings.SetCsharpException(NativeScript.Bindings.ObjectStore.Store(ex));
+				return default(int);
+			}
+		}
+		
+		[MonoPInvokeCallback(typeof(UnityEditorSceneViewPropertyGetCameraDelegateType))]
+		static int UnityEditorSceneViewPropertyGetCamera(int thisHandle)
+		{
+			try
+			{
+				var thiz = (UnityEditor.SceneView)NativeScript.Bindings.ObjectStore.Get(thisHandle);
+				var returnValue = thiz.camera;
 				return NativeScript.Bindings.ObjectStore.GetHandle(returnValue);
 			}
 			catch (System.NullReferenceException ex)
