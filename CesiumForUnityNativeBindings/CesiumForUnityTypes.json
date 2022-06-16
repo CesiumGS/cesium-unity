@@ -122,6 +122,11 @@
 					"Types": [
 						"UnityEngine.Matrix4x4"
 					]
+				},
+				{
+					"Types": [
+						"Unity.Collections.NativeArray<System.Byte>"
+					]
 				}
 			]
 		},
@@ -457,6 +462,9 @@
 				},
 				{
 					"Types": ["System.Int32"]
+				},
+				{
+					"Types": ["Unity.Collections.NativeArray<System.Byte>"]
 				}
 			],
 			"Properties": [
@@ -480,6 +488,9 @@
 				},
 				{
 					"Types": ["System.Int32"]
+				},
+				{
+					"Types": ["Unity.Collections.NativeArray<System.Byte>"]
 				}
 			],
 			"Methods": [
@@ -554,6 +565,14 @@
 				},
 				{
 					"Types": ["System.Int32"]
+				}
+			]
+		},
+		{
+			"Name": "Unity.Collections.NativeArray`1",
+			"GenericParams": [
+				{
+					"Types": ["System.Byte"]
 				}
 			]
 		},
@@ -879,6 +898,21 @@
 					],
 					"ParamTypes": [
 						"UnityEngine.T[]",
+						"System.Int32",
+						"System.Int32"
+					]
+				},
+				{
+					"Name": "SetPixelData",
+					"GenericParams": [
+						{
+							"Types": [
+								"System.Byte"
+							]
+						}
+					],
+					"ParamTypes": [
+						"Unity.Collections.NativeArray`1",
 						"System.Int32",
 						"System.Int32"
 					]

@@ -97,10 +97,15 @@ namespace Plugin
 	UnityEngine::Vector3 (*SystemCollectionsGenericIEnumeratorUnityEngineVector3PropertyGetCurrent)(int32_t thisHandle);
 	uint8_t (*SystemCollectionsGenericIEnumeratorSystemBytePropertyGetCurrent)(int32_t thisHandle);
 	int32_t (*SystemCollectionsGenericIEnumeratorSystemInt32PropertyGetCurrent)(int32_t thisHandle);
+	int32_t (*SystemCollectionsGenericIEnumeratorUnityCollectionsNativeArrayPropertyGetCurrent)(int32_t thisHandle);
 	int32_t (*SystemCollectionsGenericIEnumerableUnityEngineVector2MethodGetEnumerator)(int32_t thisHandle);
 	int32_t (*SystemCollectionsGenericIEnumerableUnityEngineVector3MethodGetEnumerator)(int32_t thisHandle);
 	int32_t (*SystemCollectionsGenericIEnumerableSystemByteMethodGetEnumerator)(int32_t thisHandle);
 	int32_t (*SystemCollectionsGenericIEnumerableSystemInt32MethodGetEnumerator)(int32_t thisHandle);
+	int32_t (*SystemCollectionsGenericIEnumerableUnityCollectionsNativeArrayMethodGetEnumerator)(int32_t thisHandle);
+	void (*ReleaseUnityCollectionsNativeArraySystemByte)(int32_t handle);
+	int32_t (*BoxNativeArraySystemByte)(int32_t valHandle);
+	int32_t (*UnboxNativeArraySystemByte)(int32_t valHandle);
 	int32_t (*UnityEngineMeshConstructor)();
 	void (*UnityEngineMeshMethodSetVerticesUnityEngineVector3Array1)(int32_t thisHandle, int32_t inVerticesHandle);
 	void (*UnityEngineMeshMethodSetNormalsUnityEngineVector3Array1)(int32_t thisHandle, int32_t inNormalsHandle);
@@ -153,6 +158,7 @@ namespace Plugin
 	UnityEngine::TextureFormat (*UnboxTextureFormat)(int32_t valHandle);
 	int32_t (*UnityEngineTexture2DConstructorSystemInt32_SystemInt32_UnityEngineTextureFormat_SystemBoolean_SystemBoolean)(int32_t width, int32_t height, UnityEngine::TextureFormat textureFormat, uint32_t mipChain, uint32_t linear);
 	void (*UnityEngineTexture2DMethodSetPixelDataSystemByteSystemByteArray1_SystemInt32_SystemInt32)(int32_t thisHandle, int32_t dataHandle, int32_t mipLevel, int32_t sourceDataStartIndex);
+	void (*UnityEngineTexture2DMethodSetPixelDataSystemByteUnityCollectionsNativeArray_SystemInt32_SystemInt32)(int32_t thisHandle, int32_t dataHandle, int32_t mipLevel, int32_t sourceDataStartIndex);
 	void (*UnityEngineTexture2DMethodApplySystemBoolean_SystemBoolean)(int32_t thisHandle, uint32_t updateMipmaps, uint32_t makeNoLongerReadable);
 	int32_t (*BoxBoolean)(uint32_t val);
 	int32_t (*UnboxBoolean)(int32_t valHandle);
@@ -985,6 +991,31 @@ namespace Plugin
 			if (numRemain == 0)
 			{
 				ReleaseSystemDecimal(handle);
+			}
+		}
+	}
+	
+	int32_t RefCountsLenUnityCollectionsNativeArraySystemByte;
+	int32_t* RefCountsUnityCollectionsNativeArraySystemByte;
+	
+	void ReferenceManagedUnityCollectionsNativeArraySystemByte(int32_t handle)
+	{
+		assert(handle >= 0 && handle < RefCountsLenUnityCollectionsNativeArraySystemByte);
+		if (handle != 0)
+		{
+			RefCountsUnityCollectionsNativeArraySystemByte[handle]++;
+		}
+	}
+	
+	void DereferenceManagedUnityCollectionsNativeArraySystemByte(int32_t handle)
+	{
+		assert(handle >= 0 && handle < RefCountsLenUnityCollectionsNativeArraySystemByte);
+		if (handle != 0)
+		{
+			int32_t numRemain = --RefCountsUnityCollectionsNativeArraySystemByte[handle];
+			if (numRemain == 0)
+			{
+				ReleaseUnityCollectionsNativeArraySystemByte(handle);
 			}
 		}
 	}
@@ -3446,6 +3477,87 @@ namespace System
 	}
 	
 	bool IEquatable_1<UnityEngine::Matrix4x4>::operator!=(const IEquatable_1<UnityEngine::Matrix4x4>& other) const
+	{
+		return Handle != other.Handle;
+	}
+}
+
+namespace System
+{
+	IEquatable_1<Unity::Collections::NativeArray_1<System::Byte>>::IEquatable_1(decltype(nullptr))
+	{
+	}
+	
+	IEquatable_1<Unity::Collections::NativeArray_1<System::Byte>>::IEquatable_1(Plugin::InternalUse, int32_t handle)
+	{
+		Handle = handle;
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+		}
+	}
+	
+	IEquatable_1<Unity::Collections::NativeArray_1<System::Byte>>::IEquatable_1(const IEquatable_1<Unity::Collections::NativeArray_1<System::Byte>>& other)
+		: IEquatable_1(Plugin::InternalUse::Only, other.Handle)
+	{
+	}
+	
+	IEquatable_1<Unity::Collections::NativeArray_1<System::Byte>>::IEquatable_1(IEquatable_1<Unity::Collections::NativeArray_1<System::Byte>>&& other)
+		: IEquatable_1(Plugin::InternalUse::Only, other.Handle)
+	{
+		other.Handle = 0;
+	}
+	
+	IEquatable_1<Unity::Collections::NativeArray_1<System::Byte>>::~IEquatable_1<Unity::Collections::NativeArray_1<System::Byte>>()
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+	}
+	
+	IEquatable_1<Unity::Collections::NativeArray_1<System::Byte>>& IEquatable_1<Unity::Collections::NativeArray_1<System::Byte>>::operator=(const IEquatable_1<Unity::Collections::NativeArray_1<System::Byte>>& other)
+	{
+		if (this->Handle)
+		{
+			Plugin::DereferenceManagedClass(this->Handle);
+		}
+		this->Handle = other.Handle;
+		if (this->Handle)
+		{
+			Plugin::ReferenceManagedClass(this->Handle);
+		}
+		return *this;
+	}
+	
+	IEquatable_1<Unity::Collections::NativeArray_1<System::Byte>>& IEquatable_1<Unity::Collections::NativeArray_1<System::Byte>>::operator=(decltype(nullptr))
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+		return *this;
+	}
+	
+	IEquatable_1<Unity::Collections::NativeArray_1<System::Byte>>& IEquatable_1<Unity::Collections::NativeArray_1<System::Byte>>::operator=(IEquatable_1<Unity::Collections::NativeArray_1<System::Byte>>&& other)
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+		}
+		Handle = other.Handle;
+		other.Handle = 0;
+		return *this;
+	}
+	
+	bool IEquatable_1<Unity::Collections::NativeArray_1<System::Byte>>::operator==(const IEquatable_1<Unity::Collections::NativeArray_1<System::Byte>>& other) const
+	{
+		return Handle == other.Handle;
+	}
+	
+	bool IEquatable_1<Unity::Collections::NativeArray_1<System::Byte>>::operator!=(const IEquatable_1<Unity::Collections::NativeArray_1<System::Byte>>& other) const
 	{
 		return Handle != other.Handle;
 	}
@@ -7090,6 +7202,110 @@ namespace System
 	{
 		namespace Generic
 		{
+			IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>::IEnumerator_1(decltype(nullptr))
+				: System::IDisposable(nullptr)
+				, System::Collections::IEnumerator(nullptr)
+			{
+			}
+			
+			IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>::IEnumerator_1(Plugin::InternalUse, int32_t handle)
+				: System::IDisposable(nullptr)
+				, System::Collections::IEnumerator(nullptr)
+			{
+				Handle = handle;
+				if (handle)
+				{
+					Plugin::ReferenceManagedClass(handle);
+				}
+			}
+			
+			IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>::IEnumerator_1(const IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>& other)
+				: IEnumerator_1(Plugin::InternalUse::Only, other.Handle)
+			{
+			}
+			
+			IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>::IEnumerator_1(IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>&& other)
+				: IEnumerator_1(Plugin::InternalUse::Only, other.Handle)
+			{
+				other.Handle = 0;
+			}
+			
+			IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>::~IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>()
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+					Handle = 0;
+				}
+			}
+			
+			IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>& IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>::operator=(const IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>& other)
+			{
+				if (this->Handle)
+				{
+					Plugin::DereferenceManagedClass(this->Handle);
+				}
+				this->Handle = other.Handle;
+				if (this->Handle)
+				{
+					Plugin::ReferenceManagedClass(this->Handle);
+				}
+				return *this;
+			}
+			
+			IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>& IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>::operator=(decltype(nullptr))
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+					Handle = 0;
+				}
+				return *this;
+			}
+			
+			IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>& IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>::operator=(IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>&& other)
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+				}
+				Handle = other.Handle;
+				other.Handle = 0;
+				return *this;
+			}
+			
+			bool IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>::operator==(const IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>& other) const
+			{
+				return Handle == other.Handle;
+			}
+			
+			bool IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>::operator!=(const IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>& other) const
+			{
+				return Handle != other.Handle;
+			}
+			
+			Unity::Collections::NativeArray_1<System::Byte> System::Collections::Generic::IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>::GetCurrent()
+			{
+				auto returnValue = Plugin::SystemCollectionsGenericIEnumeratorUnityCollectionsNativeArrayPropertyGetCurrent(Handle);
+				if (Plugin::unhandledCsharpException)
+				{
+					System::Exception* ex = Plugin::unhandledCsharpException;
+					Plugin::unhandledCsharpException = nullptr;
+					ex->ThrowReferenceToThis();
+					delete ex;
+				}
+				return Unity::Collections::NativeArray_1<System::Byte>(Plugin::InternalUse::Only, returnValue);
+			}
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
 			IEnumerable_1<UnityEngine::Vector2>::IEnumerable_1(decltype(nullptr))
 				: System::Collections::IEnumerable(nullptr)
 			{
@@ -7487,6 +7703,108 @@ namespace System
 					delete ex;
 				}
 				return System::Collections::Generic::IEnumerator_1<System::Int32>(Plugin::InternalUse::Only, returnValue);
+			}
+		}
+	}
+}
+
+namespace System
+{
+	namespace Collections
+	{
+		namespace Generic
+		{
+			IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>::IEnumerable_1(decltype(nullptr))
+				: System::Collections::IEnumerable(nullptr)
+			{
+			}
+			
+			IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>::IEnumerable_1(Plugin::InternalUse, int32_t handle)
+				: System::Collections::IEnumerable(nullptr)
+			{
+				Handle = handle;
+				if (handle)
+				{
+					Plugin::ReferenceManagedClass(handle);
+				}
+			}
+			
+			IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>::IEnumerable_1(const IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>& other)
+				: IEnumerable_1(Plugin::InternalUse::Only, other.Handle)
+			{
+			}
+			
+			IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>::IEnumerable_1(IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>&& other)
+				: IEnumerable_1(Plugin::InternalUse::Only, other.Handle)
+			{
+				other.Handle = 0;
+			}
+			
+			IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>::~IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>()
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+					Handle = 0;
+				}
+			}
+			
+			IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>& IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>::operator=(const IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>& other)
+			{
+				if (this->Handle)
+				{
+					Plugin::DereferenceManagedClass(this->Handle);
+				}
+				this->Handle = other.Handle;
+				if (this->Handle)
+				{
+					Plugin::ReferenceManagedClass(this->Handle);
+				}
+				return *this;
+			}
+			
+			IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>& IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>::operator=(decltype(nullptr))
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+					Handle = 0;
+				}
+				return *this;
+			}
+			
+			IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>& IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>::operator=(IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>&& other)
+			{
+				if (Handle)
+				{
+					Plugin::DereferenceManagedClass(Handle);
+				}
+				Handle = other.Handle;
+				other.Handle = 0;
+				return *this;
+			}
+			
+			bool IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>::operator==(const IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>& other) const
+			{
+				return Handle == other.Handle;
+			}
+			
+			bool IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>::operator!=(const IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>& other) const
+			{
+				return Handle != other.Handle;
+			}
+			
+			System::Collections::Generic::IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>> System::Collections::Generic::IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>::GetEnumerator()
+			{
+				auto returnValue = Plugin::SystemCollectionsGenericIEnumerableUnityCollectionsNativeArrayMethodGetEnumerator(Handle);
+				if (Plugin::unhandledCsharpException)
+				{
+					System::Exception* ex = Plugin::unhandledCsharpException;
+					Plugin::unhandledCsharpException = nullptr;
+					ex->ThrowReferenceToThis();
+					delete ex;
+				}
+				return System::Collections::Generic::IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>(Plugin::InternalUse::Only, returnValue);
 			}
 		}
 	}
@@ -9889,6 +10207,214 @@ namespace System
 				return Plugin::SystemCollectionsGenericIReadOnlyListSystemInt32Iterator(nullptr);
 			}
 		}
+	}
+}
+
+namespace Unity
+{
+	namespace Collections
+	{
+		NativeArray_1<System::Byte>::NativeArray_1(decltype(nullptr))
+		{
+		}
+		
+		NativeArray_1<System::Byte>::NativeArray_1(Plugin::InternalUse, int32_t handle)
+		{
+			Handle = handle;
+			if (handle)
+			{
+				Plugin::ReferenceManagedUnityCollectionsNativeArraySystemByte(Handle);
+			}
+		}
+		
+		NativeArray_1<System::Byte>::NativeArray_1(const NativeArray_1<System::Byte>& other)
+			: NativeArray_1(Plugin::InternalUse::Only, other.Handle)
+		{
+		}
+		
+		NativeArray_1<System::Byte>::NativeArray_1(NativeArray_1<System::Byte>&& other)
+			: NativeArray_1(Plugin::InternalUse::Only, other.Handle)
+		{
+			other.Handle = 0;
+		}
+		
+		NativeArray_1<System::Byte>::~NativeArray_1<System::Byte>()
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedUnityCollectionsNativeArraySystemByte(Handle);
+				Handle = 0;
+			}
+		}
+		
+		NativeArray_1<System::Byte>& NativeArray_1<System::Byte>::operator=(const NativeArray_1<System::Byte>& other)
+		{
+			if (this->Handle)
+			{
+				Plugin::DereferenceManagedUnityCollectionsNativeArraySystemByte(Handle);
+			}
+			this->Handle = other.Handle;
+			if (this->Handle)
+			{
+				Plugin::ReferenceManagedUnityCollectionsNativeArraySystemByte(Handle);
+			}
+			return *this;
+		}
+		
+		NativeArray_1<System::Byte>& NativeArray_1<System::Byte>::operator=(decltype(nullptr))
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedUnityCollectionsNativeArraySystemByte(Handle);
+				Handle = 0;
+			}
+			return *this;
+		}
+		
+		NativeArray_1<System::Byte>& NativeArray_1<System::Byte>::operator=(NativeArray_1<System::Byte>&& other)
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedUnityCollectionsNativeArraySystemByte(Handle);
+			}
+			Handle = other.Handle;
+			other.Handle = 0;
+			return *this;
+		}
+		
+		bool NativeArray_1<System::Byte>::operator==(const NativeArray_1<System::Byte>& other) const
+		{
+			return Handle == other.Handle;
+		}
+		
+		bool NativeArray_1<System::Byte>::operator!=(const NativeArray_1<System::Byte>& other) const
+		{
+			return Handle != other.Handle;
+		}
+		
+		Unity::Collections::NativeArray_1<System::Byte>::operator System::ValueType()
+		{
+			int32_t handle = Plugin::BoxNativeArraySystemByte(Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::ValueType(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+		
+		Unity::Collections::NativeArray_1<System::Byte>::operator System::Object()
+		{
+			int32_t handle = Plugin::BoxNativeArraySystemByte(Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::Object(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+		
+		Unity::Collections::NativeArray_1<System::Byte>::operator System::Collections::Generic::IEnumerable_1<System::Byte>()
+		{
+			int32_t handle = Plugin::BoxNativeArraySystemByte(Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::Collections::Generic::IEnumerable_1<System::Byte>(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+		
+		Unity::Collections::NativeArray_1<System::Byte>::operator System::Collections::IEnumerable()
+		{
+			int32_t handle = Plugin::BoxNativeArraySystemByte(Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::Collections::IEnumerable(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+		
+		Unity::Collections::NativeArray_1<System::Byte>::operator System::IDisposable()
+		{
+			int32_t handle = Plugin::BoxNativeArraySystemByte(Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::IDisposable(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+		
+		Unity::Collections::NativeArray_1<System::Byte>::operator System::IEquatable_1<Unity::Collections::NativeArray_1<System::Byte>>()
+		{
+			int32_t handle = Plugin::BoxNativeArraySystemByte(Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::IEquatable_1<Unity::Collections::NativeArray_1<System::Byte>>(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+	}
+}
+
+namespace System
+{
+	System::Object::operator Unity::Collections::NativeArray_1<System::Byte>()
+	{
+		Unity::Collections::NativeArray_1<System::Byte> returnVal(Plugin::InternalUse::Only, Plugin::UnboxNativeArraySystemByte(Handle));
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return returnVal;
 	}
 }
 
@@ -13905,6 +14431,18 @@ namespace UnityEngine
 		}
 	}
 	
+	template<> void UnityEngine::Texture2D::SetPixelData<System::Byte>(Unity::Collections::NativeArray_1<System::Byte>& data, System::Int32 mipLevel, System::Int32 sourceDataStartIndex)
+	{
+		Plugin::UnityEngineTexture2DMethodSetPixelDataSystemByteUnityCollectionsNativeArray_SystemInt32_SystemInt32(Handle, data.Handle, mipLevel, sourceDataStartIndex);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+	}
+	
 	void UnityEngine::Texture2D::Apply(System::Boolean updateMipmaps, System::Boolean makeNoLongerReadable)
 	{
 		Plugin::UnityEngineTexture2DMethodApplySystemBoolean_SystemBoolean(Handle, updateMipmaps, makeNoLongerReadable);
@@ -15708,6 +16246,8 @@ DLLEXPORT void Init(
 	curMemory += sizeof(Plugin::SystemCollectionsGenericIEnumeratorSystemBytePropertyGetCurrent);
 	Plugin::SystemCollectionsGenericIEnumeratorSystemInt32PropertyGetCurrent = *(int32_t (**)(int32_t thisHandle))curMemory;
 	curMemory += sizeof(Plugin::SystemCollectionsGenericIEnumeratorSystemInt32PropertyGetCurrent);
+	Plugin::SystemCollectionsGenericIEnumeratorUnityCollectionsNativeArrayPropertyGetCurrent = *(int32_t (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::SystemCollectionsGenericIEnumeratorUnityCollectionsNativeArrayPropertyGetCurrent);
 	Plugin::SystemCollectionsGenericIEnumerableUnityEngineVector2MethodGetEnumerator = *(int32_t (**)(int32_t thisHandle))curMemory;
 	curMemory += sizeof(Plugin::SystemCollectionsGenericIEnumerableUnityEngineVector2MethodGetEnumerator);
 	Plugin::SystemCollectionsGenericIEnumerableUnityEngineVector3MethodGetEnumerator = *(int32_t (**)(int32_t thisHandle))curMemory;
@@ -15716,6 +16256,14 @@ DLLEXPORT void Init(
 	curMemory += sizeof(Plugin::SystemCollectionsGenericIEnumerableSystemByteMethodGetEnumerator);
 	Plugin::SystemCollectionsGenericIEnumerableSystemInt32MethodGetEnumerator = *(int32_t (**)(int32_t thisHandle))curMemory;
 	curMemory += sizeof(Plugin::SystemCollectionsGenericIEnumerableSystemInt32MethodGetEnumerator);
+	Plugin::SystemCollectionsGenericIEnumerableUnityCollectionsNativeArrayMethodGetEnumerator = *(int32_t (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::SystemCollectionsGenericIEnumerableUnityCollectionsNativeArrayMethodGetEnumerator);
+	Plugin::ReleaseUnityCollectionsNativeArraySystemByte = *(void (**)(int32_t handle))curMemory;
+	curMemory += sizeof(Plugin::ReleaseUnityCollectionsNativeArraySystemByte);
+	Plugin::BoxNativeArraySystemByte = *(int32_t (**)(int32_t valHandle))curMemory;
+	curMemory += sizeof(Plugin::BoxNativeArraySystemByte);
+	Plugin::UnboxNativeArraySystemByte = *(int32_t (**)(int32_t valHandle))curMemory;
+	curMemory += sizeof(Plugin::UnboxNativeArraySystemByte);
 	Plugin::UnityEngineMeshConstructor = *(int32_t (**)())curMemory;
 	curMemory += sizeof(Plugin::UnityEngineMeshConstructor);
 	Plugin::UnityEngineMeshMethodSetVerticesUnityEngineVector3Array1 = *(void (**)(int32_t thisHandle, int32_t inVerticesHandle))curMemory;
@@ -15820,6 +16368,8 @@ DLLEXPORT void Init(
 	curMemory += sizeof(Plugin::UnityEngineTexture2DConstructorSystemInt32_SystemInt32_UnityEngineTextureFormat_SystemBoolean_SystemBoolean);
 	Plugin::UnityEngineTexture2DMethodSetPixelDataSystemByteSystemByteArray1_SystemInt32_SystemInt32 = *(void (**)(int32_t thisHandle, int32_t dataHandle, int32_t mipLevel, int32_t sourceDataStartIndex))curMemory;
 	curMemory += sizeof(Plugin::UnityEngineTexture2DMethodSetPixelDataSystemByteSystemByteArray1_SystemInt32_SystemInt32);
+	Plugin::UnityEngineTexture2DMethodSetPixelDataSystemByteUnityCollectionsNativeArray_SystemInt32_SystemInt32 = *(void (**)(int32_t thisHandle, int32_t dataHandle, int32_t mipLevel, int32_t sourceDataStartIndex))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineTexture2DMethodSetPixelDataSystemByteUnityCollectionsNativeArray_SystemInt32_SystemInt32);
 	Plugin::UnityEngineTexture2DMethodApplySystemBoolean_SystemBoolean = *(void (**)(int32_t thisHandle, uint32_t updateMipmaps, uint32_t makeNoLongerReadable))curMemory;
 	curMemory += sizeof(Plugin::UnityEngineTexture2DMethodApplySystemBoolean_SystemBoolean);
 	Plugin::BoxBoolean = *(int32_t (**)(uint32_t val))curMemory;
@@ -15925,6 +16475,10 @@ DLLEXPORT void Init(
 	Plugin::RefCountsSystemDecimal = (int32_t*)curMemory;
 	curMemory += 1000 * sizeof(int32_t);
 	Plugin::RefCountsLenSystemDecimal = 1000;
+	
+	Plugin::RefCountsUnityCollectionsNativeArraySystemByte = (int32_t*)curMemory;
+	curMemory += 1000 * sizeof(int32_t);
+	Plugin::RefCountsLenUnityCollectionsNativeArraySystemByte = 1000;
 	
 	Plugin::BaseNativeDownloadHandlerFreeListSize = 1000;
 	Plugin::BaseNativeDownloadHandlerFreeList = (CesiumForUnity::BaseNativeDownloadHandler**)curMemory;
