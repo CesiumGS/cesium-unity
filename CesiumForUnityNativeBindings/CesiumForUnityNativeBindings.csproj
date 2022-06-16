@@ -16,6 +16,7 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>disable</Nullable>
     <DefineConstants>UNITY_EDITOR;UNITY_EDITOR_WIN</DefineConstants>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>

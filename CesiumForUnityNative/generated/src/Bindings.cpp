@@ -106,6 +106,9 @@ namespace Plugin
 	void (*ReleaseUnityCollectionsNativeArraySystemByte)(int32_t handle);
 	int32_t (*BoxNativeArraySystemByte)(int32_t valHandle);
 	int32_t (*UnboxNativeArraySystemByte)(int32_t valHandle);
+	int32_t (*BoxAllocator)(Unity::Collections::Allocator val);
+	Unity::Collections::Allocator (*UnboxAllocator)(int32_t valHandle);
+	int32_t (*UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodConvertExistingDataToNativeArraySystemByteSystemVoidPointer_SystemInt32_UnityCollectionsAllocator)(void* dataPointer, int32_t length, Unity::Collections::Allocator allocator);
 	int32_t (*UnityEngineMeshConstructor)();
 	void (*UnityEngineMeshMethodSetVerticesUnityEngineVector3Array1)(int32_t thisHandle, int32_t inVerticesHandle);
 	void (*UnityEngineMeshMethodSetNormalsUnityEngineVector3Array1)(int32_t thisHandle, int32_t inNormalsHandle);
@@ -160,6 +163,7 @@ namespace Plugin
 	void (*UnityEngineTexture2DMethodSetPixelDataSystemByteSystemByteArray1_SystemInt32_SystemInt32)(int32_t thisHandle, int32_t dataHandle, int32_t mipLevel, int32_t sourceDataStartIndex);
 	void (*UnityEngineTexture2DMethodSetPixelDataSystemByteUnityCollectionsNativeArray_SystemInt32_SystemInt32)(int32_t thisHandle, int32_t dataHandle, int32_t mipLevel, int32_t sourceDataStartIndex);
 	void (*UnityEngineTexture2DMethodApplySystemBoolean_SystemBoolean)(int32_t thisHandle, uint32_t updateMipmaps, uint32_t makeNoLongerReadable);
+	void (*UnityEngineTexture2DMethodLoadRawTextureDataSystemIntPtr_SystemInt32)(int32_t thisHandle, void* data, int32_t size);
 	int32_t (*BoxBoolean)(uint32_t val);
 	int32_t (*UnboxBoolean)(int32_t valHandle);
 	int32_t (*BoxSByte)(int8_t val);
@@ -10418,6 +10422,188 @@ namespace System
 	}
 }
 
+namespace Unity
+{
+	namespace Collections
+	{
+		Allocator::Allocator(int32_t value)
+			: Value(value)
+		{
+		}
+		
+		Unity::Collections::Allocator::operator int32_t() const
+		{
+			return Value;
+		}
+		
+		bool Unity::Collections::Allocator::operator==(Allocator other)
+		{
+			return Value == other.Value;
+		}
+		
+		bool Unity::Collections::Allocator::operator!=(Allocator other)
+		{
+			return Value != other.Value;
+		}
+		
+		Unity::Collections::Allocator::operator System::Enum()
+		{
+			int32_t handle = Plugin::BoxAllocator(*this);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::Enum(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+		
+		Unity::Collections::Allocator::operator System::ValueType()
+		{
+			int32_t handle = Plugin::BoxAllocator(*this);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::ValueType(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+		
+		Unity::Collections::Allocator::operator System::Object()
+		{
+			int32_t handle = Plugin::BoxAllocator(*this);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::Object(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+		
+		Unity::Collections::Allocator::operator System::IFormattable()
+		{
+			int32_t handle = Plugin::BoxAllocator(*this);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::IFormattable(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+		
+		Unity::Collections::Allocator::operator System::IComparable()
+		{
+			int32_t handle = Plugin::BoxAllocator(*this);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::IComparable(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+		
+		Unity::Collections::Allocator::operator System::IConvertible()
+		{
+			int32_t handle = Plugin::BoxAllocator(*this);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::IConvertible(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+		
+	}
+}
+const Unity::Collections::Allocator Unity::Collections::Allocator::Invalid(0);
+const Unity::Collections::Allocator Unity::Collections::Allocator::None(1);
+const Unity::Collections::Allocator Unity::Collections::Allocator::Temp(2);
+const Unity::Collections::Allocator Unity::Collections::Allocator::TempJob(3);
+const Unity::Collections::Allocator Unity::Collections::Allocator::Persistent(4);
+const Unity::Collections::Allocator Unity::Collections::Allocator::AudioKernel(5);
+
+namespace System
+{
+	System::Object::operator Unity::Collections::Allocator()
+	{
+		Unity::Collections::Allocator returnVal(Plugin::UnboxAllocator(Handle));
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return returnVal;
+	}
+}
+
+namespace Unity
+{
+	namespace Collections
+	{
+		namespace LowLevel
+		{
+			namespace Unsafe
+			{
+				template<> Unity::Collections::NativeArray_1<System::Byte> Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::ConvertExistingDataToNativeArray<System::Byte>(System::Void* dataPointer, System::Int32 length, Unity::Collections::Allocator allocator)
+				{
+					auto returnValue = Plugin::UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodConvertExistingDataToNativeArraySystemByteSystemVoidPointer_SystemInt32_UnityCollectionsAllocator(dataPointer, length, allocator);
+					if (Plugin::unhandledCsharpException)
+					{
+						System::Exception* ex = Plugin::unhandledCsharpException;
+						Plugin::unhandledCsharpException = nullptr;
+						ex->ThrowReferenceToThis();
+						delete ex;
+					}
+					return Unity::Collections::NativeArray_1<System::Byte>(Plugin::InternalUse::Only, returnValue);
+				}
+			}
+		}
+	}
+}
+
 namespace UnityEngine
 {
 	Mesh::Mesh(decltype(nullptr))
@@ -14454,6 +14640,18 @@ namespace UnityEngine
 			delete ex;
 		}
 	}
+	
+	void UnityEngine::Texture2D::LoadRawTextureData(void* data, System::Int32 size)
+	{
+		Plugin::UnityEngineTexture2DMethodLoadRawTextureDataSystemIntPtr_SystemInt32(Handle, data, size);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+	}
 }
 
 namespace System
@@ -16264,6 +16462,12 @@ DLLEXPORT void Init(
 	curMemory += sizeof(Plugin::BoxNativeArraySystemByte);
 	Plugin::UnboxNativeArraySystemByte = *(int32_t (**)(int32_t valHandle))curMemory;
 	curMemory += sizeof(Plugin::UnboxNativeArraySystemByte);
+	Plugin::BoxAllocator = *(int32_t (**)(Unity::Collections::Allocator val))curMemory;
+	curMemory += sizeof(Plugin::BoxAllocator);
+	Plugin::UnboxAllocator = *(Unity::Collections::Allocator (**)(int32_t valHandle))curMemory;
+	curMemory += sizeof(Plugin::UnboxAllocator);
+	Plugin::UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodConvertExistingDataToNativeArraySystemByteSystemVoidPointer_SystemInt32_UnityCollectionsAllocator = *(int32_t (**)(void* dataPointer, int32_t length, Unity::Collections::Allocator allocator))curMemory;
+	curMemory += sizeof(Plugin::UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodConvertExistingDataToNativeArraySystemByteSystemVoidPointer_SystemInt32_UnityCollectionsAllocator);
 	Plugin::UnityEngineMeshConstructor = *(int32_t (**)())curMemory;
 	curMemory += sizeof(Plugin::UnityEngineMeshConstructor);
 	Plugin::UnityEngineMeshMethodSetVerticesUnityEngineVector3Array1 = *(void (**)(int32_t thisHandle, int32_t inVerticesHandle))curMemory;
@@ -16372,6 +16576,8 @@ DLLEXPORT void Init(
 	curMemory += sizeof(Plugin::UnityEngineTexture2DMethodSetPixelDataSystemByteUnityCollectionsNativeArray_SystemInt32_SystemInt32);
 	Plugin::UnityEngineTexture2DMethodApplySystemBoolean_SystemBoolean = *(void (**)(int32_t thisHandle, uint32_t updateMipmaps, uint32_t makeNoLongerReadable))curMemory;
 	curMemory += sizeof(Plugin::UnityEngineTexture2DMethodApplySystemBoolean_SystemBoolean);
+	Plugin::UnityEngineTexture2DMethodLoadRawTextureDataSystemIntPtr_SystemInt32 = *(void (**)(int32_t thisHandle, void* data, int32_t size))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineTexture2DMethodLoadRawTextureDataSystemIntPtr_SystemInt32);
 	Plugin::BoxBoolean = *(int32_t (**)(uint32_t val))curMemory;
 	curMemory += sizeof(Plugin::BoxBoolean);
 	Plugin::UnboxBoolean = *(int32_t (**)(int32_t valHandle))curMemory;

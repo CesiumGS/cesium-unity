@@ -30,14 +30,13 @@ UnityEngine::Texture TextureLoader::loadTexture(
       imageCesium.width,
       imageCesium.height,
       UnityEngine::TextureFormat::RGBA32,
-      true,
+      false,
       false);
 
-  System::Array1<System::Byte> bytes(imageCesium.pixelData.size());
-  for (size_t i = 0; i < imageCesium.pixelData.size(); ++i) {
-    bytes[i] = uint8_t(imageCesium.pixelData[i]);
-  }
-  result.SetPixelData<System::Byte>(bytes, 0, 0);
+  result.LoadRawTextureData(
+      const_cast<void*>(static_cast<const void*>(imageCesium.pixelData.data())),
+      imageCesium.pixelData.size());
+
   result.Apply(true, true);
 
   return result;

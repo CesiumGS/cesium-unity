@@ -85,6 +85,8 @@ namespace System
 	struct IFormattable;
 	struct IConvertible;
 
+	using Void = void;
+
 	// .NET booleans are four bytes long
 	// This struct makes them feel like C++'s bool, int32_t, and uint32_t types
 	struct Boolean
@@ -524,6 +526,30 @@ namespace UnityEngine
 namespace UnityEngine
 {
 	struct MonoBehaviour;
+}
+
+namespace Unity
+{
+	namespace Collections
+	{
+		struct Allocator;
+	}
+}
+
+namespace Unity
+{
+	namespace Collections
+	{
+		namespace LowLevel
+		{
+			namespace Unsafe
+			{
+				namespace NativeArrayUnsafeUtility
+				{
+				}
+			}
+		}
+	}
 }
 
 namespace UnityEngine
@@ -1269,6 +1295,7 @@ namespace System
 		explicit operator UnityEngine::Quaternion();
 		explicit operator UnityEngine::Matrix4x4();
 		explicit operator Unity::Collections::NativeArray_1<System::Byte>();
+		explicit operator Unity::Collections::Allocator();
 		explicit operator UnityEngine::PrimitiveType();
 		explicit operator CesiumForUnity::RawDownloadedData();
 		explicit operator UnityEngine::TextureFormat();
@@ -3454,6 +3481,50 @@ namespace Unity
 	}
 }
 
+namespace Unity
+{
+	namespace Collections
+	{
+		struct Allocator
+		{
+			int32_t Value;
+			static const Unity::Collections::Allocator Invalid;
+			static const Unity::Collections::Allocator None;
+			static const Unity::Collections::Allocator Temp;
+			static const Unity::Collections::Allocator TempJob;
+			static const Unity::Collections::Allocator Persistent;
+			static const Unity::Collections::Allocator AudioKernel;
+			explicit Allocator(int32_t value);
+			explicit operator int32_t() const;
+			bool operator==(Allocator other);
+			bool operator!=(Allocator other);
+			explicit operator System::Enum();
+			explicit operator System::ValueType();
+			explicit operator System::Object();
+			explicit operator System::IFormattable();
+			explicit operator System::IComparable();
+			explicit operator System::IConvertible();
+		};
+	}
+}
+
+namespace Unity
+{
+	namespace Collections
+	{
+		namespace LowLevel
+		{
+			namespace Unsafe
+			{
+				namespace NativeArrayUnsafeUtility
+				{
+					template<typename MT0> Unity::Collections::NativeArray_1<System::Byte> ConvertExistingDataToNativeArray(System::Void* dataPointer, System::Int32 length, Unity::Collections::Allocator allocator);
+				}
+			}
+		}
+	}
+}
+
 namespace UnityEngine
 {
 	struct Mesh : virtual UnityEngine::Object
@@ -4213,6 +4284,7 @@ namespace UnityEngine
 		template<typename MT0> void SetPixelData(System::Array1<System::Byte>& data, System::Int32 mipLevel, System::Int32 sourceDataStartIndex = 0);
 		template<typename MT0> void SetPixelData(Unity::Collections::NativeArray_1<System::Byte>& data, System::Int32 mipLevel, System::Int32 sourceDataStartIndex = 0);
 		virtual void Apply(System::Boolean updateMipmaps, System::Boolean makeNoLongerReadable);
+		virtual void LoadRawTextureData(void* data, System::Int32 size);
 	};
 }
 

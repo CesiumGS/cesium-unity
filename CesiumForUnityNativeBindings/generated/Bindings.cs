@@ -298,43 +298,43 @@ namespace NativeScript
 		
 		/*BEGIN CPP DELEGATES*/
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		public delegate int NewBaseNativeDownloadHandlerDelegateType(int param0);
+		public unsafe delegate int NewBaseNativeDownloadHandlerDelegateType(int param0);
 		public static NewBaseNativeDownloadHandlerDelegateType NewBaseNativeDownloadHandler;
 		
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		public delegate void DestroyBaseNativeDownloadHandlerDelegateType(int param0);
+		public unsafe delegate void DestroyBaseNativeDownloadHandlerDelegateType(int param0);
 		public static DestroyBaseNativeDownloadHandlerDelegateType DestroyBaseNativeDownloadHandler;
 		
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		public delegate bool CesiumForUnityAbstractBaseNativeDownloadHandlerReceiveDataNativeDelegateType(int thisHandle, System.IntPtr param0, int param1);
+		public unsafe delegate bool CesiumForUnityAbstractBaseNativeDownloadHandlerReceiveDataNativeDelegateType(int thisHandle, System.IntPtr param0, int param1);
 		public static CesiumForUnityAbstractBaseNativeDownloadHandlerReceiveDataNativeDelegateType CesiumForUnityAbstractBaseNativeDownloadHandlerReceiveDataNative;
 		
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		public delegate int NewBaseCesium3DTilesetDelegateType(int param0);
+		public unsafe delegate int NewBaseCesium3DTilesetDelegateType(int param0);
 		public static NewBaseCesium3DTilesetDelegateType NewBaseCesium3DTileset;
 		
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		public delegate void DestroyBaseCesium3DTilesetDelegateType(int param0);
+		public unsafe delegate void DestroyBaseCesium3DTilesetDelegateType(int param0);
 		public static DestroyBaseCesium3DTilesetDelegateType DestroyBaseCesium3DTileset;
 		
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		public delegate void CesiumForUnityAbstractBaseCesium3DTilesetStartDelegateType(int thisHandle);
+		public unsafe delegate void CesiumForUnityAbstractBaseCesium3DTilesetStartDelegateType(int thisHandle);
 		public static CesiumForUnityAbstractBaseCesium3DTilesetStartDelegateType CesiumForUnityAbstractBaseCesium3DTilesetStart;
 		
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		public delegate void CesiumForUnityAbstractBaseCesium3DTilesetUpdateDelegateType(int thisHandle);
+		public unsafe delegate void CesiumForUnityAbstractBaseCesium3DTilesetUpdateDelegateType(int thisHandle);
 		public static CesiumForUnityAbstractBaseCesium3DTilesetUpdateDelegateType CesiumForUnityAbstractBaseCesium3DTilesetUpdate;
 		
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		public delegate void SystemActionNativeInvokeDelegateType(int thisHandle);
+		public unsafe delegate void SystemActionNativeInvokeDelegateType(int thisHandle);
 		public static SystemActionNativeInvokeDelegateType SystemActionNativeInvoke;
 		
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		public delegate void SystemActionUnityEngineAsyncOperationNativeInvokeDelegateType(int thisHandle, int param0);
+		public unsafe delegate void SystemActionUnityEngineAsyncOperationNativeInvokeDelegateType(int thisHandle, int param0);
 		public static SystemActionUnityEngineAsyncOperationNativeInvokeDelegateType SystemActionUnityEngineAsyncOperationNativeInvoke;
 		
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		public delegate void SetCsharpExceptionSystemNullReferenceExceptionDelegateType(int param0);
+		public unsafe delegate void SetCsharpExceptionSystemNullReferenceExceptionDelegateType(int param0);
 		public static SetCsharpExceptionSystemNullReferenceExceptionDelegateType SetCsharpExceptionSystemNullReferenceException;
 		/*END CPP DELEGATES*/
 #endif
@@ -486,335 +486,343 @@ namespace NativeScript
 		
 		/*BEGIN DELEGATE TYPES*/
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void SystemIDisposableMethodDisposeDelegateType(int thisHandle);
+		unsafe delegate void SystemIDisposableMethodDisposeDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void ReleaseSystemDecimalDelegateType(int handle);
+		unsafe delegate void ReleaseSystemDecimalDelegateType(int handle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int SystemDecimalConstructorSystemDoubleDelegateType(double value);
+		unsafe delegate int SystemDecimalConstructorSystemDoubleDelegateType(double value);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int SystemDecimalConstructorSystemUInt64DelegateType(ulong value);
+		unsafe delegate int SystemDecimalConstructorSystemUInt64DelegateType(ulong value);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int BoxDecimalDelegateType(int valHandle);
+		unsafe delegate int BoxDecimalDelegateType(int valHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int UnboxDecimalDelegateType(int valHandle);
+		unsafe delegate int UnboxDecimalDelegateType(int valHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate UnityEngine.Vector2 UnityEngineVector2ConstructorSystemSingle_SystemSingleDelegateType(float x, float y);
+		unsafe delegate UnityEngine.Vector2 UnityEngineVector2ConstructorSystemSingle_SystemSingleDelegateType(float x, float y);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int BoxVector2DelegateType(ref UnityEngine.Vector2 val);
+		unsafe delegate int BoxVector2DelegateType(ref UnityEngine.Vector2 val);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate UnityEngine.Vector2 UnboxVector2DelegateType(int valHandle);
+		unsafe delegate UnityEngine.Vector2 UnboxVector2DelegateType(int valHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate UnityEngine.Vector3 UnityEngineVector3ConstructorSystemSingle_SystemSingle_SystemSingleDelegateType(float x, float y, float z);
+		unsafe delegate UnityEngine.Vector3 UnityEngineVector3ConstructorSystemSingle_SystemSingle_SystemSingleDelegateType(float x, float y, float z);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int BoxVector3DelegateType(ref UnityEngine.Vector3 val);
+		unsafe delegate int BoxVector3DelegateType(ref UnityEngine.Vector3 val);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate UnityEngine.Vector3 UnboxVector3DelegateType(int valHandle);
+		unsafe delegate UnityEngine.Vector3 UnboxVector3DelegateType(int valHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate UnityEngine.Vector4 UnityEngineVector4ConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingleDelegateType(float x, float y, float z, float w);
+		unsafe delegate UnityEngine.Vector4 UnityEngineVector4ConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingleDelegateType(float x, float y, float z, float w);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int BoxVector4DelegateType(ref UnityEngine.Vector4 val);
+		unsafe delegate int BoxVector4DelegateType(ref UnityEngine.Vector4 val);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate UnityEngine.Vector4 UnboxVector4DelegateType(int valHandle);
+		unsafe delegate UnityEngine.Vector4 UnboxVector4DelegateType(int valHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate UnityEngine.Quaternion UnityEngineQuaternionConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingleDelegateType(float x, float y, float z, float w);
+		unsafe delegate UnityEngine.Quaternion UnityEngineQuaternionConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingleDelegateType(float x, float y, float z, float w);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int BoxQuaternionDelegateType(ref UnityEngine.Quaternion val);
+		unsafe delegate int BoxQuaternionDelegateType(ref UnityEngine.Quaternion val);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate UnityEngine.Quaternion UnboxQuaternionDelegateType(int valHandle);
+		unsafe delegate UnityEngine.Quaternion UnboxQuaternionDelegateType(int valHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate UnityEngine.Matrix4x4 UnityEngineMatrix4x4ConstructorUnityEngineVector4_UnityEngineVector4_UnityEngineVector4_UnityEngineVector4DelegateType(ref UnityEngine.Vector4 column0, ref UnityEngine.Vector4 column1, ref UnityEngine.Vector4 column2, ref UnityEngine.Vector4 column3);
+		unsafe delegate UnityEngine.Matrix4x4 UnityEngineMatrix4x4ConstructorUnityEngineVector4_UnityEngineVector4_UnityEngineVector4_UnityEngineVector4DelegateType(ref UnityEngine.Vector4 column0, ref UnityEngine.Vector4 column1, ref UnityEngine.Vector4 column2, ref UnityEngine.Vector4 column3);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate UnityEngine.Quaternion UnityEngineMatrix4x4PropertyGetRotationDelegateType(ref UnityEngine.Matrix4x4 thiz);
+		unsafe delegate UnityEngine.Quaternion UnityEngineMatrix4x4PropertyGetRotationDelegateType(ref UnityEngine.Matrix4x4 thiz);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate UnityEngine.Vector3 UnityEngineMatrix4x4PropertyGetLossyScaleDelegateType(ref UnityEngine.Matrix4x4 thiz);
+		unsafe delegate UnityEngine.Vector3 UnityEngineMatrix4x4PropertyGetLossyScaleDelegateType(ref UnityEngine.Matrix4x4 thiz);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate UnityEngine.Vector3 UnityEngineMatrix4x4MethodGetPositionDelegateType(ref UnityEngine.Matrix4x4 thiz);
+		unsafe delegate UnityEngine.Vector3 UnityEngineMatrix4x4MethodGetPositionDelegateType(ref UnityEngine.Matrix4x4 thiz);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int BoxMatrix4x4DelegateType(ref UnityEngine.Matrix4x4 val);
+		unsafe delegate int BoxMatrix4x4DelegateType(ref UnityEngine.Matrix4x4 val);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate UnityEngine.Matrix4x4 UnboxMatrix4x4DelegateType(int valHandle);
+		unsafe delegate UnityEngine.Matrix4x4 UnboxMatrix4x4DelegateType(int valHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int UnityEngineObjectPropertyGetNameDelegateType(int thisHandle);
+		unsafe delegate int UnityEngineObjectPropertyGetNameDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void UnityEngineObjectPropertySetNameDelegateType(int thisHandle, int valueHandle);
+		unsafe delegate void UnityEngineObjectPropertySetNameDelegateType(int thisHandle, int valueHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int UnityEngineComponentPropertyGetTransformDelegateType(int thisHandle);
+		unsafe delegate int UnityEngineComponentPropertyGetTransformDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate UnityEngine.Vector3 UnityEngineTransformPropertyGetPositionDelegateType(int thisHandle);
+		unsafe delegate UnityEngine.Vector3 UnityEngineTransformPropertyGetPositionDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void UnityEngineTransformPropertySetPositionDelegateType(int thisHandle, ref UnityEngine.Vector3 value);
+		unsafe delegate void UnityEngineTransformPropertySetPositionDelegateType(int thisHandle, ref UnityEngine.Vector3 value);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate UnityEngine.Quaternion UnityEngineTransformPropertyGetRotationDelegateType(int thisHandle);
+		unsafe delegate UnityEngine.Quaternion UnityEngineTransformPropertyGetRotationDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void UnityEngineTransformPropertySetRotationDelegateType(int thisHandle, ref UnityEngine.Quaternion value);
+		unsafe delegate void UnityEngineTransformPropertySetRotationDelegateType(int thisHandle, ref UnityEngine.Quaternion value);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate UnityEngine.Vector3 UnityEngineTransformPropertyGetLocalScaleDelegateType(int thisHandle);
+		unsafe delegate UnityEngine.Vector3 UnityEngineTransformPropertyGetLocalScaleDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void UnityEngineTransformPropertySetLocalScaleDelegateType(int thisHandle, ref UnityEngine.Vector3 value);
+		unsafe delegate void UnityEngineTransformPropertySetLocalScaleDelegateType(int thisHandle, ref UnityEngine.Vector3 value);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate UnityEngine.Matrix4x4 UnityEngineTransformPropertyGetLocalToWorldMatrixDelegateType(int thisHandle);
+		unsafe delegate UnityEngine.Matrix4x4 UnityEngineTransformPropertyGetLocalToWorldMatrixDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int UnityEngineTransformPropertyGetParentDelegateType(int thisHandle);
+		unsafe delegate int UnityEngineTransformPropertyGetParentDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void UnityEngineTransformPropertySetParentDelegateType(int thisHandle, int valueHandle);
+		unsafe delegate void UnityEngineTransformPropertySetParentDelegateType(int thisHandle, int valueHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate UnityEngine.Vector3 UnityEngineTransformPropertyGetForwardDelegateType(int thisHandle);
+		unsafe delegate UnityEngine.Vector3 UnityEngineTransformPropertyGetForwardDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void UnityEngineTransformPropertySetForwardDelegateType(int thisHandle, ref UnityEngine.Vector3 value);
+		unsafe delegate void UnityEngineTransformPropertySetForwardDelegateType(int thisHandle, ref UnityEngine.Vector3 value);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate UnityEngine.Vector3 UnityEngineTransformPropertyGetUpDelegateType(int thisHandle);
+		unsafe delegate UnityEngine.Vector3 UnityEngineTransformPropertyGetUpDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void UnityEngineTransformPropertySetUpDelegateType(int thisHandle, ref UnityEngine.Vector3 value);
+		unsafe delegate void UnityEngineTransformPropertySetUpDelegateType(int thisHandle, ref UnityEngine.Vector3 value);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int SystemCollectionsIEnumeratorPropertyGetCurrentDelegateType(int thisHandle);
+		unsafe delegate int SystemCollectionsIEnumeratorPropertyGetCurrentDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate bool SystemCollectionsIEnumeratorMethodMoveNextDelegateType(int thisHandle);
+		unsafe delegate bool SystemCollectionsIEnumeratorMethodMoveNextDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int UnityEngineGameObjectConstructorSystemStringDelegateType(int nameHandle);
+		unsafe delegate int UnityEngineGameObjectConstructorSystemStringDelegateType(int nameHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int UnityEngineGameObjectPropertyGetTransformDelegateType(int thisHandle);
+		unsafe delegate int UnityEngineGameObjectPropertyGetTransformDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int UnityEngineGameObjectMethodAddComponentCesiumForUnityBaseCesium3DTilesetDelegateType(int thisHandle);
+		unsafe delegate int UnityEngineGameObjectMethodAddComponentCesiumForUnityBaseCesium3DTilesetDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int UnityEngineGameObjectMethodAddComponentUnityEngineMeshFilterDelegateType(int thisHandle);
+		unsafe delegate int UnityEngineGameObjectMethodAddComponentUnityEngineMeshFilterDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int UnityEngineGameObjectMethodAddComponentUnityEngineMeshRendererDelegateType(int thisHandle);
+		unsafe delegate int UnityEngineGameObjectMethodAddComponentUnityEngineMeshRendererDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int UnityEngineGameObjectMethodCreatePrimitiveUnityEnginePrimitiveTypeDelegateType(UnityEngine.PrimitiveType type);
+		unsafe delegate int UnityEngineGameObjectMethodCreatePrimitiveUnityEnginePrimitiveTypeDelegateType(UnityEngine.PrimitiveType type);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void UnityEngineGameObjectMethodSetActiveSystemBooleanDelegateType(int thisHandle, bool value);
+		unsafe delegate void UnityEngineGameObjectMethodSetActiveSystemBooleanDelegateType(int thisHandle, bool value);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void UnityEngineDebugMethodLogSystemObjectDelegateType(int messageHandle);
+		unsafe delegate void UnityEngineDebugMethodLogSystemObjectDelegateType(int messageHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int UnityEngineMonoBehaviourPropertyGetTransformDelegateType(int thisHandle);
+		unsafe delegate int UnityEngineMonoBehaviourPropertyGetTransformDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int UnityEngineMonoBehaviourPropertyGetGameObjectDelegateType(int thisHandle);
+		unsafe delegate int UnityEngineMonoBehaviourPropertyGetGameObjectDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate UnityEngine.Vector2 SystemCollectionsGenericIEnumeratorUnityEngineVector2PropertyGetCurrentDelegateType(int thisHandle);
+		unsafe delegate UnityEngine.Vector2 SystemCollectionsGenericIEnumeratorUnityEngineVector2PropertyGetCurrentDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate UnityEngine.Vector3 SystemCollectionsGenericIEnumeratorUnityEngineVector3PropertyGetCurrentDelegateType(int thisHandle);
+		unsafe delegate UnityEngine.Vector3 SystemCollectionsGenericIEnumeratorUnityEngineVector3PropertyGetCurrentDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate byte SystemCollectionsGenericIEnumeratorSystemBytePropertyGetCurrentDelegateType(int thisHandle);
+		unsafe delegate byte SystemCollectionsGenericIEnumeratorSystemBytePropertyGetCurrentDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int SystemCollectionsGenericIEnumeratorSystemInt32PropertyGetCurrentDelegateType(int thisHandle);
+		unsafe delegate int SystemCollectionsGenericIEnumeratorSystemInt32PropertyGetCurrentDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int SystemCollectionsGenericIEnumeratorUnityCollectionsNativeArrayPropertyGetCurrentDelegateType(int thisHandle);
+		unsafe delegate int SystemCollectionsGenericIEnumeratorUnityCollectionsNativeArrayPropertyGetCurrentDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int SystemCollectionsGenericIEnumerableUnityEngineVector2MethodGetEnumeratorDelegateType(int thisHandle);
+		unsafe delegate int SystemCollectionsGenericIEnumerableUnityEngineVector2MethodGetEnumeratorDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int SystemCollectionsGenericIEnumerableUnityEngineVector3MethodGetEnumeratorDelegateType(int thisHandle);
+		unsafe delegate int SystemCollectionsGenericIEnumerableUnityEngineVector3MethodGetEnumeratorDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int SystemCollectionsGenericIEnumerableSystemByteMethodGetEnumeratorDelegateType(int thisHandle);
+		unsafe delegate int SystemCollectionsGenericIEnumerableSystemByteMethodGetEnumeratorDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int SystemCollectionsGenericIEnumerableSystemInt32MethodGetEnumeratorDelegateType(int thisHandle);
+		unsafe delegate int SystemCollectionsGenericIEnumerableSystemInt32MethodGetEnumeratorDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int SystemCollectionsGenericIEnumerableUnityCollectionsNativeArrayMethodGetEnumeratorDelegateType(int thisHandle);
+		unsafe delegate int SystemCollectionsGenericIEnumerableUnityCollectionsNativeArrayMethodGetEnumeratorDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void ReleaseUnityCollectionsNativeArraySystemByteDelegateType(int handle);
+		unsafe delegate void ReleaseUnityCollectionsNativeArraySystemByteDelegateType(int handle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int BoxNativeArraySystemByteDelegateType(int valHandle);
+		unsafe delegate int BoxNativeArraySystemByteDelegateType(int valHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int UnboxNativeArraySystemByteDelegateType(int valHandle);
+		unsafe delegate int UnboxNativeArraySystemByteDelegateType(int valHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int UnityEngineMeshConstructorDelegateType();
+		unsafe delegate int BoxAllocatorDelegateType(Unity.Collections.Allocator val);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void UnityEngineMeshMethodSetVerticesUnityEngineVector3Array1DelegateType(int thisHandle, int inVerticesHandle);
+		unsafe delegate Unity.Collections.Allocator UnboxAllocatorDelegateType(int valHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void UnityEngineMeshMethodSetNormalsUnityEngineVector3Array1DelegateType(int thisHandle, int inNormalsHandle);
+		unsafe delegate int UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodConvertExistingDataToNativeArraySystemByteSystemVoidPointer_SystemInt32_UnityCollectionsAllocatorDelegateType(void* dataPointer, int length, Unity.Collections.Allocator allocator);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void UnityEngineMeshMethodSetTrianglesSystemInt32Array1_SystemInt32_SystemBoolean_SystemInt32DelegateType(int thisHandle, int trianglesHandle, int submesh, bool calculateBounds, int baseVertex);
+		unsafe delegate int UnityEngineMeshConstructorDelegateType();
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void UnityEngineMeshMethodSetUVsSystemInt32_UnityEngineVector2Array1DelegateType(int thisHandle, int channel, int uvsHandle);
+		unsafe delegate void UnityEngineMeshMethodSetVerticesUnityEngineVector3Array1DelegateType(int thisHandle, int inVerticesHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int UnityEngineMeshFilterPropertyGetMeshDelegateType(int thisHandle);
+		unsafe delegate void UnityEngineMeshMethodSetNormalsUnityEngineVector3Array1DelegateType(int thisHandle, int inNormalsHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void UnityEngineMeshFilterPropertySetMeshDelegateType(int thisHandle, int valueHandle);
+		unsafe delegate void UnityEngineMeshMethodSetTrianglesSystemInt32Array1_SystemInt32_SystemBoolean_SystemInt32DelegateType(int thisHandle, int trianglesHandle, int submesh, bool calculateBounds, int baseVertex);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int UnityEngineMeshRendererPropertyGetMaterialDelegateType(int thisHandle);
+		unsafe delegate void UnityEngineMeshMethodSetUVsSystemInt32_UnityEngineVector2Array1DelegateType(int thisHandle, int channel, int uvsHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void UnityEngineMeshRendererPropertySetMaterialDelegateType(int thisHandle, int valueHandle);
+		unsafe delegate int UnityEngineMeshFilterPropertyGetMeshDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int SystemExceptionConstructorSystemStringDelegateType(int messageHandle);
+		unsafe delegate void UnityEngineMeshFilterPropertySetMeshDelegateType(int thisHandle, int valueHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int BoxPrimitiveTypeDelegateType(UnityEngine.PrimitiveType val);
+		unsafe delegate int UnityEngineMeshRendererPropertyGetMaterialDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate UnityEngine.PrimitiveType UnboxPrimitiveTypeDelegateType(int valHandle);
+		unsafe delegate void UnityEngineMeshRendererPropertySetMaterialDelegateType(int thisHandle, int valueHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate float UnityEngineTimePropertyGetDeltaTimeDelegateType();
+		unsafe delegate int SystemExceptionConstructorSystemStringDelegateType(int messageHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int UnityEngineCameraPropertyGetMainDelegateType();
+		unsafe delegate int BoxPrimitiveTypeDelegateType(UnityEngine.PrimitiveType val);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate float UnityEngineCameraPropertyGetFieldOfViewDelegateType(int thisHandle);
+		unsafe delegate UnityEngine.PrimitiveType UnboxPrimitiveTypeDelegateType(int valHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void UnityEngineCameraPropertySetFieldOfViewDelegateType(int thisHandle, float value);
+		unsafe delegate float UnityEngineTimePropertyGetDeltaTimeDelegateType();
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate float UnityEngineCameraPropertyGetAspectDelegateType(int thisHandle);
+		unsafe delegate int UnityEngineCameraPropertyGetMainDelegateType();
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void UnityEngineCameraPropertySetAspectDelegateType(int thisHandle, float value);
+		unsafe delegate float UnityEngineCameraPropertyGetFieldOfViewDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int UnityEngineCameraPropertyGetPixelWidthDelegateType(int thisHandle);
+		unsafe delegate void UnityEngineCameraPropertySetFieldOfViewDelegateType(int thisHandle, float value);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int UnityEngineCameraPropertyGetPixelHeightDelegateType(int thisHandle);
+		unsafe delegate float UnityEngineCameraPropertyGetAspectDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int BoxRawDownloadedDataDelegateType(ref CesiumForUnity.RawDownloadedData val);
+		unsafe delegate void UnityEngineCameraPropertySetAspectDelegateType(int thisHandle, float value);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate CesiumForUnity.RawDownloadedData UnboxRawDownloadedDataDelegateType(int valHandle);
+		unsafe delegate int UnityEngineCameraPropertyGetPixelWidthDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void BaseNativeDownloadHandlerConstructorDelegateType(int cppHandle, ref int handle);
+		unsafe delegate int UnityEngineCameraPropertyGetPixelHeightDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void ReleaseBaseNativeDownloadHandlerDelegateType(int handle);
+		unsafe delegate int BoxRawDownloadedDataDelegateType(ref CesiumForUnity.RawDownloadedData val);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int UnityEngineNetworkingUnityWebRequestPropertyGetErrorDelegateType(int thisHandle);
+		unsafe delegate CesiumForUnity.RawDownloadedData UnboxRawDownloadedDataDelegateType(int valHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate bool UnityEngineNetworkingUnityWebRequestPropertyGetIsDoneDelegateType(int thisHandle);
+		unsafe delegate void BaseNativeDownloadHandlerConstructorDelegateType(int cppHandle, ref int handle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate long UnityEngineNetworkingUnityWebRequestPropertyGetResponseCodeDelegateType(int thisHandle);
+		unsafe delegate void ReleaseBaseNativeDownloadHandlerDelegateType(int handle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int UnityEngineNetworkingUnityWebRequestPropertyGetUrlDelegateType(int thisHandle);
+		unsafe delegate int UnityEngineNetworkingUnityWebRequestPropertyGetErrorDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void UnityEngineNetworkingUnityWebRequestPropertySetUrlDelegateType(int thisHandle, int valueHandle);
+		unsafe delegate bool UnityEngineNetworkingUnityWebRequestPropertyGetIsDoneDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int UnityEngineNetworkingUnityWebRequestPropertyGetMethodDelegateType(int thisHandle);
+		unsafe delegate long UnityEngineNetworkingUnityWebRequestPropertyGetResponseCodeDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void UnityEngineNetworkingUnityWebRequestPropertySetMethodDelegateType(int thisHandle, int valueHandle);
+		unsafe delegate int UnityEngineNetworkingUnityWebRequestPropertyGetUrlDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int UnityEngineNetworkingUnityWebRequestPropertyGetDownloadHandlerDelegateType(int thisHandle);
+		unsafe delegate void UnityEngineNetworkingUnityWebRequestPropertySetUrlDelegateType(int thisHandle, int valueHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void UnityEngineNetworkingUnityWebRequestPropertySetDownloadHandlerDelegateType(int thisHandle, int valueHandle);
+		unsafe delegate int UnityEngineNetworkingUnityWebRequestPropertyGetMethodDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int UnityEngineNetworkingUnityWebRequestMethodGetSystemStringDelegateType(int uriHandle);
+		unsafe delegate void UnityEngineNetworkingUnityWebRequestPropertySetMethodDelegateType(int thisHandle, int valueHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void UnityEngineNetworkingUnityWebRequestMethodSetRequestHeaderSystemString_SystemStringDelegateType(int thisHandle, int nameHandle, int valueHandle);
+		unsafe delegate int UnityEngineNetworkingUnityWebRequestPropertyGetDownloadHandlerDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int UnityEngineNetworkingUnityWebRequestMethodSendWebRequestDelegateType(int thisHandle);
+		unsafe delegate void UnityEngineNetworkingUnityWebRequestPropertySetDownloadHandlerDelegateType(int thisHandle, int valueHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int UnityEngineNetworkingUnityWebRequestMethodGetResponseHeaderSystemStringDelegateType(int thisHandle, int nameHandle);
+		unsafe delegate int UnityEngineNetworkingUnityWebRequestMethodGetSystemStringDelegateType(int uriHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void UnityEngineNetworkingUnityWebRequestAsyncOperationAddEventCompletedDelegateType(int thisHandle, int delHandle);
+		unsafe delegate void UnityEngineNetworkingUnityWebRequestMethodSetRequestHeaderSystemString_SystemStringDelegateType(int thisHandle, int nameHandle, int valueHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void UnityEngineNetworkingUnityWebRequestAsyncOperationRemoveEventCompletedDelegateType(int thisHandle, int delHandle);
+		unsafe delegate int UnityEngineNetworkingUnityWebRequestMethodSendWebRequestDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate System.IntPtr SystemRuntimeInteropServicesMarshalMethodStringToCoTaskMemUTF8SystemStringDelegateType(int sHandle);
+		unsafe delegate int UnityEngineNetworkingUnityWebRequestMethodGetResponseHeaderSystemStringDelegateType(int thisHandle, int nameHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void SystemRuntimeInteropServicesMarshalMethodFreeCoTaskMemSystemIntPtrDelegateType(System.IntPtr ptr);
+		unsafe delegate void UnityEngineNetworkingUnityWebRequestAsyncOperationAddEventCompletedDelegateType(int thisHandle, int delHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void BaseCesium3DTilesetConstructorDelegateType(int cppHandle, ref int handle);
+		unsafe delegate void UnityEngineNetworkingUnityWebRequestAsyncOperationRemoveEventCompletedDelegateType(int thisHandle, int delHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void ReleaseBaseCesium3DTilesetDelegateType(int handle);
+		unsafe delegate System.IntPtr SystemRuntimeInteropServicesMarshalMethodStringToCoTaskMemUTF8SystemStringDelegateType(int sHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int SystemThreadingTasksTaskMethodRunSystemActionDelegateType(int actionHandle);
+		unsafe delegate void SystemRuntimeInteropServicesMarshalMethodFreeCoTaskMemSystemIntPtrDelegateType(System.IntPtr ptr);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void UnityEngineMaterialMethodSetTextureSystemString_UnityEngineTextureDelegateType(int thisHandle, int nameHandle, int valueHandle);
+		unsafe delegate void BaseCesium3DTilesetConstructorDelegateType(int cppHandle, ref int handle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int UnityEngineResourcesMethodLoadUnityEngineMaterialSystemStringDelegateType(int pathHandle);
+		unsafe delegate void ReleaseBaseCesium3DTilesetDelegateType(int handle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int UnityEditorSceneViewPropertyGetLastActiveSceneViewDelegateType();
+		unsafe delegate int SystemThreadingTasksTaskMethodRunSystemActionDelegateType(int actionHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int UnityEditorSceneViewPropertyGetCameraDelegateType(int thisHandle);
+		unsafe delegate void UnityEngineMaterialMethodSetTextureSystemString_UnityEngineTextureDelegateType(int thisHandle, int nameHandle, int valueHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int BoxTextureFormatDelegateType(UnityEngine.TextureFormat val);
+		unsafe delegate int UnityEngineResourcesMethodLoadUnityEngineMaterialSystemStringDelegateType(int pathHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate UnityEngine.TextureFormat UnboxTextureFormatDelegateType(int valHandle);
+		unsafe delegate int UnityEditorSceneViewPropertyGetLastActiveSceneViewDelegateType();
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int UnityEngineTexture2DConstructorSystemInt32_SystemInt32_UnityEngineTextureFormat_SystemBoolean_SystemBooleanDelegateType(int width, int height, UnityEngine.TextureFormat textureFormat, bool mipChain, bool linear);
+		unsafe delegate int UnityEditorSceneViewPropertyGetCameraDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void UnityEngineTexture2DMethodSetPixelDataSystemByteSystemByteArray1_SystemInt32_SystemInt32DelegateType(int thisHandle, int dataHandle, int mipLevel, int sourceDataStartIndex);
+		unsafe delegate int BoxTextureFormatDelegateType(UnityEngine.TextureFormat val);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void UnityEngineTexture2DMethodSetPixelDataSystemByteUnityCollectionsNativeArray_SystemInt32_SystemInt32DelegateType(int thisHandle, int dataHandle, int mipLevel, int sourceDataStartIndex);
+		unsafe delegate UnityEngine.TextureFormat UnboxTextureFormatDelegateType(int valHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void UnityEngineTexture2DMethodApplySystemBoolean_SystemBooleanDelegateType(int thisHandle, bool updateMipmaps, bool makeNoLongerReadable);
+		unsafe delegate int UnityEngineTexture2DConstructorSystemInt32_SystemInt32_UnityEngineTextureFormat_SystemBoolean_SystemBooleanDelegateType(int width, int height, UnityEngine.TextureFormat textureFormat, bool mipChain, bool linear);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int BoxBooleanDelegateType(bool val);
+		unsafe delegate void UnityEngineTexture2DMethodSetPixelDataSystemByteSystemByteArray1_SystemInt32_SystemInt32DelegateType(int thisHandle, int dataHandle, int mipLevel, int sourceDataStartIndex);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate bool UnboxBooleanDelegateType(int valHandle);
+		unsafe delegate void UnityEngineTexture2DMethodSetPixelDataSystemByteUnityCollectionsNativeArray_SystemInt32_SystemInt32DelegateType(int thisHandle, int dataHandle, int mipLevel, int sourceDataStartIndex);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int BoxSByteDelegateType(sbyte val);
+		unsafe delegate void UnityEngineTexture2DMethodApplySystemBoolean_SystemBooleanDelegateType(int thisHandle, bool updateMipmaps, bool makeNoLongerReadable);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate sbyte UnboxSByteDelegateType(int valHandle);
+		unsafe delegate void UnityEngineTexture2DMethodLoadRawTextureDataSystemIntPtr_SystemInt32DelegateType(int thisHandle, System.IntPtr data, int size);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int BoxByteDelegateType(byte val);
+		unsafe delegate int BoxBooleanDelegateType(bool val);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate byte UnboxByteDelegateType(int valHandle);
+		unsafe delegate bool UnboxBooleanDelegateType(int valHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int BoxInt16DelegateType(short val);
+		unsafe delegate int BoxSByteDelegateType(sbyte val);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate short UnboxInt16DelegateType(int valHandle);
+		unsafe delegate sbyte UnboxSByteDelegateType(int valHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int BoxUInt16DelegateType(ushort val);
+		unsafe delegate int BoxByteDelegateType(byte val);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate ushort UnboxUInt16DelegateType(int valHandle);
+		unsafe delegate byte UnboxByteDelegateType(int valHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int BoxInt32DelegateType(int val);
+		unsafe delegate int BoxInt16DelegateType(short val);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int UnboxInt32DelegateType(int valHandle);
+		unsafe delegate short UnboxInt16DelegateType(int valHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int BoxUInt32DelegateType(uint val);
+		unsafe delegate int BoxUInt16DelegateType(ushort val);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate uint UnboxUInt32DelegateType(int valHandle);
+		unsafe delegate ushort UnboxUInt16DelegateType(int valHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int BoxInt64DelegateType(long val);
+		unsafe delegate int BoxInt32DelegateType(int val);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate long UnboxInt64DelegateType(int valHandle);
+		unsafe delegate int UnboxInt32DelegateType(int valHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int BoxUInt64DelegateType(ulong val);
+		unsafe delegate int BoxUInt32DelegateType(uint val);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate ulong UnboxUInt64DelegateType(int valHandle);
+		unsafe delegate uint UnboxUInt32DelegateType(int valHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int BoxCharDelegateType(char val);
+		unsafe delegate int BoxInt64DelegateType(long val);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate char UnboxCharDelegateType(int valHandle);
+		unsafe delegate long UnboxInt64DelegateType(int valHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int BoxSingleDelegateType(float val);
+		unsafe delegate int BoxUInt64DelegateType(ulong val);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate float UnboxSingleDelegateType(int valHandle);
+		unsafe delegate ulong UnboxUInt64DelegateType(int valHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int BoxDoubleDelegateType(double val);
+		unsafe delegate int BoxCharDelegateType(char val);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate double UnboxDoubleDelegateType(int valHandle);
+		unsafe delegate char UnboxCharDelegateType(int valHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int UnityEngineUnityEngineVector2Array1Constructor1DelegateType(int length0);
+		unsafe delegate int BoxSingleDelegateType(float val);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate UnityEngine.Vector2 UnityEngineVector2Array1GetItem1DelegateType(int thisHandle, int index0);
+		unsafe delegate float UnboxSingleDelegateType(int valHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void UnityEngineVector2Array1SetItem1DelegateType(int thisHandle, int index0, ref UnityEngine.Vector2 item);
+		unsafe delegate int BoxDoubleDelegateType(double val);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int UnityEngineUnityEngineVector3Array1Constructor1DelegateType(int length0);
+		unsafe delegate double UnboxDoubleDelegateType(int valHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate UnityEngine.Vector3 UnityEngineVector3Array1GetItem1DelegateType(int thisHandle, int index0);
+		unsafe delegate int UnityEngineUnityEngineVector2Array1Constructor1DelegateType(int length0);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void UnityEngineVector3Array1SetItem1DelegateType(int thisHandle, int index0, ref UnityEngine.Vector3 item);
+		unsafe delegate UnityEngine.Vector2 UnityEngineVector2Array1GetItem1DelegateType(int thisHandle, int index0);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int SystemSystemByteArray1Constructor1DelegateType(int length0);
+		unsafe delegate void UnityEngineVector2Array1SetItem1DelegateType(int thisHandle, int index0, ref UnityEngine.Vector2 item);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate byte SystemByteArray1GetItem1DelegateType(int thisHandle, int index0);
+		unsafe delegate int UnityEngineUnityEngineVector3Array1Constructor1DelegateType(int length0);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void SystemByteArray1SetItem1DelegateType(int thisHandle, int index0, byte item);
+		unsafe delegate UnityEngine.Vector3 UnityEngineVector3Array1GetItem1DelegateType(int thisHandle, int index0);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int SystemSystemInt32Array1Constructor1DelegateType(int length0);
+		unsafe delegate void UnityEngineVector3Array1SetItem1DelegateType(int thisHandle, int index0, ref UnityEngine.Vector3 item);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int SystemInt32Array1GetItem1DelegateType(int thisHandle, int index0);
+		unsafe delegate int SystemSystemByteArray1Constructor1DelegateType(int length0);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void SystemInt32Array1SetItem1DelegateType(int thisHandle, int index0, int item);
+		unsafe delegate byte SystemByteArray1GetItem1DelegateType(int thisHandle, int index0);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void SystemActionInvokeDelegateType(int thisHandle);
+		unsafe delegate void SystemByteArray1SetItem1DelegateType(int thisHandle, int index0, byte item);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void SystemActionConstructorDelegateType(int cppHandle, ref int handle, ref int classHandle);
+		unsafe delegate int SystemSystemInt32Array1Constructor1DelegateType(int length0);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void ReleaseSystemActionDelegateType(int handle, int classHandle);
+		unsafe delegate int SystemInt32Array1GetItem1DelegateType(int thisHandle, int index0);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void SystemActionAddDelegateType(int thisHandle, int delHandle);
+		unsafe delegate void SystemInt32Array1SetItem1DelegateType(int thisHandle, int index0, int item);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void SystemActionRemoveDelegateType(int thisHandle, int delHandle);
+		unsafe delegate void SystemActionInvokeDelegateType(int thisHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void SystemActionUnityEngineAsyncOperationInvokeDelegateType(int thisHandle, int objHandle);
+		unsafe delegate void SystemActionConstructorDelegateType(int cppHandle, ref int handle, ref int classHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void SystemActionUnityEngineAsyncOperationConstructorDelegateType(int cppHandle, ref int handle, ref int classHandle);
+		unsafe delegate void ReleaseSystemActionDelegateType(int handle, int classHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void ReleaseSystemActionUnityEngineAsyncOperationDelegateType(int handle, int classHandle);
+		unsafe delegate void SystemActionAddDelegateType(int thisHandle, int delHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void SystemActionUnityEngineAsyncOperationAddDelegateType(int thisHandle, int delHandle);
+		unsafe delegate void SystemActionRemoveDelegateType(int thisHandle, int delHandle);
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void SystemActionUnityEngineAsyncOperationRemoveDelegateType(int thisHandle, int delHandle);
+		unsafe delegate void SystemActionUnityEngineAsyncOperationInvokeDelegateType(int thisHandle, int objHandle);
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		unsafe delegate void SystemActionUnityEngineAsyncOperationConstructorDelegateType(int cppHandle, ref int handle, ref int classHandle);
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		unsafe delegate void ReleaseSystemActionUnityEngineAsyncOperationDelegateType(int handle, int classHandle);
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		unsafe delegate void SystemActionUnityEngineAsyncOperationAddDelegateType(int thisHandle, int delHandle);
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		unsafe delegate void SystemActionUnityEngineAsyncOperationRemoveDelegateType(int thisHandle, int delHandle);
 		/*END DELEGATE TYPES*/
 
 #if UNITY_EDITOR_WIN
@@ -841,171 +849,175 @@ namespace NativeScript
 		
 		// Generated delegates
 		/*BEGIN CSHARP DELEGATES*/
-		static readonly SystemIDisposableMethodDisposeDelegateType SystemIDisposableMethodDisposeDelegate = new SystemIDisposableMethodDisposeDelegateType(SystemIDisposableMethodDispose);
-		static readonly ReleaseSystemDecimalDelegateType ReleaseSystemDecimalDelegate = new ReleaseSystemDecimalDelegateType(ReleaseSystemDecimal);
-		static readonly SystemDecimalConstructorSystemDoubleDelegateType SystemDecimalConstructorSystemDoubleDelegate = new SystemDecimalConstructorSystemDoubleDelegateType(SystemDecimalConstructorSystemDouble);
-		static readonly SystemDecimalConstructorSystemUInt64DelegateType SystemDecimalConstructorSystemUInt64Delegate = new SystemDecimalConstructorSystemUInt64DelegateType(SystemDecimalConstructorSystemUInt64);
-		static readonly BoxDecimalDelegateType BoxDecimalDelegate = new BoxDecimalDelegateType(BoxDecimal);
-		static readonly UnboxDecimalDelegateType UnboxDecimalDelegate = new UnboxDecimalDelegateType(UnboxDecimal);
-		static readonly UnityEngineVector2ConstructorSystemSingle_SystemSingleDelegateType UnityEngineVector2ConstructorSystemSingle_SystemSingleDelegate = new UnityEngineVector2ConstructorSystemSingle_SystemSingleDelegateType(UnityEngineVector2ConstructorSystemSingle_SystemSingle);
-		static readonly BoxVector2DelegateType BoxVector2Delegate = new BoxVector2DelegateType(BoxVector2);
-		static readonly UnboxVector2DelegateType UnboxVector2Delegate = new UnboxVector2DelegateType(UnboxVector2);
-		static readonly UnityEngineVector3ConstructorSystemSingle_SystemSingle_SystemSingleDelegateType UnityEngineVector3ConstructorSystemSingle_SystemSingle_SystemSingleDelegate = new UnityEngineVector3ConstructorSystemSingle_SystemSingle_SystemSingleDelegateType(UnityEngineVector3ConstructorSystemSingle_SystemSingle_SystemSingle);
-		static readonly BoxVector3DelegateType BoxVector3Delegate = new BoxVector3DelegateType(BoxVector3);
-		static readonly UnboxVector3DelegateType UnboxVector3Delegate = new UnboxVector3DelegateType(UnboxVector3);
-		static readonly UnityEngineVector4ConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingleDelegateType UnityEngineVector4ConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingleDelegate = new UnityEngineVector4ConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingleDelegateType(UnityEngineVector4ConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingle);
-		static readonly BoxVector4DelegateType BoxVector4Delegate = new BoxVector4DelegateType(BoxVector4);
-		static readonly UnboxVector4DelegateType UnboxVector4Delegate = new UnboxVector4DelegateType(UnboxVector4);
-		static readonly UnityEngineQuaternionConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingleDelegateType UnityEngineQuaternionConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingleDelegate = new UnityEngineQuaternionConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingleDelegateType(UnityEngineQuaternionConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingle);
-		static readonly BoxQuaternionDelegateType BoxQuaternionDelegate = new BoxQuaternionDelegateType(BoxQuaternion);
-		static readonly UnboxQuaternionDelegateType UnboxQuaternionDelegate = new UnboxQuaternionDelegateType(UnboxQuaternion);
-		static readonly UnityEngineMatrix4x4ConstructorUnityEngineVector4_UnityEngineVector4_UnityEngineVector4_UnityEngineVector4DelegateType UnityEngineMatrix4x4ConstructorUnityEngineVector4_UnityEngineVector4_UnityEngineVector4_UnityEngineVector4Delegate = new UnityEngineMatrix4x4ConstructorUnityEngineVector4_UnityEngineVector4_UnityEngineVector4_UnityEngineVector4DelegateType(UnityEngineMatrix4x4ConstructorUnityEngineVector4_UnityEngineVector4_UnityEngineVector4_UnityEngineVector4);
-		static readonly UnityEngineMatrix4x4PropertyGetRotationDelegateType UnityEngineMatrix4x4PropertyGetRotationDelegate = new UnityEngineMatrix4x4PropertyGetRotationDelegateType(UnityEngineMatrix4x4PropertyGetRotation);
-		static readonly UnityEngineMatrix4x4PropertyGetLossyScaleDelegateType UnityEngineMatrix4x4PropertyGetLossyScaleDelegate = new UnityEngineMatrix4x4PropertyGetLossyScaleDelegateType(UnityEngineMatrix4x4PropertyGetLossyScale);
-		static readonly UnityEngineMatrix4x4MethodGetPositionDelegateType UnityEngineMatrix4x4MethodGetPositionDelegate = new UnityEngineMatrix4x4MethodGetPositionDelegateType(UnityEngineMatrix4x4MethodGetPosition);
-		static readonly BoxMatrix4x4DelegateType BoxMatrix4x4Delegate = new BoxMatrix4x4DelegateType(BoxMatrix4x4);
-		static readonly UnboxMatrix4x4DelegateType UnboxMatrix4x4Delegate = new UnboxMatrix4x4DelegateType(UnboxMatrix4x4);
-		static readonly UnityEngineObjectPropertyGetNameDelegateType UnityEngineObjectPropertyGetNameDelegate = new UnityEngineObjectPropertyGetNameDelegateType(UnityEngineObjectPropertyGetName);
-		static readonly UnityEngineObjectPropertySetNameDelegateType UnityEngineObjectPropertySetNameDelegate = new UnityEngineObjectPropertySetNameDelegateType(UnityEngineObjectPropertySetName);
-		static readonly UnityEngineComponentPropertyGetTransformDelegateType UnityEngineComponentPropertyGetTransformDelegate = new UnityEngineComponentPropertyGetTransformDelegateType(UnityEngineComponentPropertyGetTransform);
-		static readonly UnityEngineTransformPropertyGetPositionDelegateType UnityEngineTransformPropertyGetPositionDelegate = new UnityEngineTransformPropertyGetPositionDelegateType(UnityEngineTransformPropertyGetPosition);
-		static readonly UnityEngineTransformPropertySetPositionDelegateType UnityEngineTransformPropertySetPositionDelegate = new UnityEngineTransformPropertySetPositionDelegateType(UnityEngineTransformPropertySetPosition);
-		static readonly UnityEngineTransformPropertyGetRotationDelegateType UnityEngineTransformPropertyGetRotationDelegate = new UnityEngineTransformPropertyGetRotationDelegateType(UnityEngineTransformPropertyGetRotation);
-		static readonly UnityEngineTransformPropertySetRotationDelegateType UnityEngineTransformPropertySetRotationDelegate = new UnityEngineTransformPropertySetRotationDelegateType(UnityEngineTransformPropertySetRotation);
-		static readonly UnityEngineTransformPropertyGetLocalScaleDelegateType UnityEngineTransformPropertyGetLocalScaleDelegate = new UnityEngineTransformPropertyGetLocalScaleDelegateType(UnityEngineTransformPropertyGetLocalScale);
-		static readonly UnityEngineTransformPropertySetLocalScaleDelegateType UnityEngineTransformPropertySetLocalScaleDelegate = new UnityEngineTransformPropertySetLocalScaleDelegateType(UnityEngineTransformPropertySetLocalScale);
-		static readonly UnityEngineTransformPropertyGetLocalToWorldMatrixDelegateType UnityEngineTransformPropertyGetLocalToWorldMatrixDelegate = new UnityEngineTransformPropertyGetLocalToWorldMatrixDelegateType(UnityEngineTransformPropertyGetLocalToWorldMatrix);
-		static readonly UnityEngineTransformPropertyGetParentDelegateType UnityEngineTransformPropertyGetParentDelegate = new UnityEngineTransformPropertyGetParentDelegateType(UnityEngineTransformPropertyGetParent);
-		static readonly UnityEngineTransformPropertySetParentDelegateType UnityEngineTransformPropertySetParentDelegate = new UnityEngineTransformPropertySetParentDelegateType(UnityEngineTransformPropertySetParent);
-		static readonly UnityEngineTransformPropertyGetForwardDelegateType UnityEngineTransformPropertyGetForwardDelegate = new UnityEngineTransformPropertyGetForwardDelegateType(UnityEngineTransformPropertyGetForward);
-		static readonly UnityEngineTransformPropertySetForwardDelegateType UnityEngineTransformPropertySetForwardDelegate = new UnityEngineTransformPropertySetForwardDelegateType(UnityEngineTransformPropertySetForward);
-		static readonly UnityEngineTransformPropertyGetUpDelegateType UnityEngineTransformPropertyGetUpDelegate = new UnityEngineTransformPropertyGetUpDelegateType(UnityEngineTransformPropertyGetUp);
-		static readonly UnityEngineTransformPropertySetUpDelegateType UnityEngineTransformPropertySetUpDelegate = new UnityEngineTransformPropertySetUpDelegateType(UnityEngineTransformPropertySetUp);
-		static readonly SystemCollectionsIEnumeratorPropertyGetCurrentDelegateType SystemCollectionsIEnumeratorPropertyGetCurrentDelegate = new SystemCollectionsIEnumeratorPropertyGetCurrentDelegateType(SystemCollectionsIEnumeratorPropertyGetCurrent);
-		static readonly SystemCollectionsIEnumeratorMethodMoveNextDelegateType SystemCollectionsIEnumeratorMethodMoveNextDelegate = new SystemCollectionsIEnumeratorMethodMoveNextDelegateType(SystemCollectionsIEnumeratorMethodMoveNext);
-		static readonly UnityEngineGameObjectConstructorSystemStringDelegateType UnityEngineGameObjectConstructorSystemStringDelegate = new UnityEngineGameObjectConstructorSystemStringDelegateType(UnityEngineGameObjectConstructorSystemString);
-		static readonly UnityEngineGameObjectPropertyGetTransformDelegateType UnityEngineGameObjectPropertyGetTransformDelegate = new UnityEngineGameObjectPropertyGetTransformDelegateType(UnityEngineGameObjectPropertyGetTransform);
-		static readonly UnityEngineGameObjectMethodAddComponentCesiumForUnityBaseCesium3DTilesetDelegateType UnityEngineGameObjectMethodAddComponentCesiumForUnityBaseCesium3DTilesetDelegate = new UnityEngineGameObjectMethodAddComponentCesiumForUnityBaseCesium3DTilesetDelegateType(UnityEngineGameObjectMethodAddComponentCesiumForUnityBaseCesium3DTileset);
-		static readonly UnityEngineGameObjectMethodAddComponentUnityEngineMeshFilterDelegateType UnityEngineGameObjectMethodAddComponentUnityEngineMeshFilterDelegate = new UnityEngineGameObjectMethodAddComponentUnityEngineMeshFilterDelegateType(UnityEngineGameObjectMethodAddComponentUnityEngineMeshFilter);
-		static readonly UnityEngineGameObjectMethodAddComponentUnityEngineMeshRendererDelegateType UnityEngineGameObjectMethodAddComponentUnityEngineMeshRendererDelegate = new UnityEngineGameObjectMethodAddComponentUnityEngineMeshRendererDelegateType(UnityEngineGameObjectMethodAddComponentUnityEngineMeshRenderer);
-		static readonly UnityEngineGameObjectMethodCreatePrimitiveUnityEnginePrimitiveTypeDelegateType UnityEngineGameObjectMethodCreatePrimitiveUnityEnginePrimitiveTypeDelegate = new UnityEngineGameObjectMethodCreatePrimitiveUnityEnginePrimitiveTypeDelegateType(UnityEngineGameObjectMethodCreatePrimitiveUnityEnginePrimitiveType);
-		static readonly UnityEngineGameObjectMethodSetActiveSystemBooleanDelegateType UnityEngineGameObjectMethodSetActiveSystemBooleanDelegate = new UnityEngineGameObjectMethodSetActiveSystemBooleanDelegateType(UnityEngineGameObjectMethodSetActiveSystemBoolean);
-		static readonly UnityEngineDebugMethodLogSystemObjectDelegateType UnityEngineDebugMethodLogSystemObjectDelegate = new UnityEngineDebugMethodLogSystemObjectDelegateType(UnityEngineDebugMethodLogSystemObject);
-		static readonly UnityEngineMonoBehaviourPropertyGetTransformDelegateType UnityEngineMonoBehaviourPropertyGetTransformDelegate = new UnityEngineMonoBehaviourPropertyGetTransformDelegateType(UnityEngineMonoBehaviourPropertyGetTransform);
-		static readonly UnityEngineMonoBehaviourPropertyGetGameObjectDelegateType UnityEngineMonoBehaviourPropertyGetGameObjectDelegate = new UnityEngineMonoBehaviourPropertyGetGameObjectDelegateType(UnityEngineMonoBehaviourPropertyGetGameObject);
-		static readonly SystemCollectionsGenericIEnumeratorUnityEngineVector2PropertyGetCurrentDelegateType SystemCollectionsGenericIEnumeratorUnityEngineVector2PropertyGetCurrentDelegate = new SystemCollectionsGenericIEnumeratorUnityEngineVector2PropertyGetCurrentDelegateType(SystemCollectionsGenericIEnumeratorUnityEngineVector2PropertyGetCurrent);
-		static readonly SystemCollectionsGenericIEnumeratorUnityEngineVector3PropertyGetCurrentDelegateType SystemCollectionsGenericIEnumeratorUnityEngineVector3PropertyGetCurrentDelegate = new SystemCollectionsGenericIEnumeratorUnityEngineVector3PropertyGetCurrentDelegateType(SystemCollectionsGenericIEnumeratorUnityEngineVector3PropertyGetCurrent);
-		static readonly SystemCollectionsGenericIEnumeratorSystemBytePropertyGetCurrentDelegateType SystemCollectionsGenericIEnumeratorSystemBytePropertyGetCurrentDelegate = new SystemCollectionsGenericIEnumeratorSystemBytePropertyGetCurrentDelegateType(SystemCollectionsGenericIEnumeratorSystemBytePropertyGetCurrent);
-		static readonly SystemCollectionsGenericIEnumeratorSystemInt32PropertyGetCurrentDelegateType SystemCollectionsGenericIEnumeratorSystemInt32PropertyGetCurrentDelegate = new SystemCollectionsGenericIEnumeratorSystemInt32PropertyGetCurrentDelegateType(SystemCollectionsGenericIEnumeratorSystemInt32PropertyGetCurrent);
-		static readonly SystemCollectionsGenericIEnumeratorUnityCollectionsNativeArrayPropertyGetCurrentDelegateType SystemCollectionsGenericIEnumeratorUnityCollectionsNativeArrayPropertyGetCurrentDelegate = new SystemCollectionsGenericIEnumeratorUnityCollectionsNativeArrayPropertyGetCurrentDelegateType(SystemCollectionsGenericIEnumeratorUnityCollectionsNativeArrayPropertyGetCurrent);
-		static readonly SystemCollectionsGenericIEnumerableUnityEngineVector2MethodGetEnumeratorDelegateType SystemCollectionsGenericIEnumerableUnityEngineVector2MethodGetEnumeratorDelegate = new SystemCollectionsGenericIEnumerableUnityEngineVector2MethodGetEnumeratorDelegateType(SystemCollectionsGenericIEnumerableUnityEngineVector2MethodGetEnumerator);
-		static readonly SystemCollectionsGenericIEnumerableUnityEngineVector3MethodGetEnumeratorDelegateType SystemCollectionsGenericIEnumerableUnityEngineVector3MethodGetEnumeratorDelegate = new SystemCollectionsGenericIEnumerableUnityEngineVector3MethodGetEnumeratorDelegateType(SystemCollectionsGenericIEnumerableUnityEngineVector3MethodGetEnumerator);
-		static readonly SystemCollectionsGenericIEnumerableSystemByteMethodGetEnumeratorDelegateType SystemCollectionsGenericIEnumerableSystemByteMethodGetEnumeratorDelegate = new SystemCollectionsGenericIEnumerableSystemByteMethodGetEnumeratorDelegateType(SystemCollectionsGenericIEnumerableSystemByteMethodGetEnumerator);
-		static readonly SystemCollectionsGenericIEnumerableSystemInt32MethodGetEnumeratorDelegateType SystemCollectionsGenericIEnumerableSystemInt32MethodGetEnumeratorDelegate = new SystemCollectionsGenericIEnumerableSystemInt32MethodGetEnumeratorDelegateType(SystemCollectionsGenericIEnumerableSystemInt32MethodGetEnumerator);
-		static readonly SystemCollectionsGenericIEnumerableUnityCollectionsNativeArrayMethodGetEnumeratorDelegateType SystemCollectionsGenericIEnumerableUnityCollectionsNativeArrayMethodGetEnumeratorDelegate = new SystemCollectionsGenericIEnumerableUnityCollectionsNativeArrayMethodGetEnumeratorDelegateType(SystemCollectionsGenericIEnumerableUnityCollectionsNativeArrayMethodGetEnumerator);
-		static readonly ReleaseUnityCollectionsNativeArraySystemByteDelegateType ReleaseUnityCollectionsNativeArraySystemByteDelegate = new ReleaseUnityCollectionsNativeArraySystemByteDelegateType(ReleaseUnityCollectionsNativeArraySystemByte);
-		static readonly BoxNativeArraySystemByteDelegateType BoxNativeArraySystemByteDelegate = new BoxNativeArraySystemByteDelegateType(BoxNativeArraySystemByte);
-		static readonly UnboxNativeArraySystemByteDelegateType UnboxNativeArraySystemByteDelegate = new UnboxNativeArraySystemByteDelegateType(UnboxNativeArraySystemByte);
-		static readonly UnityEngineMeshConstructorDelegateType UnityEngineMeshConstructorDelegate = new UnityEngineMeshConstructorDelegateType(UnityEngineMeshConstructor);
-		static readonly UnityEngineMeshMethodSetVerticesUnityEngineVector3Array1DelegateType UnityEngineMeshMethodSetVerticesUnityEngineVector3Array1Delegate = new UnityEngineMeshMethodSetVerticesUnityEngineVector3Array1DelegateType(UnityEngineMeshMethodSetVerticesUnityEngineVector3Array1);
-		static readonly UnityEngineMeshMethodSetNormalsUnityEngineVector3Array1DelegateType UnityEngineMeshMethodSetNormalsUnityEngineVector3Array1Delegate = new UnityEngineMeshMethodSetNormalsUnityEngineVector3Array1DelegateType(UnityEngineMeshMethodSetNormalsUnityEngineVector3Array1);
-		static readonly UnityEngineMeshMethodSetTrianglesSystemInt32Array1_SystemInt32_SystemBoolean_SystemInt32DelegateType UnityEngineMeshMethodSetTrianglesSystemInt32Array1_SystemInt32_SystemBoolean_SystemInt32Delegate = new UnityEngineMeshMethodSetTrianglesSystemInt32Array1_SystemInt32_SystemBoolean_SystemInt32DelegateType(UnityEngineMeshMethodSetTrianglesSystemInt32Array1_SystemInt32_SystemBoolean_SystemInt32);
-		static readonly UnityEngineMeshMethodSetUVsSystemInt32_UnityEngineVector2Array1DelegateType UnityEngineMeshMethodSetUVsSystemInt32_UnityEngineVector2Array1Delegate = new UnityEngineMeshMethodSetUVsSystemInt32_UnityEngineVector2Array1DelegateType(UnityEngineMeshMethodSetUVsSystemInt32_UnityEngineVector2Array1);
-		static readonly UnityEngineMeshFilterPropertyGetMeshDelegateType UnityEngineMeshFilterPropertyGetMeshDelegate = new UnityEngineMeshFilterPropertyGetMeshDelegateType(UnityEngineMeshFilterPropertyGetMesh);
-		static readonly UnityEngineMeshFilterPropertySetMeshDelegateType UnityEngineMeshFilterPropertySetMeshDelegate = new UnityEngineMeshFilterPropertySetMeshDelegateType(UnityEngineMeshFilterPropertySetMesh);
-		static readonly UnityEngineMeshRendererPropertyGetMaterialDelegateType UnityEngineMeshRendererPropertyGetMaterialDelegate = new UnityEngineMeshRendererPropertyGetMaterialDelegateType(UnityEngineMeshRendererPropertyGetMaterial);
-		static readonly UnityEngineMeshRendererPropertySetMaterialDelegateType UnityEngineMeshRendererPropertySetMaterialDelegate = new UnityEngineMeshRendererPropertySetMaterialDelegateType(UnityEngineMeshRendererPropertySetMaterial);
-		static readonly SystemExceptionConstructorSystemStringDelegateType SystemExceptionConstructorSystemStringDelegate = new SystemExceptionConstructorSystemStringDelegateType(SystemExceptionConstructorSystemString);
-		static readonly BoxPrimitiveTypeDelegateType BoxPrimitiveTypeDelegate = new BoxPrimitiveTypeDelegateType(BoxPrimitiveType);
-		static readonly UnboxPrimitiveTypeDelegateType UnboxPrimitiveTypeDelegate = new UnboxPrimitiveTypeDelegateType(UnboxPrimitiveType);
-		static readonly UnityEngineTimePropertyGetDeltaTimeDelegateType UnityEngineTimePropertyGetDeltaTimeDelegate = new UnityEngineTimePropertyGetDeltaTimeDelegateType(UnityEngineTimePropertyGetDeltaTime);
-		static readonly UnityEngineCameraPropertyGetMainDelegateType UnityEngineCameraPropertyGetMainDelegate = new UnityEngineCameraPropertyGetMainDelegateType(UnityEngineCameraPropertyGetMain);
-		static readonly UnityEngineCameraPropertyGetFieldOfViewDelegateType UnityEngineCameraPropertyGetFieldOfViewDelegate = new UnityEngineCameraPropertyGetFieldOfViewDelegateType(UnityEngineCameraPropertyGetFieldOfView);
-		static readonly UnityEngineCameraPropertySetFieldOfViewDelegateType UnityEngineCameraPropertySetFieldOfViewDelegate = new UnityEngineCameraPropertySetFieldOfViewDelegateType(UnityEngineCameraPropertySetFieldOfView);
-		static readonly UnityEngineCameraPropertyGetAspectDelegateType UnityEngineCameraPropertyGetAspectDelegate = new UnityEngineCameraPropertyGetAspectDelegateType(UnityEngineCameraPropertyGetAspect);
-		static readonly UnityEngineCameraPropertySetAspectDelegateType UnityEngineCameraPropertySetAspectDelegate = new UnityEngineCameraPropertySetAspectDelegateType(UnityEngineCameraPropertySetAspect);
-		static readonly UnityEngineCameraPropertyGetPixelWidthDelegateType UnityEngineCameraPropertyGetPixelWidthDelegate = new UnityEngineCameraPropertyGetPixelWidthDelegateType(UnityEngineCameraPropertyGetPixelWidth);
-		static readonly UnityEngineCameraPropertyGetPixelHeightDelegateType UnityEngineCameraPropertyGetPixelHeightDelegate = new UnityEngineCameraPropertyGetPixelHeightDelegateType(UnityEngineCameraPropertyGetPixelHeight);
-		static readonly BoxRawDownloadedDataDelegateType BoxRawDownloadedDataDelegate = new BoxRawDownloadedDataDelegateType(BoxRawDownloadedData);
-		static readonly UnboxRawDownloadedDataDelegateType UnboxRawDownloadedDataDelegate = new UnboxRawDownloadedDataDelegateType(UnboxRawDownloadedData);
-		static readonly ReleaseBaseNativeDownloadHandlerDelegateType ReleaseBaseNativeDownloadHandlerDelegate = new ReleaseBaseNativeDownloadHandlerDelegateType(ReleaseBaseNativeDownloadHandler);
-		static readonly BaseNativeDownloadHandlerConstructorDelegateType BaseNativeDownloadHandlerConstructorDelegate = new BaseNativeDownloadHandlerConstructorDelegateType(BaseNativeDownloadHandlerConstructor);
-		static readonly UnityEngineNetworkingUnityWebRequestPropertyGetErrorDelegateType UnityEngineNetworkingUnityWebRequestPropertyGetErrorDelegate = new UnityEngineNetworkingUnityWebRequestPropertyGetErrorDelegateType(UnityEngineNetworkingUnityWebRequestPropertyGetError);
-		static readonly UnityEngineNetworkingUnityWebRequestPropertyGetIsDoneDelegateType UnityEngineNetworkingUnityWebRequestPropertyGetIsDoneDelegate = new UnityEngineNetworkingUnityWebRequestPropertyGetIsDoneDelegateType(UnityEngineNetworkingUnityWebRequestPropertyGetIsDone);
-		static readonly UnityEngineNetworkingUnityWebRequestPropertyGetResponseCodeDelegateType UnityEngineNetworkingUnityWebRequestPropertyGetResponseCodeDelegate = new UnityEngineNetworkingUnityWebRequestPropertyGetResponseCodeDelegateType(UnityEngineNetworkingUnityWebRequestPropertyGetResponseCode);
-		static readonly UnityEngineNetworkingUnityWebRequestPropertyGetUrlDelegateType UnityEngineNetworkingUnityWebRequestPropertyGetUrlDelegate = new UnityEngineNetworkingUnityWebRequestPropertyGetUrlDelegateType(UnityEngineNetworkingUnityWebRequestPropertyGetUrl);
-		static readonly UnityEngineNetworkingUnityWebRequestPropertySetUrlDelegateType UnityEngineNetworkingUnityWebRequestPropertySetUrlDelegate = new UnityEngineNetworkingUnityWebRequestPropertySetUrlDelegateType(UnityEngineNetworkingUnityWebRequestPropertySetUrl);
-		static readonly UnityEngineNetworkingUnityWebRequestPropertyGetMethodDelegateType UnityEngineNetworkingUnityWebRequestPropertyGetMethodDelegate = new UnityEngineNetworkingUnityWebRequestPropertyGetMethodDelegateType(UnityEngineNetworkingUnityWebRequestPropertyGetMethod);
-		static readonly UnityEngineNetworkingUnityWebRequestPropertySetMethodDelegateType UnityEngineNetworkingUnityWebRequestPropertySetMethodDelegate = new UnityEngineNetworkingUnityWebRequestPropertySetMethodDelegateType(UnityEngineNetworkingUnityWebRequestPropertySetMethod);
-		static readonly UnityEngineNetworkingUnityWebRequestPropertyGetDownloadHandlerDelegateType UnityEngineNetworkingUnityWebRequestPropertyGetDownloadHandlerDelegate = new UnityEngineNetworkingUnityWebRequestPropertyGetDownloadHandlerDelegateType(UnityEngineNetworkingUnityWebRequestPropertyGetDownloadHandler);
-		static readonly UnityEngineNetworkingUnityWebRequestPropertySetDownloadHandlerDelegateType UnityEngineNetworkingUnityWebRequestPropertySetDownloadHandlerDelegate = new UnityEngineNetworkingUnityWebRequestPropertySetDownloadHandlerDelegateType(UnityEngineNetworkingUnityWebRequestPropertySetDownloadHandler);
-		static readonly UnityEngineNetworkingUnityWebRequestMethodGetSystemStringDelegateType UnityEngineNetworkingUnityWebRequestMethodGetSystemStringDelegate = new UnityEngineNetworkingUnityWebRequestMethodGetSystemStringDelegateType(UnityEngineNetworkingUnityWebRequestMethodGetSystemString);
-		static readonly UnityEngineNetworkingUnityWebRequestMethodSetRequestHeaderSystemString_SystemStringDelegateType UnityEngineNetworkingUnityWebRequestMethodSetRequestHeaderSystemString_SystemStringDelegate = new UnityEngineNetworkingUnityWebRequestMethodSetRequestHeaderSystemString_SystemStringDelegateType(UnityEngineNetworkingUnityWebRequestMethodSetRequestHeaderSystemString_SystemString);
-		static readonly UnityEngineNetworkingUnityWebRequestMethodSendWebRequestDelegateType UnityEngineNetworkingUnityWebRequestMethodSendWebRequestDelegate = new UnityEngineNetworkingUnityWebRequestMethodSendWebRequestDelegateType(UnityEngineNetworkingUnityWebRequestMethodSendWebRequest);
-		static readonly UnityEngineNetworkingUnityWebRequestMethodGetResponseHeaderSystemStringDelegateType UnityEngineNetworkingUnityWebRequestMethodGetResponseHeaderSystemStringDelegate = new UnityEngineNetworkingUnityWebRequestMethodGetResponseHeaderSystemStringDelegateType(UnityEngineNetworkingUnityWebRequestMethodGetResponseHeaderSystemString);
-		static readonly UnityEngineNetworkingUnityWebRequestAsyncOperationAddEventCompletedDelegateType UnityEngineNetworkingUnityWebRequestAsyncOperationAddEventCompletedDelegate = new UnityEngineNetworkingUnityWebRequestAsyncOperationAddEventCompletedDelegateType(UnityEngineNetworkingUnityWebRequestAsyncOperationAddEventCompleted);
-		static readonly UnityEngineNetworkingUnityWebRequestAsyncOperationRemoveEventCompletedDelegateType UnityEngineNetworkingUnityWebRequestAsyncOperationRemoveEventCompletedDelegate = new UnityEngineNetworkingUnityWebRequestAsyncOperationRemoveEventCompletedDelegateType(UnityEngineNetworkingUnityWebRequestAsyncOperationRemoveEventCompleted);
-		static readonly SystemRuntimeInteropServicesMarshalMethodStringToCoTaskMemUTF8SystemStringDelegateType SystemRuntimeInteropServicesMarshalMethodStringToCoTaskMemUTF8SystemStringDelegate = new SystemRuntimeInteropServicesMarshalMethodStringToCoTaskMemUTF8SystemStringDelegateType(SystemRuntimeInteropServicesMarshalMethodStringToCoTaskMemUTF8SystemString);
-		static readonly SystemRuntimeInteropServicesMarshalMethodFreeCoTaskMemSystemIntPtrDelegateType SystemRuntimeInteropServicesMarshalMethodFreeCoTaskMemSystemIntPtrDelegate = new SystemRuntimeInteropServicesMarshalMethodFreeCoTaskMemSystemIntPtrDelegateType(SystemRuntimeInteropServicesMarshalMethodFreeCoTaskMemSystemIntPtr);
-		static readonly ReleaseBaseCesium3DTilesetDelegateType ReleaseBaseCesium3DTilesetDelegate = new ReleaseBaseCesium3DTilesetDelegateType(ReleaseBaseCesium3DTileset);
-		static readonly BaseCesium3DTilesetConstructorDelegateType BaseCesium3DTilesetConstructorDelegate = new BaseCesium3DTilesetConstructorDelegateType(BaseCesium3DTilesetConstructor);
-		static readonly SystemThreadingTasksTaskMethodRunSystemActionDelegateType SystemThreadingTasksTaskMethodRunSystemActionDelegate = new SystemThreadingTasksTaskMethodRunSystemActionDelegateType(SystemThreadingTasksTaskMethodRunSystemAction);
-		static readonly UnityEngineMaterialMethodSetTextureSystemString_UnityEngineTextureDelegateType UnityEngineMaterialMethodSetTextureSystemString_UnityEngineTextureDelegate = new UnityEngineMaterialMethodSetTextureSystemString_UnityEngineTextureDelegateType(UnityEngineMaterialMethodSetTextureSystemString_UnityEngineTexture);
-		static readonly UnityEngineResourcesMethodLoadUnityEngineMaterialSystemStringDelegateType UnityEngineResourcesMethodLoadUnityEngineMaterialSystemStringDelegate = new UnityEngineResourcesMethodLoadUnityEngineMaterialSystemStringDelegateType(UnityEngineResourcesMethodLoadUnityEngineMaterialSystemString);
-		static readonly UnityEditorSceneViewPropertyGetLastActiveSceneViewDelegateType UnityEditorSceneViewPropertyGetLastActiveSceneViewDelegate = new UnityEditorSceneViewPropertyGetLastActiveSceneViewDelegateType(UnityEditorSceneViewPropertyGetLastActiveSceneView);
-		static readonly UnityEditorSceneViewPropertyGetCameraDelegateType UnityEditorSceneViewPropertyGetCameraDelegate = new UnityEditorSceneViewPropertyGetCameraDelegateType(UnityEditorSceneViewPropertyGetCamera);
-		static readonly BoxTextureFormatDelegateType BoxTextureFormatDelegate = new BoxTextureFormatDelegateType(BoxTextureFormat);
-		static readonly UnboxTextureFormatDelegateType UnboxTextureFormatDelegate = new UnboxTextureFormatDelegateType(UnboxTextureFormat);
-		static readonly UnityEngineTexture2DConstructorSystemInt32_SystemInt32_UnityEngineTextureFormat_SystemBoolean_SystemBooleanDelegateType UnityEngineTexture2DConstructorSystemInt32_SystemInt32_UnityEngineTextureFormat_SystemBoolean_SystemBooleanDelegate = new UnityEngineTexture2DConstructorSystemInt32_SystemInt32_UnityEngineTextureFormat_SystemBoolean_SystemBooleanDelegateType(UnityEngineTexture2DConstructorSystemInt32_SystemInt32_UnityEngineTextureFormat_SystemBoolean_SystemBoolean);
-		static readonly UnityEngineTexture2DMethodSetPixelDataSystemByteSystemByteArray1_SystemInt32_SystemInt32DelegateType UnityEngineTexture2DMethodSetPixelDataSystemByteSystemByteArray1_SystemInt32_SystemInt32Delegate = new UnityEngineTexture2DMethodSetPixelDataSystemByteSystemByteArray1_SystemInt32_SystemInt32DelegateType(UnityEngineTexture2DMethodSetPixelDataSystemByteSystemByteArray1_SystemInt32_SystemInt32);
-		static readonly UnityEngineTexture2DMethodSetPixelDataSystemByteUnityCollectionsNativeArray_SystemInt32_SystemInt32DelegateType UnityEngineTexture2DMethodSetPixelDataSystemByteUnityCollectionsNativeArray_SystemInt32_SystemInt32Delegate = new UnityEngineTexture2DMethodSetPixelDataSystemByteUnityCollectionsNativeArray_SystemInt32_SystemInt32DelegateType(UnityEngineTexture2DMethodSetPixelDataSystemByteUnityCollectionsNativeArray_SystemInt32_SystemInt32);
-		static readonly UnityEngineTexture2DMethodApplySystemBoolean_SystemBooleanDelegateType UnityEngineTexture2DMethodApplySystemBoolean_SystemBooleanDelegate = new UnityEngineTexture2DMethodApplySystemBoolean_SystemBooleanDelegateType(UnityEngineTexture2DMethodApplySystemBoolean_SystemBoolean);
-		static readonly BoxBooleanDelegateType BoxBooleanDelegate = new BoxBooleanDelegateType(BoxBoolean);
-		static readonly UnboxBooleanDelegateType UnboxBooleanDelegate = new UnboxBooleanDelegateType(UnboxBoolean);
-		static readonly BoxSByteDelegateType BoxSByteDelegate = new BoxSByteDelegateType(BoxSByte);
-		static readonly UnboxSByteDelegateType UnboxSByteDelegate = new UnboxSByteDelegateType(UnboxSByte);
-		static readonly BoxByteDelegateType BoxByteDelegate = new BoxByteDelegateType(BoxByte);
-		static readonly UnboxByteDelegateType UnboxByteDelegate = new UnboxByteDelegateType(UnboxByte);
-		static readonly BoxInt16DelegateType BoxInt16Delegate = new BoxInt16DelegateType(BoxInt16);
-		static readonly UnboxInt16DelegateType UnboxInt16Delegate = new UnboxInt16DelegateType(UnboxInt16);
-		static readonly BoxUInt16DelegateType BoxUInt16Delegate = new BoxUInt16DelegateType(BoxUInt16);
-		static readonly UnboxUInt16DelegateType UnboxUInt16Delegate = new UnboxUInt16DelegateType(UnboxUInt16);
-		static readonly BoxInt32DelegateType BoxInt32Delegate = new BoxInt32DelegateType(BoxInt32);
-		static readonly UnboxInt32DelegateType UnboxInt32Delegate = new UnboxInt32DelegateType(UnboxInt32);
-		static readonly BoxUInt32DelegateType BoxUInt32Delegate = new BoxUInt32DelegateType(BoxUInt32);
-		static readonly UnboxUInt32DelegateType UnboxUInt32Delegate = new UnboxUInt32DelegateType(UnboxUInt32);
-		static readonly BoxInt64DelegateType BoxInt64Delegate = new BoxInt64DelegateType(BoxInt64);
-		static readonly UnboxInt64DelegateType UnboxInt64Delegate = new UnboxInt64DelegateType(UnboxInt64);
-		static readonly BoxUInt64DelegateType BoxUInt64Delegate = new BoxUInt64DelegateType(BoxUInt64);
-		static readonly UnboxUInt64DelegateType UnboxUInt64Delegate = new UnboxUInt64DelegateType(UnboxUInt64);
-		static readonly BoxCharDelegateType BoxCharDelegate = new BoxCharDelegateType(BoxChar);
-		static readonly UnboxCharDelegateType UnboxCharDelegate = new UnboxCharDelegateType(UnboxChar);
-		static readonly BoxSingleDelegateType BoxSingleDelegate = new BoxSingleDelegateType(BoxSingle);
-		static readonly UnboxSingleDelegateType UnboxSingleDelegate = new UnboxSingleDelegateType(UnboxSingle);
-		static readonly BoxDoubleDelegateType BoxDoubleDelegate = new BoxDoubleDelegateType(BoxDouble);
-		static readonly UnboxDoubleDelegateType UnboxDoubleDelegate = new UnboxDoubleDelegateType(UnboxDouble);
-		static readonly UnityEngineUnityEngineVector2Array1Constructor1DelegateType UnityEngineUnityEngineVector2Array1Constructor1Delegate = new UnityEngineUnityEngineVector2Array1Constructor1DelegateType(UnityEngineUnityEngineVector2Array1Constructor1);
-		static readonly UnityEngineVector2Array1GetItem1DelegateType UnityEngineVector2Array1GetItem1Delegate = new UnityEngineVector2Array1GetItem1DelegateType(UnityEngineVector2Array1GetItem1);
-		static readonly UnityEngineVector2Array1SetItem1DelegateType UnityEngineVector2Array1SetItem1Delegate = new UnityEngineVector2Array1SetItem1DelegateType(UnityEngineVector2Array1SetItem1);
-		static readonly UnityEngineUnityEngineVector3Array1Constructor1DelegateType UnityEngineUnityEngineVector3Array1Constructor1Delegate = new UnityEngineUnityEngineVector3Array1Constructor1DelegateType(UnityEngineUnityEngineVector3Array1Constructor1);
-		static readonly UnityEngineVector3Array1GetItem1DelegateType UnityEngineVector3Array1GetItem1Delegate = new UnityEngineVector3Array1GetItem1DelegateType(UnityEngineVector3Array1GetItem1);
-		static readonly UnityEngineVector3Array1SetItem1DelegateType UnityEngineVector3Array1SetItem1Delegate = new UnityEngineVector3Array1SetItem1DelegateType(UnityEngineVector3Array1SetItem1);
-		static readonly SystemSystemByteArray1Constructor1DelegateType SystemSystemByteArray1Constructor1Delegate = new SystemSystemByteArray1Constructor1DelegateType(SystemSystemByteArray1Constructor1);
-		static readonly SystemByteArray1GetItem1DelegateType SystemByteArray1GetItem1Delegate = new SystemByteArray1GetItem1DelegateType(SystemByteArray1GetItem1);
-		static readonly SystemByteArray1SetItem1DelegateType SystemByteArray1SetItem1Delegate = new SystemByteArray1SetItem1DelegateType(SystemByteArray1SetItem1);
-		static readonly SystemSystemInt32Array1Constructor1DelegateType SystemSystemInt32Array1Constructor1Delegate = new SystemSystemInt32Array1Constructor1DelegateType(SystemSystemInt32Array1Constructor1);
-		static readonly SystemInt32Array1GetItem1DelegateType SystemInt32Array1GetItem1Delegate = new SystemInt32Array1GetItem1DelegateType(SystemInt32Array1GetItem1);
-		static readonly SystemInt32Array1SetItem1DelegateType SystemInt32Array1SetItem1Delegate = new SystemInt32Array1SetItem1DelegateType(SystemInt32Array1SetItem1);
-		static readonly ReleaseSystemActionDelegateType ReleaseSystemActionDelegate = new ReleaseSystemActionDelegateType(ReleaseSystemAction);
-		static readonly SystemActionConstructorDelegateType SystemActionConstructorDelegate = new SystemActionConstructorDelegateType(SystemActionConstructor);
-		static readonly SystemActionAddDelegateType SystemActionAddDelegate = new SystemActionAddDelegateType(SystemActionAdd);
-		static readonly SystemActionRemoveDelegateType SystemActionRemoveDelegate = new SystemActionRemoveDelegateType(SystemActionRemove);
-		static readonly SystemActionInvokeDelegateType SystemActionInvokeDelegate = new SystemActionInvokeDelegateType(SystemActionInvoke);
-		static readonly ReleaseSystemActionUnityEngineAsyncOperationDelegateType ReleaseSystemActionUnityEngineAsyncOperationDelegate = new ReleaseSystemActionUnityEngineAsyncOperationDelegateType(ReleaseSystemActionUnityEngineAsyncOperation);
-		static readonly SystemActionUnityEngineAsyncOperationConstructorDelegateType SystemActionUnityEngineAsyncOperationConstructorDelegate = new SystemActionUnityEngineAsyncOperationConstructorDelegateType(SystemActionUnityEngineAsyncOperationConstructor);
-		static readonly SystemActionUnityEngineAsyncOperationAddDelegateType SystemActionUnityEngineAsyncOperationAddDelegate = new SystemActionUnityEngineAsyncOperationAddDelegateType(SystemActionUnityEngineAsyncOperationAdd);
-		static readonly SystemActionUnityEngineAsyncOperationRemoveDelegateType SystemActionUnityEngineAsyncOperationRemoveDelegate = new SystemActionUnityEngineAsyncOperationRemoveDelegateType(SystemActionUnityEngineAsyncOperationRemove);
-		static readonly SystemActionUnityEngineAsyncOperationInvokeDelegateType SystemActionUnityEngineAsyncOperationInvokeDelegate = new SystemActionUnityEngineAsyncOperationInvokeDelegateType(SystemActionUnityEngineAsyncOperationInvoke);
+		static unsafe readonly SystemIDisposableMethodDisposeDelegateType SystemIDisposableMethodDisposeDelegate = new SystemIDisposableMethodDisposeDelegateType(SystemIDisposableMethodDispose);
+		static unsafe readonly ReleaseSystemDecimalDelegateType ReleaseSystemDecimalDelegate = new ReleaseSystemDecimalDelegateType(ReleaseSystemDecimal);
+		static unsafe readonly SystemDecimalConstructorSystemDoubleDelegateType SystemDecimalConstructorSystemDoubleDelegate = new SystemDecimalConstructorSystemDoubleDelegateType(SystemDecimalConstructorSystemDouble);
+		static unsafe readonly SystemDecimalConstructorSystemUInt64DelegateType SystemDecimalConstructorSystemUInt64Delegate = new SystemDecimalConstructorSystemUInt64DelegateType(SystemDecimalConstructorSystemUInt64);
+		static unsafe readonly BoxDecimalDelegateType BoxDecimalDelegate = new BoxDecimalDelegateType(BoxDecimal);
+		static unsafe readonly UnboxDecimalDelegateType UnboxDecimalDelegate = new UnboxDecimalDelegateType(UnboxDecimal);
+		static unsafe readonly UnityEngineVector2ConstructorSystemSingle_SystemSingleDelegateType UnityEngineVector2ConstructorSystemSingle_SystemSingleDelegate = new UnityEngineVector2ConstructorSystemSingle_SystemSingleDelegateType(UnityEngineVector2ConstructorSystemSingle_SystemSingle);
+		static unsafe readonly BoxVector2DelegateType BoxVector2Delegate = new BoxVector2DelegateType(BoxVector2);
+		static unsafe readonly UnboxVector2DelegateType UnboxVector2Delegate = new UnboxVector2DelegateType(UnboxVector2);
+		static unsafe readonly UnityEngineVector3ConstructorSystemSingle_SystemSingle_SystemSingleDelegateType UnityEngineVector3ConstructorSystemSingle_SystemSingle_SystemSingleDelegate = new UnityEngineVector3ConstructorSystemSingle_SystemSingle_SystemSingleDelegateType(UnityEngineVector3ConstructorSystemSingle_SystemSingle_SystemSingle);
+		static unsafe readonly BoxVector3DelegateType BoxVector3Delegate = new BoxVector3DelegateType(BoxVector3);
+		static unsafe readonly UnboxVector3DelegateType UnboxVector3Delegate = new UnboxVector3DelegateType(UnboxVector3);
+		static unsafe readonly UnityEngineVector4ConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingleDelegateType UnityEngineVector4ConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingleDelegate = new UnityEngineVector4ConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingleDelegateType(UnityEngineVector4ConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingle);
+		static unsafe readonly BoxVector4DelegateType BoxVector4Delegate = new BoxVector4DelegateType(BoxVector4);
+		static unsafe readonly UnboxVector4DelegateType UnboxVector4Delegate = new UnboxVector4DelegateType(UnboxVector4);
+		static unsafe readonly UnityEngineQuaternionConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingleDelegateType UnityEngineQuaternionConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingleDelegate = new UnityEngineQuaternionConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingleDelegateType(UnityEngineQuaternionConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingle);
+		static unsafe readonly BoxQuaternionDelegateType BoxQuaternionDelegate = new BoxQuaternionDelegateType(BoxQuaternion);
+		static unsafe readonly UnboxQuaternionDelegateType UnboxQuaternionDelegate = new UnboxQuaternionDelegateType(UnboxQuaternion);
+		static unsafe readonly UnityEngineMatrix4x4ConstructorUnityEngineVector4_UnityEngineVector4_UnityEngineVector4_UnityEngineVector4DelegateType UnityEngineMatrix4x4ConstructorUnityEngineVector4_UnityEngineVector4_UnityEngineVector4_UnityEngineVector4Delegate = new UnityEngineMatrix4x4ConstructorUnityEngineVector4_UnityEngineVector4_UnityEngineVector4_UnityEngineVector4DelegateType(UnityEngineMatrix4x4ConstructorUnityEngineVector4_UnityEngineVector4_UnityEngineVector4_UnityEngineVector4);
+		static unsafe readonly UnityEngineMatrix4x4PropertyGetRotationDelegateType UnityEngineMatrix4x4PropertyGetRotationDelegate = new UnityEngineMatrix4x4PropertyGetRotationDelegateType(UnityEngineMatrix4x4PropertyGetRotation);
+		static unsafe readonly UnityEngineMatrix4x4PropertyGetLossyScaleDelegateType UnityEngineMatrix4x4PropertyGetLossyScaleDelegate = new UnityEngineMatrix4x4PropertyGetLossyScaleDelegateType(UnityEngineMatrix4x4PropertyGetLossyScale);
+		static unsafe readonly UnityEngineMatrix4x4MethodGetPositionDelegateType UnityEngineMatrix4x4MethodGetPositionDelegate = new UnityEngineMatrix4x4MethodGetPositionDelegateType(UnityEngineMatrix4x4MethodGetPosition);
+		static unsafe readonly BoxMatrix4x4DelegateType BoxMatrix4x4Delegate = new BoxMatrix4x4DelegateType(BoxMatrix4x4);
+		static unsafe readonly UnboxMatrix4x4DelegateType UnboxMatrix4x4Delegate = new UnboxMatrix4x4DelegateType(UnboxMatrix4x4);
+		static unsafe readonly UnityEngineObjectPropertyGetNameDelegateType UnityEngineObjectPropertyGetNameDelegate = new UnityEngineObjectPropertyGetNameDelegateType(UnityEngineObjectPropertyGetName);
+		static unsafe readonly UnityEngineObjectPropertySetNameDelegateType UnityEngineObjectPropertySetNameDelegate = new UnityEngineObjectPropertySetNameDelegateType(UnityEngineObjectPropertySetName);
+		static unsafe readonly UnityEngineComponentPropertyGetTransformDelegateType UnityEngineComponentPropertyGetTransformDelegate = new UnityEngineComponentPropertyGetTransformDelegateType(UnityEngineComponentPropertyGetTransform);
+		static unsafe readonly UnityEngineTransformPropertyGetPositionDelegateType UnityEngineTransformPropertyGetPositionDelegate = new UnityEngineTransformPropertyGetPositionDelegateType(UnityEngineTransformPropertyGetPosition);
+		static unsafe readonly UnityEngineTransformPropertySetPositionDelegateType UnityEngineTransformPropertySetPositionDelegate = new UnityEngineTransformPropertySetPositionDelegateType(UnityEngineTransformPropertySetPosition);
+		static unsafe readonly UnityEngineTransformPropertyGetRotationDelegateType UnityEngineTransformPropertyGetRotationDelegate = new UnityEngineTransformPropertyGetRotationDelegateType(UnityEngineTransformPropertyGetRotation);
+		static unsafe readonly UnityEngineTransformPropertySetRotationDelegateType UnityEngineTransformPropertySetRotationDelegate = new UnityEngineTransformPropertySetRotationDelegateType(UnityEngineTransformPropertySetRotation);
+		static unsafe readonly UnityEngineTransformPropertyGetLocalScaleDelegateType UnityEngineTransformPropertyGetLocalScaleDelegate = new UnityEngineTransformPropertyGetLocalScaleDelegateType(UnityEngineTransformPropertyGetLocalScale);
+		static unsafe readonly UnityEngineTransformPropertySetLocalScaleDelegateType UnityEngineTransformPropertySetLocalScaleDelegate = new UnityEngineTransformPropertySetLocalScaleDelegateType(UnityEngineTransformPropertySetLocalScale);
+		static unsafe readonly UnityEngineTransformPropertyGetLocalToWorldMatrixDelegateType UnityEngineTransformPropertyGetLocalToWorldMatrixDelegate = new UnityEngineTransformPropertyGetLocalToWorldMatrixDelegateType(UnityEngineTransformPropertyGetLocalToWorldMatrix);
+		static unsafe readonly UnityEngineTransformPropertyGetParentDelegateType UnityEngineTransformPropertyGetParentDelegate = new UnityEngineTransformPropertyGetParentDelegateType(UnityEngineTransformPropertyGetParent);
+		static unsafe readonly UnityEngineTransformPropertySetParentDelegateType UnityEngineTransformPropertySetParentDelegate = new UnityEngineTransformPropertySetParentDelegateType(UnityEngineTransformPropertySetParent);
+		static unsafe readonly UnityEngineTransformPropertyGetForwardDelegateType UnityEngineTransformPropertyGetForwardDelegate = new UnityEngineTransformPropertyGetForwardDelegateType(UnityEngineTransformPropertyGetForward);
+		static unsafe readonly UnityEngineTransformPropertySetForwardDelegateType UnityEngineTransformPropertySetForwardDelegate = new UnityEngineTransformPropertySetForwardDelegateType(UnityEngineTransformPropertySetForward);
+		static unsafe readonly UnityEngineTransformPropertyGetUpDelegateType UnityEngineTransformPropertyGetUpDelegate = new UnityEngineTransformPropertyGetUpDelegateType(UnityEngineTransformPropertyGetUp);
+		static unsafe readonly UnityEngineTransformPropertySetUpDelegateType UnityEngineTransformPropertySetUpDelegate = new UnityEngineTransformPropertySetUpDelegateType(UnityEngineTransformPropertySetUp);
+		static unsafe readonly SystemCollectionsIEnumeratorPropertyGetCurrentDelegateType SystemCollectionsIEnumeratorPropertyGetCurrentDelegate = new SystemCollectionsIEnumeratorPropertyGetCurrentDelegateType(SystemCollectionsIEnumeratorPropertyGetCurrent);
+		static unsafe readonly SystemCollectionsIEnumeratorMethodMoveNextDelegateType SystemCollectionsIEnumeratorMethodMoveNextDelegate = new SystemCollectionsIEnumeratorMethodMoveNextDelegateType(SystemCollectionsIEnumeratorMethodMoveNext);
+		static unsafe readonly UnityEngineGameObjectConstructorSystemStringDelegateType UnityEngineGameObjectConstructorSystemStringDelegate = new UnityEngineGameObjectConstructorSystemStringDelegateType(UnityEngineGameObjectConstructorSystemString);
+		static unsafe readonly UnityEngineGameObjectPropertyGetTransformDelegateType UnityEngineGameObjectPropertyGetTransformDelegate = new UnityEngineGameObjectPropertyGetTransformDelegateType(UnityEngineGameObjectPropertyGetTransform);
+		static unsafe readonly UnityEngineGameObjectMethodAddComponentCesiumForUnityBaseCesium3DTilesetDelegateType UnityEngineGameObjectMethodAddComponentCesiumForUnityBaseCesium3DTilesetDelegate = new UnityEngineGameObjectMethodAddComponentCesiumForUnityBaseCesium3DTilesetDelegateType(UnityEngineGameObjectMethodAddComponentCesiumForUnityBaseCesium3DTileset);
+		static unsafe readonly UnityEngineGameObjectMethodAddComponentUnityEngineMeshFilterDelegateType UnityEngineGameObjectMethodAddComponentUnityEngineMeshFilterDelegate = new UnityEngineGameObjectMethodAddComponentUnityEngineMeshFilterDelegateType(UnityEngineGameObjectMethodAddComponentUnityEngineMeshFilter);
+		static unsafe readonly UnityEngineGameObjectMethodAddComponentUnityEngineMeshRendererDelegateType UnityEngineGameObjectMethodAddComponentUnityEngineMeshRendererDelegate = new UnityEngineGameObjectMethodAddComponentUnityEngineMeshRendererDelegateType(UnityEngineGameObjectMethodAddComponentUnityEngineMeshRenderer);
+		static unsafe readonly UnityEngineGameObjectMethodCreatePrimitiveUnityEnginePrimitiveTypeDelegateType UnityEngineGameObjectMethodCreatePrimitiveUnityEnginePrimitiveTypeDelegate = new UnityEngineGameObjectMethodCreatePrimitiveUnityEnginePrimitiveTypeDelegateType(UnityEngineGameObjectMethodCreatePrimitiveUnityEnginePrimitiveType);
+		static unsafe readonly UnityEngineGameObjectMethodSetActiveSystemBooleanDelegateType UnityEngineGameObjectMethodSetActiveSystemBooleanDelegate = new UnityEngineGameObjectMethodSetActiveSystemBooleanDelegateType(UnityEngineGameObjectMethodSetActiveSystemBoolean);
+		static unsafe readonly UnityEngineDebugMethodLogSystemObjectDelegateType UnityEngineDebugMethodLogSystemObjectDelegate = new UnityEngineDebugMethodLogSystemObjectDelegateType(UnityEngineDebugMethodLogSystemObject);
+		static unsafe readonly UnityEngineMonoBehaviourPropertyGetTransformDelegateType UnityEngineMonoBehaviourPropertyGetTransformDelegate = new UnityEngineMonoBehaviourPropertyGetTransformDelegateType(UnityEngineMonoBehaviourPropertyGetTransform);
+		static unsafe readonly UnityEngineMonoBehaviourPropertyGetGameObjectDelegateType UnityEngineMonoBehaviourPropertyGetGameObjectDelegate = new UnityEngineMonoBehaviourPropertyGetGameObjectDelegateType(UnityEngineMonoBehaviourPropertyGetGameObject);
+		static unsafe readonly SystemCollectionsGenericIEnumeratorUnityEngineVector2PropertyGetCurrentDelegateType SystemCollectionsGenericIEnumeratorUnityEngineVector2PropertyGetCurrentDelegate = new SystemCollectionsGenericIEnumeratorUnityEngineVector2PropertyGetCurrentDelegateType(SystemCollectionsGenericIEnumeratorUnityEngineVector2PropertyGetCurrent);
+		static unsafe readonly SystemCollectionsGenericIEnumeratorUnityEngineVector3PropertyGetCurrentDelegateType SystemCollectionsGenericIEnumeratorUnityEngineVector3PropertyGetCurrentDelegate = new SystemCollectionsGenericIEnumeratorUnityEngineVector3PropertyGetCurrentDelegateType(SystemCollectionsGenericIEnumeratorUnityEngineVector3PropertyGetCurrent);
+		static unsafe readonly SystemCollectionsGenericIEnumeratorSystemBytePropertyGetCurrentDelegateType SystemCollectionsGenericIEnumeratorSystemBytePropertyGetCurrentDelegate = new SystemCollectionsGenericIEnumeratorSystemBytePropertyGetCurrentDelegateType(SystemCollectionsGenericIEnumeratorSystemBytePropertyGetCurrent);
+		static unsafe readonly SystemCollectionsGenericIEnumeratorSystemInt32PropertyGetCurrentDelegateType SystemCollectionsGenericIEnumeratorSystemInt32PropertyGetCurrentDelegate = new SystemCollectionsGenericIEnumeratorSystemInt32PropertyGetCurrentDelegateType(SystemCollectionsGenericIEnumeratorSystemInt32PropertyGetCurrent);
+		static unsafe readonly SystemCollectionsGenericIEnumeratorUnityCollectionsNativeArrayPropertyGetCurrentDelegateType SystemCollectionsGenericIEnumeratorUnityCollectionsNativeArrayPropertyGetCurrentDelegate = new SystemCollectionsGenericIEnumeratorUnityCollectionsNativeArrayPropertyGetCurrentDelegateType(SystemCollectionsGenericIEnumeratorUnityCollectionsNativeArrayPropertyGetCurrent);
+		static unsafe readonly SystemCollectionsGenericIEnumerableUnityEngineVector2MethodGetEnumeratorDelegateType SystemCollectionsGenericIEnumerableUnityEngineVector2MethodGetEnumeratorDelegate = new SystemCollectionsGenericIEnumerableUnityEngineVector2MethodGetEnumeratorDelegateType(SystemCollectionsGenericIEnumerableUnityEngineVector2MethodGetEnumerator);
+		static unsafe readonly SystemCollectionsGenericIEnumerableUnityEngineVector3MethodGetEnumeratorDelegateType SystemCollectionsGenericIEnumerableUnityEngineVector3MethodGetEnumeratorDelegate = new SystemCollectionsGenericIEnumerableUnityEngineVector3MethodGetEnumeratorDelegateType(SystemCollectionsGenericIEnumerableUnityEngineVector3MethodGetEnumerator);
+		static unsafe readonly SystemCollectionsGenericIEnumerableSystemByteMethodGetEnumeratorDelegateType SystemCollectionsGenericIEnumerableSystemByteMethodGetEnumeratorDelegate = new SystemCollectionsGenericIEnumerableSystemByteMethodGetEnumeratorDelegateType(SystemCollectionsGenericIEnumerableSystemByteMethodGetEnumerator);
+		static unsafe readonly SystemCollectionsGenericIEnumerableSystemInt32MethodGetEnumeratorDelegateType SystemCollectionsGenericIEnumerableSystemInt32MethodGetEnumeratorDelegate = new SystemCollectionsGenericIEnumerableSystemInt32MethodGetEnumeratorDelegateType(SystemCollectionsGenericIEnumerableSystemInt32MethodGetEnumerator);
+		static unsafe readonly SystemCollectionsGenericIEnumerableUnityCollectionsNativeArrayMethodGetEnumeratorDelegateType SystemCollectionsGenericIEnumerableUnityCollectionsNativeArrayMethodGetEnumeratorDelegate = new SystemCollectionsGenericIEnumerableUnityCollectionsNativeArrayMethodGetEnumeratorDelegateType(SystemCollectionsGenericIEnumerableUnityCollectionsNativeArrayMethodGetEnumerator);
+		static unsafe readonly ReleaseUnityCollectionsNativeArraySystemByteDelegateType ReleaseUnityCollectionsNativeArraySystemByteDelegate = new ReleaseUnityCollectionsNativeArraySystemByteDelegateType(ReleaseUnityCollectionsNativeArraySystemByte);
+		static unsafe readonly BoxNativeArraySystemByteDelegateType BoxNativeArraySystemByteDelegate = new BoxNativeArraySystemByteDelegateType(BoxNativeArraySystemByte);
+		static unsafe readonly UnboxNativeArraySystemByteDelegateType UnboxNativeArraySystemByteDelegate = new UnboxNativeArraySystemByteDelegateType(UnboxNativeArraySystemByte);
+		static unsafe readonly BoxAllocatorDelegateType BoxAllocatorDelegate = new BoxAllocatorDelegateType(BoxAllocator);
+		static unsafe readonly UnboxAllocatorDelegateType UnboxAllocatorDelegate = new UnboxAllocatorDelegateType(UnboxAllocator);
+		static unsafe readonly UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodConvertExistingDataToNativeArraySystemByteSystemVoidPointer_SystemInt32_UnityCollectionsAllocatorDelegateType UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodConvertExistingDataToNativeArraySystemByteSystemVoidPointer_SystemInt32_UnityCollectionsAllocatorDelegate = new UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodConvertExistingDataToNativeArraySystemByteSystemVoidPointer_SystemInt32_UnityCollectionsAllocatorDelegateType(UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodConvertExistingDataToNativeArraySystemByteSystemVoidPointer_SystemInt32_UnityCollectionsAllocator);
+		static unsafe readonly UnityEngineMeshConstructorDelegateType UnityEngineMeshConstructorDelegate = new UnityEngineMeshConstructorDelegateType(UnityEngineMeshConstructor);
+		static unsafe readonly UnityEngineMeshMethodSetVerticesUnityEngineVector3Array1DelegateType UnityEngineMeshMethodSetVerticesUnityEngineVector3Array1Delegate = new UnityEngineMeshMethodSetVerticesUnityEngineVector3Array1DelegateType(UnityEngineMeshMethodSetVerticesUnityEngineVector3Array1);
+		static unsafe readonly UnityEngineMeshMethodSetNormalsUnityEngineVector3Array1DelegateType UnityEngineMeshMethodSetNormalsUnityEngineVector3Array1Delegate = new UnityEngineMeshMethodSetNormalsUnityEngineVector3Array1DelegateType(UnityEngineMeshMethodSetNormalsUnityEngineVector3Array1);
+		static unsafe readonly UnityEngineMeshMethodSetTrianglesSystemInt32Array1_SystemInt32_SystemBoolean_SystemInt32DelegateType UnityEngineMeshMethodSetTrianglesSystemInt32Array1_SystemInt32_SystemBoolean_SystemInt32Delegate = new UnityEngineMeshMethodSetTrianglesSystemInt32Array1_SystemInt32_SystemBoolean_SystemInt32DelegateType(UnityEngineMeshMethodSetTrianglesSystemInt32Array1_SystemInt32_SystemBoolean_SystemInt32);
+		static unsafe readonly UnityEngineMeshMethodSetUVsSystemInt32_UnityEngineVector2Array1DelegateType UnityEngineMeshMethodSetUVsSystemInt32_UnityEngineVector2Array1Delegate = new UnityEngineMeshMethodSetUVsSystemInt32_UnityEngineVector2Array1DelegateType(UnityEngineMeshMethodSetUVsSystemInt32_UnityEngineVector2Array1);
+		static unsafe readonly UnityEngineMeshFilterPropertyGetMeshDelegateType UnityEngineMeshFilterPropertyGetMeshDelegate = new UnityEngineMeshFilterPropertyGetMeshDelegateType(UnityEngineMeshFilterPropertyGetMesh);
+		static unsafe readonly UnityEngineMeshFilterPropertySetMeshDelegateType UnityEngineMeshFilterPropertySetMeshDelegate = new UnityEngineMeshFilterPropertySetMeshDelegateType(UnityEngineMeshFilterPropertySetMesh);
+		static unsafe readonly UnityEngineMeshRendererPropertyGetMaterialDelegateType UnityEngineMeshRendererPropertyGetMaterialDelegate = new UnityEngineMeshRendererPropertyGetMaterialDelegateType(UnityEngineMeshRendererPropertyGetMaterial);
+		static unsafe readonly UnityEngineMeshRendererPropertySetMaterialDelegateType UnityEngineMeshRendererPropertySetMaterialDelegate = new UnityEngineMeshRendererPropertySetMaterialDelegateType(UnityEngineMeshRendererPropertySetMaterial);
+		static unsafe readonly SystemExceptionConstructorSystemStringDelegateType SystemExceptionConstructorSystemStringDelegate = new SystemExceptionConstructorSystemStringDelegateType(SystemExceptionConstructorSystemString);
+		static unsafe readonly BoxPrimitiveTypeDelegateType BoxPrimitiveTypeDelegate = new BoxPrimitiveTypeDelegateType(BoxPrimitiveType);
+		static unsafe readonly UnboxPrimitiveTypeDelegateType UnboxPrimitiveTypeDelegate = new UnboxPrimitiveTypeDelegateType(UnboxPrimitiveType);
+		static unsafe readonly UnityEngineTimePropertyGetDeltaTimeDelegateType UnityEngineTimePropertyGetDeltaTimeDelegate = new UnityEngineTimePropertyGetDeltaTimeDelegateType(UnityEngineTimePropertyGetDeltaTime);
+		static unsafe readonly UnityEngineCameraPropertyGetMainDelegateType UnityEngineCameraPropertyGetMainDelegate = new UnityEngineCameraPropertyGetMainDelegateType(UnityEngineCameraPropertyGetMain);
+		static unsafe readonly UnityEngineCameraPropertyGetFieldOfViewDelegateType UnityEngineCameraPropertyGetFieldOfViewDelegate = new UnityEngineCameraPropertyGetFieldOfViewDelegateType(UnityEngineCameraPropertyGetFieldOfView);
+		static unsafe readonly UnityEngineCameraPropertySetFieldOfViewDelegateType UnityEngineCameraPropertySetFieldOfViewDelegate = new UnityEngineCameraPropertySetFieldOfViewDelegateType(UnityEngineCameraPropertySetFieldOfView);
+		static unsafe readonly UnityEngineCameraPropertyGetAspectDelegateType UnityEngineCameraPropertyGetAspectDelegate = new UnityEngineCameraPropertyGetAspectDelegateType(UnityEngineCameraPropertyGetAspect);
+		static unsafe readonly UnityEngineCameraPropertySetAspectDelegateType UnityEngineCameraPropertySetAspectDelegate = new UnityEngineCameraPropertySetAspectDelegateType(UnityEngineCameraPropertySetAspect);
+		static unsafe readonly UnityEngineCameraPropertyGetPixelWidthDelegateType UnityEngineCameraPropertyGetPixelWidthDelegate = new UnityEngineCameraPropertyGetPixelWidthDelegateType(UnityEngineCameraPropertyGetPixelWidth);
+		static unsafe readonly UnityEngineCameraPropertyGetPixelHeightDelegateType UnityEngineCameraPropertyGetPixelHeightDelegate = new UnityEngineCameraPropertyGetPixelHeightDelegateType(UnityEngineCameraPropertyGetPixelHeight);
+		static unsafe readonly BoxRawDownloadedDataDelegateType BoxRawDownloadedDataDelegate = new BoxRawDownloadedDataDelegateType(BoxRawDownloadedData);
+		static unsafe readonly UnboxRawDownloadedDataDelegateType UnboxRawDownloadedDataDelegate = new UnboxRawDownloadedDataDelegateType(UnboxRawDownloadedData);
+		static unsafe readonly ReleaseBaseNativeDownloadHandlerDelegateType ReleaseBaseNativeDownloadHandlerDelegate = new ReleaseBaseNativeDownloadHandlerDelegateType(ReleaseBaseNativeDownloadHandler);
+		static unsafe readonly BaseNativeDownloadHandlerConstructorDelegateType BaseNativeDownloadHandlerConstructorDelegate = new BaseNativeDownloadHandlerConstructorDelegateType(BaseNativeDownloadHandlerConstructor);
+		static unsafe readonly UnityEngineNetworkingUnityWebRequestPropertyGetErrorDelegateType UnityEngineNetworkingUnityWebRequestPropertyGetErrorDelegate = new UnityEngineNetworkingUnityWebRequestPropertyGetErrorDelegateType(UnityEngineNetworkingUnityWebRequestPropertyGetError);
+		static unsafe readonly UnityEngineNetworkingUnityWebRequestPropertyGetIsDoneDelegateType UnityEngineNetworkingUnityWebRequestPropertyGetIsDoneDelegate = new UnityEngineNetworkingUnityWebRequestPropertyGetIsDoneDelegateType(UnityEngineNetworkingUnityWebRequestPropertyGetIsDone);
+		static unsafe readonly UnityEngineNetworkingUnityWebRequestPropertyGetResponseCodeDelegateType UnityEngineNetworkingUnityWebRequestPropertyGetResponseCodeDelegate = new UnityEngineNetworkingUnityWebRequestPropertyGetResponseCodeDelegateType(UnityEngineNetworkingUnityWebRequestPropertyGetResponseCode);
+		static unsafe readonly UnityEngineNetworkingUnityWebRequestPropertyGetUrlDelegateType UnityEngineNetworkingUnityWebRequestPropertyGetUrlDelegate = new UnityEngineNetworkingUnityWebRequestPropertyGetUrlDelegateType(UnityEngineNetworkingUnityWebRequestPropertyGetUrl);
+		static unsafe readonly UnityEngineNetworkingUnityWebRequestPropertySetUrlDelegateType UnityEngineNetworkingUnityWebRequestPropertySetUrlDelegate = new UnityEngineNetworkingUnityWebRequestPropertySetUrlDelegateType(UnityEngineNetworkingUnityWebRequestPropertySetUrl);
+		static unsafe readonly UnityEngineNetworkingUnityWebRequestPropertyGetMethodDelegateType UnityEngineNetworkingUnityWebRequestPropertyGetMethodDelegate = new UnityEngineNetworkingUnityWebRequestPropertyGetMethodDelegateType(UnityEngineNetworkingUnityWebRequestPropertyGetMethod);
+		static unsafe readonly UnityEngineNetworkingUnityWebRequestPropertySetMethodDelegateType UnityEngineNetworkingUnityWebRequestPropertySetMethodDelegate = new UnityEngineNetworkingUnityWebRequestPropertySetMethodDelegateType(UnityEngineNetworkingUnityWebRequestPropertySetMethod);
+		static unsafe readonly UnityEngineNetworkingUnityWebRequestPropertyGetDownloadHandlerDelegateType UnityEngineNetworkingUnityWebRequestPropertyGetDownloadHandlerDelegate = new UnityEngineNetworkingUnityWebRequestPropertyGetDownloadHandlerDelegateType(UnityEngineNetworkingUnityWebRequestPropertyGetDownloadHandler);
+		static unsafe readonly UnityEngineNetworkingUnityWebRequestPropertySetDownloadHandlerDelegateType UnityEngineNetworkingUnityWebRequestPropertySetDownloadHandlerDelegate = new UnityEngineNetworkingUnityWebRequestPropertySetDownloadHandlerDelegateType(UnityEngineNetworkingUnityWebRequestPropertySetDownloadHandler);
+		static unsafe readonly UnityEngineNetworkingUnityWebRequestMethodGetSystemStringDelegateType UnityEngineNetworkingUnityWebRequestMethodGetSystemStringDelegate = new UnityEngineNetworkingUnityWebRequestMethodGetSystemStringDelegateType(UnityEngineNetworkingUnityWebRequestMethodGetSystemString);
+		static unsafe readonly UnityEngineNetworkingUnityWebRequestMethodSetRequestHeaderSystemString_SystemStringDelegateType UnityEngineNetworkingUnityWebRequestMethodSetRequestHeaderSystemString_SystemStringDelegate = new UnityEngineNetworkingUnityWebRequestMethodSetRequestHeaderSystemString_SystemStringDelegateType(UnityEngineNetworkingUnityWebRequestMethodSetRequestHeaderSystemString_SystemString);
+		static unsafe readonly UnityEngineNetworkingUnityWebRequestMethodSendWebRequestDelegateType UnityEngineNetworkingUnityWebRequestMethodSendWebRequestDelegate = new UnityEngineNetworkingUnityWebRequestMethodSendWebRequestDelegateType(UnityEngineNetworkingUnityWebRequestMethodSendWebRequest);
+		static unsafe readonly UnityEngineNetworkingUnityWebRequestMethodGetResponseHeaderSystemStringDelegateType UnityEngineNetworkingUnityWebRequestMethodGetResponseHeaderSystemStringDelegate = new UnityEngineNetworkingUnityWebRequestMethodGetResponseHeaderSystemStringDelegateType(UnityEngineNetworkingUnityWebRequestMethodGetResponseHeaderSystemString);
+		static unsafe readonly UnityEngineNetworkingUnityWebRequestAsyncOperationAddEventCompletedDelegateType UnityEngineNetworkingUnityWebRequestAsyncOperationAddEventCompletedDelegate = new UnityEngineNetworkingUnityWebRequestAsyncOperationAddEventCompletedDelegateType(UnityEngineNetworkingUnityWebRequestAsyncOperationAddEventCompleted);
+		static unsafe readonly UnityEngineNetworkingUnityWebRequestAsyncOperationRemoveEventCompletedDelegateType UnityEngineNetworkingUnityWebRequestAsyncOperationRemoveEventCompletedDelegate = new UnityEngineNetworkingUnityWebRequestAsyncOperationRemoveEventCompletedDelegateType(UnityEngineNetworkingUnityWebRequestAsyncOperationRemoveEventCompleted);
+		static unsafe readonly SystemRuntimeInteropServicesMarshalMethodStringToCoTaskMemUTF8SystemStringDelegateType SystemRuntimeInteropServicesMarshalMethodStringToCoTaskMemUTF8SystemStringDelegate = new SystemRuntimeInteropServicesMarshalMethodStringToCoTaskMemUTF8SystemStringDelegateType(SystemRuntimeInteropServicesMarshalMethodStringToCoTaskMemUTF8SystemString);
+		static unsafe readonly SystemRuntimeInteropServicesMarshalMethodFreeCoTaskMemSystemIntPtrDelegateType SystemRuntimeInteropServicesMarshalMethodFreeCoTaskMemSystemIntPtrDelegate = new SystemRuntimeInteropServicesMarshalMethodFreeCoTaskMemSystemIntPtrDelegateType(SystemRuntimeInteropServicesMarshalMethodFreeCoTaskMemSystemIntPtr);
+		static unsafe readonly ReleaseBaseCesium3DTilesetDelegateType ReleaseBaseCesium3DTilesetDelegate = new ReleaseBaseCesium3DTilesetDelegateType(ReleaseBaseCesium3DTileset);
+		static unsafe readonly BaseCesium3DTilesetConstructorDelegateType BaseCesium3DTilesetConstructorDelegate = new BaseCesium3DTilesetConstructorDelegateType(BaseCesium3DTilesetConstructor);
+		static unsafe readonly SystemThreadingTasksTaskMethodRunSystemActionDelegateType SystemThreadingTasksTaskMethodRunSystemActionDelegate = new SystemThreadingTasksTaskMethodRunSystemActionDelegateType(SystemThreadingTasksTaskMethodRunSystemAction);
+		static unsafe readonly UnityEngineMaterialMethodSetTextureSystemString_UnityEngineTextureDelegateType UnityEngineMaterialMethodSetTextureSystemString_UnityEngineTextureDelegate = new UnityEngineMaterialMethodSetTextureSystemString_UnityEngineTextureDelegateType(UnityEngineMaterialMethodSetTextureSystemString_UnityEngineTexture);
+		static unsafe readonly UnityEngineResourcesMethodLoadUnityEngineMaterialSystemStringDelegateType UnityEngineResourcesMethodLoadUnityEngineMaterialSystemStringDelegate = new UnityEngineResourcesMethodLoadUnityEngineMaterialSystemStringDelegateType(UnityEngineResourcesMethodLoadUnityEngineMaterialSystemString);
+		static unsafe readonly UnityEditorSceneViewPropertyGetLastActiveSceneViewDelegateType UnityEditorSceneViewPropertyGetLastActiveSceneViewDelegate = new UnityEditorSceneViewPropertyGetLastActiveSceneViewDelegateType(UnityEditorSceneViewPropertyGetLastActiveSceneView);
+		static unsafe readonly UnityEditorSceneViewPropertyGetCameraDelegateType UnityEditorSceneViewPropertyGetCameraDelegate = new UnityEditorSceneViewPropertyGetCameraDelegateType(UnityEditorSceneViewPropertyGetCamera);
+		static unsafe readonly BoxTextureFormatDelegateType BoxTextureFormatDelegate = new BoxTextureFormatDelegateType(BoxTextureFormat);
+		static unsafe readonly UnboxTextureFormatDelegateType UnboxTextureFormatDelegate = new UnboxTextureFormatDelegateType(UnboxTextureFormat);
+		static unsafe readonly UnityEngineTexture2DConstructorSystemInt32_SystemInt32_UnityEngineTextureFormat_SystemBoolean_SystemBooleanDelegateType UnityEngineTexture2DConstructorSystemInt32_SystemInt32_UnityEngineTextureFormat_SystemBoolean_SystemBooleanDelegate = new UnityEngineTexture2DConstructorSystemInt32_SystemInt32_UnityEngineTextureFormat_SystemBoolean_SystemBooleanDelegateType(UnityEngineTexture2DConstructorSystemInt32_SystemInt32_UnityEngineTextureFormat_SystemBoolean_SystemBoolean);
+		static unsafe readonly UnityEngineTexture2DMethodSetPixelDataSystemByteSystemByteArray1_SystemInt32_SystemInt32DelegateType UnityEngineTexture2DMethodSetPixelDataSystemByteSystemByteArray1_SystemInt32_SystemInt32Delegate = new UnityEngineTexture2DMethodSetPixelDataSystemByteSystemByteArray1_SystemInt32_SystemInt32DelegateType(UnityEngineTexture2DMethodSetPixelDataSystemByteSystemByteArray1_SystemInt32_SystemInt32);
+		static unsafe readonly UnityEngineTexture2DMethodSetPixelDataSystemByteUnityCollectionsNativeArray_SystemInt32_SystemInt32DelegateType UnityEngineTexture2DMethodSetPixelDataSystemByteUnityCollectionsNativeArray_SystemInt32_SystemInt32Delegate = new UnityEngineTexture2DMethodSetPixelDataSystemByteUnityCollectionsNativeArray_SystemInt32_SystemInt32DelegateType(UnityEngineTexture2DMethodSetPixelDataSystemByteUnityCollectionsNativeArray_SystemInt32_SystemInt32);
+		static unsafe readonly UnityEngineTexture2DMethodApplySystemBoolean_SystemBooleanDelegateType UnityEngineTexture2DMethodApplySystemBoolean_SystemBooleanDelegate = new UnityEngineTexture2DMethodApplySystemBoolean_SystemBooleanDelegateType(UnityEngineTexture2DMethodApplySystemBoolean_SystemBoolean);
+		static unsafe readonly UnityEngineTexture2DMethodLoadRawTextureDataSystemIntPtr_SystemInt32DelegateType UnityEngineTexture2DMethodLoadRawTextureDataSystemIntPtr_SystemInt32Delegate = new UnityEngineTexture2DMethodLoadRawTextureDataSystemIntPtr_SystemInt32DelegateType(UnityEngineTexture2DMethodLoadRawTextureDataSystemIntPtr_SystemInt32);
+		static unsafe readonly BoxBooleanDelegateType BoxBooleanDelegate = new BoxBooleanDelegateType(BoxBoolean);
+		static unsafe readonly UnboxBooleanDelegateType UnboxBooleanDelegate = new UnboxBooleanDelegateType(UnboxBoolean);
+		static unsafe readonly BoxSByteDelegateType BoxSByteDelegate = new BoxSByteDelegateType(BoxSByte);
+		static unsafe readonly UnboxSByteDelegateType UnboxSByteDelegate = new UnboxSByteDelegateType(UnboxSByte);
+		static unsafe readonly BoxByteDelegateType BoxByteDelegate = new BoxByteDelegateType(BoxByte);
+		static unsafe readonly UnboxByteDelegateType UnboxByteDelegate = new UnboxByteDelegateType(UnboxByte);
+		static unsafe readonly BoxInt16DelegateType BoxInt16Delegate = new BoxInt16DelegateType(BoxInt16);
+		static unsafe readonly UnboxInt16DelegateType UnboxInt16Delegate = new UnboxInt16DelegateType(UnboxInt16);
+		static unsafe readonly BoxUInt16DelegateType BoxUInt16Delegate = new BoxUInt16DelegateType(BoxUInt16);
+		static unsafe readonly UnboxUInt16DelegateType UnboxUInt16Delegate = new UnboxUInt16DelegateType(UnboxUInt16);
+		static unsafe readonly BoxInt32DelegateType BoxInt32Delegate = new BoxInt32DelegateType(BoxInt32);
+		static unsafe readonly UnboxInt32DelegateType UnboxInt32Delegate = new UnboxInt32DelegateType(UnboxInt32);
+		static unsafe readonly BoxUInt32DelegateType BoxUInt32Delegate = new BoxUInt32DelegateType(BoxUInt32);
+		static unsafe readonly UnboxUInt32DelegateType UnboxUInt32Delegate = new UnboxUInt32DelegateType(UnboxUInt32);
+		static unsafe readonly BoxInt64DelegateType BoxInt64Delegate = new BoxInt64DelegateType(BoxInt64);
+		static unsafe readonly UnboxInt64DelegateType UnboxInt64Delegate = new UnboxInt64DelegateType(UnboxInt64);
+		static unsafe readonly BoxUInt64DelegateType BoxUInt64Delegate = new BoxUInt64DelegateType(BoxUInt64);
+		static unsafe readonly UnboxUInt64DelegateType UnboxUInt64Delegate = new UnboxUInt64DelegateType(UnboxUInt64);
+		static unsafe readonly BoxCharDelegateType BoxCharDelegate = new BoxCharDelegateType(BoxChar);
+		static unsafe readonly UnboxCharDelegateType UnboxCharDelegate = new UnboxCharDelegateType(UnboxChar);
+		static unsafe readonly BoxSingleDelegateType BoxSingleDelegate = new BoxSingleDelegateType(BoxSingle);
+		static unsafe readonly UnboxSingleDelegateType UnboxSingleDelegate = new UnboxSingleDelegateType(UnboxSingle);
+		static unsafe readonly BoxDoubleDelegateType BoxDoubleDelegate = new BoxDoubleDelegateType(BoxDouble);
+		static unsafe readonly UnboxDoubleDelegateType UnboxDoubleDelegate = new UnboxDoubleDelegateType(UnboxDouble);
+		static unsafe readonly UnityEngineUnityEngineVector2Array1Constructor1DelegateType UnityEngineUnityEngineVector2Array1Constructor1Delegate = new UnityEngineUnityEngineVector2Array1Constructor1DelegateType(UnityEngineUnityEngineVector2Array1Constructor1);
+		static unsafe readonly UnityEngineVector2Array1GetItem1DelegateType UnityEngineVector2Array1GetItem1Delegate = new UnityEngineVector2Array1GetItem1DelegateType(UnityEngineVector2Array1GetItem1);
+		static unsafe readonly UnityEngineVector2Array1SetItem1DelegateType UnityEngineVector2Array1SetItem1Delegate = new UnityEngineVector2Array1SetItem1DelegateType(UnityEngineVector2Array1SetItem1);
+		static unsafe readonly UnityEngineUnityEngineVector3Array1Constructor1DelegateType UnityEngineUnityEngineVector3Array1Constructor1Delegate = new UnityEngineUnityEngineVector3Array1Constructor1DelegateType(UnityEngineUnityEngineVector3Array1Constructor1);
+		static unsafe readonly UnityEngineVector3Array1GetItem1DelegateType UnityEngineVector3Array1GetItem1Delegate = new UnityEngineVector3Array1GetItem1DelegateType(UnityEngineVector3Array1GetItem1);
+		static unsafe readonly UnityEngineVector3Array1SetItem1DelegateType UnityEngineVector3Array1SetItem1Delegate = new UnityEngineVector3Array1SetItem1DelegateType(UnityEngineVector3Array1SetItem1);
+		static unsafe readonly SystemSystemByteArray1Constructor1DelegateType SystemSystemByteArray1Constructor1Delegate = new SystemSystemByteArray1Constructor1DelegateType(SystemSystemByteArray1Constructor1);
+		static unsafe readonly SystemByteArray1GetItem1DelegateType SystemByteArray1GetItem1Delegate = new SystemByteArray1GetItem1DelegateType(SystemByteArray1GetItem1);
+		static unsafe readonly SystemByteArray1SetItem1DelegateType SystemByteArray1SetItem1Delegate = new SystemByteArray1SetItem1DelegateType(SystemByteArray1SetItem1);
+		static unsafe readonly SystemSystemInt32Array1Constructor1DelegateType SystemSystemInt32Array1Constructor1Delegate = new SystemSystemInt32Array1Constructor1DelegateType(SystemSystemInt32Array1Constructor1);
+		static unsafe readonly SystemInt32Array1GetItem1DelegateType SystemInt32Array1GetItem1Delegate = new SystemInt32Array1GetItem1DelegateType(SystemInt32Array1GetItem1);
+		static unsafe readonly SystemInt32Array1SetItem1DelegateType SystemInt32Array1SetItem1Delegate = new SystemInt32Array1SetItem1DelegateType(SystemInt32Array1SetItem1);
+		static unsafe readonly ReleaseSystemActionDelegateType ReleaseSystemActionDelegate = new ReleaseSystemActionDelegateType(ReleaseSystemAction);
+		static unsafe readonly SystemActionConstructorDelegateType SystemActionConstructorDelegate = new SystemActionConstructorDelegateType(SystemActionConstructor);
+		static unsafe readonly SystemActionAddDelegateType SystemActionAddDelegate = new SystemActionAddDelegateType(SystemActionAdd);
+		static unsafe readonly SystemActionRemoveDelegateType SystemActionRemoveDelegate = new SystemActionRemoveDelegateType(SystemActionRemove);
+		static unsafe readonly SystemActionInvokeDelegateType SystemActionInvokeDelegate = new SystemActionInvokeDelegateType(SystemActionInvoke);
+		static unsafe readonly ReleaseSystemActionUnityEngineAsyncOperationDelegateType ReleaseSystemActionUnityEngineAsyncOperationDelegate = new ReleaseSystemActionUnityEngineAsyncOperationDelegateType(ReleaseSystemActionUnityEngineAsyncOperation);
+		static unsafe readonly SystemActionUnityEngineAsyncOperationConstructorDelegateType SystemActionUnityEngineAsyncOperationConstructorDelegate = new SystemActionUnityEngineAsyncOperationConstructorDelegateType(SystemActionUnityEngineAsyncOperationConstructor);
+		static unsafe readonly SystemActionUnityEngineAsyncOperationAddDelegateType SystemActionUnityEngineAsyncOperationAddDelegate = new SystemActionUnityEngineAsyncOperationAddDelegateType(SystemActionUnityEngineAsyncOperationAdd);
+		static unsafe readonly SystemActionUnityEngineAsyncOperationRemoveDelegateType SystemActionUnityEngineAsyncOperationRemoveDelegate = new SystemActionUnityEngineAsyncOperationRemoveDelegateType(SystemActionUnityEngineAsyncOperationRemove);
+		static unsafe readonly SystemActionUnityEngineAsyncOperationInvokeDelegateType SystemActionUnityEngineAsyncOperationInvokeDelegate = new SystemActionUnityEngineAsyncOperationInvokeDelegateType(SystemActionUnityEngineAsyncOperationInvoke);
 		/*END CSHARP DELEGATES*/
 		
 		/// <summary>
@@ -1284,6 +1296,12 @@ namespace NativeScript
 			curMemory += IntPtr.Size;
 			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(UnboxNativeArraySystemByteDelegate));
 			curMemory += IntPtr.Size;
+			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(BoxAllocatorDelegate));
+			curMemory += IntPtr.Size;
+			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(UnboxAllocatorDelegate));
+			curMemory += IntPtr.Size;
+			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodConvertExistingDataToNativeArraySystemByteSystemVoidPointer_SystemInt32_UnityCollectionsAllocatorDelegate));
+			curMemory += IntPtr.Size;
 			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(UnityEngineMeshConstructorDelegate));
 			curMemory += IntPtr.Size;
 			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(UnityEngineMeshMethodSetVerticesUnityEngineVector3Array1Delegate));
@@ -1391,6 +1409,8 @@ namespace NativeScript
 			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(UnityEngineTexture2DMethodSetPixelDataSystemByteUnityCollectionsNativeArray_SystemInt32_SystemInt32Delegate));
 			curMemory += IntPtr.Size;
 			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(UnityEngineTexture2DMethodApplySystemBoolean_SystemBooleanDelegate));
+			curMemory += IntPtr.Size;
+			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(UnityEngineTexture2DMethodLoadRawTextureDataSystemIntPtr_SystemInt32Delegate));
 			curMemory += IntPtr.Size;
 			Marshal.WriteIntPtr(memory, curMemory, Marshal.GetFunctionPointerForDelegate(BoxBooleanDelegate));
 			curMemory += IntPtr.Size;
@@ -1619,7 +1639,7 @@ namespace NativeScript
 
 		/*BEGIN FUNCTIONS*/
 		[MonoPInvokeCallback(typeof(SystemIDisposableMethodDisposeDelegateType))]
-		static void SystemIDisposableMethodDispose(int thisHandle)
+		static unsafe void SystemIDisposableMethodDispose(int thisHandle)
 		{
 			try
 			{
@@ -1639,7 +1659,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(ReleaseSystemDecimalDelegateType))]
-		static void ReleaseSystemDecimal(int handle)
+		static unsafe void ReleaseSystemDecimal(int handle)
 		{
 			try
 			{
@@ -1661,7 +1681,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(SystemDecimalConstructorSystemDoubleDelegateType))]
-		static int SystemDecimalConstructorSystemDouble(double value)
+		static unsafe int SystemDecimalConstructorSystemDouble(double value)
 		{
 			try
 			{
@@ -1683,7 +1703,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(SystemDecimalConstructorSystemUInt64DelegateType))]
-		static int SystemDecimalConstructorSystemUInt64(ulong value)
+		static unsafe int SystemDecimalConstructorSystemUInt64(ulong value)
 		{
 			try
 			{
@@ -1705,7 +1725,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(BoxDecimalDelegateType))]
-		static int BoxDecimal(int valHandle)
+		static unsafe int BoxDecimal(int valHandle)
 		{
 			try
 			{
@@ -1728,7 +1748,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnboxDecimalDelegateType))]
-		static int UnboxDecimal(int valHandle)
+		static unsafe int UnboxDecimal(int valHandle)
 		{
 			try
 			{
@@ -1751,7 +1771,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineVector2ConstructorSystemSingle_SystemSingleDelegateType))]
-		static UnityEngine.Vector2 UnityEngineVector2ConstructorSystemSingle_SystemSingle(float x, float y)
+		static unsafe UnityEngine.Vector2 UnityEngineVector2ConstructorSystemSingle_SystemSingle(float x, float y)
 		{
 			try
 			{
@@ -1773,7 +1793,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(BoxVector2DelegateType))]
-		static int BoxVector2(ref UnityEngine.Vector2 val)
+		static unsafe int BoxVector2(ref UnityEngine.Vector2 val)
 		{
 			try
 			{
@@ -1795,7 +1815,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnboxVector2DelegateType))]
-		static UnityEngine.Vector2 UnboxVector2(int valHandle)
+		static unsafe UnityEngine.Vector2 UnboxVector2(int valHandle)
 		{
 			try
 			{
@@ -1818,7 +1838,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineVector3ConstructorSystemSingle_SystemSingle_SystemSingleDelegateType))]
-		static UnityEngine.Vector3 UnityEngineVector3ConstructorSystemSingle_SystemSingle_SystemSingle(float x, float y, float z)
+		static unsafe UnityEngine.Vector3 UnityEngineVector3ConstructorSystemSingle_SystemSingle_SystemSingle(float x, float y, float z)
 		{
 			try
 			{
@@ -1840,7 +1860,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(BoxVector3DelegateType))]
-		static int BoxVector3(ref UnityEngine.Vector3 val)
+		static unsafe int BoxVector3(ref UnityEngine.Vector3 val)
 		{
 			try
 			{
@@ -1862,7 +1882,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnboxVector3DelegateType))]
-		static UnityEngine.Vector3 UnboxVector3(int valHandle)
+		static unsafe UnityEngine.Vector3 UnboxVector3(int valHandle)
 		{
 			try
 			{
@@ -1885,7 +1905,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineVector4ConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingleDelegateType))]
-		static UnityEngine.Vector4 UnityEngineVector4ConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingle(float x, float y, float z, float w)
+		static unsafe UnityEngine.Vector4 UnityEngineVector4ConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingle(float x, float y, float z, float w)
 		{
 			try
 			{
@@ -1907,7 +1927,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(BoxVector4DelegateType))]
-		static int BoxVector4(ref UnityEngine.Vector4 val)
+		static unsafe int BoxVector4(ref UnityEngine.Vector4 val)
 		{
 			try
 			{
@@ -1929,7 +1949,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnboxVector4DelegateType))]
-		static UnityEngine.Vector4 UnboxVector4(int valHandle)
+		static unsafe UnityEngine.Vector4 UnboxVector4(int valHandle)
 		{
 			try
 			{
@@ -1952,7 +1972,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineQuaternionConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingleDelegateType))]
-		static UnityEngine.Quaternion UnityEngineQuaternionConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingle(float x, float y, float z, float w)
+		static unsafe UnityEngine.Quaternion UnityEngineQuaternionConstructorSystemSingle_SystemSingle_SystemSingle_SystemSingle(float x, float y, float z, float w)
 		{
 			try
 			{
@@ -1974,7 +1994,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(BoxQuaternionDelegateType))]
-		static int BoxQuaternion(ref UnityEngine.Quaternion val)
+		static unsafe int BoxQuaternion(ref UnityEngine.Quaternion val)
 		{
 			try
 			{
@@ -1996,7 +2016,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnboxQuaternionDelegateType))]
-		static UnityEngine.Quaternion UnboxQuaternion(int valHandle)
+		static unsafe UnityEngine.Quaternion UnboxQuaternion(int valHandle)
 		{
 			try
 			{
@@ -2019,7 +2039,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineMatrix4x4ConstructorUnityEngineVector4_UnityEngineVector4_UnityEngineVector4_UnityEngineVector4DelegateType))]
-		static UnityEngine.Matrix4x4 UnityEngineMatrix4x4ConstructorUnityEngineVector4_UnityEngineVector4_UnityEngineVector4_UnityEngineVector4(ref UnityEngine.Vector4 column0, ref UnityEngine.Vector4 column1, ref UnityEngine.Vector4 column2, ref UnityEngine.Vector4 column3)
+		static unsafe UnityEngine.Matrix4x4 UnityEngineMatrix4x4ConstructorUnityEngineVector4_UnityEngineVector4_UnityEngineVector4_UnityEngineVector4(ref UnityEngine.Vector4 column0, ref UnityEngine.Vector4 column1, ref UnityEngine.Vector4 column2, ref UnityEngine.Vector4 column3)
 		{
 			try
 			{
@@ -2041,7 +2061,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineMatrix4x4PropertyGetRotationDelegateType))]
-		static UnityEngine.Quaternion UnityEngineMatrix4x4PropertyGetRotation(ref UnityEngine.Matrix4x4 thiz)
+		static unsafe UnityEngine.Quaternion UnityEngineMatrix4x4PropertyGetRotation(ref UnityEngine.Matrix4x4 thiz)
 		{
 			try
 			{
@@ -2063,7 +2083,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineMatrix4x4PropertyGetLossyScaleDelegateType))]
-		static UnityEngine.Vector3 UnityEngineMatrix4x4PropertyGetLossyScale(ref UnityEngine.Matrix4x4 thiz)
+		static unsafe UnityEngine.Vector3 UnityEngineMatrix4x4PropertyGetLossyScale(ref UnityEngine.Matrix4x4 thiz)
 		{
 			try
 			{
@@ -2085,7 +2105,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineMatrix4x4MethodGetPositionDelegateType))]
-		static UnityEngine.Vector3 UnityEngineMatrix4x4MethodGetPosition(ref UnityEngine.Matrix4x4 thiz)
+		static unsafe UnityEngine.Vector3 UnityEngineMatrix4x4MethodGetPosition(ref UnityEngine.Matrix4x4 thiz)
 		{
 			try
 			{
@@ -2107,7 +2127,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(BoxMatrix4x4DelegateType))]
-		static int BoxMatrix4x4(ref UnityEngine.Matrix4x4 val)
+		static unsafe int BoxMatrix4x4(ref UnityEngine.Matrix4x4 val)
 		{
 			try
 			{
@@ -2129,7 +2149,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnboxMatrix4x4DelegateType))]
-		static UnityEngine.Matrix4x4 UnboxMatrix4x4(int valHandle)
+		static unsafe UnityEngine.Matrix4x4 UnboxMatrix4x4(int valHandle)
 		{
 			try
 			{
@@ -2152,7 +2172,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineObjectPropertyGetNameDelegateType))]
-		static int UnityEngineObjectPropertyGetName(int thisHandle)
+		static unsafe int UnityEngineObjectPropertyGetName(int thisHandle)
 		{
 			try
 			{
@@ -2175,7 +2195,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineObjectPropertySetNameDelegateType))]
-		static void UnityEngineObjectPropertySetName(int thisHandle, int valueHandle)
+		static unsafe void UnityEngineObjectPropertySetName(int thisHandle, int valueHandle)
 		{
 			try
 			{
@@ -2196,7 +2216,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineComponentPropertyGetTransformDelegateType))]
-		static int UnityEngineComponentPropertyGetTransform(int thisHandle)
+		static unsafe int UnityEngineComponentPropertyGetTransform(int thisHandle)
 		{
 			try
 			{
@@ -2219,7 +2239,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineTransformPropertyGetPositionDelegateType))]
-		static UnityEngine.Vector3 UnityEngineTransformPropertyGetPosition(int thisHandle)
+		static unsafe UnityEngine.Vector3 UnityEngineTransformPropertyGetPosition(int thisHandle)
 		{
 			try
 			{
@@ -2242,7 +2262,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineTransformPropertySetPositionDelegateType))]
-		static void UnityEngineTransformPropertySetPosition(int thisHandle, ref UnityEngine.Vector3 value)
+		static unsafe void UnityEngineTransformPropertySetPosition(int thisHandle, ref UnityEngine.Vector3 value)
 		{
 			try
 			{
@@ -2262,7 +2282,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineTransformPropertyGetRotationDelegateType))]
-		static UnityEngine.Quaternion UnityEngineTransformPropertyGetRotation(int thisHandle)
+		static unsafe UnityEngine.Quaternion UnityEngineTransformPropertyGetRotation(int thisHandle)
 		{
 			try
 			{
@@ -2285,7 +2305,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineTransformPropertySetRotationDelegateType))]
-		static void UnityEngineTransformPropertySetRotation(int thisHandle, ref UnityEngine.Quaternion value)
+		static unsafe void UnityEngineTransformPropertySetRotation(int thisHandle, ref UnityEngine.Quaternion value)
 		{
 			try
 			{
@@ -2305,7 +2325,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineTransformPropertyGetLocalScaleDelegateType))]
-		static UnityEngine.Vector3 UnityEngineTransformPropertyGetLocalScale(int thisHandle)
+		static unsafe UnityEngine.Vector3 UnityEngineTransformPropertyGetLocalScale(int thisHandle)
 		{
 			try
 			{
@@ -2328,7 +2348,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineTransformPropertySetLocalScaleDelegateType))]
-		static void UnityEngineTransformPropertySetLocalScale(int thisHandle, ref UnityEngine.Vector3 value)
+		static unsafe void UnityEngineTransformPropertySetLocalScale(int thisHandle, ref UnityEngine.Vector3 value)
 		{
 			try
 			{
@@ -2348,7 +2368,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineTransformPropertyGetLocalToWorldMatrixDelegateType))]
-		static UnityEngine.Matrix4x4 UnityEngineTransformPropertyGetLocalToWorldMatrix(int thisHandle)
+		static unsafe UnityEngine.Matrix4x4 UnityEngineTransformPropertyGetLocalToWorldMatrix(int thisHandle)
 		{
 			try
 			{
@@ -2371,7 +2391,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineTransformPropertyGetParentDelegateType))]
-		static int UnityEngineTransformPropertyGetParent(int thisHandle)
+		static unsafe int UnityEngineTransformPropertyGetParent(int thisHandle)
 		{
 			try
 			{
@@ -2394,7 +2414,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineTransformPropertySetParentDelegateType))]
-		static void UnityEngineTransformPropertySetParent(int thisHandle, int valueHandle)
+		static unsafe void UnityEngineTransformPropertySetParent(int thisHandle, int valueHandle)
 		{
 			try
 			{
@@ -2415,7 +2435,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineTransformPropertyGetForwardDelegateType))]
-		static UnityEngine.Vector3 UnityEngineTransformPropertyGetForward(int thisHandle)
+		static unsafe UnityEngine.Vector3 UnityEngineTransformPropertyGetForward(int thisHandle)
 		{
 			try
 			{
@@ -2438,7 +2458,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineTransformPropertySetForwardDelegateType))]
-		static void UnityEngineTransformPropertySetForward(int thisHandle, ref UnityEngine.Vector3 value)
+		static unsafe void UnityEngineTransformPropertySetForward(int thisHandle, ref UnityEngine.Vector3 value)
 		{
 			try
 			{
@@ -2458,7 +2478,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineTransformPropertyGetUpDelegateType))]
-		static UnityEngine.Vector3 UnityEngineTransformPropertyGetUp(int thisHandle)
+		static unsafe UnityEngine.Vector3 UnityEngineTransformPropertyGetUp(int thisHandle)
 		{
 			try
 			{
@@ -2481,7 +2501,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineTransformPropertySetUpDelegateType))]
-		static void UnityEngineTransformPropertySetUp(int thisHandle, ref UnityEngine.Vector3 value)
+		static unsafe void UnityEngineTransformPropertySetUp(int thisHandle, ref UnityEngine.Vector3 value)
 		{
 			try
 			{
@@ -2501,7 +2521,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(SystemCollectionsIEnumeratorPropertyGetCurrentDelegateType))]
-		static int SystemCollectionsIEnumeratorPropertyGetCurrent(int thisHandle)
+		static unsafe int SystemCollectionsIEnumeratorPropertyGetCurrent(int thisHandle)
 		{
 			try
 			{
@@ -2524,7 +2544,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(SystemCollectionsIEnumeratorMethodMoveNextDelegateType))]
-		static bool SystemCollectionsIEnumeratorMethodMoveNext(int thisHandle)
+		static unsafe bool SystemCollectionsIEnumeratorMethodMoveNext(int thisHandle)
 		{
 			try
 			{
@@ -2547,7 +2567,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineGameObjectConstructorSystemStringDelegateType))]
-		static int UnityEngineGameObjectConstructorSystemString(int nameHandle)
+		static unsafe int UnityEngineGameObjectConstructorSystemString(int nameHandle)
 		{
 			try
 			{
@@ -2570,7 +2590,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineGameObjectPropertyGetTransformDelegateType))]
-		static int UnityEngineGameObjectPropertyGetTransform(int thisHandle)
+		static unsafe int UnityEngineGameObjectPropertyGetTransform(int thisHandle)
 		{
 			try
 			{
@@ -2593,7 +2613,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineGameObjectMethodAddComponentCesiumForUnityBaseCesium3DTilesetDelegateType))]
-		static int UnityEngineGameObjectMethodAddComponentCesiumForUnityBaseCesium3DTileset(int thisHandle)
+		static unsafe int UnityEngineGameObjectMethodAddComponentCesiumForUnityBaseCesium3DTileset(int thisHandle)
 		{
 			try
 			{
@@ -2616,7 +2636,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineGameObjectMethodAddComponentUnityEngineMeshFilterDelegateType))]
-		static int UnityEngineGameObjectMethodAddComponentUnityEngineMeshFilter(int thisHandle)
+		static unsafe int UnityEngineGameObjectMethodAddComponentUnityEngineMeshFilter(int thisHandle)
 		{
 			try
 			{
@@ -2639,7 +2659,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineGameObjectMethodAddComponentUnityEngineMeshRendererDelegateType))]
-		static int UnityEngineGameObjectMethodAddComponentUnityEngineMeshRenderer(int thisHandle)
+		static unsafe int UnityEngineGameObjectMethodAddComponentUnityEngineMeshRenderer(int thisHandle)
 		{
 			try
 			{
@@ -2662,7 +2682,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineGameObjectMethodCreatePrimitiveUnityEnginePrimitiveTypeDelegateType))]
-		static int UnityEngineGameObjectMethodCreatePrimitiveUnityEnginePrimitiveType(UnityEngine.PrimitiveType type)
+		static unsafe int UnityEngineGameObjectMethodCreatePrimitiveUnityEnginePrimitiveType(UnityEngine.PrimitiveType type)
 		{
 			try
 			{
@@ -2684,7 +2704,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineGameObjectMethodSetActiveSystemBooleanDelegateType))]
-		static void UnityEngineGameObjectMethodSetActiveSystemBoolean(int thisHandle, bool value)
+		static unsafe void UnityEngineGameObjectMethodSetActiveSystemBoolean(int thisHandle, bool value)
 		{
 			try
 			{
@@ -2704,7 +2724,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineDebugMethodLogSystemObjectDelegateType))]
-		static void UnityEngineDebugMethodLogSystemObject(int messageHandle)
+		static unsafe void UnityEngineDebugMethodLogSystemObject(int messageHandle)
 		{
 			try
 			{
@@ -2724,7 +2744,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineMonoBehaviourPropertyGetTransformDelegateType))]
-		static int UnityEngineMonoBehaviourPropertyGetTransform(int thisHandle)
+		static unsafe int UnityEngineMonoBehaviourPropertyGetTransform(int thisHandle)
 		{
 			try
 			{
@@ -2747,7 +2767,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineMonoBehaviourPropertyGetGameObjectDelegateType))]
-		static int UnityEngineMonoBehaviourPropertyGetGameObject(int thisHandle)
+		static unsafe int UnityEngineMonoBehaviourPropertyGetGameObject(int thisHandle)
 		{
 			try
 			{
@@ -2770,7 +2790,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(SystemCollectionsGenericIEnumeratorUnityEngineVector2PropertyGetCurrentDelegateType))]
-		static UnityEngine.Vector2 SystemCollectionsGenericIEnumeratorUnityEngineVector2PropertyGetCurrent(int thisHandle)
+		static unsafe UnityEngine.Vector2 SystemCollectionsGenericIEnumeratorUnityEngineVector2PropertyGetCurrent(int thisHandle)
 		{
 			try
 			{
@@ -2793,7 +2813,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(SystemCollectionsGenericIEnumeratorUnityEngineVector3PropertyGetCurrentDelegateType))]
-		static UnityEngine.Vector3 SystemCollectionsGenericIEnumeratorUnityEngineVector3PropertyGetCurrent(int thisHandle)
+		static unsafe UnityEngine.Vector3 SystemCollectionsGenericIEnumeratorUnityEngineVector3PropertyGetCurrent(int thisHandle)
 		{
 			try
 			{
@@ -2816,7 +2836,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(SystemCollectionsGenericIEnumeratorSystemBytePropertyGetCurrentDelegateType))]
-		static byte SystemCollectionsGenericIEnumeratorSystemBytePropertyGetCurrent(int thisHandle)
+		static unsafe byte SystemCollectionsGenericIEnumeratorSystemBytePropertyGetCurrent(int thisHandle)
 		{
 			try
 			{
@@ -2839,7 +2859,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(SystemCollectionsGenericIEnumeratorSystemInt32PropertyGetCurrentDelegateType))]
-		static int SystemCollectionsGenericIEnumeratorSystemInt32PropertyGetCurrent(int thisHandle)
+		static unsafe int SystemCollectionsGenericIEnumeratorSystemInt32PropertyGetCurrent(int thisHandle)
 		{
 			try
 			{
@@ -2862,7 +2882,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(SystemCollectionsGenericIEnumeratorUnityCollectionsNativeArrayPropertyGetCurrentDelegateType))]
-		static int SystemCollectionsGenericIEnumeratorUnityCollectionsNativeArrayPropertyGetCurrent(int thisHandle)
+		static unsafe int SystemCollectionsGenericIEnumeratorUnityCollectionsNativeArrayPropertyGetCurrent(int thisHandle)
 		{
 			try
 			{
@@ -2885,7 +2905,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(SystemCollectionsGenericIEnumerableUnityEngineVector2MethodGetEnumeratorDelegateType))]
-		static int SystemCollectionsGenericIEnumerableUnityEngineVector2MethodGetEnumerator(int thisHandle)
+		static unsafe int SystemCollectionsGenericIEnumerableUnityEngineVector2MethodGetEnumerator(int thisHandle)
 		{
 			try
 			{
@@ -2908,7 +2928,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(SystemCollectionsGenericIEnumerableUnityEngineVector3MethodGetEnumeratorDelegateType))]
-		static int SystemCollectionsGenericIEnumerableUnityEngineVector3MethodGetEnumerator(int thisHandle)
+		static unsafe int SystemCollectionsGenericIEnumerableUnityEngineVector3MethodGetEnumerator(int thisHandle)
 		{
 			try
 			{
@@ -2931,7 +2951,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(SystemCollectionsGenericIEnumerableSystemByteMethodGetEnumeratorDelegateType))]
-		static int SystemCollectionsGenericIEnumerableSystemByteMethodGetEnumerator(int thisHandle)
+		static unsafe int SystemCollectionsGenericIEnumerableSystemByteMethodGetEnumerator(int thisHandle)
 		{
 			try
 			{
@@ -2954,7 +2974,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(SystemCollectionsGenericIEnumerableSystemInt32MethodGetEnumeratorDelegateType))]
-		static int SystemCollectionsGenericIEnumerableSystemInt32MethodGetEnumerator(int thisHandle)
+		static unsafe int SystemCollectionsGenericIEnumerableSystemInt32MethodGetEnumerator(int thisHandle)
 		{
 			try
 			{
@@ -2977,7 +2997,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(SystemCollectionsGenericIEnumerableUnityCollectionsNativeArrayMethodGetEnumeratorDelegateType))]
-		static int SystemCollectionsGenericIEnumerableUnityCollectionsNativeArrayMethodGetEnumerator(int thisHandle)
+		static unsafe int SystemCollectionsGenericIEnumerableUnityCollectionsNativeArrayMethodGetEnumerator(int thisHandle)
 		{
 			try
 			{
@@ -3000,7 +3020,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(ReleaseUnityCollectionsNativeArraySystemByteDelegateType))]
-		static void ReleaseUnityCollectionsNativeArraySystemByte(int handle)
+		static unsafe void ReleaseUnityCollectionsNativeArraySystemByte(int handle)
 		{
 			try
 			{
@@ -3022,7 +3042,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(BoxNativeArraySystemByteDelegateType))]
-		static int BoxNativeArraySystemByte(int valHandle)
+		static unsafe int BoxNativeArraySystemByte(int valHandle)
 		{
 			try
 			{
@@ -3045,7 +3065,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnboxNativeArraySystemByteDelegateType))]
-		static int UnboxNativeArraySystemByte(int valHandle)
+		static unsafe int UnboxNativeArraySystemByte(int valHandle)
 		{
 			try
 			{
@@ -3067,8 +3087,75 @@ namespace NativeScript
 			}
 		}
 		
+		[MonoPInvokeCallback(typeof(BoxAllocatorDelegateType))]
+		static unsafe int BoxAllocator(Unity.Collections.Allocator val)
+		{
+			try
+			{
+				var returnValue = NativeScript.Bindings.ObjectStore.Store((object)val);
+				return returnValue;
+			}
+			catch (System.NullReferenceException ex)
+			{
+				UnityEngine.Debug.LogException(ex);
+				NativeScript.Bindings.SetCsharpExceptionSystemNullReferenceException(NativeScript.Bindings.ObjectStore.Store(ex));
+				return default(int);
+			}
+			catch (System.Exception ex)
+			{
+				UnityEngine.Debug.LogException(ex);
+				NativeScript.Bindings.SetCsharpException(NativeScript.Bindings.ObjectStore.Store(ex));
+				return default(int);
+			}
+		}
+		
+		[MonoPInvokeCallback(typeof(UnboxAllocatorDelegateType))]
+		static unsafe Unity.Collections.Allocator UnboxAllocator(int valHandle)
+		{
+			try
+			{
+				var val = NativeScript.Bindings.ObjectStore.Get(valHandle);
+				var returnValue = (Unity.Collections.Allocator)val;
+				return returnValue;
+			}
+			catch (System.NullReferenceException ex)
+			{
+				UnityEngine.Debug.LogException(ex);
+				NativeScript.Bindings.SetCsharpExceptionSystemNullReferenceException(NativeScript.Bindings.ObjectStore.Store(ex));
+				return default(Unity.Collections.Allocator);
+			}
+			catch (System.Exception ex)
+			{
+				UnityEngine.Debug.LogException(ex);
+				NativeScript.Bindings.SetCsharpException(NativeScript.Bindings.ObjectStore.Store(ex));
+				return default(Unity.Collections.Allocator);
+			}
+		}
+		
+		[MonoPInvokeCallback(typeof(UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodConvertExistingDataToNativeArraySystemByteSystemVoidPointer_SystemInt32_UnityCollectionsAllocatorDelegateType))]
+		static unsafe int UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodConvertExistingDataToNativeArraySystemByteSystemVoidPointer_SystemInt32_UnityCollectionsAllocator(void* dataPointer, int length, Unity.Collections.Allocator allocator)
+		{
+			try
+			{
+				var returnValue = Unity.Collections.LowLevel.Unsafe.NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<byte>(dataPointer, length, allocator);
+				return NativeScript.Bindings.StructStore<Unity.Collections.NativeArray<byte>>.Store(returnValue);
+			}
+			catch (System.NullReferenceException ex)
+			{
+				UnityEngine.Debug.LogException(ex);
+				NativeScript.Bindings.SetCsharpExceptionSystemNullReferenceException(NativeScript.Bindings.ObjectStore.Store(ex));
+				return default(int);
+			}
+			catch (System.Exception ex)
+			{
+				UnityEngine.Debug.LogException(ex);
+				NativeScript.Bindings.SetCsharpException(NativeScript.Bindings.ObjectStore.Store(ex));
+				return default(int);
+			}
+		}
+		
 		[MonoPInvokeCallback(typeof(UnityEngineMeshConstructorDelegateType))]
-		static int UnityEngineMeshConstructor()
+		static unsafe int UnityEngineMeshConstructor()
 		{
 			try
 			{
@@ -3090,7 +3177,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineMeshMethodSetVerticesUnityEngineVector3Array1DelegateType))]
-		static void UnityEngineMeshMethodSetVerticesUnityEngineVector3Array1(int thisHandle, int inVerticesHandle)
+		static unsafe void UnityEngineMeshMethodSetVerticesUnityEngineVector3Array1(int thisHandle, int inVerticesHandle)
 		{
 			try
 			{
@@ -3111,7 +3198,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineMeshMethodSetNormalsUnityEngineVector3Array1DelegateType))]
-		static void UnityEngineMeshMethodSetNormalsUnityEngineVector3Array1(int thisHandle, int inNormalsHandle)
+		static unsafe void UnityEngineMeshMethodSetNormalsUnityEngineVector3Array1(int thisHandle, int inNormalsHandle)
 		{
 			try
 			{
@@ -3132,7 +3219,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineMeshMethodSetTrianglesSystemInt32Array1_SystemInt32_SystemBoolean_SystemInt32DelegateType))]
-		static void UnityEngineMeshMethodSetTrianglesSystemInt32Array1_SystemInt32_SystemBoolean_SystemInt32(int thisHandle, int trianglesHandle, int submesh, bool calculateBounds, int baseVertex)
+		static unsafe void UnityEngineMeshMethodSetTrianglesSystemInt32Array1_SystemInt32_SystemBoolean_SystemInt32(int thisHandle, int trianglesHandle, int submesh, bool calculateBounds, int baseVertex)
 		{
 			try
 			{
@@ -3153,7 +3240,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineMeshMethodSetUVsSystemInt32_UnityEngineVector2Array1DelegateType))]
-		static void UnityEngineMeshMethodSetUVsSystemInt32_UnityEngineVector2Array1(int thisHandle, int channel, int uvsHandle)
+		static unsafe void UnityEngineMeshMethodSetUVsSystemInt32_UnityEngineVector2Array1(int thisHandle, int channel, int uvsHandle)
 		{
 			try
 			{
@@ -3174,7 +3261,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineMeshFilterPropertyGetMeshDelegateType))]
-		static int UnityEngineMeshFilterPropertyGetMesh(int thisHandle)
+		static unsafe int UnityEngineMeshFilterPropertyGetMesh(int thisHandle)
 		{
 			try
 			{
@@ -3197,7 +3284,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineMeshFilterPropertySetMeshDelegateType))]
-		static void UnityEngineMeshFilterPropertySetMesh(int thisHandle, int valueHandle)
+		static unsafe void UnityEngineMeshFilterPropertySetMesh(int thisHandle, int valueHandle)
 		{
 			try
 			{
@@ -3218,7 +3305,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineMeshRendererPropertyGetMaterialDelegateType))]
-		static int UnityEngineMeshRendererPropertyGetMaterial(int thisHandle)
+		static unsafe int UnityEngineMeshRendererPropertyGetMaterial(int thisHandle)
 		{
 			try
 			{
@@ -3241,7 +3328,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineMeshRendererPropertySetMaterialDelegateType))]
-		static void UnityEngineMeshRendererPropertySetMaterial(int thisHandle, int valueHandle)
+		static unsafe void UnityEngineMeshRendererPropertySetMaterial(int thisHandle, int valueHandle)
 		{
 			try
 			{
@@ -3262,7 +3349,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(SystemExceptionConstructorSystemStringDelegateType))]
-		static int SystemExceptionConstructorSystemString(int messageHandle)
+		static unsafe int SystemExceptionConstructorSystemString(int messageHandle)
 		{
 			try
 			{
@@ -3285,7 +3372,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(BoxPrimitiveTypeDelegateType))]
-		static int BoxPrimitiveType(UnityEngine.PrimitiveType val)
+		static unsafe int BoxPrimitiveType(UnityEngine.PrimitiveType val)
 		{
 			try
 			{
@@ -3307,7 +3394,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnboxPrimitiveTypeDelegateType))]
-		static UnityEngine.PrimitiveType UnboxPrimitiveType(int valHandle)
+		static unsafe UnityEngine.PrimitiveType UnboxPrimitiveType(int valHandle)
 		{
 			try
 			{
@@ -3330,7 +3417,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineTimePropertyGetDeltaTimeDelegateType))]
-		static float UnityEngineTimePropertyGetDeltaTime()
+		static unsafe float UnityEngineTimePropertyGetDeltaTime()
 		{
 			try
 			{
@@ -3352,7 +3439,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineCameraPropertyGetMainDelegateType))]
-		static int UnityEngineCameraPropertyGetMain()
+		static unsafe int UnityEngineCameraPropertyGetMain()
 		{
 			try
 			{
@@ -3374,7 +3461,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineCameraPropertyGetFieldOfViewDelegateType))]
-		static float UnityEngineCameraPropertyGetFieldOfView(int thisHandle)
+		static unsafe float UnityEngineCameraPropertyGetFieldOfView(int thisHandle)
 		{
 			try
 			{
@@ -3397,7 +3484,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineCameraPropertySetFieldOfViewDelegateType))]
-		static void UnityEngineCameraPropertySetFieldOfView(int thisHandle, float value)
+		static unsafe void UnityEngineCameraPropertySetFieldOfView(int thisHandle, float value)
 		{
 			try
 			{
@@ -3417,7 +3504,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineCameraPropertyGetAspectDelegateType))]
-		static float UnityEngineCameraPropertyGetAspect(int thisHandle)
+		static unsafe float UnityEngineCameraPropertyGetAspect(int thisHandle)
 		{
 			try
 			{
@@ -3440,7 +3527,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineCameraPropertySetAspectDelegateType))]
-		static void UnityEngineCameraPropertySetAspect(int thisHandle, float value)
+		static unsafe void UnityEngineCameraPropertySetAspect(int thisHandle, float value)
 		{
 			try
 			{
@@ -3460,7 +3547,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineCameraPropertyGetPixelWidthDelegateType))]
-		static int UnityEngineCameraPropertyGetPixelWidth(int thisHandle)
+		static unsafe int UnityEngineCameraPropertyGetPixelWidth(int thisHandle)
 		{
 			try
 			{
@@ -3483,7 +3570,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineCameraPropertyGetPixelHeightDelegateType))]
-		static int UnityEngineCameraPropertyGetPixelHeight(int thisHandle)
+		static unsafe int UnityEngineCameraPropertyGetPixelHeight(int thisHandle)
 		{
 			try
 			{
@@ -3506,7 +3593,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(BoxRawDownloadedDataDelegateType))]
-		static int BoxRawDownloadedData(ref CesiumForUnity.RawDownloadedData val)
+		static unsafe int BoxRawDownloadedData(ref CesiumForUnity.RawDownloadedData val)
 		{
 			try
 			{
@@ -3528,7 +3615,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnboxRawDownloadedDataDelegateType))]
-		static CesiumForUnity.RawDownloadedData UnboxRawDownloadedData(int valHandle)
+		static unsafe CesiumForUnity.RawDownloadedData UnboxRawDownloadedData(int valHandle)
 		{
 			try
 			{
@@ -3551,7 +3638,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(BaseNativeDownloadHandlerConstructorDelegateType))]
-		static void BaseNativeDownloadHandlerConstructor(int cppHandle, ref int handle)
+		static unsafe void BaseNativeDownloadHandlerConstructor(int cppHandle, ref int handle)
 		{
 			try
 			{
@@ -3573,7 +3660,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(ReleaseBaseNativeDownloadHandlerDelegateType))]
-		static void ReleaseBaseNativeDownloadHandler(int handle)
+		static unsafe void ReleaseBaseNativeDownloadHandler(int handle)
 		{
 			try
 			{
@@ -3597,7 +3684,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineNetworkingUnityWebRequestPropertyGetErrorDelegateType))]
-		static int UnityEngineNetworkingUnityWebRequestPropertyGetError(int thisHandle)
+		static unsafe int UnityEngineNetworkingUnityWebRequestPropertyGetError(int thisHandle)
 		{
 			try
 			{
@@ -3620,7 +3707,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineNetworkingUnityWebRequestPropertyGetIsDoneDelegateType))]
-		static bool UnityEngineNetworkingUnityWebRequestPropertyGetIsDone(int thisHandle)
+		static unsafe bool UnityEngineNetworkingUnityWebRequestPropertyGetIsDone(int thisHandle)
 		{
 			try
 			{
@@ -3643,7 +3730,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineNetworkingUnityWebRequestPropertyGetResponseCodeDelegateType))]
-		static long UnityEngineNetworkingUnityWebRequestPropertyGetResponseCode(int thisHandle)
+		static unsafe long UnityEngineNetworkingUnityWebRequestPropertyGetResponseCode(int thisHandle)
 		{
 			try
 			{
@@ -3666,7 +3753,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineNetworkingUnityWebRequestPropertyGetUrlDelegateType))]
-		static int UnityEngineNetworkingUnityWebRequestPropertyGetUrl(int thisHandle)
+		static unsafe int UnityEngineNetworkingUnityWebRequestPropertyGetUrl(int thisHandle)
 		{
 			try
 			{
@@ -3689,7 +3776,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineNetworkingUnityWebRequestPropertySetUrlDelegateType))]
-		static void UnityEngineNetworkingUnityWebRequestPropertySetUrl(int thisHandle, int valueHandle)
+		static unsafe void UnityEngineNetworkingUnityWebRequestPropertySetUrl(int thisHandle, int valueHandle)
 		{
 			try
 			{
@@ -3710,7 +3797,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineNetworkingUnityWebRequestPropertyGetMethodDelegateType))]
-		static int UnityEngineNetworkingUnityWebRequestPropertyGetMethod(int thisHandle)
+		static unsafe int UnityEngineNetworkingUnityWebRequestPropertyGetMethod(int thisHandle)
 		{
 			try
 			{
@@ -3733,7 +3820,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineNetworkingUnityWebRequestPropertySetMethodDelegateType))]
-		static void UnityEngineNetworkingUnityWebRequestPropertySetMethod(int thisHandle, int valueHandle)
+		static unsafe void UnityEngineNetworkingUnityWebRequestPropertySetMethod(int thisHandle, int valueHandle)
 		{
 			try
 			{
@@ -3754,7 +3841,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineNetworkingUnityWebRequestPropertyGetDownloadHandlerDelegateType))]
-		static int UnityEngineNetworkingUnityWebRequestPropertyGetDownloadHandler(int thisHandle)
+		static unsafe int UnityEngineNetworkingUnityWebRequestPropertyGetDownloadHandler(int thisHandle)
 		{
 			try
 			{
@@ -3777,7 +3864,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineNetworkingUnityWebRequestPropertySetDownloadHandlerDelegateType))]
-		static void UnityEngineNetworkingUnityWebRequestPropertySetDownloadHandler(int thisHandle, int valueHandle)
+		static unsafe void UnityEngineNetworkingUnityWebRequestPropertySetDownloadHandler(int thisHandle, int valueHandle)
 		{
 			try
 			{
@@ -3798,7 +3885,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineNetworkingUnityWebRequestMethodGetSystemStringDelegateType))]
-		static int UnityEngineNetworkingUnityWebRequestMethodGetSystemString(int uriHandle)
+		static unsafe int UnityEngineNetworkingUnityWebRequestMethodGetSystemString(int uriHandle)
 		{
 			try
 			{
@@ -3821,7 +3908,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineNetworkingUnityWebRequestMethodSetRequestHeaderSystemString_SystemStringDelegateType))]
-		static void UnityEngineNetworkingUnityWebRequestMethodSetRequestHeaderSystemString_SystemString(int thisHandle, int nameHandle, int valueHandle)
+		static unsafe void UnityEngineNetworkingUnityWebRequestMethodSetRequestHeaderSystemString_SystemString(int thisHandle, int nameHandle, int valueHandle)
 		{
 			try
 			{
@@ -3843,7 +3930,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineNetworkingUnityWebRequestMethodSendWebRequestDelegateType))]
-		static int UnityEngineNetworkingUnityWebRequestMethodSendWebRequest(int thisHandle)
+		static unsafe int UnityEngineNetworkingUnityWebRequestMethodSendWebRequest(int thisHandle)
 		{
 			try
 			{
@@ -3866,7 +3953,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineNetworkingUnityWebRequestMethodGetResponseHeaderSystemStringDelegateType))]
-		static int UnityEngineNetworkingUnityWebRequestMethodGetResponseHeaderSystemString(int thisHandle, int nameHandle)
+		static unsafe int UnityEngineNetworkingUnityWebRequestMethodGetResponseHeaderSystemString(int thisHandle, int nameHandle)
 		{
 			try
 			{
@@ -3890,7 +3977,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineNetworkingUnityWebRequestAsyncOperationAddEventCompletedDelegateType))]
-		static void UnityEngineNetworkingUnityWebRequestAsyncOperationAddEventCompleted(int thisHandle, int delHandle)
+		static unsafe void UnityEngineNetworkingUnityWebRequestAsyncOperationAddEventCompleted(int thisHandle, int delHandle)
 		{
 			try
 			{
@@ -3911,7 +3998,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineNetworkingUnityWebRequestAsyncOperationRemoveEventCompletedDelegateType))]
-		static void UnityEngineNetworkingUnityWebRequestAsyncOperationRemoveEventCompleted(int thisHandle, int delHandle)
+		static unsafe void UnityEngineNetworkingUnityWebRequestAsyncOperationRemoveEventCompleted(int thisHandle, int delHandle)
 		{
 			try
 			{
@@ -3932,7 +4019,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(SystemRuntimeInteropServicesMarshalMethodStringToCoTaskMemUTF8SystemStringDelegateType))]
-		static System.IntPtr SystemRuntimeInteropServicesMarshalMethodStringToCoTaskMemUTF8SystemString(int sHandle)
+		static unsafe System.IntPtr SystemRuntimeInteropServicesMarshalMethodStringToCoTaskMemUTF8SystemString(int sHandle)
 		{
 			try
 			{
@@ -3955,7 +4042,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(SystemRuntimeInteropServicesMarshalMethodFreeCoTaskMemSystemIntPtrDelegateType))]
-		static void SystemRuntimeInteropServicesMarshalMethodFreeCoTaskMemSystemIntPtr(System.IntPtr ptr)
+		static unsafe void SystemRuntimeInteropServicesMarshalMethodFreeCoTaskMemSystemIntPtr(System.IntPtr ptr)
 		{
 			try
 			{
@@ -3974,7 +4061,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(BaseCesium3DTilesetConstructorDelegateType))]
-		static void BaseCesium3DTilesetConstructor(int cppHandle, ref int handle)
+		static unsafe void BaseCesium3DTilesetConstructor(int cppHandle, ref int handle)
 		{
 			try
 			{
@@ -3996,7 +4083,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(ReleaseBaseCesium3DTilesetDelegateType))]
-		static void ReleaseBaseCesium3DTileset(int handle)
+		static unsafe void ReleaseBaseCesium3DTileset(int handle)
 		{
 			try
 			{
@@ -4020,7 +4107,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(SystemThreadingTasksTaskMethodRunSystemActionDelegateType))]
-		static int SystemThreadingTasksTaskMethodRunSystemAction(int actionHandle)
+		static unsafe int SystemThreadingTasksTaskMethodRunSystemAction(int actionHandle)
 		{
 			try
 			{
@@ -4043,7 +4130,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineMaterialMethodSetTextureSystemString_UnityEngineTextureDelegateType))]
-		static void UnityEngineMaterialMethodSetTextureSystemString_UnityEngineTexture(int thisHandle, int nameHandle, int valueHandle)
+		static unsafe void UnityEngineMaterialMethodSetTextureSystemString_UnityEngineTexture(int thisHandle, int nameHandle, int valueHandle)
 		{
 			try
 			{
@@ -4065,7 +4152,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineResourcesMethodLoadUnityEngineMaterialSystemStringDelegateType))]
-		static int UnityEngineResourcesMethodLoadUnityEngineMaterialSystemString(int pathHandle)
+		static unsafe int UnityEngineResourcesMethodLoadUnityEngineMaterialSystemString(int pathHandle)
 		{
 			try
 			{
@@ -4088,7 +4175,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEditorSceneViewPropertyGetLastActiveSceneViewDelegateType))]
-		static int UnityEditorSceneViewPropertyGetLastActiveSceneView()
+		static unsafe int UnityEditorSceneViewPropertyGetLastActiveSceneView()
 		{
 			try
 			{
@@ -4110,7 +4197,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEditorSceneViewPropertyGetCameraDelegateType))]
-		static int UnityEditorSceneViewPropertyGetCamera(int thisHandle)
+		static unsafe int UnityEditorSceneViewPropertyGetCamera(int thisHandle)
 		{
 			try
 			{
@@ -4133,7 +4220,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(BoxTextureFormatDelegateType))]
-		static int BoxTextureFormat(UnityEngine.TextureFormat val)
+		static unsafe int BoxTextureFormat(UnityEngine.TextureFormat val)
 		{
 			try
 			{
@@ -4155,7 +4242,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnboxTextureFormatDelegateType))]
-		static UnityEngine.TextureFormat UnboxTextureFormat(int valHandle)
+		static unsafe UnityEngine.TextureFormat UnboxTextureFormat(int valHandle)
 		{
 			try
 			{
@@ -4178,7 +4265,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineTexture2DConstructorSystemInt32_SystemInt32_UnityEngineTextureFormat_SystemBoolean_SystemBooleanDelegateType))]
-		static int UnityEngineTexture2DConstructorSystemInt32_SystemInt32_UnityEngineTextureFormat_SystemBoolean_SystemBoolean(int width, int height, UnityEngine.TextureFormat textureFormat, bool mipChain, bool linear)
+		static unsafe int UnityEngineTexture2DConstructorSystemInt32_SystemInt32_UnityEngineTextureFormat_SystemBoolean_SystemBoolean(int width, int height, UnityEngine.TextureFormat textureFormat, bool mipChain, bool linear)
 		{
 			try
 			{
@@ -4200,7 +4287,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineTexture2DMethodSetPixelDataSystemByteSystemByteArray1_SystemInt32_SystemInt32DelegateType))]
-		static void UnityEngineTexture2DMethodSetPixelDataSystemByteSystemByteArray1_SystemInt32_SystemInt32(int thisHandle, int dataHandle, int mipLevel, int sourceDataStartIndex)
+		static unsafe void UnityEngineTexture2DMethodSetPixelDataSystemByteSystemByteArray1_SystemInt32_SystemInt32(int thisHandle, int dataHandle, int mipLevel, int sourceDataStartIndex)
 		{
 			try
 			{
@@ -4221,7 +4308,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineTexture2DMethodSetPixelDataSystemByteUnityCollectionsNativeArray_SystemInt32_SystemInt32DelegateType))]
-		static void UnityEngineTexture2DMethodSetPixelDataSystemByteUnityCollectionsNativeArray_SystemInt32_SystemInt32(int thisHandle, int dataHandle, int mipLevel, int sourceDataStartIndex)
+		static unsafe void UnityEngineTexture2DMethodSetPixelDataSystemByteUnityCollectionsNativeArray_SystemInt32_SystemInt32(int thisHandle, int dataHandle, int mipLevel, int sourceDataStartIndex)
 		{
 			try
 			{
@@ -4242,7 +4329,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineTexture2DMethodApplySystemBoolean_SystemBooleanDelegateType))]
-		static void UnityEngineTexture2DMethodApplySystemBoolean_SystemBoolean(int thisHandle, bool updateMipmaps, bool makeNoLongerReadable)
+		static unsafe void UnityEngineTexture2DMethodApplySystemBoolean_SystemBoolean(int thisHandle, bool updateMipmaps, bool makeNoLongerReadable)
 		{
 			try
 			{
@@ -4261,8 +4348,28 @@ namespace NativeScript
 			}
 		}
 		
+		[MonoPInvokeCallback(typeof(UnityEngineTexture2DMethodLoadRawTextureDataSystemIntPtr_SystemInt32DelegateType))]
+		static unsafe void UnityEngineTexture2DMethodLoadRawTextureDataSystemIntPtr_SystemInt32(int thisHandle, System.IntPtr data, int size)
+		{
+			try
+			{
+				var thiz = (UnityEngine.Texture2D)NativeScript.Bindings.ObjectStore.Get(thisHandle);
+				thiz.LoadRawTextureData(data, size);
+			}
+			catch (System.NullReferenceException ex)
+			{
+				UnityEngine.Debug.LogException(ex);
+				NativeScript.Bindings.SetCsharpExceptionSystemNullReferenceException(NativeScript.Bindings.ObjectStore.Store(ex));
+			}
+			catch (System.Exception ex)
+			{
+				UnityEngine.Debug.LogException(ex);
+				NativeScript.Bindings.SetCsharpException(NativeScript.Bindings.ObjectStore.Store(ex));
+			}
+		}
+		
 		[MonoPInvokeCallback(typeof(BoxBooleanDelegateType))]
-		static int BoxBoolean(bool val)
+		static unsafe int BoxBoolean(bool val)
 		{
 			try
 			{
@@ -4284,7 +4391,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnboxBooleanDelegateType))]
-		static bool UnboxBoolean(int valHandle)
+		static unsafe bool UnboxBoolean(int valHandle)
 		{
 			try
 			{
@@ -4307,7 +4414,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(BoxSByteDelegateType))]
-		static int BoxSByte(sbyte val)
+		static unsafe int BoxSByte(sbyte val)
 		{
 			try
 			{
@@ -4329,7 +4436,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnboxSByteDelegateType))]
-		static sbyte UnboxSByte(int valHandle)
+		static unsafe sbyte UnboxSByte(int valHandle)
 		{
 			try
 			{
@@ -4352,7 +4459,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(BoxByteDelegateType))]
-		static int BoxByte(byte val)
+		static unsafe int BoxByte(byte val)
 		{
 			try
 			{
@@ -4374,7 +4481,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnboxByteDelegateType))]
-		static byte UnboxByte(int valHandle)
+		static unsafe byte UnboxByte(int valHandle)
 		{
 			try
 			{
@@ -4397,7 +4504,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(BoxInt16DelegateType))]
-		static int BoxInt16(short val)
+		static unsafe int BoxInt16(short val)
 		{
 			try
 			{
@@ -4419,7 +4526,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnboxInt16DelegateType))]
-		static short UnboxInt16(int valHandle)
+		static unsafe short UnboxInt16(int valHandle)
 		{
 			try
 			{
@@ -4442,7 +4549,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(BoxUInt16DelegateType))]
-		static int BoxUInt16(ushort val)
+		static unsafe int BoxUInt16(ushort val)
 		{
 			try
 			{
@@ -4464,7 +4571,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnboxUInt16DelegateType))]
-		static ushort UnboxUInt16(int valHandle)
+		static unsafe ushort UnboxUInt16(int valHandle)
 		{
 			try
 			{
@@ -4487,7 +4594,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(BoxInt32DelegateType))]
-		static int BoxInt32(int val)
+		static unsafe int BoxInt32(int val)
 		{
 			try
 			{
@@ -4509,7 +4616,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnboxInt32DelegateType))]
-		static int UnboxInt32(int valHandle)
+		static unsafe int UnboxInt32(int valHandle)
 		{
 			try
 			{
@@ -4532,7 +4639,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(BoxUInt32DelegateType))]
-		static int BoxUInt32(uint val)
+		static unsafe int BoxUInt32(uint val)
 		{
 			try
 			{
@@ -4554,7 +4661,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnboxUInt32DelegateType))]
-		static uint UnboxUInt32(int valHandle)
+		static unsafe uint UnboxUInt32(int valHandle)
 		{
 			try
 			{
@@ -4577,7 +4684,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(BoxInt64DelegateType))]
-		static int BoxInt64(long val)
+		static unsafe int BoxInt64(long val)
 		{
 			try
 			{
@@ -4599,7 +4706,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnboxInt64DelegateType))]
-		static long UnboxInt64(int valHandle)
+		static unsafe long UnboxInt64(int valHandle)
 		{
 			try
 			{
@@ -4622,7 +4729,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(BoxUInt64DelegateType))]
-		static int BoxUInt64(ulong val)
+		static unsafe int BoxUInt64(ulong val)
 		{
 			try
 			{
@@ -4644,7 +4751,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnboxUInt64DelegateType))]
-		static ulong UnboxUInt64(int valHandle)
+		static unsafe ulong UnboxUInt64(int valHandle)
 		{
 			try
 			{
@@ -4667,7 +4774,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(BoxCharDelegateType))]
-		static int BoxChar(char val)
+		static unsafe int BoxChar(char val)
 		{
 			try
 			{
@@ -4689,7 +4796,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnboxCharDelegateType))]
-		static char UnboxChar(int valHandle)
+		static unsafe char UnboxChar(int valHandle)
 		{
 			try
 			{
@@ -4712,7 +4819,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(BoxSingleDelegateType))]
-		static int BoxSingle(float val)
+		static unsafe int BoxSingle(float val)
 		{
 			try
 			{
@@ -4734,7 +4841,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnboxSingleDelegateType))]
-		static float UnboxSingle(int valHandle)
+		static unsafe float UnboxSingle(int valHandle)
 		{
 			try
 			{
@@ -4757,7 +4864,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(BoxDoubleDelegateType))]
-		static int BoxDouble(double val)
+		static unsafe int BoxDouble(double val)
 		{
 			try
 			{
@@ -4779,7 +4886,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnboxDoubleDelegateType))]
-		static double UnboxDouble(int valHandle)
+		static unsafe double UnboxDouble(int valHandle)
 		{
 			try
 			{
@@ -4802,7 +4909,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineUnityEngineVector2Array1Constructor1DelegateType))]
-		static int UnityEngineUnityEngineVector2Array1Constructor1(int length0)
+		static unsafe int UnityEngineUnityEngineVector2Array1Constructor1(int length0)
 		{
 			try
 			{
@@ -4824,7 +4931,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineVector2Array1GetItem1DelegateType))]
-		static UnityEngine.Vector2 UnityEngineVector2Array1GetItem1(int thisHandle, int index0)
+		static unsafe UnityEngine.Vector2 UnityEngineVector2Array1GetItem1(int thisHandle, int index0)
 		{
 			try
 			{
@@ -4847,7 +4954,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineVector2Array1SetItem1DelegateType))]
-		static void UnityEngineVector2Array1SetItem1(int thisHandle, int index0, ref UnityEngine.Vector2 item)
+		static unsafe void UnityEngineVector2Array1SetItem1(int thisHandle, int index0, ref UnityEngine.Vector2 item)
 		{
 			try
 			{
@@ -4867,7 +4974,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineUnityEngineVector3Array1Constructor1DelegateType))]
-		static int UnityEngineUnityEngineVector3Array1Constructor1(int length0)
+		static unsafe int UnityEngineUnityEngineVector3Array1Constructor1(int length0)
 		{
 			try
 			{
@@ -4889,7 +4996,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineVector3Array1GetItem1DelegateType))]
-		static UnityEngine.Vector3 UnityEngineVector3Array1GetItem1(int thisHandle, int index0)
+		static unsafe UnityEngine.Vector3 UnityEngineVector3Array1GetItem1(int thisHandle, int index0)
 		{
 			try
 			{
@@ -4912,7 +5019,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(UnityEngineVector3Array1SetItem1DelegateType))]
-		static void UnityEngineVector3Array1SetItem1(int thisHandle, int index0, ref UnityEngine.Vector3 item)
+		static unsafe void UnityEngineVector3Array1SetItem1(int thisHandle, int index0, ref UnityEngine.Vector3 item)
 		{
 			try
 			{
@@ -4932,7 +5039,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(SystemSystemByteArray1Constructor1DelegateType))]
-		static int SystemSystemByteArray1Constructor1(int length0)
+		static unsafe int SystemSystemByteArray1Constructor1(int length0)
 		{
 			try
 			{
@@ -4954,7 +5061,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(SystemByteArray1GetItem1DelegateType))]
-		static byte SystemByteArray1GetItem1(int thisHandle, int index0)
+		static unsafe byte SystemByteArray1GetItem1(int thisHandle, int index0)
 		{
 			try
 			{
@@ -4977,7 +5084,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(SystemByteArray1SetItem1DelegateType))]
-		static void SystemByteArray1SetItem1(int thisHandle, int index0, byte item)
+		static unsafe void SystemByteArray1SetItem1(int thisHandle, int index0, byte item)
 		{
 			try
 			{
@@ -4997,7 +5104,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(SystemSystemInt32Array1Constructor1DelegateType))]
-		static int SystemSystemInt32Array1Constructor1(int length0)
+		static unsafe int SystemSystemInt32Array1Constructor1(int length0)
 		{
 			try
 			{
@@ -5019,7 +5126,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(SystemInt32Array1GetItem1DelegateType))]
-		static int SystemInt32Array1GetItem1(int thisHandle, int index0)
+		static unsafe int SystemInt32Array1GetItem1(int thisHandle, int index0)
 		{
 			try
 			{
@@ -5042,7 +5149,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(SystemInt32Array1SetItem1DelegateType))]
-		static void SystemInt32Array1SetItem1(int thisHandle, int index0, int item)
+		static unsafe void SystemInt32Array1SetItem1(int thisHandle, int index0, int item)
 		{
 			try
 			{
@@ -5062,7 +5169,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(SystemActionInvokeDelegateType))]
-		static void SystemActionInvoke(int thisHandle)
+		static unsafe void SystemActionInvoke(int thisHandle)
 		{
 			try
 			{
@@ -5081,7 +5188,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(SystemActionConstructorDelegateType))]
-		static void SystemActionConstructor(int cppHandle, ref int handle, ref int classHandle)
+		static unsafe void SystemActionConstructor(int cppHandle, ref int handle, ref int classHandle)
 		{
 			try
 			{
@@ -5106,7 +5213,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(ReleaseSystemActionDelegateType))]
-		static void ReleaseSystemAction(int handle, int classHandle)
+		static unsafe void ReleaseSystemAction(int handle, int classHandle)
 		{
 			try
 			{
@@ -5132,7 +5239,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(SystemActionAddDelegateType))]
-		static void SystemActionAdd(int thisHandle, int delHandle)
+		static unsafe void SystemActionAdd(int thisHandle, int delHandle)
 		{
 			try
 			{
@@ -5153,7 +5260,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(SystemActionRemoveDelegateType))]
-		static void SystemActionRemove(int thisHandle, int delHandle)
+		static unsafe void SystemActionRemove(int thisHandle, int delHandle)
 		{
 			try
 			{
@@ -5174,7 +5281,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(SystemActionUnityEngineAsyncOperationInvokeDelegateType))]
-		static void SystemActionUnityEngineAsyncOperationInvoke(int thisHandle, int objHandle)
+		static unsafe void SystemActionUnityEngineAsyncOperationInvoke(int thisHandle, int objHandle)
 		{
 			try
 			{
@@ -5194,7 +5301,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(SystemActionUnityEngineAsyncOperationConstructorDelegateType))]
-		static void SystemActionUnityEngineAsyncOperationConstructor(int cppHandle, ref int handle, ref int classHandle)
+		static unsafe void SystemActionUnityEngineAsyncOperationConstructor(int cppHandle, ref int handle, ref int classHandle)
 		{
 			try
 			{
@@ -5219,7 +5326,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(ReleaseSystemActionUnityEngineAsyncOperationDelegateType))]
-		static void ReleaseSystemActionUnityEngineAsyncOperation(int handle, int classHandle)
+		static unsafe void ReleaseSystemActionUnityEngineAsyncOperation(int handle, int classHandle)
 		{
 			try
 			{
@@ -5245,7 +5352,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(SystemActionUnityEngineAsyncOperationAddDelegateType))]
-		static void SystemActionUnityEngineAsyncOperationAdd(int thisHandle, int delHandle)
+		static unsafe void SystemActionUnityEngineAsyncOperationAdd(int thisHandle, int delHandle)
 		{
 			try
 			{
@@ -5266,7 +5373,7 @@ namespace NativeScript
 		}
 		
 		[MonoPInvokeCallback(typeof(SystemActionUnityEngineAsyncOperationRemoveDelegateType))]
-		static void SystemActionUnityEngineAsyncOperationRemove(int thisHandle, int delHandle)
+		static unsafe void SystemActionUnityEngineAsyncOperationRemove(int thisHandle, int delHandle)
 		{
 			try
 			{

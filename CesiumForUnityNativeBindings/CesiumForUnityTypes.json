@@ -577,6 +577,29 @@
 			]
 		},
 		{
+			"Name": "Unity.Collections.Allocator"
+		},
+		{
+			"Name": "Unity.Collections.LowLevel.Unsafe.NativeArrayUnsafeUtility",
+			"Methods": [
+				{
+					"Name": "ConvertExistingDataToNativeArray",
+					"GenericParams": [
+						{
+							"Types": [
+								"System.Byte"
+							]
+						}
+					],
+					"ParamTypes": [
+						"System.Void*",
+						"System.Int32",
+						"Unity.Collections.Allocator"
+					]
+				}
+			]
+		},
+		{
 			"Name": "UnityEngine.Mesh",
 			"Methods": [
 				{
@@ -922,6 +945,13 @@
 					"ParamTypes": [
 						"System.Boolean",
 						"System.Boolean"
+					]
+				},
+				{
+					"Name": "LoadRawTextureData",
+					"ParamTypes": [
+						"System.IntPtr",
+						"System.Int32"
 					]
 				}
 			]
