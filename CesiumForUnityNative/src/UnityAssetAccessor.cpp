@@ -16,7 +16,9 @@ namespace {
 
 class UnityAssetResponse : public IAssetResponse {
 public:
-  UnityAssetResponse(UnityWebRequest& request, const std::shared_ptr<NativeDownloadHandler>& pHandler)
+  UnityAssetResponse(
+      UnityWebRequest& request,
+      const std::shared_ptr<NativeDownloadHandler>& pHandler)
       : _statusCode(uint16_t(request.GetResponseCode())),
         _contentType(Interop::convert(
             request.GetResponseHeader(String("Content-Type")))),
@@ -44,7 +46,9 @@ private:
 
 class UnityAssetRequest : public IAssetRequest {
 public:
-  UnityAssetRequest(UnityWebRequest& request, const std::shared_ptr<NativeDownloadHandler>& pHandler)
+  UnityAssetRequest(
+      UnityWebRequest& request,
+      const std::shared_ptr<NativeDownloadHandler>& pHandler)
       : _method(Interop::convert(request.GetMethod())),
         _url(Interop::convert(request.GetUrl())),
         _headers(),
@@ -96,32 +100,36 @@ UnityAssetAccessor::get(
     const CesiumAsync::AsyncSystem& asyncSystem,
     const std::string& url,
     const std::vector<THeader>& headers) {
-  UnityWebRequest request = UnityWebRequest::Get(String(url.c_str()));
+  // Sadly, Unity requires us to call this from the main thread.
+  return asyncSystem.runInMainThread([asyncSystem, url, headers]() {
+    UnityWebRequest request = UnityWebRequest::Get(String(url.c_str()));
 
-  auto pHandler = std::make_shared<NativeDownloadHandler>();
-  request.SetDownloadHandler(*pHandler);
+    auto pHandler = std::make_shared<NativeDownloadHandler>();
+    request.SetDownloadHandler(*pHandler);
 
-  for (const auto& header : headers) {
-    request.SetRequestHeader(
-        String(header.first.c_str()),
-        String(header.second.c_str()));
-  }
+    for (const auto& header : headers) {
+      request.SetRequestHeader(
+          String(header.first.c_str()),
+          String(header.second.c_str()));
+    }
 
-  auto promise =
-      asyncSystem.createPromise<std::shared_ptr<CesiumAsync::IAssetRequest>>();
+    auto promise =
+        asyncSystem
+            .createPromise<std::shared_ptr<CesiumAsync::IAssetRequest>>();
 
-  auto pCompleted =
-      std::make_shared<WebRequestCompleted>(request, pHandler, promise);
+    auto pCompleted =
+        std::make_shared<WebRequestCompleted>(request, pHandler, promise);
 
-  UnityWebRequestAsyncOperation op = request.SendWebRequest();
-  op.AddCompleted(*pCompleted);
+    UnityWebRequestAsyncOperation op = request.SendWebRequest();
+    op.AddCompleted(*pCompleted);
 
-  return promise.getFuture().thenImmediately(
-      [pCompleted](std::shared_ptr<IAssetRequest>&& pRequest) {
-        // The lambda capture here keeps the managed WebRequestCompleted alive
-        // until we're done with it.
-        return std::move(pRequest);
-      });
+    return promise.getFuture().thenImmediately(
+        [pCompleted](std::shared_ptr<IAssetRequest>&& pRequest) {
+          // The lambda capture here keeps the managed WebRequestCompleted alive
+          // until we're done with it.
+          return std::move(pRequest);
+        });
+  });
 }
 
 CesiumAsync::Future<std::shared_ptr<CesiumAsync::IAssetRequest>>

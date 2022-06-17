@@ -24,11 +24,21 @@ namespace {
 
 template <typename T>
 void setTriangles(UnityEngine::Mesh& mesh, const AccessorView<T>& indices) {
-  Array1<System::Int32> triangles(indices.size());
+  Unity::Collections::NativeArray_1<System::Int32> nativeArrayTriangles(
+      indices.size(),
+      Unity::Collections::Allocator::Temp,
+      Unity::Collections::NativeArrayOptions::UninitializedMemory);
+  System::Int32* triangles = static_cast<System::Int32*>(
+      Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
+          GetUnsafeBufferPointerWithoutChecks(nativeArrayTriangles));
+
   for (int64_t i = 0; i < indices.size(); ++i) {
     triangles[i] = indices[i];
   }
-  mesh.SetTriangles(triangles, 0, true, 0);
+
+  mesh.SetIndices<System::Int32>(nativeArrayTriangles, UnityEngine::MeshTopology::Triangles, 0, true, 0);
+
+  nativeArrayTriangles.Dispose();
 }
 
 } // namespace
@@ -193,23 +203,40 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
         UnityEngine::Mesh unityMesh{};
 
-        Array1<UnityEngine::Vector3> vertices(positionView.size());
+        Unity::Collections::NativeArray_1<UnityEngine::Vector3>
+            nativeArrayVertices(
+                positionView.size(),
+                Unity::Collections::Allocator::Temp,
+                Unity::Collections::NativeArrayOptions::UninitializedMemory);
+        UnityEngine::Vector3* vertices = static_cast<UnityEngine::Vector3*>(
+            Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
+                GetUnsafeBufferPointerWithoutChecks(nativeArrayVertices));
         for (int64_t i = 0; i < positionView.size(); ++i) {
           vertices[i] = positionView[i];
         }
-        unityMesh.SetVertices(vertices);
+        unityMesh.SetVertices<UnityEngine::Vector3>(nativeArrayVertices);
+        nativeArrayVertices.Dispose();
 
         auto normalAccessorIt = primitive.attributes.find("NORMAL");
         if (normalAccessorIt != primitive.attributes.end()) {
           int32_t normalAccessorID = normalAccessorIt->second;
           AccessorView<UnityEngine::Vector3> normalView(gltf, normalAccessorID);
-
-          Array1<UnityEngine::Vector3> normals(normalView.size());
           if (normalView.status() == AccessorViewStatus::Valid) {
+            Unity::Collections::NativeArray_1<UnityEngine::Vector3>
+                nativeArrayNormals(
+                    normalView.size(),
+                    Unity::Collections::Allocator::Temp,
+                    Unity::Collections::NativeArrayOptions::
+                        UninitializedMemory);
+            UnityEngine::Vector3* normals = static_cast<UnityEngine::Vector3*>(
+                Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
+                    GetUnsafeBufferPointerWithoutChecks(nativeArrayNormals));
+
             for (int64_t i = 0; i < normalView.size(); ++i) {
               normals[i] = normalView[i];
             }
-            unityMesh.SetNormals(normals);
+            unityMesh.SetNormals(nativeArrayNormals);
+            nativeArrayNormals.Dispose();
           }
         }
 
@@ -220,12 +247,23 @@ void* UnityPrepareRendererResources::prepareInMainThread(
               gltf,
               texCoord0AccessorID);
 
-          Array1<UnityEngine::Vector2> texCoord0s(texCoord0View.size());
           if (texCoord0View.status() == AccessorViewStatus::Valid) {
+            Unity::Collections::NativeArray_1<UnityEngine::Vector2>
+                nativeArrayTexCoord0s(
+                    texCoord0View.size(),
+                    Unity::Collections::Allocator::Temp,
+                    Unity::Collections::NativeArrayOptions::
+                        UninitializedMemory);
+            UnityEngine::Vector2* texCoord0s = static_cast<
+                UnityEngine::Vector2*>(
+                Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
+                    GetUnsafeBufferPointerWithoutChecks(nativeArrayTexCoord0s));
+
             for (int64_t i = 0; i < texCoord0View.size(); ++i) {
               texCoord0s[i] = texCoord0View[i];
             }
-            unityMesh.SetUVs(0, texCoord0s);
+            unityMesh.SetUVs(0, nativeArrayTexCoord0s);
+            nativeArrayTexCoord0s.Dispose();
           }
         }
 

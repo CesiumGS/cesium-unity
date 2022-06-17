@@ -532,6 +532,14 @@ namespace Unity
 {
 	namespace Collections
 	{
+		struct NativeArrayOptions;
+	}
+}
+
+namespace Unity
+{
+	namespace Collections
+	{
 		struct Allocator;
 	}
 }
@@ -550,6 +558,11 @@ namespace Unity
 			}
 		}
 	}
+}
+
+namespace UnityEngine
+{
+	struct MeshTopology;
 }
 
 namespace UnityEngine
@@ -764,6 +777,11 @@ namespace UnityEngine
 	struct Texture2D;
 }
 
+namespace UnityEngine
+{
+	struct Application;
+}
+
 namespace System
 {
 	struct Action;
@@ -864,6 +882,21 @@ namespace System
 namespace System
 {
 	template<> struct IEquatable_1<Unity::Collections::NativeArray_1<System::Byte>>;
+}
+
+namespace System
+{
+	template<> struct IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector3>>;
+}
+
+namespace System
+{
+	template<> struct IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector2>>;
+}
+
+namespace System
+{
+	template<> struct IEquatable_1<Unity::Collections::NativeArray_1<System::Int32>>;
 }
 
 namespace System
@@ -981,17 +1014,6 @@ namespace System
 	{
 		namespace Generic
 		{
-			template<> struct IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>;
-		}
-	}
-}
-
-namespace System
-{
-	namespace Collections
-	{
-		namespace Generic
-		{
 			template<> struct IEnumerable_1<UnityEngine::Vector2>;
 		}
 	}
@@ -1026,17 +1048,6 @@ namespace System
 		namespace Generic
 		{
 			template<> struct IEnumerable_1<System::Int32>;
-		}
-	}
-}
-
-namespace System
-{
-	namespace Collections
-	{
-		namespace Generic
-		{
-			template<> struct IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>;
 		}
 	}
 }
@@ -1225,6 +1236,30 @@ namespace Unity
 	}
 }
 
+namespace Unity
+{
+	namespace Collections
+	{
+		template<> struct NativeArray_1<UnityEngine::Vector3>;
+	}
+}
+
+namespace Unity
+{
+	namespace Collections
+	{
+		template<> struct NativeArray_1<UnityEngine::Vector2>;
+	}
+}
+
+namespace Unity
+{
+	namespace Collections
+	{
+		template<> struct NativeArray_1<System::Int32>;
+	}
+}
+
 namespace Plugin
 {
 	template<> struct ArrayElementProxy1_1<UnityEngine::Vector2>;
@@ -1294,8 +1329,13 @@ namespace System
 		explicit operator UnityEngine::Vector4();
 		explicit operator UnityEngine::Quaternion();
 		explicit operator UnityEngine::Matrix4x4();
+		explicit operator Unity::Collections::NativeArrayOptions();
 		explicit operator Unity::Collections::NativeArray_1<System::Byte>();
+		explicit operator Unity::Collections::NativeArray_1<UnityEngine::Vector3>();
+		explicit operator Unity::Collections::NativeArray_1<UnityEngine::Vector2>();
+		explicit operator Unity::Collections::NativeArray_1<System::Int32>();
 		explicit operator Unity::Collections::Allocator();
+		explicit operator UnityEngine::MeshTopology();
 		explicit operator UnityEngine::PrimitiveType();
 		explicit operator CesiumForUnity::RawDownloadedData();
 		explicit operator UnityEngine::TextureFormat();
@@ -1832,6 +1872,57 @@ namespace System
 		IEquatable_1<Unity::Collections::NativeArray_1<System::Byte>>& operator=(IEquatable_1<Unity::Collections::NativeArray_1<System::Byte>>&& other);
 		bool operator==(const IEquatable_1<Unity::Collections::NativeArray_1<System::Byte>>& other) const;
 		bool operator!=(const IEquatable_1<Unity::Collections::NativeArray_1<System::Byte>>& other) const;
+	};
+}
+
+namespace System
+{
+	template<> struct IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector3>> : virtual System::Object
+	{
+		IEquatable_1(decltype(nullptr));
+		IEquatable_1(Plugin::InternalUse, int32_t handle);
+		IEquatable_1(const IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector3>>& other);
+		IEquatable_1(IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector3>>&& other);
+		virtual ~IEquatable_1();
+		IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector3>>& operator=(const IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector3>>& other);
+		IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector3>>& operator=(decltype(nullptr));
+		IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector3>>& operator=(IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector3>>&& other);
+		bool operator==(const IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector3>>& other) const;
+		bool operator!=(const IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector3>>& other) const;
+	};
+}
+
+namespace System
+{
+	template<> struct IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector2>> : virtual System::Object
+	{
+		IEquatable_1(decltype(nullptr));
+		IEquatable_1(Plugin::InternalUse, int32_t handle);
+		IEquatable_1(const IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector2>>& other);
+		IEquatable_1(IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector2>>&& other);
+		virtual ~IEquatable_1();
+		IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector2>>& operator=(const IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector2>>& other);
+		IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector2>>& operator=(decltype(nullptr));
+		IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector2>>& operator=(IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector2>>&& other);
+		bool operator==(const IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector2>>& other) const;
+		bool operator!=(const IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector2>>& other) const;
+	};
+}
+
+namespace System
+{
+	template<> struct IEquatable_1<Unity::Collections::NativeArray_1<System::Int32>> : virtual System::Object
+	{
+		IEquatable_1(decltype(nullptr));
+		IEquatable_1(Plugin::InternalUse, int32_t handle);
+		IEquatable_1(const IEquatable_1<Unity::Collections::NativeArray_1<System::Int32>>& other);
+		IEquatable_1(IEquatable_1<Unity::Collections::NativeArray_1<System::Int32>>&& other);
+		virtual ~IEquatable_1();
+		IEquatable_1<Unity::Collections::NativeArray_1<System::Int32>>& operator=(const IEquatable_1<Unity::Collections::NativeArray_1<System::Int32>>& other);
+		IEquatable_1<Unity::Collections::NativeArray_1<System::Int32>>& operator=(decltype(nullptr));
+		IEquatable_1<Unity::Collections::NativeArray_1<System::Int32>>& operator=(IEquatable_1<Unity::Collections::NativeArray_1<System::Int32>>&& other);
+		bool operator==(const IEquatable_1<Unity::Collections::NativeArray_1<System::Int32>>& other) const;
+		bool operator!=(const IEquatable_1<Unity::Collections::NativeArray_1<System::Int32>>& other) const;
 	};
 }
 
@@ -2517,30 +2608,6 @@ namespace System
 	{
 		namespace Generic
 		{
-			template<> struct IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>> : virtual System::IDisposable, virtual System::Collections::IEnumerator
-			{
-				IEnumerator_1(decltype(nullptr));
-				IEnumerator_1(Plugin::InternalUse, int32_t handle);
-				IEnumerator_1(const IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>& other);
-				IEnumerator_1(IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>&& other);
-				virtual ~IEnumerator_1();
-				IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>& operator=(const IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>& other);
-				IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>& operator=(decltype(nullptr));
-				IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>& operator=(IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>&& other);
-				bool operator==(const IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>& other) const;
-				bool operator!=(const IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>& other) const;
-				Unity::Collections::NativeArray_1<System::Byte> GetCurrent();
-			};
-		}
-	}
-}
-
-namespace System
-{
-	namespace Collections
-	{
-		namespace Generic
-		{
 			template<> struct IEnumerable_1<UnityEngine::Vector2> : virtual System::Collections::IEnumerable
 			{
 				IEnumerable_1(decltype(nullptr));
@@ -2626,30 +2693,6 @@ namespace System
 				bool operator==(const IEnumerable_1<System::Int32>& other) const;
 				bool operator!=(const IEnumerable_1<System::Int32>& other) const;
 				virtual System::Collections::Generic::IEnumerator_1<System::Int32> GetEnumerator();
-			};
-		}
-	}
-}
-
-namespace System
-{
-	namespace Collections
-	{
-		namespace Generic
-		{
-			template<> struct IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>> : virtual System::Collections::IEnumerable
-			{
-				IEnumerable_1(decltype(nullptr));
-				IEnumerable_1(Plugin::InternalUse, int32_t handle);
-				IEnumerable_1(const IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>& other);
-				IEnumerable_1(IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>&& other);
-				virtual ~IEnumerable_1();
-				IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>& operator=(const IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>& other);
-				IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>& operator=(decltype(nullptr));
-				IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>& operator=(IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>&& other);
-				bool operator==(const IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>& other) const;
-				bool operator!=(const IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>& other) const;
-				virtual System::Collections::Generic::IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>> GetEnumerator();
 			};
 		}
 	}
@@ -3459,6 +3502,29 @@ namespace Unity
 {
 	namespace Collections
 	{
+		struct NativeArrayOptions
+		{
+			int32_t Value;
+			static const Unity::Collections::NativeArrayOptions UninitializedMemory;
+			static const Unity::Collections::NativeArrayOptions ClearMemory;
+			explicit NativeArrayOptions(int32_t value);
+			explicit operator int32_t() const;
+			bool operator==(NativeArrayOptions other);
+			bool operator!=(NativeArrayOptions other);
+			explicit operator System::Enum();
+			explicit operator System::ValueType();
+			explicit operator System::Object();
+			explicit operator System::IFormattable();
+			explicit operator System::IComparable();
+			explicit operator System::IConvertible();
+		};
+	}
+}
+
+namespace Unity
+{
+	namespace Collections
+	{
 		template<> struct NativeArray_1<System::Byte> : Plugin::ManagedType
 		{
 			NativeArray_1(decltype(nullptr));
@@ -3471,12 +3537,98 @@ namespace Unity
 			NativeArray_1<System::Byte>& operator=(NativeArray_1<System::Byte>&& other);
 			bool operator==(const NativeArray_1<System::Byte>& other) const;
 			bool operator!=(const NativeArray_1<System::Byte>& other) const;
+			NativeArray_1(System::Int32 length, Unity::Collections::Allocator allocator, Unity::Collections::NativeArrayOptions options = Unity::Collections::NativeArrayOptions::ClearMemory);
+			virtual void Dispose();
 			explicit operator System::ValueType();
 			explicit operator System::Object();
 			explicit operator System::Collections::Generic::IEnumerable_1<System::Byte>();
 			explicit operator System::Collections::IEnumerable();
 			explicit operator System::IDisposable();
 			explicit operator System::IEquatable_1<Unity::Collections::NativeArray_1<System::Byte>>();
+		};
+	}
+}
+
+namespace Unity
+{
+	namespace Collections
+	{
+		template<> struct NativeArray_1<UnityEngine::Vector3> : Plugin::ManagedType
+		{
+			NativeArray_1(decltype(nullptr));
+			NativeArray_1(Plugin::InternalUse, int32_t handle);
+			NativeArray_1(const NativeArray_1<UnityEngine::Vector3>& other);
+			NativeArray_1(NativeArray_1<UnityEngine::Vector3>&& other);
+			virtual ~NativeArray_1();
+			NativeArray_1<UnityEngine::Vector3>& operator=(const NativeArray_1<UnityEngine::Vector3>& other);
+			NativeArray_1<UnityEngine::Vector3>& operator=(decltype(nullptr));
+			NativeArray_1<UnityEngine::Vector3>& operator=(NativeArray_1<UnityEngine::Vector3>&& other);
+			bool operator==(const NativeArray_1<UnityEngine::Vector3>& other) const;
+			bool operator!=(const NativeArray_1<UnityEngine::Vector3>& other) const;
+			NativeArray_1(System::Int32 length, Unity::Collections::Allocator allocator, Unity::Collections::NativeArrayOptions options = Unity::Collections::NativeArrayOptions::ClearMemory);
+			virtual void Dispose();
+			explicit operator System::ValueType();
+			explicit operator System::Object();
+			explicit operator System::Collections::Generic::IEnumerable_1<UnityEngine::Vector3>();
+			explicit operator System::Collections::IEnumerable();
+			explicit operator System::IDisposable();
+			explicit operator System::IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector3>>();
+		};
+	}
+}
+
+namespace Unity
+{
+	namespace Collections
+	{
+		template<> struct NativeArray_1<UnityEngine::Vector2> : Plugin::ManagedType
+		{
+			NativeArray_1(decltype(nullptr));
+			NativeArray_1(Plugin::InternalUse, int32_t handle);
+			NativeArray_1(const NativeArray_1<UnityEngine::Vector2>& other);
+			NativeArray_1(NativeArray_1<UnityEngine::Vector2>&& other);
+			virtual ~NativeArray_1();
+			NativeArray_1<UnityEngine::Vector2>& operator=(const NativeArray_1<UnityEngine::Vector2>& other);
+			NativeArray_1<UnityEngine::Vector2>& operator=(decltype(nullptr));
+			NativeArray_1<UnityEngine::Vector2>& operator=(NativeArray_1<UnityEngine::Vector2>&& other);
+			bool operator==(const NativeArray_1<UnityEngine::Vector2>& other) const;
+			bool operator!=(const NativeArray_1<UnityEngine::Vector2>& other) const;
+			NativeArray_1(System::Int32 length, Unity::Collections::Allocator allocator, Unity::Collections::NativeArrayOptions options = Unity::Collections::NativeArrayOptions::ClearMemory);
+			virtual void Dispose();
+			explicit operator System::ValueType();
+			explicit operator System::Object();
+			explicit operator System::Collections::Generic::IEnumerable_1<UnityEngine::Vector2>();
+			explicit operator System::Collections::IEnumerable();
+			explicit operator System::IDisposable();
+			explicit operator System::IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector2>>();
+		};
+	}
+}
+
+namespace Unity
+{
+	namespace Collections
+	{
+		template<> struct NativeArray_1<System::Int32> : Plugin::ManagedType
+		{
+			NativeArray_1(decltype(nullptr));
+			NativeArray_1(Plugin::InternalUse, int32_t handle);
+			NativeArray_1(const NativeArray_1<System::Int32>& other);
+			NativeArray_1(NativeArray_1<System::Int32>&& other);
+			virtual ~NativeArray_1();
+			NativeArray_1<System::Int32>& operator=(const NativeArray_1<System::Int32>& other);
+			NativeArray_1<System::Int32>& operator=(decltype(nullptr));
+			NativeArray_1<System::Int32>& operator=(NativeArray_1<System::Int32>&& other);
+			bool operator==(const NativeArray_1<System::Int32>& other) const;
+			bool operator!=(const NativeArray_1<System::Int32>& other) const;
+			NativeArray_1(System::Int32 length, Unity::Collections::Allocator allocator, Unity::Collections::NativeArrayOptions options = Unity::Collections::NativeArrayOptions::ClearMemory);
+			virtual void Dispose();
+			explicit operator System::ValueType();
+			explicit operator System::Object();
+			explicit operator System::Collections::Generic::IEnumerable_1<System::Int32>();
+			explicit operator System::Collections::IEnumerable();
+			explicit operator System::IDisposable();
+			explicit operator System::IEquatable_1<Unity::Collections::NativeArray_1<System::Int32>>();
 		};
 	}
 }
@@ -3518,11 +3670,35 @@ namespace Unity
 			{
 				namespace NativeArrayUnsafeUtility
 				{
-					template<typename MT0> Unity::Collections::NativeArray_1<System::Byte> ConvertExistingDataToNativeArray(System::Void* dataPointer, System::Int32 length, Unity::Collections::Allocator allocator);
+					template<typename MT0> Unity::Collections::NativeArray_1<MT0> ConvertExistingDataToNativeArray(System::Void* dataPointer, System::Int32 length, Unity::Collections::Allocator allocator);
+					template<typename MT0> System::Void* GetUnsafeBufferPointerWithoutChecks(Unity::Collections::NativeArray_1<MT0>& nativeArray);
 				}
 			}
 		}
 	}
+}
+
+namespace UnityEngine
+{
+	struct MeshTopology
+	{
+		int32_t Value;
+		static const UnityEngine::MeshTopology Triangles;
+		static const UnityEngine::MeshTopology Quads;
+		static const UnityEngine::MeshTopology Lines;
+		static const UnityEngine::MeshTopology LineStrip;
+		static const UnityEngine::MeshTopology Points;
+		explicit MeshTopology(int32_t value);
+		explicit operator int32_t() const;
+		bool operator==(MeshTopology other);
+		bool operator!=(MeshTopology other);
+		explicit operator System::Enum();
+		explicit operator System::ValueType();
+		explicit operator System::Object();
+		explicit operator System::IFormattable();
+		explicit operator System::IComparable();
+		explicit operator System::IConvertible();
+	};
 }
 
 namespace UnityEngine
@@ -3541,9 +3717,13 @@ namespace UnityEngine
 		bool operator!=(const Mesh& other) const;
 		Mesh();
 		virtual void SetVertices(System::Array1<UnityEngine::Vector3>& inVertices);
+		template<typename MT0> void SetVertices(Unity::Collections::NativeArray_1<MT0>& inVertices);
 		virtual void SetNormals(System::Array1<UnityEngine::Vector3>& inNormals);
+		template<typename MT0> void SetNormals(Unity::Collections::NativeArray_1<MT0>& inNormals);
 		virtual void SetTriangles(System::Array1<System::Int32>& triangles, System::Int32 submesh, System::Boolean calculateBounds, System::Int32 baseVertex);
+		template<typename MT0> void SetIndices(Unity::Collections::NativeArray_1<MT0>& indices, UnityEngine::MeshTopology topology, MT0 submesh, System::Boolean calculateBounds = true, MT0 baseVertex = 0);
 		virtual void SetUVs(System::Int32 channel, System::Array1<UnityEngine::Vector2>& uvs);
+		template<typename MT0> void SetUVs(System::Int32 channel, Unity::Collections::NativeArray_1<MT0>& uvs);
 	};
 }
 
@@ -4281,10 +4461,29 @@ namespace UnityEngine
 		bool operator==(const Texture2D& other) const;
 		bool operator!=(const Texture2D& other) const;
 		Texture2D(System::Int32 width, System::Int32 height, UnityEngine::TextureFormat textureFormat, System::Boolean mipChain, System::Boolean linear);
-		template<typename MT0> void SetPixelData(System::Array1<System::Byte>& data, System::Int32 mipLevel, System::Int32 sourceDataStartIndex = 0);
-		template<typename MT0> void SetPixelData(Unity::Collections::NativeArray_1<System::Byte>& data, System::Int32 mipLevel, System::Int32 sourceDataStartIndex = 0);
+		template<typename MT0> void SetPixelData(System::Array1<MT0>& data, System::Int32 mipLevel, System::Int32 sourceDataStartIndex = 0);
+		template<typename MT0> void SetPixelData(Unity::Collections::NativeArray_1<MT0>& data, System::Int32 mipLevel, System::Int32 sourceDataStartIndex = 0);
 		virtual void Apply(System::Boolean updateMipmaps, System::Boolean makeNoLongerReadable);
 		virtual void LoadRawTextureData(void* data, System::Int32 size);
+	};
+}
+
+namespace UnityEngine
+{
+	struct Application : virtual System::Object
+	{
+		Application(decltype(nullptr));
+		Application(Plugin::InternalUse, int32_t handle);
+		Application(const Application& other);
+		Application(Application&& other);
+		virtual ~Application();
+		Application& operator=(const Application& other);
+		Application& operator=(decltype(nullptr));
+		Application& operator=(Application&& other);
+		bool operator==(const Application& other) const;
+		bool operator!=(const Application& other) const;
+		static System::String GetTemporaryCachePath();
+		static System::String GetPersistentDataPath();
 	};
 }
 

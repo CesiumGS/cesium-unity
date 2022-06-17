@@ -1,4 +1,5 @@
 {
+	"DefaultMaxSimultaneous": 10000,
 	"Assemblies": [
 		"UNITY_ASSETS/CesiumForUnity.dll"
 	],
@@ -126,6 +127,21 @@
 				{
 					"Types": [
 						"Unity.Collections.NativeArray<System.Byte>"
+					]
+				},
+				{
+					"Types": [
+						"Unity.Collections.NativeArray<UnityEngine.Vector3>"
+					]
+				},
+				{
+					"Types": [
+						"Unity.Collections.NativeArray<UnityEngine.Vector2>"
+					]
+				},
+				{
+					"Types": [
+						"Unity.Collections.NativeArray<System.Int32>"
 					]
 				}
 			]
@@ -462,9 +478,6 @@
 				},
 				{
 					"Types": ["System.Int32"]
-				},
-				{
-					"Types": ["Unity.Collections.NativeArray<System.Byte>"]
 				}
 			],
 			"Properties": [
@@ -488,9 +501,6 @@
 				},
 				{
 					"Types": ["System.Int32"]
-				},
-				{
-					"Types": ["Unity.Collections.NativeArray<System.Byte>"]
 				}
 			],
 			"Methods": [
@@ -569,10 +579,37 @@
 			]
 		},
 		{
+			"Name": "Unity.Collections.NativeArrayOptions"
+		},
+		{
 			"Name": "Unity.Collections.NativeArray`1",
 			"GenericParams": [
 				{
 					"Types": ["System.Byte"]
+				},
+				{
+					"Types": ["UnityEngine.Vector3"]
+				},
+				{
+					"Types": ["UnityEngine.Vector2"]
+				},
+				{
+					"Types": ["System.Int32"]
+				}
+			],
+			"Constructors": [
+				{
+					"ParamTypes": [
+						"System.Int32",
+						"Unity.Collections.Allocator",
+						"Unity.Collections.NativeArrayOptions"
+					]
+				}
+			],
+			"Methods": [
+				{
+					"Name": "Dispose",
+					"ParamTypes": []
 				}
 			]
 		},
@@ -589,6 +626,21 @@
 							"Types": [
 								"System.Byte"
 							]
+						},
+						{
+							"Types": [
+								"UnityEngine.Vector3"
+							]
+						},
+						{
+							"Types": [
+								"UnityEngine.Vector2"
+							]
+						},
+						{
+							"Types": [
+								"System.Int32"
+							]
 						}
 					],
 					"ParamTypes": [
@@ -596,8 +648,28 @@
 						"System.Int32",
 						"Unity.Collections.Allocator"
 					]
+				},
+				{
+					"Name": "GetUnsafeBufferPointerWithoutChecks",
+					"GenericParams": [
+						{
+							"Types": ["UnityEngine.Vector3"]
+						},
+						{
+							"Types": ["UnityEngine.Vector2"]
+						},
+						{
+							"Types": ["System.Int32"]
+						}
+					],
+					"ParamTypes": [
+						"Unity.Collections.NativeArray`1"
+					]
 				}
 			]
+		},
+		{
+			"Name": "UnityEngine.MeshTopology"
 		},
 		{
 			"Name": "UnityEngine.Mesh",
@@ -609,9 +681,27 @@
 					]
 				},
 				{
+					"Name": "SetVertices",
+					"GenericParams": [
+						{ "Types": ["UnityEngine.Vector3"] }
+					],
+					"ParamTypes": [
+						"Unity.Collections.NativeArray`1"
+					]
+				},
+				{
 					"Name": "SetNormals",
 					"ParamTypes": [
 						"UnityEngine.Vector3[]"
+					]
+				},
+				{
+					"Name": "SetNormals",
+					"GenericParams": [
+						{ "Types": ["UnityEngine.Vector3"] }
+					],
+					"ParamTypes": [
+						"Unity.Collections.NativeArray`1"
 					]
 				},
 				{
@@ -624,10 +714,33 @@
 					]
 				},
 				{
+					"Name": "SetIndices",
+					"GenericParams": [
+						{ "Types": ["System.Int32"] }
+					],
+					"ParamTypes": [
+						"Unity.Collections.NativeArray`1",
+						"UnityEngine.MeshTopology",
+						"System.Int32",
+						"System.Boolean",
+						"System.Int32"
+					]
+				},
+				{
 					"Name": "SetUVs",
 					"ParamTypes": [
 						"System.Int32",
 						"UnityEngine.Vector2[]"
+					]
+				},
+				{
+					"Name": "SetUVs",
+					"GenericParams": [
+						{ "Types": ["UnityEngine.Vector2"] }
+					],
+					"ParamTypes": [
+						"System.Int32",
+						"Unity.Collections.NativeArray`1"
 					]
 				}
 			],
@@ -953,6 +1066,17 @@
 						"System.IntPtr",
 						"System.Int32"
 					]
+				}
+			]
+		},
+		{
+			"Name": "UnityEngine.Application",
+			"Properties": [
+				{
+					"Name": "temporaryCachePath"
+				},
+				{
+					"Name": "persistentDataPath"
 				}
 			]
 		}

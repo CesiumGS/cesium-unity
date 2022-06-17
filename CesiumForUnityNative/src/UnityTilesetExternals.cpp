@@ -1,11 +1,14 @@
 #include "UnityTilesetExternals.h"
 
+#include "Interop.h"
 #include "UnityAssetAccessor.h"
 #include "UnityPrepareRendererResources.h"
 #include "UnityTaskProcessor.h"
 
 #include <Cesium3DTilesSelection/CreditSystem.h>
 #include <Cesium3DTilesSelection/TilesetExternals.h>
+#include <CesiumAsync/CachingAssetAccessor.h>
+#include <CesiumAsync/SqliteCache.h>
 
 #include <memory>
 
@@ -46,8 +49,15 @@ const std::shared_ptr<CreditSystem>& getCreditSystem() {
 
 Cesium3DTilesSelection::TilesetExternals
 createTilesetExternals(UnityEngine::GameObject& tileset) {
+  std::string tempPath =
+      Interop::convert(UnityEngine::Application::GetTemporaryCachePath());
+  std::string cacheDBPath = tempPath + "/cesium-request-cache.sqlite";
+
   return TilesetExternals{
-      getAssetAccessor(),
+      std::make_shared<CachingAssetAccessor>(
+          spdlog::default_logger(),
+          getAssetAccessor(),
+          std::make_shared<SqliteCache>(spdlog::default_logger(), cacheDBPath)),
       std::make_shared<UnityPrepareRendererResources>(tileset),
       AsyncSystem(getTaskProcessor()),
       getCreditSystem(),

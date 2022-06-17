@@ -97,23 +97,52 @@ namespace Plugin
 	UnityEngine::Vector3 (*SystemCollectionsGenericIEnumeratorUnityEngineVector3PropertyGetCurrent)(int32_t thisHandle);
 	uint8_t (*SystemCollectionsGenericIEnumeratorSystemBytePropertyGetCurrent)(int32_t thisHandle);
 	int32_t (*SystemCollectionsGenericIEnumeratorSystemInt32PropertyGetCurrent)(int32_t thisHandle);
-	int32_t (*SystemCollectionsGenericIEnumeratorUnityCollectionsNativeArrayPropertyGetCurrent)(int32_t thisHandle);
 	int32_t (*SystemCollectionsGenericIEnumerableUnityEngineVector2MethodGetEnumerator)(int32_t thisHandle);
 	int32_t (*SystemCollectionsGenericIEnumerableUnityEngineVector3MethodGetEnumerator)(int32_t thisHandle);
 	int32_t (*SystemCollectionsGenericIEnumerableSystemByteMethodGetEnumerator)(int32_t thisHandle);
 	int32_t (*SystemCollectionsGenericIEnumerableSystemInt32MethodGetEnumerator)(int32_t thisHandle);
-	int32_t (*SystemCollectionsGenericIEnumerableUnityCollectionsNativeArrayMethodGetEnumerator)(int32_t thisHandle);
+	int32_t (*BoxNativeArrayOptions)(Unity::Collections::NativeArrayOptions val);
+	Unity::Collections::NativeArrayOptions (*UnboxNativeArrayOptions)(int32_t valHandle);
 	void (*ReleaseUnityCollectionsNativeArraySystemByte)(int32_t handle);
+	int32_t (*UnityCollectionsNativeArraySystemByteConstructorSystemInt32_UnityCollectionsAllocator_UnityCollectionsNativeArrayOptions)(int32_t length, Unity::Collections::Allocator allocator, Unity::Collections::NativeArrayOptions options);
+	void (*UnityCollectionsNativeArraySystemByteMethodDispose)(int32_t thisHandle);
 	int32_t (*BoxNativeArraySystemByte)(int32_t valHandle);
 	int32_t (*UnboxNativeArraySystemByte)(int32_t valHandle);
+	void (*ReleaseUnityCollectionsNativeArrayUnityEngineVector3)(int32_t handle);
+	int32_t (*UnityCollectionsNativeArrayUnityEngineVector3ConstructorSystemInt32_UnityCollectionsAllocator_UnityCollectionsNativeArrayOptions)(int32_t length, Unity::Collections::Allocator allocator, Unity::Collections::NativeArrayOptions options);
+	void (*UnityCollectionsNativeArrayUnityEngineVector3MethodDispose)(int32_t thisHandle);
+	int32_t (*BoxNativeArrayUnityEngineVector3)(int32_t valHandle);
+	int32_t (*UnboxNativeArrayUnityEngineVector3)(int32_t valHandle);
+	void (*ReleaseUnityCollectionsNativeArrayUnityEngineVector2)(int32_t handle);
+	int32_t (*UnityCollectionsNativeArrayUnityEngineVector2ConstructorSystemInt32_UnityCollectionsAllocator_UnityCollectionsNativeArrayOptions)(int32_t length, Unity::Collections::Allocator allocator, Unity::Collections::NativeArrayOptions options);
+	void (*UnityCollectionsNativeArrayUnityEngineVector2MethodDispose)(int32_t thisHandle);
+	int32_t (*BoxNativeArrayUnityEngineVector2)(int32_t valHandle);
+	int32_t (*UnboxNativeArrayUnityEngineVector2)(int32_t valHandle);
+	void (*ReleaseUnityCollectionsNativeArraySystemInt32)(int32_t handle);
+	int32_t (*UnityCollectionsNativeArraySystemInt32ConstructorSystemInt32_UnityCollectionsAllocator_UnityCollectionsNativeArrayOptions)(int32_t length, Unity::Collections::Allocator allocator, Unity::Collections::NativeArrayOptions options);
+	void (*UnityCollectionsNativeArraySystemInt32MethodDispose)(int32_t thisHandle);
+	int32_t (*BoxNativeArraySystemInt32)(int32_t valHandle);
+	int32_t (*UnboxNativeArraySystemInt32)(int32_t valHandle);
 	int32_t (*BoxAllocator)(Unity::Collections::Allocator val);
 	Unity::Collections::Allocator (*UnboxAllocator)(int32_t valHandle);
 	int32_t (*UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodConvertExistingDataToNativeArraySystemByteSystemVoidPointer_SystemInt32_UnityCollectionsAllocator)(void* dataPointer, int32_t length, Unity::Collections::Allocator allocator);
+	int32_t (*UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodConvertExistingDataToNativeArrayUnityEngineVector3SystemVoidPointer_SystemInt32_UnityCollectionsAllocator)(void* dataPointer, int32_t length, Unity::Collections::Allocator allocator);
+	int32_t (*UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodConvertExistingDataToNativeArrayUnityEngineVector2SystemVoidPointer_SystemInt32_UnityCollectionsAllocator)(void* dataPointer, int32_t length, Unity::Collections::Allocator allocator);
+	int32_t (*UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodConvertExistingDataToNativeArraySystemInt32SystemVoidPointer_SystemInt32_UnityCollectionsAllocator)(void* dataPointer, int32_t length, Unity::Collections::Allocator allocator);
+	System::Void* (*UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodGetUnsafeBufferPointerWithoutChecksUnityEngineVector3UnityCollectionsNativeArray)(int32_t nativeArrayHandle);
+	System::Void* (*UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodGetUnsafeBufferPointerWithoutChecksUnityEngineVector2UnityCollectionsNativeArray)(int32_t nativeArrayHandle);
+	System::Void* (*UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodGetUnsafeBufferPointerWithoutChecksSystemInt32UnityCollectionsNativeArray)(int32_t nativeArrayHandle);
+	int32_t (*BoxMeshTopology)(UnityEngine::MeshTopology val);
+	UnityEngine::MeshTopology (*UnboxMeshTopology)(int32_t valHandle);
 	int32_t (*UnityEngineMeshConstructor)();
 	void (*UnityEngineMeshMethodSetVerticesUnityEngineVector3Array1)(int32_t thisHandle, int32_t inVerticesHandle);
+	void (*UnityEngineMeshMethodSetVerticesUnityEngineVector3UnityCollectionsNativeArray)(int32_t thisHandle, int32_t inVerticesHandle);
 	void (*UnityEngineMeshMethodSetNormalsUnityEngineVector3Array1)(int32_t thisHandle, int32_t inNormalsHandle);
+	void (*UnityEngineMeshMethodSetNormalsUnityEngineVector3UnityCollectionsNativeArray)(int32_t thisHandle, int32_t inNormalsHandle);
 	void (*UnityEngineMeshMethodSetTrianglesSystemInt32Array1_SystemInt32_SystemBoolean_SystemInt32)(int32_t thisHandle, int32_t trianglesHandle, int32_t submesh, uint32_t calculateBounds, int32_t baseVertex);
+	void (*UnityEngineMeshMethodSetIndicesSystemInt32UnityCollectionsNativeArray_UnityEngineMeshTopology_SystemInt32_SystemBoolean_SystemInt32)(int32_t thisHandle, int32_t indicesHandle, UnityEngine::MeshTopology topology, int32_t submesh, uint32_t calculateBounds, int32_t baseVertex);
 	void (*UnityEngineMeshMethodSetUVsSystemInt32_UnityEngineVector2Array1)(int32_t thisHandle, int32_t channel, int32_t uvsHandle);
+	void (*UnityEngineMeshMethodSetUVsUnityEngineVector2SystemInt32_UnityCollectionsNativeArray)(int32_t thisHandle, int32_t channel, int32_t uvsHandle);
 	int32_t (*UnityEngineMeshFilterPropertyGetMesh)(int32_t thisHandle);
 	void (*UnityEngineMeshFilterPropertySetMesh)(int32_t thisHandle, int32_t valueHandle);
 	int32_t (*UnityEngineMeshRendererPropertyGetMaterial)(int32_t thisHandle);
@@ -164,6 +193,8 @@ namespace Plugin
 	void (*UnityEngineTexture2DMethodSetPixelDataSystemByteUnityCollectionsNativeArray_SystemInt32_SystemInt32)(int32_t thisHandle, int32_t dataHandle, int32_t mipLevel, int32_t sourceDataStartIndex);
 	void (*UnityEngineTexture2DMethodApplySystemBoolean_SystemBoolean)(int32_t thisHandle, uint32_t updateMipmaps, uint32_t makeNoLongerReadable);
 	void (*UnityEngineTexture2DMethodLoadRawTextureDataSystemIntPtr_SystemInt32)(int32_t thisHandle, void* data, int32_t size);
+	int32_t (*UnityEngineApplicationPropertyGetTemporaryCachePath)();
+	int32_t (*UnityEngineApplicationPropertyGetPersistentDataPath)();
 	int32_t (*BoxBoolean)(uint32_t val);
 	int32_t (*UnboxBoolean)(int32_t valHandle);
 	int32_t (*BoxSByte)(int8_t val);
@@ -1020,6 +1051,81 @@ namespace Plugin
 			if (numRemain == 0)
 			{
 				ReleaseUnityCollectionsNativeArraySystemByte(handle);
+			}
+		}
+	}
+	
+	int32_t RefCountsLenUnityCollectionsNativeArrayUnityEngineVector3;
+	int32_t* RefCountsUnityCollectionsNativeArrayUnityEngineVector3;
+	
+	void ReferenceManagedUnityCollectionsNativeArrayUnityEngineVector3(int32_t handle)
+	{
+		assert(handle >= 0 && handle < RefCountsLenUnityCollectionsNativeArrayUnityEngineVector3);
+		if (handle != 0)
+		{
+			RefCountsUnityCollectionsNativeArrayUnityEngineVector3[handle]++;
+		}
+	}
+	
+	void DereferenceManagedUnityCollectionsNativeArrayUnityEngineVector3(int32_t handle)
+	{
+		assert(handle >= 0 && handle < RefCountsLenUnityCollectionsNativeArrayUnityEngineVector3);
+		if (handle != 0)
+		{
+			int32_t numRemain = --RefCountsUnityCollectionsNativeArrayUnityEngineVector3[handle];
+			if (numRemain == 0)
+			{
+				ReleaseUnityCollectionsNativeArrayUnityEngineVector3(handle);
+			}
+		}
+	}
+	
+	int32_t RefCountsLenUnityCollectionsNativeArrayUnityEngineVector2;
+	int32_t* RefCountsUnityCollectionsNativeArrayUnityEngineVector2;
+	
+	void ReferenceManagedUnityCollectionsNativeArrayUnityEngineVector2(int32_t handle)
+	{
+		assert(handle >= 0 && handle < RefCountsLenUnityCollectionsNativeArrayUnityEngineVector2);
+		if (handle != 0)
+		{
+			RefCountsUnityCollectionsNativeArrayUnityEngineVector2[handle]++;
+		}
+	}
+	
+	void DereferenceManagedUnityCollectionsNativeArrayUnityEngineVector2(int32_t handle)
+	{
+		assert(handle >= 0 && handle < RefCountsLenUnityCollectionsNativeArrayUnityEngineVector2);
+		if (handle != 0)
+		{
+			int32_t numRemain = --RefCountsUnityCollectionsNativeArrayUnityEngineVector2[handle];
+			if (numRemain == 0)
+			{
+				ReleaseUnityCollectionsNativeArrayUnityEngineVector2(handle);
+			}
+		}
+	}
+	
+	int32_t RefCountsLenUnityCollectionsNativeArraySystemInt32;
+	int32_t* RefCountsUnityCollectionsNativeArraySystemInt32;
+	
+	void ReferenceManagedUnityCollectionsNativeArraySystemInt32(int32_t handle)
+	{
+		assert(handle >= 0 && handle < RefCountsLenUnityCollectionsNativeArraySystemInt32);
+		if (handle != 0)
+		{
+			RefCountsUnityCollectionsNativeArraySystemInt32[handle]++;
+		}
+	}
+	
+	void DereferenceManagedUnityCollectionsNativeArraySystemInt32(int32_t handle)
+	{
+		assert(handle >= 0 && handle < RefCountsLenUnityCollectionsNativeArraySystemInt32);
+		if (handle != 0)
+		{
+			int32_t numRemain = --RefCountsUnityCollectionsNativeArraySystemInt32[handle];
+			if (numRemain == 0)
+			{
+				ReleaseUnityCollectionsNativeArraySystemInt32(handle);
 			}
 		}
 	}
@@ -3562,6 +3668,249 @@ namespace System
 	}
 	
 	bool IEquatable_1<Unity::Collections::NativeArray_1<System::Byte>>::operator!=(const IEquatable_1<Unity::Collections::NativeArray_1<System::Byte>>& other) const
+	{
+		return Handle != other.Handle;
+	}
+}
+
+namespace System
+{
+	IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector3>>::IEquatable_1(decltype(nullptr))
+	{
+	}
+	
+	IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector3>>::IEquatable_1(Plugin::InternalUse, int32_t handle)
+	{
+		Handle = handle;
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+		}
+	}
+	
+	IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector3>>::IEquatable_1(const IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector3>>& other)
+		: IEquatable_1(Plugin::InternalUse::Only, other.Handle)
+	{
+	}
+	
+	IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector3>>::IEquatable_1(IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector3>>&& other)
+		: IEquatable_1(Plugin::InternalUse::Only, other.Handle)
+	{
+		other.Handle = 0;
+	}
+	
+	IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector3>>::~IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector3>>()
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+	}
+	
+	IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector3>>& IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector3>>::operator=(const IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector3>>& other)
+	{
+		if (this->Handle)
+		{
+			Plugin::DereferenceManagedClass(this->Handle);
+		}
+		this->Handle = other.Handle;
+		if (this->Handle)
+		{
+			Plugin::ReferenceManagedClass(this->Handle);
+		}
+		return *this;
+	}
+	
+	IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector3>>& IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector3>>::operator=(decltype(nullptr))
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+		return *this;
+	}
+	
+	IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector3>>& IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector3>>::operator=(IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector3>>&& other)
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+		}
+		Handle = other.Handle;
+		other.Handle = 0;
+		return *this;
+	}
+	
+	bool IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector3>>::operator==(const IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector3>>& other) const
+	{
+		return Handle == other.Handle;
+	}
+	
+	bool IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector3>>::operator!=(const IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector3>>& other) const
+	{
+		return Handle != other.Handle;
+	}
+}
+
+namespace System
+{
+	IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector2>>::IEquatable_1(decltype(nullptr))
+	{
+	}
+	
+	IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector2>>::IEquatable_1(Plugin::InternalUse, int32_t handle)
+	{
+		Handle = handle;
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+		}
+	}
+	
+	IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector2>>::IEquatable_1(const IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector2>>& other)
+		: IEquatable_1(Plugin::InternalUse::Only, other.Handle)
+	{
+	}
+	
+	IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector2>>::IEquatable_1(IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector2>>&& other)
+		: IEquatable_1(Plugin::InternalUse::Only, other.Handle)
+	{
+		other.Handle = 0;
+	}
+	
+	IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector2>>::~IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector2>>()
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+	}
+	
+	IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector2>>& IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector2>>::operator=(const IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector2>>& other)
+	{
+		if (this->Handle)
+		{
+			Plugin::DereferenceManagedClass(this->Handle);
+		}
+		this->Handle = other.Handle;
+		if (this->Handle)
+		{
+			Plugin::ReferenceManagedClass(this->Handle);
+		}
+		return *this;
+	}
+	
+	IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector2>>& IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector2>>::operator=(decltype(nullptr))
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+		return *this;
+	}
+	
+	IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector2>>& IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector2>>::operator=(IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector2>>&& other)
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+		}
+		Handle = other.Handle;
+		other.Handle = 0;
+		return *this;
+	}
+	
+	bool IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector2>>::operator==(const IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector2>>& other) const
+	{
+		return Handle == other.Handle;
+	}
+	
+	bool IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector2>>::operator!=(const IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector2>>& other) const
+	{
+		return Handle != other.Handle;
+	}
+}
+
+namespace System
+{
+	IEquatable_1<Unity::Collections::NativeArray_1<System::Int32>>::IEquatable_1(decltype(nullptr))
+	{
+	}
+	
+	IEquatable_1<Unity::Collections::NativeArray_1<System::Int32>>::IEquatable_1(Plugin::InternalUse, int32_t handle)
+	{
+		Handle = handle;
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+		}
+	}
+	
+	IEquatable_1<Unity::Collections::NativeArray_1<System::Int32>>::IEquatable_1(const IEquatable_1<Unity::Collections::NativeArray_1<System::Int32>>& other)
+		: IEquatable_1(Plugin::InternalUse::Only, other.Handle)
+	{
+	}
+	
+	IEquatable_1<Unity::Collections::NativeArray_1<System::Int32>>::IEquatable_1(IEquatable_1<Unity::Collections::NativeArray_1<System::Int32>>&& other)
+		: IEquatable_1(Plugin::InternalUse::Only, other.Handle)
+	{
+		other.Handle = 0;
+	}
+	
+	IEquatable_1<Unity::Collections::NativeArray_1<System::Int32>>::~IEquatable_1<Unity::Collections::NativeArray_1<System::Int32>>()
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+	}
+	
+	IEquatable_1<Unity::Collections::NativeArray_1<System::Int32>>& IEquatable_1<Unity::Collections::NativeArray_1<System::Int32>>::operator=(const IEquatable_1<Unity::Collections::NativeArray_1<System::Int32>>& other)
+	{
+		if (this->Handle)
+		{
+			Plugin::DereferenceManagedClass(this->Handle);
+		}
+		this->Handle = other.Handle;
+		if (this->Handle)
+		{
+			Plugin::ReferenceManagedClass(this->Handle);
+		}
+		return *this;
+	}
+	
+	IEquatable_1<Unity::Collections::NativeArray_1<System::Int32>>& IEquatable_1<Unity::Collections::NativeArray_1<System::Int32>>::operator=(decltype(nullptr))
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+		return *this;
+	}
+	
+	IEquatable_1<Unity::Collections::NativeArray_1<System::Int32>>& IEquatable_1<Unity::Collections::NativeArray_1<System::Int32>>::operator=(IEquatable_1<Unity::Collections::NativeArray_1<System::Int32>>&& other)
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+		}
+		Handle = other.Handle;
+		other.Handle = 0;
+		return *this;
+	}
+	
+	bool IEquatable_1<Unity::Collections::NativeArray_1<System::Int32>>::operator==(const IEquatable_1<Unity::Collections::NativeArray_1<System::Int32>>& other) const
+	{
+		return Handle == other.Handle;
+	}
+	
+	bool IEquatable_1<Unity::Collections::NativeArray_1<System::Int32>>::operator!=(const IEquatable_1<Unity::Collections::NativeArray_1<System::Int32>>& other) const
 	{
 		return Handle != other.Handle;
 	}
@@ -7206,110 +7555,6 @@ namespace System
 	{
 		namespace Generic
 		{
-			IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>::IEnumerator_1(decltype(nullptr))
-				: System::IDisposable(nullptr)
-				, System::Collections::IEnumerator(nullptr)
-			{
-			}
-			
-			IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>::IEnumerator_1(Plugin::InternalUse, int32_t handle)
-				: System::IDisposable(nullptr)
-				, System::Collections::IEnumerator(nullptr)
-			{
-				Handle = handle;
-				if (handle)
-				{
-					Plugin::ReferenceManagedClass(handle);
-				}
-			}
-			
-			IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>::IEnumerator_1(const IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>& other)
-				: IEnumerator_1(Plugin::InternalUse::Only, other.Handle)
-			{
-			}
-			
-			IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>::IEnumerator_1(IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>&& other)
-				: IEnumerator_1(Plugin::InternalUse::Only, other.Handle)
-			{
-				other.Handle = 0;
-			}
-			
-			IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>::~IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>()
-			{
-				if (Handle)
-				{
-					Plugin::DereferenceManagedClass(Handle);
-					Handle = 0;
-				}
-			}
-			
-			IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>& IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>::operator=(const IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>& other)
-			{
-				if (this->Handle)
-				{
-					Plugin::DereferenceManagedClass(this->Handle);
-				}
-				this->Handle = other.Handle;
-				if (this->Handle)
-				{
-					Plugin::ReferenceManagedClass(this->Handle);
-				}
-				return *this;
-			}
-			
-			IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>& IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>::operator=(decltype(nullptr))
-			{
-				if (Handle)
-				{
-					Plugin::DereferenceManagedClass(Handle);
-					Handle = 0;
-				}
-				return *this;
-			}
-			
-			IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>& IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>::operator=(IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>&& other)
-			{
-				if (Handle)
-				{
-					Plugin::DereferenceManagedClass(Handle);
-				}
-				Handle = other.Handle;
-				other.Handle = 0;
-				return *this;
-			}
-			
-			bool IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>::operator==(const IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>& other) const
-			{
-				return Handle == other.Handle;
-			}
-			
-			bool IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>::operator!=(const IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>& other) const
-			{
-				return Handle != other.Handle;
-			}
-			
-			Unity::Collections::NativeArray_1<System::Byte> System::Collections::Generic::IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>::GetCurrent()
-			{
-				auto returnValue = Plugin::SystemCollectionsGenericIEnumeratorUnityCollectionsNativeArrayPropertyGetCurrent(Handle);
-				if (Plugin::unhandledCsharpException)
-				{
-					System::Exception* ex = Plugin::unhandledCsharpException;
-					Plugin::unhandledCsharpException = nullptr;
-					ex->ThrowReferenceToThis();
-					delete ex;
-				}
-				return Unity::Collections::NativeArray_1<System::Byte>(Plugin::InternalUse::Only, returnValue);
-			}
-		}
-	}
-}
-
-namespace System
-{
-	namespace Collections
-	{
-		namespace Generic
-		{
 			IEnumerable_1<UnityEngine::Vector2>::IEnumerable_1(decltype(nullptr))
 				: System::Collections::IEnumerable(nullptr)
 			{
@@ -7707,108 +7952,6 @@ namespace System
 					delete ex;
 				}
 				return System::Collections::Generic::IEnumerator_1<System::Int32>(Plugin::InternalUse::Only, returnValue);
-			}
-		}
-	}
-}
-
-namespace System
-{
-	namespace Collections
-	{
-		namespace Generic
-		{
-			IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>::IEnumerable_1(decltype(nullptr))
-				: System::Collections::IEnumerable(nullptr)
-			{
-			}
-			
-			IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>::IEnumerable_1(Plugin::InternalUse, int32_t handle)
-				: System::Collections::IEnumerable(nullptr)
-			{
-				Handle = handle;
-				if (handle)
-				{
-					Plugin::ReferenceManagedClass(handle);
-				}
-			}
-			
-			IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>::IEnumerable_1(const IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>& other)
-				: IEnumerable_1(Plugin::InternalUse::Only, other.Handle)
-			{
-			}
-			
-			IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>::IEnumerable_1(IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>&& other)
-				: IEnumerable_1(Plugin::InternalUse::Only, other.Handle)
-			{
-				other.Handle = 0;
-			}
-			
-			IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>::~IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>()
-			{
-				if (Handle)
-				{
-					Plugin::DereferenceManagedClass(Handle);
-					Handle = 0;
-				}
-			}
-			
-			IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>& IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>::operator=(const IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>& other)
-			{
-				if (this->Handle)
-				{
-					Plugin::DereferenceManagedClass(this->Handle);
-				}
-				this->Handle = other.Handle;
-				if (this->Handle)
-				{
-					Plugin::ReferenceManagedClass(this->Handle);
-				}
-				return *this;
-			}
-			
-			IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>& IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>::operator=(decltype(nullptr))
-			{
-				if (Handle)
-				{
-					Plugin::DereferenceManagedClass(Handle);
-					Handle = 0;
-				}
-				return *this;
-			}
-			
-			IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>& IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>::operator=(IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>&& other)
-			{
-				if (Handle)
-				{
-					Plugin::DereferenceManagedClass(Handle);
-				}
-				Handle = other.Handle;
-				other.Handle = 0;
-				return *this;
-			}
-			
-			bool IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>::operator==(const IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>& other) const
-			{
-				return Handle == other.Handle;
-			}
-			
-			bool IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>::operator!=(const IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>& other) const
-			{
-				return Handle != other.Handle;
-			}
-			
-			System::Collections::Generic::IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>> System::Collections::Generic::IEnumerable_1<Unity::Collections::NativeArray_1<System::Byte>>::GetEnumerator()
-			{
-				auto returnValue = Plugin::SystemCollectionsGenericIEnumerableUnityCollectionsNativeArrayMethodGetEnumerator(Handle);
-				if (Plugin::unhandledCsharpException)
-				{
-					System::Exception* ex = Plugin::unhandledCsharpException;
-					Plugin::unhandledCsharpException = nullptr;
-					ex->ThrowReferenceToThis();
-					delete ex;
-				}
-				return System::Collections::Generic::IEnumerator_1<Unity::Collections::NativeArray_1<System::Byte>>(Plugin::InternalUse::Only, returnValue);
 			}
 		}
 	}
@@ -10218,6 +10361,159 @@ namespace Unity
 {
 	namespace Collections
 	{
+		NativeArrayOptions::NativeArrayOptions(int32_t value)
+			: Value(value)
+		{
+		}
+		
+		Unity::Collections::NativeArrayOptions::operator int32_t() const
+		{
+			return Value;
+		}
+		
+		bool Unity::Collections::NativeArrayOptions::operator==(NativeArrayOptions other)
+		{
+			return Value == other.Value;
+		}
+		
+		bool Unity::Collections::NativeArrayOptions::operator!=(NativeArrayOptions other)
+		{
+			return Value != other.Value;
+		}
+		
+		Unity::Collections::NativeArrayOptions::operator System::Enum()
+		{
+			int32_t handle = Plugin::BoxNativeArrayOptions(*this);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::Enum(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+		
+		Unity::Collections::NativeArrayOptions::operator System::ValueType()
+		{
+			int32_t handle = Plugin::BoxNativeArrayOptions(*this);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::ValueType(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+		
+		Unity::Collections::NativeArrayOptions::operator System::Object()
+		{
+			int32_t handle = Plugin::BoxNativeArrayOptions(*this);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::Object(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+		
+		Unity::Collections::NativeArrayOptions::operator System::IFormattable()
+		{
+			int32_t handle = Plugin::BoxNativeArrayOptions(*this);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::IFormattable(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+		
+		Unity::Collections::NativeArrayOptions::operator System::IComparable()
+		{
+			int32_t handle = Plugin::BoxNativeArrayOptions(*this);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::IComparable(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+		
+		Unity::Collections::NativeArrayOptions::operator System::IConvertible()
+		{
+			int32_t handle = Plugin::BoxNativeArrayOptions(*this);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::IConvertible(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+		
+	}
+}
+const Unity::Collections::NativeArrayOptions Unity::Collections::NativeArrayOptions::UninitializedMemory(0);
+const Unity::Collections::NativeArrayOptions Unity::Collections::NativeArrayOptions::ClearMemory(1);
+
+namespace System
+{
+	System::Object::operator Unity::Collections::NativeArrayOptions()
+	{
+		Unity::Collections::NativeArrayOptions returnVal(Plugin::UnboxNativeArrayOptions(Handle));
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return returnVal;
+	}
+}
+
+namespace Unity
+{
+	namespace Collections
+	{
 		NativeArray_1<System::Byte>::NativeArray_1(decltype(nullptr))
 		{
 		}
@@ -10296,6 +10592,35 @@ namespace Unity
 			return Handle != other.Handle;
 		}
 		
+		Unity::Collections::NativeArray_1<System::Byte>::NativeArray_1(System::Int32 length, Unity::Collections::Allocator allocator, Unity::Collections::NativeArrayOptions options)
+		{
+			auto returnValue = Plugin::UnityCollectionsNativeArraySystemByteConstructorSystemInt32_UnityCollectionsAllocator_UnityCollectionsNativeArrayOptions(length, allocator, options);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			Handle = returnValue;
+			if (returnValue)
+			{
+				Plugin::ReferenceManagedUnityCollectionsNativeArraySystemByte(Handle);
+			}
+		}
+		
+		void Unity::Collections::NativeArray_1<System::Byte>::Dispose()
+		{
+			Plugin::UnityCollectionsNativeArraySystemByteMethodDispose(Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+		}
+	
 		Unity::Collections::NativeArray_1<System::Byte>::operator System::ValueType()
 		{
 			int32_t handle = Plugin::BoxNativeArraySystemByte(Handle);
@@ -10411,6 +10736,717 @@ namespace System
 	System::Object::operator Unity::Collections::NativeArray_1<System::Byte>()
 	{
 		Unity::Collections::NativeArray_1<System::Byte> returnVal(Plugin::InternalUse::Only, Plugin::UnboxNativeArraySystemByte(Handle));
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return returnVal;
+	}
+}
+
+namespace Unity
+{
+	namespace Collections
+	{
+		NativeArray_1<UnityEngine::Vector3>::NativeArray_1(decltype(nullptr))
+		{
+		}
+		
+		NativeArray_1<UnityEngine::Vector3>::NativeArray_1(Plugin::InternalUse, int32_t handle)
+		{
+			Handle = handle;
+			if (handle)
+			{
+				Plugin::ReferenceManagedUnityCollectionsNativeArrayUnityEngineVector3(Handle);
+			}
+		}
+		
+		NativeArray_1<UnityEngine::Vector3>::NativeArray_1(const NativeArray_1<UnityEngine::Vector3>& other)
+			: NativeArray_1(Plugin::InternalUse::Only, other.Handle)
+		{
+		}
+		
+		NativeArray_1<UnityEngine::Vector3>::NativeArray_1(NativeArray_1<UnityEngine::Vector3>&& other)
+			: NativeArray_1(Plugin::InternalUse::Only, other.Handle)
+		{
+			other.Handle = 0;
+		}
+		
+		NativeArray_1<UnityEngine::Vector3>::~NativeArray_1<UnityEngine::Vector3>()
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedUnityCollectionsNativeArrayUnityEngineVector3(Handle);
+				Handle = 0;
+			}
+		}
+		
+		NativeArray_1<UnityEngine::Vector3>& NativeArray_1<UnityEngine::Vector3>::operator=(const NativeArray_1<UnityEngine::Vector3>& other)
+		{
+			if (this->Handle)
+			{
+				Plugin::DereferenceManagedUnityCollectionsNativeArrayUnityEngineVector3(Handle);
+			}
+			this->Handle = other.Handle;
+			if (this->Handle)
+			{
+				Plugin::ReferenceManagedUnityCollectionsNativeArrayUnityEngineVector3(Handle);
+			}
+			return *this;
+		}
+		
+		NativeArray_1<UnityEngine::Vector3>& NativeArray_1<UnityEngine::Vector3>::operator=(decltype(nullptr))
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedUnityCollectionsNativeArrayUnityEngineVector3(Handle);
+				Handle = 0;
+			}
+			return *this;
+		}
+		
+		NativeArray_1<UnityEngine::Vector3>& NativeArray_1<UnityEngine::Vector3>::operator=(NativeArray_1<UnityEngine::Vector3>&& other)
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedUnityCollectionsNativeArrayUnityEngineVector3(Handle);
+			}
+			Handle = other.Handle;
+			other.Handle = 0;
+			return *this;
+		}
+		
+		bool NativeArray_1<UnityEngine::Vector3>::operator==(const NativeArray_1<UnityEngine::Vector3>& other) const
+		{
+			return Handle == other.Handle;
+		}
+		
+		bool NativeArray_1<UnityEngine::Vector3>::operator!=(const NativeArray_1<UnityEngine::Vector3>& other) const
+		{
+			return Handle != other.Handle;
+		}
+		
+		Unity::Collections::NativeArray_1<UnityEngine::Vector3>::NativeArray_1(System::Int32 length, Unity::Collections::Allocator allocator, Unity::Collections::NativeArrayOptions options)
+		{
+			auto returnValue = Plugin::UnityCollectionsNativeArrayUnityEngineVector3ConstructorSystemInt32_UnityCollectionsAllocator_UnityCollectionsNativeArrayOptions(length, allocator, options);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			Handle = returnValue;
+			if (returnValue)
+			{
+				Plugin::ReferenceManagedUnityCollectionsNativeArrayUnityEngineVector3(Handle);
+			}
+		}
+		
+		void Unity::Collections::NativeArray_1<UnityEngine::Vector3>::Dispose()
+		{
+			Plugin::UnityCollectionsNativeArrayUnityEngineVector3MethodDispose(Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+		}
+	
+		Unity::Collections::NativeArray_1<UnityEngine::Vector3>::operator System::ValueType()
+		{
+			int32_t handle = Plugin::BoxNativeArrayUnityEngineVector3(Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::ValueType(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+		
+		Unity::Collections::NativeArray_1<UnityEngine::Vector3>::operator System::Object()
+		{
+			int32_t handle = Plugin::BoxNativeArrayUnityEngineVector3(Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::Object(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+		
+		Unity::Collections::NativeArray_1<UnityEngine::Vector3>::operator System::Collections::Generic::IEnumerable_1<UnityEngine::Vector3>()
+		{
+			int32_t handle = Plugin::BoxNativeArrayUnityEngineVector3(Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::Collections::Generic::IEnumerable_1<UnityEngine::Vector3>(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+		
+		Unity::Collections::NativeArray_1<UnityEngine::Vector3>::operator System::Collections::IEnumerable()
+		{
+			int32_t handle = Plugin::BoxNativeArrayUnityEngineVector3(Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::Collections::IEnumerable(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+		
+		Unity::Collections::NativeArray_1<UnityEngine::Vector3>::operator System::IDisposable()
+		{
+			int32_t handle = Plugin::BoxNativeArrayUnityEngineVector3(Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::IDisposable(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+		
+		Unity::Collections::NativeArray_1<UnityEngine::Vector3>::operator System::IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector3>>()
+		{
+			int32_t handle = Plugin::BoxNativeArrayUnityEngineVector3(Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector3>>(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+	}
+}
+
+namespace System
+{
+	System::Object::operator Unity::Collections::NativeArray_1<UnityEngine::Vector3>()
+	{
+		Unity::Collections::NativeArray_1<UnityEngine::Vector3> returnVal(Plugin::InternalUse::Only, Plugin::UnboxNativeArrayUnityEngineVector3(Handle));
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return returnVal;
+	}
+}
+
+namespace Unity
+{
+	namespace Collections
+	{
+		NativeArray_1<UnityEngine::Vector2>::NativeArray_1(decltype(nullptr))
+		{
+		}
+		
+		NativeArray_1<UnityEngine::Vector2>::NativeArray_1(Plugin::InternalUse, int32_t handle)
+		{
+			Handle = handle;
+			if (handle)
+			{
+				Plugin::ReferenceManagedUnityCollectionsNativeArrayUnityEngineVector2(Handle);
+			}
+		}
+		
+		NativeArray_1<UnityEngine::Vector2>::NativeArray_1(const NativeArray_1<UnityEngine::Vector2>& other)
+			: NativeArray_1(Plugin::InternalUse::Only, other.Handle)
+		{
+		}
+		
+		NativeArray_1<UnityEngine::Vector2>::NativeArray_1(NativeArray_1<UnityEngine::Vector2>&& other)
+			: NativeArray_1(Plugin::InternalUse::Only, other.Handle)
+		{
+			other.Handle = 0;
+		}
+		
+		NativeArray_1<UnityEngine::Vector2>::~NativeArray_1<UnityEngine::Vector2>()
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedUnityCollectionsNativeArrayUnityEngineVector2(Handle);
+				Handle = 0;
+			}
+		}
+		
+		NativeArray_1<UnityEngine::Vector2>& NativeArray_1<UnityEngine::Vector2>::operator=(const NativeArray_1<UnityEngine::Vector2>& other)
+		{
+			if (this->Handle)
+			{
+				Plugin::DereferenceManagedUnityCollectionsNativeArrayUnityEngineVector2(Handle);
+			}
+			this->Handle = other.Handle;
+			if (this->Handle)
+			{
+				Plugin::ReferenceManagedUnityCollectionsNativeArrayUnityEngineVector2(Handle);
+			}
+			return *this;
+		}
+		
+		NativeArray_1<UnityEngine::Vector2>& NativeArray_1<UnityEngine::Vector2>::operator=(decltype(nullptr))
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedUnityCollectionsNativeArrayUnityEngineVector2(Handle);
+				Handle = 0;
+			}
+			return *this;
+		}
+		
+		NativeArray_1<UnityEngine::Vector2>& NativeArray_1<UnityEngine::Vector2>::operator=(NativeArray_1<UnityEngine::Vector2>&& other)
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedUnityCollectionsNativeArrayUnityEngineVector2(Handle);
+			}
+			Handle = other.Handle;
+			other.Handle = 0;
+			return *this;
+		}
+		
+		bool NativeArray_1<UnityEngine::Vector2>::operator==(const NativeArray_1<UnityEngine::Vector2>& other) const
+		{
+			return Handle == other.Handle;
+		}
+		
+		bool NativeArray_1<UnityEngine::Vector2>::operator!=(const NativeArray_1<UnityEngine::Vector2>& other) const
+		{
+			return Handle != other.Handle;
+		}
+		
+		Unity::Collections::NativeArray_1<UnityEngine::Vector2>::NativeArray_1(System::Int32 length, Unity::Collections::Allocator allocator, Unity::Collections::NativeArrayOptions options)
+		{
+			auto returnValue = Plugin::UnityCollectionsNativeArrayUnityEngineVector2ConstructorSystemInt32_UnityCollectionsAllocator_UnityCollectionsNativeArrayOptions(length, allocator, options);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			Handle = returnValue;
+			if (returnValue)
+			{
+				Plugin::ReferenceManagedUnityCollectionsNativeArrayUnityEngineVector2(Handle);
+			}
+		}
+		
+		void Unity::Collections::NativeArray_1<UnityEngine::Vector2>::Dispose()
+		{
+			Plugin::UnityCollectionsNativeArrayUnityEngineVector2MethodDispose(Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+		}
+	
+		Unity::Collections::NativeArray_1<UnityEngine::Vector2>::operator System::ValueType()
+		{
+			int32_t handle = Plugin::BoxNativeArrayUnityEngineVector2(Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::ValueType(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+		
+		Unity::Collections::NativeArray_1<UnityEngine::Vector2>::operator System::Object()
+		{
+			int32_t handle = Plugin::BoxNativeArrayUnityEngineVector2(Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::Object(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+		
+		Unity::Collections::NativeArray_1<UnityEngine::Vector2>::operator System::Collections::Generic::IEnumerable_1<UnityEngine::Vector2>()
+		{
+			int32_t handle = Plugin::BoxNativeArrayUnityEngineVector2(Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::Collections::Generic::IEnumerable_1<UnityEngine::Vector2>(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+		
+		Unity::Collections::NativeArray_1<UnityEngine::Vector2>::operator System::Collections::IEnumerable()
+		{
+			int32_t handle = Plugin::BoxNativeArrayUnityEngineVector2(Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::Collections::IEnumerable(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+		
+		Unity::Collections::NativeArray_1<UnityEngine::Vector2>::operator System::IDisposable()
+		{
+			int32_t handle = Plugin::BoxNativeArrayUnityEngineVector2(Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::IDisposable(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+		
+		Unity::Collections::NativeArray_1<UnityEngine::Vector2>::operator System::IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector2>>()
+		{
+			int32_t handle = Plugin::BoxNativeArrayUnityEngineVector2(Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::IEquatable_1<Unity::Collections::NativeArray_1<UnityEngine::Vector2>>(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+	}
+}
+
+namespace System
+{
+	System::Object::operator Unity::Collections::NativeArray_1<UnityEngine::Vector2>()
+	{
+		Unity::Collections::NativeArray_1<UnityEngine::Vector2> returnVal(Plugin::InternalUse::Only, Plugin::UnboxNativeArrayUnityEngineVector2(Handle));
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return returnVal;
+	}
+}
+
+namespace Unity
+{
+	namespace Collections
+	{
+		NativeArray_1<System::Int32>::NativeArray_1(decltype(nullptr))
+		{
+		}
+		
+		NativeArray_1<System::Int32>::NativeArray_1(Plugin::InternalUse, int32_t handle)
+		{
+			Handle = handle;
+			if (handle)
+			{
+				Plugin::ReferenceManagedUnityCollectionsNativeArraySystemInt32(Handle);
+			}
+		}
+		
+		NativeArray_1<System::Int32>::NativeArray_1(const NativeArray_1<System::Int32>& other)
+			: NativeArray_1(Plugin::InternalUse::Only, other.Handle)
+		{
+		}
+		
+		NativeArray_1<System::Int32>::NativeArray_1(NativeArray_1<System::Int32>&& other)
+			: NativeArray_1(Plugin::InternalUse::Only, other.Handle)
+		{
+			other.Handle = 0;
+		}
+		
+		NativeArray_1<System::Int32>::~NativeArray_1<System::Int32>()
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedUnityCollectionsNativeArraySystemInt32(Handle);
+				Handle = 0;
+			}
+		}
+		
+		NativeArray_1<System::Int32>& NativeArray_1<System::Int32>::operator=(const NativeArray_1<System::Int32>& other)
+		{
+			if (this->Handle)
+			{
+				Plugin::DereferenceManagedUnityCollectionsNativeArraySystemInt32(Handle);
+			}
+			this->Handle = other.Handle;
+			if (this->Handle)
+			{
+				Plugin::ReferenceManagedUnityCollectionsNativeArraySystemInt32(Handle);
+			}
+			return *this;
+		}
+		
+		NativeArray_1<System::Int32>& NativeArray_1<System::Int32>::operator=(decltype(nullptr))
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedUnityCollectionsNativeArraySystemInt32(Handle);
+				Handle = 0;
+			}
+			return *this;
+		}
+		
+		NativeArray_1<System::Int32>& NativeArray_1<System::Int32>::operator=(NativeArray_1<System::Int32>&& other)
+		{
+			if (Handle)
+			{
+				Plugin::DereferenceManagedUnityCollectionsNativeArraySystemInt32(Handle);
+			}
+			Handle = other.Handle;
+			other.Handle = 0;
+			return *this;
+		}
+		
+		bool NativeArray_1<System::Int32>::operator==(const NativeArray_1<System::Int32>& other) const
+		{
+			return Handle == other.Handle;
+		}
+		
+		bool NativeArray_1<System::Int32>::operator!=(const NativeArray_1<System::Int32>& other) const
+		{
+			return Handle != other.Handle;
+		}
+		
+		Unity::Collections::NativeArray_1<System::Int32>::NativeArray_1(System::Int32 length, Unity::Collections::Allocator allocator, Unity::Collections::NativeArrayOptions options)
+		{
+			auto returnValue = Plugin::UnityCollectionsNativeArraySystemInt32ConstructorSystemInt32_UnityCollectionsAllocator_UnityCollectionsNativeArrayOptions(length, allocator, options);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			Handle = returnValue;
+			if (returnValue)
+			{
+				Plugin::ReferenceManagedUnityCollectionsNativeArraySystemInt32(Handle);
+			}
+		}
+		
+		void Unity::Collections::NativeArray_1<System::Int32>::Dispose()
+		{
+			Plugin::UnityCollectionsNativeArraySystemInt32MethodDispose(Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+		}
+	
+		Unity::Collections::NativeArray_1<System::Int32>::operator System::ValueType()
+		{
+			int32_t handle = Plugin::BoxNativeArraySystemInt32(Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::ValueType(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+		
+		Unity::Collections::NativeArray_1<System::Int32>::operator System::Object()
+		{
+			int32_t handle = Plugin::BoxNativeArraySystemInt32(Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::Object(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+		
+		Unity::Collections::NativeArray_1<System::Int32>::operator System::Collections::Generic::IEnumerable_1<System::Int32>()
+		{
+			int32_t handle = Plugin::BoxNativeArraySystemInt32(Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::Collections::Generic::IEnumerable_1<System::Int32>(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+		
+		Unity::Collections::NativeArray_1<System::Int32>::operator System::Collections::IEnumerable()
+		{
+			int32_t handle = Plugin::BoxNativeArraySystemInt32(Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::Collections::IEnumerable(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+		
+		Unity::Collections::NativeArray_1<System::Int32>::operator System::IDisposable()
+		{
+			int32_t handle = Plugin::BoxNativeArraySystemInt32(Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::IDisposable(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+		
+		Unity::Collections::NativeArray_1<System::Int32>::operator System::IEquatable_1<Unity::Collections::NativeArray_1<System::Int32>>()
+		{
+			int32_t handle = Plugin::BoxNativeArraySystemInt32(Handle);
+			if (Plugin::unhandledCsharpException)
+			{
+				System::Exception* ex = Plugin::unhandledCsharpException;
+				Plugin::unhandledCsharpException = nullptr;
+				ex->ThrowReferenceToThis();
+				delete ex;
+			}
+			if (handle)
+			{
+				Plugin::ReferenceManagedClass(handle);
+				return System::IEquatable_1<Unity::Collections::NativeArray_1<System::Int32>>(Plugin::InternalUse::Only, handle);
+			}
+			return nullptr;
+		}
+	}
+}
+
+namespace System
+{
+	System::Object::operator Unity::Collections::NativeArray_1<System::Int32>()
+	{
+		Unity::Collections::NativeArray_1<System::Int32> returnVal(Plugin::InternalUse::Only, Plugin::UnboxNativeArraySystemInt32(Handle));
 		if (Plugin::unhandledCsharpException)
 		{
 			System::Exception* ex = Plugin::unhandledCsharpException;
@@ -10599,8 +11635,239 @@ namespace Unity
 					}
 					return Unity::Collections::NativeArray_1<System::Byte>(Plugin::InternalUse::Only, returnValue);
 				}
+	
+				template<> Unity::Collections::NativeArray_1<UnityEngine::Vector3> Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::ConvertExistingDataToNativeArray<UnityEngine::Vector3>(System::Void* dataPointer, System::Int32 length, Unity::Collections::Allocator allocator)
+				{
+					auto returnValue = Plugin::UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodConvertExistingDataToNativeArrayUnityEngineVector3SystemVoidPointer_SystemInt32_UnityCollectionsAllocator(dataPointer, length, allocator);
+					if (Plugin::unhandledCsharpException)
+					{
+						System::Exception* ex = Plugin::unhandledCsharpException;
+						Plugin::unhandledCsharpException = nullptr;
+						ex->ThrowReferenceToThis();
+						delete ex;
+					}
+					return Unity::Collections::NativeArray_1<UnityEngine::Vector3>(Plugin::InternalUse::Only, returnValue);
+				}
+	
+				template<> Unity::Collections::NativeArray_1<UnityEngine::Vector2> Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::ConvertExistingDataToNativeArray<UnityEngine::Vector2>(System::Void* dataPointer, System::Int32 length, Unity::Collections::Allocator allocator)
+				{
+					auto returnValue = Plugin::UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodConvertExistingDataToNativeArrayUnityEngineVector2SystemVoidPointer_SystemInt32_UnityCollectionsAllocator(dataPointer, length, allocator);
+					if (Plugin::unhandledCsharpException)
+					{
+						System::Exception* ex = Plugin::unhandledCsharpException;
+						Plugin::unhandledCsharpException = nullptr;
+						ex->ThrowReferenceToThis();
+						delete ex;
+					}
+					return Unity::Collections::NativeArray_1<UnityEngine::Vector2>(Plugin::InternalUse::Only, returnValue);
+				}
+	
+				template<> Unity::Collections::NativeArray_1<System::Int32> Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::ConvertExistingDataToNativeArray<System::Int32>(System::Void* dataPointer, System::Int32 length, Unity::Collections::Allocator allocator)
+				{
+					auto returnValue = Plugin::UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodConvertExistingDataToNativeArraySystemInt32SystemVoidPointer_SystemInt32_UnityCollectionsAllocator(dataPointer, length, allocator);
+					if (Plugin::unhandledCsharpException)
+					{
+						System::Exception* ex = Plugin::unhandledCsharpException;
+						Plugin::unhandledCsharpException = nullptr;
+						ex->ThrowReferenceToThis();
+						delete ex;
+					}
+					return Unity::Collections::NativeArray_1<System::Int32>(Plugin::InternalUse::Only, returnValue);
+				}
+	
+				template<> System::Void* Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::GetUnsafeBufferPointerWithoutChecks<UnityEngine::Vector3>(Unity::Collections::NativeArray_1<UnityEngine::Vector3>& nativeArray)
+				{
+					auto returnValue = Plugin::UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodGetUnsafeBufferPointerWithoutChecksUnityEngineVector3UnityCollectionsNativeArray(nativeArray.Handle);
+					if (Plugin::unhandledCsharpException)
+					{
+						System::Exception* ex = Plugin::unhandledCsharpException;
+						Plugin::unhandledCsharpException = nullptr;
+						ex->ThrowReferenceToThis();
+						delete ex;
+					}
+					return returnValue;
+				}
+	
+				template<> System::Void* Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::GetUnsafeBufferPointerWithoutChecks<UnityEngine::Vector2>(Unity::Collections::NativeArray_1<UnityEngine::Vector2>& nativeArray)
+				{
+					auto returnValue = Plugin::UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodGetUnsafeBufferPointerWithoutChecksUnityEngineVector2UnityCollectionsNativeArray(nativeArray.Handle);
+					if (Plugin::unhandledCsharpException)
+					{
+						System::Exception* ex = Plugin::unhandledCsharpException;
+						Plugin::unhandledCsharpException = nullptr;
+						ex->ThrowReferenceToThis();
+						delete ex;
+					}
+					return returnValue;
+				}
+	
+				template<> System::Void* Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::GetUnsafeBufferPointerWithoutChecks<System::Int32>(Unity::Collections::NativeArray_1<System::Int32>& nativeArray)
+				{
+					auto returnValue = Plugin::UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodGetUnsafeBufferPointerWithoutChecksSystemInt32UnityCollectionsNativeArray(nativeArray.Handle);
+					if (Plugin::unhandledCsharpException)
+					{
+						System::Exception* ex = Plugin::unhandledCsharpException;
+						Plugin::unhandledCsharpException = nullptr;
+						ex->ThrowReferenceToThis();
+						delete ex;
+					}
+					return returnValue;
+				}
 			}
 		}
+	}
+}
+
+namespace UnityEngine
+{
+	MeshTopology::MeshTopology(int32_t value)
+		: Value(value)
+	{
+	}
+	
+	UnityEngine::MeshTopology::operator int32_t() const
+	{
+		return Value;
+	}
+	
+	bool UnityEngine::MeshTopology::operator==(MeshTopology other)
+	{
+		return Value == other.Value;
+	}
+	
+	bool UnityEngine::MeshTopology::operator!=(MeshTopology other)
+	{
+		return Value != other.Value;
+	}
+	
+	UnityEngine::MeshTopology::operator System::Enum()
+	{
+		int32_t handle = Plugin::BoxMeshTopology(*this);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+			return System::Enum(Plugin::InternalUse::Only, handle);
+		}
+		return nullptr;
+	}
+	
+	UnityEngine::MeshTopology::operator System::ValueType()
+	{
+		int32_t handle = Plugin::BoxMeshTopology(*this);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+			return System::ValueType(Plugin::InternalUse::Only, handle);
+		}
+		return nullptr;
+	}
+	
+	UnityEngine::MeshTopology::operator System::Object()
+	{
+		int32_t handle = Plugin::BoxMeshTopology(*this);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+			return System::Object(Plugin::InternalUse::Only, handle);
+		}
+		return nullptr;
+	}
+	
+	UnityEngine::MeshTopology::operator System::IFormattable()
+	{
+		int32_t handle = Plugin::BoxMeshTopology(*this);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+			return System::IFormattable(Plugin::InternalUse::Only, handle);
+		}
+		return nullptr;
+	}
+	
+	UnityEngine::MeshTopology::operator System::IComparable()
+	{
+		int32_t handle = Plugin::BoxMeshTopology(*this);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+			return System::IComparable(Plugin::InternalUse::Only, handle);
+		}
+		return nullptr;
+	}
+	
+	UnityEngine::MeshTopology::operator System::IConvertible()
+	{
+		int32_t handle = Plugin::BoxMeshTopology(*this);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+			return System::IConvertible(Plugin::InternalUse::Only, handle);
+		}
+		return nullptr;
+	}
+	
+}
+const UnityEngine::MeshTopology UnityEngine::MeshTopology::Triangles(0);
+const UnityEngine::MeshTopology UnityEngine::MeshTopology::Quads(2);
+const UnityEngine::MeshTopology UnityEngine::MeshTopology::Lines(3);
+const UnityEngine::MeshTopology UnityEngine::MeshTopology::LineStrip(4);
+const UnityEngine::MeshTopology UnityEngine::MeshTopology::Points(5);
+
+namespace System
+{
+	System::Object::operator UnityEngine::MeshTopology()
+	{
+		UnityEngine::MeshTopology returnVal(Plugin::UnboxMeshTopology(Handle));
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return returnVal;
 	}
 }
 
@@ -10716,9 +11983,33 @@ namespace UnityEngine
 		}
 	}
 	
+	template<> void UnityEngine::Mesh::SetVertices<UnityEngine::Vector3>(Unity::Collections::NativeArray_1<UnityEngine::Vector3>& inVertices)
+	{
+		Plugin::UnityEngineMeshMethodSetVerticesUnityEngineVector3UnityCollectionsNativeArray(Handle, inVertices.Handle);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+	}
+	
 	void UnityEngine::Mesh::SetNormals(System::Array1<UnityEngine::Vector3>& inNormals)
 	{
 		Plugin::UnityEngineMeshMethodSetNormalsUnityEngineVector3Array1(Handle, inNormals.Handle);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+	}
+	
+	template<> void UnityEngine::Mesh::SetNormals<UnityEngine::Vector3>(Unity::Collections::NativeArray_1<UnityEngine::Vector3>& inNormals)
+	{
+		Plugin::UnityEngineMeshMethodSetNormalsUnityEngineVector3UnityCollectionsNativeArray(Handle, inNormals.Handle);
 		if (Plugin::unhandledCsharpException)
 		{
 			System::Exception* ex = Plugin::unhandledCsharpException;
@@ -10740,9 +12031,33 @@ namespace UnityEngine
 		}
 	}
 	
+	template<> void UnityEngine::Mesh::SetIndices<System::Int32>(Unity::Collections::NativeArray_1<System::Int32>& indices, UnityEngine::MeshTopology topology, System::Int32 submesh, System::Boolean calculateBounds, System::Int32 baseVertex)
+	{
+		Plugin::UnityEngineMeshMethodSetIndicesSystemInt32UnityCollectionsNativeArray_UnityEngineMeshTopology_SystemInt32_SystemBoolean_SystemInt32(Handle, indices.Handle, topology, submesh, calculateBounds, baseVertex);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+	}
+	
 	void UnityEngine::Mesh::SetUVs(System::Int32 channel, System::Array1<UnityEngine::Vector2>& uvs)
 	{
 		Plugin::UnityEngineMeshMethodSetUVsSystemInt32_UnityEngineVector2Array1(Handle, channel, uvs.Handle);
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+	}
+	
+	template<> void UnityEngine::Mesh::SetUVs<UnityEngine::Vector2>(System::Int32 channel, Unity::Collections::NativeArray_1<UnityEngine::Vector2>& uvs)
+	{
+		Plugin::UnityEngineMeshMethodSetUVsUnityEngineVector2SystemInt32_UnityCollectionsNativeArray(Handle, channel, uvs.Handle);
 		if (Plugin::unhandledCsharpException)
 		{
 			System::Exception* ex = Plugin::unhandledCsharpException;
@@ -14654,6 +15969,113 @@ namespace UnityEngine
 	}
 }
 
+namespace UnityEngine
+{
+	Application::Application(decltype(nullptr))
+	{
+	}
+	
+	Application::Application(Plugin::InternalUse, int32_t handle)
+	{
+		Handle = handle;
+		if (handle)
+		{
+			Plugin::ReferenceManagedClass(handle);
+		}
+	}
+	
+	Application::Application(const Application& other)
+		: Application(Plugin::InternalUse::Only, other.Handle)
+	{
+	}
+	
+	Application::Application(Application&& other)
+		: Application(Plugin::InternalUse::Only, other.Handle)
+	{
+		other.Handle = 0;
+	}
+	
+	Application::~Application()
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+	}
+	
+	Application& Application::operator=(const Application& other)
+	{
+		if (this->Handle)
+		{
+			Plugin::DereferenceManagedClass(this->Handle);
+		}
+		this->Handle = other.Handle;
+		if (this->Handle)
+		{
+			Plugin::ReferenceManagedClass(this->Handle);
+		}
+		return *this;
+	}
+	
+	Application& Application::operator=(decltype(nullptr))
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+			Handle = 0;
+		}
+		return *this;
+	}
+	
+	Application& Application::operator=(Application&& other)
+	{
+		if (Handle)
+		{
+			Plugin::DereferenceManagedClass(Handle);
+		}
+		Handle = other.Handle;
+		other.Handle = 0;
+		return *this;
+	}
+	
+	bool Application::operator==(const Application& other) const
+	{
+		return Handle == other.Handle;
+	}
+	
+	bool Application::operator!=(const Application& other) const
+	{
+		return Handle != other.Handle;
+	}
+	
+	System::String UnityEngine::Application::GetTemporaryCachePath()
+	{
+		auto returnValue = Plugin::UnityEngineApplicationPropertyGetTemporaryCachePath();
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return System::String(Plugin::InternalUse::Only, returnValue);
+	}
+	
+	System::String UnityEngine::Application::GetPersistentDataPath()
+	{
+		auto returnValue = Plugin::UnityEngineApplicationPropertyGetPersistentDataPath();
+		if (Plugin::unhandledCsharpException)
+		{
+			System::Exception* ex = Plugin::unhandledCsharpException;
+			Plugin::unhandledCsharpException = nullptr;
+			ex->ThrowReferenceToThis();
+			delete ex;
+		}
+		return System::String(Plugin::InternalUse::Only, returnValue);
+	}
+}
+
 namespace System
 {
 	System::Object::operator System::Boolean()
@@ -16444,8 +17866,6 @@ DLLEXPORT void Init(
 	curMemory += sizeof(Plugin::SystemCollectionsGenericIEnumeratorSystemBytePropertyGetCurrent);
 	Plugin::SystemCollectionsGenericIEnumeratorSystemInt32PropertyGetCurrent = *(int32_t (**)(int32_t thisHandle))curMemory;
 	curMemory += sizeof(Plugin::SystemCollectionsGenericIEnumeratorSystemInt32PropertyGetCurrent);
-	Plugin::SystemCollectionsGenericIEnumeratorUnityCollectionsNativeArrayPropertyGetCurrent = *(int32_t (**)(int32_t thisHandle))curMemory;
-	curMemory += sizeof(Plugin::SystemCollectionsGenericIEnumeratorUnityCollectionsNativeArrayPropertyGetCurrent);
 	Plugin::SystemCollectionsGenericIEnumerableUnityEngineVector2MethodGetEnumerator = *(int32_t (**)(int32_t thisHandle))curMemory;
 	curMemory += sizeof(Plugin::SystemCollectionsGenericIEnumerableUnityEngineVector2MethodGetEnumerator);
 	Plugin::SystemCollectionsGenericIEnumerableUnityEngineVector3MethodGetEnumerator = *(int32_t (**)(int32_t thisHandle))curMemory;
@@ -16454,30 +17874,90 @@ DLLEXPORT void Init(
 	curMemory += sizeof(Plugin::SystemCollectionsGenericIEnumerableSystemByteMethodGetEnumerator);
 	Plugin::SystemCollectionsGenericIEnumerableSystemInt32MethodGetEnumerator = *(int32_t (**)(int32_t thisHandle))curMemory;
 	curMemory += sizeof(Plugin::SystemCollectionsGenericIEnumerableSystemInt32MethodGetEnumerator);
-	Plugin::SystemCollectionsGenericIEnumerableUnityCollectionsNativeArrayMethodGetEnumerator = *(int32_t (**)(int32_t thisHandle))curMemory;
-	curMemory += sizeof(Plugin::SystemCollectionsGenericIEnumerableUnityCollectionsNativeArrayMethodGetEnumerator);
+	Plugin::BoxNativeArrayOptions = *(int32_t (**)(Unity::Collections::NativeArrayOptions val))curMemory;
+	curMemory += sizeof(Plugin::BoxNativeArrayOptions);
+	Plugin::UnboxNativeArrayOptions = *(Unity::Collections::NativeArrayOptions (**)(int32_t valHandle))curMemory;
+	curMemory += sizeof(Plugin::UnboxNativeArrayOptions);
 	Plugin::ReleaseUnityCollectionsNativeArraySystemByte = *(void (**)(int32_t handle))curMemory;
 	curMemory += sizeof(Plugin::ReleaseUnityCollectionsNativeArraySystemByte);
+	Plugin::UnityCollectionsNativeArraySystemByteConstructorSystemInt32_UnityCollectionsAllocator_UnityCollectionsNativeArrayOptions = *(int32_t (**)(int32_t length, Unity::Collections::Allocator allocator, Unity::Collections::NativeArrayOptions options))curMemory;
+	curMemory += sizeof(Plugin::UnityCollectionsNativeArraySystemByteConstructorSystemInt32_UnityCollectionsAllocator_UnityCollectionsNativeArrayOptions);
+	Plugin::UnityCollectionsNativeArraySystemByteMethodDispose = *(void (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityCollectionsNativeArraySystemByteMethodDispose);
 	Plugin::BoxNativeArraySystemByte = *(int32_t (**)(int32_t valHandle))curMemory;
 	curMemory += sizeof(Plugin::BoxNativeArraySystemByte);
 	Plugin::UnboxNativeArraySystemByte = *(int32_t (**)(int32_t valHandle))curMemory;
 	curMemory += sizeof(Plugin::UnboxNativeArraySystemByte);
+	Plugin::ReleaseUnityCollectionsNativeArrayUnityEngineVector3 = *(void (**)(int32_t handle))curMemory;
+	curMemory += sizeof(Plugin::ReleaseUnityCollectionsNativeArrayUnityEngineVector3);
+	Plugin::UnityCollectionsNativeArrayUnityEngineVector3ConstructorSystemInt32_UnityCollectionsAllocator_UnityCollectionsNativeArrayOptions = *(int32_t (**)(int32_t length, Unity::Collections::Allocator allocator, Unity::Collections::NativeArrayOptions options))curMemory;
+	curMemory += sizeof(Plugin::UnityCollectionsNativeArrayUnityEngineVector3ConstructorSystemInt32_UnityCollectionsAllocator_UnityCollectionsNativeArrayOptions);
+	Plugin::UnityCollectionsNativeArrayUnityEngineVector3MethodDispose = *(void (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityCollectionsNativeArrayUnityEngineVector3MethodDispose);
+	Plugin::BoxNativeArrayUnityEngineVector3 = *(int32_t (**)(int32_t valHandle))curMemory;
+	curMemory += sizeof(Plugin::BoxNativeArrayUnityEngineVector3);
+	Plugin::UnboxNativeArrayUnityEngineVector3 = *(int32_t (**)(int32_t valHandle))curMemory;
+	curMemory += sizeof(Plugin::UnboxNativeArrayUnityEngineVector3);
+	Plugin::ReleaseUnityCollectionsNativeArrayUnityEngineVector2 = *(void (**)(int32_t handle))curMemory;
+	curMemory += sizeof(Plugin::ReleaseUnityCollectionsNativeArrayUnityEngineVector2);
+	Plugin::UnityCollectionsNativeArrayUnityEngineVector2ConstructorSystemInt32_UnityCollectionsAllocator_UnityCollectionsNativeArrayOptions = *(int32_t (**)(int32_t length, Unity::Collections::Allocator allocator, Unity::Collections::NativeArrayOptions options))curMemory;
+	curMemory += sizeof(Plugin::UnityCollectionsNativeArrayUnityEngineVector2ConstructorSystemInt32_UnityCollectionsAllocator_UnityCollectionsNativeArrayOptions);
+	Plugin::UnityCollectionsNativeArrayUnityEngineVector2MethodDispose = *(void (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityCollectionsNativeArrayUnityEngineVector2MethodDispose);
+	Plugin::BoxNativeArrayUnityEngineVector2 = *(int32_t (**)(int32_t valHandle))curMemory;
+	curMemory += sizeof(Plugin::BoxNativeArrayUnityEngineVector2);
+	Plugin::UnboxNativeArrayUnityEngineVector2 = *(int32_t (**)(int32_t valHandle))curMemory;
+	curMemory += sizeof(Plugin::UnboxNativeArrayUnityEngineVector2);
+	Plugin::ReleaseUnityCollectionsNativeArraySystemInt32 = *(void (**)(int32_t handle))curMemory;
+	curMemory += sizeof(Plugin::ReleaseUnityCollectionsNativeArraySystemInt32);
+	Plugin::UnityCollectionsNativeArraySystemInt32ConstructorSystemInt32_UnityCollectionsAllocator_UnityCollectionsNativeArrayOptions = *(int32_t (**)(int32_t length, Unity::Collections::Allocator allocator, Unity::Collections::NativeArrayOptions options))curMemory;
+	curMemory += sizeof(Plugin::UnityCollectionsNativeArraySystemInt32ConstructorSystemInt32_UnityCollectionsAllocator_UnityCollectionsNativeArrayOptions);
+	Plugin::UnityCollectionsNativeArraySystemInt32MethodDispose = *(void (**)(int32_t thisHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityCollectionsNativeArraySystemInt32MethodDispose);
+	Plugin::BoxNativeArraySystemInt32 = *(int32_t (**)(int32_t valHandle))curMemory;
+	curMemory += sizeof(Plugin::BoxNativeArraySystemInt32);
+	Plugin::UnboxNativeArraySystemInt32 = *(int32_t (**)(int32_t valHandle))curMemory;
+	curMemory += sizeof(Plugin::UnboxNativeArraySystemInt32);
 	Plugin::BoxAllocator = *(int32_t (**)(Unity::Collections::Allocator val))curMemory;
 	curMemory += sizeof(Plugin::BoxAllocator);
 	Plugin::UnboxAllocator = *(Unity::Collections::Allocator (**)(int32_t valHandle))curMemory;
 	curMemory += sizeof(Plugin::UnboxAllocator);
 	Plugin::UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodConvertExistingDataToNativeArraySystemByteSystemVoidPointer_SystemInt32_UnityCollectionsAllocator = *(int32_t (**)(void* dataPointer, int32_t length, Unity::Collections::Allocator allocator))curMemory;
 	curMemory += sizeof(Plugin::UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodConvertExistingDataToNativeArraySystemByteSystemVoidPointer_SystemInt32_UnityCollectionsAllocator);
+	Plugin::UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodConvertExistingDataToNativeArrayUnityEngineVector3SystemVoidPointer_SystemInt32_UnityCollectionsAllocator = *(int32_t (**)(void* dataPointer, int32_t length, Unity::Collections::Allocator allocator))curMemory;
+	curMemory += sizeof(Plugin::UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodConvertExistingDataToNativeArrayUnityEngineVector3SystemVoidPointer_SystemInt32_UnityCollectionsAllocator);
+	Plugin::UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodConvertExistingDataToNativeArrayUnityEngineVector2SystemVoidPointer_SystemInt32_UnityCollectionsAllocator = *(int32_t (**)(void* dataPointer, int32_t length, Unity::Collections::Allocator allocator))curMemory;
+	curMemory += sizeof(Plugin::UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodConvertExistingDataToNativeArrayUnityEngineVector2SystemVoidPointer_SystemInt32_UnityCollectionsAllocator);
+	Plugin::UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodConvertExistingDataToNativeArraySystemInt32SystemVoidPointer_SystemInt32_UnityCollectionsAllocator = *(int32_t (**)(void* dataPointer, int32_t length, Unity::Collections::Allocator allocator))curMemory;
+	curMemory += sizeof(Plugin::UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodConvertExistingDataToNativeArraySystemInt32SystemVoidPointer_SystemInt32_UnityCollectionsAllocator);
+	Plugin::UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodGetUnsafeBufferPointerWithoutChecksUnityEngineVector3UnityCollectionsNativeArray = *(System::Void* (**)(int32_t nativeArrayHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodGetUnsafeBufferPointerWithoutChecksUnityEngineVector3UnityCollectionsNativeArray);
+	Plugin::UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodGetUnsafeBufferPointerWithoutChecksUnityEngineVector2UnityCollectionsNativeArray = *(System::Void* (**)(int32_t nativeArrayHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodGetUnsafeBufferPointerWithoutChecksUnityEngineVector2UnityCollectionsNativeArray);
+	Plugin::UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodGetUnsafeBufferPointerWithoutChecksSystemInt32UnityCollectionsNativeArray = *(System::Void* (**)(int32_t nativeArrayHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityCollectionsLowLevelUnsafeNativeArrayUnsafeUtilityMethodGetUnsafeBufferPointerWithoutChecksSystemInt32UnityCollectionsNativeArray);
+	Plugin::BoxMeshTopology = *(int32_t (**)(UnityEngine::MeshTopology val))curMemory;
+	curMemory += sizeof(Plugin::BoxMeshTopology);
+	Plugin::UnboxMeshTopology = *(UnityEngine::MeshTopology (**)(int32_t valHandle))curMemory;
+	curMemory += sizeof(Plugin::UnboxMeshTopology);
 	Plugin::UnityEngineMeshConstructor = *(int32_t (**)())curMemory;
 	curMemory += sizeof(Plugin::UnityEngineMeshConstructor);
 	Plugin::UnityEngineMeshMethodSetVerticesUnityEngineVector3Array1 = *(void (**)(int32_t thisHandle, int32_t inVerticesHandle))curMemory;
 	curMemory += sizeof(Plugin::UnityEngineMeshMethodSetVerticesUnityEngineVector3Array1);
+	Plugin::UnityEngineMeshMethodSetVerticesUnityEngineVector3UnityCollectionsNativeArray = *(void (**)(int32_t thisHandle, int32_t inVerticesHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineMeshMethodSetVerticesUnityEngineVector3UnityCollectionsNativeArray);
 	Plugin::UnityEngineMeshMethodSetNormalsUnityEngineVector3Array1 = *(void (**)(int32_t thisHandle, int32_t inNormalsHandle))curMemory;
 	curMemory += sizeof(Plugin::UnityEngineMeshMethodSetNormalsUnityEngineVector3Array1);
+	Plugin::UnityEngineMeshMethodSetNormalsUnityEngineVector3UnityCollectionsNativeArray = *(void (**)(int32_t thisHandle, int32_t inNormalsHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineMeshMethodSetNormalsUnityEngineVector3UnityCollectionsNativeArray);
 	Plugin::UnityEngineMeshMethodSetTrianglesSystemInt32Array1_SystemInt32_SystemBoolean_SystemInt32 = *(void (**)(int32_t thisHandle, int32_t trianglesHandle, int32_t submesh, uint32_t calculateBounds, int32_t baseVertex))curMemory;
 	curMemory += sizeof(Plugin::UnityEngineMeshMethodSetTrianglesSystemInt32Array1_SystemInt32_SystemBoolean_SystemInt32);
+	Plugin::UnityEngineMeshMethodSetIndicesSystemInt32UnityCollectionsNativeArray_UnityEngineMeshTopology_SystemInt32_SystemBoolean_SystemInt32 = *(void (**)(int32_t thisHandle, int32_t indicesHandle, UnityEngine::MeshTopology topology, int32_t submesh, uint32_t calculateBounds, int32_t baseVertex))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineMeshMethodSetIndicesSystemInt32UnityCollectionsNativeArray_UnityEngineMeshTopology_SystemInt32_SystemBoolean_SystemInt32);
 	Plugin::UnityEngineMeshMethodSetUVsSystemInt32_UnityEngineVector2Array1 = *(void (**)(int32_t thisHandle, int32_t channel, int32_t uvsHandle))curMemory;
 	curMemory += sizeof(Plugin::UnityEngineMeshMethodSetUVsSystemInt32_UnityEngineVector2Array1);
+	Plugin::UnityEngineMeshMethodSetUVsUnityEngineVector2SystemInt32_UnityCollectionsNativeArray = *(void (**)(int32_t thisHandle, int32_t channel, int32_t uvsHandle))curMemory;
+	curMemory += sizeof(Plugin::UnityEngineMeshMethodSetUVsUnityEngineVector2SystemInt32_UnityCollectionsNativeArray);
 	Plugin::UnityEngineMeshFilterPropertyGetMesh = *(int32_t (**)(int32_t thisHandle))curMemory;
 	curMemory += sizeof(Plugin::UnityEngineMeshFilterPropertyGetMesh);
 	Plugin::UnityEngineMeshFilterPropertySetMesh = *(void (**)(int32_t thisHandle, int32_t valueHandle))curMemory;
@@ -16578,6 +18058,10 @@ DLLEXPORT void Init(
 	curMemory += sizeof(Plugin::UnityEngineTexture2DMethodApplySystemBoolean_SystemBoolean);
 	Plugin::UnityEngineTexture2DMethodLoadRawTextureDataSystemIntPtr_SystemInt32 = *(void (**)(int32_t thisHandle, void* data, int32_t size))curMemory;
 	curMemory += sizeof(Plugin::UnityEngineTexture2DMethodLoadRawTextureDataSystemIntPtr_SystemInt32);
+	Plugin::UnityEngineApplicationPropertyGetTemporaryCachePath = *(int32_t (**)())curMemory;
+	curMemory += sizeof(Plugin::UnityEngineApplicationPropertyGetTemporaryCachePath);
+	Plugin::UnityEngineApplicationPropertyGetPersistentDataPath = *(int32_t (**)())curMemory;
+	curMemory += sizeof(Plugin::UnityEngineApplicationPropertyGetPersistentDataPath);
 	Plugin::BoxBoolean = *(int32_t (**)(uint32_t val))curMemory;
 	curMemory += sizeof(Plugin::BoxBoolean);
 	Plugin::UnboxBoolean = *(int32_t (**)(int32_t valHandle))curMemory;
@@ -16679,36 +18163,48 @@ DLLEXPORT void Init(
 
 	/*BEGIN INIT BODY ARRAYS*/
 	Plugin::RefCountsSystemDecimal = (int32_t*)curMemory;
-	curMemory += 1000 * sizeof(int32_t);
-	Plugin::RefCountsLenSystemDecimal = 1000;
+	curMemory += 10000 * sizeof(int32_t);
+	Plugin::RefCountsLenSystemDecimal = 10000;
 	
 	Plugin::RefCountsUnityCollectionsNativeArraySystemByte = (int32_t*)curMemory;
-	curMemory += 1000 * sizeof(int32_t);
-	Plugin::RefCountsLenUnityCollectionsNativeArraySystemByte = 1000;
+	curMemory += 10000 * sizeof(int32_t);
+	Plugin::RefCountsLenUnityCollectionsNativeArraySystemByte = 10000;
 	
-	Plugin::BaseNativeDownloadHandlerFreeListSize = 1000;
+	Plugin::RefCountsUnityCollectionsNativeArrayUnityEngineVector3 = (int32_t*)curMemory;
+	curMemory += 10000 * sizeof(int32_t);
+	Plugin::RefCountsLenUnityCollectionsNativeArrayUnityEngineVector3 = 10000;
+	
+	Plugin::RefCountsUnityCollectionsNativeArrayUnityEngineVector2 = (int32_t*)curMemory;
+	curMemory += 10000 * sizeof(int32_t);
+	Plugin::RefCountsLenUnityCollectionsNativeArrayUnityEngineVector2 = 10000;
+	
+	Plugin::RefCountsUnityCollectionsNativeArraySystemInt32 = (int32_t*)curMemory;
+	curMemory += 10000 * sizeof(int32_t);
+	Plugin::RefCountsLenUnityCollectionsNativeArraySystemInt32 = 10000;
+	
+	Plugin::BaseNativeDownloadHandlerFreeListSize = 10000;
 	Plugin::BaseNativeDownloadHandlerFreeList = (CesiumForUnity::BaseNativeDownloadHandler**)curMemory;
-	curMemory += 1000 * sizeof(CesiumForUnity::BaseNativeDownloadHandler*);
+	curMemory += 10000 * sizeof(CesiumForUnity::BaseNativeDownloadHandler*);
 	
-	Plugin::BaseNativeDownloadHandlerFreeWholeListSize = 1000;
+	Plugin::BaseNativeDownloadHandlerFreeWholeListSize = 10000;
 	Plugin::BaseNativeDownloadHandlerFreeWholeList = (Plugin::BaseNativeDownloadHandlerFreeWholeListEntry*)curMemory;
-	curMemory += 1000 * sizeof(Plugin::BaseNativeDownloadHandlerFreeWholeListEntry);
+	curMemory += 10000 * sizeof(Plugin::BaseNativeDownloadHandlerFreeWholeListEntry);
 	
-	Plugin::BaseCesium3DTilesetFreeListSize = 1000;
+	Plugin::BaseCesium3DTilesetFreeListSize = 10000;
 	Plugin::BaseCesium3DTilesetFreeList = (CesiumForUnity::BaseCesium3DTileset**)curMemory;
-	curMemory += 1000 * sizeof(CesiumForUnity::BaseCesium3DTileset*);
+	curMemory += 10000 * sizeof(CesiumForUnity::BaseCesium3DTileset*);
 	
-	Plugin::BaseCesium3DTilesetFreeWholeListSize = 1000;
+	Plugin::BaseCesium3DTilesetFreeWholeListSize = 10000;
 	Plugin::BaseCesium3DTilesetFreeWholeList = (Plugin::BaseCesium3DTilesetFreeWholeListEntry*)curMemory;
-	curMemory += 1000 * sizeof(Plugin::BaseCesium3DTilesetFreeWholeListEntry);
+	curMemory += 10000 * sizeof(Plugin::BaseCesium3DTilesetFreeWholeListEntry);
 	
-	Plugin::SystemActionFreeListSize = 1000;
+	Plugin::SystemActionFreeListSize = 10000;
 	Plugin::SystemActionFreeList = (System::Action**)curMemory;
-	curMemory += 1000 * sizeof(System::Action*);
+	curMemory += 10000 * sizeof(System::Action*);
 	
-	Plugin::SystemActionUnityEngineAsyncOperationFreeListSize = 1000;
+	Plugin::SystemActionUnityEngineAsyncOperationFreeListSize = 10000;
 	Plugin::SystemActionUnityEngineAsyncOperationFreeList = (System::Action_1<UnityEngine::AsyncOperation>**)curMemory;
-	curMemory += 1000 * sizeof(System::Action_1<UnityEngine::AsyncOperation>*);
+	curMemory += 10000 * sizeof(System::Action_1<UnityEngine::AsyncOperation>*);
 	/*END INIT BODY ARRAYS*/
 
 	// Make sure there was enough memory
