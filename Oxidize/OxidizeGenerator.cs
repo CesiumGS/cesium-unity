@@ -18,17 +18,18 @@ public class OxidizeGenerator : IIncrementalGenerator
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        // For each method in the Oxidize class, get a list of GenerationItems
+        // For each method in the Oxidize class, look at the types, methods, and properties it uses and create from
+        // that a list of items to be generated (GenerationItems).
         IncrementalValuesProvider<IEnumerable<GenerationItem>> perMethodGenerationItems =
             context.SyntaxProvider.CreateSyntaxProvider(
                 predicate: IsOxidizeClass,
                 transform: GetOxidizeClass);
 
-        // Consolidate the GenerationItems from the different methods
+        // Consolidate the GenerationItems from the different methods into a single dictionary.
         IncrementalValueProvider<Dictionary<ITypeSymbol, GenerationItem>> generationItems = perMethodGenerationItems.Collect().Select(CombineGenerationItems);
 
-        // Post-process the generation items
-        IncrementalValuesProvider<GenerationItem> processedGenerationItems = generationItems.SelectMany(PostProcess);
+        // Process the generation items, for example, linking them together.
+        IncrementalValuesProvider<GenerationItem> processedGenerationItems = generationItems.SelectMany(Process);
         
         // Generate the required items
         context.RegisterSourceOutput(processedGenerationItems, Generate);
@@ -99,7 +100,7 @@ public class OxidizeGenerator : IIncrementalGenerator
         return walker.GenerationItems.Values;
     }
 
-    private static IEnumerable<GenerationItem> PostProcess(Dictionary<ITypeSymbol, GenerationItem> items, CancellationToken token)
+    private static IEnumerable<GenerationItem> Process(Dictionary<ITypeSymbol, GenerationItem> items, CancellationToken token)
     {
         foreach (GenerationItem item in items.Values)
         {
