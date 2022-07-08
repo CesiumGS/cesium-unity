@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Roslyn": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "..\\TestOxidize\\TestOxidize.csproj"
+    }
+  }
+}
