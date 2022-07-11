@@ -112,25 +112,25 @@ public class OxidizeGenerator : IIncrementalGenerator
 
     private static void Generate(SourceProductionContext ctx, GenerationItem item)
     {
-        Console.WriteLine(item.type.Name);
+        Console.WriteLine(item.type.ToDisplayString());
         if (item.baseClass != null)
         {
-            Console.WriteLine("  Base Class: " + item.baseClass.type.Name);
+            Console.WriteLine("  Base Class: " + item.baseClass.type.ToDisplayString());
         }
         Console.WriteLine("  Interfaces");
         foreach (GenerationItem anInterface in item.interfaces)
         {
-            Console.WriteLine("    " + anInterface.type.Name);
+            Console.WriteLine("    " + anInterface.type.ToDisplayString());
         }
         Console.WriteLine("  Properties");
         foreach (IPropertySymbol property in item.properties)
         {
-            Console.WriteLine("    " + property.Name);
+            Console.WriteLine("    " + property.ToDisplayString());
         }
         Console.WriteLine("  Methods");
         foreach (IMethodSymbol method in item.methods)
         {
-            Console.WriteLine("    " + method.Name);
+            Console.WriteLine("    " + method.ToDisplayString());
         }
     }
 }

@@ -8,6 +8,10 @@ using System.Text;
 
 namespace Oxidize
 {
+    /// <summary>
+    /// Walks the methods in the Oxidize class to discover which types, methods,
+    /// and properties should be exposed to C++.
+    /// </summary>
     internal class OxidizeWalker : CSharpSyntaxWalker
     {
         public readonly Dictionary<ITypeSymbol, GenerationItem> GenerationItems = new Dictionary<ITypeSymbol, GenerationItem>(SymbolEqualityComparer.Default);
@@ -47,6 +51,17 @@ namespace Oxidize
             }
         }
 
+        public override void VisitGenericName(GenericNameSyntax node)
+        {
+            base.VisitGenericName(node);
+
+            ITypeSymbol? type = this._semanticModel.GetTypeInfo(node).Type;
+            if (type == null)
+                return;
+
+            this.AddType(type);
+        }
+
         public override void VisitIdentifierName(IdentifierNameSyntax node)
         {
             base.VisitIdentifierName(node);
@@ -60,6 +75,12 @@ namespace Oxidize
 
         private GenerationItem AddType(ITypeSymbol type)
         {
+            // Drop the nullability ("?") from the type if present.
+            if (type.NullableAnnotation == NullableAnnotation.Annotated && type.OriginalDefinition != null)
+            {
+                type = type.OriginalDefinition;
+            }
+
             GenerationItem generationItem;
             if (!this.GenerationItems.TryGetValue(type, out generationItem))
             {
