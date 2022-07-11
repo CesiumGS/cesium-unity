@@ -30,9 +30,19 @@ public class OxidizeGenerator : IIncrementalGenerator
 
         // Process the generation items, for example, linking them together.
         IncrementalValuesProvider<GenerationItem> processedGenerationItems = generationItems.SelectMany(Process);
-        
+
+        CppCodeGenerator cpp = new CppCodeGenerator(
+            headerPath: "",
+            implementationPath: "",
+            baseNamespace: ""
+        );
+
+        var withCompilation = processedGenerationItems.Combine(context.CompilationProvider);
+
         // Generate the required items
-        context.RegisterSourceOutput(processedGenerationItems, Generate);
+        //context.RegisterSourceOutput(processedGenerationItems, CSharpCodeGenerator.Generate);
+        context.RegisterImplementationSourceOutput(withCompilation, (context, pair) => cpp.Generate(context, pair.Right, pair.Left));
+        //context.RegisterSourceOutput(processedGenerationItems, CppCodeGenerator.Generate);
     }
 
     private static Dictionary<ITypeSymbol, GenerationItem> CombineGenerationItems(ImmutableArray<IEnumerable<GenerationItem>> listOfItems, CancellationToken token)
@@ -108,29 +118,5 @@ public class OxidizeGenerator : IIncrementalGenerator
         }
 
         return items.Values;
-    }
-
-    private static void Generate(SourceProductionContext ctx, GenerationItem item)
-    {
-        Console.WriteLine(item.type.ToDisplayString());
-        if (item.baseClass != null)
-        {
-            Console.WriteLine("  Base Class: " + item.baseClass.type.ToDisplayString());
-        }
-        Console.WriteLine("  Interfaces");
-        foreach (GenerationItem anInterface in item.interfaces)
-        {
-            Console.WriteLine("    " + anInterface.type.ToDisplayString());
-        }
-        Console.WriteLine("  Properties");
-        foreach (IPropertySymbol property in item.properties)
-        {
-            Console.WriteLine("    " + property.ToDisplayString());
-        }
-        Console.WriteLine("  Methods");
-        foreach (IMethodSymbol method in item.methods)
-        {
-            Console.WriteLine("    " + method.ToDisplayString());
-        }
     }
 }

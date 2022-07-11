@@ -3,8 +3,10 @@ using UnityEditor;
 
 namespace TestOxidize;
 
-public class Oxidize
+public partial class Oxidize
 {
+    partial void Initialize();
+
     public void BindCamera()
     {
         var c = Camera.main;
