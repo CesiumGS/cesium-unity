@@ -7,20 +7,14 @@ namespace Oxidize
 {
     internal class CppCodeGenerator
     {
-        private string _headerPath;
-        private string _implementationPath;
-        private string _baseNamespace;
+        private CppGenerationContext _options;
 
-        public CppCodeGenerator(string headerPath, string implementationPath, string baseNamespace = "")
+        public CppCodeGenerator(CppGenerationContext options)
         {
-            this._headerPath = headerPath;
-            this._implementationPath = implementationPath;
-            this._baseNamespace = baseNamespace;
+            this._options = options;
         }
 
-        const string baseNamespace = "";
-
-        public void Generate(SourceProductionContext context, Compilation compilation, GenerationItem item)
+        public void Generate(SourceProductionContext context, GenerationItem item)
         {
             Console.WriteLine("Generating bindings for " + item.type.ToDisplayString());
             if (item.baseClass != null)
@@ -58,13 +52,16 @@ namespace Oxidize
                 return;
             }
 
-            string cppNamespace = CppTypes.GetNamespace(this._baseNamespace, item.type);
+            CppType itemType = CppType.FromCSharp(this._options, item.type);
+
+            string cppNamespace = itemType.GetFullyQualifiedNamespace();
             string className = item.type.Name;
 
             TypeDefinition definition = new TypeDefinition();
 
-            CppCasts.GenerateDowncasts(this._baseNamespace, item, definition);
-            GenerateUpcasts(item, definition);
+            CppCasts.GenerateDowncasts(this._options, item, definition);
+            CppCasts.GenerateUpcasts(this._options, item, definition);
+            CppProperties.GenerateProperties(this._options, item, definition);
 
             string header =
                 $$"""
@@ -100,11 +97,6 @@ namespace Oxidize
                 """;
 
             File.WriteAllText(className + ".cpp", cpp, Encoding.UTF8);
-        }
-
-        private void GenerateUpcasts(GenerationItem item, TypeDefinition definition)
-        {
-
         }
     }
 }

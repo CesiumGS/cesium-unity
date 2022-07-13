@@ -31,17 +31,11 @@ public class OxidizeGenerator : IIncrementalGenerator
         // Process the generation items, for example, linking them together.
         IncrementalValuesProvider<GenerationItem> processedGenerationItems = generationItems.SelectMany(Process);
 
-        CppCodeGenerator cpp = new CppCodeGenerator(
-            headerPath: "",
-            implementationPath: "",
-            baseNamespace: ""
-        );
-
         var withCompilation = processedGenerationItems.Combine(context.CompilationProvider);
 
         // Generate the required items
         //context.RegisterSourceOutput(processedGenerationItems, CSharpCodeGenerator.Generate);
-        context.RegisterImplementationSourceOutput(withCompilation, (context, pair) => cpp.Generate(context, pair.Right, pair.Left));
+        context.RegisterImplementationSourceOutput(withCompilation, (context, pair) => Generate(context, pair.Right, pair.Left));
         //context.RegisterSourceOutput(processedGenerationItems, CppCodeGenerator.Generate);
     }
 
@@ -118,5 +112,14 @@ public class OxidizeGenerator : IIncrementalGenerator
         }
 
         return items.Values;
+    }
+
+    private static void Generate(SourceProductionContext context, Compilation compilation, GenerationItem item)
+    {
+        CppGenerationContext cppContext = new CppGenerationContext(compilation);
+        cppContext.BaseNamespace = "TestOxidize";
+
+        CppCodeGenerator cpp = new CppCodeGenerator(cppContext);
+        cpp.Generate(context, item);
     }
 }
