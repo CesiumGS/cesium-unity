@@ -7,7 +7,7 @@ namespace Oxidize
     internal class TypeDefinition
     {
         /// <summary>
-        /// The type's declarations in the header .h file.
+        /// The type's public declarations in the header .h file.
         /// </summary>
         public List<string> declarations = new List<string>();
 
@@ -19,16 +19,21 @@ namespace Oxidize
         /// <summary>
         /// #includes required in the header .h file.
         /// </summary>
-        public List<string> headerIncludes = new List<string>();
+        public HashSet<string> headerIncludes = new HashSet<string>();
 
         /// <summary>
         /// #include required in the implementation .cpp file.
         /// </summary>
-        public List<string> cppIncludes = new List<string>();
+        public HashSet<string> cppIncludes = new HashSet<string>();
 
         /// <summary>
         /// Forward declarations to include the header .h file.
         /// </summary>
-        public List<string> forwardDeclarations = new List<string>();
+        public HashSet<string> forwardDeclarations = new HashSet<string>();
+
+        /// <summary>
+        /// The type's private declarations in the header .h file.
+        /// </summary>
+        public List<string> privateDeclarations = new List<string>();
     }
 }

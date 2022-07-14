@@ -42,7 +42,7 @@ namespace Oxidize
                 this.GenerateClass(context, item);
             }
         }
-        
+
         private void GenerateClass(SourceProductionContext context, GenerationItem item)
         {
             INamedTypeSymbol? named = item.type as INamedTypeSymbol;
@@ -59,27 +59,46 @@ namespace Oxidize
 
             TypeDefinition definition = new TypeDefinition();
 
-            CppCasts.GenerateDowncasts(this._options, item, definition);
-            CppCasts.GenerateUpcasts(this._options, item, definition);
+            if (!item.type.IsStatic)
+            {
+                // Instances of this class may exist, so we need a field to hold the object handle and
+                // a constructor to create this wrapper from a handle.
+                definition.privateDeclarations.Add("::Oxidize::ObjectHandle _handle;");
+                definition.declarations.Add($"explicit {className}(::Oxidize::ObjectHandle&& handle) noexcept;");
+                definition.definitions.Add(
+                    $$"""
+                    explicit {{className}}::{{className}}(::Oxidize::ObjectHandle&& handle) noexcept :
+                      _handle(std::move(handle)) {}
+                    """);
+
+                // Also allow up- and down-casting this instance to related types.
+                CppCasts.GenerateDowncasts(this._options, item, definition);
+                CppCasts.GenerateUpcasts(this._options, item, definition);
+            }
+            else
+            {
+                // Instances of wrappers for static classes can never be constructed.
+                definition.declarations.Add($"{className}() = delete;");
+            }
+
             CppProperties.GenerateProperties(this._options, item, definition);
+            CppMethods.GenerateMethods(this._options, item, definition);
 
             string header =
                 $$"""
                 #pragma once
 
-                {{string.Join(Environment.NewLine, definition.headerIncludes)}}
+                {{string.Join(Environment.NewLine, definition.headerIncludes.Select(include => "#include " + include))}}
+                {{string.Join(Environment.NewLine, definition.forwardDeclarations)}}
 
                 namespace {{cppNamespace}} {
 
                 class {{className}} {
                 public:
-                  {{className}}();
-                  explicit {{className}}(void* handle);
-
                   {{string.Join(Environment.NewLine + "  ", definition.declarations)}}
 
                 private:
-                   void* _handle;
+                  {{string.Join(Environment.NewLine + "  ", definition.privateDeclarations)}}
                 };
 
                 }
@@ -89,6 +108,8 @@ namespace Oxidize
 
             string cpp =
                 $$"""
+                {{string.Join(Environment.NewLine, definition.cppIncludes.Select(include => "#include " + include))}}
+
                 namespace {{cppNamespace}} {
 
                 {{string.Join(Environment.NewLine + Environment.NewLine, definition.definitions)}}

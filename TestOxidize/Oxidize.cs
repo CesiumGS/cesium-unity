@@ -1,13 +1,15 @@
 ﻿using UnityEngine;
 using UnityEditor;
+using Oxidize;
 
 namespace TestOxidize;
 
+[Oxidize]
 public partial class Oxidize
 {
     partial void Initialize();
 
-    public void BindCamera()
+    public void ExposeToCPP()
     {
         var c = Camera.main;
         var t = c.transform;
@@ -16,10 +18,7 @@ public partial class Oxidize
         t.position = new Vector3();
         IFormattable f = new Vector3();
         IEquatable<Vector3> f2 = new Vector3();
-    }
 
-    public void BindSceneView()
-    {
         var sv = SceneView.lastActiveSceneView;
     }
 }

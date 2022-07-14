@@ -18,7 +18,6 @@ namespace Oxidize
     [Flags]
     internal enum CppTypeFlags
     {
-        Normal = 0,
         Pointer = 1,
         Reference = 2,
         Const = 4
@@ -40,26 +39,41 @@ namespace Oxidize
 
         private const string IncludeCStdInt = "<cstdint>";
 
+        private static readonly CppType Int16 = CreatePrimitiveType(StandardNamespace, "int16_t");
+        private static readonly CppType Int32 = CreatePrimitiveType(StandardNamespace, "int32_t");
+        private static readonly CppType Int64 = CreatePrimitiveType(StandardNamespace, "int64_t");
+        private static readonly CppType UInt16 = CreatePrimitiveType(StandardNamespace, "uint16_t");
+        private static readonly CppType UInt32 = CreatePrimitiveType(StandardNamespace, "uint32_t");
+        private static readonly CppType UInt64 = CreatePrimitiveType(StandardNamespace, "uint64_t");
+        private static readonly CppType Single = CreatePrimitiveType(NoNamespace, "float");
+        private static readonly CppType Double = CreatePrimitiveType(NoNamespace, "double");
+        private static readonly CppType VoidPointer = CreatePrimitiveType(NoNamespace, "void", CppTypeFlags.Pointer);
+        private static readonly CppType Void = CreatePrimitiveType(NoNamespace, "void");
+
         public static CppType FromCSharp(CppGenerationContext context, ITypeSymbol type)
         {
             switch (type.SpecialType)
             {
                 case SpecialType.System_Int16:
-                    return CreatePrimitiveType(StandardNamespace, "int16_t");
+                    return Int16;
                 case SpecialType.System_Int32:
-                    return CreatePrimitiveType(StandardNamespace, "int32_t");
+                    return Int32;
                 case SpecialType.System_Int64:
-                    return CreatePrimitiveType(StandardNamespace, "int64_t");
+                    return Int64;
                 case SpecialType.System_Single:
-                    return CreatePrimitiveType(NoNamespace, "float");
+                    return Single;
                 case SpecialType.System_Double:
-                    return CreatePrimitiveType(NoNamespace, "double");
+                    return Double;
                 case SpecialType.System_UInt16:
-                    return CreatePrimitiveType(StandardNamespace, "uint16_t");
+                    return UInt16;
                 case SpecialType.System_UInt32:
-                    return CreatePrimitiveType(StandardNamespace, "uint32_t");
+                    return UInt32;
                 case SpecialType.System_UInt64:
-                    return CreatePrimitiveType(StandardNamespace, "uint64_t");
+                    return UInt64;
+                case SpecialType.System_IntPtr:
+                    return VoidPointer;
+                case SpecialType.System_Void:
+                    return Void;
             }
 
             List<string> namespaces = new List<string>();
@@ -80,7 +94,7 @@ namespace Oxidize
 
             // TODO: generics
 
-            return new CppType(CppTypeKind.ClassWrapper, namespaces, type.Name, null, CppTypeFlags.Normal);
+            return new CppType(CppTypeKind.ClassWrapper, namespaces, type.Name, null, 0);
         }
 
         public CppType(
@@ -92,7 +106,7 @@ namespace Oxidize
         {
             this.Kind = kind;
             if (namespaces == StandardNamespace || namespaces == NoNamespace)
-                this.Namespaces = (List<string>)namespaces;
+                this.Namespaces = namespaces;
             else
                 this.Namespaces = new List<string>(namespaces);
             this.Name = name;
@@ -125,15 +139,38 @@ namespace Oxidize
                 return $"{modifier}{Name}{suffix}";
         }
 
+        public void AddForwardDeclarationsToSet(ISet<string> forwardDeclarations)
+        {
+            // Primitives do not need to be forward declared
+            if (Kind == CppTypeKind.Primitive)
+                return;
+
+            // Non-pointer, non-reference types cannot be forward declared.
+            if (!Flags.HasFlag(CppTypeFlags.Reference) && !Flags.HasFlag(CppTypeFlags.Pointer))
+                return;
+
+            string ns = GetFullyQualifiedNamespace();
+            if (ns != null)
+            {
+                string typeType = Kind == CppTypeKind.ClassWrapper ? "class" : "struct";
+                forwardDeclarations.Add(
+                    $$"""
+                    namespace {{ns}} {
+                    {{typeType}} {{Name}};
+                    }
+                    """);
+            }
+        }
+
         /// <summary>
         /// Adds the includes that are required to use this type in a generated
         /// header file as part of a method signature. If the type can be
         /// forward declared instead, this method will do nothing.
         /// </summary>
         /// <param name="includes">The set of includes to which to add this type's includes.</param>
-        public void AddHeaderIncludesToCollection(ISet<string> includes)
+        public void AddHeaderIncludesToSet(ISet<string> includes)
         {
-            AddIncludesToCollection(includes, true);
+            AddIncludesToSet(includes, true);
         }
 
         /// <summary>
@@ -141,21 +178,25 @@ namespace Oxidize
         /// source file.
         /// </summary>
         /// <param name="includes">The set of includes to which to add this type's includes.</param>
-        public void AddSourceIncludesToCollection(ISet<string> includes)
+        public void AddSourceIncludesToSet(ISet<string> includes)
         {
-            AddIncludesToCollection(includes, false);
+            AddIncludesToSet(includes, false);
         }
 
-        private void AddIncludesToCollection(ISet<string> includes, bool forHeader)
+        private void AddIncludesToSet(ISet<string> includes, bool forHeader)
         {
-            // Special case for primitives in <cstdint>.
-            if (Kind == CppTypeKind.Primitive && Namespaces == StandardNamespace)
+            if (Kind == CppTypeKind.Primitive)
             {
-                includes.Add(IncludeCStdInt);
+                // Special case for primitives in <cstdint>.
+                if (Namespaces == StandardNamespace)
+                {
+                    includes.Add(IncludeCStdInt);
+                }
                 return;
             }
 
-            if (!forHeader)
+            bool canBeForwardDeclared = Flags.HasFlag(CppTypeFlags.Reference) || Flags.HasFlag(CppTypeFlags.Pointer);
+            if (!forHeader || !canBeForwardDeclared)
             {
                 // Build an include name from the namespace and type names.
                 string path = string.Join("/", Namespaces);
@@ -202,9 +243,21 @@ namespace Oxidize
             return this;
         }
 
-        private static CppType CreatePrimitiveType(IReadOnlyCollection<string> cppNamespaces, string cppTypeName)
+        /// <summary>
+        /// Gets the version of this type that should be used in a function
+        /// pointer that will call into the managed side.
+        /// </summary>
+        public CppType AsInteropType()
         {
-            return new CppType(CppTypeKind.Primitive, cppNamespaces, cppTypeName, null, CppTypeFlags.Normal);
+            if (this.Kind == CppTypeKind.Primitive || this.Kind == CppTypeKind.BlittableStruct)
+                return this;
+
+            return VoidPointer;
+        }
+
+        private static CppType CreatePrimitiveType(IReadOnlyCollection<string> cppNamespaces, string cppTypeName, CppTypeFlags flags = 0)
+        {
+            return new CppType(CppTypeKind.Primitive, cppNamespaces, cppTypeName, null, flags);
         }
 
         //private static bool IsBlittableStruct(CppGenerationContext options, ITypeSymbol type)

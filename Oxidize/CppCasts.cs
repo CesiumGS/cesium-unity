@@ -21,7 +21,7 @@ namespace Oxidize
                 definition.definitions.Add(
                     $$"""
                     {{typeName}}::operator {{baseTypeName}}() const {
-                        return {{baseTypeName}}(::Oxidize::copyHandle(this->_handle));
+                        return {{baseTypeName}}(::Oxidize::ObjectHandle(this->_handle));
                     }
                     """);
                 baseClass = baseClass.baseClass;
@@ -36,7 +36,7 @@ namespace Oxidize
                 definition.definitions.Add(
                     $$"""
                     {{typeName}}::operator {{interfaceTypeName}}() const {
-                        return {{interfaceTypeName}}(::Oxidize::copyHandle(this->_handle));
+                        return {{interfaceTypeName}}(::Oxidize::ObjectHandle(this->_handle));
                     }
                     """);
             }

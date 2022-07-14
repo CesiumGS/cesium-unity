@@ -30,12 +30,18 @@ namespace Oxidize
             {
                 CppType returnType = CppType.FromCSharp(context, property.Type).AsReturnType();
                 definition.declarations.Add($"{modifiers}{returnType.GetFullyQualifiedName()} {property.Name}() const;");
+                returnType.AddHeaderIncludesToSet(definition.headerIncludes);
+                returnType.AddSourceIncludesToSet(definition.cppIncludes);
+                returnType.AddForwardDeclarationsToSet(definition.forwardDeclarations);
             }
 
             if (property.SetMethod != null)
             {
                 CppType valueType = CppType.FromCSharp(context, property.Type).AsParameterType();
                 definition.declarations.Add($"{modifiers}void {property.Name}({valueType.GetFullyQualifiedName()} value);");
+                valueType.AddHeaderIncludesToSet(definition.headerIncludes);
+                valueType.AddSourceIncludesToSet(definition.cppIncludes);
+                valueType.AddForwardDeclarationsToSet(definition.forwardDeclarations);
             }
         }
     }
