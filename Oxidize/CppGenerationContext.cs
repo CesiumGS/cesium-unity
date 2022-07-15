@@ -38,5 +38,13 @@ namespace Oxidize
         /// The compilation for which we're generating C++ code.
         /// </summary>
         public Compilation Compilation;
+
+        /// <summary>
+        /// A list of method symbols that can be called from C++ code via a
+        /// function pointer that points to a C# delegate that calls the
+        /// method. The function pointers and delegates are generated from
+        /// this list.
+        /// </summary>
+        public List<IMethodSymbol> InteropFunctions = new List<IMethodSymbol>();
     }
 }

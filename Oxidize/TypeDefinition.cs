@@ -1,11 +1,47 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Microsoft.CodeAnalysis;
 
 namespace Oxidize
 {
+    internal struct InteropFunction
+    {
+        public InteropFunction(IMethodSymbol method, string cppTarget, string cppSignature)
+        {
+            this.Method = method;
+            this.CppTarget = cppTarget;
+            this.CppSignature = cppSignature;
+        }
+
+        /// <summary>
+        /// The C# method to be made callable from C++.
+        /// </summary>
+        public IMethodSymbol Method;
+
+        /// <summary>
+        /// The C++ expression to which a function pointer corresponding to the
+        /// method is assigned.
+        /// For example: `::Oxidize::ObjectHandle::CallCreateHandle`
+        /// </summary>
+        public string CppTarget;
+
+        /// <summary>
+        /// The C++ function signature type. For example:
+        /// `void* (*)(void* o)`
+        /// </summary>
+        public string CppSignature;
+    }
+
     internal class TypeDefinition
     {
+        /// <summary>
+        /// The name of this type.
+        /// </summary>
+        public string typeName = "";
+
+        /// <summary>
+        /// This type's fully-qualified namespace.
+        /// </summary>
+        public string typeNamespace = "";
+
         /// <summary>
         /// The type's public declarations in the header .h file.
         /// </summary>
@@ -35,5 +71,11 @@ namespace Oxidize
         /// The type's private declarations in the header .h file.
         /// </summary>
         public List<string> privateDeclarations = new List<string>();
+
+        /// <summary>
+        /// The functions required to be accessible via C++ function pointer to
+        /// enable interoperability between C# and C++.
+        /// </summary>
+        public List<InteropFunction> interopFunctions = new List<InteropFunction>();
     }
 }

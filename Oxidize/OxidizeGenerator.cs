@@ -37,11 +37,25 @@ public class OxidizeGenerator : IIncrementalGenerator
         // Process the generation items, for example, linking them together.
         IncrementalValuesProvider<GenerationItem> processedGenerationItems = generationItems.SelectMany(Process);
 
-        var withCompilation = processedGenerationItems.Combine(context.CompilationProvider);
+        var cppGenerator = context.CompilationProvider.Select(CreateCppGenerator);
+        var withCppGenerator = processedGenerationItems.Combine(cppGenerator);
+
+        // Generate C++ code.
+        var typeDefinitions = withCppGenerator.Select((pair, _) => pair.Right.GenerateType(pair.Left));
+        context.RegisterImplementationSourceOutput(typeDefinitions.Combine(cppGenerator), (context, pair) => pair.Right.WriteType(pair.Left));
+
+        // Generate C++ initialization function
+        context.RegisterImplementationSourceOutput(typeDefinitions.Collect().Combine(cppGenerator), (context, pair) => pair.Right.WriteInitializeFunction(pair.Left));
+
+        //context.RegisterImplementationSourceOutput(typeDefinitions.Collect(), (context, )
+
+        // Generate the initialization function after all the other C++ code is generated.
+        //typeDefinitions.Coll
+        //withCppGenerator.Collect().Select((pair, _) => pair.
 
         // Generate the required items
         //context.RegisterSourceOutput(processedGenerationItems, CSharpCodeGenerator.Generate);
-        context.RegisterImplementationSourceOutput(withCompilation, (context, pair) => Generate(context, pair.Right, pair.Left));
+        //context.RegisterImplementationSourceOutput(withCppGenerator, (context, pair) => pair.Right.Generate(context, pair.Left));
         //context.RegisterSourceOutput(processedGenerationItems, CppCodeGenerator.Generate);
     }
 
@@ -145,12 +159,11 @@ public class OxidizeGenerator : IIncrementalGenerator
         return items.Values;
     }
 
-    private static void Generate(SourceProductionContext context, Compilation compilation, GenerationItem item)
+    private static CppCodeGenerator CreateCppGenerator(Compilation compilation, CancellationToken token)
     {
         CppGenerationContext cppContext = new CppGenerationContext(compilation);
         cppContext.BaseNamespace = "TestOxidize";
 
-        CppCodeGenerator cpp = new CppCodeGenerator(cppContext);
-        cpp.Generate(context, item);
+        return new CppCodeGenerator(cppContext);
     }
 }

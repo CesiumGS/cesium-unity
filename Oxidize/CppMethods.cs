@@ -60,6 +60,12 @@ namespace Oxidize
                     return {{returnType.GetConversionFromInteropType("result")}};
                 }
                 """);
+
+            // Prepare a C# delegate and C++ function pointer to be used to call this method.
+            definition.interopFunctions.Add(new InteropFunction(
+                method,
+                $"{typeName}::Call{method.Name}",
+                $"{interopReturnType.GetFullyQualifiedName()} (*)({string.Join(", ", parameters.Select(parameter => parameter.Type.AsInteropType().GetFullyQualifiedName()))})"));
         }
     }
 }
