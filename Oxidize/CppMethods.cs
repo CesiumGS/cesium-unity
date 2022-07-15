@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Oxidize
@@ -40,15 +41,25 @@ namespace Oxidize
                 type.AddForwardDeclarationsToSet(definition.forwardDeclarations);
             }
 
-            var parameterStrings = parameters.Select(parameter => $"{parameter.Type.GetFullyQualifiedName()} {parameter.Name}");
-
-            definition.declarations.Add($"{modifiers}{returnType.GetFullyQualifiedName()} {method.Name}({string.Join(", ", parameterStrings)});");
-
             // Add a private, static field to a function pointer that will call
             // into a managed delegate for this method.
             CppType interopReturnType = returnType.AsInteropType();
             var interopParameterStrings = parameters.Select(parameter => $"{parameter.Type.AsInteropType().GetFullyQualifiedName()} {parameter.Name}");
             definition.privateDeclarations.Add($"static {interopReturnType.GetFullyQualifiedName()} (*Call{method.Name})({string.Join(", ", interopParameterStrings)});");
+
+            // Add the method declaration
+            var parameterStrings = parameters.Select(parameter => $"{parameter.Type.GetFullyQualifiedName()} {parameter.Name}");
+            definition.declarations.Add($"{modifiers}{returnType.GetFullyQualifiedName()} {method.Name}({string.Join(", ", parameterStrings)});");
+
+            // Add the method definition
+            var parameterPassStrings = parameters.Select(parameter => parameter.Type.GetConversionToInteropType(parameter.Name));
+            definition.definitions.Add(
+                $$"""
+                {{returnType.GetFullyQualifiedName()}} {{typeName}}::{{method.Name}}({{string.Join(", ", parameterStrings)}}) {
+                    auto result = Call{{method.Name}}({{string.Join(", ", parameterPassStrings)}});
+                    return {{returnType.GetConversionFromInteropType("result")}};
+                }
+                """);
         }
     }
 }

@@ -255,6 +255,26 @@ namespace Oxidize
             return VoidPointer;
         }
 
+        /// <summary>
+        /// Gets an expression that converts this type to the
+        /// {@link AsInteropType}.
+        /// </summary>
+        public string GetConversionToInteropType(string variableName)
+        {
+            if (this.Kind == CppTypeKind.Primitive || this.Kind == CppTypeKind.BlittableStruct)
+                return variableName;
+
+            return $"{variableName}.GetHandle().GetRaw()";
+        }
+
+        public string GetConversionFromInteropType(string variableName)
+        {
+            if (this.Kind == CppTypeKind.Primitive || this.Kind == CppTypeKind.BlittableStruct)
+                return variableName;
+
+            return $"{GetFullyQualifiedName()}(::Oxidize::ObjectHandle({variableName}))";
+        }
+
         private static CppType CreatePrimitiveType(IReadOnlyCollection<string> cppNamespaces, string cppTypeName, CppTypeFlags flags = 0)
         {
             return new CppType(CppTypeKind.Primitive, cppNamespaces, cppTypeName, null, flags);

@@ -13,6 +13,8 @@ public:
   ObjectHandle& operator=(const ObjectHandle& rhs) const noexcept;
   ObjectHandle& operator=(ObjectHandle&& rhs) const noexcept;
 
+  void* GetRaw() const;
+
 private:
   void* _handle;
 };

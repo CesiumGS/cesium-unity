@@ -47,4 +47,6 @@ ObjectHandle& ObjectHandle::operator=(ObjectHandle&& rhs) const noexcept {
   return *this;
 }
 
+void* ObjectHandle::GetRaw() const { return this->_handle; }
+
 } // namespace Oxidize

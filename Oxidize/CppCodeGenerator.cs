@@ -97,6 +97,8 @@ namespace Oxidize
                 public:
                   {{string.Join(Environment.NewLine + "  ", definition.declarations)}}
 
+                  const ObjectHandle& GetHandle() const { return this->_handle; }
+
                 private:
                   {{string.Join(Environment.NewLine + "  ", definition.privateDeclarations)}}
                 };
@@ -104,7 +106,8 @@ namespace Oxidize
                 }
                 """;
 
-            File.WriteAllText(className + ".h", header, Encoding.UTF8);
+            Directory.CreateDirectory("generated/include");
+            File.WriteAllText("generated/include/" + className + ".h", header, Encoding.UTF8);
 
             string cpp =
                 $$"""
@@ -117,7 +120,8 @@ namespace Oxidize
                 }
                 """;
 
-            File.WriteAllText(className + ".cpp", cpp, Encoding.UTF8);
+            Directory.CreateDirectory("generated/src");
+            File.WriteAllText("generated/src/" + className + ".cpp", cpp, Encoding.UTF8);
         }
     }
 }
