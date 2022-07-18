@@ -21,7 +21,7 @@ namespace Oxidize
             namespace Oxidize
             {
                 [Oxidize]
-                public static class ObjectHandle
+                public static class ObjectHandleUtility
                 {
                     public static IntPtr CreateHandle(object o)
                     {

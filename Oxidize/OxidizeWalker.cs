@@ -81,6 +81,10 @@ namespace Oxidize
                 type = type.OriginalDefinition;
             }
 
+            // Don't add "void"
+            if (type.SpecialType == SpecialType.System_Void)
+                return new GenerationItem(type);
+
             GenerationItem generationItem;
             if (!this.GenerationItems.TryGetValue(type, out generationItem))
             {

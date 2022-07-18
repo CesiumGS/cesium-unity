@@ -115,16 +115,19 @@ namespace Oxidize
             this.Flags = flags;
         }
 
-        public string GetFullyQualifiedNamespace()
+        public string GetFullyQualifiedNamespace(bool startWithGlobal = true)
         {
             string ns = string.Join("::", Namespaces);
+            if (!startWithGlobal)
+                return ns;
+
             if (ns.Length > 0)
                 return "::" + ns;
             else
                 return "";
         }
 
-        public string GetFullyQualifiedName()
+        public string GetFullyQualifiedName(bool startWithGlobal = true)
         {
             string modifier = Flags.HasFlag(CppTypeFlags.Const) ? "const " : "";
             string suffix = Flags.HasFlag(CppTypeFlags.Pointer)
@@ -132,7 +135,7 @@ namespace Oxidize
                 : Flags.HasFlag(CppTypeFlags.Reference)
                     ? "&"
                     : "";
-            string ns = GetFullyQualifiedNamespace();
+            string ns = GetFullyQualifiedNamespace(startWithGlobal);
             if (ns.Length > 0)
                 return $"{modifier}{ns}::{Name}{suffix}";
             else
@@ -146,10 +149,10 @@ namespace Oxidize
                 return;
 
             // Non-pointer, non-reference types cannot be forward declared.
-            if (!Flags.HasFlag(CppTypeFlags.Reference) && !Flags.HasFlag(CppTypeFlags.Pointer))
-                return;
+            //if (!Flags.HasFlag(CppTypeFlags.Reference) && !Flags.HasFlag(CppTypeFlags.Pointer))
+            //    return;
 
-            string ns = GetFullyQualifiedNamespace();
+            string ns = GetFullyQualifiedNamespace(false);
             if (ns != null)
             {
                 string typeType = Kind == CppTypeKind.ClassWrapper ? "class" : "struct";
@@ -195,7 +198,7 @@ namespace Oxidize
                 return;
             }
 
-            bool canBeForwardDeclared = Flags.HasFlag(CppTypeFlags.Reference) || Flags.HasFlag(CppTypeFlags.Pointer);
+            bool canBeForwardDeclared = true; // Flags.HasFlag(CppTypeFlags.Reference) || Flags.HasFlag(CppTypeFlags.Pointer);
             if (!forHeader || !canBeForwardDeclared)
             {
                 // Build an include name from the namespace and type names.
@@ -259,7 +262,7 @@ namespace Oxidize
         /// Gets an expression that converts this type to the
         /// {@link AsInteropType}.
         /// </summary>
-        public string GetConversionToInteropType(string variableName)
+        public string GetConversionToInteropType(CppGenerationContext context, string variableName)
         {
             if (this.Kind == CppTypeKind.Primitive || this.Kind == CppTypeKind.BlittableStruct)
                 return variableName;
@@ -267,12 +270,12 @@ namespace Oxidize
             return $"{variableName}.GetHandle().GetRaw()";
         }
 
-        public string GetConversionFromInteropType(string variableName)
+        public string GetConversionFromInteropType(CppGenerationContext context, string variableName)
         {
             if (this.Kind == CppTypeKind.Primitive || this.Kind == CppTypeKind.BlittableStruct)
                 return variableName;
 
-            return $"{GetFullyQualifiedName()}(::Oxidize::ObjectHandle({variableName}))";
+            return $"{GetFullyQualifiedName()}({CppObjectHandle.GetCppType(context).GetFullyQualifiedName()}({variableName}))";
         }
 
         private static CppType CreatePrimitiveType(IReadOnlyCollection<string> cppNamespaces, string cppTypeName, CppTypeFlags flags = 0)

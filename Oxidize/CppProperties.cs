@@ -20,16 +20,17 @@ namespace Oxidize
 
         public static void GenerateProperty(CppGenerationContext context, string typeName, IPropertySymbol property, TypeDefinition definition)
         {
-            string modifiers = "";
+            string modifiersBefore = "";
+            string modifiersAfter = "";
             if (property.IsStatic)
-            {
-                modifiers += "static ";
-            }
+                modifiersBefore += "static ";
+            else
+                modifiersAfter = " const";
 
             if (property.GetMethod != null)
             {
                 CppType returnType = CppType.FromCSharp(context, property.Type).AsReturnType();
-                definition.declarations.Add($"{modifiers}{returnType.GetFullyQualifiedName()} {property.Name}() const;");
+                definition.declarations.Add($"{modifiersBefore}{returnType.GetFullyQualifiedName()} {property.Name}(){modifiersAfter};");
                 returnType.AddHeaderIncludesToSet(definition.headerIncludes);
                 returnType.AddSourceIncludesToSet(definition.cppIncludes);
                 returnType.AddForwardDeclarationsToSet(definition.forwardDeclarations);
@@ -38,7 +39,7 @@ namespace Oxidize
             if (property.SetMethod != null)
             {
                 CppType valueType = CppType.FromCSharp(context, property.Type).AsParameterType();
-                definition.declarations.Add($"{modifiers}void {property.Name}({valueType.GetFullyQualifiedName()} value);");
+                definition.declarations.Add($"{modifiersBefore}void {property.Name}({valueType.GetFullyQualifiedName()} value){modifiersAfter};");
                 valueType.AddHeaderIncludesToSet(definition.headerIncludes);
                 valueType.AddSourceIncludesToSet(definition.cppIncludes);
                 valueType.AddForwardDeclarationsToSet(definition.forwardDeclarations);

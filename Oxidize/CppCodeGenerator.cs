@@ -49,13 +49,23 @@ namespace Oxidize
             var interopFunctions = typeDefinitions.SelectMany(typeDefinition => typeDefinition == null ? new List<InteropFunction>() : typeDefinition.interopFunctions);
             var assignments = interopFunctions.Select(function => $"{function.CppTarget} = reinterpret_cast<{function.CppSignature}>(functionPointers[i++]);");
 
+            HashSet<string> includes = new HashSet<string>();
+            includes.Add("<cassert>");
+            includes.Add("<cstdint>");
+
+            foreach (InteropFunction interop in interopFunctions)
+            {
+                interop.Type.AddSourceIncludesToSet(includes);
+            }
+
             string initialize = $$"""
+                {{string.Join(Environment.NewLine, includes.Select(include => "#include " + include))}}
+
                 extern "C" {
 
-                void initializeOxidize(void** functionPointers, int32_t count) {
-                  if (count != {{interopFunctions.Count()}}) {
-                    throw std::runtime_error("Incorrect number of function pointers provided. Are the C# and C++ layers in sync?");
-                  }
+                void initializeOxidize(void** functionPointers, std::int32_t count) {
+                  // If this assertion fails, the C# and C++ layers are out of sync.
+                  assert(count == {{interopFunctions.Count()}});
                 
                   std::int32_t i = 0;
                   {{string.Join(Environment.NewLine + "  ", assignments)}}
@@ -79,20 +89,41 @@ namespace Oxidize
 
             CppType itemType = CppType.FromCSharp(this.Options, item.type);
 
+            // No need to generate code for primitives.
+            if (itemType.Kind == CppTypeKind.Primitive)
+                return null;
+
             TypeDefinition definition = new TypeDefinition();
-            definition.typeName = item.type.Name;
-            definition.typeNamespace = itemType.GetFullyQualifiedNamespace();
+            definition.Type = itemType;
+
+            itemType.AddSourceIncludesToSet(definition.cppIncludes);
 
             if (!item.type.IsStatic)
             {
                 // Instances of this class may exist, so we need a field to hold the object handle and
                 // a constructor to create this wrapper from a handle.
-                definition.privateDeclarations.Add("::Oxidize::ObjectHandle _handle;");
-                definition.declarations.Add($"explicit {definition.typeName}(::Oxidize::ObjectHandle&& handle) noexcept;");
+                CppType objectHandleType = CppObjectHandle.GetCppType(this.Options);
+                objectHandleType.AddForwardDeclarationsToSet(definition.forwardDeclarations);
+                objectHandleType.AddSourceIncludesToSet(definition.cppIncludes);
+
+                // We need a full definition for ObjectHandle even in the header in order to declare the field.
+                objectHandleType.AddSourceIncludesToSet(definition.headerIncludes);
+                definition.privateDeclarations.Add($"{objectHandleType.GetFullyQualifiedName()} _handle;");
+
+                definition.cppIncludes.Add("<utility>"); // for std::move
+                definition.declarations.Add($"explicit {itemType.Name}({objectHandleType.GetFullyQualifiedName()}&& handle) noexcept;");
                 definition.definitions.Add(
                     $$"""
-                    explicit {{definition.typeName}}::{{definition.typeName}}(::Oxidize::ObjectHandle&& handle) noexcept :
+                    {{itemType.Name}}::{{itemType.Name}}({{objectHandleType.GetFullyQualifiedName()}}&& handle) noexcept :
                       _handle(std::move(handle)) {}
+                    """);
+
+                definition.declarations.Add($"const {objectHandleType.GetFullyQualifiedName()}& GetHandle() const;");
+                definition.definitions.Add(
+                    $$"""
+                    const {{objectHandleType.GetFullyQualifiedName()}}& {{itemType.Name}}::GetHandle() const {
+                        return this->_handle;
+                    }
                     """);
 
                 // Also allow up- and down-casting this instance to related types.
@@ -102,8 +133,11 @@ namespace Oxidize
             else
             {
                 // Instances of wrappers for static classes can never be constructed.
-                definition.declarations.Add($"{definition.typeName}() = delete;");
+                definition.declarations.Add($"{itemType.Name}() = delete;");
             }
+
+            definition.headerIncludes.Add("<cstdint>");
+            definition.privateDeclarations.Add("friend void ::initializeOxidize(void** functionPointers, std::int32_t count);");
 
             CppProperties.GenerateProperties(this.Options, item, definition);
             CppMethods.GenerateMethods(this.Options, item, definition);
@@ -116,6 +150,10 @@ namespace Oxidize
             if (definition == null)
                 return;
 
+            CppType? type = definition.Type;
+            if (type == null)
+                return;
+
             string header =
                 $$"""
                 #pragma once
@@ -123,30 +161,32 @@ namespace Oxidize
                 {{string.Join(Environment.NewLine, definition.headerIncludes.Select(include => "#include " + include))}}
                 {{string.Join(Environment.NewLine, definition.forwardDeclarations)}}
 
-                namespace {{definition.typeNamespace}} {
+                extern "C" {
+                void initializeOxidize(void** functionPointers, std::int32_t count);
+                }
+                
+                namespace {{type.GetFullyQualifiedNamespace(false)}} {
 
-                class {{definition.typeName}} {
+                class {{type.Name}} {
                 public:
                   {{string.Join(Environment.NewLine + "  ", definition.declarations)}}
 
-                  const ObjectHandle& GetHandle() const { return this->_handle; }
-
                 private:
-                  friend void initializeOxidize(void** functionPointers, int32_t count);
                   {{string.Join(Environment.NewLine + "  ", definition.privateDeclarations)}}
                 };
 
                 }
                 """;
 
-            Directory.CreateDirectory("generated/include");
-            File.WriteAllText("generated/include/" + definition.typeName + ".h", header, Encoding.UTF8);
+            string path = string.Join("/", new string[] {"generated", "include"}.Concat(type.Namespaces));
+            Directory.CreateDirectory(path);
+            File.WriteAllText(path + "/" + type.Name + ".h", header, Encoding.UTF8);
 
             string cpp =
                 $$"""
                 {{string.Join(Environment.NewLine, definition.cppIncludes.Select(include => "#include " + include))}}
 
-                namespace {{definition.typeNamespace}} {
+                namespace {{type.GetFullyQualifiedNamespace(false)}} {
 
                 {{string.Join(Environment.NewLine + Environment.NewLine, definition.definitions)}}
 
@@ -154,7 +194,7 @@ namespace Oxidize
                 """;
 
             Directory.CreateDirectory("generated/src");
-            File.WriteAllText("generated/src/" + definition.typeName + ".cpp", cpp, Encoding.UTF8);
+            File.WriteAllText("generated/src/" + type.Name + ".cpp", cpp, Encoding.UTF8);
         }
     }
 }

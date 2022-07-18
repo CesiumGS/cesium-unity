@@ -16,8 +16,8 @@ public partial class Oxidize
         var p = t.position;
         c.GetStereoViewMatrix(Camera.StereoscopicEye.Right);
         t.position = new Vector3();
-        IFormattable f = new Vector3();
-        IEquatable<Vector3> f2 = new Vector3();
+        //IFormattable f = new Vector3();
+        //IEquatable<Vector3> f2 = new Vector3();
 
         var sv = SceneView.lastActiveSceneView;
     }
