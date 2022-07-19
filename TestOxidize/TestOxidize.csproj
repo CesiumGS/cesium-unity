@@ -1,11 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>Latest</LangVersion>
     <OutputType>Exe</OutputType>
+    <StartupObject>TestOxidize.EntryPoint</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>

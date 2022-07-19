@@ -5,10 +5,8 @@ using Oxidize;
 namespace TestOxidize;
 
 [Oxidize]
-public partial class Oxidize
+public partial class ConfigureOxidize
 {
-    partial void Initialize();
-
     public void ExposeToCPP()
     {
         var c = Camera.main;

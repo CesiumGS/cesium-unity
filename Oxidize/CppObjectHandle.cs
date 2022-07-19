@@ -47,9 +47,9 @@ namespace Oxidize
                 } // namespace {{type.GetFullyQualifiedNamespace(false)}}
                 """;
 
-            string path = string.Join("/", new string[] { "generated", "include" }.Concat(type.Namespaces));
-            Directory.CreateDirectory(path);
-            File.WriteAllText(path + "/" + type.Name + ".h", header, Encoding.UTF8);
+            string headerPath = Path.Combine(new string[] { context.OutputHeaderDirectory }.Concat(type.Namespaces).ToArray());
+            Directory.CreateDirectory(headerPath);
+            File.WriteAllText(Path.Combine(headerPath, type.Name + ".h"), header, Encoding.UTF8);
 
             CppType utilityType = new CppType(CppTypeKind.ClassWrapper, type.Namespaces, "ObjectHandleUtility", null, 0);
             
@@ -102,8 +102,8 @@ namespace Oxidize
                 } // namespace {{type.GetFullyQualifiedNamespace(false)}}
                 """;
 
-            Directory.CreateDirectory("generated/src");
-            File.WriteAllText("generated/src/" + type.Name + ".cpp", source, Encoding.UTF8);
+            Directory.CreateDirectory(context.OutputSourceDirectory);
+            File.WriteAllText(Path.Combine(context.OutputSourceDirectory, type.Name + ".cpp"), source, Encoding.UTF8);
         }
     }
 }

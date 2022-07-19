@@ -4,18 +4,24 @@ namespace Oxidize
 {
     internal struct InteropFunction
     {
-        public InteropFunction(CppType type, IMethodSymbol method, string cppTarget, string cppSignature)
+        public InteropFunction(ITypeSymbol type, CppType cppType, IMethodSymbol method, string cppTarget, string cppSignature)
         {
             this.Type = type;
+            this.CppType = cppType;
             this.Method = method;
             this.CppTarget = cppTarget;
             this.CppSignature = cppSignature;
         }
 
         /// <summary>
+        /// The managed type that contains this method.
+        /// </summary>
+        public ITypeSymbol Type;
+
+        /// <summary>
         /// The C++ type that contains this method.
         /// </summary>
-        public CppType Type;
+        public CppType CppType;
 
         /// <summary>
         /// The C# method to be made callable from C++.

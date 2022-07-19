@@ -27,12 +27,12 @@ namespace Oxidize
         /// <summary>
         /// The directory in which to generate .cpp files.
         /// </summary>
-        public string OutputSourceDirectory = "";
+        public string OutputSourceDirectory = "c:\\Dev\\cesium-unity-samples\\cesium-unity\\TestOxidize\\generated\\src";
 
         /// <summary>
         /// The directory in which to generate .h files.
         /// </summary>
-        public string OutputHeaderDirectory = "";
+        public string OutputHeaderDirectory = "c:\\Dev\\cesium-unity-samples\\cesium-unity\\TestOxidize\\generated\\include";
 
         /// <summary>
         /// The compilation for which we're generating C++ code.

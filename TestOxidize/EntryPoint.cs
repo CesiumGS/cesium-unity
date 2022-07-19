@@ -8,7 +8,8 @@ namespace TestOxidize
     {
         public static void Main(string[] args)
         {
-            new Oxidize();
+            new ConfigureOxidize();
+
         }
     }
 }

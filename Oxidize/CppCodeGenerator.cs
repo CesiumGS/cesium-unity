@@ -55,7 +55,7 @@ namespace Oxidize
 
             foreach (InteropFunction interop in interopFunctions)
             {
-                interop.Type.AddSourceIncludesToSet(includes);
+                interop.CppType.AddSourceIncludesToSet(includes);
             }
 
             string initialize = $$"""
@@ -74,8 +74,8 @@ namespace Oxidize
                 }
                 """;
 
-            Directory.CreateDirectory("generated/src");
-            File.WriteAllText("generated/src/initializeOxidize.cpp", initialize, Encoding.UTF8);
+            Directory.CreateDirectory(Options.OutputSourceDirectory);
+            File.WriteAllText(Path.Combine(Options.OutputSourceDirectory, "initializeOxidize.cpp"), initialize, Encoding.UTF8);
         }
 
         public TypeDefinition? GenerateType(GenerationItem item)
@@ -178,9 +178,9 @@ namespace Oxidize
                 }
                 """;
 
-            string path = string.Join("/", new string[] {"generated", "include"}.Concat(type.Namespaces));
-            Directory.CreateDirectory(path);
-            File.WriteAllText(path + "/" + type.Name + ".h", header, Encoding.UTF8);
+            string headerPath = Path.Combine(new string[] { Options.OutputHeaderDirectory }.Concat(type.Namespaces).ToArray());
+            Directory.CreateDirectory(headerPath);
+            File.WriteAllText(Path.Combine(headerPath, type.Name + ".h"), header, Encoding.UTF8);
 
             string cpp =
                 $$"""
@@ -193,8 +193,8 @@ namespace Oxidize
                 }
                 """;
 
-            Directory.CreateDirectory("generated/src");
-            File.WriteAllText("generated/src/" + type.Name + ".cpp", cpp, Encoding.UTF8);
+            Directory.CreateDirectory(Options.OutputSourceDirectory);
+            File.WriteAllText(Path.Combine(Options.OutputSourceDirectory, type.Name + ".cpp"), cpp, Encoding.UTF8);
         }
     }
 }

@@ -56,7 +56,7 @@ public class OxidizeGenerator : IIncrementalGenerator
         //withCppGenerator.Collect().Select((pair, _) => pair.
 
         // Generate the required items
-        //context.RegisterSourceOutput(processedGenerationItems, CSharpCodeGenerator.Generate);
+        context.RegisterSourceOutput(typesAndGenerator, (context, pair) => CSharpCodeGenerator.Generate(context, pair.Right.Options.Compilation, pair.Left));
         //context.RegisterImplementationSourceOutput(withCppGenerator, (context, pair) => pair.Right.Generate(context, pair.Left));
         //context.RegisterSourceOutput(processedGenerationItems, CppCodeGenerator.Generate);
     }

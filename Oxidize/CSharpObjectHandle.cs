@@ -23,7 +23,7 @@ namespace Oxidize
                 [Oxidize]
                 public static class ObjectHandleUtility
                 {
-                    public static IntPtr CreateHandle(object o)
+                    public static IntPtr CreateHandle(object? o)
                     {
                         if (o == null)
                             return IntPtr.Zero;
@@ -46,6 +46,14 @@ namespace Oxidize
                             return;
 
                         GCHandle.FromIntPtr(handle).Free();
+                    }
+
+                    public static object? GetObjectFromHandle(IntPtr handle)
+                    {
+                        if (handle == IntPtr.Zero)
+                            return null;
+
+                        return GCHandle.FromIntPtr(handle).Target;
                     }
 
                     public static void ExposeToCPP()
