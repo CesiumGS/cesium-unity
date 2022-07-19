@@ -7,6 +7,7 @@
     <LangVersion>Latest</LangVersion>
     <OutputType>Exe</OutputType>
     <StartupObject>TestOxidize.EntryPoint</StartupObject>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>

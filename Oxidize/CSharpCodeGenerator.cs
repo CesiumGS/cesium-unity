@@ -12,7 +12,7 @@ namespace Oxidize
         public static void Generate(SourceProductionContext context, Compilation compilation, ImmutableArray<TypeDefinition?> typeDefinitions)
         {
             var interopFunctions = typeDefinitions.SelectMany(typeDefinition => typeDefinition == null ? new List<InteropFunction>() : typeDefinition.interopFunctions);
-            var delegates = interopFunctions.Select(function =>
+            var items = interopFunctions.Select(function =>
             {
                 CSharpType type = CSharpType.FromSymbol(compilation, function.Type);
 
@@ -53,19 +53,21 @@ namespace Oxidize
                         """;
                 }
 
-                return
-                    $$"""
-                    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-                    private delegate {{interopReturnTypeString}} {{delegateName}}Type({{interopParameterList}});
-                    private static readonly {{delegateName}}Type {{delegateName}}Delegate = new {{delegateName}}Type({{delegateName}});
-                    private static {{interopReturnTypeString}} {{delegateName}}({{interopParameterList}})
-                    {
-                      {{implementation.Replace(Environment.NewLine, Environment.NewLine + "  ")}}
-                    }
-                    """;
+                return (
+                    DelegateName: delegateName,
+                    Delegates: 
+                        $$"""
+                        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+                        private delegate {{interopReturnTypeString}} {{delegateName}}Type({{interopParameterList}});
+                        private static readonly {{delegateName}}Type {{delegateName}}Delegate = new {{delegateName}}Type({{delegateName}});
+                        private static {{interopReturnTypeString}} {{delegateName}}({{interopParameterList}})
+                        {
+                          {{implementation.Replace(Environment.NewLine, Environment.NewLine + "  ")}}
+                        }
+                        """);
             });
 
-            //var assignments = interopFunctions.Select(function => $"{function.CppTarget} = reinterpret_cast<{function.CppSignature}>(functionPointers[i++]);");
+            int count = items.Count();
 
             string source =
                 $$"""
@@ -77,9 +79,19 @@ namespace Oxidize
                     {
                         public static void InitializeOxidize()
                         {
+                            unsafe
+                            {
+                                IntPtr memory = Marshal.AllocHGlobal(sizeof(IntPtr) * {{count}});
+                                int i = 0;
+                                {{string.Join(Environment.NewLine + "                ", items.Select(items => $"Marshal.WriteIntPtr(memory, (i++) * sizeof(IntPtr), Marshal.GetFunctionPointerForDelegate({items.DelegateName}Delegate));"))}}
+                                initializeOxidize(memory, {{count}});
+                            }
                         }
 
-                        {{string.Join(Environment.NewLine + "        ", delegates.Select(s => s.Replace(Environment.NewLine, Environment.NewLine + "        ")))}}
+                        [DllImport("TestOxidizeNative.dll", CallingConvention=CallingConvention.Cdecl)]
+                        private static extern void initializeOxidize(IntPtr functionPointers, int count);
+
+                        {{string.Join(Environment.NewLine + "        ", items.Select(item => item.Delegates.Replace(Environment.NewLine, Environment.NewLine + "        ")))}}
                     }
                 }
                 """;
