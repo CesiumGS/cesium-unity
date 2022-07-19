@@ -63,7 +63,7 @@ namespace Oxidize
 
                 extern "C" {
 
-                void initializeOxidize(void** functionPointers, std::int32_t count) {
+                __declspec(dllexport) void initializeOxidize(void** functionPointers, std::int32_t count) {
                   // If this assertion fails, the C# and C++ layers are out of sync.
                   assert(count == {{interopFunctions.Count()}});
                 
@@ -162,7 +162,7 @@ namespace Oxidize
                 {{string.Join(Environment.NewLine, definition.forwardDeclarations)}}
 
                 extern "C" {
-                void initializeOxidize(void** functionPointers, std::int32_t count);
+                __declspec(dllexport) void initializeOxidize(void** functionPointers, std::int32_t count);
                 }
                 
                 namespace {{type.GetFullyQualifiedNamespace(false)}} {
