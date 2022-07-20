@@ -2,9 +2,49 @@
 
 namespace Oxidize
 {
-    internal struct InteropFunction
+    internal struct InteropConstructor
     {
-        public InteropFunction(ITypeSymbol type, CppType cppType, IMethodSymbol method, string cppTarget, string cppSignature)
+        public InteropConstructor(ITypeSymbol type, CppType cppType, IMethodSymbol constructor, string cppTarget, string cppSignature)
+        {
+            this.Type = type;
+            this.CppType = cppType;
+            this.Constructor = constructor;
+            this.CppTarget = cppTarget;
+            this.CppSignature = cppSignature;
+        }
+
+        /// <summary>
+        /// The managed type that contains this method.
+        /// </summary>
+        public ITypeSymbol Type;
+
+        /// <summary>
+        /// The C++ type that contains this method.
+        /// </summary>
+        public CppType CppType;
+
+        /// <summary>
+        /// The C# constructor to be made callable from C++.
+        /// </summary>
+        public IMethodSymbol Constructor;
+
+        /// <summary>
+        /// The C++ expression to which a function pointer corresponding to the
+        /// constructor is assigned.
+        /// For example: `::Oxidize::ObjectHandle::CallCreateHandle`
+        /// </summary>
+        public string CppTarget;
+
+        /// <summary>
+        /// The C++ function signature type. For example:
+        /// `void* (*)(void* o)`
+        /// </summary>
+        public string CppSignature;
+    }
+
+    internal struct InteropMethod
+    {
+        public InteropMethod(ITypeSymbol type, CppType cppType, IMethodSymbol method, string cppTarget, string cppSignature)
         {
             this.Type = type;
             this.CppType = cppType;
@@ -80,9 +120,15 @@ namespace Oxidize
         public List<string> privateDeclarations = new List<string>();
 
         /// <summary>
-        /// The functions required to be accessible via C++ function pointer to
+        /// The constructors required to be accessible via C++ function pointer to
         /// enable interoperability between C# and C++.
         /// </summary>
-        public List<InteropFunction> interopFunctions = new List<InteropFunction>();
+        public List<InteropConstructor> interopConstructors = new List<InteropConstructor>();
+
+        /// <summary>
+        /// The methods required to be accessible via C++ function pointer to
+        /// enable interoperability between C# and C++.
+        /// </summary>
+        public List<InteropMethod> interopMethods = new List<InteropMethod>();
     }
 }

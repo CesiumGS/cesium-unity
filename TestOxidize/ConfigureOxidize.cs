@@ -18,5 +18,7 @@ public partial class ConfigureOxidize
         //IEquatable<Vector3> f2 = new Vector3();
 
         var sv = SceneView.lastActiveSceneView;
+
+        var go = new GameObject();
     }
 }

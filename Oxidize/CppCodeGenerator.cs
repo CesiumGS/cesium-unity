@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Text;
 
 namespace Oxidize
@@ -46,17 +47,27 @@ namespace Oxidize
 
         public void WriteInitializeFunction(ImmutableArray<TypeDefinition?> typeDefinitions)
         {
-            var interopFunctions = typeDefinitions.SelectMany(typeDefinition => typeDefinition == null ? new List<InteropFunction>() : typeDefinition.interopFunctions);
-            var assignments = interopFunctions.Select(function => $"{function.CppTarget} = reinterpret_cast<{function.CppSignature}>(functionPointers[i++]);");
+            var interopConstructors = typeDefinitions.SelectMany(typeDefinition => typeDefinition == null ? new List<InteropConstructor>() : typeDefinition.interopConstructors);
+            var constructorAssignments = interopConstructors.Select(function => $"{function.CppTarget} = reinterpret_cast<{function.CppSignature}>(functionPointers[i++]);");
+
+            var interopMethods = typeDefinitions.SelectMany(typeDefinition => typeDefinition == null ? new List<InteropMethod>() : typeDefinition.interopMethods);
+            var methodAssignments = interopMethods.Select(function => $"{function.CppTarget} = reinterpret_cast<{function.CppSignature}>(functionPointers[i++]);");
 
             HashSet<string> includes = new HashSet<string>();
             includes.Add("<cassert>");
             includes.Add("<cstdint>");
 
-            foreach (InteropFunction interop in interopFunctions)
+            foreach (InteropConstructor interop in interopConstructors)
             {
                 interop.CppType.AddSourceIncludesToSet(includes);
             }
+
+            foreach (InteropMethod interop in interopMethods)
+            {
+                interop.CppType.AddSourceIncludesToSet(includes);
+            }
+
+            var assignments = constructorAssignments.Concat(methodAssignments);
 
             string initialize = $$"""
                 {{string.Join(Environment.NewLine, includes.Select(include => "#include " + include))}}
@@ -65,7 +76,7 @@ namespace Oxidize
 
                 __declspec(dllexport) void initializeOxidize(void** functionPointers, std::int32_t count) {
                   // If this assertion fails, the C# and C++ layers are out of sync.
-                  assert(count == {{interopFunctions.Count()}});
+                  assert(count == {{interopMethods.Count()}});
                 
                   std::int32_t i = 0;
                   {{string.Join(Environment.NewLine + "  ", assignments)}}
@@ -125,6 +136,9 @@ namespace Oxidize
                         return this->_handle;
                     }
                     """);
+
+                // Generate constructors
+                CppConstructors.GenerateConstructors(this.Options, item, definition);
 
                 // Also allow up- and down-casting this instance to related types.
                 CppCasts.GenerateDowncasts(this.Options, item, definition);

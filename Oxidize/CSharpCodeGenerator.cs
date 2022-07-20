@@ -9,63 +9,21 @@ namespace Oxidize
 {
     internal class CSharpCodeGenerator
     {
+        struct InteropItem
+        {
+            public string Name;
+            public string Content;
+        }
+
         public static void Generate(SourceProductionContext context, Compilation compilation, ImmutableArray<TypeDefinition?> typeDefinitions)
         {
-            var interopFunctions = typeDefinitions.SelectMany(typeDefinition => typeDefinition == null ? new List<InteropFunction>() : typeDefinition.interopFunctions);
-            var items = interopFunctions.Select(function =>
-            {
-                CSharpType type = CSharpType.FromSymbol(compilation, function.Type);
+            var interopConstructors = typeDefinitions.SelectMany(typeDefinition => typeDefinition == null ? new List<InteropConstructor>() : typeDefinition.interopConstructors);
+            var constructorItems = interopConstructors.Select(constructor => CreateConstructorInterop(compilation, constructor));
 
-                string delegateName = $"{type.GetFullyQualifiedName().Replace(".", "_")}_{function.Method.Name}";
+            var interopMethods = typeDefinitions.SelectMany(typeDefinition => typeDefinition == null ? new List<InteropMethod>() : typeDefinition.interopMethods);
+            var methodItems = interopMethods.Select(method => CreateMethodInterop(compilation, method));
 
-                CSharpType returnType = CSharpType.FromSymbol(compilation, function.Method.ReturnType);
-                CSharpType interopReturnType = returnType.AsInteropType();
-                string interopReturnTypeString = interopReturnType.GetFullyQualifiedName();
-
-                var parameters = function.Method.Parameters.Select(parameter => (Name: parameter.Name, Type: CSharpType.FromSymbol(compilation, parameter.Type)));
-                var interopParameters = parameters.Select(parameter => (Name: parameter.Name, Type: parameter.Type, InteropType: parameter.Type.AsInteropType()));
-
-                string callParameterList = string.Join(", ", interopParameters.Select(parameter => parameter.Type.GetConversionFromInteropType(parameter.Name)));
-
-                string invocationTarget = type.GetFullyQualifiedName();
-                if (!function.Method.IsStatic)
-                {
-                    interopParameters = new[] { (Name: "thiz", Type: type, InteropType: type.AsInteropType()) }.Concat(interopParameters);
-                    invocationTarget = $"(({type.GetFullyQualifiedName()}?)ObjectHandleUtility.GetObjectFromHandle(thiz))";
-                }
-
-                string interopParameterList = string.Join(", ", interopParameters.Select(parameter => $"{parameter.InteropType.GetFullyQualifiedName()} {parameter.Name}"));
-
-                string implementation;
-                if (returnType.Symbol.SpecialType == SpecialType.System_Void)
-                {
-                    implementation =
-                        $$"""
-                        {{invocationTarget}}.{{function.Method.Name}}({{callParameterList}});
-                        """;
-                }
-                else
-                {
-                    implementation =
-                        $$"""
-                        var result = {{invocationTarget}}.{{function.Method.Name}}({{callParameterList}});
-                        return {{returnType.GetConversionToInteropType("result")}};
-                        """;
-                }
-
-                return (
-                    DelegateName: delegateName,
-                    Delegates: 
-                        $$"""
-                        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-                        private delegate {{interopReturnTypeString}} {{delegateName}}Type({{interopParameterList}});
-                        private static readonly {{delegateName}}Type {{delegateName}}Delegate = new {{delegateName}}Type({{delegateName}});
-                        private static {{interopReturnTypeString}} {{delegateName}}({{interopParameterList}})
-                        {
-                          {{implementation.Replace(Environment.NewLine, Environment.NewLine + "  ")}}
-                        }
-                        """);
-            });
+            var items = constructorItems.Concat(methodItems);
 
             int count = items.Count();
 
@@ -83,7 +41,7 @@ namespace Oxidize
                             {
                                 IntPtr memory = Marshal.AllocHGlobal(sizeof(IntPtr) * {{count}});
                                 int i = 0;
-                                {{string.Join(Environment.NewLine + "                ", items.Select(items => $"Marshal.WriteIntPtr(memory, (i++) * sizeof(IntPtr), Marshal.GetFunctionPointerForDelegate({items.DelegateName}Delegate));"))}}
+                                {{string.Join(Environment.NewLine + "                ", items.Select(items => $"Marshal.WriteIntPtr(memory, (i++) * sizeof(IntPtr), Marshal.GetFunctionPointerForDelegate({items.Name}Delegate));"))}}
                                 initializeOxidize(memory, {{count}});
                             }
                         }
@@ -91,7 +49,7 @@ namespace Oxidize
                         [DllImport("TestOxidizeNative.dll", CallingConvention=CallingConvention.Cdecl)]
                         private static extern void initializeOxidize(IntPtr functionPointers, int count);
 
-                        {{string.Join(Environment.NewLine + "        ", items.Select(item => item.Delegates.Replace(Environment.NewLine, Environment.NewLine + "        ")))}}
+                        {{string.Join(Environment.NewLine + "        ", items.Select(item => item.Content.Replace(Environment.NewLine, Environment.NewLine + "        ")))}}
                     }
                 }
                 """;
@@ -99,5 +57,103 @@ namespace Oxidize
             Console.WriteLine(source);
             context.AddSource("OxidizeInitializer", source);
          }
+
+        private static InteropItem CreateMethodInterop(Compilation compilation, InteropMethod interop)
+        {
+            CSharpType type = CSharpType.FromSymbol(compilation, interop.Type);
+
+            string delegateName = $"{type.GetFullyQualifiedName().Replace(".", "_")}_{interop.Method.Name}";
+
+            CSharpType returnType = CSharpType.FromSymbol(compilation, interop.Method.ReturnType);
+            CSharpType interopReturnType = returnType.AsInteropType();
+            string interopReturnTypeString = interopReturnType.GetFullyQualifiedName();
+
+            var parameters = interop.Method.Parameters.Select(parameter => (Name: parameter.Name, Type: CSharpType.FromSymbol(compilation, parameter.Type)));
+            var interopParameters = parameters.Select(parameter => (Name: parameter.Name, Type: parameter.Type, InteropType: parameter.Type.AsInteropType()));
+
+            string callParameterList = string.Join(", ", interopParameters.Select(parameter => parameter.Type.GetConversionFromInteropType(parameter.Name)));
+
+            string invocationTarget = type.GetFullyQualifiedName();
+            if (!interop.Method.IsStatic)
+            {
+                interopParameters = new[] { (Name: "thiz", Type: type, InteropType: type.AsInteropType()) }.Concat(interopParameters);
+                invocationTarget = $"(({type.GetFullyQualifiedName()}?)ObjectHandleUtility.GetObjectFromHandle(thiz))";
+            }
+
+            string interopParameterList = string.Join(", ", interopParameters.Select(parameter => $"{parameter.InteropType.GetFullyQualifiedName()} {parameter.Name}"));
+
+
+            string implementation;
+            if (returnType.Symbol.SpecialType == SpecialType.System_Void)
+            {
+                implementation =
+                    $$"""
+                    {{invocationTarget}}.{{interop.Method.Name}}({{callParameterList}});
+                    """;
+            }
+            else
+            {
+                implementation =
+                    $$"""
+                    var result = {{invocationTarget}}.{{interop.Method.Name}}({{callParameterList}});
+                    return {{returnType.GetConversionToInteropType("result")}};
+                    """;
+            }
+
+            return new InteropItem
+            {
+                Name = delegateName,
+                Content =
+                    $$"""
+                    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+                    private delegate {{interopReturnTypeString}} {{delegateName}}Type({{interopParameterList}});
+                    private static readonly {{delegateName}}Type {{delegateName}}Delegate = new {{delegateName}}Type({{delegateName}});
+                    private static {{interopReturnTypeString}} {{delegateName}}({{interopParameterList}})
+                    {
+                      {{implementation.Replace(Environment.NewLine, Environment.NewLine + "  ")}}
+                    }
+                    """
+            };
+        }
+
+        private static InteropItem CreateConstructorInterop(Compilation compilation, InteropConstructor interop)
+        {
+            CSharpType type = CSharpType.FromSymbol(compilation, interop.Type);
+
+            string delegateName = $"{type.GetFullyQualifiedName().Replace(".", "_")}_Constructor";
+
+            CSharpType interopReturnType = type.AsInteropType();
+            string interopReturnTypeString = interopReturnType.GetFullyQualifiedName();
+
+            var parameters = interop.Constructor.Parameters.Select(parameter => (Name: parameter.Name, Type: CSharpType.FromSymbol(compilation, parameter.Type)));
+            var interopParameters = parameters.Select(parameter => (Name: parameter.Name, Type: parameter.Type, InteropType: parameter.Type.AsInteropType()));
+
+            string callParameterList = string.Join(", ", interopParameters.Select(parameter => parameter.Type.GetConversionFromInteropType(parameter.Name)));
+
+            string invocationTarget = type.GetFullyQualifiedName();
+            string interopParameterList = string.Join(", ", interopParameters.Select(parameter => $"{parameter.InteropType.GetFullyQualifiedName()} {parameter.Name}"));
+
+
+            string implementation =
+                $$"""
+                var result = new {{invocationTarget}}({{callParameterList}});
+                return {{type.GetConversionToInteropType("result")}};
+                """;
+
+            return new InteropItem
+            {
+                Name = delegateName,
+                Content =
+                    $$"""
+                    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+                    private delegate {{interopReturnTypeString}} {{delegateName}}Type({{interopParameterList}});
+                    private static readonly {{delegateName}}Type {{delegateName}}Delegate = new {{delegateName}}Type({{delegateName}});
+                    private static {{interopReturnTypeString}} {{delegateName}}({{interopParameterList}})
+                    {
+                      {{implementation.Replace(Environment.NewLine, Environment.NewLine + "  ")}}
+                    }
+                    """
+            };
+        }
     }
 }

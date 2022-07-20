@@ -76,6 +76,11 @@ public class OxidizeGenerator : IIncrementalGenerator
                     result.Add(item.type, current);
                 }
 
+                foreach (IMethodSymbol method in item.constructors)
+                {
+                    current.constructors.Add(method);
+                }
+
                 foreach (IMethodSymbol method in item.methods)
                 {
                     current.methods.Add(method);

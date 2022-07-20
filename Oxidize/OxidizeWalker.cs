@@ -73,6 +73,18 @@ namespace Oxidize
             this.AddType(type);
         }
 
+        public override void VisitObjectCreationExpression(ObjectCreationExpressionSyntax node)
+        {
+            base.VisitObjectCreationExpression(node);
+
+            ISymbol? symbol = this._semanticModel.GetSymbolInfo(node).Symbol;
+            IMethodSymbol? methodSymbol = symbol as IMethodSymbol;
+            if (methodSymbol == null)
+                return;
+
+            this.AddConstructor(methodSymbol);
+        }
+
         private GenerationItem AddType(ITypeSymbol type)
         {
             // Drop the nullability ("?") from the type if present.
@@ -118,6 +130,20 @@ namespace Oxidize
 
             // We also need to generate the property type.
             this.AddType(symbol.Type);
+
+            return item;
+        }
+
+        private GenerationItem AddConstructor(IMethodSymbol symbol)
+        {
+            GenerationItem item = this.AddType(symbol.ContainingType);
+            item.constructors.Add(symbol);
+
+            // We also need to generate the parameter types
+            foreach (IParameterSymbol parameter in symbol.Parameters)
+            {
+                this.AddType(parameter.Type);
+            }
 
             return item;
         }

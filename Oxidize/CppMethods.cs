@@ -86,7 +86,7 @@ namespace Oxidize
             }
 
             // Prepare a C# delegate and C++ function pointer to be used to call this method.
-            definition.interopFunctions.Add(new InteropFunction(
+            definition.interopMethods.Add(new InteropMethod(
                 managedType,
                 cppType,
                 method,
