@@ -42,4 +42,5 @@ set_target_properties(
         CXX_EXTENSIONS NO
 )
 
-# install(FILES $<TARGET_FILE:CesiumForUnityNative> DESTINATION ${CMAKE_SYSTEM_NAME})
+set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_LIST_DIR}/native)
+install(FILES $<TARGET_FILE:TestOxidizeNative> DESTINATION ${CMAKE_SYSTEM_NAME})

@@ -72,14 +72,20 @@ namespace Oxidize
             string initialize = $$"""
                 {{string.Join(Environment.NewLine, includes.Select(include => "#include " + include))}}
 
+                void start();
+                void stop();
+
                 extern "C" {
 
                 __declspec(dllexport) void initializeOxidize(void** functionPointers, std::int32_t count) {
                   // If this assertion fails, the C# and C++ layers are out of sync.
-                  assert(count == {{interopMethods.Count()}});
+                  assert(count == {{assignments.Count()}});
                 
                   std::int32_t i = 0;
                   {{string.Join(Environment.NewLine + "  ", assignments)}}
+
+                  // Invoke user startup code.
+                  start();
                 }
 
                 }
