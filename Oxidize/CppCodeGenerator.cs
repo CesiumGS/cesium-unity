@@ -158,17 +158,17 @@ namespace Oxidize
                         """);
 
                     // Add comparison to a null reference
-                    definition.declarations.Add($"bool operator==(std::nullptr_t) noexcept;");
-                    definition.declarations.Add($"bool operator!=(std::nullptr_t) noexcept;");
+                    definition.declarations.Add($"bool operator==(std::nullptr_t) const noexcept;");
+                    definition.declarations.Add($"bool operator!=(std::nullptr_t) const noexcept;");
                     definition.definitions.Add(
                         $$"""
-                        bool {{mainType.Name}}::operator==(std::nullptr_t) noexcept {
+                        bool {{mainType.Name}}::operator==(std::nullptr_t) const noexcept {
                           return this->_handle.GetRaw() == nullptr;
                         }
                         """);
                     definition.definitions.Add(
                         $$"""
-                        bool {{mainType.Name}}::operator!=(std::nullptr_t) noexcept {
+                        bool {{mainType.Name}}::operator!=(std::nullptr_t) const noexcept {
                           return this->_handle.GetRaw() != nullptr;
                         }
                         """);

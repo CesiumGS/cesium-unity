@@ -29,9 +29,14 @@ namespace Oxidize
         private static void GenerateMethod(CppGenerationContext context, ITypeSymbol managedType, CppType cppType, IPropertySymbol property, IMethodSymbol method, TypeDefinition definition)
         {
             string modifiers = "";
+            string afterModifiers = "";
             if (method.IsStatic)
             {
                 modifiers += "static ";
+            }
+            else
+            {
+                afterModifiers += " const";
             }
 
             CppType returnType = CppType.FromCSharp(context, method.ReturnType).AsReturnType();
@@ -68,7 +73,7 @@ namespace Oxidize
 
             // Add the method declaration
             var parameterStrings = parameters.Select(parameter => $"{parameter.Type.GetFullyQualifiedName()} {parameter.Name}");
-            definition.declarations.Add($"{modifiers}{returnType.GetFullyQualifiedName()} {property.Name}({string.Join(", ", parameterStrings)});");
+            definition.declarations.Add($"{modifiers}{returnType.GetFullyQualifiedName()} {property.Name}({string.Join(", ", parameterStrings)}){afterModifiers};");
 
             // Add the method definition
             var parameterPassStrings = interopParameters.Select(parameter => parameter.Type.GetConversionToInteropType(context, parameter.CallSiteName));
@@ -77,7 +82,7 @@ namespace Oxidize
             {
                 definition.definitions.Add(
                     $$"""
-                    {{returnType.GetFullyQualifiedName()}} {{cppType.GetFullyQualifiedName(false)}}::{{property.Name}}({{string.Join(", ", parameterStrings)}}) {
+                    {{returnType.GetFullyQualifiedName()}} {{cppType.GetFullyQualifiedName(false)}}::{{property.Name}}({{string.Join(", ", parameterStrings)}}){{afterModifiers}} {
                         Property_{{method.Name}}({{string.Join(", ", parameterPassStrings)}});
                     }
                     """);
@@ -86,7 +91,7 @@ namespace Oxidize
             {
                 definition.definitions.Add(
                     $$"""
-                    {{returnType.GetFullyQualifiedName()}} {{cppType.GetFullyQualifiedName(false)}}::{{property.Name}}({{string.Join(", ", parameterStrings)}}) {
+                    {{returnType.GetFullyQualifiedName()}} {{cppType.GetFullyQualifiedName(false)}}::{{property.Name}}({{string.Join(", ", parameterStrings)}}){{afterModifiers}} {
                         auto result = Property_{{method.Name}}({{string.Join(", ", parameterPassStrings)}});
                         return {{returnType.GetConversionFromInteropType(context, "result")}};
                     }
