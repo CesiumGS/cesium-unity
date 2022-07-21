@@ -148,6 +148,30 @@ namespace Oxidize
                     {{mainType.Name}}::{{mainType.Name}}({{objectHandleType.GetFullyQualifiedName()}}&& handle) noexcept :
                       _handle(std::move(handle)) {}
                     """);
+                    
+                    // Add constructor for a null reference
+                    definition.declarations.Add($"{mainType.Name}(std::nullptr_t) noexcept;");
+                    definition.definitions.Add(
+                        $$"""
+                        {{mainType.Name}}::{{mainType.Name}}(std::nullptr_t) noexcept : _handle(nullptr) {
+                        }
+                        """);
+
+                    // Add comparison to a null reference
+                    definition.declarations.Add($"bool operator==(std::nullptr_t) noexcept;");
+                    definition.declarations.Add($"bool operator!=(std::nullptr_t) noexcept;");
+                    definition.definitions.Add(
+                        $$"""
+                        bool {{mainType.Name}}::operator==(std::nullptr_t) noexcept {
+                          return this->_handle.GetRaw() == nullptr;
+                        }
+                        """);
+                    definition.definitions.Add(
+                        $$"""
+                        bool {{mainType.Name}}::operator!=(std::nullptr_t) noexcept {
+                          return this->_handle.GetRaw() != nullptr;
+                        }
+                        """);
 
                     definition.declarations.Add($"const {objectHandleType.GetFullyQualifiedName()}& GetHandle() const;");
                     definition.definitions.Add(
