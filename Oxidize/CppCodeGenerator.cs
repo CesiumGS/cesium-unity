@@ -113,56 +113,69 @@ namespace Oxidize
             TypeDefinition definition = new TypeDefinition();
             definition.Type = itemType;
 
-            itemType.AddSourceIncludesToSet(definition.cppIncludes);
-
-            if (!item.type.IsStatic)
+            GenerationItem? current = item;
+            while (current != null)
             {
-                // Instances of this class may exist, so we need a field to hold the object handle and
-                // a constructor to create this wrapper from a handle.
-                CppType objectHandleType = CppObjectHandle.GetCppType(this.Options);
-                objectHandleType.AddForwardDeclarationsToSet(definition.forwardDeclarations);
-                objectHandleType.AddSourceIncludesToSet(definition.cppIncludes);
+                GenerateType(item, current, itemType, definition);
+                current = current.baseClass;
+            }
 
-                // We need a full definition for ObjectHandle even in the header in order to declare the field.
-                objectHandleType.AddSourceIncludesToSet(definition.headerIncludes);
-                definition.privateDeclarations.Add($"{objectHandleType.GetFullyQualifiedName()} _handle;");
+            return definition;
+        }
 
-                definition.cppIncludes.Add("<utility>"); // for std::move
-                definition.declarations.Add($"explicit {itemType.Name}({objectHandleType.GetFullyQualifiedName()}&& handle) noexcept;");
-                definition.definitions.Add(
-                    $$"""
-                    {{itemType.Name}}::{{itemType.Name}}({{objectHandleType.GetFullyQualifiedName()}}&& handle) noexcept :
+        private void GenerateType(GenerationItem mainItem, GenerationItem currentItem, CppType mainType, TypeDefinition definition)
+        {
+            mainType.AddSourceIncludesToSet(definition.cppIncludes);
+
+            if (mainItem == currentItem)
+            {
+                if (!mainItem.type.IsStatic)
+                {
+                    // Instances of this class may exist, so we need a field to hold the object handle and
+                    // a constructor to create this wrapper from a handle.
+                    CppType objectHandleType = CppObjectHandle.GetCppType(this.Options);
+                    objectHandleType.AddForwardDeclarationsToSet(definition.forwardDeclarations);
+                    objectHandleType.AddSourceIncludesToSet(definition.cppIncludes);
+
+                    // We need a full definition for ObjectHandle even in the header in order to declare the field.
+                    objectHandleType.AddSourceIncludesToSet(definition.headerIncludes);
+                    definition.privateDeclarations.Add($"{objectHandleType.GetFullyQualifiedName()} _handle;");
+
+                    definition.cppIncludes.Add("<utility>"); // for std::move
+                    definition.declarations.Add($"explicit {mainType.Name}({objectHandleType.GetFullyQualifiedName()}&& handle) noexcept;");
+                    definition.definitions.Add(
+                        $$"""
+                    {{mainType.Name}}::{{mainType.Name}}({{objectHandleType.GetFullyQualifiedName()}}&& handle) noexcept :
                       _handle(std::move(handle)) {}
                     """);
 
-                definition.declarations.Add($"const {objectHandleType.GetFullyQualifiedName()}& GetHandle() const;");
-                definition.definitions.Add(
-                    $$"""
-                    const {{objectHandleType.GetFullyQualifiedName()}}& {{itemType.Name}}::GetHandle() const {
+                    definition.declarations.Add($"const {objectHandleType.GetFullyQualifiedName()}& GetHandle() const;");
+                    definition.definitions.Add(
+                        $$"""
+                    const {{objectHandleType.GetFullyQualifiedName()}}& {{mainType.Name}}::GetHandle() const {
                         return this->_handle;
                     }
                     """);
 
-                // Generate constructors
-                CppConstructors.GenerateConstructors(this.Options, item, definition);
+                    // Generate constructors
+                    CppConstructors.GenerateConstructors(this.Options, mainItem, definition);
 
-                // Also allow up- and down-casting this instance to related types.
-                CppCasts.GenerateDowncasts(this.Options, item, definition);
-                CppCasts.GenerateUpcasts(this.Options, item, definition);
+                    // Also allow up- and down-casting this instance to related types.
+                    CppCasts.GenerateDowncasts(this.Options, mainItem, definition);
+                    CppCasts.GenerateUpcasts(this.Options, mainItem, definition);
+                }
+                else
+                {
+                    // Instances of wrappers for static classes can never be constructed.
+                    definition.declarations.Add($"{mainType.Name}() = delete;");
+                }
+
+                definition.headerIncludes.Add("<cstdint>");
+                definition.privateDeclarations.Add("friend void ::initializeOxidize(void** functionPointers, std::int32_t count);");
             }
-            else
-            {
-                // Instances of wrappers for static classes can never be constructed.
-                definition.declarations.Add($"{itemType.Name}() = delete;");
-            }
 
-            definition.headerIncludes.Add("<cstdint>");
-            definition.privateDeclarations.Add("friend void ::initializeOxidize(void** functionPointers, std::int32_t count);");
-
-            CppProperties.GenerateProperties(this.Options, item, definition);
-            CppMethods.GenerateMethods(this.Options, item, definition);
-
-            return definition;
+            CppProperties.GenerateProperties(this.Options, mainItem, currentItem, definition);
+            CppMethods.GenerateMethods(this.Options, mainItem, currentItem, definition);
         }
 
         public void WriteType(TypeDefinition? definition)

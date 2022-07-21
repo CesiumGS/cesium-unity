@@ -8,13 +8,13 @@ namespace Oxidize
 {
     internal class CppMethods
     {
-        public static void GenerateMethods(CppGenerationContext context, GenerationItem item, TypeDefinition definition)
+        public static void GenerateMethods(CppGenerationContext context, GenerationItem mainItem, GenerationItem currentItem, TypeDefinition definition)
         {
-            CppType cppType = CppType.FromCSharp(context, item.type);
+            CppType cppType = CppType.FromCSharp(context, mainItem.type);
 
-            foreach (IMethodSymbol method in item.methods)
+            foreach (IMethodSymbol method in currentItem.methods)
             {
-                GenerateMethod(context, item.type, cppType, method, definition);
+                GenerateMethod(context, mainItem.type, cppType, method, definition);
             }
         }
 

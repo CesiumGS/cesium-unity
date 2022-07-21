@@ -7,13 +7,13 @@ namespace Oxidize
 {
     internal class CppProperties
     {
-        public static void GenerateProperties(CppGenerationContext context, GenerationItem item, TypeDefinition definition)
+        public static void GenerateProperties(CppGenerationContext context, GenerationItem mainItem, GenerationItem currentItem, TypeDefinition definition)
         {
-            CppType cppType = CppType.FromCSharp(context, item.type);
+            CppType cppType = CppType.FromCSharp(context, mainItem.type);
 
-            foreach (IPropertySymbol property in item.properties)
+            foreach (IPropertySymbol property in currentItem.properties)
             {
-                GenerateProperty(context, item.type, cppType, property, definition);
+                GenerateProperty(context, mainItem.type, cppType, property, definition);
             }
         }
 
