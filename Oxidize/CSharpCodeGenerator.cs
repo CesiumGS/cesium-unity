@@ -56,7 +56,7 @@ namespace Oxidize
 
             Console.WriteLine(source);
             context.AddSource("OxidizeInitializer", source);
-         }
+        }
 
         private static InteropItem CreateMethodInterop(Compilation compilation, InteropMethod interop)
         {
@@ -77,15 +77,34 @@ namespace Oxidize
             if (!interop.Method.IsStatic)
             {
                 interopParameters = new[] { (Name: "thiz", Type: type, InteropType: type.AsInteropType()) }.Concat(interopParameters);
-                invocationTarget = $"(({type.GetFullyQualifiedName()}?)ObjectHandleUtility.GetObjectFromHandle(thiz))";
+                invocationTarget = $"(({type.GetFullyQualifiedName()})ObjectHandleUtility.GetObjectFromHandle(thiz)!)";
             }
 
             string interopParameterList = string.Join(", ", interopParameters.Select(parameter => $"{parameter.InteropType.GetFullyQualifiedName()} {parameter.Name}"));
 
 
             string implementation;
-            if (returnType.Symbol.SpecialType == SpecialType.System_Void)
+            IPropertySymbol? property = interop.Method.AssociatedSymbol as IPropertySymbol;
+            if (property != null && ReferenceEquals(property.GetMethod, interop.Method))
             {
+                // A property getter.
+                implementation =
+                    $$"""
+                    var result = {{invocationTarget}}.{{property.Name}};
+                    return {{returnType.GetConversionToInteropType("result")}};
+                    """;
+            }
+            else if (property != null && ReferenceEquals(property.SetMethod, interop.Method))
+            {
+                // A property setter.
+                implementation =
+                    $$"""
+                    {{invocationTarget}}.{{property.Name}} = {{callParameterList}};
+                    """;
+            }
+            else if (returnType.Symbol.SpecialType == SpecialType.System_Void)
+            {
+                // Regular method returning void.
                 implementation =
                     $$"""
                     {{invocationTarget}}.{{interop.Method.Name}}({{callParameterList}});
@@ -93,6 +112,7 @@ namespace Oxidize
             }
             else
             {
+                // Regular method with a return value.
                 implementation =
                     $$"""
                     var result = {{invocationTarget}}.{{interop.Method.Name}}({{callParameterList}});
