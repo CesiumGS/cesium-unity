@@ -1,7 +1,4 @@
 ﻿using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Oxidize
 {
@@ -19,6 +16,8 @@ namespace Oxidize
 
         private const string source =
             """
+            using System;
+
             namespace Oxidize
             {
                 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]

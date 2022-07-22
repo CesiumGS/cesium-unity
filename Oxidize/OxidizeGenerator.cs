@@ -2,6 +2,7 @@
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
 
 namespace Oxidize;
@@ -37,7 +38,8 @@ public class OxidizeGenerator : IIncrementalGenerator
         // Process the generation items, for example, linking them together.
         IncrementalValuesProvider<GenerationItem> processedGenerationItems = generationItems.SelectMany(Process);
 
-        var cppGenerator = context.CompilationProvider.Select(CreateCppGenerator);
+        var cppGenerator = context.CompilationProvider.Combine(context.AnalyzerConfigOptionsProvider).Select((pair, _) => CreateCppGenerator(pair.Left, pair.Right));
+        //var cppGenerator = context.CompilationProvider.Select(CreateCppGenerator);
         var withCppGenerator = processedGenerationItems.Combine(cppGenerator);
 
         // Generate C++ code.
@@ -166,10 +168,30 @@ public class OxidizeGenerator : IIncrementalGenerator
         return items.Values;
     }
 
-    private static CppCodeGenerator CreateCppGenerator(Compilation compilation, CancellationToken token)
+    private static CppCodeGenerator CreateCppGenerator(Compilation compilation, AnalyzerConfigOptionsProvider options)
     {
         CppGenerationContext cppContext = new CppGenerationContext(compilation);
-        cppContext.BaseNamespace = "TestOxidize";
+        
+        string? projectDir;
+        if (!options.GlobalOptions.TryGetValue("build_property.projectdir", out projectDir))
+            projectDir = "";
+
+        string? cppHeaderPath;
+        if (!options.GlobalOptions.TryGetValue("cpp_header_path", out cppHeaderPath))
+            cppHeaderPath = "generated/include";
+
+        string? cppSourcePath;
+        if (!options.GlobalOptions.TryGetValue("cpp_source_path", out cppSourcePath))
+            cppSourcePath = "generated/src";
+
+        cppContext.OutputHeaderDirectory = Path.GetFullPath(Path.Combine(projectDir, cppHeaderPath));
+        cppContext.OutputSourceDirectory = Path.GetFullPath(Path.Combine(projectDir, cppSourcePath));
+
+        string? baseNamespace;
+        if (!options.GlobalOptions.TryGetValue("base_namespace", out baseNamespace))
+            baseNamespace = "";
+
+        cppContext.BaseNamespace = baseNamespace;
 
         return new CppCodeGenerator(cppContext);
     }

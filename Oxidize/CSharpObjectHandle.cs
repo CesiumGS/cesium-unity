@@ -16,6 +16,7 @@ namespace Oxidize
 
         private const string source =
             """
+            using System;
             using System.Runtime.InteropServices;
 
             namespace Oxidize

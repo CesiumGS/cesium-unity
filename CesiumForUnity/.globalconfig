@@ -1,0 +1,11 @@
+﻿is_global = true
+
+# The output path for generated C++ header files.
+# If this is relative, it is relative to the project directory.
+cpp_header_path = generatedized/include
+
+# The output path for generated C++ source files.
+# If this is relative, it is relative to the project directory.
+cpp_source_path = generatedized/src
+
+#base_namespace = Managed

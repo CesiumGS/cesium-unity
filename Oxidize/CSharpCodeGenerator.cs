@@ -29,6 +29,7 @@ namespace Oxidize
 
             string source =
                 $$"""
+                using System;
                 using System.Runtime.InteropServices;
 
                 namespace Oxidize
