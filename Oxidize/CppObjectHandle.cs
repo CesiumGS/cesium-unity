@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Xml.Linq;
 
 namespace Oxidize
 {
@@ -13,6 +14,11 @@ namespace Oxidize
             if (context.BaseNamespace.Length > 0)
                 ns.Add(context.BaseNamespace);
             ns.Add("Oxidize");
+
+            // If the first two namespaces are identical, remove the duplication.
+            // This is to avoid `Oxidize::Oxidize`.
+            if (ns.Count >= 2 && ns[0] == ns[1])
+                ns.RemoveAt(0);
 
             return new CppType(CppTypeKind.ClassWrapper, ns, "ObjectHandle", null, 0);
         }

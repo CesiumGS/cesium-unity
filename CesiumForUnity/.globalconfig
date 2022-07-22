@@ -2,10 +2,13 @@
 
 # The output path for generated C++ header files.
 # If this is relative, it is relative to the project directory.
-cpp_header_path = generatedized/include
+cpp_header_path = ../CesiumForUnityNative/generated/include
 
 # The output path for generated C++ source files.
 # If this is relative, it is relative to the project directory.
-cpp_source_path = generatedized/src
+cpp_source_path = ../CesiumForUnityNative/generated/src
 
-#base_namespace = Managed
+# The namespace with which to prefix all C# namespaces. For example, if this
+# property is set to "Oxidize", then anything in the "System" namespaces in C#
+# will be found in the "Oxidize::System" namespace in C++.
+base_namespace = Oxidize

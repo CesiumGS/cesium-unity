@@ -1,23 +1,27 @@
 #include "CameraManager.h"
 
-#include "Bindings.h"
-
 #include <CesiumGeospatial/Ellipsoid.h>
 #include <CesiumGeospatial/Transforms.h>
 #include <CesiumUtility/Math.h>
 
+#include <Oxidize/UnityEditor/SceneView.h>
+#include <Oxidize/UnityEngine/Camera.h>
+#include <Oxidize/UnityEngine/GameObject.h>
+#include <Oxidize/UnityEngine/Transform.h>
+#include <Oxidize/UnityEngine/Vector3.h>
+
 using namespace Cesium3DTilesSelection;
 using namespace CesiumGeospatial;
 using namespace CesiumUtility;
-using namespace UnityEditor;
-using namespace UnityEngine;
+using namespace Oxidize::UnityEditor;
+using namespace Oxidize::UnityEngine;
 
 namespace CesiumForUnity {
 
 namespace {
 
 ViewState unityCameraToViewState(Camera& camera) {
-  Transform transform = camera.GetTransform();
+  Transform transform = camera.transform();
 
   glm::dvec3 origin = Ellipsoid::WGS84.cartographicToCartesian(
       Cartographic::fromDegrees(144.96133, -37.81510, 2250.0));
@@ -29,7 +33,7 @@ ViewState unityCameraToViewState(Camera& camera) {
       glm::dvec4(0.0, 0.0, 0.0, 1.0));
   glm::dmat4 unityToEcef = enuToFixed * swapYandZ;
 
-  Vector3 cameraPositionUnity = transform.GetPosition();
+  Vector3 cameraPositionUnity = transform.position();
   glm::dvec3 cameraPositionEcef = glm::dvec3(
       unityToEcef * glm::dvec4(
                         cameraPositionUnity.x,
@@ -37,7 +41,7 @@ ViewState unityCameraToViewState(Camera& camera) {
                         cameraPositionUnity.z,
                         1.0));
 
-  Vector3 cameraDirectionUnity = transform.GetForward();
+  Vector3 cameraDirectionUnity = transform.forward();
   glm::dvec3 cameraDirectionEcef = glm::dvec3(
       unityToEcef * glm::dvec4(
                         cameraDirectionUnity.x,
@@ -45,19 +49,19 @@ ViewState unityCameraToViewState(Camera& camera) {
                         cameraDirectionUnity.z,
                         0.0));
 
-  Vector3 cameraUpUnity = transform.GetUp();
+  Vector3 cameraUpUnity = transform.up();
   glm::dvec3 cameraUpEcef = glm::dvec3(
       unityToEcef *
       glm::dvec4(cameraUpUnity.x, cameraUpUnity.y, cameraUpUnity.z, 0.0));
 
-  double verticalFOV = Math::degreesToRadians(camera.GetFieldOfView());
+  double verticalFOV = Math::degreesToRadians(camera.fieldOfView());
 
   return ViewState::create(
       cameraPositionEcef,
       cameraDirectionEcef,
       cameraUpEcef,
-      glm::dvec2(camera.GetPixelWidth(), camera.GetPixelHeight()),
-      verticalFOV * camera.GetAspect(),
+      glm::dvec2(camera.pixelWidth(), camera.pixelHeight()),
+      verticalFOV * camera.aspect(),
       verticalFOV);
 }
 
@@ -66,14 +70,14 @@ ViewState unityCameraToViewState(Camera& camera) {
 std::vector<ViewState> CameraManager::getAllCameras(GameObject& context) {
   std::vector<ViewState> result;
 
-  Camera camera = Camera::GetMain();
+  Camera camera = Camera::main();
   if (camera != nullptr) {
     result.emplace_back(unityCameraToViewState(camera));
   }
 
-  SceneView lastActiveEditorView = SceneView::GetLastActiveSceneView();
+  SceneView lastActiveEditorView = SceneView::lastActiveSceneView();
   if (lastActiveEditorView != nullptr) {
-    Camera editorCamera = lastActiveEditorView.GetCamera();
+    Camera editorCamera = lastActiveEditorView.camera();
     if (camera != nullptr) {
       result.emplace_back(unityCameraToViewState(editorCamera));
     }

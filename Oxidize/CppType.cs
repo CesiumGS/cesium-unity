@@ -86,11 +86,14 @@ namespace Oxidize
             while (ns != null)
             {
                 if (ns.Name.Length > 0)
-                {
                     namespaces.Add(ns.Name);
-                }
                 ns = ns.ContainingNamespace;
             }
+
+            // If the first two namespaces are identical, remove the duplication.
+            // This is to avoid `Oxidize::Oxidize`.
+            if (namespaces.Count >= 2 && namespaces[0] == namespaces[1])
+                namespaces.RemoveAt(0);
 
             // TODO: generics
 
