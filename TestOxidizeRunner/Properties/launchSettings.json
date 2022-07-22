@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "TestOxidizeRunner": {
-      "commandName": "Project",
-      "nativeDebugging": true
-    }
-  }
-}
