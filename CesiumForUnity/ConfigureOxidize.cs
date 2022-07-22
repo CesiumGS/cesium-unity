@@ -14,6 +14,7 @@ internal partial class ConfigureOxidize
         Vector3 u = t.up;
         Vector3 f = t.forward;
 
+        t.position = new Vector3();
         Vector3 p = t.position;
         float x = p.x;
         float y = p.y;
@@ -23,7 +24,6 @@ internal partial class ConfigureOxidize
         int pixelHeight = c.pixelHeight;
         int pixelWidth = c.pixelWidth;
         float aspect = c.aspect;
-        t.position = new Vector3();
         //IFormattable f = new Vector3();
         //IEquatable<Vector3> f2 = new Vector3();
 

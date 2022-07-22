@@ -40,8 +40,8 @@ void Cesium3DTileset::Update() {
     return;
   }
 
-  std::vector<ViewState> viewStates =
-      CameraManager::getAllCameras(this->GetGameObject());
+  std::vector<ViewState> viewStates = {};
+      //CameraManager::getAllCameras(this->GetGameObject());
 
   const ViewUpdateResult& updateResult =
       this->_pTileset->updateView(viewStates);

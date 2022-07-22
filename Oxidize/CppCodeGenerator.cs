@@ -16,35 +16,6 @@ namespace Oxidize
             this.Options = options;
         }
 
-        //public void Generate(GenerationItem item)
-        //{
-        //    Console.WriteLine("Generating bindings for " + item.type.ToDisplayString());
-        //    if (item.baseClass != null)
-        //    {
-        //        Console.WriteLine("  Base Class: " + item.baseClass.type.ToDisplayString());
-        //    }
-        //    Console.WriteLine("  Interfaces");
-        //    foreach (GenerationItem anInterface in item.interfaces)
-        //    {
-        //        Console.WriteLine("    " + anInterface.type.ToDisplayString());
-        //    }
-        //    Console.WriteLine("  Properties");
-        //    foreach (IPropertySymbol property in item.properties)
-        //    {
-        //        Console.WriteLine("    " + property.ToDisplayString());
-        //    }
-        //    Console.WriteLine("  Methods");
-        //    foreach (IMethodSymbol method in item.methods)
-        //    {
-        //        Console.WriteLine("    " + method.ToDisplayString());
-        //    }
-
-        //    if (item.type.IsReferenceType)
-        //    {
-        //        this.GenerateClass(item);
-        //    }
-        //}
-
         public void WriteInitializeFunction(ImmutableArray<TypeDefinition?> typeDefinitions)
         {
             var interopConstructors = typeDefinitions.SelectMany(typeDefinition => typeDefinition == null ? new List<InteropConstructor>() : typeDefinition.interopConstructors);
@@ -131,62 +102,73 @@ namespace Oxidize
             {
                 if (!mainItem.type.IsStatic)
                 {
-                    // Instances of this class may exist, so we need a field to hold the object handle and
-                    // a constructor to create this wrapper from a handle.
-                    CppType objectHandleType = CppObjectHandle.GetCppType(this.Options);
-                    objectHandleType.AddForwardDeclarationsToSet(definition.forwardDeclarations);
-                    objectHandleType.AddSourceIncludesToSet(definition.cppIncludes);
+                    if (mainType.Kind == CppTypeKind.ClassWrapper)
+                    {
+                        // Instances of this class may exist, so we need a field to hold the object handle and
+                        // a constructor to create this wrapper from a handle.
+                        CppType objectHandleType = CppObjectHandle.GetCppType(this.Options);
+                        objectHandleType.AddForwardDeclarationsToSet(definition.forwardDeclarations);
+                        objectHandleType.AddSourceIncludesToSet(definition.cppIncludes);
 
-                    // We need a full definition for ObjectHandle even in the header in order to declare the field.
-                    objectHandleType.AddSourceIncludesToSet(definition.headerIncludes);
-                    definition.privateDeclarations.Add($"{objectHandleType.GetFullyQualifiedName()} _handle;");
+                        // We need a full definition for ObjectHandle even in the header in order to declare the field.
+                        objectHandleType.AddSourceIncludesToSet(definition.headerIncludes);
+                        definition.privateDeclarations.Add($"{objectHandleType.GetFullyQualifiedName()} _handle;");
 
-                    definition.cppIncludes.Add("<utility>"); // for std::move
-                    definition.declarations.Add($"explicit {mainType.Name}({objectHandleType.GetFullyQualifiedName()}&& handle) noexcept;");
-                    definition.definitions.Add(
-                        $$"""
-                    {{mainType.Name}}::{{mainType.Name}}({{objectHandleType.GetFullyQualifiedName()}}&& handle) noexcept :
-                      _handle(std::move(handle)) {}
-                    """);
-                    
-                    // Add constructor for a null reference
-                    definition.declarations.Add($"{mainType.Name}(std::nullptr_t) noexcept;");
-                    definition.definitions.Add(
-                        $$"""
-                        {{mainType.Name}}::{{mainType.Name}}(std::nullptr_t) noexcept : _handle(nullptr) {
-                        }
-                        """);
+                        definition.cppIncludes.Add("<utility>"); // for std::move
+                        definition.declarations.Add($"explicit {mainType.Name}({objectHandleType.GetFullyQualifiedName()}&& handle) noexcept;");
+                        definition.definitions.Add(
+                            $$"""
+                            {{mainType.Name}}::{{mainType.Name}}({{objectHandleType.GetFullyQualifiedName()}}&& handle) noexcept :
+                              _handle(std::move(handle)) {}
+                            """);
 
-                    // Add comparison to a null reference
-                    definition.declarations.Add($"bool operator==(std::nullptr_t) const noexcept;");
-                    definition.declarations.Add($"bool operator!=(std::nullptr_t) const noexcept;");
-                    definition.definitions.Add(
-                        $$"""
-                        bool {{mainType.Name}}::operator==(std::nullptr_t) const noexcept {
-                          return this->_handle.GetRaw() == nullptr;
-                        }
-                        """);
-                    definition.definitions.Add(
-                        $$"""
-                        bool {{mainType.Name}}::operator!=(std::nullptr_t) const noexcept {
-                          return this->_handle.GetRaw() != nullptr;
-                        }
-                        """);
+                        // Add constructor for a null reference
+                        definition.declarations.Add($"{mainType.Name}(std::nullptr_t) noexcept;");
+                        definition.definitions.Add(
+                            $$"""
+                            {{mainType.Name}}::{{mainType.Name}}(std::nullptr_t) noexcept : _handle(nullptr) {
+                            }
+                            """);
 
-                    definition.declarations.Add($"const {objectHandleType.GetFullyQualifiedName()}& GetHandle() const;");
-                    definition.definitions.Add(
-                        $$"""
-                    const {{objectHandleType.GetFullyQualifiedName()}}& {{mainType.Name}}::GetHandle() const {
-                        return this->_handle;
+                        // Add comparison to a null reference
+                        definition.declarations.Add($"bool operator==(std::nullptr_t) const noexcept;");
+                        definition.declarations.Add($"bool operator!=(std::nullptr_t) const noexcept;");
+                        definition.definitions.Add(
+                            $$"""
+                            bool {{mainType.Name}}::operator==(std::nullptr_t) const noexcept {
+                              return this->_handle.GetRaw() == nullptr;
+                            }
+                            """);
+                        definition.definitions.Add(
+                            $$"""
+                            bool {{mainType.Name}}::operator!=(std::nullptr_t) const noexcept {
+                              return this->_handle.GetRaw() != nullptr;
+                            }
+                            """);
+
+                        definition.declarations.Add($"const {objectHandleType.GetFullyQualifiedName()}& GetHandle() const;");
+                        definition.definitions.Add(
+                            $$"""
+                            const {{objectHandleType.GetFullyQualifiedName()}}& {{mainType.Name}}::GetHandle() const {
+                                return this->_handle;
+                            }
+                            """);
                     }
-                    """);
+                    else if (mainType.Kind == CppTypeKind.BlittableStruct)
+                    {
+                        CppFields.GenerateFields(this.Options, mainItem, definition);
+                    }
 
-                    // Generate constructors
-                    CppConstructors.GenerateConstructors(this.Options, mainItem, definition);
+                    // TODO: we're currently not generating this for value types, which isn't quite right.
+                    if (mainType.Kind == CppTypeKind.ClassWrapper)
+                    {
+                        // Generate constructors
+                        CppConstructors.GenerateConstructors(this.Options, mainItem, definition);
 
-                    // Also allow up- and down-casting this instance to related types.
-                    CppCasts.GenerateDowncasts(this.Options, mainItem, definition);
-                    CppCasts.GenerateUpcasts(this.Options, mainItem, definition);
+                        // Also allow up- and down-casting this instance to related types.
+                        CppCasts.GenerateDowncasts(this.Options, mainItem, definition);
+                        CppCasts.GenerateUpcasts(this.Options, mainItem, definition);
+                    }
                 }
                 else
                 {

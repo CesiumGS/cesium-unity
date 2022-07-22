@@ -97,7 +97,12 @@ namespace Oxidize
 
             // TODO: generics
 
-            return new CppType(CppTypeKind.ClassWrapper, namespaces, type.Name, null, 0);
+            if (type.IsReferenceType)
+                return new CppType(CppTypeKind.ClassWrapper, namespaces, type.Name, null, 0);
+            else if (IsBlittableStruct(context, type))
+                return new CppType(CppTypeKind.BlittableStruct, namespaces, type.Name, null, 0);
+            else
+                return new CppType(CppTypeKind.NonBlittableStructWrapper, namespaces, type.Name, null, 0);
         }
 
         public CppType(
@@ -286,30 +291,58 @@ namespace Oxidize
             return new CppType(CppTypeKind.Primitive, cppNamespaces, cppTypeName, null, flags);
         }
 
-        //private static bool IsBlittableStruct(CppGenerationContext options, ITypeSymbol type)
-        //{
-        //    if (!type.IsValueType)
-        //        return false;
+        /// <summary>
+        /// Determines if the given type is a blittable value type (struct).
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="type"></param>
+        /// <returns>True if the struct is blittable.</returns>
+        private static bool IsBlittableStruct(CppGenerationContext context, ITypeSymbol type)
+        {
+            if (!type.IsValueType)
+                return false;
 
-        //    string? primitiveType = TranslatePrimitiveType(options, type);
-        //    if (primitiveType != null)
-        //        return true;
+            if (IsBlittablePrimitive(type))
+                return true;
 
-        //    ImmutableArray<ISymbol> members = type.GetMembers();
-        //    foreach (ISymbol member in members)
-        //    {
-        //        if (member.Kind != SymbolKind.Field)
-        //            continue;
+            ImmutableArray<ISymbol> members = type.GetMembers();
+            foreach (ISymbol member in members)
+            {
+                if (member.Kind != SymbolKind.Field)
+                    continue;
 
-        //        ITypeSymbol? memberType = member as ITypeSymbol;
-        //        if (memberType == null)
-        //            continue;
+                ITypeSymbol? memberType = member as ITypeSymbol;
+                if (memberType == null)
+                    continue;
 
-        //        if (!IsBlittableStruct(options, memberType))
-        //            return false;
-        //    }
+                if (!IsBlittableStruct(context, memberType))
+                    return false;
+            }
 
-        //    return true;
-        //}
+            return true;
+        }
+
+        private static bool IsBlittablePrimitive(ITypeSymbol type)
+        {
+            switch (type.SpecialType)
+            {
+                case SpecialType.System_Byte:
+                case SpecialType.System_SByte:
+                case SpecialType.System_Int16:
+                case SpecialType.System_UInt16:
+                case SpecialType.System_Int32:
+                case SpecialType.System_UInt32:
+                case SpecialType.System_Int64:
+                case SpecialType.System_UInt64:
+                case SpecialType.System_IntPtr:
+                case SpecialType.System_UIntPtr:
+                case SpecialType.System_Single:
+                case SpecialType.System_Double:
+                case SpecialType.System_Boolean:
+                    return true;
+                default:
+                    return false;
+            }
+        }
     }
 }
