@@ -18,6 +18,10 @@ namespace Oxidize
             }
         }
 
+        public static void Generate(CppGenerationContext context, GenerationItem mainItem, GenerationItem currentItem, GeneratedResult result)
+        {
+        }
+
         public static void GenerateMethod(CppGenerationContext context, ITypeSymbol managedType, CppType cppType, IMethodSymbol method, TypeDefinition definition)
         {
             string modifiers = "";

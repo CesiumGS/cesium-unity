@@ -17,6 +17,10 @@ namespace Oxidize
             }
         }
 
+        public static void Generate(CppGenerationContext context, GenerationItem mainItem, GenerationItem currentItem, GeneratedResult result)
+        {
+        }
+
         public static void GenerateProperty(CppGenerationContext context, ITypeSymbol itemType, CppType cppType, IPropertySymbol property, TypeDefinition definition)
         {
             if (property.GetMethod != null)

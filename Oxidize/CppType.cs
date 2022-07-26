@@ -6,15 +6,6 @@ using System.Text;
 
 namespace Oxidize
 {
-    internal enum CppTypeKind
-    {
-        Unknown,
-        Primitive,
-        BlittableStruct,
-        NonBlittableStructWrapper,
-        ClassWrapper
-    }
-
     [Flags]
     internal enum CppTypeFlags
     {
@@ -33,22 +24,25 @@ namespace Oxidize
         public readonly string Name;
         public readonly IReadOnlyCollection<CppType>? GenericArguments;
         public readonly CppTypeFlags Flags;
+        public readonly string? HeaderOverride;
 
         private static readonly string[] StandardNamespace = { "std" };
         private static readonly string[] NoNamespace = { };
 
         private const string IncludeCStdInt = "<cstdint>";
+        private const string IncludeCStdDef = "<cstddef>";
 
-        private static readonly CppType Int16 = CreatePrimitiveType(StandardNamespace, "int16_t");
-        private static readonly CppType Int32 = CreatePrimitiveType(StandardNamespace, "int32_t");
-        private static readonly CppType Int64 = CreatePrimitiveType(StandardNamespace, "int64_t");
-        private static readonly CppType UInt16 = CreatePrimitiveType(StandardNamespace, "uint16_t");
-        private static readonly CppType UInt32 = CreatePrimitiveType(StandardNamespace, "uint32_t");
-        private static readonly CppType UInt64 = CreatePrimitiveType(StandardNamespace, "uint64_t");
-        private static readonly CppType Single = CreatePrimitiveType(NoNamespace, "float");
-        private static readonly CppType Double = CreatePrimitiveType(NoNamespace, "double");
-        private static readonly CppType VoidPointer = CreatePrimitiveType(NoNamespace, "void", CppTypeFlags.Pointer);
-        private static readonly CppType Void = CreatePrimitiveType(NoNamespace, "void");
+        public static readonly CppType Int16 = CreatePrimitiveType(StandardNamespace, "int16_t", 0, IncludeCStdInt);
+        public static readonly CppType Int32 = CreatePrimitiveType(StandardNamespace, "int32_t", 0, IncludeCStdInt);
+        public static readonly CppType Int64 = CreatePrimitiveType(StandardNamespace, "int64_t", 0, IncludeCStdInt);
+        public static readonly CppType UInt16 = CreatePrimitiveType(StandardNamespace, "uint16_t", 0, IncludeCStdInt);
+        public static readonly CppType UInt32 = CreatePrimitiveType(StandardNamespace, "uint32_t", 0, IncludeCStdInt);
+        public static readonly CppType UInt64 = CreatePrimitiveType(StandardNamespace, "uint64_t", 0, IncludeCStdInt);
+        public static readonly CppType Single = CreatePrimitiveType(NoNamespace, "float");
+        public static readonly CppType Double = CreatePrimitiveType(NoNamespace, "double");
+        public static readonly CppType VoidPointer = CreatePrimitiveType(NoNamespace, "void", CppTypeFlags.Pointer);
+        public static readonly CppType Void = CreatePrimitiveType(NoNamespace, "void");
+        public static readonly CppType NullPointer = CreatePrimitiveType(StandardNamespace, "nullptr_t", 0, IncludeCStdDef);
 
         public static CppType FromCSharp(CppGenerationContext context, ITypeSymbol type)
         {
@@ -110,7 +104,8 @@ namespace Oxidize
             IReadOnlyCollection<string> namespaces,
             string name,
             IReadOnlyCollection<CppType>? genericArguments,
-            CppTypeFlags flags)
+            CppTypeFlags flags,
+            string? headerOverride = null)
         {
             this.Kind = kind;
             if (namespaces == StandardNamespace || namespaces == NoNamespace)
@@ -121,6 +116,23 @@ namespace Oxidize
             if (genericArguments != null)
                 this.GenericArguments = new List<CppType>(genericArguments);
             this.Flags = flags;
+
+            if (headerOverride != null)
+            {
+                // If the header name is not wrapped in quotes or angle brackets, wrap it in quotes.
+                if (!headerOverride.StartsWith("<") && !headerOverride.StartsWith("\""))
+                    headerOverride = '"' + headerOverride + '"';
+                this.HeaderOverride = headerOverride;
+            }
+        }
+
+        public bool CanBeForwardDeclared
+        {
+            get
+            {
+                // TODO: currently any type that uses a custom header cannot be forward declared, but this may need more nuance.
+                return this.HeaderOverride == null;
+            }
         }
 
         public string GetFullyQualifiedNamespace(bool startWithGlobal = true)
@@ -196,6 +208,12 @@ namespace Oxidize
 
         private void AddIncludesToSet(ISet<string> includes, bool forHeader)
         {
+            if (this.HeaderOverride != null)
+            {
+                includes.Add(this.HeaderOverride);
+                return;
+            }
+
             if (Kind == CppTypeKind.Primitive)
             {
                 // Special case for primitives in <cstdint>.
@@ -286,9 +304,9 @@ namespace Oxidize
             return $"{GetFullyQualifiedName()}({CppObjectHandle.GetCppType(context).GetFullyQualifiedName()}({variableName}))";
         }
 
-        private static CppType CreatePrimitiveType(IReadOnlyCollection<string> cppNamespaces, string cppTypeName, CppTypeFlags flags = 0)
+        private static CppType CreatePrimitiveType(IReadOnlyCollection<string> cppNamespaces, string cppTypeName, CppTypeFlags flags = 0, string? headerOverride = null)
         {
-            return new CppType(CppTypeKind.Primitive, cppNamespaces, cppTypeName, null, flags);
+            return new CppType(CppTypeKind.Primitive, cppNamespaces, cppTypeName, null, flags, headerOverride);
         }
 
         /// <summary>

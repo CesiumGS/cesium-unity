@@ -6,6 +6,10 @@ namespace Oxidize
 {
     internal class CppCasts
     {
+        public static void Generate(CppGenerationContext context, GenerationItem item, GeneratedResult result)
+        {
+        }
+
         public static void GenerateDowncasts(CppGenerationContext context, GenerationItem item, TypeDefinition definition)
         {
             CppType itemType = CppType.FromCSharp(context, item.type);

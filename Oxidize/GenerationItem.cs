@@ -1,7 +1,4 @@
 ﻿using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Oxidize
 {
@@ -14,6 +11,7 @@ namespace Oxidize
             this.methods = new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default);
             this.properties = new HashSet<IPropertySymbol>(SymbolEqualityComparer.Default);
             this.interfaces = new List<GenerationItem>();
+            this.methodsImplementedInCpp = new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default);
         }
 
         public ITypeSymbol type;
@@ -22,5 +20,18 @@ namespace Oxidize
         public HashSet<IPropertySymbol> properties;
         public GenerationItem? baseClass;
         public List<GenerationItem> interfaces;
+        public HashSet<IMethodSymbol> methodsImplementedInCpp;
+
+        /// <summary>
+        /// If this C# class has a C++ implementation, this is the name of the
+        /// C++ implementation class.
+        /// </summary>
+        public string? implClassName;
+
+        /// <summary>
+        /// If this C# class has a C++ implementation, this is the name of the
+        /// C++ header file declaring the class.
+        /// </summary>
+        public string? implHeaderName;
     }
 }

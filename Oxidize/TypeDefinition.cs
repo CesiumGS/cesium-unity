@@ -130,5 +130,10 @@ namespace Oxidize
         /// enable interoperability between C# and C++.
         /// </summary>
         public List<InteropMethod> interopMethods = new List<InteropMethod>();
+
+        /// <summary>
+        /// The methods that are defined in a C# class but implemented in C++.
+        /// </summary>
+        public List<InteropMethod> methodsImplementedInCpp = new List<InteropMethod>();
     }
 }

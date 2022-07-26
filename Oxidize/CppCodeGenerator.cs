@@ -81,15 +81,47 @@ namespace Oxidize
             if (itemType.Kind == CppTypeKind.Primitive)
                 return null;
 
+            GeneratedResult result = new GeneratedResult(itemType);
+
+            if (item.implClassName != null)
+            {
+                // TODO: parse out namespaces? Require user to specify them separately?
+                result.CppImplementationInvoker =
+                    new GeneratedCppImplementationInvoker(
+                        new CppType(CppTypeKind.Unknown, Array.Empty<string>(), item.implClassName, null, 0, item.implHeaderName));
+            }
+
+            CppHandleManagement.Generate(this.Options, item, result);
+            CppConstructors.Generate(this.Options, item, result);
+            CppCasts.Generate(this.Options, item, result);
+
             TypeDefinition definition = new TypeDefinition();
             definition.Type = itemType;
 
             GenerationItem? current = item;
             while (current != null)
             {
+                CppProperties.Generate(this.Options, item, current, result);
+                CppMethods.Generate(this.Options, item, current, result);
+
                 GenerateType(item, current, itemType, definition);
                 current = current.baseClass;
             }
+
+            Console.WriteLine(result.CppInit.ToSourceFileString());
+
+            if (item.methodsImplementedInCpp.Count > 0 && item.implClassName != null)
+            {
+                CppType implementationType = new CppType(CppTypeKind.Unknown, Array.Empty<string>(), item.implClassName, null, 0, item.implHeaderName);
+                result.CppImplementationInvoker = new GeneratedCppImplementationInvoker(implementationType);
+                MethodsImplementedInCpp.Generate(this.Options, item, result);
+                Console.WriteLine(result.CppImplementationInvoker.ToSourceFileString());
+            }
+            foreach (IMethodSymbol method in item.methodsImplementedInCpp)
+            {
+                definition.methodsImplementedInCpp.Add(new InteropMethod(item.type, itemType, method, "", ""));
+            }
+
 
             return definition;
         }
@@ -234,6 +266,14 @@ namespace Oxidize
 
             Directory.CreateDirectory(Options.OutputSourceDirectory);
             File.WriteAllText(Path.Combine(Options.OutputSourceDirectory, type.Name + ".cpp"), cpp, Encoding.UTF8);
+
+            if (definition.methodsImplementedInCpp.Count > 0)
+            {
+                string impl =
+                    $$"""
+                    foo
+                    """;
+            }
         }
     }
 }

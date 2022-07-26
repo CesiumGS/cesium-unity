@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Text;
+using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -20,6 +21,7 @@ public class OxidizeGenerator : IIncrementalGenerator
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         context.RegisterPostInitializationOutput(CSharpOxidizeAttribute.Generate);
+        context.RegisterPostInitializationOutput(CSharpOxidizeNativeImplementationAttribute.Generate);
         context.RegisterPostInitializationOutput(CSharpObjectHandle.Generate);
 
         // For each method in the Oxidize class, look at the types, methods, and properties it uses and create from
@@ -78,6 +80,24 @@ public class OxidizeGenerator : IIncrementalGenerator
                     result.Add(item.type, current);
                 }
 
+                if (current.implClassName == null)
+                {
+                    current.implClassName = item.implClassName;
+                }
+                else if (item.implClassName != null && item.implClassName != current.implClassName)
+                {
+                    // TODO: report conflicting implementation class name
+                }
+
+                if (current.implHeaderName == null)
+                {
+                    current.implHeaderName = item.implHeaderName;
+                }
+                else if (item.implHeaderName != null && item.implHeaderName != current.implHeaderName)
+                {
+                    // TODO: report conflicting implementation header name
+                }
+
                 foreach (IMethodSymbol method in item.constructors)
                 {
                     current.constructors.Add(method);
@@ -92,6 +112,11 @@ public class OxidizeGenerator : IIncrementalGenerator
                 {
                     current.properties.Add(property);
                 }
+
+                foreach (IMethodSymbol method in item.methodsImplementedInCpp)
+                {
+                    current.methodsImplementedInCpp.Add(method);
+                }
             }
         }
 
@@ -104,16 +129,25 @@ public class OxidizeGenerator : IIncrementalGenerator
         if (attributeNode == null)
             return false;
 
-        var name = attributeNode.Name;
-        var simpleName = name as SimpleNameSyntax;
+        string? name = GetAttributeName(attributeNode);
+        return name == "Oxidize" ||
+            name == "OxidizeAttribute" ||
+            name == "OxidizeNativeImplementation" ||
+            name == "OxidizeNativeImplementationAttribute";
+    }
+
+    private static string? GetAttributeName(AttributeSyntax attribute)
+    {
+        NameSyntax? name = attribute.Name;
+        SimpleNameSyntax? simpleName = name as SimpleNameSyntax;
         if (simpleName != null)
-            return simpleName.Identifier.Text == "Oxidize" || simpleName.Identifier.Text == "OxidizeAttribute";
+            return simpleName.Identifier.Text;
 
-        var qualifiedName = name as QualifiedNameSyntax;
+        QualifiedNameSyntax? qualifiedName = name as QualifiedNameSyntax;
         if (qualifiedName != null)
-            return qualifiedName.Right.Identifier.Text == "Oxidize" || qualifiedName.Right.Identifier.Text == "OxidizeAttribute";
+            return qualifiedName.Right.Identifier.Text;
 
-        return false;
+        return null;
     }
 
     private static IEnumerable<GenerationItem> GetOxidizeClass(GeneratorSyntaxContext ctx, CancellationToken token)
@@ -129,14 +163,62 @@ public class OxidizeGenerator : IIncrementalGenerator
         if (classSyntax == null)
             return Array.Empty<GenerationItem>();
 
-        foreach (MemberDeclarationSyntax memberSyntax in classSyntax.Members)
-        {
-            MethodDeclarationSyntax? methodSyntax = memberSyntax as MethodDeclarationSyntax;
-            if (methodSyntax == null)
-                continue;
+        string? attributeName = GetAttributeName(attributeSyntax);
 
-            if (string.Equals(methodSyntax.Identifier.Text, "ExposeToCPP", StringComparison.InvariantCultureIgnoreCase))
-                walker.Visit(methodSyntax);
+        if (attributeName == "Oxidize" || attributeName == "OxidizeAttribute")
+        {
+            // A C# class containing a method that identifies what types, methods, properties, etc. should be accessible from C++.
+            foreach (MemberDeclarationSyntax memberSyntax in classSyntax.Members)
+            {
+                MethodDeclarationSyntax? methodSyntax = memberSyntax as MethodDeclarationSyntax;
+                if (methodSyntax == null)
+                    continue;
+
+                if (string.Equals(methodSyntax.Identifier.Text, "ExposeToCPP", StringComparison.InvariantCultureIgnoreCase))
+                    walker.Visit(methodSyntax);
+            }
+        }
+        else if (attributeName == "OxidizeNativeImplementation" || attributeName == "OxidizeNativeImplementationAttribute")
+        {
+            var args = attributeSyntax.ArgumentList!.Arguments;
+            if (args.Count < 2)
+                // TODO: report insufficient arguments. Can this even happen?
+                return walker.GenerationItems.Values;
+
+            var implClassName = (args[0]?.Expression as LiteralExpressionSyntax)?.Token.ValueText;
+            var implHeaderName = (args[1]?.Expression as LiteralExpressionSyntax)?.Token.ValueText;
+
+            // A C# class that is meant to be implemented in C++.
+            ITypeSymbol? type = semanticModel.GetDeclaredSymbol(classSyntax) as ITypeSymbol;
+
+            if (type != null)
+            {
+                GenerationItem item;
+                if (!walker.GenerationItems.TryGetValue(type, out item))
+                {
+                    item = new GenerationItem(type);
+                    walker.GenerationItems.Add(type, item);
+                }
+
+                item.implClassName = implClassName;
+                item.implHeaderName = implHeaderName;
+
+                foreach (MemberDeclarationSyntax memberSyntax in classSyntax.Members)
+                {
+                    MethodDeclarationSyntax? methodSyntax = memberSyntax as MethodDeclarationSyntax;
+                    if (methodSyntax == null)
+                        continue;
+
+                    if (methodSyntax.Modifiers.IndexOf(Microsoft.CodeAnalysis.CSharp.SyntaxKind.PartialKeyword) >= 0)
+                    {
+                        IMethodSymbol? symbol = semanticModel.GetDeclaredSymbol(methodSyntax) as IMethodSymbol;
+                        if (symbol != null)
+                        {
+                            item.methodsImplementedInCpp.Add(symbol);
+                        }
+                    }
+                }
+            }
         }
 
         return walker.GenerationItems.Values;
