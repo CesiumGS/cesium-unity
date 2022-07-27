@@ -107,7 +107,7 @@ namespace Oxidize
                 // TODO: parse out namespaces? Require user to specify them separately?
                 CppType implementationType = new CppType(CppTypeKind.Unknown, Array.Empty<string>(), item.implClassName, null, 0, item.implHeaderName);
                 result.CppImplementationInvoker = new GeneratedCppImplementationInvoker(implementationType);
-                result.CSharpPartialMethodDefinitions = new GeneratedCSharpPartialMethodDefinition(CSharpType.FromSymbol(this.Options.Compilation, item.type));
+                result.CSharpPartialMethodDefinitions = new GeneratedCSharpPartialMethodDefinitions(CSharpType.FromSymbol(this.Options.Compilation, item.type));
                 
                 MethodsImplementedInCpp.Generate(this.Options, item, result);
                 Console.WriteLine(result.CSharpPartialMethodDefinitions.ToSourceFileString());

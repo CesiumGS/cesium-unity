@@ -22,12 +22,12 @@ namespace Oxidize
         public string InteropFunctionDeclaration;
     }
 
-    internal class GeneratedCSharpPartialMethodDefinition
+    internal class GeneratedCSharpPartialMethodDefinitions
     {
         public readonly CSharpType Type;
         public List<GeneratedCSharpPartialMethod> Methods = new List<GeneratedCSharpPartialMethod>();
 
-        public GeneratedCSharpPartialMethodDefinition(CSharpType type)
+        public GeneratedCSharpPartialMethodDefinitions(CSharpType type)
         {
             this.Type = type;
         }

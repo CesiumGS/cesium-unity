@@ -46,6 +46,6 @@
         /// The C# implementations for any partial methods on this class that are intended to be
         /// implemented by the user in C++ code.
         /// </summary>
-        public GeneratedCSharpPartialMethodDefinition? CSharpPartialMethodDefinitions;
+        public GeneratedCSharpPartialMethodDefinitions? CSharpPartialMethodDefinitions;
     }
 }
