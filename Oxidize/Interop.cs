@@ -101,7 +101,7 @@ namespace Oxidize
             }
             else
             {
-                // Constructor, or regular method with a return value.
+                // Either a constructor or a regular method with a return value.
                 implementation =
                     $$"""
                     var result = {{invocationTarget}}({{callParameterList}});

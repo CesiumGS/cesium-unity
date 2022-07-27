@@ -12,5 +12,23 @@ namespace Oxidize
                 name = "Constructor";
             return $"{type.GetFullyQualifiedName().Replace(".", "_")}_{name}";
         }
+
+        public static string GetAccessString(Accessibility access)
+        {
+            if (access == Accessibility.Public)
+                return "public";
+            else if (access == Accessibility.Private)
+                return "private";
+            else if (access == Accessibility.Protected)
+                return "protected";
+            else if (access == Accessibility.Internal)
+                return "internal";
+            else if (access == Accessibility.ProtectedAndInternal)
+                return "private protected";
+            else if (access == Accessibility.ProtectedOrInternal)
+                return "protected internal";
+            else
+                return "";
+        }
     }
 }

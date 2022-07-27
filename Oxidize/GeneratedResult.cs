@@ -9,6 +9,7 @@
             this.CppDeclaration = new GeneratedCppDeclaration(type);
             this.CppDefinition = new GeneratedCppDefinition(type);
             this.CppImplementationInvoker = null;
+            this.CSharpPartialMethodDefinitions = null;
         }
 
         /// <summary>
@@ -40,5 +41,11 @@
         /// class.
         /// </summary>
         public GeneratedCppImplementationInvoker? CppImplementationInvoker;
+
+        /// <summary>
+        /// The C# implementations for any partial methods on this class that are intended to be
+        /// implemented by the user in C++ code.
+        /// </summary>
+        public GeneratedCSharpPartialMethodDefinition? CSharpPartialMethodDefinitions;
     }
 }

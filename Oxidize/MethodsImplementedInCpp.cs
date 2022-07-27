@@ -10,6 +10,8 @@ namespace Oxidize
             Debug.Assert(result.CppImplementationInvoker != null);
             if (result.CppImplementationInvoker == null)
                 return;
+            if (result.CSharpPartialMethodDefinitions == null)
+                return;
 
             // Add functions to create and destroy the implementation class instance.
             CppType wrapperType = result.CppDefinition.Type;
@@ -58,6 +60,8 @@ namespace Oxidize
         {
             if (result.CppImplementationInvoker == null)
                 return;
+            if (result.CSharpPartialMethodDefinitions == null)
+                return;
 
             CppType wrapperType = result.CppDefinition.Type;
             CppType implType = result.CppImplementationInvoker.ImplementationType;
@@ -100,6 +104,23 @@ namespace Oxidize
                 }.Concat(parameters.Select(parameter => new CppTypeReference(parameter.Type)))
                 .Concat(parameters.Select(parameter => new CppTypeReference(parameter.InteropType)))
             ));
+
+            CSharpType csWrapperType = CSharpType.FromSymbol(context.Compilation, item.type);
+            CSharpType csReturnType = CSharpType.FromSymbol(context.Compilation, method.ReturnType);
+            var csParameters = method.Parameters.Select(parameter => (Name: parameter.Name, Type: CSharpType.FromSymbol(context.Compilation, parameter.Type)));
+            string modifiers = CSharpTypeUtility.GetAccessString(method.DeclaredAccessibility);
+            if (method.IsStatic)
+                modifiers += " static";
+
+            result.CSharpPartialMethodDefinitions.Methods.Add(new(
+                methodDefinition:
+                    $$"""
+                    {{modifiers}} {{csReturnType.GetFullyQualifiedName()}} {{method.Name}}({{string.Join(", ", csParameters.Select(parameter => $"{parameter.Type.GetFullyQualifiedName()} {parameter.Name}"))}}
+                    {
+                        throw new NotImplementedException();
+                    }
+                    """,
+                interopFunctionDeclaration: ""));
         }
     }
 }

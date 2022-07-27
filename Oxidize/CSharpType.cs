@@ -73,6 +73,13 @@ namespace Oxidize
             return new CSharpType(compilation, kind, namespaces, symbol);
         }
 
+        public string GetFullyQualifiedNamespace()
+        {
+            if (Symbol.SpecialType == SpecialType.System_Void)
+                return "";
+            return string.Join(".", Namespaces);
+        }
+
         public string GetFullyQualifiedName()
         {
             if (Symbol.SpecialType == SpecialType.System_Void)
@@ -85,7 +92,8 @@ namespace Oxidize
                 name = containingType.Name + "." + name;
                 containingType = containingType.ContainingType;
             }
-            return $"{string.Join(".", Namespaces)}.{name}";
+
+            return $"{GetFullyQualifiedNamespace()}.{name}";
         }
 
         public CSharpType AsInteropType()
