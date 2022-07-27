@@ -34,11 +34,7 @@ namespace Oxidize
 
             foreach (GeneratedCppImplementationInvokerFunction function in Functions)
             {
-                foreach (CppTypeReference reference in function.TypesReferenced)
-                {
-                    if (reference.Type != null && reference.RequiresCompleteDefinition)
-                        reference.Type.AddSourceIncludesToSet(result);
-                }
+                function.AddIncludesToSet(result);
             }
 
             return result.Select(include => $"#include {include}");
@@ -50,11 +46,7 @@ namespace Oxidize
 
             foreach (GeneratedCppImplementationInvokerFunction function in Functions)
             {
-                foreach (CppTypeReference reference in function.TypesReferenced)
-                {
-                    if (reference.Type != null && !reference.RequiresCompleteDefinition)
-                        reference.Type.AddForwardDeclarationsToSet(result);
-                }
+                function.AddForwardDeclarationsToSet(result);
             }
 
             return result;

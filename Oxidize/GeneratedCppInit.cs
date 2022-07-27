@@ -5,18 +5,14 @@ using System.Xml.Linq;
 
 namespace Oxidize
 {
-    internal class GeneratedCppFieldInit
+    internal record GeneratedCppFieldInit(
+        string Name,
+        string TypeSignature,
+        IEnumerable<CppType>? TypeDeclarationsReferenced = null,
+        IEnumerable<CppType>? TypeDefinitionsReferenced = null,
+        IEnumerable<string>? AdditionalIncludes = null)
+        : GeneratedCppElement(TypeDeclarationsReferenced, TypeDefinitionsReferenced, AdditionalIncludes)
     {
-        public GeneratedCppFieldInit(string name, string typeSignature, IEnumerable<CppTypeReference> typesReferenced)
-        {
-            this.Name = name;
-            this.TypeSignature = typeSignature;
-            this.TypesReferenced = new List<CppTypeReference>(typesReferenced);
-        }
-
-        public string Name;
-        public string TypeSignature;
-        public List<CppTypeReference> TypesReferenced;
     }
 
     internal class GeneratedCppInit
@@ -60,11 +56,7 @@ namespace Oxidize
 
             foreach (GeneratedCppFieldInit field in Fields)
             {
-                foreach (CppTypeReference reference in field.TypesReferenced)
-                {
-                    if (reference.Type != null && reference.RequiresCompleteDefinition)
-                        reference.Type.AddSourceIncludesToSet(result);
-                }
+                field.AddIncludesToSet(result);
             }
 
             return result.Select(include => $"#include {include}");
@@ -76,11 +68,7 @@ namespace Oxidize
 
             foreach (GeneratedCppFieldInit field in Fields)
             {
-                foreach (CppTypeReference reference in field.TypesReferenced)
-                {
-                    if (reference.Type != null && !reference.RequiresCompleteDefinition)
-                        reference.Type.AddForwardDeclarationsToSet(result);
-                }
+                field.AddForwardDeclarationsToSet(result);
             }
 
             return result;

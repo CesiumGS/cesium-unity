@@ -35,13 +35,7 @@
 
             foreach (GeneratedCppDefinitionElement element in Elements)
             {
-                result.UnionWith(element.AdditionalIncludes);
-
-                foreach (CppTypeReference reference in element.TypesReferenced)
-                {
-                    if (reference.Type != null && reference.RequiresCompleteDefinition)
-                        reference.Type.AddSourceIncludesToSet(result);
-                }
+                element.AddIncludesToSet(result);
             }
 
             return result.Select(include => $"#include {include}");
@@ -53,11 +47,7 @@
 
             foreach (GeneratedCppDefinitionElement element in Elements)
             {
-                foreach (CppTypeReference reference in element.TypesReferenced)
-                {
-                    if (reference.Type != null && !reference.RequiresCompleteDefinition)
-                        reference.Type.AddForwardDeclarationsToSet(result);
-                }
+                element.AddForwardDeclarationsToSet(result);
             }
 
             return result;
@@ -65,7 +55,7 @@
 
         private IEnumerable<string> GetElements()
         {
-            return Elements.Select(element => element.Content);
+            return Elements.Select(element => element.Content + Environment.NewLine);
         }
     }
 }

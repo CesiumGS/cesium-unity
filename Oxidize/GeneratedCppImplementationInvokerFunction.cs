@@ -1,9 +1,9 @@
 ﻿namespace Oxidize
 {
-    internal class GeneratedCppImplementationInvokerFunction : GeneratedCppElement
-    {
-        public GeneratedCppImplementationInvokerFunction(string content, IEnumerable<CppTypeReference> typesReferenced) : base(content, typesReferenced)
-        {
-        }
-    }
+    internal record GeneratedCppImplementationInvokerFunction(
+        string Content,
+        IEnumerable<CppType>? TypeDeclarationsReferenced = null,
+        IEnumerable<CppType>? TypeDefinitionsReferenced = null,
+        IEnumerable<string>? AdditionalIncludes = null)
+        : GeneratedCppElement(TypeDeclarationsReferenced, TypeDefinitionsReferenced, AdditionalIncludes);
 }

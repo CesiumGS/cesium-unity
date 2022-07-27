@@ -1,12 +1,11 @@
 ﻿namespace Oxidize
 {
-    internal class GeneratedCppDefinitionElement : GeneratedCppElement
+    internal record GeneratedCppDefinitionElement(
+        string Content,
+        IEnumerable<CppType>? TypeDeclarationsReferenced = null,
+        IEnumerable<CppType>? TypeDefinitionsReferenced = null,
+        IEnumerable<string>? AdditionalIncludes = null)
+        : GeneratedCppElement(TypeDeclarationsReferenced, TypeDefinitionsReferenced, AdditionalIncludes)
     {
-        public GeneratedCppDefinitionElement(string content, IEnumerable<CppTypeReference> typesReferenced, IEnumerable<string>? additionalIncludes = null) : base(content, typesReferenced)
-        {
-            this.AdditionalIncludes = additionalIncludes == null ? new List<string>() : new List<string>(additionalIncludes);
-        }
-
-        public List<string> AdditionalIncludes;
     }
 }

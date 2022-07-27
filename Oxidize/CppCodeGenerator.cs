@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Reflection.PortableExecutable;
 using System.Text;
 
 namespace Oxidize
@@ -66,7 +67,7 @@ namespace Oxidize
             File.WriteAllText(Path.Combine(Options.OutputSourceDirectory, "initializeOxidize.cpp"), initialize, Encoding.UTF8);
         }
 
-        public TypeDefinition? GenerateType(GenerationItem item)
+        public GeneratedResult? GenerateType(GenerationItem item)
         {
             INamedTypeSymbol? named = item.type as INamedTypeSymbol;
             if (named == null || named.IsGenericType)
@@ -87,21 +88,17 @@ namespace Oxidize
             CppConstructors.Generate(this.Options, item, result);
             CppCasts.Generate(this.Options, item, result);
 
-            TypeDefinition definition = new TypeDefinition();
-            definition.Type = itemType;
-
+            // Generate properties and methods throughout the whole inheritance hierarchy.
             GenerationItem? current = item;
             while (current != null)
             {
                 CppProperties.Generate(this.Options, item, current, result);
                 CppMethods.Generate(this.Options, item, current, result);
-
-                GenerateType(item, current, itemType, definition);
                 current = current.baseClass;
             }
 
-            Console.WriteLine(result.CppInit.ToSourceFileString());
-
+            // If this class has partial methods that are meant to be implemented in C++,
+            // generate the necessary bindings.
             if (item.implClassName != null)
             {
                 // TODO: parse out namespaces? Require user to specify them separately?
@@ -113,14 +110,23 @@ namespace Oxidize
                 Console.WriteLine(result.CSharpPartialMethodDefinitions.ToSourceFileString());
             }
 
-            foreach (IMethodSymbol method in item.methodsImplementedInCpp)
-            {
-                definition.methodsImplementedInCpp.Add(new InteropMethod(item.type, itemType, method, "", ""));
-            }
-
-
-            return definition;
+            return result;
         }
+
+        public void WriteCppCode(GeneratedResult? result)
+        {
+            if (result == null)
+                return;
+
+            CppType type = result.CppDefinition.Type;
+            string headerPath = Path.Combine(new string[] { Options.OutputHeaderDirectory }.Concat(type.Namespaces).ToArray());
+            Directory.CreateDirectory(headerPath);
+            File.WriteAllText(Path.Combine(headerPath, type.Name + ".h"), result.CppDeclaration.ToHeaderFileString(), Encoding.UTF8);
+
+            Directory.CreateDirectory(Options.OutputSourceDirectory);
+            File.WriteAllText(Path.Combine(Options.OutputSourceDirectory, type.Name + ".cpp"), result.CppDefinition.ToSourceFileString(), Encoding.UTF8);
+        }
+
 
         private void GenerateType(GenerationItem mainItem, GenerationItem currentItem, CppType mainType, TypeDefinition definition)
         {

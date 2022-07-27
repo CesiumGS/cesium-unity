@@ -46,23 +46,15 @@ public class OxidizeGenerator : IIncrementalGenerator
 
         // Generate C++ code.
         var typeDefinitions = withCppGenerator.Select((pair, _) => pair.Right.GenerateType(pair.Left));
-        context.RegisterImplementationSourceOutput(typeDefinitions.Combine(cppGenerator), (context, pair) => pair.Right.WriteType(pair.Left));
+        context.RegisterImplementationSourceOutput(typeDefinitions.Combine(cppGenerator), (context, pair) => pair.Right.WriteCppCode(pair.Left));
 
         // Generate C++ initialization function
         var typesAndGenerator = typeDefinitions.Collect().Combine(cppGenerator);
-        context.RegisterImplementationSourceOutput(typesAndGenerator, (context, pair) => pair.Right.WriteInitializeFunction(pair.Left));
+        //context.RegisterImplementationSourceOutput(typesAndGenerator, (context, pair) => pair.Right.WriteInitializeFunction(pair.Left));
         context.RegisterImplementationSourceOutput(typesAndGenerator, (context, pair) => CppObjectHandle.Generate(pair.Right.Options));
 
-        //context.RegisterImplementationSourceOutput(typeDefinitions.Collect(), (context, )
-
-        // Generate the initialization function after all the other C++ code is generated.
-        //typeDefinitions.Coll
-        //withCppGenerator.Collect().Select((pair, _) => pair.
-
         // Generate the required items
-        context.RegisterSourceOutput(typesAndGenerator, (context, pair) => CSharpCodeGenerator.Generate(context, pair.Right.Options.Compilation, pair.Left));
-        //context.RegisterImplementationSourceOutput(withCppGenerator, (context, pair) => pair.Right.Generate(context, pair.Left));
-        //context.RegisterSourceOutput(processedGenerationItems, CppCodeGenerator.Generate);
+        //context.RegisterSourceOutput(typesAndGenerator, (context, pair) => CSharpCodeGenerator.Generate(context, pair.Right.Options.Compilation, pair.Left));
     }
 
     private static Dictionary<ITypeSymbol, GenerationItem> CombineGenerationItems(ImmutableArray<IEnumerable<GenerationItem>> listOfItems, CancellationToken token)

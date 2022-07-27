@@ -28,6 +28,8 @@
                 {{GetTypeKind()}} {{Type.Name}} {
                   {{GetElements().JoinAndIndent("  ")}}
                 };
+
+                } // namespace {{Type.GetFullyQualifiedNamespace(false)}}
                 """;
         }
 
@@ -37,11 +39,7 @@
 
             foreach (GeneratedCppDeclarationElement element in Elements)
             {
-                foreach (CppTypeReference reference in element.TypesReferenced)
-                {
-                    if (reference.Type != null && reference.RequiresCompleteDefinition)
-                        reference.Type.AddSourceIncludesToSet(result);
-                }
+                element.AddIncludesToSet(result);
             }
 
             return result.Select(include => $"#include {include}");
@@ -53,11 +51,7 @@
 
             foreach (GeneratedCppDeclarationElement element in Elements)
             {
-                foreach (CppTypeReference reference in element.TypesReferenced)
-                {
-                    if (reference.Type != null && !reference.RequiresCompleteDefinition)
-                        reference.Type.AddForwardDeclarationsToSet(result);
-                }
+                element.AddForwardDeclarationsToSet(result);
             }
 
             return result;

@@ -32,9 +32,8 @@ namespace Oxidize
 
             // Delete the default constructor so this static class can't be constructed.
             declaration.Elements.Add(new(
-                content: $"{declaration.Type.Name}() = delete;",
-                isPrivate: false,
-                typesReferenced: Array.Empty<CppTypeReference>()
+                Content: $"{declaration.Type.Name}() = delete;",
+                IsPrivate: false
             ));
         }
 
@@ -57,30 +56,27 @@ namespace Oxidize
             var interopReturnType = declaration.Type.AsInteropType();
             var interopParameters = parameters.Select(parameter => (ParameterName: parameter.Name, CallSiteName: parameter.Name, Type: parameter.Type, InteropType: parameter.Type.AsInteropType()));
             var interopParameterStrings = interopParameters.Select(parameter => $"{parameter.InteropType.GetFullyQualifiedName()} {parameter.ParameterName}");
-            var allInteropTypes = interopParameters.Select(parameter => new CppTypeReference(parameter.InteropType))
-                    .Concat(new List<CppTypeReference> { new CppTypeReference(interopReturnType) });
 
             // A private, static field of function pointer type that will call
             // into a managed delegate for this constructor.
             declaration.Elements.Add(new(
-                content: $"static {interopReturnType.GetFullyQualifiedName()} (*Construct)({string.Join(", ", interopParameterStrings)});",
-                isPrivate: true,
-                typesReferenced: allInteropTypes
-                    
+                Content: $"static {interopReturnType.GetFullyQualifiedName()} (*Construct)({string.Join(", ", interopParameterStrings)});",
+                IsPrivate: true,
+                TypeDeclarationsReferenced: new[] { interopReturnType }.Concat(interopParameters.Select(parameter => parameter.InteropType))
+
             ));
 
             definition.Elements.Add(new(
-                content: $"{interopReturnType.GetFullyQualifiedName()} (*{definition.Type.GetFullyQualifiedName(false)}::Construct)({string.Join(", ", interopParameterStrings)}) = nullptr;",
-                typesReferenced: allInteropTypes
+                Content: $"{interopReturnType.GetFullyQualifiedName()} (*{definition.Type.GetFullyQualifiedName(false)}::Construct)({string.Join(", ", interopParameterStrings)}) = nullptr;",
+                TypeDefinitionsReferenced: new[] { interopReturnType }.Concat(interopParameters.Select(parameter => parameter.InteropType))
             ));
-
-
 
             // The static field should be initialized at startup.
             cppInit.Fields.Add(new(
-                name: $"{definition.Type.GetFullyQualifiedName()}::Construct",
-                typeSignature: $"{interopReturnType.GetFullyQualifiedName()} (*)({string.Join(", ", interopParameters.Select(parameter => parameter.InteropType.GetFullyQualifiedName()))})",
-                typesReferenced: allInteropTypes.Concat(new[] { new CppTypeReference(definition.Type) { RequiresCompleteDefinition = true } })
+                Name: $"{definition.Type.GetFullyQualifiedName()}::Construct",
+                TypeSignature: $"{interopReturnType.GetFullyQualifiedName()} (*)({string.Join(", ", interopParameters.Select(parameter => parameter.InteropType.GetFullyQualifiedName()))})",
+                TypeDefinitionsReferenced: new[] { definition.Type },
+                TypeDeclarationsReferenced: new[] { interopReturnType }.Concat(interopParameters.Select(parameter => parameter.Type))
             ));
 
             // And passed from the C# init method
@@ -89,21 +85,26 @@ namespace Oxidize
             // Constructor declaration
             var parameterStrings = parameters.Select(parameter => $"{parameter.Type.GetFullyQualifiedName()} {parameter.Name}");
             declaration.Elements.Add(new(
-                content: $"{declaration.Type.Name}({string.Join(", ", parameterStrings)});",
-                isPrivate: false,
-                typesReferenced: parameters.Select(parameter => new CppTypeReference(parameter.Type))
+                Content: $"{declaration.Type.Name}({string.Join(", ", parameterStrings)});",
+                TypeDeclarationsReferenced: parameters.Select(parameter => parameter.Type)
             ));
 
+            // Constructor definition
             var parameterPassStrings = interopParameters.Select(parameter => parameter.Type.GetConversionToInteropType(context, parameter.CallSiteName));
             definition.Elements.Add(new(
-                content:
+                Content:
                     $$"""
                     {{definition.Type.GetFullyQualifiedName(false)}}::{{definition.Type.Name}}({{string.Join(", ", parameterStrings)}})
                         : _handle(Construct({{string.Join(", ", parameterPassStrings)}}))
                     {
                     }
                     """,
-                typesReferenced: allInteropTypes
+                TypeDefinitionsReferenced: new[]
+                {
+                    definition.Type,
+                    interopReturnType,
+                    CppObjectHandle.GetCppType(context)
+                }.Concat(parameters.Select(parameter => parameter.Type))
             ));
         }
 

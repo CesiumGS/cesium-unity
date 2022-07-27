@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace Oxidize
 {
@@ -30,6 +31,7 @@ namespace Oxidize
         public GeneratedCSharpPartialMethodDefinitions(CSharpType type)
         {
             this.Type = type;
+            Console.WriteLine(SyntaxFactory.MethodDeclaration(SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.VoidKeyword)), "DoSomething").NormalizeWhitespace().ToFullString());
         }
         
         public string ToSourceFileString()

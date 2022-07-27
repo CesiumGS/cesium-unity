@@ -19,34 +19,34 @@ namespace Oxidize
             CppType objectHandleType = CppObjectHandle.GetCppType(context);
 
             result.CppImplementationInvoker.Functions.Add(new(
-                content:
+                Content:
                     $$"""
-                    void* {{result.CppDefinition.Type.GetFullyQualifiedName(false).Replace("::", "_")}}_Create(void* handle) {
+                    void* {{wrapperType.GetFullyQualifiedName(false).Replace("::", "_")}}_Create(void* handle) {
                       const {{wrapperType.GetFullyQualifiedName()}} wrapper({{objectHandleType.GetFullyQualifiedName()}}(handle));
                       return new {{implType.GetFullyQualifiedName()}}(wrapper);
                     }
                     """,
-                typesReferenced: new[]
+                TypeDefinitionsReferenced: new[]
                 {
-                    new CppTypeReference(wrapperType, true),
-                    new CppTypeReference(implType, true),
-                    new CppTypeReference(objectHandleType, true)
+                    wrapperType,
+                    implType,
+                    objectHandleType,
                 }));
 
             result.CppImplementationInvoker.Functions.Add(new(
-                content:
+                Content:
                     $$"""
-                    void* {{result.CppDefinition.Type.GetFullyQualifiedName(false).Replace("::", "_")}}_Destroy(void* handle, void* pImpl) {
+                    void* {{wrapperType.GetFullyQualifiedName(false).Replace("::", "_")}}_Destroy(void* handle, void* pImpl) {
                       const {{wrapperType.GetFullyQualifiedName()}} wrapper({{objectHandleType.GetFullyQualifiedName()}}(handle));
                       auto pImplTyped = reinterpret_cast<{{implType.GetFullyQualifiedName()}}*>(pImpl);
                       pImplTyped->Destroy(wrapper);
                     }
                     """,
-                typesReferenced: new[]
+                TypeDefinitionsReferenced: new[]
                 {
-                    new CppTypeReference(wrapperType, true),
-                    new CppTypeReference(implType, true),
-                    new CppTypeReference(objectHandleType, true)
+                    wrapperType,
+                    implType,
+                    objectHandleType
                 }));
 
             // Add functions for other methods.
@@ -88,21 +88,23 @@ namespace Oxidize
             CppType objectHandleType = CppObjectHandle.GetCppType(context);
 
             result.CppImplementationInvoker.Functions.Add(new(
-                content: $$"""
+                Content: $$"""
                     {{interopReturnType.GetFullyQualifiedName()}} {{name}}({{parameterListString}}) {
                       const {{wrapperType.GetFullyQualifiedName()}} wrapper({{objectHandleType.GetFullyQualifiedName()}}(handle));
                       auto pImplTyped = reinterpret_cast<{{implType.GetFullyQualifiedName()}}*>(pImpl);
                       pImplTyped->{{method.Name}}({{callParameterListString}});
                     }
                     """,
-                typesReferenced: new[]
+                TypeDefinitionsReferenced: new[]
                 {
-                    new CppTypeReference(wrapperType, true),
-                    new CppTypeReference(implType, true),
-                    new CppTypeReference(returnType, true),
-                    new CppTypeReference(objectHandleType, true)
-                }.Concat(parameters.Select(parameter => new CppTypeReference(parameter.Type)))
-                .Concat(parameters.Select(parameter => new CppTypeReference(parameter.InteropType)))
+                    wrapperType,
+                    implType,
+                    returnType,
+                    objectHandleType
+                },
+                TypeDeclarationsReferenced:
+                    parameters.Select(parameter => parameter.Type)
+                    .Concat(parameters.Select(parameter => parameter.InteropType))
             ));
 
             CSharpType csWrapperType = CSharpType.FromSymbol(context.Compilation, item.type);
