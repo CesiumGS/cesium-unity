@@ -14,7 +14,7 @@ namespace Oxidize
             if (result.CppDeclaration.Type.Kind != CppTypeKind.BlittableStruct)
                 return;
 
-            ImmutableArray<ISymbol> members = item.type.GetMembers();
+            ImmutableArray<ISymbol> members = item.Type.GetMembers();
             foreach (ISymbol member in members)
             {
                 IFieldSymbol? field = member as IFieldSymbol;

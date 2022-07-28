@@ -9,21 +9,21 @@ namespace Oxidize
         public static void Generate(CppGenerationContext context, GenerationItem item, GeneratedResult result)
         {
             // It only makes sense to cast instances, so static class need not apply.
-            if (item.type.IsStatic)
+            if (item.Type.IsStatic)
                 return;
 
             // Don't allow conversion of value types
             // TODO: but we could, by boxing them
-            if (item.type.IsValueType)
+            if (item.Type.IsValueType)
                 return;
 
             CppType objectHandleType = CppObjectHandle.GetCppType(context);
 
             // Generate implicit conversions to all base classes.
-            GenerationItem? baseClass = item.baseClass;
+            GenerationItem? baseClass = item.BaseClass;
             while (baseClass != null)
             {
-                CppType baseType = CppType.FromCSharp(context, baseClass.type);
+                CppType baseType = CppType.FromCSharp(context, baseClass.Type);
 
                 string baseTypeName = baseType.GetFullyQualifiedName();
 
@@ -39,13 +39,13 @@ namespace Oxidize
                         }
                         """,
                     TypeDefinitionsReferenced: new[] { baseType, objectHandleType }));
-                baseClass = baseClass.baseClass;
+                baseClass = baseClass.BaseClass;
             }
 
             // Generate implicit conversions to all interfaces.
-            foreach (GenerationItem anInterface in item.interfaces)
+            foreach (GenerationItem anInterface in item.Interfaces)
             {
-                CppType interfaceType = CppType.FromCSharp(context, anInterface.type);
+                CppType interfaceType = CppType.FromCSharp(context, anInterface.Type);
                 string interfaceTypeName = interfaceType.GetFullyQualifiedName();
 
                 result.CppDeclaration.Elements.Add(new(

@@ -14,7 +14,7 @@ namespace Oxidize
             if (result.CppDeclaration.Type.Kind != CppTypeKind.ClassWrapper)
                 return;
 
-            if (item.type.IsStatic)
+            if (item.Type.IsStatic)
                 GenerateStatic(context, item, result);
             else
                 GenerateNonStatic(context, item, result);
@@ -33,7 +33,7 @@ namespace Oxidize
 
         private static void GenerateNonStatic(CppGenerationContext context, GenerationItem item, GeneratedResult result)
         {
-            foreach (IMethodSymbol constructor in item.constructors)
+            foreach (IMethodSymbol constructor in item.Constructors)
             {
                 GenerateSingleNonStatic(context, item, result, constructor);
             }
@@ -74,7 +74,7 @@ namespace Oxidize
             ));
 
             // And passed from the C# init method
-            csharpInit.Delegates.Add(Interop.CreateCSharpDelegateInit(context.Compilation, item.type, constructor));
+            csharpInit.Delegates.Add(Interop.CreateCSharpDelegateInit(context.Compilation, item.Type, constructor));
 
             // Constructor declaration
             var parameterStrings = parameters.Select(parameter => $"{parameter.Type.GetFullyQualifiedName()} {parameter.Name}");

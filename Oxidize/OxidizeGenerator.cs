@@ -66,48 +66,48 @@ public class OxidizeGenerator : IIncrementalGenerator
             foreach (GenerationItem item in items)
             {
                 GenerationItem current;
-                if (!result.TryGetValue(item.type, out current))
+                if (!result.TryGetValue(item.Type, out current))
                 {
-                    current = new GenerationItem(item.type);
-                    result.Add(item.type, current);
+                    current = new GenerationItem(item.Type);
+                    result.Add(item.Type, current);
                 }
 
-                if (current.implClassName == null)
+                if (current.ImplementationClassName == null)
                 {
-                    current.implClassName = item.implClassName;
+                    current.ImplementationClassName = item.ImplementationClassName;
                 }
-                else if (item.implClassName != null && item.implClassName != current.implClassName)
+                else if (item.ImplementationClassName != null && item.ImplementationClassName != current.ImplementationClassName)
                 {
                     // TODO: report conflicting implementation class name
                 }
 
-                if (current.implHeaderName == null)
+                if (current.ImplementationHeaderName == null)
                 {
-                    current.implHeaderName = item.implHeaderName;
+                    current.ImplementationHeaderName = item.ImplementationHeaderName;
                 }
-                else if (item.implHeaderName != null && item.implHeaderName != current.implHeaderName)
+                else if (item.ImplementationHeaderName != null && item.ImplementationHeaderName != current.ImplementationHeaderName)
                 {
                     // TODO: report conflicting implementation header name
                 }
 
-                foreach (IMethodSymbol method in item.constructors)
+                foreach (IMethodSymbol method in item.Constructors)
                 {
-                    current.constructors.Add(method);
+                    current.Constructors.Add(method);
                 }
 
-                foreach (IMethodSymbol method in item.methods)
+                foreach (IMethodSymbol method in item.Methods)
                 {
-                    current.methods.Add(method);
+                    current.Methods.Add(method);
                 }
 
-                foreach (IPropertySymbol property in item.properties)
+                foreach (IPropertySymbol property in item.Properties)
                 {
-                    current.properties.Add(property);
+                    current.Properties.Add(property);
                 }
 
-                foreach (IMethodSymbol method in item.methodsImplementedInCpp)
+                foreach (IMethodSymbol method in item.MethodsImplementedInCpp)
                 {
-                    current.methodsImplementedInCpp.Add(method);
+                    current.MethodsImplementedInCpp.Add(method);
                 }
             }
         }
@@ -192,8 +192,8 @@ public class OxidizeGenerator : IIncrementalGenerator
                     walker.GenerationItems.Add(type, item);
                 }
 
-                item.implClassName = implClassName;
-                item.implHeaderName = implHeaderName;
+                item.ImplementationClassName = implClassName;
+                item.ImplementationHeaderName = implHeaderName;
 
                 foreach (MemberDeclarationSyntax memberSyntax in classSyntax.Members)
                 {
@@ -206,7 +206,7 @@ public class OxidizeGenerator : IIncrementalGenerator
                         IMethodSymbol? symbol = semanticModel.GetDeclaredSymbol(methodSyntax) as IMethodSymbol;
                         if (symbol != null)
                         {
-                            item.methodsImplementedInCpp.Add(symbol);
+                            item.MethodsImplementedInCpp.Add(symbol);
                         }
                     }
                 }

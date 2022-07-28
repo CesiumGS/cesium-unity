@@ -110,7 +110,7 @@ namespace Oxidize
         private GenerationItem AddMethod(IMethodSymbol symbol)
         {
             GenerationItem item = this.AddType(symbol.ContainingType);
-            item.methods.Add(symbol);
+            item.Methods.Add(symbol);
 
             // We also need to generate the parameter and return value types
             this.AddType(symbol.ReturnType);
@@ -126,7 +126,7 @@ namespace Oxidize
         private GenerationItem AddProperty(IPropertySymbol symbol)
         {
             GenerationItem item = this.AddType(symbol.ContainingType);
-            item.properties.Add(symbol);
+            item.Properties.Add(symbol);
 
             // We also need to generate the property type.
             this.AddType(symbol.Type);
@@ -137,7 +137,7 @@ namespace Oxidize
         private GenerationItem AddConstructor(IMethodSymbol symbol)
         {
             GenerationItem item = this.AddType(symbol.ContainingType);
-            item.constructors.Add(symbol);
+            item.Constructors.Add(symbol);
 
             // We also need to generate the parameter types
             foreach (IParameterSymbol parameter in symbol.Parameters)

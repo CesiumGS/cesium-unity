@@ -6,32 +6,32 @@ namespace Oxidize
     {
         public GenerationItem(ITypeSymbol type)
         {
-            this.type = type;
-            this.constructors = new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default);
-            this.methods = new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default);
-            this.properties = new HashSet<IPropertySymbol>(SymbolEqualityComparer.Default);
-            this.interfaces = new List<GenerationItem>();
-            this.methodsImplementedInCpp = new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default);
+            this.Type = type;
+            this.Constructors = new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default);
+            this.Methods = new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default);
+            this.Properties = new HashSet<IPropertySymbol>(SymbolEqualityComparer.Default);
+            this.Interfaces = new List<GenerationItem>();
+            this.MethodsImplementedInCpp = new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default);
         }
 
-        public ITypeSymbol type;
-        public HashSet<IMethodSymbol> constructors;
-        public HashSet<IMethodSymbol> methods;
-        public HashSet<IPropertySymbol> properties;
-        public GenerationItem? baseClass;
-        public List<GenerationItem> interfaces;
-        public HashSet<IMethodSymbol> methodsImplementedInCpp;
+        public ITypeSymbol Type;
+        public HashSet<IMethodSymbol> Constructors;
+        public HashSet<IMethodSymbol> Methods;
+        public HashSet<IPropertySymbol> Properties;
+        public GenerationItem? BaseClass;
+        public List<GenerationItem> Interfaces;
+        public HashSet<IMethodSymbol> MethodsImplementedInCpp;
 
         /// <summary>
         /// If this C# class has a C++ implementation, this is the name of the
         /// C++ implementation class.
         /// </summary>
-        public string? implClassName;
+        public string? ImplementationClassName;
 
         /// <summary>
         /// If this C# class has a C++ implementation, this is the name of the
         /// C++ header file declaring the class.
         /// </summary>
-        public string? implHeaderName;
+        public string? ImplementationHeaderName;
     }
 }

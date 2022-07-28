@@ -50,7 +50,7 @@ namespace Oxidize
                 }));
 
             // Add functions for other methods.
-            foreach (IMethodSymbol method in item.methodsImplementedInCpp)
+            foreach (IMethodSymbol method in item.MethodsImplementedInCpp)
             {
                 GenerateMethod(context, item, result, method);
             }
@@ -107,7 +107,7 @@ namespace Oxidize
                     .Concat(parameters.Select(parameter => parameter.InteropType))
             ));
 
-            CSharpType csWrapperType = CSharpType.FromSymbol(context.Compilation, item.type);
+            CSharpType csWrapperType = CSharpType.FromSymbol(context.Compilation, item.Type);
             CSharpType csReturnType = CSharpType.FromSymbol(context.Compilation, method.ReturnType);
             var csParameters = method.Parameters.Select(parameter => (Name: parameter.Name, Type: CSharpType.FromSymbol(context.Compilation, parameter.Type)));
             string modifiers = CSharpTypeUtility.GetAccessString(method.DeclaredAccessibility);

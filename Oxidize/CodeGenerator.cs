@@ -34,14 +34,14 @@ namespace Oxidize
 
         public GeneratedResult? GenerateType(GenerationItem item)
         {
-            INamedTypeSymbol? named = item.type as INamedTypeSymbol;
+            INamedTypeSymbol? named = item.Type as INamedTypeSymbol;
             if (named == null || named.IsGenericType)
             {
                 Console.WriteLine("Skipping generation for generic type (for now).");
                 return null;
             }
 
-            CppType itemType = CppType.FromCSharp(this.Options, item.type);
+            CppType itemType = CppType.FromCSharp(this.Options, item.Type);
 
             // No need to generate code for primitives.
             if (itemType.Kind == CppTypeKind.Primitive)
@@ -61,17 +61,17 @@ namespace Oxidize
             {
                 Properties.Generate(this.Options, item, current, result);
                 Methods.Generate(this.Options, item, current, result);
-                current = current.baseClass;
+                current = current.BaseClass;
             }
 
             // If this class has partial methods that are meant to be implemented in C++,
             // generate the necessary bindings.
-            if (item.implClassName != null)
+            if (item.ImplementationClassName != null)
             {
                 // TODO: parse out namespaces? Require user to specify them separately?
-                CppType implementationType = new CppType(CppTypeKind.Unknown, Array.Empty<string>(), item.implClassName, null, 0, item.implHeaderName);
+                CppType implementationType = new CppType(CppTypeKind.Unknown, Array.Empty<string>(), item.ImplementationClassName, null, 0, item.ImplementationHeaderName);
                 result.CppImplementationInvoker = new GeneratedCppImplementationInvoker(implementationType);
-                result.CSharpPartialMethodDefinitions = new GeneratedCSharpPartialMethodDefinitions(CSharpType.FromSymbol(this.Options.Compilation, item.type));
+                result.CSharpPartialMethodDefinitions = new GeneratedCSharpPartialMethodDefinitions(CSharpType.FromSymbol(this.Options.Compilation, item.Type));
                 
                 MethodsImplementedInCpp.Generate(this.Options, item, result);
                 Console.WriteLine(result.CSharpPartialMethodDefinitions.ToSourceFileString());

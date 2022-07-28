@@ -9,7 +9,7 @@ namespace Oxidize
     {
         public static void Generate(CppGenerationContext context, GenerationItem mainItem, GenerationItem currentItem, GeneratedResult result)
         {
-            foreach (IPropertySymbol property in currentItem.properties)
+            foreach (IPropertySymbol property in currentItem.Properties)
             {
                 GenerateSingleProperty(context, mainItem, result, property);
             }
@@ -69,7 +69,7 @@ namespace Oxidize
             ));
 
             // And passed from the C# init method
-            csharpInit.Delegates.Add(Interop.CreateCSharpDelegateInit(context.Compilation, item.type, method));
+            csharpInit.Delegates.Add(Interop.CreateCSharpDelegateInit(context.Compilation, item.Type, method));
 
             string modifiers = "";
             string afterModifiers = "";

@@ -17,24 +17,24 @@ namespace Oxidize
         {
             // This item's immediate base class might not be generated. So walk up the inheritance chain
             // until we find one that is.
-            ITypeSymbol? current = item.type.BaseType;
+            ITypeSymbol? current = item.Type.BaseType;
             while (current != null)
             {
                 GenerationItem baseGenerationItem;
                 if (items.TryGetValue(current, out baseGenerationItem))
                 {
-                    item.baseClass = baseGenerationItem;
+                    item.BaseClass = baseGenerationItem;
                     break;
                 }
                 current = current.BaseType;
             }
 
-            foreach (ITypeSymbol anInterface in item.type.AllInterfaces)
+            foreach (ITypeSymbol anInterface in item.Type.AllInterfaces)
             {
                 GenerationItem interfaceGenerationItem;
                 if (items.TryGetValue(anInterface, out interfaceGenerationItem))
                 {
-                    item.interfaces.Add(interfaceGenerationItem);
+                    item.Interfaces.Add(interfaceGenerationItem);
                 }
             }
         }
