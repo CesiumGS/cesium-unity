@@ -50,7 +50,7 @@ namespace Oxidize
             CppType fieldType = CppType.FromCSharp(context, field.Type);
 
             result.CppDeclaration.Elements.Add(new(
-                Content: $$"""{{fieldType.GetFullyQualifiedName()}} {{field.Name}}{};""",
+                Content: $"{fieldType.GetFullyQualifiedName()} {field.Name};",
                 IsPrivate: field.DeclaredAccessibility != Accessibility.Public,
                 TypeDefinitionsReferenced: new[] { fieldType }));
         }
