@@ -26,22 +26,27 @@ namespace Oxidize
 
             IPropertySymbol? property = method.AssociatedSymbol as IPropertySymbol;
 
-            string name = method.Name;
-            if (name == ".ctor")
+            string descriptiveName;
+            string accessName;
+            if (method.Name == ".ctor")
             {
-                name = "Constructor";
+                descriptiveName = "Constructor";
+                accessName = $"new {csType.GetFullyQualifiedName()}";
             }
             else if (property != null && ReferenceEquals(property.GetMethod, method))
             {
-                name = $"Get{property.Name}";
+                descriptiveName = $"Get{property.Name}";
+                accessName = property.Name;
             }
             else if (property != null && ReferenceEquals(property.SetMethod, method))
             {
-                name = $"Set{property.Name}";
+                descriptiveName = $"Set{property.Name}";
+                accessName = property.Name;
             }
             else
             {
-                name = method.Name;
+                descriptiveName = method.Name;
+                accessName = method.Name;
             }
 
             var callParameterDetails = parameters.Select(parameter => (Name: parameter.Name, Type: CSharpType.FromSymbol(compilation, parameter.Type), InteropType: CSharpType.FromSymbol(compilation, parameter.Type).AsInteropType()));
@@ -58,12 +63,12 @@ namespace Oxidize
             {
                 // Instance method or property
                 interopParameterDetails = new[] { (Name: "thiz", Type: csType, InteropType: csType.AsInteropType()) }.Concat(interopParameterDetails);
-                invocationTarget = $"(({csType.GetFullyQualifiedName()})ObjectHandleUtility.GetObjectFromHandle(thiz)!).${name}";
+                invocationTarget = $"(({csType.GetFullyQualifiedName()})ObjectHandleUtility.GetObjectFromHandle(thiz)!).{accessName}";
             }
             else
             {
                 // Static method or property
-                invocationTarget = $"{csType.GetFullyQualifiedName()}.{name}";
+                invocationTarget = $"{csType.GetFullyQualifiedName()}.{accessName}";
             }
 
             CSharpType csReturnType = CSharpType.FromSymbol(compilation, returnType);
@@ -88,7 +93,7 @@ namespace Oxidize
                 // A property setter.
                 implementation =
                     $$"""
-                    {{invocationTarget}}.{{property.Name}} = {{callParameterList}};
+                    {{invocationTarget}} = {{callParameterList}};
                     """;
             }
             else if (returnType.SpecialType == SpecialType.System_Void)
@@ -109,7 +114,7 @@ namespace Oxidize
                     """;
             }
 
-            string baseName = $"{csType.GetFullyQualifiedName().Replace(".", "_")}_{name}";
+            string baseName = $"{csType.GetFullyQualifiedName().Replace(".", "_")}_{descriptiveName}";
             return new GeneratedCSharpDelegateInit(
                 // TODO: incorporate parameter types into delegate name to support overloading.
                 name: $"{baseName}Delegate",

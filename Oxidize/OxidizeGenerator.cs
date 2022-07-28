@@ -54,7 +54,7 @@ public class OxidizeGenerator : IIncrementalGenerator
         context.RegisterImplementationSourceOutput(typesAndGenerator, (context, pair) => CppObjectHandle.Generate(pair.Right.Options));
 
         // Generate the required items
-        //context.RegisterSourceOutput(typesAndGenerator, (context, pair) => CSharpCodeGenerator.Generate(context, pair.Right.Options.Compilation, pair.Left));
+        context.RegisterSourceOutput(typesAndGenerator, (context, pair) => CSharpCodeGenerator.Generate(context, pair.Right.Options.Compilation, pair.Left));
     }
 
     private static Dictionary<ITypeSymbol, GenerationItem> CombineGenerationItems(ImmutableArray<IEnumerable<GenerationItem>> listOfItems, CancellationToken token)

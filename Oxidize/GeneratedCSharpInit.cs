@@ -18,6 +18,17 @@ namespace Oxidize
     {
         public List<GeneratedCSharpDelegateInit> Delegates = new List<GeneratedCSharpDelegateInit>();
 
+        public static GeneratedCSharpInit Merge(IEnumerable<GeneratedCSharpInit> inits)
+        {
+            List<GeneratedCSharpDelegateInit> delegates = new List<GeneratedCSharpDelegateInit>();
+            foreach (GeneratedCSharpInit init in inits)
+            {
+                delegates.AddRange(init.Delegates);
+            }
+
+            return new GeneratedCSharpInit() { Delegates = delegates };
+        }
+
         public string ToSourceFileString()
         {
             return

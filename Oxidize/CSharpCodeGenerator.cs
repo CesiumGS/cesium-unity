@@ -15,48 +15,11 @@ namespace Oxidize
             public string Content;
         }
 
-        public static void Generate(SourceProductionContext context, Compilation compilation, ImmutableArray<TypeDefinition?> typeDefinitions)
+        public static void Generate(SourceProductionContext context, Compilation compilation, ImmutableArray<GeneratedResult?> results)
         {
-            var interopConstructors = typeDefinitions.SelectMany(typeDefinition => typeDefinition == null ? new List<InteropConstructor>() : typeDefinition.interopConstructors);
-            var constructorItems = interopConstructors.Select(constructor => CreateConstructorInterop(compilation, constructor));
-
-            var interopMethods = typeDefinitions.SelectMany(typeDefinition => typeDefinition == null ? new List<InteropMethod>() : typeDefinition.interopMethods);
-            var methodItems = interopMethods.Select(method => CreateMethodInterop(compilation, method));
-
-            var items = constructorItems.Concat(methodItems);
-
-            int count = items.Count();
-
-            string source =
-                $$"""
-                using System;
-                using System.Runtime.InteropServices;
-
-                namespace Oxidize
-                {
-                    public class OxidizeInitializer
-                    {
-                        public static void InitializeOxidize()
-                        {
-                            unsafe
-                            {
-                                IntPtr memory = Marshal.AllocHGlobal(sizeof(IntPtr) * {{count}});
-                                int i = 0;
-                                {{string.Join(Environment.NewLine + "                ", items.Select(items => $"Marshal.WriteIntPtr(memory, (i++) * sizeof(IntPtr), Marshal.GetFunctionPointerForDelegate({items.Name}Delegate));"))}}
-                                initializeOxidize(memory, {{count}});
-                            }
-                        }
-
-                        [DllImport("TestOxidizeNative.dll", CallingConvention=CallingConvention.Cdecl)]
-                        private static extern void initializeOxidize(IntPtr functionPointers, int count);
-
-                        {{string.Join(Environment.NewLine + "        ", items.Select(item => item.Content.Replace(Environment.NewLine, Environment.NewLine + "        ")))}}
-                    }
-                }
-                """;
-
-            Console.WriteLine(source);
-            context.AddSource("OxidizeInitializer", source);
+            GeneratedCSharpInit combined = GeneratedCSharpInit.Merge(results.Select(result => result == null ? new GeneratedCSharpInit() : result.CSharpInit));
+            Console.WriteLine(combined.ToSourceFileString());
+            context.AddSource("OxidizeInitializer", combined.ToSourceFileString());
         }
 
         private static InteropItem CreateMethodInterop(Compilation compilation, InteropMethod interop)
