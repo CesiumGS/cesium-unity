@@ -33,6 +33,8 @@
         {
             HashSet<string> result = new HashSet<string>();
 
+            this.Type.AddSourceIncludesToSet(result);
+
             foreach (GeneratedCppDefinitionElement element in Elements)
             {
                 element.AddIncludesToSet(result);
