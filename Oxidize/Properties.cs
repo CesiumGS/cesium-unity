@@ -1,25 +1,30 @@
 ﻿using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Runtime.InteropServices;
 using System.Text;
-using System.Xml.Linq;
 
 namespace Oxidize
 {
-    internal class CppMethods
+    internal class Properties
     {
         public static void Generate(CppGenerationContext context, GenerationItem mainItem, GenerationItem currentItem, GeneratedResult result)
         {
-            foreach (IMethodSymbol method in currentItem.methods)
+            foreach (IPropertySymbol property in currentItem.properties)
             {
-                GenerateSingleMethod(context, mainItem, result, method);
+                GenerateSingleProperty(context, mainItem, result, property);
             }
         }
 
-        private static void GenerateSingleMethod(CppGenerationContext context, GenerationItem item, GeneratedResult result, IMethodSymbol method)
+        private static void GenerateSingleProperty(CppGenerationContext context, GenerationItem item, GeneratedResult result, IPropertySymbol property)
+        {
+            if (property.GetMethod != null)
+                GenerateSingleMethod(context, item, result, property, property.GetMethod);
+
+            if (property.SetMethod != null)
+                GenerateSingleMethod(context, item, result, property, property.SetMethod);
+        }
+
+        private static void GenerateSingleMethod(CppGenerationContext context, GenerationItem item, GeneratedResult result, IPropertySymbol property, IMethodSymbol method)
         {
             GeneratedCppDeclaration declaration = result.CppDeclaration;
             GeneratedCppDefinition definition = result.CppDefinition;
@@ -32,32 +37,33 @@ namespace Oxidize
                 CppType type = CppType.FromCSharp(context, parameter.Type);
                 return (ParameterName: parameter.Name, CallSiteName: parameter.Name, Type: type, InteropType: type.AsInteropType());
             });
+            var interopParameters = parameters;
 
             // If this is an instance method, pass the current object as the first parameter.
             if (!method.IsStatic)
             {
-                parameters = new[] { (ParameterName: "thiz", CallSiteName: "(*this)", Type: result.CppDefinition.Type, InteropType: result.CppDefinition.Type.AsInteropType()) }.Concat(parameters);
+                interopParameters = new[] { (ParameterName: "thiz", CallSiteName: "(*this)", Type: result.CppDefinition.Type, InteropType: result.CppDefinition.Type.AsInteropType()) }.Concat(interopParameters);
             }
 
-            var interopParameterStrings = parameters.Select(parameter => $"{parameter.InteropType.GetFullyQualifiedName()} {parameter.ParameterName}");
+            var interopParameterStrings = interopParameters.Select(parameter => $"{parameter.InteropType.GetFullyQualifiedName()} {parameter.ParameterName}");
 
             // A private, static field of function pointer type that will call
             // into a managed delegate for this method.
             declaration.Elements.Add(new(
-                Content: $"static {interopReturnType.GetFullyQualifiedName()} (*Call{method.Name})({string.Join(", ", interopParameterStrings)});",
+                Content: $"static {interopReturnType.GetFullyQualifiedName()} (*Property_{method.Name})({string.Join(", ", interopParameterStrings)});",
                 IsPrivate: true,
                 TypeDeclarationsReferenced: new[] { interopReturnType }.Concat(parameters.Select(parameter => parameter.InteropType))
             ));
 
             definition.Elements.Add(new(
-                Content: $"{interopReturnType.GetFullyQualifiedName()} (*{definition.Type.GetFullyQualifiedName(false)}::Call{method.Name})({string.Join(", ", interopParameterStrings)}) = nullptr;",
+                Content: $"{interopReturnType.GetFullyQualifiedName()} (*{definition.Type.GetFullyQualifiedName(false)}::Property_{method.Name})({string.Join(", ", interopParameterStrings)}) = nullptr;",
                 TypeDeclarationsReferenced: new[] { interopReturnType }.Concat(parameters.Select(parameter => parameter.InteropType))
             ));
 
             // The static field should be initialized at startup.
             cppInit.Fields.Add(new(
-                Name: $"{definition.Type.GetFullyQualifiedName()}::Call{method.Name}",
-                TypeSignature: $"{interopReturnType.GetFullyQualifiedName()} (*)({string.Join(", ", parameters.Select(parameter => parameter.InteropType.GetFullyQualifiedName()))})",
+                Name: $"{definition.Type.GetFullyQualifiedName()}::Property_{method.Name}",
+                TypeSignature: $"{interopReturnType.GetFullyQualifiedName()} (*)({string.Join(", ", interopParameters.Select(parameter => parameter.InteropType.GetFullyQualifiedName()))})",
                 TypeDefinitionsReferenced: new[] { definition.Type },
                 TypeDeclarationsReferenced: new[] { interopReturnType }.Concat(parameters.Select(parameter => parameter.Type))
             ));
@@ -75,19 +81,19 @@ namespace Oxidize
             // Method declaration
             var parameterStrings = parameters.Select(parameter => $"{parameter.Type.GetFullyQualifiedName()} {parameter.ParameterName}");
             declaration.Elements.Add(new(
-                Content: $"{modifiers}{returnType.GetFullyQualifiedName()} {method.Name}({string.Join(", ", parameterStrings)}){afterModifiers};",
+                Content: $"{modifiers}{returnType.GetFullyQualifiedName()} {property.Name}({string.Join(", ", parameterStrings)}){afterModifiers};",
                 TypeDeclarationsReferenced: new[] { returnType }.Concat(parameters.Select(parameter => parameter.Type))
             ));
 
-            // Constructor definition
-            var parameterPassStrings = parameters.Select(parameter => parameter.Type.GetConversionToInteropType(context, parameter.CallSiteName));
+            // Method definition
+            var parameterPassStrings = interopParameters.Select(parameter => parameter.Type.GetConversionToInteropType(context, parameter.CallSiteName));
             if (returnType.Name == "void" && !returnType.Flags.HasFlag(CppTypeFlags.Pointer))
             {
                 definition.Elements.Add(new(
                     Content:
                         $$"""
-                        {{returnType.GetFullyQualifiedName()}} {{definition.Type.Name}}::{{method.Name}}({{string.Join(", ", parameterStrings)}}){{afterModifiers}} {
-                            Call{{method.Name}}({{string.Join(", ", parameterPassStrings)}});
+                        {{returnType.GetFullyQualifiedName()}} {{definition.Type.Name}}::{{property.Name}}({{string.Join(", ", parameterStrings)}}){{afterModifiers}} {
+                            Property_{{method.Name}}({{string.Join(", ", parameterPassStrings)}});
                         }
                         """,
                     TypeDefinitionsReferenced: new[]
@@ -103,8 +109,8 @@ namespace Oxidize
                 definition.Elements.Add(new(
                     Content:
                         $$"""
-                        {{returnType.GetFullyQualifiedName()}} {{definition.Type.Name}}::{{method.Name}}({{string.Join(", ", parameterStrings)}}){{afterModifiers}} {
-                            auto result = Call{{method.Name}}({{string.Join(", ", parameterPassStrings)}});
+                        {{returnType.GetFullyQualifiedName()}} {{definition.Type.Name}}::{{property.Name}}({{string.Join(", ", parameterStrings)}}){{afterModifiers}} {
+                            auto result = Property_{{method.Name}}({{string.Join(", ", parameterPassStrings)}});
                             return {{returnType.GetConversionFromInteropType(context, "result")}};
                         }
                         """,

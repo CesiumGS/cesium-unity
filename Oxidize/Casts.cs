@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Oxidize
 {
-    internal class CppCasts
+    internal class Casts
     {
         public static void Generate(CppGenerationContext context, GenerationItem item, GeneratedResult result)
         {

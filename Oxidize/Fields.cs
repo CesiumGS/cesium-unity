@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Oxidize
 {
-    internal class CppFields
+    internal class Fields
     {
         public static void Generate(CppGenerationContext context, GenerationItem item, GeneratedResult result)
         {

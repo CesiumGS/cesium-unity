@@ -51,16 +51,16 @@ namespace Oxidize
 
             Interop.GenerateForType(this.Options, item, result);
             CppHandleManagement.Generate(this.Options, item, result);
-            CppConstructors.Generate(this.Options, item, result);
-            CppCasts.Generate(this.Options, item, result);
-            CppFields.Generate(this.Options, item, result);
+            Constructors.Generate(this.Options, item, result);
+            Casts.Generate(this.Options, item, result);
+            Fields.Generate(this.Options, item, result);
 
             // Generate properties and methods throughout the whole inheritance hierarchy.
             GenerationItem? current = item;
             while (current != null)
             {
-                CppProperties.Generate(this.Options, item, current, result);
-                CppMethods.Generate(this.Options, item, current, result);
+                Properties.Generate(this.Options, item, current, result);
+                Methods.Generate(this.Options, item, current, result);
                 current = current.baseClass;
             }
 
