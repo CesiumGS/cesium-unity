@@ -22,7 +22,7 @@ public class OxidizeGenerator : IIncrementalGenerator
     {
         context.RegisterPostInitializationOutput(CSharpOxidizeAttribute.Generate);
         context.RegisterPostInitializationOutput(CSharpOxidizeNativeImplementationAttribute.Generate);
-        context.RegisterPostInitializationOutput(CSharpObjectHandle.Generate);
+        context.RegisterPostInitializationOutput(CSharpObjectHandleUtility.Generate);
 
         // For each method in the Oxidize class, look at the types, methods, and properties it uses and create from
         // that a list of items to be generated (GenerationItems).

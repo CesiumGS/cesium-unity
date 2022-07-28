@@ -7,7 +7,7 @@ namespace Oxidize
     /// This is intended to be used from a RegisterPostInitializationOutput
     /// callback on an IIncrementalGenerator.
     /// </summary>
-    internal class CSharpObjectHandle
+    internal class CSharpObjectHandleUtility
     {
         public static void Generate(IncrementalGeneratorPostInitializationContext context)
         {
