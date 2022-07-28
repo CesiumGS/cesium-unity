@@ -19,6 +19,17 @@ namespace Oxidize
     {
         public List<GeneratedCppFieldInit> Fields = new List<GeneratedCppFieldInit>();
 
+        public static GeneratedCppInit Merge(IEnumerable<GeneratedCppInit> inits)
+        {
+            List<GeneratedCppFieldInit> fields = new List<GeneratedCppFieldInit>();
+            foreach (GeneratedCppInit init in inits)
+            {
+                fields.AddRange(init.Fields);
+            }
+
+            return new GeneratedCppInit() { Fields = fields };
+        }
+
         public string ToSourceFileString()
         {
             return $$"""
@@ -46,12 +57,26 @@ namespace Oxidize
                 """;
         }
 
+        public string ToHeaderFileString()
+        {
+            return
+                $$"""
+                #pragma once
+
+                #include <cstdint>
+
+                extern "C" {
+                __declspec(dllexport) void initializeOxidize(void** functionPointers, std::int32_t count);
+                }
+                """;
+        }
+
         public IEnumerable<string> GetIncludes()
         {
             HashSet<string> result = new HashSet<string>();
 
             // These are required for the init boilerplate
-            result.Add("<casset>");
+            result.Add("<cassert>");
             result.Add("<cstdint>");
 
             foreach (GeneratedCppFieldInit field in Fields)

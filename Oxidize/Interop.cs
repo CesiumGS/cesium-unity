@@ -124,5 +124,15 @@ namespace Oxidize
                     }
                     """);
         }
+
+        internal static void GenerateForType(CppGenerationContext context, GenerationItem item, GeneratedResult result)
+        {
+            string initializeOxidizeHeader = context.BaseNamespace == null ? "<initializeOxidize.h>" : $"<{context.BaseNamespace.Replace("::", "/")}/initializeOxidize.h>";
+            result.CppDeclaration.Elements.Add(new(
+                Content: "friend void ::initializeOxidize(void** functionPointers, std::int32_t count);",
+                IsPrivate: true,
+                TypeDeclarationsReferenced: new[] { CppType.Int32 },
+                AdditionalIncludes: new[] { initializeOxidizeHeader }));
+        }
     }
 }

@@ -17,54 +17,19 @@ namespace Oxidize
             this.Options = options;
         }
 
-        public void WriteInitializeFunction(ImmutableArray<TypeDefinition?> typeDefinitions)
+        public void WriteInitializeFunction(ImmutableArray<GeneratedResult?> results)
         {
-            var interopConstructors = typeDefinitions.SelectMany(typeDefinition => typeDefinition == null ? new List<InteropConstructor>() : typeDefinition.interopConstructors);
-            var constructorAssignments = interopConstructors.Select(function => $"{function.CppTarget} = reinterpret_cast<{function.CppSignature}>(functionPointers[i++]);");
-
-            var interopMethods = typeDefinitions.SelectMany(typeDefinition => typeDefinition == null ? new List<InteropMethod>() : typeDefinition.interopMethods);
-            var methodAssignments = interopMethods.Select(function => $"{function.CppTarget} = reinterpret_cast<{function.CppSignature}>(functionPointers[i++]);");
-
-            HashSet<string> includes = new HashSet<string>();
-            includes.Add("<cassert>");
-            includes.Add("<cstdint>");
-
-            foreach (InteropConstructor interop in interopConstructors)
-            {
-                interop.CppType.AddSourceIncludesToSet(includes);
-            }
-
-            foreach (InteropMethod interop in interopMethods)
-            {
-                interop.CppType.AddSourceIncludesToSet(includes);
-            }
-
-            var assignments = constructorAssignments.Concat(methodAssignments);
-
-            string initialize = $$"""
-                {{string.Join(Environment.NewLine, includes.Select(include => "#include " + include))}}
-
-                void start();
-                void stop();
-
-                extern "C" {
-
-                __declspec(dllexport) void initializeOxidize(void** functionPointers, std::int32_t count) {
-                  // If this assertion fails, the C# and C++ layers are out of sync.
-                  assert(count == {{assignments.Count()}});
-                
-                  std::int32_t i = 0;
-                  {{string.Join(Environment.NewLine + "  ", assignments)}}
-
-                  // Invoke user startup code.
-                  start();
-                }
-
-                }
-                """;
+            GeneratedCppInit init = GeneratedCppInit.Merge(results.Select(result => result == null ? new GeneratedCppInit() : result.CppInit));
 
             Directory.CreateDirectory(Options.OutputSourceDirectory);
-            File.WriteAllText(Path.Combine(Options.OutputSourceDirectory, "initializeOxidize.cpp"), initialize, Encoding.UTF8);
+            File.WriteAllText(Path.Combine(Options.OutputSourceDirectory, "initializeOxidize.cpp"), init.ToSourceFileString(), Encoding.UTF8);
+
+            string headerPath = Options.OutputHeaderDirectory;
+            if (this.Options.BaseNamespace != null)
+                headerPath = Path.Combine(headerPath, this.Options.BaseNamespace);
+
+            Directory.CreateDirectory(headerPath);
+            File.WriteAllText(Path.Combine(headerPath, "initializeOxidize.h"), init.ToHeaderFileString(), Encoding.UTF8);
         }
 
         public GeneratedResult? GenerateType(GenerationItem item)
@@ -84,6 +49,7 @@ namespace Oxidize
 
             GeneratedResult result = new GeneratedResult(itemType);
 
+            Interop.GenerateForType(this.Options, item, result);
             CppHandleManagement.Generate(this.Options, item, result);
             CppConstructors.Generate(this.Options, item, result);
             CppCasts.Generate(this.Options, item, result);
