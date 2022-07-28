@@ -2,15 +2,15 @@
 
 namespace Oxidize
 {
-    internal class GenerationItem
+    internal class TypeToGenerate
     {
-        public GenerationItem(ITypeSymbol type)
+        public TypeToGenerate(ITypeSymbol type)
         {
             this.Type = type;
             this.Constructors = new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default);
             this.Methods = new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default);
             this.Properties = new HashSet<IPropertySymbol>(SymbolEqualityComparer.Default);
-            this.Interfaces = new List<GenerationItem>();
+            this.Interfaces = new List<TypeToGenerate>();
             this.MethodsImplementedInCpp = new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default);
         }
 
@@ -18,8 +18,8 @@ namespace Oxidize
         public HashSet<IMethodSymbol> Constructors;
         public HashSet<IMethodSymbol> Methods;
         public HashSet<IPropertySymbol> Properties;
-        public GenerationItem? BaseClass;
-        public List<GenerationItem> Interfaces;
+        public TypeToGenerate? BaseClass;
+        public List<TypeToGenerate> Interfaces;
         public HashSet<IMethodSymbol> MethodsImplementedInCpp;
 
         /// <summary>

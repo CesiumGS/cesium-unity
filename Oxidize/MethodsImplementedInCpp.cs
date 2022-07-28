@@ -5,7 +5,7 @@ namespace Oxidize
 {
     internal class MethodsImplementedInCpp
     {
-        public static void Generate(CppGenerationContext context, GenerationItem item, GeneratedResult result)
+        public static void Generate(CppGenerationContext context, TypeToGenerate item, GeneratedResult result)
         {
             Debug.Assert(result.CppImplementationInvoker != null);
             if (result.CppImplementationInvoker == null)
@@ -56,7 +56,7 @@ namespace Oxidize
             }
         }
 
-        private static void GenerateMethod(CppGenerationContext context, GenerationItem item, GeneratedResult result, IMethodSymbol method)
+        private static void GenerateMethod(CppGenerationContext context, TypeToGenerate item, GeneratedResult result, IMethodSymbol method)
         {
             if (result.CppImplementationInvoker == null)
                 return;

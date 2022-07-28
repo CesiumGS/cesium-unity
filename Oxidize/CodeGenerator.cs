@@ -32,7 +32,7 @@ namespace Oxidize
             File.WriteAllText(Path.Combine(headerPath, "initializeOxidize.h"), init.ToHeaderFileString(), Encoding.UTF8);
         }
 
-        public GeneratedResult? GenerateType(GenerationItem item)
+        public GeneratedResult? GenerateType(TypeToGenerate item)
         {
             INamedTypeSymbol? named = item.Type as INamedTypeSymbol;
             if (named == null || named.IsGenericType)
@@ -56,7 +56,7 @@ namespace Oxidize
             Fields.Generate(this.Options, item, result);
 
             // Generate properties and methods throughout the whole inheritance hierarchy.
-            GenerationItem? current = item;
+            TypeToGenerate? current = item;
             while (current != null)
             {
                 Properties.Generate(this.Options, item, current, result);

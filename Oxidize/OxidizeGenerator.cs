@@ -26,19 +26,19 @@ public class OxidizeGenerator : IIncrementalGenerator
 
         // For each method in the Oxidize class, look at the types, methods, and properties it uses and create from
         // that a list of items to be generated (GenerationItems).
-        IncrementalValuesProvider<IEnumerable<GenerationItem>> perMethodGenerationItems =
+        IncrementalValuesProvider<IEnumerable<TypeToGenerate>> perMethodGenerationItems =
             context.SyntaxProvider.CreateSyntaxProvider(
                 predicate: IsOxidizeType,
                 transform: GetOxidizeClass);
 
         // Consolidate the GenerationItems from the different methods into a single dictionary.
-        IncrementalValueProvider<Dictionary<ITypeSymbol, GenerationItem>> generationItems =
+        IncrementalValueProvider<Dictionary<ITypeSymbol, TypeToGenerate>> generationItems =
             perMethodGenerationItems
                 .Collect()
                 .Select(CombineGenerationItems);
 
         // Process the generation items, for example, linking them together.
-        IncrementalValuesProvider<GenerationItem> processedGenerationItems = generationItems.SelectMany(Process);
+        IncrementalValuesProvider<TypeToGenerate> processedGenerationItems = generationItems.SelectMany(Process);
 
         var cppGenerator = context.CompilationProvider.Combine(context.AnalyzerConfigOptionsProvider).Select((pair, _) => CreateCppGenerator(pair.Left, pair.Right));
         //var cppGenerator = context.CompilationProvider.Select(CreateCppGenerator);
@@ -57,18 +57,18 @@ public class OxidizeGenerator : IIncrementalGenerator
         context.RegisterSourceOutput(typesAndGenerator, (context, pair) => CodeGenerator.WriteCSharpCode(context, pair.Right.Options.Compilation, pair.Left));
     }
 
-    private static Dictionary<ITypeSymbol, GenerationItem> CombineGenerationItems(ImmutableArray<IEnumerable<GenerationItem>> listOfItems, CancellationToken token)
+    private static Dictionary<ITypeSymbol, TypeToGenerate> CombineGenerationItems(ImmutableArray<IEnumerable<TypeToGenerate>> listOfItems, CancellationToken token)
     {
-        Dictionary<ITypeSymbol, GenerationItem> result = new Dictionary<ITypeSymbol, GenerationItem>(SymbolEqualityComparer.Default);
+        Dictionary<ITypeSymbol, TypeToGenerate> result = new Dictionary<ITypeSymbol, TypeToGenerate>(SymbolEqualityComparer.Default);
 
-        foreach (IEnumerable<GenerationItem> items in listOfItems)
+        foreach (IEnumerable<TypeToGenerate> items in listOfItems)
         {
-            foreach (GenerationItem item in items)
+            foreach (TypeToGenerate item in items)
             {
-                GenerationItem current;
+                TypeToGenerate current;
                 if (!result.TryGetValue(item.Type, out current))
                 {
-                    current = new GenerationItem(item.Type);
+                    current = new TypeToGenerate(item.Type);
                     result.Add(item.Type, current);
                 }
 
@@ -142,18 +142,18 @@ public class OxidizeGenerator : IIncrementalGenerator
         return null;
     }
 
-    private static IEnumerable<GenerationItem> GetOxidizeClass(GeneratorSyntaxContext ctx, CancellationToken token)
+    private static IEnumerable<TypeToGenerate> GetOxidizeClass(GeneratorSyntaxContext ctx, CancellationToken token)
     {
         SemanticModel semanticModel = ctx.SemanticModel;
         OxidizeWalker walker = new OxidizeWalker(semanticModel);
 
         var attributeSyntax = ctx.Node as AttributeSyntax;
         if (attributeSyntax == null)
-            return Array.Empty<GenerationItem>();
+            return Array.Empty<TypeToGenerate>();
 
         var classSyntax = attributeSyntax.Parent?.Parent as ClassDeclarationSyntax;
         if (classSyntax == null)
-            return Array.Empty<GenerationItem>();
+            return Array.Empty<TypeToGenerate>();
 
         string? attributeName = GetAttributeName(attributeSyntax);
 
@@ -185,10 +185,10 @@ public class OxidizeGenerator : IIncrementalGenerator
 
             if (type != null)
             {
-                GenerationItem item;
+                TypeToGenerate item;
                 if (!walker.GenerationItems.TryGetValue(type, out item))
                 {
-                    item = new GenerationItem(type);
+                    item = new TypeToGenerate(type);
                     walker.GenerationItems.Add(type, item);
                 }
 
@@ -232,9 +232,9 @@ public class OxidizeGenerator : IIncrementalGenerator
         return null;
     }
 
-    private static IEnumerable<GenerationItem> Process(Dictionary<ITypeSymbol, GenerationItem> items, CancellationToken token)
+    private static IEnumerable<TypeToGenerate> Process(Dictionary<ITypeSymbol, TypeToGenerate> items, CancellationToken token)
     {
-        foreach (GenerationItem item in items.Values)
+        foreach (TypeToGenerate item in items.Values)
         {
             InheritanceChainer.Chain(item, items);
         }

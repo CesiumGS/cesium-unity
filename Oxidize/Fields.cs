@@ -8,7 +8,7 @@ namespace Oxidize
 {
     internal class Fields
     {
-        public static void Generate(CppGenerationContext context, GenerationItem item, GeneratedResult result)
+        public static void Generate(CppGenerationContext context, TypeToGenerate item, GeneratedResult result)
         {
             // Only blittable value types need fields.
             if (result.CppDeclaration.Type.Kind != CppTypeKind.BlittableStruct)
@@ -25,7 +25,7 @@ namespace Oxidize
             }
         }
 
-        private static void GenerateField(CppGenerationContext context, GenerationItem item, IFieldSymbol field, GeneratedResult result)
+        private static void GenerateField(CppGenerationContext context, TypeToGenerate item, IFieldSymbol field, GeneratedResult result)
         {
             // Skip static fields
             // TODO: Implement these as functions that call into the C#?

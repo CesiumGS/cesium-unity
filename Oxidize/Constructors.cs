@@ -8,7 +8,7 @@ namespace Oxidize
 {
     internal class Constructors
     {
-        public static void Generate(CppGenerationContext context, GenerationItem item, GeneratedResult result)
+        public static void Generate(CppGenerationContext context, TypeToGenerate item, GeneratedResult result)
         {
             // TODO: We're not currently generating constructors for value types. They'll need to be slightly different (no handle).
             if (result.CppDeclaration.Type.Kind != CppTypeKind.ClassWrapper)
@@ -20,7 +20,7 @@ namespace Oxidize
                 GenerateNonStatic(context, item, result);
         }
 
-        private static void GenerateStatic(CppGenerationContext context, GenerationItem item, GeneratedResult result)
+        private static void GenerateStatic(CppGenerationContext context, TypeToGenerate item, GeneratedResult result)
         {
             GeneratedCppDeclaration declaration = result.CppDeclaration;
 
@@ -31,7 +31,7 @@ namespace Oxidize
             ));
         }
 
-        private static void GenerateNonStatic(CppGenerationContext context, GenerationItem item, GeneratedResult result)
+        private static void GenerateNonStatic(CppGenerationContext context, TypeToGenerate item, GeneratedResult result)
         {
             foreach (IMethodSymbol constructor in item.Constructors)
             {
@@ -39,7 +39,7 @@ namespace Oxidize
             }
         }
 
-        private static void GenerateSingleNonStatic(CppGenerationContext context, GenerationItem item, GeneratedResult result, IMethodSymbol constructor)
+        private static void GenerateSingleNonStatic(CppGenerationContext context, TypeToGenerate item, GeneratedResult result, IMethodSymbol constructor)
         {
             GeneratedCppDeclaration declaration = result.CppDeclaration;
             GeneratedCppDefinition definition = result.CppDefinition;

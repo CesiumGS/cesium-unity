@@ -6,7 +6,7 @@ namespace Oxidize
 {
     internal class Casts
     {
-        public static void Generate(CppGenerationContext context, GenerationItem item, GeneratedResult result)
+        public static void Generate(CppGenerationContext context, TypeToGenerate item, GeneratedResult result)
         {
             // It only makes sense to cast instances, so static class need not apply.
             if (item.Type.IsStatic)
@@ -20,7 +20,7 @@ namespace Oxidize
             CppType objectHandleType = CppObjectHandle.GetCppType(context);
 
             // Generate implicit conversions to all base classes.
-            GenerationItem? baseClass = item.BaseClass;
+            TypeToGenerate? baseClass = item.BaseClass;
             while (baseClass != null)
             {
                 CppType baseType = CppType.FromCSharp(context, baseClass.Type);
@@ -43,7 +43,7 @@ namespace Oxidize
             }
 
             // Generate implicit conversions to all interfaces.
-            foreach (GenerationItem anInterface in item.Interfaces)
+            foreach (TypeToGenerate anInterface in item.Interfaces)
             {
                 CppType interfaceType = CppType.FromCSharp(context, anInterface.Type);
                 string interfaceTypeName = interfaceType.GetFullyQualifiedName();

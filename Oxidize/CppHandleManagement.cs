@@ -6,7 +6,7 @@ namespace Oxidize
 {
     internal class CppHandleManagement
     {
-        internal static void Generate(CppGenerationContext context, GenerationItem item, GeneratedResult result)
+        internal static void Generate(CppGenerationContext context, TypeToGenerate item, GeneratedResult result)
         {
             GeneratedCppDeclaration declaration = result.CppDeclaration;
             GeneratedCppDefinition definition = result.CppDefinition;

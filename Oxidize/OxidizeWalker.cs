@@ -14,7 +14,7 @@ namespace Oxidize
     /// </summary>
     internal class OxidizeWalker : CSharpSyntaxWalker
     {
-        public readonly Dictionary<ITypeSymbol, GenerationItem> GenerationItems = new Dictionary<ITypeSymbol, GenerationItem>(SymbolEqualityComparer.Default);
+        public readonly Dictionary<ITypeSymbol, TypeToGenerate> GenerationItems = new Dictionary<ITypeSymbol, TypeToGenerate>(SymbolEqualityComparer.Default);
 
         public OxidizeWalker(SemanticModel semanticModel)
         {
@@ -85,7 +85,7 @@ namespace Oxidize
             this.AddConstructor(methodSymbol);
         }
 
-        private GenerationItem AddType(ITypeSymbol type)
+        private TypeToGenerate AddType(ITypeSymbol type)
         {
             // Drop the nullability ("?") from the type if present.
             if (type.NullableAnnotation == NullableAnnotation.Annotated && type.OriginalDefinition != null)
@@ -95,21 +95,21 @@ namespace Oxidize
 
             // Don't add "void"
             if (type.SpecialType == SpecialType.System_Void)
-                return new GenerationItem(type);
+                return new TypeToGenerate(type);
 
-            GenerationItem generationItem;
+            TypeToGenerate generationItem;
             if (!this.GenerationItems.TryGetValue(type, out generationItem))
             {
-                generationItem = new GenerationItem(type);
+                generationItem = new TypeToGenerate(type);
                 this.GenerationItems.Add(type, generationItem);
             }
 
             return generationItem;
         }
 
-        private GenerationItem AddMethod(IMethodSymbol symbol)
+        private TypeToGenerate AddMethod(IMethodSymbol symbol)
         {
-            GenerationItem item = this.AddType(symbol.ContainingType);
+            TypeToGenerate item = this.AddType(symbol.ContainingType);
             item.Methods.Add(symbol);
 
             // We also need to generate the parameter and return value types
@@ -123,9 +123,9 @@ namespace Oxidize
             return item;
         }
 
-        private GenerationItem AddProperty(IPropertySymbol symbol)
+        private TypeToGenerate AddProperty(IPropertySymbol symbol)
         {
-            GenerationItem item = this.AddType(symbol.ContainingType);
+            TypeToGenerate item = this.AddType(symbol.ContainingType);
             item.Properties.Add(symbol);
 
             // We also need to generate the property type.
@@ -134,9 +134,9 @@ namespace Oxidize
             return item;
         }
 
-        private GenerationItem AddConstructor(IMethodSymbol symbol)
+        private TypeToGenerate AddConstructor(IMethodSymbol symbol)
         {
-            GenerationItem item = this.AddType(symbol.ContainingType);
+            TypeToGenerate item = this.AddType(symbol.ContainingType);
             item.Constructors.Add(symbol);
 
             // We also need to generate the parameter types

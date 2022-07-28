@@ -7,7 +7,7 @@ namespace Oxidize
 {
     internal class Properties
     {
-        public static void Generate(CppGenerationContext context, GenerationItem mainItem, GenerationItem currentItem, GeneratedResult result)
+        public static void Generate(CppGenerationContext context, TypeToGenerate mainItem, TypeToGenerate currentItem, GeneratedResult result)
         {
             foreach (IPropertySymbol property in currentItem.Properties)
             {
@@ -15,7 +15,7 @@ namespace Oxidize
             }
         }
 
-        private static void GenerateSingleProperty(CppGenerationContext context, GenerationItem item, GeneratedResult result, IPropertySymbol property)
+        private static void GenerateSingleProperty(CppGenerationContext context, TypeToGenerate item, GeneratedResult result, IPropertySymbol property)
         {
             if (property.GetMethod != null)
                 GenerateSingleMethod(context, item, result, property, property.GetMethod);
@@ -24,7 +24,7 @@ namespace Oxidize
                 GenerateSingleMethod(context, item, result, property, property.SetMethod);
         }
 
-        private static void GenerateSingleMethod(CppGenerationContext context, GenerationItem item, GeneratedResult result, IPropertySymbol property, IMethodSymbol method)
+        private static void GenerateSingleMethod(CppGenerationContext context, TypeToGenerate item, GeneratedResult result, IPropertySymbol property, IMethodSymbol method)
         {
             GeneratedCppDeclaration declaration = result.CppDeclaration;
             GeneratedCppDefinition definition = result.CppDefinition;

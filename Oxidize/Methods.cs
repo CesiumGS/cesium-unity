@@ -11,7 +11,7 @@ namespace Oxidize
 {
     internal class Methods
     {
-        public static void Generate(CppGenerationContext context, GenerationItem mainItem, GenerationItem currentItem, GeneratedResult result)
+        public static void Generate(CppGenerationContext context, TypeToGenerate mainItem, TypeToGenerate currentItem, GeneratedResult result)
         {
             foreach (IMethodSymbol method in currentItem.Methods)
             {
@@ -19,7 +19,7 @@ namespace Oxidize
             }
         }
 
-        private static void GenerateSingleMethod(CppGenerationContext context, GenerationItem item, GeneratedResult result, IMethodSymbol method)
+        private static void GenerateSingleMethod(CppGenerationContext context, TypeToGenerate item, GeneratedResult result, IMethodSymbol method)
         {
             GeneratedCppDeclaration declaration = result.CppDeclaration;
             GeneratedCppDefinition definition = result.CppDefinition;

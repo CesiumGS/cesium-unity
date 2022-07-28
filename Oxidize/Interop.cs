@@ -130,7 +130,7 @@ namespace Oxidize
                     """);
         }
 
-        internal static void GenerateForType(CppGenerationContext context, GenerationItem item, GeneratedResult result)
+        internal static void GenerateForType(CppGenerationContext context, TypeToGenerate item, GeneratedResult result)
         {
             string initializeOxidizeHeader = context.BaseNamespace == null ? "<initializeOxidize.h>" : $"<{context.BaseNamespace.Replace("::", "/")}/initializeOxidize.h>";
             result.CppDeclaration.Elements.Add(new(
