@@ -22,8 +22,8 @@ namespace Oxidize
                 Content:
                     $$"""
                     void* {{wrapperType.GetFullyQualifiedName(false).Replace("::", "_")}}_Create(void* handle) {
-                      const {{wrapperType.GetFullyQualifiedName()}} wrapper({{objectHandleType.GetFullyQualifiedName()}}(handle));
-                      return new {{implType.GetFullyQualifiedName()}}(wrapper);
+                      const {{wrapperType.GetFullyQualifiedName()}} wrapper{{{objectHandleType.GetFullyQualifiedName()}}(handle)};
+                      return reinterpret_cast<void*>(new {{implType.GetFullyQualifiedName()}}(wrapper));
                     }
                     """,
                 TypeDefinitionsReferenced: new[]
@@ -36,8 +36,8 @@ namespace Oxidize
             result.CppImplementationInvoker.Functions.Add(new(
                 Content:
                     $$"""
-                    void* {{wrapperType.GetFullyQualifiedName(false).Replace("::", "_")}}_Destroy(void* handle, void* pImpl) {
-                      const {{wrapperType.GetFullyQualifiedName()}} wrapper({{objectHandleType.GetFullyQualifiedName()}}(handle));
+                    void {{wrapperType.GetFullyQualifiedName(false).Replace("::", "_")}}_Destroy(void* handle, void* pImpl) {
+                      const {{wrapperType.GetFullyQualifiedName()}} wrapper{{{objectHandleType.GetFullyQualifiedName()}}(handle)};
                       auto pImplTyped = reinterpret_cast<{{implType.GetFullyQualifiedName()}}*>(pImpl);
                       pImplTyped->Destroy(wrapper);
                     }
@@ -48,6 +48,16 @@ namespace Oxidize
                     implType,
                     objectHandleType
                 }));
+
+            result.CSharpPartialMethodDefinitions.Methods.Add(new(
+                methodDefinition:
+                    $$"""
+                    public void Dispose()
+                    {
+                        throw new System.NotImplementedException();
+                    }
+                    """,
+                interopFunctionDeclaration: ""));
 
             // Add functions for other methods.
             foreach (IMethodSymbol method in item.MethodsImplementedInCpp)
@@ -90,7 +100,7 @@ namespace Oxidize
             result.CppImplementationInvoker.Functions.Add(new(
                 Content: $$"""
                     {{interopReturnType.GetFullyQualifiedName()}} {{name}}({{parameterListString}}) {
-                      const {{wrapperType.GetFullyQualifiedName()}} wrapper({{objectHandleType.GetFullyQualifiedName()}}(handle));
+                      const {{wrapperType.GetFullyQualifiedName()}} wrapper{{{objectHandleType.GetFullyQualifiedName()}}(handle)};
                       auto pImplTyped = reinterpret_cast<{{implType.GetFullyQualifiedName()}}*>(pImpl);
                       pImplTyped->{{method.Name}}({{callParameterListString}});
                     }
@@ -117,9 +127,9 @@ namespace Oxidize
             result.CSharpPartialMethodDefinitions.Methods.Add(new(
                 methodDefinition:
                     $$"""
-                    {{modifiers}} {{csReturnType.GetFullyQualifiedName()}} {{method.Name}}({{string.Join(", ", csParameters.Select(parameter => $"{parameter.Type.GetFullyQualifiedName()} {parameter.Name}"))}}
+                    {{modifiers}} partial {{csReturnType.GetFullyQualifiedName()}} {{method.Name}}({{string.Join(", ", csParameters.Select(parameter => $"{parameter.Type.GetFullyQualifiedName()} {parameter.Name}"))}})
                     {
-                        throw new NotImplementedException();
+                        throw new System.NotImplementedException();
                     }
                     """,
                 interopFunctionDeclaration: ""));

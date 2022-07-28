@@ -92,13 +92,28 @@ namespace Oxidize
 
             Directory.CreateDirectory(Options.OutputSourceDirectory);
             File.WriteAllText(Path.Combine(Options.OutputSourceDirectory, type.Name + ".cpp"), result.CppDefinition.ToSourceFileString(), Encoding.UTF8);
+
+            if (result.CppImplementationInvoker != null)
+                File.WriteAllText(Path.Combine(Options.OutputSourceDirectory, type.Name + "Bindings.cpp"), result.CppImplementationInvoker.ToSourceFileString(), Encoding.UTF8);
         }
 
         public static void WriteCSharpCode(SourceProductionContext context, Compilation compilation, ImmutableArray<GeneratedResult?> results)
         {
-            GeneratedCSharpInit combined = GeneratedCSharpInit.Merge(results.Select(result => result == null ? new GeneratedCSharpInit() : result.CSharpInit));
-            Console.WriteLine(combined.ToSourceFileString());
-            context.AddSource("OxidizeInitializer", combined.ToSourceFileString());
+            GeneratedCSharpInit combinedInit = GeneratedCSharpInit.Merge(results.Select(result => result == null ? new GeneratedCSharpInit() : result.CSharpInit));
+            Console.WriteLine(combinedInit.ToSourceFileString());
+            context.AddSource("OxidizeInitializer", combinedInit.ToSourceFileString());
+
+            foreach (GeneratedResult? result in results)
+            {
+                if (result == null)
+                    continue;
+
+                GeneratedCSharpPartialMethodDefinitions? partialMethods = result.CSharpPartialMethodDefinitions;
+                if (partialMethods == null)
+                    continue;
+
+                context.AddSource(partialMethods.Type.Symbol.Name + "-generated", partialMethods.ToSourceFileString());
+            }
         }
     }
 }
