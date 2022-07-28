@@ -54,7 +54,7 @@ public class OxidizeGenerator : IIncrementalGenerator
         context.RegisterImplementationSourceOutput(typesAndGenerator, (context, pair) => CppObjectHandle.Generate(pair.Right.Options));
 
         // Generate the required items
-        context.RegisterSourceOutput(typesAndGenerator, (context, pair) => CSharpCodeGenerator.Generate(context, pair.Right.Options.Compilation, pair.Left));
+        context.RegisterSourceOutput(typesAndGenerator, (context, pair) => CodeGenerator.WriteCSharpCode(context, pair.Right.Options.Compilation, pair.Left));
     }
 
     private static Dictionary<ITypeSymbol, GenerationItem> CombineGenerationItems(ImmutableArray<IEnumerable<GenerationItem>> listOfItems, CancellationToken token)
@@ -242,7 +242,7 @@ public class OxidizeGenerator : IIncrementalGenerator
         return items.Values;
     }
 
-    private static CppCodeGenerator CreateCppGenerator(Compilation compilation, AnalyzerConfigOptionsProvider options)
+    private static CodeGenerator CreateCppGenerator(Compilation compilation, AnalyzerConfigOptionsProvider options)
     {
         CppGenerationContext cppContext = new CppGenerationContext(compilation);
         
@@ -267,6 +267,6 @@ public class OxidizeGenerator : IIncrementalGenerator
 
         cppContext.BaseNamespace = baseNamespace;
 
-        return new CppCodeGenerator(cppContext);
+        return new CodeGenerator(cppContext);
     }
 }

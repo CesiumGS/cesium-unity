@@ -8,11 +8,11 @@ using System.Text;
 
 namespace Oxidize
 {
-    internal class CppCodeGenerator
+    internal class CodeGenerator
     {
         public readonly CppGenerationContext Options;
 
-        public CppCodeGenerator(CppGenerationContext options)
+        public CodeGenerator(CppGenerationContext options)
         {
             this.Options = options;
         }
@@ -92,6 +92,13 @@ namespace Oxidize
 
             Directory.CreateDirectory(Options.OutputSourceDirectory);
             File.WriteAllText(Path.Combine(Options.OutputSourceDirectory, type.Name + ".cpp"), result.CppDefinition.ToSourceFileString(), Encoding.UTF8);
+        }
+
+        public static void WriteCSharpCode(SourceProductionContext context, Compilation compilation, ImmutableArray<GeneratedResult?> results)
+        {
+            GeneratedCSharpInit combined = GeneratedCSharpInit.Merge(results.Select(result => result == null ? new GeneratedCSharpInit() : result.CSharpInit));
+            Console.WriteLine(combined.ToSourceFileString());
+            context.AddSource("OxidizeInitializer", combined.ToSourceFileString());
         }
     }
 }
