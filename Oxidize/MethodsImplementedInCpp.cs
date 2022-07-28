@@ -39,7 +39,8 @@ namespace Oxidize
                     void {{wrapperType.GetFullyQualifiedName(false).Replace("::", "_")}}_Destroy(void* handle, void* pImpl) {
                       const {{wrapperType.GetFullyQualifiedName()}} wrapper{{{objectHandleType.GetFullyQualifiedName()}}(handle)};
                       auto pImplTyped = reinterpret_cast<{{implType.GetFullyQualifiedName()}}*>(pImpl);
-                      pImplTyped->Destroy(wrapper);
+                      pImplTyped->JustBeforeDelete(wrapper);
+                      delete pImplTyped;
                     }
                     """,
                 TypeDefinitionsReferenced: new[]
