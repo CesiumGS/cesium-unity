@@ -20,6 +20,10 @@ namespace Oxidize
 
         public static void Generate(CppGenerationContext context, GenerationItem item, GeneratedResult result)
         {
+            // TODO: We're not currently generating constructors for value types. They'll need to be slightly different (no handle).
+            if (result.CppDeclaration.Type.Kind != CppTypeKind.ClassWrapper)
+                return;
+
             if (item.type.IsStatic)
                 GenerateStatic(context, item, result);
             else
@@ -68,7 +72,7 @@ namespace Oxidize
 
             definition.Elements.Add(new(
                 Content: $"{interopReturnType.GetFullyQualifiedName()} (*{definition.Type.GetFullyQualifiedName(false)}::Construct)({string.Join(", ", interopParameterStrings)}) = nullptr;",
-                TypeDefinitionsReferenced: new[] { interopReturnType }.Concat(interopParameters.Select(parameter => parameter.InteropType))
+                TypeDeclarationsReferenced: new[] { interopReturnType }.Concat(interopParameters.Select(parameter => parameter.InteropType))
             ));
 
             // The static field should be initialized at startup.
