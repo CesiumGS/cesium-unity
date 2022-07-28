@@ -87,6 +87,7 @@ namespace Oxidize
             CppHandleManagement.Generate(this.Options, item, result);
             CppConstructors.Generate(this.Options, item, result);
             CppCasts.Generate(this.Options, item, result);
+            CppFields.Generate(this.Options, item, result);
 
             // Generate properties and methods throughout the whole inheritance hierarchy.
             GenerationItem? current = item;
