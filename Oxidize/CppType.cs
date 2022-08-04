@@ -49,6 +49,11 @@ namespace Oxidize
 
         public static CppType FromCSharp(CppGenerationContext context, ITypeSymbol type)
         {
+            if (type.Kind == SymbolKind.TypeParameter)
+            {
+                return new CppType(CppTypeKind.GenericParameter, NoNamespace, type.Name, null, 0);
+            }
+
             switch (type.SpecialType)
             {
                 case SpecialType.System_SByte:

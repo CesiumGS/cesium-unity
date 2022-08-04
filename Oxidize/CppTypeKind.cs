@@ -7,6 +7,7 @@
         BlittableStruct,
         NonBlittableStructWrapper,
         ClassWrapper,
-        Enum
+        Enum,
+        GenericParameter
     }
 }

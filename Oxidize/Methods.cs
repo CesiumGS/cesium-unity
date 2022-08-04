@@ -73,10 +73,31 @@ namespace Oxidize
             else
                 afterModifiers += " const";
 
+            string templateSpecialization = "";
+            if (method.IsGenericMethod)
+            {
+                // Add the template which will be specialized by this method.
+                IMethodSymbol genericMethod = method.ConstructedFrom;
+                CppType genericReturn = CppType.FromCSharp(context, genericMethod.ReturnType);
+                var genericParameters = genericMethod.Parameters.Select(parameter => CppType.FromCSharp(context, parameter.Type).GetFullyQualifiedName() + " " + parameter.Name);
+                string genericParametersString = string.Join(", ", genericParameters);
+                declaration.Elements.Add(new(
+                    Content:
+                        $$"""
+                        template <{{string.Join(", ", method.TypeParameters.Select(parameter => "typename " + parameter.Name))}}>
+                        {{modifiers}}{{genericReturn.GetFullyQualifiedName()}} {{method.Name}}({{genericParametersString}}){{afterModifiers}};
+                        """
+                    ));
+
+                modifiers = "template <> " + modifiers;
+                var templateParameters = method.TypeArguments.Select(typeArgument => CppType.FromCSharp(context, typeArgument).GetFullyQualifiedName());
+                templateSpecialization = $"<{string.Join(", ", templateParameters)}>";
+            }
+
             // Method declaration
             var parameterStrings = parameters.Select(parameter => $"{parameter.Type.GetFullyQualifiedName()} {parameter.ParameterName}");
             declaration.Elements.Add(new(
-                Content: $"{modifiers}{returnType.GetFullyQualifiedName()} {method.Name}({string.Join(", ", parameterStrings)}){afterModifiers};",
+                Content: $"{modifiers}{returnType.GetFullyQualifiedName()} {method.Name}{templateSpecialization}({string.Join(", ", parameterStrings)}){afterModifiers};",
                 TypeDeclarationsReferenced: new[] { returnType }.Concat(parameters.Select(parameter => parameter.Type))
             ));
 
