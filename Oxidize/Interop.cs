@@ -1,4 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Oxidize
 {
@@ -138,6 +140,24 @@ namespace Oxidize
                 IsPrivate: true,
                 TypeDeclarationsReferenced: new[] { CppType.Int32 },
                 AdditionalIncludes: new[] { initializeOxidizeHeader }));
+        }
+
+        internal static string InsecureHash(string s)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(s);
+            using (MD5 md5 = MD5.Create())
+            {
+                byte[] hash = md5.ComputeHash(bytes);
+                return System.Convert.ToBase64String(hash);
+            }
+        }
+
+        internal static string HashParameters(IEnumerable<IParameterSymbol> parameters)
+        {
+            var formattedParameters = parameters.Select(parameter => $"{parameter.Type.ToDisplayString()} {parameter.Name}");
+            var allTogether = string.Join(", ", formattedParameters);
+            string hash = InsecureHash(allTogether);
+            return hash.Replace("=", "").Replace("+", "_").Replace("/", "__");
         }
     }
 }

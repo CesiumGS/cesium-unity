@@ -34,13 +34,16 @@ internal partial class ConfigureOxidize
 
         GameObject go = new GameObject();
         go = new GameObject("name");
-        go.active = go.active;
+        go.SetActive(go.activeSelf);
         Transform transform = go.transform;
         transform.parent = transform.parent;
         transform.position = transform.position;
         transform.rotation = transform.rotation;
         transform.localScale = transform.localScale;
         Matrix4x4 m = transform.localToWorldMatrix;
+
+        go.AddComponent<MeshFilter>();
+        go.AddComponent<MeshRenderer>();
 
         Texture2D texture2D = new Texture2D(256, 256, TextureFormat.RGBA32, false, false);
         texture2D.LoadRawTextureData(IntPtr.Zero, 0);

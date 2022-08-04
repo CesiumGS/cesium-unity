@@ -51,23 +51,25 @@ namespace Oxidize
             var interopParameters = parameters.Select(parameter => (ParameterName: parameter.Name, CallSiteName: parameter.Name, Type: parameter.Type, InteropType: parameter.Type.AsInteropType()));
             var interopParameterStrings = interopParameters.Select(parameter => $"{parameter.InteropType.GetFullyQualifiedName()} {parameter.ParameterName}");
 
+            string interopFunctionName = $"Construct_{Interop.HashParameters(constructor.Parameters)}";
+
             // A private, static field of function pointer type that will call
             // into a managed delegate for this constructor.
             declaration.Elements.Add(new(
-                Content: $"static {interopReturnType.GetFullyQualifiedName()} (*Construct)({string.Join(", ", interopParameterStrings)});",
+                Content: $"static {interopReturnType.GetFullyQualifiedName()} (*{interopFunctionName})({string.Join(", ", interopParameterStrings)});",
                 IsPrivate: true,
                 TypeDeclarationsReferenced: new[] { interopReturnType }.Concat(interopParameters.Select(parameter => parameter.InteropType))
 
             ));
 
             definition.Elements.Add(new(
-                Content: $"{interopReturnType.GetFullyQualifiedName()} (*{definition.Type.GetFullyQualifiedName(false)}::Construct)({string.Join(", ", interopParameterStrings)}) = nullptr;",
+                Content: $"{interopReturnType.GetFullyQualifiedName()} (*{definition.Type.GetFullyQualifiedName(false)}::{interopFunctionName})({string.Join(", ", interopParameterStrings)}) = nullptr;",
                 TypeDeclarationsReferenced: new[] { interopReturnType }.Concat(interopParameters.Select(parameter => parameter.InteropType))
             ));
 
             // The static field should be initialized at startup.
             cppInit.Fields.Add(new(
-                Name: $"{definition.Type.GetFullyQualifiedName()}::Construct",
+                Name: $"{definition.Type.GetFullyQualifiedName()}::{interopFunctionName}",
                 TypeSignature: $"{interopReturnType.GetFullyQualifiedName()} (*)({string.Join(", ", interopParameters.Select(parameter => parameter.InteropType.GetFullyQualifiedName()))})",
                 TypeDefinitionsReferenced: new[] { definition.Type },
                 TypeDeclarationsReferenced: new[] { interopReturnType }.Concat(interopParameters.Select(parameter => parameter.Type))
@@ -89,7 +91,7 @@ namespace Oxidize
                 Content:
                     $$"""
                     {{definition.Type.GetFullyQualifiedName(false)}}::{{definition.Type.Name}}({{string.Join(", ", parameterStrings)}})
-                        : _handle(Construct({{string.Join(", ", parameterPassStrings)}}))
+                        : _handle({{interopFunctionName}}({{string.Join(", ", parameterPassStrings)}}))
                     {
                     }
                     """,
