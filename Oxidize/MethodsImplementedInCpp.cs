@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using System.Diagnostics;
+using System.Xml.Linq;
 
 namespace Oxidize
 {
@@ -36,7 +37,7 @@ namespace Oxidize
             result.CppImplementationInvoker.Functions.Add(new(
                 Content:
                     $$"""
-                    void {{wrapperType.GetFullyQualifiedName(false).Replace("::", "_")}}_Destroy(void* handle, void* pImpl) {
+                    void {{wrapperType.GetFullyQualifiedName(false).Replace("::", "_")}}_Dispose(void* handle, void* pImpl) {
                       const {{wrapperType.GetFullyQualifiedName()}} wrapper{{{objectHandleType.GetFullyQualifiedName()}}(handle)};
                       auto pImplTyped = reinterpret_cast<{{implType.GetFullyQualifiedName()}}*>(pImpl);
                       pImplTyped->JustBeforeDelete(wrapper);
@@ -50,15 +51,24 @@ namespace Oxidize
                     objectHandleType
                 }));
 
+            string disposeName = $$"""{{wrapperType.GetFullyQualifiedName(false).Replace("::", "_")}}_Dispose""";
             result.CSharpPartialMethodDefinitions.Methods.Add(new(
                 methodDefinition:
                     $$"""
                     public void Dispose()
                     {
-                        throw new System.NotImplementedException();
+                        if (_implementation != System.IntPtr.Zero)
+                        {
+                            {{disposeName}}(ObjectHandleUtility.CreateHandle(this), _implementation);
+                            _implementation = System.IntPtr.Zero;
+                        }
                     }
                     """,
-                interopFunctionDeclaration: ""));
+                interopFunctionDeclaration:
+                    $$"""
+                    [DllImport("CesiumForUnityNative.dll", CallingConvention=CallingConvention.Cdecl)]
+                    private static extern void {{disposeName}}(System.IntPtr thiz, System.IntPtr implementation);
+                    """));
 
             // Add functions for other methods.
             foreach (IMethodSymbol method in item.MethodsImplementedInCpp)
@@ -120,7 +130,32 @@ namespace Oxidize
 
             CSharpType csWrapperType = CSharpType.FromSymbol(context.Compilation, item.Type);
             CSharpType csReturnType = CSharpType.FromSymbol(context.Compilation, method.ReturnType);
-            var csParameters = method.Parameters.Select(parameter => (Name: parameter.Name, Type: CSharpType.FromSymbol(context.Compilation, parameter.Type)));
+            var csParameters = method.Parameters.Select(parameter => (Name: parameter.Name, CallName: parameter.Name, Type: CSharpType.FromSymbol(context.Compilation, parameter.Type)));
+            var csParametersInterop = csParameters;
+            var implementationPointer = CSharpType.FromSymbol(context.Compilation, context.Compilation.GetSpecialType(SpecialType.System_IntPtr));
+
+            if (!method.IsStatic)
+            {
+                csParametersInterop = new[] { (Name: "thiz", CallName: "this", Type: csWrapperType), (Name: "implementation", CallName: "_implementation", Type: implementationPointer) }.Concat(csParametersInterop);
+            }
+
+            string implementation;
+            if (csReturnType.Symbol.SpecialType == SpecialType.System_Void)
+            {
+                implementation =
+                    $$"""
+                    {{name}}({{string.Join(", ", csParametersInterop.Select(parameter => parameter.Type.GetConversionToInteropType(parameter.CallName)))}});
+                    """;
+            }
+            else
+            {
+                implementation =
+                    $$"""
+                    var result = {{ name }}({{string.Join(", ", csParametersInterop.Select(parameter => parameter.Type.GetConversionToInteropType(parameter.CallName)))}});
+                    return {{csReturnType.GetConversionFromInteropType("result")}};
+                    """;
+            }
+
             string modifiers = CSharpTypeUtility.GetAccessString(method.DeclaredAccessibility);
             if (method.IsStatic)
                 modifiers += " static";
@@ -130,10 +165,15 @@ namespace Oxidize
                     $$"""
                     {{modifiers}} partial {{csReturnType.GetFullyQualifiedName()}} {{method.Name}}({{string.Join(", ", csParameters.Select(parameter => $"{parameter.Type.GetFullyQualifiedName()} {parameter.Name}"))}})
                     {
-                        throw new System.NotImplementedException();
+                        System.Diagnostics.Debug.Assert(_implementation != System.IntPtr.Zero, "Implementation instance has already been destroyed.");
+                        {{new[] { implementation }.JoinAndIndent("    ")}}
                     }
                     """,
-                interopFunctionDeclaration: ""));
+                interopFunctionDeclaration:
+                    $$"""
+                    [DllImport("CesiumForUnityNative.dll", CallingConvention=CallingConvention.Cdecl)]
+                    private static extern {{csReturnType.AsInteropType().GetFullyQualifiedName()}} {{name}}({{string.Join(", ", csParametersInterop.Select(parameter => parameter.Type.AsInteropType().GetFullyQualifiedName() + " " + parameter.Name))}});
+                    """));
         }
     }
 }

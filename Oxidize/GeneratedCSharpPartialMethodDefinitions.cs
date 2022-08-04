@@ -39,11 +39,18 @@ namespace Oxidize
             string kind = "class";
             return
                 $$"""
+                using System;
+                using System.Runtime.InteropServices;
+
                 namespace {{Type.GetFullyQualifiedNamespace()}}
                 {
                     {{CSharpTypeUtility.GetAccessString(Type.Symbol.DeclaredAccessibility)}} partial {{kind}} {{Type.Symbol.Name}} : System.IDisposable
                     {
+                        private System.IntPtr _implementation;
+
                         {{GetMethods().JoinAndIndent("        ")}}
+
+                        {{GetInteropFunctionDeclarations().JoinAndIndent("        ")}}
                     }
                 }
                 """;
@@ -52,6 +59,11 @@ namespace Oxidize
         private IEnumerable<string> GetMethods()
         {
             return Methods.Select(method => method.MethodDefinition);
+        }
+
+        private IEnumerable<string> GetInteropFunctionDeclarations()
+        {
+            return Methods.Select(method => method.InteropFunctionDeclaration);
         }
     }
 }
