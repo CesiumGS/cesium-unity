@@ -9,6 +9,9 @@
 #include <CesiumGeospatial/Transforms.h>
 #include <CesiumGltf/AccessorView.h>
 
+#include <Oxidize/System/Object.h>
+#include <Oxidize/System/String.h>
+#include <Oxidize/System/Text/Encoding.h>
 #include <Oxidize/UnityEngine/Debug.h>
 #include <Oxidize/UnityEngine/Matrix4x4.h>
 #include <Oxidize/UnityEngine/Mesh.h>
@@ -80,7 +83,10 @@ void* UnityPrepareRendererResources::prepareInMainThread(
   const QuadtreeTileID* pQ = std::get_if<QuadtreeTileID>(&tile.getTileID());
   if (pQ) {
     if (pQ->level >= 14) {
-      UnityEngine::Debug::Log(String(">=14"));
+      std::string message(">=14");
+      UnityEngine::Debug::Log(System::Text::Encoding::UTF8().GetString(
+          reinterpret_cast<std::uint8_t*>(message.data()),
+          message.size()));
     }
   }
 
@@ -92,10 +98,12 @@ void* UnityPrepareRendererResources::prepareInMainThread(
     name = urlIt->second.getStringOrDefault("glTF");
   }
 
-  auto pModelGameObject =
-      std::make_unique<UnityEngine::GameObject>(String(name.c_str()));
-  pModelGameObject->transform().SetParent(this->_tileset.transform());
-  pModelGameObject->SetActive(false);
+  auto pModelGameObject = std::make_unique<UnityEngine::GameObject>(
+      System::Text::Encoding::UTF8().GetString(
+          reinterpret_cast<std::uint8_t*>(name.data()),
+          name.size()));
+  pModelGameObject->transform().parent(this->_tileset.transform());
+  pModelGameObject->active(false);
 
   glm::dmat4 tileTransform = tile.getTransform();
   tileTransform = GltfContent::applyRtcCenter(model, tileTransform);
@@ -130,7 +138,11 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         }
 
         // TODO: better name (index of mesh and primitive?)
-        UnityEngine::GameObject primitiveGameObject(String("Primitive"));
+        std::string primitiveName = "Primitive";
+        UnityEngine::GameObject primitiveGameObject(
+            System::Text::Encoding::UTF8().GetString(
+                reinterpret_cast<std::uint8_t*>(primitiveName.data()),
+                primitiveName.size()));
         primitiveGameObject.transform().parent(pModelGameObject->transform());
 
         // Hard-coded "georeference" to put the Unity origin at a default

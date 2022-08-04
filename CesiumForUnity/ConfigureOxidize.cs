@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEditor;
 using Oxidize;
+using System.Text;
 
 namespace CesiumForUnity;
 
@@ -32,6 +33,8 @@ internal partial class ConfigureOxidize
         Camera svc = sv.camera;
 
         GameObject go = new GameObject();
+        go = new GameObject("name");
+        go.active = go.active;
         Transform transform = go.transform;
         transform.parent = transform.parent;
         transform.position = transform.position;
@@ -53,6 +56,10 @@ internal partial class ConfigureOxidize
 
         MeshFilter meshFilter = new MeshFilter();
 
-
+        byte b;
+        unsafe
+        {
+            string s = Encoding.UTF8.GetString(&b, 0);
+        }
     }
 }

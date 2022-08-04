@@ -32,10 +32,12 @@ namespace Oxidize
         private const string IncludeCStdInt = "<cstdint>";
         private const string IncludeCStdDef = "<cstddef>";
 
+        public static readonly CppType Int8 = CreatePrimitiveType(StandardNamespace, "int8_t", 0, IncludeCStdInt);
         public static readonly CppType Int16 = CreatePrimitiveType(StandardNamespace, "int16_t", 0, IncludeCStdInt);
         public static readonly CppType Int32 = CreatePrimitiveType(StandardNamespace, "int32_t", 0, IncludeCStdInt);
         public static readonly CppType Int64 = CreatePrimitiveType(StandardNamespace, "int64_t", 0, IncludeCStdInt);
         public static readonly CppType UInt16 = CreatePrimitiveType(StandardNamespace, "uint16_t", 0, IncludeCStdInt);
+        public static readonly CppType UInt8 = CreatePrimitiveType(StandardNamespace, "uint8_t", 0, IncludeCStdInt);
         public static readonly CppType UInt32 = CreatePrimitiveType(StandardNamespace, "uint32_t", 0, IncludeCStdInt);
         public static readonly CppType UInt64 = CreatePrimitiveType(StandardNamespace, "uint64_t", 0, IncludeCStdInt);
         public static readonly CppType Boolean = CreatePrimitiveType(NoNamespace, "bool");
@@ -49,6 +51,8 @@ namespace Oxidize
         {
             switch (type.SpecialType)
             {
+                case SpecialType.System_SByte:
+                    return Int8;
                 case SpecialType.System_Int16:
                     return Int16;
                 case SpecialType.System_Int32:
@@ -59,6 +63,8 @@ namespace Oxidize
                     return Single;
                 case SpecialType.System_Double:
                     return Double;
+                case SpecialType.System_Byte:
+                    return UInt8;
                 case SpecialType.System_UInt16:
                     return UInt16;
                 case SpecialType.System_UInt32:
@@ -73,11 +79,14 @@ namespace Oxidize
                     return Void;
             }
 
-            List<string> namespaces = new List<string>();
-            if (context.BaseNamespace.Length > 0)
+            IPointerTypeSymbol? pointer = type as IPointerTypeSymbol;
+            if (pointer != null)
             {
-                namespaces.Add(context.BaseNamespace);
+                CppType original = FromCSharp(context, pointer.PointedAtType);
+                return original.AsPointer();
             }
+
+            List<string> namespaces = new List<string>();
 
             INamespaceSymbol ns = type.ContainingNamespace;
             while (ns != null)
@@ -86,6 +95,13 @@ namespace Oxidize
                     namespaces.Add(ns.Name);
                 ns = ns.ContainingNamespace;
             }
+
+            if (context.BaseNamespace.Length > 0)
+            {
+                namespaces.Add(context.BaseNamespace);
+            }
+
+            namespaces.Reverse();
 
             // If the first two namespaces are identical, remove the duplication.
             // This is to avoid `Oxidize::Oxidize`.
@@ -250,9 +266,14 @@ namespace Oxidize
             // TODO
         }
 
+        public CppType AsPointer()
+        {
+            return new CppType(Kind, Namespaces, Name, GenericArguments, Flags | CppTypeFlags.Pointer, HeaderOverride);
+        }
+
         public CppType AsConstReference()
         {
-            return new CppType(Kind, Namespaces, Name, GenericArguments, Flags | CppTypeFlags.Const | CppTypeFlags.Reference & ~CppTypeFlags.Pointer);
+            return new CppType(Kind, Namespaces, Name, GenericArguments, Flags | CppTypeFlags.Const | CppTypeFlags.Reference & ~CppTypeFlags.Pointer, HeaderOverride);
         }
 
         /// <summary>
