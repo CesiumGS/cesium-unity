@@ -38,6 +38,7 @@ namespace Oxidize
         public static readonly CppType UInt16 = CreatePrimitiveType(StandardNamespace, "uint16_t", 0, IncludeCStdInt);
         public static readonly CppType UInt32 = CreatePrimitiveType(StandardNamespace, "uint32_t", 0, IncludeCStdInt);
         public static readonly CppType UInt64 = CreatePrimitiveType(StandardNamespace, "uint64_t", 0, IncludeCStdInt);
+        public static readonly CppType Boolean = CreatePrimitiveType(NoNamespace, "bool");
         public static readonly CppType Single = CreatePrimitiveType(NoNamespace, "float");
         public static readonly CppType Double = CreatePrimitiveType(NoNamespace, "double");
         public static readonly CppType VoidPointer = CreatePrimitiveType(NoNamespace, "void", CppTypeFlags.Pointer);
@@ -64,6 +65,8 @@ namespace Oxidize
                     return UInt32;
                 case SpecialType.System_UInt64:
                     return UInt64;
+                case SpecialType.System_Boolean:
+                    return Boolean;
                 case SpecialType.System_IntPtr:
                     return VoidPointer;
                 case SpecialType.System_Void:
@@ -91,7 +94,9 @@ namespace Oxidize
 
             // TODO: generics
 
-            if (type.IsReferenceType)
+            if (SymbolEqualityComparer.Default.Equals(type.BaseType, context.Compilation.GetSpecialType(SpecialType.System_Enum)))
+                return new CppType(CppTypeKind.Enum, namespaces, type.Name, null, 0);
+            else if (type.IsReferenceType)
                 return new CppType(CppTypeKind.ClassWrapper, namespaces, type.Name, null, 0);
             else if (IsBlittableStruct(context, type))
                 return new CppType(CppTypeKind.BlittableStruct, namespaces, type.Name, null, 0);
@@ -175,7 +180,13 @@ namespace Oxidize
             string ns = GetFullyQualifiedNamespace(false);
             if (ns != null)
             {
-                string typeType = Kind == CppTypeKind.ClassWrapper ? "class" : "struct";
+                string typeType;
+                if (Kind == CppTypeKind.BlittableStruct || Kind == CppTypeKind.NonBlittableStructWrapper)
+                    typeType = "struct";
+                else if (Kind == CppTypeKind.Enum)
+                    typeType = "enum class";
+                else
+                    typeType = "class";
                 forwardDeclarations.Add(
                     $$"""
                     namespace {{ns}} {
@@ -280,6 +291,8 @@ namespace Oxidize
         {
             if (this.Kind == CppTypeKind.Primitive || this.Kind == CppTypeKind.BlittableStruct)
                 return this;
+            else if (this.Kind == CppTypeKind.Enum)
+                return UInt32;
 
             return VoidPointer;
         }
@@ -290,18 +303,34 @@ namespace Oxidize
         /// </summary>
         public string GetConversionToInteropType(CppGenerationContext context, string variableName)
         {
-            if (this.Kind == CppTypeKind.Primitive || this.Kind == CppTypeKind.BlittableStruct)
-                return variableName;
-
-            return $"{variableName}.GetHandle().GetRaw()";
+            switch (this.Kind)
+            {
+                case CppTypeKind.ClassWrapper:
+                    return $"{variableName}.GetHandle().GetRaw()";
+                case CppTypeKind.Enum:
+                    return $"::std::uint32_t({variableName})";
+                case CppTypeKind.Primitive:
+                case CppTypeKind.BlittableStruct:
+                case CppTypeKind.Unknown:
+                default:
+                    return variableName;
+            }
         }
 
         public string GetConversionFromInteropType(CppGenerationContext context, string variableName)
         {
-            if (this.Kind == CppTypeKind.Primitive || this.Kind == CppTypeKind.BlittableStruct)
-                return variableName;
-
-            return $"{GetFullyQualifiedName()}({CppObjectHandle.GetCppType(context).GetFullyQualifiedName()}({variableName}))";
+            switch (this.Kind)
+            {
+                case CppTypeKind.ClassWrapper:
+                    return $"{GetFullyQualifiedName()}({CppObjectHandle.GetCppType(context).GetFullyQualifiedName()}({variableName}))";
+                case CppTypeKind.Enum:
+                    return $"{this.GetFullyQualifiedName()}({variableName})";
+                case CppTypeKind.Primitive:
+                case CppTypeKind.BlittableStruct:
+                case CppTypeKind.Unknown:
+                default:
+                    return variableName;
+            }
         }
 
         private static CppType CreatePrimitiveType(IReadOnlyCollection<string> cppNamespaces, string cppTypeName, CppTypeFlags flags = 0, string? headerOverride = null)

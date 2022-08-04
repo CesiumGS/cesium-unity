@@ -1,4 +1,3 @@
-#include "Bindings.h"
 #include "UnityLoggerSink.h"
 
 #include <Cesium3DTilesSelection/registerAllTileContentTypes.h>
@@ -8,13 +7,9 @@
 using namespace Cesium3DTilesSelection;
 using namespace CesiumForUnity;
 
-void PluginMain(void* memory, int32_t memorySize, bool isFirstBoot) {
+void start() {
   registerAllTileContentTypes();
   spdlog::default_logger()->sinks() = {std::make_shared<UnityLoggerSink>()};
-}
-
-void start() {
-
 }
 
 void stop() {

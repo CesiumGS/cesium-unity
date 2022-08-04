@@ -1,6 +1,5 @@
 #include "UnityPrepareRendererResources.h"
 
-#include "Bindings.h"
 #include "TextureLoader.h"
 
 #include <Cesium3DTilesSelection/GltfContent.h>
@@ -10,6 +9,14 @@
 #include <CesiumGeospatial/Transforms.h>
 #include <CesiumGltf/AccessorView.h>
 
+#include <Oxidize/UnityEngine/Debug.h>
+#include <Oxidize/UnityEngine/Matrix4x4.h>
+#include <Oxidize/UnityEngine/Mesh.h>
+#include <Oxidize/UnityEngine/MeshFilter.h>
+#include <Oxidize/UnityEngine/MeshRenderer.h>
+#include <Oxidize/UnityEngine/Quaternion.h>
+#include <Oxidize/UnityEngine/Transform.h>
+#include <Oxidize/UnityEngine/Vector3.h>
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/quaternion.hpp>
 
@@ -18,7 +25,7 @@ using namespace CesiumForUnity;
 using namespace CesiumGeometry;
 using namespace CesiumGeospatial;
 using namespace CesiumGltf;
-using namespace System;
+using namespace Oxidize;
 
 namespace {
 
@@ -36,7 +43,12 @@ void setTriangles(UnityEngine::Mesh& mesh, const AccessorView<T>& indices) {
     triangles[i] = indices[i];
   }
 
-  mesh.SetIndices<System::Int32>(nativeArrayTriangles, UnityEngine::MeshTopology::Triangles, 0, true, 0);
+  mesh.SetIndices<System::Int32>(
+      nativeArrayTriangles,
+      UnityEngine::MeshTopology::Triangles,
+      0,
+      true,
+      0);
 
   nativeArrayTriangles.Dispose();
 }
@@ -44,7 +56,7 @@ void setTriangles(UnityEngine::Mesh& mesh, const AccessorView<T>& indices) {
 } // namespace
 
 UnityPrepareRendererResources::UnityPrepareRendererResources(
-    UnityEngine::GameObject& tileset)
+    const UnityEngine::GameObject& tileset)
     : _tileset(tileset) {}
 
 void* UnityPrepareRendererResources::prepareInLoadThread(
@@ -82,7 +94,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
   auto pModelGameObject =
       std::make_unique<UnityEngine::GameObject>(String(name.c_str()));
-  pModelGameObject->GetTransform().SetParent(this->_tileset.GetTransform());
+  pModelGameObject->transform().SetParent(this->_tileset.transform());
   pModelGameObject->SetActive(false);
 
   glm::dmat4 tileTransform = tile.getTransform();
@@ -119,8 +131,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
         // TODO: better name (index of mesh and primitive?)
         UnityEngine::GameObject primitiveGameObject(String("Primitive"));
-        primitiveGameObject.GetTransform().SetParent(
-            pModelGameObject->GetTransform());
+        primitiveGameObject.transform().parent(pModelGameObject->transform());
 
         // Hard-coded "georeference" to put the Unity origin at a default
         // location in Melbourne and adjust for Unity left-handed, Y-up
@@ -162,18 +173,22 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
         glm::dquat rotation = glm::quat_cast(rotationMatrix);
 
-        primitiveGameObject.GetTransform().SetPosition(
-            UnityEngine::Vector3(translation.x, translation.y, translation.z));
-        primitiveGameObject.GetTransform().SetRotation(UnityEngine::Quaternion(
-            rotation.x,
-            rotation.y,
-            rotation.z,
-            rotation.w));
-        primitiveGameObject.GetTransform().SetLocalScale(
-            UnityEngine::Vector3(scale.x, scale.y, scale.z));
+        primitiveGameObject.transform().position(UnityEngine::Vector3{
+            float(translation.x),
+            float(translation.y),
+            float(translation.z)});
+        primitiveGameObject.transform().rotation(UnityEngine::Quaternion{
+            float(rotation.x),
+            float(rotation.y),
+            float(rotation.z),
+            float(rotation.w)});
+        primitiveGameObject.transform().localScale(UnityEngine::Vector3{
+            float(scale.x),
+            float(scale.y),
+            float(scale.z)});
 
         UnityEngine::Matrix4x4 compare =
-            primitiveGameObject.GetTransform().GetLocalToWorldMatrix();
+            primitiveGameObject.transform().localToWorldMatrix();
 
         UnityEngine::MeshFilter meshFilter =
             primitiveGameObject.AddComponent<UnityEngine::MeshFilter>();
@@ -183,9 +198,9 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         UnityEngine::Material sharedMaterial =
             UnityEngine::Resources::Load<UnityEngine::Material>(
                 String("CesiumDefaultMaterial"));
-        meshRenderer.SetMaterial(sharedMaterial);
+        meshRenderer.material(sharedMaterial);
 
-        UnityEngine::Material material = meshRenderer.GetMaterial();
+        UnityEngine::Material material = meshRenderer.material();
 
         const Material* pMaterial =
             Model::getSafe(&gltf.materials, primitive.material);

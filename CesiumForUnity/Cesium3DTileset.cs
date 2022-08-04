@@ -30,5 +30,4 @@ namespace CesiumForUnity
             EditorApplication.update -= Update;
         }
     }
-
 }

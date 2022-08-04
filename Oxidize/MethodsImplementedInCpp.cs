@@ -19,10 +19,11 @@ namespace Oxidize
             CppType implType = result.CppImplementationInvoker.ImplementationType;
             CppType objectHandleType = CppObjectHandle.GetCppType(context);
 
+            string createName = $$"""{{wrapperType.GetFullyQualifiedName(false).Replace("::", "_")}}_CreateImplementation""";
             result.CppImplementationInvoker.Functions.Add(new(
                 Content:
                     $$"""
-                    void* {{wrapperType.GetFullyQualifiedName(false).Replace("::", "_")}}_Create(void* handle) {
+                    void* {{createName}}(void* handle) {
                       const {{wrapperType.GetFullyQualifiedName()}} wrapper{{{objectHandleType.GetFullyQualifiedName()}}(handle)};
                       return reinterpret_cast<void*>(new {{implType.GetFullyQualifiedName()}}(wrapper));
                     }
@@ -34,10 +35,26 @@ namespace Oxidize
                     objectHandleType,
                 }));
 
+            result.CSharpPartialMethodDefinitions.Methods.Add(new(
+                methodDefinition:
+                    $$"""
+                    private void CreateImplementation()
+                    {
+                        System.Diagnostics.Debug.Assert(_implementation == System.IntPtr.Zero, "Implementation is already created. Be sure to call CreateImplementation only once.");
+                        _implementation = {{createName}}(Oxidize.ObjectHandleUtility.CreateHandle(this));
+                    }
+                    """,
+                interopFunctionDeclaration:
+                    $$"""
+                    [DllImport("CesiumForUnityNative.dll", CallingConvention=CallingConvention.Cdecl)]
+                    private static extern System.IntPtr {{createName}}(System.IntPtr thiz);
+                    """));
+
+            string disposeName = $$"""{{wrapperType.GetFullyQualifiedName(false).Replace("::", "_")}}_Dispose""";
             result.CppImplementationInvoker.Functions.Add(new(
                 Content:
                     $$"""
-                    void {{wrapperType.GetFullyQualifiedName(false).Replace("::", "_")}}_Dispose(void* handle, void* pImpl) {
+                    void {{disposeName}}(void* handle, void* pImpl) {
                       const {{wrapperType.GetFullyQualifiedName()}} wrapper{{{objectHandleType.GetFullyQualifiedName()}}(handle)};
                       auto pImplTyped = reinterpret_cast<{{implType.GetFullyQualifiedName()}}*>(pImpl);
                       pImplTyped->JustBeforeDelete(wrapper);
@@ -51,15 +68,23 @@ namespace Oxidize
                     objectHandleType
                 }));
 
-            string disposeName = $$"""{{wrapperType.GetFullyQualifiedName(false).Replace("::", "_")}}_Dispose""";
             result.CSharpPartialMethodDefinitions.Methods.Add(new(
                 methodDefinition:
                     $$"""
+                    ~{{wrapperType.Name}}()
+                    {
+                        Dispose(false);
+                    }
                     public void Dispose()
+                    {
+                        Dispose(true);
+                        GC.SuppressFinalize(this);
+                    }
+                    protected virtual void Dispose(bool disposing)
                     {
                         if (_implementation != System.IntPtr.Zero)
                         {
-                            {{disposeName}}(ObjectHandleUtility.CreateHandle(this), _implementation);
+                            {{disposeName}}(Oxidize.ObjectHandleUtility.CreateHandle(this), _implementation);
                             _implementation = System.IntPtr.Zero;
                         }
                     }
@@ -73,6 +98,10 @@ namespace Oxidize
             // Add functions for other methods.
             foreach (IMethodSymbol method in item.MethodsImplementedInCpp)
             {
+                // Do not generate CreateImplementation or Dispose methods.
+                if (method.Name == "CreateImplementation" || method.Name == "Dispose")
+                    continue;
+
                 GenerateMethod(context, item, result, method);
             }
         }
@@ -108,12 +137,30 @@ namespace Oxidize
 
             CppType objectHandleType = CppObjectHandle.GetCppType(context);
 
+            string implementation;
+            if (returnType == CppType.Void)
+            {
+                implementation =
+                    $$"""
+                    pImplTyped->{{method.Name}}({{callParameterListString}});
+                    """;
+            }
+            else
+            {
+                implementation =
+                    $$"""
+                    auto result = pImplTyped->{{method.Name}}({{callParameterListString}});
+                    return {{returnType.GetConversionToInteropType(context, "result")}};
+                    """;
+            }
+
             result.CppImplementationInvoker.Functions.Add(new(
-                Content: $$"""
+                Content:
+                    $$"""
                     {{interopReturnType.GetFullyQualifiedName()}} {{name}}({{parameterListString}}) {
                       const {{wrapperType.GetFullyQualifiedName()}} wrapper{{{objectHandleType.GetFullyQualifiedName()}}(handle)};
                       auto pImplTyped = reinterpret_cast<{{implType.GetFullyQualifiedName()}}*>(pImpl);
-                      pImplTyped->{{method.Name}}({{callParameterListString}});
+                      {{new[] { implementation }.JoinAndIndent("  ")}}
                     }
                     """,
                 TypeDefinitionsReferenced: new[]
@@ -139,17 +186,17 @@ namespace Oxidize
                 csParametersInterop = new[] { (Name: "thiz", CallName: "this", Type: csWrapperType), (Name: "implementation", CallName: "_implementation", Type: implementationPointer) }.Concat(csParametersInterop);
             }
 
-            string implementation;
+            string csImplementation;
             if (csReturnType.Symbol.SpecialType == SpecialType.System_Void)
             {
-                implementation =
+                csImplementation =
                     $$"""
                     {{name}}({{string.Join(", ", csParametersInterop.Select(parameter => parameter.Type.GetConversionToInteropType(parameter.CallName)))}});
                     """;
             }
             else
             {
-                implementation =
+                csImplementation =
                     $$"""
                     var result = {{ name }}({{string.Join(", ", csParametersInterop.Select(parameter => parameter.Type.GetConversionToInteropType(parameter.CallName)))}});
                     return {{csReturnType.GetConversionFromInteropType("result")}};
@@ -165,8 +212,8 @@ namespace Oxidize
                     $$"""
                     {{modifiers}} partial {{csReturnType.GetFullyQualifiedName()}} {{method.Name}}({{string.Join(", ", csParameters.Select(parameter => $"{parameter.Type.GetFullyQualifiedName()} {parameter.Name}"))}})
                     {
-                        System.Diagnostics.Debug.Assert(_implementation != System.IntPtr.Zero, "Implementation instance has already been destroyed.");
-                        {{new[] { implementation }.JoinAndIndent("    ")}}
+                        System.Diagnostics.Debug.Assert(_implementation != System.IntPtr.Zero, "Implementation instance was not created or has already been destroyed. Check that all constructors call CreateImplementation, and that the object is not used after it is Disposed.");
+                        {{new[] { csImplementation }.JoinAndIndent("    ")}}
                     }
                     """,
                 interopFunctionDeclaration:
@@ -175,5 +222,5 @@ namespace Oxidize
                     private static extern {{csReturnType.AsInteropType().GetFullyQualifiedName()}} {{name}}({{string.Join(", ", csParametersInterop.Select(parameter => parameter.Type.AsInteropType().GetFullyQualifiedName() + " " + parameter.Name))}});
                     """));
         }
-    }
+   }
 }

@@ -2,13 +2,18 @@
 
 #include <CesiumGltf/Model.h>
 
+#include <Oxidize/UnityEngine/Texture.h>
+#include <Oxidize/UnityEngine/Texture2D.h>
+#include <Oxidize/UnityEngine/TextureFormat.h>
+
 using namespace CesiumGltf;
+using namespace Oxidize;
 
 namespace CesiumForUnity {
 
 UnityEngine::Texture TextureLoader::loadTexture(
     const CesiumGltf::Model& model,
-    int32_t textureIndex) {
+    std::int32_t textureIndex) {
   const Texture* pTexture = Model::getSafe(&model.textures, textureIndex);
   if (pTexture) {
     return TextureLoader::loadTexture(model, *pTexture);

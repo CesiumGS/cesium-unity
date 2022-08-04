@@ -10,6 +10,7 @@ namespace Oxidize
             this.Constructors = new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default);
             this.Methods = new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default);
             this.Properties = new HashSet<IPropertySymbol>(SymbolEqualityComparer.Default);
+            this.EnumValues = new List<IFieldSymbol>();
             this.Interfaces = new List<TypeToGenerate>();
             this.MethodsImplementedInCpp = new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default);
         }
@@ -18,6 +19,7 @@ namespace Oxidize
         public HashSet<IMethodSymbol> Constructors;
         public HashSet<IMethodSymbol> Methods;
         public HashSet<IPropertySymbol> Properties;
+        public List<IFieldSymbol> EnumValues;
         public TypeToGenerate? BaseClass;
         public List<TypeToGenerate> Interfaces;
         public HashSet<IMethodSymbol> MethodsImplementedInCpp;

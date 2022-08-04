@@ -42,6 +42,8 @@ namespace Oxidize
             }
 
             CppType itemType = CppType.FromCSharp(this.Options, item.Type);
+            if (itemType.Kind == CppTypeKind.Enum)
+                return GenerateEnum(item, itemType);
 
             // No need to generate code for primitives.
             if (itemType.Kind == CppTypeKind.Primitive)
@@ -75,6 +77,18 @@ namespace Oxidize
                 
                 MethodsImplementedInCpp.Generate(this.Options, item, result);
                 Console.WriteLine(result.CSharpPartialMethodDefinitions.ToSourceFileString());
+            }
+
+            return result;
+        }
+
+        private GeneratedResult? GenerateEnum(TypeToGenerate item, CppType itemType)
+        {
+            GeneratedResult result = new GeneratedResult(itemType);
+
+            foreach (IFieldSymbol enumValue in item.EnumValues)
+            {
+                result.CppDeclaration.Elements.Add(new(Content: $"{enumValue.Name} = {enumValue.ConstantValue},"));
             }
 
             return result;

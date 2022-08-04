@@ -113,7 +113,7 @@ namespace Oxidize
             if (this.Kind == CSharpTypeKind.Primitive || this.Kind == CSharpTypeKind.BlittableStruct)
                 return variableName;
 
-            return $"ObjectHandleUtility.CreateHandle({variableName})";
+            return $"Oxidize.ObjectHandleUtility.CreateHandle({variableName})";
         }
 
         public string GetConversionFromInteropType(string variableName)
@@ -121,7 +121,7 @@ namespace Oxidize
             if (this.Kind == CSharpTypeKind.Primitive || this.Kind == CSharpTypeKind.BlittableStruct)
                 return variableName;
 
-            return $"({this.GetFullyQualifiedName()}?)ObjectHandleUtility.GetObjectFromHandle({variableName})";
+            return $"({this.GetFullyQualifiedName()}?)Oxidize.ObjectHandleUtility.GetObjectFromHandle({variableName})";
         }
     }
 }

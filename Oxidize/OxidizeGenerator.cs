@@ -105,6 +105,11 @@ public class OxidizeGenerator : IIncrementalGenerator
                     current.Properties.Add(property);
                 }
 
+                foreach (IFieldSymbol enumValue in item.EnumValues)
+                {
+                    current.EnumValues.Add(enumValue);
+                }
+
                 foreach (IMethodSymbol method in item.MethodsImplementedInCpp)
                 {
                     current.MethodsImplementedInCpp.Add(method);

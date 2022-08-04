@@ -32,14 +32,15 @@ namespace Oxidize
                 CppType type = CppType.FromCSharp(context, parameter.Type);
                 return (ParameterName: parameter.Name, CallSiteName: parameter.Name, Type: type, InteropType: type.AsInteropType());
             });
+            var interopParameters = parameters;
 
             // If this is an instance method, pass the current object as the first parameter.
             if (!method.IsStatic)
             {
-                parameters = new[] { (ParameterName: "thiz", CallSiteName: "(*this)", Type: result.CppDefinition.Type, InteropType: result.CppDefinition.Type.AsInteropType()) }.Concat(parameters);
+                interopParameters = new[] { (ParameterName: "thiz", CallSiteName: "(*this)", Type: result.CppDefinition.Type, InteropType: result.CppDefinition.Type.AsInteropType()) }.Concat(interopParameters);
             }
 
-            var interopParameterStrings = parameters.Select(parameter => $"{parameter.InteropType.GetFullyQualifiedName()} {parameter.ParameterName}");
+            var interopParameterStrings = interopParameters.Select(parameter => $"{parameter.InteropType.GetFullyQualifiedName()} {parameter.ParameterName}");
 
             // A private, static field of function pointer type that will call
             // into a managed delegate for this method.
@@ -57,7 +58,7 @@ namespace Oxidize
             // The static field should be initialized at startup.
             cppInit.Fields.Add(new(
                 Name: $"{definition.Type.GetFullyQualifiedName()}::Call{method.Name}",
-                TypeSignature: $"{interopReturnType.GetFullyQualifiedName()} (*)({string.Join(", ", parameters.Select(parameter => parameter.InteropType.GetFullyQualifiedName()))})",
+                TypeSignature: $"{interopReturnType.GetFullyQualifiedName()} (*)({string.Join(", ", interopParameters.Select(parameter => parameter.InteropType.GetFullyQualifiedName()))})",
                 TypeDefinitionsReferenced: new[] { definition.Type },
                 TypeDeclarationsReferenced: new[] { interopReturnType }.Concat(parameters.Select(parameter => parameter.Type))
             ));
@@ -79,8 +80,8 @@ namespace Oxidize
                 TypeDeclarationsReferenced: new[] { returnType }.Concat(parameters.Select(parameter => parameter.Type))
             ));
 
-            // Constructor definition
-            var parameterPassStrings = parameters.Select(parameter => parameter.Type.GetConversionToInteropType(context, parameter.CallSiteName));
+            // Method definition
+            var parameterPassStrings = interopParameters.Select(parameter => parameter.Type.GetConversionToInteropType(context, parameter.CallSiteName));
             if (returnType.Name == "void" && !returnType.Flags.HasFlag(CppTypeFlags.Pointer))
             {
                 definition.Elements.Add(new(

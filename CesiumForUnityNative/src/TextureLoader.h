@@ -1,21 +1,24 @@
 #pragma once
 
-#include "Bindings.h"
+#include <cstdint>
 
 namespace CesiumGltf {
 struct Model;
 struct Texture;
 } // namespace CesiumGltf
 
+namespace Oxidize::UnityEngine {
+class Texture;
+}
+
 namespace CesiumForUnity {
 
 class TextureLoader {
 public:
-  static UnityEngine::Texture loadTexture(
-      const CesiumGltf::Model& model,
-      int32_t textureIndex);
+  static ::Oxidize::UnityEngine::Texture
+  loadTexture(const CesiumGltf::Model& model, std::int32_t textureIndex);
 
-  static UnityEngine::Texture loadTexture(
+  static ::Oxidize::UnityEngine::Texture loadTexture(
       const CesiumGltf::Model& model,
       const CesiumGltf::Texture& texture);
 };

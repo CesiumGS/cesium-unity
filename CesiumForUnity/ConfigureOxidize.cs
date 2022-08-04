@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEditor;
 using Oxidize;
 
@@ -31,5 +32,27 @@ internal partial class ConfigureOxidize
         Camera svc = sv.camera;
 
         GameObject go = new GameObject();
+        Transform transform = go.transform;
+        transform.parent = transform.parent;
+        transform.position = transform.position;
+        transform.rotation = transform.rotation;
+        transform.localScale = transform.localScale;
+        Matrix4x4 m = transform.localToWorldMatrix;
+
+        Texture2D texture2D = new Texture2D(256, 256, TextureFormat.RGBA32, false, false);
+        texture2D.LoadRawTextureData(IntPtr.Zero, 0);
+        texture2D.Apply(true, true);
+        Texture texture = texture2D;
+
+        Mesh mesh = new Mesh();
+
+        Debug.Log("Logging");
+
+        MeshRenderer meshRenderer = new MeshRenderer();
+        meshRenderer.material = meshRenderer.material;
+
+        MeshFilter meshFilter = new MeshFilter();
+
+
     }
 }

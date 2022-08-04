@@ -104,6 +104,21 @@ namespace Oxidize
                 this.GenerationItems.Add(type, generationItem);
             }
 
+            // If this type is an enumeration, add all of the enum values if we haven't already.
+            if (generationItem.EnumValues.Count == 0 &&
+                SymbolEqualityComparer.Default.Equals(type.BaseType, _semanticModel.Compilation.GetSpecialType(SpecialType.System_Enum)))
+            {
+                ImmutableArray<ISymbol> members = type.GetMembers();
+                foreach (ISymbol symbol in members)
+                {
+                    IFieldSymbol? field = symbol as IFieldSymbol;
+                    if (field == null || !field.IsConst)
+                        continue;
+
+                    generationItem.EnumValues.Add(field);
+                }
+            }
+
             return generationItem;
         }
 

@@ -65,6 +65,8 @@
 
             if (Type.Kind == CppTypeKind.ClassWrapper)
                 return "class";
+            else if (Type.Kind == CppTypeKind.Enum)
+                return "enum class";
             else
                 return "struct";
         }
@@ -76,8 +78,15 @@
                 if (decl.Content == null)
                     return "";
 
-                string access = decl.IsPrivate ? "private" : "public";
-                return $"{access}: {decl.Content}";
+                string access;
+                if (this.Type.Kind == CppTypeKind.Enum)
+                    access = "";
+                else if (decl.IsPrivate)
+                    access = "private: ";
+                else
+                    access = "public: ";
+
+                return $"{access}{decl.Content}";
             });
         }
     }

@@ -1,7 +1,5 @@
+using Oxidize;
 using System;
-using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
-using UnityEngine;
 using UnityEngine.Networking;
 
 namespace CesiumForUnity
@@ -13,11 +11,13 @@ namespace CesiumForUnity
         public int length;
     }
 
-    public abstract class AbstractBaseNativeDownloadHandler : DownloadHandlerScript
+    [OxidizeNativeImplementation("CesiumForUnity::NativeDownloadHandlerImpl", "NativeDownloadHandlerImpl.h")]
+    public partial class NativeDownloadHandler : DownloadHandlerScript
     {
-        public AbstractBaseNativeDownloadHandler()
+        public NativeDownloadHandler()
          : base(new byte[16384])
         {
+            CreateImplementation();
         }
 
         protected override bool ReceiveData(byte[] data, int dataLength) {
@@ -31,7 +31,6 @@ namespace CesiumForUnity
             }
         }
 
-        public abstract bool ReceiveDataNative(IntPtr data, int dataLength);
+        private partial bool ReceiveDataNative(IntPtr data, int dataLength);
     }
-
 }
