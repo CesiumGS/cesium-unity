@@ -56,8 +56,11 @@ internal partial class ConfigureOxidize
 
         MeshRenderer meshRenderer = new MeshRenderer();
         meshRenderer.material = meshRenderer.material;
+        meshRenderer.material.SetTexture("name", texture2D);
 
         MeshFilter meshFilter = new MeshFilter();
+
+        Resources.Load<Material>("name");
 
         byte b;
         unsafe

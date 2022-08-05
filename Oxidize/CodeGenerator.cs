@@ -44,9 +44,7 @@ namespace Oxidize
             CppType itemType = CppType.FromCSharp(this.Options, item.Type);
             if (itemType.Kind == CppTypeKind.Enum)
                 return GenerateEnum(item, itemType);
-
-            // No need to generate code for primitives.
-            if (itemType.Kind == CppTypeKind.Primitive)
+            else if (itemType.Kind != CppTypeKind.ClassWrapper && itemType.Kind != CppTypeKind.BlittableStruct && itemType.Kind != CppTypeKind.NonBlittableStructWrapper)
                 return null;
 
             GeneratedResult result = new GeneratedResult(itemType);

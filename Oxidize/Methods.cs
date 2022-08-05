@@ -26,10 +26,10 @@ namespace Oxidize
             GeneratedCppInit cppInit = result.CppInit;
             GeneratedCSharpInit csharpInit = result.CSharpInit;
 
-            CppType returnType = CppType.FromCSharp(context, method.ReturnType);
+            CppType returnType = CppType.FromCSharp(context, method.ReturnType).AsReturnType();
             CppType interopReturnType = returnType.AsInteropType();
             var parameters = method.Parameters.Select(parameter => {
-                CppType type = CppType.FromCSharp(context, parameter.Type);
+                CppType type = CppType.FromCSharp(context, parameter.Type).AsParameterType();
                 return (ParameterName: parameter.Name, CallSiteName: parameter.Name, Type: type, InteropType: type.AsInteropType());
             });
             var interopParameters = parameters;
@@ -54,8 +54,8 @@ namespace Oxidize
                 IMethodSymbol? first = item.Methods.First(m => SymbolEqualityComparer.Default.Equals(m.ConstructedFrom, genericMethod));
                 if (SymbolEqualityComparer.Default.Equals(first, method))
                 {
-                    CppType genericReturn = CppType.FromCSharp(context, genericMethod.ReturnType);
-                    var genericParameters = genericMethod.Parameters.Select(parameter => CppType.FromCSharp(context, parameter.Type).GetFullyQualifiedName() + " " + parameter.Name);
+                    CppType genericReturn = CppType.FromCSharp(context, genericMethod.ReturnType).AsReturnType();
+                    var genericParameters = genericMethod.Parameters.Select(parameter => CppType.FromCSharp(context, parameter.Type).AsParameterType().GetFullyQualifiedName() + " " + parameter.Name);
                     string genericParametersString = string.Join(", ", genericParameters);
                     declaration.Elements.Add(new(
                         Content:
@@ -94,7 +94,7 @@ namespace Oxidize
 
             // The static field should be initialized at startup.
             cppInit.Fields.Add(new(
-                Name: $"{definition.Type.GetFullyQualifiedName()}::Call{method.Name}",
+                Name: $"{definition.Type.GetFullyQualifiedName()}::{interopName}",
                 TypeSignature: $"{interopReturnType.GetFullyQualifiedName()} (*)({string.Join(", ", interopParameters.Select(parameter => parameter.InteropType.GetFullyQualifiedName()))})",
                 TypeDefinitionsReferenced: new[] { definition.Type },
                 TypeDeclarationsReferenced: new[] { interopReturnType }.Concat(parameters.Select(parameter => parameter.Type))

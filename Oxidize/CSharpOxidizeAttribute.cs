@@ -20,7 +20,7 @@ namespace Oxidize
 
             namespace Oxidize
             {
-                [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
+                [AttributeUsage(AttributeTargets.Class)]
                 internal class OxidizeAttribute : Attribute
                 {
                 }

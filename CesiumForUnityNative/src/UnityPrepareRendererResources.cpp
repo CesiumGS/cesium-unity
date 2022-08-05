@@ -13,11 +13,14 @@
 #include <Oxidize/System/String.h>
 #include <Oxidize/System/Text/Encoding.h>
 #include <Oxidize/UnityEngine/Debug.h>
+#include <Oxidize/UnityEngine/Material.h>
 #include <Oxidize/UnityEngine/Matrix4x4.h>
 #include <Oxidize/UnityEngine/Mesh.h>
 #include <Oxidize/UnityEngine/MeshFilter.h>
 #include <Oxidize/UnityEngine/MeshRenderer.h>
 #include <Oxidize/UnityEngine/Quaternion.h>
+#include <Oxidize/UnityEngine/Resources.h>
+#include <Oxidize/UnityEngine/Texture.h>
 #include <Oxidize/UnityEngine/Transform.h>
 #include <Oxidize/UnityEngine/Vector3.h>
 #include <glm/gtc/matrix_inverse.hpp>
@@ -83,10 +86,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
   const QuadtreeTileID* pQ = std::get_if<QuadtreeTileID>(&tile.getTileID());
   if (pQ) {
     if (pQ->level >= 14) {
-      std::string message(">=14");
-      UnityEngine::Debug::Log(System::Text::Encoding::UTF8().GetString(
-          reinterpret_cast<std::uint8_t*>(message.data()),
-          message.size()));
+      UnityEngine::Debug::Log(System::String(">=14"));
     }
   }
 
@@ -103,7 +103,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           reinterpret_cast<std::uint8_t*>(name.data()),
           name.size()));
   pModelGameObject->transform().parent(this->_tileset.transform());
-  pModelGameObject->active(false);
+  pModelGameObject->SetActive(false);
 
   glm::dmat4 tileTransform = tile.getTransform();
   tileTransform = GltfContent::applyRtcCenter(model, tileTransform);
@@ -138,11 +138,8 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         }
 
         // TODO: better name (index of mesh and primitive?)
-        std::string primitiveName = "Primitive";
         UnityEngine::GameObject primitiveGameObject(
-            System::Text::Encoding::UTF8().GetString(
-                reinterpret_cast<std::uint8_t*>(primitiveName.data()),
-                primitiveName.size()));
+            System::String("Primitive"));
         primitiveGameObject.transform().parent(pModelGameObject->transform());
 
         // Hard-coded "georeference" to put the Unity origin at a default
@@ -209,7 +206,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
         UnityEngine::Material sharedMaterial =
             UnityEngine::Resources::Load<UnityEngine::Material>(
-                String("CesiumDefaultMaterial"));
+                System::String("CesiumDefaultMaterial"));
         meshRenderer.material(sharedMaterial);
 
         UnityEngine::Material material = meshRenderer.material();
