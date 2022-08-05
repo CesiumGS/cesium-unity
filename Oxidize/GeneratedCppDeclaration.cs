@@ -15,6 +15,21 @@
             if (Type == null)
                 return "";
 
+            string templateDeclaration = "";
+            string templateSpecialization = "";
+            if (Type.GenericArguments != null && Type.GenericArguments.Count > 0)
+            {
+                templateDeclaration =
+                    $$"""
+                    template <{{string.Join(", ", Type.GenericArguments.Select((CppType type, int index) => "typename T" + index))}}>
+                    {{GetTypeKind()}} {{Type.Name}} {};
+
+                    template <>
+
+                    """;
+                templateSpecialization = $"<{string.Join(", ", Type.GenericArguments.Select(arg => arg.GetFullyQualifiedName()))}>";
+            }
+
             return
                 $$"""
                 #pragma once
@@ -25,7 +40,7 @@
 
                 namespace {{Type.GetFullyQualifiedNamespace(false)}} {
 
-                {{GetTypeKind()}} {{Type.Name}} {
+                {{templateDeclaration}}{{GetTypeKind()}} {{Type.Name}}{{templateSpecialization}} {
                   {{GetElements().JoinAndIndent("  ")}}
                 };
 
@@ -48,6 +63,14 @@
         private IEnumerable<string> GetForwardDeclarations()
         {
             HashSet<string> result = new HashSet<string>();
+
+            if (Type.GenericArguments != null)
+            {
+                foreach (CppType genericArg in Type.GenericArguments)
+                {
+                    genericArg.AddForwardDeclarationsToSet(result);
+                }
+            }
 
             foreach (GeneratedCppDeclarationElement element in Elements)
             {

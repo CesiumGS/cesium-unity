@@ -1,7 +1,4 @@
 ﻿using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Oxidize
 {
@@ -39,12 +36,6 @@ namespace Oxidize
         /// </summary>
         public Compilation Compilation;
 
-        /// <summary>
-        /// A list of method symbols that can be called from C++ code via a
-        /// function pointer that points to a C# delegate that calls the
-        /// method. The function pointers and delegates are generated from
-        /// this list.
-        /// </summary>
-        public List<IMethodSymbol> InteropFunctions = new List<IMethodSymbol>();
+        public Dictionary<ITypeSymbol, ICustomGenerator> CustomGenerators = new Dictionary<ITypeSymbol, ICustomGenerator>();
     }
 }

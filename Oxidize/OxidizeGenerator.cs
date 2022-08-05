@@ -272,6 +272,8 @@ public class OxidizeGenerator : IIncrementalGenerator
 
         cppContext.BaseNamespace = baseNamespace;
 
+        cppContext.CustomGenerators.Add(compilation.GetSpecialType(SpecialType.System_String), new CustomStringGenerator());
+
         return new CodeGenerator(cppContext);
     }
 }

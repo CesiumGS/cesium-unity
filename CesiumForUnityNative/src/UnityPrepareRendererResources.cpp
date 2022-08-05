@@ -12,6 +12,9 @@
 #include <Oxidize/System/Object.h>
 #include <Oxidize/System/String.h>
 #include <Oxidize/System/Text/Encoding.h>
+#include <Oxidize/Unity/Collections/Allocator.h>
+#include <Oxidize/Unity/Collections/NativeArray.h>
+#include <Oxidize/Unity/Collections/NativeArrayOptions.h>
 #include <Oxidize/UnityEngine/Debug.h>
 #include <Oxidize/UnityEngine/Material.h>
 #include <Oxidize/UnityEngine/Matrix4x4.h>
@@ -37,7 +40,7 @@ namespace {
 
 template <typename T>
 void setTriangles(UnityEngine::Mesh& mesh, const AccessorView<T>& indices) {
-  Unity::Collections::NativeArray_1<System::Int32> nativeArrayTriangles(
+  Unity::Collections::NativeArray<System::Int32> nativeArrayTriangles(
       indices.size(),
       Unity::Collections::Allocator::Temp,
       Unity::Collections::NativeArrayOptions::UninitializedMemory);
@@ -220,14 +223,14 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             UnityEngine::Texture texture =
                 TextureLoader::loadTexture(gltf, baseColorTexture->index);
             if (texture != nullptr) {
-              material.SetTexture(String("_MainTex"), texture);
+              material.SetTexture(System::String("_MainTex"), texture);
             }
           }
         }
 
         UnityEngine::Mesh unityMesh{};
 
-        Unity::Collections::NativeArray_1<UnityEngine::Vector3>
+        Unity::Collections::NativeArray<UnityEngine::Vector3>
             nativeArrayVertices(
                 positionView.size(),
                 Unity::Collections::Allocator::Temp,

@@ -113,16 +113,22 @@ namespace Oxidize
             if (namespaces.Count >= 2 && namespaces[0] == namespaces[1])
                 namespaces.RemoveAt(0);
 
-            // TODO: generics
+            List<CppType>? genericArguments = null;
+
+            INamedTypeSymbol? named = type as INamedTypeSymbol;
+            if (named != null && named.IsGenericType)
+            {
+                genericArguments = named.TypeArguments.Select(symbol => CppType.FromCSharp(context, symbol)).ToList();
+            }
 
             if (SymbolEqualityComparer.Default.Equals(type.BaseType, context.Compilation.GetSpecialType(SpecialType.System_Enum)))
-                return new CppType(CppTypeKind.Enum, namespaces, type.Name, null, 0);
+                return new CppType(CppTypeKind.Enum, namespaces, type.Name, genericArguments, 0);
             else if (type.IsReferenceType)
-                return new CppType(CppTypeKind.ClassWrapper, namespaces, type.Name, null, 0);
+                return new CppType(CppTypeKind.ClassWrapper, namespaces, type.Name, genericArguments, 0);
             else if (IsBlittableStruct(context, type))
-                return new CppType(CppTypeKind.BlittableStruct, namespaces, type.Name, null, 0);
+                return new CppType(CppTypeKind.BlittableStruct, namespaces, type.Name, genericArguments, 0);
             else
-                return new CppType(CppTypeKind.NonBlittableStructWrapper, namespaces, type.Name, null, 0);
+                return new CppType(CppTypeKind.NonBlittableStructWrapper, namespaces, type.Name, genericArguments, 0);
         }
 
         public CppType(
@@ -384,11 +390,11 @@ namespace Oxidize
                 if (member.Kind != SymbolKind.Field)
                     continue;
 
-                ITypeSymbol? memberType = member as ITypeSymbol;
-                if (memberType == null)
+                IFieldSymbol? field = member as IFieldSymbol;
+                if (field == null)
                     continue;
 
-                if (!IsBlittableStruct(context, memberType))
+                if (!IsBlittableStruct(context, field.Type))
                     return false;
             }
 

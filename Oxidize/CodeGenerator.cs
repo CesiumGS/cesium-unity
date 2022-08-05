@@ -34,19 +34,27 @@ namespace Oxidize
 
         public GeneratedResult? GenerateType(TypeToGenerate item)
         {
-            INamedTypeSymbol? named = item.Type as INamedTypeSymbol;
-            if (named == null || named.IsGenericType)
-            {
-                Console.WriteLine("Skipping generation for generic type (for now).");
-                return null;
-            }
+            GeneratedResult? result = null;
 
             CppType itemType = CppType.FromCSharp(this.Options, item.Type);
             if (itemType.Kind == CppTypeKind.Enum)
-                return GenerateEnum(item, itemType);
-            else if (itemType.Kind != CppTypeKind.ClassWrapper && itemType.Kind != CppTypeKind.BlittableStruct && itemType.Kind != CppTypeKind.NonBlittableStructWrapper)
-                return null;
+                result = GenerateEnum(item, itemType);
+            else if (itemType.Kind == CppTypeKind.ClassWrapper || itemType.Kind == CppTypeKind.BlittableStruct || itemType.Kind == CppTypeKind.NonBlittableStructWrapper)
+                result = GenerateClassOrStruct(item, itemType);
+            else
+                result = null;
 
+            ICustomGenerator? customGenerator = null;
+            if (this.Options.CustomGenerators.TryGetValue(item.Type, out customGenerator))
+            {
+                result = customGenerator.Generate(this.Options, item, result);
+            }
+
+            return result;
+        }
+
+        private GeneratedResult? GenerateClassOrStruct(TypeToGenerate item, CppType itemType)
+        {
             GeneratedResult result = new GeneratedResult(itemType);
 
             Interop.GenerateForType(this.Options, item, result);

@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using UnityEditor;
+using Unity.Collections;
 using Oxidize;
 using System.Text;
 
@@ -67,5 +68,7 @@ internal partial class ConfigureOxidize
         {
             string s = Encoding.UTF8.GetString(&b, 0);
         }
+
+        NativeArray<Vector3> nav = new NativeArray<Vector3>(1, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
     }
 }

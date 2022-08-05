@@ -10,8 +10,11 @@ namespace Oxidize
     {
         public static void Generate(CppGenerationContext context, TypeToGenerate item, GeneratedResult result)
         {
-            // TODO: We're not currently generating constructors for value types. They'll need to be slightly different (no handle).
-            if (result.CppDeclaration.Type.Kind != CppTypeKind.ClassWrapper)
+            // TODO: We're not currently generating constructors for blittable value types. They'll need to be slightly different (no handle).
+            // We only need handle management for non-static classes.
+
+            GeneratedCppDeclaration declaration = result.CppDeclaration;
+            if (declaration.Type.Kind != CppTypeKind.ClassWrapper && declaration.Type.Kind != CppTypeKind.NonBlittableStructWrapper)
                 return;
 
             if (item.Type.IsStatic)
@@ -53,6 +56,12 @@ namespace Oxidize
 
             string interopFunctionName = $"Construct_{Interop.HashParameters(constructor.Parameters)}";
 
+            string templateSpecialization = "";
+            if (declaration.Type.GenericArguments != null && declaration.Type.GenericArguments.Count > 0)
+            {
+                templateSpecialization = $"<{string.Join(", ", declaration.Type.GenericArguments.Select(arg => arg.GetFullyQualifiedName()))}>";
+            }
+
             // A private, static field of function pointer type that will call
             // into a managed delegate for this constructor.
             declaration.Elements.Add(new(
@@ -63,13 +72,13 @@ namespace Oxidize
             ));
 
             definition.Elements.Add(new(
-                Content: $"{interopReturnType.GetFullyQualifiedName()} (*{definition.Type.GetFullyQualifiedName(false)}::{interopFunctionName})({string.Join(", ", interopParameterStrings)}) = nullptr;",
+                Content: $"{interopReturnType.GetFullyQualifiedName()} (*{definition.Type.Name}{templateSpecialization}::{interopFunctionName})({string.Join(", ", interopParameterStrings)}) = nullptr;",
                 TypeDeclarationsReferenced: new[] { interopReturnType }.Concat(interopParameters.Select(parameter => parameter.InteropType))
             ));
 
             // The static field should be initialized at startup.
             cppInit.Fields.Add(new(
-                Name: $"{definition.Type.GetFullyQualifiedName()}::{interopFunctionName}",
+                Name: $"{definition.Type.GetFullyQualifiedName()}{templateSpecialization}::{interopFunctionName}",
                 TypeSignature: $"{interopReturnType.GetFullyQualifiedName()} (*)({string.Join(", ", interopParameters.Select(parameter => parameter.InteropType.GetFullyQualifiedName()))})",
                 TypeDefinitionsReferenced: new[] { definition.Type },
                 TypeDeclarationsReferenced: new[] { interopReturnType }.Concat(interopParameters.Select(parameter => parameter.Type))
@@ -90,7 +99,7 @@ namespace Oxidize
             definition.Elements.Add(new(
                 Content:
                     $$"""
-                    {{definition.Type.GetFullyQualifiedName(false)}}::{{definition.Type.Name}}({{string.Join(", ", parameterStrings)}})
+                    {{definition.Type.Name}}{{templateSpecialization}}::{{definition.Type.Name}}({{string.Join(", ", parameterStrings)}})
                         : _handle({{interopFunctionName}}({{string.Join(", ", parameterPassStrings)}}))
                     {
                     }
