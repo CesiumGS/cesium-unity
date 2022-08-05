@@ -34,6 +34,43 @@ namespace Oxidize
             });
             var interopParameters = parameters;
 
+            string interopName = $"Call{method.Name}_{Interop.HashParameters(method.Parameters, method.TypeArguments)}";
+
+            string modifiers = "";
+            string afterModifiers = "";
+            if (method.IsStatic)
+                modifiers += "static ";
+            else
+                afterModifiers += " const";
+
+            string templateSpecialization = "";
+            string templatePrefix = "";
+            if (method.IsGenericMethod)
+            {
+                // Add the template which will be specialized by this method.
+                IMethodSymbol genericMethod = method.ConstructedFrom;
+
+                // Only add the template declaration if this is the first method constructed from this template.
+                IMethodSymbol? first = item.Methods.First(m => SymbolEqualityComparer.Default.Equals(m.ConstructedFrom, genericMethod));
+                if (SymbolEqualityComparer.Default.Equals(first, method))
+                {
+                    CppType genericReturn = CppType.FromCSharp(context, genericMethod.ReturnType);
+                    var genericParameters = genericMethod.Parameters.Select(parameter => CppType.FromCSharp(context, parameter.Type).GetFullyQualifiedName() + " " + parameter.Name);
+                    string genericParametersString = string.Join(", ", genericParameters);
+                    declaration.Elements.Add(new(
+                        Content:
+                            $$"""
+                        template <{{string.Join(", ", method.TypeParameters.Select(parameter => "typename " + parameter.Name))}}>
+                        {{modifiers}}{{genericReturn.GetFullyQualifiedName()}} {{method.Name}}({{genericParametersString}}){{afterModifiers}} = delete;
+                        """
+                        ));
+                }
+
+                templatePrefix = "template <> ";
+                var templateParameters = method.TypeArguments.Select(typeArgument => CppType.FromCSharp(context, typeArgument).GetFullyQualifiedName());
+                templateSpecialization = $"<{string.Join(", ", templateParameters)}>";
+            }
+
             // If this is an instance method, pass the current object as the first parameter.
             if (!method.IsStatic)
             {
@@ -45,13 +82,13 @@ namespace Oxidize
             // A private, static field of function pointer type that will call
             // into a managed delegate for this method.
             declaration.Elements.Add(new(
-                Content: $"static {interopReturnType.GetFullyQualifiedName()} (*Call{method.Name})({string.Join(", ", interopParameterStrings)});",
+                Content: $"static {interopReturnType.GetFullyQualifiedName()} (*{interopName})({string.Join(", ", interopParameterStrings)});",
                 IsPrivate: true,
                 TypeDeclarationsReferenced: new[] { interopReturnType }.Concat(parameters.Select(parameter => parameter.InteropType))
             ));
 
             definition.Elements.Add(new(
-                Content: $"{interopReturnType.GetFullyQualifiedName()} (*{definition.Type.GetFullyQualifiedName(false)}::Call{method.Name})({string.Join(", ", interopParameterStrings)}) = nullptr;",
+                Content: $"{interopReturnType.GetFullyQualifiedName()} (*{definition.Type.GetFullyQualifiedName(false)}::{interopName})({string.Join(", ", interopParameterStrings)}) = nullptr;",
                 TypeDeclarationsReferenced: new[] { interopReturnType }.Concat(parameters.Select(parameter => parameter.InteropType))
             ));
 
@@ -66,38 +103,10 @@ namespace Oxidize
             // And passed from the C# init method
             csharpInit.Delegates.Add(Interop.CreateCSharpDelegateInit(context.Compilation, item.Type, method));
 
-            string modifiers = "";
-            string afterModifiers = "";
-            if (method.IsStatic)
-                modifiers += "static ";
-            else
-                afterModifiers += " const";
-
-            string templateSpecialization = "";
-            if (method.IsGenericMethod)
-            {
-                // Add the template which will be specialized by this method.
-                IMethodSymbol genericMethod = method.ConstructedFrom;
-                CppType genericReturn = CppType.FromCSharp(context, genericMethod.ReturnType);
-                var genericParameters = genericMethod.Parameters.Select(parameter => CppType.FromCSharp(context, parameter.Type).GetFullyQualifiedName() + " " + parameter.Name);
-                string genericParametersString = string.Join(", ", genericParameters);
-                declaration.Elements.Add(new(
-                    Content:
-                        $$"""
-                        template <{{string.Join(", ", method.TypeParameters.Select(parameter => "typename " + parameter.Name))}}>
-                        {{modifiers}}{{genericReturn.GetFullyQualifiedName()}} {{method.Name}}({{genericParametersString}}){{afterModifiers}};
-                        """
-                    ));
-
-                modifiers = "template <> " + modifiers;
-                var templateParameters = method.TypeArguments.Select(typeArgument => CppType.FromCSharp(context, typeArgument).GetFullyQualifiedName());
-                templateSpecialization = $"<{string.Join(", ", templateParameters)}>";
-            }
-
             // Method declaration
             var parameterStrings = parameters.Select(parameter => $"{parameter.Type.GetFullyQualifiedName()} {parameter.ParameterName}");
             declaration.Elements.Add(new(
-                Content: $"{modifiers}{returnType.GetFullyQualifiedName()} {method.Name}{templateSpecialization}({string.Join(", ", parameterStrings)}){afterModifiers};",
+                Content: $"{templatePrefix}{modifiers}{returnType.GetFullyQualifiedName()} {method.Name}{templateSpecialization}({string.Join(", ", parameterStrings)}){afterModifiers};",
                 TypeDeclarationsReferenced: new[] { returnType }.Concat(parameters.Select(parameter => parameter.Type))
             ));
 
@@ -108,8 +117,8 @@ namespace Oxidize
                 definition.Elements.Add(new(
                     Content:
                         $$"""
-                        {{returnType.GetFullyQualifiedName()}} {{definition.Type.Name}}::{{method.Name}}({{string.Join(", ", parameterStrings)}}){{afterModifiers}} {
-                            Call{{method.Name}}({{string.Join(", ", parameterPassStrings)}});
+                        {{templatePrefix}}{{returnType.GetFullyQualifiedName()}} {{definition.Type.Name}}::{{method.Name}}{{templateSpecialization}}({{string.Join(", ", parameterStrings)}}){{afterModifiers}} {
+                            {{interopName}}({{string.Join(", ", parameterPassStrings)}});
                         }
                         """,
                     TypeDefinitionsReferenced: new[]
@@ -125,8 +134,8 @@ namespace Oxidize
                 definition.Elements.Add(new(
                     Content:
                         $$"""
-                        {{returnType.GetFullyQualifiedName()}} {{definition.Type.Name}}::{{method.Name}}({{string.Join(", ", parameterStrings)}}){{afterModifiers}} {
-                            auto result = Call{{method.Name}}({{string.Join(", ", parameterPassStrings)}});
+                        {{templatePrefix}}{{returnType.GetFullyQualifiedName()}} {{definition.Type.Name}}::{{method.Name}}{{templateSpecialization}}({{string.Join(", ", parameterStrings)}}){{afterModifiers}} {
+                            auto result = {{interopName}}({{string.Join(", ", parameterPassStrings)}});
                             return {{returnType.GetConversionFromInteropType(context, "result")}};
                         }
                         """,

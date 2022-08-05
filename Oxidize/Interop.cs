@@ -152,9 +152,13 @@ namespace Oxidize
             }
         }
 
-        internal static string HashParameters(IEnumerable<IParameterSymbol> parameters)
+        internal static string HashParameters(IEnumerable<IParameterSymbol> parameters, IEnumerable<ITypeSymbol>? typeArguments = null)
         {
             var formattedParameters = parameters.Select(parameter => $"{parameter.Type.ToDisplayString()} {parameter.Name}");
+            if (typeArguments != null)
+            {
+                formattedParameters = typeArguments.Select(arg => $"<{arg.ToDisplayString()}>").Concat(formattedParameters);
+            }
             var allTogether = string.Join(", ", formattedParameters);
             string hash = InsecureHash(allTogether);
             return hash.Replace("=", "").Replace("+", "_").Replace("/", "__");
