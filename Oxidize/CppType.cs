@@ -181,6 +181,12 @@ namespace Oxidize
 
         public string GetFullyQualifiedName(bool startWithGlobal = true)
         {
+            string template = "";
+            if (this.GenericArguments != null && this.GenericArguments.Count > 0)
+            {
+                template = $"<{string.Join(", ", this.GenericArguments.Select(arg => arg.GetFullyQualifiedName()))}>";
+            }
+
             string modifier = Flags.HasFlag(CppTypeFlags.Const) ? "const " : "";
             string suffix = Flags.HasFlag(CppTypeFlags.Pointer)
                 ? "*"
@@ -189,9 +195,9 @@ namespace Oxidize
                     : "";
             string ns = GetFullyQualifiedNamespace(startWithGlobal);
             if (ns.Length > 0)
-                return $"{modifier}{ns}::{Name}{suffix}";
+                return $"{modifier}{ns}::{Name}{template}{suffix}";
             else
-                return $"{modifier}{Name}{suffix}";
+                return $"{modifier}{Name}{template}{suffix}";
         }
 
         public void AddForwardDeclarationsToSet(ISet<string> forwardDeclarations)
@@ -200,9 +206,16 @@ namespace Oxidize
             if (Kind == CppTypeKind.Primitive)
                 return;
 
-            // Non-pointer, non-reference types cannot be forward declared.
-            //if (!Flags.HasFlag(CppTypeFlags.Reference) && !Flags.HasFlag(CppTypeFlags.Pointer))
-            //    return;
+            string template = "";
+            if (this.GenericArguments != null && this.GenericArguments.Count > 0)
+            {
+                foreach (CppType genericType in this.GenericArguments)
+                {
+                    genericType.AddForwardDeclarationsToSet(forwardDeclarations);
+                }
+
+                template = $"template <{string.Join(", ", this.GenericArguments.Select((_, index) => $"typename T{index}"))}> ";
+            }
 
             string ns = GetFullyQualifiedNamespace(false);
             if (ns != null)
@@ -217,7 +230,7 @@ namespace Oxidize
                 forwardDeclarations.Add(
                     $$"""
                     namespace {{ns}} {
-                    {{typeType}} {{Name}};
+                    {{template}}{{typeType}} {{Name}};
                     }
                     """);
             }
@@ -338,6 +351,7 @@ namespace Oxidize
             switch (this.Kind)
             {
                 case CppTypeKind.ClassWrapper:
+                case CppTypeKind.NonBlittableStructWrapper:
                     return $"{variableName}.GetHandle().GetRaw()";
                 case CppTypeKind.Enum:
                     return $"::std::uint32_t({variableName})";
@@ -354,6 +368,7 @@ namespace Oxidize
             switch (this.Kind)
             {
                 case CppTypeKind.ClassWrapper:
+                case CppTypeKind.NonBlittableStructWrapper:
                     return $"{GetFullyQualifiedName()}({CppObjectHandle.GetCppType(context).GetFullyQualifiedName()}({variableName}))";
                 case CppTypeKind.Enum:
                     return $"{this.GetFullyQualifiedName()}({variableName})";

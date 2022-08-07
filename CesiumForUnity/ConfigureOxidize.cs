@@ -4,6 +4,7 @@ using UnityEditor;
 using Unity.Collections;
 using Oxidize;
 using System.Text;
+using Unity.Collections.LowLevel.Unsafe;
 
 namespace CesiumForUnity;
 
@@ -70,5 +71,12 @@ internal partial class ConfigureOxidize
         }
 
         NativeArray<Vector3> nav = new NativeArray<Vector3>(1, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+        NativeArray<int> nai = new NativeArray<int>(1, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+
+        unsafe
+        {
+            NativeArrayUnsafeUtility.GetUnsafeBufferPointerWithoutChecks(nav);
+            NativeArrayUnsafeUtility.GetUnsafeBufferPointerWithoutChecks(nai);
+        }
     }
 }
