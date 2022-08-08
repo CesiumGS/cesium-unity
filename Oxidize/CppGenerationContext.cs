@@ -36,6 +36,6 @@ namespace Oxidize
         /// </summary>
         public Compilation Compilation;
 
-        public Dictionary<ITypeSymbol, ICustomGenerator> CustomGenerators = new Dictionary<ITypeSymbol, ICustomGenerator>();
+        public Dictionary<ITypeSymbol, ICustomGenerator> CustomGenerators = new Dictionary<ITypeSymbol, ICustomGenerator>(SymbolEqualityComparer.Default);
     }
 }

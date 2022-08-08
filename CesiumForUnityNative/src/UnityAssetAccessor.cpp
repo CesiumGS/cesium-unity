@@ -1,28 +1,26 @@
 #include "UnityAssetAccessor.h"
 
-#include "Bindings.h"
-#include "Interop.h"
-#include "NativeDownloadHandler.h"
-
 #include <CesiumAsync/IAssetResponse.h>
 
+#include <Oxidize/CesiumForUnity/NativeDownloadHandler.h>
+#include <Oxidize/System/Action1.h>
+#include <Oxidize/System/String.h>
+#include <Oxidize/UnityEngine/Networking/DownloadHandler.h>
+#include <Oxidize/UnityEngine/Networking/UnityWebRequest.h>
+#include <Oxidize/UnityEngine/Networking/UnityWebRequestAsyncOperation.h>
+
 using namespace CesiumAsync;
-using namespace CesiumForUnity;
-using namespace System;
-using namespace UnityEngine;
-using namespace UnityEngine::Networking;
+using namespace Oxidize;
 
 namespace {
 
 class UnityAssetResponse : public IAssetResponse {
 public:
   UnityAssetResponse(
-      UnityWebRequest& request,
-      const std::shared_ptr<NativeDownloadHandler>& pHandler)
-      : _statusCode(uint16_t(request.GetResponseCode())),
-        _contentType(Interop::convert(
-            request.GetResponseHeader(String("Content-Type")))),
-        _pHandler(pHandler) {
+      const UnityEngine::Networking::UnityWebRequest& request)
+      : _statusCode(uint16_t(request.responseCode())),
+        _contentType(request.GetResponseHeader(System::String("Content-Type"))
+                         .ToStlString()) {
     this->_headers.emplace("Content-Type", this->_contentType);
     // TODO: get all response headers
   }
@@ -34,25 +32,25 @@ public:
   virtual const HttpHeaders& headers() const override { return _headers; }
 
   virtual gsl::span<const std::byte> data() const override {
-    return this->_pHandler->getData();
+    //return this->_pHandler->getData();
+    return gsl::span<const std::byte>();
   }
 
 private:
   uint16_t _statusCode;
   std::string _contentType;
   HttpHeaders _headers;
-  std::shared_ptr<NativeDownloadHandler> _pHandler;
+  std::shared_ptr<::Oxidize::CesiumForUnity::NativeDownloadHandler> _pHandler;
 };
 
 class UnityAssetRequest : public IAssetRequest {
 public:
   UnityAssetRequest(
-      UnityWebRequest& request,
-      const std::shared_ptr<NativeDownloadHandler>& pHandler)
-      : _method(Interop::convert(request.GetMethod())),
-        _url(Interop::convert(request.GetUrl())),
+      Oxidize::UnityEngine::Networking::UnityWebRequest& request)
+      : _method(request.method().ToStlString()),
+        _url(request.url().ToStlString()),
         _headers(),
-        _response(request, pHandler) {
+        _response(request) {
     // TODO: get request headers
   }
 
@@ -71,29 +69,29 @@ private:
   UnityAssetResponse _response;
 };
 
-struct WebRequestCompleted : public Action_1<AsyncOperation> {
-  UnityWebRequest _request;
-  std::shared_ptr<NativeDownloadHandler> _pHandler;
+struct WebRequestCompleted : public System::Action1<UnityEngine::AsyncOperation> {
+  UnityEngine::Networking::UnityWebRequest _request;
   Promise<std::shared_ptr<CesiumAsync::IAssetRequest>> _promise;
 
   WebRequestCompleted(
-      const UnityWebRequest& request,
-      const std::shared_ptr<NativeDownloadHandler>& pHandler,
+      const UnityEngine::Networking::UnityWebRequest& request,
       Promise<std::shared_ptr<CesiumAsync::IAssetRequest>>& promise)
-      : _request(request), _pHandler(pHandler), _promise(promise) {}
+      : System::Action1<UnityEngine::AsyncOperation>(), _request(request), _promise(promise) {}
 
-  virtual void operator()(UnityEngine::AsyncOperation& obj) override {
-    if (this->_request.GetIsDone() && this->_request.GetError() == nullptr) {
+  virtual void operator()(UnityEngine::AsyncOperation& obj) /*override*/ {
+    if (this->_request.isDone() && this->_request.error() == nullptr) {
       this->_promise.resolve(
-          std::make_shared<UnityAssetRequest>(this->_request, this->_pHandler));
+          std::make_shared<UnityAssetRequest>(this->_request));
     } else {
       this->_promise.reject(std::runtime_error(
-          "Request failed: " + Interop::convert(this->_request.GetError())));
+          "Request failed: " + this->_request.error().ToStlString()));
     }
   }
 };
 
 } // namespace
+
+namespace CesiumForUnity {
 
 CesiumAsync::Future<std::shared_ptr<CesiumAsync::IAssetRequest>>
 UnityAssetAccessor::get(
@@ -102,15 +100,15 @@ UnityAssetAccessor::get(
     const std::vector<THeader>& headers) {
   // Sadly, Unity requires us to call this from the main thread.
   return asyncSystem.runInMainThread([asyncSystem, url, headers]() {
-    UnityWebRequest request = UnityWebRequest::Get(String(url.c_str()));
+    UnityEngine::Networking::UnityWebRequest request =
+        UnityEngine::Networking::UnityWebRequest::Get(System::String(url));
 
-    auto pHandler = std::make_shared<NativeDownloadHandler>();
-    request.SetDownloadHandler(*pHandler);
+    request.downloadHandler(Oxidize::CesiumForUnity::NativeDownloadHandler());
 
     for (const auto& header : headers) {
       request.SetRequestHeader(
-          String(header.first.c_str()),
-          String(header.second.c_str()));
+          System::String(header.first),
+          System::String(header.second));
     }
 
     auto promise =
@@ -118,10 +116,10 @@ UnityAssetAccessor::get(
             .createPromise<std::shared_ptr<CesiumAsync::IAssetRequest>>();
 
     auto pCompleted =
-        std::make_shared<WebRequestCompleted>(request, pHandler, promise);
+        std::make_shared<WebRequestCompleted>(request, promise);
 
-    UnityWebRequestAsyncOperation op = request.SendWebRequest();
-    op.AddCompleted(*pCompleted);
+    UnityEngine::Networking::UnityWebRequestAsyncOperation op = request.SendWebRequest();
+    //op.AddCompleted(*pCompleted);
 
     return promise.getFuture().thenImmediately(
         [pCompleted](std::shared_ptr<IAssetRequest>&& pRequest) {
@@ -143,3 +141,5 @@ UnityAssetAccessor::request(
 }
 
 void UnityAssetAccessor::tick() noexcept {}
+
+} // namespace CesiumForUnity

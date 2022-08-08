@@ -10,23 +10,15 @@
         public CppType Type;
         public List<GeneratedCppDefinitionElement> Elements = new List<GeneratedCppDefinitionElement>();
 
-        public string ToSourceFileString()
+        public void AddToSourceFile(CppSourceFile sourceFile)
         {
             if (Type == null)
-                return "";
+                return;
 
-            return
-                $$"""
-                {{GetIncludes().JoinAndIndent("")}}
-
-                {{GetForwardDeclarations().JoinAndIndent("")}}
-
-                namespace {{Type.GetFullyQualifiedNamespace(false)}} {
-
-                {{GetElements().JoinAndIndent("")}}
-
-                }
-                """;
+            sourceFile.Includes.UnionWith(GetIncludes());
+            sourceFile.ForwardDeclarations.UnionWith(GetForwardDeclarations());
+            CppSourceFileNamespace ns = sourceFile.GetNamespace(Type.GetFullyQualifiedNamespace(false));
+            ns.Members.AddRange(GetElements());
         }
 
         private IEnumerable<string> GetIncludes()

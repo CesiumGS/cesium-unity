@@ -78,7 +78,7 @@ namespace Oxidize
 
             // The static field should be initialized at startup.
             cppInit.Fields.Add(new(
-                Name: $"{definition.Type.GetFullyQualifiedName()}{templateSpecialization}::{interopFunctionName}",
+                Name: $"{definition.Type.GetFullyQualifiedName()}::{interopFunctionName}",
                 TypeSignature: $"{interopReturnType.GetFullyQualifiedName()} (*)({string.Join(", ", interopParameters.Select(parameter => parameter.InteropType.GetFullyQualifiedName()))})",
                 TypeDefinitionsReferenced: new[] { definition.Type },
                 TypeDeclarationsReferenced: new[] { interopReturnType }.Concat(interopParameters.Select(parameter => parameter.Type))

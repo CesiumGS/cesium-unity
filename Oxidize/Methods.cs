@@ -60,9 +60,10 @@ namespace Oxidize
                     declaration.Elements.Add(new(
                         Content:
                             $$"""
-                        template <{{string.Join(", ", method.TypeParameters.Select(parameter => "typename " + parameter.Name))}}>
-                        {{modifiers}}{{genericReturn.GetFullyQualifiedName()}} {{method.Name}}({{genericParametersString}}){{afterModifiers}} = delete;
-                        """
+                            template <{{string.Join(", ", method.TypeParameters.Select(parameter => "typename " + parameter.Name))}}>
+                            {{modifiers}}{{genericReturn.GetFullyQualifiedName()}} {{method.Name}}({{genericParametersString}}){{afterModifiers}};
+                            """,
+                        TypeDeclarationsReferenced: genericMethod.Parameters.Select(p => CppType.FromCSharp(context, p.Type))
                         ));
                 }
 
@@ -103,12 +104,23 @@ namespace Oxidize
             // And passed from the C# init method
             csharpInit.Delegates.Add(Interop.CreateCSharpDelegateInit(context.Compilation, item.Type, method));
 
-            // Method declaration
             var parameterStrings = parameters.Select(parameter => $"{parameter.Type.GetFullyQualifiedName()} {parameter.ParameterName}");
-            declaration.Elements.Add(new(
-                Content: $"{templatePrefix}{modifiers}{returnType.GetFullyQualifiedName()} {method.Name}{templateSpecialization}({string.Join(", ", parameterStrings)}){afterModifiers};",
-                TypeDeclarationsReferenced: new[] { returnType }.Concat(parameters.Select(parameter => parameter.Type))
-            ));
+
+            // Method declaration
+            // Skip method declaration for generic methods, because we only need the generic version above.
+            if (!method.IsGenericMethod)
+            {
+                declaration.Elements.Add(new(
+                    Content: $"{templatePrefix}{modifiers}{returnType.GetFullyQualifiedName()} {method.Name}{templateSpecialization}({string.Join(", ", parameterStrings)}){afterModifiers};",
+                    TypeDeclarationsReferenced: new[] { returnType }.Concat(parameters.Select(parameter => parameter.Type))
+                ));
+            }
+
+            string typeTemplateSpecialization = "";
+            if (definition.Type.GenericArguments != null && definition.Type.GenericArguments.Count > 0)
+            {
+                typeTemplateSpecialization = "<" + string.Join(", ", definition.Type.GenericArguments.Select(t => t.GetFullyQualifiedName())) + ">";
+            }
 
             // Method definition
             var parameterPassStrings = interopParameters.Select(parameter => parameter.Type.GetConversionToInteropType(context, parameter.CallSiteName));
@@ -117,7 +129,7 @@ namespace Oxidize
                 definition.Elements.Add(new(
                     Content:
                         $$"""
-                        {{templatePrefix}}{{returnType.GetFullyQualifiedName()}} {{definition.Type.Name}}::{{method.Name}}{{templateSpecialization}}({{string.Join(", ", parameterStrings)}}){{afterModifiers}} {
+                        {{templatePrefix}}{{returnType.GetFullyQualifiedName()}} {{definition.Type.Name}}{{typeTemplateSpecialization}}::{{method.Name}}{{templateSpecialization}}({{string.Join(", ", parameterStrings)}}){{afterModifiers}} {
                             {{interopName}}({{string.Join(", ", parameterPassStrings)}});
                         }
                         """,
@@ -134,7 +146,7 @@ namespace Oxidize
                 definition.Elements.Add(new(
                     Content:
                         $$"""
-                        {{templatePrefix}}{{returnType.GetFullyQualifiedName()}} {{definition.Type.Name}}::{{method.Name}}{{templateSpecialization}}({{string.Join(", ", parameterStrings)}}){{afterModifiers}} {
+                        {{templatePrefix}}{{returnType.GetFullyQualifiedName()}} {{definition.Type.Name}}{{typeTemplateSpecialization}}::{{method.Name}}{{templateSpecialization}}({{string.Join(", ", parameterStrings)}}){{afterModifiers}} {
                             auto result = {{interopName}}({{string.Join(", ", parameterPassStrings)}});
                             return {{returnType.GetConversionFromInteropType(context, "result")}};
                         }

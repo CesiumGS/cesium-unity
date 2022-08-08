@@ -46,7 +46,8 @@ public class OxidizeGenerator : IIncrementalGenerator
 
         // Generate C++ code.
         var typeDefinitions = withCppGenerator.Select((pair, _) => pair.Right.GenerateType(pair.Left));
-        context.RegisterImplementationSourceOutput(typeDefinitions.Combine(cppGenerator), (context, pair) => pair.Right.WriteCppCode(pair.Left));
+        var sourceFiles = typeDefinitions.Collect().Combine(cppGenerator).SelectMany((pair, _) => pair.Right.DistributeToSourceFiles(pair.Left));
+        context.RegisterImplementationSourceOutput(sourceFiles, (context, file) => file.Write());
 
         // Generate C++ initialization function
         var typesAndGenerator = typeDefinitions.Collect().Combine(cppGenerator);

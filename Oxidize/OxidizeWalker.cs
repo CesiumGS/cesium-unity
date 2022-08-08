@@ -93,6 +93,10 @@ namespace Oxidize
                 type = type.OriginalDefinition;
             }
 
+            // Don't add generic type parameters
+            if (type.Kind == SymbolKind.TypeParameter)
+                return new TypeToGenerate(type);
+
             // Don't add "void"
             if (type.SpecialType == SpecialType.System_Void)
                 return new TypeToGenerate(type);
@@ -116,6 +120,16 @@ namespace Oxidize
                         continue;
 
                     generationItem.EnumValues.Add(field);
+                }
+            }
+
+            // If this is an instantiated generic, we also need the types it's instantiated with.
+            INamedTypeSymbol? named = type as INamedTypeSymbol;
+            if (named != null && named.IsGenericType)
+            {
+                foreach (ITypeSymbol arg in named.TypeArguments)
+                {
+                    this.AddType(arg);
                 }
             }
 

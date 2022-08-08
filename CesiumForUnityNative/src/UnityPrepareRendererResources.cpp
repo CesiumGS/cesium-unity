@@ -13,7 +13,8 @@
 #include <Oxidize/System/String.h>
 #include <Oxidize/System/Text/Encoding.h>
 #include <Oxidize/Unity/Collections/Allocator.h>
-#include <Oxidize/Unity/Collections/NativeArray.h>
+#include <Oxidize/Unity/Collections/LowLevel/Unsafe/NativeArrayUnsafeUtility.h>
+#include <Oxidize/Unity/Collections/NativeArray1.h>
 #include <Oxidize/Unity/Collections/NativeArrayOptions.h>
 #include <Oxidize/UnityEngine/Debug.h>
 #include <Oxidize/UnityEngine/Material.h>
@@ -21,10 +22,12 @@
 #include <Oxidize/UnityEngine/Mesh.h>
 #include <Oxidize/UnityEngine/MeshFilter.h>
 #include <Oxidize/UnityEngine/MeshRenderer.h>
+#include <Oxidize/UnityEngine/MeshTopology.h>
 #include <Oxidize/UnityEngine/Quaternion.h>
 #include <Oxidize/UnityEngine/Resources.h>
 #include <Oxidize/UnityEngine/Texture.h>
 #include <Oxidize/UnityEngine/Transform.h>
+#include <Oxidize/UnityEngine/Vector2.h>
 #include <Oxidize/UnityEngine/Vector3.h>
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -40,11 +43,11 @@ namespace {
 
 template <typename T>
 void setTriangles(UnityEngine::Mesh& mesh, const AccessorView<T>& indices) {
-  Unity::Collections::NativeArray<System::Int32> nativeArrayTriangles(
+  Unity::Collections::NativeArray1<std::int32_t> nativeArrayTriangles(
       indices.size(),
       Unity::Collections::Allocator::Temp,
       Unity::Collections::NativeArrayOptions::UninitializedMemory);
-  System::Int32* triangles = static_cast<System::Int32*>(
+  std::int32_t* triangles = static_cast<std::int32_t*>(
       Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
           GetUnsafeBufferPointerWithoutChecks(nativeArrayTriangles));
 
@@ -52,7 +55,7 @@ void setTriangles(UnityEngine::Mesh& mesh, const AccessorView<T>& indices) {
     triangles[i] = indices[i];
   }
 
-  mesh.SetIndices<System::Int32>(
+  mesh.SetIndices<std::int32_t>(
       nativeArrayTriangles,
       UnityEngine::MeshTopology::Triangles,
       0,
@@ -230,7 +233,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
         UnityEngine::Mesh unityMesh{};
 
-        Unity::Collections::NativeArray<UnityEngine::Vector3>
+        Unity::Collections::NativeArray1<UnityEngine::Vector3>
             nativeArrayVertices(
                 positionView.size(),
                 Unity::Collections::Allocator::Temp,
@@ -249,7 +252,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           int32_t normalAccessorID = normalAccessorIt->second;
           AccessorView<UnityEngine::Vector3> normalView(gltf, normalAccessorID);
           if (normalView.status() == AccessorViewStatus::Valid) {
-            Unity::Collections::NativeArray_1<UnityEngine::Vector3>
+            Unity::Collections::NativeArray1<UnityEngine::Vector3>
                 nativeArrayNormals(
                     normalView.size(),
                     Unity::Collections::Allocator::Temp,
@@ -275,7 +278,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
               texCoord0AccessorID);
 
           if (texCoord0View.status() == AccessorViewStatus::Valid) {
-            Unity::Collections::NativeArray_1<UnityEngine::Vector2>
+            Unity::Collections::NativeArray1<UnityEngine::Vector2>
                 nativeArrayTexCoord0s(
                     texCoord0View.size(),
                     Unity::Collections::Allocator::Temp,
@@ -309,7 +312,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           setTriangles(unityMesh, indices32);
         }
 
-        meshFilter.SetMesh(unityMesh);
+        meshFilter.mesh(unityMesh);
       });
 
   return pModelGameObject.release();

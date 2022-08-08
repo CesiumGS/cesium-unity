@@ -115,20 +115,31 @@ namespace Oxidize
 
             List<CppType>? genericArguments = null;
 
+            string name = type.Name;
+
             INamedTypeSymbol? named = type as INamedTypeSymbol;
             if (named != null && named.IsGenericType)
             {
                 genericArguments = named.TypeArguments.Select(symbol => CppType.FromCSharp(context, symbol)).ToList();
+
+                // Add the number of generic arguments as a suffix, because C++ (unlike C#) doesn't make it
+                // easy to overload based on the number.
+                name += named.Arity;
             }
 
+            CppTypeKind kind;
             if (SymbolEqualityComparer.Default.Equals(type.BaseType, context.Compilation.GetSpecialType(SpecialType.System_Enum)))
-                return new CppType(CppTypeKind.Enum, namespaces, type.Name, genericArguments, 0);
+                kind = CppTypeKind.Enum;
+            else if (type.TypeKind == TypeKind.Delegate)
+                kind = CppTypeKind.Delegate;
             else if (type.IsReferenceType)
-                return new CppType(CppTypeKind.ClassWrapper, namespaces, type.Name, genericArguments, 0);
+                kind = CppTypeKind.ClassWrapper;
             else if (IsBlittableStruct(context, type))
-                return new CppType(CppTypeKind.BlittableStruct, namespaces, type.Name, genericArguments, 0);
+                kind = CppTypeKind.BlittableStruct;
             else
-                return new CppType(CppTypeKind.NonBlittableStructWrapper, namespaces, type.Name, genericArguments, 0);
+                kind = CppTypeKind.NonBlittableStructWrapper;
+
+            return new CppType(kind, namespaces, name, genericArguments, 0);
         }
 
         public CppType(
@@ -275,6 +286,15 @@ namespace Oxidize
                 return;
             }
 
+            if (this.GenericArguments != null && this.GenericArguments.Count > 0)
+            {
+                foreach (CppType genericType in this.GenericArguments)
+                {
+                    genericType.AddIncludesToSet(includes, forHeader);
+                }
+
+            }
+
             bool canBeForwardDeclared = true; // Flags.HasFlag(CppTypeFlags.Reference) || Flags.HasFlag(CppTypeFlags.Pointer);
             if (!forHeader || !canBeForwardDeclared)
             {
@@ -322,6 +342,7 @@ namespace Oxidize
                 case CppTypeKind.ClassWrapper:
                 case CppTypeKind.BlittableStruct:
                 case CppTypeKind.NonBlittableStructWrapper:
+                case CppTypeKind.Delegate:
                     return this.AsConstReference();
             }
 
@@ -353,6 +374,8 @@ namespace Oxidize
                 case CppTypeKind.ClassWrapper:
                 case CppTypeKind.NonBlittableStructWrapper:
                     return $"{variableName}.GetHandle().GetRaw()";
+                case CppTypeKind.Delegate:
+                    return "nullptr"; // TODO
                 case CppTypeKind.Enum:
                     return $"::std::uint32_t({variableName})";
                 case CppTypeKind.Primitive:
@@ -370,6 +393,8 @@ namespace Oxidize
                 case CppTypeKind.ClassWrapper:
                 case CppTypeKind.NonBlittableStructWrapper:
                     return $"{GetFullyQualifiedName()}({CppObjectHandle.GetCppType(context).GetFullyQualifiedName()}({variableName}))";
+                case CppTypeKind.Delegate:
+                    return $"{this.GetFullyQualifiedName()}(nullptr)";
                 case CppTypeKind.Enum:
                     return $"{this.GetFullyQualifiedName()}({variableName})";
                 case CppTypeKind.Primitive:

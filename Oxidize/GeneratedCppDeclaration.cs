@@ -10,42 +10,34 @@
         public CppType Type;
         public List<GeneratedCppDeclarationElement> Elements = new List<GeneratedCppDeclarationElement>();
 
-        public string ToHeaderFileString()
+        public void AddToHeaderFile(CppSourceFile headerFile)
         {
             if (Type == null)
-                return "";
+                return;
 
+            headerFile.Includes.UnionWith(GetIncludes());
+            headerFile.ForwardDeclarations.UnionWith(GetForwardDeclarations());
+
+            CppSourceFileNamespace ns = headerFile.GetNamespace(Type.GetFullyQualifiedNamespace(false));
+            
             string templateDeclaration = "";
             string templateSpecialization = "";
             if (Type.GenericArguments != null && Type.GenericArguments.Count > 0)
             {
-                templateDeclaration =
+                ns.Members.Add(
                     $$"""
                     template <{{string.Join(", ", Type.GenericArguments.Select((CppType type, int index) => "typename T" + index))}}>
-                    {{GetTypeKind()}} {{Type.Name}} {};
-
-                    template <>
-
-                    """;
+                    {{GetTypeKind()}} {{Type.Name}};
+                    """);
+                templateDeclaration = "template <> ";
                 templateSpecialization = $"<{string.Join(", ", Type.GenericArguments.Select(arg => arg.GetFullyQualifiedName()))}>";
             }
 
-            return
-                $$"""
-                #pragma once
-
-                {{GetIncludes().JoinAndIndent("")}}
-                
-                {{GetForwardDeclarations().JoinAndIndent("")}}
-
-                namespace {{Type.GetFullyQualifiedNamespace(false)}} {
-
+            ns.Members.Add($$"""
                 {{templateDeclaration}}{{GetTypeKind()}} {{Type.Name}}{{templateSpecialization}} {
                   {{GetElements().JoinAndIndent("  ")}}
                 };
-
-                } // namespace {{Type.GetFullyQualifiedNamespace(false)}}
-                """;
+                """);
         }
 
         private IEnumerable<string> GetIncludes()

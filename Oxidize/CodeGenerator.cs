@@ -39,7 +39,9 @@ namespace Oxidize
             CppType itemType = CppType.FromCSharp(this.Options, item.Type);
             if (itemType.Kind == CppTypeKind.Enum)
                 result = GenerateEnum(item, itemType);
-            else if (itemType.Kind == CppTypeKind.ClassWrapper || itemType.Kind == CppTypeKind.BlittableStruct || itemType.Kind == CppTypeKind.NonBlittableStructWrapper)
+            //else if (itemType.Kind == CppTypeKind.Delegate)
+            //    result = GenerateDelegate(item, itemType);
+            else if (itemType.Kind == CppTypeKind.ClassWrapper || itemType.Kind == CppTypeKind.BlittableStruct || itemType.Kind == CppTypeKind.NonBlittableStructWrapper || itemType.Kind == CppTypeKind.Delegate)
                 result = GenerateClassOrStruct(item, itemType);
             else
                 result = null;
@@ -106,12 +108,12 @@ namespace Oxidize
                 return;
 
             CppType type = result.CppDefinition.Type;
-            string headerPath = Path.Combine(new string[] { Options.OutputHeaderDirectory }.Concat(type.Namespaces).ToArray());
-            Directory.CreateDirectory(headerPath);
-            File.WriteAllText(Path.Combine(headerPath, type.Name + ".h"), result.CppDeclaration.ToHeaderFileString(), Encoding.UTF8);
+            //string headerPath = Path.Combine(new string[] { Options.OutputHeaderDirectory }.Concat(type.Namespaces).ToArray());
+            //Directory.CreateDirectory(headerPath);
+            //File.WriteAllText(Path.Combine(headerPath, type.Name + ".h"), result.CppDeclaration.ToHeaderFileString(), Encoding.UTF8);
 
-            Directory.CreateDirectory(Options.OutputSourceDirectory);
-            File.WriteAllText(Path.Combine(Options.OutputSourceDirectory, type.Name + ".cpp"), result.CppDefinition.ToSourceFileString(), Encoding.UTF8);
+            //Directory.CreateDirectory(Options.OutputSourceDirectory);
+            //File.WriteAllText(Path.Combine(Options.OutputSourceDirectory, type.Name + ".cpp"), result.CppDefinition.ToSourceFileString(), Encoding.UTF8);
 
             if (result.CppImplementationInvoker != null)
                 File.WriteAllText(Path.Combine(Options.OutputSourceDirectory, type.Name + "Bindings.cpp"), result.CppImplementationInvoker.ToSourceFileString(), Encoding.UTF8);
@@ -134,6 +136,48 @@ namespace Oxidize
 
                 context.AddSource(partialMethods.Type.Symbol.Name + "-generated", partialMethods.ToSourceFileString());
             }
+        }
+
+        public IEnumerable<CppSourceFile> DistributeToSourceFiles(ImmutableArray<GeneratedResult?> generatedResults)
+        {
+            Dictionary<string, CppSourceFile> sourceFiles = new Dictionary<string, CppSourceFile>();
+            
+            foreach (GeneratedResult? generated in generatedResults)
+            {
+                if (generated == null)
+                    continue;
+
+                CppType declarationType = generated.CppDeclaration.Type;
+                string headerPath = Path.Combine(new string[] { Options.OutputHeaderDirectory }.Concat(declarationType.Namespaces).ToArray());
+                headerPath = Path.Combine(headerPath, declarationType.Name + ".h");
+
+                CppSourceFile? headerFile = null;
+                if (!sourceFiles.TryGetValue(headerPath, out headerFile))
+                {
+                    headerFile = new CppSourceFile();
+                    headerFile.IsHeaderFile = true;
+                    headerFile.Filename = headerPath;
+                    sourceFiles.Add(headerPath, headerFile);
+                }
+
+                generated.CppDeclaration.AddToHeaderFile(headerFile);
+
+                CppType definitionType = generated.CppDefinition.Type;
+                string sourcePath = Path.Combine(Options.OutputSourceDirectory, generated.CppDefinition.Type.Name + ".cpp");
+
+                CppSourceFile? sourceFile = null;
+                if (!sourceFiles.TryGetValue(sourcePath, out sourceFile))
+                {
+                    sourceFile = new CppSourceFile();
+                    sourceFile.IsHeaderFile = false;
+                    sourceFile.Filename = sourcePath;
+                    sourceFiles.Add(sourcePath, sourceFile);
+                }
+
+                generated.CppDefinition.AddToSourceFile(sourceFile);
+            }
+
+            return sourceFiles.Values;
         }
     }
 }

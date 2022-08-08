@@ -22,6 +22,12 @@ namespace Oxidize
 
             CppType encodingWrapper = CppType.FromCSharp(context, encoding);
 
+            INamedTypeSymbol? marshal = context.Compilation.GetTypeByMetadataName("System.Runtime.InteropServices.Marshal");
+            if (marshal == null)
+                return generated;
+
+            CppType marshalWrapper = CppType.FromCSharp(context, marshal);
+
             generated.CppDefinition.Elements.Add(new(
                 Content:
                     $$"""
@@ -33,6 +39,29 @@ namespace Oxidize
                     }
                     """,
                 TypeDefinitionsReferenced: new[] { encodingWrapper }));
+
+            // Add a ToStlString method
+            generated.CppDeclaration.Elements.Add(new(
+                Content: $"std::string ToStlString() const;",
+                AdditionalIncludes: new[] { "<string>" }));
+
+            generated.CppDefinition.Elements.Add(new(
+                Content:
+                    $$"""
+                    std::string String::ToStlString() const {
+                      void* p = {{marshalWrapper.GetFullyQualifiedName()}}::StringToCoTaskMemUTF8(*this);
+                      try {
+                        std::string result = static_cast<char*>(p);
+                        {{marshalWrapper.GetFullyQualifiedName()}}::FreeCoTaskMem(p);
+                        return result;
+                      } catch (...) {
+                        {{marshalWrapper.GetFullyQualifiedName()}}::FreeCoTaskMem(p);
+                        throw;
+                      }
+                    }
+                    """,
+                TypeDefinitionsReferenced: new[] { marshalWrapper }
+            ));
 
             return generated;
         }

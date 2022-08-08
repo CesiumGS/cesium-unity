@@ -19,6 +19,7 @@ namespace Oxidize
             if (declaration.Type.Kind != CppTypeKind.ClassWrapper && declaration.Type.Kind != CppTypeKind.NonBlittableStructWrapper)
                 return;
 
+            CppType type = CppType.FromCSharp(context, item.Type);
             CppType objectHandleType = CppObjectHandle.GetCppType(context);
 
             string templateSpecialization = "";
@@ -36,14 +37,14 @@ namespace Oxidize
 
             // Construct from an object handle
             declaration.Elements.Add(new(
-                Content: $"explicit {item.Type.Name}({objectHandleType.GetFullyQualifiedName()}&& handle) noexcept;",
+                Content: $"explicit {type.Name}({objectHandleType.GetFullyQualifiedName()}&& handle) noexcept;",
                 TypeDeclarationsReferenced: new[] { objectHandleType }
             ));
 
             definition.Elements.Add(new(
                 Content:
                     $$"""
-                    {{item.Type.Name}}{{templateSpecialization}}::{{item.Type.Name}}({{objectHandleType.GetFullyQualifiedName()}}&& handle) noexcept :
+                    {{type.Name}}{{templateSpecialization}}::{{type.Name}}({{objectHandleType.GetFullyQualifiedName()}}&& handle) noexcept :
                         _handle(std::move(handle)) {}
                     """,
                 AdditionalIncludes: new[] { "<utility> "}, // for std::move
@@ -56,14 +57,14 @@ namespace Oxidize
 
             // Construct from a null reference
             declaration.Elements.Add(new(
-                Content: $"{item.Type.Name}(std::nullptr_t) noexcept;",
+                Content: $"{type.Name}(std::nullptr_t) noexcept;",
                 TypeDeclarationsReferenced: new[]  { CppType.NullPointer }
             ));
 
             definition.Elements.Add(new(
                 Content:
                     $$"""
-                    {{item.Type.Name}}{{templateSpecialization}}::{{item.Type.Name}}(std::nullptr_t) noexcept : _handle(nullptr) {
+                    {{type.Name}}{{templateSpecialization}}::{{type.Name}}(std::nullptr_t) noexcept : _handle(nullptr) {
                     }
                     """,
                 TypeDefinitionsReferenced: new[]
@@ -81,7 +82,7 @@ namespace Oxidize
             definition.Elements.Add(new(
                 Content:
                     $$"""
-                    bool {{item.Type.Name}}{{templateSpecialization}}::operator==(std::nullptr_t) const noexcept {
+                    bool {{type.Name}}{{templateSpecialization}}::operator==(std::nullptr_t) const noexcept {
                         return this->_handle.GetRaw() == nullptr;
                     }
                     """,
@@ -95,7 +96,7 @@ namespace Oxidize
             definition.Elements.Add(new(
                 Content:
                     $$"""
-                    bool {{item.Type.Name}}{{templateSpecialization}}::operator!=(std::nullptr_t) const noexcept {
+                    bool {{type.Name}}{{templateSpecialization}}::operator!=(std::nullptr_t) const noexcept {
                         return this->_handle.GetRaw() != nullptr;
                     }
                     """,
@@ -111,7 +112,7 @@ namespace Oxidize
             definition.Elements.Add(new(
                 Content:
                     $$"""
-                    const {{objectHandleType.GetFullyQualifiedName()}}& {{item.Type.Name}}{{templateSpecialization}}::GetHandle() const {
+                    const {{objectHandleType.GetFullyQualifiedName()}}& {{type.Name}}{{templateSpecialization}}::GetHandle() const {
                         return this->_handle;
                     }
                     """,

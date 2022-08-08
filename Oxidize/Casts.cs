@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Xml.Linq;
 
 namespace Oxidize
 {
@@ -17,7 +18,17 @@ namespace Oxidize
             if (item.Type.IsValueType)
                 return;
 
+            GeneratedCppDeclaration declaration = result.CppDeclaration;
+            if (declaration.Type.Kind != CppTypeKind.ClassWrapper && declaration.Type.Kind != CppTypeKind.NonBlittableStructWrapper)
+                return;
+
             CppType objectHandleType = CppObjectHandle.GetCppType(context);
+
+            string templateSpecialization = "";
+            if (declaration.Type.GenericArguments != null && declaration.Type.GenericArguments.Count > 0)
+            {
+                templateSpecialization = $"<{string.Join(", ", declaration.Type.GenericArguments.Select(arg => arg.GetFullyQualifiedName()))}>";
+            }
 
             // Generate implicit conversions to all base classes.
             TypeToGenerate? baseClass = item.BaseClass;
@@ -34,7 +45,7 @@ namespace Oxidize
                 result.CppDefinition.Elements.Add(new(
                     Content:
                         $$"""
-                        {{result.CppDefinition.Type.Name}}::operator {{baseTypeName}}() const {
+                        {{result.CppDefinition.Type.Name}}{{templateSpecialization}}::operator {{baseTypeName}}() const {
                             return {{baseTypeName}}({{objectHandleType.GetFullyQualifiedName()}}(this->_handle));
                         }
                         """,
@@ -55,7 +66,7 @@ namespace Oxidize
                 result.CppDefinition.Elements.Add(new(
                     Content:
                         $$"""
-                        {{result.CppDefinition.Type.Name}}::operator {{interfaceTypeName}}() const {
+                        {{result.CppDefinition.Type.Name}}{{templateSpecialization}}::operator {{interfaceTypeName}}() const {
                             return {{interfaceTypeName}}({{objectHandleType.GetFullyQualifiedName()}}(this->_handle));
                         }
                         """,
