@@ -12,44 +12,39 @@ namespace Oxidize
         public CppType ImplementationType;
         public List<GeneratedCppImplementationInvokerFunction> Functions = new List<GeneratedCppImplementationInvokerFunction>();
 
-        public string ToSourceFileString()
+        public void AddToSourceFile(CppSourceFile sourceFile)
         {
-            return
-                $$"""
-                {{GetIncludes().JoinAndIndent("")}}
-                
-                {{GetForwardDeclarations().JoinAndIndent("")}}
+            if (ImplementationType == null)
+                return;
 
+            AddIncludes(sourceFile.Includes);
+            AddForwardDeclarations(sourceFile.ForwardDeclarations);
+            
+            CppSourceFileNamespace ns = sourceFile.GetNamespace("");
+            ns.Members.Add(
+                $$"""
                 extern "C" {
                 
                 {{GetFunctions().JoinAndIndent("")}}
-
+                
                 } // extern "C"
-                """;
+                """);
         }
 
-        private IEnumerable<string> GetIncludes()
+        private void AddIncludes(ISet<string> includes)
         {
-            HashSet<string> result = new HashSet<string>();
-
             foreach (GeneratedCppImplementationInvokerFunction function in Functions)
             {
-                function.AddIncludesToSet(result);
+                function.AddIncludesToSet(includes);
             }
-
-            return result.Select(include => $"#include {include}");
         }
 
-        private IEnumerable<string> GetForwardDeclarations()
+        private void AddForwardDeclarations(ISet<string> forwardDeclarations)
         {
-            HashSet<string> result = new HashSet<string>();
-
             foreach (GeneratedCppImplementationInvokerFunction function in Functions)
             {
-                function.AddForwardDeclarationsToSet(result);
+                function.AddForwardDeclarationsToSet(forwardDeclarations);
             }
-
-            return result;
         }
 
         private IEnumerable<string> GetFunctions()

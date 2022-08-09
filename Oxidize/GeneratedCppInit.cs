@@ -30,16 +30,50 @@ namespace Oxidize
             return new GeneratedCppInit() { Fields = fields };
         }
 
-        public string ToSourceFileString()
+        public void Generate(CppGenerationContext options, Dictionary<string, CppSourceFile> sourceFiles)
         {
-            return $$"""
-                {{GetIncludes().JoinAndIndent("")}}
+            string headerPath = options.OutputHeaderDirectory;
+            if (options.BaseNamespace != null)
+                headerPath = Path.Combine(headerPath, options.BaseNamespace);
+            headerPath = Path.Combine(headerPath, "initializeOxidize.h");
 
-                {{GetForwardDeclarations().JoinAndIndent("")}}
+            CppSourceFile? initializeHeader = null;
+            if (!sourceFiles.TryGetValue(headerPath, out initializeHeader))
+            {
+                initializeHeader = new CppSourceFile();
+                initializeHeader.IsHeaderFile = true;
+                initializeHeader.Filename = headerPath;
+                sourceFiles.Add(headerPath, initializeHeader);
+            }
 
-                void start();
-                void stop();
+            initializeHeader.Includes.Add("<cstdint>");
+            var headerNamespace = initializeHeader.GetNamespace("");
+            headerNamespace.Members.Add(
+                $$"""
+                extern "C" {
+                __declspec(dllexport) void initializeOxidize(void** functionPointers, std::int32_t count);
+                }
+                """);
 
+            string sourcePath = Path.Combine(options.OutputSourceDirectory, "initializeOxidize.cpp");
+
+            CppSourceFile? initializeSource = null;
+            if (!sourceFiles.TryGetValue(sourcePath, out initializeSource))
+            {
+                initializeSource = new CppSourceFile();
+                initializeSource.IsHeaderFile = false;
+                initializeSource.Filename = sourcePath;
+                sourceFiles.Add(sourcePath, initializeSource);
+            }
+
+            AddIncludes(initializeSource.Includes);
+            AddForwardDeclarations(initializeSource.ForwardDeclarations);
+            var sourceNamespace = initializeSource.GetNamespace("");
+
+            sourceNamespace.Members.Add("void start();");
+            sourceNamespace.Members.Add("void stop();");
+            sourceNamespace.Members.Add(
+                $$"""
                 extern "C" {
 
                 __declspec(dllexport) void initializeOxidize(void** functionPointers, std::int32_t count) {
@@ -54,49 +88,27 @@ namespace Oxidize
                 }
 
                 }
-                """;
+                """);
         }
 
-        public string ToHeaderFileString()
+        public void AddIncludes(ISet<string> includes)
         {
-            return
-                $$"""
-                #pragma once
-
-                #include <cstdint>
-
-                extern "C" {
-                __declspec(dllexport) void initializeOxidize(void** functionPointers, std::int32_t count);
-                }
-                """;
-        }
-
-        public IEnumerable<string> GetIncludes()
-        {
-            HashSet<string> result = new HashSet<string>();
-
             // These are required for the init boilerplate
-            result.Add("<cassert>");
-            result.Add("<cstdint>");
+            includes.Add("<cassert>");
+            includes.Add("<cstdint>");
 
             foreach (GeneratedCppFieldInit field in Fields)
             {
-                field.AddIncludesToSet(result);
+                field.AddIncludesToSet(includes);
             }
-
-            return result.Select(include => $"#include {include}");
         }
 
-        private IEnumerable<string> GetForwardDeclarations()
+        private void AddForwardDeclarations(ISet<string> forwardDeclarations)
         {
-            HashSet<string> result = new HashSet<string>();
-
             foreach (GeneratedCppFieldInit field in Fields)
             {
-                field.AddForwardDeclarationsToSet(result);
+                field.AddForwardDeclarationsToSet(forwardDeclarations);
             }
-
-            return result;
         }
 
         public IEnumerable<string> GetFieldAssignments()

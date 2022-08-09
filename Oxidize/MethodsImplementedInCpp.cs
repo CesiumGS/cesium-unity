@@ -23,7 +23,7 @@ namespace Oxidize
             result.CppImplementationInvoker.Functions.Add(new(
                 Content:
                     $$"""
-                    void* {{createName}}(void* handle) {
+                    __declspec(dllexport) void* {{createName}}(void* handle) {
                       const {{wrapperType.GetFullyQualifiedName()}} wrapper{{{objectHandleType.GetFullyQualifiedName()}}(handle)};
                       return reinterpret_cast<void*>(new {{implType.GetFullyQualifiedName()}}(wrapper));
                     }
@@ -54,7 +54,7 @@ namespace Oxidize
             result.CppImplementationInvoker.Functions.Add(new(
                 Content:
                     $$"""
-                    void {{disposeName}}(void* handle, void* pImpl) {
+                    __declspec(dllexport) void {{disposeName}}(void* handle, void* pImpl) {
                       const {{wrapperType.GetFullyQualifiedName()}} wrapper{{{objectHandleType.GetFullyQualifiedName()}}(handle)};
                       auto pImplTyped = reinterpret_cast<{{implType.GetFullyQualifiedName()}}*>(pImpl);
                       pImplTyped->JustBeforeDelete(wrapper);
@@ -157,7 +157,7 @@ namespace Oxidize
             result.CppImplementationInvoker.Functions.Add(new(
                 Content:
                     $$"""
-                    {{interopReturnType.GetFullyQualifiedName()}} {{name}}({{parameterListString}}) {
+                    __declspec(dllexport) {{interopReturnType.GetFullyQualifiedName()}} {{name}}({{parameterListString}}) {
                       const {{wrapperType.GetFullyQualifiedName()}} wrapper{{{objectHandleType.GetFullyQualifiedName()}}(handle)};
                       auto pImplTyped = reinterpret_cast<{{implType.GetFullyQualifiedName()}}*>(pImpl);
                       {{new[] { implementation }.JoinAndIndent("  ")}}

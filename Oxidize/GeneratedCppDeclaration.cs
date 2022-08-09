@@ -15,8 +15,8 @@
             if (Type == null)
                 return;
 
-            headerFile.Includes.UnionWith(GetIncludes());
-            headerFile.ForwardDeclarations.UnionWith(GetForwardDeclarations());
+            AddIncludes(headerFile.Includes);
+            AddForwardDeclarations(headerFile.ForwardDeclarations);
 
             CppSourceFileNamespace ns = headerFile.GetNamespace(Type.GetFullyQualifiedNamespace(false));
             
@@ -40,36 +40,28 @@
                 """);
         }
 
-        private IEnumerable<string> GetIncludes()
+        private void AddIncludes(ISet<string> includes)
         {
-            HashSet<string> result = new HashSet<string>();
-
             foreach (GeneratedCppDeclarationElement element in Elements)
             {
-                element.AddIncludesToSet(result);
+                element.AddIncludesToSet(includes);
             }
-
-            return result.Select(include => $"#include {include}");
         }
 
-        private IEnumerable<string> GetForwardDeclarations()
+        private void AddForwardDeclarations(ISet<string> forwardDeclarations)
         {
-            HashSet<string> result = new HashSet<string>();
-
             if (Type.GenericArguments != null)
             {
                 foreach (CppType genericArg in Type.GenericArguments)
                 {
-                    genericArg.AddForwardDeclarationsToSet(result);
+                    genericArg.AddForwardDeclarationsToSet(forwardDeclarations);
                 }
             }
 
             foreach (GeneratedCppDeclarationElement element in Elements)
             {
-                element.AddForwardDeclarationsToSet(result);
+                element.AddForwardDeclarationsToSet(forwardDeclarations);
             }
-
-            return result;
         }
 
         private string GetTypeKind()

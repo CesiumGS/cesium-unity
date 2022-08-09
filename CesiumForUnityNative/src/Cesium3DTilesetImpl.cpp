@@ -16,6 +16,8 @@ Cesium3DTilesetImpl::Cesium3DTilesetImpl(
     const Oxidize::CesiumForUnity::Cesium3DTileset& tileset)
     : _pTileset(), _lastUpdateResult() {}
 
+Cesium3DTilesetImpl::~Cesium3DTilesetImpl() {}
+
 void Cesium3DTilesetImpl::JustBeforeDelete(
     const Oxidize::CesiumForUnity::Cesium3DTileset& tileset) {}
 

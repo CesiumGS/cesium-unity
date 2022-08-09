@@ -31,7 +31,7 @@ namespace Oxidize
         {
             string content =
                 $$"""
-                {{Includes.JoinAndIndent("")}}
+                {{Includes.Select(i => $"#include {i}").JoinAndIndent("")}}
                 
                 {{ForwardDeclarations.JoinAndIndent("")}}
 
@@ -45,12 +45,29 @@ namespace Oxidize
 
         public void Write()
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(Filename));
-            File.WriteAllText(Filename, this.ToContentString(), Encoding.UTF8);
+            string directory = Path.GetDirectoryName(Filename);
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
+
+            string newContent = this.ToContentString();
+
+            if (File.Exists(Filename))
+            {
+                string existing = File.ReadAllText(Filename, Encoding.UTF8);
+
+                // If the content hasn't changed, there's no need to rewrite it.
+                if (existing == newContent)
+                    return;
+            }
+
+            File.WriteAllText(Filename, newContent, Encoding.UTF8);
         }
 
-        private string GetNamespace(string name, CppSourceFileNamespace content)
+        private string GetNamespace(string? name, CppSourceFileNamespace content)
         {
+            if (string.IsNullOrEmpty(name))
+                return content.Members.JoinAndIndent(indent: "", newlineBetweenEach: true);
+
             return
                 $$"""
                 namespace {{name}} {

@@ -17,21 +17,6 @@ namespace Oxidize
             this.Options = options;
         }
 
-        public void WriteInitializeFunction(ImmutableArray<GeneratedResult?> results)
-        {
-            GeneratedCppInit init = GeneratedCppInit.Merge(results.Select(result => result == null ? new GeneratedCppInit() : result.CppInit));
-
-            Directory.CreateDirectory(Options.OutputSourceDirectory);
-            File.WriteAllText(Path.Combine(Options.OutputSourceDirectory, "initializeOxidize.cpp"), init.ToSourceFileString(), Encoding.UTF8);
-
-            string headerPath = Options.OutputHeaderDirectory;
-            if (this.Options.BaseNamespace != null)
-                headerPath = Path.Combine(headerPath, this.Options.BaseNamespace);
-
-            Directory.CreateDirectory(headerPath);
-            File.WriteAllText(Path.Combine(headerPath, "initializeOxidize.h"), init.ToHeaderFileString(), Encoding.UTF8);
-        }
-
         public GeneratedResult? GenerateType(TypeToGenerate item)
         {
             GeneratedResult? result = null;
@@ -102,23 +87,6 @@ namespace Oxidize
             return result;
         }
 
-        public void WriteCppCode(GeneratedResult? result)
-        {
-            if (result == null)
-                return;
-
-            CppType type = result.CppDefinition.Type;
-            //string headerPath = Path.Combine(new string[] { Options.OutputHeaderDirectory }.Concat(type.Namespaces).ToArray());
-            //Directory.CreateDirectory(headerPath);
-            //File.WriteAllText(Path.Combine(headerPath, type.Name + ".h"), result.CppDeclaration.ToHeaderFileString(), Encoding.UTF8);
-
-            //Directory.CreateDirectory(Options.OutputSourceDirectory);
-            //File.WriteAllText(Path.Combine(Options.OutputSourceDirectory, type.Name + ".cpp"), result.CppDefinition.ToSourceFileString(), Encoding.UTF8);
-
-            if (result.CppImplementationInvoker != null)
-                File.WriteAllText(Path.Combine(Options.OutputSourceDirectory, type.Name + "Bindings.cpp"), result.CppImplementationInvoker.ToSourceFileString(), Encoding.UTF8);
-        }
-
         public static void WriteCSharpCode(SourceProductionContext context, Compilation compilation, ImmutableArray<GeneratedResult?> results)
         {
             GeneratedCSharpInit combinedInit = GeneratedCSharpInit.Merge(results.Select(result => result == null ? new GeneratedCSharpInit() : result.CSharpInit));
@@ -141,7 +109,11 @@ namespace Oxidize
         public IEnumerable<CppSourceFile> DistributeToSourceFiles(ImmutableArray<GeneratedResult?> generatedResults)
         {
             Dictionary<string, CppSourceFile> sourceFiles = new Dictionary<string, CppSourceFile>();
+
+            // Create source files for the standard types.
+            CppObjectHandle.Generate(this.Options, sourceFiles);
             
+            // Create source files for the generated types.
             foreach (GeneratedResult? generated in generatedResults)
             {
                 if (generated == null)
@@ -175,7 +147,14 @@ namespace Oxidize
                 }
 
                 generated.CppDefinition.AddToSourceFile(sourceFile);
+
+                if (generated.CppImplementationInvoker != null)
+                    generated.CppImplementationInvoker.AddToSourceFile(sourceFile);
             }
+
+            // Create source files for the initialization process.
+            GeneratedCppInit init = GeneratedCppInit.Merge(generatedResults.Select(result => result == null ? new GeneratedCppInit() : result.CppInit));
+            init.Generate(this.Options, sourceFiles);
 
             return sourceFiles.Values;
         }

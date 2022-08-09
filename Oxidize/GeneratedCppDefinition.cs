@@ -15,36 +15,28 @@
             if (Type == null)
                 return;
 
-            sourceFile.Includes.UnionWith(GetIncludes());
-            sourceFile.ForwardDeclarations.UnionWith(GetForwardDeclarations());
+            AddIncludes(sourceFile.Includes);
+            AddForwardDeclarations(sourceFile.ForwardDeclarations);
             CppSourceFileNamespace ns = sourceFile.GetNamespace(Type.GetFullyQualifiedNamespace(false));
             ns.Members.AddRange(GetElements());
         }
 
-        private IEnumerable<string> GetIncludes()
+        private void AddIncludes(ISet<string> includes)
         {
-            HashSet<string> result = new HashSet<string>();
-
-            this.Type.AddSourceIncludesToSet(result);
+            this.Type.AddSourceIncludesToSet(includes);
 
             foreach (GeneratedCppDefinitionElement element in Elements)
             {
-                element.AddIncludesToSet(result);
+                element.AddIncludesToSet(includes);
             }
-
-            return result.Select(include => $"#include {include}");
         }
 
-        private IEnumerable<string> GetForwardDeclarations()
+        private void AddForwardDeclarations(ISet<string> forwardDeclarations)
         {
-            HashSet<string> result = new HashSet<string>();
-
             foreach (GeneratedCppDefinitionElement element in Elements)
             {
-                element.AddForwardDeclarationsToSet(result);
+                element.AddForwardDeclarationsToSet(forwardDeclarations);
             }
-
-            return result;
         }
 
         private IEnumerable<string> GetElements()

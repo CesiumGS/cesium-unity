@@ -23,16 +23,24 @@ namespace Oxidize
             return new CppType(InteropTypeKind.ClassWrapper, ns, "ObjectHandle", null, 0);
         }
 
-        public static void Generate(CppGenerationContext context)
+        public static void Generate(CppGenerationContext context, IDictionary<string, CppSourceFile> sourceFiles)
         {
             CppType type = GetCppType(context);
 
-            string header =
+            string headerPath = Path.Combine(new[] { context.OutputHeaderDirectory }.Concat(type.Namespaces).Concat(new[] { type.Name + ".h" }).ToArray());
+
+            CppSourceFile? headerFile = null;
+            if (!sourceFiles.TryGetValue(headerPath, out headerFile))
+            {
+                headerFile = new CppSourceFile();
+                headerFile.IsHeaderFile = true;
+                headerFile.Filename = headerPath;
+                sourceFiles.Add(headerPath, headerFile);
+            }
+
+            var headerNamespace = headerFile.GetNamespace(type.GetFullyQualifiedNamespace(false));
+            headerNamespace.Members.Add(
                 $$"""
-                #pragma once
-
-                namespace {{type.GetFullyQualifiedNamespace(false)}} {
-
                 class ObjectHandle {
                 public:
                   ObjectHandle() noexcept;
@@ -40,35 +48,36 @@ namespace Oxidize
                   ObjectHandle(const ObjectHandle& rhs) noexcept;
                   ObjectHandle(ObjectHandle&& rhs) noexcept;
                   ~ObjectHandle() noexcept;
-
+                
                   ObjectHandle& operator=(const ObjectHandle& rhs) noexcept;
                   ObjectHandle& operator=(ObjectHandle&& rhs) noexcept;
-
+                
                   void* GetRaw() const;
-
+                
                 private:
                   void* _handle;
                 };
-
-                } // namespace {{type.GetFullyQualifiedNamespace(false)}}
-                """;
-
-            string headerPath = Path.Combine(new string[] { context.OutputHeaderDirectory }.Concat(type.Namespaces).ToArray());
-            Directory.CreateDirectory(headerPath);
-            File.WriteAllText(Path.Combine(headerPath, type.Name + ".h"), header, Encoding.UTF8);
+                """);
 
             CppType utilityType = new CppType(InteropTypeKind.ClassWrapper, type.Namespaces, "ObjectHandleUtility", null, 0);
-            
-            HashSet<string> includes = new HashSet<string>();
-            type.AddSourceIncludesToSet(includes);
-            utilityType.AddSourceIncludesToSet(includes);
 
-            string source =
+            string sourcePath = Path.Combine(context.OutputSourceDirectory, type.Name + ".cpp");
+
+            CppSourceFile? sourceFile = null;
+            if (!sourceFiles.TryGetValue(sourcePath, out sourceFile))
+            {
+                sourceFile = new CppSourceFile();
+                sourceFile.IsHeaderFile = false;
+                sourceFile.Filename = sourcePath;
+                sourceFiles.Add(sourcePath, sourceFile);
+            }
+
+            type.AddSourceIncludesToSet(sourceFile.Includes);
+            utilityType.AddSourceIncludesToSet(sourceFile.Includes);
+
+            var sourceNamespace = sourceFile.GetNamespace(type.GetFullyQualifiedNamespace(false));
+            sourceNamespace.Members.Add(
                 $$"""
-                {{string.Join(Environment.NewLine, includes.Select(include => $"#include {include}"))}}
-
-                namespace {{type.GetFullyQualifiedNamespace(false)}} {
-
                 ObjectHandle::ObjectHandle() noexcept : _handle(nullptr) {}
 
                 ObjectHandle::ObjectHandle(void* handle) noexcept : _handle(handle) {}
@@ -104,12 +113,7 @@ namespace Oxidize
                 }
 
                 void* ObjectHandle::GetRaw() const { return this->_handle; }
-
-                } // namespace {{type.GetFullyQualifiedNamespace(false)}}
-                """;
-
-            Directory.CreateDirectory(context.OutputSourceDirectory);
-            File.WriteAllText(Path.Combine(context.OutputSourceDirectory, type.Name + ".cpp"), source, Encoding.UTF8);
+                """);
         }
     }
 }
