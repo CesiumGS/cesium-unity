@@ -11,7 +11,7 @@ namespace Oxidize
         public static void Generate(CppGenerationContext context, TypeToGenerate item, GeneratedResult result)
         {
             // Only blittable value types need fields.
-            if (result.CppDeclaration.Type.Kind != CppTypeKind.BlittableStruct)
+            if (result.CppDeclaration.Type.Kind != InteropTypeKind.BlittableStruct)
                 return;
 
             ImmutableArray<ISymbol> members = item.Type.GetMembers();

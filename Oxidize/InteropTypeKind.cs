@@ -1,6 +1,6 @@
 ﻿namespace Oxidize
 {
-    internal enum CppTypeKind
+    internal enum InteropTypeKind
     {
         Unknown,
         Primitive,

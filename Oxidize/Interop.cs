@@ -1,6 +1,8 @@
 ﻿using Microsoft.CodeAnalysis;
+using System.Collections.Immutable;
 using System.Security.Cryptography;
 using System.Text;
+using System.Xml.Linq;
 
 namespace Oxidize
 {
@@ -20,7 +22,8 @@ namespace Oxidize
         public static GeneratedCSharpDelegateInit CreateCSharpDelegateInit(
             Compilation compilation,
             ITypeSymbol ownerType,
-            IMethodSymbol method)
+            IMethodSymbol method,
+            string interopFunctionName)
         {
             CSharpType csType = CSharpType.FromSymbol(compilation, ownerType);
             var parameters = method.Parameters;
@@ -28,27 +31,19 @@ namespace Oxidize
 
             IPropertySymbol? property = method.AssociatedSymbol as IPropertySymbol;
 
-            string descriptiveName;
             string accessName;
             if (method.Name == ".ctor")
-            {
-                descriptiveName = "Constructor";
                 accessName = $"new {csType.GetFullyQualifiedName()}";
-            }
             else if (property != null && ReferenceEquals(property.GetMethod, method))
-            {
-                descriptiveName = $"Get{property.Name}";
                 accessName = property.Name;
-            }
             else if (property != null && ReferenceEquals(property.SetMethod, method))
-            {
-                descriptiveName = $"Set{property.Name}";
                 accessName = property.Name;
-            }
             else
-            {
-                descriptiveName = method.Name;
                 accessName = method.Name;
+
+            if (method.IsGenericMethod)
+            {
+                accessName += $"<{string.Join(", ", method.TypeArguments.Select(t => t.ToDisplayString()))}>";
             }
 
             var callParameterDetails = parameters.Select(parameter => (Name: parameter.Name, Type: CSharpType.FromSymbol(compilation, parameter.Type), InteropType: CSharpType.FromSymbol(compilation, parameter.Type).AsInteropType()));
@@ -116,23 +111,30 @@ namespace Oxidize
                     """;
             }
 
-            string baseName = $"{csType.GetFullyQualifiedName().Replace(".", "_")}_{descriptiveName}";
+            string genericTypeHash = "";
+            INamedTypeSymbol? named = csType.Symbol as INamedTypeSymbol;
+            if (named != null && named.IsGenericType)
+            {
+                genericTypeHash = HashParameters(null, named.TypeArguments);
+            }
+
+            string baseName = $"{csType.GetFullyQualifiedNamespace().Replace(".", "_")}_{csType.Symbol.Name}{genericTypeHash}_{interopFunctionName}";
             return new GeneratedCSharpDelegateInit(
                 // TODO: incorporate parameter types into delegate name to support overloading.
                 name: $"{baseName}Delegate",
                 content:
                     $$"""
                     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-                    private delegate {{interopReturnTypeString}} {{baseName}}Type({{interopParameterList}});
-                    private static readonly {{baseName}}Type {{baseName}}Delegate = new {{baseName}}Type({{baseName}});
-                    private static {{interopReturnTypeString}} {{baseName}}({{interopParameterList}})
+                    private unsafe delegate {{interopReturnTypeString}} {{baseName}}Type({{interopParameterList}});
+                    private static unsafe readonly {{baseName}}Type {{baseName}}Delegate = new {{baseName}}Type({{baseName}});
+                    private static unsafe {{interopReturnTypeString}} {{baseName}}({{interopParameterList}})
                     {
                       {{implementation.Replace(Environment.NewLine, Environment.NewLine + "  ")}}
                     }
                     """);
         }
 
-        internal static void GenerateForType(CppGenerationContext context, TypeToGenerate item, GeneratedResult result)
+        public static void GenerateForType(CppGenerationContext context, TypeToGenerate item, GeneratedResult result)
         {
             string initializeOxidizeHeader = context.BaseNamespace == null ? "<initializeOxidize.h>" : $"<{context.BaseNamespace.Replace("::", "/")}/initializeOxidize.h>";
             result.CppDeclaration.Elements.Add(new(
@@ -142,7 +144,7 @@ namespace Oxidize
                 AdditionalIncludes: new[] { initializeOxidizeHeader }));
         }
 
-        internal static string InsecureHash(string s)
+        public static string InsecureHash(string s)
         {
             byte[] bytes = Encoding.UTF8.GetBytes(s);
             using (MD5 md5 = MD5.Create())
@@ -152,16 +154,119 @@ namespace Oxidize
             }
         }
 
-        internal static string HashParameters(IEnumerable<IParameterSymbol> parameters, IEnumerable<ITypeSymbol>? typeArguments = null)
+        public static string HashParameters(IEnumerable<IParameterSymbol>? parameters = null, IEnumerable<ITypeSymbol>? typeArguments = null)
         {
-            var formattedParameters = parameters.Select(parameter => $"{parameter.Type.ToDisplayString()} {parameter.Name}");
+            IEnumerable<string>? formattedParameters = null;
+            IEnumerable<string>? formattedTypeArguments = null;
+            
+            if (parameters != null)
+                formattedParameters = parameters.Select(parameter => $"{parameter.Type.ToDisplayString()} {parameter.Name}");
             if (typeArguments != null)
-            {
-                formattedParameters = typeArguments.Select(arg => $"<{arg.ToDisplayString()}>").Concat(formattedParameters);
-            }
-            var allTogether = string.Join(", ", formattedParameters);
+                formattedTypeArguments = typeArguments.Select(arg => $"<{arg.ToDisplayString()}>");
+
+            IEnumerable<string>? allFormattedInput = null;
+            if (formattedParameters != null && formattedTypeArguments != null)
+                allFormattedInput = formattedTypeArguments.Concat(formattedParameters);
+            else if (formattedParameters != null)
+                allFormattedInput = formattedParameters;
+            else if (formattedTypeArguments != null)
+                allFormattedInput = formattedTypeArguments;
+            else
+                allFormattedInput = new string[] {};
+
+            var allTogether = string.Join(", ", allFormattedInput);
             string hash = InsecureHash(allTogether);
             return hash.Replace("=", "").Replace("+", "_").Replace("/", "__");
+        }
+
+        public static InteropTypeKind DetermineTypeKind(Compilation compilation, ITypeSymbol type)
+        {
+            if (type.Kind == SymbolKind.TypeParameter)
+                return InteropTypeKind.GenericParameter;
+
+            switch (type.SpecialType)
+            {
+                case SpecialType.System_SByte:
+                case SpecialType.System_Int16:
+                case SpecialType.System_Int32:
+                case SpecialType.System_Int64:
+                case SpecialType.System_Single:
+                case SpecialType.System_Double:
+                case SpecialType.System_Byte:
+                case SpecialType.System_UInt16:
+                case SpecialType.System_UInt32:
+                case SpecialType.System_UInt64:
+                case SpecialType.System_Boolean:
+                case SpecialType.System_IntPtr:
+                case SpecialType.System_Void:
+                    return InteropTypeKind.Primitive;
+            }
+
+            if (SymbolEqualityComparer.Default.Equals(type.BaseType, compilation.GetSpecialType(SpecialType.System_Enum)))
+                return InteropTypeKind.Enum;
+            else if (type.TypeKind == TypeKind.Delegate)
+                return InteropTypeKind.Delegate;
+            else if (type.IsReferenceType)
+                return InteropTypeKind.ClassWrapper;
+            else if (IsBlittableStruct(compilation, type))
+                return InteropTypeKind.BlittableStruct;
+            else
+                return InteropTypeKind.NonBlittableStructWrapper;
+
+        }
+
+        /// <summary>
+        /// Determines if the given type is a blittable value type (struct).
+        /// </summary>
+        /// <param name="compilation"></param>
+        /// <param name="type"></param>
+        /// <returns>True if the struct is blittable.</returns>
+        private static bool IsBlittableStruct(Compilation compilation, ITypeSymbol type)
+        {
+            if (!type.IsValueType)
+                return false;
+
+            if (IsBlittablePrimitive(type))
+                return true;
+
+            ImmutableArray<ISymbol> members = type.GetMembers();
+            foreach (ISymbol member in members)
+            {
+                if (member.Kind != SymbolKind.Field)
+                    continue;
+
+                IFieldSymbol? field = member as IFieldSymbol;
+                if (field == null)
+                    continue;
+
+                if (!IsBlittableStruct(compilation, field.Type))
+                    return false;
+            }
+
+            return true;
+        }
+
+        private static bool IsBlittablePrimitive(ITypeSymbol type)
+        {
+            switch (type.SpecialType)
+            {
+                case SpecialType.System_Byte:
+                case SpecialType.System_SByte:
+                case SpecialType.System_Int16:
+                case SpecialType.System_UInt16:
+                case SpecialType.System_Int32:
+                case SpecialType.System_UInt32:
+                case SpecialType.System_Int64:
+                case SpecialType.System_UInt64:
+                case SpecialType.System_IntPtr:
+                case SpecialType.System_UIntPtr:
+                case SpecialType.System_Single:
+                case SpecialType.System_Double:
+                case SpecialType.System_Boolean:
+                    return true;
+                default:
+                    return false;
+            }
         }
     }
 }

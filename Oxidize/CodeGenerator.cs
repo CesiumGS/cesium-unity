@@ -37,11 +37,11 @@ namespace Oxidize
             GeneratedResult? result = null;
 
             CppType itemType = CppType.FromCSharp(this.Options, item.Type);
-            if (itemType.Kind == CppTypeKind.Enum)
+            if (itemType.Kind == InteropTypeKind.Enum)
                 result = GenerateEnum(item, itemType);
             //else if (itemType.Kind == CppTypeKind.Delegate)
             //    result = GenerateDelegate(item, itemType);
-            else if (itemType.Kind == CppTypeKind.ClassWrapper || itemType.Kind == CppTypeKind.BlittableStruct || itemType.Kind == CppTypeKind.NonBlittableStructWrapper || itemType.Kind == CppTypeKind.Delegate)
+            else if (itemType.Kind == InteropTypeKind.ClassWrapper || itemType.Kind == InteropTypeKind.BlittableStruct || itemType.Kind == InteropTypeKind.NonBlittableStructWrapper || itemType.Kind == InteropTypeKind.Delegate)
                 result = GenerateClassOrStruct(item, itemType);
             else
                 result = null;
@@ -79,7 +79,7 @@ namespace Oxidize
             if (item.ImplementationClassName != null)
             {
                 // TODO: parse out namespaces? Require user to specify them separately?
-                CppType implementationType = new CppType(CppTypeKind.Unknown, Array.Empty<string>(), item.ImplementationClassName, null, 0, item.ImplementationHeaderName);
+                CppType implementationType = new CppType(InteropTypeKind.Unknown, Array.Empty<string>(), item.ImplementationClassName, null, 0, item.ImplementationHeaderName);
                 result.CppImplementationInvoker = new GeneratedCppImplementationInvoker(implementationType);
                 result.CSharpPartialMethodDefinitions = new GeneratedCSharpPartialMethodDefinitions(CSharpType.FromSymbol(this.Options.Compilation, item.Type));
                 

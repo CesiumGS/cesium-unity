@@ -102,7 +102,7 @@ namespace Oxidize
             ));
 
             // And passed from the C# init method
-            csharpInit.Delegates.Add(Interop.CreateCSharpDelegateInit(context.Compilation, item.Type, method));
+            csharpInit.Delegates.Add(Interop.CreateCSharpDelegateInit(context.Compilation, item.Type, method, interopName));
 
             var parameterStrings = parameters.Select(parameter => $"{parameter.Type.GetFullyQualifiedName()} {parameter.ParameterName}");
 

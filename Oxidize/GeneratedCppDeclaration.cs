@@ -78,9 +78,9 @@
                 // TODO: report a compiler error instead.
                 return "TypeIsNull";
 
-            if (Type.Kind == CppTypeKind.ClassWrapper)
+            if (Type.Kind == InteropTypeKind.ClassWrapper)
                 return "class";
-            else if (Type.Kind == CppTypeKind.Enum)
+            else if (Type.Kind == InteropTypeKind.Enum)
                 return "enum class";
             else
                 return "struct";
@@ -94,7 +94,7 @@
                     return "";
 
                 string access;
-                if (this.Type.Kind == CppTypeKind.Enum)
+                if (this.Type.Kind == InteropTypeKind.Enum)
                     access = "";
                 else if (decl.IsPrivate)
                     access = "private: ";

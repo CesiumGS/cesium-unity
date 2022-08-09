@@ -69,7 +69,7 @@ namespace Oxidize
             ));
 
             // And passed from the C# init method
-            csharpInit.Delegates.Add(Interop.CreateCSharpDelegateInit(context.Compilation, item.Type, method));
+            csharpInit.Delegates.Add(Interop.CreateCSharpDelegateInit(context.Compilation, item.Type, method, $"Property_{method.Name}"));
 
             string modifiers = "";
             string afterModifiers = "";

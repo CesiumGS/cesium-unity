@@ -14,7 +14,7 @@ namespace Oxidize
             // We only need handle management for non-static classes.
 
             GeneratedCppDeclaration declaration = result.CppDeclaration;
-            if (declaration.Type.Kind != CppTypeKind.ClassWrapper && declaration.Type.Kind != CppTypeKind.NonBlittableStructWrapper)
+            if (declaration.Type.Kind != InteropTypeKind.ClassWrapper && declaration.Type.Kind != InteropTypeKind.NonBlittableStructWrapper)
                 return;
 
             if (item.Type.IsStatic)
@@ -85,7 +85,7 @@ namespace Oxidize
             ));
 
             // And passed from the C# init method
-            csharpInit.Delegates.Add(Interop.CreateCSharpDelegateInit(context.Compilation, item.Type, constructor));
+            csharpInit.Delegates.Add(Interop.CreateCSharpDelegateInit(context.Compilation, item.Type, constructor, interopFunctionName));
 
             // Constructor declaration
             var parameterStrings = parameters.Select(parameter => $"{parameter.Type.GetFullyQualifiedName()} {parameter.Name}");

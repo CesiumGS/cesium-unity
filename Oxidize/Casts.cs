@@ -19,7 +19,7 @@ namespace Oxidize
                 return;
 
             GeneratedCppDeclaration declaration = result.CppDeclaration;
-            if (declaration.Type.Kind != CppTypeKind.ClassWrapper && declaration.Type.Kind != CppTypeKind.NonBlittableStructWrapper)
+            if (declaration.Type.Kind != InteropTypeKind.ClassWrapper && declaration.Type.Kind != InteropTypeKind.NonBlittableStructWrapper)
                 return;
 
             CppType objectHandleType = CppObjectHandle.GetCppType(context);

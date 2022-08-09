@@ -19,7 +19,7 @@ namespace Oxidize
     /// </summary>
     internal class CppType
     {
-        public readonly CppTypeKind Kind;
+        public readonly InteropTypeKind Kind;
         public readonly IReadOnlyCollection<string> Namespaces;
         public readonly string Name;
         public readonly IReadOnlyCollection<CppType>? GenericArguments;
@@ -49,46 +49,48 @@ namespace Oxidize
 
         public static CppType FromCSharp(CppGenerationContext context, ITypeSymbol type)
         {
-            if (type.Kind == SymbolKind.TypeParameter)
-            {
-                return new CppType(CppTypeKind.GenericParameter, NoNamespace, type.Name, null, 0);
-            }
-
-            switch (type.SpecialType)
-            {
-                case SpecialType.System_SByte:
-                    return Int8;
-                case SpecialType.System_Int16:
-                    return Int16;
-                case SpecialType.System_Int32:
-                    return Int32;
-                case SpecialType.System_Int64:
-                    return Int64;
-                case SpecialType.System_Single:
-                    return Single;
-                case SpecialType.System_Double:
-                    return Double;
-                case SpecialType.System_Byte:
-                    return UInt8;
-                case SpecialType.System_UInt16:
-                    return UInt16;
-                case SpecialType.System_UInt32:
-                    return UInt32;
-                case SpecialType.System_UInt64:
-                    return UInt64;
-                case SpecialType.System_Boolean:
-                    return Boolean;
-                case SpecialType.System_IntPtr:
-                    return VoidPointer;
-                case SpecialType.System_Void:
-                    return Void;
-            }
-
             IPointerTypeSymbol? pointer = type as IPointerTypeSymbol;
             if (pointer != null)
             {
                 CppType original = FromCSharp(context, pointer.PointedAtType);
                 return original.AsPointer();
+            }
+
+            InteropTypeKind kind = Interop.DetermineTypeKind(context.Compilation, type);
+            if (kind == InteropTypeKind.GenericParameter)
+                return new CppType(InteropTypeKind.GenericParameter, NoNamespace, type.Name, null, 0);
+
+            if (kind == InteropTypeKind.Primitive)
+            {
+                switch (type.SpecialType)
+                {
+                    case SpecialType.System_SByte:
+                        return Int8;
+                    case SpecialType.System_Int16:
+                        return Int16;
+                    case SpecialType.System_Int32:
+                        return Int32;
+                    case SpecialType.System_Int64:
+                        return Int64;
+                    case SpecialType.System_Single:
+                        return Single;
+                    case SpecialType.System_Double:
+                        return Double;
+                    case SpecialType.System_Byte:
+                        return UInt8;
+                    case SpecialType.System_UInt16:
+                        return UInt16;
+                    case SpecialType.System_UInt32:
+                        return UInt32;
+                    case SpecialType.System_UInt64:
+                        return UInt64;
+                    case SpecialType.System_Boolean:
+                        return Boolean;
+                    case SpecialType.System_IntPtr:
+                        return VoidPointer;
+                    case SpecialType.System_Void:
+                        return Void;
+                }
             }
 
             List<string> namespaces = new List<string>();
@@ -127,23 +129,11 @@ namespace Oxidize
                 name += named.Arity;
             }
 
-            CppTypeKind kind;
-            if (SymbolEqualityComparer.Default.Equals(type.BaseType, context.Compilation.GetSpecialType(SpecialType.System_Enum)))
-                kind = CppTypeKind.Enum;
-            else if (type.TypeKind == TypeKind.Delegate)
-                kind = CppTypeKind.Delegate;
-            else if (type.IsReferenceType)
-                kind = CppTypeKind.ClassWrapper;
-            else if (IsBlittableStruct(context, type))
-                kind = CppTypeKind.BlittableStruct;
-            else
-                kind = CppTypeKind.NonBlittableStructWrapper;
-
             return new CppType(kind, namespaces, name, genericArguments, 0);
         }
 
         public CppType(
-            CppTypeKind kind,
+            InteropTypeKind kind,
             IReadOnlyCollection<string> namespaces,
             string name,
             IReadOnlyCollection<CppType>? genericArguments,
@@ -214,7 +204,7 @@ namespace Oxidize
         public void AddForwardDeclarationsToSet(ISet<string> forwardDeclarations)
         {
             // Primitives do not need to be forward declared
-            if (Kind == CppTypeKind.Primitive)
+            if (Kind == InteropTypeKind.Primitive)
                 return;
 
             string template = "";
@@ -232,9 +222,9 @@ namespace Oxidize
             if (ns != null)
             {
                 string typeType;
-                if (Kind == CppTypeKind.BlittableStruct || Kind == CppTypeKind.NonBlittableStructWrapper)
+                if (Kind == InteropTypeKind.BlittableStruct || Kind == InteropTypeKind.NonBlittableStructWrapper)
                     typeType = "struct";
-                else if (Kind == CppTypeKind.Enum)
+                else if (Kind == InteropTypeKind.Enum)
                     typeType = "enum class";
                 else
                     typeType = "class";
@@ -276,7 +266,7 @@ namespace Oxidize
                 return;
             }
 
-            if (Kind == CppTypeKind.Primitive)
+            if (Kind == InteropTypeKind.Primitive)
             {
                 // Special case for primitives in <cstdint>.
                 if (Namespaces == StandardNamespace)
@@ -339,10 +329,10 @@ namespace Oxidize
         {
             switch (this.Kind)
             {
-                case CppTypeKind.ClassWrapper:
-                case CppTypeKind.BlittableStruct:
-                case CppTypeKind.NonBlittableStructWrapper:
-                case CppTypeKind.Delegate:
+                case InteropTypeKind.ClassWrapper:
+                case InteropTypeKind.BlittableStruct:
+                case InteropTypeKind.NonBlittableStructWrapper:
+                case InteropTypeKind.Delegate:
                     return this.AsConstReference();
             }
 
@@ -355,9 +345,9 @@ namespace Oxidize
         /// </summary>
         public CppType AsInteropType()
         {
-            if (this.Kind == CppTypeKind.Primitive || this.Kind == CppTypeKind.BlittableStruct)
+            if (this.Kind == InteropTypeKind.Primitive || this.Kind == InteropTypeKind.BlittableStruct)
                 return this;
-            else if (this.Kind == CppTypeKind.Enum)
+            else if (this.Kind == InteropTypeKind.Enum)
                 return UInt32;
 
             return VoidPointer;
@@ -371,16 +361,16 @@ namespace Oxidize
         {
             switch (this.Kind)
             {
-                case CppTypeKind.ClassWrapper:
-                case CppTypeKind.NonBlittableStructWrapper:
+                case InteropTypeKind.ClassWrapper:
+                case InteropTypeKind.NonBlittableStructWrapper:
                     return $"{variableName}.GetHandle().GetRaw()";
-                case CppTypeKind.Delegate:
+                case InteropTypeKind.Delegate:
                     return "nullptr"; // TODO
-                case CppTypeKind.Enum:
+                case InteropTypeKind.Enum:
                     return $"::std::uint32_t({variableName})";
-                case CppTypeKind.Primitive:
-                case CppTypeKind.BlittableStruct:
-                case CppTypeKind.Unknown:
+                case InteropTypeKind.Primitive:
+                case InteropTypeKind.BlittableStruct:
+                case InteropTypeKind.Unknown:
                 default:
                     return variableName;
             }
@@ -390,16 +380,16 @@ namespace Oxidize
         {
             switch (this.Kind)
             {
-                case CppTypeKind.ClassWrapper:
-                case CppTypeKind.NonBlittableStructWrapper:
+                case InteropTypeKind.ClassWrapper:
+                case InteropTypeKind.NonBlittableStructWrapper:
                     return $"{GetFullyQualifiedName()}({CppObjectHandle.GetCppType(context).GetFullyQualifiedName()}({variableName}))";
-                case CppTypeKind.Delegate:
+                case InteropTypeKind.Delegate:
                     return $"{this.GetFullyQualifiedName()}(nullptr)";
-                case CppTypeKind.Enum:
+                case InteropTypeKind.Enum:
                     return $"{this.GetFullyQualifiedName()}({variableName})";
-                case CppTypeKind.Primitive:
-                case CppTypeKind.BlittableStruct:
-                case CppTypeKind.Unknown:
+                case InteropTypeKind.Primitive:
+                case InteropTypeKind.BlittableStruct:
+                case InteropTypeKind.Unknown:
                 default:
                     return variableName;
             }
@@ -407,61 +397,7 @@ namespace Oxidize
 
         private static CppType CreatePrimitiveType(IReadOnlyCollection<string> cppNamespaces, string cppTypeName, CppTypeFlags flags = 0, string? headerOverride = null)
         {
-            return new CppType(CppTypeKind.Primitive, cppNamespaces, cppTypeName, null, flags, headerOverride);
-        }
-
-        /// <summary>
-        /// Determines if the given type is a blittable value type (struct).
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="type"></param>
-        /// <returns>True if the struct is blittable.</returns>
-        private static bool IsBlittableStruct(CppGenerationContext context, ITypeSymbol type)
-        {
-            if (!type.IsValueType)
-                return false;
-
-            if (IsBlittablePrimitive(type))
-                return true;
-
-            ImmutableArray<ISymbol> members = type.GetMembers();
-            foreach (ISymbol member in members)
-            {
-                if (member.Kind != SymbolKind.Field)
-                    continue;
-
-                IFieldSymbol? field = member as IFieldSymbol;
-                if (field == null)
-                    continue;
-
-                if (!IsBlittableStruct(context, field.Type))
-                    return false;
-            }
-
-            return true;
-        }
-
-        private static bool IsBlittablePrimitive(ITypeSymbol type)
-        {
-            switch (type.SpecialType)
-            {
-                case SpecialType.System_Byte:
-                case SpecialType.System_SByte:
-                case SpecialType.System_Int16:
-                case SpecialType.System_UInt16:
-                case SpecialType.System_Int32:
-                case SpecialType.System_UInt32:
-                case SpecialType.System_Int64:
-                case SpecialType.System_UInt64:
-                case SpecialType.System_IntPtr:
-                case SpecialType.System_UIntPtr:
-                case SpecialType.System_Single:
-                case SpecialType.System_Double:
-                case SpecialType.System_Boolean:
-                    return true;
-                default:
-                    return false;
-            }
+            return new CppType(InteropTypeKind.Primitive, cppNamespaces, cppTypeName, null, flags, headerOverride);
         }
     }
 }

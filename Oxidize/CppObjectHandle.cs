@@ -20,7 +20,7 @@ namespace Oxidize
             if (ns.Count >= 2 && ns[0] == ns[1])
                 ns.RemoveAt(0);
 
-            return new CppType(CppTypeKind.ClassWrapper, ns, "ObjectHandle", null, 0);
+            return new CppType(InteropTypeKind.ClassWrapper, ns, "ObjectHandle", null, 0);
         }
 
         public static void Generate(CppGenerationContext context)
@@ -57,7 +57,7 @@ namespace Oxidize
             Directory.CreateDirectory(headerPath);
             File.WriteAllText(Path.Combine(headerPath, type.Name + ".h"), header, Encoding.UTF8);
 
-            CppType utilityType = new CppType(CppTypeKind.ClassWrapper, type.Namespaces, "ObjectHandleUtility", null, 0);
+            CppType utilityType = new CppType(InteropTypeKind.ClassWrapper, type.Namespaces, "ObjectHandleUtility", null, 0);
             
             HashSet<string> includes = new HashSet<string>();
             type.AddSourceIncludesToSet(includes);

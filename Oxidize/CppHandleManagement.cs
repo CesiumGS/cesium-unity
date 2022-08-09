@@ -16,7 +16,7 @@ namespace Oxidize
                 return;
 
             // Only class and non-blittable struct wrappers have handles.
-            if (declaration.Type.Kind != CppTypeKind.ClassWrapper && declaration.Type.Kind != CppTypeKind.NonBlittableStructWrapper)
+            if (declaration.Type.Kind != InteropTypeKind.ClassWrapper && declaration.Type.Kind != InteropTypeKind.NonBlittableStructWrapper)
                 return;
 
             CppType type = CppType.FromCSharp(context, item.Type);
