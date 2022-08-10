@@ -89,9 +89,9 @@ namespace Oxidize
 
         public static void WriteCSharpCode(SourceProductionContext context, Compilation compilation, ImmutableArray<GeneratedResult?> results)
         {
-            GeneratedCSharpInit combinedInit = GeneratedCSharpInit.Merge(results.Select(result => result == null ? new GeneratedCSharpInit() : result.CSharpInit));
-            Console.WriteLine(combinedInit.ToSourceFileString());
-            context.AddSource("OxidizeInitializer", combinedInit.ToSourceFileString());
+            GeneratedInit combinedInit = GeneratedInit.Merge(results.Select(result => result == null ? new GeneratedInit() : result.Init));
+            Console.WriteLine(combinedInit.ToCSharpSourceFileString());
+            context.AddSource("OxidizeInitializer", combinedInit.ToCSharpSourceFileString());
 
             foreach (GeneratedResult? result in results)
             {
@@ -153,8 +153,8 @@ namespace Oxidize
             }
 
             // Create source files for the initialization process.
-            GeneratedCppInit init = GeneratedCppInit.Merge(generatedResults.Select(result => result == null ? new GeneratedCppInit() : result.CppInit));
-            init.Generate(this.Options, sourceFiles);
+            GeneratedInit init = GeneratedInit.Merge(generatedResults.Select(result => result == null ? new GeneratedInit() : result.Init));
+            init.GenerateCpp(this.Options, sourceFiles);
 
             return sourceFiles.Values;
         }

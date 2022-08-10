@@ -19,7 +19,7 @@ namespace Oxidize
         /// <param name="returnType"></param>
         /// <param name="otherParameters"></param>
         /// <returns></returns>
-        public static GeneratedCSharpDelegateInit CreateCSharpDelegateInit(
+        public static (string Name, string Content) CreateCSharpDelegateInit(
             Compilation compilation,
             ITypeSymbol ownerType,
             IMethodSymbol method,
@@ -119,19 +119,21 @@ namespace Oxidize
             }
 
             string baseName = $"{csType.GetFullyQualifiedNamespace().Replace(".", "_")}_{csType.Symbol.Name}{genericTypeHash}_{interopFunctionName}";
-            return new GeneratedCSharpDelegateInit(
-                // TODO: incorporate parameter types into delegate name to support overloading.
-                name: $"{baseName}Delegate",
-                content:
+
+            return (
+                Name: $"{baseName}Delegate",
+                Content: 
                     $$"""
                     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
                     private unsafe delegate {{interopReturnTypeString}} {{baseName}}Type({{interopParameterList}});
                     private static unsafe readonly {{baseName}}Type {{baseName}}Delegate = new {{baseName}}Type({{baseName}});
                     private static unsafe {{interopReturnTypeString}} {{baseName}}({{interopParameterList}})
                     {
-                      {{implementation.Replace(Environment.NewLine, Environment.NewLine + "  ")}}
+                        Oxidize.OxidizeInitializer.Initialize();
+                        {{implementation.Replace(Environment.NewLine, Environment.NewLine + "  ")}}
                     }
-                    """);
+                    """
+            );
         }
 
         public static void GenerateForType(CppGenerationContext context, TypeToGenerate item, GeneratedResult result)

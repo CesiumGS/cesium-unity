@@ -40,6 +40,7 @@ namespace Oxidize
                     $$"""
                     private void CreateImplementation()
                     {
+                        Oxidize.OxidizeInitializer.Initialize();
                         System.Diagnostics.Debug.Assert(_implementation == System.IntPtr.Zero, "Implementation is already created. Be sure to call CreateImplementation only once.");
                         _implementation = {{createName}}(Oxidize.ObjectHandleUtility.CreateHandle(this));
                     }
@@ -94,6 +95,35 @@ namespace Oxidize
                     [DllImport("CesiumForUnityNative.dll", CallingConvention=CallingConvention.Cdecl)]
                     private static extern void {{disposeName}}(System.IntPtr thiz, System.IntPtr implementation);
                     """));
+
+            // If the class has no explicit constructors at all, add a default one.
+            bool hasConstructor = item.Type.GetMembers().Where(m =>
+            {
+                IMethodSymbol? method = m as IMethodSymbol;
+                if (method == null)
+                    return false;
+
+                if (method.MethodKind != MethodKind.Constructor)
+                    return false;
+
+                if (method.IsImplicitlyDeclared)
+                    return false;
+
+                return true;
+            }).Any();
+
+            if (!hasConstructor)
+            {
+                result.CSharpPartialMethodDefinitions.Methods.Add(new(
+                    methodDefinition:
+                        $$"""
+                        public {{wrapperType.Name}}()
+                        {
+                            CreateImplementation();
+                        }
+                        """,
+                    interopFunctionDeclaration: ""));
+            }
 
             // Add functions for other methods.
             foreach (IMethodSymbol method in item.MethodsImplementedInCpp)

@@ -23,8 +23,7 @@ namespace Oxidize
         {
             GeneratedCppDeclaration declaration = result.CppDeclaration;
             GeneratedCppDefinition definition = result.CppDefinition;
-            GeneratedCppInit cppInit = result.CppInit;
-            GeneratedCSharpInit csharpInit = result.CSharpInit;
+            GeneratedInit init = result.Init;
 
             CppType returnType = CppType.FromCSharp(context, method.ReturnType).AsReturnType();
             CppType interopReturnType = returnType.AsInteropType();
@@ -94,15 +93,15 @@ namespace Oxidize
             ));
 
             // The static field should be initialized at startup.
-            cppInit.Fields.Add(new(
-                Name: $"{definition.Type.GetFullyQualifiedName()}::{interopName}",
-                TypeSignature: $"{interopReturnType.GetFullyQualifiedName()} (*)({string.Join(", ", interopParameters.Select(parameter => parameter.InteropType.GetFullyQualifiedName()))})",
-                TypeDefinitionsReferenced: new[] { definition.Type },
-                TypeDeclarationsReferenced: new[] { interopReturnType }.Concat(parameters.Select(parameter => parameter.Type))
+            var (csName, csContent) = Interop.CreateCSharpDelegateInit(context.Compilation, item.Type, method, interopName);
+            init.Functions.Add(new(
+                CppName: $"{definition.Type.GetFullyQualifiedName()}::{interopName}",
+                CppTypeSignature: $"{interopReturnType.GetFullyQualifiedName()} (*)({string.Join(", ", interopParameters.Select(parameter => parameter.InteropType.GetFullyQualifiedName()))})",
+                CppTypeDefinitionsReferenced: new[] { definition.Type },
+                CppTypeDeclarationsReferenced: new[] { interopReturnType }.Concat(parameters.Select(parameter => parameter.Type)),
+                CSharpName: csName,
+                CSharpContent: csContent
             ));
-
-            // And passed from the C# init method
-            csharpInit.Delegates.Add(Interop.CreateCSharpDelegateInit(context.Compilation, item.Type, method, interopName));
 
             var parameterStrings = parameters.Select(parameter => $"{parameter.Type.GetFullyQualifiedName()} {parameter.ParameterName}");
 

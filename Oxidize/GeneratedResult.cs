@@ -4,8 +4,7 @@
     {
         public GeneratedResult(CppType type)
         {
-            this.CppInit = new GeneratedCppInit();
-            this.CSharpInit = new GeneratedCSharpInit();
+            this.Init = new GeneratedInit();
             this.CppDeclaration = new GeneratedCppDeclaration(type);
             this.CppDefinition = new GeneratedCppDefinition(type);
             this.CppImplementationInvoker = null;
@@ -13,16 +12,10 @@
         }
 
         /// <summary>
-        /// The C++ code that initializes the C++ side of the interop layer with function
-        /// pointers passed from the C# side.
+        /// The functions created as delegates on the C# side and passed to the C++
+        /// side as function pointers during the init process.
         /// </summary>
-        public GeneratedCppInit CppInit;
-
-        /// <summary>
-        /// The C# code that initializes the C++ side of the interop layer by passing function
-        /// pointers from the C# side.
-        /// </summary>
-        public GeneratedCSharpInit CSharpInit;
+        public GeneratedInit Init;
 
         /// <summary>
         /// The C++ type declaration, i.e. the contents of the .h file.

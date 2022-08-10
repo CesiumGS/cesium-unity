@@ -46,8 +46,7 @@ namespace Oxidize
         {
             GeneratedCppDeclaration declaration = result.CppDeclaration;
             GeneratedCppDefinition definition = result.CppDefinition;
-            GeneratedCppInit cppInit = result.CppInit;
-            GeneratedCSharpInit csharpInit = result.CSharpInit;
+            GeneratedInit init = result.Init;
 
             var parameters = constructor.Parameters.Select(parameter => (Name: parameter.Name, Type: CppType.FromCSharp(context, parameter.Type).AsParameterType()));
             var interopReturnType = declaration.Type.AsInteropType();
@@ -77,15 +76,15 @@ namespace Oxidize
             ));
 
             // The static field should be initialized at startup.
-            cppInit.Fields.Add(new(
-                Name: $"{definition.Type.GetFullyQualifiedName()}::{interopFunctionName}",
-                TypeSignature: $"{interopReturnType.GetFullyQualifiedName()} (*)({string.Join(", ", interopParameters.Select(parameter => parameter.InteropType.GetFullyQualifiedName()))})",
-                TypeDefinitionsReferenced: new[] { definition.Type },
-                TypeDeclarationsReferenced: new[] { interopReturnType }.Concat(interopParameters.Select(parameter => parameter.Type))
+            var (csName, csContent) = Interop.CreateCSharpDelegateInit(context.Compilation, item.Type, constructor, interopFunctionName);
+            init.Functions.Add(new(
+                CppName: $"{definition.Type.GetFullyQualifiedName()}::{interopFunctionName}",
+                CppTypeSignature: $"{interopReturnType.GetFullyQualifiedName()} (*)({string.Join(", ", interopParameters.Select(parameter => parameter.InteropType.GetFullyQualifiedName()))})",
+                CppTypeDefinitionsReferenced: new[] { definition.Type },
+                CppTypeDeclarationsReferenced: new[] { interopReturnType }.Concat(interopParameters.Select(parameter => parameter.Type)),
+                CSharpName: csName,
+                CSharpContent: csContent
             ));
-
-            // And passed from the C# init method
-            csharpInit.Delegates.Add(Interop.CreateCSharpDelegateInit(context.Compilation, item.Type, constructor, interopFunctionName));
 
             // Constructor declaration
             var parameterStrings = parameters.Select(parameter => $"{parameter.Type.GetFullyQualifiedName()} {parameter.Name}");
