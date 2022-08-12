@@ -16,8 +16,7 @@ namespace {
 
 class UnityAssetResponse : public IAssetResponse {
 public:
-  UnityAssetResponse(
-      const UnityEngine::Networking::UnityWebRequest& request)
+  UnityAssetResponse(const UnityEngine::Networking::UnityWebRequest& request)
       : _statusCode(uint16_t(request.responseCode())),
         _contentType(request.GetResponseHeader(System::String("Content-Type"))
                          .ToStlString()) {
@@ -32,7 +31,7 @@ public:
   virtual const HttpHeaders& headers() const override { return _headers; }
 
   virtual gsl::span<const std::byte> data() const override {
-    //return this->_pHandler->getData();
+    // return this->_pHandler->getData();
     return gsl::span<const std::byte>();
   }
 
@@ -45,8 +44,7 @@ private:
 
 class UnityAssetRequest : public IAssetRequest {
 public:
-  UnityAssetRequest(
-      Oxidize::UnityEngine::Networking::UnityWebRequest& request)
+  UnityAssetRequest(Oxidize::UnityEngine::Networking::UnityWebRequest& request)
       : _method(request.method().ToStlString()),
         _url(request.url().ToStlString()),
         _headers(),
@@ -67,26 +65,6 @@ private:
   std::string _url;
   HttpHeaders _headers;
   UnityAssetResponse _response;
-};
-
-struct WebRequestCompleted : public System::Action1<UnityEngine::AsyncOperation> {
-  UnityEngine::Networking::UnityWebRequest _request;
-  Promise<std::shared_ptr<CesiumAsync::IAssetRequest>> _promise;
-
-  WebRequestCompleted(
-      const UnityEngine::Networking::UnityWebRequest& request,
-      Promise<std::shared_ptr<CesiumAsync::IAssetRequest>>& promise)
-      : System::Action1<UnityEngine::AsyncOperation>(), _request(request), _promise(promise) {}
-
-  virtual void operator()(UnityEngine::AsyncOperation& obj) /*override*/ {
-    if (this->_request.isDone() && this->_request.error() == nullptr) {
-      this->_promise.resolve(
-          std::make_shared<UnityAssetRequest>(this->_request));
-    } else {
-      this->_promise.reject(std::runtime_error(
-          "Request failed: " + this->_request.error().ToStlString()));
-    }
-  }
 };
 
 } // namespace
@@ -115,18 +93,30 @@ UnityAssetAccessor::get(
         asyncSystem
             .createPromise<std::shared_ptr<CesiumAsync::IAssetRequest>>();
 
-    auto pCompleted =
-        std::make_shared<WebRequestCompleted>(request, promise);
+    auto future = promise.getFuture();
 
-    UnityEngine::Networking::UnityWebRequestAsyncOperation op = request.SendWebRequest();
-    //op.AddCompleted(*pCompleted);
+    UnityEngine::Networking::UnityWebRequestAsyncOperation op =
+        request.SendWebRequest();
+    op.add_completed(System::Action1<UnityEngine::AsyncOperation>(
+        [request, promise = std::move(promise)](
+            const UnityEngine::AsyncOperation& operation) mutable {
+          if (request.isDone() && request.error() == nullptr) {
+            promise.resolve(std::make_shared<UnityAssetRequest>(request));
+          } else {
+            promise.reject(std::runtime_error(
+                "Request failed: " + request.error().ToStlString()));
+          }
+        }));
 
-    return promise.getFuture().thenImmediately(
-        [pCompleted](std::shared_ptr<IAssetRequest>&& pRequest) {
-          // The lambda capture here keeps the managed WebRequestCompleted alive
-          // until we're done with it.
-          return std::move(pRequest);
-        });
+    return future;
+
+    // .thenImmediately(
+    //     [pCompleted](std::shared_ptr<IAssetRequest>&& pRequest) {
+    //       // The lambda capture here keeps the managed WebRequestCompleted
+    //       alive
+    //       // until we're done with it.
+    //       return std::move(pRequest);
+    //     });
   });
 }
 

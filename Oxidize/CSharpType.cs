@@ -49,7 +49,7 @@ namespace Oxidize
 
         public CSharpType AsInteropType()
         {
-            if (this.Kind == InteropTypeKind.ClassWrapper || this.Kind == InteropTypeKind.NonBlittableStructWrapper)
+            if (this.Kind == InteropTypeKind.ClassWrapper || this.Kind == InteropTypeKind.NonBlittableStructWrapper || this.Kind == InteropTypeKind.Delegate)
                 return new CSharpType(Compilation, InteropTypeKind.Primitive, new string[] { "System" }, Compilation.GetSpecialType(SpecialType.System_IntPtr));
 
             return this;
@@ -61,7 +61,7 @@ namespace Oxidize
         /// </summary>
         public string GetConversionToInteropType(string variableName)
         {
-            if (this.Kind == InteropTypeKind.ClassWrapper || this.Kind == InteropTypeKind.NonBlittableStructWrapper)
+            if (this.Kind == InteropTypeKind.ClassWrapper || this.Kind == InteropTypeKind.NonBlittableStructWrapper || this.Kind == InteropTypeKind.Delegate)
                 return $"Oxidize.ObjectHandleUtility.CreateHandle({variableName})";
 
             return variableName;
@@ -69,7 +69,7 @@ namespace Oxidize
 
         public string GetConversionFromInteropType(string variableName)
         {
-            if (this.Kind == InteropTypeKind.ClassWrapper || this.Kind == InteropTypeKind.NonBlittableStructWrapper)
+            if (this.Kind == InteropTypeKind.ClassWrapper || this.Kind == InteropTypeKind.NonBlittableStructWrapper || this.Kind == InteropTypeKind.Delegate)
                 return $"({this.GetFullyQualifiedName()})Oxidize.ObjectHandleUtility.GetObjectFromHandle({variableName})!";
 
             return variableName;

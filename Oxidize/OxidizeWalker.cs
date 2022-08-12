@@ -44,10 +44,17 @@ namespace Oxidize
             base.VisitMemberAccessExpression(node);
 
             ISymbol? symbol = this._semanticModel.GetSymbolInfo(node.Name).Symbol;
+            
             IPropertySymbol? propertySymbol = symbol as IPropertySymbol;
             if (propertySymbol != null)
             {
                 this.AddProperty(propertySymbol);
+            }
+
+            IEventSymbol? eventSymbol = symbol as IEventSymbol;
+            if (eventSymbol != null)
+            {
+                this.AddEvent(eventSymbol);
             }
         }
 
@@ -106,6 +113,16 @@ namespace Oxidize
             {
                 generationItem = new TypeToGenerate(type);
                 this.GenerationItems.Add(type, generationItem);
+
+                // If this is a delegate, be sure to add the Invoke method.
+                if (type.TypeKind == TypeKind.Delegate)
+                {
+                    IMethodSymbol? invokeMethod = type.GetMembers("Invoke").FirstOrDefault() as IMethodSymbol;
+                    if (invokeMethod != null)
+                    {
+                        this.AddMethod(invokeMethod);
+                    }
+                }
             }
 
             // If this type is an enumeration, add all of the enum values if we haven't already.
@@ -161,6 +178,15 @@ namespace Oxidize
             this.AddType(symbol.Type);
 
             return item;
+        }
+
+        private void AddEvent(IEventSymbol symbol)
+        {
+            TypeToGenerate item = this.AddType(symbol.ContainingType);
+            item.Events.Add(symbol);
+
+            // We also need to generate the event type.
+            this.AddType(symbol.Type);
         }
 
         private TypeToGenerate AddConstructor(IMethodSymbol symbol)

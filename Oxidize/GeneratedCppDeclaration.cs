@@ -70,7 +70,7 @@
                 // TODO: report a compiler error instead.
                 return "TypeIsNull";
 
-            if (Type.Kind == InteropTypeKind.ClassWrapper)
+            if (Type.Kind == InteropTypeKind.ClassWrapper || Type.Kind == InteropTypeKind.Delegate)
                 return "class";
             else if (Type.Kind == InteropTypeKind.Enum)
                 return "enum class";

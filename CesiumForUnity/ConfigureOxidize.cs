@@ -108,9 +108,17 @@ internal partial class ConfigureOxidize
         request.GetResponseHeader("name");
         long responseCode = request.responseCode;
         UnityWebRequestAsyncOperation op = request.SendWebRequest();
+        //Action<AsyncOperation> foo = (ao) => { };
+        //var asdfx = foo + foo;
         op.completed += o => {};
+        op.completed += Foo;
 
         Task.Run(() => { });
+
+    }
+
+    void Foo(AsyncOperation op)
+    {
 
     }
 }

@@ -14,8 +14,12 @@ namespace Oxidize
             // We only need handle management for non-static classes.
 
             GeneratedCppDeclaration declaration = result.CppDeclaration;
-            if (declaration.Type.Kind != InteropTypeKind.ClassWrapper && declaration.Type.Kind != InteropTypeKind.NonBlittableStructWrapper)
+            if (declaration.Type.Kind != InteropTypeKind.ClassWrapper &&
+                declaration.Type.Kind != InteropTypeKind.NonBlittableStructWrapper &&
+                declaration.Type.Kind != InteropTypeKind.Delegate)
+            {
                 return;
+            }
 
             if (item.Type.IsStatic)
                 GenerateStatic(context, item, result);

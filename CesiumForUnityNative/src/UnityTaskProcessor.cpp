@@ -1,6 +1,6 @@
 #include "UnityTaskProcessor.h"
 
-//#include <Oxidize/System/Action.h>
+#include <Oxidize/System/Action.h>
 #include <Oxidize/System/Threading/Tasks/Task.h>
 
 using namespace Oxidize;
@@ -30,8 +30,7 @@ private:
 } // namespace
 
 void UnityTaskProcessor::startTask(std::function<void()> f) {
-  // TODO
-  //System::Threading::Tasks::Task::Run(*new TaskRunner(std::move(f)));
+  System::Threading::Tasks::Task::Run(f);
 }
 
 } // namespace CesiumForUnity

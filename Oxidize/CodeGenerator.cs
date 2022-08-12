@@ -2,7 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Data;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 using System.Text;
 
@@ -24,12 +26,14 @@ namespace Oxidize
             CppType itemType = CppType.FromCSharp(this.Options, item.Type);
             if (itemType.Kind == InteropTypeKind.Enum)
                 result = GenerateEnum(item, itemType);
-            //else if (itemType.Kind == CppTypeKind.Delegate)
-            //    result = GenerateDelegate(item, itemType);
             else if (itemType.Kind == InteropTypeKind.ClassWrapper || itemType.Kind == InteropTypeKind.BlittableStruct || itemType.Kind == InteropTypeKind.NonBlittableStructWrapper || itemType.Kind == InteropTypeKind.Delegate)
                 result = GenerateClassOrStruct(item, itemType);
             else
                 result = null;
+
+            // A delegate is a class with some extras
+            if (itemType.Kind == InteropTypeKind.Delegate && result != null)
+                GenerateDelegate(result, item, itemType);
 
             ICustomGenerator? customGenerator = null;
             if (this.Options.CustomGenerators.TryGetValue(item.Type, out customGenerator))
@@ -56,6 +60,7 @@ namespace Oxidize
             {
                 Properties.Generate(this.Options, item, current, result);
                 Methods.Generate(this.Options, item, current, result);
+                Events.Generate(this.Options, item, current, result);
                 current = current.BaseClass;
             }
 
@@ -73,6 +78,149 @@ namespace Oxidize
             }
 
             return result;
+        }
+
+        private void GenerateDelegate(GeneratedResult result, TypeToGenerate item, CppType itemType)
+        {
+            // TODO: support delegates that return a value
+
+            CppType implementationType = new CppType(InteropTypeKind.Unknown, itemType.Namespaces, itemType.Name + "Native", null, 0, "<functional>");
+
+            if (result.CppImplementationInvoker == null)
+            {
+                result.CppImplementationInvoker = new GeneratedCppImplementationInvoker(implementationType);
+                result.CSharpPartialMethodDefinitions = new GeneratedCSharpPartialMethodDefinitions(CSharpType.FromSymbol(this.Options.Compilation, item.Type));
+            }
+
+            // Add a constructor taking a std::function
+            IMethodSymbol? invokeMethod = item.Methods.FirstOrDefault(m => m.Name == "Invoke");
+            if (invokeMethod == null)
+                return;
+
+            var callbackParameters = invokeMethod.Parameters.Select(p =>
+            {
+                CppType type = CppType.FromCSharp(this.Options, p.Type);
+                return (Name: p.Name, CsType: CSharpType.FromSymbol(this.Options.Compilation, p.Type), Type: type, InteropType: type.AsInteropType());
+            });
+
+            string templateSpecialization = "";
+            if (itemType.GenericArguments != null && itemType.GenericArguments.Count > 0)
+            {
+                templateSpecialization = $"<{string.Join(", ", itemType.GenericArguments.Select(arg => arg.GetFullyQualifiedName()))}>";
+            }
+
+            result.CppDeclaration.Elements.Add(new(
+                Content: $"static void* (*CreateDelegate)(void* pCallbackFunction);",
+                IsPrivate: true));
+            result.CppDefinition.Elements.Add(new(
+                Content: $"void* (*{itemType.Name}{templateSpecialization}::CreateDelegate)(void* pCallbackFunction) = nullptr;"));
+
+            result.CppDeclaration.Elements.Add(new(
+                Content: $"using FunctionSignature = void ({string.Join(", ", callbackParameters.Select(p => p.Type.AsParameterType().GetFullyQualifiedName()))});"
+            ));
+            result.CppDeclaration.Elements.Add(new(
+                Content: $"{itemType.Name}(std::function<FunctionSignature> callback);",
+                TypeDeclarationsReferenced: callbackParameters.Select(p => p.Type.AsParameterType()),
+                AdditionalIncludes: new[] { "<functional>" }
+            ));
+
+            result.CppDefinition.Elements.Add(new(
+                Content:
+                    $$"""
+                    {{itemType.Name}}{{templateSpecialization}}::{{itemType.Name}}(std::function<FunctionSignature> callback) :
+                        _handle(CreateDelegate(reinterpret_cast<void*>(new std::function<FunctionSignature>(std::move(callback)))))
+                    {
+                    }
+                    """
+                ));
+
+            CSharpType csType = CSharpType.FromSymbol(this.Options.Compilation, item.Type);
+
+            string genericTypeHash = "";
+            INamedTypeSymbol? named = item.Type as INamedTypeSymbol;
+            if (named != null && named.IsGenericType)
+            {
+                genericTypeHash = Interop.HashParameters(null, named.TypeArguments);
+            }
+
+            string csBaseName = $"{csType.GetFullyQualifiedNamespace().Replace(".", "_")}_{csType.Symbol.Name}{genericTypeHash}_CreateDelegate";
+            string invokeCallbackName = $"{csType.GetFullyQualifiedNamespace().Replace(".", "_")}_{item.Type.Name}{genericTypeHash}_InvokeCallback";
+            string disposeCallbackName = $"{csType.GetFullyQualifiedNamespace().Replace(".", "_")}_{item.Type.Name}{genericTypeHash}_DisposeCallback";
+
+            var invokeParameters = callbackParameters.Select(p => $"{p.CsType.GetFullyQualifiedName()} {p.Name}");
+            var invokeInteropParameters = new[] { "IntPtr callbackFunction" }.Concat(callbackParameters.Select(p => $"{p.CsType.AsInteropType().GetFullyQualifiedName()} {p.Name}"));
+            var callInvokeInteropParameters = new[] { "_callbackFunction" }.Concat(callbackParameters.Select(p => p.CsType.GetConversionToInteropType(p.Name)));
+
+            result.Init.Functions.Add(new(
+                CppName: $"{itemType.GetFullyQualifiedName()}::CreateDelegate",
+                CppTypeSignature: $"void* (*)(void*)",
+                CppTypeDefinitionsReferenced: new[] { itemType },
+                CSharpName: csBaseName + "Delegate",
+                CSharpContent:
+                    $$"""
+                    private class {{csType.Symbol.Name}}{{genericTypeHash}}NativeFunction : System.IDisposable
+                    {
+                        private IntPtr _callbackFunction;
+
+                        public {{csType.Symbol.Name}}{{genericTypeHash}}NativeFunction(IntPtr callbackFunction)
+                        {
+                            _callbackFunction = callbackFunction;
+                        }
+
+                        ~{{csType.Symbol.Name}}{{genericTypeHash}}NativeFunction()
+                        {
+                            Dispose(false);
+                        }
+                    
+                        public void Dispose()
+                        {
+                            Dispose(true);
+                            GC.SuppressFinalize(this);
+                        }
+
+                        private void Dispose(bool disposing)
+                        {
+                            if (_callbackFunction != IntPtr.Zero)
+                            {
+                                {{disposeCallbackName}}(_callbackFunction);
+                                _callbackFunction = IntPtr.Zero;
+                            }
+                        }
+
+                        public void Invoke({{string.Join(", ", invokeParameters)}})
+                        {
+                            if (_callbackFunction != null)
+                                {{invokeCallbackName}}({{string.Join(", ", callInvokeInteropParameters)}});
+                        }
+
+                        [System.Runtime.InteropServices.DllImport("CesiumForUnityNative.dll")]
+                        private static extern void {{disposeCallbackName}}(IntPtr callbackFunction);
+                        [System.Runtime.InteropServices.DllImport("CesiumForUnityNative.dll")]
+                        private static extern void {{invokeCallbackName}}({{string.Join(", ", invokeInteropParameters)}});
+                    }
+                    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+                    private unsafe delegate IntPtr {{csBaseName}}Type(IntPtr callbackFunction);
+                    private static unsafe readonly {{csBaseName}}Type {{csBaseName}}Delegate = new {{csBaseName}}Type({{csBaseName}});
+                    private static unsafe IntPtr {{csBaseName}}(IntPtr callbackFunction)
+                    {
+                        Oxidize.OxidizeInitializer.Initialize();
+                        var receiver = new {{csType.Symbol.Name}}{{genericTypeHash}}NativeFunction(callbackFunction);
+                        return Oxidize.ObjectHandleUtility.CreateHandle(new {{csType.GetFullyQualifiedName()}}(receiver.Invoke));
+                    }
+                    """
+            ));
+
+            var interopParameters = new[] { (Name: "pCallbackFunction", CsType: CSharpType.FromSymbol(this.Options.Compilation, this.Options.Compilation.GetSpecialType(SpecialType.System_IntPtr)), Type: CppType.VoidPointer, InteropType: CppType.VoidPointer) }.Concat(callbackParameters);
+            var callParameters = callbackParameters.Select(p => p.Type.GetConversionFromInteropType(this.Options, p.Name));
+
+            result.CppImplementationInvoker.Functions.Add(new(
+                Content:
+                    $$"""
+                    __declspec(dllexport) void {{invokeCallbackName}}({{string.Join(", ", interopParameters.Select(p => $"{p.InteropType.GetFullyQualifiedName()} {p.Name}"))}}) {
+                      auto pFunc = reinterpret_cast<std::function<{{itemType.GetFullyQualifiedName()}}::FunctionSignature>*>(pCallbackFunction);
+                      (*pFunc)({{string.Join(", ", callParameters)}});
+                    }
+                    """));
         }
 
         private GeneratedResult? GenerateEnum(TypeToGenerate item, CppType itemType)
@@ -99,7 +247,7 @@ namespace Oxidize
                     continue;
 
                 GeneratedCSharpPartialMethodDefinitions? partialMethods = result.CSharpPartialMethodDefinitions;
-                if (partialMethods == null)
+                if (partialMethods == null || partialMethods.Methods.Count == 0)
                     continue;
 
                 context.AddSource(partialMethods.Type.Symbol.Name + "-generated", partialMethods.ToSourceFileString());

@@ -2,7 +2,6 @@
 using System.Collections.Immutable;
 using System.Security.Cryptography;
 using System.Text;
-using System.Xml.Linq;
 
 namespace Oxidize
 {
@@ -30,14 +29,15 @@ namespace Oxidize
             var returnType = method.ReturnType;
 
             IPropertySymbol? property = method.AssociatedSymbol as IPropertySymbol;
+            IEventSymbol? evt = method.AssociatedSymbol as IEventSymbol;
 
             string accessName;
             if (method.Name == ".ctor")
                 accessName = $"new {csType.GetFullyQualifiedName()}";
-            else if (property != null && ReferenceEquals(property.GetMethod, method))
+            else if (property != null)
                 accessName = property.Name;
-            else if (property != null && ReferenceEquals(property.SetMethod, method))
-                accessName = property.Name;
+            else if (evt != null)
+                accessName = evt.Name;
             else
                 accessName = method.Name;
 
@@ -91,6 +91,22 @@ namespace Oxidize
                 implementation =
                     $$"""
                     {{invocationTarget}} = {{callParameterList}};
+                    """;
+            }
+            else if (evt != null && ReferenceEquals(evt.AddMethod, method))
+            {
+                // An event adder
+                implementation =
+                    $$"""
+                    {{invocationTarget}} += {{callParameterList}};
+                    """;
+            }
+            else if (evt != null && ReferenceEquals(evt.RemoveMethod, method))
+            {
+                // An event adder
+                implementation =
+                    $$"""
+                    {{invocationTarget}} -= {{callParameterList}};
                     """;
             }
             else if (returnType.SpecialType == SpecialType.System_Void)

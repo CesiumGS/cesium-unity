@@ -15,9 +15,13 @@ namespace Oxidize
             if (item.Type.IsStatic)
                 return;
 
-            // Only class and non-blittable struct wrappers have handles.
-            if (declaration.Type.Kind != InteropTypeKind.ClassWrapper && declaration.Type.Kind != InteropTypeKind.NonBlittableStructWrapper)
+            // Only classes, delegates, and non-blittable struct wrappers have handles.
+            if (declaration.Type.Kind != InteropTypeKind.ClassWrapper &&
+                declaration.Type.Kind != InteropTypeKind.NonBlittableStructWrapper &&
+                declaration.Type.Kind != InteropTypeKind.Delegate)
+            {
                 return;
+            }
 
             CppType type = CppType.FromCSharp(context, item.Type);
             CppType objectHandleType = CppObjectHandle.GetCppType(context);

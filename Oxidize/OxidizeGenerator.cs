@@ -106,6 +106,11 @@ public class OxidizeGenerator : IIncrementalGenerator
                     current.Properties.Add(property);
                 }
 
+                foreach (IEventSymbol evt in item.Events)
+                {
+                    current.Events.Add(evt);
+                }
+
                 foreach (IFieldSymbol enumValue in item.EnumValues)
                 {
                     current.EnumValues.Add(enumValue);

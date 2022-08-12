@@ -363,9 +363,8 @@ namespace Oxidize
             {
                 case InteropTypeKind.ClassWrapper:
                 case InteropTypeKind.NonBlittableStructWrapper:
-                    return $"{variableName}.GetHandle().GetRaw()";
                 case InteropTypeKind.Delegate:
-                    return "nullptr"; // TODO
+                    return $"{variableName}.GetHandle().GetRaw()";
                 case InteropTypeKind.Enum:
                     return $"::std::uint32_t({variableName})";
                 case InteropTypeKind.Primitive:
@@ -382,9 +381,8 @@ namespace Oxidize
             {
                 case InteropTypeKind.ClassWrapper:
                 case InteropTypeKind.NonBlittableStructWrapper:
-                    return $"{GetFullyQualifiedName()}({CppObjectHandle.GetCppType(context).GetFullyQualifiedName()}({variableName}))";
                 case InteropTypeKind.Delegate:
-                    return $"{this.GetFullyQualifiedName()}(nullptr)";
+                    return $"{GetFullyQualifiedName()}({CppObjectHandle.GetCppType(context).GetFullyQualifiedName()}({variableName}))";
                 case InteropTypeKind.Enum:
                     return $"{this.GetFullyQualifiedName()}({variableName})";
                 case InteropTypeKind.Primitive:
