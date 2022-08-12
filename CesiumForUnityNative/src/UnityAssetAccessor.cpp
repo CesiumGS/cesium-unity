@@ -16,10 +16,13 @@ namespace {
 
 class UnityAssetResponse : public IAssetResponse {
 public:
-  UnityAssetResponse(const UnityEngine::Networking::UnityWebRequest& request)
+  UnityAssetResponse(
+      const UnityEngine::Networking::UnityWebRequest& request,
+      const Oxidize::CesiumForUnity::NativeDownloadHandler& handler)
       : _statusCode(uint16_t(request.responseCode())),
         _contentType(request.GetResponseHeader(System::String("Content-Type"))
-                         .ToStlString()) {
+                         .ToStlString()),
+        _handler(handler) {
     this->_headers.emplace("Content-Type", this->_contentType);
     // TODO: get all response headers
   }
@@ -31,24 +34,25 @@ public:
   virtual const HttpHeaders& headers() const override { return _headers; }
 
   virtual gsl::span<const std::byte> data() const override {
-    // return this->_pHandler->getData();
-    return gsl::span<const std::byte>();
+    return this->_handler.NativeImplementation().getData();
   }
 
 private:
   uint16_t _statusCode;
   std::string _contentType;
   HttpHeaders _headers;
-  std::shared_ptr<::Oxidize::CesiumForUnity::NativeDownloadHandler> _pHandler;
+  ::Oxidize::CesiumForUnity::NativeDownloadHandler _handler;
 };
 
 class UnityAssetRequest : public IAssetRequest {
 public:
-  UnityAssetRequest(Oxidize::UnityEngine::Networking::UnityWebRequest& request)
+  UnityAssetRequest(
+      const Oxidize::UnityEngine::Networking::UnityWebRequest& request,
+      const Oxidize::CesiumForUnity::NativeDownloadHandler& handler)
       : _method(request.method().ToStlString()),
         _url(request.url().ToStlString()),
         _headers(),
-        _response(request) {
+        _response(request, handler) {
     // TODO: get request headers
   }
 
@@ -81,7 +85,8 @@ UnityAssetAccessor::get(
     UnityEngine::Networking::UnityWebRequest request =
         UnityEngine::Networking::UnityWebRequest::Get(System::String(url));
 
-    request.downloadHandler(Oxidize::CesiumForUnity::NativeDownloadHandler());
+    Oxidize::CesiumForUnity::NativeDownloadHandler handler{};
+    request.downloadHandler(handler);
 
     for (const auto& header : headers) {
       request.SetRequestHeader(
@@ -98,10 +103,11 @@ UnityAssetAccessor::get(
     UnityEngine::Networking::UnityWebRequestAsyncOperation op =
         request.SendWebRequest();
     op.add_completed(System::Action1<UnityEngine::AsyncOperation>(
-        [request, promise = std::move(promise)](
+        [request, promise = std::move(promise), handler = std::move(handler)](
             const UnityEngine::AsyncOperation& operation) mutable {
           if (request.isDone() && request.error() == nullptr) {
-            promise.resolve(std::make_shared<UnityAssetRequest>(request));
+            promise.resolve(
+                std::make_shared<UnityAssetRequest>(request, handler));
           } else {
             promise.reject(std::runtime_error(
                 "Request failed: " + request.error().ToStlString()));
@@ -109,14 +115,6 @@ UnityAssetAccessor::get(
         }));
 
     return future;
-
-    // .thenImmediately(
-    //     [pCompleted](std::shared_ptr<IAssetRequest>&& pRequest) {
-    //       // The lambda capture here keeps the managed WebRequestCompleted
-    //       alive
-    //       // until we're done with it.
-    //       return std::move(pRequest);
-    //     });
   });
 }
 

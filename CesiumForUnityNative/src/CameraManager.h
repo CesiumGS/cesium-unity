@@ -13,7 +13,7 @@ namespace CesiumForUnity {
 class CameraManager {
 public:
   static std::vector<Cesium3DTilesSelection::ViewState>
-  getAllCameras(Oxidize::UnityEngine::GameObject& context);
+  getAllCameras(const Oxidize::UnityEngine::GameObject& context);
 };
 
 } // namespace CesiumForUnity

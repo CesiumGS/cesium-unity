@@ -305,6 +305,11 @@ namespace Oxidize
             return new CppType(Kind, Namespaces, Name, GenericArguments, Flags | CppTypeFlags.Pointer, HeaderOverride);
         }
 
+        public CppType AsReference()
+        {
+            return new CppType(Kind, Namespaces, Name, GenericArguments, Flags | CppTypeFlags.Reference, HeaderOverride);
+        }
+
         public CppType AsConstReference()
         {
             return new CppType(Kind, Namespaces, Name, GenericArguments, Flags | CppTypeFlags.Const | CppTypeFlags.Reference & ~CppTypeFlags.Pointer, HeaderOverride);

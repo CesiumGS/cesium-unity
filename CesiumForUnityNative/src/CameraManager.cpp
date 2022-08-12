@@ -67,7 +67,7 @@ ViewState unityCameraToViewState(Camera& camera) {
 
 } // namespace
 
-std::vector<ViewState> CameraManager::getAllCameras(GameObject& context) {
+std::vector<ViewState> CameraManager::getAllCameras(const GameObject& context) {
   std::vector<ViewState> result;
 
   Camera camera = Camera::main();

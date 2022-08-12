@@ -1,5 +1,6 @@
 #include "Cesium3DTilesetImpl.h"
 
+#include "CameraManager.h"
 #include "UnityTilesetExternals.h"
 
 #include <Cesium3DTilesSelection/Tileset.h>
@@ -41,8 +42,8 @@ void Cesium3DTilesetImpl::Update(
     return;
   }
 
-  std::vector<ViewState> viewStates = {};
-  // CameraManager::getAllCameras(this->GetGameObject());
+  std::vector<ViewState> viewStates =
+      CameraManager::getAllCameras(tileset.gameObject());
 
   const ViewUpdateResult& updateResult =
       this->_pTileset->updateView(viewStates);

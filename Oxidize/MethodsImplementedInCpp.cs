@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using System.Diagnostics;
+using System.Reflection.Metadata;
 using System.Xml.Linq;
 
 namespace Oxidize
@@ -134,6 +135,54 @@ namespace Oxidize
 
                 GenerateMethod(context, item, result, method);
             }
+
+            // Add a method to the C++ wrapper that allows access to the C++ implementation.
+            result.CppDeclaration.Elements.Add(new(
+                Content: $"static void* (*Property_get_NativeImplementation)(void*);",
+                IsPrivate: true));
+            result.CppDeclaration.Elements.Add(new(
+                Content: $"::{implType.AsReference().GetFullyQualifiedName()} NativeImplementation() const noexcept;",
+                TypeDeclarationsReferenced: new[] { implType.AsReference() }
+            ));
+
+            result.CppDefinition.Elements.Add(new(
+                Content: $"void* (*{wrapperType.Name}::Property_get_NativeImplementation)(void*) = nullptr;"));
+            result.CppDefinition.Elements.Add(new(
+                Content:
+                    $$"""
+                    ::{{implType.AsReference().GetFullyQualifiedName()}} {{wrapperType.Name}}::NativeImplementation() const noexcept {
+                      return *reinterpret_cast<::{{implType.GetFullyQualifiedName()}}*>(Property_get_NativeImplementation(this->_handle.GetRaw()));
+                    }
+                    """
+            ));
+
+            CSharpType csWrapperType = CSharpType.FromSymbol(context.Compilation, item.Type);
+
+            string genericTypeHash = "";
+            INamedTypeSymbol? named = csWrapperType.Symbol as INamedTypeSymbol;
+            if (named != null && named.IsGenericType)
+            {
+                genericTypeHash = Interop.HashParameters(null, named.TypeArguments);
+            }
+
+            string baseName = $"{csWrapperType.GetFullyQualifiedNamespace().Replace(".", "_")}_{csWrapperType.Symbol.Name}{genericTypeHash}_Property_get_NativeImplementation";
+
+            result.Init.Functions.Add(new(
+                CppName: $"{wrapperType.GetFullyQualifiedName()}::Property_get_NativeImplementation",
+                CppTypeSignature: $"void* (*)(void*)",
+                CSharpName: $"{baseName}Delegate",
+                CSharpContent:
+                    $$"""
+                    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+                    private unsafe delegate IntPtr {{baseName}}Type(IntPtr thiz);
+                    private static unsafe readonly {{baseName}}Type {{baseName}}Delegate = new {{baseName}}Type({{baseName}});
+                    private static unsafe IntPtr {{baseName}}(IntPtr thiz)
+                    {
+                        Oxidize.OxidizeInitializer.Initialize();
+                        return ({{csWrapperType.GetConversionFromInteropType("thiz")}}).NativeImplementation;
+                    }
+                    """
+            ));
         }
 
         private static void GenerateMethod(CppGenerationContext context, TypeToGenerate item, GeneratedResult result, IMethodSymbol method)

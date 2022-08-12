@@ -48,6 +48,11 @@ namespace Oxidize
                     {
                         private System.IntPtr _implementation;
 
+                        public IntPtr NativeImplementation
+                        {
+                            get { return _implementation; }
+                        }
+
                         {{GetMethods().JoinAndIndent("        ")}}
 
                         {{GetInteropFunctionDeclarations().JoinAndIndent("        ")}}
