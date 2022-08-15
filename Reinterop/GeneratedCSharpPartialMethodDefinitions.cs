@@ -1,5 +1,4 @@
 ﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 
 namespace Reinterop
 {
@@ -32,7 +31,7 @@ namespace Reinterop
         {
             this.Type = type;
         }
-        
+
         public string ToSourceFileString()
         {
             // TODO: support structs

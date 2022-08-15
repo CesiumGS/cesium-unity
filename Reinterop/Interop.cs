@@ -138,7 +138,7 @@ namespace Reinterop
 
             return (
                 Name: $"{baseName}Delegate",
-                Content: 
+                Content:
                     $$"""
                     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
                     private unsafe delegate {{interopReturnTypeString}} {{baseName}}Type({{interopParameterList}});
@@ -176,7 +176,7 @@ namespace Reinterop
         {
             IEnumerable<string>? formattedParameters = null;
             IEnumerable<string>? formattedTypeArguments = null;
-            
+
             if (parameters != null)
                 formattedParameters = parameters.Select(parameter => $"{parameter.Type.ToDisplayString()} {parameter.Name}");
             if (typeArguments != null)
@@ -190,7 +190,7 @@ namespace Reinterop
             else if (formattedTypeArguments != null)
                 allFormattedInput = formattedTypeArguments;
             else
-                allFormattedInput = new string[] {};
+                allFormattedInput = new string[] { };
 
             var allTogether = string.Join(", ", allFormattedInput);
             string hash = InsecureHash(allTogether);

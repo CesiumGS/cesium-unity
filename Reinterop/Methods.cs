@@ -1,11 +1,4 @@
 ﻿using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Xml.Linq;
 
 namespace Reinterop
 {
@@ -39,7 +32,8 @@ namespace Reinterop
 
             CppType returnType = CppType.FromCSharp(context, method.ReturnType).AsReturnType();
             CppType interopReturnType = returnType.AsInteropType();
-            var parameters = method.Parameters.Select(parameter => {
+            var parameters = method.Parameters.Select(parameter =>
+            {
                 CppType type = CppType.FromCSharp(context, parameter.Type).AsParameterType();
                 return (ParameterName: parameter.Name, CallSiteName: parameter.Name, Type: type, InteropType: type.AsInteropType());
             });

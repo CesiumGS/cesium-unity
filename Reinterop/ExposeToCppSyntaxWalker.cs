@@ -1,10 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Text;
 
 namespace Reinterop
 {
@@ -44,7 +41,7 @@ namespace Reinterop
             base.VisitMemberAccessExpression(node);
 
             ISymbol? symbol = this._semanticModel.GetSymbolInfo(node.Name).Symbol;
-            
+
             IPropertySymbol? propertySymbol = symbol as IPropertySymbol;
             if (propertySymbol != null)
             {
@@ -160,7 +157,7 @@ namespace Reinterop
 
             // We also need to generate the parameter and return value types
             this.AddType(symbol.ReturnType);
-            
+
             foreach (IParameterSymbol parameter in symbol.Parameters)
             {
                 this.AddType(parameter.Type);

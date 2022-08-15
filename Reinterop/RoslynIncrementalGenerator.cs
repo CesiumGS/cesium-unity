@@ -1,7 +1,7 @@
-﻿using System.Collections.Immutable;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using System.Collections.Immutable;
 
 namespace Reinterop;
 
@@ -246,7 +246,7 @@ public class RoslynIncrementalGenerator : IIncrementalGenerator
     private static CodeGenerator CreateCppGenerator(Compilation compilation, AnalyzerConfigOptionsProvider options)
     {
         CppGenerationContext cppContext = new CppGenerationContext(compilation);
-        
+
         string? projectDir;
         if (!options.GlobalOptions.TryGetValue("build_property.projectdir", out projectDir))
             projectDir = "";

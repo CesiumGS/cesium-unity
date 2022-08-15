@@ -1,6 +1,4 @@
-﻿using System.Xml.Linq;
-
-namespace Reinterop
+﻿namespace Reinterop
 {
     internal class GeneratedCppImplementationInvoker
     {
@@ -19,7 +17,7 @@ namespace Reinterop
 
             AddIncludes(sourceFile.Includes);
             AddForwardDeclarations(sourceFile.ForwardDeclarations);
-            
+
             CppSourceFileNamespace ns = sourceFile.GetNamespace("");
             ns.Members.Add(
                 $$"""

@@ -1,10 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Xml.Linq;
-
-namespace Reinterop
+﻿namespace Reinterop
 {
     internal class CppObjectHandle
     {

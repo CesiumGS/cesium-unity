@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Reinterop
+﻿namespace Reinterop
 {
     internal record GeneratedInitFunction(
         string CppName,

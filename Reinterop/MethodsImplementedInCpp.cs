@@ -1,7 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
 using System.Diagnostics;
-using System.Reflection.Metadata;
-using System.Xml.Linq;
 
 namespace Reinterop
 {
@@ -207,7 +205,7 @@ namespace Reinterop
             });
 
             string name = $"{wrapperType.GetFullyQualifiedName(false).Replace("::", "_")}_{method.Name}";
-            
+
             var parameterList = new[] { "void* handle", "void* pImpl" }.Concat(parameters.Select(parameter => $"{parameter.InteropType.GetFullyQualifiedName()} {parameter.Name}"));
             string parameterListString = string.Join(", ", parameterList);
 
@@ -277,7 +275,7 @@ namespace Reinterop
             {
                 csImplementation =
                     $$"""
-                    var result = {{ name }}({{string.Join(", ", csParametersInterop.Select(parameter => parameter.Type.GetConversionToInteropType(parameter.CallName)))}});
+                    var result = {{name}}({{string.Join(", ", csParametersInterop.Select(parameter => parameter.Type.GetConversionToInteropType(parameter.CallName)))}});
                     return {{csReturnType.GetConversionFromInteropType("result")}};
                     """;
             }
@@ -301,5 +299,5 @@ namespace Reinterop
                     private static extern {{csReturnType.AsInteropType().GetFullyQualifiedName()}} {{name}}({{string.Join(", ", csParametersInterop.Select(parameter => parameter.Type.AsInteropType().GetFullyQualifiedName() + " " + parameter.Name))}});
                     """));
         }
-   }
+    }
 }

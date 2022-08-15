@@ -1,12 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Data;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Reflection.PortableExecutable;
-using System.Text;
 
 namespace Reinterop
 {
@@ -72,7 +65,7 @@ namespace Reinterop
                 CppType implementationType = new CppType(InteropTypeKind.Unknown, Array.Empty<string>(), item.ImplementationClassName, null, 0, item.ImplementationHeaderName);
                 result.CppImplementationInvoker = new GeneratedCppImplementationInvoker(implementationType);
                 result.CSharpPartialMethodDefinitions = new GeneratedCSharpPartialMethodDefinitions(CSharpType.FromSymbol(this.Options.Compilation, item.Type));
-                
+
                 MethodsImplementedInCpp.Generate(this.Options, item, result);
                 Console.WriteLine(result.CSharpPartialMethodDefinitions.ToSourceFileString());
             }
@@ -260,7 +253,7 @@ namespace Reinterop
 
             // Create source files for the standard types.
             CppObjectHandle.Generate(this.Options, sourceFiles);
-            
+
             // Create source files for the generated types.
             foreach (GeneratedResult? generated in generatedResults)
             {

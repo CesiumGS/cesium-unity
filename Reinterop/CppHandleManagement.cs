@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Reinterop
+﻿namespace Reinterop
 {
     internal class CppHandleManagement
     {
@@ -51,7 +47,7 @@ namespace Reinterop
                     {{type.Name}}{{templateSpecialization}}::{{type.Name}}({{objectHandleType.GetFullyQualifiedName()}}&& handle) noexcept :
                         _handle(std::move(handle)) {}
                     """,
-                AdditionalIncludes: new[] { "<utility> "}, // for std::move
+                AdditionalIncludes: new[] { "<utility> " }, // for std::move
                 TypeDefinitionsReferenced: new[]
                 {
                     objectHandleType,
@@ -62,7 +58,7 @@ namespace Reinterop
             // Construct from a null reference
             declaration.Elements.Add(new(
                 Content: $"{type.Name}(std::nullptr_t) noexcept;",
-                TypeDeclarationsReferenced: new[]  { CppType.NullPointer }
+                TypeDeclarationsReferenced: new[] { CppType.NullPointer }
             ));
 
             definition.Elements.Add(new(

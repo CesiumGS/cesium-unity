@@ -1,6 +1,4 @@
-﻿using System.Xml.Linq;
-
-namespace Reinterop
+﻿namespace Reinterop
 {
     internal abstract record GeneratedCppElement(
         IEnumerable<CppType>? TypeDeclarationsReferenced = null,
@@ -13,7 +11,7 @@ namespace Reinterop
             TypeDeclarationsReferenced == null ? Array.Empty<CppType>() : TypeDeclarationsReferenced;
         public IEnumerable<CppType> TypeDefinitionsReferenced { get; init; } =
             TypeDefinitionsReferenced == null ? Array.Empty<CppType>() : TypeDefinitionsReferenced;
-        
+
         public void AddIncludesToSet(ISet<string> set)
         {
             set.UnionWith(this.AdditionalIncludes);

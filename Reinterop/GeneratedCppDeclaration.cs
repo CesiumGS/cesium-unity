@@ -19,7 +19,7 @@
             AddForwardDeclarations(headerFile.ForwardDeclarations);
 
             CppSourceFileNamespace ns = headerFile.GetNamespace(Type.GetFullyQualifiedNamespace(false));
-            
+
             string templateDeclaration = "";
             string templateSpecialization = "";
             if (Type.GenericArguments != null && Type.GenericArguments.Count > 0)

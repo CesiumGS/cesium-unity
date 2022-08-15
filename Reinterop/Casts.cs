@@ -1,6 +1,4 @@
-﻿using System.Xml.Linq;
-
-namespace Reinterop
+﻿namespace Reinterop
 {
     internal class Casts
     {
