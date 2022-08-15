@@ -12,11 +12,11 @@ namespace Oxidize
     /// Walks the methods in the Oxidize class to discover which types, methods,
     /// and properties should be exposed to C++.
     /// </summary>
-    internal class OxidizeWalker : CSharpSyntaxWalker
+    internal class ExposeToCppSyntaxWalker : CSharpSyntaxWalker
     {
         public readonly Dictionary<ITypeSymbol, TypeToGenerate> GenerationItems = new Dictionary<ITypeSymbol, TypeToGenerate>(SymbolEqualityComparer.Default);
 
-        public OxidizeWalker(SemanticModel semanticModel)
+        public ExposeToCppSyntaxWalker(SemanticModel semanticModel)
         {
             this._semanticModel = semanticModel;
         }

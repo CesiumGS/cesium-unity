@@ -9,15 +9,8 @@ using Microsoft.CodeAnalysis.Text;
 namespace Oxidize;
 
 [Generator]
-public class OxidizeGenerator : IIncrementalGenerator
+public class RoslynIncrementalGenerator : IIncrementalGenerator
 {
-    private static readonly DiagnosticDescriptor RandomWarning = new DiagnosticDescriptor(id: "RANDOM001",
-                                                                                              title: "Some random warning",
-                                                                                              messageFormat: "Yep something went wrong '{0}'",
-                                                                                              category: "SomeCategory",
-                                                                                              DiagnosticSeverity.Warning,
-                                                                                              isEnabledByDefault: true);
-
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         context.RegisterPostInitializationOutput(CSharpOxidizeAttribute.Generate);
@@ -156,7 +149,7 @@ public class OxidizeGenerator : IIncrementalGenerator
     private static IEnumerable<TypeToGenerate> GetOxidizeClass(GeneratorSyntaxContext ctx, CancellationToken token)
     {
         SemanticModel semanticModel = ctx.SemanticModel;
-        OxidizeWalker walker = new OxidizeWalker(semanticModel);
+        ExposeToCppSyntaxWalker walker = new ExposeToCppSyntaxWalker(semanticModel);
 
         var attributeSyntax = ctx.Node as AttributeSyntax;
         if (attributeSyntax == null)
