@@ -187,9 +187,9 @@ namespace Reinterop
                                 {{invokeCallbackName}}({{string.Join(", ", callInvokeInteropParameters)}});
                         }
 
-                        [System.Runtime.InteropServices.DllImport("CesiumForUnityNative.dll")]
+                        [System.Runtime.InteropServices.DllImport("{{this.Options.NativeLibraryName}}.dll", CallingConvention=System.Runtime.InteropServices.CallingConvention.Cdecl)]
                         private static extern void {{disposeCallbackName}}(IntPtr callbackFunction);
-                        [System.Runtime.InteropServices.DllImport("CesiumForUnityNative.dll")]
+                        [System.Runtime.InteropServices.DllImport("{{this.Options.NativeLibraryName}}.dll, CallingConvention=System.Runtime.InteropServices.CallingConvention.Cdecl")]
                         private static extern void {{invokeCallbackName}}({{string.Join(", ", invokeInteropParameters)}});
                     }
                     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -229,11 +229,10 @@ namespace Reinterop
             return result;
         }
 
-        public static void WriteCSharpCode(SourceProductionContext context, Compilation compilation, ImmutableArray<GeneratedResult?> results)
+        public static void WriteCSharpCode(SourceProductionContext context, CppGenerationContext cppContext, ImmutableArray<GeneratedResult?> results)
         {
             GeneratedInit combinedInit = GeneratedInit.Merge(results.Select(result => result == null ? new GeneratedInit() : result.Init));
-            Console.WriteLine(combinedInit.ToCSharpSourceFileString());
-            context.AddSource("ReinteropInitializer", combinedInit.ToCSharpSourceFileString());
+            context.AddSource("ReinteropInitializer", combinedInit.ToCSharpSourceFileString(cppContext));
 
             foreach (GeneratedResult? result in results)
             {

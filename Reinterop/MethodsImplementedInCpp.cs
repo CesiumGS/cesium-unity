@@ -46,7 +46,7 @@ namespace Reinterop
                     """,
                 interopFunctionDeclaration:
                     $$"""
-                    [DllImport("CesiumForUnityNative.dll", CallingConvention=CallingConvention.Cdecl)]
+                    [DllImport("{{context.NativeLibraryName}}.dll", CallingConvention=CallingConvention.Cdecl)]
                     private static extern System.IntPtr {{createName}}(System.IntPtr thiz);
                     """));
 
@@ -91,7 +91,7 @@ namespace Reinterop
                     """,
                 interopFunctionDeclaration:
                     $$"""
-                    [DllImport("CesiumForUnityNative.dll", CallingConvention=CallingConvention.Cdecl)]
+                    [DllImport("{{context.NativeLibraryName}}.dll", CallingConvention=CallingConvention.Cdecl)]
                     private static extern void {{disposeName}}(System.IntPtr thiz, System.IntPtr implementation);
                     """));
 
@@ -295,7 +295,7 @@ namespace Reinterop
                     """,
                 interopFunctionDeclaration:
                     $$"""
-                    [DllImport("CesiumForUnityNative.dll", CallingConvention=CallingConvention.Cdecl)]
+                    [DllImport("{{context.NativeLibraryName}}.dll", CallingConvention=CallingConvention.Cdecl)]
                     private static extern {{csReturnType.AsInteropType().GetFullyQualifiedName()}} {{name}}({{string.Join(", ", csParametersInterop.Select(parameter => parameter.Type.AsInteropType().GetFullyQualifiedName() + " " + parameter.Name))}});
                     """));
         }

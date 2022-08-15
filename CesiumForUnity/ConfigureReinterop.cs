@@ -1,13 +1,13 @@
-﻿using System;
-using UnityEngine;
-using UnityEditor;
-using Unity.Collections;
-using Reinterop;
-using System.Text;
-using Unity.Collections.LowLevel.Unsafe;
+﻿using Reinterop;
+using System;
 using System.Runtime.InteropServices;
-using UnityEngine.Networking;
+using System.Text;
 using System.Threading.Tasks;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
+using UnityEditor;
+using UnityEngine;
+using UnityEngine.Networking;
 
 namespace CesiumForUnity;
 
@@ -112,14 +112,7 @@ internal partial class ConfigureReinterop
         //Action<AsyncOperation> foo = (ao) => { };
         //var asdfx = foo + foo;
         op.completed += o => {};
-        op.completed += Foo;
 
         Task.Run(() => { });
-
-    }
-
-    void Foo(AsyncOperation op)
-    {
-
     }
 }

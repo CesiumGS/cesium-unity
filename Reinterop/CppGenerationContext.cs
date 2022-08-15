@@ -19,7 +19,7 @@ namespace Reinterop
         /// `Foo::System::Threading`. If this property is empty, the C++
         /// namespace will match the C# namespace.
         /// </summary>
-        public string BaseNamespace = "";
+        public string BaseNamespace = "DotNet";
 
         /// <summary>
         /// The directory in which to generate output C++ files.
@@ -30,6 +30,11 @@ namespace Reinterop
         /// The compilation for which we're generating C++ code.
         /// </summary>
         public Compilation Compilation;
+
+        /// <summary>
+        /// The name of the DLL or SO containing the C++ code.
+        /// </summary>
+        public string NativeLibraryName = "ReinteropNative";
 
         public Dictionary<ITypeSymbol, ICustomGenerator> CustomGenerators = new Dictionary<ITypeSymbol, ICustomGenerator>(SymbolEqualityComparer.Default);
     }

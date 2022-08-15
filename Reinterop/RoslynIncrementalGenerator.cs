@@ -45,7 +45,7 @@ public class RoslynIncrementalGenerator : IIncrementalGenerator
         //context.RegisterImplementationSourceOutput(typesAndGenerator, (context, pair) => CppObjectHandle.Generate(pair.Right.Options));
 
         // Generate the required items
-        context.RegisterSourceOutput(typesAndGenerator, (context, pair) => CodeGenerator.WriteCSharpCode(context, pair.Right.Options.Compilation, pair.Left));
+        context.RegisterSourceOutput(typesAndGenerator, (context, pair) => CodeGenerator.WriteCSharpCode(context, pair.Right.Options, pair.Left));
     }
 
     private static Dictionary<ITypeSymbol, TypeToGenerate> CombineGenerationItems(ImmutableArray<IEnumerable<TypeToGenerate>> listOfItems, CancellationToken token)
@@ -259,9 +259,15 @@ public class RoslynIncrementalGenerator : IIncrementalGenerator
 
         string? baseNamespace;
         if (!options.GlobalOptions.TryGetValue("base_namespace", out baseNamespace))
-            baseNamespace = "";
+            baseNamespace = "DotNet";
 
         cppContext.BaseNamespace = baseNamespace;
+
+        string? nativeLibraryName;
+        if (!options.GlobalOptions.TryGetValue("native_library_name", out nativeLibraryName))
+            nativeLibraryName = "ReinteropNative";
+
+        cppContext.NativeLibraryName = nativeLibraryName;
 
         cppContext.CustomGenerators.Add(compilation.GetSpecialType(SpecialType.System_String), new CustomStringGenerator());
 
