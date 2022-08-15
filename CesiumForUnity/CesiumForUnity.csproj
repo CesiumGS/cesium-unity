@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-      <ProjectReference Include="..\Oxidize\Oxidize.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+      <ProjectReference Include="..\Reinterop\Reinterop.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
 </Project>

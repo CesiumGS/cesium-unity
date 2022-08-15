@@ -5,7 +5,7 @@ VisualStudioVersion = 17.3.32611.2
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CesiumForUnity", "CesiumForUnity\CesiumForUnity.csproj", "{87313CF7-951D-4A98-9860-26CB34B8D3C8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Oxidize", "Oxidize\Oxidize.csproj", "{6CCCA995-2AEE-4DD4-BC10-38A0ECBF1EE6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reinterop", "Reinterop\Reinterop.csproj", "{6CCCA995-2AEE-4DD4-BC10-38A0ECBF1EE6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
