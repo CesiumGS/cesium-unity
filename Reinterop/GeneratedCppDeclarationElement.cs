@@ -1,4 +1,4 @@
-﻿namespace Oxidize
+﻿namespace Reinterop
 {
     internal record GeneratedCppDeclarationElement(
         string Content,

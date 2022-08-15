@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Reflection.Metadata;
 using System.Text;
 
-namespace Oxidize
+namespace Reinterop
 {
     internal class Constructors
     {

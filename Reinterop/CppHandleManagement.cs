@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Oxidize
+namespace Reinterop
 {
     internal class CppHandleManagement
     {

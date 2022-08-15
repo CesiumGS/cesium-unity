@@ -1,6 +1,6 @@
 ﻿using System.Xml.Linq;
 
-namespace Oxidize
+namespace Reinterop
 {
     internal class GeneratedCppImplementationInvoker
     {

@@ -3,7 +3,7 @@ using System.Collections.Immutable;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Oxidize
+namespace Reinterop
 {
     internal class Interop
     {
@@ -145,7 +145,7 @@ namespace Oxidize
                     private static unsafe readonly {{baseName}}Type {{baseName}}Delegate = new {{baseName}}Type({{baseName}});
                     private static unsafe {{interopReturnTypeString}} {{baseName}}({{interopParameterList}})
                     {
-                        Oxidize.OxidizeInitializer.Initialize();
+                        Reinterop.ReinteropInitializer.Initialize();
                         {{implementation.Replace(Environment.NewLine, Environment.NewLine + "  ")}}
                     }
                     """
@@ -154,12 +154,12 @@ namespace Oxidize
 
         public static void GenerateForType(CppGenerationContext context, TypeToGenerate item, GeneratedResult result)
         {
-            string initializeOxidizeHeader = context.BaseNamespace == null ? "<initializeOxidize.h>" : $"<{context.BaseNamespace.Replace("::", "/")}/initializeOxidize.h>";
+            string initializeReinteropHeader = context.BaseNamespace == null ? "<initializeReinterop.h>" : $"<{context.BaseNamespace.Replace("::", "/")}/initializeReinterop.h>";
             result.CppDeclaration.Elements.Add(new(
-                Content: "friend void ::initializeOxidize(void** functionPointers, std::int32_t count);",
+                Content: "friend void ::initializeReinterop(void** functionPointers, std::int32_t count);",
                 IsPrivate: true,
                 TypeDeclarationsReferenced: new[] { CppType.Int32 },
-                AdditionalIncludes: new[] { initializeOxidizeHeader }));
+                AdditionalIncludes: new[] { initializeReinteropHeader }));
         }
 
         public static string InsecureHash(string s)

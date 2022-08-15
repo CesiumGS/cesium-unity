@@ -1,28 +1,25 @@
 ﻿using System.Collections.Immutable;
-using System.Text;
-using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
-using Microsoft.CodeAnalysis.Text;
 
-namespace Oxidize;
+namespace Reinterop;
 
 [Generator]
 public class RoslynIncrementalGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        context.RegisterPostInitializationOutput(CSharpOxidizeAttribute.Generate);
-        context.RegisterPostInitializationOutput(CSharpOxidizeNativeImplementationAttribute.Generate);
+        context.RegisterPostInitializationOutput(CSharpReinteropAttribute.Generate);
+        context.RegisterPostInitializationOutput(CSharpReinteropNativeImplementationAttribute.Generate);
         context.RegisterPostInitializationOutput(CSharpObjectHandleUtility.Generate);
 
-        // For each method in the Oxidize class, look at the types, methods, and properties it uses and create from
+        // For each method in the Reinterop class, look at the types, methods, and properties it uses and create from
         // that a list of items to be generated (GenerationItems).
         IncrementalValuesProvider<IEnumerable<TypeToGenerate>> perMethodGenerationItems =
             context.SyntaxProvider.CreateSyntaxProvider(
-                predicate: IsOxidizeType,
-                transform: GetOxidizeClass);
+                predicate: IsReinteropType,
+                transform: GetReinteropClass);
 
         // Consolidate the GenerationItems from the different methods into a single dictionary.
         IncrementalValueProvider<Dictionary<ITypeSymbol, TypeToGenerate>> generationItems =
@@ -119,17 +116,17 @@ public class RoslynIncrementalGenerator : IIncrementalGenerator
         return result;
     }
 
-    private static bool IsOxidizeType(SyntaxNode node, CancellationToken token)
+    private static bool IsReinteropType(SyntaxNode node, CancellationToken token)
     {
         var attributeNode = node as AttributeSyntax;
         if (attributeNode == null)
             return false;
 
         string? name = GetAttributeName(attributeNode);
-        return name == "Oxidize" ||
-            name == "OxidizeAttribute" ||
-            name == "OxidizeNativeImplementation" ||
-            name == "OxidizeNativeImplementationAttribute";
+        return name == "Reinterop" ||
+            name == "ReinteropAttribute" ||
+            name == "ReinteropNativeImplementation" ||
+            name == "ReinteropNativeImplementationAttribute";
     }
 
     private static string? GetAttributeName(AttributeSyntax attribute)
@@ -146,7 +143,7 @@ public class RoslynIncrementalGenerator : IIncrementalGenerator
         return null;
     }
 
-    private static IEnumerable<TypeToGenerate> GetOxidizeClass(GeneratorSyntaxContext ctx, CancellationToken token)
+    private static IEnumerable<TypeToGenerate> GetReinteropClass(GeneratorSyntaxContext ctx, CancellationToken token)
     {
         SemanticModel semanticModel = ctx.SemanticModel;
         ExposeToCppSyntaxWalker walker = new ExposeToCppSyntaxWalker(semanticModel);
@@ -161,7 +158,7 @@ public class RoslynIncrementalGenerator : IIncrementalGenerator
 
         string? attributeName = GetAttributeName(attributeSyntax);
 
-        if (attributeName == "Oxidize" || attributeName == "OxidizeAttribute")
+        if (attributeName == "Reinterop" || attributeName == "ReinteropAttribute")
         {
             // A C# class containing a method that identifies what types, methods, properties, etc. should be accessible from C++.
             foreach (MemberDeclarationSyntax memberSyntax in classSyntax.Members)
@@ -174,7 +171,7 @@ public class RoslynIncrementalGenerator : IIncrementalGenerator
                     walker.Visit(methodSyntax);
             }
         }
-        else if (attributeName == "OxidizeNativeImplementation" || attributeName == "OxidizeNativeImplementationAttribute")
+        else if (attributeName == "ReinteropNativeImplementation" || attributeName == "ReinteropNativeImplementationAttribute")
         {
             var args = attributeSyntax.ArgumentList!.Arguments;
             if (args.Count < 2)

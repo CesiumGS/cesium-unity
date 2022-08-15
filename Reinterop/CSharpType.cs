@@ -1,7 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using System.Xml.Linq;
 
-namespace Oxidize
+namespace Reinterop
 {
     internal class CSharpType
     {
@@ -62,7 +62,7 @@ namespace Oxidize
         public string GetConversionToInteropType(string variableName)
         {
             if (this.Kind == InteropTypeKind.ClassWrapper || this.Kind == InteropTypeKind.NonBlittableStructWrapper || this.Kind == InteropTypeKind.Delegate)
-                return $"Oxidize.ObjectHandleUtility.CreateHandle({variableName})";
+                return $"Reinterop.ObjectHandleUtility.CreateHandle({variableName})";
 
             return variableName;
         }
@@ -70,7 +70,7 @@ namespace Oxidize
         public string GetConversionFromInteropType(string variableName)
         {
             if (this.Kind == InteropTypeKind.ClassWrapper || this.Kind == InteropTypeKind.NonBlittableStructWrapper || this.Kind == InteropTypeKind.Delegate)
-                return $"({this.GetFullyQualifiedName()})Oxidize.ObjectHandleUtility.GetObjectFromHandle({variableName})!";
+                return $"({this.GetFullyQualifiedName()})Reinterop.ObjectHandleUtility.GetObjectFromHandle({variableName})!";
 
             return variableName;
         }

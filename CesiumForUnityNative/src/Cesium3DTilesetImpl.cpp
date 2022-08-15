@@ -5,26 +5,26 @@
 
 #include <Cesium3DTilesSelection/Tileset.h>
 
-#include <Oxidize/CesiumForUnity/Cesium3DTileset.h>
-#include <Oxidize/System/String.h>
-#include <Oxidize/UnityEngine/GameObject.h>
+#include <DotNet/CesiumForUnity/Cesium3DTileset.h>
+#include <DotNet/System/String.h>
+#include <DotNet/UnityEngine/GameObject.h>
 
 using namespace Cesium3DTilesSelection;
-using namespace Oxidize;
+using namespace DotNet;
 
 namespace CesiumForUnity {
 
 Cesium3DTilesetImpl::Cesium3DTilesetImpl(
-    const Oxidize::CesiumForUnity::Cesium3DTileset& tileset)
+    const DotNet::CesiumForUnity::Cesium3DTileset& tileset)
     : _pTileset(), _lastUpdateResult() {}
 
 Cesium3DTilesetImpl::~Cesium3DTilesetImpl() {}
 
 void Cesium3DTilesetImpl::JustBeforeDelete(
-    const Oxidize::CesiumForUnity::Cesium3DTileset& tileset) {}
+    const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {}
 
 void Cesium3DTilesetImpl::Start(
-    const Oxidize::CesiumForUnity::Cesium3DTileset& tileset) {
+    const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
   TilesetOptions options{};
 
   this->_lastUpdateResult = ViewUpdateResult();
@@ -38,7 +38,7 @@ void Cesium3DTilesetImpl::Start(
 }
 
 void Cesium3DTilesetImpl::Update(
-    const Oxidize::CesiumForUnity::Cesium3DTileset& tileset) {
+    const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
   if (!this->_pTileset) {
     return;
   }
@@ -76,7 +76,7 @@ void Cesium3DTilesetImpl::Update(
 }
 
 void Cesium3DTilesetImpl::updateLastViewUpdateResultState(
-    const Oxidize::CesiumForUnity::Cesium3DTileset& tileset,
+    const DotNet::CesiumForUnity::Cesium3DTileset& tileset,
     const Cesium3DTilesSelection::ViewUpdateResult& currentResult) {
   const ViewUpdateResult& previousResult = this->_lastUpdateResult;
   if (currentResult.tilesToRenderThisFrame.size() !=

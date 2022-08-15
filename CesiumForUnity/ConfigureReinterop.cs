@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEditor;
 using Unity.Collections;
-using Oxidize;
+using Reinterop;
 using System.Text;
 using Unity.Collections.LowLevel.Unsafe;
 using System.Runtime.InteropServices;
@@ -11,8 +11,8 @@ using System.Threading.Tasks;
 
 namespace CesiumForUnity;
 
-[Oxidize]
-internal partial class ConfigureOxidize
+[Reinterop]
+internal partial class ConfigureReinterop
 {
     public void ExposeToCPP()
     {

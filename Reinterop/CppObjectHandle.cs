@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Xml.Linq;
 
-namespace Oxidize
+namespace Reinterop
 {
     internal class CppObjectHandle
     {
@@ -13,10 +13,10 @@ namespace Oxidize
             List<string> ns = new List<string>();
             if (context.BaseNamespace.Length > 0)
                 ns.Add(context.BaseNamespace);
-            ns.Add("Oxidize");
+            ns.Add("Reinterop");
 
             // If the first two namespaces are identical, remove the duplication.
-            // This is to avoid `Oxidize::Oxidize`.
+            // This is to avoid `Reinterop::Reinterop`.
             if (ns.Count >= 2 && ns[0] == ns[1])
                 ns.RemoveAt(0);
 

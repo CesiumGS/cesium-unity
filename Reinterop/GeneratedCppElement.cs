@@ -1,6 +1,6 @@
 ﻿using System.Xml.Linq;
 
-namespace Oxidize
+namespace Reinterop
 {
     internal abstract record GeneratedCppElement(
         IEnumerable<CppType>? TypeDeclarationsReferenced = null,

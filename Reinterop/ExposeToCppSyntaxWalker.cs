@@ -6,10 +6,10 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Text;
 
-namespace Oxidize
+namespace Reinterop
 {
     /// <summary>
-    /// Walks the methods in the Oxidize class to discover which types, methods,
+    /// Walks the methods in the Reinterop-tagged class to discover which types, methods,
     /// and properties should be exposed to C++.
     /// </summary>
     internal class ExposeToCppSyntaxWalker : CSharpSyntaxWalker

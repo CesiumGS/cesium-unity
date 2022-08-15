@@ -4,7 +4,7 @@
 
 #include <vector>
 
-namespace Oxidize::UnityEngine {
+namespace DotNet::UnityEngine {
 class GameObject;
 }
 
@@ -13,7 +13,7 @@ namespace CesiumForUnity {
 class CameraManager {
 public:
   static std::vector<Cesium3DTilesSelection::ViewState>
-  getAllCameras(const Oxidize::UnityEngine::GameObject& context);
+  getAllCameras(const DotNet::UnityEngine::GameObject& context);
 };
 
 } // namespace CesiumForUnity

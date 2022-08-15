@@ -8,7 +8,7 @@ using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 using System.Text;
 
-namespace Oxidize
+namespace Reinterop
 {
     internal class CodeGenerator
     {
@@ -203,9 +203,9 @@ namespace Oxidize
                     private static unsafe readonly {{csBaseName}}Type {{csBaseName}}Delegate = new {{csBaseName}}Type({{csBaseName}});
                     private static unsafe IntPtr {{csBaseName}}(IntPtr callbackFunction)
                     {
-                        Oxidize.OxidizeInitializer.Initialize();
+                        Reinterop.ReinteropInitializer.Initialize();
                         var receiver = new {{csType.Symbol.Name}}{{genericTypeHash}}NativeFunction(callbackFunction);
-                        return Oxidize.ObjectHandleUtility.CreateHandle(new {{csType.GetFullyQualifiedName()}}(receiver.Invoke));
+                        return Reinterop.ObjectHandleUtility.CreateHandle(new {{csType.GetFullyQualifiedName()}}(receiver.Invoke));
                     }
                     """
             ));
@@ -239,7 +239,7 @@ namespace Oxidize
         {
             GeneratedInit combinedInit = GeneratedInit.Merge(results.Select(result => result == null ? new GeneratedInit() : result.Init));
             Console.WriteLine(combinedInit.ToCSharpSourceFileString());
-            context.AddSource("OxidizeInitializer", combinedInit.ToCSharpSourceFileString());
+            context.AddSource("ReinteropInitializer", combinedInit.ToCSharpSourceFileString());
 
             foreach (GeneratedResult? result in results)
             {

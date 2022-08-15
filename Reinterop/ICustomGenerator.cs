@@ -1,4 +1,4 @@
-﻿namespace Oxidize
+﻿namespace Reinterop
 {
     /// <summary>
     /// Allows for custom code generation for a particular type. Register

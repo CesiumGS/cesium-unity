@@ -1,14 +1,14 @@
 #include "NativeDownloadHandlerImpl.h"
 
-using namespace Oxidize::CesiumForUnity;
+using namespace DotNet::CesiumForUnity;
 
 namespace CesiumForUnity {
 
 NativeDownloadHandlerImpl::NativeDownloadHandlerImpl(
-    const ::Oxidize::CesiumForUnity::NativeDownloadHandler& handler) {}
+    const NativeDownloadHandler& handler) {}
 
 void NativeDownloadHandlerImpl::JustBeforeDelete(
-    const ::Oxidize::CesiumForUnity::NativeDownloadHandler& handler) {}
+    const NativeDownloadHandler& handler) {}
 
 bool NativeDownloadHandlerImpl::ReceiveDataNative(
     const NativeDownloadHandler& handler,

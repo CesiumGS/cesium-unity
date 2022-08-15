@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace Oxidize
+namespace Reinterop
 {
     /// <summary>
     /// Options to the C++ code generation.
@@ -24,12 +24,12 @@ namespace Oxidize
         /// <summary>
         /// The directory in which to generate .cpp files.
         /// </summary>
-        public string OutputSourceDirectory = "c:\\Dev\\cesium-unity-samples\\cesium-unity\\TestOxidize\\generated\\src";
+        public string OutputSourceDirectory = "generated\\src";
 
         /// <summary>
         /// The directory in which to generate .h files.
         /// </summary>
-        public string OutputHeaderDirectory = "c:\\Dev\\cesium-unity-samples\\cesium-unity\\TestOxidize\\generated\\include";
+        public string OutputHeaderDirectory = "generated\\include";
 
         /// <summary>
         /// The compilation for which we're generating C++ code.

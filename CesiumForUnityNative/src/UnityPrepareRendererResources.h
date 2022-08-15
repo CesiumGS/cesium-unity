@@ -2,7 +2,7 @@
 
 #include <Cesium3DTilesSelection/IPrepareRendererResources.h>
 
-#include <Oxidize/UnityEngine/GameObject.h>
+#include <DotNet/UnityEngine/GameObject.h>
 
 namespace CesiumForUnity {
 
@@ -10,7 +10,7 @@ class UnityPrepareRendererResources
     : public Cesium3DTilesSelection::IPrepareRendererResources {
 public:
   UnityPrepareRendererResources(
-      const ::Oxidize::UnityEngine::GameObject& tileset);
+      const ::DotNet::UnityEngine::GameObject& tileset);
 
   virtual void* prepareInLoadThread(
       const CesiumGltf::Model& model,
@@ -53,7 +53,7 @@ public:
       void* pMainThreadRendererResources) noexcept override;
 
 private:
-  ::Oxidize::UnityEngine::GameObject _tileset;
+  ::DotNet::UnityEngine::GameObject _tileset;
 };
 
 } // namespace CesiumForUnity

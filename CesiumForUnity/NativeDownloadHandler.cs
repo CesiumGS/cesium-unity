@@ -1,17 +1,16 @@
-using Oxidize;
+using Reinterop;
 using System;
 using UnityEngine.Networking;
 
 namespace CesiumForUnity
 {
-
     public struct RawDownloadedData
     {
         public IntPtr pointer;
         public int length;
     }
 
-    [OxidizeNativeImplementation("CesiumForUnity::NativeDownloadHandlerImpl", "NativeDownloadHandlerImpl.h")]
+    [ReinteropNativeImplementation("CesiumForUnity::NativeDownloadHandlerImpl", "NativeDownloadHandlerImpl.h")]
     public partial class NativeDownloadHandler : DownloadHandlerScript
     {
         public NativeDownloadHandler()

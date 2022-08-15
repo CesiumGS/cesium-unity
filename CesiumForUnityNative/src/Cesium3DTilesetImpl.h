@@ -4,7 +4,7 @@
 
 #include <memory>
 
-namespace Oxidize::CesiumForUnity {
+namespace DotNet::CesiumForUnity {
 class Cesium3DTileset;
 }
 
@@ -16,16 +16,16 @@ namespace CesiumForUnity {
 
 class Cesium3DTilesetImpl {
 public:
-  Cesium3DTilesetImpl(const Oxidize::CesiumForUnity::Cesium3DTileset& tileset);
+  Cesium3DTilesetImpl(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
   ~Cesium3DTilesetImpl();
   void
-  JustBeforeDelete(const Oxidize::CesiumForUnity::Cesium3DTileset& tileset);
-  void Start(const Oxidize::CesiumForUnity::Cesium3DTileset& tileset);
-  void Update(const Oxidize::CesiumForUnity::Cesium3DTileset& tileset);
+  JustBeforeDelete(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
+  void Start(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
+  void Update(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
 
 private:
   void updateLastViewUpdateResultState(
-      const Oxidize::CesiumForUnity::Cesium3DTileset& tileset,
+      const DotNet::CesiumForUnity::Cesium3DTileset& tileset,
       const Cesium3DTilesSelection::ViewUpdateResult& currentResult);
 
   std::unique_ptr<Cesium3DTilesSelection::Tileset> _pTileset;

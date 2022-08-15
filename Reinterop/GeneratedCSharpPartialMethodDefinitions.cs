@@ -1,7 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace Oxidize
+namespace Reinterop
 {
     internal class GeneratedCSharpPartialMethod
     {

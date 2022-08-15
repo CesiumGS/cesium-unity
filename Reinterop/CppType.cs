@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Text;
 
-namespace Oxidize
+namespace Reinterop
 {
     [Flags]
     internal enum CppTypeFlags
@@ -111,7 +111,7 @@ namespace Oxidize
             namespaces.Reverse();
 
             // If the first two namespaces are identical, remove the duplication.
-            // This is to avoid `Oxidize::Oxidize`.
+            // This is to avoid `Reinterop::Reinterop`.
             if (namespaces.Count >= 2 && namespaces[0] == namespaces[1])
                 namespaces.RemoveAt(0);
 

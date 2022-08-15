@@ -1,4 +1,4 @@
-using Oxidize;
+using Reinterop;
 using UnityEngine;
 using UnityEditor;
 
@@ -6,7 +6,7 @@ namespace CesiumForUnity
 {
 
     [ExecuteInEditMode]
-    [OxidizeNativeImplementation("CesiumForUnity::Cesium3DTilesetImpl", "Cesium3DTilesetImpl.h")]
+    [ReinteropNativeImplementation("CesiumForUnity::Cesium3DTilesetImpl", "Cesium3DTilesetImpl.h")]
     public partial class Cesium3DTileset : MonoBehaviour
     {
         public partial void Start();

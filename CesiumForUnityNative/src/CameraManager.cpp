@@ -4,17 +4,17 @@
 #include <CesiumGeospatial/Transforms.h>
 #include <CesiumUtility/Math.h>
 
-#include <Oxidize/UnityEditor/SceneView.h>
-#include <Oxidize/UnityEngine/Camera.h>
-#include <Oxidize/UnityEngine/GameObject.h>
-#include <Oxidize/UnityEngine/Transform.h>
-#include <Oxidize/UnityEngine/Vector3.h>
+#include <DotNet/UnityEditor/SceneView.h>
+#include <DotNet/UnityEngine/Camera.h>
+#include <DotNet/UnityEngine/GameObject.h>
+#include <DotNet/UnityEngine/Transform.h>
+#include <DotNet/UnityEngine/Vector3.h>
 
 using namespace Cesium3DTilesSelection;
 using namespace CesiumGeospatial;
 using namespace CesiumUtility;
-using namespace Oxidize::UnityEditor;
-using namespace Oxidize::UnityEngine;
+using namespace DotNet::UnityEditor;
+using namespace DotNet::UnityEngine;
 
 namespace CesiumForUnity {
 

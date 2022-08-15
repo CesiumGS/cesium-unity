@@ -9,27 +9,27 @@
 #include <CesiumGeospatial/Transforms.h>
 #include <CesiumGltf/AccessorView.h>
 
-#include <Oxidize/System/Object.h>
-#include <Oxidize/System/String.h>
-#include <Oxidize/System/Text/Encoding.h>
-#include <Oxidize/Unity/Collections/Allocator.h>
-#include <Oxidize/Unity/Collections/LowLevel/Unsafe/NativeArrayUnsafeUtility.h>
-#include <Oxidize/Unity/Collections/NativeArray1.h>
-#include <Oxidize/Unity/Collections/NativeArrayOptions.h>
-#include <Oxidize/UnityEngine/Debug.h>
-#include <Oxidize/UnityEngine/Material.h>
-#include <Oxidize/UnityEngine/Matrix4x4.h>
-#include <Oxidize/UnityEngine/Mesh.h>
-#include <Oxidize/UnityEngine/MeshFilter.h>
-#include <Oxidize/UnityEngine/MeshRenderer.h>
-#include <Oxidize/UnityEngine/MeshTopology.h>
-#include <Oxidize/UnityEngine/Object.h>
-#include <Oxidize/UnityEngine/Quaternion.h>
-#include <Oxidize/UnityEngine/Resources.h>
-#include <Oxidize/UnityEngine/Texture.h>
-#include <Oxidize/UnityEngine/Transform.h>
-#include <Oxidize/UnityEngine/Vector2.h>
-#include <Oxidize/UnityEngine/Vector3.h>
+#include <DotNet/System/Object.h>
+#include <DotNet/System/String.h>
+#include <DotNet/System/Text/Encoding.h>
+#include <DotNet/Unity/Collections/Allocator.h>
+#include <DotNet/Unity/Collections/LowLevel/Unsafe/NativeArrayUnsafeUtility.h>
+#include <DotNet/Unity/Collections/NativeArray1.h>
+#include <DotNet/Unity/Collections/NativeArrayOptions.h>
+#include <DotNet/UnityEngine/Debug.h>
+#include <DotNet/UnityEngine/Material.h>
+#include <DotNet/UnityEngine/Matrix4x4.h>
+#include <DotNet/UnityEngine/Mesh.h>
+#include <DotNet/UnityEngine/MeshFilter.h>
+#include <DotNet/UnityEngine/MeshRenderer.h>
+#include <DotNet/UnityEngine/MeshTopology.h>
+#include <DotNet/UnityEngine/Object.h>
+#include <DotNet/UnityEngine/Quaternion.h>
+#include <DotNet/UnityEngine/Resources.h>
+#include <DotNet/UnityEngine/Texture.h>
+#include <DotNet/UnityEngine/Transform.h>
+#include <DotNet/UnityEngine/Vector2.h>
+#include <DotNet/UnityEngine/Vector3.h>
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/quaternion.hpp>
 
@@ -38,7 +38,7 @@ using namespace CesiumForUnity;
 using namespace CesiumGeometry;
 using namespace CesiumGeospatial;
 using namespace CesiumGltf;
-using namespace Oxidize;
+using namespace DotNet;
 
 namespace {
 

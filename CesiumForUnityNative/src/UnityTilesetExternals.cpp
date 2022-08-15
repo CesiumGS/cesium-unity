@@ -9,14 +9,14 @@
 #include <CesiumAsync/CachingAssetAccessor.h>
 #include <CesiumAsync/SqliteCache.h>
 
-#include <Oxidize/System/String.h>
-#include <Oxidize/UnityEngine/Application.h>
+#include <DotNet/System/String.h>
+#include <DotNet/UnityEngine/Application.h>
 
 #include <memory>
 
 using namespace Cesium3DTilesSelection;
 using namespace CesiumAsync;
-using namespace Oxidize;
+using namespace DotNet;
 
 namespace CesiumForUnity {
 
@@ -51,7 +51,7 @@ const std::shared_ptr<CreditSystem>& getCreditSystem() {
 } // namespace
 
 Cesium3DTilesSelection::TilesetExternals
-createTilesetExternals(const ::Oxidize::UnityEngine::GameObject& tileset) {
+createTilesetExternals(const ::DotNet::UnityEngine::GameObject& tileset) {
   std::string tempPath =
       UnityEngine::Application::temporaryCachePath().ToStlString();
   std::string cacheDBPath = tempPath + "/cesium-request-cache.sqlite";

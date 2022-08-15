@@ -1,9 +1,9 @@
 #include "UnityTaskProcessor.h"
 
-#include <Oxidize/System/Action.h>
-#include <Oxidize/System/Threading/Tasks/Task.h>
+#include <DotNet/System/Action.h>
+#include <DotNet/System/Threading/Tasks/Task.h>
 
-using namespace Oxidize;
+using namespace DotNet;
 
 namespace CesiumForUnity {
 

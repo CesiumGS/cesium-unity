@@ -9,6 +9,6 @@ cpp_header_path = ../CesiumForUnityNative/generated/include
 cpp_source_path = ../CesiumForUnityNative/generated/src
 
 # The namespace with which to prefix all C# namespaces. For example, if this
-# property is set to "Oxidize", then anything in the "System" namespaces in C#
-# will be found in the "Oxidize::System" namespace in C++.
-base_namespace = Oxidize
+# property is set to "DotNet", then anything in the "System" namespaces in C#
+# will be found in the "DotNet::System" namespace in C++.
+base_namespace = DotNet

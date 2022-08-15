@@ -1,4 +1,4 @@
-﻿namespace Oxidize
+﻿namespace Reinterop
 {
     internal record GeneratedCppImplementationInvokerFunction(
         string Content,

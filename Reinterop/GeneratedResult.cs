@@ -1,4 +1,4 @@
-﻿namespace Oxidize
+﻿namespace Reinterop
 {
     internal class GeneratedResult
     {
@@ -29,7 +29,7 @@
 
         /// <summary>
         /// The generated extern "C" functions that are called by the C# side
-        /// to invoke a partial method declared on a class with the `OxidizeNativeImplementation`
+        /// to invoke a partial method declared on a class with the `ReinteropNativeImplementation`
         /// attribute. These functions call corresponding methods on a user-specified implementation
         /// class.
         /// </summary>

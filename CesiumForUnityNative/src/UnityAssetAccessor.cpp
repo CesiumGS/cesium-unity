@@ -2,15 +2,15 @@
 
 #include <CesiumAsync/IAssetResponse.h>
 
-#include <Oxidize/CesiumForUnity/NativeDownloadHandler.h>
-#include <Oxidize/System/Action1.h>
-#include <Oxidize/System/String.h>
-#include <Oxidize/UnityEngine/Networking/DownloadHandler.h>
-#include <Oxidize/UnityEngine/Networking/UnityWebRequest.h>
-#include <Oxidize/UnityEngine/Networking/UnityWebRequestAsyncOperation.h>
+#include <DotNet/CesiumForUnity/NativeDownloadHandler.h>
+#include <DotNet/System/Action1.h>
+#include <DotNet/System/String.h>
+#include <DotNet/UnityEngine/Networking/DownloadHandler.h>
+#include <DotNet/UnityEngine/Networking/UnityWebRequest.h>
+#include <DotNet/UnityEngine/Networking/UnityWebRequestAsyncOperation.h>
 
 using namespace CesiumAsync;
-using namespace Oxidize;
+using namespace DotNet;
 
 namespace {
 
@@ -18,7 +18,7 @@ class UnityAssetResponse : public IAssetResponse {
 public:
   UnityAssetResponse(
       const UnityEngine::Networking::UnityWebRequest& request,
-      const Oxidize::CesiumForUnity::NativeDownloadHandler& handler)
+      const DotNet::CesiumForUnity::NativeDownloadHandler& handler)
       : _statusCode(uint16_t(request.responseCode())),
         _contentType(request.GetResponseHeader(System::String("Content-Type"))
                          .ToStlString()),
@@ -41,14 +41,14 @@ private:
   uint16_t _statusCode;
   std::string _contentType;
   HttpHeaders _headers;
-  ::Oxidize::CesiumForUnity::NativeDownloadHandler _handler;
+  ::DotNet::CesiumForUnity::NativeDownloadHandler _handler;
 };
 
 class UnityAssetRequest : public IAssetRequest {
 public:
   UnityAssetRequest(
-      const Oxidize::UnityEngine::Networking::UnityWebRequest& request,
-      const Oxidize::CesiumForUnity::NativeDownloadHandler& handler)
+      const DotNet::UnityEngine::Networking::UnityWebRequest& request,
+      const DotNet::CesiumForUnity::NativeDownloadHandler& handler)
       : _method(request.method().ToStlString()),
         _url(request.url().ToStlString()),
         _headers(),
@@ -85,7 +85,7 @@ UnityAssetAccessor::get(
     UnityEngine::Networking::UnityWebRequest request =
         UnityEngine::Networking::UnityWebRequest::Get(System::String(url));
 
-    Oxidize::CesiumForUnity::NativeDownloadHandler handler{};
+    DotNet::CesiumForUnity::NativeDownloadHandler handler{};
     request.downloadHandler(handler);
 
     for (const auto& header : headers) {

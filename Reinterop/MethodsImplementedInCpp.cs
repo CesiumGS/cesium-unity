@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Reflection.Metadata;
 using System.Xml.Linq;
 
-namespace Oxidize
+namespace Reinterop
 {
     internal class MethodsImplementedInCpp
     {
@@ -41,9 +41,9 @@ namespace Oxidize
                     $$"""
                     private void CreateImplementation()
                     {
-                        Oxidize.OxidizeInitializer.Initialize();
+                        Reinterop.ReinteropInitializer.Initialize();
                         System.Diagnostics.Debug.Assert(_implementation == System.IntPtr.Zero, "Implementation is already created. Be sure to call CreateImplementation only once.");
-                        _implementation = {{createName}}(Oxidize.ObjectHandleUtility.CreateHandle(this));
+                        _implementation = {{createName}}(Reinterop.ObjectHandleUtility.CreateHandle(this));
                     }
                     """,
                 interopFunctionDeclaration:
@@ -86,7 +86,7 @@ namespace Oxidize
                     {
                         if (_implementation != System.IntPtr.Zero)
                         {
-                            {{disposeName}}(Oxidize.ObjectHandleUtility.CreateHandle(this), _implementation);
+                            {{disposeName}}(Reinterop.ObjectHandleUtility.CreateHandle(this), _implementation);
                             _implementation = System.IntPtr.Zero;
                         }
                     }
@@ -178,7 +178,7 @@ namespace Oxidize
                     private static unsafe readonly {{baseName}}Type {{baseName}}Delegate = new {{baseName}}Type({{baseName}});
                     private static unsafe IntPtr {{baseName}}(IntPtr thiz)
                     {
-                        Oxidize.OxidizeInitializer.Initialize();
+                        Reinterop.ReinteropInitializer.Initialize();
                         return ({{csWrapperType.GetConversionFromInteropType("thiz")}}).NativeImplementation;
                     }
                     """

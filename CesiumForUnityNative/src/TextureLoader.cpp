@@ -2,12 +2,12 @@
 
 #include <CesiumGltf/Model.h>
 
-#include <Oxidize/UnityEngine/Texture.h>
-#include <Oxidize/UnityEngine/Texture2D.h>
-#include <Oxidize/UnityEngine/TextureFormat.h>
+#include <DotNet/UnityEngine/Texture.h>
+#include <DotNet/UnityEngine/Texture2D.h>
+#include <DotNet/UnityEngine/TextureFormat.h>
 
 using namespace CesiumGltf;
-using namespace Oxidize;
+using namespace DotNet;
 
 namespace CesiumForUnity {
 

@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <vector>
 
-namespace Oxidize::CesiumForUnity {
+namespace DotNet::CesiumForUnity {
 class NativeDownloadHandler;
 }
 
@@ -15,11 +15,11 @@ namespace CesiumForUnity {
 class NativeDownloadHandlerImpl {
 public:
   NativeDownloadHandlerImpl(
-      const ::Oxidize::CesiumForUnity::NativeDownloadHandler& handler);
+      const ::DotNet::CesiumForUnity::NativeDownloadHandler& handler);
   void JustBeforeDelete(
-      const ::Oxidize::CesiumForUnity::NativeDownloadHandler& handler);
+      const ::DotNet::CesiumForUnity::NativeDownloadHandler& handler);
   bool ReceiveDataNative(
-      const ::Oxidize::CesiumForUnity::NativeDownloadHandler& handler,
+      const ::DotNet::CesiumForUnity::NativeDownloadHandler& handler,
       void* data,
       std::int32_t dataLength);
 

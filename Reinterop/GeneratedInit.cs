@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Oxidize
+namespace Reinterop
 {
     internal record GeneratedInitFunction(
         string CppName,
@@ -37,7 +37,7 @@ namespace Oxidize
             string headerPath = options.OutputHeaderDirectory;
             if (options.BaseNamespace != null)
                 headerPath = Path.Combine(headerPath, options.BaseNamespace);
-            headerPath = Path.Combine(headerPath, "initializeOxidize.h");
+            headerPath = Path.Combine(headerPath, "initializeReinterop.h");
 
             CppSourceFile? initializeHeader = null;
             if (!sourceFiles.TryGetValue(headerPath, out initializeHeader))
@@ -53,11 +53,11 @@ namespace Oxidize
             headerNamespace.Members.Add(
                 $$"""
                 extern "C" {
-                __declspec(dllexport) void initializeOxidize(void** functionPointers, std::int32_t count);
+                __declspec(dllexport) void initializeReinterop(void** functionPointers, std::int32_t count);
                 }
                 """);
 
-            string sourcePath = Path.Combine(options.OutputSourceDirectory, "initializeOxidize.cpp");
+            string sourcePath = Path.Combine(options.OutputSourceDirectory, "initializeReinterop.cpp");
 
             CppSourceFile? initializeSource = null;
             if (!sourceFiles.TryGetValue(sourcePath, out initializeSource))
@@ -78,7 +78,7 @@ namespace Oxidize
                 $$"""
                 extern "C" {
 
-                __declspec(dllexport) void initializeOxidize(void** functionPointers, std::int32_t count) {
+                __declspec(dllexport) void initializeReinterop(void** functionPointers, std::int32_t count) {
                   // If this assertion fails, the C# and C++ layers are out of sync.
                   assert(count == {{Functions.Count}});
                 
@@ -102,9 +102,9 @@ namespace Oxidize
                 using System;
                 using System.Runtime.InteropServices;
 
-                namespace Oxidize
+                namespace Reinterop
                 {
-                    public class OxidizeInitializer
+                    public class ReinteropInitializer
                     {
                         public static void Initialize()
                         {
@@ -112,19 +112,19 @@ namespace Oxidize
                             // called exactly once.
                         }
 
-                        static OxidizeInitializer()
+                        static ReinteropInitializer()
                         {
                             unsafe
                             {
                                 IntPtr memory = Marshal.AllocHGlobal(sizeof(IntPtr) * {{Functions.Count}});
                                 int i = 0;
                                 {{GetFunctionPointerInitLines().JoinAndIndent("                ")}}
-                                initializeOxidize(memory, {{Functions.Count}});
+                                initializeReinterop(memory, {{Functions.Count}});
                             }
                         }
 
                         [DllImport("CesiumForUnityNative.dll", CallingConvention=CallingConvention.Cdecl)]
-                        private static extern void initializeOxidize(IntPtr functionPointers, int count);
+                        private static extern void initializeReinterop(IntPtr functionPointers, int count);
 
                         {{GetContent().JoinAndIndent("        ")}}
                     }

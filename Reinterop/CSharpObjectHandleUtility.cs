@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace Oxidize
+namespace Reinterop
 {
     /// <summary>
     /// Inserts the "ObjectHandle" class into an assembly as it is compiled.
@@ -19,9 +19,9 @@ namespace Oxidize
             using System;
             using System.Runtime.InteropServices;
 
-            namespace Oxidize
+            namespace Reinterop
             {
-                [Oxidize]
+                [Reinterop]
                 public static class ObjectHandleUtility
                 {
                     public static IntPtr CreateHandle(object? o)
