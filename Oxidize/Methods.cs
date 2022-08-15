@@ -19,6 +19,18 @@ namespace Oxidize
             }
         }
 
+        private static IMethodSymbol? FindMethod(TypeToGenerate item, Func<IMethodSymbol, bool> predicate)
+        {
+            IMethodSymbol? result = item.Methods.FirstOrDefault(predicate);
+            if (result != null)
+                return result;
+
+            if (item.BaseClass != null)
+                return FindMethod(item.BaseClass, predicate);
+
+            return null;
+        }
+
         public static void GenerateSingleMethod(CppGenerationContext context, TypeToGenerate item, GeneratedResult result, IMethodSymbol method)
         {
             GeneratedCppDeclaration declaration = result.CppDeclaration;
@@ -50,7 +62,7 @@ namespace Oxidize
                 IMethodSymbol genericMethod = method.ConstructedFrom;
 
                 // Only add the template declaration if this is the first method constructed from this template.
-                IMethodSymbol? first = item.Methods.First(m => SymbolEqualityComparer.Default.Equals(m.ConstructedFrom, genericMethod));
+                IMethodSymbol? first = FindMethod(item, m => SymbolEqualityComparer.Default.Equals(m.ConstructedFrom, genericMethod));
                 if (SymbolEqualityComparer.Default.Equals(first, method))
                 {
                     CppType genericReturn = CppType.FromCSharp(context, genericMethod.ReturnType).AsReturnType();

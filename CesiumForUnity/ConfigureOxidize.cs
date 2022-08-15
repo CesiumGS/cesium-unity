@@ -38,6 +38,7 @@ internal partial class ConfigureOxidize
         Camera svc = sv.camera;
 
         GameObject go = new GameObject();
+        go.name = go.name;
         go = new GameObject("name");
         go.SetActive(go.activeSelf);
         Transform transform = go.transform;
@@ -65,7 +66,7 @@ internal partial class ConfigureOxidize
 
         MeshRenderer meshRenderer = new MeshRenderer();
         GameObject meshGameObject = meshRenderer.gameObject;
-        meshRenderer.material = meshRenderer.material;
+        meshRenderer.material = UnityEngine.Object.Instantiate(meshRenderer.material);
         meshRenderer.material.SetTexture("name", texture2D);
 
         MeshFilter meshFilter = new MeshFilter();

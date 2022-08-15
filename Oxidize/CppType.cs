@@ -339,6 +339,11 @@ namespace Oxidize
                 case InteropTypeKind.NonBlittableStructWrapper:
                 case InteropTypeKind.Delegate:
                     return this.AsConstReference();
+                case InteropTypeKind.GenericParameter:
+                    // TODO: ideally, we wouldn't pass primitives by const reference, but
+                    // we can't easily tell from the generic parameter. So just pass all parameters
+                    // of generic type by const reference.
+                    return this.AsConstReference();
             }
 
             return this;

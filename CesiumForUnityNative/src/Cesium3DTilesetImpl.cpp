@@ -6,6 +6,7 @@
 #include <Cesium3DTilesSelection/Tileset.h>
 
 #include <Oxidize/CesiumForUnity/Cesium3DTileset.h>
+#include <Oxidize/System/String.h>
 #include <Oxidize/UnityEngine/GameObject.h>
 
 using namespace Cesium3DTilesSelection;
@@ -47,7 +48,7 @@ void Cesium3DTilesetImpl::Update(
 
   const ViewUpdateResult& updateResult =
       this->_pTileset->updateView(viewStates);
-  this->updateLastViewUpdateResultState(updateResult);
+  this->updateLastViewUpdateResultState(tileset, updateResult);
 
   for (auto pTile : updateResult.tilesToNoLongerRenderThisFrame) {
     if (pTile->getState() != Tile::LoadState::Done) {
@@ -75,6 +76,7 @@ void Cesium3DTilesetImpl::Update(
 }
 
 void Cesium3DTilesetImpl::updateLastViewUpdateResultState(
+    const Oxidize::CesiumForUnity::Cesium3DTileset& tileset,
     const Cesium3DTilesSelection::ViewUpdateResult& currentResult) {
   const ViewUpdateResult& previousResult = this->_lastUpdateResult;
   if (currentResult.tilesToRenderThisFrame.size() !=
@@ -94,7 +96,7 @@ void Cesium3DTilesetImpl::updateLastViewUpdateResultState(
         "{0}: Visited {1}, Culled Visited {2}, Rendered {3}, Culled {4}, Max "
         "Depth Visited {5}, Loading-Low {6}, Loading-Medium {7}, Loading-High "
         "{8}",
-        "TODO", // this->GetName().,
+        tileset.gameObject().name().ToStlString(),
         currentResult.tilesVisited,
         currentResult.culledTilesVisited,
         currentResult.tilesToRenderThisFrame.size(),

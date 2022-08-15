@@ -25,6 +25,7 @@ public:
 
 private:
   void updateLastViewUpdateResultState(
+      const Oxidize::CesiumForUnity::Cesium3DTileset& tileset,
       const Cesium3DTilesSelection::ViewUpdateResult& currentResult);
 
   std::unique_ptr<Cesium3DTilesSelection::Tileset> _pTileset;

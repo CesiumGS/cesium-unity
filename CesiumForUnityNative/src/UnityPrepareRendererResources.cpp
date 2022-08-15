@@ -23,6 +23,7 @@
 #include <Oxidize/UnityEngine/MeshFilter.h>
 #include <Oxidize/UnityEngine/MeshRenderer.h>
 #include <Oxidize/UnityEngine/MeshTopology.h>
+#include <Oxidize/UnityEngine/Object.h>
 #include <Oxidize/UnityEngine/Quaternion.h>
 #include <Oxidize/UnityEngine/Resources.h>
 #include <Oxidize/UnityEngine/Texture.h>
@@ -213,9 +214,9 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         UnityEngine::Material sharedMaterial =
             UnityEngine::Resources::Load<UnityEngine::Material>(
                 System::String("CesiumDefaultMaterial"));
-        meshRenderer.material(sharedMaterial);
-
-        UnityEngine::Material material = meshRenderer.material();
+        UnityEngine::Material material =
+            UnityEngine::Object::Instantiate(sharedMaterial);
+        meshRenderer.material(material);
 
         const Material* pMaterial =
             Model::getSafe(&gltf.materials, primitive.material);
