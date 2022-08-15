@@ -1,6 +1,5 @@
 #include "UnityPrepareRendererResources.h"
 
-#include "Bindings.h"
 #include "TextureLoader.h"
 
 #include <Cesium3DTilesSelection/GltfContent.h>
@@ -10,6 +9,27 @@
 #include <CesiumGeospatial/Transforms.h>
 #include <CesiumGltf/AccessorView.h>
 
+#include <DotNet/System/Object.h>
+#include <DotNet/System/String.h>
+#include <DotNet/System/Text/Encoding.h>
+#include <DotNet/Unity/Collections/Allocator.h>
+#include <DotNet/Unity/Collections/LowLevel/Unsafe/NativeArrayUnsafeUtility.h>
+#include <DotNet/Unity/Collections/NativeArray1.h>
+#include <DotNet/Unity/Collections/NativeArrayOptions.h>
+#include <DotNet/UnityEngine/Debug.h>
+#include <DotNet/UnityEngine/Material.h>
+#include <DotNet/UnityEngine/Matrix4x4.h>
+#include <DotNet/UnityEngine/Mesh.h>
+#include <DotNet/UnityEngine/MeshFilter.h>
+#include <DotNet/UnityEngine/MeshRenderer.h>
+#include <DotNet/UnityEngine/MeshTopology.h>
+#include <DotNet/UnityEngine/Object.h>
+#include <DotNet/UnityEngine/Quaternion.h>
+#include <DotNet/UnityEngine/Resources.h>
+#include <DotNet/UnityEngine/Texture.h>
+#include <DotNet/UnityEngine/Transform.h>
+#include <DotNet/UnityEngine/Vector2.h>
+#include <DotNet/UnityEngine/Vector3.h>
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/quaternion.hpp>
 
@@ -18,17 +38,17 @@ using namespace CesiumForUnity;
 using namespace CesiumGeometry;
 using namespace CesiumGeospatial;
 using namespace CesiumGltf;
-using namespace System;
+using namespace DotNet;
 
 namespace {
 
 template <typename T>
 void setTriangles(UnityEngine::Mesh& mesh, const AccessorView<T>& indices) {
-  Unity::Collections::NativeArray_1<System::Int32> nativeArrayTriangles(
+  Unity::Collections::NativeArray1<std::int32_t> nativeArrayTriangles(
       indices.size(),
       Unity::Collections::Allocator::Temp,
       Unity::Collections::NativeArrayOptions::UninitializedMemory);
-  System::Int32* triangles = static_cast<System::Int32*>(
+  std::int32_t* triangles = static_cast<std::int32_t*>(
       Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
           GetUnsafeBufferPointerWithoutChecks(nativeArrayTriangles));
 
@@ -36,7 +56,12 @@ void setTriangles(UnityEngine::Mesh& mesh, const AccessorView<T>& indices) {
     triangles[i] = indices[i];
   }
 
-  mesh.SetIndices<System::Int32>(nativeArrayTriangles, UnityEngine::MeshTopology::Triangles, 0, true, 0);
+  mesh.SetIndices<std::int32_t>(
+      nativeArrayTriangles,
+      UnityEngine::MeshTopology::Triangles,
+      0,
+      true,
+      0);
 
   nativeArrayTriangles.Dispose();
 }
@@ -44,7 +69,7 @@ void setTriangles(UnityEngine::Mesh& mesh, const AccessorView<T>& indices) {
 } // namespace
 
 UnityPrepareRendererResources::UnityPrepareRendererResources(
-    UnityEngine::GameObject& tileset)
+    const UnityEngine::GameObject& tileset)
     : _tileset(tileset) {}
 
 void* UnityPrepareRendererResources::prepareInLoadThread(
@@ -68,7 +93,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
   const QuadtreeTileID* pQ = std::get_if<QuadtreeTileID>(&tile.getTileID());
   if (pQ) {
     if (pQ->level >= 14) {
-      UnityEngine::Debug::Log(String(">=14"));
+      UnityEngine::Debug::Log(System::String(">=14"));
     }
   }
 
@@ -80,9 +105,11 @@ void* UnityPrepareRendererResources::prepareInMainThread(
     name = urlIt->second.getStringOrDefault("glTF");
   }
 
-  auto pModelGameObject =
-      std::make_unique<UnityEngine::GameObject>(String(name.c_str()));
-  pModelGameObject->GetTransform().SetParent(this->_tileset.GetTransform());
+  auto pModelGameObject = std::make_unique<UnityEngine::GameObject>(
+      System::Text::Encoding::UTF8().GetString(
+          reinterpret_cast<std::uint8_t*>(name.data()),
+          name.size()));
+  pModelGameObject->transform().parent(this->_tileset.transform());
   pModelGameObject->SetActive(false);
 
   glm::dmat4 tileTransform = tile.getTransform();
@@ -118,9 +145,9 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         }
 
         // TODO: better name (index of mesh and primitive?)
-        UnityEngine::GameObject primitiveGameObject(String("Primitive"));
-        primitiveGameObject.GetTransform().SetParent(
-            pModelGameObject->GetTransform());
+        UnityEngine::GameObject primitiveGameObject(
+            System::String("Primitive"));
+        primitiveGameObject.transform().parent(pModelGameObject->transform());
 
         // Hard-coded "georeference" to put the Unity origin at a default
         // location in Melbourne and adjust for Unity left-handed, Y-up
@@ -162,18 +189,22 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
         glm::dquat rotation = glm::quat_cast(rotationMatrix);
 
-        primitiveGameObject.GetTransform().SetPosition(
-            UnityEngine::Vector3(translation.x, translation.y, translation.z));
-        primitiveGameObject.GetTransform().SetRotation(UnityEngine::Quaternion(
-            rotation.x,
-            rotation.y,
-            rotation.z,
-            rotation.w));
-        primitiveGameObject.GetTransform().SetLocalScale(
-            UnityEngine::Vector3(scale.x, scale.y, scale.z));
+        primitiveGameObject.transform().position(UnityEngine::Vector3{
+            float(translation.x),
+            float(translation.y),
+            float(translation.z)});
+        primitiveGameObject.transform().rotation(UnityEngine::Quaternion{
+            float(rotation.x),
+            float(rotation.y),
+            float(rotation.z),
+            float(rotation.w)});
+        primitiveGameObject.transform().localScale(UnityEngine::Vector3{
+            float(scale.x),
+            float(scale.y),
+            float(scale.z)});
 
         UnityEngine::Matrix4x4 compare =
-            primitiveGameObject.GetTransform().GetLocalToWorldMatrix();
+            primitiveGameObject.transform().localToWorldMatrix();
 
         UnityEngine::MeshFilter meshFilter =
             primitiveGameObject.AddComponent<UnityEngine::MeshFilter>();
@@ -182,10 +213,10 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
         UnityEngine::Material sharedMaterial =
             UnityEngine::Resources::Load<UnityEngine::Material>(
-                String("CesiumDefaultMaterial"));
-        meshRenderer.SetMaterial(sharedMaterial);
-
-        UnityEngine::Material material = meshRenderer.GetMaterial();
+                System::String("CesiumDefaultMaterial"));
+        UnityEngine::Material material =
+            UnityEngine::Object::Instantiate(sharedMaterial);
+        meshRenderer.material(material);
 
         const Material* pMaterial =
             Model::getSafe(&gltf.materials, primitive.material);
@@ -196,14 +227,14 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             UnityEngine::Texture texture =
                 TextureLoader::loadTexture(gltf, baseColorTexture->index);
             if (texture != nullptr) {
-              material.SetTexture(String("_MainTex"), texture);
+              material.SetTexture(System::String("_MainTex"), texture);
             }
           }
         }
 
         UnityEngine::Mesh unityMesh{};
 
-        Unity::Collections::NativeArray_1<UnityEngine::Vector3>
+        Unity::Collections::NativeArray1<UnityEngine::Vector3>
             nativeArrayVertices(
                 positionView.size(),
                 Unity::Collections::Allocator::Temp,
@@ -222,7 +253,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           int32_t normalAccessorID = normalAccessorIt->second;
           AccessorView<UnityEngine::Vector3> normalView(gltf, normalAccessorID);
           if (normalView.status() == AccessorViewStatus::Valid) {
-            Unity::Collections::NativeArray_1<UnityEngine::Vector3>
+            Unity::Collections::NativeArray1<UnityEngine::Vector3>
                 nativeArrayNormals(
                     normalView.size(),
                     Unity::Collections::Allocator::Temp,
@@ -248,7 +279,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
               texCoord0AccessorID);
 
           if (texCoord0View.status() == AccessorViewStatus::Valid) {
-            Unity::Collections::NativeArray_1<UnityEngine::Vector2>
+            Unity::Collections::NativeArray1<UnityEngine::Vector2>
                 nativeArrayTexCoord0s(
                     texCoord0View.size(),
                     Unity::Collections::Allocator::Temp,
@@ -282,7 +313,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           setTriangles(unityMesh, indices32);
         }
 
-        meshFilter.SetMesh(unityMesh);
+        meshFilter.mesh(unityMesh);
       });
 
   return pModelGameObject.release();

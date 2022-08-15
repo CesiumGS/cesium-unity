@@ -4,8 +4,8 @@
 
 #include <vector>
 
-namespace UnityEngine {
-struct GameObject;
+namespace DotNet::UnityEngine {
+class GameObject;
 }
 
 namespace CesiumForUnity {
@@ -13,7 +13,7 @@ namespace CesiumForUnity {
 class CameraManager {
 public:
   static std::vector<Cesium3DTilesSelection::ViewState>
-  getAllCameras(UnityEngine::GameObject& context);
+  getAllCameras(const DotNet::UnityEngine::GameObject& context);
 };
 
 } // namespace CesiumForUnity

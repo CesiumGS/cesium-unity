@@ -1,3 +1,4 @@
+using Reinterop;
 using UnityEngine;
 using UnityEditor;
 
@@ -5,10 +6,11 @@ namespace CesiumForUnity
 {
 
     [ExecuteInEditMode]
-    public abstract class AbstractBaseCesium3DTileset : MonoBehaviour
+    [ReinteropNativeImplementation("CesiumForUnity::Cesium3DTilesetImpl", "Cesium3DTilesetImpl.h")]
+    public partial class Cesium3DTileset : MonoBehaviour
     {
-        public abstract void Start();
-        public abstract void Update();
+        public partial void Start();
+        public partial void Update();
 
         void OnEnable()
         {
@@ -28,5 +30,4 @@ namespace CesiumForUnity
             EditorApplication.update -= Update;
         }
     }
-
 }

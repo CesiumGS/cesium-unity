@@ -2,13 +2,18 @@
 
 #include <CesiumGltf/Model.h>
 
+#include <DotNet/UnityEngine/Texture.h>
+#include <DotNet/UnityEngine/Texture2D.h>
+#include <DotNet/UnityEngine/TextureFormat.h>
+
 using namespace CesiumGltf;
+using namespace DotNet;
 
 namespace CesiumForUnity {
 
 UnityEngine::Texture TextureLoader::loadTexture(
     const CesiumGltf::Model& model,
-    int32_t textureIndex) {
+    std::int32_t textureIndex) {
   const Texture* pTexture = Model::getSafe(&model.textures, textureIndex);
   if (pTexture) {
     return TextureLoader::loadTexture(model, *pTexture);

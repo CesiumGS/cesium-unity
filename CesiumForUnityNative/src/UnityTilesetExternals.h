@@ -6,13 +6,13 @@ namespace Cesium3DTilesSelection {
 class TilesetExternals;
 }
 
-namespace UnityEngine {
-struct GameObject;
+namespace DotNet::UnityEngine {
+class GameObject;
 }
 
 namespace CesiumForUnity {
 
 Cesium3DTilesSelection::TilesetExternals
-createTilesetExternals(UnityEngine::GameObject& tileset);
+createTilesetExternals(const ::DotNet::UnityEngine::GameObject& tileset);
 
 }

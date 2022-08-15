@@ -6,7 +6,7 @@ project(CesiumForUnityNative
     LANGUAGES CXX C
 )
 
-# Install to 
+# Install to
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_LIST_DIR}/../CesiumForUnityNativeBindings/native)
 
 add_subdirectory(extern/cesium-native EXCLUDE_FROM_ALL)
@@ -27,7 +27,9 @@ target_include_directories(
     CesiumForUnityNative
     PRIVATE
         src
+        include
         generated/src
+        generated/include
 )
 
 target_link_libraries(

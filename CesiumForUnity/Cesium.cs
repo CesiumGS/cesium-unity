@@ -4,6 +4,5 @@ namespace CesiumForUnity
 {
     public class Cesium
     {
-
     }
 }

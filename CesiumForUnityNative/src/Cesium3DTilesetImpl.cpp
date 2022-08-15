@@ -1,33 +1,35 @@
-#include "Cesium3DTileset.h"
+#include "Cesium3DTilesetImpl.h"
 
-#include "Bindings.h"
 #include "CameraManager.h"
 #include "UnityTilesetExternals.h"
 
 #include <Cesium3DTilesSelection/Tileset.h>
-#include <CesiumGeospatial/Ellipsoid.h>
-#include <CesiumGeospatial/Transforms.h>
-#include <CesiumUtility/Math.h>
 
-#include <glm/gtc/matrix_inverse.hpp>
-
-#include <memory>
+#include <DotNet/CesiumForUnity/Cesium3DTileset.h>
+#include <DotNet/System/String.h>
+#include <DotNet/UnityEngine/GameObject.h>
 
 using namespace Cesium3DTilesSelection;
-using namespace CesiumForUnity;
-using namespace CesiumGeospatial;
-using namespace CesiumUtility;
-using namespace UnityEngine;
+using namespace DotNet;
 
-CESIUM_FOR_UNITY_CESIUM3DTILESET_DEFAULT_CONTENTS_DEFINITION
-CESIUM_FOR_UNITY_CESIUM3DTILESET_DEFAULT_CONSTRUCTOR_DEFINITION
+namespace CesiumForUnity {
 
-void Cesium3DTileset::Start() {
+Cesium3DTilesetImpl::Cesium3DTilesetImpl(
+    const DotNet::CesiumForUnity::Cesium3DTileset& tileset)
+    : _pTileset(), _lastUpdateResult() {}
+
+Cesium3DTilesetImpl::~Cesium3DTilesetImpl() {}
+
+void Cesium3DTilesetImpl::JustBeforeDelete(
+    const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {}
+
+void Cesium3DTilesetImpl::Start(
+    const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
   TilesetOptions options{};
 
   this->_lastUpdateResult = ViewUpdateResult();
   this->_pTileset = std::make_unique<Tileset>(
-      createTilesetExternals(this->GetGameObject()),
+      createTilesetExternals(tileset.gameObject()),
       69380,
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
       "eyJqdGkiOiJjZmUzNjE3MC0wZmUwLTQzODItODMwZC01ZjE1Yzg1N2Y1MDIiLCJpZCI6MjU4"
@@ -35,17 +37,18 @@ void Cesium3DTileset::Start() {
       options);
 }
 
-void Cesium3DTileset::Update() {
+void Cesium3DTilesetImpl::Update(
+    const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
   if (!this->_pTileset) {
     return;
   }
 
   std::vector<ViewState> viewStates =
-      CameraManager::getAllCameras(this->GetGameObject());
+      CameraManager::getAllCameras(tileset.gameObject());
 
   const ViewUpdateResult& updateResult =
       this->_pTileset->updateView(viewStates);
-  this->updateLastViewUpdateResultState(updateResult);
+  this->updateLastViewUpdateResultState(tileset, updateResult);
 
   for (auto pTile : updateResult.tilesToNoLongerRenderThisFrame) {
     if (pTile->getState() != Tile::LoadState::Done) {
@@ -72,7 +75,8 @@ void Cesium3DTileset::Update() {
   }
 }
 
-void Cesium3DTileset::updateLastViewUpdateResultState(
+void Cesium3DTilesetImpl::updateLastViewUpdateResultState(
+    const DotNet::CesiumForUnity::Cesium3DTileset& tileset,
     const Cesium3DTilesSelection::ViewUpdateResult& currentResult) {
   const ViewUpdateResult& previousResult = this->_lastUpdateResult;
   if (currentResult.tilesToRenderThisFrame.size() !=
@@ -92,7 +96,7 @@ void Cesium3DTileset::updateLastViewUpdateResultState(
         "{0}: Visited {1}, Culled Visited {2}, Rendered {3}, Culled {4}, Max "
         "Depth Visited {5}, Loading-Low {6}, Loading-Medium {7}, Loading-High "
         "{8}",
-        "TODO", // this->GetName().,
+        tileset.gameObject().name().ToStlString(),
         currentResult.tilesVisited,
         currentResult.culledTilesVisited,
         currentResult.tilesToRenderThisFrame.size(),
@@ -105,3 +109,5 @@ void Cesium3DTileset::updateLastViewUpdateResultState(
 
   this->_lastUpdateResult = currentResult;
 }
+
+} // namespace CesiumForUnity

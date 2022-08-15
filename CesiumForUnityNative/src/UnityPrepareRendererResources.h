@@ -1,15 +1,16 @@
 #pragma once
 
-#include "Bindings.h"
-
 #include <Cesium3DTilesSelection/IPrepareRendererResources.h>
+
+#include <DotNet/UnityEngine/GameObject.h>
 
 namespace CesiumForUnity {
 
 class UnityPrepareRendererResources
     : public Cesium3DTilesSelection::IPrepareRendererResources {
 public:
-  UnityPrepareRendererResources(UnityEngine::GameObject& tileset);
+  UnityPrepareRendererResources(
+      const ::DotNet::UnityEngine::GameObject& tileset);
 
   virtual void* prepareInLoadThread(
       const CesiumGltf::Model& model,
@@ -52,7 +53,7 @@ public:
       void* pMainThreadRendererResources) noexcept override;
 
 private:
-  UnityEngine::GameObject _tileset;
+  ::DotNet::UnityEngine::GameObject _tileset;
 };
 
 } // namespace CesiumForUnity
