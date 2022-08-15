@@ -22,14 +22,9 @@ namespace Reinterop
         public string BaseNamespace = "";
 
         /// <summary>
-        /// The directory in which to generate .cpp files.
+        /// The directory in which to generate output C++ files.
         /// </summary>
-        public string OutputSourceDirectory = "generated\\src";
-
-        /// <summary>
-        /// The directory in which to generate .h files.
-        /// </summary>
-        public string OutputHeaderDirectory = "generated\\include";
+        public string OutputDirectory = "generated";
 
         /// <summary>
         /// The compilation for which we're generating C++ code.

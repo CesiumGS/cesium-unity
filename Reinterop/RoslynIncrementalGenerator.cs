@@ -37,8 +37,8 @@ public class RoslynIncrementalGenerator : IIncrementalGenerator
         // Generate C++ code.
         var typeDefinitions = withCppGenerator.Select((pair, _) => pair.Right.GenerateType(pair.Left));
         var typesAndGenerator = typeDefinitions.Collect().Combine(cppGenerator);
-        var sourceFiles = typesAndGenerator.SelectMany((pair, _) => pair.Right.DistributeToSourceFiles(pair.Left));
-        context.RegisterImplementationSourceOutput(sourceFiles, (context, file) => file.Write());
+        var sourceFiles = typesAndGenerator.SelectMany((pair, _) => pair.Right.DistributeToSourceFiles(pair.Left)).Combine(cppGenerator);
+        context.RegisterImplementationSourceOutput(sourceFiles, (context, pair) => pair.Left.Write(pair.Right.Options));
 
         // Generate C++ initialization function
         //context.RegisterImplementationSourceOutput(typesAndGenerator, (context, pair) => pair.Right.WriteInitializeFunction(pair.Left));
@@ -251,16 +251,11 @@ public class RoslynIncrementalGenerator : IIncrementalGenerator
         if (!options.GlobalOptions.TryGetValue("build_property.projectdir", out projectDir))
             projectDir = "";
 
-        string? cppHeaderPath;
-        if (!options.GlobalOptions.TryGetValue("cpp_header_path", out cppHeaderPath))
-            cppHeaderPath = "generated/include";
+        string? cppOutputPath;
+        if (!options.GlobalOptions.TryGetValue("cpp_output_path", out cppOutputPath))
+            cppOutputPath = "generated";
 
-        string? cppSourcePath;
-        if (!options.GlobalOptions.TryGetValue("cpp_source_path", out cppSourcePath))
-            cppSourcePath = "generated/src";
-
-        cppContext.OutputHeaderDirectory = Path.GetFullPath(Path.Combine(projectDir, cppHeaderPath));
-        cppContext.OutputSourceDirectory = Path.GetFullPath(Path.Combine(projectDir, cppSourcePath));
+        cppContext.OutputDirectory = Path.GetFullPath(Path.Combine(projectDir, cppOutputPath));
 
         string? baseNamespace;
         if (!options.GlobalOptions.TryGetValue("base_namespace", out baseNamespace))

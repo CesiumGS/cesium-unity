@@ -30,7 +30,7 @@
         {
             Sort();
 
-            string headerPath = options.OutputHeaderDirectory;
+            string headerPath = "include";
             if (options.BaseNamespace != null)
                 headerPath = Path.Combine(headerPath, options.BaseNamespace);
             headerPath = Path.Combine(headerPath, "initializeReinterop.h");
@@ -53,7 +53,7 @@
                 }
                 """);
 
-            string sourcePath = Path.Combine(options.OutputSourceDirectory, "initializeReinterop.cpp");
+            string sourcePath = Path.Combine("src", "initializeReinterop.cpp");
 
             CppSourceFile? initializeSource = null;
             if (!sourceFiles.TryGetValue(sourcePath, out initializeSource))

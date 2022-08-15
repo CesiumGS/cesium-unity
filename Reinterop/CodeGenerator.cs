@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
+using System.Text;
 
 namespace Reinterop
 {
@@ -249,6 +250,7 @@ namespace Reinterop
 
         public IEnumerable<CppSourceFile> DistributeToSourceFiles(ImmutableArray<GeneratedResult?> generatedResults)
         {
+            // Don't emit C++ code if the C# code has compiler errors.
             Dictionary<string, CppSourceFile> sourceFiles = new Dictionary<string, CppSourceFile>();
 
             // Create source files for the standard types.
@@ -261,7 +263,7 @@ namespace Reinterop
                     continue;
 
                 CppType declarationType = generated.CppDeclaration.Type;
-                string headerPath = Path.Combine(new string[] { Options.OutputHeaderDirectory }.Concat(declarationType.Namespaces).ToArray());
+                string headerPath = Path.Combine(new string[] { "include" }.Concat(declarationType.Namespaces).ToArray());
                 headerPath = Path.Combine(headerPath, declarationType.Name + ".h");
 
                 CppSourceFile? headerFile = null;
@@ -276,7 +278,7 @@ namespace Reinterop
                 generated.CppDeclaration.AddToHeaderFile(headerFile);
 
                 CppType definitionType = generated.CppDefinition.Type;
-                string sourcePath = Path.Combine(Options.OutputSourceDirectory, generated.CppDefinition.Type.Name + ".cpp");
+                string sourcePath = Path.Combine("src", generated.CppDefinition.Type.Name + ".cpp");
 
                 CppSourceFile? sourceFile = null;
                 if (!sourceFiles.TryGetValue(sourcePath, out sourceFile))
@@ -296,6 +298,48 @@ namespace Reinterop
             // Create source files for the initialization process.
             GeneratedInit init = GeneratedInit.Merge(generatedResults.Select(result => result == null ? new GeneratedInit() : result.Init));
             init.GenerateCpp(this.Options, sourceFiles);
+
+            // Read the previous inventory, and delete any files that don't exist in the new one.
+            Directory.CreateDirectory(this.Options.OutputDirectory);
+            using (FileStream f = File.Open(Path.Combine(this.Options.OutputDirectory, "reinterop-inventory.txt"), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
+            {
+                f.Seek(0, SeekOrigin.Begin);
+
+                // Create an inventory of all the files to be written. Sorted. Use forward slashes.
+                string[] files = sourceFiles.Values.Select(f => f.Filename.Replace("\\", "/")).ToArray();
+                Array.Sort(files);
+
+                string[] previousInventory;
+                using (StreamReader reader = new StreamReader(f, Encoding.UTF8, false, 16384, true))
+                {
+                    string previousInventoryText = reader.ReadToEnd();
+                    previousInventory = previousInventoryText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (string inventoryItem in previousInventory)
+                    {
+                        if (Array.BinarySearch(files, inventoryItem) < 0)
+                        {
+                            try
+                            {
+                                File.Delete(Path.Combine(Options.OutputDirectory, inventoryItem));
+                            }
+                            catch (Exception)
+                            {
+                            }
+                        }
+                    }
+                }
+
+                if (previousInventory.Length != files.Length || !previousInventory.SequenceEqual(files))
+                {
+                    f.Seek(0, SeekOrigin.Begin);
+                    f.SetLength(0);
+
+                    using (StreamWriter writer = new StreamWriter(f))
+                    {
+                        writer.Write(string.Join(Environment.NewLine, files));
+                    }
+                }
+            }
 
             return sourceFiles.Values;
         }

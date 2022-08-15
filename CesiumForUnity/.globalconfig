@@ -1,12 +1,8 @@
 ﻿is_global = true
 
-# The output path for generated C++ header files.
+# The output path for generated C++ files.
 # If this is relative, it is relative to the project directory.
-cpp_header_path = ../CesiumForUnityNative/generated/include
-
-# The output path for generated C++ source files.
-# If this is relative, it is relative to the project directory.
-cpp_source_path = ../CesiumForUnityNative/generated/src
+cpp_output_path = ../CesiumForUnityNative/generated
 
 # The namespace with which to prefix all C# namespaces. For example, if this
 # property is set to "DotNet", then anything in the "System" namespaces in C#

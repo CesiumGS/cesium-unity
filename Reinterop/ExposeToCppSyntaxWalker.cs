@@ -97,12 +97,20 @@ namespace Reinterop
                 type = type.OriginalDefinition;
             }
 
+            // Don't add error types.
+            if (type.TypeKind == TypeKind.Error)
+                return new TypeToGenerate(type);
+
             // Don't add generic type parameters
             if (type.Kind == SymbolKind.TypeParameter)
                 return new TypeToGenerate(type);
 
             // Don't add "void"
             if (type.SpecialType == SpecialType.System_Void)
+                return new TypeToGenerate(type);
+
+            // Don't add types without a name.
+            if (type.Name == "")
                 return new TypeToGenerate(type);
 
             TypeToGenerate generationItem;

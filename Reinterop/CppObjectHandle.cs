@@ -21,7 +21,7 @@
         {
             CppType type = GetCppType(context);
 
-            string headerPath = Path.Combine(new[] { context.OutputHeaderDirectory }.Concat(type.Namespaces).Concat(new[] { type.Name + ".h" }).ToArray());
+            string headerPath = Path.Combine(new[] { "include" }.Concat(type.Namespaces).Concat(new[] { type.Name + ".h" }).ToArray());
 
             CppSourceFile? headerFile = null;
             if (!sourceFiles.TryGetValue(headerPath, out headerFile))
@@ -55,7 +55,7 @@
 
             CppType utilityType = new CppType(InteropTypeKind.ClassWrapper, type.Namespaces, "ObjectHandleUtility", null, 0);
 
-            string sourcePath = Path.Combine(context.OutputSourceDirectory, type.Name + ".cpp");
+            string sourcePath = Path.Combine("src", type.Name + ".cpp");
 
             CppSourceFile? sourceFile = null;
             if (!sourceFiles.TryGetValue(sourcePath, out sourceFile))

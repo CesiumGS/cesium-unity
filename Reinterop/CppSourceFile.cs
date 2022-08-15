@@ -43,24 +43,25 @@ namespace Reinterop
                 return content;
         }
 
-        public void Write()
+        public void Write(CppGenerationContext options)
         {
-            string directory = Path.GetDirectoryName(Filename);
+            string path = Path.Combine(options.OutputDirectory, Filename);
+            string directory = Path.GetDirectoryName(path);
             if (!Directory.Exists(directory))
                 Directory.CreateDirectory(directory);
 
             string newContent = this.ToContentString();
 
-            if (File.Exists(Filename))
+            if (File.Exists(path))
             {
-                string existing = File.ReadAllText(Filename, Encoding.UTF8);
+                string existing = File.ReadAllText(path, Encoding.UTF8);
 
                 // If the content hasn't changed, there's no need to rewrite it.
                 if (existing == newContent)
                     return;
             }
 
-            File.WriteAllText(Filename, newContent, Encoding.UTF8);
+            File.WriteAllText(path, newContent, Encoding.UTF8);
         }
 
         private string GetNamespace(string? name, CppSourceFileNamespace content)
