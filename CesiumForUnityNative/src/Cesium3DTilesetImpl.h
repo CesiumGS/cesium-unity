@@ -22,8 +22,12 @@ public:
   JustBeforeDelete(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
   void Start(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
   void Update(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
+  void OnValidate(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
+  void RecreateTileset(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
 
 private:
+  void DestroyTileset(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
+  void LoadTileset(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
   void updateLastViewUpdateResultState(
       const DotNet::CesiumForUnity::Cesium3DTileset& tileset,
       const Cesium3DTilesSelection::ViewUpdateResult& currentResult);

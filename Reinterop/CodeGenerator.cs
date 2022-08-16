@@ -189,7 +189,7 @@ namespace Reinterop
 
                         [System.Runtime.InteropServices.DllImport("{{this.Options.NativeLibraryName}}.dll", CallingConvention=System.Runtime.InteropServices.CallingConvention.Cdecl)]
                         private static extern void {{disposeCallbackName}}(IntPtr callbackFunction);
-                        [System.Runtime.InteropServices.DllImport("{{this.Options.NativeLibraryName}}.dll, CallingConvention=System.Runtime.InteropServices.CallingConvention.Cdecl")]
+                        [System.Runtime.InteropServices.DllImport("{{this.Options.NativeLibraryName}}.dll", CallingConvention=System.Runtime.InteropServices.CallingConvention.Cdecl)]
                         private static extern void {{invokeCallbackName}}({{string.Join(", ", invokeInteropParameters)}});
                     }
                     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]

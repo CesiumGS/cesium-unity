@@ -24,23 +24,12 @@ void Cesium3DTilesetImpl::JustBeforeDelete(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {}
 
 void Cesium3DTilesetImpl::Start(
-    const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
-  TilesetOptions options{};
-
-  this->_lastUpdateResult = ViewUpdateResult();
-  this->_pTileset = std::make_unique<Tileset>(
-      createTilesetExternals(tileset.gameObject()),
-      69380,
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
-      "eyJqdGkiOiJjZmUzNjE3MC0wZmUwLTQzODItODMwZC01ZjE1Yzg1N2Y1MDIiLCJpZCI6MjU4"
-      "LCJpYXQiOjE1MTczNTg0ODF9.Yv10hy_E1N0Ccc4y23fMlNkBtxiFc852wAfUSwmVUaA",
-      options);
-}
+    const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {}
 
 void Cesium3DTilesetImpl::Update(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
   if (!this->_pTileset) {
-    return;
+    this->LoadTileset(tileset);
   }
 
   std::vector<ViewState> viewStates =
@@ -73,6 +62,16 @@ void Cesium3DTilesetImpl::Update(
       pTileGO->SetActive(true);
     }
   }
+}
+
+void Cesium3DTilesetImpl::OnValidate(
+    const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
+  this->DestroyTileset(tileset);
+}
+
+void Cesium3DTilesetImpl::RecreateTileset(
+    const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
+  this->DestroyTileset(tileset);
 }
 
 void Cesium3DTilesetImpl::updateLastViewUpdateResultState(
@@ -108,6 +107,23 @@ void Cesium3DTilesetImpl::updateLastViewUpdateResultState(
   }
 
   this->_lastUpdateResult = currentResult;
+}
+
+void Cesium3DTilesetImpl::DestroyTileset(
+    const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
+  this->_pTileset.reset();
+}
+
+void Cesium3DTilesetImpl::LoadTileset(
+    const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
+  TilesetOptions options{};
+
+  this->_lastUpdateResult = ViewUpdateResult();
+  this->_pTileset = std::make_unique<Tileset>(
+      createTilesetExternals(tileset.gameObject()),
+      tileset.ionAssetID(),
+      tileset.ionAccessToken().ToStlString(),
+      options);
 }
 
 } // namespace CesiumForUnity
