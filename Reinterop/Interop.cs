@@ -72,7 +72,7 @@ namespace Reinterop
             CSharpType csInteropReturnType = csReturnType.AsInteropType();
             string interopReturnTypeString = csInteropReturnType.GetFullyQualifiedName();
 
-            string callParameterList = string.Join(", ", callParameterDetails.Select(parameter => parameter.Type.GetConversionFromInteropType(parameter.Name)));
+            string callParameterList = string.Join(", ", callParameterDetails.Select(parameter => parameter.Type.GetParameterConversionFromInteropType(parameter.Name)));
             string interopParameterList = string.Join(", ", interopParameterDetails.Select(parameter => $"{parameter.InteropType.GetFullyQualifiedName()} {parameter.Name}"));
 
             string implementation;

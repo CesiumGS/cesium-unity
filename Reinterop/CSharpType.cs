@@ -66,10 +66,18 @@ namespace Reinterop
             return variableName;
         }
 
-        public string GetConversionFromInteropType(string variableName)
+        public string GetParameterConversionFromInteropType(string variableName)
         {
             if (this.Kind == InteropTypeKind.ClassWrapper || this.Kind == InteropTypeKind.NonBlittableStructWrapper || this.Kind == InteropTypeKind.Delegate)
                 return $"({this.GetFullyQualifiedName()})Reinterop.ObjectHandleUtility.GetObjectFromHandle({variableName})!";
+
+            return variableName;
+        }
+
+        public string GetReturnValueConversionFromInteropType(string variableName)
+        {
+            if (this.Kind == InteropTypeKind.ClassWrapper || this.Kind == InteropTypeKind.NonBlittableStructWrapper || this.Kind == InteropTypeKind.Delegate)
+                return $"({this.GetFullyQualifiedName()})Reinterop.ObjectHandleUtility.GetObjectAndFreeHandle({variableName})!";
 
             return variableName;
         }

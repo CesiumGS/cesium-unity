@@ -57,6 +57,17 @@ namespace Reinterop
                         return GCHandle.FromIntPtr(handle).Target;
                     }
 
+                    public static object? GetObjectAndFreeHandle(IntPtr handle)
+                    {
+                        if (handle == IntPtr.Zero)
+                            return null;
+
+                        GCHandle gcHandle = GCHandle.FromIntPtr(handle);
+                        object? result = gcHandle.Target;
+                        gcHandle.Free();
+                        return result;
+                    }
+
                     public static void ExposeToCPP()
                     {
                         IntPtr p = CreateHandle(new object());

@@ -150,7 +150,7 @@ namespace Reinterop
             if (invokeMethod.ReturnType.SpecialType != SpecialType.System_Void)
             {
                 csResultImplementation = "var result = ";
-                csReturnImplementation = $"return {csReturnType.GetConversionFromInteropType("result")}";
+                csReturnImplementation = $"return {csReturnType.GetReturnValueConversionFromInteropType("result")}";
             }
 
             result.Init.Functions.Add(new(

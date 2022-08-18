@@ -177,7 +177,7 @@ namespace Reinterop
                     private static unsafe IntPtr {{baseName}}(IntPtr thiz)
                     {
                         Reinterop.ReinteropInitializer.Initialize();
-                        return ({{csWrapperType.GetConversionFromInteropType("thiz")}}).NativeImplementation;
+                        return ({{csWrapperType.GetParameterConversionFromInteropType("thiz")}}).NativeImplementation;
                     }
                     """
             ));
@@ -276,7 +276,7 @@ namespace Reinterop
                 csImplementation =
                     $$"""
                     var result = {{name}}({{string.Join(", ", csParametersInterop.Select(parameter => parameter.Type.GetConversionToInteropType(parameter.CallName)))}});
-                    return {{csReturnType.GetConversionFromInteropType("result")}};
+                    return {{csReturnType.GetReturnValueConversionFromInteropType("result")}};
                     """;
             }
 
