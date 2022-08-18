@@ -370,7 +370,17 @@ namespace Reinterop
                 case InteropTypeKind.ClassWrapper:
                 case InteropTypeKind.NonBlittableStructWrapper:
                 case InteropTypeKind.Delegate:
-                    return $"{variableName}.GetHandle().GetRaw()";
+                    // If this is a reference, we can count on it continuing to
+                    // exist for the duration of the relevant function call, so just
+                    // get the raw handle.
+                    //
+                    // But if it's not a reference, this is a temporary variable storing
+                    // a return value, and the handle value must outlive the ObjectHandle
+                    // instance. So, release it from this instance.
+                    if (this.Flags.HasFlag(CppTypeFlags.Reference))
+                        return $"{variableName}.GetHandle().GetRaw()";
+                    else
+                        return $"{variableName}.GetHandle().Release()";
                 case InteropTypeKind.Enum:
                     return $"::std::uint32_t({variableName})";
                 case InteropTypeKind.Primitive:

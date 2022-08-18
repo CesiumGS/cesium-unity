@@ -47,6 +47,10 @@
                   ObjectHandle& operator=(ObjectHandle&& rhs) noexcept;
                 
                   void* GetRaw() const;
+
+                  // Return the underlying raw handle and set the object's to nullptr
+                  // so it will not be released when this object is destroyed.
+                  void* Release();
                 
                 private:
                   void* _handle;
@@ -107,6 +111,12 @@
                 }
 
                 void* ObjectHandle::GetRaw() const { return this->_handle; }
+
+                void* ObjectHandle::Release() {
+                  void* handle = this->_handle;
+                  this->_handle = nullptr;
+                  return handle;
+                }
                 """);
         }
     }

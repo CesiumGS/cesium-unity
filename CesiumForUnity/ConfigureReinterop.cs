@@ -119,5 +119,8 @@ internal partial class ConfigureReinterop
         tileset.url = tileset.url;
         tileset.ionAssetID = tileset.ionAssetID;
         tileset.ionAccessToken = tileset.ionAccessToken;
+
+        MonoBehaviour mb = tileset;
+        mb.StartCoroutine(new NativeCoroutine(endIteration => endIteration).GetEnumerator());
     }
 }

@@ -6,7 +6,12 @@
 #include <Cesium3DTilesSelection/Tileset.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
+#include <DotNet/CesiumForUnity/NativeCoroutine.h>
+#include <DotNet/System/Collections/IEnumerator.h>
+#include <DotNet/System/Func2.h>
+#include <DotNet/System/Object.h>
 #include <DotNet/System/String.h>
+#include <DotNet/UnityEngine/Coroutine.h>
 #include <DotNet/UnityEngine/GameObject.h>
 
 using namespace Cesium3DTilesSelection;
@@ -111,7 +116,27 @@ void Cesium3DTilesetImpl::updateLastViewUpdateResultState(
 
 void Cesium3DTilesetImpl::DestroyTileset(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
-  this->_pTileset.reset();
+  // Create a coroutine to wait for the tileset's async operations to complete
+  // and then destroy it.
+  std::shared_ptr<Tileset> pTileset = std::move(this->_pTileset);
+  if (!pTileset)
+    return;
+
+  tileset.StartCoroutine(
+      DotNet::CesiumForUnity::NativeCoroutine(
+          System::Func2<System::Object, System::Object>(
+              [pTileset](const System::Object& terminateCoroutine) mutable {
+                if (!pTileset->canBeDestroyedWithoutBlocking()) {
+                  // Tileset can't be destroyed yet, keep going.
+                  return System::Object(nullptr);
+                }
+
+                // It is now safe to destroy the tileset and terminate the
+                // coroutine.
+                pTileset.reset();
+                return terminateCoroutine;
+              }))
+          .GetEnumerator());
 }
 
 void Cesium3DTilesetImpl::LoadTileset(

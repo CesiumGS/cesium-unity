@@ -76,8 +76,6 @@ namespace Reinterop
 
         private void GenerateDelegate(GeneratedResult result, TypeToGenerate item, CppType itemType)
         {
-            // TODO: support delegates that return a value
-
             CppType implementationType = new CppType(InteropTypeKind.Unknown, itemType.Namespaces, itemType.Name + "Native", null, 0, "<functional>");
 
             if (result.CppImplementationInvoker == null)
@@ -96,6 +94,7 @@ namespace Reinterop
                 CppType type = CppType.FromCSharp(this.Options, p.Type);
                 return (Name: p.Name, CsType: CSharpType.FromSymbol(this.Options.Compilation, p.Type), Type: type, InteropType: type.AsInteropType());
             });
+            CppType returnType = CppType.FromCSharp(this.Options, invokeMethod.ReturnType).AsReturnType();
 
             string templateSpecialization = "";
             if (itemType.GenericArguments != null && itemType.GenericArguments.Count > 0)
@@ -110,7 +109,7 @@ namespace Reinterop
                 Content: $"void* (*{itemType.Name}{templateSpecialization}::CreateDelegate)(void* pCallbackFunction) = nullptr;"));
 
             result.CppDeclaration.Elements.Add(new(
-                Content: $"using FunctionSignature = void ({string.Join(", ", callbackParameters.Select(p => p.Type.AsParameterType().GetFullyQualifiedName()))});"
+                Content: $"using FunctionSignature = {returnType.GetFullyQualifiedName()} ({string.Join(", ", callbackParameters.Select(p => p.Type.AsParameterType().GetFullyQualifiedName()))});"
             ));
             result.CppDeclaration.Elements.Add(new(
                 Content: $"{itemType.Name}(std::function<FunctionSignature> callback);",
@@ -144,6 +143,15 @@ namespace Reinterop
             var invokeParameters = callbackParameters.Select(p => $"{p.CsType.GetFullyQualifiedName()} {p.Name}");
             var invokeInteropParameters = new[] { "IntPtr callbackFunction" }.Concat(callbackParameters.Select(p => $"{p.CsType.AsInteropType().GetFullyQualifiedName()} {p.Name}"));
             var callInvokeInteropParameters = new[] { "_callbackFunction" }.Concat(callbackParameters.Select(p => p.CsType.GetConversionToInteropType(p.Name)));
+            var csReturnType = CSharpType.FromSymbol(this.Options.Compilation, invokeMethod.ReturnType);
+
+            string csResultImplementation = "";
+            string csReturnImplementation = "return;";
+            if (invokeMethod.ReturnType.SpecialType != SpecialType.System_Void)
+            {
+                csResultImplementation = "var result = ";
+                csReturnImplementation = $"return {csReturnType.GetConversionFromInteropType("result")}";
+            }
 
             result.Init.Functions.Add(new(
                 CppName: $"{itemType.GetFullyQualifiedName()}::CreateDelegate",
@@ -181,16 +189,19 @@ namespace Reinterop
                             }
                         }
 
-                        public void Invoke({{string.Join(", ", invokeParameters)}})
+                        public {{csReturnType.GetFullyQualifiedName()}} Invoke({{string.Join(", ", invokeParameters)}})
                         {
-                            if (_callbackFunction != null)
-                                {{invokeCallbackName}}({{string.Join(", ", callInvokeInteropParameters)}});
+                            if (_callbackFunction == null)
+                                throw new System.ObjectDisposedException("{{csType.Symbol.Name}}");
+                    
+                            {{csResultImplementation}}{{invokeCallbackName}}({{string.Join(", ", callInvokeInteropParameters)}});
+                            {{csReturnImplementation}};
                         }
 
                         [System.Runtime.InteropServices.DllImport("{{this.Options.NativeLibraryName}}.dll", CallingConvention=System.Runtime.InteropServices.CallingConvention.Cdecl)]
                         private static extern void {{disposeCallbackName}}(IntPtr callbackFunction);
                         [System.Runtime.InteropServices.DllImport("{{this.Options.NativeLibraryName}}.dll", CallingConvention=System.Runtime.InteropServices.CallingConvention.Cdecl)]
-                        private static extern void {{invokeCallbackName}}({{string.Join(", ", invokeInteropParameters)}});
+                        private static extern {{csReturnType.AsInteropType().GetFullyQualifiedName()}} {{invokeCallbackName}}({{string.Join(", ", invokeInteropParameters)}});
                     }
                     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
                     private unsafe delegate IntPtr {{csBaseName}}Type(IntPtr callbackFunction);
@@ -207,12 +218,21 @@ namespace Reinterop
             var interopParameters = new[] { (Name: "pCallbackFunction", CsType: CSharpType.FromSymbol(this.Options.Compilation, this.Options.Compilation.GetSpecialType(SpecialType.System_IntPtr)), Type: CppType.VoidPointer, InteropType: CppType.VoidPointer) }.Concat(callbackParameters);
             var callParameters = callbackParameters.Select(p => p.Type.GetConversionFromInteropType(this.Options, p.Name));
 
+            string resultImplementation = "";
+            string returnImplementation = "return;";
+            if (invokeMethod.ReturnType.SpecialType != SpecialType.System_Void)
+            {
+                resultImplementation = "auto result = ";
+                returnImplementation = $"return {returnType.GetConversionToInteropType(this.Options, "result")};";
+            }
+
             result.CppImplementationInvoker.Functions.Add(new(
                 Content:
                     $$"""
-                    __declspec(dllexport) void {{invokeCallbackName}}({{string.Join(", ", interopParameters.Select(p => $"{p.InteropType.GetFullyQualifiedName()} {p.Name}"))}}) {
+                    __declspec(dllexport) {{returnType.AsInteropType().GetFullyQualifiedName()}} {{invokeCallbackName}}({{string.Join(", ", interopParameters.Select(p => $"{p.InteropType.GetFullyQualifiedName()} {p.Name}"))}}) {
                       auto pFunc = reinterpret_cast<std::function<{{itemType.GetFullyQualifiedName()}}::FunctionSignature>*>(pCallbackFunction);
-                      (*pFunc)({{string.Join(", ", callParameters)}});
+                      {{resultImplementation}}(*pFunc)({{string.Join(", ", callParameters)}});
+                      {{returnImplementation}}
                     }
                     """));
         }

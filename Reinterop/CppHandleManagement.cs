@@ -108,11 +108,24 @@
                 Content: $"const {objectHandleType.GetFullyQualifiedName()}& GetHandle() const;",
                 TypeDeclarationsReferenced: new[] { objectHandleType }
             ));
+            declaration.Elements.Add(new(
+                Content: $"{objectHandleType.GetFullyQualifiedName()}& GetHandle();",
+                TypeDeclarationsReferenced: new[] { objectHandleType }
+            ));
 
             definition.Elements.Add(new(
                 Content:
                     $$"""
                     const {{objectHandleType.GetFullyQualifiedName()}}& {{type.Name}}{{templateSpecialization}}::GetHandle() const {
+                        return this->_handle;
+                    }
+                    """,
+                TypeDefinitionsReferenced: new[] { result.CppDefinition.Type }
+            ));
+            definition.Elements.Add(new(
+                Content:
+                    $$"""
+                    {{objectHandleType.GetFullyQualifiedName()}}& {{type.Name}}{{templateSpecialization}}::GetHandle() {
                         return this->_handle;
                     }
                     """,
