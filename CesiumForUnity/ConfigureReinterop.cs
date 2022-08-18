@@ -68,6 +68,8 @@ internal partial class ConfigureReinterop
         GameObject meshGameObject = meshRenderer.gameObject;
         meshRenderer.material = UnityEngine.Object.Instantiate(meshRenderer.material);
         meshRenderer.material.SetTexture("name", texture2D);
+        UnityEngine.Object.Destroy(meshGameObject);
+        UnityEngine.Object.DestroyImmediate(meshGameObject);
 
         MeshFilter meshFilter = new MeshFilter();
         meshFilter.mesh = mesh;
@@ -96,6 +98,7 @@ internal partial class ConfigureReinterop
         nai.Dispose();
 
         string temporaryCachePath = Application.temporaryCachePath;
+        bool isEditor = Application.isEditor;
 
         Marshal.FreeCoTaskMem(Marshal.StringToCoTaskMemUTF8("hi"));
 

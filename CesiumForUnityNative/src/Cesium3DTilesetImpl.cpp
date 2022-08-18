@@ -125,9 +125,32 @@ void Cesium3DTilesetImpl::DestroyTileset(
   tileset.StartCoroutine(
       DotNet::CesiumForUnity::NativeCoroutine(
           System::Func2<System::Object, System::Object>(
-              [pTileset](const System::Object& terminateCoroutine) mutable {
+              [pTileset, firstTime = true](
+                  const System::Object& terminateCoroutine) mutable {
+                // Do nothing on the first invocation so that the stack can
+                // unwind.
+                if (firstTime) {
+                  firstTime = false;
+                  return System::Object(nullptr);
+                }
+
                 if (!pTileset->canBeDestroyedWithoutBlocking()) {
                   // Tileset can't be destroyed yet, keep going.
+
+                  // But first, mark all tiles inactive so that they disappear immediately.
+                  pTileset->forEachLoadedTile([](Tile& tile) {
+                    if (tile.getState() != Tile::LoadState::Done) {
+                      return;
+                    }
+
+                    UnityEngine::GameObject* pTileGO =
+                        static_cast<UnityEngine::GameObject*>(
+                            tile.getRendererResources());
+                    if (pTileGO) {
+                      pTileGO->SetActive(false);
+                    }
+                  });
+
                   return System::Object(nullptr);
                 }
 

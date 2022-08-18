@@ -16,6 +16,7 @@
 #include <DotNet/Unity/Collections/LowLevel/Unsafe/NativeArrayUnsafeUtility.h>
 #include <DotNet/Unity/Collections/NativeArray1.h>
 #include <DotNet/Unity/Collections/NativeArrayOptions.h>
+#include <DotNet/UnityEngine/Application.h>
 #include <DotNet/UnityEngine/Debug.h>
 #include <DotNet/UnityEngine/Material.h>
 #include <DotNet/UnityEngine/Matrix4x4.h>
@@ -326,6 +327,14 @@ void UnityPrepareRendererResources::free(
   if (pMainThreadResult) {
     UnityEngine::GameObject* pGameObject =
         static_cast<UnityEngine::GameObject*>(pMainThreadResult);
+
+    // In the Editor, we must use DestroyImmediate because Destroy won't
+    // actually destroy the object.
+    if (UnityEngine::Application::isEditor())
+      UnityEngine::Object::DestroyImmediate(*pGameObject);
+    else
+      UnityEngine::Object::Destroy(*pGameObject);
+
     delete pGameObject;
   }
 }
