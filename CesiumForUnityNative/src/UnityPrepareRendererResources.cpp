@@ -145,9 +145,9 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           return;
         }
 
-        // TODO: better name (index of mesh and primitive?)
+        int64_t primitiveIndex = &mesh.primitives[0] - &primitive;
         UnityEngine::GameObject primitiveGameObject(
-            System::String("Primitive"));
+            System::String("Primitive " + std::to_string(primitiveIndex)));
         primitiveGameObject.hideFlags(UnityEngine::HideFlags::DontSave);
         primitiveGameObject.transform().parent(pModelGameObject->transform());
 
