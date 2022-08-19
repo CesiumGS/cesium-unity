@@ -51,6 +51,10 @@ internal partial class ConfigureReinterop
         go.AddComponent<MeshFilter>();
         go.AddComponent<MeshRenderer>();
 
+        go.transform.GetChild(go.transform.childCount - 1);
+        go.transform.DetachChildren();
+        go.hideFlags = HideFlags.DontSave;
+
         Texture2D texture2D = new Texture2D(256, 256, TextureFormat.RGBA32, false, false);
         texture2D.LoadRawTextureData(IntPtr.Zero, 0);
         texture2D.Apply(true, true);

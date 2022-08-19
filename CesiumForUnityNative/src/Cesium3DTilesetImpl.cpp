@@ -122,7 +122,7 @@ void Cesium3DTilesetImpl::DestroyTileset(
   if (!pTileset)
     return;
 
-  tileset.StartCoroutine(
+    tileset.StartCoroutine(
       DotNet::CesiumForUnity::NativeCoroutine(
           System::Func2<System::Object, System::Object>(
               [pTileset, firstTime = true](

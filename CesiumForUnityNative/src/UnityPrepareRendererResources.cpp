@@ -18,6 +18,7 @@
 #include <DotNet/Unity/Collections/NativeArrayOptions.h>
 #include <DotNet/UnityEngine/Application.h>
 #include <DotNet/UnityEngine/Debug.h>
+#include <DotNet/UnityEngine/HideFlags.h>
 #include <DotNet/UnityEngine/Material.h>
 #include <DotNet/UnityEngine/Matrix4x4.h>
 #include <DotNet/UnityEngine/Mesh.h>
@@ -106,10 +107,9 @@ void* UnityPrepareRendererResources::prepareInMainThread(
     name = urlIt->second.getStringOrDefault("glTF");
   }
 
-  auto pModelGameObject = std::make_unique<UnityEngine::GameObject>(
-      System::Text::Encoding::UTF8().GetString(
-          reinterpret_cast<std::uint8_t*>(name.data()),
-          name.size()));
+  auto pModelGameObject =
+      std::make_unique<UnityEngine::GameObject>(System::String(name));
+  pModelGameObject->hideFlags(UnityEngine::HideFlags::DontSave);
   pModelGameObject->transform().parent(this->_tileset.transform());
   pModelGameObject->SetActive(false);
 
@@ -148,6 +148,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         // TODO: better name (index of mesh and primitive?)
         UnityEngine::GameObject primitiveGameObject(
             System::String("Primitive"));
+        primitiveGameObject.hideFlags(UnityEngine::HideFlags::DontSave);
         primitiveGameObject.transform().parent(pModelGameObject->transform());
 
         // Hard-coded "georeference" to put the Unity origin at a default
@@ -325,8 +326,8 @@ void UnityPrepareRendererResources::free(
     void* pLoadThreadResult,
     void* pMainThreadResult) noexcept {
   if (pMainThreadResult) {
-    UnityEngine::GameObject* pGameObject =
-        static_cast<UnityEngine::GameObject*>(pMainThreadResult);
+    std::unique_ptr<UnityEngine::GameObject> pGameObject(
+        static_cast<UnityEngine::GameObject*>(pMainThreadResult));
 
     // In the Editor, we must use DestroyImmediate because Destroy won't
     // actually destroy the object.
@@ -334,8 +335,6 @@ void UnityPrepareRendererResources::free(
       UnityEngine::Object::DestroyImmediate(*pGameObject);
     else
       UnityEngine::Object::Destroy(*pGameObject);
-
-    delete pGameObject;
   }
 }
 
