@@ -10,7 +10,7 @@ namespace CesiumForUnity
     public partial class Cesium3DTileset : MonoBehaviour
     {
         [SerializeField]
-        [Header("Cesium")]
+        [Header("Source")]
         [Tooltip("The URL of this tileset's \"tileset.json\" file.")]
         [InspectorName("URL")]
         private string _url = "";
@@ -53,6 +53,18 @@ namespace CesiumForUnity
                 this._ionAccessToken = value;
                 this.RecreateTileset();
             }
+        }
+
+        [SerializeField]
+        [Header("Debug")]
+        [Tooltip("Whether to log details about the tile selection process.")]
+        [InspectorName("Log Selection Stats")]
+        private bool _logSelectionStats = false;
+
+        public bool logSelectionStats
+        {
+            get => this._logSelectionStats;
+            set { this._logSelectionStats = value; }
         }
 
         private partial void Start();

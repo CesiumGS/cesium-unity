@@ -26,7 +26,9 @@ Cesium3DTilesetImpl::Cesium3DTilesetImpl(
 Cesium3DTilesetImpl::~Cesium3DTilesetImpl() {}
 
 void Cesium3DTilesetImpl::JustBeforeDelete(
-    const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {}
+    const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
+  this->DestroyTileset(tileset);
+}
 
 void Cesium3DTilesetImpl::Start(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {}
@@ -82,6 +84,9 @@ void Cesium3DTilesetImpl::RecreateTileset(
 void Cesium3DTilesetImpl::updateLastViewUpdateResultState(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset,
     const Cesium3DTilesSelection::ViewUpdateResult& currentResult) {
+  if (!tileset.logSelectionStats())
+    return;
+
   const ViewUpdateResult& previousResult = this->_lastUpdateResult;
   if (currentResult.tilesToRenderThisFrame.size() !=
           previousResult.tilesToRenderThisFrame.size() ||
@@ -122,7 +127,7 @@ void Cesium3DTilesetImpl::DestroyTileset(
   if (!pTileset)
     return;
 
-    tileset.StartCoroutine(
+  tileset.StartCoroutine(
       DotNet::CesiumForUnity::NativeCoroutine(
           System::Func2<System::Object, System::Object>(
               [pTileset, firstTime = true](
@@ -137,7 +142,8 @@ void Cesium3DTilesetImpl::DestroyTileset(
                 if (!pTileset->canBeDestroyedWithoutBlocking()) {
                   // Tileset can't be destroyed yet, keep going.
 
-                  // But first, mark all tiles inactive so that they disappear immediately.
+                  // But first, mark all tiles inactive so that they disappear
+                  // immediately.
                   pTileset->forEachLoadedTile([](Tile& tile) {
                     if (tile.getState() != Tile::LoadState::Done) {
                       return;

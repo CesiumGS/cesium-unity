@@ -145,7 +145,6 @@ namespace Reinterop
                     private static unsafe readonly {{baseName}}Type {{baseName}}Delegate = new {{baseName}}Type({{baseName}});
                     private static unsafe {{interopReturnTypeString}} {{baseName}}({{interopParameterList}})
                     {
-                        Reinterop.ReinteropInitializer.Initialize();
                         {{implementation.Replace(Environment.NewLine, Environment.NewLine + "  ")}}
                     }
                     """

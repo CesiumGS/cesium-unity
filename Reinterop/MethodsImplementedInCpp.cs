@@ -176,7 +176,6 @@ namespace Reinterop
                     private static unsafe readonly {{baseName}}Type {{baseName}}Delegate = new {{baseName}}Type({{baseName}});
                     private static unsafe IntPtr {{baseName}}(IntPtr thiz)
                     {
-                        Reinterop.ReinteropInitializer.Initialize();
                         return ({{csWrapperType.GetParameterConversionFromInteropType("thiz")}}).NativeImplementation;
                     }
                     """

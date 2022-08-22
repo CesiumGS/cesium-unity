@@ -8,6 +8,7 @@
 #include <CesiumGeospatial/Ellipsoid.h>
 #include <CesiumGeospatial/Transforms.h>
 #include <CesiumGltf/AccessorView.h>
+#include <CesiumUtility/ScopeGuard.h>
 
 #include <DotNet/System/Object.h>
 #include <DotNet/System/String.h>
@@ -40,6 +41,7 @@ using namespace CesiumForUnity;
 using namespace CesiumGeometry;
 using namespace CesiumGeospatial;
 using namespace CesiumGltf;
+using namespace CesiumUtility;
 using namespace DotNet;
 
 namespace {
@@ -50,6 +52,8 @@ void setTriangles(UnityEngine::Mesh& mesh, const AccessorView<T>& indices) {
       indices.size(),
       Unity::Collections::Allocator::Temp,
       Unity::Collections::NativeArrayOptions::UninitializedMemory);
+  ScopeGuard sg([&nativeArrayTriangles]() { nativeArrayTriangles.Dispose(); });
+
   std::int32_t* triangles = static_cast<std::int32_t*>(
       Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
           GetUnsafeBufferPointerWithoutChecks(nativeArrayTriangles));
@@ -64,8 +68,6 @@ void setTriangles(UnityEngine::Mesh& mesh, const AccessorView<T>& indices) {
       0,
       true,
       0);
-
-  nativeArrayTriangles.Dispose();
 }
 
 } // namespace
@@ -90,13 +92,6 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
   if (!pContent->model) {
     return nullptr;
-  }
-
-  const QuadtreeTileID* pQ = std::get_if<QuadtreeTileID>(&tile.getTileID());
-  if (pQ) {
-    if (pQ->level >= 14) {
-      UnityEngine::Debug::Log(System::String(">=14"));
-    }
   }
 
   const Model& model = *pContent->model;
@@ -229,26 +224,29 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             UnityEngine::Texture texture =
                 TextureLoader::loadTexture(gltf, baseColorTexture->index);
             if (texture != nullptr) {
-              material.SetTexture(System::String("_MainTex"), texture);
+              material.SetTexture(System::String("_BaseMap"), texture);
             }
           }
         }
 
         UnityEngine::Mesh unityMesh{};
 
-        Unity::Collections::NativeArray1<UnityEngine::Vector3>
-            nativeArrayVertices(
-                positionView.size(),
-                Unity::Collections::Allocator::Temp,
-                Unity::Collections::NativeArrayOptions::UninitializedMemory);
-        UnityEngine::Vector3* vertices = static_cast<UnityEngine::Vector3*>(
-            Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
-                GetUnsafeBufferPointerWithoutChecks(nativeArrayVertices));
-        for (int64_t i = 0; i < positionView.size(); ++i) {
-          vertices[i] = positionView[i];
+        {
+          Unity::Collections::NativeArray1<UnityEngine::Vector3>
+              nativeArrayVertices(
+                  positionView.size(),
+                  Unity::Collections::Allocator::Temp,
+                  Unity::Collections::NativeArrayOptions::UninitializedMemory);
+          ScopeGuard sgVertices(
+              [&nativeArrayVertices]() { nativeArrayVertices.Dispose(); });
+          UnityEngine::Vector3* vertices = static_cast<UnityEngine::Vector3*>(
+              Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
+                  GetUnsafeBufferPointerWithoutChecks(nativeArrayVertices));
+          for (int64_t i = 0; i < positionView.size(); ++i) {
+            vertices[i] = positionView[i];
+          }
+          unityMesh.SetVertices<UnityEngine::Vector3>(nativeArrayVertices);
         }
-        unityMesh.SetVertices<UnityEngine::Vector3>(nativeArrayVertices);
-        nativeArrayVertices.Dispose();
 
         auto normalAccessorIt = primitive.attributes.find("NORMAL");
         if (normalAccessorIt != primitive.attributes.end()) {
@@ -261,6 +259,8 @@ void* UnityPrepareRendererResources::prepareInMainThread(
                     Unity::Collections::Allocator::Temp,
                     Unity::Collections::NativeArrayOptions::
                         UninitializedMemory);
+            ScopeGuard sgNormals(
+                [&nativeArrayNormals]() { nativeArrayNormals.Dispose(); });
             UnityEngine::Vector3* normals = static_cast<UnityEngine::Vector3*>(
                 Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
                     GetUnsafeBufferPointerWithoutChecks(nativeArrayNormals));
@@ -269,7 +269,6 @@ void* UnityPrepareRendererResources::prepareInMainThread(
               normals[i] = normalView[i];
             }
             unityMesh.SetNormals(nativeArrayNormals);
-            nativeArrayNormals.Dispose();
           }
         }
 
@@ -287,6 +286,9 @@ void* UnityPrepareRendererResources::prepareInMainThread(
                     Unity::Collections::Allocator::Temp,
                     Unity::Collections::NativeArrayOptions::
                         UninitializedMemory);
+            ScopeGuard sgTexCoord0([&nativeArrayTexCoord0s]() {
+              nativeArrayTexCoord0s.Dispose();
+            });
             UnityEngine::Vector2* texCoord0s = static_cast<
                 UnityEngine::Vector2*>(
                 Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
@@ -296,7 +298,6 @@ void* UnityPrepareRendererResources::prepareInMainThread(
               texCoord0s[i] = texCoord0View[i];
             }
             unityMesh.SetUVs(0, nativeArrayTexCoord0s);
-            nativeArrayTexCoord0s.Dispose();
           }
         }
 

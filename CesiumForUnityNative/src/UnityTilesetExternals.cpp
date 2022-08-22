@@ -22,7 +22,6 @@ namespace CesiumForUnity {
 
 namespace {
 
-std::unique_ptr<TilesetExternals> pExternals = nullptr;
 std::shared_ptr<UnityAssetAccessor> pAccessor = nullptr;
 std::shared_ptr<UnityTaskProcessor> pTaskProcessor = nullptr;
 std::shared_ptr<CreditSystem> pCreditSystem = nullptr;

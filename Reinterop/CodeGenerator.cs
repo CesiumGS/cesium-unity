@@ -208,7 +208,6 @@ namespace Reinterop
                     private static unsafe readonly {{csBaseName}}Type {{csBaseName}}Delegate = new {{csBaseName}}Type({{csBaseName}});
                     private static unsafe IntPtr {{csBaseName}}(IntPtr callbackFunction)
                     {
-                        Reinterop.ReinteropInitializer.Initialize();
                         var receiver = new {{csType.Symbol.Name}}{{genericTypeHash}}NativeFunction(callbackFunction);
                         return Reinterop.ObjectHandleUtility.CreateHandle(new {{csType.GetFullyQualifiedName()}}(receiver.Invoke));
                     }
@@ -233,6 +232,15 @@ namespace Reinterop
                       auto pFunc = reinterpret_cast<std::function<{{itemType.GetFullyQualifiedName()}}::FunctionSignature>*>(pCallbackFunction);
                       {{resultImplementation}}(*pFunc)({{string.Join(", ", callParameters)}});
                       {{returnImplementation}}
+                    }
+                    """));
+
+            result.CppImplementationInvoker.Functions.Add(new(
+                Content:
+                    $$"""
+                    __declspec(dllexport) void {{disposeCallbackName}}(void* pCallbackFunction) {
+                      auto pFunc = reinterpret_cast<std::function<{{itemType.GetFullyQualifiedName()}}::FunctionSignature>*>(pCallbackFunction);
+                      delete pFunc;
                     }
                     """));
         }
