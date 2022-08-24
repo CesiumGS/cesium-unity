@@ -3,6 +3,7 @@
 #include "CameraManager.h"
 #include "UnityTilesetExternals.h"
 
+#include <Cesium3DTilesSelection/IonRasterOverlay.h>
 #include <Cesium3DTilesSelection/Tileset.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
@@ -178,6 +179,8 @@ void Cesium3DTilesetImpl::LoadTileset(
       tileset.ionAssetID(),
       tileset.ionAccessToken().ToStlString(),
       options);
+
+  this->_pTileset->getOverlays().add(std::make_unique<IonRasterOverlay>("Test", 2, tileset.ionAccessToken().ToStlString()));
 }
 
 } // namespace CesiumForUnity

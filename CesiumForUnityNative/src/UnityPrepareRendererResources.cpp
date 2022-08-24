@@ -10,6 +10,7 @@
 #include <CesiumGltf/AccessorView.h>
 #include <CesiumUtility/ScopeGuard.h>
 
+#include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/System/Object.h>
 #include <DotNet/System/String.h>
 #include <DotNet/System/Text/Encoding.h>
@@ -112,9 +113,18 @@ void* UnityPrepareRendererResources::prepareInMainThread(
   tileTransform = GltfContent::applyRtcCenter(model, tileTransform);
   tileTransform = GltfContent::applyGltfUpAxisTransform(model, tileTransform);
 
+  DotNet::CesiumForUnity::Cesium3DTileset tilesetComponent =
+      this->_tileset.GetComponent<DotNet::CesiumForUnity::Cesium3DTileset>();
+
+  UnityEngine::Material opaqueMaterial = tilesetComponent.opaqueMaterial();
+  if (opaqueMaterial == nullptr) {
+    opaqueMaterial = UnityEngine::Resources::Load<UnityEngine::Material>(
+        System::String("CesiumDefaultTilesetMaterial"));
+  }
+
   model.forEachPrimitiveInScene(
       -1,
-      [&pModelGameObject, &tileTransform](
+      [&pModelGameObject, &tileTransform, opaqueMaterial](
           const Model& gltf,
           const Node& node,
           const Mesh& mesh,
@@ -208,11 +218,8 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         UnityEngine::MeshRenderer meshRenderer =
             primitiveGameObject.AddComponent<UnityEngine::MeshRenderer>();
 
-        UnityEngine::Material sharedMaterial =
-            UnityEngine::Resources::Load<UnityEngine::Material>(
-                System::String("CesiumDefaultMaterial"));
         UnityEngine::Material material =
-            UnityEngine::Object::Instantiate(sharedMaterial);
+            UnityEngine::Object::Instantiate(opaqueMaterial);
         meshRenderer.material(material);
 
         const Material* pMaterial =
@@ -224,7 +231,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             UnityEngine::Texture texture =
                 TextureLoader::loadTexture(gltf, baseColorTexture->index);
             if (texture != nullptr) {
-              material.SetTexture(System::String("_BaseMap"), texture);
+              material.SetTexture(System::String("_baseColorTexture"), texture);
             }
           }
         }
@@ -301,6 +308,37 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           }
         }
 
+        auto overlay0AccessorIt = primitive.attributes.find("_CESIUMOVERLAY_0");
+        if (overlay0AccessorIt != primitive.attributes.end()) {
+          int32_t overlay0AccessorID = overlay0AccessorIt->second;
+          AccessorView<UnityEngine::Vector2> overlay0View(
+              gltf,
+              overlay0AccessorID);
+
+          if (overlay0View.status() == AccessorViewStatus::Valid) {
+            Unity::Collections::NativeArray1<UnityEngine::Vector2>
+                nativeArrayOverlay0s(
+                    overlay0View.size(),
+                    Unity::Collections::Allocator::Temp,
+                    Unity::Collections::NativeArrayOptions::
+                        UninitializedMemory);
+            ScopeGuard sgOverlay0([&nativeArrayOverlay0s]() {
+              nativeArrayOverlay0s.Dispose();
+            });
+            UnityEngine::Vector2* overlay0s = static_cast<
+                UnityEngine::Vector2*>(
+                Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
+                    GetUnsafeBufferPointerWithoutChecks(nativeArrayOverlay0s));
+
+            for (int64_t i = 0; i < overlay0View.size(); ++i) {
+              overlay0s[i] = overlay0View[i];
+            }
+            unityMesh.SetUVs(1, nativeArrayOverlay0s);
+
+            material.SetFloat(System::String("_overlay0TextureCoordinateIndex"), 1);
+          }
+        }
+
         AccessorView<uint8_t> indices8(gltf, primitive.indices);
         if (indices8.status() == AccessorViewStatus::Valid) {
           setTriangles(unityMesh, indices8);
@@ -348,13 +386,27 @@ void* UnityPrepareRendererResources::prepareRasterInLoadThread(
 void* UnityPrepareRendererResources::prepareRasterInMainThread(
     const Cesium3DTilesSelection::RasterOverlayTile& rasterTile,
     void* pLoadThreadResult) {
-  return nullptr;
+  auto pTexture = std::make_unique<UnityEngine::Texture>(
+      TextureLoader::loadTexture(rasterTile.getImage()));
+  return pTexture.release();
 }
 
 void UnityPrepareRendererResources::freeRaster(
     const Cesium3DTilesSelection::RasterOverlayTile& rasterTile,
     void* pLoadThreadResult,
-    void* pMainThreadResult) noexcept {}
+    void* pMainThreadResult) noexcept {
+  if (pMainThreadResult) {
+    std::unique_ptr<UnityEngine::Texture> pTexture(
+        static_cast<UnityEngine::Texture*>(pMainThreadResult));
+
+    // In the Editor, we must use DestroyImmediate because Destroy won't
+    // actually destroy the object.
+    if (UnityEngine::Application::isEditor())
+      UnityEngine::Object::DestroyImmediate(*pTexture);
+    else
+      UnityEngine::Object::Destroy(*pTexture);
+  }
+}
 
 void UnityPrepareRendererResources::attachRasterInMainThread(
     const Cesium3DTilesSelection::Tile& tile,
@@ -362,7 +414,36 @@ void UnityPrepareRendererResources::attachRasterInMainThread(
     const Cesium3DTilesSelection::RasterOverlayTile& rasterTile,
     void* pMainThreadRendererResources,
     const glm::dvec2& translation,
-    const glm::dvec2& scale) {}
+    const glm::dvec2& scale) {
+  UnityEngine::GameObject* pGameObject =
+      static_cast<UnityEngine::GameObject*>(tile.getRendererResources());
+  UnityEngine::Texture* pTexture =
+      static_cast<UnityEngine::Texture*>(pMainThreadRendererResources);
+  if (!pGameObject || !pTexture)
+    return;
+
+  UnityEngine::Transform transform = pGameObject->transform();
+  for (int32_t i = 0, len = transform.childCount(); i < len; ++i) {
+    UnityEngine::Transform childTransform = transform.GetChild(i);
+    if (childTransform == nullptr)
+      continue;
+
+    UnityEngine::GameObject child = childTransform.gameObject();
+    if (child == nullptr)
+      continue;
+
+    UnityEngine::MeshRenderer meshRenderer =
+        child.GetComponent<UnityEngine::MeshRenderer>();
+    if (meshRenderer == nullptr)
+      continue;
+
+    UnityEngine::Material material = meshRenderer.sharedMaterial();
+    if (material == nullptr)
+      continue;
+
+    material.SetTexture(System::String("_overlay0Texture"), *pTexture);
+  }
+}
 
 void UnityPrepareRendererResources::detachRasterInMainThread(
     const Cesium3DTilesSelection::Tile& tile,

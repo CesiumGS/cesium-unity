@@ -43,7 +43,7 @@ namespace CesiumForUnity
         [SerializeField]
         [Tooltip("The access token to use to access the Cesium ion resource.")]
         [InspectorName("ion Access Token")]
-        public string _ionAccessToken = "";
+        private string _ionAccessToken = "";
 
         public string ionAccessToken
         {
@@ -51,6 +51,22 @@ namespace CesiumForUnity
             set
             {
                 this._ionAccessToken = value;
+                this.RecreateTileset();
+            }
+        }
+
+        [SerializeField]
+        [Header("Render")]
+        [Tooltip("The Material to use to render opaque parts of tiles.")]
+        [InspectorName("Opaque Material")]
+        private Material? _opaqueMaterial = null;
+
+        public Material? opaqueMaterial
+        {
+            get => this._opaqueMaterial;
+            set
+            {
+                this._opaqueMaterial = value;
                 this.RecreateTileset();
             }
         }

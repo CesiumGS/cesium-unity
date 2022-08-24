@@ -72,6 +72,8 @@ internal partial class ConfigureReinterop
         GameObject meshGameObject = meshRenderer.gameObject;
         meshRenderer.material = UnityEngine.Object.Instantiate(meshRenderer.material);
         meshRenderer.material.SetTexture("name", texture2D);
+        meshRenderer.material.SetFloat("name", 1.0f);
+        meshRenderer.sharedMaterial = meshRenderer.sharedMaterial;
         UnityEngine.Object.Destroy(meshGameObject);
         UnityEngine.Object.DestroyImmediate(meshGameObject);
 
@@ -127,6 +129,11 @@ internal partial class ConfigureReinterop
         tileset.ionAssetID = tileset.ionAssetID;
         tileset.ionAccessToken = tileset.ionAccessToken;
         tileset.logSelectionStats = tileset.logSelectionStats;
+        tileset.opaqueMaterial = tileset.opaqueMaterial;
+
+        Cesium3DTileset tilesetFromGameObject = go.GetComponent<Cesium3DTileset>();
+        MeshRenderer meshRendererFromGameObject = go.GetComponent<MeshRenderer>();
+        CesiumIonRasterOverlay overlay = go.GetComponent<CesiumIonRasterOverlay>();
 
         MonoBehaviour mb = tileset;
         mb.StartCoroutine(new NativeCoroutine(endIteration => endIteration).GetEnumerator());

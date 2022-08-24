@@ -11,6 +11,24 @@ using namespace DotNet;
 
 namespace CesiumForUnity {
 
+UnityEngine::Texture
+TextureLoader::loadTexture(const CesiumGltf::ImageCesium& image) {
+  UnityEngine::Texture2D result(
+      image.width,
+      image.height,
+      UnityEngine::TextureFormat::RGBA32,
+      false,
+      false);
+
+  result.LoadRawTextureData(
+      const_cast<void*>(static_cast<const void*>(image.pixelData.data())),
+      image.pixelData.size());
+
+  result.Apply(true, true);
+
+  return result;
+}
+
 UnityEngine::Texture TextureLoader::loadTexture(
     const CesiumGltf::Model& model,
     std::int32_t textureIndex) {
@@ -31,20 +49,7 @@ UnityEngine::Texture TextureLoader::loadTexture(
   }
 
   const ImageCesium& imageCesium = pImage->cesium;
-  UnityEngine::Texture2D result(
-      imageCesium.width,
-      imageCesium.height,
-      UnityEngine::TextureFormat::RGBA32,
-      false,
-      false);
-
-  result.LoadRawTextureData(
-      const_cast<void*>(static_cast<const void*>(imageCesium.pixelData.data())),
-      imageCesium.pixelData.size());
-
-  result.Apply(true, true);
-
-  return result;
+  return loadTexture(imageCesium);
 }
 
 } // namespace CesiumForUnity
