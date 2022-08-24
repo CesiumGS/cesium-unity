@@ -12,6 +12,4 @@ void start() {
   spdlog::default_logger()->sinks() = {std::make_shared<UnityLoggerSink>()};
 }
 
-void stop() {
-
-}
+void stop() {}

@@ -23,4 +23,4 @@ gsl::span<const std::byte> NativeDownloadHandlerImpl::getData() const {
   return this->_data;
 }
 
-} // namespace CesiumForUnity
+} // namespace CesiumForUnityNative

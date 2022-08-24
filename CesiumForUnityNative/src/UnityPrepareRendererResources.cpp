@@ -322,9 +322,8 @@ void* UnityPrepareRendererResources::prepareInMainThread(
                     Unity::Collections::Allocator::Temp,
                     Unity::Collections::NativeArrayOptions::
                         UninitializedMemory);
-            ScopeGuard sgOverlay0([&nativeArrayOverlay0s]() {
-              nativeArrayOverlay0s.Dispose();
-            });
+            ScopeGuard sgOverlay0(
+                [&nativeArrayOverlay0s]() { nativeArrayOverlay0s.Dispose(); });
             UnityEngine::Vector2* overlay0s = static_cast<
                 UnityEngine::Vector2*>(
                 Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
@@ -335,7 +334,9 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             }
             unityMesh.SetUVs(1, nativeArrayOverlay0s);
 
-            material.SetFloat(System::String("_overlay0TextureCoordinateIndex"), 1);
+            material.SetFloat(
+                System::String("_overlay0TextureCoordinateIndex"),
+                1);
           }
         }
 

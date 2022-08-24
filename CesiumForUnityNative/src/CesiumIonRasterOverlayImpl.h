@@ -12,7 +12,8 @@ public:
       const DotNet::CesiumForUnity::CesiumIonRasterOverlay& overlay);
   void JustBeforeDelete(
       const ::DotNet::CesiumForUnity::CesiumIonRasterOverlay& overlay);
-  void RecreateRasterOverlay(const ::DotNet::CesiumForUnity::CesiumIonRasterOverlay& overlay);
+  void RecreateRasterOverlay(
+      const ::DotNet::CesiumForUnity::CesiumIonRasterOverlay& overlay);
 };
 
 } // namespace CesiumForUnityNative

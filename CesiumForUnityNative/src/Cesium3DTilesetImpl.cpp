@@ -180,7 +180,10 @@ void Cesium3DTilesetImpl::LoadTileset(
       tileset.ionAccessToken().ToStlString(),
       options);
 
-  this->_pTileset->getOverlays().add(std::make_unique<IonRasterOverlay>("Test", 2, tileset.ionAccessToken().ToStlString()));
+  this->_pTileset->getOverlays().add(std::make_unique<IonRasterOverlay>(
+      "Test",
+      2,
+      tileset.ionAccessToken().ToStlString()));
 }
 
-} // namespace CesiumForUnity
+} // namespace CesiumForUnityNative
