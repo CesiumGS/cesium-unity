@@ -34,6 +34,7 @@
 #include <DotNet/UnityEngine/Transform.h>
 #include <DotNet/UnityEngine/Vector2.h>
 #include <DotNet/UnityEngine/Vector3.h>
+#include <DotNet/UnityEngine/Vector4.h>
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/quaternion.hpp>
 
@@ -443,6 +444,15 @@ void UnityPrepareRendererResources::attachRasterInMainThread(
       continue;
 
     material.SetTexture(System::String("_overlay0Texture"), *pTexture);
+
+    UnityEngine::Vector4 translationAndScale{
+        float(translation.x),
+        float(translation.y),
+        float(scale.x),
+        float(scale.y)};
+    material.SetVector(
+        System::String("_overlay0TranslationAndScale"),
+        translationAndScale);
   }
 }
 
