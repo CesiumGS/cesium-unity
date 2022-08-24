@@ -4,7 +4,7 @@
 
 #include <DotNet/UnityEngine/GameObject.h>
 
-namespace CesiumForUnity {
+namespace CesiumForUnityNative {
 
 class UnityPrepareRendererResources
     : public Cesium3DTilesSelection::IPrepareRendererResources {
@@ -56,4 +56,4 @@ private:
   ::DotNet::UnityEngine::GameObject _tileset;
 };
 
-} // namespace CesiumForUnity
+} // namespace CesiumForUnityNative

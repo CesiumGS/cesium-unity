@@ -12,14 +12,13 @@ namespace Cesium3DTilesSelection {
 class Tileset;
 }
 
-namespace CesiumForUnity {
+namespace CesiumForUnityNative {
 
 class Cesium3DTilesetImpl {
 public:
   Cesium3DTilesetImpl(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
   ~Cesium3DTilesetImpl();
-  void
-  JustBeforeDelete(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
+  void JustBeforeDelete(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
   void Start(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
   void Update(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
   void OnValidate(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
@@ -36,4 +35,4 @@ private:
   Cesium3DTilesSelection::ViewUpdateResult _lastUpdateResult;
 };
 
-} // namespace CesiumForUnity
+} // namespace CesiumForUnityNative

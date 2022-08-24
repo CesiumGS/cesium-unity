@@ -2,11 +2,11 @@
 
 #include <CesiumAsync/ITaskProcessor.h>
 
-namespace CesiumForUnity {
+namespace CesiumForUnityNative {
 
 class UnityTaskProcessor : public CesiumAsync::ITaskProcessor {
 public:
   virtual void startTask(std::function<void()> f) override;
 };
 
-} // namespace CesiumForUnity
+} // namespace CesiumForUnityNative

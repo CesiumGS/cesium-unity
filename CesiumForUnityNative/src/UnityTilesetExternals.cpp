@@ -18,7 +18,7 @@ using namespace Cesium3DTilesSelection;
 using namespace CesiumAsync;
 using namespace DotNet;
 
-namespace CesiumForUnity {
+namespace CesiumForUnityNative {
 
 namespace {
 
@@ -66,4 +66,4 @@ createTilesetExternals(const ::DotNet::UnityEngine::GameObject& tileset) {
       spdlog::default_logger()};
 }
 
-} // namespace CesiumForUnity
+} // namespace CesiumForUnityNative

@@ -8,7 +8,7 @@ namespace DotNet::UnityEngine {
 class GameObject;
 }
 
-namespace CesiumForUnity {
+namespace CesiumForUnityNative {
 
 class CameraManager {
 public:
@@ -16,4 +16,4 @@ public:
   getAllCameras(const DotNet::UnityEngine::GameObject& context);
 };
 
-} // namespace CesiumForUnity
+} // namespace CesiumForUnityNative

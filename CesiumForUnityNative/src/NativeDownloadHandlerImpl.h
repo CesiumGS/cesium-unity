@@ -10,7 +10,7 @@ namespace DotNet::CesiumForUnity {
 class NativeDownloadHandler;
 }
 
-namespace CesiumForUnity {
+namespace CesiumForUnityNative {
 
 class NativeDownloadHandlerImpl {
 public:
@@ -29,4 +29,4 @@ private:
   std::vector<std::byte> _data;
 };
 
-} // namespace CesiumForUnity
+} // namespace CesiumForUnityNative

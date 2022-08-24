@@ -5,10 +5,10 @@
 
 using namespace DotNet;
 
-namespace CesiumForUnity {
+namespace CesiumForUnityNative {
 
 void UnityTaskProcessor::startTask(std::function<void()> f) {
   System::Threading::Tasks::Task::Run(f);
 }
 
-} // namespace CesiumForUnity
+} // namespace CesiumForUnityNative

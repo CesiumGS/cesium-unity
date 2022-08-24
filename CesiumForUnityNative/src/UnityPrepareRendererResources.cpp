@@ -38,7 +38,7 @@
 #include <glm/gtc/quaternion.hpp>
 
 using namespace Cesium3DTilesSelection;
-using namespace CesiumForUnity;
+using namespace CesiumForUnityNative;
 using namespace CesiumGeometry;
 using namespace CesiumGeospatial;
 using namespace CesiumGltf;

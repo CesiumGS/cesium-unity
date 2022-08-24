@@ -2,7 +2,7 @@
 
 using namespace DotNet::CesiumForUnity;
 
-namespace CesiumForUnity {
+namespace CesiumForUnityNative {
 
 NativeDownloadHandlerImpl::NativeDownloadHandlerImpl(
     const NativeDownloadHandler& handler) {}

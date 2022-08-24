@@ -2,7 +2,7 @@
 
 #include <CesiumAsync/IAssetAccessor.h>
 
-namespace CesiumForUnity {
+namespace CesiumForUnityNative {
 
 class UnityAssetAccessor : public CesiumAsync::IAssetAccessor {
 public:
@@ -11,7 +11,8 @@ public:
       const std::string& url,
       const std::vector<THeader>& headers = {}) override;
 
-  virtual CesiumAsync::Future<std::shared_ptr<CesiumAsync::IAssetRequest>> request(
+  virtual CesiumAsync::Future<std::shared_ptr<CesiumAsync::IAssetRequest>>
+  request(
       const CesiumAsync::AsyncSystem& asyncSystem,
       const std::string& verb,
       const std::string& url,
@@ -21,4 +22,4 @@ public:
   virtual void tick() noexcept override;
 };
 
-}
+} // namespace CesiumForUnityNative

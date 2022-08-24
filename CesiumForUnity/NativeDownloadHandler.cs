@@ -10,7 +10,7 @@ namespace CesiumForUnity
         public int length;
     }
 
-    [ReinteropNativeImplementation("CesiumForUnity::NativeDownloadHandlerImpl", "NativeDownloadHandlerImpl.h")]
+    [ReinteropNativeImplementation("CesiumForUnityNative::NativeDownloadHandlerImpl", "NativeDownloadHandlerImpl.h")]
     public partial class NativeDownloadHandler : DownloadHandlerScript
     {
         public NativeDownloadHandler()

@@ -12,7 +12,7 @@ namespace DotNet::UnityEngine {
 class Texture;
 }
 
-namespace CesiumForUnity {
+namespace CesiumForUnityNative {
 
 class TextureLoader {
 public:
@@ -27,4 +27,4 @@ public:
       const CesiumGltf::Texture& texture);
 };
 
-} // namespace CesiumForUnity
+} // namespace CesiumForUnityNative

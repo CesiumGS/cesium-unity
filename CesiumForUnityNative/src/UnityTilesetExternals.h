@@ -10,7 +10,7 @@ namespace DotNet::UnityEngine {
 class GameObject;
 }
 
-namespace CesiumForUnity {
+namespace CesiumForUnityNative {
 
 Cesium3DTilesSelection::TilesetExternals
 createTilesetExternals(const ::DotNet::UnityEngine::GameObject& tileset);

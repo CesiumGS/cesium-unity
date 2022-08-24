@@ -18,7 +18,7 @@
 using namespace Cesium3DTilesSelection;
 using namespace DotNet;
 
-namespace CesiumForUnity {
+namespace CesiumForUnityNative {
 
 Cesium3DTilesetImpl::Cesium3DTilesetImpl(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset)

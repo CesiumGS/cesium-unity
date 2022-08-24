@@ -73,7 +73,7 @@ private:
 
 } // namespace
 
-namespace CesiumForUnity {
+namespace CesiumForUnityNative {
 
 CesiumAsync::Future<std::shared_ptr<CesiumAsync::IAssetRequest>>
 UnityAssetAccessor::get(
@@ -130,4 +130,4 @@ UnityAssetAccessor::request(
 
 void UnityAssetAccessor::tick() noexcept {}
 
-} // namespace CesiumForUnity
+} // namespace CesiumForUnityNative

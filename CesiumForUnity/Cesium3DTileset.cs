@@ -6,7 +6,7 @@ namespace CesiumForUnity
 {
 
     [ExecuteInEditMode]
-    [ReinteropNativeImplementation("CesiumForUnity::Cesium3DTilesetImpl", "Cesium3DTilesetImpl.h")]
+    [ReinteropNativeImplementation("CesiumForUnityNative::Cesium3DTilesetImpl", "Cesium3DTilesetImpl.h")]
     public partial class Cesium3DTileset : MonoBehaviour
     {
         [SerializeField]

@@ -16,7 +16,7 @@ using namespace CesiumUtility;
 using namespace DotNet::UnityEditor;
 using namespace DotNet::UnityEngine;
 
-namespace CesiumForUnity {
+namespace CesiumForUnityNative {
 
 namespace {
 
@@ -86,4 +86,4 @@ std::vector<ViewState> CameraManager::getAllCameras(const GameObject& context) {
   return result;
 }
 
-} // namespace CesiumForUnity
+} // namespace CesiumForUnityNative

@@ -9,7 +9,7 @@
 using namespace CesiumGltf;
 using namespace DotNet;
 
-namespace CesiumForUnity {
+namespace CesiumForUnityNative {
 
 UnityEngine::Texture
 TextureLoader::loadTexture(const CesiumGltf::ImageCesium& image) {
@@ -52,4 +52,4 @@ UnityEngine::Texture TextureLoader::loadTexture(
   return loadTexture(imageCesium);
 }
 
-} // namespace CesiumForUnity
+} // namespace CesiumForUnityNative
