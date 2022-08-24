@@ -24,6 +24,9 @@ public:
   void OnValidate(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
   void RecreateTileset(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
 
+  Cesium3DTilesSelection::Tileset* getTileset();
+  const Cesium3DTilesSelection::Tileset* getTileset() const;
+
 private:
   void DestroyTileset(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
   void LoadTileset(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);

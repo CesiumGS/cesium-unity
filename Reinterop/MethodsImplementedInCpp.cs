@@ -245,10 +245,8 @@ namespace Reinterop
                     implType,
                     returnType,
                     objectHandleType
-                },
-                TypeDeclarationsReferenced:
-                    parameters.Select(parameter => parameter.Type)
-                    .Concat(parameters.Select(parameter => parameter.InteropType))
+                }.Concat(parameters.Select(parameter => parameter.Type))
+                 .Concat(parameters.Select(parameter => parameter.InteropType))
             ));
 
             CSharpType csWrapperType = CSharpType.FromSymbol(context.Compilation, item.Type);
@@ -282,6 +280,11 @@ namespace Reinterop
             string modifiers = CSharpTypeUtility.GetAccessString(method.DeclaredAccessibility);
             if (method.IsStatic)
                 modifiers += " static";
+
+            if (method.IsOverride)
+                modifiers += " override";
+            else if (method.IsVirtual)
+                modifiers += " virtual";
 
             result.CSharpPartialMethodDefinitions.Methods.Add(new(
                 methodDefinition:

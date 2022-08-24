@@ -7,6 +7,7 @@
 #include <Cesium3DTilesSelection/Tileset.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
+#include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
 #include <DotNet/CesiumForUnity/NativeCoroutine.h>
 #include <DotNet/System/Collections/IEnumerator.h>
 #include <DotNet/System/Func2.h>
@@ -80,6 +81,12 @@ void Cesium3DTilesetImpl::OnValidate(
 void Cesium3DTilesetImpl::RecreateTileset(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
   this->DestroyTileset(tileset);
+}
+
+Tileset* Cesium3DTilesetImpl::getTileset() { return this->_pTileset.get(); }
+
+const Tileset* Cesium3DTilesetImpl::getTileset() const {
+  return this->_pTileset.get();
 }
 
 void Cesium3DTilesetImpl::updateLastViewUpdateResultState(
@@ -180,10 +187,13 @@ void Cesium3DTilesetImpl::LoadTileset(
       tileset.ionAccessToken().ToStlString(),
       options);
 
-  this->_pTileset->getOverlays().add(std::make_unique<IonRasterOverlay>(
-      "Test",
-      2,
-      tileset.ionAccessToken().ToStlString()));
+  // Add any overlay components
+  // TODO: support more than one
+      CesiumForUnity::CesiumRasterOverlay overlay =
+      tileset.gameObject().GetComponent<CesiumForUnity::CesiumRasterOverlay>();
+  if (overlay != nullptr) {
+    overlay.AddToTileset();
+  }
 }
 
 } // namespace CesiumForUnityNative

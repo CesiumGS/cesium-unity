@@ -346,6 +346,17 @@ namespace Reinterop
         }
 
         /// <summary>
+        /// Gets a version of this type without any const, pointer, or reference qualifications.
+        /// </summary>
+        public CppType AsSimpleType()
+        {
+            if (this.Flags != 0)
+                return new CppType(this.Kind, this.Namespaces, this.Name, this.GenericArguments, 0, this.HeaderOverride);
+            else
+                return this;
+        }
+
+        /// <summary>
         /// Gets the version of this type that should be used in a function
         /// pointer that will call into the managed side.
         /// </summary>
@@ -398,9 +409,9 @@ namespace Reinterop
                 case InteropTypeKind.ClassWrapper:
                 case InteropTypeKind.NonBlittableStructWrapper:
                 case InteropTypeKind.Delegate:
-                    return $"{GetFullyQualifiedName()}({CppObjectHandle.GetCppType(context).GetFullyQualifiedName()}({variableName}))";
+                    return $"{this.AsSimpleType().GetFullyQualifiedName()}({CppObjectHandle.GetCppType(context).GetFullyQualifiedName()}({variableName}))";
                 case InteropTypeKind.Enum:
-                    return $"{this.GetFullyQualifiedName()}({variableName})";
+                    return $"{this.AsSimpleType().GetFullyQualifiedName()}({variableName})";
                 case InteropTypeKind.Primitive:
                 case InteropTypeKind.BlittableStruct:
                 case InteropTypeKind.Unknown:

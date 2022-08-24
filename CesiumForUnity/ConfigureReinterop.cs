@@ -134,7 +134,12 @@ internal partial class ConfigureReinterop
 
         Cesium3DTileset tilesetFromGameObject = go.GetComponent<Cesium3DTileset>();
         MeshRenderer meshRendererFromGameObject = go.GetComponent<MeshRenderer>();
-        CesiumIonRasterOverlay overlay = go.GetComponent<CesiumIonRasterOverlay>();
+        CesiumIonRasterOverlay ionOverlay = go.GetComponent<CesiumIonRasterOverlay>();
+        ionOverlay.ionAssetID = ionOverlay.ionAssetID;
+        ionOverlay.ionAccessToken = ionOverlay.ionAccessToken;
+        CesiumRasterOverlay baseOverlay = ionOverlay;
+        CesiumRasterOverlay overlay = go.GetComponent<CesiumRasterOverlay>();
+        baseOverlay.AddToTileset();
 
         MonoBehaviour mb = tileset;
         mb.StartCoroutine(new NativeCoroutine(endIteration => endIteration).GetEnumerator());

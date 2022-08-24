@@ -4,21 +4,21 @@ using UnityEngine;
 namespace CesiumForUnity
 {
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumIonRasterOverlayImpl", "CesiumIonRasterOverlayImpl.h")]
-    public partial class CesiumIonRasterOverlay : MonoBehaviour
+    public partial class CesiumIonRasterOverlay : CesiumRasterOverlay
     {
         [SerializeField]
         [Header("Source")]
         [Tooltip("The ID of the Cesium ion asset to use.")]
         [InspectorName("ion Asset ID")]
-        private ulong _ionAssetID = 0;
+        private long _ionAssetID = 0;
 
-        public ulong ionAssetID
+        public long ionAssetID
         {
             get => this._ionAssetID;
             set
             {
                 this._ionAssetID = value;
-                this.RecreateRasterOverlay();
+                this.Refresh();
             }
         }
 
@@ -33,10 +33,12 @@ namespace CesiumForUnity
             set
             {
                 this._ionAccessToken = value;
-                this.RecreateRasterOverlay();
+                this.Refresh();
             }
         }
 
-        private partial void RecreateRasterOverlay();
+        protected override partial void AddToTileset(Cesium3DTileset tileset);
+
+        protected override partial void RemoveFromTileset(Cesium3DTileset tileset);
     }
 }

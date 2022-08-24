@@ -28,9 +28,9 @@ namespace CesiumForUnity
         [SerializeField]
         [Tooltip("The ID of the Cesium ion asset to use.")]
         [InspectorName("ion Asset ID")]
-        private ulong _ionAssetID = 0;
+        private long _ionAssetID = 0;
 
-        public ulong ionAssetID
+        public long ionAssetID
         {
             get => this._ionAssetID;
             set
