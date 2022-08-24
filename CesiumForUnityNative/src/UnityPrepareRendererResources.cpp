@@ -2,9 +2,8 @@
 
 #include "TextureLoader.h"
 
-#include <Cesium3DTilesSelection/GltfContent.h>
+#include <Cesium3DTilesSelection/GltfUtilities.h>
 #include <Cesium3DTilesSelection/Tile.h>
-#include <Cesium3DTilesSelection/TileContentLoadResult.h>
 #include <CesiumGeospatial/Ellipsoid.h>
 #include <CesiumGeospatial/Transforms.h>
 #include <CesiumGltf/AccessorView.h>
@@ -87,16 +86,14 @@ void* UnityPrepareRendererResources::prepareInLoadThread(
 void* UnityPrepareRendererResources::prepareInMainThread(
     Cesium3DTilesSelection::Tile& tile,
     void* pLoadThreadResult) {
-  TileContentLoadResult* pContent = tile.getContent();
-  if (!pContent) {
+  const Cesium3DTilesSelection::TileContent& content = tile.getContent();
+  const Cesium3DTilesSelection::TileRenderContent* pRenderContent =
+      content.getRenderContent();
+  if (!pRenderContent) {
     return nullptr;
   }
 
-  if (!pContent->model) {
-    return nullptr;
-  }
-
-  const Model& model = *pContent->model;
+  const Model& model = pRenderContent->getModel();
 
   std::string name = "glTF";
   auto urlIt = model.extras.find("Cesium3DTiles_TileUrl");
@@ -111,8 +108,8 @@ void* UnityPrepareRendererResources::prepareInMainThread(
   pModelGameObject->SetActive(false);
 
   glm::dmat4 tileTransform = tile.getTransform();
-  tileTransform = GltfContent::applyRtcCenter(model, tileTransform);
-  tileTransform = GltfContent::applyGltfUpAxisTransform(model, tileTransform);
+  tileTransform = GltfUtilities::applyRtcCenter(model, tileTransform);
+  tileTransform = GltfUtilities::applyGltfUpAxisTransform(model, tileTransform);
 
   DotNet::CesiumForUnity::Cesium3DTileset tilesetComponent =
       this->_tileset.GetComponent<DotNet::CesiumForUnity::Cesium3DTileset>();
@@ -417,8 +414,14 @@ void UnityPrepareRendererResources::attachRasterInMainThread(
     void* pMainThreadRendererResources,
     const glm::dvec2& translation,
     const glm::dvec2& scale) {
-  UnityEngine::GameObject* pGameObject =
-      static_cast<UnityEngine::GameObject*>(tile.getRendererResources());
+  const Cesium3DTilesSelection::TileContent& content = tile.getContent();
+  const Cesium3DTilesSelection::TileRenderContent* pRenderContent =
+      content.getRenderContent();
+  if (!pRenderContent) {
+    return;
+  }
+  UnityEngine::GameObject* pGameObject = static_cast<UnityEngine::GameObject*>(
+      pRenderContent->getRenderResources());
   UnityEngine::Texture* pTexture =
       static_cast<UnityEngine::Texture*>(pMainThreadRendererResources);
   if (!pGameObject || !pTexture)

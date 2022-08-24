@@ -49,26 +49,36 @@ void Cesium3DTilesetImpl::Update(
   this->updateLastViewUpdateResultState(tileset, updateResult);
 
   for (auto pTile : updateResult.tilesToNoLongerRenderThisFrame) {
-    if (pTile->getState() != Tile::LoadState::Done) {
+    if (pTile->getState() != TileLoadState::Done) {
       continue;
     }
 
-    UnityEngine::GameObject* pTileGO =
-        static_cast<UnityEngine::GameObject*>(pTile->getRendererResources());
-    if (pTileGO) {
-      pTileGO->SetActive(false);
+    const Cesium3DTilesSelection::TileContent& content = pTile->getContent();
+    const Cesium3DTilesSelection::TileRenderContent* pRenderContent =
+        content.getRenderContent();
+    if (pRenderContent) {
+      UnityEngine::GameObject* pTileGO = static_cast<UnityEngine::GameObject*>(
+          pRenderContent->getRenderResources());
+      if (pTileGO) {
+        pTileGO->SetActive(false);
+      }
     }
   }
 
   for (auto pTile : updateResult.tilesToRenderThisFrame) {
-    if (pTile->getState() != Tile::LoadState::Done) {
+    if (pTile->getState() != TileLoadState::Done) {
       continue;
     }
 
-    UnityEngine::GameObject* pTileGO =
-        static_cast<UnityEngine::GameObject*>(pTile->getRendererResources());
-    if (pTileGO) {
-      pTileGO->SetActive(true);
+    const Cesium3DTilesSelection::TileContent& content = pTile->getContent();
+    const Cesium3DTilesSelection::TileRenderContent* pRenderContent =
+        content.getRenderContent();
+    if (pRenderContent) {
+      UnityEngine::GameObject* pTileGO = static_cast<UnityEngine::GameObject*>(
+          pRenderContent->getRenderResources());
+      if (pTileGO) {
+        pTileGO->SetActive(true);
+      }
     }
   }
 }
@@ -153,15 +163,21 @@ void Cesium3DTilesetImpl::DestroyTileset(
                   // But first, mark all tiles inactive so that they disappear
                   // immediately.
                   pTileset->forEachLoadedTile([](Tile& tile) {
-                    if (tile.getState() != Tile::LoadState::Done) {
+                    if (tile.getState() != TileLoadState::Done) {
                       return;
                     }
 
-                    UnityEngine::GameObject* pTileGO =
-                        static_cast<UnityEngine::GameObject*>(
-                            tile.getRendererResources());
-                    if (pTileGO) {
-                      pTileGO->SetActive(false);
+                    const Cesium3DTilesSelection::TileContent& content =
+                        tile.getContent();
+                    const Cesium3DTilesSelection::TileRenderContent*
+                        pRenderContent = content.getRenderContent();
+                    if (pRenderContent) {
+                      UnityEngine::GameObject* pTileGO =
+                          static_cast<UnityEngine::GameObject*>(
+                              pRenderContent->getRenderResources());
+                      if (pTileGO) {
+                        pTileGO->SetActive(false);
+                      }
                     }
                   });
 
@@ -189,7 +205,7 @@ void Cesium3DTilesetImpl::LoadTileset(
 
   // Add any overlay components
   // TODO: support more than one
-      CesiumForUnity::CesiumRasterOverlay overlay =
+  CesiumForUnity::CesiumRasterOverlay overlay =
       tileset.gameObject().GetComponent<CesiumForUnity::CesiumRasterOverlay>();
   if (overlay != nullptr) {
     overlay.AddToTileset();
