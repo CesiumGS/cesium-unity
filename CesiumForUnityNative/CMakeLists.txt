@@ -6,9 +6,6 @@ project(CesiumForUnityNative
     LANGUAGES CXX C
 )
 
-# Install to
-set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_LIST_DIR}/../Assets)
-
 add_subdirectory(extern/cesium-native EXCLUDE_FROM_ALL)
 
 file(GLOB CESIUMFORUNITYNATIVE_SOURCES src/*.cpp generated/src/*.cpp)

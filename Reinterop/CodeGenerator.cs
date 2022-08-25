@@ -68,7 +68,6 @@ namespace Reinterop
                 result.CSharpPartialMethodDefinitions = new GeneratedCSharpPartialMethodDefinitions(CSharpType.FromSymbol(this.Options.Compilation, item.Type));
 
                 MethodsImplementedInCpp.Generate(this.Options, item, result);
-                Console.WriteLine(result.CSharpPartialMethodDefinitions.ToSourceFileString());
             }
 
             return result;

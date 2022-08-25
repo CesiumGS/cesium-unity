@@ -1,5 +1,5 @@
 {
-    "cmake.sourceDirectory": "${workspaceFolder}/CesiumForUnityNative",
+    "cmake.sourceDirectory": "${workspaceFolder}",
     "files.associations": {
         "iosfwd": "cpp",
         "algorithm": "cpp",
