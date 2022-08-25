@@ -3,3 +3,4 @@ obj/
 build/
 CesiumForUnityNativeBindings/native/
 .vs/
+*.user

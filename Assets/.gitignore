@@ -2,3 +2,8 @@
 *.dll.meta
 *.pdb
 *.pdb.meta
+*.nupkg
+*.nupkg.meta
+*.deps.json
+*.deps.json.meta
+

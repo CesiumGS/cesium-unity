@@ -6,11 +6,14 @@
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <LangVersion>Latest</LangVersion>
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <PublishDir>$(ProjectDir)..\Assets</PublishDir>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
     <Reference Include="UnityEngine">
       <HintPath>C:\Program Files\Unity\Hub\Editor\2021.3.2f1\Editor\Data\Managed\UnityEngine.dll</HintPath>
+      <Private>false</Private>
     </Reference>
     <Reference Include="UnityEditor">
       <HintPath>C:\Program Files\Unity\Hub\Editor\2021.3.2f1\Editor\Data\Managed\UnityEditor.dll</HintPath>
@@ -19,11 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-      <ProjectReference Include="..\Reinterop\Reinterop.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\Reinterop\Reinterop.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
-
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy &quot;$(TargetDir)$(ProjectName).dll&quot; &quot;$(ProjectDir)../../Assets&quot;&#xD;&#xA;copy &quot;$(TargetDir)$(ProjectName).pdb&quot; &quot;$(ProjectDir)../../Assets&quot;&#xD;&#xA;" />
-  </Target>
 
 </Project>
