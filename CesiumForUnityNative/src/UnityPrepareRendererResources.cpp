@@ -1,6 +1,7 @@
 #include "UnityPrepareRendererResources.h"
 
 #include "TextureLoader.h"
+#include "UnityLifetime.h"
 
 #include <Cesium3DTilesSelection/GltfUtilities.h>
 #include <Cesium3DTilesSelection/Tile.h>
@@ -366,13 +367,7 @@ void UnityPrepareRendererResources::free(
   if (pMainThreadResult) {
     std::unique_ptr<UnityEngine::GameObject> pGameObject(
         static_cast<UnityEngine::GameObject*>(pMainThreadResult));
-
-    // In the Editor, we must use DestroyImmediate because Destroy won't
-    // actually destroy the object.
-    if (UnityEngine::Application::isEditor())
-      UnityEngine::Object::DestroyImmediate(*pGameObject);
-    else
-      UnityEngine::Object::Destroy(*pGameObject);
+    UnityLifetime::Destroy(*pGameObject);
   }
 }
 
@@ -397,13 +392,7 @@ void UnityPrepareRendererResources::freeRaster(
   if (pMainThreadResult) {
     std::unique_ptr<UnityEngine::Texture> pTexture(
         static_cast<UnityEngine::Texture*>(pMainThreadResult));
-
-    // In the Editor, we must use DestroyImmediate because Destroy won't
-    // actually destroy the object.
-    if (UnityEngine::Application::isEditor())
-      UnityEngine::Object::DestroyImmediate(*pTexture);
-    else
-      UnityEngine::Object::Destroy(*pTexture);
+    UnityLifetime::Destroy(*pTexture);
   }
 }
 
@@ -420,6 +409,7 @@ void UnityPrepareRendererResources::attachRasterInMainThread(
   if (!pRenderContent) {
     return;
   }
+
   UnityEngine::GameObject* pGameObject = static_cast<UnityEngine::GameObject*>(
       pRenderContent->getRenderResources());
   UnityEngine::Texture* pTexture =
@@ -463,4 +453,42 @@ void UnityPrepareRendererResources::detachRasterInMainThread(
     const Cesium3DTilesSelection::Tile& tile,
     int32_t overlayTextureCoordinateID,
     const Cesium3DTilesSelection::RasterOverlayTile& rasterTile,
-    void* pMainThreadRendererResources) noexcept {}
+    void* pMainThreadRendererResources) noexcept {
+  const Cesium3DTilesSelection::TileContent& content = tile.getContent();
+  const Cesium3DTilesSelection::TileRenderContent* pRenderContent =
+      content.getRenderContent();
+  if (!pRenderContent) {
+    return;
+  }
+
+  UnityEngine::GameObject* pGameObject = static_cast<UnityEngine::GameObject*>(
+      pRenderContent->getRenderResources());
+  UnityEngine::Texture* pTexture =
+      static_cast<UnityEngine::Texture*>(pMainThreadRendererResources);
+  if (!pGameObject || !pTexture)
+    return;
+
+  UnityEngine::Transform transform = pGameObject->transform();
+  for (int32_t i = 0, len = transform.childCount(); i < len; ++i) {
+    UnityEngine::Transform childTransform = transform.GetChild(i);
+    if (childTransform == nullptr)
+      continue;
+
+    UnityEngine::GameObject child = childTransform.gameObject();
+    if (child == nullptr)
+      continue;
+
+    UnityEngine::MeshRenderer meshRenderer =
+        child.GetComponent<UnityEngine::MeshRenderer>();
+    if (meshRenderer == nullptr)
+      continue;
+
+    UnityEngine::Material material = meshRenderer.sharedMaterial();
+    if (material == nullptr)
+      continue;
+
+    material.SetTexture(
+        System::String("_overlay0Texture"),
+        UnityEngine::Texture(nullptr));
+  }
+}
