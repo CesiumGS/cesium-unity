@@ -73,3 +73,17 @@ Debugging the source generator itself is possible, but not obvious. This page ex
 See https://github.com/JoanComasFdz/dotnet-how-to-debug-source-generator-vs2022
 
 If you change the generator, be sure to compile it and then restart Visual Studio. Otherwise, every time you change your project, Visual Studio Intellisense will invoke the old, cached version of Reinterop and probably clobber the changes you were hoping to see.
+
+# Temporarily disabling the code generator
+
+It is sometimes useful to temporarily disable the code generator so that you can modify the generated code to try things out. This is easy to do. First, open your project's .csproj and comment-out the section that adds the Reinterop project as an Analyzer:
+
+```
+  <!-- <ItemGroup>
+    <ProjectReference Include="..\Reinterop\Reinterop.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup> -->
+```
+
+With that change, your project will no longer compile because the generated code is missing. To fix that, find the previously-generated code in your project's `obj\Debug\netstandard2.1\generated\Reinterop\Reinterop.RoslynIncrementalGenerator` (or similar), and copy the entire contents into a folder called `generated` in your project's top-level directory. Your project should now build again.
+
+To revert back to on-the-fly generation, delete the `generated` folder and uncomment the lines in the .csproj.
