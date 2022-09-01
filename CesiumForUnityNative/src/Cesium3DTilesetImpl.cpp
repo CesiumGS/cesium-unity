@@ -48,7 +48,7 @@ void Cesium3DTilesetImpl::Update(
       this->_pTileset->updateView(viewStates);
   this->updateLastViewUpdateResultState(tileset, updateResult);
 
-  for (auto pTile : updateResult.tilesToNoLongerRenderThisFrame) {
+  for (auto pTile : updateResult.tilesFadingOut) {
     if (pTile->getState() != TileLoadState::Done) {
       continue;
     }

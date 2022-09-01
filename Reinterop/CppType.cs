@@ -362,8 +362,10 @@ namespace Reinterop
         /// </summary>
         public CppType AsInteropType()
         {
-            if (this.Kind == InteropTypeKind.Primitive || this.Kind == InteropTypeKind.BlittableStruct)
+            if (this.Kind == InteropTypeKind.Primitive)
                 return this;
+            else if (this.Kind == InteropTypeKind.BlittableStruct)
+                return this.AsSimpleType();
             else if (this.Kind == InteropTypeKind.Enum)
                 return UInt32;
 
