@@ -6,6 +6,10 @@ project(cesium-unity
     LANGUAGES CXX C
 )
 
+if(APPLE)
+    set(CMAKE_OSX_ARCHITECTURES "x86_64")
+endif()
+
 # Install to the Assets directory.
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_LIST_DIR}/Assets)
 

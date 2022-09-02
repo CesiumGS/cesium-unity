@@ -49,7 +49,10 @@
             headerNamespace.Members.Add(
                 $$"""
                 extern "C" {
-                __declspec(dllexport) void initializeReinterop(void** functionPointers, std::int32_t count);
+                #if __WIN32
+                __declspec(dllexport)
+                #endif
+                void initializeReinterop(void** functionPointers, std::int32_t count);
                 }
                 """);
 
@@ -73,8 +76,10 @@
             sourceNamespace.Members.Add(
                 $$"""
                 extern "C" {
-
-                __declspec(dllexport) void initializeReinterop(void** functionPointers, std::int32_t count) {
+                #if __WIN32
+                __declspec(dllexport)
+                #endif
+                void initializeReinterop(void** functionPointers, std::int32_t count) {
                   // If this assertion fails, the C# and C++ layers are out of sync.
                   assert(count == {{Functions.Count}});
                 

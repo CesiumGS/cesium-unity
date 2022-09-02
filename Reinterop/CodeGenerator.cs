@@ -227,7 +227,10 @@ namespace Reinterop
             result.CppImplementationInvoker.Functions.Add(new(
                 Content:
                     $$"""
-                    __declspec(dllexport) {{returnType.AsInteropType().GetFullyQualifiedName()}} {{invokeCallbackName}}({{string.Join(", ", interopParameters.Select(p => $"{p.InteropType.GetFullyQualifiedName()} {p.Name}"))}}) {
+                    #if __WIN32
+                    __declspec(dllexport)
+                    #endif
+                    {{returnType.AsInteropType().GetFullyQualifiedName()}} {{invokeCallbackName}}({{string.Join(", ", interopParameters.Select(p => $"{p.InteropType.GetFullyQualifiedName()} {p.Name}"))}}) {
                       auto pFunc = reinterpret_cast<std::function<{{itemType.GetFullyQualifiedName()}}::FunctionSignature>*>(pCallbackFunction);
                       {{resultImplementation}}(*pFunc)({{string.Join(", ", callParameters)}});
                       {{returnImplementation}}
@@ -237,7 +240,10 @@ namespace Reinterop
             result.CppImplementationInvoker.Functions.Add(new(
                 Content:
                     $$"""
-                    __declspec(dllexport) void {{disposeCallbackName}}(void* pCallbackFunction) {
+                    #if __WIN32
+                    __declspec(dllexport)
+                    #endif
+                    void {{disposeCallbackName}}(void* pCallbackFunction) {
                       auto pFunc = reinterpret_cast<std::function<{{itemType.GetFullyQualifiedName()}}::FunctionSignature>*>(pCallbackFunction);
                       delete pFunc;
                     }
