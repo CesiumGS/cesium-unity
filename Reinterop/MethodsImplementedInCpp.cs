@@ -22,7 +22,10 @@ namespace Reinterop
             result.CppImplementationInvoker.Functions.Add(new(
                 Content:
                     $$"""
-                    __declspec(dllexport) void* {{createName}}(void* handle) {
+                    #if __WIN32
+                    __declspec(dllexport)
+                    #endif
+                    void* {{createName}}(void* handle) {
                       const {{wrapperType.GetFullyQualifiedName()}} wrapper{{{objectHandleType.GetFullyQualifiedName()}}(handle)};
                       return reinterpret_cast<void*>(new {{implType.GetFullyQualifiedName()}}(wrapper));
                     }
@@ -54,7 +57,10 @@ namespace Reinterop
             result.CppImplementationInvoker.Functions.Add(new(
                 Content:
                     $$"""
-                    __declspec(dllexport) void {{disposeName}}(void* handle, void* pImpl) {
+                    #if __WIN32
+                    __declspec(dllexport)
+                    #endif
+                    void {{disposeName}}(void* handle, void* pImpl) {
                       const {{wrapperType.GetFullyQualifiedName()}} wrapper{{{objectHandleType.GetFullyQualifiedName()}}(handle)};
                       auto pImplTyped = reinterpret_cast<{{implType.GetFullyQualifiedName()}}*>(pImpl);
                       pImplTyped->JustBeforeDelete(wrapper);
@@ -233,7 +239,10 @@ namespace Reinterop
             result.CppImplementationInvoker.Functions.Add(new(
                 Content:
                     $$"""
-                    __declspec(dllexport) {{interopReturnType.GetFullyQualifiedName()}} {{name}}({{parameterListString}}) {
+                    #if __WIN32
+                    __declspec(dllexport)
+                    #endif
+                    {{interopReturnType.GetFullyQualifiedName()}} {{name}}({{parameterListString}}) {
                       const {{wrapperType.GetFullyQualifiedName()}} wrapper{{{objectHandleType.GetFullyQualifiedName()}}(handle)};
                       auto pImplTyped = reinterpret_cast<{{implType.GetFullyQualifiedName()}}*>(pImpl);
                       {{new[] { implementation }.JoinAndIndent("  ")}}
