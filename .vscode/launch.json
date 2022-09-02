@@ -5,6 +5,20 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "(Mac) Launch",
+      "type": "lldb",
+      "request": "launch",
+      "program": "/Applications/Unity/Hub/Editor/2021.3.2f1/Unity.app",
+      "args": ["-projectPath", "${workspaceFolder}/../cesium-unity-samples"]
+    },
+
+    {
+      "name": "(Mac) Attach",
+      "type": "lldb",
+      "request": "attach",
+      "pid": "${command:pickMyProcess}" // use ${command:pickProcess} to pick other users' processes
+    },
+    {
       "name": "(Windows) Launch",
       "type": "cppvsdbg",
       "request": "launch",
