@@ -22,7 +22,7 @@ namespace Reinterop
             result.CppImplementationInvoker.Functions.Add(new(
                 Content:
                     $$"""
-                    #if __WIN32
+                    #if defined(_WIN32)
                     __declspec(dllexport)
                     #endif
                     void* {{createName}}(void* handle) {
@@ -57,7 +57,7 @@ namespace Reinterop
             result.CppImplementationInvoker.Functions.Add(new(
                 Content:
                     $$"""
-                    #if __WIN32
+                    #if defined(_WIN32)
                     __declspec(dllexport)
                     #endif
                     void {{disposeName}}(void* handle, void* pImpl) {
@@ -239,7 +239,7 @@ namespace Reinterop
             result.CppImplementationInvoker.Functions.Add(new(
                 Content:
                     $$"""
-                    #if __WIN32
+                    #if defined(_WIN32)
                     __declspec(dllexport)
                     #endif
                     {{interopReturnType.GetFullyQualifiedName()}} {{name}}({{parameterListString}}) {
