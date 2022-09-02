@@ -28,6 +28,13 @@ cd cesium-unity
 New-Item -ItemType Junction -Path "..\cesium-unity-samples\Assets\CesiumForUnity" -Target ".\Assets"
 ```
 
+To setup the symbolic link in Mac or Linux:
+
+```
+cd cesium-unity-samples/Assets/
+ln -s ../../cesium-unity/Assets CesiumForUnity
+```
+
 Unity only loads assets found in the game's Assets folder. By using a symlink, we keep the plugin's assets in the plugin's repo, making them much easier to manage with source control.
 
 ## Building
