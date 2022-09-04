@@ -139,57 +139,7 @@ void Cesium3DTilesetImpl::updateLastViewUpdateResultState(
 
 void Cesium3DTilesetImpl::DestroyTileset(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
-  // Create a coroutine to wait for the tileset's async operations to complete
-  // and then destroy it.
-  std::shared_ptr<Tileset> pTileset = std::move(this->_pTileset);
-  if (!pTileset)
-    return;
-
-  tileset.StartCoroutine(
-      DotNet::CesiumForUnity::NativeCoroutine(
-          System::Func2<System::Object, System::Object>(
-              [pTileset, firstTime = true](
-                  const System::Object& terminateCoroutine) mutable {
-                // Do nothing on the first invocation so that the stack can
-                // unwind.
-                if (firstTime) {
-                  firstTime = false;
-                  return System::Object(nullptr);
-                }
-
-                if (!pTileset->canBeDestroyedWithoutBlocking()) {
-                  // Tileset can't be destroyed yet, keep going.
-
-                  // But first, mark all tiles inactive so that they disappear
-                  // immediately.
-                  pTileset->forEachLoadedTile([](Tile& tile) {
-                    if (tile.getState() != TileLoadState::Done) {
-                      return;
-                    }
-
-                    const Cesium3DTilesSelection::TileContent& content =
-                        tile.getContent();
-                    const Cesium3DTilesSelection::TileRenderContent*
-                        pRenderContent = content.getRenderContent();
-                    if (pRenderContent) {
-                      UnityEngine::GameObject* pTileGO =
-                          static_cast<UnityEngine::GameObject*>(
-                              pRenderContent->getRenderResources());
-                      if (pTileGO) {
-                        pTileGO->SetActive(false);
-                      }
-                    }
-                  });
-
-                  return System::Object(nullptr);
-                }
-
-                // It is now safe to destroy the tileset and terminate the
-                // coroutine.
-                pTileset.reset();
-                return terminateCoroutine;
-              }))
-          .GetEnumerator());
+  this->_pTileset.reset();
 }
 
 void Cesium3DTilesetImpl::LoadTileset(
