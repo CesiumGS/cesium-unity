@@ -17,6 +17,8 @@ CesiumIonRasterOverlayImpl::CesiumIonRasterOverlayImpl(
     const DotNet::CesiumForUnity::CesiumIonRasterOverlay& overlay)
     : _pOverlay(nullptr) {}
 
+CesiumIonRasterOverlayImpl::~CesiumIonRasterOverlayImpl() {}
+
 void CesiumIonRasterOverlayImpl::JustBeforeDelete(
     const ::DotNet::CesiumForUnity::CesiumIonRasterOverlay& overlay) {}
 
@@ -33,15 +35,12 @@ void CesiumIonRasterOverlayImpl::AddToTileset(
   if (!pTileset)
     return;
 
-  auto pOverlay = std::make_unique<IonRasterOverlay>(
+  this->_pOverlay = new IonRasterOverlay(
       overlay.name().ToStlString(),
       overlay.ionAssetID(),
       overlay.ionAccessToken().ToStlString());
 
-  // We keep a pointer to the overlay, but the Tileset owns it.
-  this->_pOverlay = pOverlay.get();
-
-  pTileset->getOverlays().add(std::move(pOverlay));
+  pTileset->getOverlays().add(this->_pOverlay);
 }
 
 void CesiumIonRasterOverlayImpl::RemoveFromTileset(
