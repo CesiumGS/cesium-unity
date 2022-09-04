@@ -13,11 +13,9 @@ namespace Reinterop
         /// </summary>
         /// <param name="compilation">The compilation context.</param>
         /// <param name="ownerType">The type that owns the method, constructor, or property.</param>
-        /// <param name="name">The name of the method, constructor, or property. This is used to name the delegate, field, and method, and need not match the target exactly.</param>
-        /// <param name="invocationTarget">The C# code that is the target of the invocation. For a static method, sh</param>
-        /// <param name="returnType"></param>
-        /// <param name="otherParameters"></param>
-        /// <returns></returns>
+        /// <param name="method">The method, constructor, or property getter/setter.</param>
+        /// <param name="interopFunctionName">The name to use for the function, which must be unique within its containing type.</param>
+        /// <returns>The Name and Content to add to the C# GeneratedInit functions list.</returns>
         public static (string Name, string Content) CreateCSharpDelegateInit(
             Compilation compilation,
             ITypeSymbol ownerType,
@@ -127,14 +125,7 @@ namespace Reinterop
                     """;
             }
 
-            string genericTypeHash = "";
-            INamedTypeSymbol? named = csType.Symbol as INamedTypeSymbol;
-            if (named != null && named.IsGenericType)
-            {
-                genericTypeHash = HashParameters(null, named.TypeArguments);
-            }
-
-            string baseName = $"{csType.GetFullyQualifiedNamespace().Replace(".", "_")}_{csType.Symbol.Name}{genericTypeHash}_{interopFunctionName}";
+            string baseName = GetUniqueNameForType(csType) + "_" + interopFunctionName;
 
             return (
                 Name: $"{baseName}Delegate",
@@ -149,6 +140,98 @@ namespace Reinterop
                     }
                     """
             );
+        }
+
+        /// <summary>
+        /// Creates a C# delegate, field of delegate type, and method/constructor/property to be invoked
+        /// by the delegate in order to provide a way for C++ code to access the given field.
+        /// </summary>
+        /// <param name="compilation">The compilation context.</param>
+        /// <param name="ownerType">The type that owns the method, constructor, or property.</param>
+        /// <param name="method">The method, constructor, or property getter/setter.</param>
+        /// <param name="isGet">True if this delegate provides the ability to GET the field, or false if it provides the ability to SET it.</param>
+        /// <returns>The Name and Content to add to the C# GeneratedInit functions list.</returns>
+        public static (string Name, string Content) CreateCSharpDelegateInit(
+            Compilation compilation,
+            ITypeSymbol ownerType,
+            IFieldSymbol field,
+            bool isGet)
+        {
+            CSharpType csType = CSharpType.FromSymbol(compilation, ownerType);
+
+            var parameters = isGet ? new (string Name, ITypeSymbol Type)[] { } : new[] { (Name: "value", Type: field.Type ) };
+            var returnType = isGet ? field.Type : compilation.GetSpecialType(SpecialType.System_Void);
+
+            string accessName = field.Name;
+
+            var callParameterDetails = parameters.Select(parameter => (Name: parameter.Name, Type: CSharpType.FromSymbol(compilation, parameter.Type), InteropType: CSharpType.FromSymbol(compilation, parameter.Type).AsInteropType()));
+            var interopParameterDetails = callParameterDetails;
+
+            string invocationTarget;
+            if (!field.IsStatic)
+            {
+                // Instance method or property
+                interopParameterDetails = new[] { (Name: "thiz", Type: csType, InteropType: csType.AsInteropType()) }.Concat(interopParameterDetails);
+                invocationTarget = $"(({csType.GetFullyQualifiedName()})ObjectHandleUtility.GetObjectFromHandle(thiz)!).{accessName}";
+            }
+            else
+            {
+                // Static method or property
+                invocationTarget = $"{csType.GetFullyQualifiedName()}.{accessName}";
+            }
+
+            CSharpType csReturnType = CSharpType.FromSymbol(compilation, returnType);
+            CSharpType csInteropReturnType = csReturnType.AsInteropType();
+            string interopReturnTypeString = csInteropReturnType.GetFullyQualifiedName();
+
+            string callParameterList = string.Join(", ", callParameterDetails.Select(parameter => parameter.Type.GetParameterConversionFromInteropType(parameter.Name)));
+            string interopParameterList = string.Join(", ", interopParameterDetails.Select(parameter => $"{parameter.InteropType.GetFullyQualifiedName()} {parameter.Name}"));
+
+            string implementation;
+            if (isGet)
+            {
+                implementation =
+                    $$"""
+                    var result = {{invocationTarget}};
+                    return {{csReturnType.GetConversionToInteropType("result")}};
+                    """;
+            }
+            else
+            {
+                // A property setter.
+                implementation =
+                    $$"""
+                    {{invocationTarget}} = {{callParameterList}};
+                    """;
+            }
+
+            string baseName = $"{GetUniqueNameForType(csType)}_Field_{(isGet ? "get" : "set")}_{field.Name}";
+
+            return (
+                Name: $"{baseName}Delegate",
+                Content:
+                    $$"""
+                    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+                    private unsafe delegate {{interopReturnTypeString}} {{baseName}}Type({{interopParameterList}});
+                    private static unsafe readonly {{baseName}}Type {{baseName}}Delegate = new {{baseName}}Type({{baseName}});
+                    private static unsafe {{interopReturnTypeString}} {{baseName}}({{interopParameterList}})
+                    {
+                        {{implementation.Replace(Environment.NewLine, Environment.NewLine + "  ")}}
+                    }
+                    """
+            );
+        }
+
+        public static string GetUniqueNameForType(CSharpType type)
+        {
+            string genericTypeHash = "";
+            INamedTypeSymbol? named = type.Symbol as INamedTypeSymbol;
+            if (named != null && named.IsGenericType)
+            {
+                genericTypeHash = HashParameters(null, named.TypeArguments);
+            }
+
+            return $"{type.GetFullyQualifiedNamespace().Replace(".", "_")}_{type.Symbol.Name}{genericTypeHash}";
         }
 
         public static void GenerateForType(CppGenerationContext context, TypeToGenerate item, GeneratedResult result)

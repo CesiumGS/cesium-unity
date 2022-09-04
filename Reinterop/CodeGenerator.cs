@@ -46,7 +46,6 @@ namespace Reinterop
             CppHandleManagement.Generate(this.Options, item, result);
             Constructors.Generate(this.Options, item, result);
             Casts.Generate(this.Options, item, result);
-            Fields.Generate(this.Options, item, result);
 
             // Generate properties and methods throughout the whole inheritance hierarchy.
             TypeToGenerate? current = item;
@@ -55,6 +54,7 @@ namespace Reinterop
                 Properties.Generate(this.Options, item, current, result);
                 Methods.Generate(this.Options, item, current, result);
                 Events.Generate(this.Options, item, current, result);
+                Fields.Generate(this.Options, item, current, result);
                 current = current.BaseClass;
             }
 
