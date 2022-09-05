@@ -26,7 +26,8 @@ namespace CesiumForUnity
         public void Refresh()
         {
             this.RemoveFromTileset();
-            this.AddToTileset();
+            if (this.enabled)
+                this.AddToTileset();
         }
 
         private void OnEnable()

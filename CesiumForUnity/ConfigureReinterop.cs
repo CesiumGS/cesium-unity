@@ -131,6 +131,7 @@ internal partial class ConfigureReinterop
         tileset.ionAccessToken = tileset.ionAccessToken;
         tileset.logSelectionStats = tileset.logSelectionStats;
         tileset.opaqueMaterial = tileset.opaqueMaterial;
+        tileset.enabled = tileset.enabled;
 
         Cesium3DTileset tilesetFromGameObject = go.GetComponent<Cesium3DTileset>();
         MeshRenderer meshRendererFromGameObject = go.GetComponent<MeshRenderer>();
@@ -140,8 +141,12 @@ internal partial class ConfigureReinterop
         CesiumRasterOverlay baseOverlay = ionOverlay;
         CesiumRasterOverlay overlay = go.GetComponent<CesiumRasterOverlay>();
         baseOverlay.AddToTileset();
+        baseOverlay.RemoveFromTileset();
 
         MonoBehaviour mb = tileset;
         mb.StartCoroutine(new NativeCoroutine(endIteration => endIteration).GetEnumerator());
+
+        bool isPlaying = EditorApplication.isPlaying;
+        EditorApplication.update += () => {};
     }
 }

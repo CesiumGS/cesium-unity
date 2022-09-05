@@ -308,7 +308,7 @@ namespace Reinterop
                 CppName: $"{itemType.GetFullyQualifiedName()}::RemoveDelegate",
                 CppTypeSignature: $"void* (*)(void*, void*)",
                 CppTypeDefinitionsReferenced: new[] { itemType, objectHandle },
-                CSharpName: csCombineDelegatesName + "Delegate",
+                CSharpName: csRemoveDelegateName + "Delegate",
                 CSharpContent:
                     $$"""
                     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]

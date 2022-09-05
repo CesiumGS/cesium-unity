@@ -87,23 +87,8 @@ namespace CesiumForUnity
         private partial void Update();
         private partial void OnValidate();
 
-        private void OnEnable()
-        {
-            // In the Editor, Update will only be called when something
-            // changes. We need to call it continuously to allow tiles to
-            // load.
-            // TODO: we could be more careful about only calling Update when
-            //       it's really needed.
-            if (Application.isEditor && !EditorApplication.isPlaying)
-            {
-                EditorApplication.update += Update;
-            }
-        }
-
-        private void OnDisable()
-        {
-            EditorApplication.update -= Update;
-        }
+        private partial void OnEnable();
+        private partial void OnDisable();
 
         private partial void RecreateTileset();
     }

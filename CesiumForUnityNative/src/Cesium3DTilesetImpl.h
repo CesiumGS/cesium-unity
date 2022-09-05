@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Cesium3DTilesSelection/ViewUpdateResult.h>
+#include <DotNet/UnityEditor/CallbackFunction.h>
 
 #include <memory>
 
@@ -18,10 +19,14 @@ class Cesium3DTilesetImpl {
 public:
   Cesium3DTilesetImpl(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
   ~Cesium3DTilesetImpl();
+
   void JustBeforeDelete(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
   void Start(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
   void Update(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
   void OnValidate(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
+  void OnEnable(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
+  void OnDisable(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
+
   void RecreateTileset(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
 
   Cesium3DTilesSelection::Tileset* getTileset();
@@ -36,6 +41,8 @@ private:
 
   std::unique_ptr<Cesium3DTilesSelection::Tileset> _pTileset;
   Cesium3DTilesSelection::ViewUpdateResult _lastUpdateResult;
+  DotNet::UnityEditor::CallbackFunction _updateInEditorCallback;
+  bool _destroyTilesetOnNextUpdate;
 };
 
 } // namespace CesiumForUnityNative
