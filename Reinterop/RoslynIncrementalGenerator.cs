@@ -96,6 +96,11 @@ public class RoslynIncrementalGenerator : IIncrementalGenerator
                     current.Properties.Add(property);
                 }
 
+                foreach (IFieldSymbol field in item.Fields)
+                {
+                    current.Fields.Add(field);
+                }
+
                 foreach (IEventSymbol evt in item.Events)
                 {
                     current.Events.Add(evt);

@@ -10,6 +10,7 @@ namespace Reinterop
             this.Constructors = new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default);
             this.Methods = new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default);
             this.Properties = new HashSet<IPropertySymbol>(SymbolEqualityComparer.Default);
+            this.Fields = new HashSet<IFieldSymbol>(SymbolEqualityComparer.Default);
             this.Events = new HashSet<IEventSymbol>(SymbolEqualityComparer.Default);
             this.EnumValues = new List<IFieldSymbol>();
             this.Interfaces = new List<TypeToGenerate>();
@@ -20,6 +21,7 @@ namespace Reinterop
         public HashSet<IMethodSymbol> Constructors;
         public HashSet<IMethodSymbol> Methods;
         public HashSet<IPropertySymbol> Properties;
+        public HashSet<IFieldSymbol> Fields;
         public HashSet<IEventSymbol> Events;
         public List<IFieldSymbol> EnumValues;
         public TypeToGenerate? BaseClass;

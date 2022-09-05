@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
@@ -53,6 +53,12 @@ namespace Reinterop
             {
                 this.AddEvent(eventSymbol);
             }
+
+            IFieldSymbol? fieldSymbol = symbol as IFieldSymbol;
+            if (fieldSymbol != null)
+            {
+                this.AddField(fieldSymbol);
+            }
         }
 
         public override void VisitGenericName(GenericNameSyntax node)
@@ -89,6 +95,26 @@ namespace Reinterop
             this.AddConstructor(methodSymbol);
         }
 
+        /// <summary>
+        /// Find a member on a type or any of its base classes.
+        /// </summary>
+        /// <param name="type">The type on which to find the member.</param>
+        /// <param name="name">The name of the member.</param>
+        /// <returns>The member, or null if it does not exist.</returns>
+        private ISymbol? FindMember(ITypeSymbol type, string name)
+        {
+            ITypeSymbol? current = type;
+            while (current != null)
+            {
+                ISymbol? member = current.GetMembers(name).FirstOrDefault();
+                if (member != null)
+                    return member;
+                current = current.BaseType;
+            }
+
+            return null;
+        }
+
         private TypeToGenerate AddType(ITypeSymbol type)
         {
             // Drop the nullability ("?") from the type if present.
@@ -122,11 +148,10 @@ namespace Reinterop
                 // If this is a delegate, be sure to add the Invoke method.
                 if (type.TypeKind == TypeKind.Delegate)
                 {
-                    IMethodSymbol? invokeMethod = type.GetMembers("Invoke").FirstOrDefault() as IMethodSymbol;
+                    IMethodSymbol? invokeMethod = FindMember(type, "Invoke") as IMethodSymbol;
                     if (invokeMethod != null)
-                    {
                         this.AddMethod(invokeMethod);
-                    }
+
                 }
             }
 
@@ -192,6 +217,17 @@ namespace Reinterop
 
             // We also need to generate the event type.
             this.AddType(symbol.Type);
+        }
+
+        private TypeToGenerate AddField(IFieldSymbol symbol)
+        {
+            TypeToGenerate item = this.AddType(symbol.ContainingType);
+            item.Fields.Add(symbol);
+
+            // We also need to generate the field type.
+            this.AddType(symbol.Type);
+
+            return item;
         }
 
         private TypeToGenerate AddConstructor(IMethodSymbol symbol)
