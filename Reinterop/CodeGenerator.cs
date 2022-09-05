@@ -126,6 +126,8 @@ namespace Reinterop
                     """
                 ));
 
+            // A a C# delegate type that wraps a std::function, and arrange for
+            // the invoke and dispose to be implemented in C++.
             CSharpType csType = CSharpType.FromSymbol(this.Options.Compilation, item.Type);
 
             string genericTypeHash = "";
@@ -242,6 +244,84 @@ namespace Reinterop
                       delete pFunc;
                     }
                     """));
+
+            // Add operator+ and operator- to combine and remove delegates, respectively.
+            result.CppDeclaration.Elements.Add(new(
+                Content: $"static void* (*CombineDelegates)(void* thiz, void* rhs);",
+                IsPrivate: true));
+            result.CppDeclaration.Elements.Add(new(
+                Content: $"static void* (*RemoveDelegate)(void* thiz, void* rhs);",
+                IsPrivate: true));
+
+            result.CppDefinition.Elements.Add(new(
+                Content: $"void* (*{itemType.GetFullyQualifiedName()}::CombineDelegates)(void* thiz, void* rhs) = nullptr;"));
+            result.CppDefinition.Elements.Add(new(
+                Content: $"void* (*{itemType.GetFullyQualifiedName()}::RemoveDelegate)(void* thiz, void* rhs) = nullptr;"));
+
+            result.CppDeclaration.Elements.Add(new(
+                Content: $"{itemType.GetFullyQualifiedName()} operator+(const {itemType.GetFullyQualifiedName()}& rhs) const;"));
+            result.CppDeclaration.Elements.Add(new(
+                Content: $"{itemType.GetFullyQualifiedName()} operator-(const {itemType.GetFullyQualifiedName()}& rhs) const;"));
+
+            CppType objectHandle = CppObjectHandle.GetCppType(this.Options);
+
+            result.CppDefinition.Elements.Add(new(
+                Content:
+                    $$"""
+                    {{itemType.GetFullyQualifiedName()}} {{itemType.GetFullyQualifiedName(false)}}::operator+(const {{itemType.GetFullyQualifiedName()}}& rhs) const {
+                      return {{itemType.GetFullyQualifiedName()}}({{objectHandle.GetFullyQualifiedName()}}(CombineDelegates(this->GetHandle().GetRaw(), rhs.GetHandle().GetRaw())));
+                    }
+                    """,
+                TypeDefinitionsReferenced: new[] { objectHandle }));
+            result.CppDefinition.Elements.Add(new(
+                Content:
+                    $$"""
+                    {{itemType.GetFullyQualifiedName()}} {{itemType.GetFullyQualifiedName(false)}}::operator-(const {{itemType.GetFullyQualifiedName()}}& rhs) const {
+                      return {{itemType.GetFullyQualifiedName()}}({{objectHandle.GetFullyQualifiedName()}}(RemoveDelegate(this->GetHandle().GetRaw(), rhs.GetHandle().GetRaw())));
+                    }
+                    """));
+
+            string csTypeName = Interop.GetUniqueNameForType(csType);
+            string csCombineDelegatesName = csTypeName + "_CombineDelegates";
+            string csRemoveDelegateName = csTypeName + "_RemoveDelegate";
+
+            result.Init.Functions.Add(new(
+                CppName: $"{itemType.GetFullyQualifiedName()}::CombineDelegates",
+                CppTypeSignature: $"void* (*)(void*, void*)",
+                CppTypeDefinitionsReferenced: new[] { itemType, objectHandle },
+                CSharpName: csCombineDelegatesName + "Delegate",
+                CSharpContent:
+                    $$"""
+                    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+                    private unsafe delegate System.IntPtr {{csCombineDelegatesName}}Type(System.IntPtr thiz, System.IntPtr rhs);
+                    private static unsafe readonly {{csCombineDelegatesName}}Type {{csCombineDelegatesName}}Delegate = new {{csCombineDelegatesName}}Type({{csCombineDelegatesName}});
+                    private static unsafe System.IntPtr {{csCombineDelegatesName}}(System.IntPtr thiz, System.IntPtr rhs)
+                    {
+                        {{csType.GetFullyQualifiedName()}} left = ({{csType.GetFullyQualifiedName()}})ObjectHandleUtility.GetObjectFromHandle(thiz)!;
+                        {{csType.GetFullyQualifiedName()}} right = ({{csType.GetFullyQualifiedName()}})ObjectHandleUtility.GetObjectFromHandle(rhs)!;
+                        return ObjectHandleUtility.CreateHandle(left + right);
+                    }
+                    """
+            ));
+
+            result.Init.Functions.Add(new(
+                CppName: $"{itemType.GetFullyQualifiedName()}::RemoveDelegate",
+                CppTypeSignature: $"void* (*)(void*, void*)",
+                CppTypeDefinitionsReferenced: new[] { itemType, objectHandle },
+                CSharpName: csCombineDelegatesName + "Delegate",
+                CSharpContent:
+                    $$"""
+                    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+                    private unsafe delegate System.IntPtr {{csRemoveDelegateName}}Type(System.IntPtr thiz, System.IntPtr rhs);
+                    private static unsafe readonly {{csRemoveDelegateName}}Type {{csRemoveDelegateName}}Delegate = new {{csRemoveDelegateName}}Type({{csRemoveDelegateName}});
+                    private static unsafe System.IntPtr {{csRemoveDelegateName}}(System.IntPtr thiz, System.IntPtr rhs)
+                    {
+                        {{csType.GetFullyQualifiedName()}} left = ({{csType.GetFullyQualifiedName()}})ObjectHandleUtility.GetObjectFromHandle(thiz)!;
+                        {{csType.GetFullyQualifiedName()}} right = ({{csType.GetFullyQualifiedName()}})ObjectHandleUtility.GetObjectFromHandle(rhs)!;
+                        return ObjectHandleUtility.CreateHandle(left - right);
+                    }
+                    """
+            ));
         }
 
         private GeneratedResult? GenerateEnum(TypeToGenerate item, CppType itemType)
