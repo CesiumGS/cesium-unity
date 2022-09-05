@@ -21,6 +21,8 @@ git clone https://github.com/CesiumGS/cesium-unity-samples.git
 git clone https://github.com/CesiumGS/cesium-unity.git
 ```
 
+Make sure to also clone the submodules.
+
 Create a directory junction (symbol link) from the game project's Assets directory into the plugin's Assets directory. On Windows 11, this should just work. On Windows 10, you may need to enable "Developer Mode" and/or use an Administrator command prompt. If you've put the two repos side-by-side as shown above, simply run the following in PowerShell:
 
 ```
@@ -28,9 +30,19 @@ cd cesium-unity
 New-Item -ItemType Junction -Path "..\cesium-unity-samples\Assets\CesiumForUnity" -Target ".\Assets"
 ```
 
+To setup the symbolic link in Mac or Linux:
+
+```
+cd cesium-unity-samples/Assets/
+ln -s ../../cesium-unity/Assets CesiumForUnity
+```
+
 Unity only loads assets found in the game's Assets folder. By using a symlink, we keep the plugin's assets in the plugin's repo, making them much easier to manage with source control.
 
 ## Building
+
+ In order to build succesfully, the HintPaths in [CesiumForUnity.csproj](CesiumForUnity/CesiumForUnity.csproj) must be correct. On Mac, for instance, the UnityEngine.dll HintPath is:
+`/Applications/Unity/Hub/Editor/2021.3.2f1/Unity.app/Contents/Managed/UnityEngine.dll`
 
 The build consists of both C# and C++ code, but both can be invoked with a single CMake command. In the root `cesium-unity` directory, run:
 

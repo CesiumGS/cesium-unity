@@ -229,7 +229,7 @@ namespace Reinterop
             result.CppImplementationInvoker.Functions.Add(new(
                 Content:
                     $$"""
-                    #if __WIN32
+                    #if defined(_WIN32)
                     __declspec(dllexport)
                     #endif
                     {{returnType.AsInteropType().GetFullyQualifiedName()}} {{invokeCallbackName}}({{string.Join(", ", interopParameters.Select(p => $"{p.InteropType.GetFullyQualifiedName()} {p.Name}"))}}) {
@@ -242,7 +242,7 @@ namespace Reinterop
             result.CppImplementationInvoker.Functions.Add(new(
                 Content:
                     $$"""
-                    #if __WIN32
+                    #if defined(_WIN32)
                     __declspec(dllexport)
                     #endif
                     void {{disposeCallbackName}}(void* pCallbackFunction) {

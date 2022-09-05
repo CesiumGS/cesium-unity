@@ -49,7 +49,7 @@
             headerNamespace.Members.Add(
                 $$"""
                 extern "C" {
-                #if __WIN32
+                #if defined(_WIN32)
                 __declspec(dllexport)
                 #endif
                 void initializeReinterop(void** functionPointers, std::int32_t count);
@@ -76,7 +76,7 @@
             sourceNamespace.Members.Add(
                 $$"""
                 extern "C" {
-                #if __WIN32
+                #if defined(_WIN32)
                 __declspec(dllexport)
                 #endif
                 void initializeReinterop(void** functionPointers, std::int32_t count) {
