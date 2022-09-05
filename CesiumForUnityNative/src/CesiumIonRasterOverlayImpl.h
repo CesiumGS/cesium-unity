@@ -1,5 +1,7 @@
 #pragma once
 
+#include <CesiumUtility/IntrusivePointer.h>
+
 namespace DotNet::CesiumForUnity {
 class Cesium3DTileset;
 class CesiumIonRasterOverlay;
@@ -15,6 +17,8 @@ class CesiumIonRasterOverlayImpl {
 public:
   CesiumIonRasterOverlayImpl(
       const DotNet::CesiumForUnity::CesiumIonRasterOverlay& overlay);
+  ~CesiumIonRasterOverlayImpl();
+
   void JustBeforeDelete(
       const ::DotNet::CesiumForUnity::CesiumIonRasterOverlay& overlay);
   void AddToTileset(
@@ -25,7 +29,8 @@ public:
       const ::DotNet::CesiumForUnity::Cesium3DTileset& tileset);
 
 private:
-  Cesium3DTilesSelection::IonRasterOverlay* _pOverlay;
+  CesiumUtility::IntrusivePointer<Cesium3DTilesSelection::IonRasterOverlay>
+      _pOverlay;
 };
 
 } // namespace CesiumForUnityNative
