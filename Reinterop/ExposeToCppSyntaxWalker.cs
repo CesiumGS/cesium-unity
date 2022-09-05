@@ -1,4 +1,4 @@
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
@@ -151,7 +151,6 @@ namespace Reinterop
                     IMethodSymbol? invokeMethod = FindMember(type, "Invoke") as IMethodSymbol;
                     if (invokeMethod != null)
                         this.AddMethod(invokeMethod);
-
                 }
             }
 

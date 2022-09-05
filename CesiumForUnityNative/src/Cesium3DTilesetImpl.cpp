@@ -13,6 +13,9 @@
 #include <DotNet/System/Func2.h>
 #include <DotNet/System/Object.h>
 #include <DotNet/System/String.h>
+#include <DotNet/UnityEditor/CallbackFunction.h>
+#include <DotNet/UnityEditor/EditorApplication.h>
+#include <DotNet/UnityEngine/Application.h>
 #include <DotNet/UnityEngine/Coroutine.h>
 #include <DotNet/UnityEngine/GameObject.h>
 
@@ -23,13 +26,16 @@ namespace CesiumForUnityNative {
 
 Cesium3DTilesetImpl::Cesium3DTilesetImpl(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset)
-    : _pTileset(), _lastUpdateResult() {}
+    : _pTileset(),
+      _lastUpdateResult(),
+      _updateInEditorCallback(nullptr),
+      _destroyTilesetOnNextUpdate(false) {}
 
 Cesium3DTilesetImpl::~Cesium3DTilesetImpl() {}
 
 void Cesium3DTilesetImpl::JustBeforeDelete(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
-  this->DestroyTileset(tileset);
+  this->OnDisable(tileset);
 }
 
 void Cesium3DTilesetImpl::Start(
@@ -37,8 +43,17 @@ void Cesium3DTilesetImpl::Start(
 
 void Cesium3DTilesetImpl::Update(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
+  assert(tileset.enabled());
+
+  if (this->_destroyTilesetOnNextUpdate) {
+    this->_destroyTilesetOnNextUpdate = false;
+    this->DestroyTileset(tileset);
+  }
+
   if (!this->_pTileset) {
     this->LoadTileset(tileset);
+    if (!this->_pTileset)
+      return;
   }
 
   std::vector<ViewState> viewStates =
@@ -85,6 +100,34 @@ void Cesium3DTilesetImpl::Update(
 
 void Cesium3DTilesetImpl::OnValidate(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
+  // Unity does not allow us to destroy GameObjects and MonoBehaviours in this
+  // callback. So instead mark it to happen later.
+  this->_destroyTilesetOnNextUpdate = true;
+}
+
+void Cesium3DTilesetImpl::OnEnable(
+    const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
+  // In the Editor, Update will only be called when something
+  // changes. We need to call it continuously to allow tiles to
+  // load.
+  if (UnityEngine::Application::isEditor() &&
+      !UnityEditor::EditorApplication::isPlaying()) {
+    this->_updateInEditorCallback = UnityEditor::CallbackFunction(
+        [this, tileset]() { this->Update(tileset); });
+    UnityEditor::EditorApplication::update(
+        UnityEditor::EditorApplication::update() +
+        this->_updateInEditorCallback);
+  }
+}
+
+void Cesium3DTilesetImpl::OnDisable(
+    const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
+  if (this->_updateInEditorCallback != nullptr) {
+    UnityEditor::EditorApplication::update(
+        UnityEditor::EditorApplication::update() -
+        this->_updateInEditorCallback);
+    this->_updateInEditorCallback = nullptr;
+  }
   this->DestroyTileset(tileset);
 }
 
@@ -139,6 +182,14 @@ void Cesium3DTilesetImpl::updateLastViewUpdateResultState(
 
 void Cesium3DTilesetImpl::DestroyTileset(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
+  // Remove any existing raster overlays
+  // TODO: support more than one
+  CesiumForUnity::CesiumRasterOverlay overlay =
+      tileset.gameObject().GetComponent<CesiumForUnity::CesiumRasterOverlay>();
+  if (overlay != nullptr) {
+    overlay.RemoveFromTileset();
+  }
+
   this->_pTileset.reset();
 }
 
