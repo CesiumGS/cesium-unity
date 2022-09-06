@@ -41,7 +41,7 @@ Unity only loads assets found in the game's Assets folder. By using a symlink, w
 
 ## Building
 
- In order to build succesfully, the HintPaths in [CesiumForUnity.csproj](CesiumForUnity/CesiumForUnity.csproj) must be correct. On Mac, for instance, the UnityEngine.dll HintPath is:
+ In order to build successfully, the HintPaths in [CesiumForUnity.csproj](CesiumForUnity/CesiumForUnity.csproj) must be correct. On Mac, for instance, the UnityEngine.dll HintPath is:
 `/Applications/Unity/Hub/Editor/2021.3.2f1/Unity.app/Contents/Managed/UnityEngine.dll`
 
 The build consists of both C# and C++ code. The C# code must be compiled first, because its compilation process generates some code that is needed by the C++ build. To build the C# code, run the following in the root `cesium-unity` directory:
