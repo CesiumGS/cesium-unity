@@ -1,6 +1,5 @@
 using Reinterop;
 using UnityEngine;
-using UnityEditor;
 
 namespace CesiumForUnity
 {
