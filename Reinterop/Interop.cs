@@ -32,12 +32,14 @@ namespace Reinterop
             string accessName;
             if (method.Name == ".ctor")
                 accessName = $"new {csType.GetFullyQualifiedName()}";
+            else if (property != null && property.IsIndexer)
+                accessName = "";
             else if (property != null)
-                accessName = property.Name;
+                accessName = "." + property.Name;
             else if (evt != null)
-                accessName = evt.Name;
+                accessName = "." + evt.Name;
             else
-                accessName = method.Name;
+                accessName = "." + method.Name;
 
             if (method.IsGenericMethod)
             {
@@ -58,12 +60,12 @@ namespace Reinterop
             {
                 // Instance method or property
                 interopParameterDetails = new[] { (Name: "thiz", Type: csType, InteropType: csType.AsInteropType()) }.Concat(interopParameterDetails);
-                invocationTarget = $"(({csType.GetFullyQualifiedName()})ObjectHandleUtility.GetObjectFromHandle(thiz)!).{accessName}";
+                invocationTarget = $"(({csType.GetFullyQualifiedName()})ObjectHandleUtility.GetObjectFromHandle(thiz)!){accessName}";
             }
             else
             {
                 // Static method or property
-                invocationTarget = $"{csType.GetFullyQualifiedName()}.{accessName}";
+                invocationTarget = $"{csType.GetFullyQualifiedName()}{accessName}";
             }
 
             CSharpType csReturnType = CSharpType.FromSymbol(compilation, returnType);
@@ -74,24 +76,50 @@ namespace Reinterop
             string interopParameterList = string.Join(", ", interopParameterDetails.Select(parameter => $"{parameter.InteropType.GetFullyQualifiedName()} {parameter.Name}"));
 
             string implementation;
-            if (property != null && ReferenceEquals(property.GetMethod, method))
+            if (property != null && SymbolEqualityComparer.Default.Equals(property.GetMethod, method))
             {
-                // A property getter.
-                implementation =
-                    $$"""
-                    var result = {{invocationTarget}};
-                    return {{csReturnType.GetConversionToInteropType("result")}};
-                    """;
+                if (property.IsIndexer)
+                {
+                    // An element indexer (operator[])
+                    implementation =
+                        $$"""
+                        var result = {{invocationTarget}}[{{callParameterList}}];
+                        return {{csReturnType.GetConversionToInteropType("result")}};
+                        """;
+                }
+                else
+                {
+                    // A property getter.
+                    implementation =
+                        $$"""
+                        var result = {{invocationTarget}};
+                        return {{csReturnType.GetConversionToInteropType("result")}};
+                        """;
+                }
+
             }
-            else if (property != null && ReferenceEquals(property.SetMethod, method))
+            else if (property != null && SymbolEqualityComparer.Default.Equals(property.SetMethod, method))
             {
-                // A property setter.
-                implementation =
-                    $$"""
-                    {{invocationTarget}} = {{callParameterList}};
-                    """;
+                if (property.IsIndexer && callParameterDetails.Count() >= 2)
+                {
+                    // An element indexer (operator[])
+                    var indexParameter = callParameterDetails.ElementAt(0);
+                    var valueParameter = callParameterDetails.ElementAt(1);
+                    implementation =
+                        $$"""
+                        {{invocationTarget}}[{{indexParameter.Type.GetParameterConversionFromInteropType(indexParameter.Name)}}] = {{valueParameter.Type.GetParameterConversionFromInteropType(valueParameter.Name)}};
+                        """;
+                }
+                else
+                {
+                    // A property setter.
+                    implementation =
+                        $$"""
+                        {{invocationTarget}} = {{callParameterList}};
+                        """;
+                }
             }
-            else if (evt != null && ReferenceEquals(evt.AddMethod, method))
+            else if (evt != null && SymbolEqualityComparer.Default.Equals(evt.AddMethod, method))
             {
                 // An event adder
                 implementation =
@@ -99,7 +127,7 @@ namespace Reinterop
                     {{invocationTarget}} += {{callParameterList}};
                     """;
             }
-            else if (evt != null && ReferenceEquals(evt.RemoveMethod, method))
+            else if (evt != null && SymbolEqualityComparer.Default.Equals(evt.RemoveMethod, method))
             {
                 // An event adder
                 implementation =

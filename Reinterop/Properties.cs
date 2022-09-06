@@ -17,7 +17,8 @@ namespace Reinterop
             if (property.GetMethod != null)
                 GenerateSingleMethod(context, item, result, property, property.GetMethod);
 
-            if (property.SetMethod != null)
+            // TODO: support element setters (i.e. obj[0] = x)
+            if (property.SetMethod != null && !property.IsIndexer)
                 GenerateSingleMethod(context, item, result, property, property.SetMethod);
         }
 
@@ -75,12 +76,22 @@ namespace Reinterop
             else
                 afterModifiers += " const";
 
+            string propertyName = property.Name;
+            if (property.IsIndexer)
+                propertyName = "operator[]";
+
             // Method declaration
             var parameterStrings = parameters.Select(parameter => $"{parameter.Type.GetFullyQualifiedName()} {parameter.ParameterName}");
             declaration.Elements.Add(new(
-                Content: $"{modifiers}{returnType.GetFullyQualifiedName()} {property.Name}({string.Join(", ", parameterStrings)}){afterModifiers};",
+                Content: $"{modifiers}{returnType.GetFullyQualifiedName()} {propertyName}({string.Join(", ", parameterStrings)}){afterModifiers};",
                 TypeDeclarationsReferenced: new[] { returnType }.Concat(parameters.Select(parameter => parameter.Type))
             ));
+
+            string typeTemplateSpecialization = "";
+            if (definition.Type.GenericArguments != null && definition.Type.GenericArguments.Count > 0)
+            {
+                typeTemplateSpecialization = "<" + string.Join(", ", definition.Type.GenericArguments.Select(t => t.GetFullyQualifiedName())) + ">";
+            }
 
             // Method definition
             var parameterPassStrings = interopParameters.Select(parameter => parameter.Type.GetConversionToInteropType(context, parameter.CallSiteName));
@@ -89,7 +100,7 @@ namespace Reinterop
                 definition.Elements.Add(new(
                     Content:
                         $$"""
-                        {{returnType.GetFullyQualifiedName()}} {{definition.Type.Name}}::{{property.Name}}({{string.Join(", ", parameterStrings)}}){{afterModifiers}} {
+                        {{returnType.GetFullyQualifiedName()}} {{definition.Type.Name}}{{typeTemplateSpecialization}}::{{propertyName}}({{string.Join(", ", parameterStrings)}}){{afterModifiers}} {
                             Property_{{method.Name}}({{string.Join(", ", parameterPassStrings)}});
                         }
                         """,
@@ -106,7 +117,7 @@ namespace Reinterop
                 definition.Elements.Add(new(
                     Content:
                         $$"""
-                        {{returnType.GetFullyQualifiedName()}} {{definition.Type.Name}}::{{property.Name}}({{string.Join(", ", parameterStrings)}}){{afterModifiers}} {
+                        {{returnType.GetFullyQualifiedName()}} {{definition.Type.Name}}{{typeTemplateSpecialization}}::{{propertyName}}({{string.Join(", ", parameterStrings)}}){{afterModifiers}} {
                             auto result = Property_{{method.Name}}({{string.Join(", ", parameterPassStrings)}});
                             return {{returnType.GetConversionFromInteropType(context, "result")}};
                         }
