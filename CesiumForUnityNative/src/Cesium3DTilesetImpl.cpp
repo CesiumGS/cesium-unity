@@ -9,6 +9,7 @@
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
 #include <DotNet/CesiumForUnity/NativeCoroutine.h>
+#include <DotNet/System/Collections/Generic/List1.h>
 #include <DotNet/System/Collections/IEnumerator.h>
 #include <DotNet/System/Func2.h>
 #include <DotNet/System/Object.h>
@@ -183,10 +184,12 @@ void Cesium3DTilesetImpl::updateLastViewUpdateResultState(
 void Cesium3DTilesetImpl::DestroyTileset(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
   // Remove any existing raster overlays
-  // TODO: support more than one
-  CesiumForUnity::CesiumRasterOverlay overlay =
-      tileset.gameObject().GetComponent<CesiumForUnity::CesiumRasterOverlay>();
-  if (overlay != nullptr) {
+  System::Collections::Generic::List1<CesiumForUnity::CesiumRasterOverlay>
+      overlays{};
+  tileset.gameObject().GetComponents<CesiumForUnity::CesiumRasterOverlay>(
+      overlays);
+  for (int32_t i = 0, len = overlays.Count(); i < len; ++i) {
+    CesiumForUnity::CesiumRasterOverlay overlay = overlays[i];
     overlay.RemoveFromTileset();
   }
 
@@ -205,10 +208,12 @@ void Cesium3DTilesetImpl::LoadTileset(
       options);
 
   // Add any overlay components
-  // TODO: support more than one
-  CesiumForUnity::CesiumRasterOverlay overlay =
-      tileset.gameObject().GetComponent<CesiumForUnity::CesiumRasterOverlay>();
-  if (overlay != nullptr) {
+  System::Collections::Generic::List1<CesiumForUnity::CesiumRasterOverlay>
+      overlays{};
+  tileset.gameObject().GetComponents<CesiumForUnity::CesiumRasterOverlay>(
+      overlays);
+  for (int32_t i = 0, len = overlays.Count(); i < len; ++i) {
+    CesiumForUnity::CesiumRasterOverlay overlay = overlays[i];
     overlay.AddToTileset();
   }
 }

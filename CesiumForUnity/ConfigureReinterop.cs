@@ -1,5 +1,6 @@
 ﻿using Reinterop;
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -142,6 +143,13 @@ internal partial class ConfigureReinterop
         CesiumRasterOverlay overlay = go.GetComponent<CesiumRasterOverlay>();
         baseOverlay.AddToTileset();
         baseOverlay.RemoveFromTileset();
+
+        List<CesiumRasterOverlay> overlays = new List<CesiumRasterOverlay>();
+        go.GetComponents<CesiumRasterOverlay>(overlays);
+        for (int i = 0; i < overlays.Count; ++i)
+        {
+          CesiumRasterOverlay anOverlay = overlays[i];
+        }
 
         MonoBehaviour mb = tileset;
         mb.StartCoroutine(new NativeCoroutine(endIteration => endIteration).GetEnumerator());

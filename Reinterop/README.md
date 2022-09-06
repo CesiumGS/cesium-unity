@@ -64,7 +64,7 @@ void start() {
 }
 ```
 
-Build the generated C++ code into a shared library and copy it alongside the .NET assembly built by your C# project. Add C# code to call the generated method `Reinterop.ReinteropInitializer.Initialize()` at startup. This will initialize the interop layer and then call the `start` function in the C++ code. From there your C++ code can call back into .NET as it fees fit.
+Build the generated C++ code into a shared library and copy it alongside the .NET assembly built by your C# project. Add C# code to call the generated method `Reinterop.ReinteropInitializer.Initialize()` at startup. This will initialize the interop layer and then call the `start` function in the C++ code. From there your C++ code can call back into .NET as it sees fit.
 
 # Debugging
 
@@ -87,3 +87,9 @@ It is sometimes useful to temporarily disable the code generator so that you can
 With that change, your project will no longer compile because the generated code is missing. To fix that, find the previously-generated code in your project's `obj\Debug\netstandard2.1\generated\Reinterop\Reinterop.RoslynIncrementalGenerator` (or similar), and copy the entire contents into a folder called `generated` in your project's top-level directory. Your project should now build again.
 
 To revert back to on-the-fly generation, delete the `generated` folder and uncomment the lines in the .csproj.
+
+# Extending ExposeToCppSyntaxWalker
+
+If you want to discover more elements in `ConfigureReinterop` so that you can generate code for them, you will probably need to know what syntax elements you're looking for, and it's sometimes not very obvious. But if you install the ".NET Compiler Platform SDK" in Visual Studio, you can go to View -> Other Windows -> Syntax Visualizer. Then find the code you want to capture in `ConfigureReinterop.cs` (or wherever), click it, and look at the elements in the Syntax Visualizer window. If the window is broken, make a trivial modification to the code (e.g. add a space and then remove it) and the the tree should appear.
+
+To install the ".NET Compiler Platform SDK", just go to Add/Remove Programs, modify your Visual Studio installation, and find it under Individual Components.

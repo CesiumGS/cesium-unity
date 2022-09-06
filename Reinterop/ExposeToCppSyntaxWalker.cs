@@ -95,6 +95,19 @@ namespace Reinterop
             this.AddConstructor(methodSymbol);
         }
 
+        public override void VisitElementAccessExpression(ElementAccessExpressionSyntax node)
+        {
+            base.VisitElementAccessExpression(node);
+
+            // Look for the property for accessing elements of a list (or similar) by index.
+            ISymbol? symbol = this._semanticModel.GetSymbolInfo(node).Symbol;
+            IPropertySymbol? property = symbol as IPropertySymbol;
+            if (property == null)
+                return;
+
+            this.AddProperty(property);
+        }
+
         /// <summary>
         /// Find a member on a type or any of its base classes.
         /// </summary>
