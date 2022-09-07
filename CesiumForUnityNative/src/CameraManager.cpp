@@ -4,17 +4,23 @@
 #include <CesiumGeospatial/Transforms.h>
 #include <CesiumUtility/Math.h>
 
-#include <DotNet/UnityEditor/SceneView.h>
 #include <DotNet/UnityEngine/Camera.h>
 #include <DotNet/UnityEngine/GameObject.h>
 #include <DotNet/UnityEngine/Transform.h>
 #include <DotNet/UnityEngine/Vector3.h>
 
+#if UNITY_EDITOR
+#include <DotNet/UnityEditor/SceneView.h>
+#endif
+
 using namespace Cesium3DTilesSelection;
 using namespace CesiumGeospatial;
 using namespace CesiumUtility;
-using namespace DotNet::UnityEditor;
 using namespace DotNet::UnityEngine;
+
+#if UNITY_EDITOR
+using namespace DotNet::UnityEditor;
+#endif
 
 namespace CesiumForUnityNative {
 
@@ -75,6 +81,7 @@ std::vector<ViewState> CameraManager::getAllCameras(const GameObject& context) {
     result.emplace_back(unityCameraToViewState(camera));
   }
 
+#if UNITY_EDITOR
   SceneView lastActiveEditorView = SceneView::lastActiveSceneView();
   if (lastActiveEditorView != nullptr) {
     Camera editorCamera = lastActiveEditorView.camera();
@@ -82,6 +89,7 @@ std::vector<ViewState> CameraManager::getAllCameras(const GameObject& context) {
       result.emplace_back(unityCameraToViewState(editorCamera));
     }
   }
+#endif
 
   return result;
 }

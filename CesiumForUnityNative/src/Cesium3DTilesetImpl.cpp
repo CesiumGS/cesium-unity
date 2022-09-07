@@ -14,11 +14,14 @@
 #include <DotNet/System/Func2.h>
 #include <DotNet/System/Object.h>
 #include <DotNet/System/String.h>
-#include <DotNet/UnityEditor/CallbackFunction.h>
-#include <DotNet/UnityEditor/EditorApplication.h>
 #include <DotNet/UnityEngine/Application.h>
 #include <DotNet/UnityEngine/Coroutine.h>
 #include <DotNet/UnityEngine/GameObject.h>
+
+#if UNITY_EDITOR
+#include <DotNet/UnityEditor/CallbackFunction.h>
+#include <DotNet/UnityEditor/EditorApplication.h>
+#endif
 
 using namespace Cesium3DTilesSelection;
 using namespace DotNet;
@@ -29,7 +32,9 @@ Cesium3DTilesetImpl::Cesium3DTilesetImpl(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset)
     : _pTileset(),
       _lastUpdateResult(),
+#if UNITY_EDITOR
       _updateInEditorCallback(nullptr),
+#endif
       _destroyTilesetOnNextUpdate(false) {}
 
 Cesium3DTilesetImpl::~Cesium3DTilesetImpl() {}
@@ -108,6 +113,7 @@ void Cesium3DTilesetImpl::OnValidate(
 
 void Cesium3DTilesetImpl::OnEnable(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
+#if UNITY_EDITOR
   // In the Editor, Update will only be called when something
   // changes. We need to call it continuously to allow tiles to
   // load.
@@ -119,16 +125,19 @@ void Cesium3DTilesetImpl::OnEnable(
         UnityEditor::EditorApplication::update() +
         this->_updateInEditorCallback);
   }
+#endif
 }
 
 void Cesium3DTilesetImpl::OnDisable(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
+#if UNITY_EDITOR
   if (this->_updateInEditorCallback != nullptr) {
     UnityEditor::EditorApplication::update(
         UnityEditor::EditorApplication::update() -
         this->_updateInEditorCallback);
     this->_updateInEditorCallback = nullptr;
   }
+#endif
   this->DestroyTileset(tileset);
 }
 
