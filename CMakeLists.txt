@@ -6,6 +6,10 @@ project(cesium-unity
     LANGUAGES CXX C
 )
 
+# Static libraries are eventually built into shared libraries, so we need
+# position independent code.
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 if(APPLE)
     set(CMAKE_OSX_ARCHITECTURES "x86_64")
 endif()

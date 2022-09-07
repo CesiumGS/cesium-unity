@@ -1,5 +1,7 @@
 *.dll
 *.dll.meta
+*.so
+*.so.meta
 *.pdb
 *.pdb.meta
 *.nupkg
