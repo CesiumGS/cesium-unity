@@ -1,6 +1,7 @@
 #pragma once
 
 #include <DotNet/UnityEngine/Application.h>
+#include <DotNet/UnityEngine/Object.h>
 
 namespace CesiumForUnityNative {
 
