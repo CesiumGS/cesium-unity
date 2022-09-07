@@ -15,6 +15,10 @@ if(APPLE)
 endif()
 
 # Install to the Assets directory.
-set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_LIST_DIR}/Assets)
+if (EDITOR)
+    set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_LIST_DIR}/Assets/Editor)
+else()
+    set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_LIST_DIR}/Assets/Standalone)
+endif()
 
 add_subdirectory(CesiumForUnityNative)

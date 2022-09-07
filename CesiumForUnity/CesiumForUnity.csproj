@@ -6,7 +6,8 @@
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <LangVersion>Latest</LangVersion>
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-    <PublishDir>$(ProjectDir)..\Assets</PublishDir>
+    <PublishDir Condition="'$(Editor)' == 'true'">$(ProjectDir)..\Assets\Editor</PublishDir>
+    <PublishDir Condition="'$(Editor)' != 'true'">$(ProjectDir)..\Assets\Standalone</PublishDir>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <DefineConstants Condition="'$(Editor)' == 'true'">UNITY_EDITOR</DefineConstants>
   </PropertyGroup>

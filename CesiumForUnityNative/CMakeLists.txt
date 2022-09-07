@@ -8,8 +8,8 @@ project(CesiumForUnityNative
 
 add_subdirectory(extern/cesium-native EXCLUDE_FROM_ALL)
 
-file(GLOB CESIUMFORUNITYNATIVE_SOURCES src/*.cpp generated/src/*.cpp)
-file(GLOB CESIUMFORUNITYNATIVE_HEADERS src/*.h generated/src/*.h)
+file(GLOB CESIUMFORUNITYNATIVE_SOURCES CONFIGURE_DEPENDS src/*.cpp generated/src/*.cpp)
+file(GLOB CESIUMFORUNITYNATIVE_HEADERS CONFIGURE_DEPENDS src/*.h generated/src/*.h)
 
 add_library(CesiumForUnityNative SHARED)
 
@@ -42,5 +42,9 @@ set_target_properties(
         CXX_STANDARD_REQUIRED YES
         CXX_EXTENSIONS NO
 )
+
+if (EDITOR)
+  target_compile_definitions(CesiumForUnityNative PRIVATE UNITY_EDITOR)
+endif()
 
 install(FILES $<TARGET_FILE:CesiumForUnityNative> DESTINATION ".")
