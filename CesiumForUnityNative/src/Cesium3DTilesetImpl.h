@@ -1,9 +1,12 @@
 #pragma once
 
 #include <Cesium3DTilesSelection/ViewUpdateResult.h>
-#include <DotNet/UnityEditor/CallbackFunction.h>
 
 #include <memory>
+
+#if UNITY_EDITOR
+#include <DotNet/UnityEditor/CallbackFunction.h>
+#endif
 
 namespace DotNet::CesiumForUnity {
 class Cesium3DTileset;
@@ -41,7 +44,9 @@ private:
 
   std::unique_ptr<Cesium3DTilesSelection::Tileset> _pTileset;
   Cesium3DTilesSelection::ViewUpdateResult _lastUpdateResult;
+#if UNITY_EDITOR
   DotNet::UnityEditor::CallbackFunction _updateInEditorCallback;
+#endif
   bool _destroyTilesetOnNextUpdate;
 };
 

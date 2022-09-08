@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -34,9 +33,6 @@ internal partial class ConfigureReinterop
         float aspect = c.aspect;
         //IFormattable f = new Vector3();
         //IEquatable<Vector3> f2 = new Vector3();
-
-        SceneView sv = SceneView.lastActiveSceneView;
-        Camera svc = sv.camera;
 
         GameObject go = new GameObject();
         go.name = go.name;
@@ -153,8 +149,5 @@ internal partial class ConfigureReinterop
 
         MonoBehaviour mb = tileset;
         mb.StartCoroutine(new NativeCoroutine(endIteration => endIteration).GetEnumerator());
-
-        bool isPlaying = EditorApplication.isPlaying;
-        EditorApplication.update += () => {};
     }
 }

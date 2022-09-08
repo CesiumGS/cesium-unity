@@ -41,13 +41,15 @@ Unity only loads assets found in the game's Assets folder. By using a symlink, w
 
 ## Building
 
- In order to build successfully, the HintPaths in [CesiumForUnity.csproj](CesiumForUnity/CesiumForUnity.csproj) must be correct. On Mac, for instance, the UnityEngine.dll HintPath is:
+Before you begin, check that the HintPaths in [CesiumForUnity.csproj](CesiumForUnity/CesiumForUnity.csproj) are correct for your platform and version of Unity. On Mac, for instance, the UnityEngine.dll HintPath is:
 `/Applications/Unity/Hub/Editor/2021.3.2f1/Unity.app/Contents/Managed/UnityEngine.dll`
 
-The build consists of both C# and C++ code. The C# code must be compiled first, because its compilation process generates some code that is needed by the C++ build. To build the C# code, run the following in the root `cesium-unity` directory:
+Building Cesium for Unity requires building both an Editor and a non-Editor (i.e. built game) configuration, and each configuration has both a C# and a C++ part. So there are a totally of four projects, and all must be built before you can run Cesium for Unity.
+
+The C# code must be compiled first, because its compilation process generates some code that is needed by the C++ build. To build the C# code for the non-Editor configuration, run the following in the root `cesium-unity` directory:
 
 ```
-dotnet publish CesiumForUnity -c Debug
+dotnet publish CesiumForUnity -c Debug -p:Editor=False
 ```
 
 Replace `Debug` with `Release` for a release build.
@@ -57,21 +59,31 @@ This will do the following:
 * Compile the Cesium for Unity C# code.
 * Generate (on the fly) some new C# code for interop with C++ and compile that in, too.
 * Generate C++ header and source files for the C++ side of the interop.
-* Copy the built DLLs and PDBs to the `Assets` directory.
+* Copy the built DLLs and PDBs to the `Assets/NonEditor` directory.
 
-To build the C++ code, run the following from the `cesium-unity` directory:
+To build the C++ code for the non-Editor configuration, run the following from the `cesium-unity` directory:
 
 ```
-cmake -B build -S .
-cmake --build build --target install
+cmake -B build -S . -DEDITOR=false
+cmake --build build --target install -j14
 ```
 
-(or just use `CMake: Configure` and `CMake: Install` from Visual Studio Code)
+The `-j14` tells CMake to build using 14 threads. A higher or lower number may be more suitable for your system.
 
 The CMake build will:
 
 * Compile the DLL containing the C++ code.
-* Copy the built DLLs and PDBs to the `Assets` directory.
+* Copy the built DLLs and PDBs to the `Assets/NonEditor` directory.
+
+Next, build the Editor configuration of both the C# and C++ code:
+
+```
+dotnet publish CesiumForUnity -c Debug -p:Editor=True
+cmake -B build -S . -DEDITOR=true
+cmake --build build --target install -j14
+```
+
+Unity requires that the binaries for the non-Editor configuration _exist_, otherwise Cesium for Unity won't work at all, even in the Editor. But once you've built it once, if you're working exclusively in the Editor, you can iterate by only building the Editor configuration. The non-Editor binaries must exist, but they need not be up-to-date unless you're planning to build a game to run outside the Editor.
 
 ## Running the Examples
 

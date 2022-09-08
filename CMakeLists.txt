@@ -11,6 +11,10 @@ project(cesium-unity
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Install to the Assets directory.
-set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_LIST_DIR}/Assets)
+if (EDITOR)
+    set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_LIST_DIR}/Assets/Editor)
+else()
+    set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_LIST_DIR}/Assets/NonEditor)
+endif()
 
 add_subdirectory(CesiumForUnityNative)
