@@ -10,10 +10,6 @@ project(cesium-unity
 # position independent code.
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-if(APPLE)
-    set(CMAKE_OSX_ARCHITECTURES "x86_64")
-endif()
-
 # Install to the Assets directory.
 if (EDITOR)
     set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_LIST_DIR}/Assets/Editor)
