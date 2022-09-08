@@ -7,7 +7,7 @@
     <LangVersion>Latest</LangVersion>
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
     <PublishDir Condition="'$(Editor)' == 'true'">$(ProjectDir)..\Assets\Editor</PublishDir>
-    <PublishDir Condition="'$(Editor)' != 'true'">$(ProjectDir)..\Assets\Standalone</PublishDir>
+    <PublishDir Condition="'$(Editor)' != 'true'">$(ProjectDir)..\Assets\NonEditor</PublishDir>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <DefineConstants Condition="'$(Editor)' == 'true'">UNITY_EDITOR</DefineConstants>
   </PropertyGroup>
