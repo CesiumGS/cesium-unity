@@ -4,7 +4,7 @@ namespace Reinterop
 {
     internal class GeneratedCSharpPartialMethod
     {
-        public GeneratedCSharpPartialMethod(string methodDefinition, string interopFunctionDeclaration)
+        public GeneratedCSharpPartialMethod(string methodDefinition, string interopFunctionDeclaration = "")
         {
             this.MethodDefinition = methodDefinition;
             this.InteropFunctionDeclaration = interopFunctionDeclaration;
@@ -67,7 +67,7 @@ namespace Reinterop
 
         private IEnumerable<string> GetInteropFunctionDeclarations()
         {
-            return Methods.Select(method => method.InteropFunctionDeclaration);
+            return Methods.Select(method => method.InteropFunctionDeclaration).Where(method => !string.IsNullOrEmpty(method));
         }
     }
 }

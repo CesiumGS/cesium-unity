@@ -19,7 +19,12 @@ bool NativeDownloadHandlerImpl::ReceiveDataNative(
   return true;
 }
 
-gsl::span<const std::byte> NativeDownloadHandlerImpl::getData() const {
+const std::vector<std::byte>&
+NativeDownloadHandlerImpl::getData() const noexcept {
+  return this->_data;
+}
+
+std::vector<std::byte>& NativeDownloadHandlerImpl::getData() noexcept {
   return this->_data;
 }
 

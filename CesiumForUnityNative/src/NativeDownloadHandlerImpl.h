@@ -23,7 +23,8 @@ public:
       void* data,
       std::int32_t dataLength);
 
-  gsl::span<const std::byte> getData() const;
+  const std::vector<std::byte>& getData() const noexcept;
+  std::vector<std::byte>& getData() noexcept;
 
 private:
   std::vector<std::byte> _data;

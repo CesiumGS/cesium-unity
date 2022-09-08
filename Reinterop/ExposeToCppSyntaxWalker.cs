@@ -108,26 +108,6 @@ namespace Reinterop
             this.AddProperty(property);
         }
 
-        /// <summary>
-        /// Find a member on a type or any of its base classes.
-        /// </summary>
-        /// <param name="type">The type on which to find the member.</param>
-        /// <param name="name">The name of the member.</param>
-        /// <returns>The member, or null if it does not exist.</returns>
-        private ISymbol? FindMember(ITypeSymbol type, string name)
-        {
-            ITypeSymbol? current = type;
-            while (current != null)
-            {
-                ISymbol? member = current.GetMembers(name).FirstOrDefault();
-                if (member != null)
-                    return member;
-                current = current.BaseType;
-            }
-
-            return null;
-        }
-
         private TypeToGenerate AddType(ITypeSymbol type)
         {
             // Drop the nullability ("?") from the type if present.
@@ -161,7 +141,7 @@ namespace Reinterop
                 // If this is a delegate, be sure to add the Invoke method.
                 if (type.TypeKind == TypeKind.Delegate)
                 {
-                    IMethodSymbol? invokeMethod = FindMember(type, "Invoke") as IMethodSymbol;
+                    IMethodSymbol? invokeMethod = CSharpTypeUtility.FindMember(type, "Invoke") as IMethodSymbol;
                     if (invokeMethod != null)
                         this.AddMethod(invokeMethod);
                 }

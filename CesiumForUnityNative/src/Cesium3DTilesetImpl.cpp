@@ -35,7 +35,8 @@ Cesium3DTilesetImpl::Cesium3DTilesetImpl(
 #if UNITY_EDITOR
       _updateInEditorCallback(nullptr),
 #endif
-      _destroyTilesetOnNextUpdate(false) {}
+      _destroyTilesetOnNextUpdate(false) {
+}
 
 Cesium3DTilesetImpl::~Cesium3DTilesetImpl() {}
 

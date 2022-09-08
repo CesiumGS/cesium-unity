@@ -1,6 +1,7 @@
 #include "UnityAssetAccessor.h"
 
 #include <CesiumAsync/IAssetResponse.h>
+#include <CesiumUtility/ScopeGuard.h>
 
 #include <DotNet/CesiumForUnity/NativeDownloadHandler.h>
 #include <DotNet/System/Action1.h>
@@ -10,6 +11,7 @@
 #include <DotNet/UnityEngine/Networking/UnityWebRequestAsyncOperation.h>
 
 using namespace CesiumAsync;
+using namespace CesiumUtility;
 using namespace DotNet;
 
 namespace {
@@ -22,7 +24,7 @@ public:
       : _statusCode(uint16_t(request.responseCode())),
         _contentType(request.GetResponseHeader(System::String("Content-Type"))
                          .ToStlString()),
-        _handler(handler) {
+        _data(std::move(handler.NativeImplementation().getData())) {
     this->_headers.emplace("Content-Type", this->_contentType);
     // TODO: get all response headers
   }
@@ -34,14 +36,14 @@ public:
   virtual const HttpHeaders& headers() const override { return _headers; }
 
   virtual gsl::span<const std::byte> data() const override {
-    return this->_handler.NativeImplementation().getData();
+    return this->_data;
   }
 
 private:
   uint16_t _statusCode;
   std::string _contentType;
   HttpHeaders _headers;
-  ::DotNet::CesiumForUnity::NativeDownloadHandler _handler;
+  std::vector<std::byte> _data;
 };
 
 class UnityAssetRequest : public IAssetRequest {
@@ -105,6 +107,7 @@ UnityAssetAccessor::get(
     op.add_completed(System::Action1<UnityEngine::AsyncOperation>(
         [request, promise = std::move(promise), handler = std::move(handler)](
             const UnityEngine::AsyncOperation& operation) mutable {
+          ScopeGuard disposeHandler{[&handler]() { handler.Dispose(); }};
           if (request.isDone() && request.error() == nullptr) {
             promise.resolve(
                 std::make_shared<UnityAssetRequest>(request, handler));

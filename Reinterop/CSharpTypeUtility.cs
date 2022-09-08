@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using System.Collections.Immutable;
 
 namespace Reinterop
 {
@@ -29,6 +30,38 @@ namespace Reinterop
                 return "protected internal";
             else
                 return "";
+        }
+
+        /// <summary>
+        /// Find a member on a type or any of its base classes.
+        /// </summary>
+        /// <param name="type">The type on which to find the member.</param>
+        /// <param name="name">The name of the member.</param>
+        /// <returns>The member, or null if it does not exist.</returns>
+        public static ISymbol? FindMember(ITypeSymbol type, string name)
+        {
+            return FindMembers(type, name).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Find a member on a type or any of its base classes.
+        /// </summary>
+        /// <param name="type">The type on which to find the member.</param>
+        /// <param name="name">The name of the member.</param>
+        /// <returns>The member, or null if it does not exist.</returns>
+        public static IEnumerable<ISymbol> FindMembers(ITypeSymbol type, string name)
+        {
+            ITypeSymbol? current = type;
+            while (current != null)
+            {
+                ImmutableArray<ISymbol> members = current.GetMembers(name);
+                foreach (ISymbol symbol in members)
+                {
+                    yield return symbol;
+                }
+
+                current = current.BaseType;
+            }
         }
     }
 }
