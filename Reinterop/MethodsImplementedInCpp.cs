@@ -74,19 +74,11 @@ namespace Reinterop
                     objectHandleType
                 }));
 
+            // Always add a protected DisposeImplementation method.
             result.CSharpPartialMethodDefinitions.Methods.Add(new(
                 methodDefinition:
                     $$"""
-                    ~{{wrapperType.Name}}()
-                    {
-                        Dispose(false);
-                    }
-                    public void Dispose()
-                    {
-                        Dispose(true);
-                        GC.SuppressFinalize(this);
-                    }
-                    protected virtual void Dispose(bool disposing)
+                    protected void DisposeImplementation()
                     {
                         if (_implementation != System.IntPtr.Zero)
                         {
@@ -100,6 +92,41 @@ namespace Reinterop
                     [DllImport("{{context.NativeLibraryName}}.dll", CallingConvention=CallingConvention.Cdecl)]
                     private static extern void {{disposeName}}(System.IntPtr thiz, System.IntPtr implementation);
                     """));
+
+            // If there is no finalizer, create one that calls DisposeImplementation.
+            // But if the other half of this partial class has a finalizer already, we can't add one, so it's on
+            // the implementer of that other class to call DisposeImplementation themselves.
+            if (!item.Type.GetMembers("Finalize").Any())
+            {
+                result.CSharpPartialMethodDefinitions.Methods.Add(new(
+                    methodDefinition:
+                        $$"""
+                        ~{{wrapperType.Name}}()
+                        {
+                            DisposeImplementation();
+                        }
+                        """));
+            }
+
+            // If there is no parameterless Dispose Method, add one. If the base class has one, call it (and mark it override if needed).
+            // But if the other half of this partial class implements Dispose, it's on the implementer of that other class to
+            // arrange for DisposeImplementation to be called themselves.
+            if (!item.Type.GetMembers("Dispose").Where(symbol => symbol is IMethodSymbol method && method.Parameters.Length == 0).Any())
+            {
+                IMethodSymbol? baseDisposeMethod = CSharpTypeUtility.FindMembers(item.Type, "Dispose").Where(symbol => symbol is IMethodSymbol method && method.Parameters.Length == 0).FirstOrDefault() as IMethodSymbol;
+                result.CSharpPartialMethodDefinitions.Methods.Add(new(
+                    methodDefinition:
+                        $$"""
+                        public {{(baseDisposeMethod != null && baseDisposeMethod.IsVirtual ? "override " : "")}}void Dispose()
+                        {
+                            {{(baseDisposeMethod != null
+                                    ? "base.Dispose();" // let the base class suppress finalization if desired
+                                    : "GC.SuppressFinalize(this);"
+                                )}}
+                            this.DisposeImplementation();
+                        }
+                        """));
+            }
 
             // If the class has no explicit constructors at all, add a default one.
             bool hasConstructor = item.Type.GetMembers().Where(m =>
