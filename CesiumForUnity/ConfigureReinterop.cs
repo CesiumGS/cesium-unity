@@ -114,7 +114,7 @@ internal partial class ConfigureReinterop
         request.downloadHandler = new NativeDownloadHandler();
         request.SetRequestHeader("name", "value");
         request.GetResponseHeader("name");
-       request.downloadHandler.Dispose();
+        request.downloadHandler.Dispose();
         long responseCode = request.responseCode;
         UnityWebRequestAsyncOperation op = request.SendWebRequest();
         //Action<AsyncOperation> foo = (ao) => { };
