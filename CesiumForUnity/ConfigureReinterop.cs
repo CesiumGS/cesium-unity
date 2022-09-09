@@ -63,6 +63,11 @@ internal partial class ConfigureReinterop
         mesh.SetUVs(0, new NativeArray<Vector2>());
         mesh.SetIndices(new NativeArray<int>(), MeshTopology.Triangles, 0, true, 0);
 
+        MeshCollider meshCollider = go.AddComponent<MeshCollider>();
+        meshCollider.sharedMesh = mesh;
+        Rigidbody rigidbody = go.AddComponent<Rigidbody>();
+        rigidbody.isKinematic = true;
+
         Debug.Log("Logging");
 
         MeshRenderer meshRenderer = new MeshRenderer();
