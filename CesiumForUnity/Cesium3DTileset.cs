@@ -177,8 +177,8 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Tooltip("Whether a specified screen-space error should be enforced for tiles that are outside the frustum or hidden in fog.")]
-        [InspectorName("Enforce Culled Screen Space Error")]
+        [Tooltip("The screen-space error to be enforced for tiles that are outside the frustum or hidden in fog.")]
+        [InspectorName("Culled Screen Space Error")]
         private float _culledScreenSpaceError = 64.0f;
 
         public float culledScreenSpaceError
