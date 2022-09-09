@@ -130,6 +130,15 @@ internal partial class ConfigureReinterop
         tileset.logSelectionStats = tileset.logSelectionStats;
         tileset.opaqueMaterial = tileset.opaqueMaterial;
         tileset.enabled = tileset.enabled;
+        tileset.maximumScreenSpaceError = tileset.maximumScreenSpaceError;
+        tileset.preloadAncestors = tileset.preloadAncestors;
+        tileset.preloadSiblings = tileset.preloadSiblings;
+        tileset.forbidHoles = tileset.forbidHoles;
+        tileset.maximumSimultaneousTileLoads = tileset.maximumSimultaneousTileLoads;
+        tileset.maximumCachedBytes = tileset.maximumCachedBytes;
+        tileset.loadingDescendantLimit = tileset.loadingDescendantLimit;
+        tileset.enforceCulledScreenSpaceError = tileset.enforceCulledScreenSpaceError;
+        tileset.culledScreenSpaceError = tileset.culledScreenSpaceError;
 
         Cesium3DTileset tilesetFromGameObject = go.GetComponent<Cesium3DTileset>();
         MeshRenderer meshRendererFromGameObject = go.GetComponent<MeshRenderer>();
