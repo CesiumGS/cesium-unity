@@ -162,6 +162,7 @@ namespace Reinterop
                     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
                     private unsafe delegate {{interopReturnTypeString}} {{baseName}}Type({{interopParameterList}});
                     private static unsafe readonly {{baseName}}Type {{baseName}}Delegate = new {{baseName}}Type({{baseName}});
+                    [AOT.MonoPInvokeCallback(typeof({{baseName}}Type))]
                     private static unsafe {{interopReturnTypeString}} {{baseName}}({{interopParameterList}})
                     {
                         {{implementation.Replace(Environment.NewLine, Environment.NewLine + "  ")}}
@@ -242,6 +243,7 @@ namespace Reinterop
                     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
                     private unsafe delegate {{interopReturnTypeString}} {{baseName}}Type({{interopParameterList}});
                     private static unsafe readonly {{baseName}}Type {{baseName}}Delegate = new {{baseName}}Type({{baseName}});
+                    [AOT.MonoPInvokeCallback(typeof({{baseName}}Type))]
                     private static unsafe {{interopReturnTypeString}} {{baseName}}({{interopParameterList}})
                     {
                         {{implementation.Replace(Environment.NewLine, Environment.NewLine + "  ")}}

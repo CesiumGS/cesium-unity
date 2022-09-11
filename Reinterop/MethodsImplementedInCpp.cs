@@ -207,6 +207,7 @@ namespace Reinterop
                     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
                     private unsafe delegate IntPtr {{baseName}}Type(IntPtr thiz);
                     private static unsafe readonly {{baseName}}Type {{baseName}}Delegate = new {{baseName}}Type({{baseName}});
+                    [AOT.MonoPInvokeCallback(typeof({{baseName}}Type))]
                     private static unsafe IntPtr {{baseName}}(IntPtr thiz)
                     {
                         return ({{csWrapperType.GetParameterConversionFromInteropType("thiz")}}).NativeImplementation;
