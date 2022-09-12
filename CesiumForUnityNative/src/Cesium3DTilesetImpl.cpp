@@ -7,8 +7,10 @@
 #include <Cesium3DTilesSelection/Tileset.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
+#include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
 #include <DotNet/CesiumForUnity/NativeCoroutine.h>
+#include <DotNet/System/Action.h>
 #include <DotNet/System/Collections/Generic/List1.h>
 #include <DotNet/System/Collections/IEnumerator.h>
 #include <DotNet/System/Func2.h>
@@ -35,6 +37,8 @@ Cesium3DTilesetImpl::Cesium3DTilesetImpl(
 #if UNITY_EDITOR
       _updateInEditorCallback(nullptr),
 #endif
+      _georeference(nullptr),
+      _georeferenceChangedCallback(nullptr),
       _destroyTilesetOnNextUpdate(false) {
 }
 
@@ -127,6 +131,18 @@ void Cesium3DTilesetImpl::OnEnable(
         this->_updateInEditorCallback);
   }
 #endif
+
+  // When the georeference changes, recreate the tileset.
+  // TODO: just update tile positions rather than recreating.
+  this->_georeference =
+      tileset.gameObject()
+          .GetComponentInParent<CesiumForUnity::CesiumGeoreference>();
+  this->_georeferenceChangedCallback = System::Action([this]() {
+    // Unity does not allow us to destroy GameObjects and MonoBehaviours in this
+    // callback. So instead mark it to happen later.
+    this->_destroyTilesetOnNextUpdate = true;
+  });
+  this->_georeference.add_changed(this->_georeferenceChangedCallback);
 }
 
 void Cesium3DTilesetImpl::OnDisable(
@@ -139,6 +155,14 @@ void Cesium3DTilesetImpl::OnDisable(
     this->_updateInEditorCallback = nullptr;
   }
 #endif
+
+  if (this->_georeferenceChangedCallback != nullptr) {
+    this->_georeference.remove_changed(this->_georeferenceChangedCallback);
+  }
+
+  this->_georeferenceChangedCallback = nullptr;
+  this->_georeference = nullptr;
+
   this->DestroyTileset(tileset);
 }
 
