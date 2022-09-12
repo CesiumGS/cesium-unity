@@ -2,6 +2,9 @@
 
 #include <Cesium3DTilesSelection/ViewUpdateResult.h>
 
+#include <DotNet/CesiumForUnity/CesiumGeoreference.h>
+#include <DotNet/System/Action.h>
+
 #include <memory>
 
 #if UNITY_EDITOR
@@ -47,6 +50,8 @@ private:
 #if UNITY_EDITOR
   DotNet::UnityEditor::CallbackFunction _updateInEditorCallback;
 #endif
+  DotNet::CesiumForUnity::CesiumGeoreference _georeference;
+  DotNet::System::Action _georeferenceChangedCallback;
   bool _destroyTilesetOnNextUpdate;
 };
 

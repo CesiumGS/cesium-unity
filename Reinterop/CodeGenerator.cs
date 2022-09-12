@@ -207,6 +207,7 @@ namespace Reinterop
                     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
                     private unsafe delegate IntPtr {{csBaseName}}Type(IntPtr callbackFunction);
                     private static unsafe readonly {{csBaseName}}Type {{csBaseName}}Delegate = new {{csBaseName}}Type({{csBaseName}});
+                    [AOT.MonoPInvokeCallback(typeof({{csBaseName}}Type))]
                     private static unsafe IntPtr {{csBaseName}}(IntPtr callbackFunction)
                     {
                         var receiver = new {{csType.Symbol.Name}}{{genericTypeHash}}NativeFunction(callbackFunction);
@@ -301,6 +302,7 @@ namespace Reinterop
                     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
                     private unsafe delegate System.IntPtr {{csCombineDelegatesName}}Type(System.IntPtr thiz, System.IntPtr rhs);
                     private static unsafe readonly {{csCombineDelegatesName}}Type {{csCombineDelegatesName}}Delegate = new {{csCombineDelegatesName}}Type({{csCombineDelegatesName}});
+                    [AOT.MonoPInvokeCallback(typeof({{csCombineDelegatesName}}Type))]
                     private static unsafe System.IntPtr {{csCombineDelegatesName}}(System.IntPtr thiz, System.IntPtr rhs)
                     {
                         {{csType.GetFullyQualifiedName()}} left = ({{csType.GetFullyQualifiedName()}})ObjectHandleUtility.GetObjectFromHandle(thiz)!;
@@ -320,6 +322,7 @@ namespace Reinterop
                     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
                     private unsafe delegate System.IntPtr {{csRemoveDelegateName}}Type(System.IntPtr thiz, System.IntPtr rhs);
                     private static unsafe readonly {{csRemoveDelegateName}}Type {{csRemoveDelegateName}}Delegate = new {{csRemoveDelegateName}}Type({{csRemoveDelegateName}});
+                    [AOT.MonoPInvokeCallback(typeof({{csRemoveDelegateName}}Type))]
                     private static unsafe System.IntPtr {{csRemoveDelegateName}}(System.IntPtr thiz, System.IntPtr rhs)
                     {
                         {{csType.GetFullyQualifiedName()}} left = ({{csType.GetFullyQualifiedName()}})ObjectHandleUtility.GetObjectFromHandle(thiz)!;

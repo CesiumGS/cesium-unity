@@ -11,6 +11,7 @@
 #include <CesiumUtility/ScopeGuard.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
+#include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/System/Object.h>
 #include <DotNet/System/String.h>
 #include <DotNet/System/Text/Encoding.h>
@@ -116,6 +117,16 @@ void* UnityPrepareRendererResources::prepareInMainThread(
   DotNet::CesiumForUnity::Cesium3DTileset tilesetComponent =
       this->_tileset.GetComponent<DotNet::CesiumForUnity::Cesium3DTileset>();
 
+  DotNet::CesiumForUnity::CesiumGeoreference georeferenceComponent =
+      this->_tileset
+          .GetComponentInParent<DotNet::CesiumForUnity::CesiumGeoreference>();
+
+  const LocalHorizontalCoordinateSystem* pCoordinateSystem = nullptr;
+  if (georeferenceComponent != nullptr) {
+    pCoordinateSystem =
+        &georeferenceComponent.NativeImplementation().getCoordinateSystem();
+  }
+
   UnityEngine::Material opaqueMaterial = tilesetComponent.opaqueMaterial();
   if (opaqueMaterial == nullptr) {
     opaqueMaterial = UnityEngine::Resources::Load<UnityEngine::Material>(
@@ -124,7 +135,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
   model.forEachPrimitiveInScene(
       -1,
-      [&pModelGameObject, &tileTransform, opaqueMaterial](
+      [&pModelGameObject, &tileTransform, opaqueMaterial, pCoordinateSystem](
           const Model& gltf,
           const Node& node,
           const Mesh& mesh,
@@ -156,21 +167,12 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         primitiveGameObject.hideFlags(UnityEngine::HideFlags::DontSave);
         primitiveGameObject.transform().parent(pModelGameObject->transform());
 
-        // Hard-coded "georeference" to put the Unity origin at a default
-        // location in Melbourne and adjust for Unity left-handed, Y-up
-        // convention.
-        glm::dvec3 origin = Ellipsoid::WGS84.cartographicToCartesian(
-            Cartographic::fromDegrees(144.96133, -37.81510, 2250.0));
-        glm::dmat4 enuToFixed = Transforms::eastNorthUpToFixedFrame(origin);
-        glm::dmat4 fixedToEnu = glm::affineInverse(enuToFixed);
-        glm::dmat4 swapYandZ(
-            glm::dvec4(1.0, 0.0, 0.0, 0.0),
-            glm::dvec4(0.0, 0.0, 1.0, 0.0),
-            glm::dvec4(0.0, 1.0, 0.0, 0.0),
-            glm::dvec4(0.0, 0.0, 0.0, 1.0));
+        glm::dmat4 fixedToUnity =
+            pCoordinateSystem
+                ? pCoordinateSystem->getEcefToLocalTransformation()
+                : glm::dmat4();
 
-        glm::dmat4 fullTransform = fixedToEnu * (tileTransform * transform);
-        fullTransform = swapYandZ * fullTransform;
+        glm::dmat4 fullTransform = fixedToUnity * (tileTransform * transform);
 
         glm::dvec3 translation = glm::dvec3(fullTransform[3]);
         glm::dmat3 rotationScale = glm::dmat3(fullTransform);
@@ -189,10 +191,6 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           rotationMatrix *= -1.0;
           scale *= -1.0;
         }
-
-        rotationMatrix[0] = glm::normalize(rotationMatrix[0]);
-        rotationMatrix[1] = glm::normalize(rotationMatrix[1]);
-        rotationMatrix[2] = glm::normalize(rotationMatrix[2]);
 
         glm::dquat rotation = glm::quat_cast(rotationMatrix);
 
