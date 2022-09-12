@@ -240,9 +240,13 @@ void Cesium3DTilesetImpl::LoadTileset(
   options.maximumSimultaneousTileLoads = tileset.maximumSimultaneousTileLoads();
   options.maximumCachedBytes = tileset.maximumCachedBytes();
   options.loadingDescendantLimit = tileset.loadingDescendantLimit();
+  options.enableFrustumCulling = tileset.enableFrustumCulling();
+  options.enableFogCulling = tileset.enableFogCulling();
   options.enforceCulledScreenSpaceError =
       tileset.enforceCulledScreenSpaceError();
   options.culledScreenSpaceError = tileset.culledScreenSpaceError();
+  options.enableLodTransitionPeriod = tileset.useLodTransitions();
+  options.lodTransitionLength = tileset.lodTransitionLength();
 
   this->_lastUpdateResult = ViewUpdateResult();
   this->_pTileset = std::make_unique<Tileset>(

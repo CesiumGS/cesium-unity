@@ -140,8 +140,12 @@ internal partial class ConfigureReinterop
         tileset.maximumSimultaneousTileLoads = tileset.maximumSimultaneousTileLoads;
         tileset.maximumCachedBytes = tileset.maximumCachedBytes;
         tileset.loadingDescendantLimit = tileset.loadingDescendantLimit;
+        tileset.enableFrustumCulling = tileset.enableFrustumCulling;
+        tileset.enableFogCulling = tileset.enableFogCulling;
         tileset.enforceCulledScreenSpaceError = tileset.enforceCulledScreenSpaceError;
         tileset.culledScreenSpaceError = tileset.culledScreenSpaceError;
+        tileset.useLodTransitions = tileset.useLodTransitions;
+        tileset.lodTransitionLength = tileset.lodTransitionLength;
         tileset.createPhysicsMeshes = tileset.createPhysicsMeshes;
 
         Cesium3DTileset tilesetFromGameObject = go.GetComponent<Cesium3DTileset>();
