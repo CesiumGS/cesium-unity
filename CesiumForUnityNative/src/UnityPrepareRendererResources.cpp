@@ -31,7 +31,6 @@
 #include <DotNet/UnityEngine/Object.h>
 #include <DotNet/UnityEngine/Quaternion.h>
 #include <DotNet/UnityEngine/Resources.h>
-#include <DotNet/UnityEngine/Rigidbody.h>
 #include <DotNet/UnityEngine/Texture.h>
 #include <DotNet/UnityEngine/Transform.h>
 #include <DotNet/UnityEngine/Vector2.h>
@@ -361,10 +360,6 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         UnityEngine::MeshCollider meshCollider =
             primitiveGameObject.AddComponent<UnityEngine::MeshCollider>();
         meshCollider.sharedMesh(unityMesh);
-
-        UnityEngine::Rigidbody rigidbody =
-            primitiveGameObject.AddComponent<UnityEngine::Rigidbody>();
-        rigidbody.isKinematic(true);
       });
 
   return pModelGameObject.release();

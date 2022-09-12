@@ -65,8 +65,6 @@ internal partial class ConfigureReinterop
 
         MeshCollider meshCollider = go.AddComponent<MeshCollider>();
         meshCollider.sharedMesh = mesh;
-        Rigidbody rigidbody = go.AddComponent<Rigidbody>();
-        rigidbody.isKinematic = true;
 
         Debug.Log("Logging");
 
