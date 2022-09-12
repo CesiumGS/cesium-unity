@@ -219,6 +219,24 @@ namespace CesiumForUnity
             set { this._logSelectionStats = value; }
         }
 
+        [SerializeField]
+        [Header("Physics")]
+        [Tooltip("Whether to generate physics meshes for this tileset.\n\n" +
+            "Disabling this option will improve the performance of tile loading, " +
+            "but it will no longer be possible to collide with the tileset since " +
+            "the physics meshes will not be created.")]
+        [InspectorName("Create Physics Meshes")]
+        private bool _createPhysicsMeshes = true;
+
+        public bool createPhysicsMeshes
+        {
+            get => this._createPhysicsMeshes;
+            set {
+                this._createPhysicsMeshes = value;
+                this.RecreateTileset();
+            }
+        }
+
         private partial void Start();
         private partial void Update();
         private partial void OnValidate();

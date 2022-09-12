@@ -142,6 +142,7 @@ internal partial class ConfigureReinterop
         tileset.loadingDescendantLimit = tileset.loadingDescendantLimit;
         tileset.enforceCulledScreenSpaceError = tileset.enforceCulledScreenSpaceError;
         tileset.culledScreenSpaceError = tileset.culledScreenSpaceError;
+        tileset.createPhysicsMeshes = tileset.createPhysicsMeshes;
 
         Cesium3DTileset tilesetFromGameObject = go.GetComponent<Cesium3DTileset>();
         MeshRenderer meshRendererFromGameObject = go.GetComponent<MeshRenderer>();

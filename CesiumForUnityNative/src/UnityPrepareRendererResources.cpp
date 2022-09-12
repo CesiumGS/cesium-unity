@@ -133,9 +133,15 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         System::String("CesiumDefaultTilesetMaterial"));
   }
 
+  const bool createPhysicsMeshes = tilesetComponent.createPhysicsMeshes();
+
   model.forEachPrimitiveInScene(
       -1,
-      [&pModelGameObject, &tileTransform, opaqueMaterial, pCoordinateSystem](
+      [&pModelGameObject,
+       &tileTransform,
+       opaqueMaterial,
+       pCoordinateSystem,
+       createPhysicsMeshes](
           const Model& gltf,
           const Node& node,
           const Mesh& mesh,
@@ -355,9 +361,11 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
         meshFilter.mesh(unityMesh);
 
-        UnityEngine::MeshCollider meshCollider =
-            primitiveGameObject.AddComponent<UnityEngine::MeshCollider>();
-        meshCollider.sharedMesh(unityMesh);
+        if (createPhysicsMeshes) {
+          UnityEngine::MeshCollider meshCollider =
+              primitiveGameObject.AddComponent<UnityEngine::MeshCollider>();
+          meshCollider.sharedMesh(unityMesh);
+        }
       });
 
   return pModelGameObject.release();
