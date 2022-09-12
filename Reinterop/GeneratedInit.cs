@@ -124,7 +124,7 @@
                             }
                         }
 
-                        [DllImport("{{cppContext.NativeLibraryName}}.dll", CallingConvention=CallingConvention.Cdecl)]
+                        [DllImport("{{cppContext.NativeLibraryName}}", CallingConvention=CallingConvention.Cdecl)]
                         private static extern void initializeReinterop(IntPtr functionPointers, int count);
 
                         {{GetContent().JoinAndIndent("        ")}}
