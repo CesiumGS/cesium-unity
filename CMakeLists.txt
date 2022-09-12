@@ -6,6 +6,8 @@ project(cesium-unity
     LANGUAGES CXX C
 )
 
+option(EDITOR "Whether to build with Editor support." ON)
+
 # Static libraries are eventually built into shared libraries, so we need
 # position independent code.
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)

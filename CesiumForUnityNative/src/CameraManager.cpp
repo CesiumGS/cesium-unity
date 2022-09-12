@@ -4,6 +4,7 @@
 #include <CesiumGeospatial/Transforms.h>
 #include <CesiumUtility/Math.h>
 
+#include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/UnityEngine/Camera.h>
 #include <DotNet/UnityEngine/GameObject.h>
 #include <DotNet/UnityEngine/Transform.h>
@@ -17,6 +18,7 @@ using namespace Cesium3DTilesSelection;
 using namespace CesiumGeospatial;
 using namespace CesiumUtility;
 using namespace DotNet::UnityEngine;
+using namespace DotNet::CesiumForUnity;
 
 #if UNITY_EDITOR
 using namespace DotNet::UnityEditor;
@@ -26,7 +28,9 @@ namespace CesiumForUnityNative {
 
 namespace {
 
-ViewState unityCameraToViewState(Camera& camera) {
+ViewState unityCameraToViewState(
+    const LocalHorizontalCoordinateSystem* pCoordinateSystem,
+    Camera& camera) {
   Transform transform = camera.transform();
 
   glm::dvec3 origin = Ellipsoid::WGS84.cartographicToCartesian(
@@ -40,32 +44,33 @@ ViewState unityCameraToViewState(Camera& camera) {
   glm::dmat4 unityToEcef = enuToFixed * swapYandZ;
 
   Vector3 cameraPositionUnity = transform.position();
-  glm::dvec3 cameraPositionEcef = glm::dvec3(
-      unityToEcef * glm::dvec4(
-                        cameraPositionUnity.x,
-                        cameraPositionUnity.y,
-                        cameraPositionUnity.z,
-                        1.0));
+  glm::dvec3 cameraPosition(
+      cameraPositionUnity.x,
+      cameraPositionUnity.y,
+      cameraPositionUnity.z);
 
   Vector3 cameraDirectionUnity = transform.forward();
-  glm::dvec3 cameraDirectionEcef = glm::dvec3(
-      unityToEcef * glm::dvec4(
-                        cameraDirectionUnity.x,
-                        cameraDirectionUnity.y,
-                        cameraDirectionUnity.z,
-                        0.0));
+  glm::dvec3 cameraDirection = glm::dvec3(
+      cameraDirectionUnity.x,
+      cameraDirectionUnity.y,
+      cameraDirectionUnity.z);
 
   Vector3 cameraUpUnity = transform.up();
-  glm::dvec3 cameraUpEcef = glm::dvec3(
-      unityToEcef *
-      glm::dvec4(cameraUpUnity.x, cameraUpUnity.y, cameraUpUnity.z, 0.0));
+  glm::dvec3 cameraUp =
+      glm::dvec3(cameraUpUnity.x, cameraUpUnity.y, cameraUpUnity.z);
+
+  if (pCoordinateSystem) {
+    cameraPosition = pCoordinateSystem->localPositionToEcef(cameraPosition);
+    cameraDirection = pCoordinateSystem->localDirectionToEcef(cameraDirection);
+    cameraUp = pCoordinateSystem->localDirectionToEcef(cameraUp);
+  }
 
   double verticalFOV = Math::degreesToRadians(camera.fieldOfView());
 
   return ViewState::create(
-      cameraPositionEcef,
-      cameraDirectionEcef,
-      cameraUpEcef,
+      cameraPosition,
+      cameraDirection,
+      cameraUp,
       glm::dvec2(camera.pixelWidth(), camera.pixelHeight()),
       verticalFOV * camera.aspect(),
       verticalFOV);
@@ -74,11 +79,20 @@ ViewState unityCameraToViewState(Camera& camera) {
 } // namespace
 
 std::vector<ViewState> CameraManager::getAllCameras(const GameObject& context) {
-  std::vector<ViewState> result;
+  const LocalHorizontalCoordinateSystem* pCoordinateSystem = nullptr;
 
+  CesiumGeoreference georeferenceComponent =
+      context.GetComponentInParent<CesiumGeoreference>();
+  if (georeferenceComponent != nullptr) {
+    CesiumGeoreferenceImpl& georeference =
+        georeferenceComponent.NativeImplementation();
+    pCoordinateSystem = &georeference.getCoordinateSystem();
+  }
+
+  std::vector<ViewState> result;
   Camera camera = Camera::main();
   if (camera != nullptr) {
-    result.emplace_back(unityCameraToViewState(camera));
+    result.emplace_back(unityCameraToViewState(pCoordinateSystem, camera));
   }
 
 #if UNITY_EDITOR
@@ -86,7 +100,8 @@ std::vector<ViewState> CameraManager::getAllCameras(const GameObject& context) {
   if (lastActiveEditorView != nullptr) {
     Camera editorCamera = lastActiveEditorView.camera();
     if (camera != nullptr) {
-      result.emplace_back(unityCameraToViewState(editorCamera));
+      result.emplace_back(
+          unityCameraToViewState(pCoordinateSystem, editorCamera));
     }
   }
 #endif
