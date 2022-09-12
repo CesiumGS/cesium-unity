@@ -63,6 +63,9 @@ internal partial class ConfigureReinterop
         mesh.SetUVs(0, new NativeArray<Vector2>());
         mesh.SetIndices(new NativeArray<int>(), MeshTopology.Triangles, 0, true, 0);
 
+        MeshCollider meshCollider = go.AddComponent<MeshCollider>();
+        meshCollider.sharedMesh = mesh;
+
         Debug.Log("Logging");
 
         MeshRenderer meshRenderer = new MeshRenderer();
@@ -139,6 +142,7 @@ internal partial class ConfigureReinterop
         tileset.loadingDescendantLimit = tileset.loadingDescendantLimit;
         tileset.enforceCulledScreenSpaceError = tileset.enforceCulledScreenSpaceError;
         tileset.culledScreenSpaceError = tileset.culledScreenSpaceError;
+        tileset.createPhysicsMeshes = tileset.createPhysicsMeshes;
 
         Cesium3DTileset tilesetFromGameObject = go.GetComponent<Cesium3DTileset>();
         MeshRenderer meshRendererFromGameObject = go.GetComponent<MeshRenderer>();

@@ -25,6 +25,7 @@
 #include <DotNet/UnityEngine/Material.h>
 #include <DotNet/UnityEngine/Matrix4x4.h>
 #include <DotNet/UnityEngine/Mesh.h>
+#include <DotNet/UnityEngine/MeshCollider.h>
 #include <DotNet/UnityEngine/MeshFilter.h>
 #include <DotNet/UnityEngine/MeshRenderer.h>
 #include <DotNet/UnityEngine/MeshTopology.h>
@@ -132,9 +133,15 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         System::String("CesiumDefaultTilesetMaterial"));
   }
 
+  const bool createPhysicsMeshes = tilesetComponent.createPhysicsMeshes();
+
   model.forEachPrimitiveInScene(
       -1,
-      [&pModelGameObject, &tileTransform, opaqueMaterial, pCoordinateSystem](
+      [&pModelGameObject,
+       &tileTransform,
+       opaqueMaterial,
+       pCoordinateSystem,
+       createPhysicsMeshes](
           const Model& gltf,
           const Node& node,
           const Mesh& mesh,
@@ -353,6 +360,12 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         }
 
         meshFilter.mesh(unityMesh);
+
+        if (createPhysicsMeshes) {
+          UnityEngine::MeshCollider meshCollider =
+              primitiveGameObject.AddComponent<UnityEngine::MeshCollider>();
+          meshCollider.sharedMesh(unityMesh);
+        }
       });
 
   return pModelGameObject.release();
