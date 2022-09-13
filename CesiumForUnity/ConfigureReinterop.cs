@@ -146,7 +146,11 @@ internal partial class ConfigureReinterop
         tileset.culledScreenSpaceError = tileset.culledScreenSpaceError;
         tileset.useLodTransitions = tileset.useLodTransitions;
         tileset.lodTransitionLength = tileset.lodTransitionLength;
+        tileset.generateSmoothNormals = tileset.generateSmoothNormals;
         tileset.createPhysicsMeshes = tileset.createPhysicsMeshes;
+        tileset.suspendUpdate = tileset.suspendUpdate;
+        tileset.updateInEditor = tileset.updateInEditor;
+        tileset.previousSuspendUpdate = tileset.previousSuspendUpdate;
 
         Cesium3DTileset tilesetFromGameObject = go.GetComponent<Cesium3DTileset>();
         MeshRenderer meshRendererFromGameObject = go.GetComponent<MeshRenderer>();

@@ -56,10 +56,24 @@ void Cesium3DTilesetImpl::Update(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
   assert(tileset.enabled());
 
+  // If "Suspend Update" is true, return early.
+  if (tileset.suspendUpdate()) {
+    return;
+  }
+
   if (this->_destroyTilesetOnNextUpdate) {
     this->_destroyTilesetOnNextUpdate = false;
     this->DestroyTileset(tileset);
   }
+
+#if UNITY_EDITOR
+  // If "Update In Editor" is false, return early.
+  if (UnityEngine::Application::isEditor() &&
+      !UnityEditor::EditorApplication::isPlaying() &&
+      !tileset.updateInEditor()) {
+    return;
+  }
+#endif
 
   if (!this->_pTileset) {
     this->LoadTileset(tileset);
@@ -111,9 +125,15 @@ void Cesium3DTilesetImpl::Update(
 
 void Cesium3DTilesetImpl::OnValidate(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
-  // Unity does not allow us to destroy GameObjects and MonoBehaviours in this
-  // callback. So instead mark it to happen later.
-  this->_destroyTilesetOnNextUpdate = true;
+  // Check if "Suspend Update" was the modified value.
+  if (tileset.suspendUpdate() != tileset.previousSuspendUpdate()) {
+    // If so, then don't destroy the tileset.
+    tileset.previousSuspendUpdate(tileset.suspendUpdate());
+  } else {
+    // Unity does not allow us to destroy GameObjects and MonoBehaviours in this
+    // callback. So instead mark it to happen later.
+    this->_destroyTilesetOnNextUpdate = true;
+  }
 }
 
 void Cesium3DTilesetImpl::OnEnable(
@@ -126,6 +146,7 @@ void Cesium3DTilesetImpl::OnEnable(
       !UnityEditor::EditorApplication::isPlaying()) {
     this->_updateInEditorCallback = UnityEditor::CallbackFunction(
         [this, tileset]() { this->Update(tileset); });
+
     UnityEditor::EditorApplication::update(
         UnityEditor::EditorApplication::update() +
         this->_updateInEditorCallback);
@@ -247,6 +268,11 @@ void Cesium3DTilesetImpl::LoadTileset(
   options.culledScreenSpaceError = tileset.culledScreenSpaceError();
   options.enableLodTransitionPeriod = tileset.useLodTransitions();
   options.lodTransitionLength = tileset.lodTransitionLength();
+
+  TilesetContentOptions contentOptions{};
+  contentOptions.generateMissingNormalsSmooth = tileset.generateSmoothNormals();
+
+  options.contentOptions = contentOptions;
 
   this->_lastUpdateResult = ViewUpdateResult();
   this->_pTileset = std::make_unique<Tileset>(
