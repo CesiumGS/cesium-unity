@@ -421,7 +421,6 @@ namespace CesiumForUnity
             }
         }
 
-
         [SerializeField]
         [Tooltip("If true, this tileset is ticked/updated in the editor. " +
             "If false, it is only ticked while playing (including Play-in-Editor).")]
