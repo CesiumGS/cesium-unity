@@ -12,7 +12,8 @@ public:
   UnityPrepareRendererResources(
       const ::DotNet::UnityEngine::GameObject& tileset);
 
-  virtual void* prepareInLoadThread(
+  virtual CesiumAsync::Future<void*> prepareInLoadThread(
+      const CesiumAsync::AsyncSystem& asyncSystem,
       const CesiumGltf::Model& model,
       const glm::dmat4& transform) override;
 

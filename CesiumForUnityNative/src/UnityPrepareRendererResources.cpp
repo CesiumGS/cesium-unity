@@ -80,10 +80,11 @@ UnityPrepareRendererResources::UnityPrepareRendererResources(
     const UnityEngine::GameObject& tileset)
     : _tileset(tileset) {}
 
-void* UnityPrepareRendererResources::prepareInLoadThread(
+CesiumAsync::Future<void*> UnityPrepareRendererResources::prepareInLoadThread(
+    const CesiumAsync::AsyncSystem& asyncSystem,
     const CesiumGltf::Model& model,
     const glm::dmat4& transform) {
-  return nullptr;
+  return asyncSystem.createResolvedFuture<void*>(nullptr);
 }
 
 void* UnityPrepareRendererResources::prepareInMainThread(
