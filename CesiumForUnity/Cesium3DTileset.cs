@@ -433,6 +433,7 @@ namespace CesiumForUnity
             set
             {
                 this._updateInEditor = value;
+                this.RecreateTileset();
             }
         }
 
