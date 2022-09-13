@@ -214,9 +214,6 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             float(scale.y),
             float(scale.z)});
 
-        UnityEngine::Matrix4x4 compare =
-            primitiveGameObject.transform().localToWorldMatrix();
-
         UnityEngine::MeshFilter meshFilter =
             primitiveGameObject.AddComponent<UnityEngine::MeshFilter>();
         UnityEngine::MeshRenderer meshRenderer =

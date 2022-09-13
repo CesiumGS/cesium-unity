@@ -22,13 +22,20 @@ namespace CesiumForUnityNative {
 
 namespace {
 
-std::shared_ptr<UnityAssetAccessor> pAccessor = nullptr;
+std::shared_ptr<CachingAssetAccessor> pAccessor = nullptr;
 std::shared_ptr<UnityTaskProcessor> pTaskProcessor = nullptr;
 std::shared_ptr<CreditSystem> pCreditSystem = nullptr;
 
-const std::shared_ptr<UnityAssetAccessor>& getAssetAccessor() {
+const std::shared_ptr<CachingAssetAccessor>& getAssetAccessor() {
   if (!pAccessor) {
-    pAccessor = std::make_shared<UnityAssetAccessor>();
+    std::string tempPath =
+        UnityEngine::Application::temporaryCachePath().ToStlString();
+    std::string cacheDBPath = tempPath + "/cesium-request-cache.sqlite";
+
+    pAccessor = std::make_shared<CachingAssetAccessor>(
+        spdlog::default_logger(),
+        std::make_shared<UnityAssetAccessor>(),
+        std::make_shared<SqliteCache>(spdlog::default_logger(), cacheDBPath));
   }
   return pAccessor;
 }
@@ -51,15 +58,8 @@ const std::shared_ptr<CreditSystem>& getCreditSystem() {
 
 Cesium3DTilesSelection::TilesetExternals
 createTilesetExternals(const ::DotNet::UnityEngine::GameObject& tileset) {
-  std::string tempPath =
-      UnityEngine::Application::temporaryCachePath().ToStlString();
-  std::string cacheDBPath = tempPath + "/cesium-request-cache.sqlite";
-
   return TilesetExternals{
-      std::make_shared<CachingAssetAccessor>(
-          spdlog::default_logger(),
-          getAssetAccessor(),
-          std::make_shared<SqliteCache>(spdlog::default_logger(), cacheDBPath)),
+      getAssetAccessor(),
       std::make_shared<UnityPrepareRendererResources>(tileset),
       AsyncSystem(getTaskProcessor()),
       getCreditSystem(),
