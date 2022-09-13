@@ -177,5 +177,7 @@ internal partial class ConfigureReinterop
         CesiumGeoreference inParent = go.GetComponentInParent<CesiumGeoreference>();
         inParent.UpdateOrigin();
         inParent.changed += () => {};
+
+        float time = Time.deltaTime;
     }
 }

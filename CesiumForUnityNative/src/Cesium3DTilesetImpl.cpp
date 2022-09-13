@@ -19,6 +19,7 @@
 #include <DotNet/UnityEngine/Application.h>
 #include <DotNet/UnityEngine/Coroutine.h>
 #include <DotNet/UnityEngine/GameObject.h>
+#include <DotNet/UnityEngine/Time.h>
 
 #if UNITY_EDITOR
 #include <DotNet/UnityEditor/CallbackFunction.h>
@@ -70,8 +71,9 @@ void Cesium3DTilesetImpl::Update(
   std::vector<ViewState> viewStates =
       CameraManager::getAllCameras(tileset.gameObject());
 
-  const ViewUpdateResult& updateResult =
-      this->_pTileset->updateView(viewStates);
+  const ViewUpdateResult& updateResult = this->_pTileset->updateView(
+      viewStates,
+      DotNet::UnityEngine::Time::deltaTime());
   this->updateLastViewUpdateResultState(tileset, updateResult);
 
   for (auto pTile : updateResult.tilesFadingOut) {
