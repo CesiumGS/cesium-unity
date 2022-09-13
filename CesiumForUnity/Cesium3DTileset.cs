@@ -401,14 +401,14 @@ namespace CesiumForUnity
             set
             {
                 this._suspendUpdate = value;
-            }   
+            }
         }
 
         // Normally tilesets are destroyed when anything in the editor changes.
-        // But if suspendUpdate is the only property that has changed, the tileset
+        // But if suspendUpdate is the only value that has changed, the tileset
         // should not be reloaded, and instead continue updating after the setting
-        // has been toggled.
-        // This variable indicates whether the "Suspend Update" property, and if so,
+        // has been toggled. This variable saves the last value of suspendUpdate,
+        // so OnValidate() can determine if this property was modified. If so, it
         // prevents the tileset from being destroyed.
         private bool _previousSuspendUpdate = false;
 

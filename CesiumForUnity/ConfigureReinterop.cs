@@ -149,8 +149,8 @@ internal partial class ConfigureReinterop
         tileset.generateSmoothNormals = tileset.generateSmoothNormals;
         tileset.createPhysicsMeshes = tileset.createPhysicsMeshes;
         tileset.suspendUpdate = tileset.suspendUpdate;
-        tileset.updateInEditor = tileset.updateInEditor;
         tileset.previousSuspendUpdate = tileset.previousSuspendUpdate;
+        tileset.updateInEditor = tileset.updateInEditor;
 
         Cesium3DTileset tilesetFromGameObject = go.GetComponent<Cesium3DTileset>();
         MeshRenderer meshRendererFromGameObject = go.GetComponent<MeshRenderer>();
