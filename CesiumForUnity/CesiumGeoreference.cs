@@ -65,5 +65,6 @@ namespace CesiumForUnity
         private partial void RecalculateOrigin();
 
         private partial void OnValidate();
+        private partial void Awake();
     }
 }
