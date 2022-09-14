@@ -362,7 +362,14 @@ namespace Reinterop
         /// </summary>
         public CppType AsInteropType()
         {
-            if (this.Kind == InteropTypeKind.Primitive)
+            if (this == Boolean)
+            {
+                // C++ doesn't specify the size of a bool, and C# uses
+                // different sizes in different contexts. So we explicitly
+                // marshal bools as uint8_t.
+                return UInt8;
+            }
+            else if (this.Kind == InteropTypeKind.Primitive)
                 return this;
             else if (this.Kind == InteropTypeKind.BlittableStruct)
                 return this.AsSimpleType();
@@ -378,6 +385,11 @@ namespace Reinterop
         /// </summary>
         public string GetConversionToInteropType(CppGenerationContext context, string variableName)
         {
+            if (this == Boolean)
+            {
+                return $"{variableName} ? 1 : 0";
+            }
+
             switch (this.Kind)
             {
                 case InteropTypeKind.ClassWrapper:
@@ -406,6 +418,11 @@ namespace Reinterop
 
         public string GetConversionFromInteropType(CppGenerationContext context, string variableName)
         {
+            if (this == Boolean)
+            {
+                return $"!!{variableName}";
+            }
+
             switch (this.Kind)
             {
                 case InteropTypeKind.ClassWrapper:

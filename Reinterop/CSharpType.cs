@@ -48,6 +48,10 @@ namespace Reinterop
 
         public CSharpType AsInteropType()
         {
+            // C++ doesn't specify the size of a bool, and C# uses different sizes in different contexts.
+            // So we explicitly marshal bools as uint8_t / System.Byte.
+            if (this.Symbol.SpecialType == SpecialType.System_Boolean)
+                return CSharpType.FromSymbol(Compilation, Compilation.GetSpecialType(SpecialType.System_Byte));
             if (this.Kind == InteropTypeKind.ClassWrapper || this.Kind == InteropTypeKind.NonBlittableStructWrapper || this.Kind == InteropTypeKind.Delegate)
                 return new CSharpType(Compilation, InteropTypeKind.Primitive, new string[] { "System" }, Compilation.GetSpecialType(SpecialType.System_IntPtr));
 
@@ -60,26 +64,32 @@ namespace Reinterop
         /// </summary>
         public string GetConversionToInteropType(string variableName)
         {
-            if (this.Kind == InteropTypeKind.ClassWrapper || this.Kind == InteropTypeKind.NonBlittableStructWrapper || this.Kind == InteropTypeKind.Delegate)
+            if (this.Symbol.SpecialType == SpecialType.System_Boolean)
+                return $"{variableName} ? (byte)1 : (byte)0";
+            else if (this.Kind == InteropTypeKind.ClassWrapper || this.Kind == InteropTypeKind.NonBlittableStructWrapper || this.Kind == InteropTypeKind.Delegate)
                 return $"Reinterop.ObjectHandleUtility.CreateHandle({variableName})";
-
-            return variableName;
+            else
+                return variableName;
         }
 
         public string GetParameterConversionFromInteropType(string variableName)
         {
-            if (this.Kind == InteropTypeKind.ClassWrapper || this.Kind == InteropTypeKind.NonBlittableStructWrapper || this.Kind == InteropTypeKind.Delegate)
+            if (this.Symbol.SpecialType == SpecialType.System_Boolean)
+                return $"{variableName} != 0";
+            else if (this.Kind == InteropTypeKind.ClassWrapper || this.Kind == InteropTypeKind.NonBlittableStructWrapper || this.Kind == InteropTypeKind.Delegate)
                 return $"({this.GetFullyQualifiedName()})Reinterop.ObjectHandleUtility.GetObjectFromHandle({variableName})!";
-
-            return variableName;
+            else
+                return variableName;
         }
 
         public string GetReturnValueConversionFromInteropType(string variableName)
         {
-            if (this.Kind == InteropTypeKind.ClassWrapper || this.Kind == InteropTypeKind.NonBlittableStructWrapper || this.Kind == InteropTypeKind.Delegate)
+            if (this.Symbol.SpecialType == SpecialType.System_Boolean)
+                return $"{variableName} != 0";
+            else if (this.Kind == InteropTypeKind.ClassWrapper || this.Kind == InteropTypeKind.NonBlittableStructWrapper || this.Kind == InteropTypeKind.Delegate)
                 return $"({this.GetFullyQualifiedName()})Reinterop.ObjectHandleUtility.GetObjectAndFreeHandle({variableName})!";
-
-            return variableName;
+            else
+                return variableName;
         }
     }
 }
