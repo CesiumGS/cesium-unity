@@ -19,6 +19,7 @@ public:
       const DotNet::CesiumForUnity::CesiumGeoreference& georeference);
   void
   OnValidate(const DotNet::CesiumForUnity::CesiumGeoreference& georeference);
+  void Awake(const DotNet::CesiumForUnity::CesiumGeoreference& georeference);
 
   const CesiumGeospatial::LocalHorizontalCoordinateSystem&
   getCoordinateSystem() const {
