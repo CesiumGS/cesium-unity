@@ -143,7 +143,7 @@ namespace CesiumForUnity
 
         [SerializeField]
         [Tooltip("The maximum number of tiles that may be loaded at once." +
-            "\n\n"+
+            "\n\n" +
             "When new parts of the tileset become visible, the tasks to load the " +
             "corresponding tiles are put into a queue. This value determines how many " +
             "of these tasks are processed at the same time. A higher value may cause " +
@@ -370,7 +370,74 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
+        [Tooltip("Whether to generate smooth normals when normals are missing in the glTF." +
+            "\n\n" +
+            "According to the glTF spec: \"When normals are not specified, client " +
+            "implementations should calculate flat normals.\" However, calculating flat " +
+            "normals requires duplicating vertices. This option allows the glTFs to be " +
+            "sent with explicit smooth normals when the original glTF was missing normals.")]
+        [InspectorName("Generate Smooth Normals")]
+        private bool _generateSmoothNormals = false;
+
+        public bool generateSmoothNormals
+        {
+            get => this._generateSmoothNormals;
+            set
+            {
+                this._generateSmoothNormals = value;
+                this.RecreateTileset();
+            }
+        }
+
+        [SerializeField]
         [Header("Debug")]
+        [Tooltip("Pauses level-of-detail and culling updates of this tileset.")]
+        [InspectorName("Suspend Update")]
+        private bool _suspendUpdate = false;
+
+        public bool suspendUpdate
+        {
+            get => this._suspendUpdate;
+            set
+            {
+                this._suspendUpdate = value;
+            }
+        }
+
+        // Normally tilesets are destroyed when anything in the editor changes.
+        // But if suspendUpdate is the only value that has changed, the tileset
+        // should not be reloaded, and instead continue updating after the setting
+        // has been toggled. This variable saves the last value of suspendUpdate,
+        // so OnValidate() can determine if this property was modified. If so, it
+        // prevents the tileset from being destroyed.
+        private bool _previousSuspendUpdate = false;
+
+        public bool previousSuspendUpdate
+        {
+            get => this._previousSuspendUpdate;
+            set
+            {
+                this._previousSuspendUpdate = value;
+            }
+        }
+
+        [SerializeField]
+        [Tooltip("If true, this tileset is ticked/updated in the editor. " +
+            "If false, it is only ticked while playing (including Play-in-Editor).")]
+        [InspectorName("Update in Editor")]
+        private bool _updateInEditor = true;
+
+        public bool updateInEditor
+        {
+            get => this._updateInEditor;
+            set
+            {
+                this._updateInEditor = value;
+                this.RecreateTileset();
+            }
+        }
+
+        [SerializeField]
         [Tooltip("Whether to log details about the tile selection process.")]
         [InspectorName("Log Selection Stats")]
         private bool _logSelectionStats = false;
@@ -393,7 +460,8 @@ namespace CesiumForUnity
         public bool createPhysicsMeshes
         {
             get => this._createPhysicsMeshes;
-            set {
+            set
+            {
                 this._createPhysicsMeshes = value;
                 this.RecreateTileset();
             }
