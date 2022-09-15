@@ -33,6 +33,7 @@
 #include <DotNet/UnityEngine/Quaternion.h>
 #include <DotNet/UnityEngine/Resources.h>
 #include <DotNet/UnityEngine/Texture.h>
+#include <DotNet/UnityEngine/TextureWrapMode.h>
 #include <DotNet/UnityEngine/Transform.h>
 #include <DotNet/UnityEngine/Vector2.h>
 #include <DotNet/UnityEngine/Vector3.h>
@@ -393,6 +394,7 @@ void* UnityPrepareRendererResources::prepareRasterInMainThread(
     void* pLoadThreadResult) {
   auto pTexture = std::make_unique<UnityEngine::Texture>(
       TextureLoader::loadTexture(rasterTile.getImage()));
+  pTexture->wrapMode(UnityEngine::TextureWrapMode::Clamp);
   return pTexture.release();
 }
 
