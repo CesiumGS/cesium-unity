@@ -60,7 +60,7 @@ namespace Reinterop
             {
                 // Instance method or property
                 interopParameterDetails = new[] { (Name: "thiz", Type: csType, InteropType: csType.AsInteropType()) }.Concat(interopParameterDetails);
-                invocationTarget = $"(({csType.GetFullyQualifiedName()})ObjectHandleUtility.GetObjectFromHandle(thiz)!){accessName}";
+                invocationTarget = $"({csType.GetParameterConversionFromInteropType("thiz")}){accessName}";
             }
             else
             {
@@ -351,8 +351,12 @@ namespace Reinterop
         /// <param name="compilation"></param>
         /// <param name="type"></param>
         /// <returns>True if the struct is blittable.</returns>
-        private static bool IsBlittableStruct(Compilation compilation, ITypeSymbol type)
+        public static bool IsBlittableStruct(Compilation compilation, ITypeSymbol type, int depth = 0)
         {
+            // Sanity test to avoid a stack overflow
+            if (depth > 10)
+                return false;
+
             if (!type.IsValueType)
                 return false;
 
@@ -369,7 +373,7 @@ namespace Reinterop
                 if (field == null)
                     continue;
 
-                if (!IsBlittableStruct(compilation, field.Type))
+                if (!IsBlittableStruct(compilation, field.Type, depth + 1))
                     return false;
             }
 
@@ -378,6 +382,9 @@ namespace Reinterop
 
         private static bool IsBlittablePrimitive(ITypeSymbol type)
         {
+            if (type.TypeKind == TypeKind.Enum)
+                return true;
+
             switch (type.SpecialType)
             {
                 case SpecialType.System_Byte:
