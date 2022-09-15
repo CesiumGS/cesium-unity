@@ -5,7 +5,7 @@
 * If you're using Visual Studio, you need Visual Studio 2022 v17.2 or later. The original release of Visual Studio 2022 is too old, so make sure yours has been updated.
 * Unity 2021.3.2f1 (newer versions are likely to work)
 
-The build Cesium for Unity assembly will run on much older versions of .NET, including the version of Mono included in Unity. However, these very recent versions are required for the C#<->C++ interop code generator (Reinterop).
+The built Cesium for Unity assembly will run on much older versions of .NET, including the version of Mono included in Unity. However, these very recent versions are required for the C#<->C++ interop code generator (Reinterop).
 
 To make sure things are set up correctly, open a command-prompt (PowerShell is a good choice on Windows) and run:
 
@@ -52,7 +52,7 @@ The C# code must be compiled first, because its compilation process generates so
 dotnet publish CesiumForUnity -c Debug -p:Editor=False
 ```
 
-Replace `Debug` with `Release` for a release build.
+Replace `Debug` with `Release` for a release build. The performance is significantly better with a Release build!
 
 This will do the following:
 
@@ -88,3 +88,23 @@ Unity requires that the binaries for the non-Editor configuration _exist_, other
 ## Running the Examples
 
 You should now be able to open the cesium-unity-samples project in the Unity Editor and see Cesium datasets being streamed in.
+
+## Adding Cesium for Unity to a new project
+
+1. Cesium for Unity has only been tested with the Universal Render Pipeline (URP), so use that for best results. Others _may_ work.
+2. To install Cesium for Unity into your project, build Cesium for Unity (as above) and then copy or symlink the Cesium for Unity `Assets` directory into your project's `Assets/CesiumForUnity` directory.
+3. Change the Editor camera settings to accomodate globe-sized view distances. Disable "Dynamic Clipping" and set the near plane to 1 and the far plane to 1000000 (1 million). You may want to increase the maximum speed as well, to perhaps 200 or so.
+
+![Camera Settings](Documentation/images/CameraSettings.png)
+
+4. Set the near and far planes for any cameras in your level as well.
+5. Add a new empty GameObject to your scene and name it "Cesium".
+6. Add a new `Cesium Georeference` component to the "Cesium" game object. By setting the Longitude, Latitude, and Height properties on this object, you define the position on the globe that becomes the center of the Unity world.
+7. Add another new GameObject as a _child_ of the "Cesium" game object, and name it "Cesium World Terrain".
+8. Add a new "Cesium 3D Tileset" component to the "Cesium World Terrain" game object and set the following properties:
+  * Set the "Opaque Material" to "CesiumDefaultTilesetMaterial". This step will not be necessary in the future, but failing to do so at the moment may lead to a crash.
+  * Set the "Ion Asset ID" to 1.
+  * Set the "Ion Access Token" to a valid token for Cesium World Terrain from your Cesium ion account. At this point Cesium World Terrain should appear, but it will be all white.
+9. Add a new "Cesium Ion Raster Overlay" component to the "Cesium World Terrain" game object and set the following properties:
+  * Set the "Ion Asset ID" to 2.
+  * Set the "Ion Access Token" to a valid Cesium ion token; the one from above is likely to work. At this point, the terrain surface should become textured.
