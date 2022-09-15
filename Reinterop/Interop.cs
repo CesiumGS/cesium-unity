@@ -405,5 +405,14 @@ namespace Reinterop
                     return false;
             }
         }
+
+        public static List<string> BuildNamespace(string? baseNamespace, params string[] namespaces)
+        {
+            List<string> result = new List<string>();
+            if (!string.IsNullOrEmpty(baseNamespace) && (namespaces.Length == 0 || namespaces[0] != baseNamespace))
+                result.Add(baseNamespace!);
+            result.AddRange(namespaces);
+            return result;
+        }
     }
 }
