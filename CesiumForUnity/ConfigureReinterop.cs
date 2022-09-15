@@ -194,5 +194,7 @@ internal partial class ConfigureReinterop
         {
             GameObject goFromArray = gos[i];
         }
+
+        CesiumGeoreference[] georeferences = UnityEngine.Object.FindObjectsOfType<CesiumGeoreference>();
     }
 }
