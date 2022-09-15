@@ -145,6 +145,19 @@ namespace Reinterop
                     if (invokeMethod != null)
                         this.AddMethod(invokeMethod);
                 }
+
+                // If this is a blittable struct, we need to generate all the field types, too.
+                if (type.TypeKind != TypeKind.Enum && Interop.IsBlittableStruct(this._semanticModel.Compilation, type))
+                {
+                    ImmutableArray<ISymbol> members = type.GetMembers();
+                    foreach (ISymbol member in members)
+                    {
+                        IFieldSymbol? field = member as IFieldSymbol;
+                        if (field == null)
+                            continue;
+                        AddType(field.Type);
+                    }
+                }
             }
 
             // If this type is an enumeration, add all of the enum values if we haven't already.
