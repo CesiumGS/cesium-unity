@@ -169,6 +169,10 @@ internal partial class ConfigureReinterop
           CesiumRasterOverlay anOverlay = overlays[i];
         }
 
+        CesiumRasterOverlay[] overlaysArray = go.GetComponents<CesiumRasterOverlay>();
+        int len = overlaysArray.Length;
+        CesiumRasterOverlay first = overlaysArray[0];
+
         MonoBehaviour mb = tileset;
         mb.StartCoroutine(new NativeCoroutine(endIteration => endIteration).GetEnumerator());
 
@@ -183,5 +187,11 @@ internal partial class ConfigureReinterop
         inParent.changed += () => {};
 
         float time = Time.deltaTime;
+
+        GameObject[] gos = GameObject.FindGameObjectsWithTag("test");
+        for (int i = 0; i < gos.Length; ++i)
+        {
+            GameObject goFromArray = gos[i];
+        }
     }
 }

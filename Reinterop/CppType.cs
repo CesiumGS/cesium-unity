@@ -52,6 +52,13 @@ namespace Reinterop
                 return original.AsPointer();
             }
 
+            IArrayTypeSymbol? arrayType = type as IArrayTypeSymbol;
+            if (arrayType != null)
+            {
+                CppType original = FromCSharp(context, arrayType.ElementType);
+                return new CppType(InteropTypeKind.ClassWrapper, Interop.BuildNamespace(context.BaseNamespace, "System"), "Array1", new[] { original }, 0);
+            }
+
             InteropTypeKind kind = Interop.DetermineTypeKind(context.Compilation, type);
             if (kind == InteropTypeKind.GenericParameter)
                 return new CppType(InteropTypeKind.GenericParameter, NoNamespace, type.Name, null, 0);
