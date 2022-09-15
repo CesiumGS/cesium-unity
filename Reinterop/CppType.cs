@@ -206,8 +206,8 @@ namespace Reinterop
 
         public void AddForwardDeclarationsToSet(ISet<string> forwardDeclarations)
         {
-            // Primitives do not need to be forward declared
-            if (Kind == InteropTypeKind.Primitive)
+            // Primitives and generic parameters do not need to be forward declared
+            if (Kind == InteropTypeKind.Primitive || Kind == InteropTypeKind.GenericParameter)
                 return;
 
             string template = "";

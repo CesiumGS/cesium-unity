@@ -68,7 +68,7 @@ namespace Reinterop
                             template <{{string.Join(", ", method.TypeParameters.Select(parameter => "typename " + parameter.Name))}}>
                             {{modifiers}}{{genericReturn.GetFullyQualifiedName()}} {{method.Name}}({{genericParametersString}}){{afterModifiers}};
                             """,
-                        TypeDeclarationsReferenced: genericMethod.Parameters.Select(p => CppType.FromCSharp(context, p.Type))
+                        TypeDeclarationsReferenced: new[] { genericReturn }.Concat(genericMethod.Parameters.Select(p => CppType.FromCSharp(context, p.Type)))
                         ));
                 }
 
