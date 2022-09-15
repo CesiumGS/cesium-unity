@@ -8,6 +8,7 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.Rendering;
 
 namespace CesiumForUnity;
 
@@ -62,6 +63,7 @@ internal partial class ConfigureReinterop
         mesh.SetNormals(new NativeArray<Vector3>());
         mesh.SetUVs(0, new NativeArray<Vector2>());
         mesh.SetIndices(new NativeArray<int>(), MeshTopology.Triangles, 0, true, 0);
+        int instanceID = mesh.GetInstanceID();
 
         MeshCollider meshCollider = go.AddComponent<MeshCollider>();
         meshCollider.sharedMesh = mesh;
@@ -183,5 +185,24 @@ internal partial class ConfigureReinterop
         inParent.changed += () => {};
 
         float time = Time.deltaTime;
+
+        Mesh.MeshDataArray meshDataArray = Mesh.AllocateWritableMeshData(1);
+        Mesh.MeshData meshData = meshDataArray[0];
+
+        NativeArray<VertexAttributeDescriptor> descriptors;
+        unsafe
+        {
+            descriptors = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<VertexAttributeDescriptor>(null, 1, Allocator.None);
+            NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref descriptors, AtomicSafetyHandle.Create());
+        }
+        meshData.SetVertexBufferParams(1, descriptors);
+        meshData.SetIndexBufferParams(1, IndexFormat.UInt16);
+        descriptors.Dispose();
+        NativeArray<Vector3> positionNormal = meshData.GetVertexData<Vector3>(0);
+        NativeArray<Vector2> texCoord = meshData.GetVertexData<Vector2>(0);
+        NativeArray<Vector3> indices = meshData.GetIndexData<Vector3>();
+
+        meshDataArray.Dispose();
+
     }
 }

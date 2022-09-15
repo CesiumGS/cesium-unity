@@ -26,11 +26,14 @@
 #include <DotNet/UnityEngine/Matrix4x4.h>
 #include <DotNet/UnityEngine/Mesh.h>
 #include <DotNet/UnityEngine/MeshCollider.h>
+#include <DotNet/UnityEngine/MeshData.h>
+#include <DotNet/UnityEngine/MeshDataArray.h>
 #include <DotNet/UnityEngine/MeshFilter.h>
 #include <DotNet/UnityEngine/MeshRenderer.h>
 #include <DotNet/UnityEngine/MeshTopology.h>
 #include <DotNet/UnityEngine/Object.h>
 #include <DotNet/UnityEngine/Quaternion.h>
+#include <DotNet/UnityEngine/Rendering/VertexAttributeDescriptor.h>
 #include <DotNet/UnityEngine/Resources.h>
 #include <DotNet/UnityEngine/Texture.h>
 #include <DotNet/UnityEngine/Transform.h>
@@ -74,17 +77,290 @@ void setTriangles(UnityEngine::Mesh& mesh, const AccessorView<T>& indices) {
       0);
 }
 
+int32_t countPrimitives(const CesiumGltf::Model& model) {
+  int32_t numberOfPrimitives = 0;
+  model.forEachPrimitiveInScene(
+      -1,
+      [&numberOfPrimitives](
+          const Model& gltf,
+          const Node& node,
+          const Mesh& mesh,
+          const MeshPrimitive& primitive,
+          const glm::dmat4& transform) { ++numberOfPrimitives; });
+  return numberOfPrimitives;
+}
+
+void populateMeshDataArray(
+    const UnityEngine::MeshDataArray& meshDataArray,
+    const TileLoadResult& tileLoadResult,
+    const glm::dmat4& transform) {
+  const CesiumGltf::Model* pModel =
+      std::get_if<CesiumGltf::Model>(&tileLoadResult.contentKind);
+  if (!pModel)
+    return;
+
+  glm::dmat4 tileTransform = GltfUtilities::applyRtcCenter(*pModel, transform);
+  tileTransform =
+      GltfUtilities::applyGltfUpAxisTransform(*pModel, tileTransform);
+
+  size_t meshDataInstance = 0;
+
+  pModel->forEachPrimitiveInScene(
+      -1,
+      [&tileTransform, &meshDataArray, &meshDataInstance](
+          const Model& gltf,
+          const Node& node,
+          const Mesh& mesh,
+          const MeshPrimitive& primitive,
+          const glm::dmat4& transform) {
+        UnityEngine::MeshData meshData = meshDataArray[meshDataInstance++];
+
+        if (primitive.indices < 0) {
+          // TODO: support non-indexed primitives.
+          return;
+        }
+
+        auto positionAccessorIt = primitive.attributes.find("POSITION");
+        if (positionAccessorIt == primitive.attributes.end()) {
+          // This primitive doesn't have a POSITION semantic, ignore it.
+          return;
+        }
+
+        int32_t positionAccessorID = positionAccessorIt->second;
+        AccessorView<UnityEngine::Vector3> positionView(
+            gltf,
+            positionAccessorID);
+        if (positionView.status() != AccessorViewStatus::Valid) {
+          // TODO: report invalid accessor
+          return;
+        }
+
+        auto normalAccessorIt = primitive.attributes.find("NORMAL");
+        AccessorView<UnityEngine::Vector3> normalView =
+            normalAccessorIt != primitive.attributes.end()
+                ? AccessorView<UnityEngine::Vector3>(
+                      gltf,
+                      normalAccessorIt->second)
+                : AccessorView<UnityEngine::Vector3>();
+
+        auto texCoord0AccessorIt = primitive.attributes.find("TEXCOORD_0");
+        AccessorView<UnityEngine::Vector2> texCoord0View =
+            texCoord0AccessorIt != primitive.attributes.end()
+                ? AccessorView<UnityEngine::Vector2>(
+                      gltf,
+                      texCoord0AccessorIt->second)
+                : AccessorView<UnityEngine::Vector2>();
+
+        auto overlay0AccessorIt = primitive.attributes.find("_CESIUMOVERLAY_0");
+        AccessorView<UnityEngine::Vector2> overlay0View =
+            overlay0AccessorIt != primitive.attributes.end()
+                ? AccessorView<UnityEngine::Vector2>(
+                      gltf,
+                      overlay0AccessorIt->second)
+                : AccessorView<UnityEngine::Vector2>();
+
+        using namespace DotNet::UnityEngine;
+        using namespace DotNet::UnityEngine::Rendering;
+        using namespace DotNet::Unity::Collections;
+        using namespace DotNet::Unity::Collections::LowLevel::Unsafe;
+
+        const int MAX_ATTRIBUTES = 5;
+        VertexAttributeDescriptor descriptor[MAX_ATTRIBUTES];
+
+        std::int32_t numberOfAttributes = 0;
+        std::int32_t nextStream = 0;
+
+        std::int32_t positionStream = -1;
+        std::int32_t normalStream = -1;
+        std::int32_t texCoord0Stream = -1;
+        std::int32_t overlay0Stream = -1;
+
+        // TODO: is it better to interleave the attributes, rather than a stream
+        // per attribute?
+
+        assert(numberOfAttributes < MAX_ATTRIBUTES);
+        descriptor[numberOfAttributes].attribute = VertexAttribute::Position;
+        descriptor[numberOfAttributes].format = VertexAttributeFormat::Float32;
+        descriptor[numberOfAttributes].dimension = 3;
+        positionStream = nextStream++;
+        descriptor[numberOfAttributes].stream = positionStream;
+        ++numberOfAttributes;
+
+        if (normalView.size() > 0) {
+          assert(numberOfAttributes < MAX_ATTRIBUTES);
+          descriptor[numberOfAttributes].attribute = VertexAttribute::Normal;
+          descriptor[numberOfAttributes].format =
+              VertexAttributeFormat::Float32;
+          descriptor[numberOfAttributes].dimension = 3;
+          normalStream = nextStream++;
+          descriptor[numberOfAttributes].stream = normalStream;
+          ++numberOfAttributes;
+        }
+
+        if (texCoord0View.size() > 0) {
+          assert(numberOfAttributes < MAX_ATTRIBUTES);
+          descriptor[numberOfAttributes].attribute = VertexAttribute::TexCoord0;
+          descriptor[numberOfAttributes].format =
+              VertexAttributeFormat::Float32;
+          descriptor[numberOfAttributes].dimension = 2;
+          texCoord0Stream = nextStream++;
+          descriptor[numberOfAttributes].stream = texCoord0Stream;
+          ++numberOfAttributes;
+        }
+
+        if (overlay0View.size() > 0) {
+          assert(numberOfAttributes < MAX_ATTRIBUTES);
+          descriptor[numberOfAttributes].attribute = VertexAttribute::TexCoord1;
+          descriptor[numberOfAttributes].format =
+              VertexAttributeFormat::Float32;
+          descriptor[numberOfAttributes].dimension = 2;
+          overlay0Stream = nextStream++;
+          descriptor[numberOfAttributes].stream = overlay0Stream;
+          ++numberOfAttributes;
+        }
+
+        NativeArray1<VertexAttributeDescriptor> attributes =
+            NativeArrayUnsafeUtility::ConvertExistingDataToNativeArray<
+                VertexAttributeDescriptor>(
+                descriptor,
+                numberOfAttributes,
+                Allocator::None);
+        meshData.SetVertexBufferParams(positionView.size(), attributes);
+        attributes.Dispose();
+
+        // Copy positions into the MeshData
+        NativeArray1<Vector3> nativeArrayVertices =
+            meshData.GetVertexData<Vector3>(positionStream);
+        Vector3* vertices = static_cast<Vector3*>(
+            NativeArrayUnsafeUtility::GetUnsafeBufferPointerWithoutChecks(
+                nativeArrayVertices));
+        for (int64_t i = 0; i < positionView.size(); ++i) {
+          vertices[i] = positionView[i];
+        }
+
+        // Copy normals (if any) into the MeshData
+        if (normalStream >= 0) {
+          NativeArray1<Vector3> nativeArrayNormals =
+              meshData.GetVertexData<Vector3>(normalStream);
+          Vector3* normals = static_cast<Vector3*>(
+              NativeArrayUnsafeUtility::GetUnsafeBufferPointerWithoutChecks(
+                  nativeArrayNormals));
+
+          int64_t normalsToCopy =
+              glm::min(normalView.size(), positionView.size());
+          for (int64_t i = 0; i < normalsToCopy; ++i) {
+            normals[i] = normalView[i];
+          }
+
+          // Just in case there are more positions than normals
+          for (int64_t i = normalsToCopy; i < positionView.size(); ++i) {
+            normals[i] = Vector3{0.0f, 0.0f, 0.0f};
+          }
+        }
+
+        // Copy texture coordinates (if any) into the MeshData
+        if (texCoord0Stream >= 0) {
+          NativeArray1<Vector2> nativeArrayTexCoord0 =
+              meshData.GetVertexData<Vector2>(texCoord0Stream);
+          Vector2* texCoord0 = static_cast<Vector2*>(
+              NativeArrayUnsafeUtility::GetUnsafeBufferPointerWithoutChecks(
+                  nativeArrayTexCoord0));
+
+          int64_t texCoord0sToCopy =
+              glm::min(texCoord0View.size(), positionView.size());
+          for (int64_t i = 0; i < texCoord0sToCopy; ++i) {
+            texCoord0[i] = texCoord0View[i];
+          }
+
+          // Just in case there are more positions than normals
+          for (int64_t i = texCoord0sToCopy; i < positionView.size(); ++i) {
+            texCoord0[i] = Vector2{0.0f, 0.0f};
+          }
+        }
+
+        // Copy overlay texture coordinates (if any) into the MeshData
+        if (overlay0Stream >= 0) {
+          NativeArray1<Vector2> nativeArrayOverlay0 =
+              meshData.GetVertexData<Vector2>(overlay0Stream);
+          Vector2* overlay0 = static_cast<Vector2*>(
+              NativeArrayUnsafeUtility::GetUnsafeBufferPointerWithoutChecks(
+                  nativeArrayOverlay0));
+
+          int64_t overlay0sToCopy =
+              glm::min(overlay0View.size(), positionView.size());
+          for (int64_t i = 0; i < overlay0sToCopy; ++i) {
+            overlay0[i] = overlay0View[i];
+          }
+
+          // Just in case there are more positions than normals
+          for (int64_t i = overlay0sToCopy; i < positionView.size(); ++i) {
+            overlay0[i] = Vector2{0.0f, 0.0f};
+          }
+        }
+
+        // AccessorView<uint8_t> indices8(gltf, primitive.indices);
+        // if (indices8.status() == AccessorViewStatus::Valid) {
+        //   setTriangles(unityMesh, indices8);
+        // }
+
+        // AccessorView<uint16_t> indices16(gltf, primitive.indices);
+        // if (indices16.status() == AccessorViewStatus::Valid) {
+        //   setTriangles(unityMesh, indices16);
+        // }
+
+        // AccessorView<uint32_t> indices32(gltf, primitive.indices);
+        // if (indices32.status() == AccessorViewStatus::Valid) {
+        //   setTriangles(unityMesh, indices32);
+        // }
+
+        // meshFilter.mesh(unityMesh);
+
+        // if (createPhysicsMeshes) {
+        //   UnityEngine::MeshCollider meshCollider =
+        //       primitiveGameObject.AddComponent<UnityEngine::MeshCollider>();
+        //   meshCollider.sharedMesh(unityMesh);
+        // }
+      });
+}
 } // namespace
 
 UnityPrepareRendererResources::UnityPrepareRendererResources(
     const UnityEngine::GameObject& tileset)
     : _tileset(tileset) {}
 
-CesiumAsync::Future<void*> UnityPrepareRendererResources::prepareInLoadThread(
+CesiumAsync::Future<TileLoadResultAndRenderResources>
+UnityPrepareRendererResources::prepareInLoadThread(
     const CesiumAsync::AsyncSystem& asyncSystem,
-    const CesiumGltf::Model& model,
+    Cesium3DTilesSelection::TileLoadResult&& tileLoadResult,
     const glm::dmat4& transform) {
-  return asyncSystem.createResolvedFuture<void*>(nullptr);
+  CesiumGltf::Model* pModel =
+      std::get_if<CesiumGltf::Model>(&tileLoadResult.contentKind);
+  if (!pModel)
+    return asyncSystem.createResolvedFuture(
+        TileLoadResultAndRenderResources{std::move(tileLoadResult), nullptr});
+
+  int32_t numberOfPrimitives = countPrimitives(*pModel);
+
+  return asyncSystem
+      .runInMainThread([numberOfPrimitives, tileset = this->_tileset]() {
+        // Allocate a MeshDataArray for the primitives.
+        // Unfortunately, this must be done on the main thread.
+        return UnityEngine::Mesh::AllocateWritableMeshData(numberOfPrimitives);
+      })
+      .thenInWorkerThread(
+          [tileLoadResult = std::move(tileLoadResult),
+           transform](UnityEngine::MeshDataArray&& meshDataArray) mutable {
+            // Free the MeshDataArray if something goes wrong.
+            ScopeGuard sg([&meshDataArray]() { meshDataArray.Dispose(); });
+
+            populateMeshDataArray(meshDataArray, tileLoadResult, transform);
+
+            // We're returning the MeshDataArray, so don't free it.
+            sg.release();
+            return TileLoadResultAndRenderResources{
+                std::move(tileLoadResult),
+                new UnityEngine::MeshDataArray(std::move(meshDataArray))};
+          });
 }
 
 void* UnityPrepareRendererResources::prepareInMainThread(
