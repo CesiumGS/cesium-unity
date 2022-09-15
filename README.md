@@ -65,7 +65,7 @@ To build the C++ code for the non-Editor configuration, run the following from t
 
 ```
 cmake -B build -S . -DEDITOR=false
-cmake --build build --target install -j14
+cmake --build build --target install -j14 --config Debug
 ```
 
 The `-j14` tells CMake to build using 14 threads. A higher or lower number may be more suitable for your system.
@@ -80,7 +80,7 @@ Next, build the Editor configuration of both the C# and C++ code:
 ```
 dotnet publish CesiumForUnity -c Debug -p:Editor=True
 cmake -B build -S . -DEDITOR=true
-cmake --build build --target install -j14
+cmake --build build --target install -j14 --config Debug
 ```
 
 Unity requires that the binaries for the non-Editor configuration _exist_, otherwise Cesium for Unity won't work at all, even in the Editor. But once you've built it once, if you're working exclusively in the Editor, you can iterate by only building the Editor configuration. The non-Editor binaries must exist, but they need not be up-to-date unless you're planning to build a game to run outside the Editor.
@@ -108,3 +108,20 @@ You should now be able to open the cesium-unity-samples project in the Unity Edi
 9. Add a new "Cesium Ion Raster Overlay" component to the "Cesium World Terrain" game object and set the following properties:
   * Set the "Ion Asset ID" to 2.
   * Set the "Ion Access Token" to a valid Cesium ion token; the one from above is likely to work. At this point, the terrain surface should become textured.
+
+## Running Cesium for Unity on Quest 2
+
+Build Cesium for Unity for Android with the following commands:
+
+```
+dotnet publish CesiumForUnity -c Release -p:Editor=False
+cmake -B build-android -S . -G Ninja -DCMAKE_TOOLCHAIN_FILE="CesiumForUnityNative/extern/android-toolchain.cmake" -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_BUILD_TYPE=Release -DEDITOR=false
+cmake --build build --target install -j14
+```
+
+In the Unity Editor, change the settings of the project according to this page: https://developer.oculus.com/documentation/unity/unity-conf-settings/.
+
+Then, convert the main camera to an XR rig by going to GameObject > XR > Add XR Rig.
+
+If you run into a crash on startup while using Vulkan, you may need to upgrade your version of Unity:
+https://issuetracker.unity3d.com/issues/oculus-quest-app-using-vulkan-crashes-on-startup
