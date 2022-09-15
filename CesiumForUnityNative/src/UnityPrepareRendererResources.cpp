@@ -80,11 +80,13 @@ UnityPrepareRendererResources::UnityPrepareRendererResources(
     const UnityEngine::GameObject& tileset)
     : _tileset(tileset) {}
 
-CesiumAsync::Future<void*> UnityPrepareRendererResources::prepareInLoadThread(
+CesiumAsync::Future<TileLoadResultAndRenderResources>
+UnityPrepareRendererResources::prepareInLoadThread(
     const CesiumAsync::AsyncSystem& asyncSystem,
-    const CesiumGltf::Model& model,
+    TileLoadResult&& tileLoadResult,
     const glm::dmat4& transform) {
-  return asyncSystem.createResolvedFuture<void*>(nullptr);
+  return asyncSystem.createResolvedFuture(
+      TileLoadResultAndRenderResources{std::move(tileLoadResult), nullptr});
 }
 
 void* UnityPrepareRendererResources::prepareInMainThread(

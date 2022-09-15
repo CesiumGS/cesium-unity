@@ -12,9 +12,11 @@ public:
   UnityPrepareRendererResources(
       const ::DotNet::UnityEngine::GameObject& tileset);
 
-  virtual CesiumAsync::Future<void*> prepareInLoadThread(
+  virtual CesiumAsync::Future<
+      Cesium3DTilesSelection::TileLoadResultAndRenderResources>
+  prepareInLoadThread(
       const CesiumAsync::AsyncSystem& asyncSystem,
-      const CesiumGltf::Model& model,
+      Cesium3DTilesSelection::TileLoadResult&& tileLoadResult,
       const glm::dmat4& transform) override;
 
   virtual void* prepareInMainThread(
