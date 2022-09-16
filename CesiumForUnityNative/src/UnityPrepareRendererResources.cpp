@@ -58,30 +58,6 @@ using namespace DotNet;
 
 namespace {
 
-template <typename T>
-void setTriangles(UnityEngine::Mesh& mesh, const AccessorView<T>& indices) {
-  Unity::Collections::NativeArray1<std::int32_t> nativeArrayTriangles(
-      indices.size(),
-      Unity::Collections::Allocator::Temp,
-      Unity::Collections::NativeArrayOptions::UninitializedMemory);
-  ScopeGuard sg([&nativeArrayTriangles]() { nativeArrayTriangles.Dispose(); });
-
-  std::int32_t* triangles = static_cast<std::int32_t*>(
-      Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
-          GetUnsafeBufferPointerWithoutChecks(nativeArrayTriangles));
-
-  for (int64_t i = 0; i < indices.size(); ++i) {
-    triangles[i] = indices[i];
-  }
-
-  mesh.SetIndices<std::int32_t>(
-      nativeArrayTriangles,
-      UnityEngine::MeshTopology::Triangles,
-      0,
-      true,
-      0);
-}
-
 template <typename TDest, typename TSource>
 void setTriangles(
     Unity::Collections::NativeArray1<TDest>& dest,
