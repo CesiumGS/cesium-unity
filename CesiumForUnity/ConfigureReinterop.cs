@@ -195,6 +195,7 @@ internal partial class ConfigureReinterop
         for (int i = 0; i < gos.Length; ++i)
         {
             GameObject goFromArray = gos[i];
+            gos[i] = goFromArray;
         }
 
         CesiumGeoreference[] georeferences = UnityEngine.Object.FindObjectsOfType<CesiumGeoreference>();
@@ -202,11 +203,14 @@ internal partial class ConfigureReinterop
         Mesh.MeshDataArray meshDataArray = Mesh.AllocateWritableMeshData(1);
         Mesh.MeshData meshData = meshDataArray[0];
 
+        VertexAttributeDescriptor[] descriptorsArray = new VertexAttributeDescriptor[1];
+        VertexAttributeDescriptor descriptor0 = descriptorsArray[0];
+
         NativeArray<VertexAttributeDescriptor> descriptors;
         unsafe
         {
             descriptors = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<VertexAttributeDescriptor>(null, 1, Allocator.None);
-            NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref descriptors, AtomicSafetyHandle.Create());
+            //NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref descriptors, AtomicSafetyHandle.Create());
         }
         meshData.SetVertexBufferParams(1, descriptors);
         meshData.SetIndexBufferParams(1, IndexFormat.UInt16);

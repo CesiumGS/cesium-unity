@@ -12,6 +12,7 @@
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
+#include <DotNet/System/Array1.h>
 #include <DotNet/System/Object.h>
 #include <DotNet/System/String.h>
 #include <DotNet/System/Text/Encoding.h>
@@ -220,14 +221,11 @@ void populateMeshDataArray(
           ++numberOfAttributes;
         }
 
-        NativeArray1<VertexAttributeDescriptor> attributes =
-            NativeArrayUnsafeUtility::ConvertExistingDataToNativeArray<
-                VertexAttributeDescriptor>(
-                descriptor,
-                numberOfAttributes,
-                Allocator::None);
-        meshData.SetVertexBufferParams(positionView.size(), attributes);
-        attributes.Dispose();
+        System::Array1<VertexAttributeDescriptor> attributes(
+            numberOfAttributes);
+
+        //meshData.SetVertexBufferParams(positionView.size(), attributes);
+        //attributes.Dispose();
 
         // Copy positions into the MeshData
         NativeArray1<Vector3> nativeArrayVertices =
