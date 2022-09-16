@@ -299,27 +299,21 @@ void populateMeshDataArray(
         AccessorView<uint8_t> indices8(gltf, primitive.indices);
         if (indices8.status() == AccessorViewStatus::Valid) {
           indexCount = indices8.size();
-          meshData.SetIndexBufferParams(
-              indexCount,
-              UnityEngine::Rendering::IndexFormat::UInt16);
+          meshData.SetIndexBufferParams(indexCount, IndexFormat::UInt16);
           setTriangles(meshData.GetIndexData<std::uint16_t>(), indices8);
         }
 
         AccessorView<uint16_t> indices16(gltf, primitive.indices);
         if (indices16.status() == AccessorViewStatus::Valid) {
           indexCount = indices16.size();
-          meshData.SetIndexBufferParams(
-              indexCount,
-              UnityEngine::Rendering::IndexFormat::UInt16);
+          meshData.SetIndexBufferParams(indexCount, IndexFormat::UInt16);
           setTriangles(meshData.GetIndexData<std::uint16_t>(), indices16);
         }
 
         AccessorView<uint32_t> indices32(gltf, primitive.indices);
         if (indices32.status() == AccessorViewStatus::Valid) {
           indexCount = indices32.size();
-          meshData.SetIndexBufferParams(
-              indexCount,
-              UnityEngine::Rendering::IndexFormat::UInt32);
+          meshData.SetIndexBufferParams(indexCount, IndexFormat::UInt32);
           setTriangles(meshData.GetIndexData<std::uint32_t>(), indices32);
         }
 
@@ -327,8 +321,8 @@ void populateMeshDataArray(
 
         // TODO: use sub-meshes for glTF primitives, instead of a separate mesh
         // for each.
-        UnityEngine::Rendering::SubMeshDescriptor subMeshDescriptor{};
-        subMeshDescriptor.topology = UnityEngine::MeshTopology::Triangles;
+        SubMeshDescriptor subMeshDescriptor{};
+        subMeshDescriptor.topology = MeshTopology::Triangles;
         subMeshDescriptor.indexStart = 0;
         subMeshDescriptor.indexCount = indexCount;
         subMeshDescriptor.baseVertex = 0;
