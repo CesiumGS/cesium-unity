@@ -67,6 +67,7 @@ internal partial class ConfigureReinterop
         mesh.SetNormals(new NativeArray<Vector3>());
         mesh.SetUVs(0, new NativeArray<Vector2>());
         mesh.SetIndices(new NativeArray<int>(), MeshTopology.Triangles, 0, true, 0);
+        mesh.RecalculateBounds();
         int instanceID = mesh.GetInstanceID();
 
         MeshCollider meshCollider = go.AddComponent<MeshCollider>();

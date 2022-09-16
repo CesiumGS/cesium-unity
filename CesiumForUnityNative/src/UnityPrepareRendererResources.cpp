@@ -475,6 +475,12 @@ void* UnityPrepareRendererResources::prepareInMainThread(
       meshes,
       UnityEngine::Rendering::MeshUpdateFlags::Default);
 
+  // TODO: we should be able to do this in the worker thread, even if we have to
+  // do it manually.
+  for (int32_t i = 0, len = meshes.Length(); i < len; ++i) {
+    meshes[i].RecalculateBounds();
+  }
+
   size_t meshIndex = 0;
 
   model.forEachPrimitiveInScene(
