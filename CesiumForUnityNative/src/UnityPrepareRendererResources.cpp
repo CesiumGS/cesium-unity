@@ -35,6 +35,8 @@
 #include <DotNet/UnityEngine/Object.h>
 #include <DotNet/UnityEngine/Quaternion.h>
 #include <DotNet/UnityEngine/Rendering/IndexFormat.h>
+#include <DotNet/UnityEngine/Rendering/MeshUpdateFlags.h>
+#include <DotNet/UnityEngine/Rendering/SubMeshDescriptor.h>
 #include <DotNet/UnityEngine/Rendering/VertexAttributeDescriptor.h>
 #include <DotNet/UnityEngine/Resources.h>
 #include <DotNet/UnityEngine/Texture.h>
@@ -316,31 +318,50 @@ void populateMeshDataArray(
           }
         }
 
+        int32_t indexCount = 0;
+
         AccessorView<uint8_t> indices8(gltf, primitive.indices);
         if (indices8.status() == AccessorViewStatus::Valid) {
+          indexCount = indices8.size();
           meshData.SetIndexBufferParams(
-              indices8.size(),
+              indexCount,
               UnityEngine::Rendering::IndexFormat::UInt16);
           setTriangles(meshData.GetIndexData<std::uint16_t>(), indices8);
         }
 
         AccessorView<uint16_t> indices16(gltf, primitive.indices);
         if (indices16.status() == AccessorViewStatus::Valid) {
+          indexCount = indices16.size();
           meshData.SetIndexBufferParams(
-              indices16.size(),
+              indexCount,
               UnityEngine::Rendering::IndexFormat::UInt16);
           setTriangles(meshData.GetIndexData<std::uint16_t>(), indices16);
         }
 
         AccessorView<uint32_t> indices32(gltf, primitive.indices);
         if (indices32.status() == AccessorViewStatus::Valid) {
+          indexCount = indices32.size();
           meshData.SetIndexBufferParams(
-              indices32.size(),
+              indexCount,
               UnityEngine::Rendering::IndexFormat::UInt32);
           setTriangles(meshData.GetIndexData<std::uint32_t>(), indices32);
         }
 
-        // meshFilter.mesh(unityMesh);
+        meshData.subMeshCount(1);
+
+        // TODO: use sub-meshes for glTF primitives, instead of a separate mesh
+        // for each.
+        UnityEngine::Rendering::SubMeshDescriptor subMeshDescriptor{};
+        subMeshDescriptor.topology = UnityEngine::MeshTopology::Triangles;
+        subMeshDescriptor.indexStart = 0;
+        subMeshDescriptor.indexCount = indexCount;
+        subMeshDescriptor.baseVertex = 0;
+
+        // These are calculated automatically by SetSubMesh
+        subMeshDescriptor.firstVertex = 0;
+        subMeshDescriptor.vertexCount = 0;
+
+        meshData.SetSubMesh(0, subMeshDescriptor, MeshUpdateFlags::Default);
 
         // if (createPhysicsMeshes) {
         //   UnityEngine::MeshCollider meshCollider =
@@ -393,6 +414,9 @@ UnityPrepareRendererResources::prepareInLoadThread(
 void* UnityPrepareRendererResources::prepareInMainThread(
     Cesium3DTilesSelection::Tile& tile,
     void* pLoadThreadResult) {
+  std::unique_ptr<UnityEngine::MeshDataArray> pMeshDataArray(
+      static_cast<UnityEngine::MeshDataArray*>(pLoadThreadResult));
+
   const Cesium3DTilesSelection::TileContent& content = tile.getContent();
   const Cesium3DTilesSelection::TileRenderContent* pRenderContent =
       content.getRenderContent();
@@ -439,10 +463,26 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
   const bool createPhysicsMeshes = tilesetComponent.createPhysicsMeshes();
 
+  // Create meshes and populate them from the MeshData created in the worker
+  // thread.
+  System::Array1<UnityEngine::Mesh> meshes(pMeshDataArray->Length());
+  for (int32_t i = 0, len = meshes.Length(); i < len; ++i) {
+    meshes.Item(i, UnityEngine::Mesh());
+  }
+
+  UnityEngine::Mesh::ApplyAndDisposeWritableMeshData(
+      *pMeshDataArray,
+      meshes,
+      UnityEngine::Rendering::MeshUpdateFlags::Default);
+
+  size_t meshIndex = 0;
+
   model.forEachPrimitiveInScene(
       -1,
-      [&pModelGameObject,
+      [&meshes,
+       &pModelGameObject,
        &tileTransform,
+       &meshIndex,
        opaqueMaterial,
        pCoordinateSystem,
        createPhysicsMeshes](
@@ -451,6 +491,8 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           const Mesh& mesh,
           const MeshPrimitive& primitive,
           const glm::dmat4& transform) {
+        UnityEngine::Mesh unityMesh = meshes[meshIndex++];
+
         if (primitive.indices < 0) {
           // TODO: support non-indexed primitives.
           return;
@@ -541,123 +583,11 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           }
         }
 
-        UnityEngine::Mesh unityMesh{};
-
-        {
-          Unity::Collections::NativeArray1<UnityEngine::Vector3>
-              nativeArrayVertices(
-                  positionView.size(),
-                  Unity::Collections::Allocator::Temp,
-                  Unity::Collections::NativeArrayOptions::UninitializedMemory);
-          ScopeGuard sgVertices(
-              [&nativeArrayVertices]() { nativeArrayVertices.Dispose(); });
-          UnityEngine::Vector3* vertices = static_cast<UnityEngine::Vector3*>(
-              Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
-                  GetUnsafeBufferPointerWithoutChecks(nativeArrayVertices));
-          for (int64_t i = 0; i < positionView.size(); ++i) {
-            vertices[i] = positionView[i];
-          }
-          unityMesh.SetVertices<UnityEngine::Vector3>(nativeArrayVertices);
-        }
-
-        auto normalAccessorIt = primitive.attributes.find("NORMAL");
-        if (normalAccessorIt != primitive.attributes.end()) {
-          int32_t normalAccessorID = normalAccessorIt->second;
-          AccessorView<UnityEngine::Vector3> normalView(gltf, normalAccessorID);
-          if (normalView.status() == AccessorViewStatus::Valid) {
-            Unity::Collections::NativeArray1<UnityEngine::Vector3>
-                nativeArrayNormals(
-                    normalView.size(),
-                    Unity::Collections::Allocator::Temp,
-                    Unity::Collections::NativeArrayOptions::
-                        UninitializedMemory);
-            ScopeGuard sgNormals(
-                [&nativeArrayNormals]() { nativeArrayNormals.Dispose(); });
-            UnityEngine::Vector3* normals = static_cast<UnityEngine::Vector3*>(
-                Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
-                    GetUnsafeBufferPointerWithoutChecks(nativeArrayNormals));
-
-            for (int64_t i = 0; i < normalView.size(); ++i) {
-              normals[i] = normalView[i];
-            }
-            unityMesh.SetNormals(nativeArrayNormals);
-          }
-        }
-
-        auto texCoord0AccessorIt = primitive.attributes.find("TEXCOORD_0");
-        if (texCoord0AccessorIt != primitive.attributes.end()) {
-          int32_t texCoord0AccessorID = texCoord0AccessorIt->second;
-          AccessorView<UnityEngine::Vector2> texCoord0View(
-              gltf,
-              texCoord0AccessorID);
-
-          if (texCoord0View.status() == AccessorViewStatus::Valid) {
-            Unity::Collections::NativeArray1<UnityEngine::Vector2>
-                nativeArrayTexCoord0s(
-                    texCoord0View.size(),
-                    Unity::Collections::Allocator::Temp,
-                    Unity::Collections::NativeArrayOptions::
-                        UninitializedMemory);
-            ScopeGuard sgTexCoord0([&nativeArrayTexCoord0s]() {
-              nativeArrayTexCoord0s.Dispose();
-            });
-            UnityEngine::Vector2* texCoord0s = static_cast<
-                UnityEngine::Vector2*>(
-                Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
-                    GetUnsafeBufferPointerWithoutChecks(nativeArrayTexCoord0s));
-
-            for (int64_t i = 0; i < texCoord0View.size(); ++i) {
-              texCoord0s[i] = texCoord0View[i];
-            }
-            unityMesh.SetUVs(0, nativeArrayTexCoord0s);
-          }
-        }
-
         auto overlay0AccessorIt = primitive.attributes.find("_CESIUMOVERLAY_0");
         if (overlay0AccessorIt != primitive.attributes.end()) {
-          int32_t overlay0AccessorID = overlay0AccessorIt->second;
-          AccessorView<UnityEngine::Vector2> overlay0View(
-              gltf,
-              overlay0AccessorID);
-
-          if (overlay0View.status() == AccessorViewStatus::Valid) {
-            Unity::Collections::NativeArray1<UnityEngine::Vector2>
-                nativeArrayOverlay0s(
-                    overlay0View.size(),
-                    Unity::Collections::Allocator::Temp,
-                    Unity::Collections::NativeArrayOptions::
-                        UninitializedMemory);
-            ScopeGuard sgOverlay0(
-                [&nativeArrayOverlay0s]() { nativeArrayOverlay0s.Dispose(); });
-            UnityEngine::Vector2* overlay0s = static_cast<
-                UnityEngine::Vector2*>(
-                Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
-                    GetUnsafeBufferPointerWithoutChecks(nativeArrayOverlay0s));
-
-            for (int64_t i = 0; i < overlay0View.size(); ++i) {
-              overlay0s[i] = overlay0View[i];
-            }
-            unityMesh.SetUVs(1, nativeArrayOverlay0s);
-
-            material.SetFloat(
-                System::String("_overlay0TextureCoordinateIndex"),
-                1);
-          }
-        }
-
-        AccessorView<uint8_t> indices8(gltf, primitive.indices);
-        if (indices8.status() == AccessorViewStatus::Valid) {
-          setTriangles(unityMesh, indices8);
-        }
-
-        AccessorView<uint16_t> indices16(gltf, primitive.indices);
-        if (indices16.status() == AccessorViewStatus::Valid) {
-          setTriangles(unityMesh, indices16);
-        }
-
-        AccessorView<uint32_t> indices32(gltf, primitive.indices);
-        if (indices32.status() == AccessorViewStatus::Valid) {
-          setTriangles(unityMesh, indices32);
+          material.SetFloat(
+              System::String("_overlay0TextureCoordinateIndex"),
+              1);
         }
 
         meshFilter.mesh(unityMesh);

@@ -60,6 +60,9 @@ internal partial class ConfigureReinterop
         Texture texture = texture2D;
 
         Mesh mesh = new Mesh();
+        Mesh[] meshes = new[] { mesh };
+        mesh = meshes[0];
+        int meshesLength = meshes.Length;
         mesh.SetVertices(new NativeArray<Vector3>());
         mesh.SetNormals(new NativeArray<Vector3>());
         mesh.SetUVs(0, new NativeArray<Vector2>());
@@ -201,13 +204,15 @@ internal partial class ConfigureReinterop
         CesiumGeoreference[] georeferences = UnityEngine.Object.FindObjectsOfType<CesiumGeoreference>();
 
         Mesh.MeshDataArray meshDataArray = Mesh.AllocateWritableMeshData(1);
-        Mesh.MeshData meshData = meshDataArray[0];
+        Mesh.MeshData meshData = meshDataArray[meshDataArray.Length - 1];
 
         VertexAttributeDescriptor[] descriptorsArray = new VertexAttributeDescriptor[1];
         VertexAttributeDescriptor descriptor0 = descriptorsArray[0];
 
         meshData.SetVertexBufferParams(1, descriptorsArray);
         meshData.SetIndexBufferParams(1, IndexFormat.UInt16);
+        meshData.subMeshCount = 1;
+        meshData.SetSubMesh(0, new SubMeshDescriptor(0, 1, MeshTopology.Triangles));
 
         NativeArray<Vector3> positionNormal = meshData.GetVertexData<Vector3>(0);
         NativeArray<Vector2> texCoord = meshData.GetVertexData<Vector2>(0);
@@ -228,5 +233,7 @@ internal partial class ConfigureReinterop
         }
 
         meshDataArray.Dispose();
+
+        Mesh.ApplyAndDisposeWritableMeshData(meshDataArray, meshes, MeshUpdateFlags.Default);
     }
 }
