@@ -36,6 +36,6 @@ namespace Reinterop
         /// </summary>
         public string NativeLibraryName = "ReinteropNative";
 
-        public Dictionary<ITypeSymbol, ICustomGenerator> CustomGenerators = new Dictionary<ITypeSymbol, ICustomGenerator>(SymbolEqualityComparer.Default);
+        public List<ICustomGenerator> CustomGenerators = new List<ICustomGenerator>();
     }
 }

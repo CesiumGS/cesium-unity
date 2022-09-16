@@ -37,9 +37,6 @@ namespace Reinterop
 
         private static void GenerateNonStatic(CppGenerationContext context, TypeToGenerate item, GeneratedResult result)
         {
-            if (item.Type is IArrayTypeSymbol arrayType)
-                GenerateArrayExtras(context, item, result, arrayType);
-
             foreach (IMethodSymbol constructor in item.Constructors)
             {
                 GenerateSingleNonStatic(context, item, result, constructor);
@@ -59,7 +56,7 @@ namespace Reinterop
 
             string interopFunctionName = $"Construct_{Interop.HashParameters(constructor.Parameters)}";
 
-            string templateSpecialization = GetTemplateSpecialization(declaration);
+            string templateSpecialization = Interop.GetTemplateSpecialization(declaration.Type);
 
             // A private, static field of function pointer type that will call
             // into a managed delegate for this constructor.
@@ -109,73 +106,6 @@ namespace Reinterop
                     interopReturnType,
                     CppObjectHandle.GetCppType(context)
                 }.Concat(parameters.Select(parameter => parameter.Type))
-            ));
-        }
-
-        private static string GetTemplateSpecialization(GeneratedCppDeclaration declaration)
-        {
-            string templateSpecialization = "";
-            if (declaration.Type.GenericArguments != null && declaration.Type.GenericArguments.Count > 0)
-            {
-                templateSpecialization = $"<{string.Join(", ", declaration.Type.GenericArguments.Select(arg => arg.GetFullyQualifiedName()))}>";
-            }
-
-            return templateSpecialization;
-        }
-
-        private static void GenerateArrayExtras(CppGenerationContext context, TypeToGenerate item, GeneratedResult result, IArrayTypeSymbol arrayType)
-        {
-            GeneratedCppDeclaration declaration = result.CppDeclaration;
-            GeneratedCppDefinition definition = result.CppDefinition;
-            GeneratedInit init = result.Init;
-
-            // Add a constructor taking a size
-            string createBySizeName = $"Construct_Size";
-
-            declaration.Elements.Add(new(
-                Content: $"static void* (*{createBySizeName})(std::int32_t size);",
-                IsPrivate: true
-            ));
-            declaration.Elements.Add(new(
-                Content: $"{declaration.Type.Name}(std::int32_t size);",
-                TypeDeclarationsReferenced: new[] { CppType.Int32 }
-            ));
-
-            string templateSpecialization = GetTemplateSpecialization(declaration);
-
-            definition.Elements.Add(new(
-                Content: $"void* (*{definition.Type.Name}{templateSpecialization}::{createBySizeName})(std::int32_t) = nullptr;"
-            ));
-            definition.Elements.Add(new(
-                Content:
-                    $$"""
-                    {{definition.Type.Name}}{{templateSpecialization}}::{{definition.Type.Name}}(std::int32_t size)
-                        : _handle({{createBySizeName}}(size))
-                    {
-                    }
-                    """
-            ));
-
-            CSharpType csType = CSharpType.FromSymbol(context.Compilation, arrayType);
-            string baseName = $"{Interop.GetUniqueNameForType(csType)}_Constructor_Size";
-            init.Functions.Add(new(
-                CppName: $"{definition.Type.GetFullyQualifiedName()}::{createBySizeName}",
-                CppTypeSignature: $"void* (*)(std::int32_t size)",
-                CppTypeDefinitionsReferenced: new[] { definition.Type },
-                CppTypeDeclarationsReferenced: new[] { CppType.Int32 },
-                CSharpName: baseName + "Delegate",
-                CSharpContent:
-                    $$"""
-                    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-                    private unsafe delegate IntPtr {{baseName}}Type(System.Int32 size);
-                    private static unsafe readonly {{baseName}}Type {{baseName}}Delegate = new {{baseName}}Type({{baseName}});
-                    [AOT.MonoPInvokeCallback(typeof({{baseName}}Type))]
-                    private static unsafe IntPtr {{baseName}}(System.Int32 size)
-                    {
-                        var result = new {{arrayType.ElementType.ToDisplayString()}}[size];
-                        return {{csType.GetConversionToInteropType("result")}};
-                    }
-                    """
             ));
         }
     }

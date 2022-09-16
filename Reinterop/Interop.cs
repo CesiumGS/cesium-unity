@@ -422,5 +422,16 @@ namespace Reinterop
             result.AddRange(namespaces);
             return result;
         }
+
+        public static string GetTemplateSpecialization(CppType type)
+        {
+            string templateSpecialization = "";
+            if (type.GenericArguments != null && type.GenericArguments.Count > 0)
+            {
+                templateSpecialization = $"<{string.Join(", ", type.GenericArguments.Select(arg => arg.GetFullyQualifiedName()))}>";
+            }
+
+            return templateSpecialization;
+        }
     }
 }

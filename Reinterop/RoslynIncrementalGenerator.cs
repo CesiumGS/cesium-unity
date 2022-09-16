@@ -274,7 +274,9 @@ public class RoslynIncrementalGenerator : IIncrementalGenerator
 
         cppContext.NativeLibraryName = nativeLibraryName;
 
-        cppContext.CustomGenerators.Add(compilation.GetSpecialType(SpecialType.System_String), new CustomStringGenerator());
+        cppContext.CustomGenerators.Add(new CustomStringGenerator());
+        cppContext.CustomGenerators.Add(new CustomDelegateGenerator());
+        cppContext.CustomGenerators.Add(new CustomArrayGenerator());
 
         return new CodeGenerator(cppContext);
     }

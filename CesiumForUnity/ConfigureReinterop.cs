@@ -206,15 +206,9 @@ internal partial class ConfigureReinterop
         VertexAttributeDescriptor[] descriptorsArray = new VertexAttributeDescriptor[1];
         VertexAttributeDescriptor descriptor0 = descriptorsArray[0];
 
-        NativeArray<VertexAttributeDescriptor> descriptors;
-        unsafe
-        {
-            descriptors = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<VertexAttributeDescriptor>(null, 1, Allocator.None);
-            //NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref descriptors, AtomicSafetyHandle.Create());
-        }
-        meshData.SetVertexBufferParams(1, descriptors);
+        meshData.SetVertexBufferParams(1, descriptorsArray);
         meshData.SetIndexBufferParams(1, IndexFormat.UInt16);
-        descriptors.Dispose();
+
         NativeArray<Vector3> positionNormal = meshData.GetVertexData<Vector3>(0);
         NativeArray<Vector2> texCoord = meshData.GetVertexData<Vector2>(0);
         NativeArray<Vector3> indices = meshData.GetIndexData<Vector3>();

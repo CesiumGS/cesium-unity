@@ -223,9 +223,11 @@ void populateMeshDataArray(
 
         System::Array1<VertexAttributeDescriptor> attributes(
             numberOfAttributes);
+        for (int32_t i = 0; i < numberOfAttributes; ++i) {
+          attributes.Item(i, descriptor[i]);
+        }
 
-        //meshData.SetVertexBufferParams(positionView.size(), attributes);
-        //attributes.Dispose();
+        meshData.SetVertexBufferParams(positionView.size(), attributes);
 
         // Copy positions into the MeshData
         NativeArray1<Vector3> nativeArrayVertices =
