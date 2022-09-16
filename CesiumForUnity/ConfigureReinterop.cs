@@ -211,7 +211,21 @@ internal partial class ConfigureReinterop
 
         NativeArray<Vector3> positionNormal = meshData.GetVertexData<Vector3>(0);
         NativeArray<Vector2> texCoord = meshData.GetVertexData<Vector2>(0);
-        NativeArray<Vector3> indices = meshData.GetIndexData<Vector3>();
+        NativeArray<ushort> indices = meshData.GetIndexData<ushort>();
+        NativeArray<uint> indices32 = meshData.GetIndexData<uint>();
+
+        int positionNormalLength = positionNormal.Length;
+        int texCoordLength = texCoord.Length;
+        int indicesLength = indices.Length;
+        int indices32Length = indices32.Length;
+
+        unsafe
+        {
+            NativeArrayUnsafeUtility.GetUnsafeBufferPointerWithoutChecks(positionNormal);
+            NativeArrayUnsafeUtility.GetUnsafeBufferPointerWithoutChecks(texCoord);
+            NativeArrayUnsafeUtility.GetUnsafeBufferPointerWithoutChecks(indices);
+            NativeArrayUnsafeUtility.GetUnsafeBufferPointerWithoutChecks(indices32);
+        }
 
         meshDataArray.Dispose();
     }

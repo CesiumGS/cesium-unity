@@ -34,6 +34,7 @@
 #include <DotNet/UnityEngine/MeshTopology.h>
 #include <DotNet/UnityEngine/Object.h>
 #include <DotNet/UnityEngine/Quaternion.h>
+#include <DotNet/UnityEngine/Rendering/IndexFormat.h>
 #include <DotNet/UnityEngine/Rendering/VertexAttributeDescriptor.h>
 #include <DotNet/UnityEngine/Resources.h>
 #include <DotNet/UnityEngine/Texture.h>
@@ -77,6 +78,21 @@ void setTriangles(UnityEngine::Mesh& mesh, const AccessorView<T>& indices) {
       0,
       true,
       0);
+}
+
+template <typename TDest, typename TSource>
+void setTriangles(
+    Unity::Collections::NativeArray1<TDest>& dest,
+    const AccessorView<TSource>& source) {
+  assert(dest.Length() == source.size());
+
+  TDest* triangles = static_cast<TDest*>(
+      Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
+          GetUnsafeBufferPointerWithoutChecks(dest));
+
+  for (int64_t i = 0; i < source.size(); ++i) {
+    triangles[i] = source[i];
+  }
 }
 
 int32_t countPrimitives(const CesiumGltf::Model& model) {
@@ -273,7 +289,7 @@ void populateMeshDataArray(
             texCoord0[i] = texCoord0View[i];
           }
 
-          // Just in case there are more positions than normals
+          // Just in case there are more positions than texture coordinates
           for (int64_t i = texCoord0sToCopy; i < positionView.size(); ++i) {
             texCoord0[i] = Vector2{0.0f, 0.0f};
           }
@@ -293,26 +309,36 @@ void populateMeshDataArray(
             overlay0[i] = overlay0View[i];
           }
 
-          // Just in case there are more positions than normals
+          // Just in case there are more positions than overlay texture
+          // coordinates
           for (int64_t i = overlay0sToCopy; i < positionView.size(); ++i) {
             overlay0[i] = Vector2{0.0f, 0.0f};
           }
         }
 
-        // AccessorView<uint8_t> indices8(gltf, primitive.indices);
-        // if (indices8.status() == AccessorViewStatus::Valid) {
-        //   setTriangles(unityMesh, indices8);
-        // }
+        AccessorView<uint8_t> indices8(gltf, primitive.indices);
+        if (indices8.status() == AccessorViewStatus::Valid) {
+          meshData.SetIndexBufferParams(
+              indices8.size(),
+              UnityEngine::Rendering::IndexFormat::UInt16);
+          setTriangles(meshData.GetIndexData<std::uint16_t>(), indices8);
+        }
 
-        // AccessorView<uint16_t> indices16(gltf, primitive.indices);
-        // if (indices16.status() == AccessorViewStatus::Valid) {
-        //   setTriangles(unityMesh, indices16);
-        // }
+        AccessorView<uint16_t> indices16(gltf, primitive.indices);
+        if (indices16.status() == AccessorViewStatus::Valid) {
+          meshData.SetIndexBufferParams(
+              indices16.size(),
+              UnityEngine::Rendering::IndexFormat::UInt16);
+          setTriangles(meshData.GetIndexData<std::uint16_t>(), indices16);
+        }
 
-        // AccessorView<uint32_t> indices32(gltf, primitive.indices);
-        // if (indices32.status() == AccessorViewStatus::Valid) {
-        //   setTriangles(unityMesh, indices32);
-        // }
+        AccessorView<uint32_t> indices32(gltf, primitive.indices);
+        if (indices32.status() == AccessorViewStatus::Valid) {
+          meshData.SetIndexBufferParams(
+              indices32.size(),
+              UnityEngine::Rendering::IndexFormat::UInt32);
+          setTriangles(meshData.GetIndexData<std::uint32_t>(), indices32);
+        }
 
         // meshFilter.mesh(unityMesh);
 
