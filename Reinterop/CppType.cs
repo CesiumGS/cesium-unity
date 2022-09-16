@@ -52,6 +52,13 @@ namespace Reinterop
                 return original.AsPointer();
             }
 
+            IArrayTypeSymbol? arrayType = type as IArrayTypeSymbol;
+            if (arrayType != null)
+            {
+                CppType original = FromCSharp(context, arrayType.ElementType);
+                return new CppType(InteropTypeKind.ClassWrapper, Interop.BuildNamespace(context.BaseNamespace, "System"), "Array1", new[] { original }, 0);
+            }
+
             InteropTypeKind kind = Interop.DetermineTypeKind(context.Compilation, type);
             if (kind == InteropTypeKind.GenericParameter)
                 return new CppType(InteropTypeKind.GenericParameter, NoNamespace, type.Name, null, 0);
@@ -199,8 +206,8 @@ namespace Reinterop
 
         public void AddForwardDeclarationsToSet(ISet<string> forwardDeclarations)
         {
-            // Primitives do not need to be forward declared
-            if (Kind == InteropTypeKind.Primitive)
+            // Primitives and generic parameters do not need to be forward declared
+            if (Kind == InteropTypeKind.Primitive || Kind == InteropTypeKind.GenericParameter)
                 return;
 
             string template = "";

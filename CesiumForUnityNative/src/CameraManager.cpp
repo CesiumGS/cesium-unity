@@ -10,6 +10,8 @@
 #include <DotNet/UnityEngine/Transform.h>
 #include <DotNet/UnityEngine/Vector3.h>
 
+#include <glm/trigonometric.hpp>
+
 #if UNITY_EDITOR
 #include <DotNet/UnityEditor/SceneView.h>
 #endif
@@ -66,13 +68,14 @@ ViewState unityCameraToViewState(
   }
 
   double verticalFOV = Math::degreesToRadians(camera.fieldOfView());
+  double horizontalFOV = 2 * glm::atan(camera.aspect() * glm::tan(verticalFOV * 0.5));
 
   return ViewState::create(
       cameraPosition,
       cameraDirection,
       cameraUp,
       glm::dvec2(camera.pixelWidth(), camera.pixelHeight()),
-      verticalFOV * camera.aspect(),
+      horizontalFOV,
       verticalFOV);
 }
 

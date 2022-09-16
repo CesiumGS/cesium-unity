@@ -36,6 +36,7 @@
 #include <DotNet/UnityEngine/Rendering/VertexAttributeDescriptor.h>
 #include <DotNet/UnityEngine/Resources.h>
 #include <DotNet/UnityEngine/Texture.h>
+#include <DotNet/UnityEngine/TextureWrapMode.h>
 #include <DotNet/UnityEngine/Transform.h>
 #include <DotNet/UnityEngine/Vector2.h>
 #include <DotNet/UnityEngine/Vector3.h>
@@ -331,7 +332,7 @@ UnityPrepareRendererResources::UnityPrepareRendererResources(
 CesiumAsync::Future<TileLoadResultAndRenderResources>
 UnityPrepareRendererResources::prepareInLoadThread(
     const CesiumAsync::AsyncSystem& asyncSystem,
-    Cesium3DTilesSelection::TileLoadResult&& tileLoadResult,
+    TileLoadResult&& tileLoadResult,
     const glm::dmat4& transform) {
   CesiumGltf::Model* pModel =
       std::get_if<CesiumGltf::Model>(&tileLoadResult.contentKind);
@@ -667,6 +668,7 @@ void* UnityPrepareRendererResources::prepareRasterInMainThread(
     void* pLoadThreadResult) {
   auto pTexture = std::make_unique<UnityEngine::Texture>(
       TextureLoader::loadTexture(rasterTile.getImage()));
+  pTexture->wrapMode(UnityEngine::TextureWrapMode::Clamp);
   return pTexture.release();
 }
 

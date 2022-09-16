@@ -5,7 +5,7 @@
 * If you're using Visual Studio, you need Visual Studio 2022 v17.2 or later. The original release of Visual Studio 2022 is too old, so make sure yours has been updated.
 * Unity 2021.3.2f1 (newer versions are likely to work)
 
-The build Cesium for Unity assembly will run on much older versions of .NET, including the version of Mono included in Unity. However, these very recent versions are required for the C#<->C++ interop code generator (Reinterop).
+The built Cesium for Unity assembly will run on much older versions of .NET, including the version of Mono included in Unity. However, these very recent versions are required for the C#<->C++ interop code generator (Reinterop).
 
 To make sure things are set up correctly, open a command-prompt (PowerShell is a good choice on Windows) and run:
 
@@ -52,7 +52,7 @@ The C# code must be compiled first, because its compilation process generates so
 dotnet publish CesiumForUnity -c Debug -p:Editor=False
 ```
 
-Replace `Debug` with `Release` for a release build.
+Replace `Debug` with `Release` for a release build. The performance is significantly better with a Release build!
 
 This will do the following:
 
@@ -65,7 +65,7 @@ To build the C++ code for the non-Editor configuration, run the following from t
 
 ```
 cmake -B build -S . -DEDITOR=false
-cmake --build build --target install -j14
+cmake --build build --target install -j14 --config Debug
 ```
 
 The `-j14` tells CMake to build using 14 threads. A higher or lower number may be more suitable for your system.
@@ -80,7 +80,7 @@ Next, build the Editor configuration of both the C# and C++ code:
 ```
 dotnet publish CesiumForUnity -c Debug -p:Editor=True
 cmake -B build -S . -DEDITOR=true
-cmake --build build --target install -j14
+cmake --build build --target install -j14 --config Debug
 ```
 
 Unity requires that the binaries for the non-Editor configuration _exist_, otherwise Cesium for Unity won't work at all, even in the Editor. But once you've built it once, if you're working exclusively in the Editor, you can iterate by only building the Editor configuration. The non-Editor binaries must exist, but they need not be up-to-date unless you're planning to build a game to run outside the Editor.
@@ -88,3 +88,40 @@ Unity requires that the binaries for the non-Editor configuration _exist_, other
 ## Running the Examples
 
 You should now be able to open the cesium-unity-samples project in the Unity Editor and see Cesium datasets being streamed in.
+
+## Adding Cesium for Unity to a new project
+
+1. Cesium for Unity has only been tested with the Universal Render Pipeline (URP), so use that for best results. Others _may_ work.
+2. To install Cesium for Unity into your project, build Cesium for Unity (as above) and then copy or symlink the Cesium for Unity `Assets` directory into your project's `Assets/CesiumForUnity` directory.
+3. Change the Editor camera settings to accomodate globe-sized view distances. Disable "Dynamic Clipping" and set the near plane to 1 and the far plane to 1000000 (1 million). You may want to increase the maximum speed as well, to perhaps 200 or so.
+
+![Camera Settings](Documentation/images/CameraSettings.png)
+
+4. Set the near and far planes for any cameras in your level as well.
+5. Add a new empty GameObject to your scene and name it "Cesium".
+6. Add a new `Cesium Georeference` component to the "Cesium" game object. By setting the Longitude, Latitude, and Height properties on this object, you define the position on the globe that becomes the center of the Unity world.
+7. Add another new GameObject as a _child_ of the "Cesium" game object, and name it "Cesium World Terrain".
+8. Add a new "Cesium 3D Tileset" component to the "Cesium World Terrain" game object and set the following properties:
+  * Set the "Opaque Material" to "CesiumDefaultTilesetMaterial". This step will not be necessary in the future, but failing to do so at the moment may lead to a crash.
+  * Set the "Ion Asset ID" to 1.
+  * Set the "Ion Access Token" to a valid token for Cesium World Terrain from your Cesium ion account. At this point Cesium World Terrain should appear, but it will be all white.
+9. Add a new "Cesium Ion Raster Overlay" component to the "Cesium World Terrain" game object and set the following properties:
+  * Set the "Ion Asset ID" to 2.
+  * Set the "Ion Access Token" to a valid Cesium ion token; the one from above is likely to work. At this point, the terrain surface should become textured.
+
+## Running Cesium for Unity on Quest 2
+
+Build Cesium for Unity for Android with the following commands:
+
+```
+dotnet publish CesiumForUnity -c Release -p:Editor=False
+cmake -B build-android -S . -G Ninja -DCMAKE_TOOLCHAIN_FILE="CesiumForUnityNative/extern/android-toolchain.cmake" -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_BUILD_TYPE=Release -DEDITOR=false
+cmake --build build --target install -j14
+```
+
+In the Unity Editor, change the settings of the project according to this page: https://developer.oculus.com/documentation/unity/unity-conf-settings/.
+
+Then, convert the main camera to an XR rig by going to GameObject > XR > Add XR Rig.
+
+If you run into a crash on startup while using Vulkan, you may need to upgrade your version of Unity:
+https://issuetracker.unity3d.com/issues/oculus-quest-app-using-vulkan-crashes-on-startup

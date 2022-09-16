@@ -100,12 +100,25 @@ namespace Reinterop
             base.VisitElementAccessExpression(node);
 
             // Look for the property for accessing elements of a list (or similar) by index.
+            ITypeSymbol? containingType = null;
             ISymbol? symbol = this._semanticModel.GetSymbolInfo(node).Symbol;
             IPropertySymbol? property = symbol as IPropertySymbol;
             if (property == null)
-                return;
+            {
+                // Arrays don't have a proper property. Find one on the IList<T> interface instead.
+                ITypeSymbol? expressionType = this._semanticModel.GetTypeInfo(node.Expression).Type as ITypeSymbol;
+                if (expressionType == null)
+                    return;
 
-            this.AddProperty(property);
+                containingType = expressionType;
+                INamedTypeSymbol? listInterface = expressionType.AllInterfaces.Where(ifc => ifc.Name == "IList" && ifc.IsGenericType).FirstOrDefault();
+                property = CSharpTypeUtility.FindMember(listInterface, "this[]") as IPropertySymbol;
+
+                if (property == null)
+                    return;
+            }
+
+            this.AddProperty(property, containingType);
         }
 
         private TypeToGenerate AddType(ITypeSymbol type)
@@ -128,8 +141,8 @@ namespace Reinterop
             if (type.SpecialType == SpecialType.System_Void)
                 return new TypeToGenerate(type);
 
-            // Don't add types without a name.
-            if (type.Name == "")
+            // Don't add types without a name, except for arrays.
+            if (type.TypeKind != TypeKind.Array && type.Name == "")
                 return new TypeToGenerate(type);
 
             TypeToGenerate generationItem;
@@ -185,6 +198,13 @@ namespace Reinterop
                 }
             }
 
+            // If this is an array, we also need the element type.
+            IArrayTypeSymbol? arrayType = type as IArrayTypeSymbol;
+            if (arrayType != null)
+            {
+                this.AddType(arrayType.ElementType);
+            }
+
             return generationItem;
         }
 
@@ -204,9 +224,12 @@ namespace Reinterop
             return item;
         }
 
-        private TypeToGenerate AddProperty(IPropertySymbol symbol)
+        private TypeToGenerate AddProperty(IPropertySymbol symbol, ITypeSymbol? containingType = null)
         {
-            TypeToGenerate item = this.AddType(symbol.ContainingType);
+            if (containingType == null)
+                containingType = symbol.ContainingType;
+
+            TypeToGenerate item = this.AddType(containingType);
             item.Properties.Add(symbol);
 
             // We also need to generate the property type.

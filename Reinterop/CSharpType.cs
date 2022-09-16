@@ -38,7 +38,11 @@ namespace Reinterop
 
         public string GetFullyQualifiedNamespace()
         {
-            return Symbol.ContainingNamespace.ToDisplayString();
+            IArrayTypeSymbol? arraySymbol = this.Symbol as IArrayTypeSymbol;
+            if (arraySymbol != null)
+                return CSharpType.FromSymbol(this.Compilation, arraySymbol.ElementType).GetFullyQualifiedNamespace();
+            else
+                return Symbol.ContainingNamespace.ToDisplayString();
         }
 
         public string GetFullyQualifiedName()

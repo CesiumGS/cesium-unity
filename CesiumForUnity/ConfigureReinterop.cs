@@ -56,6 +56,7 @@ internal partial class ConfigureReinterop
         Texture2D texture2D = new Texture2D(256, 256, TextureFormat.RGBA32, false, false);
         texture2D.LoadRawTextureData(IntPtr.Zero, 0);
         texture2D.Apply(true, true);
+        texture2D.wrapMode = TextureWrapMode.Clamp;
         Texture texture = texture2D;
 
         Mesh mesh = new Mesh();
@@ -171,6 +172,10 @@ internal partial class ConfigureReinterop
           CesiumRasterOverlay anOverlay = overlays[i];
         }
 
+        CesiumRasterOverlay[] overlaysArray = go.GetComponents<CesiumRasterOverlay>();
+        int len = overlaysArray.Length;
+        CesiumRasterOverlay first = overlaysArray[0];
+
         MonoBehaviour mb = tileset;
         mb.StartCoroutine(new NativeCoroutine(endIteration => endIteration).GetEnumerator());
 
@@ -185,6 +190,14 @@ internal partial class ConfigureReinterop
         inParent.changed += () => {};
 
         float time = Time.deltaTime;
+
+        GameObject[] gos = GameObject.FindGameObjectsWithTag("test");
+        for (int i = 0; i < gos.Length; ++i)
+        {
+            GameObject goFromArray = gos[i];
+        }
+
+        CesiumGeoreference[] georeferences = UnityEngine.Object.FindObjectsOfType<CesiumGeoreference>();
 
         Mesh.MeshDataArray meshDataArray = Mesh.AllocateWritableMeshData(1);
         Mesh.MeshData meshData = meshDataArray[0];
@@ -203,6 +216,5 @@ internal partial class ConfigureReinterop
         NativeArray<Vector3> indices = meshData.GetIndexData<Vector3>();
 
         meshDataArray.Dispose();
-
     }
 }
