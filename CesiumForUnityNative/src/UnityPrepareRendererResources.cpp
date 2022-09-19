@@ -85,7 +85,8 @@ CesiumAsync::Future<TileLoadResultAndRenderResources>
 UnityPrepareRendererResources::prepareInLoadThread(
     const CesiumAsync::AsyncSystem& asyncSystem,
     TileLoadResult&& tileLoadResult,
-    const glm::dmat4& transform) {
+    const glm::dmat4& transform,
+    const std::any& rendererOptions) {
   return asyncSystem.createResolvedFuture(
       TileLoadResultAndRenderResources{std::move(tileLoadResult), nullptr});
 }

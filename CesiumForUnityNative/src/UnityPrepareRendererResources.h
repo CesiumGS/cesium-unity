@@ -17,7 +17,8 @@ public:
   prepareInLoadThread(
       const CesiumAsync::AsyncSystem& asyncSystem,
       Cesium3DTilesSelection::TileLoadResult&& tileLoadResult,
-      const glm::dmat4& transform) override;
+      const glm::dmat4& transform,
+      const std::any& rendererOptions) override;
 
   virtual void* prepareInMainThread(
       Cesium3DTilesSelection::Tile& tile,
