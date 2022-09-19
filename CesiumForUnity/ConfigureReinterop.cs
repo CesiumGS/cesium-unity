@@ -87,6 +87,7 @@ internal partial class ConfigureReinterop
 
         MeshFilter meshFilter = new MeshFilter();
         meshFilter.mesh = mesh;
+        meshFilter.sharedMesh = mesh;
 
         Resources.Load<Material>("name");
 
@@ -236,5 +237,7 @@ internal partial class ConfigureReinterop
         meshDataArray.Dispose();
 
         Mesh.ApplyAndDisposeWritableMeshData(meshDataArray, meshes, MeshUpdateFlags.Default);
+
+        Physics.BakeMesh(mesh.GetInstanceID(), false);
     }
 }

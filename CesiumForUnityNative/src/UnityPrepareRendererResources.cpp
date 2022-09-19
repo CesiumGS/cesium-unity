@@ -33,6 +33,7 @@
 #include <DotNet/UnityEngine/MeshRenderer.h>
 #include <DotNet/UnityEngine/MeshTopology.h>
 #include <DotNet/UnityEngine/Object.h>
+#include <DotNet/UnityEngine/Physics.h>
 #include <DotNet/UnityEngine/Quaternion.h>
 #include <DotNet/UnityEngine/Rendering/IndexFormat.h>
 #include <DotNet/UnityEngine/Rendering/MeshUpdateFlags.h>
@@ -88,22 +89,17 @@ int32_t countPrimitives(const CesiumGltf::Model& model) {
 
 void populateMeshDataArray(
     const UnityEngine::MeshDataArray& meshDataArray,
-    const TileLoadResult& tileLoadResult,
-    const glm::dmat4& transform) {
+    const TileLoadResult& tileLoadResult) {
   const CesiumGltf::Model* pModel =
       std::get_if<CesiumGltf::Model>(&tileLoadResult.contentKind);
   if (!pModel)
     return;
 
-  glm::dmat4 tileTransform = GltfUtilities::applyRtcCenter(*pModel, transform);
-  tileTransform =
-      GltfUtilities::applyGltfUpAxisTransform(*pModel, tileTransform);
-
   size_t meshDataInstance = 0;
 
   pModel->forEachPrimitiveInScene(
       -1,
-      [&tileTransform, &meshDataArray, &meshDataInstance](
+      [&meshDataArray, &meshDataInstance](
           const Model& gltf,
           const Node& node,
           const Mesh& mesh,
@@ -360,32 +356,101 @@ UnityPrepareRendererResources::prepareInLoadThread(
   int32_t numberOfPrimitives = countPrimitives(*pModel);
 
   return asyncSystem
-      .runInMainThread([numberOfPrimitives, tileset = this->_tileset]() {
+      .runInMainThread([numberOfPrimitives]() {
         // Allocate a MeshDataArray for the primitives.
         // Unfortunately, this must be done on the main thread.
         return UnityEngine::Mesh::AllocateWritableMeshData(numberOfPrimitives);
       })
       .thenInWorkerThread(
-          [tileLoadResult = std::move(tileLoadResult),
-           transform](UnityEngine::MeshDataArray&& meshDataArray) mutable {
+          [tileLoadResult = std::move(tileLoadResult)](
+              UnityEngine::MeshDataArray&& meshDataArray) mutable {
             // Free the MeshDataArray if something goes wrong.
             ScopeGuard sg([&meshDataArray]() { meshDataArray.Dispose(); });
 
-            populateMeshDataArray(meshDataArray, tileLoadResult, transform);
+            populateMeshDataArray(meshDataArray, tileLoadResult);
 
             // We're returning the MeshDataArray, so don't free it.
             sg.release();
-            return TileLoadResultAndRenderResources{
-                std::move(tileLoadResult),
-                new UnityEngine::MeshDataArray(std::move(meshDataArray))};
+            return std::make_pair(
+                std::move(meshDataArray),
+                std::move(tileLoadResult));
+          })
+      .thenInMainThread(
+          [asyncSystem, tileset = this->_tileset](
+              std::pair<UnityEngine::MeshDataArray, TileLoadResult>&&
+                  workerResult) mutable {
+            // Create meshes and populate them from the MeshData created in
+            // the worker thread. Sadly, this must be done in the main
+            // thread, too.
+            System::Array1<UnityEngine::Mesh> meshes(
+                workerResult.first.Length());
+            for (int32_t i = 0, len = meshes.Length(); i < len; ++i) {
+              meshes.Item(i, UnityEngine::Mesh());
+            }
+
+            // TODO: Validate indices in the worker thread, and then ask Unity
+            // not to do it here by setting
+            // MeshUpdateFlags::DontValidateIndices.
+            UnityEngine::Mesh::ApplyAndDisposeWritableMeshData(
+                workerResult.first,
+                meshes,
+                UnityEngine::Rendering::MeshUpdateFlags::Default);
+
+            // TODO: we should be able to do this in the worker thread, even if
+            // we have to do it manually. But if we do it in the main thread, we
+            // need to do it right here. For some very mysterious reason, if we
+            // call this method in prepareInMainThread, it sometimes throws a
+            // MissingReferenceException.
+            for (int32_t i = 0, len = meshes.Length(); i < len; ++i) {
+              meshes[i].RecalculateBounds();
+            }
+
+            bool shouldCreatePhysicsMeshes = false;
+
+            DotNet::CesiumForUnity::Cesium3DTileset tilesetComponent =
+                tileset.GetComponent<DotNet::CesiumForUnity::Cesium3DTileset>();
+            if (tilesetComponent != nullptr) {
+              shouldCreatePhysicsMeshes =
+                  tilesetComponent.createPhysicsMeshes();
+            }
+
+            if (shouldCreatePhysicsMeshes) {
+              // Baking physics meshes takes awhile, so do that in a
+              // worker thread.
+              std::int32_t len = meshes.Length();
+              std::vector<std::int32_t> instanceIDs(meshes.Length());
+              for (int32_t i = 0; i < len; ++i) {
+                instanceIDs[i] = meshes[i].GetInstanceID();
+              }
+
+              return asyncSystem.runInWorkerThread(
+                  [workerResult = std::move(workerResult),
+                   instanceIDs = std::move(instanceIDs),
+                   meshes = std::move(meshes)]() mutable {
+                    for (std::int32_t instanceID : instanceIDs) {
+                      UnityEngine::Physics::BakeMesh(instanceID, false);
+                    }
+                    return TileLoadResultAndRenderResources{
+                        std::move(workerResult.second),
+                        new System::Array1<UnityEngine::Mesh>(
+                            std::move(meshes))};
+                  });
+            } else {
+              return asyncSystem.createResolvedFuture(
+                  TileLoadResultAndRenderResources{
+                      std::move(workerResult.second),
+                      new System::Array1<UnityEngine::Mesh>(
+                          std::move(meshes))});
+            }
           });
 }
 
 void* UnityPrepareRendererResources::prepareInMainThread(
     Cesium3DTilesSelection::Tile& tile,
     void* pLoadThreadResult) {
-  std::unique_ptr<UnityEngine::MeshDataArray> pMeshDataArray(
-      static_cast<UnityEngine::MeshDataArray*>(pLoadThreadResult));
+  std::unique_ptr<System::Array1<UnityEngine::Mesh>> pMeshArray(
+      static_cast<System::Array1<UnityEngine::Mesh>*>(pLoadThreadResult));
+  const System::Array1<UnityEngine::Mesh>& meshes = *pMeshArray;
 
   const Cesium3DTilesSelection::TileContent& content = tile.getContent();
   const Cesium3DTilesSelection::TileRenderContent* pRenderContent =
@@ -432,24 +497,6 @@ void* UnityPrepareRendererResources::prepareInMainThread(
   }
 
   const bool createPhysicsMeshes = tilesetComponent.createPhysicsMeshes();
-
-  // Create meshes and populate them from the MeshData created in the worker
-  // thread.
-  System::Array1<UnityEngine::Mesh> meshes(pMeshDataArray->Length());
-  for (int32_t i = 0, len = meshes.Length(); i < len; ++i) {
-    meshes.Item(i, UnityEngine::Mesh());
-  }
-
-  UnityEngine::Mesh::ApplyAndDisposeWritableMeshData(
-      *pMeshDataArray,
-      meshes,
-      UnityEngine::Rendering::MeshUpdateFlags::Default);
-
-  // TODO: we should be able to do this in the worker thread, even if we have to
-  // do it manually.
-  for (int32_t i = 0, len = meshes.Length(); i < len; ++i) {
-    meshes[i].RecalculateBounds();
-  }
 
   size_t meshIndex = 0;
 
@@ -566,9 +613,11 @@ void* UnityPrepareRendererResources::prepareInMainThread(
               1);
         }
 
-        meshFilter.mesh(unityMesh);
+        meshFilter.sharedMesh(unityMesh);
 
         if (createPhysicsMeshes) {
+          // This should not trigger mesh baking for physics, because the meshes
+          // were already baked in the worker thread.
           UnityEngine::MeshCollider meshCollider =
               primitiveGameObject.AddComponent<UnityEngine::MeshCollider>();
           meshCollider.sharedMesh(unityMesh);
