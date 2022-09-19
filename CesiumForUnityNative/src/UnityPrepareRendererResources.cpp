@@ -346,7 +346,8 @@ CesiumAsync::Future<TileLoadResultAndRenderResources>
 UnityPrepareRendererResources::prepareInLoadThread(
     const CesiumAsync::AsyncSystem& asyncSystem,
     TileLoadResult&& tileLoadResult,
-    const glm::dmat4& transform) {
+    const glm::dmat4& transform,
+    const std::any& rendererOptions) {
   CesiumGltf::Model* pModel =
       std::get_if<CesiumGltf::Model>(&tileLoadResult.contentKind);
   if (!pModel)
