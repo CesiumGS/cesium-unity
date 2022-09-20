@@ -386,7 +386,14 @@ UnityPrepareRendererResources::prepareInLoadThread(
             System::Array1<UnityEngine::Mesh> meshes(
                 workerResult.first.Length());
             for (int32_t i = 0, len = meshes.Length(); i < len; ++i) {
-              meshes.Item(i, UnityEngine::Mesh());
+              UnityEngine::Mesh unityMesh{};
+
+              // Don't let Unity unload this mesh during the time in between
+              // when we create it and when we attach it to a GameObject.
+              unityMesh.hideFlags(
+                  UnityEngine::HideFlags::DontUnloadUnusedAsset);
+
+              meshes.Item(i, unityMesh);
             }
 
             // TODO: Validate indices in the worker thread, and then ask Unity
@@ -516,6 +523,9 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           const MeshPrimitive& primitive,
           const glm::dmat4& transform) {
         UnityEngine::Mesh unityMesh = meshes[meshIndex++];
+        if (unityMesh == nullptr) {
+          return;
+        }
 
         if (primitive.indices < 0) {
           // TODO: support non-indexed primitives.

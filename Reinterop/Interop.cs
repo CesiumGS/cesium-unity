@@ -135,6 +135,17 @@ namespace Reinterop
                     {{invocationTarget}} -= {{callParameterList}};
                     """;
             }
+            else if (method.MethodKind == MethodKind.UserDefinedOperator && method.Parameters.Length == 2)
+            {
+                // binary operator, like operator==
+                var lhs = callParameterDetails.ElementAt(0);
+                var rhs = callParameterDetails.ElementAt(1);
+                implementation =
+                    $$"""
+                    var result = ({{lhs.Type.GetParameterConversionFromInteropType(lhs.Name)}}) {{Interop.MethodNameToOperator(method.Name)}} ({{rhs.Type.GetParameterConversionFromInteropType(rhs.Name)}});
+                    return {{csReturnType.GetConversionToInteropType("result")}};
+                    """;
+            }
             else if (returnType.SpecialType == SpecialType.System_Void)
             {
                 // Regular method returning void.
@@ -165,7 +176,7 @@ namespace Reinterop
                     [AOT.MonoPInvokeCallback(typeof({{baseName}}Type))]
                     private static unsafe {{interopReturnTypeString}} {{baseName}}({{interopParameterList}})
                     {
-                        {{implementation.Replace(Environment.NewLine, Environment.NewLine + "  ")}}
+                        {{implementation.Replace(Environment.NewLine, Environment.NewLine + "    ")}}
                     }
                     """
             );
@@ -432,6 +443,19 @@ namespace Reinterop
             }
 
             return templateSpecialization;
+        }
+
+        public static string MethodNameToOperator(string methodName)
+        {
+            switch (methodName)
+            {
+                case "op_Equality":
+                    return "==";
+                case "op_Inequality":
+                    return "!=";
+                default:
+                    throw new Exception("Unsupported operator " + methodName);
+            }
         }
     }
 }

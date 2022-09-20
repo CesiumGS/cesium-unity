@@ -48,6 +48,16 @@ namespace Reinterop
             else
                 afterModifiers += " const";
 
+            bool isPrivate = false;
+
+            // For op_Equality, mark the method private and add a public operator== to access it.
+            bool addOperator = false;
+            if (method.MethodKind == MethodKind.UserDefinedOperator && (method.Name == "op_Equality" || method.Name == "op_Inequality"))
+            {
+                isPrivate = true;
+                addOperator = true;
+            }
+
             string templateSpecialization = "";
             string templatePrefix = "";
             if (method.IsGenericMethod)
@@ -68,7 +78,8 @@ namespace Reinterop
                             template <{{string.Join(", ", method.TypeParameters.Select(parameter => "typename " + parameter.Name))}}>
                             {{modifiers}}{{genericReturn.GetFullyQualifiedName()}} {{method.Name}}({{genericParametersString}}){{afterModifiers}};
                             """,
-                        TypeDeclarationsReferenced: new[] { genericReturn }.Concat(genericMethod.Parameters.Select(p => CppType.FromCSharp(context, p.Type)))
+                        TypeDeclarationsReferenced: new[] { genericReturn }.Concat(genericMethod.Parameters.Select(p => CppType.FromCSharp(context, p.Type))),
+                        IsPrivate: isPrivate
                         ));
                 }
 
@@ -117,7 +128,8 @@ namespace Reinterop
             {
                 declaration.Elements.Add(new(
                     Content: $"{templatePrefix}{modifiers}{returnType.GetFullyQualifiedName()} {method.Name}{templateSpecialization}({string.Join(", ", parameterStrings)}){afterModifiers};",
-                    TypeDeclarationsReferenced: new[] { returnType }.Concat(parameters.Select(parameter => parameter.Type))
+                    TypeDeclarationsReferenced: new[] { returnType }.Concat(parameters.Select(parameter => parameter.Type)),
+                    IsPrivate: isPrivate
                 ));
             }
 
@@ -125,6 +137,24 @@ namespace Reinterop
             if (definition.Type.GenericArguments != null && definition.Type.GenericArguments.Count > 0)
             {
                 typeTemplateSpecialization = "<" + string.Join(", ", definition.Type.GenericArguments.Select(t => t.GetFullyQualifiedName())) + ">";
+            }
+
+            if (addOperator)
+            {
+                string op = Interop.MethodNameToOperator(method.Name);
+                var rhs = parameters.ElementAt(1);
+                declaration.Elements.Add(new(
+                    Content: $"bool operator{op}({rhs.Type.GetFullyQualifiedName()} rhs) const;"
+                ));
+                definition.Elements.Add(new(
+                    Content:
+                        $$"""
+                        bool {{definition.Type.Name}}{{typeTemplateSpecialization}}::operator{{op}}({{rhs.Type.GetFullyQualifiedName()}} rhs) const {
+                          return {{method.Name}}(*this, rhs);
+                        }
+                        """,
+                    TypeDefinitionsReferenced: parameters.Select(parameter => parameter.Type)
+                ));
             }
 
             // Method definition

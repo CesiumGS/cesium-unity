@@ -1,4 +1,6 @@
-﻿namespace Reinterop
+﻿using Microsoft.CodeAnalysis;
+
+namespace Reinterop
 {
     internal class CppHandleManagement
     {
@@ -74,34 +76,52 @@
                 }
             ));
 
-            // Comparisons to null reference
-            declaration.Elements.Add(new(
-                Content: $"bool operator==(std::nullptr_t) const noexcept;",
-                TypeDeclarationsReferenced: new[] { CppType.NullPointer }
-            ));
-            definition.Elements.Add(new(
-                Content:
-                    $$"""
+            bool hasOverloadedOperatorEquals = CSharpTypeUtility
+                .FindMembers(item.Type, "op_Equality")
+                .Where(
+                    op => op is IMethodSymbol method &&
+                    method.ReturnType.SpecialType == SpecialType.System_Boolean &&
+                    method.Parameters.Length == 2 &&
+                    SymbolEqualityComparer.Default.Equals(method.Parameters[0].Type, method.ContainingType) &&
+                    SymbolEqualityComparer.Default.Equals(method.Parameters[1].Type, method.ContainingType))
+                .Any();
+
+            // For simple types without an overloaded operator==, we can check
+            // to see if a wrapper represents a null reference without leaving
+            // C++ land.
+            //
+            // But if such an operator does exist, we have to use it, even if
+            // that means a call into C#.
+            if (!hasOverloadedOperatorEquals)
+            {
+                declaration.Elements.Add(new(
+                    Content: $"bool operator==(std::nullptr_t) const noexcept;",
+                    TypeDeclarationsReferenced: new[] { CppType.NullPointer }
+                ));
+                definition.Elements.Add(new(
+                    Content:
+                        $$"""
                     bool {{type.Name}}{{templateSpecialization}}::operator==(std::nullptr_t) const noexcept {
                         return this->_handle.GetRaw() == nullptr;
                     }
                     """,
-                TypeDefinitionsReferenced: new[] { result.CppDefinition.Type, objectHandleType }
-            ));
+                    TypeDefinitionsReferenced: new[] { result.CppDefinition.Type, objectHandleType }
+                ));
 
-            declaration.Elements.Add(new(
-                Content: $"bool operator!=(std::nullptr_t) const noexcept;",
-                TypeDeclarationsReferenced: new[] { CppType.NullPointer }
-            ));
-            definition.Elements.Add(new(
-                Content:
-                    $$"""
+                declaration.Elements.Add(new(
+                    Content: $"bool operator!=(std::nullptr_t) const noexcept;",
+                    TypeDeclarationsReferenced: new[] { CppType.NullPointer }
+                ));
+                definition.Elements.Add(new(
+                    Content:
+                        $$"""
                     bool {{type.Name}}{{templateSpecialization}}::operator!=(std::nullptr_t) const noexcept {
                         return this->_handle.GetRaw() != nullptr;
                     }
                     """,
-                TypeDefinitionsReferenced: new[] { result.CppDefinition.Type, objectHandleType }
-            ));
+                    TypeDefinitionsReferenced: new[] { result.CppDefinition.Type, objectHandleType }
+                ));
+            }
 
             // Get handle
             declaration.Elements.Add(new(
