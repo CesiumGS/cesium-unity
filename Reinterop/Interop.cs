@@ -254,6 +254,7 @@ namespace Reinterop
 
         public static string GetUniqueNameForType(CSharpType type)
         {
+            string name = type.Symbol.Name;
             string genericTypeHash = "";
             INamedTypeSymbol? named = type.Symbol as INamedTypeSymbol;
             if (named != null && named.IsGenericType)
@@ -261,7 +262,14 @@ namespace Reinterop
                 genericTypeHash = HashParameters(null, named.TypeArguments);
             }
 
-            return $"{type.GetFullyQualifiedNamespace().Replace(".", "_")}_{type.Symbol.Name}{genericTypeHash}";
+            IArrayTypeSymbol? arraySymbol = type.Symbol as IArrayTypeSymbol;
+            if (arraySymbol != null)
+            {
+                name = "Array1";
+                genericTypeHash = HashParameters(null, new[] { arraySymbol.ElementType });
+            }
+
+            return $"{type.GetFullyQualifiedNamespace().Replace(".", "_")}_{name}{genericTypeHash}";
         }
 
         public static void GenerateForType(CppGenerationContext context, TypeToGenerate item, GeneratedResult result)
