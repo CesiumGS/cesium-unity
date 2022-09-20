@@ -57,6 +57,8 @@ internal partial class ConfigureReinterop
         texture2D.LoadRawTextureData(IntPtr.Zero, 0);
         texture2D.Apply(true, true);
         texture2D.wrapMode = TextureWrapMode.Clamp;
+        texture2D.anisoLevel = 16;
+        texture2D.filterMode = FilterMode.Trilinear;
         Texture texture = texture2D;
 
         Mesh mesh = new Mesh();
