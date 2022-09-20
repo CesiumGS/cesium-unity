@@ -390,8 +390,7 @@ UnityPrepareRendererResources::prepareInLoadThread(
 
               // Don't let Unity unload this mesh during the time in between
               // when we create it and when we attach it to a GameObject.
-              unityMesh.hideFlags(
-                  UnityEngine::HideFlags::HideAndDontSave);
+              unityMesh.hideFlags(UnityEngine::HideFlags::HideAndDontSave);
 
               meshes.Item(i, unityMesh);
             }
@@ -405,10 +404,7 @@ UnityPrepareRendererResources::prepareInLoadThread(
                 UnityEngine::Rendering::MeshUpdateFlags::Default);
 
             // TODO: we should be able to do this in the worker thread, even if
-            // we have to do it manually. But if we do it in the main thread, we
-            // need to do it right here. For some very mysterious reason, if we
-            // call this method in prepareInMainThread, it sometimes throws a
-            // MissingReferenceException.
+            // we have to do it manually.
             for (int32_t i = 0, len = meshes.Length(); i < len; ++i) {
               meshes[i].RecalculateBounds();
             }
@@ -524,6 +520,8 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           const glm::dmat4& transform) {
         UnityEngine::Mesh unityMesh = meshes[meshIndex++];
         if (unityMesh == nullptr) {
+          // This indicates Unity destroyed the mesh already, which really
+          // shouldn't happen.
           return;
         }
 
