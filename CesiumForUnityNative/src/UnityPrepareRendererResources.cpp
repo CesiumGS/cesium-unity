@@ -391,7 +391,7 @@ UnityPrepareRendererResources::prepareInLoadThread(
               // Don't let Unity unload this mesh during the time in between
               // when we create it and when we attach it to a GameObject.
               unityMesh.hideFlags(
-                  UnityEngine::HideFlags::DontUnloadUnusedAsset);
+                  UnityEngine::HideFlags::HideAndDontSave);
 
               meshes.Item(i, unityMesh);
             }
