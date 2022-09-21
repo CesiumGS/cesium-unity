@@ -34,6 +34,7 @@
 #include <DotNet/UnityEngine/Resources.h>
 #include <DotNet/UnityEngine/Texture.h>
 #include <DotNet/UnityEngine/TextureWrapMode.h>
+#include <DotNet/UnityEngine/FilterMode.h>
 #include <DotNet/UnityEngine/Transform.h>
 #include <DotNet/UnityEngine/Vector2.h>
 #include <DotNet/UnityEngine/Vector3.h>
@@ -396,6 +397,8 @@ void* UnityPrepareRendererResources::prepareRasterInMainThread(
   auto pTexture = std::make_unique<UnityEngine::Texture>(
       TextureLoader::loadTexture(rasterTile.getImage()));
   pTexture->wrapMode(UnityEngine::TextureWrapMode::Clamp);
+  pTexture->filterMode(UnityEngine::FilterMode::Trilinear);
+  pTexture->anisoLevel(16);
   return pTexture.release();
 }
 
