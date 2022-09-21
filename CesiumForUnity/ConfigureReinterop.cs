@@ -55,6 +55,14 @@ internal partial class ConfigureReinterop
 
         Texture2D texture2D = new Texture2D(256, 256, TextureFormat.RGBA32, false, false);
         texture2D.LoadRawTextureData(IntPtr.Zero, 0);
+        NativeArray<byte> textureBytes = texture2D.GetRawTextureData<byte>();
+
+        unsafe
+        {
+            NativeArrayUnsafeUtility.GetUnsafeBufferPointerWithoutChecks(textureBytes);
+        }
+
+        int textureBytesLength = textureBytes.Length;
         texture2D.Apply(true, true);
         texture2D.wrapMode = TextureWrapMode.Clamp;
         texture2D.anisoLevel = 16;

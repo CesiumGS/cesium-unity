@@ -2,6 +2,8 @@
 
 #include <CesiumGltf/Model.h>
 
+#include <DotNet/Unity/Collections/LowLevel/Unsafe/NativeArrayUnsafeUtility.h>
+#include <DotNet/Unity/Collections/NativeArray1.h>
 #include <DotNet/UnityEngine/Texture.h>
 #include <DotNet/UnityEngine/Texture2D.h>
 #include <DotNet/UnityEngine/TextureFormat.h>
@@ -17,12 +19,18 @@ TextureLoader::loadTexture(const CesiumGltf::ImageCesium& image) {
       image.width,
       image.height,
       UnityEngine::TextureFormat::RGBA32,
-      false,
+      true,
       false);
 
-  result.LoadRawTextureData(
-      const_cast<void*>(static_cast<const void*>(image.pixelData.data())),
-      image.pixelData.size());
+  Unity::Collections::NativeArray1<std::uint8_t> textureData =
+      result.GetRawTextureData<std::uint8_t>();
+  std::uint8_t* pixels = static_cast<std::uint8_t*>(
+      Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
+          GetUnsafeBufferPointerWithoutChecks(textureData));
+
+  assert(textureData.Length() >= image.pixelData.size());
+
+  std::memcpy(pixels, image.pixelData.data(), image.pixelData.size());
 
   result.Apply(true, true);
 
