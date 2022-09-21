@@ -8,6 +8,11 @@ namespace Reinterop
         {
             foreach (IMethodSymbol method in currentItem.Methods)
             {
+                // Don't add static methods from base classes.
+                // Unless they're operators, because operators become instance methods in C++.
+                if (mainItem != currentItem && method.IsStatic && method.MethodKind != MethodKind.UserDefinedOperator)
+                    continue;
+
                 GenerateSingleMethod(context, mainItem, result, method);
             }
         }
