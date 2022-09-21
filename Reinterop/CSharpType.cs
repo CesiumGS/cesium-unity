@@ -95,5 +95,24 @@ namespace Reinterop
             else
                 return variableName;
         }
+
+        public static bool IsFirstDerivedFromSecond(ITypeSymbol first, ITypeSymbol second)
+        {
+            INamedTypeSymbol? namedSecond = second as INamedTypeSymbol;
+
+            ITypeSymbol? toCheckFirst = first;
+            while (toCheckFirst != null)
+            {
+                if (SymbolEqualityComparer.Default.Equals(second, toCheckFirst))
+                    return true;
+
+                if (namedSecond != null && toCheckFirst.AllInterfaces.Contains(namedSecond, SymbolEqualityComparer.Default))
+                    return true;
+
+                toCheckFirst = toCheckFirst.BaseType;
+            }
+
+            return false;
+        }
     }
 }

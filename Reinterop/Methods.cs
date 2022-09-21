@@ -160,6 +160,45 @@ namespace Reinterop
                         """,
                     TypeDefinitionsReferenced: parameters.Select(parameter => parameter.Type)
                 ));
+
+                // If this operator is on a base type and that base type is the right-hand side, also add a
+                // version that takes this type, and a version that takes nullptr. This is a nice convenience
+                // so that the user doesn't need to include the base class header file in order to compare
+                // instances of this type.
+                // Only do this for the first such operator, though, or we'll have multiply-defined symbols.
+                if (!SymbolEqualityComparer.Default.Equals(method.ContainingType, item.Type) &&
+                    SymbolEqualityComparer.Default.Equals(method.ContainingType, method.Parameters[1].Type) &&
+                    IsMostDerivedVersionOfOperator(item.Type, method))
+                {
+                    declaration.Elements.Add(new(
+                        Content: $"bool operator{op}(const {declaration.Type.Name}& rhs) const;"
+                    ));
+
+                    CppType baseType = CppType.FromCSharp(context, method.ContainingType);
+                    definition.Elements.Add(new(
+                        Content:
+                            $$"""
+                        bool {{definition.Type.Name}}{{typeTemplateSpecialization}}::operator{{op}}(const {{declaration.Type.Name}}& rhs) const {
+                          return {{method.Name}}(*this, {{baseType.GetFullyQualifiedName()}}(rhs));
+                        }
+                        """,
+                        TypeDefinitionsReferenced: new[] { rhs.Type }
+                    ));
+
+                    declaration.Elements.Add(new(
+                        Content: $"bool operator{op}(std::nullptr_t) const;"
+                    ));
+
+                    definition.Elements.Add(new(
+                        Content:
+                            $$"""
+                        bool {{definition.Type.Name}}{{typeTemplateSpecialization}}::operator{{op}}(std::nullptr_t) const {
+                          return {{method.Name}}(*this, {{baseType.GetFullyQualifiedName()}}(nullptr));
+                        }
+                        """,
+                        TypeDefinitionsReferenced: new[] { rhs.Type }
+                    ));
+                }
             }
 
             // Method definition
@@ -199,6 +238,18 @@ namespace Reinterop
                     }.Concat(parameters.Select(parameter => parameter.Type))
                 ));
             }
+        }
+
+        private static bool IsMostDerivedVersionOfOperator(ITypeSymbol type, IMethodSymbol method)
+        {
+            ISymbol? first = CSharpTypeUtility
+                .FindMembers(type, method.Name)
+                .Where(
+                    member => member is IMethodSymbol method &&
+                    method.Parameters.Length == 2 &&
+                    CSharpType.IsFirstDerivedFromSecond(type, method.Parameters[0].Type) &&
+                    CSharpType.IsFirstDerivedFromSecond(type, method.Parameters[1].Type)).FirstOrDefault();
+            return SymbolEqualityComparer.Default.Equals(first, method);
         }
     }
 }
