@@ -178,10 +178,10 @@ namespace Reinterop
                     definition.Elements.Add(new(
                         Content:
                             $$"""
-                        bool {{definition.Type.Name}}{{typeTemplateSpecialization}}::operator{{op}}(const {{declaration.Type.Name}}& rhs) const {
-                          return {{method.Name}}(*this, {{baseType.GetFullyQualifiedName()}}(rhs));
-                        }
-                        """,
+                            bool {{definition.Type.Name}}{{typeTemplateSpecialization}}::operator{{op}}(const {{declaration.Type.Name}}& rhs) const {
+                            return {{method.Name}}(*this, {{baseType.GetFullyQualifiedName()}}(rhs));
+                            }
+                            """,
                         TypeDefinitionsReferenced: new[] { rhs.Type }
                     ));
 
@@ -192,10 +192,10 @@ namespace Reinterop
                     definition.Elements.Add(new(
                         Content:
                             $$"""
-                        bool {{definition.Type.Name}}{{typeTemplateSpecialization}}::operator{{op}}(std::nullptr_t) const {
-                          return {{method.Name}}(*this, {{baseType.GetFullyQualifiedName()}}(nullptr));
-                        }
-                        """,
+                            bool {{definition.Type.Name}}{{typeTemplateSpecialization}}::operator{{op}}(std::nullptr_t) const {
+                            return {{method.Name}}(*this, {{baseType.GetFullyQualifiedName()}}(nullptr));
+                            }
+                            """,
                         TypeDefinitionsReferenced: new[] { rhs.Type }
                     ));
                 }
