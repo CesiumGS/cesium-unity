@@ -7,7 +7,6 @@
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/UnityEngine/Camera.h>
 #include <DotNet/UnityEngine/GameObject.h>
-#include <DotNet/UnityEngine/Object.h>
 #include <DotNet/UnityEngine/Transform.h>
 #include <DotNet/UnityEngine/Vector3.h>
 #include <glm/trigonometric.hpp>

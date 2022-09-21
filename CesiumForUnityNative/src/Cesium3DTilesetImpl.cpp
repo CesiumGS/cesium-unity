@@ -11,7 +11,6 @@
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
 #include <DotNet/System/Action.h>
 #include <DotNet/System/Array1.h>
-#include <DotNet/System/MulticastDelegate.h>
 #include <DotNet/System/Object.h>
 #include <DotNet/System/String.h>
 #include <DotNet/UnityEngine/Application.h>
