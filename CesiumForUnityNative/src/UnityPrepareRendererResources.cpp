@@ -22,6 +22,7 @@
 #include <DotNet/Unity/Collections/NativeArrayOptions.h>
 #include <DotNet/UnityEngine/Application.h>
 #include <DotNet/UnityEngine/Debug.h>
+#include <DotNet/UnityEngine/FilterMode.h>
 #include <DotNet/UnityEngine/HideFlags.h>
 #include <DotNet/UnityEngine/Material.h>
 #include <DotNet/UnityEngine/Matrix4x4.h>
@@ -42,7 +43,6 @@
 #include <DotNet/UnityEngine/Resources.h>
 #include <DotNet/UnityEngine/Texture.h>
 #include <DotNet/UnityEngine/TextureWrapMode.h>
-#include <DotNet/UnityEngine/FilterMode.h>
 #include <DotNet/UnityEngine/Transform.h>
 #include <DotNet/UnityEngine/Vector2.h>
 #include <DotNet/UnityEngine/Vector3.h>
@@ -62,7 +62,7 @@ namespace {
 
 template <typename TDest, typename TSource>
 void setTriangles(
-    Unity::Collections::NativeArray1<TDest>& dest,
+    const Unity::Collections::NativeArray1<TDest>& dest,
     const AccessorView<TSource>& source) {
   assert(dest.Length() == source.size());
 

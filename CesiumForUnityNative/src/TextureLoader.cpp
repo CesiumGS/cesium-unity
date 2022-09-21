@@ -8,6 +8,8 @@
 #include <DotNet/UnityEngine/Texture2D.h>
 #include <DotNet/UnityEngine/TextureFormat.h>
 
+#include <cstring>
+
 using namespace CesiumGltf;
 using namespace DotNet;
 
