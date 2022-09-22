@@ -17,8 +17,8 @@ To make sure things are set up correctly, open a command-prompt (PowerShell is a
 Clone the `cesium-unity-samples` (game) project and `cesium-unity` (plugin) project anywhere you like:
 
 ```
-git clone --recurse-submodules https://github.com/CesiumGS/cesium-unity-samples.git
-git clone --recurse-submodules https://github.com/CesiumGS/cesium-unity.git
+git clone --recurse-submodules git@github.com:CesiumGS/cesium-unity-samples.git
+git clone --recurse-submodules git@github.com:CesiumGS/cesium-unity.git
 ```
 
 Be sure to also clone the submodules. If you forgot the `--recurse-submodules` option when you cloned, run `git submodule update --init --recursive`.
