@@ -51,7 +51,7 @@ namespace Reinterop
                     """
             ));
 
-            CSharpType csType = CSharpType.FromSymbol(context.Compilation, arrayType);
+            CSharpType csType = CSharpType.FromSymbol(context, arrayType);
             string baseName = $"{Interop.GetUniqueNameForType(csType)}_Constructor_Size";
             init.Functions.Add(new(
                 CppName: $"{definition.Type.GetFullyQualifiedName()}::{createBySizeName}",
@@ -118,8 +118,8 @@ namespace Reinterop
                     """
             ));
 
-            CSharpType csType = CSharpType.FromSymbol(context.Compilation, arrayType);
-            CSharpType csElementType = CSharpType.FromSymbol(context.Compilation, arrayType.ElementType);
+            CSharpType csType = CSharpType.FromSymbol(context, arrayType);
+            CSharpType csElementType = CSharpType.FromSymbol(context, arrayType.ElementType);
             CSharpType csElementInteropType = csElementType.AsInteropType();
 
             string baseName = $"{Interop.GetUniqueNameForType(csType)}_SetItem";

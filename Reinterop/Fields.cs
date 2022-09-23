@@ -126,7 +126,7 @@ namespace Reinterop
             ));
 
             // Initialize the fields at startup
-            var (csName, csContent) = Interop.CreateCSharpDelegateInit(context.Compilation, item.Type, field, isGet: true);
+            var (csName, csContent) = Interop.CreateCSharpDelegateInit(context, item.Type, field, isGet: true);
             init.Functions.Add(new(
                 CppName: $"{definition.Type.GetFullyQualifiedName()}::Field_get_{field.Name}",
                 CppTypeSignature: $"{getInteropType.GetFullyQualifiedName()} (*)({interopGetParameters})",
@@ -136,7 +136,7 @@ namespace Reinterop
                 CSharpContent: csContent
             ));
 
-            (csName, csContent) = Interop.CreateCSharpDelegateInit(context.Compilation, item.Type, field, isGet: false);
+            (csName, csContent) = Interop.CreateCSharpDelegateInit(context, item.Type, field, isGet: false);
             init.Functions.Add(new(
                 CppName: $"{definition.Type.GetFullyQualifiedName()}::Field_set_{field.Name}",
                 CppTypeSignature: $"void (*)({interopSetParameters})",

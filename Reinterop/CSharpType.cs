@@ -4,22 +4,27 @@ namespace Reinterop
 {
     internal class CSharpType
     {
-        public readonly Compilation Compilation;
+        public readonly CppGenerationContext Context;
         public readonly InteropTypeKind Kind;
         public readonly IReadOnlyCollection<string> Namespaces;
         public readonly ITypeSymbol Symbol;
 
-        public CSharpType(Compilation compilation, InteropTypeKind kind, IReadOnlyCollection<string> namespaces, ITypeSymbol symbol)
+        public Compilation Compilation
         {
-            this.Compilation = compilation;
+            get { return Context.Compilation; }
+        }
+
+        public CSharpType(CppGenerationContext context, InteropTypeKind kind, IReadOnlyCollection<string> namespaces, ITypeSymbol symbol)
+        {
+            this.Context = context;
             this.Kind = kind;
             this.Namespaces = new List<string>(namespaces);
             this.Symbol = symbol;
         }
 
-        public static CSharpType FromSymbol(Compilation compilation, ITypeSymbol symbol)
+        public static CSharpType FromSymbol(CppGenerationContext context, ITypeSymbol symbol)
         {
-            InteropTypeKind kind = Interop.DetermineTypeKind(compilation, symbol);
+            InteropTypeKind kind = Interop.DetermineTypeKind(context, symbol);
 
             List<string> namespaces = new List<string>();
 
@@ -33,14 +38,14 @@ namespace Reinterop
 
             namespaces.Reverse();
 
-            return new CSharpType(compilation, kind, namespaces, symbol);
+            return new CSharpType(context, kind, namespaces, symbol);
         }
 
         public string GetFullyQualifiedNamespace()
         {
             IArrayTypeSymbol? arraySymbol = this.Symbol as IArrayTypeSymbol;
             if (arraySymbol != null)
-                return CSharpType.FromSymbol(this.Compilation, arraySymbol.ElementType).GetFullyQualifiedNamespace();
+                return CSharpType.FromSymbol(this.Context, arraySymbol.ElementType).GetFullyQualifiedNamespace();
             else
                 return Symbol.ContainingNamespace.ToDisplayString();
         }
@@ -55,9 +60,9 @@ namespace Reinterop
             // C++ doesn't specify the size of a bool, and C# uses different sizes in different contexts.
             // So we explicitly marshal bools as uint8_t / System.Byte.
             if (this.Symbol.SpecialType == SpecialType.System_Boolean)
-                return CSharpType.FromSymbol(Compilation, Compilation.GetSpecialType(SpecialType.System_Byte));
+                return CSharpType.FromSymbol(Context, Compilation.GetSpecialType(SpecialType.System_Byte));
             if (this.Kind == InteropTypeKind.ClassWrapper || this.Kind == InteropTypeKind.NonBlittableStructWrapper || this.Kind == InteropTypeKind.Delegate)
-                return new CSharpType(Compilation, InteropTypeKind.Primitive, new string[] { "System" }, Compilation.GetSpecialType(SpecialType.System_IntPtr));
+                return new CSharpType(Context, InteropTypeKind.Primitive, new string[] { "System" }, Compilation.GetSpecialType(SpecialType.System_IntPtr));
 
             return this;
         }

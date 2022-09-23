@@ -21,7 +21,7 @@ namespace Reinterop
             if (result.CppImplementationInvoker == null)
             {
                 result.CppImplementationInvoker = new GeneratedCppImplementationInvoker(implementationType);
-                result.CSharpPartialMethodDefinitions = new GeneratedCSharpPartialMethodDefinitions(CSharpType.FromSymbol(context.Compilation, item.Type));
+                result.CSharpPartialMethodDefinitions = new GeneratedCSharpPartialMethodDefinitions(CSharpType.FromSymbol(context, item.Type));
             }
 
             // Add a constructor taking a std::function
@@ -32,7 +32,7 @@ namespace Reinterop
             var callbackParameters = invokeMethod.Parameters.Select(p =>
             {
                 CppType type = CppType.FromCSharp(context, p.Type);
-                return (Name: p.Name, CsType: CSharpType.FromSymbol(context.Compilation, p.Type), Type: type, InteropType: type.AsInteropType());
+                return (Name: p.Name, CsType: CSharpType.FromSymbol(context, p.Type), Type: type, InteropType: type.AsInteropType());
             });
             CppType returnType = CppType.FromCSharp(context, invokeMethod.ReturnType).AsReturnType();
 
@@ -69,7 +69,7 @@ namespace Reinterop
 
             // A a C# delegate type that wraps a std::function, and arrange for
             // the invoke and dispose to be implemented in C++.
-            CSharpType csType = CSharpType.FromSymbol(context.Compilation, item.Type);
+            CSharpType csType = CSharpType.FromSymbol(context, item.Type);
 
             string genericTypeHash = "";
             INamedTypeSymbol? named = item.Type as INamedTypeSymbol;
@@ -85,7 +85,7 @@ namespace Reinterop
             var invokeParameters = callbackParameters.Select(p => $"{p.CsType.GetFullyQualifiedName()} {p.Name}");
             var invokeInteropParameters = new[] { "IntPtr callbackFunction" }.Concat(callbackParameters.Select(p => $"{p.CsType.AsInteropType().GetFullyQualifiedName()} {p.Name}"));
             var callInvokeInteropParameters = new[] { "_callbackFunction" }.Concat(callbackParameters.Select(p => p.CsType.GetConversionToInteropType(p.Name)));
-            var csReturnType = CSharpType.FromSymbol(context.Compilation, invokeMethod.ReturnType);
+            var csReturnType = CSharpType.FromSymbol(context, invokeMethod.ReturnType);
 
             string csResultImplementation = "";
             string csReturnImplementation = "return;";
@@ -157,7 +157,7 @@ namespace Reinterop
                     """
             ));
 
-            var interopParameters = new[] { (Name: "pCallbackFunction", CsType: CSharpType.FromSymbol(context.Compilation, context.Compilation.GetSpecialType(SpecialType.System_IntPtr)), Type: CppType.VoidPointer, InteropType: CppType.VoidPointer) }.Concat(callbackParameters);
+            var interopParameters = new[] { (Name: "pCallbackFunction", CsType: CSharpType.FromSymbol(context, context.Compilation.GetSpecialType(SpecialType.System_IntPtr)), Type: CppType.VoidPointer, InteropType: CppType.VoidPointer) }.Concat(callbackParameters);
             var callParameters = callbackParameters.Select(p => p.Type.GetConversionFromInteropType(context, p.Name));
 
             string resultImplementation = "";

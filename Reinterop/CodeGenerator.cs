@@ -60,7 +60,7 @@ namespace Reinterop
                 // TODO: parse out namespaces? Require user to specify them separately?
                 CppType implementationType = new CppType(InteropTypeKind.Unknown, Array.Empty<string>(), item.ImplementationClassName, null, 0, item.ImplementationHeaderName);
                 result.CppImplementationInvoker = new GeneratedCppImplementationInvoker(implementationType);
-                result.CSharpPartialMethodDefinitions = new GeneratedCSharpPartialMethodDefinitions(CSharpType.FromSymbol(this.Options.Compilation, item.Type));
+                result.CSharpPartialMethodDefinitions = new GeneratedCSharpPartialMethodDefinitions(CSharpType.FromSymbol(this.Options, item.Type));
 
                 MethodsImplementedInCpp.Generate(this.Options, item, result);
             }

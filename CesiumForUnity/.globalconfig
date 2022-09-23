@@ -11,3 +11,7 @@ base_namespace = DotNet
 
 # The name of the DLL or SO containing the C++ code.
 native_library_name = CesiumForUnityNative
+
+# Comma-separated types to treat as non-blittable, even if their fields would
+# otherwise cause Reinterop to treat them as blittable.
+non_blittable_types = Unity.Collections.LowLevel.Unsafe.AtomicSafetyHandle

@@ -13,8 +13,9 @@ namespace Reinterop
     {
         public readonly Dictionary<ITypeSymbol, TypeToGenerate> GenerationItems = new Dictionary<ITypeSymbol, TypeToGenerate>(SymbolEqualityComparer.Default);
 
-        public ExposeToCppSyntaxWalker(SemanticModel semanticModel)
+        public ExposeToCppSyntaxWalker(CppGenerationContext context, SemanticModel semanticModel)
         {
+            this._context = context;
             this._semanticModel = semanticModel;
         }
 
@@ -175,7 +176,7 @@ namespace Reinterop
                 }
 
                 // If this is a blittable struct, we need to generate all the field types, too.
-                if (type.TypeKind != TypeKind.Enum && Interop.IsBlittableStruct(this._semanticModel.Compilation, type))
+                if (type.TypeKind != TypeKind.Enum && Interop.IsBlittableStruct(this._context, type))
                 {
                     ImmutableArray<ISymbol> members = type.GetMembers();
                     foreach (ISymbol member in members)
@@ -287,6 +288,7 @@ namespace Reinterop
             return item;
         }
 
+        private CppGenerationContext _context;
         private SemanticModel _semanticModel;
     }
 }

@@ -17,12 +17,12 @@ namespace Reinterop
         /// <param name="interopFunctionName">The name to use for the function, which must be unique within its containing type.</param>
         /// <returns>The Name and Content to add to the C# GeneratedInit functions list.</returns>
         public static (string Name, string Content) CreateCSharpDelegateInit(
-            Compilation compilation,
+            CppGenerationContext context,
             ITypeSymbol ownerType,
             IMethodSymbol method,
             string interopFunctionName)
         {
-            CSharpType csType = CSharpType.FromSymbol(compilation, ownerType);
+            CSharpType csType = CSharpType.FromSymbol(context, ownerType);
             var parameters = method.Parameters;
             var returnType = method.ReturnType;
 
@@ -46,15 +46,25 @@ namespace Reinterop
                 accessName += $"<{string.Join(", ", method.TypeArguments.Select(t => t.ToDisplayString()))}>";
             }
 
-            var callParameterDetails = parameters.Select(parameter => (Name: parameter.Name, Type: CSharpType.FromSymbol(compilation, parameter.Type), InteropType: CSharpType.FromSymbol(compilation, parameter.Type).AsInteropType()));
+            var callParameterDetails = parameters.Select(parameter => (Name: parameter.Name, Type: CSharpType.FromSymbol(context, parameter.Type), InteropType: CSharpType.FromSymbol(context, parameter.Type).AsInteropType()));
             var interopParameterDetails = callParameterDetails;
 
             string invocationTarget;
+            string beforeInvocation = "";
+            string afterInvocation = "";
             if (method.Name == ".ctor")
             {
                 // New object construction
                 invocationTarget = $"new {csType.GetFullyQualifiedName()}";
                 returnType = ownerType;
+            }
+            else if (!method.IsStatic && csType.Kind == InteropTypeKind.NonBlittableStructWrapper)
+            {
+                // Structs must be unboxed, modified, and then reboxed.
+                interopParameterDetails = new[] { (Name: "thiz", Type: csType, InteropType: csType.AsInteropType()) }.Concat(interopParameterDetails);
+                beforeInvocation = $"var thizUnboxed = {csType.GetParameterConversionFromInteropType("thiz")};";
+                invocationTarget = $"thizUnboxed{accessName}";
+                afterInvocation = $"Reinterop.ObjectHandleUtility.ResetHandleObject(thiz, thizUnboxed);";
             }
             else if (!method.IsStatic)
             {
@@ -68,7 +78,7 @@ namespace Reinterop
                 invocationTarget = $"{csType.GetFullyQualifiedName()}{accessName}";
             }
 
-            CSharpType csReturnType = CSharpType.FromSymbol(compilation, returnType);
+            CSharpType csReturnType = CSharpType.FromSymbol(context, returnType);
             CSharpType csInteropReturnType = csReturnType.AsInteropType();
             string interopReturnTypeString = csInteropReturnType.GetFullyQualifiedName();
 
@@ -83,7 +93,9 @@ namespace Reinterop
                     // An element indexer (operator[])
                     implementation =
                         $$"""
+                        {{beforeInvocation}}
                         var result = {{invocationTarget}}[{{callParameterList}}];
+                        {{afterInvocation}}
                         return {{csReturnType.GetConversionToInteropType("result")}};
                         """;
                 }
@@ -92,7 +104,9 @@ namespace Reinterop
                     // A property getter.
                     implementation =
                         $$"""
+                        {{beforeInvocation}}
                         var result = {{invocationTarget}};
+                        {{afterInvocation}}
                         return {{csReturnType.GetConversionToInteropType("result")}};
                         """;
                 }
@@ -107,7 +121,7 @@ namespace Reinterop
                     var valueParameter = callParameterDetails.ElementAt(1);
                     implementation =
                         $$"""
-                        {{invocationTarget}}[{{indexParameter.Type.GetParameterConversionFromInteropType(indexParameter.Name)}}] = {{valueParameter.Type.GetParameterConversionFromInteropType(valueParameter.Name)}};
+                        {{beforeInvocation}}{{invocationTarget}}[{{indexParameter.Type.GetParameterConversionFromInteropType(indexParameter.Name)}}] = {{valueParameter.Type.GetParameterConversionFromInteropType(valueParameter.Name)}};{{afterInvocation}}
                         """;
                 }
                 else
@@ -115,7 +129,7 @@ namespace Reinterop
                     // A property setter.
                     implementation =
                         $$"""
-                        {{invocationTarget}} = {{callParameterList}};
+                        {{beforeInvocation}}{{invocationTarget}} = {{callParameterList}};{{afterInvocation}}
                         """;
                 }
             }
@@ -124,7 +138,7 @@ namespace Reinterop
                 // An event adder
                 implementation =
                     $$"""
-                    {{invocationTarget}} += {{callParameterList}};
+                    {{beforeInvocation}}{{invocationTarget}} += {{callParameterList}};{{afterInvocation}}
                     """;
             }
             else if (evt != null && SymbolEqualityComparer.Default.Equals(evt.RemoveMethod, method))
@@ -132,7 +146,7 @@ namespace Reinterop
                 // An event adder
                 implementation =
                     $$"""
-                    {{invocationTarget}} -= {{callParameterList}};
+                    {{beforeInvocation}}{{invocationTarget}} -= {{callParameterList}};{{afterInvocation}}
                     """;
             }
             else if (method.MethodKind == MethodKind.UserDefinedOperator && method.Parameters.Length == 2)
@@ -142,7 +156,9 @@ namespace Reinterop
                 var rhs = callParameterDetails.ElementAt(1);
                 implementation =
                     $$"""
+                    {{beforeInvocation}}
                     var result = ({{lhs.Type.GetParameterConversionFromInteropType(lhs.Name)}}) {{Interop.MethodNameToOperator(method.Name)}} ({{rhs.Type.GetParameterConversionFromInteropType(rhs.Name)}});
+                    {{afterInvocation}}
                     return {{csReturnType.GetConversionToInteropType("result")}};
                     """;
             }
@@ -151,7 +167,7 @@ namespace Reinterop
                 // Regular method returning void.
                 implementation =
                     $$"""
-                    {{invocationTarget}}({{callParameterList}});
+                    {{beforeInvocation}}{{invocationTarget}}({{callParameterList}});{{afterInvocation}}
                     """;
             }
             else
@@ -159,7 +175,9 @@ namespace Reinterop
                 // Either a constructor or a regular method with a return value.
                 implementation =
                     $$"""
+                    {{beforeInvocation}}
                     var result = {{invocationTarget}}({{callParameterList}});
+                    {{afterInvocation}}
                     return {{csReturnType.GetConversionToInteropType("result")}};
                     """;
             }
@@ -192,19 +210,19 @@ namespace Reinterop
         /// <param name="isGet">True if this delegate provides the ability to GET the field, or false if it provides the ability to SET it.</param>
         /// <returns>The Name and Content to add to the C# GeneratedInit functions list.</returns>
         public static (string Name, string Content) CreateCSharpDelegateInit(
-            Compilation compilation,
+            CppGenerationContext context,
             ITypeSymbol ownerType,
             IFieldSymbol field,
             bool isGet)
         {
-            CSharpType csType = CSharpType.FromSymbol(compilation, ownerType);
+            CSharpType csType = CSharpType.FromSymbol(context, ownerType);
 
             var parameters = isGet ? new (string Name, ITypeSymbol Type)[] { } : new[] { (Name: "value", Type: field.Type ) };
-            var returnType = isGet ? field.Type : compilation.GetSpecialType(SpecialType.System_Void);
+            var returnType = isGet ? field.Type : context.Compilation.GetSpecialType(SpecialType.System_Void);
 
             string accessName = field.Name;
 
-            var callParameterDetails = parameters.Select(parameter => (Name: parameter.Name, Type: CSharpType.FromSymbol(compilation, parameter.Type), InteropType: CSharpType.FromSymbol(compilation, parameter.Type).AsInteropType()));
+            var callParameterDetails = parameters.Select(parameter => (Name: parameter.Name, Type: CSharpType.FromSymbol(context, parameter.Type), InteropType: CSharpType.FromSymbol(context, parameter.Type).AsInteropType()));
             var interopParameterDetails = callParameterDetails;
 
             string invocationTarget;
@@ -220,7 +238,7 @@ namespace Reinterop
                 invocationTarget = $"{csType.GetFullyQualifiedName()}.{accessName}";
             }
 
-            CSharpType csReturnType = CSharpType.FromSymbol(compilation, returnType);
+            CSharpType csReturnType = CSharpType.FromSymbol(context, returnType);
             CSharpType csInteropReturnType = csReturnType.AsInteropType();
             string interopReturnTypeString = csInteropReturnType.GetFullyQualifiedName();
 
@@ -328,7 +346,7 @@ namespace Reinterop
             return hash.Replace("=", "").Replace("+", "_").Replace("/", "__");
         }
 
-        public static InteropTypeKind DetermineTypeKind(Compilation compilation, ITypeSymbol type)
+        public static InteropTypeKind DetermineTypeKind(CppGenerationContext context, ITypeSymbol type)
         {
             if (type.Kind == SymbolKind.TypeParameter)
                 return InteropTypeKind.GenericParameter;
@@ -351,13 +369,13 @@ namespace Reinterop
                     return InteropTypeKind.Primitive;
             }
 
-            if (SymbolEqualityComparer.Default.Equals(type.BaseType, compilation.GetSpecialType(SpecialType.System_Enum)))
+            if (SymbolEqualityComparer.Default.Equals(type.BaseType, context.Compilation.GetSpecialType(SpecialType.System_Enum)))
                 return InteropTypeKind.Enum;
             else if (type.TypeKind == TypeKind.Delegate)
                 return InteropTypeKind.Delegate;
             else if (type.IsReferenceType)
                 return InteropTypeKind.ClassWrapper;
-            else if (IsBlittableStruct(compilation, type))
+            else if (IsBlittableStruct(context, type))
                 return InteropTypeKind.BlittableStruct;
             else
                 return InteropTypeKind.NonBlittableStructWrapper;
@@ -370,10 +388,13 @@ namespace Reinterop
         /// <param name="compilation"></param>
         /// <param name="type"></param>
         /// <returns>True if the struct is blittable.</returns>
-        public static bool IsBlittableStruct(Compilation compilation, ITypeSymbol type, int depth = 0)
+        public static bool IsBlittableStruct(CppGenerationContext context, ITypeSymbol type, int depth = 0)
         {
             // Sanity test to avoid a stack overflow
             if (depth > 10)
+                return false;
+
+            if (context.NonBlittableTypes.Contains(type.ToDisplayString()))
                 return false;
 
             if (!type.IsValueType)
@@ -392,7 +413,7 @@ namespace Reinterop
                 if (field == null)
                     continue;
 
-                if (!IsBlittableStruct(compilation, field.Type, depth + 1))
+                if (!IsBlittableStruct(context, field.Type, depth + 1))
                     return false;
             }
 

@@ -115,7 +115,7 @@ namespace Reinterop
             ));
 
             // The static field should be initialized at startup.
-            var (csName, csContent) = Interop.CreateCSharpDelegateInit(context.Compilation, item.Type, method, interopName);
+            var (csName, csContent) = Interop.CreateCSharpDelegateInit(context, item.Type, method, interopName);
             init.Functions.Add(new(
                 CppName: $"{definition.Type.GetFullyQualifiedName()}::{interopName}",
                 CppTypeSignature: $"{interopReturnType.GetFullyQualifiedName()} (*)({string.Join(", ", interopParameters.Select(parameter => parameter.InteropType.GetFullyQualifiedName()))})",

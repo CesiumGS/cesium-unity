@@ -555,7 +555,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         glm::dmat4 fixedToUnity =
             pCoordinateSystem
                 ? pCoordinateSystem->getEcefToLocalTransformation()
-                : glm::dmat4();
+                : glm::dmat4(1.0);
 
         glm::dmat4 fullTransform = fixedToUnity * (tileTransform * transform);
 
