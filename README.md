@@ -17,8 +17,8 @@ To make sure things are set up correctly, open a command-prompt (PowerShell is a
 Clone the `cesium-unity-samples` (game) project and `cesium-unity` (plugin) project anywhere you like:
 
 ```
-git clone --recurse-submodules https://github.com/CesiumGS/cesium-unity-samples.git
-git clone --recurse-submodules https://github.com/CesiumGS/cesium-unity.git
+git clone --recurse-submodules git@github.com:CesiumGS/cesium-unity-samples.git
+git clone --recurse-submodules git@github.com:CesiumGS/cesium-unity.git
 ```
 
 Be sure to also clone the submodules. If you forgot the `--recurse-submodules` option when you cloned, run `git submodule update --init --recursive`.
@@ -87,7 +87,7 @@ Unity requires that the binaries for the non-Editor configuration _exist_, other
 
 ## Running the Examples
 
-You should now be able to open the cesium-unity-samples project in the Unity Editor and see Cesium datasets being streamed in.
+The easiest way to get started is to open the [**cesium-unity-samples**](https://github.com/CesiumGS/cesium-unity-samples) project in the Unity Editor and see Cesium datasets being streamed in. The project has been set up with levels that allow you to quickly get running with Cesium for Unity.
 
 ## Adding Cesium for Unity to a new project
 
