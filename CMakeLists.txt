@@ -20,10 +20,11 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Android")
 endif()
 
 # Install to the Assets directory.
-if (EDITOR)
-    set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_LIST_DIR}/Assets/Editor)
-else()
-    set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_LIST_DIR}/Assets/NonEditor)
-endif()
+# if (EDITOR)
+#     set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_LIST_DIR}/Assets/Editor)
+# else()
+#     set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_LIST_DIR}/Assets/NonEditor)
+# endif()
+set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_LIST_DIR}/Assets)
 
-add_subdirectory(CesiumForUnityNative)
+add_subdirectory(Assets/native~)

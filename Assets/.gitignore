@@ -6,4 +6,4 @@
 *.nupkg.meta
 *.deps.json
 *.deps.json.meta
-
+generated/

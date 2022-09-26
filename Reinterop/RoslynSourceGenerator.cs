@@ -18,6 +18,10 @@ namespace Reinterop
         {
             ReinteropSyntaxReceiver receiver = (ReinteropSyntaxReceiver)context.SyntaxReceiver!;
 
+            // Don't generate any support code if there's nothing real to generate.
+            if (receiver.ClassesImplementedInCpp.Count == 0 && receiver.ExposeToCppMethods.Count == 0)
+                return;
+
             CSharpReinteropAttribute.Generate(context);
             CSharpReinteropNativeImplementationAttribute.Generate(context);
             CSharpObjectHandleUtility.Generate(context);

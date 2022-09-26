@@ -4,19 +4,18 @@ using Reinterop;
 using UnityEditor;
 using UnityEngine;
 
-namespace CesiumForUnity;
-
-[Reinterop]
-internal partial class ConfigureReinteropEditor
-{
-    public void ExposeToCPP()
+namespace CesiumForUnity {
+    [Reinterop]
+    internal partial class ConfigureReinteropEditor
     {
-        SceneView sv = SceneView.lastActiveSceneView;
-        Camera svc = sv.camera;
+        public void ExposeToCPP()
+        {
+            SceneView sv = SceneView.lastActiveSceneView;
+            Camera svc = sv.camera;
 
-        bool isPlaying = EditorApplication.isPlaying;
-        EditorApplication.update += () => {};
+            bool isPlaying = EditorApplication.isPlaying;
+            EditorApplication.update += () => {};
+        }
     }
 }
-
 #endif // #if UNITY_EDITOR
