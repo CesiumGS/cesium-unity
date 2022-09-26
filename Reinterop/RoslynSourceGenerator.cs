@@ -3,7 +3,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
-using System.Text;
 
 namespace Reinterop
 {
@@ -49,8 +48,23 @@ namespace Reinterop
                 }
             }
 
+            Dictionary<string, string> properties = new Dictionary<string, string>();
+            foreach (var property in receiver.Properties)
+            {
+                string name = property.Key;
+                ExpressionSyntax expression = property.Value;
+
+                SemanticModel semanticModel = compilation.GetSemanticModel(expression.SyntaxTree);
+                Optional<object?> value = semanticModel.GetConstantValue(expression);
+                if (value.HasValue && value.Value is string s)
+                {
+                    properties.Add(name, s);
+                }
+            }
+
+            CodeGenerator codeGenerator = CreateCodeGenerator(context.AnalyzerConfigOptions, properties, compilation);
+
             List<IEnumerable<TypeToGenerate>> typesToGenerate = new List<IEnumerable<TypeToGenerate>>();
-            CodeGenerator codeGenerator = CreateCodeGenerator(context.AnalyzerConfigOptions, compilation);
 
             foreach (MethodDeclarationSyntax exposeMethod in receiver.ExposeToCppMethods)
             {
@@ -138,36 +152,51 @@ namespace Reinterop
             CodeGenerator.WriteCSharpCode(context, codeGenerator.Options, generatedResults);
         }
 
-        private CodeGenerator CreateCodeGenerator(AnalyzerConfigOptionsProvider options, Compilation compilation)
+        private CodeGenerator CreateCodeGenerator(AnalyzerConfigOptionsProvider options, IDictionary<string, string> properties, Compilation compilation)
         {
+            Dictionary<string, string> mergedProperties = new Dictionary<string, string>(properties);
+
             CppGenerationContext cppContext = new CppGenerationContext(compilation);
 
             string? projectDir;
             if (!options.GlobalOptions.TryGetValue("build_property.projectdir", out projectDir))
-                projectDir = "";
+            {
+                // Use the directory of the first syntax tree as the project directory.
+                SyntaxTree? tree = compilation.SyntaxTrees.FirstOrDefault();
+                if (tree != null)
+                    projectDir = Path.GetDirectoryName(tree.FilePath);
+                else
+                    projectDir = "";
+            }
 
             string? cppOutputPath;
-            if (!options.GlobalOptions.TryGetValue("cpp_output_path", out cppOutputPath))
-                cppOutputPath = "generated";
-
-            cppContext.OutputDirectory = Path.GetFullPath(Path.Combine(projectDir, cppOutputPath));
-
+            if (options.GlobalOptions.TryGetValue("cpp_output_path", out cppOutputPath))
+                mergedProperties["OutputDirectory"] = cppOutputPath;
+                
             string? baseNamespace;
-            if (!options.GlobalOptions.TryGetValue("base_namespace", out baseNamespace))
-                baseNamespace = "DotNet";
-
-            cppContext.BaseNamespace = baseNamespace;
+            if (options.GlobalOptions.TryGetValue("base_namespace", out baseNamespace))
+                mergedProperties["BaseNamespace"] = baseNamespace;
 
             string? nativeLibraryName;
-            if (!options.GlobalOptions.TryGetValue("native_library_name", out nativeLibraryName))
-                nativeLibraryName = "ReinteropNative";
-
-            cppContext.NativeLibraryName = nativeLibraryName;
+            if (options.GlobalOptions.TryGetValue("native_library_name", out nativeLibraryName))
+                mergedProperties["NativeLibraryName"] = nativeLibraryName;
 
             string? nonBlittableTypes;
-            if (!options.GlobalOptions.TryGetValue("non_blittable_types", out nonBlittableTypes))
+            if (options.GlobalOptions.TryGetValue("non_blittable_types", out nonBlittableTypes))
+                mergedProperties["NonBlittableTypes"] = nonBlittableTypes;
+
+            if (!mergedProperties.TryGetValue("CppOutputPath", out cppOutputPath))
+                cppOutputPath = "generated";
+            if (!mergedProperties.TryGetValue("BaseNamespace", out baseNamespace))
+                baseNamespace = "DotNet";
+            if (!mergedProperties.TryGetValue("NativeLibraryName", out nativeLibraryName))
+                nativeLibraryName = "ReinteropNative";
+            if (!mergedProperties.TryGetValue("NonBlittableTypes", out nonBlittableTypes))
                 nonBlittableTypes = "";
 
+            cppContext.OutputDirectory = Path.GetFullPath(Path.Combine(projectDir, cppOutputPath));
+            cppContext.BaseNamespace = baseNamespace;
+            cppContext.NativeLibraryName = nativeLibraryName;
             cppContext.NonBlittableTypes.UnionWith(nonBlittableTypes.Split(',').Select(t => t.Trim()));
 
             cppContext.CustomGenerators.Add(new CustomStringGenerator());
@@ -195,6 +224,7 @@ namespace Reinterop
         {
             public readonly List<MethodDeclarationSyntax> ExposeToCppMethods = new List<MethodDeclarationSyntax>();
             public readonly List<AttributeSyntax> ClassesImplementedInCpp = new List<AttributeSyntax>();
+            public readonly Dictionary<string, ExpressionSyntax> Properties = new Dictionary<string, ExpressionSyntax>();
 
             public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
             {
@@ -220,6 +250,19 @@ namespace Reinterop
                     // A C# class containing a method that identifies what types, methods, properties, etc. should be accessible from C++.
                     foreach (MemberDeclarationSyntax memberSyntax in classSyntax.Members)
                     {
+                        // Fields may be configuration properties, store them to be resolved later.
+                        FieldDeclarationSyntax? fieldSyntax = memberSyntax as FieldDeclarationSyntax;
+                        if (fieldSyntax != null)
+                        {
+                            foreach (var variable in fieldSyntax.Declaration.Variables)
+                            {
+                                ExpressionSyntax? expression = variable.Initializer?.Value;
+                                if (expression != null) {
+                                    Properties.Add(variable.Identifier.Text, expression);
+                                }
+                            }
+                        }
+
                         MethodDeclarationSyntax? methodSyntax = memberSyntax as MethodDeclarationSyntax;
                         if (methodSyntax == null)
                             continue;
