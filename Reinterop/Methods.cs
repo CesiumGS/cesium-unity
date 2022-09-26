@@ -8,6 +8,11 @@ namespace Reinterop
         {
             foreach (IMethodSymbol method in currentItem.Methods)
             {
+                // Don't add static methods from base classes.
+                // Unless they're operators, because operators become instance methods in C++.
+                if (mainItem != currentItem && method.IsStatic && method.MethodKind != MethodKind.UserDefinedOperator)
+                    continue;
+
                 GenerateSingleMethod(context, mainItem, result, method);
             }
         }
@@ -48,6 +53,16 @@ namespace Reinterop
             else
                 afterModifiers += " const";
 
+            bool isPrivate = false;
+
+            // For op_Equality, mark the method private and add a public operator== to access it.
+            bool addOperator = false;
+            if (method.MethodKind == MethodKind.UserDefinedOperator && (method.Name == "op_Equality" || method.Name == "op_Inequality"))
+            {
+                isPrivate = true;
+                addOperator = true;
+            }
+
             string templateSpecialization = "";
             string templatePrefix = "";
             if (method.IsGenericMethod)
@@ -68,7 +83,8 @@ namespace Reinterop
                             template <{{string.Join(", ", method.TypeParameters.Select(parameter => "typename " + parameter.Name))}}>
                             {{modifiers}}{{genericReturn.GetFullyQualifiedName()}} {{method.Name}}({{genericParametersString}}){{afterModifiers}};
                             """,
-                        TypeDeclarationsReferenced: new[] { genericReturn }.Concat(genericMethod.Parameters.Select(p => CppType.FromCSharp(context, p.Type)))
+                        TypeDeclarationsReferenced: new[] { genericReturn }.Concat(genericMethod.Parameters.Select(p => CppType.FromCSharp(context, p.Type))),
+                        IsPrivate: isPrivate
                         ));
                 }
 
@@ -99,7 +115,7 @@ namespace Reinterop
             ));
 
             // The static field should be initialized at startup.
-            var (csName, csContent) = Interop.CreateCSharpDelegateInit(context.Compilation, item.Type, method, interopName);
+            var (csName, csContent) = Interop.CreateCSharpDelegateInit(context, item.Type, method, interopName);
             init.Functions.Add(new(
                 CppName: $"{definition.Type.GetFullyQualifiedName()}::{interopName}",
                 CppTypeSignature: $"{interopReturnType.GetFullyQualifiedName()} (*)({string.Join(", ", interopParameters.Select(parameter => parameter.InteropType.GetFullyQualifiedName()))})",
@@ -117,7 +133,8 @@ namespace Reinterop
             {
                 declaration.Elements.Add(new(
                     Content: $"{templatePrefix}{modifiers}{returnType.GetFullyQualifiedName()} {method.Name}{templateSpecialization}({string.Join(", ", parameterStrings)}){afterModifiers};",
-                    TypeDeclarationsReferenced: new[] { returnType }.Concat(parameters.Select(parameter => parameter.Type))
+                    TypeDeclarationsReferenced: new[] { returnType }.Concat(parameters.Select(parameter => parameter.Type)),
+                    IsPrivate: isPrivate
                 ));
             }
 
@@ -125,6 +142,63 @@ namespace Reinterop
             if (definition.Type.GenericArguments != null && definition.Type.GenericArguments.Count > 0)
             {
                 typeTemplateSpecialization = "<" + string.Join(", ", definition.Type.GenericArguments.Select(t => t.GetFullyQualifiedName())) + ">";
+            }
+
+            if (addOperator)
+            {
+                string op = Interop.MethodNameToOperator(method.Name);
+                var rhs = parameters.ElementAt(1);
+                declaration.Elements.Add(new(
+                    Content: $"bool operator{op}({rhs.Type.GetFullyQualifiedName()} rhs) const;"
+                ));
+                definition.Elements.Add(new(
+                    Content:
+                        $$"""
+                        bool {{definition.Type.Name}}{{typeTemplateSpecialization}}::operator{{op}}({{rhs.Type.GetFullyQualifiedName()}} rhs) const {
+                          return {{method.Name}}(*this, rhs);
+                        }
+                        """,
+                    TypeDefinitionsReferenced: parameters.Select(parameter => parameter.Type)
+                ));
+
+                // If this operator is on a base type and that base type is the right-hand side, also add a
+                // version that takes this type, and a version that takes nullptr. This is a nice convenience
+                // so that the user doesn't need to include the base class header file in order to compare
+                // instances of this type.
+                // Only do this for the first such operator, though, or we'll have multiply-defined symbols.
+                if (!SymbolEqualityComparer.Default.Equals(method.ContainingType, item.Type) &&
+                    SymbolEqualityComparer.Default.Equals(method.ContainingType, method.Parameters[1].Type) &&
+                    IsMostDerivedVersionOfOperator(item.Type, method))
+                {
+                    declaration.Elements.Add(new(
+                        Content: $"bool operator{op}(const {declaration.Type.Name}& rhs) const;"
+                    ));
+
+                    CppType baseType = CppType.FromCSharp(context, method.ContainingType);
+                    definition.Elements.Add(new(
+                        Content:
+                            $$"""
+                            bool {{definition.Type.Name}}{{typeTemplateSpecialization}}::operator{{op}}(const {{declaration.Type.Name}}& rhs) const {
+                            return {{method.Name}}(*this, {{baseType.GetFullyQualifiedName()}}(rhs));
+                            }
+                            """,
+                        TypeDefinitionsReferenced: new[] { rhs.Type }
+                    ));
+
+                    declaration.Elements.Add(new(
+                        Content: $"bool operator{op}(std::nullptr_t) const;"
+                    ));
+
+                    definition.Elements.Add(new(
+                        Content:
+                            $$"""
+                            bool {{definition.Type.Name}}{{typeTemplateSpecialization}}::operator{{op}}(std::nullptr_t) const {
+                            return {{method.Name}}(*this, {{baseType.GetFullyQualifiedName()}}(nullptr));
+                            }
+                            """,
+                        TypeDefinitionsReferenced: new[] { rhs.Type }
+                    ));
+                }
             }
 
             // Method definition
@@ -164,6 +238,18 @@ namespace Reinterop
                     }.Concat(parameters.Select(parameter => parameter.Type))
                 ));
             }
+        }
+
+        private static bool IsMostDerivedVersionOfOperator(ITypeSymbol type, IMethodSymbol method)
+        {
+            ISymbol? first = CSharpTypeUtility
+                .FindMembers(type, method.Name)
+                .Where(
+                    member => member is IMethodSymbol method &&
+                    method.Parameters.Length == 2 &&
+                    CSharpType.IsFirstDerivedFromSecond(type, method.Parameters[0].Type) &&
+                    CSharpType.IsFirstDerivedFromSecond(type, method.Parameters[1].Type)).FirstOrDefault();
+            return SymbolEqualityComparer.Default.Equals(first, method);
         }
     }
 }

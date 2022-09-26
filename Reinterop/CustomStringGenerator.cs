@@ -6,7 +6,8 @@ namespace Reinterop
     {
         public GeneratedResult? Generate(CppGenerationContext context, TypeToGenerate type, GeneratedResult? generated)
         {
-            if (generated == null)
+            // This generator only operates on strings.
+            if (generated == null || type.Type.SpecialType != SpecialType.System_String)
                 return generated;
 
             // Add a constructor taking std::string.

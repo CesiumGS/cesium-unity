@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using System.Xml.Linq;
 
 namespace Reinterop
 {
@@ -55,11 +56,7 @@ namespace Reinterop
 
             string interopFunctionName = $"Construct_{Interop.HashParameters(constructor.Parameters)}";
 
-            string templateSpecialization = "";
-            if (declaration.Type.GenericArguments != null && declaration.Type.GenericArguments.Count > 0)
-            {
-                templateSpecialization = $"<{string.Join(", ", declaration.Type.GenericArguments.Select(arg => arg.GetFullyQualifiedName()))}>";
-            }
+            string templateSpecialization = Interop.GetTemplateSpecialization(declaration.Type);
 
             // A private, static field of function pointer type that will call
             // into a managed delegate for this constructor.
@@ -76,7 +73,7 @@ namespace Reinterop
             ));
 
             // The static field should be initialized at startup.
-            var (csName, csContent) = Interop.CreateCSharpDelegateInit(context.Compilation, item.Type, constructor, interopFunctionName);
+            var (csName, csContent) = Interop.CreateCSharpDelegateInit(context, item.Type, constructor, interopFunctionName);
             init.Functions.Add(new(
                 CppName: $"{definition.Type.GetFullyQualifiedName()}::{interopFunctionName}",
                 CppTypeSignature: $"{interopReturnType.GetFullyQualifiedName()} (*)({string.Join(", ", interopParameters.Select(parameter => parameter.InteropType.GetFullyQualifiedName()))})",

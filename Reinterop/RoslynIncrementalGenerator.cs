@@ -16,10 +16,13 @@ public class RoslynIncrementalGenerator : IIncrementalGenerator
 
         // For each method in the Reinterop class, look at the types, methods, and properties it uses and create from
         // that a list of items to be generated (GenerationItems).
-        IncrementalValuesProvider<IEnumerable<TypeToGenerate>> perMethodGenerationItems =
+        IncrementalValuesProvider<(SemanticModel SemanticModel, SyntaxNode Node)> selectedNodes =
             context.SyntaxProvider.CreateSyntaxProvider(
                 predicate: IsReinteropType,
-                transform: GetReinteropClass);
+                transform: (GeneratorSyntaxContext ctx, CancellationToken token) => (SemanticModel: ctx.SemanticModel, Node: ctx.Node));
+
+        var cppGenerator = context.CompilationProvider.Combine(context.AnalyzerConfigOptionsProvider).Select((pair, _) => CreateCppGenerator(pair.Left, pair.Right));
+        IncrementalValuesProvider<IEnumerable<TypeToGenerate>> perMethodGenerationItems = selectedNodes.Combine(cppGenerator).Select((pair, _) => GetReinteropClass(pair.Right.Options, pair.Left.SemanticModel, pair.Left.Node));
 
         // Consolidate the GenerationItems from the different methods into a single dictionary.
         IncrementalValueProvider<Dictionary<ITypeSymbol, TypeToGenerate>> generationItems =
@@ -30,7 +33,6 @@ public class RoslynIncrementalGenerator : IIncrementalGenerator
         // Process the generation items, for example, linking them together.
         IncrementalValuesProvider<TypeToGenerate> processedGenerationItems = generationItems.SelectMany(Process);
 
-        var cppGenerator = context.CompilationProvider.Combine(context.AnalyzerConfigOptionsProvider).Select((pair, _) => CreateCppGenerator(pair.Left, pair.Right));
         //var cppGenerator = context.CompilationProvider.Select(CreateCppGenerator);
         var withCppGenerator = processedGenerationItems.Combine(cppGenerator);
 
@@ -148,12 +150,11 @@ public class RoslynIncrementalGenerator : IIncrementalGenerator
         return null;
     }
 
-    private static IEnumerable<TypeToGenerate> GetReinteropClass(GeneratorSyntaxContext ctx, CancellationToken token)
+    private static IEnumerable<TypeToGenerate> GetReinteropClass(CppGenerationContext context, SemanticModel semanticModel, SyntaxNode node)
     {
-        SemanticModel semanticModel = ctx.SemanticModel;
-        ExposeToCppSyntaxWalker walker = new ExposeToCppSyntaxWalker(semanticModel);
+        ExposeToCppSyntaxWalker walker = new ExposeToCppSyntaxWalker(context, semanticModel);
 
-        var attributeSyntax = ctx.Node as AttributeSyntax;
+        var attributeSyntax = node as AttributeSyntax;
         if (attributeSyntax == null)
             return Array.Empty<TypeToGenerate>();
 
@@ -274,7 +275,15 @@ public class RoslynIncrementalGenerator : IIncrementalGenerator
 
         cppContext.NativeLibraryName = nativeLibraryName;
 
-        cppContext.CustomGenerators.Add(compilation.GetSpecialType(SpecialType.System_String), new CustomStringGenerator());
+        string? nonBlittableTypes;
+        if (!options.GlobalOptions.TryGetValue("non_blittable_types", out nonBlittableTypes))
+            nonBlittableTypes = "";
+
+        cppContext.NonBlittableTypes.UnionWith(nonBlittableTypes.Split(',').Select(t => t.Trim()));
+
+        cppContext.CustomGenerators.Add(new CustomStringGenerator());
+        cppContext.CustomGenerators.Add(new CustomDelegateGenerator());
+        cppContext.CustomGenerators.Add(new CustomArrayGenerator());
 
         return new CodeGenerator(cppContext);
     }

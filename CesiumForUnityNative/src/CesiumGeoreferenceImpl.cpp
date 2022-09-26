@@ -44,6 +44,7 @@ void CesiumGeoreferenceImpl::OnValidate(
   georeference.UpdateOrigin();
 }
 
-void CesiumGeoreferenceImpl::Awake(const DotNet::CesiumForUnity::CesiumGeoreference& georeference) {
+void CesiumGeoreferenceImpl::Awake(
+    const DotNet::CesiumForUnity::CesiumGeoreference& georeference) {
   georeference.UpdateOrigin();
 }

@@ -36,6 +36,11 @@ namespace Reinterop
         /// </summary>
         public string NativeLibraryName = "ReinteropNative";
 
-        public Dictionary<ITypeSymbol, ICustomGenerator> CustomGenerators = new Dictionary<ITypeSymbol, ICustomGenerator>(SymbolEqualityComparer.Default);
+        /// <summary>
+        /// Types that should not be treated as blittable, even if they appear to be.
+        /// </summary>
+        public HashSet<string> NonBlittableTypes = new HashSet<string>();
+
+        public List<ICustomGenerator> CustomGenerators = new List<ICustomGenerator>();
     }
 }

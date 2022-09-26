@@ -9,7 +9,6 @@
 #include <DotNet/UnityEngine/GameObject.h>
 #include <DotNet/UnityEngine/Transform.h>
 #include <DotNet/UnityEngine/Vector3.h>
-
 #include <glm/trigonometric.hpp>
 
 #if UNITY_EDITOR
@@ -68,7 +67,8 @@ ViewState unityCameraToViewState(
   }
 
   double verticalFOV = Math::degreesToRadians(camera.fieldOfView());
-  double horizontalFOV = 2 * glm::atan(camera.aspect() * glm::tan(verticalFOV * 0.5));
+  double horizontalFOV =
+      2 * glm::atan(camera.aspect() * glm::tan(verticalFOV * 0.5));
 
   return ViewState::create(
       cameraPosition,

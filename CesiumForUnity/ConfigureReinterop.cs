@@ -8,6 +8,7 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.Rendering;
 
 namespace CesiumForUnity;
 
@@ -54,6 +55,14 @@ internal partial class ConfigureReinterop
 
         Texture2D texture2D = new Texture2D(256, 256, TextureFormat.RGBA32, false, false);
         texture2D.LoadRawTextureData(IntPtr.Zero, 0);
+        NativeArray<byte> textureBytes = texture2D.GetRawTextureData<byte>();
+
+        unsafe
+        {
+            NativeArrayUnsafeUtility.GetUnsafeBufferPointerWithoutChecks(textureBytes);
+        }
+
+        int textureBytesLength = textureBytes.Length;
         texture2D.Apply(true, true);
         texture2D.wrapMode = TextureWrapMode.Clamp;
         texture2D.anisoLevel = 16;
@@ -61,10 +70,15 @@ internal partial class ConfigureReinterop
         Texture texture = texture2D;
 
         Mesh mesh = new Mesh();
+        Mesh[] meshes = new[] { mesh };
+        mesh = meshes[0];
+        int meshesLength = meshes.Length;
         mesh.SetVertices(new NativeArray<Vector3>());
         mesh.SetNormals(new NativeArray<Vector3>());
         mesh.SetUVs(0, new NativeArray<Vector2>());
         mesh.SetIndices(new NativeArray<int>(), MeshTopology.Triangles, 0, true, 0);
+        mesh.RecalculateBounds();
+        int instanceID = mesh.GetInstanceID();
 
         MeshCollider meshCollider = go.AddComponent<MeshCollider>();
         meshCollider.sharedMesh = mesh;
@@ -83,6 +97,7 @@ internal partial class ConfigureReinterop
 
         MeshFilter meshFilter = new MeshFilter();
         meshFilter.mesh = mesh;
+        meshFilter.sharedMesh = mesh;
 
         Resources.Load<Material>("name");
 
@@ -195,8 +210,44 @@ internal partial class ConfigureReinterop
         for (int i = 0; i < gos.Length; ++i)
         {
             GameObject goFromArray = gos[i];
+            gos[i] = goFromArray;
         }
 
         CesiumGeoreference[] georeferences = UnityEngine.Object.FindObjectsOfType<CesiumGeoreference>();
+
+        Mesh.MeshDataArray meshDataArray = Mesh.AllocateWritableMeshData(1);
+        Mesh.MeshData meshData = meshDataArray[meshDataArray.Length - 1];
+
+        VertexAttributeDescriptor[] descriptorsArray = new VertexAttributeDescriptor[1];
+        VertexAttributeDescriptor descriptor0 = descriptorsArray[0];
+
+        meshData.SetVertexBufferParams(1, descriptorsArray);
+        meshData.SetIndexBufferParams(1, IndexFormat.UInt16);
+        meshData.subMeshCount = 1;
+        meshData.SetSubMesh(0, new SubMeshDescriptor(0, 1, MeshTopology.Triangles));
+
+        NativeArray<Vector3> positionNormal = meshData.GetVertexData<Vector3>(0);
+        NativeArray<Vector2> texCoord = meshData.GetVertexData<Vector2>(0);
+        NativeArray<ushort> indices = meshData.GetIndexData<ushort>();
+        NativeArray<uint> indices32 = meshData.GetIndexData<uint>();
+
+        int positionNormalLength = positionNormal.Length;
+        int texCoordLength = texCoord.Length;
+        int indicesLength = indices.Length;
+        int indices32Length = indices32.Length;
+
+        unsafe
+        {
+            NativeArrayUnsafeUtility.GetUnsafeBufferPointerWithoutChecks(positionNormal);
+            NativeArrayUnsafeUtility.GetUnsafeBufferPointerWithoutChecks(texCoord);
+            NativeArrayUnsafeUtility.GetUnsafeBufferPointerWithoutChecks(indices);
+            NativeArrayUnsafeUtility.GetUnsafeBufferPointerWithoutChecks(indices32);
+        }
+
+        meshDataArray.Dispose();
+
+        Mesh.ApplyAndDisposeWritableMeshData(meshDataArray, meshes, MeshUpdateFlags.Default);
+
+        Physics.BakeMesh(mesh.GetInstanceID(), false);
     }
 }

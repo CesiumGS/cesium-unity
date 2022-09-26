@@ -59,7 +59,7 @@ namespace Reinterop
                 return new CppType(InteropTypeKind.ClassWrapper, Interop.BuildNamespace(context.BaseNamespace, "System"), "Array1", new[] { original }, 0);
             }
 
-            InteropTypeKind kind = Interop.DetermineTypeKind(context.Compilation, type);
+            InteropTypeKind kind = Interop.DetermineTypeKind(context, type);
             if (kind == InteropTypeKind.GenericParameter)
                 return new CppType(InteropTypeKind.GenericParameter, NoNamespace, type.Name, null, 0);
 

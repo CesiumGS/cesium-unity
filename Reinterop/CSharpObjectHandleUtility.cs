@@ -68,6 +68,14 @@ namespace Reinterop
                         return result;
                     }
 
+                    public static void ResetHandleObject(IntPtr handle, object newValue)
+                    {
+                        if (handle == IntPtr.Zero)
+                            throw new ArgumentException("handle must not be IntPtr.Zero");
+                        GCHandle gcHandle = GCHandle.FromIntPtr(handle);
+                        gcHandle.Target = newValue;
+                    }
+
                     public static void ExposeToCPP()
                     {
                         IntPtr p = CreateHandle(new object());

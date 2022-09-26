@@ -127,7 +127,14 @@
                         [DllImport("{{cppContext.NativeLibraryName}}", CallingConvention=CallingConvention.Cdecl)]
                         private static extern void initializeReinterop(IntPtr functionPointers, int count);
 
+                        // Roslyn raises CS0252 spuriously for MulticastDelegate operator==, so disable the warning
+                        // See https://github.com/dotnet/roslyn/issues/17212
+                        //     https://github.com/dotnet/roslyn/issues/58996
+                        #pragma warning disable 0252
+
                         {{GetContent().JoinAndIndent("        ")}}
+
+                        #pragma warning restore 0252
                     }
                 }
                 """;

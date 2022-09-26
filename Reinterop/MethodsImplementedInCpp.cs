@@ -187,7 +187,7 @@ namespace Reinterop
                     """
             ));
 
-            CSharpType csWrapperType = CSharpType.FromSymbol(context.Compilation, item.Type);
+            CSharpType csWrapperType = CSharpType.FromSymbol(context, item.Type);
 
             string genericTypeHash = "";
             INamedTypeSymbol? named = csWrapperType.Symbol as INamedTypeSymbol;
@@ -286,11 +286,11 @@ namespace Reinterop
                  .Concat(parameters.Select(parameter => parameter.InteropType))
             ));
 
-            CSharpType csWrapperType = CSharpType.FromSymbol(context.Compilation, item.Type);
-            CSharpType csReturnType = CSharpType.FromSymbol(context.Compilation, method.ReturnType);
-            var csParameters = method.Parameters.Select(parameter => (Name: parameter.Name, CallName: parameter.Name, Type: CSharpType.FromSymbol(context.Compilation, parameter.Type)));
+            CSharpType csWrapperType = CSharpType.FromSymbol(context, item.Type);
+            CSharpType csReturnType = CSharpType.FromSymbol(context, method.ReturnType);
+            var csParameters = method.Parameters.Select(parameter => (Name: parameter.Name, CallName: parameter.Name, Type: CSharpType.FromSymbol(context, parameter.Type)));
             var csParametersInterop = csParameters;
-            var implementationPointer = CSharpType.FromSymbol(context.Compilation, context.Compilation.GetSpecialType(SpecialType.System_IntPtr));
+            var implementationPointer = CSharpType.FromSymbol(context, context.Compilation.GetSpecialType(SpecialType.System_IntPtr));
 
             if (!method.IsStatic)
             {

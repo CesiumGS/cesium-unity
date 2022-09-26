@@ -13,8 +13,9 @@ namespace Reinterop
     {
         public readonly Dictionary<ITypeSymbol, TypeToGenerate> GenerationItems = new Dictionary<ITypeSymbol, TypeToGenerate>(SymbolEqualityComparer.Default);
 
-        public ExposeToCppSyntaxWalker(SemanticModel semanticModel)
+        public ExposeToCppSyntaxWalker(CppGenerationContext context, SemanticModel semanticModel)
         {
+            this._context = context;
             this._semanticModel = semanticModel;
         }
 
@@ -159,8 +160,23 @@ namespace Reinterop
                         this.AddMethod(invokeMethod);
                 }
 
+                // If this type has overloaded operator==, generate wrappers for it, because we need it
+                // to even compare to null.
+                IEnumerable<ISymbol> equalityOperators = CSharpTypeUtility.FindMembers(type, "op_Equality");
+                foreach (ISymbol equalityOperator in equalityOperators)
+                {
+                    if (equalityOperator is IMethodSymbol method)
+                        AddMethod(method);
+                }
+                IEnumerable<ISymbol> inequalityOperators = CSharpTypeUtility.FindMembers(type, "op_Inequality");
+                foreach (ISymbol inequalityOperator in inequalityOperators)
+                {
+                    if (inequalityOperator is IMethodSymbol method)
+                        AddMethod(method);
+                }
+
                 // If this is a blittable struct, we need to generate all the field types, too.
-                if (type.TypeKind != TypeKind.Enum && Interop.IsBlittableStruct(this._semanticModel.Compilation, type))
+                if (type.TypeKind != TypeKind.Enum && Interop.IsBlittableStruct(this._context, type))
                 {
                     ImmutableArray<ISymbol> members = type.GetMembers();
                     foreach (ISymbol member in members)
@@ -272,6 +288,7 @@ namespace Reinterop
             return item;
         }
 
+        private CppGenerationContext _context;
         private SemanticModel _semanticModel;
     }
 }
