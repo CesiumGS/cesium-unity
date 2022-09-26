@@ -10,6 +10,9 @@
 #include <CesiumGltf/AccessorView.h>
 #include <CesiumUtility/ScopeGuard.h>
 
+#include <CesiumGltf/ExtensionMeshPrimitiveExtFeatureMetadata.h>
+#include <DotNet/CesiumForUnity/CesiumMetadata.h>
+
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/System/Array1.h>
@@ -631,6 +634,14 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           UnityEngine::MeshCollider meshCollider =
               primitiveGameObject.AddComponent<UnityEngine::MeshCollider>();
           meshCollider.sharedMesh(unityMesh);
+        }
+
+        const ExtensionMeshPrimitiveExtFeatureMetadata* pMetadata = primitive.getExtension<ExtensionMeshPrimitiveExtFeatureMetadata>();
+        if(pMetadata){
+          DotNet::CesiumForUnity::CesiumMetadata parentMetadata = primitiveGameObject.GetComponentInParent<DotNet::CesiumForUnity::CesiumMetadata>();
+          if(parentMetadata == nullptr){
+            pModelGameObject->AddComponent<DotNet::CesiumForUnity::CesiumMetadata>();
+          }
         }
       });
 

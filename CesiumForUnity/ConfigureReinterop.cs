@@ -194,6 +194,9 @@ internal partial class ConfigureReinterop
         MonoBehaviour mb = tileset;
         mb.StartCoroutine(new NativeCoroutine(endIteration => endIteration).GetEnumerator());
 
+        CesiumMetadata metadata = go.AddComponent<CesiumMetadata>();
+        CesiumMetadata metadataParent = go.GetComponentInParent<CesiumMetadata>();
+
         CesiumGeoreference georeference = go.AddComponent<CesiumGeoreference>();
         georeference = go.GetComponent<CesiumGeoreference>();
         georeference.longitude = georeference.longitude;
