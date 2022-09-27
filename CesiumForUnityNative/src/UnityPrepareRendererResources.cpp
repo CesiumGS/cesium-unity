@@ -640,8 +640,9 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         if(pMetadata){
           DotNet::CesiumForUnity::CesiumMetadata parentMetadata = primitiveGameObject.GetComponentInParent<DotNet::CesiumForUnity::CesiumMetadata>();
           if(parentMetadata == nullptr){
-            pModelGameObject->AddComponent<DotNet::CesiumForUnity::CesiumMetadata>();
+            parentMetadata = pModelGameObject->AddComponent<DotNet::CesiumForUnity::CesiumMetadata>();
           }
+          parentMetadata.NativeImplementation().loadMetadataPrimitive(gltf, primitive, *pMetadata);
         }
       });
 
