@@ -74,6 +74,19 @@ See https://github.com/JoanComasFdz/dotnet-how-to-debug-source-generator-vs2022
 
 If you change the generator, be sure to compile it and then restart Visual Studio. Otherwise, every time you change your project, Visual Studio Intellisense will invoke the old, cached version of Reinterop and probably clobber the changes you were hoping to see.
 
+# Debugging in Unity
+
+The above won't work if Roslyn needs to be run by Unity. Instead, add this code to the `Initialize` method of `RoslynSourceGenerator.cs`:
+
+```
+if (!Debugger.IsAttached)
+{
+    Debugger.Launch();
+}
+```
+
+Then, when Unity runs Roslyn and Roslyn runs Reinterop, Visual Studio will pop up offering to attach to the process. Let it do so, and you should be able to step and set breakpoints in the code generator.
+
 # Temporarily disabling the code generator
 
 It is sometimes useful to temporarily disable the code generator so that you can modify the generated code to try things out. This is easy to do. First, open your project's .csproj and comment-out the section that adds the Reinterop project as an Analyzer:

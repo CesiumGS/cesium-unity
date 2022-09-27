@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
+using System.Diagnostics;
 
 namespace Reinterop
 {
@@ -11,6 +12,11 @@ namespace Reinterop
     {
         public void Initialize(GeneratorInitializationContext context)
         {
+            //if (!Debugger.IsAttached)
+            //{
+            //   Debugger.Launch();
+            //}
+
             context.RegisterForSyntaxNotifications(() => new ReinteropSyntaxReceiver());
         }
 
@@ -66,7 +72,7 @@ namespace Reinterop
                 }
             }
 
-            CodeGenerator codeGenerator = CreateCodeGenerator(context.AnalyzerConfigOptions, properties, compilation);
+            CodeGenerator codeGenerator = CreateCodeGenerator(context.AnalyzerConfigOptions, receiver.PropertiesPath, properties, compilation);
 
             List<IEnumerable<TypeToGenerate>> typesToGenerate = new List<IEnumerable<TypeToGenerate>>();
 
@@ -156,26 +162,27 @@ namespace Reinterop
             CodeGenerator.WriteCSharpCode(context, codeGenerator.Options, generatedResults);
         }
 
-        private CodeGenerator CreateCodeGenerator(AnalyzerConfigOptionsProvider options, IDictionary<string, string> properties, Compilation compilation)
+        private static readonly string[] ConfigurationPropertyNames = {"CppOutputPath", "BaseNamespace", "NativeLibraryName", "NonBlittableTypes"};
+
+        private CodeGenerator CreateCodeGenerator(AnalyzerConfigOptionsProvider options, string? propertiesPath, IDictionary<string, string> properties, Compilation compilation)
         {
             Dictionary<string, string> mergedProperties = new Dictionary<string, string>(properties);
 
             CppGenerationContext cppContext = new CppGenerationContext(compilation);
 
-            string? projectDir;
-            if (!options.GlobalOptions.TryGetValue("build_property.projectdir", out projectDir))
+            string? baseDir;
+            if (!options.GlobalOptions.TryGetValue("build_property.projectdir", out baseDir))
             {
-                // Use the directory of the first syntax tree as the project directory.
-                SyntaxTree? tree = compilation.SyntaxTrees.FirstOrDefault();
-                if (tree != null)
-                    projectDir = Path.GetDirectoryName(tree.FilePath);
+                // Use the directory of the file containing the properties as the base path.
+                if (propertiesPath != null)
+                    baseDir = Path.GetDirectoryName(propertiesPath);
                 else
-                    projectDir = "";
+                    baseDir = "";
             }
 
             string? cppOutputPath;
             if (options.GlobalOptions.TryGetValue("cpp_output_path", out cppOutputPath))
-                mergedProperties["OutputDirectory"] = cppOutputPath;
+                mergedProperties["CppOutputPath"] = cppOutputPath;
                 
             string? baseNamespace;
             if (options.GlobalOptions.TryGetValue("base_namespace", out baseNamespace))
@@ -198,7 +205,7 @@ namespace Reinterop
             if (!mergedProperties.TryGetValue("NonBlittableTypes", out nonBlittableTypes))
                 nonBlittableTypes = "";
 
-            cppContext.OutputDirectory = Path.GetFullPath(Path.Combine(projectDir, cppOutputPath));
+            cppContext.OutputDirectory = Path.GetFullPath(Path.Combine(baseDir, cppOutputPath));
             cppContext.BaseNamespace = baseNamespace;
             cppContext.NativeLibraryName = nativeLibraryName;
             cppContext.NonBlittableTypes.UnionWith(nonBlittableTypes.Split(',').Select(t => t.Trim()));
@@ -229,6 +236,7 @@ namespace Reinterop
             public readonly List<MethodDeclarationSyntax> ExposeToCppMethods = new List<MethodDeclarationSyntax>();
             public readonly List<AttributeSyntax> ClassesImplementedInCpp = new List<AttributeSyntax>();
             public readonly Dictionary<string, ExpressionSyntax> Properties = new Dictionary<string, ExpressionSyntax>();
+            public string? PropertiesPath = null;
 
             public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
             {
@@ -260,10 +268,20 @@ namespace Reinterop
                         {
                             foreach (var variable in fieldSyntax.Declaration.Variables)
                             {
+                                string name = variable.Identifier.Text;
+                                if (Array.IndexOf(ConfigurationPropertyNames, name) < 0)
+                                    continue;
+
                                 ExpressionSyntax? expression = variable.Initializer?.Value;
-                                if (expression != null) {
-                                    Properties.Add(variable.Identifier.Text, expression);
-                                }
+                                if (expression == null)
+                                    continue;
+
+                                string path = expression.SyntaxTree.FilePath;
+                                if (PropertiesPath != null && PropertiesPath != path)
+                                    throw new Exception("Reinterop configuration properties must be defined in only one class, but they were found in both " + PropertiesPath + " and " + path + ".");
+
+                                PropertiesPath = path;
+                                Properties.Add(name, expression);
                             }
                         }
 

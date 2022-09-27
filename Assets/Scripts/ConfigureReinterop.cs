@@ -16,11 +16,11 @@ namespace CesiumForUnity
     internal partial class ConfigureReinterop
     {
         // The output path for generated C++ files.
-        // If this is relative, it is relative to the project directory.
-        public const string CppOutputPath = "native~/generated";
+        // If this is relative, it is relative to the this file.
+        public const string CppOutputPath = "../native~/generated";
 
         // The namespace with which to prefix all C# namespaces. For example, if this
-        // property is set to "DotNet", then anything in the "System" namespaces in C#
+        // property is set to "DotNet", then anything in the "System" namespace in C#
         // will be found in the "DotNet::System" namespace in C++.
         public const string BaseNamespace = "DotNet";
 
