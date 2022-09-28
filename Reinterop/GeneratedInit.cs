@@ -162,12 +162,12 @@
 
         public IEnumerable<string> GetFieldAssignments()
         {
-            return Functions.Select(f => $"{f.CppName} = reinterpret_cast<{f.CppTypeSignature}>(functionPointers[i++]);");
+            return Functions.Select((f, i) => $"{f.CppName} = reinterpret_cast<{f.CppTypeSignature}>(functionPointers[{i}]);");
         }
 
         private IEnumerable<string> GetFunctionPointerInitLines()
         {
-            return Functions.Select(d => $"Marshal.WriteIntPtr(memory, (i++) * sizeof(IntPtr), Marshal.GetFunctionPointerForDelegate({d.CSharpName}));");
+            return Functions.Select((d, i) => $"Marshal.WriteIntPtr(memory, {i} * sizeof(IntPtr), Marshal.GetFunctionPointerForDelegate({d.CSharpName}));");
         }
 
         private IEnumerable<string> GetContent()
