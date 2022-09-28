@@ -89,7 +89,14 @@ Then, when Unity runs Roslyn and Roslyn runs Reinterop, Visual Studio will pop u
 
 # Temporarily disabling the code generator
 
-It is sometimes useful to temporarily disable the code generator so that you can modify the generated code to try things out. This is easy to do. First, open your project's .csproj and comment-out the section that adds the Reinterop project as an Analyzer:
+It is sometimes useful to temporarily disable the code generator so that you can modify the generated code to try things out. This is easy to do. First, find the generated code. It may be in your project's `obj\Debug\netstandard2.1\generated\Reinterop\Reinterop.RoslynIncrementalGenerator` directory, or similar. If you can't find it, add the following to a `<PropertyGroup>` in your csproj (adjusting the path appropriately for your system):
+
+```
+<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+<CompilerGeneratedFilesOutputPath>C:\Dev\cesium-unity-samples\Assets\CesiumForUnity\generatedcsharp~</CompilerGeneratedFilesOutputPath>
+```
+
+Once you have the generated code, open your project's .csproj and comment-out the section that adds the Reinterop project as an Analyzer:
 
 ```
   <!-- <ItemGroup>
@@ -97,7 +104,15 @@ It is sometimes useful to temporarily disable the code generator so that you can
   </ItemGroup> -->
 ```
 
-With that change, your project will no longer compile because the generated code is missing. To fix that, find the previously-generated code in your project's `obj\Debug\netstandard2.1\generated\Reinterop\Reinterop.RoslynIncrementalGenerator` (or similar), and copy the entire contents into a folder called `generated` in your project's top-level directory. Your project should now build again.
+It may also look like this:
+
+```
+  <!-- <ItemGroup>
+    <Analyzer Include="C:\some\path\Reinterop.dll" />
+  </ItemGroup> -->
+```
+
+With that change, your project will no longer compile because the generated code is missing. To fix that, copy the generated code that you located previously into a folder called `generated` in your project's top-level directory. Your project should now build again.
 
 To revert back to on-the-fly generation, delete the `generated` folder and uncomment the lines in the .csproj.
 
