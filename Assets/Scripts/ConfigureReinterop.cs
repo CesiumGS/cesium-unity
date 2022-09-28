@@ -31,6 +31,9 @@ namespace CesiumForUnity
         // otherwise cause Reinterop to treat them as blittable.
         public const string NonBlittableTypes = "Unity.Collections.LowLevel.Unsafe.AtomicSafetyHandle";
 
+        // True to build the native library automatically using CMake while compiling the managed one.
+        public const bool BuildNativeLibrary = true;
+
         public void ExposeToCPP()
         {
             Camera c = Camera.main;
