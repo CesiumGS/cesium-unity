@@ -1,4 +1,6 @@
-﻿namespace Reinterop
+﻿using System.Text;
+
+namespace Reinterop
 {
     internal record GeneratedInitFunction(
         string CppName,
@@ -29,6 +31,8 @@
         public void GenerateCpp(CppGenerationContext options, Dictionary<string, CppSourceFile> sourceFiles)
         {
             Sort();
+            
+            ulong validationHash = ComputeValidationHash();
 
             string headerPath = "include";
             if (options.BaseNamespace != null)
@@ -52,7 +56,7 @@
                 #if defined(_WIN32)
                 __declspec(dllexport)
                 #endif
-                void initializeReinterop(void** functionPointers, std::int32_t count);
+                std::uint8_t initializeReinterop(std::uint64_t validationHashValue, void** functionPointers, std::int32_t count);
                 }
                 """);
 
@@ -79,15 +83,20 @@
                 #if defined(_WIN32)
                 __declspec(dllexport)
                 #endif
-                void initializeReinterop(void** functionPointers, std::int32_t count) {
-                  // If this assertion fails, the C# and C++ layers are out of sync.
-                  assert(count == {{Functions.Count}});
+                std::uint8_t initializeReinterop(std::uint64_t validationHashValue, void** functionPointers, std::int32_t count) {
+                  // Make sure the C++ and C# layers are in sync.
+                  if (count != {{Functions.Count}})
+                    return 0;
+                  if (validationHashValue != {{validationHash}}ULL)
+                    return 0;
                 
                   std::int32_t i = 0;
                   {{GetFieldAssignments().JoinAndIndent("  ")}}
 
                   // Invoke user startup code.
                   start();
+
+                  return 1;
                 }
 
                 }
@@ -97,6 +106,8 @@
         public string ToCSharpSourceFileString(CppGenerationContext cppContext)
         {
             Sort();
+
+            ulong validationHash = ComputeValidationHash();
 
             return
                 $$"""
@@ -120,12 +131,14 @@
                                 IntPtr memory = Marshal.AllocHGlobal(sizeof(IntPtr) * {{Functions.Count}});
                                 int i = 0;
                                 {{GetFunctionPointerInitLines().JoinAndIndent("                ")}}
-                                initializeReinterop(memory, {{Functions.Count}});
+                                byte success = initializeReinterop({{validationHash}}UL, memory, {{Functions.Count}});
+                                if (success == 0)
+                                    throw new NotImplementedException("The native library is out of sync with the managed one.");
                             }
                         }
 
                         [DllImport("{{cppContext.NativeLibraryName}}", CallingConvention=CallingConvention.Cdecl)]
-                        private static extern void initializeReinterop(IntPtr functionPointers, int count);
+                        private static extern byte initializeReinterop(ulong validationHash, IntPtr functionPointers, int count);
 
                         // Roslyn raises CS0252 spuriously for MulticastDelegate operator==, so disable the warning
                         // See https://github.com/dotnet/roslyn/issues/17212
@@ -178,6 +191,24 @@
         private void Sort()
         {
             Functions.Sort((a, b) => string.Compare(a.CppName, b.CppName));
+        }
+
+        /// <summary>
+        /// Compute a value representing the state of the interop, so that C# can pass it and C++ can verify it
+        /// in order to ensure that the two are in sync.
+        /// </summary>
+        /// <returns></returns>
+        private ulong ComputeValidationHash()
+        {
+            StringBuilder s = new StringBuilder();
+            foreach (GeneratedInitFunction func in Functions)
+            {
+                s.Append(func.CppName);
+                s.Append(',');
+                s.AppendLine(func.CppTypeSignature);
+            }
+
+            return Interop.InsecureHash64bits(s.ToString());
         }
     }
 }
