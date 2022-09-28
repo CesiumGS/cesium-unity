@@ -45,7 +45,8 @@ namespace Reinterop
                 {
                     {{CSharpTypeUtility.GetAccessString(Type.Symbol.DeclaredAccessibility)}} partial {{kind}} {{Type.Symbol.Name}} : System.IDisposable
                     {
-                        private System.IntPtr _implementation;
+                        [System.NonSerialized]
+                        private System.IntPtr _implementation = System.IntPtr.Zero;
 
                         public IntPtr NativeImplementation
                         {

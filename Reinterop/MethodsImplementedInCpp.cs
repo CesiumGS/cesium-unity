@@ -328,7 +328,8 @@ namespace Reinterop
                     $$"""
                     {{modifiers}} partial {{csReturnType.GetFullyQualifiedName()}} {{method.Name}}({{string.Join(", ", csParameters.Select(parameter => $"{parameter.Type.GetFullyQualifiedName()} {parameter.Name}"))}})
                     {
-                        System.Diagnostics.Debug.Assert(_implementation != System.IntPtr.Zero, "Implementation instance was not created or has already been destroyed. Check that all constructors call CreateImplementation, and that the object is not used after it is Disposed.");
+                        if (this._implementation == System.IntPtr.Zero)
+                            throw new NotImplementedException("The native implementation is missing so {{method.Name}} cannot be invoked.");
                         {{new[] { csImplementation }.JoinAndIndent("    ")}}
                     }
                     """,
