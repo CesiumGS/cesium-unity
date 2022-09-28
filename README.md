@@ -128,3 +128,8 @@ cmake --build build-android --target install -j14 --config Debug
 
 If you run into a crash on startup while using Vulkan, you may need to upgrade your version of Unity:
 https://issuetracker.unity3d.com/issues/oculus-quest-app-using-vulkan-crashes-on-startup
+
+
+### :green_book:License
+
+[Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.html). Cesium for Unity is free to use for both commercial and non-commercial use.
