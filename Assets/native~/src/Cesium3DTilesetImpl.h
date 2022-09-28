@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Cesium3DTilesSelection/ViewUpdateResult.h>
-
+#include <DotNet/CesiumForUnity/CesiumCreditSystem.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/System/Action.h>
 
@@ -13,6 +13,7 @@
 
 namespace DotNet::CesiumForUnity {
 class Cesium3DTileset;
+class CesiumCreditSystem;
 }
 
 namespace Cesium3DTilesSelection {
@@ -38,6 +39,10 @@ public:
   Cesium3DTilesSelection::Tileset* getTileset();
   const Cesium3DTilesSelection::Tileset* getTileset() const;
 
+  //DotNet::CesiumForUnity::CesiumCreditSystem& getCreditSystem();
+  const DotNet::CesiumForUnity::CesiumCreditSystem& getCreditSystem() const;
+  void setCreditSystem(const DotNet::CesiumForUnity::CesiumCreditSystem& creditSystem);
+
 private:
   void DestroyTileset(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
   void LoadTileset(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
@@ -52,6 +57,7 @@ private:
 #endif
   DotNet::CesiumForUnity::CesiumGeoreference _georeference;
   DotNet::System::Action _georeferenceChangedCallback;
+  DotNet::CesiumForUnity::CesiumCreditSystem _creditSystem;
   bool _destroyTilesetOnNextUpdate;
 };
 

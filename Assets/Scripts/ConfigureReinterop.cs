@@ -68,6 +68,7 @@ namespace CesiumForUnity
             go.AddComponent<MeshFilter>();
             go.AddComponent<MeshRenderer>();
 
+            go.transform.Find("Child Name");
             go.transform.GetChild(go.transform.childCount - 1);
             go.transform.DetachChildren();
             go.hideFlags = HideFlags.DontSave;
@@ -199,13 +200,6 @@ namespace CesiumForUnity
             baseOverlay.AddToTileset();
             baseOverlay.RemoveFromTileset();
 
-            List<CesiumRasterOverlay> overlays = new List<CesiumRasterOverlay>();
-            go.GetComponents<CesiumRasterOverlay>(overlays);
-            for (int i = 0; i < overlays.Count; ++i)
-            {
-                CesiumRasterOverlay anOverlay = overlays[i];
-            }
-
             CesiumRasterOverlay[] overlaysArray = go.GetComponents<CesiumRasterOverlay>();
             int len = overlaysArray.Length;
             CesiumRasterOverlay first = overlaysArray[0];
@@ -232,7 +226,11 @@ namespace CesiumForUnity
                 gos[i] = goFromArray;
             }
 
-            CesiumGeoreference[] georeferences = UnityEngine.Object.FindObjectsOfType<CesiumGeoreference>();
+            go = Resources.Load<GameObject>("name");
+            go = UnityEngine.Object.Instantiate(go);
+
+            CesiumCreditSystem creditSystem = go.AddComponent<CesiumCreditSystem>();
+            creditSystem = go.GetComponent<CesiumCreditSystem>();
 
             Mesh.MeshDataArray meshDataArray = Mesh.AllocateWritableMeshData(1);
             Mesh.MeshData meshData = meshDataArray[meshDataArray.Length - 1];
@@ -268,6 +266,13 @@ namespace CesiumForUnity
             Mesh.ApplyAndDisposeWritableMeshData(meshDataArray, meshes, MeshUpdateFlags.Default);
 
             Physics.BakeMesh(mesh.GetInstanceID(), false);
+
+            CesiumCreditSystem[] creditSystems = UnityEngine.Object.FindObjectsOfType<CesiumCreditSystem>();
+            for (int i = 0; i < creditSystems.Length; ++i)
+            {
+                CesiumCreditSystem cs = creditSystems[i];
+                cs.gameObject.name.StartsWith("name");
+            }
         }
     }
 }
