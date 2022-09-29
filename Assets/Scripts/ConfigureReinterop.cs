@@ -270,12 +270,11 @@ namespace CesiumForUnity
             CesiumCreditSystem[] creditSystems = UnityEngine.Object.FindObjectsOfType<CesiumCreditSystem>();
             for (int i = 0; i < creditSystems.Length; ++i)
             {
-                CesiumCreditSystem cs = creditSystems[i];
-                cs.gameObject.name.StartsWith("name");
+                creditSystem = creditSystems[i];
+                creditSystem.gameObject.name.StartsWith("name");
             }
-
-            Text textComponent = go.GetComponent<Text>();
-            textComponent.text = "text here";
+            
+            creditSystem.SetCreditsText("Popup", "OnScreen");
         }
     }
 }
