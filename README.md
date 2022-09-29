@@ -119,16 +119,12 @@ dotnet publish CesiumForUnity -c Debug -p:Editor=False
 cmake -B build-android -S . -G Ninja -DCMAKE_TOOLCHAIN_FILE="CesiumForUnityNative/extern/android-toolchain.cmake" -DEDITOR=false
 cmake --build build-android --target install -j14 --config Debug
 ```
-3. Open the Cesium Unity Samples project with Unity version 2021.3.9f1 or higher. 
-4. In the Unity Editor, change the settings of the project according to this page: https://developer.oculus.com/documentation/unity/unity-conf-settings/. 
-5. Furthermore, in the Player settings, change the Graphics APIs list to only include Vulkan.
-6. Click on `CesiumForUnity/NonEditor/libCesiumForUnityNative.so` and in the inspector, set the platform to Android and set CPU to ARM64.
-7. With the Sample Scene open, go to GameObject > XR > Convert Main Camera To XR Rig.
-8. Finally, select File > Build And Run to build an APK.
-
-If you run into a crash on startup while using Vulkan, you may need to upgrade your version of Unity:
-https://issuetracker.unity3d.com/issues/oculus-quest-app-using-vulkan-crashes-on-startup
-
+3. Open the Cesium Unity Samples project.
+4. Open the Quest 2 Demo scene.
+5. Go to File -> Build Settings and change the platform to Android.
+6. Also in the Build Settings, click Add Open Scenes and remove the original Sample Scene.
+7. Go to Player Settings, and in XR Plug-in Management, go to the Android section and check OpenXR.
+8. Finally, in the Build Settings, click Build And Run to build an APK.
 
 ### :green_book:License
 
