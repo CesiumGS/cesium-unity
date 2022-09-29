@@ -110,12 +110,12 @@ The easiest way to get started is to open the [**cesium-unity-samples**](https:/
 6. Add a new `Cesium Georeference` component to the "Cesium" game object. By setting the Longitude, Latitude, and Height properties on this object, you define the position on the globe that becomes the center of the Unity world.
 7. Add another new GameObject as a _child_ of the "Cesium" game object, and name it "Cesium World Terrain".
 8. Add a new "Cesium 3D Tileset" component to the "Cesium World Terrain" game object and set the following properties:
-  * Set the "Opaque Material" to "CesiumDefaultTilesetMaterial". This step will not be necessary in the future, but failing to do so at the moment may lead to a crash.
-  * Set the "Ion Asset ID" to 1.
-  * Set the "Ion Access Token" to a valid token for Cesium World Terrain from your Cesium ion account. At this point Cesium World Terrain should appear, but it will be all white.
+    * Set the "Opaque Material" to "CesiumDefaultTilesetMaterial". This step will not be necessary in the future, but failing to do so at the moment may lead to a crash.
+    * Set the "Ion Asset ID" to 1.
+    * Set the "Ion Access Token" to a valid token for Cesium World Terrain from your Cesium ion account. At this point Cesium World Terrain should appear, but it will be all white.
 9. Add a new "Cesium Ion Raster Overlay" component to the "Cesium World Terrain" game object and set the following properties:
-  * Set the "Ion Asset ID" to 2.
-  * Set the "Ion Access Token" to a valid Cesium ion token; the one from above is likely to work. At this point, the terrain surface should become textured.
+    * Set the "Ion Asset ID" to 2.
+    * Set the "Ion Access Token" to a valid Cesium ion token; the one from above is likely to work. At this point, the terrain surface should become textured.
 
 ## :goggles: Running Cesium for Unity on Quest 2
 
