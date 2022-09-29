@@ -7,6 +7,7 @@ project(CesiumForUnityNative
 )
 
 add_subdirectory(extern/cesium-native EXCLUDE_FROM_ALL)
+add_subdirectory(extern/tidy-html5)
 
 file(GLOB CESIUMFORUNITYNATIVE_SOURCES CONFIGURE_DEPENDS src/*.cpp generated/src/*.cpp)
 file(GLOB CESIUMFORUNITYNATIVE_HEADERS CONFIGURE_DEPENDS src/*.h generated/src/*.h)
