@@ -9,7 +9,8 @@ project(CesiumForUnityNative
 add_subdirectory(extern/cesium-native EXCLUDE_FROM_ALL)
 
 option(BUILD_SHARED_LIB OFF)
-add_subdirectory(extern/tidy-html5)
+option( SUPPORT_CONSOLE_APP OFF)
+add_subdirectory(extern/tidy-html5 EXCLUDE_FROM_ALL)
 
 file(GLOB CESIUMFORUNITYNATIVE_SOURCES CONFIGURE_DEPENDS src/*.cpp generated/src/*.cpp)
 file(GLOB CESIUMFORUNITYNATIVE_HEADERS CONFIGURE_DEPENDS src/*.h generated/src/*.h)
@@ -36,6 +37,8 @@ target_link_libraries(
     CesiumForUnityNative
     PUBLIC
         Cesium3DTilesSelection
+    PRIVATE
+        tidy-static
 )
 
 set_target_properties(
