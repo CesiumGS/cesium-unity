@@ -1,4 +1,4 @@
-[submodule "extern/cesium-native"]
+[submodule "Assets/native~/extern/cesium-native"]
 	path = Assets/native~/extern/cesium-native
 	url = git@github.com:CesiumGS/cesium-native.git
 [submodule "Assets/native~/extern/tidy-html5"]

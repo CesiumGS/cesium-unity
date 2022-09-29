@@ -48,7 +48,6 @@ namespace CesiumForUnity
             int linkIndex = TMP_TextUtilities.FindIntersectingLink(_onScreenText, eventData.position, null);
             if (linkIndex != -1) {
                 TMP_LinkInfo linkInfo = _onScreenText.textInfo.linkInfo[linkIndex];
-                Debug.Log(linkInfo);
                 string linkId = linkInfo.GetLinkID();
                 if(linkId == "popup") {
                     _popupGameObject.SetActive(!_popupGameObject.activeSelf);

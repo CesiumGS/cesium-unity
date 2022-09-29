@@ -6,6 +6,7 @@
 #include <DotNet/UnityEngine/GameObject.h>
 
 #include <memory>
+#include <unordered_map>
 
 namespace DotNet::CesiumForUnity {
 class CesiumCreditSystem;
@@ -37,8 +38,14 @@ public:
   static DotNet::CesiumForUnity::CesiumCreditSystem getDefaultCreditSystem();
 
 private:
+  // The underlying cesium-native credit system.
   std::shared_ptr<Cesium3DTilesSelection::CreditSystem> _pCreditSystem;
+
+  // The GameObject prefab used to host the CreditSystem script and UI.
   static DotNet::UnityEngine::GameObject _creditSystemPrefab;
+
+  const std::string convertHtmlToRtf(const std::string& html);
+  std::unordered_map<std::string, std::string> _htmlToRtf;
 
   size_t _lastCreditsCount;
 };

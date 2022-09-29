@@ -9,6 +9,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
+using TMPro;
 
 namespace CesiumForUnity
 {
@@ -275,6 +276,8 @@ namespace CesiumForUnity
             }
             
             creditSystem.SetCreditsText("Popup", "OnScreen");
+            
+            TextMeshProUGUI _popupText = go.GetComponent<TextMeshProUGUI>();
         }
     }
 }

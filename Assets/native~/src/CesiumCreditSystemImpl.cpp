@@ -62,8 +62,16 @@ void CesiumCreditSystemImpl::Update(
       }
 
       const std::string& html = _pCreditSystem->getHtml(credit);
-      // TODO: convert HTML to RTF
-      popupCredits += html;
+      std::string rtf = "";
+
+      auto htmlFind = _htmlToRtf.find(html);
+      if (htmlFind != _htmlToRtf.end()) {
+        rtf = htmlFind->second;
+      } else {
+        rtf = convertHtmlToRtf(html);
+        _htmlToRtf.insert({html, rtf});
+      }
+      popupCredits += rtf;
 
       if (_pCreditSystem->shouldBeShownOnScreen(credit)) {
         if (firstCreditOnScreen) {
@@ -71,7 +79,7 @@ void CesiumCreditSystemImpl::Update(
         } else {
           onScreenCredits += " \u2022 ";
         }
-        onScreenCredits += html;
+        onScreenCredits += rtf;
       }
     }
 
@@ -136,8 +144,8 @@ void CesiumCreditSystemImpl::Update(
 //  tidyBufFree(&buf);
 //}
 //} // namespace
-//
-//std::string convertHtmlToRtf(std::string html) {
+
+const std::string CesiumCreditSystemImpl::convertHtmlToRtf(const std::string& html) {
 //  TidyDoc tdoc;
 //  TidyBuffer tidy_errbuf = {0};
 //  int err;
@@ -160,12 +168,13 @@ void CesiumCreditSystemImpl::Update(
 //  tidyRelease(tdoc);
 //
 //  return output.c_str();
-//}
+return html;
+}
 
 void CesiumCreditSystemImpl::OnApplicationQuit(
     const DotNet::CesiumForUnity::CesiumCreditSystem& creditSystem) {
   // Dereference the prefab. If this isn't done, the Editor will try to
-  // use the destroyed prefab the next time it enters play mode.
+  // use the destroyed prefab when it re-enters play mode.
   CesiumCreditSystemImpl::_creditSystemPrefab = nullptr;
 }
 
