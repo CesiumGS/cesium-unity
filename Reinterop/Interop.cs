@@ -413,7 +413,11 @@ namespace Reinterop
             if (depth > 10)
                 return false;
 
-            if (context.NonBlittableTypes.Contains(type.ToDisplayString()))
+            // We construct a name rather than using `type.ToDisplayString()` here so that
+            // entire generic types can be listed as unblittable.
+            string name = type.ContainingNamespace != null ? type.ContainingNamespace.ToDisplayString() + "." : "";
+            name += type.Name;
+            if (context.NonBlittableTypes.Contains(name))
                 return false;
 
             if (!type.IsValueType)

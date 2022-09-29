@@ -96,6 +96,12 @@ It is sometimes useful to temporarily disable the code generator so that you can
 <CompilerGeneratedFilesOutputPath>C:\Dev\cesium-unity-samples\Assets\CesiumForUnity\generatedcsharp~</CompilerGeneratedFilesOutputPath>
 ```
 
+In Unity, the above is a hassle. Instead, add a line to `csc.rsp`:
+
+```
+-generatedfilesout:"C:\place\to\write\files"
+```
+
 Once you have the generated code, open your project's .csproj and comment-out the section that adds the Reinterop project as an Analyzer:
 
 ```

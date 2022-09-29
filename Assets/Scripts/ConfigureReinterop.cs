@@ -17,20 +17,30 @@ namespace CesiumForUnity
     {
         // The output path for generated C++ files.
         // If this is relative, it is relative to the this file.
-        public const string CppOutputPath = "../native~/generated";
+#if UNITY_EDITOR
+        public const string CppOutputPath = "../native~/generated-Editor";
+#elif UNITY_ANDROID
+        public const string CppOutputPath = "../native~/generated-Android";
+#elif UNITY_IOS
+        public const string CppOutputPath = "../native~/generated-iOS";
+#elif UNITY_64
+        public const string CppOutputPath = "../native~/generated-x64";
+#else
+        public const string CppOutputPath = "../native~/generated-x86";
+#endif
 
         // The namespace with which to prefix all C# namespaces. For example, if this
         // property is set to "DotNet", then anything in the "System" namespace in C#
         // will be found in the "DotNet::System" namespace in C++.
         public const string BaseNamespace = "DotNet";
-
+        //
         // The name of the DLL or SO containing the C++ code.
         public const string NativeLibraryName = "CesiumForUnityNative";
 
         // Comma-separated types to treat as non-blittable, even if their fields would
         // otherwise cause Reinterop to treat them as blittable.
-        public const string NonBlittableTypes = "Unity.Collections.LowLevel.Unsafe.AtomicSafetyHandle";
-
+        public const string NonBlittableTypes = "Unity.Collections.LowLevel.Unsafe.AtomicSafetyHandle,Unity.Collections.NativeArray,UnityEngine.MeshData,UnityEngine.MeshDataArray";
+        //
         // True to build the native library automatically using CMake while compiling the managed one.
         public const bool BuildNativeLibrary = true;
 

@@ -6,10 +6,13 @@ project(CesiumForUnityNative
     LANGUAGES CXX C
 )
 
+
+set(REINTEROP_GENERATED_DIRECTORY "Editor" CACHE String "The suffix for the generated code folder.")
+
 add_subdirectory(extern/cesium-native EXCLUDE_FROM_ALL)
 
-file(GLOB CESIUMFORUNITYNATIVE_SOURCES CONFIGURE_DEPENDS src/*.cpp generated/src/*.cpp)
-file(GLOB CESIUMFORUNITYNATIVE_HEADERS CONFIGURE_DEPENDS src/*.h generated/src/*.h)
+file(GLOB CESIUMFORUNITYNATIVE_SOURCES CONFIGURE_DEPENDS src/*.cpp ${REINTEROP_GENERATED_DIRECTORY}/src/*.cpp)
+file(GLOB CESIUMFORUNITYNATIVE_HEADERS CONFIGURE_DEPENDS src/*.h ${REINTEROP_GENERATED_DIRECTORY}/src/*.h)
 
 add_library(CesiumForUnityNative SHARED)
 
@@ -25,8 +28,8 @@ target_include_directories(
     PRIVATE
         src
         include
-        generated/src
-        generated/include
+        ${REINTEROP_GENERATED_DIRECTORY}/src
+        ${REINTEROP_GENERATED_DIRECTORY}/include
 )
 
 target_link_libraries(
