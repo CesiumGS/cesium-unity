@@ -1,6 +1,5 @@
 ﻿using Reinterop;
 using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,6 +8,7 @@ using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.Rendering;
+using UnityEngine.UI;
 
 namespace CesiumForUnity
 {
@@ -273,6 +273,9 @@ namespace CesiumForUnity
                 CesiumCreditSystem cs = creditSystems[i];
                 cs.gameObject.name.StartsWith("name");
             }
+
+            Text textComponent = go.GetComponent<Text>();
+            textComponent.text = "text here";
         }
     }
 }

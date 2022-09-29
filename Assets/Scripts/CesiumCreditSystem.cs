@@ -8,5 +8,6 @@ namespace CesiumForUnity
     {
         private partial void Awake();
         private partial void Update();
+        private partial void OnApplicationQuit();
     }
 }

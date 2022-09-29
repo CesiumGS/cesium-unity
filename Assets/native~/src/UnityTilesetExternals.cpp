@@ -30,8 +30,8 @@ std::shared_ptr<CachingAssetAccessor> pAccessor = nullptr;
 std::shared_ptr<UnityTaskProcessor> pTaskProcessor = nullptr;
 std::shared_ptr<CreditSystem> pCreditSystem = nullptr;
 #if UNITY_EDITOR
-// If the tileset is being loaded in the editor, it won't instantiate
-// a credit system prefab. A CreditSystem will be manually constructed
+// If a tileset is loading in the editor, it won't instantiate the
+// credit system prefab. A CreditSystem will be manually constructed
 // so that the TilesetExternals won't contain a nullptr.
 std::shared_ptr<CreditSystem> pEditorCreditSystem = nullptr;
 #endif

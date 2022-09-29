@@ -17,6 +17,7 @@
 #include <DotNet/UnityEngine/Object.h>
 #include <DotNet/UnityEngine/Resources.h>
 #include <DotNet/UnityEngine/Transform.h>
+#include <DotNet/UnityEngine/UI/Text.h>
 
 using namespace Cesium3DTilesSelection;
 using namespace DotNet;
@@ -27,7 +28,10 @@ UnityEngine::GameObject CesiumCreditSystemImpl::_creditSystemPrefab = nullptr;
 
 CesiumCreditSystemImpl::CesiumCreditSystemImpl(
     const CesiumForUnity::CesiumCreditSystem& creditSystem)
-    : _pCreditSystem(std::make_shared<CreditSystem>()), _lastCreditsCount(0) {}
+    : _pCreditSystem(std::make_shared<CreditSystem>()),
+      _lastCreditsCount(0),
+      _popupText(nullptr),
+      _onScreenText(nullptr) {}
 
 CesiumCreditSystemImpl::~CesiumCreditSystemImpl() {}
 
@@ -39,15 +43,20 @@ void CesiumCreditSystemImpl::Awake(
   UnityEngine::GameObject gameObject = creditSystem.gameObject();
   UnityEngine::GameObject canvasGameObject =
       gameObject.transform().GetChild(0).gameObject();
+
   UnityEngine::GameObject popupGameObject =
       canvasGameObject.transform().Find(System::String("Popup")).gameObject();
+  UnityEngine::GameObject popupTextGameObject =
+      popupGameObject.transform().GetChild(0).gameObject();
+  _popupText = popupTextGameObject.GetComponent<UnityEngine::UI::Text>();
+
   UnityEngine::GameObject onScreenGameObject =
       canvasGameObject.transform()
           .Find(System::String("OnScreen"))
           .gameObject();
-
-  // TODO: Add a link at the bottom that says "Data Attribution."
-  // clicking on it should make the popup come up.
+  UnityEngine::GameObject onScreenTextGameObject =
+      onScreenGameObject.transform().GetChild(0).gameObject();
+  _onScreenText = onScreenTextGameObject.GetComponent<UnityEngine::UI::Text>();
 }
 
 void CesiumCreditSystemImpl::Update(
@@ -66,12 +75,37 @@ void CesiumCreditSystemImpl::Update(
       _pCreditSystem->getCreditsToNoLongerShowThisFrame().size() > 0;
 
   if (creditsUpdated) {
-    // TODO: mimic the Tick() code in Unreal's credit system here
+    std::string popupCredits = "";
+    // System::String onScreenCredits;
+    //  TODO: mimic the Tick() code in Unreal's credit system here
+
+    // TODO: Add a link at the bottom that says "Data Attribution."
+    // clicking on it should make the popup come up.
+
+    bool first = true;
+    for (int i = 0; i < creditsCount; i++) {
+      const Cesium3DTilesSelection::Credit& credit = creditsToShowThisFrame[i];
+      if (i != 0) {
+        popupCredits += "\n";
+      }
+
+      const std::string& html = _pCreditSystem->getHtml(credit);
+      popupCredits += html;
+    }
+
+    _popupText.text(System::String(popupCredits));
     _lastCreditsCount = creditsCount;
   }
 
   _pCreditSystem->startNextFrame();
 }
+
+void CesiumCreditSystemImpl::OnApplicationQuit() {
+  // Dereference the prefab. If this isn't done, the Editor will try to
+  // use the destroyed prefab the next time it enters play mode.
+  CesiumCreditSystemImpl::_creditSystemPrefab = nullptr;
+}
+
 
 const std::shared_ptr<Cesium3DTilesSelection::CreditSystem>&
 CesiumCreditSystemImpl::getExternalCreditSystem() const {
@@ -83,7 +117,7 @@ CesiumCreditSystemImpl::getDefaultCreditSystem() {
   UnityEngine::GameObject defaultCreditSystemObject = nullptr;
   System::String defaultName = System::String("CesiumCreditSystemDefault");
 
-  // Look for existing default credit system first.
+  // Look for an existing default credit system first.
   System::Array1<CesiumForUnity::CesiumCreditSystem> creditSystems =
       UnityEngine::Object::FindObjectsOfType<
           CesiumForUnity::CesiumCreditSystem>();
@@ -96,6 +130,7 @@ CesiumCreditSystemImpl::getDefaultCreditSystem() {
     }
   }
 
+  // If no default credit system was found, instantiate one.
   if (defaultCreditSystemObject == nullptr) {
     if (CesiumCreditSystemImpl::_creditSystemPrefab == nullptr) {
       CesiumCreditSystemImpl::_creditSystemPrefab =

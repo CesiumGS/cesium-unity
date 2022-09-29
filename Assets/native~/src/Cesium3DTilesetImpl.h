@@ -39,7 +39,6 @@ public:
   Cesium3DTilesSelection::Tileset* getTileset();
   const Cesium3DTilesSelection::Tileset* getTileset() const;
 
-  //DotNet::CesiumForUnity::CesiumCreditSystem& getCreditSystem();
   const DotNet::CesiumForUnity::CesiumCreditSystem& getCreditSystem() const;
   void setCreditSystem(const DotNet::CesiumForUnity::CesiumCreditSystem& creditSystem);
 
