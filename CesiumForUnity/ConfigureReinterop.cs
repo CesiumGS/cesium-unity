@@ -145,6 +145,7 @@ internal partial class ConfigureReinterop
         Task.Run(() => { });
 
         Cesium3DTileset tileset = new Cesium3DTileset();
+        tileset.tilesetSource = tileset.tilesetSource;
         tileset.url = tileset.url;
         tileset.ionAssetID = tileset.ionAssetID;
         tileset.ionAccessToken = tileset.ionAccessToken;
