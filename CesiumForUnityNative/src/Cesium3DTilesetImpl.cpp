@@ -7,6 +7,7 @@
 #include <Cesium3DTilesSelection/Tileset.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
+#include <DotNet/CesiumForUnity/CesiumDataSource.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
 #include <DotNet/System/Action.h>
@@ -271,11 +272,20 @@ void Cesium3DTilesetImpl::LoadTileset(
   options.contentOptions = contentOptions;
 
   this->_lastUpdateResult = ViewUpdateResult();
-  this->_pTileset = std::make_unique<Tileset>(
-      createTilesetExternals(tileset.gameObject()),
-      tileset.ionAssetID(),
-      tileset.ionAccessToken().ToStlString(),
-      options);
+
+  if (tileset.tilesetSource() ==
+      CesiumForUnity::CesiumDataSource::FromCesiumIon) {
+    this->_pTileset = std::make_unique<Tileset>(
+        createTilesetExternals(tileset.gameObject()),
+        tileset.ionAssetID(),
+        tileset.ionAccessToken().ToStlString(),
+        options);
+  } else {
+    this->_pTileset = std::make_unique<Tileset>(
+        createTilesetExternals(tileset.gameObject()),
+        tileset.url().ToStlString(),
+        options);
+  }
 
   // Add any overlay components
   System::Array1<CesiumForUnity::CesiumRasterOverlay> overlays =
