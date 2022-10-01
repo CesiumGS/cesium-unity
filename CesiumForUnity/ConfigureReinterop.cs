@@ -195,6 +195,7 @@ internal partial class ConfigureReinterop
         mb.StartCoroutine(new NativeCoroutine(endIteration => endIteration).GetEnumerator());
 
         CesiumMetadata metadata = go.AddComponent<CesiumMetadata>();
+        metadata = go.GetComponent<CesiumMetadata>();
         CesiumMetadata metadataParent = go.GetComponentInParent<CesiumMetadata>();
 
         CesiumGeoreference georeference = go.AddComponent<CesiumGeoreference>();

@@ -11,6 +11,7 @@
 #include <CesiumUtility/ScopeGuard.h>
 
 #include <CesiumGltf/ExtensionMeshPrimitiveExtFeatureMetadata.h>
+#include <CesiumGltf/ExtensionModelExtFeatureMetadata.h>
 #include <DotNet/CesiumForUnity/CesiumMetadata.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
@@ -508,6 +509,16 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
   size_t meshIndex = 0;
 
+
+  const ExtensionModelExtFeatureMetadata* pModelMetadata = model.getExtension<ExtensionModelExtFeatureMetadata>();
+  if(pModelMetadata){
+          DotNet::CesiumForUnity::CesiumMetadata metadata = pModelGameObject->GetComponent<DotNet::CesiumForUnity::CesiumMetadata>();
+          if(metadata == nullptr){
+            metadata = pModelGameObject->AddComponent<DotNet::CesiumForUnity::CesiumMetadata>();
+          }
+          metadata.NativeImplementation().loadMetadata(model, *pModelMetadata);
+  }
+
   model.forEachPrimitiveInScene(
       -1,
       [&meshes,
@@ -636,15 +647,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           meshCollider.sharedMesh(unityMesh);
         }
 
-        const ExtensionMeshPrimitiveExtFeatureMetadata* pMetadata = primitive.getExtension<ExtensionMeshPrimitiveExtFeatureMetadata>();
-        if(pMetadata){
-          DotNet::CesiumForUnity::CesiumMetadata parentMetadata = primitiveGameObject.GetComponentInParent<DotNet::CesiumForUnity::CesiumMetadata>();
-          if(parentMetadata == nullptr){
-            parentMetadata = pModelGameObject->AddComponent<DotNet::CesiumForUnity::CesiumMetadata>();
-          }
-          parentMetadata.NativeImplementation().loadMetadataPrimitive(gltf, primitive, *pMetadata);
-        }
-      });
+     });
 
   return pModelGameObject.release();
 }
