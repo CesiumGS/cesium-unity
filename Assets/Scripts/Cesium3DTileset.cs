@@ -3,13 +3,33 @@ using UnityEngine;
 
 namespace CesiumForUnity
 {
+    public enum CesiumDataSource
+    {
+        FromCesiumIon,
+        FromUrl
+    }
 
     [ExecuteInEditMode]
     [ReinteropNativeImplementation("CesiumForUnityNative::Cesium3DTilesetImpl", "Cesium3DTilesetImpl.h")]
     public partial class Cesium3DTileset : MonoBehaviour
     {
-        [SerializeField]
         [Header("Source")]
+        [SerializeField]
+        [Tooltip("Whether this tileset should be loaded from a URL or from Cesium ion.")]
+        [InspectorName("Tileset Source")]
+        private CesiumDataSource _tilesetSource = CesiumDataSource.FromCesiumIon;
+
+        public CesiumDataSource tilesetSource
+        {
+            get => this._tilesetSource;
+            set
+            {
+                this._tilesetSource = value;
+                this.RecreateTileset();
+            }
+        }
+
+        [SerializeField]
         [Tooltip("The URL of this tileset's \"tileset.json\" file.")]
         [InspectorName("URL")]
         private string _url = "";
