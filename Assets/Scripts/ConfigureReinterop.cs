@@ -1,15 +1,16 @@
 ﻿using Reinterop;
 using System;
+using System.Collections;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using TMPro;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
-using TMPro;
 
 namespace CesiumForUnity
 {
@@ -163,6 +164,8 @@ namespace CesiumForUnity
             //var asdfx = foo + foo;
             op.completed += o => { };
 
+            UnityWebRequest imageRequest = UnityWebRequestTexture.GetTexture("url");
+
             Task.Run(() => { });
 
             Cesium3DTileset tileset = new Cesium3DTileset();
@@ -276,8 +279,7 @@ namespace CesiumForUnity
             }
             
             creditSystem.SetCreditsText("Popup", "OnScreen");
-            
-            TextMeshProUGUI _popupText = go.GetComponent<TextMeshProUGUI>();
+            string rtf = creditSystem.LoadImage("string");
         }
     }
 }

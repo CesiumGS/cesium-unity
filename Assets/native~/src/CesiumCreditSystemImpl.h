@@ -11,6 +11,7 @@
 namespace DotNet::CesiumForUnity {
 class CesiumCreditSystem;
 class GameObject;
+class Sprite;
 } // namespace DotNet::CesiumForUnity
 
 namespace Cesium3DTilesSelection {
@@ -44,9 +45,12 @@ private:
   // The GameObject prefab used to host the CreditSystem script and UI.
   static DotNet::UnityEngine::GameObject _creditSystemPrefab;
 
-  const std::string convertHtmlToRtf(const std::string& html);
-  std::unordered_map<std::string, std::string> _htmlToRtf;
+  const std::string convertHtmlToRtf(
+      const std::string& html,
+      const DotNet::CesiumForUnity::CesiumCreditSystem& creditSystem
+      );
 
+  std::unordered_map<std::string, std::string> _htmlToRtf;
   size_t _lastCreditsCount;
 };
 
