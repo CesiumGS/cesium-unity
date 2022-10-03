@@ -5,6 +5,10 @@
 #include <CesiumGltf/AccessorView.h>
 
 #include <DotNet/CesiumForUnity/CesiumMetadata.h>
+#include <DotNet/UnityEngine/GameObject.h>
+#include <DotNet/UnityEngine/Transform.h>
+#include <DotNet/UnityEngine/Mesh.h>
+#include <DotNet/System/Array1.h>
 
 using namespace CesiumForUnityNative;
 using namespace CesiumGltf;
@@ -53,13 +57,6 @@ void CesiumMetadataImpl::loadMetadata(
          const glm::dmat4& transform) {
         const ExtensionMeshPrimitiveExtFeatureMetadata* pMetadata =
             primitive.getExtension<ExtensionMeshPrimitiveExtFeatureMetadata>();
-        using VertexIDAccessorType = std::variant<
-            CesiumGltf::AccessorView<
-                CesiumGltf::AccessorTypes::SCALAR<uint8_t>>,
-            CesiumGltf::AccessorView<
-                CesiumGltf::AccessorTypes::SCALAR<uint16_t>>,
-            CesiumGltf::AccessorView<
-                CesiumGltf::AccessorTypes::SCALAR<uint32_t>>>;
 
         VertexIDAccessorType vertexIDAccessor;
 
@@ -79,6 +76,10 @@ void CesiumMetadataImpl::loadMetadata(
             default:
             break;
           }
+
+          auto& primitiveInfo = this->_featureIDs.emplace_back(std::pair<VertexIDAccessorType, std::vector<std::pair<std::string, FeatureIDAccessorType>>>());
+          primitiveInfo.first = vertexIDAccessor;
+          auto& pairs = primitiveInfo.second;
 
           for(const CesiumGltf::FeatureIDAttribute& attribute : pMetadata->featureIdAttributes){
             if(attribute.featureIds.attribute){
@@ -118,9 +119,45 @@ void CesiumMetadataImpl::loadMetadata(
 
               std::string featureTableName = attribute.featureTable.c_str();
               std::pair<std::string, FeatureIDAccessorType> p = {featureTableName, featureIDAccessor}; 
-              this->_featureIDs.emplace_back(p);
+              pairs.emplace_back(p);
             }
           }
         }
       });
 }
+
+
+    void CesiumMetadataImpl::loadMetadata(const DotNet::CesiumForUnity::CesiumMetadata& metadata, const DotNet::UnityEngine::Transform& transform, int triangleIndex){
+
+      this->_currentMetadataValues.clear();
+
+      DotNet::CesiumForUnity::CesiumMetadata metadataScript = transform.gameObject().GetComponentInParent<DotNet::CesiumForUnity::CesiumMetadata>();
+
+      if(metadataScript != nullptr){
+        this->_primitiveIndex = transform.GetSiblingIndex();
+        if (_primitiveIndex < _featureIDs.size()){
+
+          const std::pair<VertexIDAccessorType, std::vector<std::pair<std::string, FeatureIDAccessorType>>>& primitiveInfo = _featureIDs[_primitiveIndex];
+          const VertexIDAccessorType& indicesAccessor = primitiveInfo.first;
+          this->_vertexIndex = std::visit([triangleIndex](auto value){return getValueAtIndex(value, triangleIndex);}, indicesAccessor);
+          const auto& pairs = primitiveInfo.second;
+          for(const auto& pair : pairs){
+            const std::string& featureTableName = pair.first;
+            int64_t featureID = std::visit([this](auto value){ return getValueAtIndex(value, this->_vertexIndex);}, pair.second);
+
+            auto find = this->_featureTables.find(featureTableName);
+            if(find != this->_featureTables.end()){
+              const std::unordered_map<std::string, PropertyType>& featureTable = find->second;
+              for(auto kvp : featureTable){
+                const std::string& propertyName = kvp.first;
+                const PropertyType& propertyType = kvp.second;
+
+                ValueType value = std::visit([featureID](auto value){ return getValueType(value, featureID);}, propertyType);
+                std::pair<std::string, ValueType> p = {propertyName, value};
+                _currentMetadataValues.emplace_back(p);
+              }
+            }
+          }
+        }
+      }
+    }

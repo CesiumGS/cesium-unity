@@ -20,5 +20,7 @@ namespace CesiumForUnity
                 this._test = value;
             }
         }
+
+        public partial void loadMetadata(Transform transform, int triangleIndex);
     }
 }

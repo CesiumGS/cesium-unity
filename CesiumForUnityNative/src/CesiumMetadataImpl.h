@@ -11,6 +11,10 @@ namespace DotNet::CesiumForUnity {
 class CesiumMetadata;
 }
 
+namespace DotNet::UnityEngine {
+    class Transform;
+}
+
 namespace CesiumForUnityNative {
 
       using ValueType = std::variant<
@@ -92,6 +96,29 @@ namespace CesiumForUnityNative {
        CesiumGltf::AccessorView<CesiumGltf::AccessorTypes::SCALAR<uint32_t>>,
        CesiumGltf::AccessorView<CesiumGltf::AccessorTypes::SCALAR<float>>>;
 
+   template <typename T>
+   static ValueType getValueType(const CesiumGltf::MetadataPropertyView<T> view, int64_t index){
+    return view.get(index);
+   }
+   
+
+   using VertexIDAccessorType = std::variant<
+       CesiumGltf::AccessorView<CesiumGltf::AccessorTypes::SCALAR<uint8_t>>,
+       CesiumGltf::AccessorView<CesiumGltf::AccessorTypes::SCALAR<uint16_t>>,
+       CesiumGltf::AccessorView<CesiumGltf::AccessorTypes::SCALAR<uint32_t>>>;
+
+
+
+   template <typename T>
+   static int64_t
+   getValueAtIndex(const CesiumGltf::AccessorView<T>& value, int64_t vertexIndex) {
+     return static_cast<int64_t>(value[vertexIndex].value[0]);
+    }
+
+    static int64_t getValueAtIndex(std::monostate, int64_t vertexIndex){
+        return -1;
+    }
+
    class CesiumMetadataImpl {
    public:
      ~CesiumMetadataImpl();
@@ -102,6 +129,8 @@ namespace CesiumForUnityNative {
      void loadMetadata(
          const CesiumGltf::Model& model,
          const CesiumGltf::ExtensionModelExtFeatureMetadata& modelMetadata);
+    
+    void loadMetadata(const DotNet::CesiumForUnity::CesiumMetadata& metadata, const DotNet::UnityEngine::Transform& transform, int triangleIndex);
 
    private:
      std::unordered_map<
@@ -109,6 +138,11 @@ namespace CesiumForUnityNative {
          std::unordered_map<std::string, PropertyType>>
          _featureTables;
 
-     std::vector<std::pair<std::string, FeatureIDAccessorType>> _featureIDs;
+    int _primitiveIndex;
+    int _vertexIndex;
+
+    std::vector<std::pair<std::string, ValueType>> _currentMetadataValues; 
+
+     std::vector<std::pair<VertexIDAccessorType, std::vector<std::pair<std::string, FeatureIDAccessorType>>>> _featureIDs;
 };
 } // namespace CesiumForUnityNative

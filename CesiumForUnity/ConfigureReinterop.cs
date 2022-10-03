@@ -44,6 +44,7 @@ internal partial class ConfigureReinterop
         transform.position = transform.position;
         transform.rotation = transform.rotation;
         transform.localScale = transform.localScale;
+        int siblingIndex = transform.GetSiblingIndex();
         Matrix4x4 m = transform.localToWorldMatrix;
 
         go.AddComponent<MeshFilter>();
@@ -197,6 +198,7 @@ internal partial class ConfigureReinterop
         CesiumMetadata metadata = go.AddComponent<CesiumMetadata>();
         metadata = go.GetComponent<CesiumMetadata>();
         CesiumMetadata metadataParent = go.GetComponentInParent<CesiumMetadata>();
+        metadata.loadMetadata(t, 0);
 
         CesiumGeoreference georeference = go.AddComponent<CesiumGeoreference>();
         georeference = go.GetComponent<CesiumGeoreference>();
