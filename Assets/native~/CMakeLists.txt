@@ -31,6 +31,8 @@ target_include_directories(
         include
         generated/src
         generated/include
+        # tidy-html5 doesn't use target_include_directories, so add it manually
+        extern/tidy-html5/include
 )
 
 target_link_libraries(
