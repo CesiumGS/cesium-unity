@@ -164,6 +164,9 @@ public:
   }
 
 private:
+  void loadMetadata();
+  const CesiumGltf::Model* _pModel = nullptr;
+  const CesiumGltf::ExtensionModelExtFeatureMetadata* _pModelMetadata = nullptr;
   std::unordered_map<std::string, std::unordered_map<std::string, PropertyType>>
       _featureTables;
   int _primitiveIndex;
