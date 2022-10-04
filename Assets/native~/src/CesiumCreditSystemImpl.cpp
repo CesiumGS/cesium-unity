@@ -149,7 +149,7 @@ void htmlToRtf(
             output += "<link=\"" + parentUrl + "\">";
           }
 
-          output += "<sprite name=\"credit-image-" + numImages + "\">";
+          output += "<sprite name=\"credit-image-" + std::to_string(numImages) + "\">";
 
           if (!parentUrl.empty()) {
             output += "</link>";
