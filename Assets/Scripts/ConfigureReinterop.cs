@@ -1,16 +1,13 @@
 ﻿using Reinterop;
 using System;
-using System.Collections;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using TMPro;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.Rendering;
-using UnityEngine.UI;
 
 namespace CesiumForUnity
 {
@@ -279,7 +276,7 @@ namespace CesiumForUnity
             }
             
             creditSystem.SetCreditsText("Popup", "OnScreen");
-            string rtf = creditSystem.LoadImage("string");
+            creditSystem.StartCoroutine(creditSystem.LoadImage("string"));
         }
     }
 }

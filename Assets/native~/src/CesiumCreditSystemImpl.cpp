@@ -10,14 +10,14 @@
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
 #include <DotNet/System/Array1.h>
+#include <DotNet/System/Collections/IEnumerator.h>
 #include <DotNet/System/Object.h>
 #include <DotNet/System/String.h>
-#include <DotNet/UnityEngine/Networking/UnityWebRequest.h>
 #include <DotNet/UnityEngine/Application.h>
+#include <DotNet/UnityEngine/Coroutine.h>
 #include <DotNet/UnityEngine/GameObject.h>
 #include <DotNet/UnityEngine/Object.h>
 #include <DotNet/UnityEngine/Resources.h>
-#include <DotNet/UnityEngine/Sprite.h>
 #include <DotNet/UnityEngine/Texture2D.h>
 #include <DotNet/UnityEngine/Transform.h>
 
@@ -34,7 +34,6 @@ CesiumCreditSystemImpl::CesiumCreditSystemImpl(
     const CesiumForUnity::CesiumCreditSystem& creditSystem)
     : _pCreditSystem(std::make_shared<CreditSystem>()),
       _htmlToRtf(),
-      _creditSprites(),
       _lastCreditsCount(0) {}
 
 CesiumCreditSystemImpl::~CesiumCreditSystemImpl() {}
@@ -124,8 +123,7 @@ void htmlToRtf(
 
         if (!parentUrl.empty()) {
           // Output is <link="url">text</link>
-          output +=
-              "<link=\"" + parentUrl + "\">" + text + "</link>";
+          output += "<link=\"" + parentUrl + "\">" + text + "</link>";
         } else {
           output += text;
         }
@@ -136,12 +134,16 @@ void htmlToRtf(
       if (srcAttr) {
         auto srcValue = tidyAttrValue(srcAttr);
         if (srcValue) {
-          // Output is <link="url"><sprite name="url"></sprite></link>
+          const std::string srcString =
+              std::string(reinterpret_cast<const char*>(srcValue));
+          creditSystem.StartCoroutine(
+              creditSystem.LoadImage(System::String(srcString)));
+
+          // Output is <link="url"><sprite name="srcValue"></sprite></link>
           if (!parentUrl.empty()) {
             output += "<link=\"" + parentUrl + "\">";
           }
-          output += creditSystem.LoadImage(
-              std::string(reinterpret_cast<const char*>(srcValue)));
+          output += "<sprite name=\"" + srcString + "></sprite>";
           if (!parentUrl.empty()) {
             output += "</link>";
           }
@@ -176,12 +178,13 @@ const std::string CesiumCreditSystemImpl::convertHtmlToRtf(
 
   tidySetErrorBuffer(tdoc, &tidy_errbuf);
 
-  const std::string& modifiedHtml = "<!DOCTYPE html><html><body>" + html + "</body></html>";
+  const std::string& modifiedHtml =
+      "<!DOCTYPE html><html><body>" + html + "</body></html>";
 
   std::string output, url;
   err = tidyParseString(tdoc, html.c_str());
   if (err < 2) {
-    htmlToRtf(output, url, tdoc, tidyGetRoot(tdoc), creditSystem);
+    //htmlToRtf(output, url, tdoc, tidyGetRoot(tdoc), creditSystem);
   }
 
   tidyBufFree(&tidy_errbuf);

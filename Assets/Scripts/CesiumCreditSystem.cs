@@ -1,9 +1,10 @@
 using Reinterop;
 using System;
-using System.Collections.Generic;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Networking;
 using UnityEngine.TextCore;
 
 #if ENABLE_INPUT_SYSTEM
@@ -40,11 +41,11 @@ namespace CesiumForUnity
                 GameObject eventSystemGameObject = new GameObject("EventSystem");
                 eventSystemGameObject.AddComponent<EventSystem>();
 
-#if ENABLE_INPUT_SYSTEM
+                #if ENABLE_INPUT_SYSTEM
                 eventSystemGameObject.AddComponent<InputSystemUIInputModule>();
-#elif ENABLE_LEGACY_INPUT_MANAGER
+                #elif ENABLE_LEGACY_INPUT_MANAGER
                 eventSystemGameObject.AddComponent<StandaloneInputModule>();
-#endif
+                #endif
             }
 
             defaultSpriteShader = Shader.Find("TextMeshPro/Sprite");
@@ -79,7 +80,7 @@ namespace CesiumForUnity
 
         const string base64Prefix = "data:image/png;base64,";
 
-        public string LoadImage(string url)
+        public IEnumerator LoadImage(string url)
         {
             // Initialize a texture of arbitrary size.
             Texture2D texture = new Texture2D(1, 1);
@@ -94,18 +95,17 @@ namespace CesiumForUnity
             else
             {
                 // Load an image from a URL.
-                // TODO
-                return "";
-                /*UnityWebRequest request = UnityWebRequestTexture.GetTexture(url);
-                 yield return request.SendWebRequest();
-                 if (request.isNetworkError || request.isHttpError)
-                 {
-                     Debug.Log(request.error);
-                 }
-                 else
-                 {
-                     image = ((DownloadHandlerTexture)request.downloadHandler).texture;
-                 }*/
+                UnityWebRequest request = UnityWebRequestTexture.GetTexture(url);
+                yield return request.SendWebRequest();
+                if (request.result == UnityWebRequest.Result.ConnectionError ||
+                    request.result == UnityWebRequest.Result.ProtocolError)
+                {
+                    Debug.Log(request.error);
+                }
+                else
+                {
+                    texture = ((DownloadHandlerTexture)request.downloadHandler).texture;
+                }
             }
 
             // Create a TMP_SpriteAsset out of the texture and add it as a fallback
@@ -113,8 +113,6 @@ namespace CesiumForUnity
             // searches for its name (which in this case is the image url).
             TMP_SpriteAsset spriteAsset = CreateSpriteAssetFromTexture(texture, url);
             TMP_Settings.defaultSpriteAsset.fallbackSpriteAssets.Add(spriteAsset);
-
-            return "<sprite name=\"" + url + "></sprite>";
         }
 
         private TMP_SpriteAsset CreateSpriteAssetFromTexture(Texture2D texture, string name)

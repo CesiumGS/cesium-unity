@@ -11,7 +11,6 @@
 namespace DotNet::CesiumForUnity {
 class CesiumCreditSystem;
 class GameObject;
-class Sprite;
 } // namespace DotNet::CesiumForUnity
 
 namespace Cesium3DTilesSelection {
