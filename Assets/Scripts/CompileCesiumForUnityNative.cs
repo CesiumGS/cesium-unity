@@ -8,6 +8,7 @@ using UnityEditor.Compilation;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.IO;
+using System.Text;
 
 namespace CesiumForUnity
 {
@@ -18,9 +19,28 @@ namespace CesiumForUnity
         {
             UnityEngine.Debug.Log("Project loaded in Unity Editor");
         }
+
+        private static string GetSourceFilePathName([CallerFilePath] string? callerFilePath = null)
+        {
+            return callerFilePath == null ? "" : callerFilePath;
+        }
     }
 
-    class MyCustomBuildProcessor : IPostprocessBuildWithReport
+    class MyAssetPostprocessor : AssetPostprocessor
+    {
+        private void OnPreprocessAsset()
+        {
+            PluginImporter? importer = this.assetImporter as PluginImporter;
+            if (importer != null && assetPath.Contains("Plugins/x64/CesiumForUnityNative.dll"))
+            {
+                importer.SetCompatibleWithAnyPlatform(true);
+                importer.SetExcludeEditorFromAnyPlatform(true);
+                importer.SetCompatibleWithEditor(false);
+            }
+        }
+    }
+
+    class MyCustomBuildProcessor : IPostprocessBuildWithReport, IPreprocessBuildWithReport
     {
         public int callbackOrder { get { return 0; } }
         public void OnPostprocessBuild(BuildReport report)
@@ -31,7 +51,24 @@ namespace CesiumForUnity
         [PostProcessBuildAttribute(1)]
         public static void OnPostprocessBuild(BuildTarget target, string pathToBuiltProject)
         {
-            UnityEngine.Debug.Log(pathToBuiltProject);
+            UnityEngine.Debug.Log("OnPostprocessBuild");
+        }
+
+        public void OnPreprocessBuild(BuildReport report)
+        {
+            UnityEngine.Debug.Log("OnPreprocessBuild");
+
+            string sourceFilename = GetSourceFilePathName();
+            string assetsPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(sourceFilename), $".."));
+            string pluginPath = Path.Combine(assetsPath, "Plugins", "x64", "CesiumForUnityNative.dll");
+            File.WriteAllText(pluginPath, "This is not a real DLL, it is a placeholder.", Encoding.UTF8);
+            string relativePath = Path.Combine("Assets", Path.GetRelativePath(Application.dataPath, pluginPath));
+            AssetDatabase.ImportAsset(relativePath, ImportAssetOptions.ForceSynchronousImport);
+        }
+
+        private static string GetSourceFilePathName([CallerFilePath] string? callerFilePath = null)
+        {
+            return callerFilePath == null ? "" : callerFilePath;
         }
     }
 
@@ -70,7 +107,7 @@ namespace CesiumForUnity
             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.UseShellExecute = true;
             startInfo.FileName = "cmake";
-            startInfo.Arguments = $"-B build-{folder} -S . -DCMAKE_BUILD_TYPE={configuration} -DCMAKE_INSTALL_PREFIX=\"{installPath}\" -DREINTEROP_GENERATED_DIRECTORY=\"generated-{folder}\"";
+            startInfo.Arguments = $"-B build-{folder} -S . -DEDITOR=false -DCMAKE_BUILD_TYPE={configuration} -DCMAKE_INSTALL_PREFIX=\"{installPath}\" -DREINTEROP_GENERATED_DIRECTORY=\"generated-{folder}\"";
             if (toolchain != null)
                 startInfo.Arguments += $" -DCMAKE_TOOLCHAIN_FILE=\"{toolchain}\"";
             startInfo.CreateNoWindow = false;
@@ -90,7 +127,7 @@ namespace CesiumForUnity
     }
 
     [InitializeOnLoad]
-    public class BuildPP //
+    public class BuildPP
     {
         static BuildPP()
         {

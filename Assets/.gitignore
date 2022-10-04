@@ -7,3 +7,5 @@
 *.deps.json
 *.deps.json.meta
 generated/
+CesiumForUnityNative.dll
+CesiumForUnityNative.dll.meta
