@@ -6,6 +6,8 @@
 #include <CesiumGltf/MetadataPropertyView.h>
 #include <CesiumGltf/Model.h>
 
+#include <DotNet/System/String.h>
+
 #include <unordered_map>
 
 namespace DotNet::CesiumForUnity {
@@ -132,6 +134,33 @@ public:
       const DotNet::CesiumForUnity::CesiumMetadata& metadata,
       const DotNet::UnityEngine::Transform& transform,
       int triangleIndex);
+
+  int getNumberOfProperties(
+      const DotNet::CesiumForUnity::CesiumMetadata& metadata) {
+    return _currentMetadataValues.size();
+  }
+
+  DotNet::System::String
+  getKey(const DotNet::CesiumForUnity::CesiumMetadata& metadata, int index) {
+    if (index < _currentMetadataValues.size()) {
+      return DotNet::System::String(
+          _currentMetadataValues[index].first.c_str());
+    }
+    return DotNet::System::String("");
+  }
+
+  DotNet::System::String getValueAsString(
+      const DotNet::CesiumForUnity::CesiumMetadata& metadata,
+      int index) {
+    if (index < _currentMetadataValues.size()) {
+      return DotNet::System::String(
+          std::visit(
+              [](auto value) { return getString(value, "not implemented"); },
+              _currentMetadataValues[index].second)
+              .c_str());
+    }
+    return DotNet::System::String("");
+  }
 
 private:
   std::unordered_map<std::string, std::unordered_map<std::string, PropertyType>>
