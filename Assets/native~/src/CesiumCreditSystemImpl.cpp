@@ -61,14 +61,14 @@ void CesiumCreditSystemImpl::Update(
     std::string onScreenCredits = "";
 
     bool firstCreditOnScreen = true;
-    for (int i = 0; i < creditsCount; i++) {
+    for (int i = 0; i < 1; i++) {
       const Cesium3DTilesSelection::Credit& credit = creditsToShowThisFrame[i];
       if (i != 0) {
         popupCredits += "\n";
       }
 
       const std::string& html = _pCreditSystem->getHtml(credit);
-      std::string rtf = "";
+      std::string rtf;
 
       auto htmlFind = _htmlToRtf.find(html);
       if (htmlFind != _htmlToRtf.end()) {
@@ -77,6 +77,7 @@ void CesiumCreditSystemImpl::Update(
         rtf = convertHtmlToRtf(html, creditSystem);
         _htmlToRtf.insert({html, rtf});
       }
+
       popupCredits += rtf;
 
       if (_pCreditSystem->shouldBeShownOnScreen(credit)) {
@@ -134,16 +135,22 @@ void htmlToRtf(
       if (srcAttr) {
         auto srcValue = tidyAttrValue(srcAttr);
         if (srcValue) {
+          // Get the number of images that existed before LoadImage is called.
+          const int numImages = creditSystem.numberOfImages();
+
           const std::string srcString =
               std::string(reinterpret_cast<const char*>(srcValue));
           creditSystem.StartCoroutine(
               creditSystem.LoadImage(System::String(srcString)));
 
-          // Output is <link="url"><sprite name="srcValue"></sprite></link>
+          // Output is <link="url"><sprite name="credit-image-ID"></link>
+          // The ID of the image is just the number of images before it was added.
           if (!parentUrl.empty()) {
             output += "<link=\"" + parentUrl + "\">";
           }
-          output += "<sprite name=\"" + srcString + "></sprite>";
+
+          output += "<sprite name=\"credit-image-" + numImages + "\">";
+
           if (!parentUrl.empty()) {
             output += "</link>";
           }
@@ -198,6 +205,7 @@ void CesiumCreditSystemImpl::OnApplicationQuit(
   // Dereference the prefab. If this isn't done, the Editor will try to
   // use the destroyed prefab when it re-enters play mode.
   CesiumCreditSystemImpl::_creditSystemPrefab = nullptr;
+  creditSystem.ClearLoadedImages();
 }
 
 const std::shared_ptr<Cesium3DTilesSelection::CreditSystem>&

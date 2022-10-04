@@ -274,9 +274,11 @@ namespace CesiumForUnity
                 creditSystem = creditSystems[i];
                 creditSystem.gameObject.name.StartsWith("name");
             }
-            
+
+            int numImages = creditSystem.numberOfImages;
             creditSystem.SetCreditsText("Popup", "OnScreen");
             creditSystem.StartCoroutine(creditSystem.LoadImage("string"));
+            creditSystem.ClearLoadedImages();
         }
     }
 }
