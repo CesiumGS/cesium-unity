@@ -184,7 +184,7 @@ const std::string CesiumCreditSystemImpl::convertHtmlToRtf(
   std::string output, url;
   err = tidyParseString(tdoc, html.c_str());
   if (err < 2) {
-    //htmlToRtf(output, url, tdoc, tidyGetRoot(tdoc), creditSystem);
+    htmlToRtf(output, url, tdoc, tidyGetRoot(tdoc), creditSystem);
   }
 
   tidyBufFree(&tidy_errbuf);
