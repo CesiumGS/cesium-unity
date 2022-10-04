@@ -92,15 +92,16 @@ static std::string
 getString(const ValueType& value, const std::string& defaultValue) {
   return std::visit(
       [defaultValue](auto&& arg) {
-        using T = decltype(arg);
+        using T = std::decay_t<decltype(arg)>;
         if constexpr (CesiumGltf::IsMetadataNumeric<T>::value) {
           return std::to_string(arg);
         } else if constexpr (CesiumGltf::IsMetadataBoolean<T>::value) {
-          return arg ? "true" : "false";
+          return arg ? std::string("true") : std::string("false");
         } else if constexpr (CesiumGltf::IsMetadataString<T>::value) {
           return std::string(arg);
+        } else {
+          return defaultValue;
         }
-        return defaultValue;
       },
       value);
 }
