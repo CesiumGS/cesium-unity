@@ -9,10 +9,12 @@
 #include <DotNet/CesiumForUnity/CesiumCreditSystem.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
+
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/Collections/IEnumerator.h>
 #include <DotNet/System/Object.h>
 #include <DotNet/System/String.h>
+
 #include <DotNet/UnityEngine/Application.h>
 #include <DotNet/UnityEngine/Coroutine.h>
 #include <DotNet/UnityEngine/GameObject.h>
@@ -34,6 +36,8 @@ CesiumCreditSystemImpl::CesiumCreditSystemImpl(
     const CesiumForUnity::CesiumCreditSystem& creditSystem)
     : _pCreditSystem(std::make_shared<CreditSystem>()),
       _htmlToRtf(),
+      _popupCreditsList(),
+      _onScreenCreditsList(),
       _lastCreditsCount(0) {}
 
 CesiumCreditSystemImpl::~CesiumCreditSystemImpl() {}
@@ -56,43 +60,45 @@ void CesiumCreditSystemImpl::Update(
       _pCreditSystem->getCreditsToNoLongerShowThisFrame().size() > 0;
 
   if (creditsUpdated) {
-    std::string onScreenCredits = "";
-    std::string popupCredits = "";
+    _onScreenCreditsList.Clear();
+    _popupCreditsList.Clear();
 
-    bool firstCreditOnScreen = true;
     size_t creditsCount = creditsToShowThisFrame.size();
 
     for (int i = 0; i < creditsCount; i++) {
       const Cesium3DTilesSelection::Credit& credit = creditsToShowThisFrame[i];
-      if (i != 0) {
-        popupCredits += "\n";
-      }
 
-      std::string rtf;
+      System::String rtf = System::String("");
       const std::string& html = _pCreditSystem->getHtml(credit);
 
       auto htmlFind = _htmlToRtf.find(html);
       if (htmlFind != _htmlToRtf.end()) {
         rtf = htmlFind->second;
       } else {
-        rtf = convertHtmlToRtf(html, creditSystem);
+        std::string rtfString = convertHtmlToRtf(html, creditSystem);
+        rtf = System::String(rtfString);
         _htmlToRtf.insert({html, rtf});
       }
-
-      popupCredits += rtf;
+      _popupCreditsList.Add(rtf);
 
       if (_pCreditSystem->shouldBeShownOnScreen(credit)) {
-        if (firstCreditOnScreen) {
-          firstCreditOnScreen = false;
-        } else {
-          onScreenCredits += " \u2022 ";
-        }
-        onScreenCredits += rtf;
+        _onScreenCreditsList.Add(rtf);
       }
     }
 
-    onScreenCredits += "<link=\"popup\"><u>Data Attribution</u></link>";
-    creditSystem.SetCreditsText(popupCredits, onScreenCredits);
+    System::String popupCredits = System::String::Join(
+        System::String("\n"),
+        _popupCreditsList.ToArray());
+
+    System::String onScreenCredits = System::String::Join(
+        creditSystem.defaultDelimiter(),
+        _onScreenCreditsList.ToArray());
+
+    onScreenCredits = System::String::Concat(
+        onScreenCredits,
+        System::String("<link=\"popup\"><u>Data Attribution</u></link>"));
+    
+    creditSystem.SetCreditsText(System::String(popupCredits), System::String(onScreenCredits));
 
     _lastCreditsCount = creditsCount;
   }

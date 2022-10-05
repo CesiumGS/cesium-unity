@@ -3,6 +3,8 @@
 #include <Cesium3DTilesSelection/CreditSystem.h>
 
 #include <DotNet/CesiumForUnity/CesiumCreditSystem.h>
+#include <DotNet/System/Collections/Generic/List1.h>
+#include <DotNet/System/String.h>
 #include <DotNet/UnityEngine/GameObject.h>
 
 #include <memory>
@@ -46,10 +48,13 @@ private:
 
   const std::string convertHtmlToRtf(
       const std::string& html,
-      const DotNet::CesiumForUnity::CesiumCreditSystem& creditSystem
-      );
+      const DotNet::CesiumForUnity::CesiumCreditSystem& creditSystem);
 
-  std::unordered_map<std::string, std::string> _htmlToRtf;
+  std::unordered_map<std::string, DotNet::System::String> _htmlToRtf;
+  DotNet::System::Collections::Generic::List1<DotNet::System::String>
+      _popupCreditsList;
+  DotNet::System::Collections::Generic::List1<DotNet::System::String>
+      _onScreenCreditsList;
   size_t _lastCreditsCount;
 };
 

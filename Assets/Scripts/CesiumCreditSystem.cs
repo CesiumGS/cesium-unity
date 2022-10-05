@@ -24,6 +24,15 @@ namespace CesiumForUnity
         private string _popupTextContent = "";
         private string _onScreenTextContent = "";
 
+        // The delimiter refers to the string used to separate credit entries
+        // when they are presented on-screen.
+        private string _defaultDelimiter = " \u2022 ";
+
+        public string defaultDelimiter
+        {
+            get => this._defaultDelimiter;
+        }
+
         private Shader _defaultSpriteShader = null!;
 
         private int _numImages = 0;

@@ -1,5 +1,6 @@
 ﻿using Reinterop;
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -279,6 +280,15 @@ namespace CesiumForUnity
             creditSystem.SetCreditsText("Popup", "OnScreen");
             creditSystem.StartCoroutine(creditSystem.LoadImage("string"));
             creditSystem.ClearLoadedImages();
+            string delimiter = creditSystem.defaultDelimiter;
+
+            List<string> stringList = new List<string>();
+            stringList.Add("item");
+            stringList.Clear();
+
+            string test = string.Concat("string", "string2");
+            string[] stringArray = stringList.ToArray();
+            test = string.Join(" ", stringArray);
         }
     }
 }
