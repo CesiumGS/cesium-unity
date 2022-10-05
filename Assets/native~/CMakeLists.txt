@@ -51,6 +51,12 @@ set_target_properties(
         CXX_EXTENSIONS NO
 )
 
+target_compile_definitions(
+  CesiumForUnityNative
+  PUBLIC
+    TIDY_STATIC
+)
+
 if (EDITOR)
   target_compile_definitions(CesiumForUnityNative PRIVATE UNITY_EDITOR)
 endif()
