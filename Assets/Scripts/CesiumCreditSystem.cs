@@ -18,11 +18,11 @@ namespace CesiumForUnity
     public partial class CesiumCreditSystem : MonoBehaviour, IPointerClickHandler
     {
         private GameObject _popupGameObject = null!;
-        private TextMeshProUGUI _popupText = null!;
-        private TextMeshProUGUI _onScreenText = null!;
+        private TextMeshProUGUI _popupTextComponent = null!;
+        private TextMeshProUGUI _onScreenTextComponent = null!;
 
-        private string _popupTextContent = "";
-        private string _onScreenTextContent = "";
+        private string _popupText = "";
+        private string _onScreenText = "";
 
         // The delimiter refers to the string used to separate credit entries
         // when they are presented on-screen.
@@ -50,16 +50,16 @@ namespace CesiumForUnity
             _popupGameObject = canvasGameObject.transform.Find("Popup").gameObject;
             _popupGameObject.SetActive(false);
             GameObject popupTextGameObject = _popupGameObject.transform.GetChild(0).gameObject;
-            _popupText = popupTextGameObject.GetComponent<TextMeshProUGUI>();
+            _popupTextComponent = popupTextGameObject.GetComponent<TextMeshProUGUI>();
 
             GameObject onScreenGameObject = canvasGameObject.transform.Find("OnScreen").gameObject;
             GameObject onScreenTextGameObject = onScreenGameObject.transform.GetChild(0).gameObject;
-            _onScreenText = onScreenTextGameObject.GetComponent<TextMeshProUGUI>();
+            _onScreenTextComponent = onScreenTextGameObject.GetComponent<TextMeshProUGUI>();
 
-            _popupTextContent = "";
-            _onScreenTextContent = "";
+            _popupText = "";
+            _onScreenText = "";
 
-            // If no event system exists, create one.
+            // If no EventSystem exists, create one.
             if (EventSystem.current == null)
             {
                 GameObject eventSystemGameObject = new GameObject("EventSystem");
@@ -83,20 +83,21 @@ namespace CesiumForUnity
         public void OnPointerClick(PointerEventData eventData)
         {
             int linkIndex;
-            if (_popupGameObject.activeSelf) {
-                linkIndex = TMP_TextUtilities.FindIntersectingLink(_popupText, eventData.position, null);
+            if (_popupGameObject.activeSelf)
+            {
+                linkIndex = TMP_TextUtilities.FindIntersectingLink(_popupTextComponent, eventData.position, null);
                 if (linkIndex != -1)
                 {
-                    TMP_LinkInfo linkInfo = _popupText.textInfo.linkInfo[linkIndex];
+                    TMP_LinkInfo linkInfo = _popupTextComponent.textInfo.linkInfo[linkIndex];
                     Application.OpenURL(linkInfo.GetLinkID());
                     return;
                 }
             }
 
-            linkIndex = TMP_TextUtilities.FindIntersectingLink(_onScreenText, eventData.position, null);
+            linkIndex = TMP_TextUtilities.FindIntersectingLink(_onScreenTextComponent, eventData.position, null);
             if (linkIndex != -1)
             {
-                TMP_LinkInfo linkInfo = _onScreenText.textInfo.linkInfo[linkIndex];
+                TMP_LinkInfo linkInfo = _onScreenTextComponent.textInfo.linkInfo[linkIndex];
                 string linkId = linkInfo.GetLinkID();
                 if (linkId == "popup")
                 {
@@ -109,17 +110,19 @@ namespace CesiumForUnity
             }
         }
 
-        private void RefreshCreditsText() {
-            if (_numLoadingImages == 0) {
-                _popupText.text = _popupTextContent;
-                _onScreenText.text = _onScreenTextContent;
+        private void RefreshCreditsText()
+        {
+            if (_numLoadingImages == 0)
+            {
+                _popupTextComponent.text = _popupText;
+                _onScreenTextComponent.text = _onScreenText;
             }
         }
 
         public void SetCreditsText(string popupCredits, string onScreenCredits)
         {
-            _popupTextContent = popupCredits;
-            _onScreenTextContent = onScreenCredits;
+            _popupText = popupCredits;
+            _onScreenText = onScreenCredits;
 
             RefreshCreditsText();
         }
@@ -130,7 +133,7 @@ namespace CesiumForUnity
         {
             // Each image is identified by its index.
             int imageId = _numImages;
-            _numImages++; 
+            _numImages++;
 
             // Initialize a texture of arbitrary size.
             Texture2D texture = new Texture2D(1, 1);
@@ -140,7 +143,8 @@ namespace CesiumForUnity
                 // Load an image from a string that contains the "data:image/png;base64," prefix
                 string byteString = url.Substring(base64Prefix.Length);
                 byte[] bytes = Convert.FromBase64String(byteString);
-                if (!texture.LoadImage(bytes)) {
+                if (!texture.LoadImage(bytes))
+                {
                     Debug.Log("Could not parse image from base64 string.");
                 }
             }
@@ -164,8 +168,6 @@ namespace CesiumForUnity
                 _numLoadingImages--;
             }
 
-            texture.wrapMode = TextureWrapMode.Clamp;
-
             // Create a TMP_SpriteAsset out of the texture and add it as a fallback
             // for the default sprite asset. The sprite will be accessed when the text
             // searches for its name.
@@ -178,6 +180,8 @@ namespace CesiumForUnity
 
         private TMP_SpriteAsset CreateSpriteAssetFromTexture(Texture2D texture, string name)
         {
+            texture.wrapMode = TextureWrapMode.Clamp;
+
             // Convert the image to a sprite asset for TextMeshPro.
             TMP_SpriteAsset spriteAsset = ScriptableObject.CreateInstance<TMP_SpriteAsset>();
             spriteAsset.name = name;

@@ -148,7 +148,7 @@ GameObject:
   - component: {fileID: 3942584564580068781}
   - component: {fileID: 6876633697405786747}
   m_Layer: 0
-  m_Name: Canvas
+  m_Name: CesiumCreditSystemUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

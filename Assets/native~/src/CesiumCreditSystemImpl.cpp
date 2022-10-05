@@ -43,7 +43,9 @@ CesiumCreditSystemImpl::CesiumCreditSystemImpl(
 CesiumCreditSystemImpl::~CesiumCreditSystemImpl() {}
 
 void CesiumCreditSystemImpl::JustBeforeDelete(
-    const CesiumForUnity::CesiumCreditSystem& creditSystem) {}
+    const CesiumForUnity::CesiumCreditSystem& creditSystem) {
+  creditSystem.ClearLoadedImages();
+}
 
 void CesiumCreditSystemImpl::Update(
     const CesiumForUnity::CesiumCreditSystem& creditSystem) {
@@ -210,7 +212,6 @@ void CesiumCreditSystemImpl::OnApplicationQuit(
   // Dereference the prefab. If this isn't done, the Editor will try to
   // use the destroyed prefab when it re-enters play mode.
   CesiumCreditSystemImpl::_creditSystemPrefab = nullptr;
-  creditSystem.ClearLoadedImages();
 }
 
 const std::shared_ptr<Cesium3DTilesSelection::CreditSystem>&
