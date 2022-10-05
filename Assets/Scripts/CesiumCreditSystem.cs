@@ -155,6 +155,8 @@ namespace CesiumForUnity
                 _numLoadingImages--;
             }
 
+            texture.wrapMode = TextureWrapMode.Clamp;
+
             // Create a TMP_SpriteAsset out of the texture and add it as a fallback
             // for the default sprite asset. The sprite will be accessed when the text
             // searches for its name.
