@@ -144,12 +144,35 @@ private:
   void loadMetadata();
   const CesiumGltf::Model* _pModel = nullptr;
   const CesiumGltf::ExtensionModelExtFeatureMetadata* _pModelMetadata = nullptr;
-  std::unordered_map<std::string, std::unordered_map<std::string, PropertyType>>
+
+  /**
+   * @brief Feature tables are a map of property names to properties 
+   */
+  using FeatureTable = std::unordered_map<std::string, PropertyType>;
+  /**
+   * @brief Map of feature table name to feature tables
+   */
+  std::unordered_map<std::string, FeatureTable>
       _featureTables;
+
+  /**
+   * @brief FeatureIDAttributes is a pair of feature table name, and the
+   * corresponding accessor view of the primitive's feature IDs.
+   */
+  using FeatureIDAttribute = std::pair<std::string, AccessorType>;
+
+  /**
+   * @brief Vector containing one element per primitive containing the
+   * primitive's indices accessor view, and collection of Feature ID Attributes.
+   */
   std::vector<std::pair<
       AccessorType,
-      std::vector<std::pair<std::string, AccessorType>>>>
+      std::vector<FeatureIDAttribute>>>
       _featureIDs;
+
+  /**
+   * @brief Map of property names to property values of currently loaded metadata. 
+   */
   std::vector<std::pair<std::string, ValueType>> _currentMetadataValues;
 };
 } // namespace CesiumForUnityNative
