@@ -50,25 +50,26 @@ void CesiumCreditSystemImpl::Update(
   const std::vector<Cesium3DTilesSelection::Credit>& creditsToShowThisFrame =
       _pCreditSystem->getCreditsToShowThisFrame();
 
-  // If the credit list has changed, reformat the credits
-  size_t creditsCount = creditsToShowThisFrame.size();
+  // If the credit list has changed, reformat the credits.
   bool creditsUpdated =
-      creditsCount != _lastCreditsCount ||
+      creditsToShowThisFrame.size() != _lastCreditsCount ||
       _pCreditSystem->getCreditsToNoLongerShowThisFrame().size() > 0;
 
   if (creditsUpdated) {
-    std::string popupCredits = "";
     std::string onScreenCredits = "";
+    std::string popupCredits = "";
 
     bool firstCreditOnScreen = true;
-    for (int i = 0; i < 1; i++) {
+    size_t creditsCount = creditsToShowThisFrame.size();
+
+    for (int i = 0; i < creditsCount; i++) {
       const Cesium3DTilesSelection::Credit& credit = creditsToShowThisFrame[i];
       if (i != 0) {
         popupCredits += "\n";
       }
 
-      const std::string& html = _pCreditSystem->getHtml(credit);
       std::string rtf;
+      const std::string& html = _pCreditSystem->getHtml(credit);
 
       auto htmlFind = _htmlToRtf.find(html);
       if (htmlFind != _htmlToRtf.end()) {
@@ -92,6 +93,7 @@ void CesiumCreditSystemImpl::Update(
 
     onScreenCredits += "<link=\"popup\"><u>Data Attribution</u></link>";
     creditSystem.SetCreditsText(popupCredits, onScreenCredits);
+
     _lastCreditsCount = creditsCount;
   }
 
@@ -143,14 +145,13 @@ void htmlToRtf(
           creditSystem.StartCoroutine(
               creditSystem.LoadImage(System::String(srcString)));
 
-          // Output is <link="url"><sprite name="credit-image-ID"></link>
+          // Output is <link="url"><size=150%><sprite name="credit-image-ID"></size></link>
           // The ID of the image is just the number of images before it was added.
           if (!parentUrl.empty()) {
             output += "<link=\"" + parentUrl + "\">";
           }
-
-          output += "<sprite name=\"credit-image-" + std::to_string(numImages) + "\">";
-
+          output += "<size=150%><sprite name=\"credit-image-" +
+                    std::to_string(numImages) + "\"></size>";
           if (!parentUrl.empty()) {
             output += "</link>";
           }
@@ -163,7 +164,6 @@ void htmlToRtf(
       auto hrefValue = tidyAttrValue(hrefAttr);
       parentUrl = std::string(reinterpret_cast<const char*>(hrefValue));
     }
-
     htmlToRtf(output, parentUrl, tdoc, child, creditSystem);
   }
 
@@ -193,7 +193,6 @@ const std::string CesiumCreditSystemImpl::convertHtmlToRtf(
   if (err < 2) {
     htmlToRtf(output, url, tdoc, tidyGetRoot(tdoc), creditSystem);
   }
-
   tidyBufFree(&tidy_errbuf);
   tidyRelease(tdoc);
 
