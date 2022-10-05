@@ -102,22 +102,84 @@ namespace CesiumForUnity
         private void BuildNativeLibrary(string configuration, string folder, string? toolchain)
         {
             string sourceFilename = GetSourceFilePathName();
-            string installPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(sourceFilename), $"../Plugins/{folder}"));
+            string scriptsDirectory = Path.GetDirectoryName(sourceFilename);
+            string nativeDirectory = Path.GetFullPath(Path.Combine(scriptsDirectory, "../native~"));
+            string buildDirectory = Path.Combine(nativeDirectory, $"build-{folder}");
+            Directory.CreateDirectory(buildDirectory);
 
-            ProcessStartInfo startInfo = new ProcessStartInfo();
-            startInfo.UseShellExecute = true;
-            startInfo.FileName = "cmake";
-            startInfo.Arguments = $"-B build-{folder} -S . -DEDITOR=false -DCMAKE_BUILD_TYPE={configuration} -DCMAKE_INSTALL_PREFIX=\"{installPath}\" -DREINTEROP_GENERATED_DIRECTORY=\"generated-{folder}\"";
-            if (toolchain != null)
-                startInfo.Arguments += $" -DCMAKE_TOOLCHAIN_FILE=\"{toolchain}\"";
-            startInfo.CreateNoWindow = false;
-            startInfo.WorkingDirectory = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(sourceFilename), "../native~"));
-            Process configure = Process.Start(startInfo);
-            configure.WaitForExit();
+            try
+            {
+                string logFilename = Path.Combine(buildDirectory, "build.log");
+                string logDisplayName = Path.Combine("Assets", Path.GetRelativePath(Application.dataPath, logFilename));
+                if (EditorUtility.DisplayCancelableProgressBar("Building CesiumForUnityNative", $"See {logDisplayName}.", 0.0f))
+                    return;
 
-            startInfo.Arguments = $"--build build-{folder} -j14 --config {configuration} --target install";
-            Process install = Process.Start(startInfo);
-            install.WaitForExit();
+                string installPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(sourceFilename), $"../Plugins/{folder}"));
+
+                ProcessStartInfo startInfo = new ProcessStartInfo();
+                startInfo.UseShellExecute = false;
+                startInfo.FileName = "cmake.exe";
+                startInfo.Arguments = $"-B build-{folder} -S . -DEDITOR=false -DCMAKE_BUILD_TYPE={configuration} -DCMAKE_INSTALL_PREFIX=\"{installPath}\" -DREINTEROP_GENERATED_DIRECTORY=\"generated-{folder}\"";
+                if (toolchain != null)
+                    startInfo.Arguments += $" -DCMAKE_TOOLCHAIN_FILE=\"{toolchain}\"";
+                startInfo.CreateNoWindow = false;
+                startInfo.WorkingDirectory = nativeDirectory;
+                startInfo.RedirectStandardError = true;
+                startInfo.RedirectStandardOutput = true;
+                string? ndkRoot = startInfo.Environment.ContainsKey("ANDROID_NDK_ROOT") ? startInfo.Environment["ANDROID_NDK_ROOT"] : null;
+                if (!string.IsNullOrEmpty(ndkRoot))
+                {
+                    ndkRoot = ndkRoot.Replace('\\', '/');
+                    startInfo.Environment["ANDROID_NDK_ROOT"] = ndkRoot;
+                }
+                
+                using (Process configure = new Process())
+                using (StreamWriter log = new StreamWriter(logFilename, false, Encoding.UTF8))
+                {
+                    configure.OutputDataReceived += (sender, e) =>
+                    {
+                        log.WriteLine(e.Data);
+                    };
+                    configure.ErrorDataReceived += (sender, e) =>
+                    {
+                        log.WriteLine(e.Data);
+                    };
+                    configure.StartInfo = startInfo;
+                    configure.Start();
+                    configure.BeginOutputReadLine();
+                    configure.BeginErrorReadLine();
+                    configure.WaitForExit();
+                }
+
+                startInfo.Arguments = $"--build build-{folder} -j14 --config {configuration} --target install";
+
+                using (Process install = new Process())
+                using (StreamWriter log = new StreamWriter(logFilename, true, Encoding.UTF8))
+                {
+                    install.OutputDataReceived += (sender, e) =>
+                    {
+                        log.WriteLine(e.Data);
+                    };
+                    install.ErrorDataReceived += (sender, e) =>
+                    {
+                        log.WriteLine(e.Data);
+                    };
+                    install.StartInfo = startInfo;
+                    install.Start();
+                    install.BeginOutputReadLine();
+                    install.BeginErrorReadLine();
+                    install.WaitForExit();
+                }
+            }
+            finally
+            {
+                EditorUtility.ClearProgressBar();
+            }
+        }
+
+        private void Configure_OutputDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            throw new System.NotImplementedException();
         }
 
         private static string GetSourceFilePathName([CallerFilePath] string? callerFilePath = null)
