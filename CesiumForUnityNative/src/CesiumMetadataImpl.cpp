@@ -51,7 +51,7 @@ void CesiumMetadataImpl::loadMetadata(
         const ExtensionMeshPrimitiveExtFeatureMetadata* pMetadata =
             primitive.getExtension<ExtensionMeshPrimitiveExtFeatureMetadata>();
 
-        VertexIDAccessorType vertexIDAccessor;
+        AccessorType vertexIDAccessor;
 
         if (pMetadata) {
           const CesiumGltf::Accessor& indicesAccessor =
@@ -81,9 +81,9 @@ void CesiumMetadataImpl::loadMetadata(
 
           auto& primitiveInfo = this->_featureIDs.emplace_back(
               std::pair<
-                  VertexIDAccessorType,
+                  AccessorType,
                   std::vector<
-                      std::pair<std::string, FeatureIDAccessorType>>>());
+                      std::pair<std::string, AccessorType>>>());
           primitiveInfo.first = vertexIDAccessor;
           auto& pairs = primitiveInfo.second;
 
@@ -104,7 +104,7 @@ void CesiumMetadataImpl::loadMetadata(
                 continue;
               }
 
-              FeatureIDAccessorType featureIDAccessor;
+              AccessorType featureIDAccessor;
               switch (accessor->componentType) {
               case CesiumGltf::Accessor::ComponentType::BYTE:
                 featureIDAccessor = CesiumGltf::AccessorView<
@@ -137,7 +137,7 @@ void CesiumMetadataImpl::loadMetadata(
               }
 
               std::string featureTableName = attribute.featureTable.c_str();
-              std::pair<std::string, FeatureIDAccessorType> p = {
+              std::pair<std::string, AccessorType> p = {
                   featureTableName,
                   featureIDAccessor};
               pairs.emplace_back(p);
@@ -159,24 +159,24 @@ void CesiumMetadataImpl::loadMetadata(
           .GetComponentInParent<DotNet::CesiumForUnity::CesiumMetadata>();
 
   if (metadataScript != nullptr) {
-    this->_primitiveIndex = transform.GetSiblingIndex();
-    if (_primitiveIndex < _featureIDs.size()) {
+    int32_t primitiveIndex = transform.GetSiblingIndex();
+    if (primitiveIndex < _featureIDs.size()) {
       const std::pair<
-          VertexIDAccessorType,
-          std::vector<std::pair<std::string, FeatureIDAccessorType>>>&
-          primitiveInfo = _featureIDs[_primitiveIndex];
-      const VertexIDAccessorType& indicesAccessor = primitiveInfo.first;
-      this->_vertexIndex = std::visit(
-          [triangleIndex](auto value) {
-            return getValueAtIndex(value, triangleIndex);
+          AccessorType,
+          std::vector<std::pair<std::string, AccessorType>>>&
+          primitiveInfo = _featureIDs[primitiveIndex];
+      const AccessorType& indicesAccessor = primitiveInfo.first;
+      int64_t vertexIndex = std::visit(
+          [triangleIndex](auto&& value) {
+            return static_cast<int64_t>(value[triangleIndex].value[0]);
           },
           indicesAccessor);
       const auto& pairs = primitiveInfo.second;
       for (const auto& pair : pairs) {
         const std::string& featureTableName = pair.first;
         int64_t featureID = std::visit(
-            [this](auto value) {
-              return getValueAtIndex(value, this->_vertexIndex);
+            [vertexIndex](auto&& value) {
+              return static_cast<int64_t>(value[vertexIndex].value[0]);
             },
             pair.second);
 
@@ -189,8 +189,8 @@ void CesiumMetadataImpl::loadMetadata(
             const PropertyType& propertyType = kvp.second;
 
             ValueType value = std::visit(
-                [featureID](auto value) {
-                  return getValueType(value, featureID);
+                [featureID](auto&& value) {
+                  return static_cast<ValueType>(value.get(featureID));
                 },
                 propertyType);
             std::pair<std::string, ValueType> p = {propertyName, value};
