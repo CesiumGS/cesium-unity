@@ -12,11 +12,6 @@
 using namespace CesiumForUnityNative;
 using namespace CesiumGltf;
 
-CesiumMetadataImpl::~CesiumMetadataImpl() {}
-
-void CesiumMetadataImpl::JustBeforeDelete(
-    const DotNet::CesiumForUnity::CesiumMetadata& metadata) {}
-
 void CesiumMetadataImpl::loadMetadata() {
   if (this->_pModel && this->_pModelMetadata) {
     for (auto kvp : _pModelMetadata->featureTables) {

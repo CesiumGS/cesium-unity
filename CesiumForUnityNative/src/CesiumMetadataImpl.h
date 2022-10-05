@@ -5,7 +5,7 @@
 #include <CesiumGltf/ExtensionModelExtFeatureMetadata.h>
 #include <CesiumGltf/MetadataPropertyView.h>
 #include <CesiumGltf/Model.h>
-
+#include <DotNet/CesiumForUnity/MetadataValue.h>
 #include <DotNet/System/String.h>
 
 #include <unordered_map>
@@ -101,9 +101,9 @@ getString(const ValueType& value, const std::string& defaultValue) {
 
 class CesiumMetadataImpl {
 public:
-  ~CesiumMetadataImpl();
+  ~CesiumMetadataImpl(){};
   CesiumMetadataImpl(const DotNet::CesiumForUnity::CesiumMetadata& metadata){};
-  void JustBeforeDelete(const DotNet::CesiumForUnity::CesiumMetadata& metadata);
+  void JustBeforeDelete(const DotNet::CesiumForUnity::CesiumMetadata& metadata){};
   void loadMetadata(
       const CesiumGltf::Model& model,
       const CesiumGltf::ExtensionModelExtFeatureMetadata& modelMetadata);

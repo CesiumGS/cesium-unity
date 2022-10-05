@@ -14,9 +14,9 @@ public class MetadataPicking : MonoBehaviour
                 var metadataScript = hit.transform.GetComponentInParent<CesiumMetadata>();
                 if(metadataScript != null){
                     metadataScript.loadMetadata(hit.transform, hit.triangleIndex);
-                    foreach(var kvp in metadataScript.Keys().Zip(metadataScript.ValuesAsString(), Tuple.Create)){
-                        Debug.Log(kvp.Item1 + ": " + kvp.Item2);
-                    }
+                    //foreach(var kvp in metadataScript.Keys().Zip(metadataScript.ValuesAsString(), Tuple.Create)){
+                    //    Debug.Log(kvp.Item1 + ": " + kvp.Item2);
+                    //}
                 }
             }
 
