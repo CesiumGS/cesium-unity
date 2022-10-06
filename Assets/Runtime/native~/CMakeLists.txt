@@ -13,7 +13,7 @@ if (EDITOR)
   set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_LIST_DIR}/../Editor)
 else()
   set(REINTEROP_TARGET_NAME "x64")
-  set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_LIST_DIR}/../Plugins/x64)
+  #set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_LIST_DIR}/../Plugins/x64)
 endif()
 
 set(REINTEROP_GENERATED_DIRECTORY "generated-${REINTEROP_TARGET_NAME}" CACHE STRING "The suffix for the generated code folder.")

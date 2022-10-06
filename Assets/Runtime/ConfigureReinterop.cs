@@ -18,15 +18,15 @@ namespace CesiumForUnity
         // The output path for generated C++ files.
         // If this is relative, it is relative to the this file.
 #if UNITY_EDITOR
-        public const string CppOutputPath = "../native~/generated-Editor";
+        public const string CppOutputPath = "native~/generated-Editor";
 #elif UNITY_ANDROID
-        public const string CppOutputPath = "../native~/generated-Android";
+        public const string CppOutputPath = "native~/generated-Android";
 #elif UNITY_IOS
-        public const string CppOutputPath = "../native~/generated-iOS";
+        public const string CppOutputPath = "native~/generated-iOS";
 #elif UNITY_64
-        public const string CppOutputPath = "../native~/generated-x64";
+        public const string CppOutputPath = "native~/generated-x64";
 #else
-        public const string CppOutputPath = "../native~/generated-x86";
+        public const string CppOutputPath = "native~/generated-x86";
 #endif
 
         // The namespace with which to prefix all C# namespaces. For example, if this

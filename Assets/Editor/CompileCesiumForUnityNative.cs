@@ -1,4 +1,3 @@
-#if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
 using UnityEditor.Build;
@@ -45,9 +44,14 @@ namespace CesiumForUnity
 
             string sourceFilename = GetSourceFilePathName();
             string assetsPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(sourceFilename), $".."));
-            string pluginPath = Path.Combine(assetsPath, "Plugins", "x64", "CesiumForUnityNative.dll");
-            File.WriteAllText(pluginPath, "This is not a real DLL, it is a placeholder.", Encoding.UTF8);
-            string relativePath = Path.Combine("Assets", Path.GetRelativePath(Application.dataPath, pluginPath));
+            string runtimePath = Path.Combine(assetsPath, "Runtime");
+            string pluginDirectory = Path.Combine(runtimePath, "x64");
+            string pluginFilename = Path.Combine(pluginDirectory, "CesiumForUnityNative.dll");
+
+            Directory.CreateDirectory(pluginDirectory);
+            File.WriteAllText(pluginFilename, "This is not a real DLL, it is a placeholder.", Encoding.UTF8);
+
+            string relativePath = Path.Combine("Assets", Path.GetRelativePath(Application.dataPath, pluginFilename));
             AssetDatabase.ImportAsset(relativePath, ImportAssetOptions.ForceSynchronousImport);
         }
 
@@ -58,7 +62,7 @@ namespace CesiumForUnity
         private void OnPreprocessAsset()
         {
             PluginImporter? importer = this.assetImporter as PluginImporter;
-            if (importer != null && assetPath.Contains("Plugins/x64/CesiumForUnityNative.dll"))
+            if (importer != null && assetPath.Contains("Runtime/x64/CesiumForUnityNative.dll"))
             {
                 importer.SetCompatibleWithAnyPlatform(true);
                 importer.SetExcludeEditorFromAnyPlatform(true);
@@ -101,8 +105,10 @@ namespace CesiumForUnity
         private void BuildNativeLibrary(string configuration, string folder, string? toolchain)
         {
             string sourceFilename = GetSourceFilePathName();
-            string scriptsDirectory = Path.GetDirectoryName(sourceFilename);
-            string nativeDirectory = Path.GetFullPath(Path.Combine(scriptsDirectory, "../native~"));
+            string assetsPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(sourceFilename), $".."));
+            string runtimePath = Path.Combine(assetsPath, "Runtime");
+            string pluginDirectory = Path.Combine(runtimePath, "x64");
+            string nativeDirectory = Path.Combine(runtimePath, "native~");
             string buildDirectory = Path.Combine(nativeDirectory, $"build-{folder}");
             Directory.CreateDirectory(buildDirectory);
 
@@ -113,7 +119,7 @@ namespace CesiumForUnity
                 if (EditorUtility.DisplayCancelableProgressBar("Building CesiumForUnityNative", $"See {logDisplayName}.", 0.0f))
                     return;
 
-                string installPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(sourceFilename), $"../Plugins/{folder}"));
+                string installPath = Path.Combine(runtimePath, folder);
 
                 ProcessStartInfo startInfo = new ProcessStartInfo();
                 startInfo.UseShellExecute = false;
@@ -121,7 +127,7 @@ namespace CesiumForUnity
                 startInfo.Arguments = $"-B build-{folder} -S . -DEDITOR=false -DCMAKE_BUILD_TYPE={configuration} -DCMAKE_INSTALL_PREFIX=\"{installPath}\" -DREINTEROP_GENERATED_DIRECTORY=\"generated-{folder}\"";
                 if (toolchain != null)
                     startInfo.Arguments += $" -DCMAKE_TOOLCHAIN_FILE=\"{toolchain}\"";
-                startInfo.CreateNoWindow = false;
+                startInfo.CreateNoWindow = true;
                 startInfo.WorkingDirectory = nativeDirectory;
                 startInfo.RedirectStandardError = true;
                 startInfo.RedirectStandardOutput = true;
@@ -138,10 +144,12 @@ namespace CesiumForUnity
                     configure.OutputDataReceived += (sender, e) =>
                     {
                         log.WriteLine(e.Data);
+                        log.Flush();
                     };
                     configure.ErrorDataReceived += (sender, e) =>
                     {
                         log.WriteLine(e.Data);
+                        log.Flush();
                     };
                     configure.StartInfo = startInfo;
                     configure.Start();
@@ -158,10 +166,12 @@ namespace CesiumForUnity
                     install.OutputDataReceived += (sender, e) =>
                     {
                         log.WriteLine(e.Data);
+                        log.Flush();
                     };
                     install.ErrorDataReceived += (sender, e) =>
                     {
                         log.WriteLine(e.Data);
+                        log.Flush();
                     };
                     install.StartInfo = startInfo;
                     install.Start();
@@ -182,4 +192,3 @@ namespace CesiumForUnity
         }
     }
 }
-#endif
