@@ -12,48 +12,33 @@ using System.Text;
 
 namespace CesiumForUnity
 {
-    internal class CompileCesiumForUnityNative
+    /// <summary>
+    /// When the user builds a Player (built game) in the Unity Editor, this class manages
+    /// automatically compiling a suitable version of the native C++ CesiumForUnityNative
+    /// shared library to go with it.
+    /// </summary>
+    class CompileCesiumForUnityNative :
+        AssetPostprocessor,
+        IPreprocessBuildWithReport,
+        IPostBuildPlayerScriptDLLs
     {
-        [InitializeOnLoadMethod]
-        static void OnProjectLoadedInEditor()
-        {
-            UnityEngine.Debug.Log("Project loaded in Unity Editor");
-        }
-
-        private static string GetSourceFilePathName([CallerFilePath] string? callerFilePath = null)
-        {
-            return callerFilePath == null ? "" : callerFilePath;
-        }
-    }
-
-    class MyAssetPostprocessor : AssetPostprocessor
-    {
-        private void OnPreprocessAsset()
-        {
-            PluginImporter? importer = this.assetImporter as PluginImporter;
-            if (importer != null && assetPath.Contains("Plugins/x64/CesiumForUnityNative.dll"))
-            {
-                importer.SetCompatibleWithAnyPlatform(true);
-                importer.SetExcludeEditorFromAnyPlatform(true);
-                importer.SetCompatibleWithEditor(false);
-            }
-        }
-    }
-
-    class MyCustomBuildProcessor : IPostprocessBuildWithReport, IPreprocessBuildWithReport
-    {
-        public int callbackOrder { get { return 0; } }
-        public void OnPostprocessBuild(BuildReport report)
-        {
-            UnityEngine.Debug.Log("MyCustomBuildProcessor.OnPostprocessBuild for target " + report.summary.platform + " at path " + report.summary.outputPath);
-        }
-
-        [PostProcessBuildAttribute(1)]
-        public static void OnPostprocessBuild(BuildTarget target, string pathToBuiltProject)
-        {
-            UnityEngine.Debug.Log("OnPostprocessBuild");
-        }
-
+        /// <summary>
+        /// At the start of the build, create placeholders for the CesiumForUnityNative shared
+        /// libraries that will be produced during the build.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This is necessary because, if a shared library is not present at the start of the build,
+        /// Unity won't pick it up if it is created during the build. However, as long as it exists,
+        /// Unity will pick up the latest version.
+        /// </para>
+        /// <para>
+        /// The shared library assets are imported synchronously, and Unity will call
+        /// `OnPreprocessAsset` at the start of the import in order to allow us to set
+        /// the import settings.
+        /// </para>
+        /// </remarks>
+        /// <param name="report"></param>
         public void OnPreprocessBuild(BuildReport report)
         {
             UnityEngine.Debug.Log("OnPreprocessBuild");
@@ -66,16 +51,30 @@ namespace CesiumForUnity
             AssetDatabase.ImportAsset(relativePath, ImportAssetOptions.ForceSynchronousImport);
         }
 
-        private static string GetSourceFilePathName([CallerFilePath] string? callerFilePath = null)
+        /// <summary>
+        /// This Unity message is invoked at the start of the asset import initiated in OnPreprocessBuild
+        /// above and allows us to configure how the shared library is imported.
+        /// </summary>
+        private void OnPreprocessAsset()
         {
-            return callerFilePath == null ? "" : callerFilePath;
+            PluginImporter? importer = this.assetImporter as PluginImporter;
+            if (importer != null && assetPath.Contains("Plugins/x64/CesiumForUnityNative.dll"))
+            {
+                importer.SetCompatibleWithAnyPlatform(true);
+                importer.SetExcludeEditorFromAnyPlatform(true);
+                importer.SetCompatibleWithEditor(false);
+            }
         }
-    }
 
-    class MyIPostBuildPlayerScriptDLLs : IPostBuildPlayerScriptDLLs
-    {
         public int callbackOrder => 0;
 
+        /// <summary>
+        /// Invoked after the managed script assemblies are compiled, including the CesiumForUnity
+        /// managed code. Building the CesiumForUnity assembly will generate C++ code via Reinterop,
+        /// so we handle this method in order to compile that generated C++ code to a shared library
+        /// and inject it into the in-progress Player build.
+        /// </summary>
+        /// <param name="report"></param>
         public void OnPostBuildPlayerScriptDLLs(BuildReport report)
         {
             string folder;
@@ -132,7 +131,7 @@ namespace CesiumForUnity
                     ndkRoot = ndkRoot.Replace('\\', '/');
                     startInfo.Environment["ANDROID_NDK_ROOT"] = ndkRoot;
                 }
-                
+
                 using (Process configure = new Process())
                 using (StreamWriter log = new StreamWriter(logFilename, false, Encoding.UTF8))
                 {
@@ -180,24 +179,6 @@ namespace CesiumForUnity
         private static string GetSourceFilePathName([CallerFilePath] string? callerFilePath = null)
         {
             return callerFilePath == null ? "" : callerFilePath;
-        }
-    }
-
-    [InitializeOnLoad]
-    public class BuildPP
-    {
-        static BuildPP()
-        {
-            CompilationPipeline.assemblyCompilationFinished += CompilationEventReceiver.OnAssemblyCompilationFinished;
-        }
-    }
-    public static class CompilationEventReceiver
-    {
-        static public void OnAssemblyCompilationFinished(string filename, CompilerMessage[] CompilerMessages)
-        {
-            UnityEngine.Debug.Log("assemblyCompilationFinished " + filename);
-            // I see control passed here every time the scripts are rebuilt,
-            // even when I switch to Unity from VS...
         }
     }
 }
