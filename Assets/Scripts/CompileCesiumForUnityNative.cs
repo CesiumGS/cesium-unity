@@ -177,11 +177,6 @@ namespace CesiumForUnity
             }
         }
 
-        private void Configure_OutputDataReceived(object sender, DataReceivedEventArgs e)
-        {
-            throw new System.NotImplementedException();
-        }
-
         private static string GetSourceFilePathName([CallerFilePath] string? callerFilePath = null)
         {
             return callerFilePath == null ? "" : callerFilePath;
