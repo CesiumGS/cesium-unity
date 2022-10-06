@@ -8,6 +8,8 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.IO;
 using System.Text;
+using System;
+using System.Collections.Generic;
 
 namespace CesiumForUnity
 {
@@ -21,6 +23,24 @@ namespace CesiumForUnity
         IPreprocessBuildWithReport,
         IPostBuildPlayerScriptDLLs
     {
+        class LibraryToBuild
+        {
+            public string Name = "Unknown";
+            public BuildTarget Platform = BuildTarget.StandaloneWindows64;
+            public BuildTargetGroup PlatformGroup = BuildTargetGroup.Standalone;
+            public string SourceDirectory = "";
+            public string BuildDirectory = "build";
+            public string GeneratedDirectoryName = "generated-Unknown";
+            public string Configuration = "RelWithDebInfo";
+            public string InstallDirectory = "";
+            public bool CleanBuild = false;
+            public string? Toolchain;
+        }
+
+        // This field is static because OnPreprocessBuild and OnPreprocessAsset are called on difference
+        // instances of this class.
+        private static Dictionary<string, LibraryToBuild> importsInProgress = new Dictionary<string, LibraryToBuild>();
+
         /// <summary>
         /// At the start of the build, create placeholders for the CesiumForUnityNative shared
         /// libraries that will be produced during the build.
@@ -40,34 +60,70 @@ namespace CesiumForUnity
         /// <param name="report"></param>
         public void OnPreprocessBuild(BuildReport report)
         {
-            UnityEngine.Debug.Log("OnPreprocessBuild");
+            importsInProgress.Clear();
 
-            string sourceFilename = GetSourceFilePathName();
-            string assetsPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(sourceFilename), $".."));
-            string runtimePath = Path.Combine(assetsPath, "Runtime");
-            string pluginDirectory = Path.Combine(runtimePath, "x64");
-            string pluginFilename = Path.Combine(pluginDirectory, "CesiumForUnityNative.dll");
+            AssetDatabase.StartAssetEditing();
+            try
+            {
+                CreatePlaceholders(
+                    GetLibraryToBuild(report.summary, "Runtime"),
+                    "CesiumForUnityNative"
+                );
+            }
+            finally
+            {
+                AssetDatabase.StopAssetEditing();
+                importsInProgress.Clear();
+            }
+        }
 
-            Directory.CreateDirectory(pluginDirectory);
-            File.WriteAllText(pluginFilename, "This is not a real DLL, it is a placeholder.", Encoding.UTF8);
+        private void CreatePlaceholders(LibraryToBuild libraryToBuild, string sharedLibraryName)
+        {
+            Directory.CreateDirectory(libraryToBuild.InstallDirectory);
 
-            string relativePath = Path.Combine("Assets", Path.GetRelativePath(Application.dataPath, pluginFilename));
-            AssetDatabase.ImportAsset(relativePath, ImportAssetOptions.ForceSynchronousImport);
+            string libraryFilename = GetSharedLibraryFilename(sharedLibraryName, libraryToBuild.Platform);
+            string libraryPath = Path.Combine(libraryToBuild.InstallDirectory, libraryFilename);
+            if (!File.Exists(libraryPath))
+                File.WriteAllText(libraryPath, "This is not a real shared library, it is a placeholder.", Encoding.UTF8);
+
+            string assetPath = Path.Combine("Assets", Path.GetRelativePath(Application.dataPath, libraryPath)).Replace("\\", "/");
+            importsInProgress.Add(assetPath, libraryToBuild);
+            AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceSynchronousImport);
+        }
+
+        private static string GetSharedLibraryFilename(string baseName, BuildTarget target)
+        {
+            switch (target)
+            {
+                case BuildTarget.StandaloneWindows:
+                case BuildTarget.StandaloneWindows64:
+                    return $"{baseName}.dll";
+                case BuildTarget.iOS:
+                case BuildTarget.StandaloneOSX:
+                    return $"lib{baseName}.dylib";
+                default:
+                    // Assume Linux-ish
+                    return $"lib{baseName}.so";
+            }
         }
 
         /// <summary>
-        /// This Unity message is invoked at the start of the asset import initiated in OnPreprocessBuild
-        /// above and allows us to configure how the shared library is imported.
+        /// This Unity message is invoked at the start of the asset imports initiated in OnPreprocessBuild
+        /// above and allows us to configure how the placeholder shared libraries are imported.
         /// </summary>
         private void OnPreprocessAsset()
         {
+            LibraryToBuild? libraryToBuild;
+            if (!importsInProgress.TryGetValue(this.assetPath, out libraryToBuild))
+                return;
+
             PluginImporter? importer = this.assetImporter as PluginImporter;
-            if (importer != null && assetPath.Contains("Runtime/x64/CesiumForUnityNative.dll"))
-            {
-                importer.SetCompatibleWithAnyPlatform(true);
-                importer.SetExcludeEditorFromAnyPlatform(true);
-                importer.SetCompatibleWithEditor(false);
-            }
+            if (importer == null)
+                return;
+
+            importer.SetCompatibleWithAnyPlatform(false);
+            importer.SetCompatibleWithEditor(false);
+            importer.SetCompatibleWithPlatform(libraryToBuild.Platform, true);
         }
 
         public int callbackOrder => 0;
@@ -75,114 +131,148 @@ namespace CesiumForUnity
         /// <summary>
         /// Invoked after the managed script assemblies are compiled, including the CesiumForUnity
         /// managed code. Building the CesiumForUnity assembly will generate C++ code via Reinterop,
-        /// so we handle this method in order to compile that generated C++ code to a shared library
+        /// so we implement this method in order to compile that generated C++ code to a shared library
         /// and inject it into the in-progress Player build.
         /// </summary>
         /// <param name="report"></param>
         public void OnPostBuildPlayerScriptDLLs(BuildReport report)
         {
-            string folder;
-            string? toolchain = null;
-            switch (report.summary.platformGroup)
-            {
-                case BuildTargetGroup.Android:
-                    folder = "Android";
-                    toolchain = "extern/android-toolchain.cmake";
-                    break;
-                case BuildTargetGroup.Standalone:
-                    folder = "x64";
-                    break;
-                default:
-                    folder = "unknown";
-                    break;
-            }
-
-            string configuration = report.summary.options.HasFlag(BuildOptions.Development) ? "Debug" : "RelWithDebInfo";
-
-            BuildNativeLibrary(configuration, folder, toolchain);
+            BuildNativeLibrary(GetLibraryToBuild(report.summary, "Runtime"));
+            //BuildNativeLibrary(GetLibraryToBuild(report.summary, "Editor"));
         }
 
-        private void BuildNativeLibrary(string configuration, string folder, string? toolchain)
+        private LibraryToBuild GetLibraryToBuild(BuildSummary summary, string libraryName)
         {
             string sourceFilename = GetSourceFilePathName();
             string assetsPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(sourceFilename), $".."));
-            string runtimePath = Path.Combine(assetsPath, "Runtime");
-            string pluginDirectory = Path.Combine(runtimePath, "x64");
-            string nativeDirectory = Path.Combine(runtimePath, "native~");
-            string buildDirectory = Path.Combine(nativeDirectory, $"build-{folder}");
-            Directory.CreateDirectory(buildDirectory);
+            string libraryPath = Path.Combine(assetsPath, libraryName);
+            string nativeDirectory = Path.Combine(libraryPath, "native~");
+
+            string platformDirectoryName = GetDirectoryNameForPlatform(summary);
+
+            LibraryToBuild library = new LibraryToBuild();
+            library.Name = libraryName;
+            library.Platform = summary.platform;
+            library.PlatformGroup = summary.platformGroup;
+            library.SourceDirectory = nativeDirectory;
+            library.BuildDirectory = Path.Combine(nativeDirectory, $"build-{platformDirectoryName}");
+            library.GeneratedDirectoryName = $"generated-{platformDirectoryName}";
+            library.Configuration = summary.options.HasFlag(BuildOptions.Development)
+                ? "Debug"
+                : "RelWithDebInfo";
+            library.InstallDirectory = GetInstallDirectoryForPlatform(summary, libraryPath);
+            library.CleanBuild = summary.options.HasFlag(BuildOptions.CleanBuildCache);
+
+            if (summary.platformGroup == BuildTargetGroup.Android)
+                library.Toolchain = "extern/android-toolchain.cmake";
+            return library;
+        }
+
+        private string GetDirectoryNameForPlatform(BuildSummary summary)
+        {
+            return summary.platformGroup.ToString();
+        }
+
+        private string GetInstallDirectoryForPlatform(BuildSummary summary, string libraryPath)
+        {
+            return Path.Combine(libraryPath, "Plugins", GetDirectoryNameForPlatform(summary));
+        }
+
+        private void BuildNativeLibrary(LibraryToBuild library)
+        {
+            if (library.CleanBuild && library.BuildDirectory.Length > 2 && Directory.Exists(library.BuildDirectory))
+                Directory.Delete(library.BuildDirectory, true);
+            Directory.CreateDirectory(library.BuildDirectory);
 
             try
             {
-                string logFilename = Path.Combine(buildDirectory, "build.log");
+                string logFilename = Path.Combine(library.BuildDirectory, "build.log");
                 string logDisplayName = Path.Combine("Assets", Path.GetRelativePath(Application.dataPath, logFilename));
-                if (EditorUtility.DisplayCancelableProgressBar("Building CesiumForUnityNative", $"See {logDisplayName}.", 0.0f))
+                if (EditorUtility.DisplayCancelableProgressBar($"Building CesiumForUnity {library.Name}", $"See {logDisplayName}.", 0.0f))
                     return;
 
-                string installPath = Path.Combine(runtimePath, folder);
-
-                ProcessStartInfo startInfo = new ProcessStartInfo();
-                startInfo.UseShellExecute = false;
-                startInfo.FileName = "cmake.exe";
-                startInfo.Arguments = $"-B build-{folder} -S . -DEDITOR=false -DCMAKE_BUILD_TYPE={configuration} -DCMAKE_INSTALL_PREFIX=\"{installPath}\" -DREINTEROP_GENERATED_DIRECTORY=\"generated-{folder}\"";
-                if (toolchain != null)
-                    startInfo.Arguments += $" -DCMAKE_TOOLCHAIN_FILE=\"{toolchain}\"";
-                startInfo.CreateNoWindow = true;
-                startInfo.WorkingDirectory = nativeDirectory;
-                startInfo.RedirectStandardError = true;
-                startInfo.RedirectStandardOutput = true;
-                string? ndkRoot = startInfo.Environment.ContainsKey("ANDROID_NDK_ROOT") ? startInfo.Environment["ANDROID_NDK_ROOT"] : null;
-                if (!string.IsNullOrEmpty(ndkRoot))
-                {
-                    ndkRoot = ndkRoot.Replace('\\', '/');
-                    startInfo.Environment["ANDROID_NDK_ROOT"] = ndkRoot;
-                }
-
-                using (Process configure = new Process())
                 using (StreamWriter log = new StreamWriter(logFilename, false, Encoding.UTF8))
                 {
-                    configure.OutputDataReceived += (sender, e) =>
-                    {
-                        log.WriteLine(e.Data);
-                        log.Flush();
-                    };
-                    configure.ErrorDataReceived += (sender, e) =>
-                    {
-                        log.WriteLine(e.Data);
-                        log.Flush();
-                    };
-                    configure.StartInfo = startInfo;
-                    configure.Start();
-                    configure.BeginOutputReadLine();
-                    configure.BeginErrorReadLine();
-                    configure.WaitForExit();
-                }
+                    ProcessStartInfo startInfo = new ProcessStartInfo();
+                    startInfo.UseShellExecute = false;
+                    startInfo.FileName = "cmake.exe";
+                    startInfo.CreateNoWindow = true;
+                    startInfo.WorkingDirectory = library.SourceDirectory;
+                    startInfo.RedirectStandardError = true;
+                    startInfo.RedirectStandardOutput = true;
+                    ConfigureEnvironmentVariables(startInfo.Environment, library);
 
-                startInfo.Arguments = $"--build build-{folder} -j14 --config {configuration} --target install";
+                    List<string> args = new List<string>()
+                    {
+                        "-B",
+                        library.BuildDirectory,
+                        "-S",
+                        library.SourceDirectory,
+                        "-DEDITOR=false",
+                        $"-DCMAKE_BUILD_TYPE={library.Configuration}",
+                        $"-DCMAKE_INSTALL_PREFIX=\"{library.InstallDirectory}\"",
+                        $"-DREINTEROP_GENERATED_DIRECTORY={library.GeneratedDirectoryName}",
+                    };
+                    
+                    if (library.Toolchain != null)
+                        args.Add($"-DCMAKE_TOOLCHAIN_FILE=\"{library.Toolchain}\"");
 
-                using (Process install = new Process())
-                using (StreamWriter log = new StreamWriter(logFilename, true, Encoding.UTF8))
-                {
-                    install.OutputDataReceived += (sender, e) =>
+                    startInfo.Arguments = string.Join(' ', args);
+
+                    RunAndLog(startInfo, log);
+
+                    args = new List<string>()
                     {
-                        log.WriteLine(e.Data);
-                        log.Flush();
+                        "--build",
+                        $"\"{library.BuildDirectory}\"",
+                        "--config",
+                        library.Configuration,
+                        "--parallel",
+                        "14",
+                        "--target",
+                        "install"
                     };
-                    install.ErrorDataReceived += (sender, e) =>
-                    {
-                        log.WriteLine(e.Data);
-                        log.Flush();
-                    };
-                    install.StartInfo = startInfo;
-                    install.Start();
-                    install.BeginOutputReadLine();
-                    install.BeginErrorReadLine();
-                    install.WaitForExit();
+                    startInfo.Arguments = string.Join(' ', args);
+                    RunAndLog(startInfo, log);
                 }
             }
             finally
             {
                 EditorUtility.ClearProgressBar();
+            }
+        }
+
+        private void RunAndLog(ProcessStartInfo startInfo, StreamWriter log)
+        {
+            using (Process configure = new Process())
+            {
+                configure.OutputDataReceived += (sender, e) =>
+                {
+                    log.WriteLine(e.Data);
+                    log.Flush();
+                };
+                configure.ErrorDataReceived += (sender, e) =>
+                {
+                    log.WriteLine(e.Data);
+                    log.Flush();
+                };
+                configure.StartInfo = startInfo;
+                configure.Start();
+                configure.BeginOutputReadLine();
+                configure.BeginErrorReadLine();
+                configure.WaitForExit();
+            }
+        }
+
+        private void ConfigureEnvironmentVariables(IDictionary<string, string> environment, LibraryToBuild library)
+        {
+            // CMake can't deal with back slashes (Windows) in the ANDROID_NDK_ROOT environment variable.
+            // So replace them with forward slashes.
+            string? ndkRoot = environment.ContainsKey("ANDROID_NDK_ROOT") ? environment["ANDROID_NDK_ROOT"] : null;
+            if (ndkRoot != null)
+            {
+                ndkRoot = ndkRoot.Replace('\\', '/');
+                environment["ANDROID_NDK_ROOT"] = ndkRoot;
             }
         }
 

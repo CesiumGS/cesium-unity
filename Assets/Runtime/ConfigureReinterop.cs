@@ -24,11 +24,11 @@ namespace CesiumForUnity
 #elif UNITY_IOS
         public const string CppOutputPath = "native~/generated-iOS";
 #elif UNITY_64
-        public const string CppOutputPath = "native~/generated-x64";
+        public const string CppOutputPath = "native~/generated-Standalone";
 #else
-        public const string CppOutputPath = "native~/generated-x86";
+        public const string CppOutputPath = "native~/generated-Unknown";
 #endif
-
+        //
         // The namespace with which to prefix all C# namespaces. For example, if this
         // property is set to "DotNet", then anything in the "System" namespace in C#
         // will be found in the "DotNet::System" namespace in C++.
