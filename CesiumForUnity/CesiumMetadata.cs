@@ -14,9 +14,7 @@ namespace CesiumForUnity
 
         private partial string getKey(int index);
 
-        //            private partial MetadataValue getValue(int index);
-
-        private partial string getValueAsString(int index);
+        private partial void getValue(MetadataValue value, int index);
 
         public IEnumerable<string> Keys()
         {
@@ -26,12 +24,14 @@ namespace CesiumForUnity
             }
         }
 
-        //           public IEnumerable<MetadataValue> Values(){
-        //               for (int i = 0; i < getNumberOfProperties(); i++)
-        //               {
-        //                   yield return getValue(i);
-        //               }
+        public IEnumerable<MetadataValue> Values(){
+            for (int i = 0; i < getNumberOfProperties(); i++)
+            {
+                MetadataValue value = new MetadataValue();
+                getValue(value, i);
+                yield return value;
+            }
 
-        //           }
+        }
     }
 }

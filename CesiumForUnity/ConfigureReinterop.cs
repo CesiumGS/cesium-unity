@@ -199,6 +199,7 @@ internal partial class ConfigureReinterop
         metadata = go.GetComponent<CesiumMetadata>();
         CesiumMetadata metadataParent = go.GetComponentInParent<CesiumMetadata>();
         metadata.loadMetadata(t, 0);
+        MetadataType type = MetadataType.String;
 
         CesiumGeoreference georeference = go.AddComponent<CesiumGeoreference>();
         georeference = go.GetComponent<CesiumGeoreference>();
