@@ -47,57 +47,62 @@ cd cesium-unity-samples/Assets/
 ln -s ../../cesium-unity/Assets CesiumForUnity
 ```
 
-### Build
+## Reinterop
 
-Before you begin, check that the HintPaths in [CesiumForUnity.csproj](CesiumForUnity/CesiumForUnity.csproj) are correct for your platform and version of Unity. Example paths are:
+Reinterop is a Roslyn (C# compiler) source generator that is automatically invoked by Unity while compiling the Cesium for Unity C# code, and generates C# <-> C++ interop layer.
 
-* Windows: `C:\Program Files\Unity\Hub\Editor\2021.3.9f1\Editor\Data\Managed\UnityEngine.dll`
-* macOS: `/Applications/Unity/Hub/Editor/2021.3.2f1/Unity.app/Contents/Managed/UnityEngine.dll`
-
-Building Cesium for Unity requires building both an Editor and a non-Editor (i.e. built game) configuration, and each configuration has both a C# and a C++ part. So there are a totally of four projects, and all must be built before you can run Cesium for Unity.
-
-The C# code must be compiled first, because its compilation process generates some code that is needed by the C++ build. To build the C# code for the non-Editor configuration, run the following in the root `cesium-unity` directory:
+To build Reinterop and publish it to Cesium for Unity's `Assets` directory, run the following from the `cesium-unity` directory:
 
 ```
-dotnet publish CesiumForUnity -c Debug -p:Editor=False
+dotnet publish Reinterop -o Assets
 ```
 
-Replace `Debug` with `Release` for a release build. The performance is significantly better with a Release build!
+This should be repeated if you modify Reinterop, or if you pull new changes that modify it.
 
-This will do the following:
+### Build for the Editor
 
-* Compile the Cesium for Unity C# code.
-* Generate (on the fly) some new C# code for interop with C++ and compile that in, too.
-* Generate C++ header and source files for the C++ side of the interop.
-* Copy the built DLLs and PDBs to the `Assets/NonEditor` directory.
+To start the Cesium for Unity build process, open the `cesium-unity-samples` project in the Unity Editor. Unity will automatically compile the Cesium for Unity C# source code, invoking Reinterop along the way to generate the C# and C++ source code.
 
-To build the C++ code for the non-Editor configuration, run the following from the `cesium-unity` directory:
+At this point, you can open the sample scene and you will see GameObjects with Cesium3DTileset and other Cesium behaviors attached to them. However, the Cesium functionality will not actually work yet. Instead, you'll see errors like this in the console:
 
 ```
-cmake -B build -S . -DEDITOR=false
-cmake --build build --target install -j14 --config Debug
+DllNotFoundException: CesiumForUnityNative assembly:<unknown assembly> type:<unknown type> member:(null)
+NotImplementedException: The native implementation is missing so OnValidate cannot be invoked.
+```
+
+This is because the C++ code has not yet been compiled. To compile the C++ code for use in the Editor, run:
+
+```
+cd Assets/Runtime/native~
+cmake -B build -S .
+cmake --build build -j14 --target install
 ```
 
 The `-j14` tells CMake to build using 14 threads. A higher or lower number may be more suitable for your system.
 
-The CMake build will:
+Once this build/install completes, Cesium for Unity should work the next time Unity loads Cesium for Unity. You can get it to do so by either restarting the Editor, or by making a small change to any Cesium for Unity script (.cs) file in `Assets/Runtime`.
 
-* Compile the DLL containing the C++ code.
-* Copy the built DLLs and PDBs to the `Assets/NonEditor` directory.
+## Building and Running Games
 
-Next, build the Editor configuration of both the C# and C++ code:
+When you build and run a standalone game (i.e. with File -> Build Settings... or File -> Build and Run in the Unity Editor), Unity will automatically compile Cesium for Unity for the target platform. Then, by hooking into Unity build events, Cesium for Unity will build the corresponding native code for that platform by running CMake on the command-line. This can take a few minutes, and during that time Unity's progress bar will display a message stating the location of the build log file.
+
+You can view build progress on Windows using the following PowerShell command:
 
 ```
-dotnet publish CesiumForUnity -c Debug -p:Editor=True
-cmake -B build -S . -DEDITOR=true
-cmake --build build --target install -j14 --config Debug
+Get-Content -Path Assets/Runtime/native~/build-Standalone/build.log -Wait
 ```
 
-Unity requires that the binaries for the non-Editor configuration _exist_, otherwise Cesium for Unity won't work at all, even in the Editor. But once you've built it once, if you're working exclusively in the Editor, you can iterate by only building the Editor configuration. The non-Editor binaries must exist, but they need not be up-to-date unless you're planning to build a game to run outside the Editor.
+Replace `build-Standalone` with the name of the log file from the progress window.
+
+Or on Linux or macOS:
+
+```
+tail -f Assets/Runtime/native~/build-Standalone/build.log
+```
 
 ## Running the Samples
 
-The easiest way to get started is to open the [**cesium-unity-samples**](https://github.com/CesiumGS/cesium-unity-samples) project in the Unity Editor and see Cesium datasets being streamed in. The project has been set up with levels that allow you to quickly get running with Cesium for Unity.
+The cesium-unity-samples project has several scenes that help you to quickly get running with Cesium for Unity. Go to File -> Open Scene and navigate to the `Scenes` directory.
 
 ## Adding Cesium for Unity to a New Project
 
@@ -118,6 +123,8 @@ The easiest way to get started is to open the [**cesium-unity-samples**](https:/
     * Set the "Ion Access Token" to a valid Cesium ion token; the one from above is likely to work. At this point, the terrain surface should become textured.
 
 ## :goggles: Running Cesium for Unity on Quest 2
+
+TODO: update these instructions for the new build process! It should not be necessary to set `ANDROID_NDK_ROOT` manually anymore.
 
 1. Before building, make sure that there is an environment variable `ANDROID_NDK_ROOT` set as the path to the Android NDK.
 2. Next, build Cesium for Unity for Android with the following commands:
