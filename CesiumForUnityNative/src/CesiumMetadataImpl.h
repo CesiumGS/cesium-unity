@@ -74,7 +74,7 @@ public:
     return _currentMetadataValues.size();
   }
 
-  void getValue(const DotNet::CesiumForUnity::CesiumMetadata& metadata, DotNet::CesiumForUnity::MetadataValue& value, int index){
+  void getValue(const DotNet::CesiumForUnity::CesiumMetadata& metadata, const DotNet::CesiumForUnity::MetadataValue& value, int index){
     if(index < _currentMetadataValues.size()){
       value.NativeImplementation().SetValue(_currentMetadataValues[index].second);
     }
