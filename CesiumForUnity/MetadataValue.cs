@@ -5,6 +5,7 @@ namespace CesiumForUnity
 {
     public enum MetadataType
     {
+        None,
         Int8,
         UInt8,
         Int16,

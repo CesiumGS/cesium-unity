@@ -88,14 +88,46 @@ public:
       const DotNet::System::String& defaultValue);
   void SetValue(const ValueType& value) {
     _value = value;
+    _type = std::visit([](auto&& arg){
+        using T = std::decay_t<decltype(arg)>;
+        return CesiumGltf::TypeToPropertyType<T>::value;
+    }, _value);
   }
 
   DotNet::CesiumForUnity::MetadataType
   GetMetadataType(const DotNet::CesiumForUnity::MetadataValue& value) {
-    return DotNet::CesiumForUnity::MetadataType::Boolean;
+    switch(_type){
+        case CesiumGltf::PropertyType::Int8:
+            return DotNet::CesiumForUnity::MetadataType::Int8;
+        case CesiumGltf::PropertyType::Uint8:
+            return DotNet::CesiumForUnity::MetadataType::UInt8;
+        case CesiumGltf::PropertyType::Int16:
+            return DotNet::CesiumForUnity::MetadataType::Int16;
+        case CesiumGltf::PropertyType::Uint16:
+            return DotNet::CesiumForUnity::MetadataType::UInt16;
+        case CesiumGltf::PropertyType::Int32:
+            return DotNet::CesiumForUnity::MetadataType::Int32;
+        case CesiumGltf::PropertyType::Uint32:
+            return DotNet::CesiumForUnity::MetadataType::UInt32;
+        case CesiumGltf::PropertyType::Int64:
+            return DotNet::CesiumForUnity::MetadataType::Int64;
+        case CesiumGltf::PropertyType::Uint64:
+            return DotNet::CesiumForUnity::MetadataType::UInt64;
+        case CesiumGltf::PropertyType::Float32:
+            return DotNet::CesiumForUnity::MetadataType::Float;
+        case CesiumGltf::PropertyType::Float64:
+            return DotNet::CesiumForUnity::MetadataType::Double;
+        case CesiumGltf::PropertyType::Boolean:
+            return DotNet::CesiumForUnity::MetadataType::Boolean;
+        case CesiumGltf::PropertyType::String:
+            return DotNet::CesiumForUnity::MetadataType::String;
+        default:
+            return DotNet::CesiumForUnity::MetadataType::None;
+    }
   }
 
 private:
   ValueType _value;
+  CesiumGltf::PropertyType _type;
 };
 } // namespace CesiumForUnityNative
