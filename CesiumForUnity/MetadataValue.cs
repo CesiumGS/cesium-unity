@@ -3,7 +3,7 @@ using Reinterop;
 
 namespace CesiumForUnity
 {
-    enum MetadataType
+    public enum MetadataType
     {
         Int8,
         UInt8,
