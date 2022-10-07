@@ -35,6 +35,8 @@ namespace CesiumForUnity
             public string InstallDirectory = "";
             public bool CleanBuild = false;
             public string? Toolchain;
+            public List<string> ExtraConfigureArgs = new List<string>();
+            public List<string> ExtraBuildArgs = new List<string>();
         }
 
         // This field is static because OnPreprocessBuild and OnPreprocessAsset are called on difference
@@ -124,6 +126,11 @@ namespace CesiumForUnity
             importer.SetCompatibleWithAnyPlatform(false);
             importer.SetCompatibleWithEditor(false);
             importer.SetCompatibleWithPlatform(libraryToBuild.Platform, true);
+            
+            if (libraryToBuild.Platform == BuildTarget.Android)
+            {
+                importer.SetPlatformData(BuildTarget.Android, "CPU", "ARM64");
+            }
         }
 
         public int callbackOrder => 0;
@@ -164,7 +171,10 @@ namespace CesiumForUnity
             library.CleanBuild = summary.options.HasFlag(BuildOptions.CleanBuildCache);
 
             if (summary.platformGroup == BuildTargetGroup.Android)
+            {
                 library.Toolchain = "extern/android-toolchain.cmake";
+                library.ExtraConfigureArgs.Add("-G Ninja");
+            }
             return library;
         }
 
@@ -213,6 +223,7 @@ namespace CesiumForUnity
                         $"-DCMAKE_INSTALL_PREFIX=\"{library.InstallDirectory}\"",
                         $"-DREINTEROP_GENERATED_DIRECTORY={library.GeneratedDirectoryName}",
                     };
+                    args.AddRange(library.ExtraConfigureArgs);
                     
                     if (library.Toolchain != null)
                         args.Add($"-DCMAKE_TOOLCHAIN_FILE=\"{library.Toolchain}\"");
@@ -232,6 +243,7 @@ namespace CesiumForUnity
                         "--target",
                         "install"
                     };
+                    args.AddRange(library.ExtraBuildArgs);
                     startInfo.Arguments = string.Join(' ', args);
                     RunAndLog(startInfo, log);
                 }

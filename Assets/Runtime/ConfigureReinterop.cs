@@ -33,7 +33,7 @@ namespace CesiumForUnity
         // property is set to "DotNet", then anything in the "System" namespace in C#
         // will be found in the "DotNet::System" namespace in C++.
         public const string BaseNamespace = "DotNet";
-        //
+
         // The name of the DLL or SO containing the C++ code.
         public const string NativeLibraryName = "CesiumForUnityNative";
 
