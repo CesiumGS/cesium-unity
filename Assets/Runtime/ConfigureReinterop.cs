@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.Rendering;
@@ -279,6 +280,15 @@ namespace CesiumForUnity
             Mesh.ApplyAndDisposeWritableMeshData(meshDataArray, meshes, MeshUpdateFlags.Default);
 
             Physics.BakeMesh(mesh.GetInstanceID(), false);
+
+            CesiumIonSession session = new CesiumIonSession();
+
+            EditorPrefs.HasKey("Key");
+            EditorPrefs.GetString("Key");
+            EditorPrefs.SetString("Key", "Value");
+            EditorPrefs.DeleteKey("Key");
+
+            Application.OpenURL("URL");
         }
     }
 }

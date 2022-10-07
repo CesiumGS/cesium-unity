@@ -56,6 +56,8 @@ target_link_libraries(
     CesiumForUnityNative
     PUBLIC
         Cesium3DTilesSelection
+	CesiumAsync
+	CesiumIonClient
 )
 
 set_target_properties(
