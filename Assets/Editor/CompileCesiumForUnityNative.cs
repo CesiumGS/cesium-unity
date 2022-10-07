@@ -171,10 +171,7 @@ namespace CesiumForUnity
             library.CleanBuild = summary.options.HasFlag(BuildOptions.CleanBuildCache);
 
             if (summary.platformGroup == BuildTargetGroup.Android)
-            {
                 library.Toolchain = "extern/android-toolchain.cmake";
-                library.ExtraConfigureArgs.Add("-G Ninja");
-            }
             return library;
         }
 
@@ -198,8 +195,8 @@ namespace CesiumForUnity
             {
                 string logFilename = Path.Combine(library.BuildDirectory, "build.log");
                 string logDisplayName = Path.Combine("Assets", Path.GetRelativePath(Application.dataPath, logFilename));
-                if (EditorUtility.DisplayCancelableProgressBar($"Building CesiumForUnity {library.Name}", $"See {logDisplayName}.", 0.0f))
-                    return;
+
+                EditorUtility.DisplayProgressBar($"Building CesiumForUnity {library.Name}", $"See {logDisplayName}.", 0.0f);
 
                 using (StreamWriter log = new StreamWriter(logFilename, false, Encoding.UTF8))
                 {
@@ -283,8 +280,16 @@ namespace CesiumForUnity
             string? ndkRoot = environment.ContainsKey("ANDROID_NDK_ROOT") ? environment["ANDROID_NDK_ROOT"] : null;
             if (ndkRoot != null)
             {
-                ndkRoot = ndkRoot.Replace('\\', '/');
-                environment["ANDROID_NDK_ROOT"] = ndkRoot;
+                // On Windows, use the make program included in the NDK. Because Visual Studio (which is usually
+                // the default) won't work to build for Android.
+                if (library.Platform == BuildTarget.Android && Environment.OSVersion.Platform == PlatformID.Win32NT)
+                {
+                    library.ExtraConfigureArgs.Add("-G \"Unix Makefiles\"");
+                    string make = Path.Combine(ndkRoot, "prebuilt", "windows-x86_64", "bin", "make.exe").Replace('\\', '/');
+                    library.ExtraConfigureArgs.Add($"-DCMAKE_MAKE_PROGRAM=\"{make}\"");
+                }
+
+                environment["ANDROID_NDK_ROOT"] = ndkRoot.Replace('\\', '/');
             }
         }
 
