@@ -6,6 +6,5 @@
 *.nupkg.meta
 *.deps.json
 *.deps.json.meta
-CesiumForUnityNative.dll
-CesiumForUnityNative.dll.meta
-Plugins/
+Runtime/Editor/
+Runtime/Plugins/
