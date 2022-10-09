@@ -1,8 +1,6 @@
 #pragma once
 
 #include <CesiumGltf/AccessorView.h>
-#include <CesiumGltf/ExtensionMeshPrimitiveExtFeatureMetadata.h>
-#include <CesiumGltf/ExtensionModelExtFeatureMetadata.h>
 #include <CesiumGltf/MetadataPropertyView.h>
 #include <CesiumGltf/Model.h>
 #include <DotNet/CesiumForUnity/MetadataValue.h>
@@ -60,9 +58,7 @@ public:
   ~CesiumMetadataImpl(){};
   CesiumMetadataImpl(const DotNet::CesiumForUnity::CesiumMetadata& metadata){};
   void JustBeforeDelete(const DotNet::CesiumForUnity::CesiumMetadata& metadata){};
-  void loadMetadata(
-      const CesiumGltf::Model& model,
-      const CesiumGltf::ExtensionModelExtFeatureMetadata& modelMetadata);
+  void loadMetadata(const CesiumGltf::Model* pModel);
 
   void loadMetadata(
       const DotNet::CesiumForUnity::CesiumMetadata& metadata,
@@ -92,7 +88,6 @@ public:
 private:
   void loadMetadata();
   const CesiumGltf::Model* _pModel = nullptr;
-  const CesiumGltf::ExtensionModelExtFeatureMetadata* _pModelMetadata = nullptr;
 
   /**
    * @brief Feature tables are a map of property names to properties 
