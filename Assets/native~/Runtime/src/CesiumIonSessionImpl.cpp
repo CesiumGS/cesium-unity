@@ -1,9 +1,9 @@
 #include "CesiumIonSessionImpl.h"
 
-#include <DotNet/CesiumForUnity/CesiumIonSession.h>
-
 #include "UnityAssetAccessor.h"
 #include "UnityTaskProcessor.h"
+
+#include <DotNet/CesiumForUnity/CesiumIonSession.h>
 
 #include <DotNet/System/String.h>
 #include <DotNet/UnityEditor/EditorPrefs.h>

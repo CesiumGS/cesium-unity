@@ -32,7 +32,7 @@ namespace CesiumForUnity
             editorWindow.Focus();
         }
 
-        void OnEnable()
+        void Awake()
         {
             if (CesiumIonSession.currentSession == null)
             {
@@ -41,6 +41,7 @@ namespace CesiumForUnity
 
             CesiumToolbar.LoadResources();
             CesiumIonLoginPanel.LoadResources();
+            CesiumQuickAddPanel.LoadResources();
         }
 
         void OnGUI()
@@ -49,7 +50,23 @@ namespace CesiumForUnity
             DrawQuickAddBasicAssetsPanel();
 
             GUILayout.Space(10);
-            DrawIonLoginPanel();
+            if (CesiumIonSession.currentSession.IsConnected())
+            {
+                DrawQuickAddIonAssetsPanel();
+            }
+            else
+            {
+                DrawIonLoginPanel();
+            }
+
+
+            // Force the window to repaint if the cursor is hovered over it.
+            // (By default, it only repaints sporadically, so the hover and
+            // selection behavior will appear delayed.)
+            if (mouseOverWindow == editorWindow)
+            {
+                Repaint();
+            }
         }
 
         private static class CesiumToolbar
@@ -118,18 +135,22 @@ namespace CesiumForUnity
                 resourcesLoaded = true;
 
                 style.imagePosition = ImagePosition.ImageAbove;
-                style.padding = new RectOffset(10, 10, 0, 0);
-                style.margin = new RectOffset(0, 0, 5, 5);
+                style.padding = new RectOffset(5, 5, 5, 5);
+                style.margin = new RectOffset(5, 5, 5, 5);
                 style.normal.textColor = new Color(0.9f, 0.9f, 0.9f);
+
+                style.hover.background = Texture2D.grayTexture;
+                style.hover.textColor = new Color(0.9f, 0.9f, 0.9f);
             }
         }
-
-        private int selectedIndex = -1;
 
         void DrawCesiumToolbar()
         {
             // TODO: prevent icons from being clipped by window height...
             // maybe make it a selection grid and resize manually?
+            // TODO: add hover tints
+            int selectedIndex = -1;
+
             selectedIndex = GUILayout.Toolbar(
                 selectedIndex,
                 CesiumToolbar.icons,
@@ -168,6 +189,9 @@ namespace CesiumForUnity
         {
             GUILayout.Label("Quick Add Basic Assets", EditorStyles.boldLabel);
 
+            // TODO: maybe replace with a selection grid (to simulate a vertical toolbar),
+            // especially if we're moving towards a design where the UI mimics Unreal's.
+            // e.g. Blank 3D Tiles Tileset [+] where [+] is an image
             if (GUILayout.Button("Blank 3D Tiles Tileset"))
             {
                 AddBlankTileset();
@@ -175,10 +199,10 @@ namespace CesiumForUnity
 
             // add other options as they come up
         }
-
-        void DrawQuickAddIonAssetsPanel()
+        private void AddBlankTileset()
         {
-            GUILayout.Label("Quick Add Cesium ion Assets", EditorStyles.boldLabel);
+            GameObject tilesetGameObject = new GameObject("Cesium3DTileset");
+            tilesetGameObject.AddComponent<Cesium3DTileset>();
         }
 
         static class CesiumIonLoginPanel
@@ -218,11 +242,106 @@ namespace CesiumForUnity
             }
         }
 
-        private void AddBlankTileset()
+
+        void DrawQuickAddIonAssetsPanel()
         {
-            GameObject tilesetGameObject = new GameObject("Cesium3DTileset");
-            tilesetGameObject.AddComponent<Cesium3DTileset>();
+            GUILayout.Label("Quick Add Cesium ion Assets", EditorStyles.boldLabel);
+
+            CesiumQuickAddItem[] ionAssets = CesiumQuickAddPanel.ionAssets;
+            for (int i = 0; i < ionAssets.Length; i++)
+            {
+                GUILayout.BeginHorizontal(CesiumQuickAddPanel.assetItemStyle);
+                GUILayout.Box(new GUIContent(ionAssets[i].name, ionAssets[i].tooltip), CesiumQuickAddPanel.assetItemLabelStyle);
+                GUILayout.FlexibleSpace();
+                if (GUILayout.Button(CesiumQuickAddPanel.addButton, CesiumQuickAddPanel.addButtonStyle))
+                {
+                    // TODO: some function here
+                }
+                GUILayout.EndHorizontal();
+            }
         }
+
+        private class CesiumQuickAddItem
+        {
+            public string name;
+            public string tooltip;
+            public int tilesetId;
+            public int overlayId;
+
+            public CesiumQuickAddItem(string name, string tooltip, int tilesetId, int overlayId)
+            {
+                this.name = name;
+                this.tooltip = tooltip;
+                this.tilesetId = tilesetId;
+                this.overlayId = overlayId;
+            }
+        }
+
+        static class CesiumQuickAddPanel
+        {
+            private static bool resourcesLoaded = false;
+
+            public static readonly CesiumQuickAddItem[] ionAssets = new CesiumQuickAddItem[5];
+            public static readonly GUIStyle assetItemStyle = new GUIStyle();
+            public static readonly GUIStyle assetItemLabelStyle = new GUIStyle();
+
+            public static GUIContent addButton = null!;
+            public static readonly GUIStyle addButtonStyle = new GUIStyle();
+
+            public static void LoadResources()
+            {
+                if (resourcesLoaded)
+                {
+                    return;
+                }
+
+                ionAssets[0] = new CesiumQuickAddItem(
+                    "Cesium World Terrain + Bing Maps Aerial imagery",
+                    "High-resolution global terrain tileset curated from several data sources, textured with Bing Maps satellite imagery.",
+                    1,
+                    2
+                );
+                ionAssets[1] = new CesiumQuickAddItem(
+                    "Cesium World Terrain + Bing Maps Aerial with Labels imagery",
+                    "High-resolution global terrain tileset curated from several data sources, textured with labeled Bing Maps satellite imagery.",
+                    1,
+                    3
+                );
+                ionAssets[2] = new CesiumQuickAddItem(
+                    "Cesium World Terrain + Bing Maps Road imagery",
+                    "High-resolution global terrain tileset curated from several data sources, textured with labeled Bing Maps imagery.",
+                    1,
+                    4
+                );
+                ionAssets[3] = new CesiumQuickAddItem(
+                    "Cesium World Terrain + Sentinel-2 imagery",
+                    "High-resolution global terrain tileset curated from several data sources, textured with high-resolution satellite imagery from the Sentinel-2 project.",
+                    1,
+                    3954
+                );
+                ionAssets[4] = new CesiumQuickAddItem(
+                     "Cesium OSM Buildings",
+                     "A 3D buildings layer derived from OpenStreetMap covering the entire world.",
+                     96188,
+                     -1
+                 );
+
+                assetItemStyle.margin = new RectOffset(5, 5, 10, 10);
+
+                assetItemLabelStyle.normal.textColor = new Color(0.9f, 0.9f, 0.9f);
+                assetItemLabelStyle.wordWrap = true;
+
+                Texture2D addIcon = (Texture2D)Resources.Load("FontAwesome/plus-solid");
+                addButton = new GUIContent(addIcon, "Add this item to the level");
+                addButtonStyle.fixedWidth = 16.0f;
+                addButtonStyle.fixedHeight = 16.0f;
+                addButtonStyle.hover.background = Texture2D.grayTexture;
+
+                resourcesLoaded = true;
+            }
+        }
+
+
     }
 
 }

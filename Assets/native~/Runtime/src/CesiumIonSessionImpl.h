@@ -29,7 +29,6 @@ class Token;
 }
 
 namespace CesiumForUnityNative {
-
 class CesiumIonSessionImpl {
 public:
   CesiumIonSessionImpl(const DotNet::CesiumForUnity::CesiumIonSession& session);
@@ -42,7 +41,6 @@ public:
   bool IsConnecting(const DotNet::CesiumForUnity::CesiumIonSession& session);
   bool IsResuming(const DotNet::CesiumForUnity::CesiumIonSession& session);
 
-  
   bool IsProfileLoaded(const DotNet::CesiumForUnity::CesiumIonSession& session);
   bool
   IsLoadingProfile(const DotNet::CesiumForUnity::CesiumIonSession& session);
@@ -80,5 +78,4 @@ private:
 
   const static std::string userAccessTokenKey;
 };
-
 } // namespace CesiumForUnityNative
