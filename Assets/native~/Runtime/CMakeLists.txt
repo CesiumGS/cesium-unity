@@ -6,36 +6,36 @@ project(CesiumForUnityNative
     LANGUAGES CXX C
 )
 
-file(GLOB CESIUMFORUNITYNATIVE_SOURCES CONFIGURE_DEPENDS src/*.cpp ../../native~/src/*.cpp ${REINTEROP_GENERATED_DIRECTORY}/src/*.cpp)
+file(GLOB CESIUMFORUNITYNATIVE_SOURCES CONFIGURE_DEPENDS src/*.cpp ../Shared/src/*.cpp ${REINTEROP_GENERATED_DIRECTORY}/src/*.cpp)
 file(GLOB CESIUMFORUNITYNATIVE_HEADERS CONFIGURE_DEPENDS src/*.h ${REINTEROP_GENERATED_DIRECTORY}/src/*.h)
 
-add_library(CesiumForUnityNative SHARED)
+add_library(CesiumForUnityNative-Runtime SHARED)
 
 target_sources(
-    CesiumForUnityNative
+  CesiumForUnityNative-Runtime
     PRIVATE
         ${CESIUMFORUNITYNATIVE_SOURCES}
         ${CESIUMFORUNITYNATIVE_HEADERS}
 )
 
 target_include_directories(
-    CesiumForUnityNative
+  CesiumForUnityNative-Runtime
     PRIVATE
         src
         include
-        ../../native~/src
+        ../Shared/src
         ${REINTEROP_GENERATED_DIRECTORY}/src
         ${REINTEROP_GENERATED_DIRECTORY}/include
 )
 
 target_link_libraries(
-    CesiumForUnityNative
+  CesiumForUnityNative-Runtime
     PUBLIC
         Cesium3DTilesSelection
 )
 
 set_target_properties(
-    CesiumForUnityNative
+  CesiumForUnityNative-Runtime
     PROPERTIES
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED YES
@@ -43,8 +43,8 @@ set_target_properties(
 )
 
 # If we're building for the Unity Editor, set a #define accordingly.
-if ("${REINTEROP_GENERATED_DIRECTORY}" STREQUAL "generated-Editor")
-  target_compile_definitions(CesiumForUnityNative PRIVATE UNITY_EDITOR)
+if (EDITOR)
+  target_compile_definitions(CesiumForUnityNative-Runtime PRIVATE UNITY_EDITOR)
 endif()
 
-install(FILES $<TARGET_FILE:CesiumForUnityNative> DESTINATION ".")
+install(FILES $<TARGET_FILE:CesiumForUnityNative-Runtime> DESTINATION ".")

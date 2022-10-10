@@ -10,5 +10,7 @@
 *.nupkg.meta
 *.deps.json
 *.deps.json.meta
-Runtime/Editor/
-Runtime/Plugins/
+Plugins/
+Plugins.meta
+build/
+build-*/

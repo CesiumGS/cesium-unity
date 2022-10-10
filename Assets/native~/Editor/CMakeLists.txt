@@ -6,7 +6,7 @@ project(CesiumForUnityNative-Editor
     LANGUAGES CXX C
 )
 
-file(GLOB CESIUMFORUNITYNATIVEEDITOR_SOURCES CONFIGURE_DEPENDS src/*.cpp ../../native~/src/*.cpp ${REINTEROP_GENERATED_DIRECTORY}/src/*.cpp)
+file(GLOB CESIUMFORUNITYNATIVEEDITOR_SOURCES CONFIGURE_DEPENDS src/*.cpp ../Shared/src/*.cpp ${REINTEROP_GENERATED_DIRECTORY}/src/*.cpp)
 file(GLOB CESIUMFORUNITYNATIVEEDITOR_HEADERS CONFIGURE_DEPENDS src/*.h ${REINTEROP_GENERATED_DIRECTORY}/src/*.h)
 
 add_library(CesiumForUnityNative-Editor SHARED)
@@ -23,7 +23,7 @@ target_include_directories(
     PRIVATE
         src
         include
-        ../../native~/src
+        ../Shared/src
         ${REINTEROP_GENERATED_DIRECTORY}/src
         ${REINTEROP_GENERATED_DIRECTORY}/include
 )
@@ -43,7 +43,7 @@ set_target_properties(
 )
 
 # If we're building for the Unity Editor, set a #define accordingly.
-if ("${REINTEROP_GENERATED_DIRECTORY}" STREQUAL "generated-Editor")
+if (EDITOR)
   target_compile_definitions(CesiumForUnityNative-Editor PRIVATE UNITY_EDITOR)
 endif()
 
