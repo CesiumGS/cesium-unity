@@ -6,32 +6,7 @@ project(CesiumForUnityNative
     LANGUAGES CXX C
 )
 
-option(EDITOR "Whether to build with Editor support." ON)
-
-if (EDITOR)
-  set(REINTEROP_TARGET_NAME "Editor")
-  set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_LIST_DIR}/../Editor)
-else()
-  set(REINTEROP_TARGET_NAME "x64")
-  #set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_LIST_DIR}/../Plugins/x64)
-endif()
-
-set(REINTEROP_GENERATED_DIRECTORY "generated-${REINTEROP_TARGET_NAME}" CACHE STRING "The suffix for the generated code folder.")
-
-# Static libraries are eventually built into shared libraries, so we need
-# position independent code.
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-if (${CMAKE_SYSTEM_NAME} STREQUAL "Android")
-    set(CESIUM_ARCHITECTURE "aarch64")
-    set(HTTPLIB_USE_OPENSSL_IF_AVAILABLE OFF)
-    set(ANDROID_ABI ${CMAKE_ANDROID_ARCH_ABI})
-    set(ANDROID_NDK ${CMAKE_ANDROID_NDK})
-endif()
-
-add_subdirectory(extern/cesium-native EXCLUDE_FROM_ALL)
-
-file(GLOB CESIUMFORUNITYNATIVE_SOURCES CONFIGURE_DEPENDS src/*.cpp ${REINTEROP_GENERATED_DIRECTORY}/src/*.cpp)
+file(GLOB CESIUMFORUNITYNATIVE_SOURCES CONFIGURE_DEPENDS src/*.cpp ../../native~/src/*.cpp ${REINTEROP_GENERATED_DIRECTORY}/src/*.cpp)
 file(GLOB CESIUMFORUNITYNATIVE_HEADERS CONFIGURE_DEPENDS src/*.h ${REINTEROP_GENERATED_DIRECTORY}/src/*.h)
 
 add_library(CesiumForUnityNative SHARED)
@@ -48,6 +23,7 @@ target_include_directories(
     PRIVATE
         src
         include
+        ../../native~/src
         ${REINTEROP_GENERATED_DIRECTORY}/src
         ${REINTEROP_GENERATED_DIRECTORY}/include
 )

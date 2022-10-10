@@ -10,6 +10,10 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.Rendering;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 namespace CesiumForUnity
 {
     [Reinterop]
@@ -279,6 +283,15 @@ namespace CesiumForUnity
             Mesh.ApplyAndDisposeWritableMeshData(meshDataArray, meshes, MeshUpdateFlags.Default);
 
             Physics.BakeMesh(mesh.GetInstanceID(), false);
+
+#if UNITY_EDITOR
+            SceneView sv = SceneView.lastActiveSceneView;
+            Camera svc = sv.camera;
+
+            bool isPlaying = EditorApplication.isPlaying;
+            EditorApplication.update += () => {};
+#endif
         }
     }
 }
+//
