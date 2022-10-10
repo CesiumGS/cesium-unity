@@ -99,7 +99,7 @@ void CesiumCreditSystemImpl::Update(
     onScreenCredits = System::String::Concat(
         onScreenCredits,
         System::String("<link=\"popup\"><u>Data Attribution</u></link>"));
-    
+
     creditSystem.SetCreditsText(System::String(popupCredits), System::String(onScreenCredits));
 
     _lastCreditsCount = creditsCount;
@@ -193,11 +193,11 @@ const std::string CesiumCreditSystemImpl::convertHtmlToRtf(
 
   tidySetErrorBuffer(tdoc, &tidy_errbuf);
 
-  const std::string& modifiedHtml =
+  std::string modifiedHtml =
       "<!DOCTYPE html><html><body>" + html + "</body></html>";
 
   std::string output, url;
-  err = tidyParseString(tdoc, html.c_str());
+  err = tidyParseString(tdoc, modifiedHtml.c_str());
   if (err < 2) {
     htmlToRtf(output, url, tdoc, tidyGetRoot(tdoc), creditSystem);
   }

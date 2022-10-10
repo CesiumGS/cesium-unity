@@ -45,7 +45,7 @@ set_target_properties(
 )
 
 target_compile_definitions(
-  CesiumForUnityNative
+  CesiumForUnityNative-Runtime
   PUBLIC
     TIDY_STATIC
 )
