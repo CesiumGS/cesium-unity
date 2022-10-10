@@ -417,7 +417,7 @@ namespace Reinterop
             // entire generic types can be listed as unblittable.
             string name = type.ContainingNamespace != null ? type.ContainingNamespace.ToDisplayString() + "." : "";
             name += type.Name;
-            if (context.NonBlittableTypes.Contains(name))
+            if (name.Length > 0 && context.NonBlittableTypes.Contains(name))
                 return false;
 
             if (!type.IsValueType)

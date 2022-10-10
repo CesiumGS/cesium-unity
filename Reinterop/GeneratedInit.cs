@@ -90,7 +90,6 @@ namespace Reinterop
                   if (validationHashValue != {{validationHash}}ULL)
                     return 0;
                 
-                  std::int32_t i = 0;
                   {{GetFieldAssignments().JoinAndIndent("  ")}}
 
                   // Invoke user startup code.
@@ -129,7 +128,6 @@ namespace Reinterop
                             unsafe
                             {
                                 IntPtr memory = Marshal.AllocHGlobal(sizeof(IntPtr) * {{Functions.Count}});
-                                int i = 0;
                                 {{GetFunctionPointerInitLines().JoinAndIndent("                ")}}
                                 byte success = initializeReinterop({{validationHash}}UL, memory, {{Functions.Count}});
                                 if (success == 0)
