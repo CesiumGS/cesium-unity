@@ -1,7 +1,5 @@
 #pragma once
 
-#include <DotNet/CesiumForUnity/CesiumIonSession.h>
-
 #include <CesiumAsync/AsyncSystem.h>
 #include <CesiumAsync/IAssetAccessor.h>
 #include <CesiumAsync/SharedFuture.h>
@@ -43,6 +41,21 @@ public:
   bool IsConnected(const DotNet::CesiumForUnity::CesiumIonSession& session);
   bool IsConnecting(const DotNet::CesiumForUnity::CesiumIonSession& session);
   bool IsResuming(const DotNet::CesiumForUnity::CesiumIonSession& session);
+
+  
+  bool IsProfileLoaded(const DotNet::CesiumForUnity::CesiumIonSession& session);
+  bool
+  IsLoadingProfile(const DotNet::CesiumForUnity::CesiumIonSession& session);
+
+  bool
+  IsAssetListLoaded(const DotNet::CesiumForUnity::CesiumIonSession& session);
+  bool
+  IsLoadingAssetList(const DotNet::CesiumForUnity::CesiumIonSession& session);
+
+  bool
+  IsTokenListLoaded(const DotNet::CesiumForUnity::CesiumIonSession& session);
+  bool
+  IsLoadingTokenList(const DotNet::CesiumForUnity::CesiumIonSession& session);
 
   void Connect(const DotNet::CesiumForUnity::CesiumIonSession& session);
   void Resume(const DotNet::CesiumForUnity::CesiumIonSession& session);

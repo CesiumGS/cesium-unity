@@ -4,6 +4,11 @@ namespace Reinterop
 {
     internal class CustomDelegateGenerator : ICustomGenerator
     {
+        public IEnumerable<TypeToGenerate> GetDependencies(CppGenerationContext context)
+        {
+            yield break;
+        }
+
         public GeneratedResult? Generate(CppGenerationContext context, TypeToGenerate type, GeneratedResult? generated)
         {
             // A delegate is a class with some extras

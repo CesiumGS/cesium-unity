@@ -6,6 +6,8 @@
     /// </summary>
     internal interface ICustomGenerator
     {
+        IEnumerable<TypeToGenerate> GetDependencies(CppGenerationContext context);
+
         GeneratedResult? Generate(CppGenerationContext context, TypeToGenerate type, GeneratedResult? generated);
     }
 }

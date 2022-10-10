@@ -9,7 +9,7 @@ namespace CesiumForUnity
     public class CesiumEditorWindow : EditorWindow
     {
         private static CesiumEditorWindow editorWindow = null!;
-        private static CesiumIonSession ionSession = null!;
+        private static Texture2D cesiumIcon = null!;
 
         [MenuItem("Cesium/Cesium")]
         public static void ShowWindow()
@@ -19,12 +19,28 @@ namespace CesiumForUnity
             {
                 Type siblingWindow = Type.GetType("UnityEditor.SceneHierarchyWindow,UnityEditor.dll");
                 editorWindow = GetWindow<CesiumEditorWindow>("Cesium", new Type[] { siblingWindow });
-                ionSession = new CesiumIonSession();
             }
 
-            //editorWindow.titleContent.image; // add cesium icon here
+            if (cesiumIcon == null)
+            {
+                cesiumIcon = (Texture2D)Resources.Load("Cesium-icon-16x16");
+            }
+
+            editorWindow.titleContent.image = cesiumIcon;
+
             editorWindow.Show();
             editorWindow.Focus();
+        }
+
+        void OnEnable()
+        {
+            if (CesiumIonSession.currentSession == null)
+            {
+                CesiumIonSession.currentSession = new CesiumIonSession();
+            }
+
+            CesiumToolbar.LoadResources();
+            CesiumIonLoginPanel.LoadResources();
         }
 
         void OnGUI()
@@ -36,82 +52,7 @@ namespace CesiumForUnity
             DrawIonLoginPanel();
         }
 
-
-        void DrawCesiumToolbar()
-        {
-            int selectedIndex = -1;
-        CesiumToolbar.LoadToolbarIcons();
-            // TODO: prevent icons from being clipped by window height...
-            // maybe make it a selection grid and resize manually?
-            selectedIndex = GUILayout.Toolbar(
-                selectedIndex,
-                CesiumToolbar.icons,
-                CesiumToolbar.style,
-                GUI.ToolbarButtonSize.FitToContents
-            );
-
-            if (selectedIndex < 0) {
-                return;
-            }
-
-            CesiumToolbar.Index toolbarIndex = (CesiumToolbar.Index)selectedIndex;
-            switch (toolbarIndex)
-            {
-                case CesiumToolbar.Index.Add:
-                    break;
-                case CesiumToolbar.Index.Upload:
-                    Application.OpenURL("https://cesium.com/ion/addasset");
-                    break;
-                case CesiumToolbar.Index.Token:
-                    break;
-                case CesiumToolbar.Index.Learn:
-                    Application.OpenURL("https://cesium.com/docs");
-                    break;
-                case CesiumToolbar.Index.Help:
-                    Application.OpenURL("https://community.cesium.com/");
-                    break;
-                case CesiumToolbar.Index.SignOut:
-                    ionSession.Disconnect();
-                    break;
-            }
-        }
-
-        void DrawQuickAddBasicAssetsPanel()
-        {
-            GUILayout.Label("Quick Add Basic Assets", EditorStyles.boldLabel);
-
-            if (GUILayout.Button("Blank 3D Tiles Tileset"))
-            {
-                AddBlankTileset();
-            }
-
-            // add other options as they come up
-        }
-
-        void DrawQuickAddIonAssetsPanel()
-        {
-            GUILayout.Label("Quick Add Cesium ion Assets", EditorStyles.boldLabel);
-        }
-
-        void DrawIonLoginPanel()
-        {
-
-            // Cesium For Unity image here using
-            // https://docs.unity3d.com/ScriptReference/GUI.DrawTexture.html
-            //GUILayout.Box(image);
-
-            EditorGUILayout.LabelField("Access global high - resolution 3D content, including photogrammetry, " +
-                "terrain, imagery, and buildings. Bring your own data for tiling, hosting, and " +
-                "streaming to Unity.", EditorStyles.wordWrappedLabel);
-        }
-
-        private void AddBlankTileset()
-        {
-            GameObject tilesetGameObject = new GameObject("Cesium3DTileset");
-            tilesetGameObject.AddComponent<Cesium3DTileset>();
-        }
-
-        static class CesiumToolbar
+        private static class CesiumToolbar
         {
             public enum Index
             {
@@ -126,7 +67,7 @@ namespace CesiumForUnity
             public static readonly GUIStyle style = new GUIStyle();
             public static readonly GUIContent[] icons = new GUIContent[Enum.GetNames(typeof(Index)).Length];
 
-            private static bool iconsLoaded = false;
+            private static bool resourcesLoaded = false;
 
             private static GUIContent MakeToolbarIcon(string label, string relativePath, string tooltip)
             {
@@ -136,9 +77,9 @@ namespace CesiumForUnity
                 return new GUIContent(label, icon, tooltip);
             }
 
-            public static void LoadToolbarIcons()
+            public static void LoadResources()
             {
-                if (iconsLoaded)
+                if (resourcesLoaded)
                 {
                     return;
                 }
@@ -174,13 +115,113 @@ namespace CesiumForUnity
                     "Sign out of Cesium ion"
                 );
 
-                iconsLoaded = true;
+                resourcesLoaded = true;
 
                 style.imagePosition = ImagePosition.ImageAbove;
                 style.padding = new RectOffset(10, 10, 0, 0);
                 style.margin = new RectOffset(0, 0, 5, 5);
                 style.normal.textColor = new Color(0.9f, 0.9f, 0.9f);
             }
+        }
+
+        private int selectedIndex = -1;
+
+        void DrawCesiumToolbar()
+        {
+            // TODO: prevent icons from being clipped by window height...
+            // maybe make it a selection grid and resize manually?
+            selectedIndex = GUILayout.Toolbar(
+                selectedIndex,
+                CesiumToolbar.icons,
+                CesiumToolbar.style,
+                GUI.ToolbarButtonSize.FitToContents
+            );
+
+            if (selectedIndex < 0)
+            {
+                return;
+            }
+
+            CesiumToolbar.Index toolbarIndex = (CesiumToolbar.Index)selectedIndex;
+            switch (toolbarIndex)
+            {
+                case CesiumToolbar.Index.Add:
+                    break;
+                case CesiumToolbar.Index.Upload:
+                    Application.OpenURL("https://cesium.com/ion/addasset");
+                    break;
+                case CesiumToolbar.Index.Token:
+                    break;
+                case CesiumToolbar.Index.Learn:
+                    Application.OpenURL("https://cesium.com/docs");
+                    break;
+                case CesiumToolbar.Index.Help:
+                    Application.OpenURL("https://community.cesium.com/");
+                    break;
+                case CesiumToolbar.Index.SignOut:
+                    CesiumIonSession.currentSession.Disconnect();
+                    break;
+            }
+        }
+
+        void DrawQuickAddBasicAssetsPanel()
+        {
+            GUILayout.Label("Quick Add Basic Assets", EditorStyles.boldLabel);
+
+            if (GUILayout.Button("Blank 3D Tiles Tileset"))
+            {
+                AddBlankTileset();
+            }
+
+            // add other options as they come up
+        }
+
+        void DrawQuickAddIonAssetsPanel()
+        {
+            GUILayout.Label("Quick Add Cesium ion Assets", EditorStyles.boldLabel);
+        }
+
+        static class CesiumIonLoginPanel
+        {
+            public static readonly GUIStyle style = new GUIStyle();
+            public static readonly Color buttonColor = new Color(0.07059f, 0.35686f, 0.59216f, 1.0f);
+
+            /*const FLinearColor CesiumButtonLighter(0.16863f, 0.52941f, 0.76863f, 1.0f);
+            const FLinearColor CesiumButtonDarker(0.05490f, 0.29412f, 0.45882f, 1.0f);;*/
+
+            public static Texture2D cesiumForUnityLogo = null!;
+
+            public static bool resourcesLoaded = false;
+
+            public static void LoadResources()
+            {
+                if (resourcesLoaded)
+                {
+                    return;
+                }
+
+                cesiumForUnityLogo = (Texture2D)Resources.Load("Cesium-for-Unity-Logo");
+            }
+        }
+
+        void DrawIonLoginPanel()
+        {
+            //GUILayout.Box(CesiumIonLoginPanel.cesiumForUnityLogo, GUILayout.Width(500.0f));
+
+            EditorGUILayout.LabelField("Access global high - resolution 3D content, including photogrammetry, " +
+                "terrain, imagery, and buildings. Bring your own data for tiling, hosting, and " +
+                "streaming to Unity.", EditorStyles.wordWrappedLabel);
+
+            if (GUILayout.Button("Connect to Cesium ion"))
+            {
+                CesiumIonSession.currentSession.Connect();
+            }
+        }
+
+        private void AddBlankTileset()
+        {
+            GameObject tilesetGameObject = new GameObject("Cesium3DTileset");
+            tilesetGameObject.AddComponent<Cesium3DTileset>();
         }
     }
 

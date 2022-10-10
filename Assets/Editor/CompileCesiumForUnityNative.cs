@@ -25,7 +25,6 @@ namespace CesiumForUnity
     {
         class LibraryToBuild
         {
-            public string Name = "Unknown";
             public BuildTarget Platform = BuildTarget.StandaloneWindows64;
             public BuildTargetGroup PlatformGroup = BuildTargetGroup.Standalone;
             public string SourceDirectory = "";
@@ -68,8 +67,8 @@ namespace CesiumForUnity
             try
             {
                 CreatePlaceholders(
-                    GetLibraryToBuild(report.summary, "Runtime"),
-                    "CesiumForUnityNative"
+                    GetLibraryToBuild(report.summary),
+                    "CesiumForUnityNative-Runtime"
                 );
             }
             finally
@@ -144,21 +143,18 @@ namespace CesiumForUnity
         /// <param name="report"></param>
         public void OnPostBuildPlayerScriptDLLs(BuildReport report)
         {
-            BuildNativeLibrary(GetLibraryToBuild(report.summary, "Runtime"));
-            //BuildNativeLibrary(GetLibraryToBuild(report.summary, "Editor"));
+            BuildNativeLibrary(GetLibraryToBuild(report.summary));
         }
 
-        private LibraryToBuild GetLibraryToBuild(BuildSummary summary, string libraryName)
+        private LibraryToBuild GetLibraryToBuild(BuildSummary summary)
         {
             string sourceFilename = GetSourceFilePathName();
             string assetsPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(sourceFilename), $".."));
-            string libraryPath = Path.Combine(assetsPath, libraryName);
-            string nativeDirectory = Path.Combine(libraryPath, "native~");
+            string nativeDirectory = Path.Combine(assetsPath, "native~");
 
             string platformDirectoryName = GetDirectoryNameForPlatform(summary);
 
             LibraryToBuild library = new LibraryToBuild();
-            library.Name = libraryName;
             library.Platform = summary.platform;
             library.PlatformGroup = summary.platformGroup;
             library.SourceDirectory = nativeDirectory;
@@ -167,7 +163,7 @@ namespace CesiumForUnity
             library.Configuration = summary.options.HasFlag(BuildOptions.Development)
                 ? "Debug"
                 : "RelWithDebInfo";
-            library.InstallDirectory = GetInstallDirectoryForPlatform(summary, libraryPath);
+            library.InstallDirectory = GetInstallDirectoryForPlatform(summary, assetsPath);
             library.CleanBuild = summary.options.HasFlag(BuildOptions.CleanBuildCache);
 
             if (summary.platformGroup == BuildTargetGroup.Android)
@@ -180,9 +176,9 @@ namespace CesiumForUnity
             return summary.platformGroup.ToString();
         }
 
-        private string GetInstallDirectoryForPlatform(BuildSummary summary, string libraryPath)
+        private string GetInstallDirectoryForPlatform(BuildSummary summary, string assetsPath)
         {
-            return Path.Combine(libraryPath, "Plugins", GetDirectoryNameForPlatform(summary));
+            return Path.Combine(assetsPath, "Plugins", GetDirectoryNameForPlatform(summary));
         }
 
         private void BuildNativeLibrary(LibraryToBuild library)
@@ -196,7 +192,7 @@ namespace CesiumForUnity
                 string logFilename = Path.Combine(library.BuildDirectory, "build.log");
                 string logDisplayName = Path.Combine("Assets", Path.GetRelativePath(Application.dataPath, logFilename));
 
-                EditorUtility.DisplayProgressBar($"Building CesiumForUnity {library.Name}", $"See {logDisplayName}.", 0.0f);
+                EditorUtility.DisplayProgressBar($"Building CesiumForUnityNative", $"See {logDisplayName}.", 0.0f);
 
                 using (StreamWriter log = new StreamWriter(logFilename, false, Encoding.UTF8))
                 {
@@ -227,7 +223,7 @@ namespace CesiumForUnity
 
                     startInfo.Arguments = string.Join(' ', args);
 
-                    RunAndLog(startInfo, log);
+                    RunAndLog(startInfo, log, logFilename);
 
                     args = new List<string>()
                     {
@@ -242,7 +238,7 @@ namespace CesiumForUnity
                     };
                     args.AddRange(library.ExtraBuildArgs);
                     startInfo.Arguments = string.Join(' ', args);
-                    RunAndLog(startInfo, log);
+                    RunAndLog(startInfo, log, logFilename);
                 }
             }
             finally
@@ -251,7 +247,7 @@ namespace CesiumForUnity
             }
         }
 
-        private void RunAndLog(ProcessStartInfo startInfo, StreamWriter log)
+        private void RunAndLog(ProcessStartInfo startInfo, StreamWriter log, string logFilename)
         {
             using (Process configure = new Process())
             {
@@ -270,6 +266,11 @@ namespace CesiumForUnity
                 configure.BeginOutputReadLine();
                 configure.BeginErrorReadLine();
                 configure.WaitForExit();
+
+                if (configure.ExitCode != 0)
+                {
+                    UnityEngine.Debug.LogError($"An error occurred while building CesiumForUnityNative. See {logFilename} for details. The command-line was:{Environment.NewLine}{startInfo.FileName} {startInfo.Arguments}");
+                }
             }
         }
 

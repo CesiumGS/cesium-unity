@@ -84,6 +84,13 @@ namespace Reinterop
                 typesToGenerate.Add(walker.GenerationItems.Values);
             }
 
+            // Give custom generators a chance to add dependencies.
+            foreach (ICustomGenerator customGenerator in codeGenerator.Options.CustomGenerators)
+            {
+                IEnumerable<TypeToGenerate> dependencies = customGenerator.GetDependencies(codeGenerator.Options);
+                typesToGenerate.Add(dependencies);
+            }
+
             foreach (AttributeSyntax attributeSyntax in receiver.ClassesImplementedInCpp)
             {
                 var args = attributeSyntax.ArgumentList!.Arguments;

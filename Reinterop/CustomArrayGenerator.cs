@@ -4,6 +4,11 @@ namespace Reinterop
 {
     internal class CustomArrayGenerator : ICustomGenerator
     {
+        public IEnumerable<TypeToGenerate> GetDependencies(CppGenerationContext context)
+        {
+            yield break;
+        }
+
         public GeneratedResult? Generate(CppGenerationContext context, TypeToGenerate type, GeneratedResult? generated)
         {
             // This generator only operates on arrays.

@@ -1,12 +1,12 @@
 #include "CesiumIonSessionImpl.h"
 
+#include <DotNet/CesiumForUnity/CesiumIonSession.h>
+
 #include "UnityAssetAccessor.h"
 #include "UnityTaskProcessor.h"
 
 #include <DotNet/System/String.h>
-
 #include <DotNet/UnityEditor/EditorPrefs.h>
-
 #include <DotNet/UnityEngine/Application.h>
 
 using namespace DotNet;
@@ -51,6 +51,36 @@ bool CesiumIonSessionImpl::IsResuming(
   return this->_isResuming;
 }
 
+bool CesiumIonSessionImpl::IsProfileLoaded(
+    const DotNet::CesiumForUnity::CesiumIonSession& session) {
+  return this->_profile.has_value();
+}
+
+bool CesiumIonSessionImpl::IsLoadingProfile(
+    const DotNet::CesiumForUnity::CesiumIonSession& session) {
+  return this->_isLoadingProfile;
+}
+
+bool CesiumIonSessionImpl::IsAssetListLoaded(
+    const DotNet::CesiumForUnity::CesiumIonSession& session) {
+  return this->_assets.has_value();
+}
+
+bool CesiumIonSessionImpl::IsLoadingAssetList(
+    const DotNet::CesiumForUnity::CesiumIonSession& session) {
+  return this->_isLoadingAssets;
+}
+
+bool CesiumIonSessionImpl::IsTokenListLoaded(
+    const DotNet::CesiumForUnity::CesiumIonSession& session) {
+  return this->_tokens.has_value();
+}
+
+bool CesiumIonSessionImpl::IsLoadingTokenList(
+    const DotNet::CesiumForUnity::CesiumIonSession& session) {
+  return this->_isLoadingTokens;
+}
+
 void CesiumIonSessionImpl::Connect(
     const DotNet::CesiumForUnity::CesiumIonSession& session) {
   if (this->IsConnecting(session) || this->IsConnected(session) ||
@@ -64,8 +94,8 @@ void CesiumIonSessionImpl::Connect(
       this->_asyncSystem,
       this->_pAssetAccessor,
       "Cesium for Unity",
-      190,
-      "/cesium-for-unreal/oauth2/callback", // TODO
+      381,
+      "/cesium-for-unity/oauth2/callback",
       {"assets:list",
        "assets:read",
        "profile:read",
@@ -87,15 +117,14 @@ void CesiumIonSessionImpl::Connect(
         /*CesiumSourceControl::PromptToCheckoutConfigFile(
             pSettings->GetClass()->GetConfigName());*/
 
-        //this->ConnectionUpdated.Broadcast();
+        // this->ConnectionUpdated.Broadcast();
       })
       .catchInMainThread([this](std::exception&& e) {
         this->_isConnecting = false;
         this->_connection = std::nullopt;
-        //this->ConnectionUpdated.Broadcast();
+        // this->ConnectionUpdated.Broadcast();
       });
 }
-
 
 void CesiumIonSessionImpl::Resume(
     const DotNet::CesiumForUnity::CesiumIonSession& session) {
@@ -104,10 +133,12 @@ void CesiumIonSessionImpl::Resume(
     return;
   }
 
-  System::String userAccessToken = UnityEditor::EditorPrefs::GetString(System::String(userAccessTokenKey));
+  System::String userAccessToken =
+      UnityEditor::EditorPrefs::GetString(System::String(userAccessTokenKey));
 
   if (userAccessToken == System::String("")) {
-    // If no user access token was stored, there's no existing session to resume.
+    // If no user access token was stored, there's no existing session to
+    // resume.
     return;
   }
 
@@ -143,16 +174,14 @@ void CesiumIonSessionImpl::Disconnect(
   this->_assets.reset();
   this->_tokens.reset();
 
-UnityEditor::EditorPrefs::DeleteKey(System::String(userAccessTokenKey));
+  UnityEditor::EditorPrefs::DeleteKey(System::String(userAccessTokenKey));
 
   /* CesiumSourceControl::PromptToCheckoutConfigFile(
       pSettings->GetClass()->GetConfigName());*/
 
-  /* this->ConnectionUpdated.Broadcast();
-  this->ProfileUpdated.Broadcast();
-  this->AssetsUpdated.Broadcast();
-  this->TokensUpdated.Broadcast();*/
-
+  session.TriggerConnectionUpdate();
+  session.TriggerAssetsUpdate();
+  session.TriggerTokensUpdate();
 }
 
 } // namespace CesiumForUnityNative

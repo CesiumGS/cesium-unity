@@ -6,10 +6,13 @@ using System.Text;
 using System.Threading.Tasks;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.Rendering;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace CesiumForUnity
 {
@@ -19,15 +22,15 @@ namespace CesiumForUnity
         // The output path for generated C++ files.
         // If this is relative, it is relative to the this file.
 #if UNITY_EDITOR
-        public const string CppOutputPath = "native~/generated-Editor";
+        public const string CppOutputPath = "../native~/Runtime/generated-Editor";
 #elif UNITY_ANDROID
-        public const string CppOutputPath = "native~/generated-Android";
+        public const string CppOutputPath = "../native~/Runtime/generated-Android";
 #elif UNITY_IOS
-        public const string CppOutputPath = "native~/generated-iOS";
+        public const string CppOutputPath = "../native~/Runtime/generated-iOS";
 #elif UNITY_64
-        public const string CppOutputPath = "native~/generated-Standalone";
+        public const string CppOutputPath = "../native~/Runtime/generated-Standalone";
 #else
-        public const string CppOutputPath = "native~/generated-Unknown";
+        public const string CppOutputPath = "../native~/Runtime/generated-Unknown";
 #endif
 
         // The namespace with which to prefix all C# namespaces. For example, if this
@@ -36,7 +39,7 @@ namespace CesiumForUnity
         public const string BaseNamespace = "DotNet";
 
         // The name of the DLL or SO containing the C++ code.
-        public const string NativeLibraryName = "CesiumForUnityNative";
+        public const string NativeLibraryName = "CesiumForUnityNative-Runtime";
 
         // Comma-separated types to treat as non-blittable, even if their fields would
         // otherwise cause Reinterop to treat them as blittable.
@@ -281,6 +284,15 @@ namespace CesiumForUnity
 
             Physics.BakeMesh(mesh.GetInstanceID(), false);
 
+            Application.OpenURL("URL");
+
+#if UNITY_EDITOR
+            SceneView sv = SceneView.lastActiveSceneView;
+            Camera svc = sv.camera;
+
+            bool isPlaying = EditorApplication.isPlaying;
+            EditorApplication.update += () => {};
+            
             CesiumIonSession session = new CesiumIonSession();
 
             EditorPrefs.HasKey("Key");
@@ -288,7 +300,11 @@ namespace CesiumForUnity
             EditorPrefs.SetString("Key", "Value");
             EditorPrefs.DeleteKey("Key");
 
-            Application.OpenURL("URL");
+            CesiumIonSession.TriggerConnectionUpdate();
+            CesiumIonSession.TriggerAssetsUpdate();
+            CesiumIonSession.TriggerTokensUpdate();
+#endif
         }
     }
 }
+//
