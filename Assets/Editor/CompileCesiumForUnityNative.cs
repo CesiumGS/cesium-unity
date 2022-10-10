@@ -227,7 +227,7 @@ namespace CesiumForUnity
 
                     startInfo.Arguments = string.Join(' ', args);
 
-                    RunAndLog(startInfo, log);
+                    RunAndLog(startInfo, log, logFilename);
 
                     args = new List<string>()
                     {
@@ -242,7 +242,7 @@ namespace CesiumForUnity
                     };
                     args.AddRange(library.ExtraBuildArgs);
                     startInfo.Arguments = string.Join(' ', args);
-                    RunAndLog(startInfo, log);
+                    RunAndLog(startInfo, log, logFilename);
                 }
             }
             finally
@@ -251,7 +251,7 @@ namespace CesiumForUnity
             }
         }
 
-        private void RunAndLog(ProcessStartInfo startInfo, StreamWriter log)
+        private void RunAndLog(ProcessStartInfo startInfo, StreamWriter log, string logFilename)
         {
             using (Process configure = new Process())
             {
@@ -270,6 +270,11 @@ namespace CesiumForUnity
                 configure.BeginOutputReadLine();
                 configure.BeginErrorReadLine();
                 configure.WaitForExit();
+
+                if (configure.ExitCode != 0)
+                {
+                    UnityEngine.Debug.LogError($"An error occurred while building CesiumForUnityNative. See {logFilename} for details. The command-line was:{Environment.NewLine}{startInfo.FileName} {startInfo.Arguments}");
+                }
             }
         }
 
