@@ -305,9 +305,9 @@ namespace Reinterop
         {
             string initializeReinteropHeader = context.BaseNamespace == null ? "<initializeReinterop.h>" : $"<{context.BaseNamespace.Replace("::", "/")}/initializeReinterop.h>";
             result.CppDeclaration.Elements.Add(new(
-                Content: "friend void ::initializeReinterop(void** functionPointers, std::int32_t count);",
+                Content: "friend std::uint8_t (::initializeReinterop)(std::uint64_t validationHash, void** functionPointers, std::int32_t count);",
                 IsPrivate: true,
-                TypeDeclarationsReferenced: new[] { CppType.Int32 },
+                TypeDeclarationsReferenced: new[] { CppType.UInt8, CppType.Int32, CppType.UInt64 },
                 AdditionalIncludes: new[] { initializeReinteropHeader }));
         }
 
@@ -318,6 +318,25 @@ namespace Reinterop
             {
                 byte[] hash = md5.ComputeHash(bytes);
                 return System.Convert.ToBase64String(hash);
+            }
+        }
+
+        public static ulong InsecureHash64bits(string s)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(s);
+            using (MD5 md5 = MD5.Create())
+            {
+                byte[] hash = md5.ComputeHash(bytes);
+
+                ulong result = 0;
+
+                for (int i = 0; i < sizeof(ulong) && i < hash.Length; ++i)
+                {
+                    result <<= 8;
+                    result |= hash[i];
+                }
+
+                return result;
             }
         }
 
@@ -394,7 +413,11 @@ namespace Reinterop
             if (depth > 10)
                 return false;
 
-            if (context.NonBlittableTypes.Contains(type.ToDisplayString()))
+            // We construct a name rather than using `type.ToDisplayString()` here so that
+            // entire generic types can be listed as unblittable.
+            string name = type.ContainingNamespace != null ? type.ContainingNamespace.ToDisplayString() + "." : "";
+            name += type.Name;
+            if (name.Length > 0 && context.NonBlittableTypes.Contains(name))
                 return false;
 
             if (!type.IsValueType)

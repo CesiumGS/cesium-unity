@@ -6,24 +6,9 @@ project(cesium-unity
     LANGUAGES CXX C
 )
 
-option(EDITOR "Whether to build with Editor support." ON)
+# When building for the Editor, both Runtime and Editor assemblies are
+# written to the Editor directory so that Unity won't load them in
+# a standalone build.
+set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_LIST_DIR}/Assets/Editor)
 
-# Static libraries are eventually built into shared libraries, so we need
-# position independent code.
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-if (${CMAKE_SYSTEM_NAME} STREQUAL "Android")
-    set(CESIUM_ARCHITECTURE "aarch64")
-    set(HTTPLIB_USE_OPENSSL_IF_AVAILABLE OFF)
-    set(ANDROID_ABI ${CMAKE_ANDROID_ARCH_ABI})
-    set(ANDROID_NDK ${CMAKE_ANDROID_NDK})
-endif()
-
-# Install to the Assets directory.
-if (EDITOR)
-    set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_LIST_DIR}/Assets/Editor)
-else()
-    set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_LIST_DIR}/Assets/NonEditor)
-endif()
-
-add_subdirectory(CesiumForUnityNative)
+add_subdirectory(Assets/native~)
