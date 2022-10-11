@@ -281,8 +281,6 @@ namespace CesiumForUnity
 
             Physics.BakeMesh(mesh.GetInstanceID(), false);
 
-            Application.OpenURL("URL");
-
             CesiumCreditSystem[] creditSystems = UnityEngine.Object.FindObjectsOfType<CesiumCreditSystem>();
             for (int i = 0; i < creditSystems.Length; ++i)
             {
@@ -310,17 +308,6 @@ namespace CesiumForUnity
 
             bool isPlaying = EditorApplication.isPlaying;
             EditorApplication.update += () => {};
-            
-            CesiumIonSession session = new CesiumIonSession();
-
-            EditorPrefs.HasKey("Key");
-            EditorPrefs.GetString("Key");
-            EditorPrefs.SetString("Key", "Value");
-            EditorPrefs.DeleteKey("Key");
-
-            CesiumIonSession.TriggerConnectionUpdate();
-            CesiumIonSession.TriggerAssetsUpdate();
-            CesiumIonSession.TriggerTokensUpdate();
 #endif
         }
     }

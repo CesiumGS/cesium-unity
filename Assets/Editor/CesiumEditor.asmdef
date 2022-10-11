@@ -1,7 +1,9 @@
 {
     "name": "CesiumEditor",
     "rootNamespace": "",
-    "references": [],
+    "references": [
+        "GUID:63cab5ddbd23cf34ca160a9b3d74438d"
+    ],
     "includePlatforms": [
         "Editor"
     ],

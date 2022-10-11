@@ -53,6 +53,19 @@ namespace CesiumForUnity
             op.completed += o => { };
 
             Task.Run(() => { });
+
+            CesiumIonSession session = new CesiumIonSession();
+
+            EditorPrefs.HasKey("Key");
+            EditorPrefs.GetString("Key");
+            EditorPrefs.SetString("Key", "Value");
+            EditorPrefs.DeleteKey("Key");
+
+            CesiumIonSession.TriggerConnectionUpdate();
+            CesiumIonSession.TriggerAssetsUpdate();
+            CesiumIonSession.TriggerTokensUpdate();
+
+            Application.OpenURL("URL");
         }
     }
 }//
