@@ -44,9 +44,6 @@ namespace CesiumForUnity
         // Comma-separated types to treat as non-blittable, even if their fields would
         // otherwise cause Reinterop to treat them as blittable.
         public const string NonBlittableTypes = "Unity.Collections.LowLevel.Unsafe.AtomicSafetyHandle,Unity.Collections.NativeArray,UnityEngine.MeshData,UnityEngine.MeshDataArray";
-        //
-        // True to build the native library automatically using CMake while compiling the managed one.
-        public const bool BuildNativeLibrary = true;
 
         public void ExposeToCPP()
         {
@@ -82,6 +79,7 @@ namespace CesiumForUnity
             go.AddComponent<MeshFilter>();
             go.AddComponent<MeshRenderer>();
 
+            go.transform.Find("Child Name");
             go.transform.GetChild(go.transform.childCount - 1);
             go.transform.DetachChildren();
             go.hideFlags = HideFlags.DontSave;
@@ -175,6 +173,8 @@ namespace CesiumForUnity
             //var asdfx = foo + foo;
             op.completed += o => { };
 
+            UnityWebRequest imageRequest = UnityWebRequestTexture.GetTexture("url");
+
             Task.Run(() => { });
 
             Cesium3DTileset tileset = new Cesium3DTileset();
@@ -214,13 +214,6 @@ namespace CesiumForUnity
             baseOverlay.AddToTileset();
             baseOverlay.RemoveFromTileset();
 
-            List<CesiumRasterOverlay> overlays = new List<CesiumRasterOverlay>();
-            go.GetComponents<CesiumRasterOverlay>(overlays);
-            for (int i = 0; i < overlays.Count; ++i)
-            {
-                CesiumRasterOverlay anOverlay = overlays[i];
-            }
-
             CesiumRasterOverlay[] overlaysArray = go.GetComponents<CesiumRasterOverlay>();
             int len = overlaysArray.Length;
             CesiumRasterOverlay first = overlaysArray[0];
@@ -247,7 +240,11 @@ namespace CesiumForUnity
                 gos[i] = goFromArray;
             }
 
-            CesiumGeoreference[] georeferences = UnityEngine.Object.FindObjectsOfType<CesiumGeoreference>();
+            go = Resources.Load<GameObject>("name");
+            go = UnityEngine.Object.Instantiate(go);
+
+            CesiumCreditSystem creditSystem = go.AddComponent<CesiumCreditSystem>();
+            creditSystem = go.GetComponent<CesiumCreditSystem>();
 
             Mesh.MeshDataArray meshDataArray = Mesh.AllocateWritableMeshData(1);
             Mesh.MeshData meshData = meshDataArray[meshDataArray.Length - 1];
@@ -285,6 +282,27 @@ namespace CesiumForUnity
             Physics.BakeMesh(mesh.GetInstanceID(), false);
 
             Application.OpenURL("URL");
+
+            CesiumCreditSystem[] creditSystems = UnityEngine.Object.FindObjectsOfType<CesiumCreditSystem>();
+            for (int i = 0; i < creditSystems.Length; ++i)
+            {
+                creditSystem = creditSystems[i];
+                creditSystem.gameObject.name.StartsWith("name");
+            }
+
+            int numImages = creditSystem.numberOfImages;
+            creditSystem.SetCreditsText("Popup", "OnScreen");
+            creditSystem.StartCoroutine(creditSystem.LoadImage("string"));
+            creditSystem.ClearLoadedImages();
+            string delimiter = creditSystem.defaultDelimiter;
+
+            List<string> stringList = new List<string>();
+            stringList.Add("item");
+            stringList.Clear();
+
+            string test = string.Concat("string", "string2");
+            string[] stringArray = stringList.ToArray();
+            test = string.Join(" ", stringArray);
 
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;

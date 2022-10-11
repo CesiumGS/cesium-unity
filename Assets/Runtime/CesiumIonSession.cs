@@ -13,6 +13,7 @@ namespace CesiumForUnity
         public static event GUIUpdateDelegate OnTokensUpdated;
 
         public CesiumIonSession() {
+            this.CreateImplementation();
         }
 
         public partial bool IsConnected();

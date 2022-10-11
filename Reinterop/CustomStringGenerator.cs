@@ -63,11 +63,6 @@ namespace Reinterop
             if (!this.GetDependencies(context).Any())
                 return generated;
 
-            //if (!Debugger.IsAttached)
-            //{
-            //    Debugger.Launch();
-            //}
-
             // Add a constructor taking std::string.
             generated.CppDeclaration.Elements.Add(new(
                 Content: $"String(const ::std::string& s);",

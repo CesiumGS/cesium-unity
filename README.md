@@ -12,6 +12,7 @@ Cesium for Unity brings the 3D geospatial ecosystem to Unity. By combining a hig
 * [.NET SDK v7.0.100-preview.7 or later](https://dotnet.microsoft.com/en-us/download/dotnet/7.0)
 * If you're using Visual Studio, you need Visual Studio 2022 v17.2 or later. The original release of Visual Studio 2022 is too old, so make sure yours has been updated.
 * Unity 2021.3.2f1 (latest version of Unity 2021 LTS recommended)
+* On Windows, support for long file paths must be enabled, or you are likely to see build errors. See [Maximum Path Length Limitation](https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=registry#enable-long-paths-in-windows-10-version-1607-and-later).
 
 The built Cesium for Unity Assembly will run on much older versions of .NET, including the version of Mono included in Unity. However, these very recent versions are required for the C#<->C++ interop code generator (Reinterop).
 
@@ -59,7 +60,7 @@ dotnet publish Reinterop -o Assets
 
 This should be repeated if you modify Reinterop, or if you pull new changes that modify it.
 
-### Build for the Editor
+## Build for the Editor
 
 To start the Cesium for Unity build process, open the `cesium-unity-samples` project in the Unity Editor. Unity will automatically compile the Cesium for Unity C# source code, invoking Reinterop along the way to generate the C# and C++ source code.
 
@@ -73,12 +74,20 @@ NotImplementedException: The native implementation is missing so OnValidate cann
 This is because the C++ code has not yet been compiled. To compile the C++ code for use in the Editor, run:
 
 ```
-cd Assets/Runtime/native~
-cmake -B build -S .
-cmake --build build -j14 --target install
+cd cesium-unity
+cmake -B build -S . -DCMAKE_BUILD_TYPE=Debug
+cmake --build build -j14 --target install --config Debug
 ```
 
 The `-j14` tells CMake to build using 14 threads. A higher or lower number may be more suitable for your system.
+
+To build a release build, use these commands instead:
+
+```
+cd cesium-unity
+cmake -B build -S . -DCMAKE_BUILD_TYPE=RelWithDebInfo
+cmake --build build -j14 --target install --config RelWithDebInfo
+```
 
 Once this build/install completes, Cesium for Unity should work the next time Unity loads Cesium for Unity. You can get it to do so by either restarting the Editor, or by making a small change to any Cesium for Unity script (.cs) file in `Assets/Runtime`.
 
@@ -99,6 +108,8 @@ Or on Linux or macOS:
 ```
 tail -f Assets/Runtime/native~/build-Standalone/build.log
 ```
+
+If the log indicates that CMake cannot be found, make sure it is installed and in your path. Restarting Unity to pick up path changes may help. If all else fails, change `"cmake"` in `CompileCesiumForUnityNative.cs` to the full path of your CMake executable.
 
 ## Running the Samples
 

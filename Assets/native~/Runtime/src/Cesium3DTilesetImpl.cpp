@@ -37,6 +37,7 @@ Cesium3DTilesetImpl::Cesium3DTilesetImpl(
 #endif
       _georeference(nullptr),
       _georeferenceChangedCallback(nullptr),
+      _creditSystem(nullptr),
       _destroyTilesetOnNextUpdate(false) {
 }
 
@@ -182,6 +183,7 @@ void Cesium3DTilesetImpl::OnDisable(
 
   this->_georeferenceChangedCallback = nullptr;
   this->_georeference = nullptr;
+  this->_creditSystem = nullptr;
 
   this->DestroyTileset(tileset);
 }
@@ -195,6 +197,15 @@ Tileset* Cesium3DTilesetImpl::getTileset() { return this->_pTileset.get(); }
 
 const Tileset* Cesium3DTilesetImpl::getTileset() const {
   return this->_pTileset.get();
+}
+const DotNet::CesiumForUnity::CesiumCreditSystem&
+Cesium3DTilesetImpl::getCreditSystem() const {
+  return this->_creditSystem;
+}
+
+void Cesium3DTilesetImpl::setCreditSystem(
+    const DotNet::CesiumForUnity::CesiumCreditSystem& creditSystem) {
+  this->_creditSystem = creditSystem;
 }
 
 void Cesium3DTilesetImpl::updateLastViewUpdateResultState(
@@ -276,13 +287,13 @@ void Cesium3DTilesetImpl::LoadTileset(
   if (tileset.tilesetSource() ==
       CesiumForUnity::CesiumDataSource::FromCesiumIon) {
     this->_pTileset = std::make_unique<Tileset>(
-        createTilesetExternals(tileset.gameObject()),
+        createTilesetExternals(tileset),
         tileset.ionAssetID(),
         tileset.ionAccessToken().ToStlString(),
         options);
   } else {
     this->_pTileset = std::make_unique<Tileset>(
-        createTilesetExternals(tileset.gameObject()),
+        createTilesetExternals(tileset),
         tileset.url().ToStlString(),
         options);
   }
