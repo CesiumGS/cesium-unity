@@ -41,11 +41,6 @@ namespace Reinterop
         /// </summary>
         public HashSet<string> NonBlittableTypes = new HashSet<string>();
 
-        /// <summary>
-        /// True to build the native library using CMake while the managed build is in progress.
-        /// </summary>
-        public bool BuildNativeLibrary;
-
         public List<ICustomGenerator> CustomGenerators = new List<ICustomGenerator>();
     }
 }

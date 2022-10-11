@@ -44,9 +44,6 @@ namespace CesiumForUnity
         // Comma-separated types to treat as non-blittable, even if their fields would
         // otherwise cause Reinterop to treat them as blittable.
         public const string NonBlittableTypes = "Unity.Collections.LowLevel.Unsafe.AtomicSafetyHandle,Unity.Collections.NativeArray,UnityEngine.MeshData,UnityEngine.MeshDataArray";
-        //
-        // True to build the native library automatically using CMake while compiling the managed one.
-        public const bool BuildNativeLibrary = true;
 
         public void ExposeToCPP()
         {

@@ -167,59 +167,9 @@ namespace Reinterop
             }
 
             CodeGenerator.WriteCSharpCode(context, codeGenerator.Options, generatedResults);
-
-            // Build the native library if requested and this is _not_ the Intellisense service.
-            //string processName = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
-            //if (codeGenerator.Options.BuildNativeLibrary &&
-            //    !processName.Contains("RoslynCodeAnalysisService") &&
-            //    !processName.Contains("devenv"))
-            //{
-            //    if (!Debugger.IsAttached)
-            //    {
-            //        Debugger.Launch();
-            //    }
-
-            //    BuildNativeLibrary(codeGenerator.Options);
-            //}
-            //string processName2 = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
-            //string processName3 = System.AppDomain.CurrentDomain.FriendlyName;
-
-            //string? foo = null;
-            //if (context.AnalyzerConfigOptions.GlobalOptions.TryGetValue("foo", out foo))
-            //{
-            //    Console.WriteLine("hi");
-            //}
-
-            //string[] symbols = context.ParseOptions.PreprocessorSymbolNames.ToArray();
-            //var features = context.ParseOptions.Features.ToArray();
-            //if (context.ParseOptions.PreprocessorSymbolNames.Contains("COMPILE_NATIVE_LIBRARY"))
-            //{
-            //    BuildNativeLibrary(codeGenerator.Options);
-            //}
-            //if (codeGenerator.Options.BuildNativeLibrary)
-            //{
-
-            //    string? designTimeBuild;
-            //    if (!context.AnalyzerConfigOptions.GlobalOptions.TryGetValue("build_property.DesignTimeBuild", out designTimeBuild) || string.Compare(designTimeBuild, "true") == 0)
-            //    {
-            //        BuildNativeLibrary(codeGenerator.Options);
-            //    }
-            //}
         }
 
-        private void BuildNativeLibrary(CppGenerationContext options)
-        {
-            ProcessStartInfo startInfo = new ProcessStartInfo();
-            startInfo.UseShellExecute = true;
-            startInfo.FileName = "cmake";
-            startInfo.Arguments = "-B build -S .";
-            startInfo.CreateNoWindow = false;
-            startInfo.WorkingDirectory = Path.GetFullPath(Path.Combine(options.OutputDirectory, ".."));
-            Process configure = Process.Start(startInfo);
-            configure.WaitForExit();
-        }
-
-        private static readonly string[] ConfigurationPropertyNames = { "CppOutputPath", "BaseNamespace", "NativeLibraryName", "NonBlittableTypes", "BuildNativeLibrary" };
+        private static readonly string[] ConfigurationPropertyNames = { "CppOutputPath", "BaseNamespace", "NativeLibraryName", "NonBlittableTypes" };
 
         private CodeGenerator CreateCodeGenerator(AnalyzerConfigOptionsProvider options, string? propertiesPath, IDictionary<string, object> properties, Compilation compilation)
         {
@@ -253,10 +203,6 @@ namespace Reinterop
             if (options.GlobalOptions.TryGetValue("non_blittable_types", out nonBlittableTypes))
                 mergedProperties["NonBlittableTypes"] = nonBlittableTypes;
 
-            string? buildNativeLibraryString;
-            if (options.GlobalOptions.TryGetValue("build_native_library", out buildNativeLibraryString))
-                mergedProperties["BuildNativeLibrary"] = String.Compare(buildNativeLibraryString, "true", ignoreCase: true) == 0;
-
             object? value;
 
             if (mergedProperties.TryGetValue("CppOutputPath", out value))
@@ -279,17 +225,10 @@ namespace Reinterop
             else
                 nonBlittableTypes = "";
 
-            bool buildNativeLibrary;
-            if (mergedProperties.TryGetValue("BuildNativeLibrary", out value))
-                buildNativeLibrary = (bool)value;
-            else
-                buildNativeLibrary = false;
-
             cppContext.OutputDirectory = Path.GetFullPath(Path.Combine(baseDir, cppOutputPath));
             cppContext.BaseNamespace = baseNamespace;
             cppContext.NativeLibraryName = nativeLibraryName;
             cppContext.NonBlittableTypes.UnionWith(nonBlittableTypes.Split(',').Select(t => t.Trim()));
-            cppContext.BuildNativeLibrary = buildNativeLibrary;
 
             cppContext.CustomGenerators.Add(new CustomStringGenerator());
             cppContext.CustomGenerators.Add(new CustomDelegateGenerator());
