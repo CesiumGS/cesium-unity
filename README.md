@@ -59,7 +59,7 @@ dotnet publish Reinterop -o Assets
 
 This should be repeated if you modify Reinterop, or if you pull new changes that modify it.
 
-### Build for the Editor
+## Build for the Editor
 
 To start the Cesium for Unity build process, open the `cesium-unity-samples` project in the Unity Editor. Unity will automatically compile the Cesium for Unity C# source code, invoking Reinterop along the way to generate the C# and C++ source code.
 
