@@ -13,6 +13,8 @@ namespace CesiumForUnity
         [MenuItem("Cesium/Cesium")]
         public static void ShowWindow()
         {
+            CesiumEditorStyle.Reload();
+
             // If no existing window, make a new one docked next to the Hierarchy window.
             if (currentWindow == null)
             {
@@ -30,11 +32,6 @@ namespace CesiumForUnity
             if (CesiumIonSession.currentSession == null)
             {
                 CesiumIonSession.currentSession = new CesiumIonSession();
-            }
-
-            if (CesiumEditorStyle.currentStyle == null)
-            {
-                CesiumEditorStyle.currentStyle = new CesiumEditorStyle();
             }
 
             PopulateQuickAddLists();
@@ -315,7 +312,12 @@ namespace CesiumForUnity
                 );
 
                 GUILayout.BeginHorizontal();
-                EditorGUILayout.SelectableLabel(authorizeUrl, EditorStyles.textField);
+                EditorGUILayout.SelectableLabel(
+                    authorizeUrl,
+                    EditorStyles.textField,
+                    GUILayout.Height(EditorGUIUtility.singleLineHeight)
+                );
+
                 if (GUILayout.Button("Copy To Clipboard")) {
                     GUIUtility.systemCopyBuffer = authorizeUrl;
                 }

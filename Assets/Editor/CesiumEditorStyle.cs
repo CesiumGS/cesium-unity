@@ -5,10 +5,8 @@ using UnityEditor;
 
 namespace CesiumForUnity
 {
-    public class CesiumEditorStyle
+    public static class CesiumEditorStyle
     {
-        public static CesiumEditorStyle currentStyle = null!;
-
         public static GUIStyle toolbarStyle = null!;
         public static GUIStyle toolbarButtonStyle = null!;
         public static GUIStyle toolbarButtonDisabledStyle = null!;
@@ -17,24 +15,30 @@ namespace CesiumForUnity
         public static GUIStyle quickAddItemLabelStyle = null!;
         public static GUIStyle quickAddButtonStyle = null!;
 
+        public static GUIStyle connectToIonButtonStyle = null!;
+
         public static Texture2D cesiumIcon = null!;
         public static Texture2D cesiumForUnityLogo = null!;
         public static Texture2D quickAddIcon = null!;
         public static Texture2D[] toolbarIcons = null!;
 
-        private readonly Color textColor = new Color(0.9f, 0.9f, 0.9f, 1.0f);
+        private static readonly Color textColor = new Color(0.9f, 0.9f, 0.9f, 1.0f);
 
-        private readonly Color buttonColor = new Color(0.07059f, 0.35686f, 0.59216f, 1.0f);
-        private readonly Color buttonColorLighter = new Color(0.16863f, 0.52941f, 0.76863f, 1.0f);
-        private readonly Color buttonColorDarker = new Color(0.05490f, 0.29412f, 0.45882f, 1.0f);
+        private static readonly Color buttonColor = new Color(0.07059f, 0.35686f, 0.59216f, 1.0f);
+        private static readonly Color buttonColorLighter = new Color(0.16863f, 0.52941f, 0.76863f, 1.0f);
+        private static readonly Color buttonColorDarker = new Color(0.05490f, 0.29412f, 0.45882f, 1.0f);
 
-        public CesiumEditorStyle()
+        private static Texture2D buttonTexture = null!;
+        private static Texture2D buttonHoverTexture = null!;
+        private static Texture2D buttonPressedTexture = null!;
+
+        public static void Reload()
         {
             LoadImages();
             LoadStyles();
         }
 
-        private void LoadImages()
+        private static void LoadImages()
         {
             cesiumIcon = LoadIcon("Cesium-icon-16x16");
             quickAddIcon = LoadIcon("FontAwesome/plus-solid");
@@ -48,7 +52,7 @@ namespace CesiumForUnity
             toolbarIcons[(int)CesiumEditorWindow.ToolbarIndex.SignOut] = LoadIcon("FontAwesome/sign-out-alt-solid");
         }
 
-        private Texture2D LoadIcon(string resourcePath)
+        private static Texture2D LoadIcon(string resourcePath)
         {
             Texture2D icon = (Texture2D)Resources.Load(resourcePath);
             icon.wrapMode = TextureWrapMode.Clamp;
@@ -56,7 +60,7 @@ namespace CesiumForUnity
             return icon;
         }
 
-        private void LoadStyles()
+        private static void LoadStyles()
         {
             toolbarStyle = new GUIStyle();
             toolbarStyle.margin = new RectOffset(5, 5, 5, 5);
@@ -83,6 +87,9 @@ namespace CesiumForUnity
             quickAddButtonStyle.fixedWidth = 16.0f;
             quickAddButtonStyle.fixedHeight = 16.0f;
             quickAddButtonStyle.hover.background = Texture2D.grayTexture;
+
+            connectToIonButtonStyle = new GUIStyle();
+            connectToIonButtonStyle.fontStyle = FontStyle.Bold;
         }
 
     }
