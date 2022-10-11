@@ -21,6 +21,11 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Android")
 endif()
 
 add_subdirectory(extern/cesium-native EXCLUDE_FROM_ALL)
+
+option(BUILD_SHARED_LIB OFF)
+option( SUPPORT_CONSOLE_APP OFF)
+add_subdirectory(extern/tidy-html5 EXCLUDE_FROM_ALL)
+
 add_subdirectory(Runtime)
 
 if (EDITOR)

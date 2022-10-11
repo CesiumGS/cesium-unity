@@ -26,13 +26,15 @@ target_include_directories(
         ../Shared/src
         ${REINTEROP_GENERATED_DIRECTORY}/src
         ${REINTEROP_GENERATED_DIRECTORY}/include
-)
+        # tidy-html5 doesn't use target_include_directories, so add it manually
+        ../extern/tidy-html5/include)
 
 target_link_libraries(
   CesiumForUnityNative-Runtime
     PUBLIC
         Cesium3DTilesSelection
-)
+    PRIVATE
+        tidy-static)
 
 set_target_properties(
   CesiumForUnityNative-Runtime
@@ -40,6 +42,12 @@ set_target_properties(
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED YES
         CXX_EXTENSIONS NO
+)
+
+target_compile_definitions(
+  CesiumForUnityNative-Runtime
+  PUBLIC
+    TIDY_STATIC
 )
 
 # If we're building for the Unity Editor, set a #define accordingly.
