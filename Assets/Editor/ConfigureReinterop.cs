@@ -61,9 +61,10 @@ namespace CesiumForUnity
             EditorPrefs.SetString("Key", "Value");
             EditorPrefs.DeleteKey("Key");
 
-            CesiumIonSession.TriggerConnectionUpdate();
-            CesiumIonSession.TriggerAssetsUpdate();
-            CesiumIonSession.TriggerTokensUpdate();
+            session.TriggerConnectionUpdate();
+            session.TriggerAssetsUpdate();
+            session.TriggerProfileUpdate();
+            session.TriggerTokensUpdate();
 
             Application.OpenURL("URL");
         }

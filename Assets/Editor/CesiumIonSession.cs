@@ -1,4 +1,5 @@
 using Reinterop;
+using UnityEngine;
 
 namespace CesiumForUnity
 {
@@ -8,13 +9,11 @@ namespace CesiumForUnity
         public static CesiumIonSession currentSession = null!;
 
         public delegate void GUIUpdateDelegate();
+
         public static event GUIUpdateDelegate OnConnectionUpdated;
         public static event GUIUpdateDelegate OnAssetsUpdated;
+        public static event GUIUpdateDelegate OnProfileUpdated;
         public static event GUIUpdateDelegate OnTokensUpdated;
-
-        public CesiumIonSession() {
-            this.CreateImplementation();
-        }
 
         public partial bool IsConnected();
         public partial bool IsConnecting();
@@ -33,14 +32,19 @@ namespace CesiumForUnity
         public partial void Resume();
         public partial void Disconnect();
 
-        public static void TriggerConnectionUpdate() {
+        public partial string GetProfileUsername();
+        public partial string GetAuthorizeUrl();
+
+        public void TriggerConnectionUpdate()
+        {
+            Debug.Log("Connection update");
             if (OnConnectionUpdated != null)
             {
                 OnConnectionUpdated();
             }
         }
 
-        public static void TriggerAssetsUpdate()
+        public void TriggerAssetsUpdate()
         {
             if (OnAssetsUpdated != null)
             {
@@ -48,7 +52,15 @@ namespace CesiumForUnity
             }
         }
 
-        public static void TriggerTokensUpdate()
+        public void TriggerProfileUpdate()
+        {
+            if (OnProfileUpdated != null)
+            {
+                OnProfileUpdated();
+            }
+        }
+
+        public void TriggerTokensUpdate()
         {
             if (OnTokensUpdated != null)
             {

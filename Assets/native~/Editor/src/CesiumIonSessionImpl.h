@@ -9,73 +9,83 @@
 #include <CesiumIonClient/Profile.h>
 #include <CesiumIonClient/Token.h>
 
+#include <DotNet/System/String.h>
+
 #include <memory>
 #include <optional>
 #include <vector>
 
 namespace DotNet::CesiumForUnity {
-class CesiumIonSession;
+	class CesiumIonSession;
 }
 
 namespace CesiumAsync {
-class AsyncSystem;
+	class AsyncSystem;
 }
 
 namespace CesiumIonClient {
-class Assets;
-class Connection;
-class Profile;
-class Token;
+	class Assets;
+	class Connection;
+	class Profile;
+	class Token;
 }
 
 namespace CesiumForUnityNative {
-class CesiumIonSessionImpl {
-public:
-  CesiumIonSessionImpl(const DotNet::CesiumForUnity::CesiumIonSession& session);
-  ~CesiumIonSessionImpl();
+	class CesiumIonSessionImpl {
+	public:
+		CesiumIonSessionImpl(const DotNet::CesiumForUnity::CesiumIonSession& session);
+		~CesiumIonSessionImpl();
 
-  void
-  JustBeforeDelete(const DotNet::CesiumForUnity::CesiumIonSession& session);
+		void
+			JustBeforeDelete(const DotNet::CesiumForUnity::CesiumIonSession& session);
 
-  bool IsConnected(const DotNet::CesiumForUnity::CesiumIonSession& session);
-  bool IsConnecting(const DotNet::CesiumForUnity::CesiumIonSession& session);
-  bool IsResuming(const DotNet::CesiumForUnity::CesiumIonSession& session);
+		bool IsConnected(const DotNet::CesiumForUnity::CesiumIonSession& session);
+		bool IsConnecting(const DotNet::CesiumForUnity::CesiumIonSession& session);
+		bool IsResuming(const DotNet::CesiumForUnity::CesiumIonSession& session);
 
-  bool IsProfileLoaded(const DotNet::CesiumForUnity::CesiumIonSession& session);
-  bool
-  IsLoadingProfile(const DotNet::CesiumForUnity::CesiumIonSession& session);
+		bool IsProfileLoaded(const DotNet::CesiumForUnity::CesiumIonSession& session);
+		bool
+			IsLoadingProfile(const DotNet::CesiumForUnity::CesiumIonSession& session);
 
-  bool
-  IsAssetListLoaded(const DotNet::CesiumForUnity::CesiumIonSession& session);
-  bool
-  IsLoadingAssetList(const DotNet::CesiumForUnity::CesiumIonSession& session);
+		bool
+			IsAssetListLoaded(const DotNet::CesiumForUnity::CesiumIonSession& session);
+		bool
+			IsLoadingAssetList(const DotNet::CesiumForUnity::CesiumIonSession& session);
 
-  bool
-  IsTokenListLoaded(const DotNet::CesiumForUnity::CesiumIonSession& session);
-  bool
-  IsLoadingTokenList(const DotNet::CesiumForUnity::CesiumIonSession& session);
+		bool
+			IsTokenListLoaded(const DotNet::CesiumForUnity::CesiumIonSession& session);
+		bool
+			IsLoadingTokenList(const DotNet::CesiumForUnity::CesiumIonSession& session);
 
-  void Connect(const DotNet::CesiumForUnity::CesiumIonSession& session);
-  void Resume(const DotNet::CesiumForUnity::CesiumIonSession& session);
-  void Disconnect(const DotNet::CesiumForUnity::CesiumIonSession& session);
+		void Connect(const DotNet::CesiumForUnity::CesiumIonSession& session);
+		void Resume(const DotNet::CesiumForUnity::CesiumIonSession& session);
+		void Disconnect(const DotNet::CesiumForUnity::CesiumIonSession& session);
 
-private:
-  CesiumAsync::AsyncSystem _asyncSystem;
-  std::shared_ptr<CesiumAsync::IAssetAccessor> _pAssetAccessor;
+		DotNet::System::String
+			GetProfileUsername(const DotNet::CesiumForUnity::CesiumIonSession& session);
+		DotNet::System::String
+			GetAuthorizeUrl(const DotNet::CesiumForUnity::CesiumIonSession& session);
 
-  std::optional<CesiumIonClient::Connection> _connection;
-  std::optional<CesiumIonClient::Profile> _profile;
-  std::optional<CesiumIonClient::Assets> _assets;
-  std::optional<std::vector<CesiumIonClient::Token>> _tokens;
+	private:
+		CesiumAsync::AsyncSystem _asyncSystem;
+		std::shared_ptr<CesiumAsync::IAssetAccessor> _pAssetAccessor;
 
-  bool _isConnecting;
-  bool _isResuming;
-  bool _isLoadingProfile;
-  bool _isLoadingAssets;
-  bool _isLoadingTokens;
+		std::optional<CesiumIonClient::Connection> _connection;
+		std::optional<CesiumIonClient::Profile> _profile;
+		std::optional<CesiumIonClient::Assets> _assets;
+		std::optional<std::vector<CesiumIonClient::Token>> _tokens;
 
-  std::string _authorizeUrl;
+		bool _isConnecting;
+		bool _isResuming;
+		bool _isLoadingProfile;
+		bool _isLoadingAssets;
+		bool _isLoadingTokens;
 
-  const static std::string userAccessTokenKey;
-};
+		std::string _authorizeUrl;
+
+		void refreshProfile();
+		const CesiumIonClient::Profile& getProfile();
+
+		const static std::string userAccessTokenKey;
+	};
 } // namespace CesiumForUnityNative

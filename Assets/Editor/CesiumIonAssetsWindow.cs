@@ -5,23 +5,31 @@ using CesiumForUnity;
 
 public class CesiumIonAssetsWindow : EditorWindow
 {
-
-    private void Awake()
-    {
-
-    }
+    public static CesiumIonAssetsWindow currentWindow = null!;
 
     [MenuItem("Cesium/Cesium ion Assets")]
     public static void ShowWindow()
     {
         // Get existing open window or if none, make a new one docked next to Console window.
         Type siblingWindow = Type.GetType("UnityEditor.ConsoleWindow,UnityEditor.dll");
-        CesiumIonAssetsWindow ionAssetsWindow = GetWindow<CesiumIonAssetsWindow>("Cesium ion Assets", new Type[] { siblingWindow });
+        currentWindow = GetWindow<CesiumIonAssetsWindow>("Cesium ion Assets", new Type[] { siblingWindow });
 
-        //cesiumWindow.titleContent.image; // add cesium icon here
-        ionAssetsWindow.Show();
-        ionAssetsWindow.Focus();
+        currentWindow.titleContent.image = CesiumEditorStyle.cesiumIcon;
+        currentWindow.Show();
+        currentWindow.Focus();
+    }
 
+    void Awake()
+    {
+        if (CesiumIonSession.currentSession == null)
+        {
+            CesiumIonSession.currentSession = new CesiumIonSession();
+        }
+
+        if (CesiumEditorStyle.currentStyle == null)
+        {
+            CesiumEditorStyle.currentStyle = new CesiumEditorStyle();
+        }
     }
 
     void OnGUI()
