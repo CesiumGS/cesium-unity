@@ -74,11 +74,19 @@ This is because the C++ code has not yet been compiled. To compile the C++ code 
 
 ```
 cd cesium-unity
-cmake -B build -S .
-cmake --build build -j14 --target install
+cmake -B build -S . -DCMAKE_BUILD_TYPE=Debug
+cmake --build build -j14 --target install --config Debug
 ```
 
 The `-j14` tells CMake to build using 14 threads. A higher or lower number may be more suitable for your system.
+
+To build a release build, use these commands instead:
+
+```
+cd cesium-unity
+cmake -B build -S . -DCMAKE_BUILD_TYPE=RelWithDebInfo
+cmake --build build -j14 --target install --config RelWithDebInfo
+```
 
 Once this build/install completes, Cesium for Unity should work the next time Unity loads Cesium for Unity. You can get it to do so by either restarting the Editor, or by making a small change to any Cesium for Unity script (.cs) file in `Assets/Runtime`.
 
