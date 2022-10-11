@@ -73,7 +73,7 @@ NotImplementedException: The native implementation is missing so OnValidate cann
 This is because the C++ code has not yet been compiled. To compile the C++ code for use in the Editor, run:
 
 ```
-cd Assets/Runtime/native~
+cd cesium-unity
 cmake -B build -S .
 cmake --build build -j14 --target install
 ```
