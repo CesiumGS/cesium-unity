@@ -108,6 +108,8 @@ Or on Linux or macOS:
 tail -f Assets/Runtime/native~/build-Standalone/build.log
 ```
 
+If the log indicates that CMake cannot be found, make sure it is installed and in your path. Restarting Unity to pick up path changes may help. If all else fails, change `"cmake"` in `CompileCesiumForUnityNative.cs` to the full path of your CMake executable.
+
 ## Running the Samples
 
 The cesium-unity-samples project has several scenes that help you to quickly get running with Cesium for Unity. Go to File -> Open Scene and navigate to the `Scenes` directory.
