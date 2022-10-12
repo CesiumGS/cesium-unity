@@ -38,7 +38,7 @@ On Windows 11, this should just work. On Windows 10, you may need to enable "Dev
 
 ```
 cd cesium-unity
-New-Item -ItemType Junction -Path "..\cesium-unity-samples\Assets\CesiumForUnity" -Target ".\Assets"
+New-Item -ItemType Junction -Path "..\cesium-unity-samples\Assets\CesiumForUnity" -Target "$PWD\Assets"
 ```
 
 To setup the symbolic link in Mac or Linux:
