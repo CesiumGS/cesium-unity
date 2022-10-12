@@ -159,6 +159,17 @@ namespace CesiumForUnity
             Marshal.FreeCoTaskMem(Marshal.StringToCoTaskMemUTF8("hi"));
 
             UnityWebRequest request = UnityWebRequest.Get("url");
+
+            var uploadHandler = new UploadHandlerRaw(new byte[0]);
+
+            var rawBytes = new NativeArray<byte>(1, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
+            unsafe
+            {
+                NativeArrayUnsafeUtility.GetUnsafeBufferPointerWithoutChecks(rawBytes);
+            }
+            uploadHandler = new UploadHandlerRaw(rawBytes, true);
+            request = new UnityWebRequest("url", "method", new NativeDownloadHandler(), uploadHandler);
+
             bool isDone = request.isDone;
             string e = request.error;
             string method = request.method;

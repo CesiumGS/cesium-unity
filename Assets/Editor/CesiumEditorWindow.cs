@@ -44,6 +44,8 @@ namespace CesiumForUnity
 
         void OnGUI()
         {
+            Ion().Tick();
+
             DrawCesiumToolbar();
             DrawQuickAddBasicAssetsPanel();
 

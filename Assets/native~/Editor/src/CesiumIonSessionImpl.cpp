@@ -183,6 +183,10 @@ namespace CesiumForUnityNative {
 		session.TriggerTokensUpdate();
 	}
 
+	void CesiumIonSessionImpl::Tick(const DotNet::CesiumForUnity::CesiumIonSession& session) {
+		this->_asyncSystem.dispatchMainThreadTasks();
+	}
+
 	System::String CesiumIonSessionImpl::GetProfileUsername(
 		const DotNet::CesiumForUnity::CesiumIonSession& session) {
 		return System::String(this->getProfile().username);

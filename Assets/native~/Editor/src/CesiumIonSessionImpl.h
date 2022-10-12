@@ -61,6 +61,8 @@ namespace CesiumForUnityNative {
 		void Resume(const DotNet::CesiumForUnity::CesiumIonSession& session);
 		void Disconnect(const DotNet::CesiumForUnity::CesiumIonSession& session);
 
+		void Tick(const DotNet::CesiumForUnity::CesiumIonSession& session);
+
 		DotNet::System::String
 			GetProfileUsername(const DotNet::CesiumForUnity::CesiumIonSession& session);
 		DotNet::System::String

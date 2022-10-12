@@ -35,6 +35,8 @@ namespace CesiumForUnity
         public partial string GetProfileUsername();
         public partial string GetAuthorizeUrl();
 
+        public partial void Tick();
+
         public void TriggerConnectionUpdate()
         {
             Debug.Log("Connection update");
