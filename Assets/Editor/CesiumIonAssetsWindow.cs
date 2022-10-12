@@ -1,55 +1,45 @@
 using System;
-using UnityEngine;
 using UnityEditor;
-using CesiumForUnity;
-
-public class CesiumIonAssetsWindow : EditorWindow
+using UnityEditor.IMGUI.Controls;
+namespace CesiumForUnity
 {
-    public static CesiumIonAssetsWindow currentWindow = null!;
-
-    [MenuItem("Cesium/Cesium ion Assets")]
-    public static void ShowWindow()
+    public class CesiumIonAssetsWindow : EditorWindow
     {
-        CesiumEditorStyle.Reload();
+        public static CesiumIonAssetsWindow currentWindow = null!;
 
-        if (currentWindow == null)
+        [MenuItem("Cesium/Cesium ion Assets")]
+        public static void ShowWindow()
         {
-            // Get existing open window or if none, make a new one docked next to Console window.
-            Type siblingWindow = Type.GetType("UnityEditor.ConsoleWindow,UnityEditor.dll");
-            currentWindow = GetWindow<CesiumIonAssetsWindow>("Cesium ion Assets", new Type[] { siblingWindow });
-            currentWindow.titleContent.image = CesiumEditorStyle.cesiumIcon;
+            CesiumEditorStyle.Reload();
+
+            if (currentWindow == null)
+            {
+                // Get existing open window or if none, make a new one docked next to Console window.
+                Type siblingWindow = Type.GetType("UnityEditor.ConsoleWindow,UnityEditor.dll");
+                currentWindow = GetWindow<CesiumIonAssetsWindow>("Cesium ion Assets", new Type[] { siblingWindow });
+                currentWindow.titleContent.image = CesiumEditorStyle.cesiumIcon;
+            }
+
+            currentWindow.Show();
+            currentWindow.Focus();
         }
 
-        currentWindow.Show();
-        currentWindow.Focus();
-    }
+        private TreeViewState _assetsTreeState;
+        private IonAssetsTreeView _assetsTreeView;
 
-    void Awake()
-    {
-        if (CesiumIonSession.currentSession == null)
+        void Awake()
         {
-            CesiumIonSession.currentSession = new CesiumIonSession();
+            if (CesiumIonSession.currentSession == null)
+            {
+                CesiumIonSession.currentSession = new CesiumIonSession();
+            }
+
+            _assetsTreeState = new TreeViewState();
+            _assetsTreeView = new IonAssetsTreeView(_assetsTreeState);
         }
-    }
 
-    void OnGUI()
-    {
-        DrawFilterButtons();
-        DrawAssetsList();
-    }
-
-    void DrawFilterButtons() {
-        GUILayout.BeginHorizontal();
-        GUILayout.Button("Name");
-        GUILayout.Button("Type");
-        GUILayout.Button("Date added");
-        GUILayout.EndHorizontal();
-    }
-
-    void DrawAssetsList()
-    {
-        Vector2 scrollPosition = Vector2.zero;
-        EditorGUILayout.BeginScrollView(scrollPosition);
-        EditorGUILayout.EndScrollView();
+        void OnGUI()
+        {
+        }
     }
 }

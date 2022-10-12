@@ -73,7 +73,9 @@ namespace CesiumForUnity
         {
             CesiumIonSession session = Ion();
             if (session != null)
+            {
                 session.Tick();
+            }
         }
 
         public enum ToolbarIndex

@@ -1,8 +1,10 @@
 using Reinterop;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEditor;
+using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -68,6 +70,7 @@ namespace CesiumForUnity
             Task.Run(() => { });
 
             CesiumIonSession session = new CesiumIonSession();
+            session = CesiumIonSession.currentSession;
 
             EditorPrefs.HasKey("Key");
             EditorPrefs.GetString("Key");
@@ -80,6 +83,15 @@ namespace CesiumForUnity
             session.TriggerTokensUpdate();
 
             Application.OpenURL("URL");
+
+            TreeViewItem root = new TreeViewItem(0, -1, "root");
+            TreeViewItem child = new TreeViewItem(1, 0, "child");
+            IList<TreeViewItem> treeViewItemList = new List<TreeViewItem>(100);
+            treeViewItemList[0] = root;
+            root.AddChild(child);
+
+            TreeViewState state = new TreeViewState();
+            IonAssetsTreeView assetsTreeView = new IonAssetsTreeView(state);
         }
     }
 }//
