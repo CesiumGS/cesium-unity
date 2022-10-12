@@ -44,8 +44,6 @@ namespace CesiumForUnity
 
         void OnGUI()
         {
-            Ion().Tick();
-
             DrawCesiumToolbar();
             DrawQuickAddBasicAssetsPanel();
 
@@ -69,6 +67,13 @@ namespace CesiumForUnity
             {
                 Repaint();
             }
+        }
+
+        private void Update()
+        {
+            CesiumIonSession session = Ion();
+            if (session != null)
+                session.Tick();
         }
 
         public enum ToolbarIndex
