@@ -2,21 +2,23 @@
 
 #include <CesiumIonClient/Assets.h>
 
+#include <DotNet/CesiumForUnity/IonAssetsColumn.h>
+
 #include <DotNet/System/Collections/Generic/IList1.h>
 #include <DotNet/System/String.h>
 
 #include <DotNet/UnityEditor/IMGUI/Controls/TreeViewItem.h>
+#include <DotNet/UnityEngine/Rect.h>
 
 #include <memory>
-#include <optional>
-#include <vector>
+#include <map>
 
 namespace DotNet::CesiumForUnity {
 class IonAssetsTreeView;
 }
 
 namespace CesiumForUnityNative {
-/*
+
 class IonAssetTreeViewItem
     : public DotNet::UnityEditor::IMGUI::Controls::TreeViewItem {
 public:
@@ -24,14 +26,14 @@ public:
   ~IonAssetTreeViewItem();
 
   const int64_t assetId;
-  const std::string assetName;
-  const std::string assetType;
-  const std::string assetDateAdded;
+  const DotNet::System::String assetName;
+  const DotNet::System::String assetType;
+  const DotNet::System::String assetDateAdded;
 
 private:
   std::shared_ptr<CesiumIonClient::Asset> _pAsset;
   const static int _depth = 0; // All items are at the same depth in the tree.
-};*/
+};
 
 class IonAssetsTreeViewImpl {
 public:
@@ -47,6 +49,14 @@ public:
   BuildRows(
       const DotNet::CesiumForUnity::IonAssetsTreeView& treeView,
       DotNet::UnityEditor::IMGUI::Controls::TreeViewItem root);
+
+  void CellGUI(
+      const DotNet::CesiumForUnity::IonAssetsTreeView& treeView,
+      DotNet::UnityEngine::Rect cellRect,
+      DotNet::UnityEditor::IMGUI::Controls::TreeViewItem item,
+      DotNet::CesiumForUnity::IonAssetsColumn column);
+
+  void Refresh(const DotNet::CesiumForUnity::IonAssetsTreeView& treeView);
 
 private:
 };

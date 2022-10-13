@@ -34,6 +34,7 @@ namespace CesiumForUnity
                 CesiumIonSession.currentSession = new CesiumIonSession();
             }
 
+            CesiumIonSession.currentSession.Resume();
             PopulateQuickAddLists();
         }
 
@@ -236,7 +237,6 @@ namespace CesiumForUnity
             );
         }
 
-
         void DrawQuickAddBasicAssetsPanel()
         {
             GUILayout.Label("Quick Add Basic Assets", EditorStyles.boldLabel);
@@ -249,20 +249,24 @@ namespace CesiumForUnity
                 GUILayout.FlexibleSpace();
                 if (GUILayout.Button(addButtonContent, CesiumEditorStyle.quickAddButtonStyle))
                 {
-                    AddBasicAsset(basicAssets[i]);
+                    QuickAddAsset(basicAssets[i]);
                 }
                 GUILayout.EndHorizontal();
             }
 
             // add other options as they come up
         }
-        private void AddBasicAsset(QuickAddItem item)
+        private void QuickAddAsset(QuickAddItem item)
         {
-            GameObject addedObject = new GameObject("Cesium3DTileset");
+            GameObject addedObject = new GameObject();
             QuickAddItemType type = item.type;
 
             switch (type) {
+                case QuickAddItemType.IonTileset:
+                    addedObject.name = item.name;
+                    break;
                 case QuickAddItemType.BlankTileset:
+                    addedObject.name = "Cesium3DTileset";
                     addedObject.AddComponent<Cesium3DTileset>();
                     break;
                 default:
@@ -282,7 +286,7 @@ namespace CesiumForUnity
                 GUILayout.FlexibleSpace();
                 if (GUILayout.Button(addButtonContent, CesiumEditorStyle.quickAddButtonStyle))
                 {
-                    // TODO: some function here
+                    QuickAddAsset(ionAssets[i]);
                 }
                 GUILayout.EndHorizontal();
             }
@@ -296,10 +300,16 @@ namespace CesiumForUnity
                 "terrain, imagery, and buildings. Bring your own data for tiling, hosting, and " +
                 "streaming to Unity.", EditorStyles.wordWrappedLabel);
 
-            if (GUILayout.Button("Connect to Cesium ion"))
+            GUILayout.Space(20);
+
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("Connect to Cesium ion", CesiumEditorStyle.cesiumButtonStyle))
             {
                 Ion().Connect();
             }
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
         }
 
         void DrawConnectionStatusPanel()

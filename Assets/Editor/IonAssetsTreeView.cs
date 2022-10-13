@@ -1,60 +1,48 @@
 using Reinterop;
+using System;
 using System.Collections.Generic;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 
 namespace CesiumForUnity
 {
+    public enum IonAssetsColumn
+    {
+        Name = 0,
+        Type = 1,
+        DateAdded = 2,
+    }
+
     [ReinteropNativeImplementation("CesiumForUnityNative::IonAssetsTreeViewImpl", "IonAssetsTreeViewImpl.h")]
     public partial class IonAssetsTreeView : TreeView
     {
-        private TreeViewState _treeState;
-
-        private MultiColumnHeader _header;
-        private MultiColumnHeaderState _headerState;
-
-        public IonAssetsTreeView(TreeViewState assetsTreeState) : base(assetsTreeState)
+        public IonAssetsTreeView(TreeViewState assetsTreeState, MultiColumnHeader header)
+            : base(assetsTreeState, header)
         {
-            _treeState = assetsTreeState;
-
-            _headerState = new MultiColumnHeaderState(BuildHeaderColumns());
-            _header = new MultiColumnHeader(_headerState);
-
-            _header.ResizeToFit();
-
             CreateImplementation();
-        }
-
-        private MultiColumnHeaderState.Column[] BuildHeaderColumns()
-        {
-            string[] columnNames = { "Name", "Type", "Date added" };
-            MultiColumnHeaderState.Column[] columns = new MultiColumnHeaderState.Column[columnNames.Length];
-
-            for (int i = 0; i < columns.Length; i++)
-            {
-                columns[i] = new MultiColumnHeaderState.Column()
-                {
-                    allowToggleVisibility = false,
-                    autoResize = true,
-                    minWidth = 150.0f,
-                    canSort = true,
-                    sortingArrowAlignment = TextAlignment.Center,
-                    headerContent = new GUIContent(columnNames[i]),
-                    headerTextAlignment = TextAlignment.Left
-                };
-            }
-
-            return columns;
         }
 
         protected override TreeViewItem BuildRoot()
         {
-            int rootId = -1;
+            int rootId = 0;
             int rootDepth = -1;
             return new TreeViewItem(rootId, rootDepth);
         }
 
         protected override partial IList<TreeViewItem> BuildRows(TreeViewItem root);
+
+        protected override void RowGUI(RowGUIArgs args)
+        {
+            GUILayout.Label("TEST ROW");
+            /*for (int index = 0; index < args.GetNumVisibleColumns(); ++index)
+            {
+                CellGUI(args.GetCellRect(index), args.item, (IonAssetsColumn)index);
+            }*/
+        }
+
+        private partial void CellGUI(Rect cellRect, TreeViewItem item, IonAssetsColumn column);
+
+        public partial void Refresh();
     }
 }
 

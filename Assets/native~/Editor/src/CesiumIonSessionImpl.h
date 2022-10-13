@@ -68,11 +68,16 @@ public:
   DotNet::System::String
   GetAuthorizeUrl(const DotNet::CesiumForUnity::CesiumIonSession& session);
 
+  void refreshProfile();
+  void refreshAssets();
+  void refreshTokens();
+
   const CesiumIonClient::Profile& getProfile();
   const CesiumIonClient::Assets& getAssets();
   const std::vector<CesiumIonClient::Token>& getTokens();
 
 private:
+
   CesiumAsync::AsyncSystem _asyncSystem;
   std::shared_ptr<CesiumAsync::IAssetAccessor> _pAssetAccessor;
 
@@ -87,11 +92,11 @@ private:
   bool _isLoadingAssets;
   bool _isLoadingTokens;
 
-  std::string _authorizeUrl;
+  bool _loadProfileQueued;
+  bool _loadAssetsQueued;
+  bool _loadTokensQueued;
 
-  void refreshProfile();
-  //void refreshAssets();
-  //void refreshTokens();
+  std::string _authorizeUrl;
 
   const static std::string accessTokenEditorKey;
 };

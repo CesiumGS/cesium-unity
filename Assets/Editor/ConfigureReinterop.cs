@@ -44,7 +44,7 @@ namespace CesiumForUnity
             Debug.Log("log");
 
             UnityWebRequest request = UnityWebRequest.Get("url");
-            
+
             var uploadHandler = new UploadHandlerRaw(new byte[0]);
 
             var rawBytes = new NativeArray<byte>(1, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
@@ -87,11 +87,28 @@ namespace CesiumForUnity
             TreeViewItem root = new TreeViewItem(0, -1, "root");
             TreeViewItem child = new TreeViewItem(1, 0, "child");
             IList<TreeViewItem> treeViewItemList = new List<TreeViewItem>(100);
-            treeViewItemList[0] = root;
+            treeViewItemList.Insert(0, root);
             root.AddChild(child);
 
-            TreeViewState state = new TreeViewState();
-            IonAssetsTreeView assetsTreeView = new IonAssetsTreeView(state);
+            TreeViewState treeState = new TreeViewState();
+            MultiColumnHeaderState.Column[] columns = new MultiColumnHeaderState.Column[] { };
+            MultiColumnHeaderState headerState = new MultiColumnHeaderState(columns);
+            MultiColumnHeader header = new MultiColumnHeader(headerState);
+            IonAssetsTreeView treeView = new IonAssetsTreeView(treeState, header);
+            treeView.Reload();
+
+            IonAssetsColumn column = IonAssetsColumn.Name;
+            column = IonAssetsColumn.Type;
+            column = IonAssetsColumn.DateAdded;
+
+            Rect r = new Rect(0, 0, 50, 50);
+            GUI.Label(r, "Label");
+
+            /*DateTime date = System.DateTime.Parse(
+                "date",
+                CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.RoundtripKind
+            );*/
         }
     }
 }//

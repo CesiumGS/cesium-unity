@@ -137,8 +137,7 @@ void CesiumIonSessionImpl::Resume(
       UnityEditor::EditorPrefs::GetString(System::String(accessTokenEditorKey));
 
   if (userAccessToken == System::String("")) {
-    // No user access token was stored, so there's no existing session to
-    // resume.
+    // No user access token was stored, so there's no existing session to resume.
     return;
   }
 
@@ -226,6 +225,59 @@ void CesiumIonSessionImpl::refreshProfile() {
       });
 }
 
+
+void CesiumIonSessionImpl::refreshAssets() {
+  if (!this->_connection || this->_isLoadingAssets) {
+    return;
+  }
+
+  this->_isLoadingAssets = true;
+  this->_loadAssetsQueued = false;
+
+  this->_connection->assets()
+      .thenInMainThread(
+          [this](CesiumIonClient::Response<CesiumIonClient::Assets>&& assets) {
+        this->_isLoadingAssets = false;
+        this->_assets = std::move(assets.value);
+        //this->AssetsUpdated.Broadcast();
+        //this->refreshAssetsIfNeeded();
+      })
+      .catchInMainThread([this](std::exception&& e) {
+        this->_isLoadingAssets = false;
+        this->_assets = std::nullopt;
+        //this->AssetsUpdated.Broadcast();
+        //this->refreshAssetsIfNeeded();
+      });
+}
+
+void CesiumIonSessionImpl::refreshTokens() {
+  if (!this->_connection || this->_isLoadingTokens) {
+    return;
+  }
+
+  this->_isLoadingTokens = true;
+  this->_loadTokensQueued = false;
+
+  this->_connection->tokens()
+      .thenInMainThread(
+          [this](
+              CesiumIonClient::Response<CesiumIonClient::TokenList>&& tokens) {
+        this->_isLoadingTokens = false;
+        this->_tokens = tokens.value
+                            ? std::make_optional(std::move(tokens.value->items))
+                            : std::nullopt;
+        //this->TokensUpdated.Broadcast();
+        //this->refreshTokensIfNeeded();
+      })
+      .catchInMainThread([this](std::exception&& e) {
+        this->_isLoadingTokens = false;
+        this->_tokens = std::nullopt;
+        //this->TokensUpdated.Broadcast();
+        //this->refreshTokensIfNeeded();
+      });
+}
+
+
 const CesiumIonClient::Profile& CesiumIonSessionImpl::getProfile() {
   static const CesiumIonClient::Profile empty{};
   if (this->_profile) {
@@ -241,7 +293,7 @@ const CesiumIonClient::Assets& CesiumIonSessionImpl::getAssets() {
   if (this->_assets) {
     return *this->_assets;
   } else {
-    //this->refreshAssets();
+    this->refreshAssets();
     return empty;
   }
 }
@@ -251,7 +303,7 @@ const std::vector<CesiumIonClient::Token>& CesiumIonSessionImpl::getTokens() {
   if (this->_tokens) {
     return *this->_tokens;
   } else {
-    //this->refreshTokens();
+    this->refreshTokens();
     return empty;
   }
 }
