@@ -1,13 +1,19 @@
-#include "MetadataValueImpl.h"
+#include "MetadataPropertyImpl.h"
+
+#include <algorithm>
+#include <glm/common.hpp>
+
+#include "CesiumGltf/PropertyType.h"
+#include "CesiumGltf/PropertyTypeTraits.h"
 
 #include "CesiumUtility/JsonValue.h"
 
-#include <CesiumGltf/PropertyTypeTraits.h>
-
-#include <DotNet/CesiumForUnity/MetadataValue.h>
+#include <DotNet/CesiumForUnity/MetadataType.h>
+#include <DotNet/CesiumForUnity/MetadataProperty.h>
 #include <DotNet/System/String.h>
-#include <glm/common.hpp>
-#include <algorithm>
+
+#include "CesiumGltf/PropertyType.h"
+#include "CesiumGltf/PropertyTypeTraits.h"
 
 using namespace CesiumForUnityNative;
 
@@ -152,8 +158,43 @@ GetMetadataType(CesiumGltf::PropertyType type) {
         }
 } // namespace
 
-int8_t MetadataValueImpl::GetInt8(
-        const DotNet::CesiumForUnity::MetadataValue& value,
+DotNet::System::String MetadataPropertyImpl::GetPropertyName(
+    const DotNet::CesiumForUnity::MetadataProperty& property) {
+  return DotNet::System::String(this->_propertyName);
+}
+
+void MetadataPropertyImpl::SetProperty(
+    const std::string& propertyName, const PropertyType& property, int64_t featureID) {
+  this->_propertyName = propertyName;
+  this->_propertyType = property;
+this->_value = std::visit(
+        [featureID](auto&& value) {
+        if (featureID >= 0 && featureID < value.size()) {
+        return static_cast<ValueType>(value.get(featureID));
+        } else {
+        return static_cast<ValueType>(0);
+        }
+        },
+        _propertyType);
+
+}
+
+void MetadataPropertyImpl::SetProperty(
+    const std::string& propertyName, const PropertyType& property, ValueType value) {
+  this->_propertyName = propertyName;
+  this->_propertyType = property;
+  this->_value = value;
+}
+
+int MetadataPropertyImpl::GetComponentCount(
+const DotNet::CesiumForUnity::MetadataProperty& property) {
+return std::visit(
+    [](auto&& arg) { return arg.getComponentCount(); },
+    this->_propertyType);
+}
+
+int8_t MetadataPropertyImpl::GetInt8(
+        const DotNet::CesiumForUnity::MetadataProperty& property,
         int8_t defaultValue) {
     return std::visit(
             [defaultValue](auto&& arg) {
@@ -163,8 +204,8 @@ int8_t MetadataValueImpl::GetInt8(
             },
             _value);
 }
-uint8_t MetadataValueImpl::GetUInt8(
-        const DotNet::CesiumForUnity::MetadataValue& value,
+uint8_t MetadataPropertyImpl::GetUInt8(
+        const DotNet::CesiumForUnity::MetadataProperty& property,
         uint8_t defaultValue) {
     return std::visit(
             [defaultValue](auto&& arg) {
@@ -174,8 +215,8 @@ uint8_t MetadataValueImpl::GetUInt8(
             },
             _value);
 }
-int16_t MetadataValueImpl::GetInt16(
-        const DotNet::CesiumForUnity::MetadataValue& value,
+int16_t MetadataPropertyImpl::GetInt16(
+        const DotNet::CesiumForUnity::MetadataProperty& property,
         int16_t defaultValue) {
     return std::visit(
             [defaultValue](auto&& arg) {
@@ -185,8 +226,8 @@ int16_t MetadataValueImpl::GetInt16(
             },
             _value);
 }
-uint16_t MetadataValueImpl::GetUInt16(
-        const DotNet::CesiumForUnity::MetadataValue& value,
+uint16_t MetadataPropertyImpl::GetUInt16(
+        const DotNet::CesiumForUnity::MetadataProperty& value,
         uint16_t defaultValue) {
     return std::visit(
             [defaultValue](auto&& arg) {
@@ -196,8 +237,8 @@ uint16_t MetadataValueImpl::GetUInt16(
             },
             _value);
 }
-int32_t MetadataValueImpl::GetInt32(
-        const DotNet::CesiumForUnity::MetadataValue& value,
+int32_t MetadataPropertyImpl::GetInt32(
+        const DotNet::CesiumForUnity::MetadataProperty& value,
         int32_t defaultValue) {
     return std::visit(
             [defaultValue](auto&& arg) {
@@ -207,8 +248,8 @@ int32_t MetadataValueImpl::GetInt32(
             },
             _value);
 }
-uint32_t MetadataValueImpl::GetUInt32(
-        const DotNet::CesiumForUnity::MetadataValue& value,
+uint32_t MetadataPropertyImpl::GetUInt32(
+        const DotNet::CesiumForUnity::MetadataProperty& value,
         uint32_t defaultValue) {
     return std::visit(
             [defaultValue](auto&& arg) {
@@ -218,8 +259,8 @@ uint32_t MetadataValueImpl::GetUInt32(
             },
             _value);
 }
-int64_t MetadataValueImpl::GetInt64(
-        const DotNet::CesiumForUnity::MetadataValue& value,
+int64_t MetadataPropertyImpl::GetInt64(
+        const DotNet::CesiumForUnity::MetadataProperty& property,
         int64_t defaultValue) {
     return std::visit(
             [defaultValue](auto&& arg) {
@@ -229,8 +270,8 @@ int64_t MetadataValueImpl::GetInt64(
             },
             _value);
 }
-uint64_t MetadataValueImpl::GetUInt64(
-        const DotNet::CesiumForUnity::MetadataValue& value,
+uint64_t MetadataPropertyImpl::GetUInt64(
+        const DotNet::CesiumForUnity::MetadataProperty& property,
         uint64_t defaultValue) {
     return std::visit(
             [defaultValue](auto&& arg) {
@@ -241,8 +282,8 @@ uint64_t MetadataValueImpl::GetUInt64(
             _value);
 }
 
-float MetadataValueImpl::GetFloat32(
-        const DotNet::CesiumForUnity::MetadataValue& value,
+float MetadataPropertyImpl::GetFloat32(
+        const DotNet::CesiumForUnity::MetadataProperty& property,
         float defaultValue) {
     return std::visit(
             [defaultValue](auto&& arg) {
@@ -252,8 +293,8 @@ float MetadataValueImpl::GetFloat32(
             },
             _value);
 }
-double MetadataValueImpl::GetFloat64(
-        const DotNet::CesiumForUnity::MetadataValue& value,
+double MetadataPropertyImpl::GetFloat64(
+        const DotNet::CesiumForUnity::MetadataProperty& property,
         double defaultValue) {
     return std::visit(
             [defaultValue](auto&& arg) {
@@ -263,8 +304,8 @@ double MetadataValueImpl::GetFloat64(
             },
             _value);
 }
-bool MetadataValueImpl::GetBoolean(
-        const DotNet::CesiumForUnity::MetadataValue& value,
+bool MetadataPropertyImpl::GetBoolean(
+        const DotNet::CesiumForUnity::MetadataProperty& property,
         bool defaultValue) {
     return std::visit(
             [defaultValue](auto&& arg) {
@@ -289,8 +330,8 @@ bool MetadataValueImpl::GetBoolean(
             _value);
 }
 
-DotNet::System::String MetadataValueImpl::GetString(
-        const DotNet::CesiumForUnity::MetadataValue& value,
+DotNet::System::String MetadataPropertyImpl::GetString(
+        const DotNet::CesiumForUnity::MetadataProperty& property,
         const DotNet::System::String& defaultValue) {
     return std::visit(
             [defaultValue](auto&& arg) {
@@ -309,27 +350,29 @@ DotNet::System::String MetadataValueImpl::GetString(
             _value);
 }
 
-void MetadataValueImpl::GetComponent(const DotNet::CesiumForUnity::MetadataValue& value,  const DotNet::CesiumForUnity::MetadataValue& component, int index){
-    bool validData = true;
-    ValueType valueType = std::visit([index, &validData](auto&& arg){
+void MetadataPropertyImpl::GetComponent(const DotNet::CesiumForUnity::MetadataProperty& property,  const DotNet::CesiumForUnity::MetadataProperty& component, int index){
+    ValueType value = std::visit([index](auto&& arg){
             using T = std::decay_t<decltype(arg)>;
             if constexpr (CesiumGltf::IsMetadataArray<T>::value){
             if(index >= 0 && index < arg.size()){
             return static_cast<ValueType>(arg[index]);
             }
             }
-            validData = false;
             return static_cast<ValueType>(0);
-            }, component.NativeImplementation()._value);
-    if(validData){
-        component.NativeImplementation().SetValue(valueType);
-    }
+            }, _value);
+            component.NativeImplementation().SetProperty(this->_propertyName, this->_propertyType, value);
 }
 
- 
- 
- DotNet::CesiumForUnity::MetadataType
- MetadataValueImpl::GetComponentType(const DotNet::CesiumForUnity::MetadataValue& value){
+DotNet::CesiumForUnity::MetadataType MetadataPropertyImpl::GetMetadataType(const DotNet::CesiumForUnity::MetadataProperty& property){
+    CesiumGltf::PropertyType type = std::visit([](auto&& arg){
+        using T = std::decay_t<decltype(arg)>;
+        return CesiumGltf::TypeToPropertyType<T>::value;
+    }, this->_value);
+    return ::GetMetadataType(type);
+}
+
+DotNet::CesiumForUnity::MetadataType
+MetadataPropertyImpl::GetComponentType(const DotNet::CesiumForUnity::MetadataProperty& property){
    return std::visit(
        [](auto&& arg) {
          using T = std::decay_t<decltype(arg)>;

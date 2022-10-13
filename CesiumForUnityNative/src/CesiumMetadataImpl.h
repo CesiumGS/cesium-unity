@@ -1,9 +1,8 @@
 #pragma once
 
 #include <CesiumGltf/AccessorView.h>
-#include <CesiumGltf/MetadataPropertyView.h>
 #include <CesiumGltf/Model.h>
-#include <DotNet/CesiumForUnity/MetadataValue.h>
+#include <DotNet/CesiumForUnity/MetadataProperty.h>
 #include <DotNet/System/String.h>
 
 #include <unordered_map>
@@ -17,33 +16,6 @@ class Transform;
 }
 
 namespace CesiumForUnityNative {
-
-using PropertyType = std::variant<
-    CesiumGltf::MetadataPropertyView<int8_t>,
-    CesiumGltf::MetadataPropertyView<uint8_t>,
-    CesiumGltf::MetadataPropertyView<int16_t>,
-    CesiumGltf::MetadataPropertyView<uint16_t>,
-    CesiumGltf::MetadataPropertyView<int32_t>,
-    CesiumGltf::MetadataPropertyView<uint32_t>,
-    CesiumGltf::MetadataPropertyView<int64_t>,
-    CesiumGltf::MetadataPropertyView<uint64_t>,
-    CesiumGltf::MetadataPropertyView<float>,
-    CesiumGltf::MetadataPropertyView<double>,
-    CesiumGltf::MetadataPropertyView<bool>,
-    CesiumGltf::MetadataPropertyView<std::string_view>,
-    CesiumGltf::MetadataPropertyView<CesiumGltf::MetadataArrayView<int8_t>>,
-    CesiumGltf::MetadataPropertyView<CesiumGltf::MetadataArrayView<uint8_t>>,
-    CesiumGltf::MetadataPropertyView<CesiumGltf::MetadataArrayView<int16_t>>,
-    CesiumGltf::MetadataPropertyView<CesiumGltf::MetadataArrayView<uint16_t>>,
-    CesiumGltf::MetadataPropertyView<CesiumGltf::MetadataArrayView<int32_t>>,
-    CesiumGltf::MetadataPropertyView<CesiumGltf::MetadataArrayView<uint32_t>>,
-    CesiumGltf::MetadataPropertyView<CesiumGltf::MetadataArrayView<int64_t>>,
-    CesiumGltf::MetadataPropertyView<CesiumGltf::MetadataArrayView<uint64_t>>,
-    CesiumGltf::MetadataPropertyView<CesiumGltf::MetadataArrayView<float>>,
-    CesiumGltf::MetadataPropertyView<CesiumGltf::MetadataArrayView<double>>,
-    CesiumGltf::MetadataPropertyView<CesiumGltf::MetadataArrayView<bool>>,
-    CesiumGltf::MetadataPropertyView<
-        CesiumGltf::MetadataArrayView<std::string_view>>>;
 
 using AccessorType = std::variant<
     CesiumGltf::AccessorView<CesiumGltf::AccessorTypes::SCALAR<int8_t>>,
@@ -70,19 +42,11 @@ public:
     return _currentMetadataValues.size();
   }
 
-  void getValue(const DotNet::CesiumForUnity::CesiumMetadata& metadata, const DotNet::CesiumForUnity::MetadataValue& value, int index){
-    if(index < _currentMetadataValues.size()){
-      value.NativeImplementation().SetValue(_currentMetadataValues[index].second);
+  void getProperty(const DotNet::CesiumForUnity::CesiumMetadata& metadata, const DotNet::CesiumForUnity::MetadataProperty& property, int index) {
+    if (index >= 0 && index < _currentMetadataValues.size()) {
+      const MetadataProperty& propertyInfo = _currentMetadataValues[index];
+      property.NativeImplementation().SetProperty(propertyInfo.propertyName, propertyInfo.propertyView, propertyInfo.featureID);
     }
-  }
-
-  DotNet::System::String
-  getKey(const DotNet::CesiumForUnity::CesiumMetadata& metadata, int index) {
-    if (index < _currentMetadataValues.size()) {
-      return DotNet::System::String(
-          _currentMetadataValues[index].first.c_str());
-    }
-    return DotNet::System::String("");
   }
 
 private:
@@ -114,9 +78,12 @@ private:
       std::vector<FeatureIDAttribute>>>
       _featureIDs;
 
-  /**
-   * @brief Map of property names to property values of currently loaded metadata. 
-   */
-  std::vector<std::pair<std::string, ValueType>> _currentMetadataValues;
+  struct MetadataProperty {
+    std::string propertyName;
+    PropertyType propertyView;
+    int64_t featureID;
+  };
+
+  std::vector<MetadataProperty> _currentMetadataValues;
 };
 } // namespace CesiumForUnityNative

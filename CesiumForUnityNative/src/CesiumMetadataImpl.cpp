@@ -207,22 +207,11 @@ void CesiumMetadataImpl::loadMetadata(
                     for (auto kvp : featureTable) {
                         const std::string& propertyName = kvp.first;
                         const PropertyType& propertyType = kvp.second;
-
-                        bool validData = true;
-                        ValueType value = std::visit(
-                                [featureID, &validData](auto&& value) {
-                                if (featureID >= 0 && featureID < value.size()) {
-                                return static_cast<ValueType>(value.get(featureID));
-                                } else {
-                                validData = false;
-                                return static_cast<ValueType>(0);
-                                }
-                                },
-                                propertyType);
-                        if (validData) {
-                            std::pair<std::string, ValueType> p = {propertyName, value};
-                            _currentMetadataValues.emplace_back(p);
-                        }
+                        MetadataProperty property = {
+                            propertyName,
+                            propertyType,
+                            featureID};
+                        _currentMetadataValues.emplace_back(property);
                     }
                 }
             }

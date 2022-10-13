@@ -20,13 +20,13 @@ namespace CesiumForUnity
         String,
         Array
     }
-
-    [ReinteropNativeImplementation("CesiumForUnityNative::MetadataValueImpl", "MetadataValueImpl.h")]
-    public partial class MetadataValue
+    [ReinteropNativeImplementation("CesiumForUnityNative::MetadataPropertyImpl", "MetadataPropertyImpl.h")]
+    public partial class MetadataProperty
     {
+        public partial string GetPropertyName();
+        public partial int GetComponentCount();
+        public partial void GetComponent(MetadataProperty property, int index);
         public partial MetadataType GetComponentType();
-        public parrtial int GetComponentCount();
-        public partial void GetComponent(MetadataValue value, int index);
         public partial MetadataType GetMetadataType();
         public partial sbyte GetInt8(sbyte defaultValue);
         public partial byte GetUInt8(byte defaultValue);
@@ -40,5 +40,6 @@ namespace CesiumForUnity
         public partial double GetFloat64(double defaultValue);
         public partial Boolean GetBoolean(Boolean defaultValue);
         public partial String GetString(String defaultValue);
+
     }
 }
