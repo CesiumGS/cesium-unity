@@ -31,7 +31,7 @@ public:
   const DotNet::System::String assetDateAdded;
 
 private:
-  std::shared_ptr<CesiumIonClient::Asset> _pAsset;
+  //std::shared_ptr<CesiumIonClient::Asset> _pAsset;
   const static int _depth = 0; // All items are at the same depth in the tree.
 };
 

@@ -29,18 +29,8 @@ namespace CesiumForUnity
 
         void Awake()
         {
-            if (CesiumIonSession.currentSession == null)
-            {
-                CesiumIonSession.currentSession = new CesiumIonSession();
-            }
-
-            CesiumIonSession.currentSession.Resume();
+            CesiumIonSession.Ion().Resume();
             PopulateQuickAddLists();
-        }
-
-        CesiumIonSession Ion()
-        {
-            return CesiumIonSession.currentSession;
         }
 
         void OnGUI()
@@ -49,7 +39,7 @@ namespace CesiumForUnity
             DrawQuickAddBasicAssetsPanel();
 
             GUILayout.Space(10);
-            if (Ion().IsConnected())
+            if (CesiumIonSession.Ion().IsConnected())
             {
                 DrawQuickAddIonAssetsPanel();
             }
@@ -62,8 +52,8 @@ namespace CesiumForUnity
             DrawConnectionStatusPanel();
 
             // Force the window to repaint if the cursor is hovered over it.
-            // (By default, it only repaints sporadically, so the hover and
-            // selection behavior will appear delayed.)
+            // By default, it only repaints sporadically, so the hover and
+            // selection behavior will appear delayed.
             if (mouseOverWindow == currentWindow)
             {
                 Repaint();
@@ -72,11 +62,7 @@ namespace CesiumForUnity
 
         private void Update()
         {
-            CesiumIonSession session = Ion();
-            if (session != null)
-            {
-                session.Tick();
-            }
+            CesiumIonSession.Ion().Tick();
         }
 
         public enum ToolbarIndex
@@ -93,7 +79,7 @@ namespace CesiumForUnity
         {
             GUIContent content = new GUIContent(name, CesiumEditorStyle.toolbarIcons[iconIndex], tooltip);
             GUIStyle style = CesiumEditorStyle.toolbarButtonStyle;
-            bool isConnectedToIon = Ion().IsConnected();
+            bool isConnectedToIon = CesiumIonSession.Ion().IsConnected();
 
             if (enableForIonOnly && !isConnectedToIon)
             {
@@ -306,7 +292,7 @@ namespace CesiumForUnity
             GUILayout.FlexibleSpace();
             if (GUILayout.Button("Connect to Cesium ion", CesiumEditorStyle.cesiumButtonStyle))
             {
-                Ion().Connect();
+                CesiumIonSession.Ion().Connect();
             }
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
@@ -314,13 +300,13 @@ namespace CesiumForUnity
 
         void DrawConnectionStatusPanel()
         {
-            if (Ion().IsConnecting()) {
+            if (CesiumIonSession.Ion().IsConnecting()) {
                 EditorGUILayout.LabelField(
                     "Waiting for you to sign into Cesium ion with your web browser...",
                     EditorStyles.wordWrappedLabel
                 );
 
-                string authorizeUrl = Ion().GetAuthorizeUrl();
+                string authorizeUrl = CesiumIonSession.Ion().GetAuthorizeUrl();
                 if (EditorGUILayout.LinkButton("Open web browser again")) {
                     Application.OpenURL(authorizeUrl);
                 }
@@ -342,13 +328,13 @@ namespace CesiumForUnity
                 }
                 GUILayout.EndHorizontal();
 
-            } else if (Ion().IsProfileLoaded())
+            } else if (CesiumIonSession.Ion().IsProfileLoaded())
             {
-                string username = Ion().GetProfileUsername();
+                string username = CesiumIonSession.Ion().GetProfileUsername();
                 if (GUILayout.Button("Connected to Cesium ion as " + username, "Open your Cesium ion account in your browser")) {
                     VisitIon();
                 }
-            } else if (Ion().IsLoadingProfile()) {
+            } else if (CesiumIonSession.Ion().IsLoadingProfile()) {
                 GUILayout.Label("Loading user information...");
             }
         }
@@ -365,7 +351,7 @@ namespace CesiumForUnity
 
         void SetToken()
         {
-
+            CesiumIonTokensWindow.ShowWindow();
         }
 
         void OpenDocumentation()
@@ -380,7 +366,7 @@ namespace CesiumForUnity
 
         void SignOutOfIon()
         {
-            Ion().Disconnect();
+            CesiumIonSession.Ion().Disconnect();
         }
         void VisitIon()
         {

@@ -26,18 +26,17 @@ namespace CesiumForUnity
         {
             int rootId = 0;
             int rootDepth = -1;
-            return new TreeViewItem(rootId, rootDepth);
+            return new TreeViewItem(rootId, rootDepth, "Root");
         }
 
         protected override partial IList<TreeViewItem> BuildRows(TreeViewItem root);
 
         protected override void RowGUI(RowGUIArgs args)
         {
-            GUILayout.Label("TEST ROW");
-            /*for (int index = 0; index < args.GetNumVisibleColumns(); ++index)
+            for (int index = 0; index < args.GetNumVisibleColumns(); ++index)
             {
                 CellGUI(args.GetCellRect(index), args.item, (IonAssetsColumn)index);
-            }*/
+            }
         }
 
         private partial void CellGUI(Rect cellRect, TreeViewItem item, IonAssetsColumn column);

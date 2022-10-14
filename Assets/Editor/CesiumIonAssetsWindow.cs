@@ -16,9 +16,12 @@ namespace CesiumForUnity
 
             if (currentWindow == null)
             {
-                // Get existing open window or if none, make a new one docked next to Console window.
-                Type siblingWindow = Type.GetType("UnityEditor.ConsoleWindow,UnityEditor.dll");
-                currentWindow = GetWindow<CesiumIonAssetsWindow>("Cesium ion Assets", new Type[] { siblingWindow });
+                // Get existing open window or if none, make a new one docked next to the Project / Console window.
+                Type[] siblingWindows = new Type[] {
+                    Type.GetType("UnityEditor.ProjectBrowser,UnityEditor.dll"),
+                    Type.GetType("UnityEditor.ConsoleWindow,UnityEditor.dll")
+                };
+                currentWindow = GetWindow<CesiumIonAssetsWindow>("Cesium ion Assets", siblingWindows);
                 currentWindow.titleContent.image = CesiumEditorStyle.cesiumIcon;
             }
 
@@ -30,21 +33,21 @@ namespace CesiumForUnity
         private MultiColumnHeader _assetsHeader;
         private TreeViewState _assetsTreeState;
         private IonAssetsTreeView _assetsTreeView;
-        
+
         void Awake()
         {
-            if (CesiumIonSession.currentSession == null)
-            {
-                CesiumIonSession.currentSession = new CesiumIonSession();
-            }
-
-            CesiumIonSession.currentSession.Resume();
             BuildTreeView();
+
+            CesiumIonSession.OnConnectionUpdated += _assetsTreeView.Refresh;
+            CesiumIonSession.OnAssetsUpdated += _assetsTreeView.Refresh;
+
+            CesiumIonSession.Ion().Resume();
         }
 
-        CesiumIonSession Ion()
+        private void OnDestroy()
         {
-            return CesiumIonSession.currentSession;
+            CesiumIonSession.OnConnectionUpdated -= _assetsTreeView.Refresh;
+            CesiumIonSession.OnAssetsUpdated -= _assetsTreeView.Refresh;
         }
 
         void BuildTreeView()
@@ -75,6 +78,7 @@ namespace CesiumForUnity
 
             _assetsTreeState = new TreeViewState();
             _assetsTreeView = new IonAssetsTreeView(_assetsTreeState, _assetsHeader);
+
             _assetsTreeView.Refresh();
             _assetsHeader.ResizeToFit();
         }
@@ -85,6 +89,18 @@ namespace CesiumForUnity
             DrawAssetListPanel();
             DrawAssetDescriptionPanel();
             GUILayout.EndHorizontal();
+
+            // Force the window to repaint if the cursor is hovered over it.
+            // By default, it only repaints sporadically, so the hover and
+            // selection behavior will appear delayed.
+            if (mouseOverWindow == currentWindow)
+            {
+                Repaint();
+            }
+        }
+        void Update()
+        {
+            CesiumIonSession.Ion().Tick();
         }
 
         void DrawAssetListPanel()
@@ -123,12 +139,12 @@ namespace CesiumForUnity
 
         void DrawAssetTreeView()
         {
+            // Use this to get the corner of the rect that
+            // the TreeView should fill.
             GUILayout.FlexibleSpace();
             Rect viewRect = GUILayoutUtility.GetLastRect();
             viewRect.width = position.width / 2.0f;
-            viewRect.height = position.height;
 
-            GUILayout.Label("This is the tree view");
             _assetsTreeView.OnGUI(viewRect);
         }
     }

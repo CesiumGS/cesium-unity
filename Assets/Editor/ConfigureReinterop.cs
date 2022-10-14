@@ -69,18 +69,12 @@ namespace CesiumForUnity
 
             Task.Run(() => { });
 
-            CesiumIonSession session = new CesiumIonSession();
-            session = CesiumIonSession.currentSession;
+            CesiumIonSession session = CesiumIonSession.Ion();
 
             EditorPrefs.HasKey("Key");
             EditorPrefs.GetString("Key");
             EditorPrefs.SetString("Key", "Value");
             EditorPrefs.DeleteKey("Key");
-
-            session.TriggerConnectionUpdate();
-            session.TriggerAssetsUpdate();
-            session.TriggerProfileUpdate();
-            session.TriggerTokensUpdate();
 
             Application.OpenURL("URL");
 
@@ -103,6 +97,11 @@ namespace CesiumForUnity
 
             Rect r = new Rect(0, 0, 50, 50);
             GUI.Label(r, "Label");
+
+            session.TriggerConnectionUpdate();
+            session.TriggerAssetsUpdate();
+            session.TriggerProfileUpdate();
+            session.TriggerTokensUpdate();
 
             /*DateTime date = System.DateTime.Parse(
                 "date",

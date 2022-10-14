@@ -55,8 +55,7 @@ IonAssetTreeViewItem::IonAssetTreeViewItem(const CesiumIonClient::Asset& asset)
       assetId(asset.id),
       assetName(System::String(asset.name)),
       assetType(assetTypeToString(asset.type)),
-      assetDateAdded(formatDate(asset.dateAdded)),
-      _pAsset(std::make_shared<CesiumIonClient::Asset>(asset)) {}
+      assetDateAdded(formatDate(asset.dateAdded)) {}
 
 IonAssetTreeViewItem::~IonAssetTreeViewItem() {}
 
@@ -70,7 +69,7 @@ void IonAssetsTreeViewImpl::JustBeforeDelete(
 
 CesiumIonSessionImpl& getCurrentSessionImpl() {
   CesiumForUnity::CesiumIonSession session =
-      CesiumForUnity::CesiumIonSession::currentSession();
+      CesiumForUnity::CesiumIonSession::Ion();
   CesiumIonSessionImpl& sessionImpl = session.NativeImplementation();
 
   return sessionImpl;
@@ -85,10 +84,11 @@ IList1<TreeViewItem> IonAssetsTreeViewImpl::BuildRows(
 
   size_t numAssets = assets.items.size();
   IList1<TreeViewItem> rows = List1<TreeViewItem>(numAssets);
+
   for (int i = 0; i < numAssets; i++) {
     const CesiumIonClient::Asset& asset = assets.items[i];
-    IonAssetTreeViewItem assetTreeViewItem(asset);
-
+    
+    IonAssetTreeViewItem assetTreeViewItem = IonAssetTreeViewItem(asset);
     rows.Insert(i, assetTreeViewItem);
     root.AddChild(assetTreeViewItem);
   }
@@ -104,11 +104,11 @@ void IonAssetsTreeViewImpl::CellGUI(
   IonAssetTreeViewItem* pIonAssetItem = static_cast<IonAssetTreeViewItem*>(&item);
 
   if (columnIndex == CesiumForUnity::IonAssetsColumn::Name) {
-    UnityEngine::GUI::Label(cellRect, pIonAssetItem->assetName);
+    UnityEngine::GUI::Label(cellRect, System::String("Asset Name"));// pIonAssetItem->assetName);
   } else if (columnIndex == CesiumForUnity::IonAssetsColumn::Type) {
-    UnityEngine::GUI::Label(cellRect, pIonAssetItem->assetType);
+    UnityEngine::GUI::Label(cellRect, System::String( "Asset Type"));// pIonAssetItem->assetType);
   } else if (columnIndex == CesiumForUnity::IonAssetsColumn::DateAdded) {
-    UnityEngine::GUI::Label(cellRect, pIonAssetItem->assetDateAdded);
+    UnityEngine::GUI::Label(cellRect, System::String( "Asset Date"));// pIonAssetItem->assetDateAdded);
   }
 }
 

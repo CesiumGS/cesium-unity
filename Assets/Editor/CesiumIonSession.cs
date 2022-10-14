@@ -1,12 +1,11 @@
 using Reinterop;
-using UnityEngine;
 
 namespace CesiumForUnity
 {
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumIonSessionImpl", "CesiumIonSessionImpl.h")]
     public partial class CesiumIonSession
     {
-        public static CesiumIonSession currentSession = null!;
+        private static CesiumIonSession currentSession = null!;
 
         public delegate void GUIUpdateDelegate();
 
@@ -15,10 +14,20 @@ namespace CesiumForUnity
         public static event GUIUpdateDelegate OnProfileUpdated;
         public static event GUIUpdateDelegate OnTokensUpdated;
 
+        public static CesiumIonSession Ion()
+        {
+            if (currentSession == null)
+            {
+                currentSession = new CesiumIonSession();
+            }
+
+            return currentSession;
+        }
+
         public partial bool IsConnected();
         public partial bool IsConnecting();
         public partial bool IsResuming();
-        
+
         public partial bool IsProfileLoaded();
         public partial bool IsLoadingProfile();
 
@@ -39,7 +48,6 @@ namespace CesiumForUnity
 
         public void TriggerConnectionUpdate()
         {
-            Debug.Log("Connection update");
             if (OnConnectionUpdated != null)
             {
                 OnConnectionUpdated();

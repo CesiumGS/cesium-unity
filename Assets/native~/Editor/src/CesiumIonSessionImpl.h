@@ -12,6 +12,7 @@
 #include <DotNet/System/String.h>
 
 #include <memory>
+#include <functional>
 #include <optional>
 #include <vector>
 
@@ -72,9 +73,18 @@ public:
   void refreshAssets();
   void refreshTokens();
 
+  bool refreshProfileIfNeeded();
+  bool refreshAssetsIfNeeded();
+  bool refreshTokensIfNeeded();
+
+  const std::optional<CesiumIonClient::Connection>& getConnection() const;
   const CesiumIonClient::Profile& getProfile();
   const CesiumIonClient::Assets& getAssets();
   const std::vector<CesiumIonClient::Token>& getTokens();
+
+  const std::shared_ptr<CesiumAsync::IAssetAccessor>& getAssetAccessor() const;
+  const CesiumAsync::AsyncSystem& getAsyncSystem() const;
+  CesiumAsync::AsyncSystem& getAsyncSystem();
 
 private:
 
@@ -95,6 +105,11 @@ private:
   bool _loadProfileQueued;
   bool _loadAssetsQueued;
   bool _loadTokensQueued;
+  
+  std::function<void()> triggerConnectionUpdate;
+  std::function<void()> triggerAssetsUpdate;
+  std::function<void()> triggerProfileUpdate;
+  std::function<void()> triggerTokensUpdate;
 
   std::string _authorizeUrl;
 
