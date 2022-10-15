@@ -179,9 +179,9 @@ void CesiumMetadataImpl::loadMetadata(
                     _featureIDs[primitiveIndex];
             const AccessorType& indicesAccessor = primitiveInfo.first;
             int64_t vertexIndex = std::visit(
-                    [triangleIndex](auto&& value) {
-                    if (triangleIndex >= 0 && triangleIndex < value.size()) {
-                    return static_cast<int64_t>(value[triangleIndex].value[0]);
+                    [index = triangleIndex * 3](auto&& value) {
+                    if (index >= 0 && index < value.size()) {
+                    return static_cast<int64_t>(value[index].value[0]);
                     } else {
                     return static_cast<int64_t>(-1);
                     }
@@ -207,10 +207,20 @@ void CesiumMetadataImpl::loadMetadata(
                     for (auto kvp : featureTable) {
                         const std::string& propertyName = kvp.first;
                         const PropertyType& propertyType = kvp.second;
+                        ValueType propertyValue = std::visit(
+                                [featureID](auto&& value) {
+                                if (featureID >= 0 && featureID < value.size()) {
+                                return static_cast<ValueType>(value.get(featureID));
+                                } else {
+                                return static_cast<ValueType>(0);
+                                }
+                                },
+                                propertyType);
+
                         MetadataProperty property = {
                             propertyName,
                             propertyType,
-                            featureID};
+                            propertyValue};
                         _currentMetadataValues.emplace_back(property);
                     }
                 }

@@ -45,7 +45,7 @@ public:
   void getProperty(const DotNet::CesiumForUnity::CesiumMetadata& metadata, const DotNet::CesiumForUnity::MetadataProperty& property, int index) {
     if (index >= 0 && index < _currentMetadataValues.size()) {
       const MetadataProperty& propertyInfo = _currentMetadataValues[index];
-      property.NativeImplementation().SetProperty(propertyInfo.propertyName, propertyInfo.propertyView, propertyInfo.featureID);
+      property.NativeImplementation().SetProperty(propertyInfo.propertyName, propertyInfo.propertyView, propertyInfo.propertyValue);
     }
   }
 
@@ -81,7 +81,7 @@ private:
   struct MetadataProperty {
     std::string propertyName;
     PropertyType propertyView;
-    int64_t featureID;
+    ValueType propertyValue;
   };
 
   std::vector<MetadataProperty> _currentMetadataValues;

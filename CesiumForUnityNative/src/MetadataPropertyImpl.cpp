@@ -164,22 +164,6 @@ DotNet::System::String MetadataPropertyImpl::GetPropertyName(
 }
 
 void MetadataPropertyImpl::SetProperty(
-    const std::string& propertyName, const PropertyType& property, int64_t featureID) {
-  this->_propertyName = propertyName;
-  this->_propertyType = property;
-this->_value = std::visit(
-        [featureID](auto&& value) {
-        if (featureID >= 0 && featureID < value.size()) {
-        return static_cast<ValueType>(value.get(featureID));
-        } else {
-        return static_cast<ValueType>(0);
-        }
-        },
-        _propertyType);
-
-}
-
-void MetadataPropertyImpl::SetProperty(
     const std::string& propertyName, const PropertyType& property, ValueType value) {
   this->_propertyName = propertyName;
   this->_propertyType = property;
@@ -390,4 +374,9 @@ MetadataPropertyImpl::GetComponentType(const DotNet::CesiumForUnity::MetadataPro
          return DotNet::CesiumForUnity::MetadataType::None;
        },
       this->_value);
+}
+
+
+bool MetadataPropertyImpl::IsNormalized(const DotNet::CesiumForUnity::MetadataProperty& property){
+    return std::visit([](auto&& arg){ return arg.isNormalized(); }, this->_propertyType);
 }

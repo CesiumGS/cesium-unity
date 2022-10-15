@@ -77,12 +77,12 @@ public:
   MetadataPropertyImpl(const DotNet::CesiumForUnity::MetadataProperty& property){};
   void JustBeforeDelete(const DotNet::CesiumForUnity::MetadataProperty& property){};
   DotNet::System::String GetPropertyName(const DotNet::CesiumForUnity::MetadataProperty& property);
-  void SetProperty(const std::string& propertyName, const PropertyType& property, int64_t featureID);
   void SetProperty(const std::string& propertyName, const PropertyType& property, ValueType value);
   int GetComponentCount(const DotNet::CesiumForUnity::MetadataProperty& property);
   void GetComponent(const DotNet::CesiumForUnity::MetadataProperty& property, const DotNet::CesiumForUnity::MetadataProperty& component, int index);
   DotNet::CesiumForUnity::MetadataType GetMetadataType(const DotNet::CesiumForUnity::MetadataProperty& property);
   DotNet::CesiumForUnity::MetadataType GetComponentType(const DotNet::CesiumForUnity::MetadataProperty& property);
+  bool IsNormalized(const DotNet::CesiumForUnity::MetadataProperty& property);
 
   std::int8_t GetInt8(
       const DotNet::CesiumForUnity::MetadataProperty& value,

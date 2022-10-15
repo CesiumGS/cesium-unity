@@ -24,6 +24,7 @@ namespace CesiumForUnity
     public partial class MetadataProperty
     {
         public partial string GetPropertyName();
+        public partial bool IsNormalized();
         public partial int GetComponentCount();
         public partial void GetComponent(MetadataProperty property, int index);
         public partial MetadataType GetComponentType();
