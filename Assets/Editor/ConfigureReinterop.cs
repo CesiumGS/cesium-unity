@@ -1,6 +1,6 @@
 using Reinterop;
+using System;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEditor;
@@ -79,10 +79,7 @@ namespace CesiumForUnity
             Application.OpenURL("URL");
 
             TreeViewItem root = new TreeViewItem(0, -1, "root");
-            TreeViewItem child = new TreeViewItem(1, 0, "child");
-            IList<TreeViewItem> treeViewItemList = new List<TreeViewItem>(100);
-            treeViewItemList.Insert(0, root);
-            root.AddChild(child);
+            int id = root.id;
 
             TreeViewState treeState = new TreeViewState();
             MultiColumnHeaderState.Column[] columns = new MultiColumnHeaderState.Column[] { };
@@ -103,11 +100,8 @@ namespace CesiumForUnity
             session.TriggerProfileUpdate();
             session.TriggerTokensUpdate();
 
-            /*DateTime date = System.DateTime.Parse(
-                "date",
-                CultureInfo.InvariantCulture,
-                System.Globalization.DateTimeStyles.RoundtripKind
-            );*/
+            IonAssetDetails.FormatType("type");
+            IonAssetDetails.FormatDate("date");
         }
     }
 }//

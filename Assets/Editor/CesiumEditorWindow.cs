@@ -231,7 +231,7 @@ namespace CesiumForUnity
             for (int i = 0; i < basicAssets.Length; i++)
             {
                 GUILayout.BeginHorizontal(CesiumEditorStyle.quickAddItemStyle);
-                GUILayout.Box(new GUIContent(basicAssets[i].name, basicAssets[i].tooltip), CesiumEditorStyle.quickAddItemLabelStyle);
+                GUILayout.Box(new GUIContent(basicAssets[i].name, basicAssets[i].tooltip), EditorStyles.wordWrappedLabel);
                 GUILayout.FlexibleSpace();
                 if (GUILayout.Button(addButtonContent, CesiumEditorStyle.quickAddButtonStyle))
                 {
@@ -268,7 +268,7 @@ namespace CesiumForUnity
             for (int i = 0; i < ionAssets.Length; i++)
             {
                 GUILayout.BeginHorizontal(CesiumEditorStyle.quickAddItemStyle);
-                GUILayout.Box(new GUIContent(ionAssets[i].name, ionAssets[i].tooltip), CesiumEditorStyle.quickAddItemLabelStyle);
+                GUILayout.Box(new GUIContent(ionAssets[i].name, ionAssets[i].tooltip), EditorStyles.wordWrappedLabel);
                 GUILayout.FlexibleSpace();
                 if (GUILayout.Button(addButtonContent, CesiumEditorStyle.quickAddButtonStyle))
                 {

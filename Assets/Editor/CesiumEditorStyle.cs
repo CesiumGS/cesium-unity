@@ -11,11 +11,14 @@ namespace CesiumForUnity
         public static GUIStyle toolbarButtonDisabledStyle = null!;
 
         public static GUIStyle quickAddItemStyle = null!;
-        public static GUIStyle quickAddItemLabelStyle = null!;
         public static GUIStyle quickAddButtonStyle = null!;
 
         public static GUIStyle cesiumButtonStyle = null!;
         public static GUIStyle refreshButtonStyle = null!;
+
+        public static GUIStyle descriptionHeaderStyle = null!;
+        public static GUIStyle descriptionSubheaderStyle = null!;
+        public static GUIStyle descriptionCenterTextStyle = null!;
 
         public static Texture2D cesiumIcon = null!;
         public static Texture2D cesiumForUnityLogo = null!;
@@ -92,10 +95,6 @@ namespace CesiumForUnity
             quickAddItemStyle = new GUIStyle();
             quickAddItemStyle.margin = new RectOffset(5, 5, 10, 10);
 
-            quickAddItemLabelStyle = new GUIStyle();
-            quickAddItemLabelStyle.normal.textColor = EditorStyles.label.normal.textColor;
-            quickAddItemLabelStyle.wordWrap = true;
-
             quickAddButtonStyle = new GUIStyle();
             quickAddButtonStyle.fixedWidth = 16.0f;
             quickAddButtonStyle.fixedHeight = 16.0f;
@@ -117,6 +116,15 @@ namespace CesiumForUnity
             refreshButtonStyle.padding = new RectOffset(5, 5, 5, 5);
             refreshButtonStyle.fixedHeight = 32;
             refreshButtonStyle.fixedWidth = 40;
+
+            descriptionHeaderStyle = new GUIStyle(EditorStyles.label);
+            descriptionHeaderStyle.fontSize = 18;
+
+            descriptionSubheaderStyle = new GUIStyle(EditorStyles.label);
+            descriptionSubheaderStyle.fontSize = 14;
+
+            descriptionCenterTextStyle = new GUIStyle(EditorStyles.label);
+            descriptionCenterTextStyle.alignment = TextAnchor.MiddleCenter;
         }
 
     }

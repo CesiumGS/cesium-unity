@@ -85,6 +85,7 @@ namespace CesiumForUnity
 
         void OnGUI()
         {
+            GUILayout.Space(10);
             GUILayout.BeginHorizontal();
             DrawAssetListPanel();
             DrawAssetDescriptionPanel();
@@ -103,19 +104,13 @@ namespace CesiumForUnity
             CesiumIonSession.Ion().Tick();
         }
 
+
         void DrawAssetListPanel()
         {
-            GUILayout.BeginVertical();
+            GUILayout.BeginVertical(GUILayout.Width(position.width / 2));
             DrawRefreshButtonAndSearchBar();
             GUILayout.Space(15);
             DrawAssetTreeView();
-            GUILayout.EndVertical();
-        }
-
-        void DrawAssetDescriptionPanel()
-        {
-            GUILayout.BeginVertical();
-            GUILayout.Label("I'm going to be where the description goes");
             GUILayout.EndVertical();
         }
 
@@ -146,6 +141,80 @@ namespace CesiumForUnity
             viewRect.width = position.width / 2.0f;
 
             _assetsTreeView.OnGUI(viewRect);
+        }
+
+        private static bool IsSupportedTileset(string type)
+        {
+            return type == "3DTILES" || type == "TERRAIN";
+        }
+
+        private static bool IsSupportedImagery(string type)
+        {
+            return type == "IMAGERY";
+        }
+
+        private Vector2 scrollPosition = Vector2.zero;
+        private int selectedId = -1;
+        
+        void DrawAssetDescriptionPanel()
+        {
+            if (_assetsTreeView.GetAssetsCount() == 0) {
+                return;
+            }
+
+            int selectedId = _assetsTreeState.lastClickedID;
+            if(selectedId <= 0)
+            {
+                return;
+            }
+
+            IonAssetDetails assetDetails = _assetsTreeView.GetAssetDetails(selectedId);
+
+            GUILayout.BeginVertical();
+            GUILayout.Label(assetDetails.name, CesiumEditorStyle.descriptionHeaderStyle);
+            GUILayout.Label("(ID: " + assetDetails.id + ")");
+
+            if (IsSupportedTileset(assetDetails.type))
+            {
+                GUILayout.BeginHorizontal();
+                GUILayout.FlexibleSpace();
+                GUILayout.Button(
+                    "Add to Level",
+                    CesiumEditorStyle.cesiumButtonStyle,
+                    GUILayout.Width(200)
+                );
+                GUILayout.FlexibleSpace();
+                GUILayout.EndHorizontal();
+            }
+            else if (IsSupportedImagery(assetDetails.type))
+            {
+                GUILayout.BeginHorizontal();
+                GUILayout.FlexibleSpace();
+                GUILayout.Button(
+                    "Use as Terrain Tileset Base Layer",
+                    CesiumEditorStyle.cesiumButtonStyle,
+                    GUILayout.Width(300)
+                );
+                GUILayout.FlexibleSpace();
+                GUILayout.EndHorizontal();
+            }
+            else
+            {
+                GUILayout.Label(
+                    "This type of asset is not currently supported",
+                    CesiumEditorStyle.descriptionCenterTextStyle
+                );
+            }
+
+            scrollPosition = GUILayout.BeginScrollView(scrollPosition);
+            GUILayout.Label("Description", CesiumEditorStyle.descriptionSubheaderStyle);
+            EditorGUILayout.LabelField(assetDetails.description, EditorStyles.wordWrappedLabel);
+
+            GUILayout.Label("Attribution", CesiumEditorStyle.descriptionSubheaderStyle);
+            EditorGUILayout.LabelField(assetDetails.attribution, EditorStyles.wordWrappedLabel);
+            GUILayout.EndScrollView();
+
+            GUILayout.EndVertical();
         }
     }
 }
