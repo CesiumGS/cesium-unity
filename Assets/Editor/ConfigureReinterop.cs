@@ -44,6 +44,7 @@ namespace CesiumForUnity
             string e = request.error;
             string method = request.method;
             string url = request.url;
+            if(request.result == UnityWebRequest.Result.Success){};
             request.downloadHandler = new NativeDownloadHandler();
             request.SetRequestHeader("name", "value");
             request.GetResponseHeader("name");
