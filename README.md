@@ -135,21 +135,12 @@ The cesium-unity-samples project has several scenes that help you to quickly get
 
 ## :goggles: Running Cesium for Unity on Quest 2
 
-TODO: update these instructions for the new build process! It should not be necessary to set `ANDROID_NDK_ROOT` manually anymore.
-
-1. Before building, make sure that there is an environment variable `ANDROID_NDK_ROOT` set as the path to the Android NDK.
-2. Next, build Cesium for Unity for Android with the following commands:
-    ```
-    dotnet publish CesiumForUnity -c Debug -p:Editor=False
-    cmake -B build-android -S . -G Ninja -DCMAKE_TOOLCHAIN_FILE="CesiumForUnityNative/extern/android-toolchain.cmake" -DEDITOR=false
-    cmake --build build-android --target install -j14 --config Debug
-    ```
-3. Open the Cesium Unity Samples project.
-4. Open the Quest 2 Demo scene.
-5. Go to File -> Build Settings and change the platform to Android.
-6. Also in the Build Settings, click Add Open Scenes and remove the original Sample Scene.
-7. Go to Player Settings, and in XR Plug-in Management, go to the Android section and check OpenXR.
-8. Finally, in the Build Settings, click Build And Run to build an APK.
+1. Open the Cesium Unity Samples project.
+2. Open the Quest 2 Demo scene.
+3. Go to File -> Build Settings and change the platform to Android.
+3. Also in the Build Settings, click Add Open Scenes and remove the original Sample Scene.
+4. Go to Player Settings, and in XR Plug-in Management, go to the Android section and check OpenXR.
+5. Finally, in the Build Settings, click Build And Run to build an APK.
 
 ### :green_book:License
 
