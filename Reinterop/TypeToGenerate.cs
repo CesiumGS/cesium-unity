@@ -39,5 +39,78 @@ namespace Reinterop
         /// C++ header file declaring the class.
         /// </summary>
         public string? ImplementationHeaderName;
+
+        public static Dictionary<ITypeSymbol, TypeToGenerate> Combine(IEnumerable<IEnumerable<TypeToGenerate>> listOfItems)
+        {
+            Dictionary<ITypeSymbol, TypeToGenerate> result = new Dictionary<ITypeSymbol, TypeToGenerate>(SymbolEqualityComparer.Default);
+
+            foreach (IEnumerable<TypeToGenerate> items in listOfItems)
+            {
+                foreach (TypeToGenerate item in items)
+                {
+                    TypeToGenerate current;
+                    if (!result.TryGetValue(item.Type, out current))
+                    {
+                        current = new TypeToGenerate(item.Type);
+                        result.Add(item.Type, current);
+                    }
+
+                    if (current.ImplementationClassName == null)
+                    {
+                        current.ImplementationClassName = item.ImplementationClassName;
+                    }
+                    else if (item.ImplementationClassName != null && item.ImplementationClassName != current.ImplementationClassName)
+                    {
+                        // TODO: report conflicting implementation class name
+                    }
+
+                    if (current.ImplementationHeaderName == null)
+                    {
+                        current.ImplementationHeaderName = item.ImplementationHeaderName;
+                    }
+                    else if (item.ImplementationHeaderName != null && item.ImplementationHeaderName != current.ImplementationHeaderName)
+                    {
+                        // TODO: report conflicting implementation header name
+                    }
+
+                    foreach (IMethodSymbol method in item.Constructors)
+                    {
+                        current.Constructors.Add(method);
+                    }
+
+                    foreach (IMethodSymbol method in item.Methods)
+                    {
+                        current.Methods.Add(method);
+                    }
+
+                    foreach (IPropertySymbol property in item.Properties)
+                    {
+                        current.Properties.Add(property);
+                    }
+
+                    foreach (IFieldSymbol field in item.Fields)
+                    {
+                        current.Fields.Add(field);
+                    }
+
+                    foreach (IEventSymbol evt in item.Events)
+                    {
+                        current.Events.Add(evt);
+                    }
+
+                    foreach (IFieldSymbol enumValue in item.EnumValues)
+                    {
+                        current.EnumValues.Add(enumValue);
+                    }
+
+                    foreach (IMethodSymbol method in item.MethodsImplementedInCpp)
+                    {
+                        current.MethodsImplementedInCpp.Add(method);
+                    }
+                }
+            }
+
+            return result;
+        }
     }
 }

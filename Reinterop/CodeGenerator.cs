@@ -80,7 +80,7 @@ namespace Reinterop
             return result;
         }
 
-        public static void WriteCSharpCode(SourceProductionContext context, CppGenerationContext cppContext, ImmutableArray<GeneratedResult?> results)
+        public static void WriteCSharpCode(GeneratorExecutionContext context, CppGenerationContext cppContext, IEnumerable<GeneratedResult?> results)
         {
             GeneratedInit combinedInit = GeneratedInit.Merge(results.Select(result => result == null ? new GeneratedInit() : result.Init));
             context.AddSource("ReinteropInitializer", combinedInit.ToCSharpSourceFileString(cppContext));
@@ -98,7 +98,7 @@ namespace Reinterop
             }
         }
 
-        public IEnumerable<CppSourceFile> DistributeToSourceFiles(ImmutableArray<GeneratedResult?> generatedResults)
+        public IEnumerable<CppSourceFile> DistributeToSourceFiles(IEnumerable<GeneratedResult?> generatedResults)
         {
             // Don't emit C++ code if the C# code has compiler errors.
             Dictionary<string, CppSourceFile> sourceFiles = new Dictionary<string, CppSourceFile>();

@@ -9,7 +9,7 @@ namespace Reinterop
     /// </summary>
     internal class CSharpReinteropNativeImplementationAttribute
     {
-        public static void Generate(IncrementalGeneratorPostInitializationContext context)
+        public static void Generate(GeneratorExecutionContext context)
         {
             context.AddSource("ReinteropNativeImplementationAttribute", source);
         }

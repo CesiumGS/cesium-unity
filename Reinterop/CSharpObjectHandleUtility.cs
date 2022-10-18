@@ -9,12 +9,12 @@ namespace Reinterop
     /// </summary>
     internal class CSharpObjectHandleUtility
     {
-        public static void Generate(IncrementalGeneratorPostInitializationContext context)
+        public static void Generate(GeneratorExecutionContext context)
         {
-            context.AddSource("ObjectHandle", source);
+            context.AddSource("ObjectHandle", Source);
         }
 
-        private const string source =
+        public const string Source =
             """
             using System;
             using System.Runtime.InteropServices;
