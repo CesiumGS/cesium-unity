@@ -3,14 +3,11 @@
 #include <CesiumIonClient/Assets.h>
 
 #include <DotNet/CesiumForUnity/IonAssetsColumn.h>
-
 #include <DotNet/System/String.h>
-
 #include <DotNet/UnityEditor/IMGUI/Controls/TreeViewItem.h>
 #include <DotNet/UnityEngine/Rect.h>
 
 #include <memory>
-#include <vector>
 
 namespace DotNet::CesiumForUnity {
 class IonAssetsTreeView;
@@ -28,6 +25,10 @@ public:
   JustBeforeDelete(const DotNet::CesiumForUnity::IonAssetsTreeView& treeView);
 
   int GetAssetsCount(const DotNet::CesiumForUnity::IonAssetsTreeView& treeView);
+
+  bool IncludesAssetInSearch(
+      const DotNet::CesiumForUnity::IonAssetsTreeView& treeView,
+      int assetIndex);
 
   void CellGUI(
       const DotNet::CesiumForUnity::IonAssetsTreeView& treeView,
@@ -54,7 +55,11 @@ public:
   void Refresh(const DotNet::CesiumForUnity::IonAssetsTreeView& treeView);
 
 private:
-  std::shared_ptr<CesiumIonClient::Assets> _pAssets;
-  const static DotNet::System::String dateAddedFormat;
+  void applyFilter(const DotNet::System::String searchString);
+  void applySorting(
+      const DotNet::CesiumForUnity::IonAssetsColumn column,
+      const bool sortAscending);
+
+  std::vector<std::shared_ptr<CesiumIonClient::Asset>> _assets;
 };
 } // namespace CesiumForUnityNative

@@ -97,10 +97,41 @@ namespace CesiumForUnity
     [ReinteropNativeImplementation("CesiumForUnityNative::IonAssetsTreeViewImpl", "IonAssetsTreeViewImpl.h")]
     public partial class IonAssetsTreeView : TreeView
     {
-        public IonAssetsTreeView(TreeViewState assetsTreeState, MultiColumnHeader header)
-            : base(assetsTreeState, header)
+        MultiColumnHeaderState _headerState;
+
+        public IonAssetsTreeView(TreeViewState assetsTreeState)
+            : base(assetsTreeState)
         {
+            BuildMultiColumnHeader();
             CreateImplementation();
+        }
+
+        private void BuildMultiColumnHeader()
+        {
+            string[] columnNames = new string[Enum.GetNames(typeof(IonAssetsColumn)).Length];
+            columnNames[(int)IonAssetsColumn.Name] = "Name";
+            columnNames[(int)IonAssetsColumn.Type] = "Type";
+            columnNames[(int)IonAssetsColumn.DateAdded] = "Date added";
+
+            MultiColumnHeaderState.Column[] columns = new MultiColumnHeaderState.Column[columnNames.Length];
+
+            for (int i = 0; i < columns.Length; i++)
+            {
+                columns[i] = new MultiColumnHeaderState.Column()
+                {
+                    allowToggleVisibility = false,
+                    autoResize = true,
+                    minWidth = 135.0f,
+                    canSort = true,
+                    sortingArrowAlignment = TextAlignment.Center,
+                    headerContent = new GUIContent(columnNames[i]),
+                    headerTextAlignment = TextAlignment.Left,
+                    sortedAscending = true,
+                };
+            }
+
+            _headerState = new MultiColumnHeaderState(columns);
+            multiColumnHeader = new IonAssetsMultiColumnHeader(_headerState, this);
         }
 
         protected override TreeViewItem BuildRoot()
@@ -110,13 +141,12 @@ namespace CesiumForUnity
             return new TreeViewItem(rootId, rootDepth, "Root");
         }
 
-
         public partial int GetAssetsCount();
 
         protected override IList<TreeViewItem> BuildRows(TreeViewItem root)
         {
             int count = GetAssetsCount();
-            IList<TreeViewItem> rows = new List<TreeViewItem>(count);
+            IList<TreeViewItem> rows = new List<TreeViewItem>();
             // All items are counted as children of the root item, such that when displayed
             // they appear in a list.
             const int itemDepth = 0;
@@ -127,7 +157,7 @@ namespace CesiumForUnity
                 // have to be offset by 1. Otherwise, the selection behavior of the TreeView
                 // may be inaccurate.
                 TreeViewItem assetItem = new TreeViewItem(i + 1, itemDepth);
-                rows.Insert(i, assetItem);
+                rows.Add(assetItem);
                 root.AddChild(assetItem);
             }
 
@@ -164,6 +194,10 @@ namespace CesiumForUnity
 
         public partial void Refresh();
 
+        protected override void SearchChanged(string newSearch)
+        {
+            Refresh();
+        }
     }
 }
 

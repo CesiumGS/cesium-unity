@@ -2,7 +2,7 @@ using Reinterop;
 
 namespace CesiumForUnity
 {
-   /* [ReinteropNativeImplementation("CesiumForUnityNative::IonTokenSelectorImpl", "IonTokenSelectorImpl.h")]
+   [ReinteropNativeImplementation("CesiumForUnityNative::IonTokenSelectorImpl", "IonTokenSelectorImpl.h")]
     public partial class IonTokenSelector
     {
         public partial void RefreshTokens();
@@ -11,7 +11,7 @@ namespace CesiumForUnity
 
         public partial void UseExistingToken();
 
-        public partial void SpecifyToken();
-    }*/
+        public partial void SpecifyToken(string token);
+    }
 
 }

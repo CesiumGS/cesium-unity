@@ -77,6 +77,9 @@ public:
   bool refreshAssetsIfNeeded();
   bool refreshTokensIfNeeded();
 
+  CesiumAsync::Future<CesiumIonClient::Response<CesiumIonClient::Token>>
+  findToken(DotNet::System::String token) const;
+
   const std::optional<CesiumIonClient::Connection>& getConnection() const;
   const CesiumIonClient::Profile& getProfile();
   const CesiumIonClient::Assets& getAssets();

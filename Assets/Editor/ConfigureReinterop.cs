@@ -82,15 +82,21 @@ namespace CesiumForUnity
             int id = root.id;
 
             TreeViewState treeState = new TreeViewState();
-            MultiColumnHeaderState.Column[] columns = new MultiColumnHeaderState.Column[] { };
-            MultiColumnHeaderState headerState = new MultiColumnHeaderState(columns);
-            MultiColumnHeader header = new MultiColumnHeader(headerState);
-            IonAssetsTreeView treeView = new IonAssetsTreeView(treeState, header);
+            IonAssetsTreeView treeView = new IonAssetsTreeView(treeState);
+            MultiColumnHeader header = treeView.multiColumnHeader;
             treeView.Reload();
+            header.ResizeToFit();
+
+            string searchString = treeView.searchString;
+            int length = searchString.Length;
+            searchString.Contains("string", StringComparison.CurrentCultureIgnoreCase);
+            string.Compare("stringA", "stringB", true);
 
             IonAssetsColumn column = IonAssetsColumn.Name;
             column = IonAssetsColumn.Type;
             column = IonAssetsColumn.DateAdded;
+            int sorted = header.sortedColumnIndex;
+            bool ascending = header.IsSortedAscending(sorted);
 
             Rect r = new Rect(0, 0, 50, 50);
             GUI.Label(r, "Label");
@@ -102,6 +108,8 @@ namespace CesiumForUnity
 
             IonAssetDetails.FormatType("type");
             IonAssetDetails.FormatDate("date");
+
+            IonTokenSelector tokenSelector = new IonTokenSelector();
         }
     }
 }//

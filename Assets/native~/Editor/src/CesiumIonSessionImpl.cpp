@@ -305,6 +305,31 @@ bool CesiumIonSessionImpl::refreshTokensIfNeeded() {
   return this->_tokens.has_value();
 }
 
+CesiumAsync::Future<CesiumIonClient::Response<CesiumIonClient::Token>>
+CesiumIonSessionImpl::findToken(DotNet::System::String token) const {
+  if (!this->_connection) {
+    return this->getAsyncSystem().createResolvedFuture(
+        CesiumIonClient::Response<CesiumIonClient::Token>(
+            0,
+            "NOTCONNECTED",
+            "Not connected to Cesium ion."));
+  }
+
+  std::string tokenString = token.ToStlString();
+  std::optional<std::string> maybeTokenID =
+      CesiumIonClient::Connection::getIdFromToken(tokenString);
+
+  if (!maybeTokenID) {
+    return this->getAsyncSystem().createResolvedFuture(
+        CesiumIonClient::Response<CesiumIonClient::Token>(
+            0,
+            "INVALIDTOKEN",
+            "The token is not valid."));
+  }
+
+  return this->_connection->token(*maybeTokenID);
+}
+
 const std::optional<CesiumIonClient::Connection>&
 CesiumIonSessionImpl::getConnection() const {
   return this->_connection;
@@ -344,6 +369,7 @@ const std::shared_ptr<CesiumAsync::IAssetAccessor>&
 CesiumIonSessionImpl::getAssetAccessor() const {
   return this->_pAssetAccessor;
 }
+
 const CesiumAsync::AsyncSystem& CesiumIonSessionImpl::getAsyncSystem() const {
   return this->_asyncSystem;
 }
