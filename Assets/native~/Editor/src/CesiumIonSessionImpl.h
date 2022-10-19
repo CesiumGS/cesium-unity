@@ -34,6 +34,8 @@ class Token;
 namespace CesiumForUnityNative {
 class CesiumIonSessionImpl {
 public:
+  static CesiumIonSessionImpl& ion();
+
   CesiumIonSessionImpl(const DotNet::CesiumForUnity::CesiumIonSession& session);
   ~CesiumIonSessionImpl();
 
@@ -78,7 +80,12 @@ public:
   bool refreshTokensIfNeeded();
 
   CesiumAsync::Future<CesiumIonClient::Response<CesiumIonClient::Token>>
-  findToken(DotNet::System::String token) const;
+  findToken(const std::string& token) const;
+
+  CesiumAsync::SharedFuture<CesiumIonClient::Token>
+  getProjectDefaultTokenDetails();
+
+  void invalidateProjectDefaultTokenDetails();
 
   const std::optional<CesiumIonClient::Connection>& getConnection() const;
   const CesiumIonClient::Profile& getProfile();
@@ -99,6 +106,9 @@ private:
   std::optional<CesiumIonClient::Assets> _assets;
   std::optional<std::vector<CesiumIonClient::Token>> _tokens;
 
+  std::optional<CesiumAsync::SharedFuture<CesiumIonClient::Token>>
+      _projectDefaultTokenDetailsFuture;
+
   bool _isConnecting;
   bool _isResuming;
   bool _isLoadingProfile;
@@ -116,6 +126,6 @@ private:
 
   std::string _authorizeUrl;
 
-  const static std::string accessTokenEditorKey;
+  const static std::string _userAccessTokenEditorKey;
 };
 } // namespace CesiumForUnityNative

@@ -26,10 +26,6 @@ public:
 
   int GetAssetsCount(const DotNet::CesiumForUnity::IonAssetsTreeView& treeView);
 
-  bool IncludesAssetInSearch(
-      const DotNet::CesiumForUnity::IonAssetsTreeView& treeView,
-      int assetIndex);
-
   void CellGUI(
       const DotNet::CesiumForUnity::IonAssetsTreeView& treeView,
       DotNet::UnityEngine::Rect cellRect,
@@ -42,7 +38,7 @@ public:
   DotNet::System::String GetAssetType(
       const DotNet::CesiumForUnity::IonAssetsTreeView& treeView,
       int index);
-  int GetAssetID(
+  int64_t GetAssetID(
       const DotNet::CesiumForUnity::IonAssetsTreeView& treeView,
       int index);
   DotNet::System::String GetAssetDescription(

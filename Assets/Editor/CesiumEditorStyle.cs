@@ -42,30 +42,52 @@ namespace CesiumForUnity
 
         private static void LoadImages()
         {
-            cesiumIcon = LoadIcon("Cesium-icon-16x16");
-            quickAddIcon = LoadIcon("FontAwesome/plus-solid");
+            if (cesiumIcon == null)
+            {
+                cesiumIcon = LoadIcon("Cesium-icon-16x16");
+            }
 
-            toolbarIcons = new Texture2D[Enum.GetNames(typeof(CesiumEditorWindow.ToolbarIndex)).Length];
-            toolbarIcons[(int)CesiumEditorWindow.ToolbarIndex.Add] = quickAddIcon;
-            toolbarIcons[(int)CesiumEditorWindow.ToolbarIndex.Upload] = LoadIcon("FontAwesome/cloud-upload-alt-solid");
-            toolbarIcons[(int)CesiumEditorWindow.ToolbarIndex.Token] = LoadIcon("FontAwesome/key-solid");
-            toolbarIcons[(int)CesiumEditorWindow.ToolbarIndex.Learn] = LoadIcon("FontAwesome/book-reader-solid");
-            toolbarIcons[(int)CesiumEditorWindow.ToolbarIndex.Help] = LoadIcon("FontAwesome/hands-helping-solid");
-            toolbarIcons[(int)CesiumEditorWindow.ToolbarIndex.SignOut] = LoadIcon("FontAwesome/sign-out-alt-solid");
+            if (quickAddIcon == null)
+            {
+                quickAddIcon = LoadIcon("FontAwesome/plus-solid");
+            }
 
-            refreshIcon = LoadIcon("FontAwesome/sync-alt-solid");
+            if (toolbarIcons == null)
+            {
+                toolbarIcons = new Texture2D[Enum.GetNames(typeof(CesiumEditorWindow.ToolbarIndex)).Length];
+                toolbarIcons[(int)CesiumEditorWindow.ToolbarIndex.Add] = quickAddIcon;
+                toolbarIcons[(int)CesiumEditorWindow.ToolbarIndex.Upload] = LoadIcon("FontAwesome/cloud-upload-alt-solid");
+                toolbarIcons[(int)CesiumEditorWindow.ToolbarIndex.Token] = LoadIcon("FontAwesome/key-solid");
+                toolbarIcons[(int)CesiumEditorWindow.ToolbarIndex.Learn] = LoadIcon("FontAwesome/book-reader-solid");
+                toolbarIcons[(int)CesiumEditorWindow.ToolbarIndex.Help] = LoadIcon("FontAwesome/hands-helping-solid");
+                toolbarIcons[(int)CesiumEditorWindow.ToolbarIndex.SignOut] = LoadIcon("FontAwesome/sign-out-alt-solid");
+            }
 
-            buttonTexture = new Texture2D(1, 1);
-            buttonHoverTexture = new Texture2D(1, 1);
-            buttonPressedTexture = new Texture2D(1, 1);
+            if (refreshIcon == null)
+            {
+                refreshIcon = LoadIcon("FontAwesome/sync-alt-solid");
+            }
 
-            buttonTexture.SetPixel(0, 0, buttonColor);
-            buttonHoverTexture.SetPixel(0, 0, buttonColorLighter);
-            buttonPressedTexture.SetPixel(0, 0, buttonColorDarker);
+            if (buttonTexture == null)
+            {
+                buttonTexture = new Texture2D(1, 1);
+                buttonTexture.SetPixel(0, 0, buttonColor);
+                buttonTexture.Apply();
+            }
 
-            buttonTexture.Apply();
-            buttonHoverTexture.Apply();
-            buttonPressedTexture.Apply();
+            if (buttonHoverTexture == null)
+            {
+                buttonHoverTexture = new Texture2D(1, 1);
+                buttonHoverTexture.SetPixel(0, 0, buttonColorLighter);
+                buttonHoverTexture.Apply();
+            }
+
+            if (buttonPressedTexture == null)
+            {
+                buttonPressedTexture = new Texture2D(1, 1);
+                buttonPressedTexture.SetPixel(0, 0, buttonColorDarker);
+                buttonPressedTexture.Apply();
+            }
         }
 
         private static Texture2D LoadIcon(string resourcePath)
@@ -119,6 +141,7 @@ namespace CesiumForUnity
 
             descriptionHeaderStyle = new GUIStyle(EditorStyles.label);
             descriptionHeaderStyle.fontSize = 18;
+            descriptionHeaderStyle.wordWrap = true;
 
             descriptionSubheaderStyle = new GUIStyle(EditorStyles.label);
             descriptionSubheaderStyle.fontSize = 14;

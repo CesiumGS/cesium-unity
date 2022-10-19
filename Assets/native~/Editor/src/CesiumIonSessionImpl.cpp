@@ -4,6 +4,7 @@
 #include "UnityTaskProcessor.h"
 
 #include <DotNet/CesiumForUnity/CesiumIonSession.h>
+#include <DotNet/CesiumForUnity/IonTokenSelector.h>
 #include <DotNet/UnityEditor/EditorPrefs.h>
 #include <DotNet/UnityEngine/Application.h>
 
@@ -11,8 +12,11 @@ using namespace DotNet;
 
 namespace CesiumForUnityNative {
 
-const std::string CesiumIonSessionImpl::accessTokenEditorKey =
+const std::string CesiumIonSessionImpl::_userAccessTokenEditorKey =
     "CesiumUserAccessToken";
+CesiumIonSessionImpl& CesiumIonSessionImpl::ion() {
+  return CesiumForUnity::CesiumIonSession::Ion().NativeImplementation();
+}
 
 CesiumIonSessionImpl::CesiumIonSessionImpl(
     const DotNet::CesiumForUnity::CesiumIonSession& session)
@@ -124,7 +128,7 @@ void CesiumIonSessionImpl::Connect(
         this->_connection = std::move(connection);
 
         UnityEditor::EditorPrefs::SetString(
-            accessTokenEditorKey,
+            CesiumIonSessionImpl::_userAccessTokenEditorKey,
             this->_connection.value().getAccessToken());
         this->triggerConnectionUpdate();
       })
@@ -142,10 +146,10 @@ void CesiumIonSessionImpl::Resume(
     return;
   }
 
-  System::String userAccessToken =
-      UnityEditor::EditorPrefs::GetString(System::String(accessTokenEditorKey));
+  System::String userAccessToken = UnityEditor::EditorPrefs::GetString(
+      CesiumIonSessionImpl::_userAccessTokenEditorKey);
 
-  if (userAccessToken == System::String("")) {
+  if (System::String::Equals(userAccessToken, System::String(""))) {
     // No user access token was stored, so there's no existing session to
     // resume.
     return;
@@ -183,7 +187,8 @@ void CesiumIonSessionImpl::Disconnect(
   this->_assets.reset();
   this->_tokens.reset();
 
-  UnityEditor::EditorPrefs::DeleteKey(System::String(accessTokenEditorKey));
+  UnityEditor::EditorPrefs::DeleteKey(
+      CesiumIonSessionImpl::_userAccessTokenEditorKey);
 
   this->triggerConnectionUpdate();
   this->triggerAssetsUpdate();
@@ -306,7 +311,7 @@ bool CesiumIonSessionImpl::refreshTokensIfNeeded() {
 }
 
 CesiumAsync::Future<CesiumIonClient::Response<CesiumIonClient::Token>>
-CesiumIonSessionImpl::findToken(DotNet::System::String token) const {
+CesiumIonSessionImpl::findToken(const std::string& token) const {
   if (!this->_connection) {
     return this->getAsyncSystem().createResolvedFuture(
         CesiumIonClient::Response<CesiumIonClient::Token>(
@@ -315,9 +320,8 @@ CesiumIonSessionImpl::findToken(DotNet::System::String token) const {
             "Not connected to Cesium ion."));
   }
 
-  std::string tokenString = token.ToStlString();
   std::optional<std::string> maybeTokenID =
-      CesiumIonClient::Connection::getIdFromToken(tokenString);
+      CesiumIonClient::Connection::getIdFromToken(token);
 
   if (!maybeTokenID) {
     return this->getAsyncSystem().createResolvedFuture(
@@ -328,6 +332,83 @@ CesiumIonSessionImpl::findToken(DotNet::System::String token) const {
   }
 
   return this->_connection->token(*maybeTokenID);
+}
+
+namespace {
+
+CesiumIonClient::Token defaultTokenFromSettings() {
+  CesiumIonClient::Token result;
+
+  const System::String& defaultToken =
+      CesiumForUnity::IonTokenSelector::GetDefaultToken();
+  result.token = defaultToken.ToStlString();
+
+  return result;
+}
+
+CesiumAsync::Future<CesiumIonClient::Token>
+getDefaultTokenFuture(const CesiumIonSessionImpl& session) {
+  if (CesiumForUnity::IonTokenSelector::HasDefaultTokenId()) {
+    return session.getConnection()
+        ->token(
+            CesiumForUnity::IonTokenSelector::GetDefaultTokenId().ToStlString())
+        .thenImmediately([](CesiumIonClient::Response<CesiumIonClient::Token>&&
+                                tokenResponse) {
+          if (tokenResponse.value) {
+            return *tokenResponse.value;
+          } else {
+            return defaultTokenFromSettings();
+          }
+        });
+  } else if (CesiumForUnity::IonTokenSelector::HasDefaultToken()) {
+    return session
+        .findToken(
+            CesiumForUnity::IonTokenSelector::GetDefaultToken().ToStlString())
+        .thenImmediately(
+            [](CesiumIonClient::Response<CesiumIonClient::Token>&& response) {
+              if (response.value) {
+                return *response.value;
+              } else {
+                return defaultTokenFromSettings();
+              }
+            });
+  } else {
+    return session.getAsyncSystem().createResolvedFuture(
+        defaultTokenFromSettings());
+  }
+}
+} // namespace
+
+CesiumAsync::SharedFuture<CesiumIonClient::Token>
+CesiumIonSessionImpl::getProjectDefaultTokenDetails() {
+  if (this->_projectDefaultTokenDetailsFuture) {
+    // If the future is resolved but its token doesn't match the designated
+    // default token, do the request again because the user probably specified a
+    // new token.
+    const System::String& defaultToken =
+        CesiumForUnity::IonTokenSelector::GetDefaultToken();
+    if (this->_projectDefaultTokenDetailsFuture->isReady() &&
+        this->_projectDefaultTokenDetailsFuture->wait().token !=
+            defaultToken.ToStlString()) {
+      this->_projectDefaultTokenDetailsFuture.reset();
+    } else {
+      return *this->_projectDefaultTokenDetailsFuture;
+    }
+  }
+
+  if (!this->IsConnected(CesiumForUnity::CesiumIonSession::Ion())) {
+    return this->getAsyncSystem()
+        .createResolvedFuture(defaultTokenFromSettings())
+        .share();
+  }
+
+  this->_projectDefaultTokenDetailsFuture =
+      getDefaultTokenFuture(*this).share();
+  return *this->_projectDefaultTokenDetailsFuture;
+}
+
+void CesiumIonSessionImpl::invalidateProjectDefaultTokenDetails() {
+  this->_projectDefaultTokenDetailsFuture.reset();
 }
 
 const std::optional<CesiumIonClient::Connection>&

@@ -16,6 +16,7 @@ namespace CesiumForUnity
             base(state)
         {
             _treeView = treeView;
+            ResizeToFit();
         }
 
         protected override void ColumnHeaderClicked(

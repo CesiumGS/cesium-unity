@@ -17,11 +17,11 @@ namespace CesiumForUnity
     {
         private string _name;
         private string _type;
-        private int _id;
+        private long _id;
         private string _description;
         private string _attribution;
 
-        public IonAssetDetails(string name, string type, int id, string description, string attribution)
+        public IonAssetDetails(string name, string type, long id, string description, string attribution)
         {
             _name = name;
             _type = type;
@@ -40,7 +40,7 @@ namespace CesiumForUnity
             get => _type;
         }
 
-        public int id
+        public long id
         {
             get => _id;
         }
@@ -166,7 +166,7 @@ namespace CesiumForUnity
 
         private partial string GetAssetName(int index);
         private partial string GetAssetType(int index);
-        private partial int GetAssetID(int index);
+        private partial long GetAssetID(int index);
         private partial string GetAssetDescription(int index);
         private partial string GetAssetAttribution(int index);
 
@@ -174,7 +174,7 @@ namespace CesiumForUnity
             int index = treeId - 1;
             string name = GetAssetName(index);
             string type = GetAssetType(index);
-            int id = GetAssetID(index);
+            long id = GetAssetID(index);
             string description = GetAssetDescription(index);
             string attribution = GetAssetAttribution(index);
 

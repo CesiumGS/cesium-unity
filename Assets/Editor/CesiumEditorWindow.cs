@@ -27,9 +27,10 @@ namespace CesiumForUnity
             currentWindow.Focus();
         }
 
-        void Awake()
+        void OnEnable()
         {
             CesiumIonSession.Ion().Resume();
+            CesiumEditorStyle.Reload();
             PopulateQuickAddLists();
         }
 
@@ -351,7 +352,7 @@ namespace CesiumForUnity
 
         void SetToken()
         {
-            CesiumIonTokensWindow.ShowWindow();
+            SelectIonTokenWindow.ShowWindow();
         }
 
         void OpenDocumentation()

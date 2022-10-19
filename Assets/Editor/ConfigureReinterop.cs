@@ -83,20 +83,19 @@ namespace CesiumForUnity
 
             TreeViewState treeState = new TreeViewState();
             IonAssetsTreeView treeView = new IonAssetsTreeView(treeState);
-            MultiColumnHeader header = treeView.multiColumnHeader;
             treeView.Reload();
-            header.ResizeToFit();
+
+            MultiColumnHeader header = treeView.multiColumnHeader;
+            int sorted = header.sortedColumnIndex;
+            bool ascending = header.IsSortedAscending(sorted);
 
             string searchString = treeView.searchString;
             int length = searchString.Length;
             searchString.Contains("string", StringComparison.CurrentCultureIgnoreCase);
+            string.Equals("stringA", "stringB");
             string.Compare("stringA", "stringB", true);
 
             IonAssetsColumn column = IonAssetsColumn.Name;
-            column = IonAssetsColumn.Type;
-            column = IonAssetsColumn.DateAdded;
-            int sorted = header.sortedColumnIndex;
-            bool ascending = header.IsSortedAscending(sorted);
 
             Rect r = new Rect(0, 0, 50, 50);
             GUI.Label(r, "Label");
@@ -109,7 +108,19 @@ namespace CesiumForUnity
             IonAssetDetails.FormatType("type");
             IonAssetDetails.FormatDate("date");
 
-            IonTokenSelector tokenSelector = new IonTokenSelector();
+            IonTokenSelector.HasDefaultToken();
+            IonTokenSelector.HasDefaultTokenId();
+            IonTokenSelector.GetDefaultToken();
+            IonTokenSelector.GetDefaultTokenId();
+            IonTokenSelector.SetDefaultTokenId("id");
+            IonTokenSelector.SetDefaultToken("token");
+
+            SelectIonTokenWindow.ShowWindow();
+            SelectIonTokenWindow window = SelectIonTokenWindow.currentWindow;
+            window.SetTokenSource(IonTokenSource.Create);
+            window.Close();
+
+            Cesium3DTileset[] tilesets = UnityEngine.Object.FindObjectsOfType<Cesium3DTileset>();
         }
     }
 }//

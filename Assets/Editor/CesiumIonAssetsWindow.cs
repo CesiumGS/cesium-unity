@@ -33,18 +33,17 @@ namespace CesiumForUnity
         private IonAssetsTreeView _assetsTreeView;
         private SearchField _searchField;
 
-        void Awake()
+        private void OnEnable()
         {
+            CesiumIonSession.Ion().Resume();
+            CesiumEditorStyle.Reload();
             BuildTreeView();
             _searchField = new SearchField();
-
             CesiumIonSession.OnConnectionUpdated += _assetsTreeView.Refresh;
             CesiumIonSession.OnAssetsUpdated += _assetsTreeView.Refresh;
-
-            CesiumIonSession.Ion().Resume();
         }
 
-        private void OnDestroy()
+        private void OnDisable()
         {
             CesiumIonSession.OnConnectionUpdated -= _assetsTreeView.Refresh;
             CesiumIonSession.OnAssetsUpdated -= _assetsTreeView.Refresh;

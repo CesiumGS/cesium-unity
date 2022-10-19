@@ -35,7 +35,7 @@ System::String IonAssetsTreeViewImpl::GetAssetName(
   return System::String(pAsset->name);
 }
 
-int IonAssetsTreeViewImpl::GetAssetID(
+int64_t IonAssetsTreeViewImpl::GetAssetID(
     const DotNet::CesiumForUnity::IonAssetsTreeView& treeView,
     int index) {
   std::shared_ptr<CesiumIonClient::Asset> pAsset = this->_assets[index];
@@ -89,12 +89,10 @@ void IonAssetsTreeViewImpl::CellGUI(
 
 void IonAssetsTreeViewImpl::Refresh(
     const DotNet::CesiumForUnity::IonAssetsTreeView& treeView) {
-  CesiumForUnity::CesiumIonSession session =
-      CesiumForUnity::CesiumIonSession::Ion();
-  CesiumIonSessionImpl& sessionImpl = session.NativeImplementation();
-  sessionImpl.refreshAssets();
+  CesiumIonSessionImpl& session = CesiumIonSessionImpl::ion();
+  session.refreshAssets();
 
-  const CesiumIonClient::Assets& assets = sessionImpl.getAssets();
+  const CesiumIonClient::Assets& assets = session.getAssets();
 
   this->_assets.resize(assets.items.size());
 
@@ -118,7 +116,6 @@ void IonAssetsTreeViewImpl::Refresh(
   }
 
   treeView.Reload();
-  treeView.multiColumnHeader().ResizeToFit();
 }
 
 void IonAssetsTreeViewImpl::applyFilter(
