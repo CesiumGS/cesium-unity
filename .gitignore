@@ -4,3 +4,6 @@ build/
 CesiumForUnityNativeBindings/native/
 .vs/
 *.user
+Reinterop.dll
+Reinterop.deps.json
+Reinterop.pdb

@@ -1,8 +1,8 @@
-[![Cesium for Unity Logo](Documentation/images/Cesium_for_Unity-Logo-WhiteBGH.jpg)](https://cesium.com/)
+[![Cesium for Unity Logo](Documentation~/images/Cesium_for_Unity-Logo-WhiteBGH.jpg)](https://cesium.com/)
 
 Cesium for Unity brings the 3D geospatial ecosystem to Unity. By combining a high-accuracy full-scale WGS84 globe, open APIs and open standards for spatial indexing such as 3D Tiles, and cloud-based real-world content from [Cesium ion](https://cesium.com/cesium-ion) with Unity, this plugin enables 3D geospatial workflows and applications in Unity.
 
-![Cesium for Unity Architecture](Documentation/images/Cesium_for_Unity_Architecture.jpg)
+![Cesium for Unity Architecture](Documentation~/images/Cesium_for_Unity_Architecture.jpg)
 
 ## :computer: Building Cesium for Unity
 
@@ -120,7 +120,7 @@ The cesium-unity-samples project has several scenes that help you to quickly get
 1. Cesium for Unity has only been tested with the Universal Render Pipeline (URP), so use that for best results. Others _may_ work.
 2. To install Cesium for Unity into your project, build Cesium for Unity (as above) and then copy or symlink the Cesium for Unity `Assets` directory into your project's `Assets/CesiumForUnity` directory.
 3. Change the Editor camera settings to accomodate globe-sized view distances. Disable "Dynamic Clipping" and set the near plane to 1 and the far plane to 1000000 (1 million). You may want to increase the maximum speed as well, to perhaps 200 or so.
-    ![Camera Settings](Documentation/images/CameraSettings.png)
+    ![Camera Settings](Documentation~/images/CameraSettings.png)
 4. Set the near and far planes for any cameras in your level as well.
 5. Add a new empty GameObject to your scene and name it "Cesium".
 6. Add a new `Cesium Georeference` component to the "Cesium" game object. By setting the Longitude, Latitude, and Height properties on this object, you define the position on the globe that becomes the center of the Unity world.
