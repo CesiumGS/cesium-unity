@@ -18,10 +18,16 @@ namespace Reinterop
             CppType implType = result.CppImplementationInvoker.ImplementationType;
             CppType objectHandleType = CppObjectHandle.GetCppType(context);
 
-            string createName = $$"""{{wrapperType.GetFullyQualifiedName(false).Replace("::", "_")}}_CreateImplementation""";
-            result.CppImplementationInvoker.Functions.Add(new(
-                Content:
-                    $$"""
+            // We only need a C++ instance if any partial methods are non-static
+            bool needsInstance = item.MethodsImplementedInCpp.Any(m => !m.IsStatic);
+            result.CSharpPartialMethodDefinitions.needsInstance = needsInstance;
+
+            if (needsInstance)
+            {
+                string createName = $$"""{{wrapperType.GetFullyQualifiedName(false).Replace("::", "_")}}_CreateImplementation""";
+                result.CppImplementationInvoker.Functions.Add(new(
+                    Content:
+                        $$"""
                     #if defined(_WIN32)
                     __declspec(dllexport)
                     #endif
@@ -30,16 +36,16 @@ namespace Reinterop
                       return reinterpret_cast<void*>(new {{implType.GetFullyQualifiedName()}}(wrapper));
                     }
                     """,
-                TypeDefinitionsReferenced: new[]
-                {
+                    TypeDefinitionsReferenced: new[]
+                    {
                     wrapperType,
                     implType,
                     objectHandleType,
-                }));
+                    }));
 
-            result.CSharpPartialMethodDefinitions.Methods.Add(new(
-                methodDefinition:
-                    $$"""
+                result.CSharpPartialMethodDefinitions.Methods.Add(new(
+                    methodDefinition:
+                        $$"""
                     private void CreateImplementation()
                     {
                         Reinterop.ReinteropInitializer.Initialize();
@@ -47,16 +53,16 @@ namespace Reinterop
                         _implementation = {{createName}}(Reinterop.ObjectHandleUtility.CreateHandle(this));
                     }
                     """,
-                interopFunctionDeclaration:
-                    $$"""
+                    interopFunctionDeclaration:
+                        $$"""
                     [DllImport("{{context.NativeLibraryName}}", CallingConvention=CallingConvention.Cdecl)]
                     private static extern System.IntPtr {{createName}}(System.IntPtr thiz);
                     """));
 
-            string disposeName = $$"""{{wrapperType.GetFullyQualifiedName(false).Replace("::", "_")}}_Dispose""";
-            result.CppImplementationInvoker.Functions.Add(new(
-                Content:
-                    $$"""
+                string disposeName = $$"""{{wrapperType.GetFullyQualifiedName(false).Replace("::", "_")}}_Dispose""";
+                result.CppImplementationInvoker.Functions.Add(new(
+                    Content:
+                        $$"""
                     #if defined(_WIN32)
                     __declspec(dllexport)
                     #endif
@@ -67,17 +73,17 @@ namespace Reinterop
                       delete pImplTyped;
                     }
                     """,
-                TypeDefinitionsReferenced: new[]
-                {
+                    TypeDefinitionsReferenced: new[]
+                    {
                     wrapperType,
                     implType,
                     objectHandleType
-                }));
+                    }));
 
-            // Always add a protected DisposeImplementation method.
-            result.CSharpPartialMethodDefinitions.Methods.Add(new(
-                methodDefinition:
-                    $$"""
+                // Always add a protected DisposeImplementation method.
+                result.CSharpPartialMethodDefinitions.Methods.Add(new(
+                    methodDefinition:
+                        $$"""
                     protected void DisposeImplementation()
                     {
                         if (_implementation != System.IntPtr.Zero)
@@ -87,74 +93,75 @@ namespace Reinterop
                         }
                     }
                     """,
-                interopFunctionDeclaration:
-                    $$"""
+                    interopFunctionDeclaration:
+                        $$"""
                     [DllImport("{{context.NativeLibraryName}}", CallingConvention=CallingConvention.Cdecl)]
                     private static extern void {{disposeName}}(System.IntPtr thiz, System.IntPtr implementation);
                     """));
 
-            // If there is no finalizer, create one that calls DisposeImplementation.
-            // But if the other half of this partial class has a finalizer already, we can't add one, so it's on
-            // the implementer of that other class to call DisposeImplementation themselves.
-            if (!item.Type.GetMembers("Finalize").Any())
-            {
-                result.CSharpPartialMethodDefinitions.Methods.Add(new(
-                    methodDefinition:
-                        $$"""
+                // If there is no finalizer, create one that calls DisposeImplementation.
+                // But if the other half of this partial class has a finalizer already, we can't add one, so it's on
+                // the implementer of that other class to call DisposeImplementation themselves.
+                if (!item.Type.GetMembers("Finalize").Any())
+                {
+                    result.CSharpPartialMethodDefinitions.Methods.Add(new(
+                        methodDefinition:
+                            $$"""
                         ~{{wrapperType.Name}}()
                         {
                             DisposeImplementation();
                         }
                         """));
-            }
+                }
 
-            // If there is no parameterless Dispose Method, add one. If the base class has one, call it (and mark it override if needed).
-            // But if the other half of this partial class implements Dispose, it's on the implementer of that other class to
-            // arrange for DisposeImplementation to be called themselves.
-            if (!item.Type.GetMembers("Dispose").Where(symbol => symbol is IMethodSymbol method && method.Parameters.Length == 0).Any())
-            {
-                IMethodSymbol? baseDisposeMethod = CSharpTypeUtility.FindMembers(item.Type, "Dispose").Where(symbol => symbol is IMethodSymbol method && method.Parameters.Length == 0).FirstOrDefault() as IMethodSymbol;
-                result.CSharpPartialMethodDefinitions.Methods.Add(new(
-                    methodDefinition:
-                        $$"""
+                // If there is no parameterless Dispose Method, add one. If the base class has one, call it (and mark it override if needed).
+                // But if the other half of this partial class implements Dispose, it's on the implementer of that other class to
+                // arrange for DisposeImplementation to be called themselves.
+                if (!item.Type.GetMembers("Dispose").Where(symbol => symbol is IMethodSymbol method && method.Parameters.Length == 0).Any())
+                {
+                    IMethodSymbol? baseDisposeMethod = CSharpTypeUtility.FindMembers(item.Type, "Dispose").Where(symbol => symbol is IMethodSymbol method && method.Parameters.Length == 0).FirstOrDefault() as IMethodSymbol;
+                    result.CSharpPartialMethodDefinitions.Methods.Add(new(
+                        methodDefinition:
+                            $$"""
                         public {{(baseDisposeMethod != null && baseDisposeMethod.IsVirtual ? "override " : "")}}void Dispose()
                         {
                             {{(baseDisposeMethod != null
-                                    ? "base.Dispose();" // let the base class suppress finalization if desired
-                                    : "GC.SuppressFinalize(this);"
-                                )}}
+                                        ? "base.Dispose();" // let the base class suppress finalization if desired
+                                        : "GC.SuppressFinalize(this);"
+                                    )}}
                             this.DisposeImplementation();
                         }
                         """));
-            }
+                }
 
-            // If the class has no explicit constructors at all, add a default one.
-            bool hasConstructor = item.Type.GetMembers().Where(m =>
-            {
-                IMethodSymbol? method = m as IMethodSymbol;
-                if (method == null)
-                    return false;
+                // If the class has no explicit constructors at all, add a default one.
+                bool hasConstructor = item.Type.GetMembers().Where(m =>
+                {
+                    IMethodSymbol? method = m as IMethodSymbol;
+                    if (method == null)
+                        return false;
 
-                if (method.MethodKind != MethodKind.Constructor)
-                    return false;
+                    if (method.MethodKind != MethodKind.Constructor)
+                        return false;
 
-                if (method.IsImplicitlyDeclared)
-                    return false;
+                    if (method.IsImplicitlyDeclared)
+                        return false;
 
-                return true;
-            }).Any();
+                    return true;
+                }).Any();
 
-            if (!hasConstructor)
-            {
-                result.CSharpPartialMethodDefinitions.Methods.Add(new(
-                    methodDefinition:
-                        $$"""
+                if (!hasConstructor)
+                {
+                    result.CSharpPartialMethodDefinitions.Methods.Add(new(
+                        methodDefinition:
+                            $$"""
                         public {{wrapperType.Name}}()
                         {
                             CreateImplementation();
                         }
                         """,
-                    interopFunctionDeclaration: ""));
+                        interopFunctionDeclaration: ""));
+                }
             }
 
             // Add functions for other methods.
@@ -168,52 +175,55 @@ namespace Reinterop
             }
 
             // Add a method to the C++ wrapper that allows access to the C++ implementation.
-            result.CppDeclaration.Elements.Add(new(
-                Content: $"static void* (*Property_get_NativeImplementation)(void*);",
-                IsPrivate: true));
-            result.CppDeclaration.Elements.Add(new(
-                Content: $"::{implType.AsReference().GetFullyQualifiedName()} NativeImplementation() const noexcept;",
-                TypeDeclarationsReferenced: new[] { implType.AsReference() }
-            ));
+            if (needsInstance)
+            {
+                result.CppDeclaration.Elements.Add(new(
+                    Content: $"static void* (*Property_get_NativeImplementation)(void*);",
+                    IsPrivate: true));
+                result.CppDeclaration.Elements.Add(new(
+                    Content: $"::{implType.AsReference().GetFullyQualifiedName()} NativeImplementation() const noexcept;",
+                    TypeDeclarationsReferenced: new[] { implType.AsReference() }
+                ));
 
-            result.CppDefinition.Elements.Add(new(
-                Content: $"void* (*{wrapperType.Name}::Property_get_NativeImplementation)(void*) = nullptr;"));
-            result.CppDefinition.Elements.Add(new(
-                Content:
-                    $$"""
+                result.CppDefinition.Elements.Add(new(
+                    Content: $"void* (*{wrapperType.Name}::Property_get_NativeImplementation)(void*) = nullptr;"));
+                result.CppDefinition.Elements.Add(new(
+                    Content:
+                        $$"""
                     ::{{implType.AsReference().GetFullyQualifiedName()}} {{wrapperType.Name}}::NativeImplementation() const noexcept {
                       return *reinterpret_cast<::{{implType.GetFullyQualifiedName()}}*>(Property_get_NativeImplementation(this->_handle.GetRaw()));
                     }
                     """
-            ));
+                ));
 
-            CSharpType csWrapperType = CSharpType.FromSymbol(context, item.Type);
+                CSharpType csWrapperType = CSharpType.FromSymbol(context, item.Type);
 
-            string genericTypeHash = "";
-            INamedTypeSymbol? named = csWrapperType.Symbol as INamedTypeSymbol;
-            if (named != null && named.IsGenericType)
-            {
-                genericTypeHash = Interop.HashParameters(null, named.TypeArguments);
+                string genericTypeHash = "";
+                INamedTypeSymbol? named = csWrapperType.Symbol as INamedTypeSymbol;
+                if (named != null && named.IsGenericType)
+                {
+                    genericTypeHash = Interop.HashParameters(null, named.TypeArguments);
+                }
+
+                string baseName = $"{csWrapperType.GetFullyQualifiedNamespace().Replace(".", "_")}_{csWrapperType.Symbol.Name}{genericTypeHash}_Property_get_NativeImplementation";
+
+                result.Init.Functions.Add(new(
+                    CppName: $"{wrapperType.GetFullyQualifiedName()}::Property_get_NativeImplementation",
+                    CppTypeSignature: $"void* (*)(void*)",
+                    CSharpName: $"{baseName}Delegate",
+                    CSharpContent:
+                        $$"""
+                        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+                        private unsafe delegate IntPtr {{baseName}}Type(IntPtr thiz);
+                        private static unsafe readonly {{baseName}}Type {{baseName}}Delegate = new {{baseName}}Type({{baseName}});
+                        [AOT.MonoPInvokeCallback(typeof({{baseName}}Type))]
+                        private static unsafe IntPtr {{baseName}}(IntPtr thiz)
+                        {
+                            return ({{csWrapperType.GetParameterConversionFromInteropType("thiz")}}).NativeImplementation;
+                        }
+                        """
+                ));
             }
-
-            string baseName = $"{csWrapperType.GetFullyQualifiedNamespace().Replace(".", "_")}_{csWrapperType.Symbol.Name}{genericTypeHash}_Property_get_NativeImplementation";
-
-            result.Init.Functions.Add(new(
-                CppName: $"{wrapperType.GetFullyQualifiedName()}::Property_get_NativeImplementation",
-                CppTypeSignature: $"void* (*)(void*)",
-                CSharpName: $"{baseName}Delegate",
-                CSharpContent:
-                    $$"""
-                    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-                    private unsafe delegate IntPtr {{baseName}}Type(IntPtr thiz);
-                    private static unsafe readonly {{baseName}}Type {{baseName}}Delegate = new {{baseName}}Type({{baseName}});
-                    [AOT.MonoPInvokeCallback(typeof({{baseName}}Type))]
-                    private static unsafe IntPtr {{baseName}}(IntPtr thiz)
-                    {
-                        return ({{csWrapperType.GetParameterConversionFromInteropType("thiz")}}).NativeImplementation;
-                    }
-                    """
-            ));
         }
 
         private static void GenerateMethod(CppGenerationContext context, TypeToGenerate item, GeneratedResult result, IMethodSymbol method)
@@ -239,27 +249,43 @@ namespace Reinterop
 
             string name = $"{wrapperType.GetFullyQualifiedName(false).Replace("::", "_")}_{method.Name}";
 
-            var parameterList = new[] { "void* handle", "void* pImpl" }.Concat(parameters.Select(parameter => $"{parameter.InteropType.GetFullyQualifiedName()} {parameter.Name}"));
-            string parameterListString = string.Join(", ", parameterList);
-
-            var callParameterList = new[] { "wrapper" }.Concat(parameters.Select(parameter => parameter.Type.GetConversionFromInteropType(context, parameter.Name)));
-            string callParameterListString = string.Join(", ", callParameterList);
-
             CppType objectHandleType = CppObjectHandle.GetCppType(context);
+
+            // Start off assuming a static method
+            var parameterList = parameters.Select(parameter => $"{parameter.InteropType.GetFullyQualifiedName()} {parameter.Name}");
+            var callParameterList = parameters.Select(parameter => parameter.Type.GetConversionFromInteropType(context, parameter.Name));
+            string callTarget = $"{implType.GetFullyQualifiedName()}::";
+            string getCallTarget = "";
+
+            // If its an instance method, we need some extra parameters.
+            if (!method.IsStatic)
+            {
+                parameterList = new[] { "void* handle", "void* pImpl" }.Concat(parameterList);
+                callParameterList = new[] { "wrapper" }.Concat(callParameterList);
+                callTarget = "pImplTyped->";
+                getCallTarget =
+                    $$"""
+                    const {{wrapperType.GetFullyQualifiedName()}} wrapper{{{objectHandleType.GetFullyQualifiedName()}}(handle)};
+                    auto pImplTyped = reinterpret_cast<{{implType.GetFullyQualifiedName()}}*>(pImpl);
+                    """;
+            }
+
+            string parameterListString = string.Join(", ", parameterList);
+            string callParameterListString = string.Join(", ", callParameterList);
 
             string implementation;
             if (returnType == CppType.Void)
             {
                 implementation =
                     $$"""
-                    pImplTyped->{{method.Name}}({{callParameterListString}});
+                    {{callTarget}}{{method.Name}}({{callParameterListString}});
                     """;
             }
             else
             {
                 implementation =
                     $$"""
-                    auto result = pImplTyped->{{method.Name}}({{callParameterListString}});
+                    auto result = {{callTarget}}{{method.Name}}({{callParameterListString}});
                     return {{returnType.GetConversionToInteropType(context, "result")}};
                     """;
             }
@@ -271,8 +297,7 @@ namespace Reinterop
                     __declspec(dllexport)
                     #endif
                     {{interopReturnType.GetFullyQualifiedName()}} {{name}}({{parameterListString}}) {
-                      const {{wrapperType.GetFullyQualifiedName()}} wrapper{{{objectHandleType.GetFullyQualifiedName()}}(handle)};
-                      auto pImplTyped = reinterpret_cast<{{implType.GetFullyQualifiedName()}}*>(pImpl);
+                      {{GenerationUtility.JoinAndIndent(new[] { getCallTarget }, "  ")}}
                       {{new[] { implementation }.JoinAndIndent("  ")}}
                     }
                     """,
@@ -315,8 +340,19 @@ namespace Reinterop
             }
 
             string modifiers = CSharpTypeUtility.GetAccessString(method.DeclaredAccessibility);
+            string implementationCheck = "";
             if (method.IsStatic)
+            {
                 modifiers += " static";
+            }
+            else
+            {
+                implementationCheck =
+                    $$"""
+                    if (this._implementation == System.IntPtr.Zero)
+                        throw new NotImplementedException("The native implementation is missing so {{method.Name}} cannot be invoked. This may be caused by a missing call to CreateImplementation in one of your constructors, or it may be that the entire native implementation shared library is missing or out of date.");
+                    """;
+            }
 
             if (method.IsOverride)
                 modifiers += " override";
@@ -328,8 +364,7 @@ namespace Reinterop
                     $$"""
                     {{modifiers}} partial {{csReturnType.GetFullyQualifiedName()}} {{method.Name}}({{string.Join(", ", csParameters.Select(parameter => $"{parameter.Type.GetFullyQualifiedName()} {parameter.Name}"))}})
                     {
-                        if (this._implementation == System.IntPtr.Zero)
-                            throw new NotImplementedException("The native implementation is missing so {{method.Name}} cannot be invoked. This may be caused by a missing call to CreateImplementation in one of your constructors, or it may be that the entire native implementation shared library is missing or out of date.");
+                        {{GenerationUtility.JoinAndIndent(new[] { implementationCheck }, "    ")}}
                         {{new[] { csImplementation }.JoinAndIndent("    ")}}
                     }
                     """,
