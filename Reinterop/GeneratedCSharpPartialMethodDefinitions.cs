@@ -27,6 +27,12 @@ namespace Reinterop
         public readonly CSharpType Type;
         public List<GeneratedCSharpPartialMethod> Methods = new List<GeneratedCSharpPartialMethod>();
 
+        /// <summary>
+        /// True if this C# class needs to be backed by a C++ class instance. False if all of its methods
+        /// implemented in C++ are static so no instance is required.
+        /// </summary>
+        public bool needsInstance = true;
+
         public GeneratedCSharpPartialMethodDefinitions(CSharpType type)
         {
             this.Type = type;
@@ -36,29 +42,51 @@ namespace Reinterop
         {
             // TODO: support structs
             string kind = "class";
-            return
-                $$"""
-                using System;
-                using System.Runtime.InteropServices;
 
-                namespace {{Type.GetFullyQualifiedNamespace()}}
-                {
-                    {{CSharpTypeUtility.GetAccessString(Type.Symbol.DeclaredAccessibility)}} partial {{kind}} {{Type.Symbol.Name}} : System.IDisposable
+            if (needsInstance)
+            {
+                return
+                    $$"""
+                    using System;
+                    using System.Runtime.InteropServices;
+
+                    namespace {{Type.GetFullyQualifiedNamespace()}}
                     {
-                        [System.NonSerialized]
-                        private System.IntPtr _implementation = System.IntPtr.Zero;
-
-                        public IntPtr NativeImplementation
+                        {{CSharpTypeUtility.GetAccessString(Type.Symbol.DeclaredAccessibility)}} partial {{kind}} {{Type.Symbol.Name}} : System.IDisposable
                         {
-                            get { return _implementation; }
+                            [System.NonSerialized]
+                            private System.IntPtr _implementation = System.IntPtr.Zero;
+
+                            public IntPtr NativeImplementation
+                            {
+                                get { return _implementation; }
+                            }
+
+                            {{GetMethods().JoinAndIndent("        ")}}
+
+                            {{GetInteropFunctionDeclarations().JoinAndIndent("        ")}}
                         }
-
-                        {{GetMethods().JoinAndIndent("        ")}}
-
-                        {{GetInteropFunctionDeclarations().JoinAndIndent("        ")}}
                     }
-                }
-                """;
+                    """;
+            }
+            else
+            {
+                return
+                    $$"""
+                    using System;
+                    using System.Runtime.InteropServices;
+
+                    namespace {{Type.GetFullyQualifiedNamespace()}}
+                    {
+                        {{CSharpTypeUtility.GetAccessString(Type.Symbol.DeclaredAccessibility)}} partial {{kind}} {{Type.Symbol.Name}}
+                        {
+                            {{GetMethods().JoinAndIndent("        ")}}
+
+                            {{GetInteropFunctionDeclarations().JoinAndIndent("        ")}}
+                        }
+                    }
+                    """;
+            }
         }
 
         private IEnumerable<string> GetMethods()
