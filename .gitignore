@@ -1,6 +1,9 @@
 bin/
 obj/
 build/
+build-*/
+Plugins/
+Plugins.meta
 CesiumForUnityNativeBindings/native/
 .vs/
 *.user
