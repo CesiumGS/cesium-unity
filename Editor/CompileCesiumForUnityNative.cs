@@ -194,11 +194,11 @@ namespace CesiumForUnity
 
             try
             {
-                string logFilename = Path.Combine(
-                    Path.GetDirectoryName(Application.consoleLogPath),
-                    $"CesiumForUnityNative-build-{GetDirectoryNameForPlatform(library.PlatformGroup, library.Platform)}.log");
+                string logFilename = Path.Combine(library.BuildDirectory, "build.log");
+                string projectPath = Path.Combine(Application.dataPath, "..");
+                string logDisplayName = Path.GetRelativePath(projectPath, logFilename);
 
-                EditorUtility.DisplayProgressBar($"Building CesiumForUnityNative", $"See {logFilename}.", 0.0f);
+                EditorUtility.DisplayProgressBar($"Building CesiumForUnityNative", $"See {logDisplayName}.", 0.0f);
 
                 using (StreamWriter log = new StreamWriter(logFilename, false, Encoding.UTF8))
                 {

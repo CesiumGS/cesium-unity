@@ -23,39 +23,29 @@ To make sure things are set up correctly, open a command-prompt (PowerShell is a
 
 ### Setting up the development environment
 
-Clone the [`cesium-unity-samples`](https://github.com/CesiumGS/cesium-unity-samples) (game) project and `cesium-unity` (plugin) project anywhere you like:
+Clone the [`cesium-unity-samples`](https://github.com/CesiumGS/cesium-unity-samples) (game) project anywhere you like:
 
 ```
 git clone --recurse-submodules git@github.com:CesiumGS/cesium-unity-samples.git
-git clone --recurse-submodules git@github.com:CesiumGS/cesium-unity.git
 ```
 
-Be sure to also clone the submodules. If you forgot the `--recurse-submodules` option when you cloned, run `git submodule update --init --recursive`.
-
-Create a directory junction (symbol link) from the game project's `Assets` directory into the plugin's `Assets` directory. Unity only loads assets found in the game's Assets folder. By using a symlink, we keep the plugin's assets in the plugin's repo, making them much easier to manage with source control.
-
-On Windows 11, this should just work. On Windows 10, you may need to enable "Developer Mode" and/or use an Administrator command prompt. If you've put the two repos side-by-side as shown above, simply run the following in PowerShell:
+Then, clone the `cesium-unity` (plugin) project to a folder named `com.cesium.unity` inside its `Packages` folder:
 
 ```
-cd cesium-unity
-New-Item -ItemType Junction -Path "..\cesium-unity-samples\Assets\CesiumForUnity" -Target "$PWD\Assets"
+cd cesium-unity-samples/Packages
+git clone --recurse-submodules git@github.com:CesiumGS/cesium-unity.git com.cesium.unity
 ```
 
-To setup the symbolic link in Mac or Linux:
-
-```
-cd cesium-unity-samples/Assets/
-ln -s ../../cesium-unity/Assets CesiumForUnity
-```
+Be sure to also clone the submodules. If you forgot the `--recurse-submodules` option when you cloned, run `git submodule update --init --recursive` inside the `com.cesium.unity` folder.
 
 ## Reinterop
 
 Reinterop is a Roslyn (C# compiler) source generator that is automatically invoked by Unity while compiling the Cesium for Unity C# code, and generates C# <-> C++ interop layer.
 
-To build Reinterop and publish it to Cesium for Unity's `Assets` directory, run the following from the `cesium-unity` directory:
+To build Reinterop and publish it to Cesium for Unity's `Assets` directory, run the following from the `Packages/com.cesium.unity` directory:
 
 ```
-dotnet publish Reinterop -o Assets
+dotnet publish Reinterop~ -o .
 ```
 
 This should be repeated if you modify Reinterop, or if you pull new changes that modify it.
@@ -74,7 +64,7 @@ NotImplementedException: The native implementation is missing so OnValidate cann
 This is because the C++ code has not yet been compiled. To compile the C++ code for use in the Editor, run:
 
 ```
-cd cesium-unity
+cd cesium-unity-samples/Packages/com.cesium.unity/native~
 cmake -B build -S . -DCMAKE_BUILD_TYPE=Debug
 cmake --build build -j14 --target install --config Debug
 ```
@@ -84,12 +74,12 @@ The `-j14` tells CMake to build using 14 threads. A higher or lower number may b
 To build a release build, use these commands instead:
 
 ```
-cd cesium-unity
+cd cesium-unity-samples/Packages/com.cesium.unity/native~
 cmake -B build -S . -DCMAKE_BUILD_TYPE=RelWithDebInfo
 cmake --build build -j14 --target install --config RelWithDebInfo
 ```
 
-Once this build/install completes, Cesium for Unity should work the next time Unity loads Cesium for Unity. You can get it to do so by either restarting the Editor, or by making a small change to any Cesium for Unity script (.cs) file in `Assets/Runtime`.
+Once this build/install completes, Cesium for Unity should work the next time Unity loads Cesium for Unity. You can get it to do so by either restarting the Editor, or by making a small change to any Cesium for Unity script (.cs) file in `Packages/com.cesium.unity/Runtime`.
 
 ## Building and Running Games
 
@@ -98,7 +88,8 @@ When you build and run a standalone game (i.e. with File -> Build Settings... or
 You can view build progress on Windows using the following PowerShell command:
 
 ```
-Get-Content -Path Assets/Runtime/native~/build-Standalone/build.log -Wait
+cd cesium-unity-samples/Packages/com.cesium.unity
+Get-Content -Path native~/build-Standalone/build.log -Wait
 ```
 
 Replace `build-Standalone` with the name of the log file from the progress window.
@@ -106,7 +97,8 @@ Replace `build-Standalone` with the name of the log file from the progress windo
 Or on Linux or macOS:
 
 ```
-tail -f Assets/Runtime/native~/build-Standalone/build.log
+cd cesium-unity-samples/Packages/com.cesium.unity
+tail -f native~/build-Standalone/build.log
 ```
 
 If the log indicates that CMake cannot be found, make sure it is installed and in your path. Restarting Unity to pick up path changes may help. If all else fails, change `"cmake"` in `CompileCesiumForUnityNative.cs` to the full path of your CMake executable.
@@ -118,7 +110,7 @@ The cesium-unity-samples project has several scenes that help you to quickly get
 ## Adding Cesium for Unity to a New Project
 
 1. Cesium for Unity has only been tested with the Universal Render Pipeline (URP), so use that for best results. Others _may_ work.
-2. To install Cesium for Unity into your project, build Cesium for Unity (as above) and then copy or symlink the Cesium for Unity `Assets` directory into your project's `Assets/CesiumForUnity` directory.
+2. To install Cesium for Unity into your project, clone the `cesium-unity` repo into your project's `Packages/com.cesium.unity` directory and build it as above.
 3. Change the Editor camera settings to accomodate globe-sized view distances. Disable "Dynamic Clipping" and set the near plane to 1 and the far plane to 1000000 (1 million). You may want to increase the maximum speed as well, to perhaps 200 or so.
     ![Camera Settings](Documentation~/images/CameraSettings.png)
 4. Set the near and far planes for any cameras in your level as well.
