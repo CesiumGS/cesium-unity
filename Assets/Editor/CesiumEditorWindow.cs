@@ -1,63 +1,67 @@
+using Reinterop;
 using System;
 using UnityEngine;
 using UnityEditor;
 
 namespace CesiumForUnity
 {
-    //TODO: it would be nice to initialize this window on editor load
-    //[InitializeOnLoad]
-    public class CesiumEditorWindow : EditorWindow
+    [ReinteropNativeImplementation("CesiumForUnityNative::CesiumEditorWindowImpl", "CesiumEditorWindowImpl.h")]
+    public partial class CesiumEditorWindow : EditorWindow
     {
         public static CesiumEditorWindow currentWindow = null!;
 
         [MenuItem("Cesium/Cesium")]
         public static void ShowWindow()
         {
-            CesiumEditorStyle.Reload();
-
             // If no existing window, make a new one docked next to the Hierarchy window.
             if (currentWindow == null)
             {
                 Type siblingWindow = Type.GetType("UnityEditor.SceneHierarchyWindow,UnityEditor.dll");
                 currentWindow = GetWindow<CesiumEditorWindow>("Cesium", new Type[] { siblingWindow });
-                currentWindow.titleContent.image = CesiumEditorStyle.cesiumIcon;
+
+                // Load the icon separately from the other resources.
+                Texture2D icon = (Texture2D)Resources.Load("Cesium-icon-16x16");
+                icon.wrapMode = TextureWrapMode.Clamp;
+                currentWindow.titleContent.image = icon;
             }
 
             currentWindow.Show();
             currentWindow.Focus();
         }
 
+        public CesiumEditorWindow() { }
+
         void OnEnable()
         {
             CesiumIonSession.Ion().Resume();
-            CesiumEditorStyle.Reload();
-            PopulateQuickAddLists();
+            this.PopulateQuickAddLists();
+            this.CreateImplementation();
         }
 
         void OnGUI()
         {
-            DrawCesiumToolbar();
-            DrawQuickAddBasicAssetsPanel();
+            this.DrawCesiumToolbar();
+            this.DrawQuickAddBasicAssetsPanel();
 
             GUILayout.Space(10);
             if (CesiumIonSession.Ion().IsConnected())
             {
-                DrawQuickAddIonAssetsPanel();
+                this.DrawQuickAddIonAssetsPanel();
             }
             else
             {
-                DrawIonLoginPanel();
+                this.DrawIonLoginPanel();
             }
 
             GUILayout.Space(10);
-            DrawConnectionStatusPanel();
+            this.DrawConnectionStatusPanel();
 
             // Force the window to repaint if the cursor is hovered over it.
             // By default, it only repaints sporadically, so the hover and
             // selection behavior will appear delayed.
-            if (mouseOverWindow == currentWindow)
+            if (EditorWindow.mouseOverWindow == currentWindow)
             {
-                Repaint();
+                this.Repaint();
             }
         }
 
@@ -101,52 +105,43 @@ namespace CesiumForUnity
 
         void DrawCesiumToolbar()
         {
-            // TODO: prevent icons from being clipped by window...
-            // maybe resize manually?
-
             GUILayout.BeginHorizontal(CesiumEditorStyle.toolbarStyle);
-            DrawToolbarButton(
+            this.DrawToolbarButton(
                 "Add",
                 (int)ToolbarIndex.Add,
                 "Add a tileset from Cesium ion to this scene",
                 true,
-                AddFromIon
-            );
-            DrawToolbarButton(
+                this.AddFromIon);
+            this.DrawToolbarButton(
                 "Upload",
                 (int)ToolbarIndex.Upload,
                 "Upload a tileset to Cesium ion to process it for efficient streaming to Cesium for Unity",
                 true,
-                UploadToIon
-            );
-            DrawToolbarButton(
+                this.UploadToIon);
+            this.DrawToolbarButton(
                 "Token",
                 (int)ToolbarIndex.Token,
                 "Select or create a token to use to access Cesium ion assets",
                 false,
-                SetToken
-            );
-            DrawToolbarButton(
+                this.SetToken);
+            this.DrawToolbarButton(
                 "Learn",
                 (int)ToolbarIndex.Learn,
                 "Open Cesium for Unity tutorials and learning resources",
                 false,
-                OpenDocumentation
-            );
-            DrawToolbarButton(
+                this.OpenDocumentation);
+            this.DrawToolbarButton(
                 "Help",
                 (int)ToolbarIndex.Help,
                 "Search for existing questions or ask a new question on the Cesium Community Forum",
                 false,
-                OpenSupport
-            );
-            DrawToolbarButton(
+                this.OpenSupport);
+            this.DrawToolbarButton(
                 "Sign Out",
                 (int)ToolbarIndex.SignOut,
                 "Sign out of Cesium ion",
                 true,
-                SignOutOfIon
-            );
+                this.SignOutOfIon);
             GUILayout.EndHorizontal();
         }
 
@@ -155,16 +150,21 @@ namespace CesiumForUnity
             BlankTileset,
             IonTileset
         }
-        
+
         private class QuickAddItem
         {
             public QuickAddItemType type;
             public string name;
             public string tooltip;
-            public int tilesetId;
-            public int overlayId;
+            public long tilesetId;
+            public long overlayId;
 
-            public QuickAddItem(QuickAddItemType type, string name, string tooltip, int tilesetId, int overlayId)
+            public QuickAddItem(
+                QuickAddItemType type,
+                string name,
+                string tooltip,
+                long tilesetId,
+                long overlayId)
             {
                 this.type = type;
                 this.name = name;
@@ -174,54 +174,48 @@ namespace CesiumForUnity
             }
         }
 
-        private readonly QuickAddItem[] basicAssets = new QuickAddItem[1];
-        private readonly QuickAddItem[] ionAssets = new QuickAddItem[5];
+        private readonly QuickAddItem[] _basicAssets = new QuickAddItem[1];
+        private readonly QuickAddItem[] _ionAssets = new QuickAddItem[5];
 
         void PopulateQuickAddLists()
         {
-            basicAssets[0] = new QuickAddItem(
+            this._basicAssets[0] = new QuickAddItem(
                 QuickAddItemType.BlankTileset,
                 "Blank 3D Tiles Tileset",
                 "An empty tileset that can be configured to show Cesium ion assets or tilesets from other sources.",
                 -1,
-                -1
-            );
+                -1);
 
-            ionAssets[0] = new QuickAddItem(
+            this._ionAssets[0] = new QuickAddItem(
                 QuickAddItemType.IonTileset,
                 "Cesium World Terrain + Bing Maps Aerial imagery",
                 "High-resolution global terrain tileset curated from several data sources, textured with Bing Maps satellite imagery.",
                 1,
-                2
-            );
-            ionAssets[1] = new QuickAddItem(
+                2);
+            this._ionAssets[1] = new QuickAddItem(
                 QuickAddItemType.IonTileset,
                 "Cesium World Terrain + Bing Maps Aerial with Labels imagery",
                 "High-resolution global terrain tileset curated from several data sources, textured with labeled Bing Maps satellite imagery.",
                 1,
-                3
-            );
-            ionAssets[2] = new QuickAddItem(
+                3);
+            this._ionAssets[2] = new QuickAddItem(
                 QuickAddItemType.IonTileset,
                 "Cesium World Terrain + Bing Maps Road imagery",
                 "High-resolution global terrain tileset curated from several data sources, textured with labeled Bing Maps imagery.",
                 1,
-                4
-            );
-            ionAssets[3] = new QuickAddItem(
+                4);
+            this._ionAssets[3] = new QuickAddItem(
                 QuickAddItemType.IonTileset,
                 "Cesium World Terrain + Sentinel-2 imagery",
                 "High-resolution global terrain tileset curated from several data sources, textured with high-resolution satellite imagery from the Sentinel-2 project.",
                 1,
-                3954
-            );
-            ionAssets[4] = new QuickAddItem(
+                3954);
+            this._ionAssets[4] = new QuickAddItem(
                 QuickAddItemType.IonTileset,
                 "Cesium OSM Buildings",
                 "A 3D buildings layer derived from OpenStreetMap covering the entire world.",
                 96188,
-                -1
-            );
+                -1);
         }
 
         void DrawQuickAddBasicAssetsPanel()
@@ -229,14 +223,18 @@ namespace CesiumForUnity
             GUILayout.Label("Quick Add Basic Assets", EditorStyles.boldLabel);
             GUIContent addButtonContent = new GUIContent(CesiumEditorStyle.quickAddIcon, "Add this item to the level");
 
-            for (int i = 0; i < basicAssets.Length; i++)
+            for (int i = 0; i < this._basicAssets.Length; i++)
             {
                 GUILayout.BeginHorizontal(CesiumEditorStyle.quickAddItemStyle);
-                GUILayout.Box(new GUIContent(basicAssets[i].name, basicAssets[i].tooltip), EditorStyles.wordWrappedLabel);
+                GUILayout.Box(
+                    new GUIContent(
+                        this._basicAssets[i].name,
+                        this._basicAssets[i].tooltip),
+                    EditorStyles.wordWrappedLabel);
                 GUILayout.FlexibleSpace();
                 if (GUILayout.Button(addButtonContent, CesiumEditorStyle.quickAddButtonStyle))
                 {
-                    QuickAddAsset(basicAssets[i]);
+                    this.QuickAddAsset(this._basicAssets[i]);
                 }
                 GUILayout.EndHorizontal();
             }
@@ -245,35 +243,44 @@ namespace CesiumForUnity
         }
         private void QuickAddAsset(QuickAddItem item)
         {
-            GameObject addedObject = new GameObject();
-            QuickAddItemType type = item.type;
-
-            switch (type) {
+            switch (item.type)
+            {
                 case QuickAddItemType.IonTileset:
-                    addedObject.name = item.name;
+                    AddAssetFromIon(item.name, item.tilesetId, item.overlayId);
                     break;
                 case QuickAddItemType.BlankTileset:
-                    addedObject.name = "Cesium3DTileset";
-                    addedObject.AddComponent<Cesium3DTileset>();
+                    GameObject blankTileset = new GameObject("Cesium3DTileset");
+                    blankTileset.AddComponent<Cesium3DTileset>();
+                    Selection.activeGameObject = blankTileset;
                     break;
                 default:
                     break;
             }
         }
 
+        private partial void AddAssetFromIon(
+            string name,
+            long tilesetID,
+            long overlayID);
+
         void DrawQuickAddIonAssetsPanel()
         {
             GUILayout.Label("Quick Add Cesium ion Assets", EditorStyles.boldLabel);
-            GUIContent addButtonContent = new GUIContent(CesiumEditorStyle.quickAddIcon, "Add this item to the level");
+            GUIContent addButtonContent = new GUIContent(
+                CesiumEditorStyle.quickAddIcon,
+                "Add this item to the level");
 
-            for (int i = 0; i < ionAssets.Length; i++)
+            for (int i = 0; i < this._ionAssets.Length; i++)
             {
                 GUILayout.BeginHorizontal(CesiumEditorStyle.quickAddItemStyle);
-                GUILayout.Box(new GUIContent(ionAssets[i].name, ionAssets[i].tooltip), EditorStyles.wordWrappedLabel);
+                GUILayout.Box(new GUIContent(
+                    this._ionAssets[i].name,
+                    this._ionAssets[i].tooltip),
+                    EditorStyles.wordWrappedLabel);
                 GUILayout.FlexibleSpace();
                 if (GUILayout.Button(addButtonContent, CesiumEditorStyle.quickAddButtonStyle))
                 {
-                    QuickAddAsset(ionAssets[i]);
+                    this.QuickAddAsset(this._ionAssets[i]);
                 }
                 GUILayout.EndHorizontal();
             }
@@ -281,11 +288,12 @@ namespace CesiumForUnity
 
         void DrawIonLoginPanel()
         {
-            //GUILayout.Box(CesiumIonLoginPanel.cesiumForUnityLogo, GUILayout.Width(500.0f));
+            //GUILayout.Box(cesiumForUnityLogo, GUILayout.Width(500.0f));
 
-            EditorGUILayout.LabelField("Access global high - resolution 3D content, including photogrammetry, " +
-                "terrain, imagery, and buildings. Bring your own data for tiling, hosting, and " +
-                "streaming to Unity.", EditorStyles.wordWrappedLabel);
+            EditorGUILayout.LabelField("Access global high - resolution 3D content, " +
+                "including photogrammetry, terrain, imagery, and buildings. " +
+                "Bring your own data for tiling, hosting, and streaming to Unity.",
+                EditorStyles.wordWrappedLabel);
 
             GUILayout.Space(20);
 
@@ -301,43 +309,58 @@ namespace CesiumForUnity
 
         void DrawConnectionStatusPanel()
         {
-            if (CesiumIonSession.Ion().IsConnecting()) {
+            if (CesiumIonSession.Ion().IsConnecting())
+            {
                 EditorGUILayout.LabelField(
                     "Waiting for you to sign into Cesium ion with your web browser...",
-                    EditorStyles.wordWrappedLabel
-                );
+                    EditorStyles.wordWrappedLabel);
 
                 string authorizeUrl = CesiumIonSession.Ion().GetAuthorizeUrl();
-                if (EditorGUILayout.LinkButton("Open web browser again")) {
+                if (EditorGUILayout.LinkButton("Open web browser again"))
+                {
                     Application.OpenURL(authorizeUrl);
                 }
 
                 EditorGUILayout.LabelField(
                     "Or copy the URL below into your web browser",
-                    EditorStyles.wordWrappedLabel
-                );
+                    EditorStyles.wordWrappedLabel);
 
                 GUILayout.BeginHorizontal();
                 EditorGUILayout.SelectableLabel(
                     authorizeUrl,
                     EditorStyles.textField,
-                    GUILayout.Height(EditorGUIUtility.singleLineHeight)
-                );
+                    GUILayout.Height(EditorGUIUtility.singleLineHeight));
 
-                if (GUILayout.Button("Copy To Clipboard")) {
+                if (GUILayout.Button("Copy To Clipboard"))
+                {
                     GUIUtility.systemCopyBuffer = authorizeUrl;
                 }
                 GUILayout.EndHorizontal();
 
-            } else if (CesiumIonSession.Ion().IsProfileLoaded())
-            {
-                string username = CesiumIonSession.Ion().GetProfileUsername();
-                if (GUILayout.Button("Connected to Cesium ion as " + username, "Open your Cesium ion account in your browser")) {
-                    VisitIon();
-                }
-            } else if (CesiumIonSession.Ion().IsLoadingProfile()) {
-                GUILayout.Label("Loading user information...");
             }
+
+            GUILayout.FlexibleSpace();
+            GUILayout.BeginHorizontal();
+            if (CesiumIonSession.Ion().IsProfileLoaded())
+            {
+                GUILayout.FlexibleSpace();
+                string username = CesiumIonSession.Ion().GetProfileUsername();
+                if (GUILayout.Button(
+                    new GUIContent(
+                        "Connected to Cesium ion as " + username,
+                        "Open your Cesium ion account in your browser"),
+                    CesiumEditorStyle.profileLinkStyle))
+                {
+                    this.VisitIon();
+                }
+            }
+            else if (CesiumIonSession.Ion().IsLoadingProfile())
+            {
+                GUILayout.FlexibleSpace();
+                GUILayout.Label("Loading user information...",
+                    CesiumEditorStyle.profileLinkStyle);
+            }
+            GUILayout.EndHorizontal();
         }
 
         void AddFromIon()

@@ -1,5 +1,6 @@
 using Reinterop;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -94,6 +95,7 @@ namespace CesiumForUnity
             searchString.Contains("string", StringComparison.CurrentCultureIgnoreCase);
             string.Equals("stringA", "stringB");
             string.Compare("stringA", "stringB", true);
+            string.IsNullOrEmpty("value");
 
             IonAssetsColumn column = IonAssetsColumn.Name;
 
@@ -105,22 +107,64 @@ namespace CesiumForUnity
             session.TriggerProfileUpdate();
             session.TriggerTokensUpdate();
 
+            CesiumEditorWindow editorWindow = null!;
+            CesiumIonAssetsWindow assetsWindow = null!;
+
             IonAssetDetails.FormatType("type");
             IonAssetDetails.FormatDate("date");
 
-            IonTokenSelector.HasDefaultToken();
-            IonTokenSelector.HasDefaultTokenId();
-            IonTokenSelector.GetDefaultToken();
-            IonTokenSelector.GetDefaultTokenId();
-            IonTokenSelector.SetDefaultTokenId("id");
-            IonTokenSelector.SetDefaultToken("token");
-
+            SelectIonTokenWindow.GetDefaultNewTokenName();
             SelectIonTokenWindow.ShowWindow();
-            SelectIonTokenWindow window = SelectIonTokenWindow.currentWindow;
-            window.SetTokenSource(IonTokenSource.Create);
-            window.Close();
+            SelectIonTokenWindow tokenWindow = SelectIonTokenWindow.currentWindow;
+            tokenWindow.tokenSource = IonTokenSource.Create;
+            string name = tokenWindow.createdTokenName;
+            int tokenIndex = tokenWindow.selectedExistingTokenIndex;
+            tokenIndex = 0;
+            string token = tokenWindow.specifiedToken;
+            List<string> tokens = tokenWindow.GetExistingTokenList();
+            tokens.Clear();
+            tokens.Add(token);
+            tokenWindow.RefreshExistingTokenList();
+            tokenWindow.Close();
+
+            CesiumRuntimeSettings.HasDefaultIonAccessToken();
+            CesiumRuntimeSettings.HasDefaultIonAccessTokenId();
+            CesiumRuntimeSettings.GetDefaultIonAccessToken();
+            CesiumRuntimeSettings.GetDefaultIonAccessTokenId();
+            CesiumRuntimeSettings.SetDefaultIonAccessToken("token");
+            CesiumRuntimeSettings.SetDefaultIonAccessTokenId("id");
 
             Cesium3DTileset[] tilesets = UnityEngine.Object.FindObjectsOfType<Cesium3DTileset>();
+            Cesium3DTileset tileset = null!;
+            for (int i = 0; i < tilesets.Length; i++)
+            {
+                tileset = tilesets[i];
+                tileset.tilesetSource = CesiumDataSource.FromCesiumIon;
+                token = tileset.ionAccessToken;
+                tileset.RecreateTileset();
+            }
+
+            CesiumIonRasterOverlay ionOverlay = tileset.gameObject.GetComponent<CesiumIonRasterOverlay>();
+            token = ionOverlay.ionAccessToken;
+            ionOverlay.Refresh();
+            GameObject gameObject = new GameObject("Name");
+            tileset = gameObject.AddComponent<Cesium3DTileset>();
+            tileset.ionAssetID = 0;
+            ionOverlay = gameObject.AddComponent<CesiumIonRasterOverlay>();
+            ionOverlay.ionAssetID = 0;
+
+            CesiumRasterOverlay[] rasterOverlays = tileset.gameObject.GetComponents<CesiumRasterOverlay>();
+            CesiumRasterOverlay overlay = rasterOverlays[0];
+            UnityEngine.Object.DestroyImmediate(overlay);
+
+            string substring = "string";
+            substring = string.Concat(substring, new long[]{ 100 });
+            string message = string.Concat(substring, "string");
+            Debug.Log(message);
+            Debug.LogWarning(message);
+            Debug.LogError(message);
+
+            Selection.activeGameObject = gameObject;
         }
     }
 }//

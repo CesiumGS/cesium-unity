@@ -1,4 +1,5 @@
 using Reinterop;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
@@ -18,40 +19,85 @@ namespace CesiumForUnity
 
         public static void ShowWindow()
         {
-            CesiumEditorStyle.Reload();
-
             if (currentWindow == null)
             {
                 currentWindow = GetWindow<SelectIonTokenWindow>("Select a Cesium ion Token");
-                currentWindow.titleContent.image = CesiumEditorStyle.cesiumIcon;
+
+                // Load the icon separately from the other resources.
+                Texture2D icon = (Texture2D)Resources.Load("Cesium-icon-16x16");
+                icon.wrapMode = TextureWrapMode.Clamp;
+                currentWindow.titleContent.image = icon;
             }
 
             currentWindow.Show();
             currentWindow.Focus();
         }
 
-        private IonTokenSource _source;
+        public SelectIonTokenWindow() { }
+
+        private IonTokenSource _source = IonTokenSource.Create;
         private string _createdTokenName = "";
-        private string[] _existingTokensList = { };
+        private List<string> _existingTokenList = new List<string>();
+        private string[] _existingTokenArray = { };
         private int _existingTokenIndex;
         private string _specifiedToken = "";
+
+        public static string GetDefaultNewTokenName()
+        {
+            return Application.productName + " (Created by Cesium For Unity)";
+        }
 
         private void OnEnable()
         {
             CesiumIonSession.Ion().Resume();
-            CesiumEditorStyle.Reload();
+            CesiumIonSession.OnTokensUpdated += this.RefreshTokens;
 
-            _createdTokenName = IonTokenSelector.GetDefaultNewTokenName();
+            this._createdTokenName = GetDefaultNewTokenName();
+
+            // This has to be done in OnEnable() for ScriptableObject, which EditorWindow
+            // inherits from.
+            this.CreateImplementation();
         }
 
-        public IonTokenSource GetTokenSource()
+        private void OnDisable()
         {
-            return _source;
+            CesiumIonSession.OnTokensUpdated -= this.RefreshTokens;
         }
 
-        public void SetTokenSource(IonTokenSource source)
+        public IonTokenSource tokenSource
         {
-            _source = source;
+            get => this._source;
+            set
+            {
+                this._source = value;
+            }
+        }
+
+        public string createdTokenName
+        {
+            get => this._createdTokenName;
+            set
+            {
+                this._createdTokenName = value;
+            }
+        }
+
+        public int selectedExistingTokenIndex
+        {
+            get => this._existingTokenIndex;
+            set
+            {
+                this._existingTokenIndex = value;
+            }
+        }
+
+        public string specifiedToken
+        {
+            get => this._specifiedToken;
+            set
+            {
+                this._specifiedToken = value;
+            }
         }
 
         private void OnGUI()
@@ -67,9 +113,9 @@ namespace CesiumForUnity
             if (CesiumIonSession.Ion().IsConnected())
             {
                 GUILayout.Space(20);
-                DrawCreateTokenOption();
+                this.DrawCreateTokenOption();
                 GUILayout.Space(20);
-                DrawUseExistingTokenOption();
+                this.DrawUseExistingTokenOption();
             }
             else
             {
@@ -81,21 +127,21 @@ namespace CesiumForUnity
             }
 
             GUILayout.Space(20);
-            DrawSpecifyTokenOption();
-            DrawActionButton();
+            this.DrawSpecifyTokenOption();
+            this.DrawActionButton();
         }
 
         private void DrawCreateTokenOption()
         {
             GUILayout.BeginHorizontal();
             GUILayout.Space(15);
-            if (GUILayout.Toggle(_source == IonTokenSource.Create, "", GUILayout.Width(30)))
+            if (GUILayout.Toggle(this._source == IonTokenSource.Create, "", GUILayout.Width(30)))
             {
-                _source = IonTokenSource.Create;
+                this._source = IonTokenSource.Create;
             }
             GUILayout.BeginVertical();
             GUILayout.Label("Create a new token", EditorStyles.boldLabel);
-            _createdTokenName = EditorGUILayout.TextField("Name:", _createdTokenName);
+            this._createdTokenName = EditorGUILayout.TextField("Name:", this._createdTokenName);
             GUILayout.EndVertical();
             GUILayout.EndHorizontal();
         }
@@ -104,13 +150,16 @@ namespace CesiumForUnity
         {
             GUILayout.BeginHorizontal();
             GUILayout.Space(15);
-            if (GUILayout.Toggle(_source == IonTokenSource.UseExisting, "", GUILayout.Width(30)))
+            if (GUILayout.Toggle(this._source == IonTokenSource.UseExisting, "", GUILayout.Width(30)))
             {
-                _source = IonTokenSource.UseExisting;
+                this._source = IonTokenSource.UseExisting;
             }
             GUILayout.BeginVertical();
             GUILayout.Label("Use an existing token", EditorStyles.boldLabel);
-            _existingTokenIndex = EditorGUILayout.Popup(_existingTokenIndex, _existingTokensList);
+            this._existingTokenIndex = EditorGUILayout.Popup(
+                this._existingTokenIndex,
+                this._existingTokenArray
+            );
             GUILayout.EndVertical();
             GUILayout.EndHorizontal();
         }
@@ -119,13 +168,13 @@ namespace CesiumForUnity
         {
             GUILayout.BeginHorizontal();
             GUILayout.Space(15);
-            if (GUILayout.Toggle(_source == IonTokenSource.Specify, "", GUILayout.Width(30)))
+            if (GUILayout.Toggle(this._source == IonTokenSource.Specify, "", GUILayout.Width(30)))
             {
-                _source = IonTokenSource.Specify;
+                this._source = IonTokenSource.Specify;
             }
             GUILayout.BeginVertical();
             GUILayout.Label("Specify a token", EditorStyles.boldLabel);
-            _specifiedToken = EditorGUILayout.TextField("Token:", _specifiedToken);
+            this._specifiedToken = EditorGUILayout.TextField("Token:", this._specifiedToken);
             GUILayout.EndVertical();
             GUILayout.EndHorizontal();
         }
@@ -136,25 +185,23 @@ namespace CesiumForUnity
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
 
-            string label = _source == IonTokenSource.Create
+            string label = this._source == IonTokenSource.Create
                 ? "Create New Project Default Token"
                 : "Use as Project Default Token";
 
-            if (GUILayout.Button(label,
-                     CesiumEditorStyle.cesiumButtonStyle,
-                     GUILayout.Width(400)))
+            if (GUILayout.Button(label, CesiumEditorStyle.cesiumButtonStyle, GUILayout.Width(400)))
             {
-                if (_source == IonTokenSource.Create)
+                if (this._source == IonTokenSource.Create)
                 {
-                    CreateToken(_createdTokenName);
+                    this.CreateToken();
                 }
-                else if (_source == IonTokenSource.UseExisting)
+                else if (this._source == IonTokenSource.UseExisting)
                 {
-                    UseExistingToken(_existingTokenIndex);
+                    this.UseExistingToken();
                 }
                 else
                 {
-                    SpecifyToken(_specifiedToken);
+                    this.SpecifyToken();
                 }
             };
 
@@ -164,15 +211,18 @@ namespace CesiumForUnity
 
         public partial void RefreshTokens();
 
-        public partial void CreateToken(string name);
+        private partial void CreateToken();
+        private partial void UseExistingToken();
+        private partial void SpecifyToken();
 
-        public partial void UseExistingToken(int tokenIndex);
-
-        public partial void SpecifyToken(string token);
-
-        public void SetExistingTokenList(string[] tokens)
+        public List<string> GetExistingTokenList()
         {
-            _existingTokensList = tokens;
+            return this._existingTokenList;
+        }
+
+        public void RefreshExistingTokenList()
+        {
+            this._existingTokenArray = this._existingTokenList.ToArray();
         }
     }
 }

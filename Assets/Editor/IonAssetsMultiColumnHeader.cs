@@ -1,8 +1,4 @@
-using Reinterop;
-using System;
-using System.Collections.Generic;
 using UnityEditor.IMGUI.Controls;
-using UnityEngine;
 
 namespace CesiumForUnity
 {
@@ -47,7 +43,6 @@ namespace CesiumForUnity
         protected override void OnSortingChanged()
         {
             base.OnSortingChanged();
-            // TODO
             _treeView.Refresh();
         }
     }

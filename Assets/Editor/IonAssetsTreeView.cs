@@ -23,36 +23,36 @@ namespace CesiumForUnity
 
         public IonAssetDetails(string name, string type, long id, string description, string attribution)
         {
-            _name = name;
-            _type = type;
-            _id = id;
-            _description = description;
-            _attribution = attribution;
+            this._name = name;
+            this._type = type;
+            this._id = id;
+            this._description = description;
+            this._attribution = attribution;
         }
 
         public string name
         {
-            get => _name;
+            get => this._name;
         }
 
         public string type
         {
-            get => _type;
+            get => this._type;
         }
 
         public long id
         {
-            get => _id;
+            get => this._id;
         }
 
         public string description
         {
-            get => _description;
+            get => this._description;
         }
 
         public string attribution
         {
-            get => _attribution;
+            get => this._attribution;
         }
 
         private static Dictionary<string, string> typeLookup = new Dictionary<string, string>
@@ -130,8 +130,8 @@ namespace CesiumForUnity
                 };
             }
 
-            _headerState = new MultiColumnHeaderState(columns);
-            multiColumnHeader = new IonAssetsMultiColumnHeader(_headerState, this);
+            this._headerState = new MultiColumnHeaderState(columns);
+            multiColumnHeader = new IonAssetsMultiColumnHeader(this._headerState, this);
         }
 
         protected override TreeViewItem BuildRoot()

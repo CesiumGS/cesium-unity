@@ -1,8 +1,6 @@
 #pragma once
 
 #include <CesiumAsync/AsyncSystem.h>
-#include <CesiumAsync/SharedFuture.h>
-#include <CesiumIonClient/Response.h>
 #include <CesiumIonClient/Token.h>
 
 #include <DotNet/CesiumForUnity/IonTokenSource.h>
@@ -41,16 +39,13 @@ public:
   RefreshTokens(const DotNet::CesiumForUnity::SelectIonTokenWindow& window);
 
   void CreateToken(
-      const DotNet::CesiumForUnity::SelectIonTokenWindow& window,
-      DotNet::System::String name);
+      const DotNet::CesiumForUnity::SelectIonTokenWindow& window);
 
   void UseExistingToken(
-      const DotNet::CesiumForUnity::SelectIonTokenWindow& window,
-      int tokenIndex);
+      const DotNet::CesiumForUnity::SelectIonTokenWindow& window);
 
   void SpecifyToken(
-      const DotNet::CesiumForUnity::SelectIonTokenWindow& window,
-      DotNet::System::String token);
+      const DotNet::CesiumForUnity::SelectIonTokenWindow& window);
 
 private:
   std::optional<CesiumAsync::Promise<std::optional<CesiumIonClient::Token>>>

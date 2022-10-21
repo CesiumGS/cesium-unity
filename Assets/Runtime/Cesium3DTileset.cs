@@ -493,7 +493,6 @@ namespace CesiumForUnity
 
         private partial void OnEnable();
         private partial void OnDisable();
-
-        private partial void RecreateTileset();
+        public partial void RecreateTileset();
     }
 }

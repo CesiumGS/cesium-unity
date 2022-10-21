@@ -312,6 +312,9 @@ namespace CesiumForUnity
             string test = string.Concat("string", "string2");
             string[] stringArray = stringList.ToArray();
             test = string.Join(" ", stringArray);
+            string.IsNullOrEmpty("value");
+
+            CesiumRuntimeSettings.GetDefaultIonAccessToken();
 
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;

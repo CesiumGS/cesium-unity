@@ -13,28 +13,31 @@ namespace CesiumForUnity
         public static GUIStyle quickAddItemStyle = null!;
         public static GUIStyle quickAddButtonStyle = null!;
 
+        public static GUIStyle profileLinkStyle = null!;
+
         public static GUIStyle cesiumButtonStyle = null!;
+        public static GUIStyle cesiumButtonDisabledStyle = null!;
         public static GUIStyle refreshButtonStyle = null!;
 
         public static GUIStyle descriptionHeaderStyle = null!;
         public static GUIStyle descriptionSubheaderStyle = null!;
         public static GUIStyle descriptionCenterTextStyle = null!;
 
-        public static Texture2D cesiumIcon = null!;
         public static Texture2D cesiumForUnityLogo = null!;
         public static Texture2D quickAddIcon = null!;
         public static Texture2D[] toolbarIcons = null!;
         public static Texture2D refreshIcon = null!;
 
-        private static readonly Color buttonColor = new Color(0.2945f, 0.6317f, 0.7930f, 1.0f);
-        private static readonly Color buttonColorLighter = new Color(0.4475f, 0.7544f, 0.8904f, 1.0f);
-        private static readonly Color buttonColorDarker = new Color(0.2598f, 0.5785f, 0.7075f, 1.0f);
+        private static readonly Color buttonColor = new Color(0.2945f, 0.6317f, 0.7930f);
+        private static readonly Color buttonColorLighter = new Color(0.4475f, 0.7544f, 0.8904f);
+        private static readonly Color buttonColorDarker = new Color(0.2598f, 0.5785f, 0.7075f);
+        private static readonly Color disabledButtonTextColor = new Color(0.7f, 0.7f, 0.7f);
 
         private static Texture2D buttonTexture = null!;
         private static Texture2D buttonHoverTexture = null!;
         private static Texture2D buttonPressedTexture = null!;
 
-        public static void Reload()
+        static CesiumEditorStyle()
         {
             LoadImages();
             LoadStyles();
@@ -42,11 +45,6 @@ namespace CesiumForUnity
 
         private static void LoadImages()
         {
-            if (cesiumIcon == null)
-            {
-                cesiumIcon = LoadIcon("Cesium-icon-16x16");
-            }
-
             if (quickAddIcon == null)
             {
                 quickAddIcon = LoadIcon("FontAwesome/plus-solid");
@@ -122,8 +120,12 @@ namespace CesiumForUnity
             quickAddButtonStyle.fixedHeight = 16.0f;
             quickAddButtonStyle.hover.background = Texture2D.grayTexture;
 
+            profileLinkStyle = new GUIStyle(EditorStyles.label);
+            profileLinkStyle.margin = new RectOffset(5, 5, 10, 10);
+            profileLinkStyle.hover.textColor = new Color(0.5f, 0.5f, 0.5f);
+
             cesiumButtonStyle = new GUIStyle();
-            cesiumButtonStyle.padding = new RectOffset(10, 10, 10, 10);
+            cesiumButtonStyle.padding = new RectOffset(25, 25, 10, 10);
             cesiumButtonStyle.margin = new RectOffset(10, 10, 10, 10);
             cesiumButtonStyle.fontStyle = FontStyle.Bold;
             cesiumButtonStyle.alignment = TextAnchor.MiddleCenter;
@@ -133,6 +135,14 @@ namespace CesiumForUnity
             cesiumButtonStyle.hover.textColor = Color.white;
             cesiumButtonStyle.active.background = buttonPressedTexture;
             cesiumButtonStyle.active.textColor = Color.white;
+
+            cesiumButtonDisabledStyle = new GUIStyle(cesiumButtonStyle);
+            cesiumButtonDisabledStyle.normal.background = Texture2D.grayTexture;
+            cesiumButtonDisabledStyle.normal.textColor = disabledButtonTextColor;
+            cesiumButtonDisabledStyle.hover.background = Texture2D.grayTexture;
+            cesiumButtonDisabledStyle.hover.textColor = disabledButtonTextColor;
+            cesiumButtonDisabledStyle.active.background = Texture2D.grayTexture;
+            cesiumButtonDisabledStyle.active.textColor = disabledButtonTextColor;
 
             refreshButtonStyle = new GUIStyle(cesiumButtonStyle);
             refreshButtonStyle.padding = new RectOffset(5, 5, 5, 5);

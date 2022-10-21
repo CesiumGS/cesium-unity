@@ -1,8 +1,21 @@
 #include "SelectIonTokenWindowImpl.h"
 
+#include "CesiumIonSessionImpl.h"
+
+#include <CesiumIonClient/Response.h>
+
+#include <DotNet/CesiumForUnity/Cesium3DTileset.h>
+#include <DotNet/CesiumForUnity/CesiumDataSource.h>
+#include <DotNet/CesiumForUnity/CesiumIonRasterOverlay.h>
 #include <DotNet/CesiumForUnity/CesiumIonSession.h>
+#include <DotNet/CesiumForUnity/CesiumRuntimeSettings.h>
 #include <DotNet/CesiumForUnity/SelectIonTokenWindow.h>
-#include <DotNet/CesiumForUnity/IonTokenSelector.h>
+#include <DotNet/System/Array1.h>
+#include <DotNet/System/Collections/Generic/List1.h>
+#include <DotNet/System/Object.h>
+#include <DotNet/UnityEngine/Debug.h>
+#include <DotNet/UnityEngine/GameObject.h>
+#include <DotNet/UnityEngine/Object.h>
 
 #include <algorithm>
 
@@ -19,14 +32,15 @@ SelectIonTokenWindowImpl& currentWindow() {
 
 } // namespace
 
-CesiumAsync::SharedFuture<std::optional<CesiumIonClient::Token>>
+/*static*/ CesiumAsync::SharedFuture<std::optional<CesiumIonClient::Token>>
 SelectIonTokenWindowImpl::SelectNewToken() {
   CesiumForUnity::SelectIonTokenWindow::ShowWindow();
+  SelectIonTokenWindowImpl& window = currentWindow();
 
-  return *currentWindow()._future;
+  return *window._future;
 }
 
-CesiumAsync::Future<std::optional<CesiumIonClient::Token>>
+/*static*/ CesiumAsync::Future<std::optional<CesiumIonClient::Token>>
 SelectIonTokenWindowImpl::SelectTokenIfNecessary() {
   return CesiumIonSessionImpl::ion()
       .getProjectDefaultTokenDetails()
@@ -64,7 +78,7 @@ std::vector<int64_t> findUnauthorizedAssets(
 
 } // namespace
 
-CesiumAsync::Future<std::optional<CesiumIonClient::Token>>
+/*static*/ CesiumAsync::Future<std::optional<CesiumIonClient::Token>>
 SelectIonTokenWindowImpl::SelectAndAuthorizeToken(
     const std::vector<int64_t>& assetIDs) {
   return SelectTokenIfNecessary().thenInMainThread(
@@ -92,13 +106,18 @@ SelectIonTokenWindowImpl::SelectAndAuthorizeToken(
                           missingAssets.end(),
                           idStrings.begin(),
                           [](int64_t id) { return std::to_string(id); });
-                      /* UE_LOG(
-                          LogCesiumEditor,
-                          Warning,
-                          TEXT("Authorizing the project's default Cesium ion "
-                               "token to access the following asset IDs: %s"),
-                          UTF8_TO_TCHAR(joinToString(idStrings, ",
-                         ").c_str()));*/
+
+                      std::string assetIDsString = "";
+                      std::for_each(
+                          idStrings.begin(),
+                          idStrings.end(),
+                          [&assetIDsString](std::string& id) {
+                            assetIDsString += id;
+                      });
+                      UnityEngine::Debug::LogWarning(System::String(
+                          " Authorizing the project's default Cesium ion token "
+                          "to access the following asset IDs: " +
+                          assetIDsString));
 
                       CesiumIonClient::Token newToken = *maybeToken;
                       size_t destinationIndex = newToken.assetIds->size();
@@ -162,25 +181,110 @@ void SelectIonTokenWindowImpl::RefreshTokens(
     const DotNet::CesiumForUnity::SelectIonTokenWindow& window) {
   const std::vector<CesiumIonClient::Token>& tokens =
       CesiumIonSessionImpl::ion().getTokens();
+  this->_tokens.resize(tokens.size());
+
+  System::Collections::Generic::List1<System::String> tokenNames =
+      window.GetExistingTokenList();
+
+  const std::string& createName =
+      CesiumForUnity::SelectIonTokenWindow::GetDefaultNewTokenName()
+          .ToStlString();
+  const std::string& defaultTokenId =
+      CesiumForUnity::CesiumRuntimeSettings::GetDefaultIonAccessTokenId()
+          .ToStlString();
+  const std::string& specifiedToken = window.specifiedToken().ToStlString();
+
+  for (size_t i = 0; i < tokens.size(); ++i) {
+    if (this->_tokens[i]) {
+      *this->_tokens[i] = std::move(tokens[i]);
+    } else {
+      this->_tokens[i] =
+          std::make_shared<CesiumIonClient::Token>(std::move(tokens[i]));
+    }
+
+    if (this->_tokens[i]->id == defaultTokenId) {
+      window.selectedExistingTokenIndex(i);
+      window.tokenSource(CesiumForUnity::IonTokenSource::UseExisting);
+    }
+
+    // If there's already a token with the default name we would use to create a
+    // new one, default to selecting that rather than creating a new one.
+    if (window.tokenSource() == CesiumForUnity::IonTokenSource::Create &&
+        this->_tokens[i]->name == createName) {
+      window.selectedExistingTokenIndex(i);
+      window.tokenSource(CesiumForUnity::IonTokenSource::UseExisting);
+    }
+
+    // If this happens to be the specified token, select it.
+    if (window.tokenSource() == CesiumForUnity::IonTokenSource::Specify &&
+        this->_tokens[i]->token == specifiedToken) {
+      window.selectedExistingTokenIndex(i);
+      window.tokenSource(CesiumForUnity::IonTokenSource::UseExisting);
+    }
+
+    tokenNames.Add(System::String(this->_tokens[i]->name));
+  }
+
+  window.RefreshExistingTokenList();
 }
 
+namespace {
+void updateDefaultToken(
+    CesiumIonClient::Response<CesiumIonClient::Token> response) {
+  if (response.value) {
+    CesiumIonSessionImpl::ion().invalidateProjectDefaultTokenDetails();
+
+    CesiumForUnity::CesiumRuntimeSettings::SetDefaultIonAccessToken(
+        System::String(response.value->token));
+    CesiumForUnity::CesiumRuntimeSettings::SetDefaultIonAccessTokenId(
+        System::String(response.value->id));
+
+    // TODO: source control
+
+    // Refresh all tilesets and overlays that are using the project
+    // default token.
+    System::Array1 tilesets = UnityEngine::Object::FindObjectsOfType<
+        CesiumForUnity::Cesium3DTileset>();
+    for (int32_t i = 0; i < tilesets.Length(); i++) {
+      CesiumForUnity::Cesium3DTileset tileset = tilesets[i];
+      if (tileset.tilesetSource() ==
+              CesiumForUnity::CesiumDataSource::FromCesiumIon &&
+          System::String::IsNullOrEmpty(tileset.ionAccessToken())) {
+        tileset.RecreateTileset();
+      } else {
+        CesiumForUnity::CesiumIonRasterOverlay rasterOverlay =
+            tileset.gameObject()
+                .GetComponent<CesiumForUnity::CesiumIonRasterOverlay>();
+        if (rasterOverlay != nullptr &&
+            System::String::IsNullOrEmpty(rasterOverlay.ionAccessToken())) {
+          rasterOverlay.Refresh();
+        }
+      }
+    }
+  } else {
+    UnityEngine::Debug::LogError(System::String(
+        "An error occurred while selecting a token: " + response.errorMessage));
+  }
+}
+} // namespace
+
 void SelectIonTokenWindowImpl::CreateToken(
-    const DotNet::CesiumForUnity::SelectIonTokenWindow& window,
-    DotNet::System::String name) {
+    const DotNet::CesiumForUnity::SelectIonTokenWindow& window) {
   if (!this->_promise) {
     return;
   }
+
   CesiumAsync::Promise<std::optional<CesiumIonClient::Token>> promise =
       std::move(*this->_promise);
   this->_promise.reset();
 
-  const std::string& nameStr = name.ToStlString();
+  const std::string& name = window.createdTokenName().ToStlString();
 
-  auto getToken = [this, nameStr]() {
+  auto getToken = [this, name]() {
     const CesiumAsync::AsyncSystem& asyncSystem =
         CesiumIonSessionImpl::ion().getAsyncSystem();
 
-    if (nameStr.empty()) {
+    if (name.empty()) {
       return asyncSystem.createResolvedFuture(
           CesiumIonClient::Response<CesiumIonClient::Token>());
     }
@@ -188,23 +292,32 @@ void SelectIonTokenWindowImpl::CreateToken(
     // Create a new token, initially only with access to asset ID 1
     // (Cesium World Terrain).
     return CesiumIonSessionImpl::ion().getConnection()->createToken(
-        nameStr,
+        name,
         {"assets:read"},
         std::vector<int64_t>{1},
         std::nullopt);
   };
+
+  getToken().thenInMainThread(
+      [window, promise = std::move(promise)](
+          CesiumIonClient::Response<CesiumIonClient::Token>&& response) {
+        updateDefaultToken(response);
+        promise.resolve(std::move(response.value));
+        window.Close();
+      });
 }
 
 void SelectIonTokenWindowImpl::UseExistingToken(
-    const DotNet::CesiumForUnity::SelectIonTokenWindow& window,
-    int tokenIndex) {
+    const DotNet::CesiumForUnity::SelectIonTokenWindow& window) {
   if (!this->_promise) {
     return;
   }
+
   CesiumAsync::Promise<std::optional<CesiumIonClient::Token>> promise =
       std::move(*this->_promise);
   this->_promise.reset();
 
+  int tokenIndex = window.selectedExistingTokenIndex();
   const CesiumIonClient::Token& token = *this->_tokens[tokenIndex];
   auto getToken = [this, token]() {
     const CesiumAsync::AsyncSystem& asyncSystem =
@@ -217,33 +330,50 @@ void SelectIonTokenWindowImpl::UseExistingToken(
             "",
             ""));
   };
+
+  getToken().thenInMainThread(
+      [window, promise = std::move(promise)](
+          CesiumIonClient::Response<CesiumIonClient::Token>&& response) {
+        updateDefaultToken(response);
+        promise.resolve(std::move(response.value));
+        window.Close();
+      });
 }
 
 void SelectIonTokenWindowImpl::SpecifyToken(
-    const DotNet::CesiumForUnity::SelectIonTokenWindow& window,
-    DotNet::System::String token) {
+    const DotNet::CesiumForUnity::SelectIonTokenWindow& window) {
   if (!this->_promise) {
     return;
   }
+
   CesiumAsync::Promise<std::optional<CesiumIonClient::Token>> promise =
       std::move(*this->_promise);
   this->_promise.reset();
-  const std::string& tokenStr = token.ToStlString();
+  const std::string& token = window.specifiedToken().ToStlString();
 
-  auto getToken = [this, tokenStr]() {
+  auto getToken = [this, token]() {
     // Check if this is a known token, and use it if so.
-    return CesiumIonSessionImpl::ion().findToken(tokenStr).thenInMainThread(
-        [this, tokenStr](
-            CesiumIonClient::Response<CesiumIonClient::Token>&& response) {
+    return CesiumIonSessionImpl::ion().findToken(token).thenInMainThread(
+        [this,
+         token](CesiumIonClient::Response<CesiumIonClient::Token>&& response) {
           if (response.value) {
+            UnityEngine::Debug::Log(System::String("here"));
             return std::move(response);
           } else {
             CesiumIonClient::Token t;
-            t.token = tokenStr;
+            t.token = token;
             return CesiumIonClient::Response(std::move(t), 200, "", "");
           }
         });
   };
+
+  getToken().thenInMainThread(
+      [window, promise = std::move(promise)](
+          CesiumIonClient::Response<CesiumIonClient::Token>&& response) {
+        updateDefaultToken(response);
+        promise.resolve(std::move(response.value));
+        window.Close();
+      });
 }
 
 } // namespace CesiumForUnityNative

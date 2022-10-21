@@ -1,3 +1,4 @@
+using Reinterop;
 using System;
 using UnityEngine;
 using UnityEditor;
@@ -5,15 +6,14 @@ using UnityEditor.IMGUI.Controls;
 
 namespace CesiumForUnity
 {
-    public class CesiumIonAssetsWindow : EditorWindow
+    [ReinteropNativeImplementation("CesiumForUnityNative::CesiumIonAssetsWindowImpl", "CesiumIonAssetsWindowImpl.h")]
+    public partial class CesiumIonAssetsWindow : EditorWindow
     {
         public static CesiumIonAssetsWindow currentWindow = null!;
 
         [MenuItem("Cesium/Cesium ion Assets")]
         public static void ShowWindow()
         {
-            CesiumEditorStyle.Reload();
-
             if (currentWindow == null)
             {
                 // Get existing open window or if none, make a new one docked next to the Project / Console window.
@@ -22,12 +22,18 @@ namespace CesiumForUnity
                     Type.GetType("UnityEditor.ConsoleWindow,UnityEditor.dll")
                 };
                 currentWindow = GetWindow<CesiumIonAssetsWindow>("Cesium ion Assets", siblingWindows);
-                currentWindow.titleContent.image = CesiumEditorStyle.cesiumIcon;
+
+                // Load the icon separately from the other resources.
+                Texture2D icon = (Texture2D)Resources.Load("Cesium-icon-16x16");
+                icon.wrapMode = TextureWrapMode.Clamp;
+                currentWindow.titleContent.image = icon;
             }
 
             currentWindow.Show();
             currentWindow.Focus();
         }
+
+        public CesiumIonAssetsWindow() { }
 
         private TreeViewState _assetsTreeState;
         private IonAssetsTreeView _assetsTreeView;
@@ -36,25 +42,26 @@ namespace CesiumForUnity
         private void OnEnable()
         {
             CesiumIonSession.Ion().Resume();
-            CesiumEditorStyle.Reload();
             BuildTreeView();
-            _searchField = new SearchField();
-            CesiumIonSession.OnConnectionUpdated += _assetsTreeView.Refresh;
-            CesiumIonSession.OnAssetsUpdated += _assetsTreeView.Refresh;
+            CesiumIonSession.OnConnectionUpdated += this._assetsTreeView.Refresh;
+            CesiumIonSession.OnAssetsUpdated += this._assetsTreeView.Refresh;
+
+            this._searchField = new SearchField();
+            this.CreateImplementation();
         }
 
         private void OnDisable()
         {
-            CesiumIonSession.OnConnectionUpdated -= _assetsTreeView.Refresh;
-            CesiumIonSession.OnAssetsUpdated -= _assetsTreeView.Refresh;
+            CesiumIonSession.OnConnectionUpdated -= this._assetsTreeView.Refresh;
+            CesiumIonSession.OnAssetsUpdated -= this._assetsTreeView.Refresh;
         }
 
         void BuildTreeView()
         {
-            _assetsTreeState = new TreeViewState();
-            _assetsTreeView = new IonAssetsTreeView(_assetsTreeState);
+            this._assetsTreeState = new TreeViewState();
+            this._assetsTreeView = new IonAssetsTreeView(this._assetsTreeState);
 
-            _assetsTreeView.Refresh();
+            this._assetsTreeView.Refresh();
         }
 
         void OnGUI()
@@ -77,13 +84,12 @@ namespace CesiumForUnity
             CesiumIonSession.Ion().Tick();
         }
 
-
         void DrawAssetListPanel()
         {
             GUILayout.BeginVertical(GUILayout.Width(position.width / 2));
-            DrawRefreshButtonAndSearchBar();
+            this.DrawRefreshButtonAndSearchBar();
             GUILayout.Space(15);
-            DrawAssetTreeView();
+            this.DrawAssetTreeView();
             GUILayout.EndVertical();
         }
 
@@ -96,7 +102,7 @@ namespace CesiumForUnity
                 new GUIContent(CesiumEditorStyle.refreshIcon, "Refresh the asset list"),
                 CesiumEditorStyle.refreshButtonStyle))
             {
-                _assetsTreeView.Refresh();
+                this._assetsTreeView.Refresh();
             }
 
             GUILayout.FlexibleSpace();
@@ -104,30 +110,28 @@ namespace CesiumForUnity
             GUILayout.BeginVertical();
             GUILayout.Space(15);
 
-            string searchString = _searchField.OnToolbarGUI(
-                _assetsSearchString,
+            string searchString = this._searchField.OnToolbarGUI(
+                this._assetsSearchString,
                 GUILayout.Height(EditorGUIUtility.singleLineHeight)
             );
 
             if (searchString != null)
             {
                 searchString = searchString.Trim();
-                if (!searchString.Equals(_assetsSearchString))
+                if (!searchString.Equals(this._assetsSearchString))
                 {
-                    _assetsSearchString = searchString;
-                    _assetsTreeView.searchString = _assetsSearchString;
+                    this._assetsSearchString = searchString;
+                    this._assetsTreeView.searchString = this._assetsSearchString;
                 }
-            } else if (_assetsSearchString.Length > 0)
+            } else if (this._assetsSearchString.Length > 0)
             {
-                _assetsSearchString = "";
-                _assetsTreeView.searchString = _assetsSearchString;
+                this._assetsSearchString = "";
+                this._assetsTreeView.searchString = this._assetsSearchString;
             }
 
             GUILayout.EndVertical();
             GUILayout.EndHorizontal();
         }
-
-        private Vector2 _scrollPosition;
 
         void DrawAssetTreeView()
         {
@@ -136,7 +140,7 @@ namespace CesiumForUnity
             Rect viewRect = GUILayoutUtility.GetLastRect();
             viewRect.width = position.width / 2.0f;
 
-            _assetsTreeView.OnGUI(viewRect);
+            this._assetsTreeView.OnGUI(viewRect);
         }
 
         private static bool IsSupportedTileset(string type)
@@ -149,24 +153,24 @@ namespace CesiumForUnity
             return type == "IMAGERY";
         }
 
-        private Vector2 scrollPosition = Vector2.zero;
+        private Vector2 _scrollPosition = Vector2.zero;
         
         void DrawAssetDescriptionPanel()
         {
-            if (_assetsTreeView.GetAssetsCount() == 0) {
+            if (this._assetsTreeView.GetAssetsCount() == 0) {
                 return;
             }
 
-            int selectedId = _assetsTreeState.lastClickedID;
+            int selectedId = this._assetsTreeState.lastClickedID;
             if(selectedId <= 0)
             {
                 return;
             }
 
-            IonAssetDetails assetDetails = _assetsTreeView.GetAssetDetails(selectedId);
+            IonAssetDetails assetDetails = this._assetsTreeView.GetAssetDetails(selectedId);
 
             GUILayout.Space(10);
-            scrollPosition = GUILayout.BeginScrollView(scrollPosition);
+            this._scrollPosition = GUILayout.BeginScrollView(this._scrollPosition);
             GUILayout.BeginVertical();
 
             GUILayout.Label(assetDetails.name, CesiumEditorStyle.descriptionHeaderStyle);
@@ -175,27 +179,35 @@ namespace CesiumForUnity
             if (IsSupportedTileset(assetDetails.type))
             {
                 GUILayout.BeginHorizontal();
+                GUILayout.FlexibleSpace();
                 GUILayout.Button(
                     "Add to Level",
                     CesiumEditorStyle.cesiumButtonStyle
                 );
+                GUILayout.FlexibleSpace();
                 GUILayout.EndHorizontal();
             }
             else if (IsSupportedImagery(assetDetails.type))
             {
                 GUILayout.BeginHorizontal();
+                GUILayout.FlexibleSpace();
                 GUILayout.Button(
                     "Use as Terrain Tileset Base Layer",
                     CesiumEditorStyle.cesiumButtonStyle
                 );
+                GUILayout.FlexibleSpace();
                 GUILayout.EndHorizontal();
             }
             else
             {
-                GUILayout.Label(
+                GUILayout.BeginHorizontal();
+                GUILayout.FlexibleSpace();
+                GUILayout.Button(
                     "This type of asset is not currently supported",
-                    CesiumEditorStyle.descriptionCenterTextStyle
+                    CesiumEditorStyle.cesiumButtonDisabledStyle
                 );
+                GUILayout.FlexibleSpace();
+                GUILayout.EndHorizontal();
             }
 
             GUILayout.Label("Description", CesiumEditorStyle.descriptionSubheaderStyle);
