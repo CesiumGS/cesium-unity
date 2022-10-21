@@ -132,6 +132,9 @@ void CesiumIonSessionImpl::Connect(
             CesiumIonSessionImpl::_userAccessTokenEditorKey,
             this->_connection.value().getAccessToken());
         this->triggerConnectionUpdate();
+
+        this->refreshProfile();
+        this->triggerProfileUpdate();
       })
       .catchInMainThread([this](std::exception&& e) {
         this->_isConnecting = false;
@@ -174,6 +177,9 @@ void CesiumIonSessionImpl::Resume(
             }
             this->_isResuming = false;
             this->triggerConnectionUpdate();
+
+            this->refreshProfile();
+            this->triggerProfileUpdate();
           })
       .catchInMainThread([this](std::exception&& e) {
         this->_isResuming = false;

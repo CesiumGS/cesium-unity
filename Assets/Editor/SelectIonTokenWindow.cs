@@ -35,7 +35,7 @@ namespace CesiumForUnity
 
         public SelectIonTokenWindow() { }
 
-        private IonTokenSource _source = IonTokenSource.Create;
+        private IonTokenSource _source;
         private string _createdTokenName = "";
         private List<string> _existingTokenList = new List<string>();
         private string[] _existingTokenArray = { };
@@ -53,6 +53,9 @@ namespace CesiumForUnity
             CesiumIonSession.OnTokensUpdated += this.RefreshTokens;
 
             this._createdTokenName = GetDefaultNewTokenName();
+            this._source = CesiumIonSession.Ion().IsConnected()
+                ? IonTokenSource.Create
+                : IonTokenSource.Specify;
 
             // This has to be done in OnEnable() for ScriptableObject, which EditorWindow
             // inherits from.

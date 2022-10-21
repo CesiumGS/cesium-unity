@@ -345,11 +345,10 @@ namespace CesiumForUnity
             {
                 GUILayout.FlexibleSpace();
                 string username = CesiumIonSession.Ion().GetProfileUsername();
-                if (GUILayout.Button(
+                if (EditorGUILayout.LinkButton(
                     new GUIContent(
                         "Connected to Cesium ion as " + username,
-                        "Open your Cesium ion account in your browser"),
-                    CesiumEditorStyle.profileLinkStyle))
+                        "Open your Cesium ion account in your browser")))
                 {
                     this.VisitIon();
                 }
@@ -357,10 +356,10 @@ namespace CesiumForUnity
             else if (CesiumIonSession.Ion().IsLoadingProfile())
             {
                 GUILayout.FlexibleSpace();
-                GUILayout.Label("Loading user information...",
-                    CesiumEditorStyle.profileLinkStyle);
+                GUILayout.Label("Loading user information...");
             }
             GUILayout.EndHorizontal();
+            GUILayout.Space(5);
         }
 
         void AddFromIon()

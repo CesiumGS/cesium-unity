@@ -13,8 +13,6 @@ namespace CesiumForUnity
         public static GUIStyle quickAddItemStyle = null!;
         public static GUIStyle quickAddButtonStyle = null!;
 
-        public static GUIStyle profileLinkStyle = null!;
-
         public static GUIStyle cesiumButtonStyle = null!;
         public static GUIStyle cesiumButtonDisabledStyle = null!;
         public static GUIStyle refreshButtonStyle = null!;
@@ -119,10 +117,6 @@ namespace CesiumForUnity
             quickAddButtonStyle.fixedWidth = 16.0f;
             quickAddButtonStyle.fixedHeight = 16.0f;
             quickAddButtonStyle.hover.background = Texture2D.grayTexture;
-
-            profileLinkStyle = new GUIStyle(EditorStyles.label);
-            profileLinkStyle.margin = new RectOffset(5, 5, 10, 10);
-            profileLinkStyle.hover.textColor = new Color(0.5f, 0.5f, 0.5f);
 
             cesiumButtonStyle = new GUIStyle();
             cesiumButtonStyle.padding = new RectOffset(25, 25, 10, 10);
