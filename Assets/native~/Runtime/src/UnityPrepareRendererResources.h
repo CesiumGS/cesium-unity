@@ -30,11 +30,11 @@ public:
       void* pMainThreadResult) noexcept override;
 
   virtual void* prepareRasterInLoadThread(
-      const CesiumGltf::ImageCesium& image,
+      CesiumGltf::ImageCesium& image,
       const std::any& rendererOptions) override;
 
   virtual void* prepareRasterInMainThread(
-      const Cesium3DTilesSelection::RasterOverlayTile& rasterTile,
+      Cesium3DTilesSelection::RasterOverlayTile& rasterTile,
       void* pLoadThreadResult) override;
 
   virtual void freeRaster(

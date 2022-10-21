@@ -649,13 +649,13 @@ void UnityPrepareRendererResources::free(
 }
 
 void* UnityPrepareRendererResources::prepareRasterInLoadThread(
-    const CesiumGltf::ImageCesium& image,
+    CesiumGltf::ImageCesium& image,
     const std::any& rendererOptions) {
   return nullptr;
 }
 
 void* UnityPrepareRendererResources::prepareRasterInMainThread(
-    const Cesium3DTilesSelection::RasterOverlayTile& rasterTile,
+    Cesium3DTilesSelection::RasterOverlayTile& rasterTile,
     void* pLoadThreadResult) {
   auto pTexture = std::make_unique<UnityEngine::Texture>(
       TextureLoader::loadTexture(rasterTile.getImage()));

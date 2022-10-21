@@ -14,7 +14,7 @@
 #include <DotNet/UnityEngine/Networking/UnityWebRequest.h>
 #include <DotNet/UnityEngine/Networking/UnityWebRequestAsyncOperation.h>
 #include <DotNet/UnityEngine/Networking/UploadHandler.h>
-#include <DotNet/UnityEngine/Networking/UploadHandlerRaw.h>
+#include <DotNet/UnityEngine/Networking/Result.h>
 
 using namespace CesiumAsync;
 using namespace CesiumUtility;
@@ -114,7 +114,7 @@ UnityAssetAccessor::get(
         [request, promise = std::move(promise), handler = std::move(handler)](
             const UnityEngine::AsyncOperation& operation) mutable {
           ScopeGuard disposeHandler{[&handler]() { handler.Dispose(); }};
-          if (request.isDone() && request.error() == nullptr) {
+          if (request.isDone() && request.result() != UnityEngine::Networking::Result::ConnectionError){
             promise.resolve(
                 std::make_shared<UnityAssetRequest>(request, handler));
           } else {
