@@ -6,8 +6,7 @@ using UnityEditor.IMGUI.Controls;
 
 namespace CesiumForUnity
 {
-    [ReinteropNativeImplementation("CesiumForUnityNative::CesiumIonAssetsWindowImpl", "CesiumIonAssetsWindowImpl.h")]
-    public partial class CesiumIonAssetsWindow : EditorWindow
+    public class CesiumIonAssetsWindow : EditorWindow
     {
         public static CesiumIonAssetsWindow currentWindow = null!;
 
@@ -16,7 +15,8 @@ namespace CesiumForUnity
         {
             if (currentWindow == null)
             {
-                // Get existing open window or if none, make a new one docked next to the Project / Console window.
+                // Get existing open window or if none, make a new one docked next
+                // to the Project / Console window.
                 Type[] siblingWindows = new Type[] {
                     Type.GetType("UnityEditor.ProjectBrowser,UnityEditor.dll"),
                     Type.GetType("UnityEditor.ConsoleWindow,UnityEditor.dll")
@@ -47,7 +47,6 @@ namespace CesiumForUnity
             CesiumIonSession.OnAssetsUpdated += this._assetsTreeView.Refresh;
 
             this._searchField = new SearchField();
-            this.CreateImplementation();
         }
 
         private void OnDisable()
@@ -123,7 +122,8 @@ namespace CesiumForUnity
                     this._assetsSearchString = searchString;
                     this._assetsTreeView.searchString = this._assetsSearchString;
                 }
-            } else if (this._assetsSearchString.Length > 0)
+            }
+            else if (this._assetsSearchString.Length > 0)
             {
                 this._assetsSearchString = "";
                 this._assetsTreeView.searchString = this._assetsSearchString;
@@ -154,15 +154,16 @@ namespace CesiumForUnity
         }
 
         private Vector2 _scrollPosition = Vector2.zero;
-        
+
         void DrawAssetDescriptionPanel()
         {
-            if (this._assetsTreeView.GetAssetsCount() == 0) {
+            if (this._assetsTreeView.GetAssetsCount() == 0)
+            {
                 return;
             }
 
             int selectedId = this._assetsTreeState.lastClickedID;
-            if(selectedId <= 0)
+            if (selectedId <= 0)
             {
                 return;
             }
@@ -180,10 +181,13 @@ namespace CesiumForUnity
             {
                 GUILayout.BeginHorizontal();
                 GUILayout.FlexibleSpace();
-                GUILayout.Button(
+                if (GUILayout.Button(
                     "Add to Level",
-                    CesiumEditorStyle.cesiumButtonStyle
-                );
+                    CesiumEditorStyle.cesiumButtonStyle))
+                {
+                    // Asset indices are offset from the tree item IDs by 1.
+                    this._assetsTreeView.AddAssetToLevel(selectedId - 1);
+                }
                 GUILayout.FlexibleSpace();
                 GUILayout.EndHorizontal();
             }
@@ -191,10 +195,15 @@ namespace CesiumForUnity
             {
                 GUILayout.BeginHorizontal();
                 GUILayout.FlexibleSpace();
-                GUILayout.Button(
+                // Once multiple overlays are supported, we need the option to
+                // add the asset as a layer.
+                if (GUILayout.Button(
                     "Use as Terrain Tileset Base Layer",
-                    CesiumEditorStyle.cesiumButtonStyle
-                );
+                    CesiumEditorStyle.cesiumButtonStyle))
+                {
+                    // Asset indices are offset from the tree item IDs by 1.
+                    this._assetsTreeView.AddOverlayToTerrain(selectedId - 1);
+                }
                 GUILayout.FlexibleSpace();
                 GUILayout.EndHorizontal();
             }

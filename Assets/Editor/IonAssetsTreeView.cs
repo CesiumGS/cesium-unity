@@ -198,6 +198,10 @@ namespace CesiumForUnity
         {
             Refresh();
         }
+
+        public partial void AddAssetToLevel(int index);
+
+        public partial void AddOverlayToTerrain(int index);
     }
 }
 

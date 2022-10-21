@@ -31,8 +31,5 @@ public:
 
 private:
   std::unordered_set<std::string> _itemsBeingAdded;
-
-  DotNet::CesiumForUnity::Cesium3DTileset
-  findFirstTilesetWithAssetID(int64_t assetID);
 };
 } // namespace CesiumForUnityNative

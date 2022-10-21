@@ -107,8 +107,7 @@ namespace CesiumForUnity
             session.TriggerProfileUpdate();
             session.TriggerTokensUpdate();
 
-            CesiumEditorWindow editorWindow = null!;
-            CesiumIonAssetsWindow assetsWindow = null!;
+            CesiumEditorWindow editorWindow = CesiumEditorWindow.currentWindow;
 
             IonAssetDetails.FormatType("type");
             IonAssetDetails.FormatDate("date");

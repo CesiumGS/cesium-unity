@@ -2,6 +2,7 @@
 
 #include "CesiumEditorWindowImpl.h"
 
+#include "CesiumEditorUtility.h"
 #include "CesiumIonSessionImpl.h"
 #include "SelectIonTokenWindowImpl.h"
 
@@ -14,7 +15,6 @@
 #include <DotNet/CesiumForUnity/CesiumEditorWindow.h>
 #include <DotNet/CesiumForUnity/CesiumIonRasterOverlay.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
-#include <DotNet/System/Array1.h>
 #include <DotNet/System/Object.h>
 #include <DotNet/UnityEditor/Selection.h>
 #include <DotNet/UnityEngine/Debug.h>
@@ -99,7 +99,7 @@ void CesiumEditorWindowImpl::AddAssetFromIon(
               // showAssetDepotConfirmWindow(itemName, missingAsset);
             } else {
               CesiumForUnity::Cesium3DTileset tileset =
-                  this->findFirstTilesetWithAssetID(tilesetID);
+                  CesiumEditorUtility::FindFirstTilesetWithAssetID(tilesetID);
 
               if (tileset == nullptr) {
                 UnityEngine::GameObject tilesetGameObject(name);
@@ -111,20 +111,10 @@ void CesiumEditorWindowImpl::AddAssetFromIon(
               CesiumIonSessionImpl::ion().getAssets();
 
               if (overlayID > 0) {
-                UnityEngine::GameObject gameObject = tileset.gameObject();
                 // TODO: Need to fix this when we support multiple overlays
-                CesiumForUnity::CesiumIonRasterOverlay overlay =
-                    gameObject
-                        .GetComponent<CesiumForUnity::CesiumIonRasterOverlay>();
-                if (overlay != nullptr) {
-                  UnityEngine::Object::DestroyImmediate(overlay);
-                }
-
-                overlay =
-                    gameObject
-                        .AddComponent<CesiumForUnity::CesiumIonRasterOverlay>();
-
-                overlay.ionAssetID(overlayID);
+                CesiumEditorUtility::AddBaseOverlayToTileset(
+                    tileset,
+                    overlayID);
               }
 
               tileset.RecreateTileset();
@@ -134,20 +124,6 @@ void CesiumEditorWindowImpl::AddAssetFromIon(
 
             this->_itemsBeingAdded.erase(name.ToStlString());
           });
-}
-
-CesiumForUnity::Cesium3DTileset
-CesiumEditorWindowImpl::findFirstTilesetWithAssetID(int64_t assetID) {
-  System::Array1 tilesets =
-      UnityEngine::Object::FindObjectsOfType<CesiumForUnity::Cesium3DTileset>();
-  for (int32_t i = 0; i < tilesets.Length(); i++) {
-    const CesiumForUnity::Cesium3DTileset tileset = tilesets[i];
-    if (tileset != nullptr && tileset.ionAssetID() == assetID) {
-      return tileset;
-    }
-  }
-
-  return nullptr;
 }
 
 } // namespace CesiumForUnityNative

@@ -50,6 +50,14 @@ public:
 
   void Refresh(const DotNet::CesiumForUnity::IonAssetsTreeView& treeView);
 
+  void AddAssetToLevel(
+      const DotNet::CesiumForUnity::IonAssetsTreeView& treeView,
+      int index);
+
+  void AddOverlayToTerrain(
+      const DotNet::CesiumForUnity::IonAssetsTreeView& treeView,
+      int index);
+
 private:
   void applyFilter(const DotNet::System::String searchString);
   void applySorting(

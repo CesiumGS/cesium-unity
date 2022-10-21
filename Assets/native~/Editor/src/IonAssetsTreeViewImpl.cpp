@@ -1,11 +1,17 @@
 #include "IonAssetsTreeViewImpl.h"
 
+#include "CesiumEditorUtility.h"
+#include "SelectIonTokenWindowImpl.h"
+
+#include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/CesiumForUnity/CesiumIonSession.h>
 #include <DotNet/CesiumForUnity/IonAssetDetails.h>
 #include <DotNet/CesiumForUnity/IonAssetsTreeView.h>
 #include <DotNet/System/StringComparison.h>
 #include <DotNet/UnityEditor/IMGUI/Controls/MultiColumnHeader.h>
+#include <DotNet/UnityEditor/Selection.h>
 #include <DotNet/UnityEngine/GUI.h>
+#include <DotNet/UnityEngine/GameObject.h>
 
 #include <algorithm>
 
@@ -194,6 +200,52 @@ void IonAssetsTreeViewImpl::applySorting(
           return comparator(pRight, pLeft);
         });
   }
+}
+
+void IonAssetsTreeViewImpl::AddAssetToLevel(
+    const DotNet::CesiumForUnity::IonAssetsTreeView& treeView,
+    int index) {
+  std::shared_ptr<CesiumIonClient::Asset> pAsset = this->_assets[index];
+  SelectIonTokenWindowImpl::SelectAndAuthorizeToken({pAsset->id})
+      .thenInMainThread(
+          [pAsset](
+              const std::optional<CesiumIonClient::Token>& /*maybeToken*/) {
+            // If token selection was canceled, or if an error occurred while
+            // selecting the token, ignore it and create the tileset anyway.
+            // It's already been logged if necessary, and we can let the user
+            // sort out the problem using the resulting Troubleshooting panel.
+            CesiumForUnity::Cesium3DTileset tileset =
+                CesiumEditorUtility::CreateTileset(
+                    System::String(pAsset->name),
+                    pAsset->id);
+            tileset.RecreateTileset();
+
+            UnityEditor::Selection::activeGameObject(tileset.gameObject());
+          });
+}
+
+void IonAssetsTreeViewImpl::AddOverlayToTerrain(
+    const DotNet::CesiumForUnity::IonAssetsTreeView& treeView,
+    int index) {
+  // This behavior needs to change when we support multiple overlays.
+  std::shared_ptr<CesiumIonClient::Asset> pAsset = this->_assets[index];
+  SelectIonTokenWindowImpl::SelectAndAuthorizeToken({pAsset->id})
+      .thenInMainThread(
+          [pAsset](
+              const std::optional<CesiumIonClient::Token>& /*maybeToken*/) {
+            CesiumForUnity::Cesium3DTileset tileset =
+                CesiumEditorUtility::FindFirstTilesetSupportingOverlays();
+            if (tileset == nullptr) {
+              tileset = CesiumEditorUtility::CreateTileset(
+                  System::String("Cesium World Terrain"),
+                  1);
+            }
+
+            CesiumEditorUtility::AddBaseOverlayToTileset(tileset, pAsset->id);
+
+            tileset.RecreateTileset();
+            UnityEditor::Selection::activeGameObject(tileset.gameObject());
+          });
 }
 
 } // namespace CesiumForUnityNative
