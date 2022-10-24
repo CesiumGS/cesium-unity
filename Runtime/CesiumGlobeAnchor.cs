@@ -1,0 +1,306 @@
+using Reinterop;
+using System;
+using System.Collections;
+using System.Reflection;
+using UnityEngine;
+
+namespace CesiumForUnity
+{
+    /// <summary>
+    /// Identifies the set of the coordinates that authoritatively define
+    /// the position of this object.
+    /// </summary>
+    public enum CesiumGlobeAnchorAuthority
+    {
+        /// <summary>
+        /// The <see cref="CesiumGlobeAnchor.longitude"/>, <see cref="CesiumGlobeAnchor.latitude"/>,
+        /// and <see cref="CesiumGlobeAnchor.height"/> properties authoritatively define the position
+        /// of this object.
+        /// </summary>
+        LongitudeLatitudeHeight,
+
+        /// <summary>
+        /// The <see cref="CesiumGlobeAnchor.ecefX"/>, <see cref="CesiumGlobeAnchor.ecefY"/>,
+        /// and <see cref="CesiumGlobeAnchor.ecefZ"/> properties authoritatively define the position
+        /// of this object.
+        /// </summary>
+        EarthCenteredEarthFixed,
+
+        /// <summary>
+        /// The <see cref="CesiumGlobeAnchor.unityX"/>, <see cref="CesiumGlobeAnchor.unityY"/>,
+        /// and <see cref="CesiumGlobeAnchor.unityZ"/> properties authoritatively define the position
+        /// of this object.
+        /// </summary>
+        UnityWorldCoordinates
+    }
+
+    public class CesiumGlobeAnchor : MonoBehaviour, INotifyOfChanges
+    {
+        [SerializeField]
+        [Tooltip("Whether to adjust the game object's orientation based on globe curvature as the game object moves.\n" +
+                 "\n" +
+                 "The Earth is not flat, so as we move across its surface, the direction of \"up\" changes. " +
+                 "If we ignore this fact and leave an object's orientation unchanged as it moves over the " +
+                 "globe surface, the object will become increasingly tilted and eventually be completely " +
+                 "upside-down when we arrive at the opposite side of the globe.\n" +
+                 "\n" +
+                 "When this setting is enabled, this component will automatically apply a rotation to the " +
+                 "Transform to account for globe curvature any time the game object's position on the " +
+                 "globe changes.\n" +
+                 "\n" +
+                 "This property should usually be enabled, but it may be useful to disable it when your " +
+                 "application already accounts for globe curvature itself when it updates a game " +
+                 "object's transform, because in that case game object would be over-rotated.")]
+        private bool _adjustOrientationForGlobeWhenMoving = true;
+
+        public bool adjustOrientationForGlobeWhenMoving
+        {
+            get => this._adjustOrientationForGlobeWhenMoving;
+            set => this._adjustOrientationForGlobeWhenMoving = value;
+        }
+
+        [SerializeField]
+        [Tooltip("The set of coordinates that authoritatively define the position of this game object.")]
+        [NotifyOfChanges]
+        private CesiumGlobeAnchorAuthority _positionAuthority = CesiumGlobeAnchorAuthority.LongitudeLatitudeHeight;
+
+        public CesiumGlobeAnchorAuthority positionAuthority
+        {
+            get => this._positionAuthority;
+            set
+            {
+                this._positionAuthority = value;
+                this.UpdateTransformFromGlobePosition();
+            }
+        }
+
+        [SerializeField]
+        [Header("Position (Longitude Latitude Height)")]
+        [Tooltip("The latitude of this game object in degrees, in the range [-90, 90].")]
+        [NotifyOfChanges]
+        private double _latitude = 0.0;
+
+        public double latitude
+        {
+            get => this._latitude;
+            set
+            {
+                this._latitude = value;
+                this.positionAuthority = CesiumGlobeAnchorAuthority.LongitudeLatitudeHeight;
+            }
+        }
+
+        [SerializeField]
+        [Tooltip("The longitude of this game object in degrees, in the range [-180, 180].")]
+        [NotifyOfChanges]
+        private double _longitude = 0.0;
+
+        public double longitude
+        {
+            get => this._longitude;
+            set
+            {
+                this._longitude = value;
+                this.positionAuthority = CesiumGlobeAnchorAuthority.LongitudeLatitudeHeight;
+            }
+        }
+
+        [SerializeField]
+        [Tooltip("The height of this game object in meters above the ellipsoid (usually WGS84). " +
+                 "Do not confuse this with a geoid height or height above mean sea level, which " +
+                 "can be tens of meters higher or lower depending on where in the world the " +
+                 "object is located.")]
+        [NotifyOfChanges]
+        private double _height = 0.0;
+
+        public double height
+        {
+            get => this._height;
+            set
+            {
+                this._height = value;
+                this.positionAuthority = CesiumGlobeAnchorAuthority.LongitudeLatitudeHeight;
+            }
+        }
+
+        [SerializeField]
+        [Header("Position (Earth Centered, Earth Fixed)")]
+        [Tooltip("The Earth-Centered, Earth-Fixed X-coordinate of this game object in meters.\n" +
+                 "In the ECEF coordinate system, the origin is at the center of the Earth \n" +
+                 "and the positive X axis points toward where the Prime Meridian crosses the Equator.")]
+        [NotifyOfChanges]
+        private double _ecefX = 6378137.0;
+
+        public double ecefX
+        {
+            get => this._ecefX;
+            set
+            {
+                this._ecefX = value;
+                this.positionAuthority = CesiumGlobeAnchorAuthority.EarthCenteredEarthFixed;
+            }
+        }
+
+        [SerializeField]
+        [Tooltip("The Earth-Centered, Earth-Fixed Y-coordinate of this game object in meters.\n" +
+                 "In the ECEF coordinate system, the origin is at the center of the Earth \n" +
+                 "and the positive Y axis points toward the Equator at 90 degrees longitude.")]
+        [NotifyOfChanges]
+        private double _ecefY = 0.0;
+
+        public double ecefY
+        {
+            get => this._ecefY;
+            set
+            {
+                this._ecefY = value;
+                this.positionAuthority = CesiumGlobeAnchorAuthority.EarthCenteredEarthFixed;
+            }
+        }
+
+        [SerializeField]
+        [Tooltip("The Earth-Centered, Earth-Fixed Z-coordinate of this game object in meters.\n" +
+         "In the ECEF coordinate system, the origin is at the center of the Earth \n" +
+         "and the positive Z axis points toward the North pole.")]
+        [NotifyOfChanges]
+        private double _ecefZ = 0.0;
+
+        public double ecefZ
+        {
+            get => this._ecefZ;
+            set
+            {
+                this._ecefZ = value;
+                this.positionAuthority = CesiumGlobeAnchorAuthority.EarthCenteredEarthFixed;
+            }
+        }
+
+        [SerializeField]
+        [Header("Position (Unity coordinates)")]
+        [Tooltip("The Unity world X coordinate of this game object. This is the same as the Transform's X coordinate but expressed in 64-bit (double) precision.")]
+        [NotifyOfChanges]
+        private double _unityX = 0.0;
+
+        public double unityX
+        {
+            get => this._unityX;
+            set
+            {
+                this._unityX = value;
+                this.positionAuthority = CesiumGlobeAnchorAuthority.UnityWorldCoordinates;
+            }
+        }
+
+        [SerializeField]
+        [Tooltip("The Unity world Y coordinate of this game object. This is the same as the Transform's Y coordinate but expressed in 64-bit (double) precision.")]
+        [NotifyOfChanges]
+        private double _unityY = 0.0;
+
+        public double unityY
+        {
+            get => this._unityY;
+            set
+            {
+                this._unityY = value;
+                this.positionAuthority = CesiumGlobeAnchorAuthority.UnityWorldCoordinates;
+            }
+        }
+
+        [SerializeField]
+        [Tooltip("The Unity world Z coordinate of this game object. This is the same as the Transform's Y coordinate but expressed in 64-bit (double) precision.")]
+        [NotifyOfChanges]
+        private double _unityZ = 0.0;
+
+        public double unityZ
+        {
+            get => this._unityZ;
+            set
+            {
+                this._unityZ = value;
+                this.positionAuthority = CesiumGlobeAnchorAuthority.UnityWorldCoordinates;
+            }
+        }
+
+        public void UpdateTransformFromGlobePosition()
+        {
+            CesiumGeoreference? georeference = this.gameObject.GetComponentInParent<CesiumGeoreference>();
+            if (georeference == null)
+                throw new InvalidOperationException("CesiumGlobeAnchor is not nested inside a game object with a CesiumGeoreference.");
+
+            // Convert the authoritative position to ECEF
+            CesiumVector3 ecef;
+            switch (this.positionAuthority)
+            {
+                case CesiumGlobeAnchorAuthority.LongitudeLatitudeHeight:
+                    ecef = CesiumTransforms.LongitudeLatitudeHeightToEarthCenteredEarthFixed(new CesiumVector3()
+                    {
+                        x = this.longitude,
+                        y = this.latitude,
+                        z = this.height
+                    });
+                    break;
+                case CesiumGlobeAnchorAuthority.EarthCenteredEarthFixed:
+                    ecef.x = this.ecefX;
+                    ecef.y = this.ecefY;
+                    ecef.z = this.ecefZ;
+                    break;
+                case CesiumGlobeAnchorAuthority.UnityWorldCoordinates:
+                    ecef = georeference.TransformUnityWorldPositionToEarthCenteredEarthFixed(new CesiumVector3()
+                    {
+                        x = this.unityX,
+                        y = this.unityY,
+                        z = this.unityZ
+                    });
+                    break;
+                default:
+                    throw new InvalidOperationException("Unknown value for positionAuthority.");
+            }
+
+            // Update the orientation based on the new position (if desired)
+            if (this.adjustOrientationForGlobeWhenMoving)
+            {
+                // TODO
+            }
+
+            // Apply the new position to the non-authoritative fields
+            // TODO: it might be more efficient to lazily update these if/when they're accessed, at least outside the Editor.
+            if (this.positionAuthority != CesiumGlobeAnchorAuthority.LongitudeLatitudeHeight)
+            {
+                CesiumVector3 llh = CesiumTransforms.EarthCenteredEarthFixedToLongitudeLatitudeHeight(ecef);
+                this._longitude = llh.x;
+                this._latitude = llh.y;
+                this._height = llh.z;
+            }
+
+            if (this.positionAuthority != CesiumGlobeAnchorAuthority.EarthCenteredEarthFixed)
+            {
+                this._ecefX = ecef.x;
+                this._ecefY = ecef.y;
+                this._ecefZ = ecef.z;
+            }
+
+            if (this.positionAuthority != CesiumGlobeAnchorAuthority.UnityWorldCoordinates)
+            {
+                CesiumVector3 unityWorld = georeference.TransformEarthCenteredEarthFixedPositionToUnityWorld(ecef);
+                this._unityX = unityWorld.x;
+                this._unityY = unityWorld.y;
+                this._unityZ = unityWorld.z;
+            }
+
+            // Apply the new position to the object's Transform
+            this.gameObject.transform.position = new Vector3((float)this._unityX, (float)this._unityY, (float)this._unityY);
+        }
+
+        void INotifyOfChanges.NotifyPropertyChanged(string propertyName)
+        {
+            StartCoroutine(this.GetValueLater(propertyName));
+        }
+
+        private IEnumerator GetValueLater(string propertyName)
+        {
+            yield return null;
+            object value = typeof(CesiumGlobeAnchor).GetField(propertyName, BindingFlags.Instance | BindingFlags.NonPublic).GetValue(this);
+            Debug.Log("Changed: " + propertyName + " value: " + value);
+        }
+    }
+}

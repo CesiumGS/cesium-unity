@@ -2,6 +2,8 @@
 
 #include <CesiumGeospatial/LocalHorizontalCoordinateSystem.h>
 
+#include <DotNet/CesiumForUnity/CesiumVector3.h>
+
 namespace DotNet::CesiumForUnity {
 class CesiumGeoreference;
 }
@@ -20,6 +22,15 @@ public:
   void
   OnValidate(const DotNet::CesiumForUnity::CesiumGeoreference& georeference);
   void Awake(const DotNet::CesiumForUnity::CesiumGeoreference& georeference);
+
+  DotNet::CesiumForUnity::CesiumVector3
+  TransformUnityWorldPositionToEarthCenteredEarthFixed(
+      const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
+      DotNet::CesiumForUnity::CesiumVector3 unityWorldPosition);
+  DotNet::CesiumForUnity::CesiumVector3
+  TransformEarthCenteredEarthFixedPositionToUnityWorld(
+      const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
+      DotNet::CesiumForUnity::CesiumVector3 earthCenteredEarthFixed);
 
   const CesiumGeospatial::LocalHorizontalCoordinateSystem&
   getCoordinateSystem() const {

@@ -66,5 +66,8 @@ namespace CesiumForUnity
 
         private partial void OnValidate();
         private partial void Awake();
+
+        public partial CesiumVector3 TransformUnityWorldPositionToEarthCenteredEarthFixed(CesiumVector3 cesiumVector3);
+        public partial CesiumVector3 TransformEarthCenteredEarthFixedPositionToUnityWorld(CesiumVector3 earthCenteredEarthFixed);
     }
 }

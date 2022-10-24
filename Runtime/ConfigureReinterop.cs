@@ -303,6 +303,8 @@ namespace CesiumForUnity
             string[] stringArray = stringList.ToArray();
             test = string.Join(" ", stringArray);
 
+            CesiumVector3 cv3 = new CesiumVector3();
+
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;
             Camera svc = sv.camera;
