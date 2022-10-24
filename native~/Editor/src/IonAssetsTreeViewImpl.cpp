@@ -3,6 +3,8 @@
 #include "CesiumEditorUtility.h"
 #include "SelectIonTokenWindowImpl.h"
 
+#include <CesiumAsync/HttpHeaders.h>
+
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/CesiumForUnity/CesiumIonSession.h>
 #include <DotNet/CesiumForUnity/IonAssetDetails.h>
@@ -160,26 +162,17 @@ getComparator(const DotNet::CesiumForUnity::IonAssetsColumn column) {
   if (column == CesiumForUnity::IonAssetsColumn::Name) {
     return [](const std::shared_ptr<CesiumIonClient::Asset>& pLeft,
               const std::shared_ptr<CesiumIonClient::Asset>& pRight) {
-      System::String left = pLeft->name;
-      System::String right = pRight->name;
-
-      return System::String::Compare(left, right, true) == -1;
+      return CesiumAsync::CaseInsensitiveCompare()(pLeft->name, pRight->name);
     };
   } else if (column == CesiumForUnity::IonAssetsColumn::Type) {
     return [](const std::shared_ptr<CesiumIonClient::Asset>& pLeft,
               const std::shared_ptr<CesiumIonClient::Asset>& pRight) {
-      System::String left = pLeft->type;
-      System::String right = pRight->type;
-
-      return System::String::Compare(left, right, true) == -1;
+      return CesiumAsync::CaseInsensitiveCompare()(pLeft->type, pRight->type);
     };
   } else {
     return [](const std::shared_ptr<CesiumIonClient::Asset>& pLeft,
               const std::shared_ptr<CesiumIonClient::Asset>& pRight) {
-      System::String left = pLeft->dateAdded;
-      System::String right = pRight->dateAdded;
-
-      return System::String::Compare(left, right, true) == -1;
+      return CesiumAsync::CaseInsensitiveCompare()(pLeft->dateAdded, pRight->dateAdded);
     };
   }
 }
