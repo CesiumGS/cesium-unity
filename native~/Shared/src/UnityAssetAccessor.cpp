@@ -11,10 +11,11 @@
 #include <DotNet/Unity/Collections/NativeArray1.h>
 #include <DotNet/Unity/Collections/NativeArrayOptions.h>
 #include <DotNet/UnityEngine/Networking/DownloadHandler.h>
+#include <DotNet/UnityEngine/Networking/Result.h>
 #include <DotNet/UnityEngine/Networking/UnityWebRequest.h>
 #include <DotNet/UnityEngine/Networking/UnityWebRequestAsyncOperation.h>
 #include <DotNet/UnityEngine/Networking/UploadHandler.h>
-#include <DotNet/UnityEngine/Networking/Result.h>
+#include <DotNet/UnityEngine/Networking/UploadHandlerRaw.h>
 
 using namespace CesiumAsync;
 using namespace CesiumUtility;
@@ -114,7 +115,9 @@ UnityAssetAccessor::get(
         [request, promise = std::move(promise), handler = std::move(handler)](
             const UnityEngine::AsyncOperation& operation) mutable {
           ScopeGuard disposeHandler{[&handler]() { handler.Dispose(); }};
-          if (request.isDone() && request.result() != UnityEngine::Networking::Result::ConnectionError){
+          if (request.isDone() &&
+              request.result() !=
+                  UnityEngine::Networking::Result::ConnectionError) {
             promise.resolve(
                 std::make_shared<UnityAssetRequest>(request, handler));
           } else {
@@ -156,7 +159,9 @@ UnityAssetAccessor::request(
   return asyncSystem.runInMainThread(
       [asyncSystem, url, verb, headers, payloadBytes]() {
         DotNet::CesiumForUnity::NativeDownloadHandler downloadHandler{};
-        UnityEngine::Networking::UploadHandlerRaw uploadHandler(payloadBytes, true);
+        UnityEngine::Networking::UploadHandlerRaw uploadHandler(
+            payloadBytes,
+            true);
         UnityEngine::Networking::UnityWebRequest request(
             System::String(url),
             System::String(verb),
