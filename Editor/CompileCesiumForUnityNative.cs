@@ -149,8 +149,8 @@ namespace CesiumForUnity
         private LibraryToBuild GetLibraryToBuild(BuildSummary summary)
         {
             string sourceFilename = GetSourceFilePathName();
-            string assetsPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(sourceFilename), $".."));
-            string nativeDirectory = Path.Combine(assetsPath, "native~");
+            string packagePath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(sourceFilename), $".."));
+            string nativeDirectory = Path.Combine(packagePath, "native~");
 
             string platformDirectoryName = GetDirectoryNameForPlatform(summary);
 
@@ -163,7 +163,7 @@ namespace CesiumForUnity
             library.Configuration = summary.options.HasFlag(BuildOptions.Development)
                 ? "Debug"
                 : "RelWithDebInfo";
-            library.InstallDirectory = GetInstallDirectoryForPlatform(summary, assetsPath);
+            library.InstallDirectory = GetInstallDirectoryForPlatform(summary, packagePath);
             library.CleanBuild = summary.options.HasFlag(BuildOptions.CleanBuildCache);
 
             if (summary.platformGroup == BuildTargetGroup.Android)
@@ -173,12 +173,17 @@ namespace CesiumForUnity
 
         private string GetDirectoryNameForPlatform(BuildSummary summary)
         {
-            return summary.platformGroup.ToString();
+            return GetDirectoryNameForPlatform(summary.platformGroup, summary.platform);
         }
 
-        private string GetInstallDirectoryForPlatform(BuildSummary summary, string assetsPath)
+        private string GetDirectoryNameForPlatform(BuildTargetGroup platformGroup, BuildTarget platform)
         {
-            return Path.Combine(assetsPath, "Plugins", GetDirectoryNameForPlatform(summary));
+            return platformGroup.ToString();
+        }
+
+        private string GetInstallDirectoryForPlatform(BuildSummary summary, string packagePath)
+        {
+            return Path.Combine(packagePath, "Plugins", GetDirectoryNameForPlatform(summary));
         }
 
         private void BuildNativeLibrary(LibraryToBuild library)
@@ -190,7 +195,8 @@ namespace CesiumForUnity
             try
             {
                 string logFilename = Path.Combine(library.BuildDirectory, "build.log");
-                string logDisplayName = Path.Combine("Assets", Path.GetRelativePath(Application.dataPath, logFilename));
+                string projectPath = Path.Combine(Application.dataPath, "..");
+                string logDisplayName = Path.GetRelativePath(projectPath, logFilename);
 
                 EditorUtility.DisplayProgressBar($"Building CesiumForUnityNative", $"See {logDisplayName}.", 0.0f);
 

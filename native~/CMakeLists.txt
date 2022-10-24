@@ -6,6 +6,13 @@ project(CesiumForUnityNative
     LANGUAGES CXX C
 )
 
+# When building for the Editor, both Runtime and Editor assemblies are
+# written to the Editor directory so that Unity won't load them in
+# a standalone build.
+if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/../Editor" CACHE PATH "Installed to the Editor directory." FORCE)
+endif()
+
 option(EDITOR "Whether to build with Editor support." ON)
 set(REINTEROP_GENERATED_DIRECTORY "generated-Editor" CACHE STRING "The subdirectory of each native library in which the Reinterop-generated code is found.")
 
