@@ -234,7 +234,7 @@ void IonAssetsTreeViewImpl::AddOverlayToTerrain(
           [pAsset](
               const std::optional<CesiumIonClient::Token>& /*maybeToken*/) {
             CesiumForUnity::Cesium3DTileset tileset =
-                CesiumEditorUtility::FindFirstTilesetSupportingOverlays();
+                CesiumEditorUtility::FindFirstTileset();
             if (tileset == nullptr) {
               tileset = CesiumEditorUtility::CreateTileset(
                   System::String("Cesium World Terrain"),

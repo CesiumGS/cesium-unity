@@ -13,7 +13,7 @@ public:
   FindFirstTilesetWithAssetID(int64_t assetID);
 
   static DotNet::CesiumForUnity::Cesium3DTileset
-  FindFirstTilesetSupportingOverlays();
+  FindFirstTileset();
 
   static DotNet::CesiumForUnity::Cesium3DTileset
   CreateTileset(DotNet::System::String name, int64_t assetID);

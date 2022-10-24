@@ -132,9 +132,6 @@ void CesiumIonSessionImpl::Connect(
             CesiumIonSessionImpl::_userAccessTokenEditorKey,
             this->_connection.value().getAccessToken());
         this->triggerConnectionUpdate();
-
-        this->refreshProfile();
-        this->triggerProfileUpdate();
       })
       .catchInMainThread([this](std::exception&& e) {
         this->_isConnecting = false;
@@ -177,9 +174,6 @@ void CesiumIonSessionImpl::Resume(
             }
             this->_isResuming = false;
             this->triggerConnectionUpdate();
-
-            this->refreshProfile();
-            this->triggerProfileUpdate();
           })
       .catchInMainThread([this](std::exception&& e) {
         this->_isResuming = false;
@@ -218,6 +212,11 @@ System::String CesiumIonSessionImpl::GetAuthorizeUrl(
   return System::String(this->_authorizeUrl);
 }
 
+void CesiumIonSessionImpl::RefreshProfile(
+  const DotNet::CesiumForUnity::CesiumIonSession& session) {
+  this->refreshProfile();
+}
+
 void CesiumIonSessionImpl::refreshProfile() {
   if (!this->_connection || this->_isLoadingProfile) {
     this->_loadProfileQueued = true;
@@ -244,6 +243,11 @@ void CesiumIonSessionImpl::refreshProfile() {
       });
 }
 
+void CesiumIonSessionImpl::RefreshAssets(
+    const DotNet::CesiumForUnity::CesiumIonSession& session) {
+  this->refreshAssets();
+}
+
 void CesiumIonSessionImpl::refreshAssets() {
   if (!this->_connection || this->_isLoadingAssets) {
     return;
@@ -266,6 +270,11 @@ void CesiumIonSessionImpl::refreshAssets() {
         this->triggerAssetsUpdate();
         this->refreshAssetsIfNeeded();
       });
+}
+
+void CesiumIonSessionImpl::RefreshTokens(
+    const DotNet::CesiumForUnity::CesiumIonSession& session) {
+  this->refreshTokens();
 }
 
 void CesiumIonSessionImpl::refreshTokens() {

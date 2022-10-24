@@ -71,6 +71,10 @@ public:
   DotNet::System::String
   GetAuthorizeUrl(const DotNet::CesiumForUnity::CesiumIonSession& session);
 
+  void RefreshProfile(const DotNet::CesiumForUnity::CesiumIonSession& session);
+  void RefreshAssets(const DotNet::CesiumForUnity::CesiumIonSession& session);
+  void RefreshTokens(const DotNet::CesiumForUnity::CesiumIonSession& session);
+
   void refreshProfile();
   void refreshAssets();
   void refreshTokens();

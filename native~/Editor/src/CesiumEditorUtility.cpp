@@ -23,7 +23,7 @@ CesiumEditorUtility::FindFirstTilesetWithAssetID(int64_t assetID) {
 }
 
 /*static*/ CesiumForUnity::Cesium3DTileset
-CesiumEditorUtility::FindFirstTilesetSupportingOverlays() {
+CesiumEditorUtility::FindFirstTileset() {
   System::Array1 tilesets =
       UnityEngine::Object::FindObjectsOfType<CesiumForUnity::Cesium3DTileset>();
   for (int32_t i = 0; i < tilesets.Length(); i++) {
