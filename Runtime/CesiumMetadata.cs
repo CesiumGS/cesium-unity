@@ -8,20 +8,19 @@ namespace CesiumForUnity
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumMetadataImpl", "CesiumMetadataImpl.h")]
     public partial class CesiumMetadata : MonoBehaviour
     {
-        public partial void loadMetadata(Transform transform, int triangleIndex);
+        public partial void loadMetadata(Transform transform, int triangleIndex, MetadataProperty[] properties);
 
-        private partial int getNumberOfProperties();
+        private partial int getNumberOfProperties(Transform transform);
 
-        private partial void getProperty(MetadataProperty property, int index);
-
-        public IEnumerable<MetadataProperty> Properties()
+        public MetadataProperty[] GetProperties(Transform transform, int triangleIndex)
         {
-            for (int i = 0; i < getNumberOfProperties(); i++)
-            {
-                MetadataProperty property = new MetadataProperty();
-                getProperty(property, i);
-                yield return property;
+            int numberOfProperties = getNumberOfProperties(transform);
+            MetadataProperty[] properties = new MetadataProperty[numberOfProperties];
+            for(int i = 0; i < numberOfProperties; i++){
+                properties[i] = new MetadataProperty();
             }
+            loadMetadata(transform, triangleIndex, properties);
+            return properties;
         }
     }
 }

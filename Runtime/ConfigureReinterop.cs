@@ -226,12 +226,14 @@ namespace CesiumForUnity
             CesiumMetadata metadata = go.AddComponent<CesiumMetadata>();
             metadata = go.GetComponent<CesiumMetadata>();
             CesiumMetadata metadataParent = go.GetComponentInParent<CesiumMetadata>();
-            MetadataProperty property = new MetadataProperty();
-            metadata.loadMetadata(t, 0);
             MetadataType type = MetadataType.String;
             if(type == MetadataType.None){
                 type = MetadataType.Int16;
             }
+            MetadataProperty[] properties = new MetadataProperty[3];
+            var property = properties[0];
+            properties[0] = property;
+            metadata.loadMetadata(t, 0, properties);
 
             CesiumGeoreference georeference = go.AddComponent<CesiumGeoreference>();
             georeference = go.GetComponent<CesiumGeoreference>();

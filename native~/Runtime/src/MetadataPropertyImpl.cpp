@@ -51,8 +51,6 @@ GetMetadataType(CesiumGltf::PropertyType type) {
   }
 }
 
-
-
     template <typename TTo, typename TFrom>
         static TTo convertToFloat(TFrom from, TTo defaultValue) {
             if constexpr (CesiumGltf::IsMetadataFloating<TFrom>::value) {
