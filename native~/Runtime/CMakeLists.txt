@@ -32,9 +32,11 @@ target_include_directories(
 target_link_libraries(
   CesiumForUnityNative-Runtime
     PUBLIC
-        Cesium3DTilesSelection
+      Cesium3DTilesSelection
+      CesiumAsync
     PRIVATE
-        tidy-static)
+      tidy-static
+)
 
 set_target_properties(
   CesiumForUnityNative-Runtime
