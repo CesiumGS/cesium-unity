@@ -60,7 +60,7 @@ namespace CesiumForUnity
             string e = request.error;
             string method = request.method;
             string url = request.url;
-            if(request.result == UnityWebRequest.Result.Success){};
+            if (request.result == UnityWebRequest.Result.Success) { };
             request.downloadHandler = new NativeDownloadHandler();
             request.SetRequestHeader("name", "value");
             request.GetResponseHeader("name");
@@ -157,13 +157,18 @@ namespace CesiumForUnity
             UnityEngine.Object.DestroyImmediate(overlay);
 
             string substring = "string";
-            substring = string.Concat(substring, new long[]{ 100 });
+            substring = string.Concat(substring, new long[] { 100 });
             string message = string.Concat(substring, "string");
             Debug.Log(message);
             Debug.LogWarning(message);
             Debug.LogError(message);
 
             Selection.activeGameObject = gameObject;
+
+            CesiumEditorUtility.FindFirstTileset();
+            CesiumEditorUtility.FindFirstTilesetWithAssetID(0);
+            CesiumEditorUtility.CreateTileset("name", 0);
+            CesiumEditorUtility.AddBaseOverlayToTileset(tileset, 0);
         }
     }
 }//

@@ -1,11 +1,12 @@
 #include "IonAssetsTreeViewImpl.h"
 
-#include "CesiumEditorUtility.h"
 #include "SelectIonTokenWindowImpl.h"
 
 #include <CesiumAsync/HttpHeaders.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
+#include <DotNet/CesiumForUnity/CesiumEditorUtility.h>
+#include <DotNet/CesiumForUnity/CesiumIonRasterOverlay.h>
 #include <DotNet/CesiumForUnity/CesiumIonSession.h>
 #include <DotNet/CesiumForUnity/IonAssetDetails.h>
 #include <DotNet/CesiumForUnity/IonAssetsTreeView.h>
@@ -170,7 +171,9 @@ getComparator(const DotNet::CesiumForUnity::IonAssetsColumn column) {
   } else {
     return [](const std::shared_ptr<CesiumIonClient::Asset>& pLeft,
               const std::shared_ptr<CesiumIonClient::Asset>& pRight) {
-      return CesiumAsync::CaseInsensitiveCompare()(pLeft->dateAdded, pRight->dateAdded);
+      return CesiumAsync::CaseInsensitiveCompare()(
+          pLeft->dateAdded,
+          pRight->dateAdded);
     };
   }
 }
@@ -206,7 +209,7 @@ void IonAssetsTreeViewImpl::AddAssetToLevel(
             // It's already been logged if necessary, and we can let the user
             // sort out the problem using the resulting Troubleshooting panel.
             CesiumForUnity::Cesium3DTileset tileset =
-                CesiumEditorUtility::CreateTileset(
+                CesiumForUnity::CesiumEditorUtility::CreateTileset(
                     System::String(pAsset->name),
                     pAsset->id);
             tileset.RecreateTileset();
@@ -225,14 +228,16 @@ void IonAssetsTreeViewImpl::AddOverlayToTerrain(
           [pAsset](
               const std::optional<CesiumIonClient::Token>& /*maybeToken*/) {
             CesiumForUnity::Cesium3DTileset tileset =
-                CesiumEditorUtility::FindFirstTileset();
+                CesiumForUnity::CesiumEditorUtility::FindFirstTileset();
             if (tileset == nullptr) {
-              tileset = CesiumEditorUtility::CreateTileset(
+              tileset = CesiumForUnity::CesiumEditorUtility::CreateTileset(
                   System::String("Cesium World Terrain"),
                   1);
             }
 
-            CesiumEditorUtility::AddBaseOverlayToTileset(tileset, pAsset->id);
+            CesiumForUnity::CesiumEditorUtility::AddBaseOverlayToTileset(
+                tileset,
+                pAsset->id);
 
             tileset.RecreateTileset();
             UnityEditor::Selection::activeGameObject(tileset.gameObject());

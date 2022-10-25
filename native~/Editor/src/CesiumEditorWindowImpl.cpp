@@ -2,7 +2,6 @@
 
 #include "CesiumEditorWindowImpl.h"
 
-#include "CesiumEditorUtility.h"
 #include "CesiumIonSessionImpl.h"
 #include "SelectIonTokenWindowImpl.h"
 
@@ -12,6 +11,7 @@
 #include <CesiumIonClient/Response.h>
 #include <CesiumIonClient/Token.h>
 
+#include <DotNet/CesiumForUnity/CesiumEditorUtility.h>
 #include <DotNet/CesiumForUnity/CesiumEditorWindow.h>
 #include <DotNet/CesiumForUnity/CesiumIonRasterOverlay.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
@@ -93,37 +93,38 @@ void CesiumEditorWindowImpl::AddAssetFromIon(
                   -1);
             }
           })
-      .thenInMainThread(
-          [this, name, tilesetID, overlayID](int64_t missingAsset) {
-            if (missingAsset != -1) {
-              // showAssetDepotConfirmWindow(itemName, missingAsset);
-            } else {
-              CesiumForUnity::Cesium3DTileset tileset =
-                  CesiumEditorUtility::FindFirstTilesetWithAssetID(tilesetID);
+      .thenInMainThread([this, name, tilesetID, overlayID](
+                            int64_t missingAsset) {
+        if (missingAsset != -1) {
+          // showAssetDepotConfirmWindow(itemName, missingAsset);
+        } else {
+          CesiumForUnity::Cesium3DTileset tileset =
+              CesiumForUnity::CesiumEditorUtility::FindFirstTilesetWithAssetID(
+                  tilesetID);
 
-              if (tileset == nullptr) {
-                UnityEngine::GameObject tilesetGameObject(name);
-                tileset = tilesetGameObject
-                              .AddComponent<CesiumForUnity::Cesium3DTileset>();
-              }
-              tileset.ionAssetID(tilesetID);
+          if (tileset == nullptr) {
+            tileset = CesiumForUnity::CesiumEditorUtility::CreateTileset(
+                name,
+                tilesetID);
+          }
+          tileset.ionAssetID(tilesetID);
 
-              CesiumIonSessionImpl::ion().getAssets();
+          CesiumIonSessionImpl::ion().getAssets();
 
-              if (overlayID > 0) {
-                // TODO: Need to fix this when we support multiple overlays
-                CesiumEditorUtility::AddBaseOverlayToTileset(
-                    tileset,
-                    overlayID);
-              }
+          if (overlayID > 0) {
+            // TODO: Need to fix this when we support multiple overlays
+            CesiumForUnity::CesiumEditorUtility::AddBaseOverlayToTileset(
+                tileset,
+                overlayID);
+          }
 
-              tileset.RecreateTileset();
+          tileset.RecreateTileset();
 
-              UnityEditor::Selection::activeGameObject(tileset.gameObject());
-            }
+          UnityEditor::Selection::activeGameObject(tileset.gameObject());
+        }
 
-            this->_itemsBeingAdded.erase(name.ToStlString());
-          });
+        this->_itemsBeingAdded.erase(name.ToStlString());
+      });
 }
 
 } // namespace CesiumForUnityNative

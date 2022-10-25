@@ -266,9 +266,9 @@ namespace CesiumForUnity
                     AddAssetFromIon(item.name, item.tilesetId, item.overlayId);
                     break;
                 case QuickAddItemType.BlankTileset:
-                    GameObject blankTileset = new GameObject("Cesium3DTileset");
-                    blankTileset.AddComponent<Cesium3DTileset>();
-                    Selection.activeGameObject = blankTileset;
+                    Cesium3DTileset blankTileset =
+                        CesiumEditorUtility.CreateTileset("Cesium3DTileset", 0);
+                    Selection.activeGameObject = blankTileset.gameObject;
                     break;
                 default:
                     break;
