@@ -188,7 +188,7 @@ void SelectIonTokenWindowImpl::RefreshTokens(
       CesiumForUnity::SelectIonTokenWindow::GetDefaultNewTokenName()
           .ToStlString();
   const std::string& defaultTokenId =
-      CesiumForUnity::CesiumRuntimeSettings::GetDefaultIonAccessTokenId()
+      CesiumForUnity::CesiumRuntimeSettings::defaultIonAccessTokenID()
           .ToStlString();
   const std::string& specifiedToken = window.specifiedToken().ToStlString();
 
@@ -232,9 +232,9 @@ void updateDefaultToken(
   if (response.value) {
     CesiumIonSessionImpl::ion().invalidateProjectDefaultTokenDetails();
 
-    CesiumForUnity::CesiumRuntimeSettings::SetDefaultIonAccessToken(
+    CesiumForUnity::CesiumRuntimeSettings::defaultIonAccessToken(
         System::String(response.value->token));
-    CesiumForUnity::CesiumRuntimeSettings::SetDefaultIonAccessTokenId(
+    CesiumForUnity::CesiumRuntimeSettings::defaultIonAccessTokenID(
         System::String(response.value->id));
 
     // TODO: source control
