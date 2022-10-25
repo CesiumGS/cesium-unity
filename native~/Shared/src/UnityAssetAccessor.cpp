@@ -29,10 +29,14 @@ public:
       const UnityEngine::Networking::UnityWebRequest& request,
       const DotNet::CesiumForUnity::NativeDownloadHandler& handler)
       : _statusCode(uint16_t(request.responseCode())),
-        _contentType(request.GetResponseHeader(System::String("Content-Type"))
-                         .ToStlString()),
+        _contentType(),
         _data(std::move(handler.NativeImplementation().getData())) {
-    this->_headers.emplace("Content-Type", this->_contentType);
+    System::String contentTypeHeader =
+        request.GetResponseHeader(System::String("Content-Type"));
+    if (contentTypeHeader != nullptr) {
+      this->_contentType = contentTypeHeader.ToStlString();
+      this->_headers.emplace("Content-Type", this->_contentType);
+    }
     // TODO: get all response headers
   }
 

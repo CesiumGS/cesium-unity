@@ -95,7 +95,6 @@ namespace CesiumForUnity
             int length = searchString.Length;
             searchString.Contains("string", StringComparison.CurrentCultureIgnoreCase);
             string.Equals("stringA", "stringB");
-            string.Compare("stringA", "stringB", true);
             string.IsNullOrEmpty("value");
 
             IonAssetsColumn column = IonAssetsColumn.Name;

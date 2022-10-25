@@ -8,7 +8,7 @@ namespace CesiumForUnity
 {
     public class CesiumIonAssetsWindow : EditorWindow
     {
-        public static CesiumIonAssetsWindow currentWindow = null!;
+        public static CesiumIonAssetsWindow? currentWindow = null;
 
         [MenuItem("Cesium/Cesium ion Assets")]
         public static void ShowWindow()
@@ -21,12 +21,7 @@ namespace CesiumForUnity
                     Type.GetType("UnityEditor.ProjectBrowser,UnityEditor.dll"),
                     Type.GetType("UnityEditor.ConsoleWindow,UnityEditor.dll")
                 };
-                currentWindow = GetWindow<CesiumIonAssetsWindow>("Cesium ion Assets", siblingWindows);
-
-                // Load the icon separately from the other resources.
-                Texture2D icon = (Texture2D)Resources.Load("Cesium-icon-16x16");
-                icon.wrapMode = TextureWrapMode.Clamp;
-                currentWindow.titleContent.image = icon;
+                currentWindow = GetWindow<CesiumIonAssetsWindow>(siblingWindows);
             }
 
             currentWindow.Show();
@@ -40,13 +35,20 @@ namespace CesiumForUnity
         private SearchField _searchField;
 
         private void OnEnable()
-        {
+        { 
+            // Load the icon separately from the other resources.
+            Texture2D icon = (Texture2D)Resources.Load("Cesium-64x64");
+            icon.wrapMode = TextureWrapMode.Clamp;
+            this.titleContent = new GUIContent("Cesium ion Assets", icon);
+
+            this._searchField = new SearchField();
+
             CesiumIonSession.Ion().Resume();
             BuildTreeView();
             CesiumIonSession.OnConnectionUpdated += this._assetsTreeView.Refresh;
             CesiumIonSession.OnAssetsUpdated += this._assetsTreeView.Refresh;
 
-            this._searchField = new SearchField();
+            CesiumIonSession.Ion().RefreshAssets();
         }
 
         private void OnDisable()
@@ -59,8 +61,7 @@ namespace CesiumForUnity
         {
             this._assetsTreeState = new TreeViewState();
             this._assetsTreeView = new IonAssetsTreeView(this._assetsTreeState);
-
-            this._assetsTreeView.Refresh();
+            this._assetsTreeView.Reload();
         }
 
         void OnGUI()
@@ -101,7 +102,7 @@ namespace CesiumForUnity
                 new GUIContent(CesiumEditorStyle.refreshIcon, "Refresh the asset list"),
                 CesiumEditorStyle.refreshButtonStyle))
             {
-                this._assetsTreeView.Refresh();
+                CesiumIonSession.Ion().RefreshAssets();
             }
 
             GUILayout.FlexibleSpace();

@@ -46,6 +46,10 @@ namespace CesiumForUnity
 
         public partial void Tick();
 
+        public partial void RefreshProfile();
+        public partial void RefreshTokens();
+        public partial void RefreshAssets();
+
         public void TriggerConnectionUpdate()
         {
             if (OnConnectionUpdated != null)

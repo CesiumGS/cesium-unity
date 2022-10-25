@@ -1,39 +1,40 @@
 using System;
 using UnityEngine;
 using UnityEditor;
+using System.Collections.Generic;
 
 namespace CesiumForUnity
 {
     public static class CesiumEditorStyle
     {
-        public static GUIStyle toolbarStyle = null!;
-        public static GUIStyle toolbarButtonStyle = null!;
-        public static GUIStyle toolbarButtonDisabledStyle = null!;
+        public static GUIStyle toolbarStyle;
+        public static GUIStyle toolbarButtonStyle;
+        public static GUIStyle toolbarButtonDisabledStyle;
 
-        public static GUIStyle quickAddItemStyle = null!;
-        public static GUIStyle quickAddButtonStyle = null!;
+        public static GUIStyle quickAddItemStyle;
+        public static GUIStyle quickAddButtonStyle;
 
-        public static GUIStyle cesiumButtonStyle = null!;
-        public static GUIStyle cesiumButtonDisabledStyle = null!;
-        public static GUIStyle refreshButtonStyle = null!;
+        public static GUIStyle cesiumButtonStyle;
+        public static GUIStyle cesiumButtonDisabledStyle;
+        public static GUIStyle refreshButtonStyle;
 
-        public static GUIStyle descriptionHeaderStyle = null!;
-        public static GUIStyle descriptionSubheaderStyle = null!;
-        public static GUIStyle descriptionCenterTextStyle = null!;
+        public static GUIStyle descriptionHeaderStyle;
+        public static GUIStyle descriptionSubheaderStyle;
+        public static GUIStyle descriptionCenterTextStyle;
 
-        public static Texture2D cesiumForUnityLogo = null!;
-        public static Texture2D quickAddIcon = null!;
-        public static Texture2D[] toolbarIcons = null!;
-        public static Texture2D refreshIcon = null!;
+        public static Texture2D cesiumForUnityLogo;
+        public static Texture2D quickAddIcon;
+        public static Dictionary<CesiumEditorWindow.ToolbarButton, Texture2D> toolbarIcons;
+        public static Texture2D refreshIcon;
 
         private static readonly Color buttonColor = new Color(0.2945f, 0.6317f, 0.7930f);
         private static readonly Color buttonColorLighter = new Color(0.4475f, 0.7544f, 0.8904f);
         private static readonly Color buttonColorDarker = new Color(0.2598f, 0.5785f, 0.7075f);
         private static readonly Color disabledButtonTextColor = new Color(0.7f, 0.7f, 0.7f);
 
-        private static Texture2D buttonTexture = null!;
-        private static Texture2D buttonHoverTexture = null!;
-        private static Texture2D buttonPressedTexture = null!;
+        private static Texture2D buttonTexture;
+        private static Texture2D buttonHoverTexture;
+        private static Texture2D buttonPressedTexture;
 
         static CesiumEditorStyle()
         {
@@ -50,13 +51,25 @@ namespace CesiumForUnity
 
             if (toolbarIcons == null)
             {
-                toolbarIcons = new Texture2D[Enum.GetNames(typeof(CesiumEditorWindow.ToolbarIndex)).Length];
-                toolbarIcons[(int)CesiumEditorWindow.ToolbarIndex.Add] = quickAddIcon;
-                toolbarIcons[(int)CesiumEditorWindow.ToolbarIndex.Upload] = LoadIcon("FontAwesome/cloud-upload-alt-solid");
-                toolbarIcons[(int)CesiumEditorWindow.ToolbarIndex.Token] = LoadIcon("FontAwesome/key-solid");
-                toolbarIcons[(int)CesiumEditorWindow.ToolbarIndex.Learn] = LoadIcon("FontAwesome/book-reader-solid");
-                toolbarIcons[(int)CesiumEditorWindow.ToolbarIndex.Help] = LoadIcon("FontAwesome/hands-helping-solid");
-                toolbarIcons[(int)CesiumEditorWindow.ToolbarIndex.SignOut] = LoadIcon("FontAwesome/sign-out-alt-solid");
+                toolbarIcons = new Dictionary<CesiumEditorWindow.ToolbarButton, Texture2D>();
+                toolbarIcons.Add(
+                    CesiumEditorWindow.ToolbarButton.Add,
+                    quickAddIcon);
+                toolbarIcons.Add(
+                    CesiumEditorWindow.ToolbarButton.Upload,
+                    LoadIcon("FontAwesome/cloud-upload-alt-solid"));
+                toolbarIcons.Add(
+                    CesiumEditorWindow.ToolbarButton.Token,
+                    LoadIcon("FontAwesome/key-solid"));
+                toolbarIcons.Add(
+                    CesiumEditorWindow.ToolbarButton.Learn,
+                    LoadIcon("FontAwesome/book-reader-solid"));
+                toolbarIcons.Add(
+                    CesiumEditorWindow.ToolbarButton.Help,
+                    LoadIcon("FontAwesome/hands-helping-solid"));
+                toolbarIcons.Add(
+                    CesiumEditorWindow.ToolbarButton.SignOut,
+                    LoadIcon("FontAwesome/sign-out-alt-solid"));
             }
 
             if (refreshIcon == null)

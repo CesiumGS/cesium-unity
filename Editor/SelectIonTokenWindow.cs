@@ -15,25 +15,18 @@ namespace CesiumForUnity
     [ReinteropNativeImplementation("CesiumForUnityNative::SelectIonTokenWindowImpl", "SelectIonTokenWindowImpl.h")]
     public partial class SelectIonTokenWindow : EditorWindow
     {
-        public static SelectIonTokenWindow currentWindow = null!;
+        public static SelectIonTokenWindow? currentWindow = null;
 
         public static void ShowWindow()
         {
             if (currentWindow == null)
             {
-                currentWindow = GetWindow<SelectIonTokenWindow>("Select a Cesium ion Token");
-
-                // Load the icon separately from the other resources.
-                Texture2D icon = (Texture2D)Resources.Load("Cesium-icon-16x16");
-                icon.wrapMode = TextureWrapMode.Clamp;
-                currentWindow.titleContent.image = icon;
+                currentWindow = GetWindow<SelectIonTokenWindow>();
             }
 
             currentWindow.Show();
             currentWindow.Focus();
         }
-
-        public SelectIonTokenWindow() { }
 
         private IonTokenSource _source;
         private string _createdTokenName = "";
@@ -57,9 +50,7 @@ namespace CesiumForUnity
                 ? IonTokenSource.Create
                 : IonTokenSource.Specify;
 
-            // This has to be done in OnEnable() for ScriptableObject, which EditorWindow
-            // inherits from.
-            this.CreateImplementation();
+            CesiumIonSession.Ion().RefreshTokens();
         }
 
         private void OnDisable()
