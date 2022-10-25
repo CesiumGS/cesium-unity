@@ -304,6 +304,14 @@ namespace CesiumForUnity
             test = string.Join(" ", stringArray);
 
             CesiumVector3 cv3 = new CesiumVector3();
+            cv3.x = cv3.y = cv3.z;
+
+            CesiumGlobeAnchor[] globeAnchors = go.GetComponentsInChildren<CesiumGlobeAnchor>();
+            CesiumGlobeAnchor globeAnchor = globeAnchors[globeAnchors.Length - 1];
+            globeAnchor.ecefX = globeAnchor.ecefX;
+            globeAnchor.ecefY = globeAnchor.ecefY;
+            globeAnchor.ecefZ = globeAnchor.ecefZ;
+            globeAnchor.SetPositionEarthCenteredEarthFixed(globeAnchor.ecefX, globeAnchor.ecefY, globeAnchor.ecefZ);
 
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;

@@ -246,6 +246,67 @@ namespace CesiumForUnity
 
         #endregion
 
+        #region Set Helpers
+
+        /// <summary>
+        /// Sets the position of this object to a particular longitude, latitude, and height.
+        /// </summary>
+        /// <remarks>
+        /// Calling this method is more efficient than setting the properties individually.
+        /// </remarks>
+        /// <param name="longitude">The longitude in degrees, in the range -180 to 180.</param>
+        /// <param name="latitude">The latitude in degrees, in the range -90 to 90.</param>
+        /// <param name="height">
+        /// The height in meters above the ellipsoid. Do not confuse this with a geoid height
+        /// or height above mean sea level, which can be tens of meters higher or lower
+        /// depending on where in the world the object is located.
+        /// </param>
+        public void SetPositionLongitudeLatitudeHeight(double longitude, double latitude, double height)
+        {
+            this._longitude = longitude;
+            this._latitude = latitude;
+            this._height = height;
+            this.positionAuthority = CesiumGlobeAnchorAuthority.LongitudeLatitudeHeight;
+        }
+
+        /// <summary>
+        /// Sets the position of this object to particular X, Y, Z coordinates in the
+        /// Earth-Centered, Earth-Fixed (ECEF) frame.
+        /// </summary>
+        /// <remarks>
+        /// Calling this method is more efficient than setting the properties individually.
+        /// </remarks>
+        /// <param name="x">The X coordinate in meters.</param>
+        /// <param name="y">The Y coordinate in meters.</param>
+        /// <param name="z">The Z coordinate in meters.</param>
+        public void SetPositionEarthCenteredEarthFixed(double x, double y, double z)
+        {
+            this._ecefX = x;
+            this._ecefY = y;
+            this._ecefZ = z;
+            this.positionAuthority = CesiumGlobeAnchorAuthority.EarthCenteredEarthFixed;
+        }
+
+        /// <summary>
+        /// Sets the position of this object to particular X, Y, Z coordinates in the
+        /// Unity world coordinate system.
+        /// </summary>
+        /// <remarks>
+        /// Calling this method is more efficient than setting the properties individually.
+        /// </remarks>
+        /// <param name="x">The X coordinate.</param>
+        /// <param name="y">The Y coordinate.</param>
+        /// <param name="z">The Z coordinate.</param>
+        public void SetPositionUnityWorld(double x, double y, double z)
+        {
+            this._unityX = x;
+            this._unityY = y;
+            this._unityZ = z;
+            this.positionAuthority = CesiumGlobeAnchorAuthority.UnityWorldCoordinates;
+        }
+
+        #endregion
+
         #region Private properties
 
         [SerializeField]
@@ -424,6 +485,20 @@ namespace CesiumForUnity
             this._unityZ = position.z;
             this._positionAuthority = CesiumGlobeAnchorAuthority.UnityWorldCoordinates;
             this.UpdateTransformFromGlobePosition();
+        }
+
+        internal void UpdateGeoreference()
+        {
+            // If Unity world coordinates are authoritative, switch to ECEF.
+            //   This will cause the Unity world to be recomputed from the existing
+            //   ECEF using the updated transform.
+            // Otherwise, just recompute the Unity coordinates from the existing authority.
+            // TODO: small optimization opportunity: no need to recompute LLH or ECEF when the other
+            //       is authoritative, because they won't have changed.
+            if (this.positionAuthority == CesiumGlobeAnchorAuthority.UnityWorldCoordinates)
+                this.positionAuthority = CesiumGlobeAnchorAuthority.EarthCenteredEarthFixed;
+            else
+                this.UpdateTransformFromGlobePosition();
         }
 
         #endregion

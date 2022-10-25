@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Reinterop;
 using UnityEngine;
 
@@ -37,7 +38,10 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Tooltip("The height of the origin in meters above the ellipsoid.")]
+        [Tooltip("The height of the origin in meters above the ellipsoid (usually WGS84). " +
+                 "Do not confuse this with a geoid height or height above mean sea level, which " +
+                 "can be tens of meters higher or lower depending on where in the world the " +
+                 "origin is located.")]
         private double _height = 2250.0;
 
         public double height
@@ -53,9 +57,18 @@ namespace CesiumForUnity
         [Tooltip("An event raised when the georeference changes.")]
         public event Action? changed;
 
+        private List<CesiumGlobeAnchor> _anchorsScratch = new List<CesiumGlobeAnchor>();
+
         public void UpdateOrigin()
         {
             this.RecalculateOrigin();
+
+            this.GetComponentsInChildren<CesiumGlobeAnchor>(true, this._anchorsScratch);
+            foreach (CesiumGlobeAnchor anchor in this._anchorsScratch)
+            {
+                anchor.UpdateGeoreference();
+            }
+
             if (this.changed != null)
             {
                 this.changed();
