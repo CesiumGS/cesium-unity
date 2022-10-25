@@ -103,6 +103,9 @@ namespace Reinterop
                 Content:
                     $$"""
                     std::string String::ToStlString() const {
+                      if (*this == nullptr)
+                        return std::string();
+
                       void* p = {{marshalWrapper.GetFullyQualifiedName()}}::StringToCoTaskMemUTF8(*this);
                       try {
                         std::string result = static_cast<char*>(p);
