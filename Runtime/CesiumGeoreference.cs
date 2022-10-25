@@ -67,7 +67,18 @@ namespace CesiumForUnity
         private partial void OnValidate();
         private partial void Awake();
 
-        public partial CesiumVector3 TransformUnityWorldPositionToEarthCenteredEarthFixed(CesiumVector3 cesiumVector3);
+        /// <summary>
+        /// Transform a Unity world position to Earth-Centered, Earth-Fixed (ECEF) coordinates.
+        /// </summary>
+        /// <param name="unityWorldPosition">The Unity world position to convert.</param>
+        /// <returns>The ECEF coordinates in meters.</returns>
+        public partial CesiumVector3 TransformUnityWorldPositionToEarthCenteredEarthFixed(CesiumVector3 unityWorldPosition);
+
+        /// <summary>
+        /// Transform an Earth-Centered, Earth-Fixed position to Unity world coordinates.
+        /// </summary>
+        /// <param name="earthCenteredEarthFixed">The ECEF coordinates in meters.</param>
+        /// <returns>The corresponding Unity world coordinates.</returns>
         public partial CesiumVector3 TransformEarthCenteredEarthFixedPositionToUnityWorld(CesiumVector3 earthCenteredEarthFixed);
     }
 }

@@ -1,7 +1,9 @@
-﻿namespace CesiumForUnity
+﻿using UnityEditor;
+
+namespace CesiumForUnity
 {
     public interface INotifyOfChanges
     {
-        void NotifyPropertyChanged(string propertyName);
+        void NotifyPropertyChanged(SerializedProperty property);
     }
 }

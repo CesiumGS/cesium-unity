@@ -2,6 +2,8 @@ using Reinterop;
 using System;
 using System.Collections;
 using System.Reflection;
+using Unity.VisualScripting.YamlDotNet.Core.Tokens;
+using UnityEditor;
 using UnityEngine;
 
 namespace CesiumForUnity
@@ -34,8 +36,11 @@ namespace CesiumForUnity
         UnityWorldCoordinates
     }
 
+    [ExecuteInEditMode]
     public class CesiumGlobeAnchor : MonoBehaviour, INotifyOfChanges
     {
+        #region User-editable properties
+
         [SerializeField]
         [Tooltip("Whether to adjust the game object's orientation based on globe curvature as the game object moves.\n" +
                  "\n" +
@@ -57,6 +62,24 @@ namespace CesiumForUnity
         {
             get => this._adjustOrientationForGlobeWhenMoving;
             set => this._adjustOrientationForGlobeWhenMoving = value;
+        }
+
+        [SerializeField]
+        [Tooltip("Whether this component should detect changes to the Transform component, such as " +
+                 "from physics, and update the precise coordinates accordingly. Disabling this option " +
+                 "improves performance for game objects that will not move. Transform changes are " +
+                 "always detected in Edit mode, no matter the state of this flag.")]
+        [NotifyOfChanges]
+        private bool _detectTransformChanges = true;
+
+        public bool detectTransformChanges
+        {
+            get => this._detectTransformChanges;
+            set
+            {
+                this._detectTransformChanges = value;
+                this.StartOrStopDetectingTransformChanges();
+            }
         }
 
         [SerializeField]
@@ -221,7 +244,109 @@ namespace CesiumForUnity
             }
         }
 
-        public void UpdateTransformFromGlobePosition()
+        #endregion
+
+        #region Private properties
+
+        [SerializeField]
+        [HideInInspector]
+        private double _lastPositionEcefX = 0.0;
+
+        [SerializeField]
+        [HideInInspector]
+        private double _lastPositionEcefY = 0.0;
+
+        [SerializeField]
+        [HideInInspector]
+        private double _lastPositionEcefZ = 0.0;
+
+        private Matrix4x4 _lastLocalToWorld;
+
+        #endregion
+
+        #region INotifyOfChanges implementation
+
+        void INotifyOfChanges.NotifyPropertyChanged(SerializedProperty property)
+        {
+#if UNITY_EDITOR
+            switch (property.name)
+            {
+                case "_longitude":
+                case "_latitude":
+                case "_height":
+                    this._positionAuthority = CesiumGlobeAnchorAuthority.LongitudeLatitudeHeight;
+                    this.UpdateTransformFromGlobePosition();
+                    break;
+                case "_ecefX":
+                case "_ecefY":
+                case "_ecefZ":
+                    this._positionAuthority = CesiumGlobeAnchorAuthority.EarthCenteredEarthFixed;
+                    this.UpdateTransformFromGlobePosition();
+                    break;
+                case "_unityX":
+                case "_unityY":
+                case "_unityZ":
+                    this._positionAuthority = CesiumGlobeAnchorAuthority.UnityWorldCoordinates;
+                    this.UpdateTransformFromGlobePosition();
+                    break;
+                case "_detectTransformChanges":
+                    this.StartOrStopDetectingTransformChanges();
+                    break;
+            }
+
+            EditorApplication.QueuePlayerLoopUpdate();
+#endif
+        }
+
+        #endregion
+
+        #region Unity Messages
+
+        private void OnEnable()
+        {
+            this._lastLocalToWorld = this.transform.localToWorldMatrix;
+            this.StartOrStopDetectingTransformChanges();
+        }
+
+        #endregion
+
+        #region Coroutines
+
+        private void StartOrStopDetectingTransformChanges()
+        {
+            this.StopCoroutine("DetectTransformChanges");
+
+            bool start = this._detectTransformChanges;
+
+#if UNITY_EDITOR
+            // Always detect changes in Edit mode.
+            if (!EditorApplication.isPlaying)
+                start = true;
+#endif
+
+            if (start)
+                this.StartCoroutine("DetectTransformChanges");
+        }
+
+        private IEnumerator DetectTransformChanges()
+        {
+            // Detect changes in the Transform component.
+            // We don't use Transform.hasChanged because we can't control when it is reset to false.
+            WaitUntil waitForChanges = new WaitUntil(() => !this.transform.localToWorldMatrix.Equals(this._lastLocalToWorld));
+
+            while (true)
+            {
+                yield return waitForChanges;
+                this.UpdateGlobePositionFromTransform();
+                this._lastLocalToWorld = this.transform.localToWorldMatrix;
+            }
+        }
+
+        #endregion
+
+        #region Updaters
+
+        private void UpdateTransformFromGlobePosition()
         {
             CesiumGeoreference? georeference = this.gameObject.GetComponentInParent<CesiumGeoreference>();
             if (georeference == null)
@@ -262,7 +387,7 @@ namespace CesiumForUnity
                 // TODO
             }
 
-            // Apply the new position to the non-authoritative fields
+            // Update the non-authoritative fields with the new position.
             // TODO: it might be more efficient to lazily update these if/when they're accessed, at least outside the Editor.
             if (this.positionAuthority != CesiumGlobeAnchorAuthority.LongitudeLatitudeHeight)
             {
@@ -287,20 +412,20 @@ namespace CesiumForUnity
                 this._unityZ = unityWorld.z;
             }
 
-            // Apply the new position to the object's Transform
-            this.gameObject.transform.position = new Vector3((float)this._unityX, (float)this._unityY, (float)this._unityY);
+            // Set the object's transform with the new position
+            this.gameObject.transform.position = new Vector3((float)this._unityX, (float)this._unityY, (float)this._unityZ);
         }
 
-        void INotifyOfChanges.NotifyPropertyChanged(string propertyName)
+        private void UpdateGlobePositionFromTransform()
         {
-            StartCoroutine(this.GetValueLater(propertyName));
+            Vector3 position = this.transform.position;
+            this._unityX = position.x;
+            this._unityY = position.y;
+            this._unityZ = position.z;
+            this._positionAuthority = CesiumGlobeAnchorAuthority.UnityWorldCoordinates;
+            this.UpdateTransformFromGlobePosition();
         }
 
-        private IEnumerator GetValueLater(string propertyName)
-        {
-            yield return null;
-            object value = typeof(CesiumGlobeAnchor).GetField(propertyName, BindingFlags.Instance | BindingFlags.NonPublic).GetValue(this);
-            Debug.Log("Changed: " + propertyName + " value: " + value);
-        }
+        #endregion
     }
 }

@@ -7,11 +7,6 @@ namespace CesiumForUnity
     [CustomPropertyDrawer(typeof(NotifyOfChangesAttribute))]
     public class NotifyOfChangesPropertyDrawer : PropertyDrawer
     {
-        public NotifyOfChangesPropertyDrawer()
-        {
-            Debug.Log("Construct!");
-        }
-
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             EditorGUI.BeginChangeCheck();
@@ -20,29 +15,16 @@ namespace CesiumForUnity
 
             if (changed)
             {
+                property.serializedObject.ApplyModifiedProperties();
                 foreach (object target in property.serializedObject.targetObjects)
                 {
                     INotifyOfChanges? notify = target as INotifyOfChanges;
                     if (notify == null)
                         continue;
 
-                    MonoBehaviour? mb = target as MonoBehaviour;
-                    if (mb == null)
-                        continue;
-
-                    mb.StartCoroutine(this.NotifyChanged(notify, property.name));
+                    notify.NotifyPropertyChanged(property);
                 }
             }
-        }
-
-        private IEnumerator NotifyChanged(INotifyOfChanges receiver, string propertyName)
-        {
-            Debug.Log("Begin Changed: " + propertyName);
-            // Delay one frame before notifying so that the new value can be applied.
-            yield return null;
-
-            // Do the actual notification.
-            receiver.NotifyPropertyChanged(propertyName);
         }
     }
 }
