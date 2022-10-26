@@ -15,7 +15,7 @@
 #include <DotNet/CesiumForUnity/CesiumEditorWindow.h>
 #include <DotNet/CesiumForUnity/CesiumIonRasterOverlay.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
-#include <DotNet/CesiumForUnity/IonMissingAssetWindow.h>
+// #include <DotNet/CesiumForUnity/IonMissingAssetWindow.h>
 #include <DotNet/System/Object.h>
 #include <DotNet/UnityEditor/Selection.h>
 #include <DotNet/UnityEngine/Debug.h>
