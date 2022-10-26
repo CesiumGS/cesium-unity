@@ -114,8 +114,8 @@ SelectIonTokenWindowImpl::SelectAndAuthorizeToken(
                           [&assetIDsString](std::string& id) {
                             assetIDsString += id;
                           });
-                      UnityEngine::Debug::LogWarning(System::String(
-                          " Authorizing the project's default Cesium ion token "
+                      UnityEngine::Debug::Log(System::String(
+                          "Authorizing the project's default Cesium ion token "
                           "to access the following asset IDs: " +
                           assetIDsString));
 
@@ -355,7 +355,6 @@ void SelectIonTokenWindowImpl::SpecifyToken(
         [this,
          token](CesiumIonClient::Response<CesiumIonClient::Token>&& response) {
           if (response.value) {
-            UnityEngine::Debug::Log(System::String("here"));
             return std::move(response);
           } else {
             CesiumIonClient::Token t;
