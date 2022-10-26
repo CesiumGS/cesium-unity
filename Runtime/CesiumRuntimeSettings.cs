@@ -22,7 +22,7 @@ namespace CesiumForUnity
                 _instance =
                     Resources.Load("CesiumRuntimeSettings") as CesiumRuntimeSettings;
 
-#if UNITY_EDITOR
+                #if UNITY_EDITOR
                 if (_instance == null)
                 {
                     // Create the necessary folders if they don't already exist.
@@ -38,6 +38,7 @@ namespace CesiumForUnity
 
                     CesiumRuntimeSettings[] instances =
                         Resources.FindObjectsOfTypeAll<CesiumRuntimeSettings>();
+
                     // If a CesiumRuntimeSettings asset is found outside of the preferred
                     // file path, move it to the correct location.
                     if (instances.Length > 0)
@@ -66,19 +67,19 @@ namespace CesiumForUnity
                         }
                     }
                 }
-#endif
+                #endif
 
                 if (_instance == null)
                 {
                     // Create an instance even if the game is not running in the editor
                     // to prevent a crash.
                     _instance = new CesiumRuntimeSettings();
-#if UNITY_EDITOR
+                    #if UNITY_EDITOR
                     AssetDatabase.CreateAsset(_instance, _filePath);
-#else
+                    #else
                     Debug.LogError("Cannot find a CesiumRuntimeSettings asset " +
                         "Any assets that use the project's default token will not load.");
-#endif
+                    #endif
                 }
 
                 return _instance;
@@ -91,12 +92,12 @@ namespace CesiumForUnity
         public static string defaultIonAccessTokenID
         {
             get => instance._defaultIonAccessTokenID;
-#if UNITY_EDITOR
+            #if UNITY_EDITOR
             set
             {
                 instance._defaultIonAccessTokenID = value;
             }
-#endif
+            #endif
         }
 
         [SerializeField]
@@ -105,13 +106,13 @@ namespace CesiumForUnity
         public static string defaultIonAccessToken
         {
             get => instance._defaultIonAccessToken;
-#if UNITY_EDITOR
+            #if UNITY_EDITOR
             set
             {
                 instance._defaultIonAccessToken = value;
 
             }
-#endif
+            #endif
         }
     }
 }
