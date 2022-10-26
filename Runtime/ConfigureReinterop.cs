@@ -327,6 +327,11 @@ namespace CesiumForUnity
             globeAnchor.ecefZ = globeAnchor.ecefZ;
             globeAnchor.SetPositionEarthCenteredEarthFixed(globeAnchor.ecefX, globeAnchor.ecefY, globeAnchor.ecefZ);
 
+            globeAnchor = go.AddComponent<CesiumGlobeAnchor>();
+            globeAnchor.detectTransformChanges = globeAnchor.detectTransformChanges;
+            globeAnchor.SetPositionUnityWorld(0.0, 0.0, 0.0);
+            globeAnchor.SetPositionLongitudeLatitudeHeight(0.0, 0.0, 0.0);
+
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;
             Camera svc = sv.camera;

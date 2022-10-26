@@ -385,6 +385,10 @@ namespace CesiumForUnity
                 start = true;
 #endif
 
+            // Can't start a coroutine on an inactive game object
+            if (!this.isActiveAndEnabled)
+                start = false;
+
             if (start)
                 this.StartCoroutine("DetectTransformChanges");
         }
@@ -399,7 +403,6 @@ namespace CesiumForUnity
             {
                 yield return waitForChanges;
                 this.UpdateGlobePositionFromTransform();
-                this._lastLocalToWorld = this.transform.localToWorldMatrix;
             }
         }
 
@@ -475,6 +478,7 @@ namespace CesiumForUnity
 
             // Set the object's transform with the new position
             this.gameObject.transform.position = new Vector3((float)this._unityX, (float)this._unityY, (float)this._unityZ);
+            this._lastLocalToWorld = this.transform.localToWorldMatrix;
         }
 
         private void UpdateGlobePositionFromTransform()

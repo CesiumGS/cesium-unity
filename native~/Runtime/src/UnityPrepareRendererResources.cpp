@@ -12,6 +12,7 @@
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
+#include <DotNet/CesiumForUnity/CesiumGlobeAnchor.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/Object.h>
 #include <DotNet/System/String.h>
@@ -557,10 +558,13 @@ void* UnityPrepareRendererResources::prepareInMainThread(
                 ? pCoordinateSystem->getEcefToLocalTransformation()
                 : glm::dmat4(1.0);
 
-        glm::dmat4 fullTransform = fixedToUnity * (tileTransform * transform);
+        glm::dmat4 transformToEcef = tileTransform * transform;
+        glm::dvec3 ecefPosition = glm::dvec3(transformToEcef[3]);
 
-        glm::dvec3 translation = glm::dvec3(fullTransform[3]);
-        glm::dmat3 rotationScale = glm::dmat3(fullTransform);
+        glm::dmat4 transformToUnity = fixedToUnity * transformToEcef;
+
+        glm::dvec3 translation = glm::dvec3(transformToUnity[3]);
+        glm::dmat3 rotationScale = glm::dmat3(transformToUnity);
         double lengthColumn0 = glm::length(rotationScale[0]);
         double lengthColumn1 = glm::length(rotationScale[1]);
         double lengthColumn2 = glm::length(rotationScale[2]);
@@ -592,6 +596,12 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             float(scale.x),
             float(scale.y),
             float(scale.z)});
+
+        CesiumForUnity::CesiumGlobeAnchor anchor =
+            primitiveGameObject
+                .AddComponent<CesiumForUnity::CesiumGlobeAnchor>();
+        anchor.detectTransformChanges(false);
+        anchor.SetPositionEarthCenteredEarthFixed(ecefPosition.x, ecefPosition.y, ecefPosition.z);
 
         UnityEngine::MeshFilter meshFilter =
             primitiveGameObject.AddComponent<UnityEngine::MeshFilter>();
