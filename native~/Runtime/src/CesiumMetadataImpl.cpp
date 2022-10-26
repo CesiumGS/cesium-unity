@@ -13,7 +13,6 @@
 #include <DotNet/UnityEngine/Mesh.h>
 #include <DotNet/UnityEngine/Transform.h>
 
-
 using namespace CesiumForUnityNative;
 using namespace CesiumGltf;
 
@@ -21,25 +20,30 @@ void CesiumMetadataImpl::loadMetadata(
     const DotNet::CesiumForUnity::CesiumMetadata& metadata,
     const DotNet::UnityEngine::Transform& transform,
     int triangleIndex,
-    DotNet::System::Array1<DotNet::CesiumForUnity::MetadataProperty> properties){
+    DotNet::System::Array1<DotNet::CesiumForUnity::MetadataProperty>
+        properties) {
 
   std::unordered_map<std::string, FeatureTable> featureTables;
-  std::vector<std::pair<
-      AccessorType,
-      std::vector<FeatureIDAttribute>>> featureIDs;
+  std::vector<std::pair<AccessorType, std::vector<FeatureIDAttribute>>>
+      featureIDs;
 
-  if (this->_pModel) {
+  const DotNet::UnityEngine::GameObject* pParentGameObject =
+      &transform.parent().gameObject();
 
+  auto find = _pModels.find(pParentGameObject);
+
+  if (find != _pModels.end()) {
+    const CesiumGltf::Model* pModel = find->second;
 
     const ExtensionModelExtFeatureMetadata* pModelMetadata =
-        this->_pModel->getExtension<ExtensionModelExtFeatureMetadata>();
+        pModel->getExtension<ExtensionModelExtFeatureMetadata>();
     if (pModelMetadata != nullptr) {
       for (auto kvp : pModelMetadata->featureTables) {
         const std::string& featureTableName = kvp.first;
         const CesiumGltf::FeatureTable& featureTable = kvp.second;
 
         CesiumGltf::MetadataFeatureTableView featureTableView{
-            this->_pModel,
+            pModel,
             &featureTable};
 
         FeatureTable& myFeatureTable = featureTables[featureTableName];
@@ -54,7 +58,7 @@ void CesiumMetadataImpl::loadMetadata(
         });
       }
 
-      this->_pModel->forEachPrimitiveInScene(
+      pModel->forEachPrimitiveInScene(
           -1,
           [this, &featureIDs](
               const Model& gltf,
@@ -220,7 +224,10 @@ void CesiumMetadataImpl::loadMetadata(
                 propertyType);
 
             auto prop = properties[propertyIndex++];
-            prop.NativeImplementation().SetProperty(propertyName, propertyType, propertyValue);
+            prop.NativeImplementation().SetProperty(
+                propertyName,
+                propertyType,
+                propertyValue);
           }
         }
       }
@@ -228,48 +235,60 @@ void CesiumMetadataImpl::loadMetadata(
   }
 }
 
-void CesiumMetadataImpl::loadMetadata(const CesiumGltf::Model* pModel) {
-  this->_pModel = pModel;
+void CesiumMetadataImpl::loadMetadata(
+    const DotNet::UnityEngine::GameObject* pGameObject,
+    const CesiumGltf::Model* pModel) {
+  this->_pModels.insert({pGameObject, pModel});
 }
 
 int CesiumMetadataImpl::getNumberOfProperties(
     const DotNet::CesiumForUnity::CesiumMetadata& metadata,
     const DotNet::UnityEngine::Transform& transform) {
 
-    int totalNumberOfProperties = 0;
-  const ExtensionModelExtFeatureMetadata* pModelMetadata =
-      this->_pModel->getExtension<ExtensionModelExtFeatureMetadata>();
-  if (pModelMetadata != nullptr) {
+  int totalNumberOfProperties = 0;
 
-    int32_t primitiveIndex = transform.GetSiblingIndex();
+  const DotNet::UnityEngine::GameObject* pParentGameObject =
+      &transform.parent().gameObject();
 
-    int primitiveCount = 0;
-    const ExtensionMeshPrimitiveExtFeatureMetadata* pMetadata = nullptr;
-    this->_pModel->forEachPrimitiveInScene(
-        -1,
-        [&primitiveCount, primitiveIndex, &pMetadata](
-            const Model& gltf,
-            const Node& node,
-            const Mesh& mesh,
-            const MeshPrimitive& primitive,
-            const glm::dmat4& transform) {
-          if (primitiveCount == primitiveIndex) {
-            pMetadata =
-                primitive
-                    .getExtension<ExtensionMeshPrimitiveExtFeatureMetadata>();
-          } else {
-            ++primitiveCount;
-          }
-        });
+  auto find = _pModels.find(pParentGameObject);
 
-    if (pMetadata != nullptr) {
-      for (const CesiumGltf::FeatureIDAttribute& attribute :
-           pMetadata->featureIdAttributes) {
-        if (attribute.featureIds.attribute) {
-          auto find =
-              pModelMetadata->featureTables.find(attribute.featureTable);
-          if (find != pModelMetadata->featureTables.end()) {
-            totalNumberOfProperties += find->second.properties.size();
+  if (find != _pModels.end()) {
+    const CesiumGltf::Model* pModel = find->second;
+
+    const ExtensionModelExtFeatureMetadata* pModelMetadata =
+        pModel->getExtension<ExtensionModelExtFeatureMetadata>();
+    if (pModelMetadata != nullptr) {
+
+      int32_t primitiveIndex = transform.GetSiblingIndex();
+
+      int primitiveCount = 0;
+      const ExtensionMeshPrimitiveExtFeatureMetadata* pMetadata = nullptr;
+      pModel->forEachPrimitiveInScene(
+          -1,
+          [&primitiveCount, primitiveIndex, &pMetadata](
+              const Model& gltf,
+              const Node& node,
+              const Mesh& mesh,
+              const MeshPrimitive& primitive,
+              const glm::dmat4& transform) {
+            if (primitiveCount == primitiveIndex) {
+              pMetadata =
+                  primitive
+                      .getExtension<ExtensionMeshPrimitiveExtFeatureMetadata>();
+            } else {
+              ++primitiveCount;
+            }
+          });
+
+      if (pMetadata != nullptr) {
+        for (const CesiumGltf::FeatureIDAttribute& attribute :
+             pMetadata->featureIdAttributes) {
+          if (attribute.featureIds.attribute) {
+            auto find =
+                pModelMetadata->featureTables.find(attribute.featureTable);
+            if (find != pModelMetadata->featureTables.end()) {
+              totalNumberOfProperties += find->second.properties.size();
+            }
           }
         }
       }

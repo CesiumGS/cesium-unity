@@ -509,14 +509,14 @@ void* UnityPrepareRendererResources::prepareInMainThread(
   size_t meshIndex = 0;
 
   if (model.getExtension<ExtensionModelExtFeatureMetadata>()) {
+    auto rootGameObject = pModelGameObject->transform().root().gameObject();
     DotNet::CesiumForUnity::CesiumMetadata metadata =
-        pModelGameObject
-            ->GetComponent<DotNet::CesiumForUnity::CesiumMetadata>();
+        rootGameObject.GetComponent<DotNet::CesiumForUnity::CesiumMetadata>();
     if (metadata == nullptr) {
-      metadata = pModelGameObject
-                     ->AddComponent<DotNet::CesiumForUnity::CesiumMetadata>();
+      metadata =
+          rootGameObject.AddComponent<DotNet::CesiumForUnity::CesiumMetadata>();
     }
-    metadata.NativeImplementation().loadMetadata(&model);
+    metadata.NativeImplementation().loadMetadata(pModelGameObject.get(), &model);
   }
 
   model.forEachPrimitiveInScene(
