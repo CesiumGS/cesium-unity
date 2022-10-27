@@ -147,13 +147,17 @@ namespace CesiumForUnity
             ionOverlay.Refresh();
             GameObject gameObject = new GameObject("Name");
             tileset = gameObject.AddComponent<Cesium3DTileset>();
-            tileset.ionAssetID = 0;
             ionOverlay = gameObject.AddComponent<CesiumIonRasterOverlay>();
+            tileset.ionAssetID = 0;
             ionOverlay.ionAssetID = 0;
 
             CesiumRasterOverlay[] rasterOverlays = tileset.gameObject.GetComponents<CesiumRasterOverlay>();
             CesiumRasterOverlay overlay = rasterOverlays[0];
             UnityEngine.Object.DestroyImmediate(overlay);
+
+            CesiumIonRasterOverlay[] ionRasterOverlays =
+                tileset.gameObject.GetComponents<CesiumIonRasterOverlay>();
+            ionOverlay = ionRasterOverlays[0];
 
             string substring = "string";
             substring = string.Concat(substring, new long[] { 100 });
@@ -168,6 +172,16 @@ namespace CesiumForUnity
             CesiumEditorUtility.FindFirstTilesetWithAssetID(0);
             CesiumEditorUtility.CreateTileset("name", 0);
             CesiumEditorUtility.AddBaseOverlayToTileset(tileset, 0);
+
+            IonMissingAssetWindow.ShowWindow("Asset Name", 0);
+            /*IonTokenTroubleshootingWindow troubleshootingWindow = null!;
+
+            CesiumIonAsset asset = troubleshootingWindow.ionAsset;
+            name = asset.objectName;
+            string type = asset.type;
+            string componentType = asset.componentType;
+            string accessToken = asset.ionAccessToken;
+            long assetId = asset.ionAssetID;*/
         }
     }
 }//

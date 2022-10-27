@@ -15,7 +15,7 @@
 #include <DotNet/CesiumForUnity/CesiumEditorWindow.h>
 #include <DotNet/CesiumForUnity/CesiumIonRasterOverlay.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
-// #include <DotNet/CesiumForUnity/IonMissingAssetWindow.h>
+#include <DotNet/CesiumForUnity/IonMissingAssetWindow.h>
 #include <DotNet/System/Object.h>
 #include <DotNet/UnityEditor/Selection.h>
 #include <DotNet/UnityEngine/Debug.h>
@@ -97,7 +97,7 @@ void CesiumEditorWindowImpl::AddAssetFromIon(
       .thenInMainThread([this, name, tilesetID, overlayID](
                             int64_t missingAsset) {
         if (missingAsset != -1) {
-          //CesiumForUnity::IonMissingAssetWindow::ShowWindow(name, missingAsset);
+          CesiumForUnity::IonMissingAssetWindow::ShowWindow(name, missingAsset);
         } else {
           CesiumForUnity::Cesium3DTileset tileset =
               CesiumForUnity::CesiumEditorUtility::FindFirstTilesetWithAssetID(
