@@ -32,9 +32,11 @@ public:
   CesiumMetadataImpl(const DotNet::CesiumForUnity::CesiumMetadata& metadata){};
   void JustBeforeDelete(const DotNet::CesiumForUnity::CesiumMetadata& metadata){};
   void loadMetadata(
-      const DotNet::UnityEngine::Transform transform,
+      int32_t instanceID,
       const CesiumGltf::Model* pModel,
       const CesiumGltf::MeshPrimitive* pPrimitive);
+
+  void unloadMetadata(int32_t instanceID);
 
   void loadMetadata(
       const DotNet::CesiumForUnity::CesiumMetadata& metadata,

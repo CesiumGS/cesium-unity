@@ -653,7 +653,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             primitive.getExtension<ExtensionMeshPrimitiveExtFeatureMetadata>();
         if (pMetadata) {
           pMetadataComponent.NativeImplementation().loadMetadata(
-              primitiveGameObject.transform(),
+              primitiveGameObject.transform().GetInstanceID(),
               &gltf,
               &primitive);
         }
@@ -669,6 +669,15 @@ void UnityPrepareRendererResources::free(
   if (pMainThreadResult) {
     std::unique_ptr<UnityEngine::GameObject> pGameObject(
         static_cast<UnityEngine::GameObject*>(pMainThreadResult));
+
+    auto pMetadataComponent = pGameObject->GetComponentInParent<DotNet::CesiumForUnity::CesiumMetadata>();
+    if(pMetadataComponent != nullptr){
+      for (int32_t i = 0, len = pGameObject->transform().childCount(); i < len; ++i) {
+        pMetadataComponent.NativeImplementation().unloadMetadata(
+            pGameObject->transform().GetChild(i).GetInstanceID());
+        }
+      }
+
     UnityLifetime::Destroy(*pGameObject);
   }
 }

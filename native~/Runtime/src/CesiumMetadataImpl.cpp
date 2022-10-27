@@ -155,10 +155,17 @@ void CesiumMetadataImpl::loadMetadata(
 }
 
 void CesiumMetadataImpl::loadMetadata(
-    const DotNet::UnityEngine::Transform transform,
+    int32_t instanceID,
     const CesiumGltf::Model* pModel,
     const CesiumGltf::MeshPrimitive* pPrimitive) {
-  this->_pModels.insert({transform.GetInstanceID(), {pModel, pPrimitive}});
+  this->_pModels.insert({instanceID, {pModel, pPrimitive}});
+}
+
+void CesiumMetadataImpl::unloadMetadata(int32_t instanceID){
+  auto find = this->_pModels.find(instanceID);
+  if(find != this->_pModels.end()){
+    this->_pModels.erase(find);
+  }
 }
 
 int CesiumMetadataImpl::getNumberOfProperties(
