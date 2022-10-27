@@ -509,11 +509,15 @@ void* UnityPrepareRendererResources::prepareInMainThread(
   size_t meshIndex = 0;
 
 
-  DotNet::CesiumForUnity::CesiumMetadata* pMetadataComponent = nullptr;
+  DotNet::CesiumForUnity::CesiumMetadata pMetadataComponent = nullptr;
   if (model.getExtension<ExtensionModelExtFeatureMetadata>()) {
-    pMetadataComponent = &pModelGameObject->GetComponentInParent<DotNet::CesiumForUnity::CesiumMetadata>();
-    if(*pMetadataComponent == nullptr){
-      pMetadataComponent = &this->_tileset.AddComponent<DotNet::CesiumForUnity::CesiumMetadata>();
+    pMetadataComponent = pModelGameObject->GetComponentInParent<DotNet::CesiumForUnity::CesiumMetadata>();
+    if(pMetadataComponent == nullptr){
+      pMetadataComponent =
+          pModelGameObject->transform()
+              .parent()
+              .gameObject()
+              .AddComponent<DotNet::CesiumForUnity::CesiumMetadata>();
     }
   }
 
@@ -526,7 +530,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
        opaqueMaterial,
        pCoordinateSystem,
        createPhysicsMeshes,
-       pMetadataComponent](
+       &pMetadataComponent](
           const Model& gltf,
           const Node& node,
           const Mesh& mesh,
@@ -648,7 +652,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         const ExtensionMeshPrimitiveExtFeatureMetadata* pMetadata =
             primitive.getExtension<ExtensionMeshPrimitiveExtFeatureMetadata>();
         if (pMetadata) {
-          pMetadataComponent->NativeImplementation().loadMetadata(
+          pMetadataComponent.NativeImplementation().loadMetadata(
               &primitiveGameObject.transform(),
               &gltf,
               &primitive);
