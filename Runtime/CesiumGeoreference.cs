@@ -57,17 +57,9 @@ namespace CesiumForUnity
         [Tooltip("An event raised when the georeference changes.")]
         public event Action? changed;
 
-        private List<CesiumGlobeAnchor> _anchorsScratch = new List<CesiumGlobeAnchor>();
-
         public void UpdateOrigin()
         {
             this.RecalculateOrigin();
-
-            this.GetComponentsInChildren<CesiumGlobeAnchor>(true, this._anchorsScratch);
-            foreach (CesiumGlobeAnchor anchor in this._anchorsScratch)
-            {
-                anchor.UpdateGeoreference();
-            }
 
             if (this.changed != null)
             {

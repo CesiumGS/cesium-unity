@@ -331,6 +331,7 @@ namespace CesiumForUnity
             globeAnchor.detectTransformChanges = globeAnchor.detectTransformChanges;
             globeAnchor.SetPositionUnityWorld(0.0, 0.0, 0.0);
             globeAnchor.SetPositionLongitudeLatitudeHeight(0.0, 0.0, 0.0);
+            globeAnchor.positionAuthority = globeAnchor.positionAuthority;
 
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;

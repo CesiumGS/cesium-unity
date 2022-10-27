@@ -1,9 +1,19 @@
 #include "CesiumGeoreferenceImpl.h"
 
+#include "UnityTransforms.h"
+
 #include <CesiumGeospatial/LocalHorizontalCoordinateSystem.h>
 #include <CesiumUtility/Math.h>
 
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
+#include <DotNet/CesiumForUnity/CesiumGlobeAnchor.h>
+#include <DotNet/CesiumForUnity/CesiumGlobeAnchorAuthority.h>
+#include <DotNet/System/Array1.h>
+#include <DotNet/UnityEngine/GameObject.h>
+#include <DotNet/UnityEngine/Matrix4x4.h>
+#include <DotNet/UnityEngine/Quaternion.h>
+#include <DotNet/UnityEngine/Transform.h>
+#include <DotNet/UnityEngine/Vector3.h>
 
 using namespace CesiumForUnityNative;
 using namespace CesiumGeospatial;
@@ -36,7 +46,55 @@ void CesiumGeoreferenceImpl::JustBeforeDelete(
 
 void CesiumGeoreferenceImpl::RecalculateOrigin(
     const DotNet::CesiumForUnity::CesiumGeoreference& georeference) {
-  this->_coordinateSystem = createCoordinateSystem(georeference);
+  LocalHorizontalCoordinateSystem coordinateSystem =
+      createCoordinateSystem(georeference);
+
+  if (coordinateSystem.getLocalToEcefTransformation() ==
+      this->_coordinateSystem.getLocalToEcefTransformation()) {
+    // No change
+    return;
+  }
+
+  // Update all globe anchors based on the new origin.
+  std::swap(this->_coordinateSystem, coordinateSystem);
+
+  glm::dmat3 oldToEcef =
+      glm::dmat3(coordinateSystem.getLocalToEcefTransformation());
+  glm::dmat3 ecefToNew =
+      glm::dmat3(this->_coordinateSystem.getEcefToLocalTransformation());
+  glm::dmat3 oldToNew = ecefToNew * oldToEcef;
+
+  DotNet::System::Array1<DotNet::CesiumForUnity::CesiumGlobeAnchor> anchors =
+      georeference.gameObject()
+          .GetComponentsInChildren<DotNet::CesiumForUnity::CesiumGlobeAnchor>();
+
+  for (int32_t i = 0; i < anchors.Length(); ++i) {
+    DotNet::CesiumForUnity::CesiumGlobeAnchor anchor = anchors[i];
+
+    DotNet::UnityEngine::Transform transform = anchor.transform();
+    glm::dmat3 modelToOld =
+        glm::dmat3(UnityTransforms::fromUnity(transform.localToWorldMatrix()));
+    glm::dmat3 modelToNew = oldToNew * modelToOld;
+    RotationAndScale rotationAndScale =
+        UnityTransforms::matrixToRotationAndScale(modelToNew);
+
+    transform.rotation(UnityTransforms::toUnity(rotationAndScale.rotation));
+    transform.localScale(UnityTransforms::toUnity(rotationAndScale.scale));
+
+    // The meaning of Unity coordinates will change with the georeference
+    // change, so switch to ECEF if necessary.
+    DotNet::CesiumForUnity::CesiumGlobeAnchorAuthority authority =
+        anchor.positionAuthority();
+    if (authority == DotNet::CesiumForUnity::CesiumGlobeAnchorAuthority::
+                         UnityWorldCoordinates) {
+      authority = DotNet::CesiumForUnity::CesiumGlobeAnchorAuthority::
+          EarthCenteredEarthFixed;
+    }
+
+    // Re-assign the (probably unchanged) authority to recompute Unity
+    // coordinates with the new georeference.
+    anchor.positionAuthority(authority);
+  }
 }
 
 void CesiumGeoreferenceImpl::OnValidate(
