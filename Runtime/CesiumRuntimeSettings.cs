@@ -3,7 +3,7 @@ using UnityEditor;
 
 namespace CesiumForUnity
 {
-    public sealed class CesiumRuntimeSettings : MonoBehaviour
+    public sealed class CesiumRuntimeSettings : ScriptableObject
     {
         private static readonly string _filePath =
             "Assets/Settings/Resources/CesiumRuntimeSettings.asset";
@@ -19,8 +19,13 @@ namespace CesiumForUnity
                     return _instance;
                 }
 
+                #if UNITY_EDITOR
+                _instance = AssetDatabase.LoadAssetAtPath(_filePath, typeof(CesiumRuntimeSettings))
+                        as CesiumRuntimeSettings;
+                #else
                 _instance =
                     Resources.Load("CesiumRuntimeSettings") as CesiumRuntimeSettings;
+                #endif
 
                 #if UNITY_EDITOR
                 if (_instance == null)
@@ -36,34 +41,49 @@ namespace CesiumForUnity
                         AssetDatabase.CreateFolder("Assets/Settings", "Resources");
                     }
 
-                    CesiumRuntimeSettings[] instances =
-                        Resources.FindObjectsOfTypeAll<CesiumRuntimeSettings>();
+                    string typeString = "t:"+ typeof(CesiumRuntimeSettings).Name;
+
+                    string[] instanceGUIDS = AssetDatabase.FindAssets(typeString);
 
                     // If a CesiumRuntimeSettings asset is found outside of the preferred
                     // file path, move it to the correct location.
-                    if (instances.Length > 0)
+                    if (instanceGUIDS.Length > 0)
                     {
-                        if (instances.Length > 1)
+                        if (instanceGUIDS.Length > 1)
                         {
                             Debug.LogWarning("Found multiple CesiumRuntimeSettings assets " +
                                 "in the project folder. The first asset found will be used.");
                         }
-                        string oldPath = AssetDatabase.GetAssetPath(instances[0]);
-                        string result = AssetDatabase.MoveAsset(oldPath, _filePath);
-                        if (string.IsNullOrEmpty(result))
+                        
+                        string oldPath = AssetDatabase.GUIDToAssetPath(instanceGUIDS[0]);
+                        _instance =
+                                AssetDatabase.LoadAssetAtPath(oldPath, typeof(CesiumRuntimeSettings))
+                                    as CesiumRuntimeSettings;
+                        if(_instance != null)
                         {
-                            Debug.LogWarning("A CesiumRuntimeSettings asset was found outside " +
-                                "the Assets/Settings/Resources folder and has been moved " +
-                                "appropriately.");
-                            _instance = instances[0];
+                            string result = AssetDatabase.MoveAsset(oldPath, _filePath);
+                            AssetDatabase.Refresh();
+                            if (string.IsNullOrEmpty(result))
+                            {
+                                Debug.LogWarning("A CesiumRuntimeSettings asset was found outside " +
+                                    "the Assets/Settings/Resources folder and has been moved " +
+                                    "appropriately.");
 
-                            return _instance;
+                                return _instance;
+                            }
+                            else
+                            {
+                                Debug.LogWarning("A CesiumRuntimeSettings asset was found outside " +
+                                    "the Assets/Settings/Resources folder, but could not be moved " +
+                                    "to the appropriate location. A new settings asset will be " +
+                                    "created instead.");
+                            }
                         }
                         else
                         {
-                            Debug.LogWarning("A CesiumRuntimeSettings asset was found outside " +
-                               "the Assets/Settings/Resources folder, but could not be moved to " +
-                               "the appropriate location. A new settings asset will be created.");
+                            Debug.LogWarning("An invalid CesiumRuntimeSettings asset was found " +
+                                "outside the Assets/Settings/Resources folder. A new settings " +
+                                "asset will be created instead.");
                         }
                     }
                 }
@@ -73,9 +93,10 @@ namespace CesiumForUnity
                 {
                     // Create an instance even if the game is not running in the editor
                     // to prevent a crash.
-                    _instance = new CesiumRuntimeSettings();
+                    _instance = ScriptableObject.CreateInstance<CesiumRuntimeSettings>();
                     #if UNITY_EDITOR
                     AssetDatabase.CreateAsset(_instance, _filePath);
+                    AssetDatabase.Refresh();
                     #else
                     Debug.LogError("Cannot find a CesiumRuntimeSettings asset " +
                         "Any assets that use the project's default token will not load.");
@@ -96,6 +117,9 @@ namespace CesiumForUnity
             set
             {
                 instance._defaultIonAccessTokenID = value;
+                EditorUtility.SetDirty(_instance);
+                AssetDatabase.SaveAssetIfDirty(_instance);
+                AssetDatabase.Refresh();
             }
             #endif
         }
@@ -110,7 +134,9 @@ namespace CesiumForUnity
             set
             {
                 instance._defaultIonAccessToken = value;
-
+                EditorUtility.SetDirty(_instance);
+                AssetDatabase.SaveAssetIfDirty(_instance);
+                AssetDatabase.Refresh();
             }
             #endif
         }
