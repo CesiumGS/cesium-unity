@@ -22,7 +22,7 @@ void CesiumMetadataImpl::loadMetadata(
     int triangleIndex,
     DotNet::System::Array1<DotNet::CesiumForUnity::MetadataProperty>
         properties) {
-  auto find = this->_pModels.find(&transform);
+  auto find = this->_pModels.find(transform.GetInstanceID());
   if (find != this->_pModels.end()) {
 
     const Model* pModel = find->second.first;
@@ -155,10 +155,10 @@ void CesiumMetadataImpl::loadMetadata(
 }
 
 void CesiumMetadataImpl::loadMetadata(
-    const DotNet::UnityEngine::Transform* pTransform,
+    const DotNet::UnityEngine::Transform transform,
     const CesiumGltf::Model* pModel,
     const CesiumGltf::MeshPrimitive* pPrimitive) {
-  this->_pModels.insert({pTransform, {pModel, pPrimitive}});
+  this->_pModels.insert({transform.GetInstanceID(), {pModel, pPrimitive}});
 }
 
 int CesiumMetadataImpl::getNumberOfProperties(
@@ -167,7 +167,7 @@ int CesiumMetadataImpl::getNumberOfProperties(
 
   int totalNumberOfProperties = 0;
 
-  auto find = this->_pModels.find(&transform);
+  auto find = this->_pModels.find(transform.GetInstanceID());
   if (find != this->_pModels.end()) {
     const CesiumGltf::Model* pModel = find->second.first;
     const CesiumGltf::MeshPrimitive* pPrimitive = find->second.second;

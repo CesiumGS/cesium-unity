@@ -653,7 +653,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             primitive.getExtension<ExtensionMeshPrimitiveExtFeatureMetadata>();
         if (pMetadata) {
           pMetadataComponent.NativeImplementation().loadMetadata(
-              &primitiveGameObject.transform(),
+              primitiveGameObject.transform(),
               &gltf,
               &primitive);
         }
