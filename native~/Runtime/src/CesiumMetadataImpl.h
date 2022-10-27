@@ -31,7 +31,10 @@ public:
   ~CesiumMetadataImpl(){};
   CesiumMetadataImpl(const DotNet::CesiumForUnity::CesiumMetadata& metadata){};
   void JustBeforeDelete(const DotNet::CesiumForUnity::CesiumMetadata& metadata){};
-  void loadMetadata(const DotNet::UnityEngine::GameObject* pGameObject, const CesiumGltf::Model* pModel);
+  void loadMetadata(
+      const DotNet::UnityEngine::Transform* pTransform,
+      const CesiumGltf::Model* pModel,
+      const CesiumGltf::MeshPrimitive* pPrimitive);
 
   void loadMetadata(
       const DotNet::CesiumForUnity::CesiumMetadata& metadata,
@@ -47,7 +50,7 @@ public:
 private:
   void loadMetadata();
 
-  std::unordered_map<const DotNet::UnityEngine::GameObject*, const CesiumGltf::Model*> _pModels;
+  std::unordered_map<const DotNet::UnityEngine::Transform*, std::pair<const CesiumGltf::Model*, const CesiumGltf::MeshPrimitive*>> _pModels;
 
   using FeatureTable = std::unordered_map<std::string, PropertyType>;
 

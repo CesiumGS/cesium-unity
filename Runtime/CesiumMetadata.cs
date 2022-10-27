@@ -8,7 +8,7 @@ namespace CesiumForUnity
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumMetadataImpl", "CesiumMetadataImpl.h")]
     public partial class CesiumMetadata : MonoBehaviour
     {
-        public partial void loadMetadata(Transform transform, int triangleIndex, MetadataProperty[] properties);
+        internal partial void loadMetadata(Transform transform, int triangleIndex, MetadataProperty[] properties);
 
         private partial int getNumberOfProperties(Transform transform);
 

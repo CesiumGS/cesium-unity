@@ -508,15 +508,13 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
   size_t meshIndex = 0;
 
+
+  DotNet::CesiumForUnity::CesiumMetadata* pMetadataComponent = nullptr;
   if (model.getExtension<ExtensionModelExtFeatureMetadata>()) {
-    auto rootGameObject = pModelGameObject->transform().root().gameObject();
-    DotNet::CesiumForUnity::CesiumMetadata metadata =
-        rootGameObject.GetComponent<DotNet::CesiumForUnity::CesiumMetadata>();
-    if (metadata == nullptr) {
-      metadata =
-          rootGameObject.AddComponent<DotNet::CesiumForUnity::CesiumMetadata>();
+    pMetadataComponent = &pModelGameObject->GetComponentInParent<DotNet::CesiumForUnity::CesiumMetadata>();
+    if(*pMetadataComponent == nullptr){
+      pMetadataComponent = &this->_tileset.AddComponent<DotNet::CesiumForUnity::CesiumMetadata>();
     }
-    metadata.NativeImplementation().loadMetadata(pModelGameObject.get(), &model);
   }
 
   model.forEachPrimitiveInScene(
@@ -527,7 +525,8 @@ void* UnityPrepareRendererResources::prepareInMainThread(
        &meshIndex,
        opaqueMaterial,
        pCoordinateSystem,
-       createPhysicsMeshes](
+       createPhysicsMeshes,
+       pMetadataComponent](
           const Model& gltf,
           const Node& node,
           const Mesh& mesh,
@@ -645,6 +644,14 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           UnityEngine::MeshCollider meshCollider =
               primitiveGameObject.AddComponent<UnityEngine::MeshCollider>();
           meshCollider.sharedMesh(unityMesh);
+        }
+        const ExtensionMeshPrimitiveExtFeatureMetadata* pMetadata =
+            primitive.getExtension<ExtensionMeshPrimitiveExtFeatureMetadata>();
+        if (pMetadata) {
+          pMetadataComponent->NativeImplementation().loadMetadata(
+              &primitiveGameObject.transform(),
+              &gltf,
+              &primitive);
         }
       });
 

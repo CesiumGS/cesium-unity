@@ -74,6 +74,7 @@ namespace CesiumForUnity
             transform.position = transform.position;
             transform.rotation = transform.rotation;
             transform.localScale = transform.localScale;
+            Transform root = transform.root;
             int siblingIndex = transform.GetSiblingIndex();
             Matrix4x4 m = transform.localToWorldMatrix;
 
