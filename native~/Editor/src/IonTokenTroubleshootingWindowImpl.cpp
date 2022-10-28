@@ -143,4 +143,11 @@ void IonTokenTroubleshootingWindowImpl::GetTroubleshootingDetails(
   }
 }
 
+void IonTokenTroubleshootingWindowImpl::AuthorizeToken(
+    const DotNet::CesiumForUnity::IonTokenTroubleshootingWindow& window,
+    DotNet::System::String token,
+    bool removeAssetToken) {
+
+}
+
 } // namespace CesiumForUnityNative

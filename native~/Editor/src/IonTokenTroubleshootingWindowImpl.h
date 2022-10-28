@@ -19,6 +19,11 @@ public:
   void GetTroubleshootingDetails(
       const DotNet::CesiumForUnity::IonTokenTroubleshootingWindow& window);
 
+  void AuthorizeToken(
+      const DotNet::CesiumForUnity::IonTokenTroubleshootingWindow& window,
+      DotNet::System::String token,
+      bool removeAssetToken);
+
 private:
 };
 } // namespace CesiumForUnityNative
