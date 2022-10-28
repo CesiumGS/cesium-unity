@@ -39,7 +39,9 @@ void CesiumEditorWindowImpl::JustBeforeDelete(
 void CesiumEditorWindowImpl::AddAssetFromIon(
     const DotNet::CesiumForUnity::CesiumEditorWindow& window,
     DotNet::System::String name,
+    DotNet::System::String tilesetName,
     int64_t tilesetID,
+    DotNet::System::String overlayName,
     int64_t overlayID) {
   const std::optional<CesiumIonClient::Connection>& connection =
       CesiumIonSessionImpl::ion().getConnection();
@@ -94,10 +96,18 @@ void CesiumEditorWindowImpl::AddAssetFromIon(
                   -1);
             }
           })
-      .thenInMainThread([this, name, tilesetID, overlayID](
-                            int64_t missingAsset) {
+      .thenInMainThread([this,
+                         name,
+                         tilesetName,
+                         overlayName,
+                         tilesetID,
+                         overlayID](int64_t missingAsset) {
         if (missingAsset != -1) {
-          CesiumForUnity::IonMissingAssetWindow::ShowWindow(name, missingAsset);
+          System::String assetName =
+              missingAsset == tilesetID ? tilesetName : overlayName;
+          CesiumForUnity::IonMissingAssetWindow::ShowWindow(
+              assetName,
+              missingAsset);
         } else {
           CesiumForUnity::Cesium3DTileset tileset =
               CesiumForUnity::CesiumEditorUtility::FindFirstTilesetWithAssetID(
@@ -105,7 +115,7 @@ void CesiumEditorWindowImpl::AddAssetFromIon(
 
           if (tileset == nullptr) {
             tileset = CesiumForUnity::CesiumEditorUtility::CreateTileset(
-                name,
+                tilesetName,
                 tilesetID);
           }
           tileset.ionAssetID(tilesetID);

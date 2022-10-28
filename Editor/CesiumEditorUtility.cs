@@ -5,7 +5,7 @@ namespace CesiumForUnity
 {
     public static class CesiumEditorUtility
     {
-        public static Cesium3DTileset FindFirstTileset()
+        public static Cesium3DTileset? FindFirstTileset()
         {
             Cesium3DTileset[] tilesets =
                 Object.FindObjectsOfType<Cesium3DTileset>(true);
@@ -21,7 +21,7 @@ namespace CesiumForUnity
             return null;
         }
 
-        public static Cesium3DTileset FindFirstTilesetWithAssetID(long assetID)
+        public static Cesium3DTileset? FindFirstTilesetWithAssetID(long assetID)
         {
             Cesium3DTileset[] tilesets =
                 Object.FindObjectsOfType<Cesium3DTileset>(true);
@@ -37,7 +37,7 @@ namespace CesiumForUnity
             return null;
         }
 
-        public static CesiumGeoreference FindFirstGeoreference()
+        public static CesiumGeoreference? FindFirstGeoreference()
         {
             CesiumGeoreference[] georeferences =
                Object.FindObjectsOfType<CesiumGeoreference>(true);
@@ -56,19 +56,23 @@ namespace CesiumForUnity
         public static Cesium3DTileset CreateTileset(string name, long assetID)
         {
             // Find a georeference in the scene, or create one if none exists.
-            CesiumGeoreference georeference = CesiumEditorUtility.FindFirstGeoreference();
+            CesiumGeoreference? georeference = CesiumEditorUtility.FindFirstGeoreference();
             if(georeference == null) { 
                 GameObject georeferenceGameObject =
                     new GameObject("CesiumGeoreference");
                 georeference =
                     georeferenceGameObject.AddComponent<CesiumGeoreference>();
+                Undo.RegisterCreatedObjectUndo(georeferenceGameObject, "Create Georeference");
             }
 
             GameObject tilesetGameObject = new GameObject(name);
             tilesetGameObject.transform.SetParent(georeference.gameObject.transform);
 
             Cesium3DTileset tileset = tilesetGameObject.AddComponent<Cesium3DTileset>();
+            tileset.name = name;
             tileset.ionAssetID = assetID;
+
+            Undo.RegisterCreatedObjectUndo(tilesetGameObject, "Create Tileset");
 
             return tileset;
         }
@@ -79,12 +83,11 @@ namespace CesiumForUnity
             GameObject gameObject = tileset.gameObject;
             Undo.RecordObject(gameObject, "Add Base Overlay to Tileset");
             CesiumIonRasterOverlay overlay = gameObject.GetComponent<CesiumIonRasterOverlay>();
-            if (overlay != null)
+            if (overlay == null)
             {
-                Object.DestroyImmediate(overlay);
+                overlay = gameObject.AddComponent<CesiumIonRasterOverlay>();
             }
 
-            overlay = gameObject.AddComponent<CesiumIonRasterOverlay>();
             overlay.ionAssetID = assetID;
 
             return overlay;

@@ -174,14 +174,17 @@ namespace CesiumForUnity
             CesiumEditorUtility.AddBaseOverlayToTileset(tileset, 0);
 
             IonMissingAssetWindow.ShowWindow("Asset Name", 0);
-            /*IonTokenTroubleshootingWindow troubleshootingWindow = null!;
+            IonTokenTroubleshootingWindow troubleshootingWindow = null!;
+            TokenTroubleshootingDetails tokenDetails = troubleshootingWindow.assetTokenDetails;
+            tokenDetails = troubleshootingWindow.defaultTokenDetails;
+            AssetTroubleshootingDetails assetDetails = troubleshootingWindow.assetDetails;
 
             CesiumIonAsset asset = troubleshootingWindow.ionAsset;
             name = asset.objectName;
             string type = asset.type;
             string componentType = asset.componentType;
             string accessToken = asset.ionAccessToken;
-            long assetId = asset.ionAssetID;*/
+            long assetId = asset.ionAssetID;
         }
     }
 }//

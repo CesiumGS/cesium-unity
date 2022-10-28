@@ -28,8 +28,6 @@ namespace CesiumForUnity
             currentWindow.Focus();
         }
 
-        public CesiumIonAssetsWindow() { }
-
         private TreeViewState _assetsTreeState;
         private IonAssetsTreeView _assetsTreeView;
         private SearchField _searchField;
@@ -175,7 +173,7 @@ namespace CesiumForUnity
             this._scrollPosition = GUILayout.BeginScrollView(this._scrollPosition);
             GUILayout.BeginVertical();
 
-            GUILayout.Label(assetDetails.name, CesiumEditorStyle.descriptionHeaderStyle);
+            GUILayout.Label(assetDetails.name, CesiumEditorStyle.headerStyle);
             GUILayout.Label("(ID: " + assetDetails.id + ")");
 
             if (IsSupportedTileset(assetDetails.type))
@@ -220,10 +218,10 @@ namespace CesiumForUnity
                 GUILayout.EndHorizontal();
             }
 
-            GUILayout.Label("Description", CesiumEditorStyle.descriptionSubheaderStyle);
+            GUILayout.Label("Description", CesiumEditorStyle.subheaderStyle);
             EditorGUILayout.LabelField(assetDetails.description, EditorStyles.wordWrappedLabel);
 
-            GUILayout.Label("Attribution", CesiumEditorStyle.descriptionSubheaderStyle);
+            GUILayout.Label("Attribution", CesiumEditorStyle.subheaderStyle);
             EditorGUILayout.LabelField(assetDetails.attribution, EditorStyles.wordWrappedLabel);
 
             GUILayout.EndVertical();

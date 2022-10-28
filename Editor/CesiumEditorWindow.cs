@@ -52,10 +52,10 @@ namespace CesiumForUnity
             if (Event.current.type == EventType.Layout)
             {
                 CesiumIonSession ion = CesiumIonSession.Ion();
-                _isConnected = ion.IsConnected();
-                _isConnecting = ion.IsConnecting();
-                _isProfileLoaded = ion.IsProfileLoaded();
-                _isLoadingProfile = ion.IsLoadingProfile();
+                this._isConnected = ion.IsConnected();
+                this._isConnecting = ion.IsConnecting();
+                this._isProfileLoaded = ion.IsProfileLoaded();
+                this._isLoadingProfile = ion.IsLoadingProfile();
             }
 
             this.DrawCesiumToolbar();
@@ -173,20 +173,26 @@ namespace CesiumForUnity
             public QuickAddItemType type;
             public string name;
             public string tooltip;
+            public string tilesetName;
             public long tilesetId;
+            public string overlayName;
             public long overlayId;
 
             public QuickAddItem(
                 QuickAddItemType type,
                 string name,
                 string tooltip,
+                string tilesetName,
                 long tilesetId,
+                string overlayName,
                 long overlayId)
             {
                 this.type = type;
                 this.name = name;
                 this.tooltip = tooltip;
+                this.tilesetName = tilesetName;
                 this.tilesetId = tilesetId;
+                this.overlayName = overlayName;
                 this.overlayId = overlayId;
             }
         }
@@ -197,7 +203,9 @@ namespace CesiumForUnity
                 QuickAddItemType.BlankTileset,
                 "Blank 3D Tiles Tileset",
                 "An empty tileset that can be configured to show Cesium ion assets or tilesets from other sources.",
+                "Cesium3DTileset",
                 -1,
+                "",
                 -1)
         };
 
@@ -207,37 +215,47 @@ namespace CesiumForUnity
                 QuickAddItemType.IonTileset,
                 "Cesium World Terrain + Bing Maps Aerial imagery",
                 "High-resolution global terrain tileset curated from several data sources, textured with Bing Maps satellite imagery.",
+                "Cesium World Terrain",
                 1,
+                "Bing Maps Aerial imagery",
                 2),
             new QuickAddItem(
                 QuickAddItemType.IonTileset,
                 "Cesium World Terrain + Bing Maps Aerial with Labels imagery",
                 "High-resolution global terrain tileset curated from several data sources, textured with labeled Bing Maps satellite imagery.",
+                "Cesium World Terrain",
                 1,
+                "Bing Maps Aerial with Labels imagery",
                 3),
             new QuickAddItem(
                 QuickAddItemType.IonTileset,
                 "Cesium World Terrain + Bing Maps Road imagery",
                 "High-resolution global terrain tileset curated from several data sources, textured with labeled Bing Maps imagery.",
+                "Cesium World Terrain",
                 1,
+                "Bing Maps Road imagery",
                 4),
             new QuickAddItem(
                 QuickAddItemType.IonTileset,
                 "Cesium World Terrain + Sentinel-2 imagery",
                 "High-resolution global terrain tileset curated from several data sources, textured with high-resolution satellite imagery from the Sentinel-2 project.",
+                "Cesium World Terrain",
                 1,
+                "Sentinel-2 imagery",
                 3954),
             new QuickAddItem(
                 QuickAddItemType.IonTileset,
                 "Cesium OSM Buildings",
                 "A 3D buildings layer derived from OpenStreetMap covering the entire world.",
+                "Cesium OSM Buildings",
                 96188,
+                "",
                 -1)
         };
 
         void DrawQuickAddBasicAssetsPanel()
         {
-            GUILayout.Label("Quick Add Basic Assets", EditorStyles.boldLabel);
+            GUILayout.Label("Quick Add Basic Assets", CesiumEditorStyle.subheaderStyle);
             GUIContent addButtonContent = new GUIContent(CesiumEditorStyle.quickAddIcon, "Add this item to the level");
 
             for (int i = 0; i < this._basicAssets.Length; i++)
@@ -263,11 +281,16 @@ namespace CesiumForUnity
             switch (item.type)
             {
                 case QuickAddItemType.IonTileset:
-                    AddAssetFromIon(item.name, item.tilesetId, item.overlayId);
+                    AddAssetFromIon(
+                        item.name,
+                        item.tilesetName,
+                        item.tilesetId,
+                        item.overlayName,
+                        item.overlayId);
                     break;
                 case QuickAddItemType.BlankTileset:
                     Cesium3DTileset blankTileset =
-                        CesiumEditorUtility.CreateTileset("Cesium3DTileset", 0);
+                        CesiumEditorUtility.CreateTileset(item.tilesetName, 0);
                     Selection.activeGameObject = blankTileset.gameObject;
                     break;
                 default:
@@ -277,12 +300,14 @@ namespace CesiumForUnity
 
         private partial void AddAssetFromIon(
             string name,
+            string tilesetName,
             long tilesetID,
+            string overlayName,
             long overlayID);
 
         void DrawQuickAddIonAssetsPanel()
         {
-            GUILayout.Label("Quick Add Cesium ion Assets", EditorStyles.boldLabel);
+            GUILayout.Label("Quick Add Cesium ion Assets", CesiumEditorStyle.subheaderStyle);
             GUIContent addButtonContent = new GUIContent(
                 CesiumEditorStyle.quickAddIcon,
                 "Add this item to the level");
