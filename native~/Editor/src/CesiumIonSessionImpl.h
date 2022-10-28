@@ -123,10 +123,10 @@ private:
   bool _loadAssetsQueued;
   bool _loadTokensQueued;
   
-  std::function<void()> triggerConnectionUpdate;
-  std::function<void()> triggerAssetsUpdate;
-  std::function<void()> triggerProfileUpdate;
-  std::function<void()> triggerTokensUpdate;
+  std::function<void()> broadcastConnectionUpdate;
+  std::function<void()> broadcastAssetsUpdate;
+  std::function<void()> broadcastProfileUpdate;
+  std::function<void()> broadcastTokensUpdate;
 
   std::string _authorizeUrl;
 

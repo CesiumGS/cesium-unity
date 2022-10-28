@@ -7,6 +7,8 @@
 #include <Cesium3DTilesSelection/Tileset.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
+#include <DotNet/CesiumForUnity/Cesium3DTilesetLoadFailureDetails.h>
+#include <DotNet/CesiumForUnity/Cesium3DTilesetLoadType.h>
 #include <DotNet/CesiumForUnity/CesiumDataSource.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
@@ -277,6 +279,19 @@ void Cesium3DTilesetImpl::LoadTileset(
   options.culledScreenSpaceError = tileset.culledScreenSpaceError();
   options.enableLodTransitionPeriod = tileset.useLodTransitions();
   options.lodTransitionLength = tileset.lodTransitionLength();
+  options.loadErrorCallback =
+      [this, tileset](
+          const Cesium3DTilesSelection::TilesetLoadFailureDetails& details) {
+        int typeValue = (int)details.type;
+        CesiumForUnity::Cesium3DTilesetLoadFailureDetails unityDetails(
+            tileset,
+            CesiumForUnity::Cesium3DTilesetLoadType(typeValue),
+            details.statusCode,
+            System::String(details.message));
+
+        CesiumForUnity::Cesium3DTileset::BroadcastTilesetLoadFailure(
+            unityDetails);
+      };
 
   TilesetContentOptions contentOptions{};
   contentOptions.generateMissingNormalsSmooth = tileset.generateSmoothNormals();

@@ -13,6 +13,19 @@ namespace CesiumForUnity
     [ReinteropNativeImplementation("CesiumForUnityNative::Cesium3DTilesetImpl", "Cesium3DTilesetImpl.h")]
     public partial class Cesium3DTileset : MonoBehaviour
     {
+        public delegate void
+            TilesetLoadFailureDelegate(Cesium3DTilesetLoadFailureDetails details);
+        public static event TilesetLoadFailureDelegate OnTilesetLoadFailure;
+
+        public static void
+            BroadcastTilesetLoadFailure(Cesium3DTilesetLoadFailureDetails details)
+        {
+            if (OnTilesetLoadFailure != null)
+            {
+                OnTilesetLoadFailure(details);
+            }
+        }
+
         [Header("Source")]
         [SerializeField]
         [Tooltip("Whether this tileset should be loaded from a URL or from Cesium ion.")]

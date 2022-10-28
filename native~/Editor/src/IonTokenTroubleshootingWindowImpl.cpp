@@ -1,6 +1,6 @@
 #include "IonTokenTroubleshootingWindowImpl.h"
 
-#include <CesiumIonClient/Connection.h>
+#include "CesiumIonSessionImpl.h"
 
 #include <DotNet/CesiumForUnity/AssetTroubleshootingDetails.h>
 #include <DotNet/CesiumForUnity/CesiumIonAsset.h>
@@ -17,15 +17,7 @@ using namespace DotNet;
 namespace CesiumForUnityNative {
 
 IonTokenTroubleshootingWindowImpl::IonTokenTroubleshootingWindowImpl(
-    const DotNet::CesiumForUnity::IonTokenTroubleshootingWindow& window)
-    : _assetTokenState{window.ionAsset().ionAccessToken().ToStlString(), false, false, false},
-      _defaultTokenState{
-          CesiumForUnity::CesiumRuntimeSettings::defaultIonAccessToken()
-              .ToStlString(),
-          false,
-          false,
-          false},
-      _assetExistsInUserAccount(false) {}
+    const DotNet::CesiumForUnity::IonTokenTroubleshootingWindow& window) {}
 
 IonTokenTroubleshootingWindowImpl::~IonTokenTroubleshootingWindowImpl() {}
 
@@ -37,61 +29,91 @@ namespace {
 void getTokenTroubleShootingDetails(
     const DotNet::CesiumForUnity::IonTokenTroubleshootingWindow& window,
     std::string token,
-  bool isAssetToken) {
-
+    CesiumForUnity::TokenTroubleshootingDetails details) {
+  CesiumForUnity::CesiumIonAsset ionAsset = window.ionAsset();
   CesiumIonSessionImpl ionSession = CesiumIonSessionImpl::ion();
 
   auto pConnection = std::make_shared<CesiumIonClient::Connection>(
       ionSession.getAsyncSystem(),
       ionSession.getAssetAccessor(),
       token);
-  /*
+
   pConnection->me()
-      .thenInMainThread(
-          [pPanel, pConnection, assetID, &state](Response<Profile>&& profile) {
-            state.isValid = profile.value.has_value();
-            if (pPanel->IsVisible()) {
-              return pConnection->asset(assetID);
-            } else {
-              return pConnection->getAsyncSystem().createResolvedFuture(
-                  Response<Asset>{});
-            }
-          })
-      .thenInMainThread([pPanel, pConnection, &state](Response<Asset>&& asset) {
-        state.allowsAccessToAsset = asset.value.has_value();
-
-        if (pPanel->IsVisible()) {
-          // Query the tokens using the user's connection (_not_ the token
-          // connection created above).
-          CesiumIonSession& ionSession = FCesiumEditorModule::ion();
-          ionSession.resume();
-
-          const std::optional<Connection>& userConnection =
-              ionSession.getConnection();
-          if (!userConnection) {
-            Response<TokenList> result{};
-            return ionSession.getAsyncSystem().createResolvedFuture(
-                std::move(result));
-          }
-          return userConnection->tokens();
-        } else {
+      .thenInMainThread([pConnection, ionAsset, details](
+                            CesiumIonClient::Response<
+                                CesiumIonClient::Profile>&& profile) {
+        // If the window was closed before this was reached, don't attempt to
+        // write values to the details.
+        if (!CesiumForUnity::IonTokenTroubleshootingWindow::HasExistingWindow(
+                ionAsset)) {
           return pConnection->getAsyncSystem().createResolvedFuture(
-              Response<TokenList>{});
+              CesiumIonClient::Response<CesiumIonClient::Asset>{});
         }
+        details.isValid(profile.value.has_value());
+        return pConnection->asset(ionAsset.ionAssetID());
       })
-      .thenInMainThread(
-          [pPanel, pConnection, &state](Response<TokenList>&& tokens) {
-            state.associatedWithUserAccount = false;
-            if (tokens.value.has_value()) {
-              auto it = std::find_if(
-                  tokens.value->items.begin(),
-                  tokens.value->items.end(),
-                  [&pConnection](const Token& token) {
-                    return token.token == pConnection->getAccessToken();
-                  });
-              state.associatedWithUserAccount = it != tokens.value->items.end();
-            }
-          });*/
+      .thenInMainThread([pConnection, ionAsset, details](
+                            CesiumIonClient::Response<CesiumIonClient::Asset>&&
+                                asset) {
+        if (!CesiumForUnity::IonTokenTroubleshootingWindow::HasExistingWindow(
+                ionAsset)) {
+          return pConnection->getAsyncSystem().createResolvedFuture(
+              CesiumIonClient::Response<CesiumIonClient::TokenList>{});
+        }
+
+        details.allowsAccessToAsset(asset.value.has_value());
+
+        // Query the tokens using the user's connection (_not_ the token
+        // connection created above).
+        CesiumIonSessionImpl ionSession = CesiumIonSessionImpl::ion();
+        ionSession.Resume(CesiumForUnity::CesiumIonSession::Ion());
+
+        const std::optional<CesiumIonClient::Connection>& userConnection =
+            ionSession.getConnection();
+        if (!userConnection) {
+          CesiumIonClient::Response<CesiumIonClient::TokenList> result{};
+          return ionSession.getAsyncSystem().createResolvedFuture(
+              std::move(result));
+        }
+
+        return userConnection->tokens();
+      })
+      .thenInMainThread([pConnection, ionAsset, details](
+                            CesiumIonClient::Response<
+                                CesiumIonClient::TokenList>&& tokens) {
+        if (!CesiumForUnity::IonTokenTroubleshootingWindow::HasExistingWindow(
+                ionAsset)) {
+          return;
+        }
+        if (tokens.value.has_value()) {
+          auto it = std::find_if(
+              tokens.value->items.begin(),
+              tokens.value->items.end(),
+              [&pConnection](const CesiumIonClient::Token& token) {
+                return token.token == pConnection->getAccessToken();
+              });
+          details.associatedWithUserAccount(it != tokens.value->items.end());
+        }
+
+        details.loaded(true);
+      });
+}
+
+void getAssetTroubleshootingDetails(
+    const DotNet::CesiumForUnity::IonTokenTroubleshootingWindow& window,
+    long assetID,
+    CesiumForUnity::AssetTroubleshootingDetails details) {
+  CesiumForUnity::CesiumIonAsset ionAsset = window.ionAsset();
+  CesiumIonSessionImpl::ion().getConnection()->asset(assetID).thenInMainThread(
+      [window, ionAsset, details](
+          CesiumIonClient::Response<CesiumIonClient::Asset>&& asset) {
+        if (!CesiumForUnity::IonTokenTroubleshootingWindow::HasExistingWindow(
+                ionAsset)) {
+          return;
+        }
+        details.assetExistsInUserAccount(asset.value.has_value());
+        details.loaded(true);
+      });
 }
 } // namespace
 
@@ -99,12 +121,26 @@ void IonTokenTroubleshootingWindowImpl::GetTroubleshootingDetails(
     const DotNet::CesiumForUnity::IonTokenTroubleshootingWindow& window) {
   System::String assetToken = window.ionAsset().ionAccessToken();
   if (!System::String::IsNullOrEmpty(assetToken)) {
-    getTokenTroubleShootingDetails(window, assetToken.ToStlString(), true);
+    getTokenTroubleShootingDetails(
+        window,
+        assetToken.ToStlString(),
+        window.assetTokenDetails());
   }
 
   System::String defaultToken =
       CesiumForUnity::CesiumRuntimeSettings::defaultIonAccessToken();
-  getTokenTroubleShootingDetails(window, defaultToken.ToStlString(), false);
+  getTokenTroubleShootingDetails(
+      window,
+      defaultToken.ToStlString(),
+      window.defaultTokenDetails());
+
+  if (CesiumIonSessionImpl::ion().IsConnected(
+          CesiumForUnity::CesiumIonSession::Ion())) {
+    getAssetTroubleshootingDetails(
+        window,
+        window.ionAsset().ionAssetID(),
+        window.assetDetails());
+  }
 }
 
 } // namespace CesiumForUnityNative

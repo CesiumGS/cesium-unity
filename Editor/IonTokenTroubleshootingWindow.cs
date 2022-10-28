@@ -8,34 +8,107 @@ namespace CesiumForUnity
 {
     public class TokenTroubleshootingDetails
     {
-        public string token;
-        public bool isValid;
-        public bool allowsAccessToAsset;
-        public bool associatedWithUserAccount;
+        private string _token;
+        public string token
+        {
+            get => this._token;
+            set
+            {
+                this._token = value;
+            }
+        }
+
+        private bool _isValid;
+        public bool isValid
+        {
+            get => this._isValid;
+            set
+            {
+                this._isValid = value;
+            }
+        }
+
+        private bool _allowsAccessToAsset;
+        public bool allowsAccessToAsset
+        {
+            get => this._allowsAccessToAsset;
+            set
+            {
+                this._allowsAccessToAsset = value;
+            }
+        }
+
+        private bool _associatedWithUserAccount;
+        public bool associatedWithUserAccount
+        {
+            get => this._associatedWithUserAccount;
+            set
+            {
+                this._associatedWithUserAccount = value;
+            }
+        }
+
+        private bool _loaded;
+        public bool loaded
+        {
+            get => this._loaded;
+            set
+            {
+                this._loaded = value;
+            }
+        }
 
         public TokenTroubleshootingDetails() : this("") { }
 
         public TokenTroubleshootingDetails(string token)
         {
-            this.token = token;
-            this.isValid = false;
-            this.allowsAccessToAsset = false;
-            this.associatedWithUserAccount = false;
+            this._token = token;
+            this._isValid = false;
+            this._allowsAccessToAsset = false;
+            this._associatedWithUserAccount = false;
+            this._loaded = false;
         }
     }
 
     public class AssetTroubleshootingDetails
     {
-        public CesiumIonAsset asset;
-        public bool assetIsInUserAssets;
+        private long _assetID;
+        public long assetID
+        {
+            get => this._assetID;
+            set
+            {
+                this._assetID = value;
+            }
+        }
 
-        public AssetTroubleshootingDetails() : this(new CesiumIonAsset())
+        private bool _assetExistsInUserAccount;
+        public bool assetExistsInUserAccount
+        {
+            get => this._assetExistsInUserAccount;
+            set
+            {
+                this._assetExistsInUserAccount = value;
+            }
+        }
+
+        private bool _loaded;
+        public bool loaded
+        {
+            get => this._loaded;
+            set
+            {
+                this._loaded = value;
+            }
+        }
+
+        public AssetTroubleshootingDetails() : this(0)
         { }
 
-        public AssetTroubleshootingDetails(CesiumIonAsset asset)
+        public AssetTroubleshootingDetails(long assetID)
         {
-            this.asset = asset;
-            this.assetIsInUserAssets = false;
+            this._assetID = assetID;
+            this._assetExistsInUserAccount = false;
         }
     }
 
@@ -43,10 +116,12 @@ namespace CesiumForUnity
         "IonTokenTroubleshootingWindowImpl.h")]
     public partial class IonTokenTroubleshootingWindow : EditorWindow
     {
-        private static List<IonTokenTroubleshootingWindow> _existingWindows;
+        private static List<IonTokenTroubleshootingWindow> _existingWindows =
+            new List<IonTokenTroubleshootingWindow>();
 
         private bool _triggeredByError = false;
         private CesiumIonAsset _ionAsset = new CesiumIonAsset();
+        private bool _requestedDetails = false;
 
         public CesiumIonAsset ionAsset
         {
@@ -54,12 +129,13 @@ namespace CesiumForUnity
             internal set
             {
                 this._ionAsset = value;
-                this.assetTokenDetails.token = value.ionAccessToken;
+                this._assetTokenDetails.token = value.ionAccessToken;
+                this._assetDetails.assetID = value.ionAssetID;
             }
         }
 
-        private TokenTroubleshootingDetails? _assetTokenDetails;
-        public TokenTroubleshootingDetails? assetTokenDetails
+        private TokenTroubleshootingDetails _assetTokenDetails;
+        public TokenTroubleshootingDetails assetTokenDetails
         {
             get => this._assetTokenDetails;
         }
@@ -74,6 +150,21 @@ namespace CesiumForUnity
         public AssetTroubleshootingDetails assetDetails
         {
             get => this._assetDetails;
+        }
+
+        public static bool HasExistingWindow(CesiumIonAsset ionAsset)
+        {
+            for (int i = 0; i < IonTokenTroubleshootingWindow._existingWindows.Count; i++)
+            {
+                IonTokenTroubleshootingWindow existingWindow =
+                    IonTokenTroubleshootingWindow._existingWindows[i];
+                if (existingWindow._ionAsset == ionAsset)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static void RemoveWindowWithPredicate(
@@ -95,7 +186,16 @@ namespace CesiumForUnity
             }
         }
 
-        public static void CreateWindow(CesiumIonAsset ionAsset, bool triggeredByError)
+        public static void ShowWindow(Cesium3DTileset tileset, bool triggeredByError) {
+            ShowWindow(new CesiumIonAsset(tileset), triggeredByError);
+        }
+
+        public static void ShowWindow(CesiumRasterOverlay overlay, bool triggeredByError)
+        {
+            ShowWindow(new CesiumIonAsset(overlay), triggeredByError);
+        }
+
+        private static void ShowWindow(CesiumIonAsset ionAsset, bool triggeredByError)
         {
             if (ionAsset.IsNull())
             {
@@ -104,7 +204,9 @@ namespace CesiumForUnity
 
             // If a window is already open for this object, close it.
             Predicate<CesiumIonAsset> containsSameAsset =
-                delegate (CesiumIonAsset windowAsset) { return windowAsset == ionAsset; };
+                delegate (CesiumIonAsset windowAsset) {
+                    return windowAsset.ionAssetID == ionAsset.ionAssetID;
+                };
             RemoveWindowWithPredicate(containsSameAsset, true);
 
             // If this is a tileset, close any existing windows associated with its
@@ -154,8 +256,6 @@ namespace CesiumForUnity
             window.ionAsset = ionAsset;
             window._triggeredByError = triggeredByError;
 
-            window.GetTroubleshootingDetails();
-
             window.titleContent =
                 new GUIContent(ionAsset.objectName + ": Cesium ion Token Troubleshooting");
             window.Show();
@@ -168,6 +268,7 @@ namespace CesiumForUnity
             this._assetTokenDetails = new TokenTroubleshootingDetails();
             this._defaultTokenDetails =
                 new TokenTroubleshootingDetails(CesiumRuntimeSettings.defaultIonAccessToken);
+            this._assetDetails = new AssetTroubleshootingDetails();
             this.CreateImplementation();
         }
 
@@ -175,6 +276,19 @@ namespace CesiumForUnity
 
         private void Update()
         {
+            if (this._ionAsset.IsNull())
+            {
+                this.Close();
+            }
+
+            // This has to be deferred to the Update() loop so that CesiumRuntimeSettings
+            // calls AssetDatabase.LoadAssetAtPath during a game loop.
+            if (!this._requestedDetails)
+            {
+                this._requestedDetails = true;
+                this.GetTroubleshootingDetails();
+            }
+
             CesiumIonSession.Ion().Tick();
         }
 
@@ -195,6 +309,8 @@ namespace CesiumForUnity
                 this._isConnected = ion.IsConnected();
             }
 
+            GUILayout.Space(5);
+
             if (!this._ionAsset.IsUsingCesiumIon())
             {
                 EditorGUILayout.LabelField(
@@ -211,6 +327,7 @@ namespace CesiumForUnity
                     "asset ID " + this._ionAsset.ionAssetID + ", but it didn't work, " +
                     "probably due to a problem with the access token. This panel will " +
                     "help you fix it!", EditorStyles.wordWrappedLabel);
+                GUILayout.Space(5);
             }
 
             bool hasCustomToken = !string.IsNullOrEmpty(this._ionAsset.ionAccessToken);
@@ -231,6 +348,10 @@ namespace CesiumForUnity
                 DrawAssetTroubleshootPanel();
                 GUILayout.EndHorizontal();
             }
+
+            GUILayout.FlexibleSpace();
+
+            DrawSolutionPanel();
         }
 
         private void DrawConditionCheck(string text, bool isChecked)
@@ -253,12 +374,15 @@ namespace CesiumForUnity
             GUILayout.BeginVertical();
             GUILayout.Label("This " + this._ionAsset.type + "'s Access Token",
                 CesiumEditorStyle.subheaderStyle);
-            DrawConditionCheck("Is a valid Cesium ion Token",
-                this._assetTokenDetails.isValid);
-            DrawConditionCheck("Allows access to this asset",
-                this._assetTokenDetails.allowsAccessToAsset);
-            DrawConditionCheck("Is associated with your user account",
-                this._assetTokenDetails.associatedWithUserAccount);
+            if (this._assetTokenDetails.loaded)
+            {
+                DrawConditionCheck("Is a valid Cesium ion Token",
+                    this._assetTokenDetails.isValid);
+                DrawConditionCheck("Allows access to this asset",
+                    this._assetTokenDetails.allowsAccessToAsset);
+                DrawConditionCheck("Is associated with your user account",
+                    this._assetTokenDetails.associatedWithUserAccount);
+            }
             GUILayout.EndVertical();
         }
 
@@ -267,12 +391,15 @@ namespace CesiumForUnity
             GUILayout.BeginVertical();
             GUILayout.Label("Project Default Access Token",
                 CesiumEditorStyle.subheaderStyle);
-            DrawConditionCheck("Is a valid Cesium ion Token",
-                this._defaultTokenDetails.isValid);
-            DrawConditionCheck("Allows access to this asset",
-                this._defaultTokenDetails.allowsAccessToAsset);
-            DrawConditionCheck("Is associated with your user account",
-                this._defaultTokenDetails.associatedWithUserAccount);
+            if (this._defaultTokenDetails.loaded)
+            {
+                DrawConditionCheck("Is a valid Cesium ion Token",
+                    this._defaultTokenDetails.isValid);
+                DrawConditionCheck("Allows access to this asset",
+                    this._defaultTokenDetails.allowsAccessToAsset);
+                DrawConditionCheck("Is associated with your user account",
+                    this._defaultTokenDetails.associatedWithUserAccount);
+            }
             GUILayout.EndVertical();
         }
 
@@ -292,7 +419,10 @@ namespace CesiumForUnity
 
         private void DrawSolutionPanel()
         {
-            if (!this._assetTokenDetails.allowsAccessToAsset)
+            bool noAssetTokenRemedies =
+                string.IsNullOrEmpty(this._assetTokenDetails.token)
+                || !this._assetTokenDetails.allowsAccessToAsset;
+            if (noAssetTokenRemedies)
                 EditorGUILayout.LabelField("No automatic remedies are possible for Asset ID " +
                     this._ionAsset.ionAssetID + ", because:\n" +
                     " - The current token does not authorize access to the specified asset ID, and\n" +
@@ -302,6 +432,12 @@ namespace CesiumForUnity
                     " - The " + this._ionAsset.type + "'s \"Ion Asset ID\" property is correct.\n" +
                     " - If the asset is from the \"Asset Depot\", verify that it has been added to \"My Assets\".",
                     EditorStyles.wordWrappedLabel);
+
+
+            if (CanUseDefaultToken())
+            {
+                DrawUseDefaultTokenButton();
+            }
 
             if (this._isConnected)
             {
@@ -314,7 +450,14 @@ namespace CesiumForUnity
 
         }
 
-        public void DrawUseDefaultTokenButton()
+        private bool CanUseDefaultToken()
+        {
+            TokenTroubleshootingDetails details = this._defaultTokenDetails;
+            return !string.IsNullOrEmpty(this._ionAsset.ionAccessToken)
+                && details.isValid && details.allowsAccessToAsset;
+        }
+
+        private void DrawUseDefaultTokenButton()
         {
             if (GUILayout.Button("Use the project default token for this " + this._ionAsset.type,
                     CesiumEditorStyle.cesiumButtonStyle))
@@ -324,7 +467,7 @@ namespace CesiumForUnity
             }
         }
 
-        public void DrawOpenCesiumIonButton()
+        private void DrawOpenCesiumIonButton()
         {
             if (GUILayout.Button("Open Cesium ion on the Web",
                         CesiumEditorStyle.cesiumButtonStyle))
@@ -334,7 +477,7 @@ namespace CesiumForUnity
             }
         }
 
-        public void DrawConnectToIonButton()
+        private void DrawConnectToIonButton()
         {
             if (GUILayout.Button("Connect to Cesium ion",
                         CesiumEditorStyle.cesiumButtonStyle))

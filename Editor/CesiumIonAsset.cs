@@ -90,12 +90,12 @@ namespace CesiumForUnity
             {
                 if (this._type == AssetType.Tileset && this._tileset != null)
                 {
-                    return this._tileset.GetType().ToString();
+                    return this._tileset.GetType().Name;
                 }
 
                 if (this._type == AssetType.Overlay && this._overlay != null)
                 {
-                    return this._overlay.GetType().ToString();
+                    return this._overlay.GetType().Name;
                 }
 
                 return "";
@@ -160,7 +160,17 @@ namespace CesiumForUnity
 
         public bool IsNull()
         {
-            return this._type == AssetType.Null;
+            if(this._type == AssetType.Tileset)
+            {
+                return this._tileset == null;
+            }
+
+            if(this._type == AssetType.Overlay)
+            {
+                return this._overlay == null;
+            }
+
+            return true;
         }
 
         public bool IsUsingCesiumIon()

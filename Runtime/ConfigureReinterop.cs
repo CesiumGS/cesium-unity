@@ -317,6 +317,10 @@ namespace CesiumForUnity
 
             string token = CesiumRuntimeSettings.defaultIonAccessToken;
 
+            Cesium3DTilesetLoadFailureDetails details
+                = new Cesium3DTilesetLoadFailureDetails(tileset, Cesium3DTilesetLoadType.Unknown, 0, "");
+            Cesium3DTileset.BroadcastTilesetLoadFailure(details);
+
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;
             Camera svc = sv.camera;

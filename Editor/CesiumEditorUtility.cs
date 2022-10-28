@@ -3,8 +3,33 @@ using UnityEditor;
 
 namespace CesiumForUnity
 {
+    [InitializeOnLoad]
     public static class CesiumEditorUtility
     {
+        static CesiumEditorUtility()
+        {
+            Cesium3DTileset.OnTilesetLoadFailure += HandleTilesetLoadFailure;
+        }
+
+        static void
+            HandleTilesetLoadFailure(Cesium3DTilesetLoadFailureDetails details)
+        {
+            // Don't open a troubleshooting panel during play mode.
+            if (EditorApplication.isPlaying)
+            {
+                return;
+            }
+
+            // Check for a 401 connecting to Cesium ion, which means the token is invalid
+            // (or perhaps the asset ID is). Also check for a 404, because ion returns 404
+            // when the token is valid but not authorized for the asset.
+            if (details.type == Cesium3DTilesetLoadType.CesiumIon
+                && (details.httpStatusCode == 401 || details.httpStatusCode == 404))
+            {
+                IonTokenTroubleshootingWindow.ShowWindow(details.tileset, true);
+            }
+        }
+
         public static Cesium3DTileset? FindFirstTileset()
         {
             Cesium3DTileset[] tilesets =
@@ -81,11 +106,13 @@ namespace CesiumForUnity
             AddBaseOverlayToTileset(Cesium3DTileset tileset, long assetID)
         {
             GameObject gameObject = tileset.gameObject;
-            Undo.RecordObject(gameObject, "Add Base Overlay to Tileset");
             CesiumIonRasterOverlay overlay = gameObject.GetComponent<CesiumIonRasterOverlay>();
-            if (overlay == null)
+            if (overlay != null)
             {
-                overlay = gameObject.AddComponent<CesiumIonRasterOverlay>();
+                Undo.RecordObject(overlay, "Update Base Overlay of Tileset");
+            } else
+            {
+                overlay = Undo.AddComponent<CesiumIonRasterOverlay>(gameObject);
             }
 
             overlay.ionAssetID = assetID;

@@ -102,10 +102,10 @@ namespace CesiumForUnity
             Rect r = new Rect(0, 0, 50, 50);
             GUI.Label(r, "Label");
 
-            session.TriggerConnectionUpdate();
-            session.TriggerAssetsUpdate();
-            session.TriggerProfileUpdate();
-            session.TriggerTokensUpdate();
+            session.BroadcastConnectionUpdate();
+            session.BroadcastAssetsUpdate();
+            session.BroadcastProfileUpdate();
+            session.BroadcastTokensUpdate();
 
             CesiumEditorWindow editorWindow = CesiumEditorWindow.currentWindow;
 
@@ -133,7 +133,7 @@ namespace CesiumForUnity
             CesiumRuntimeSettings.defaultIonAccessTokenID = "tokenID";
 
             Cesium3DTileset[] tilesets = UnityEngine.Object.FindObjectsOfType<Cesium3DTileset>();
-            Cesium3DTileset tileset = null!;
+            Cesium3DTileset tileset = tilesets[0];
             for (int i = 0; i < tilesets.Length; i++)
             {
                 tileset = tilesets[i];
@@ -141,6 +141,8 @@ namespace CesiumForUnity
                 token = tileset.ionAccessToken;
                 tileset.RecreateTileset();
             }
+
+            tileset = tileset.gameObject.GetComponent<Cesium3DTileset>();
 
             CesiumIonRasterOverlay ionOverlay = tileset.gameObject.GetComponent<CesiumIonRasterOverlay>();
             token = ionOverlay.ionAccessToken;
@@ -174,10 +176,15 @@ namespace CesiumForUnity
             CesiumEditorUtility.AddBaseOverlayToTileset(tileset, 0);
 
             IonMissingAssetWindow.ShowWindow("Asset Name", 0);
+
             IonTokenTroubleshootingWindow troubleshootingWindow = null!;
             TokenTroubleshootingDetails tokenDetails = troubleshootingWindow.assetTokenDetails;
             tokenDetails = troubleshootingWindow.defaultTokenDetails;
-            AssetTroubleshootingDetails assetDetails = troubleshootingWindow.assetDetails;
+            token = tokenDetails.token;
+            tokenDetails.isValid = true;
+            tokenDetails.allowsAccessToAsset = true;
+            tokenDetails.associatedWithUserAccount = true;
+            tokenDetails.loaded = true;
 
             CesiumIonAsset asset = troubleshootingWindow.ionAsset;
             name = asset.objectName;
@@ -185,6 +192,11 @@ namespace CesiumForUnity
             string componentType = asset.componentType;
             string accessToken = asset.ionAccessToken;
             long assetId = asset.ionAssetID;
+
+            IonTokenTroubleshootingWindow.HasExistingWindow(asset);
+            AssetTroubleshootingDetails assetDetails = troubleshootingWindow.assetDetails;
+            assetDetails.assetExistsInUserAccount = true;
+            assetDetails.loaded = true;
         }
     }
 }//
