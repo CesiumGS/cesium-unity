@@ -287,7 +287,7 @@ void Cesium3DTilesetImpl::LoadTileset(
 
   if (tileset.tilesetSource() ==
       CesiumForUnity::CesiumDataSource::FromCesiumIon) {
-    System::String& ionAccessToken = tileset.ionAccessToken();
+    const System::String& ionAccessToken = tileset.ionAccessToken();
     if (System::String::IsNullOrEmpty(ionAccessToken)) {
         // TODO: get default access token
     }

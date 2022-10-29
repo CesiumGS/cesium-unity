@@ -1,4 +1,7 @@
 using UnityEngine;
+
+#if UNITY_EDITOR
+
 using UnityEditor;
 
 namespace CesiumForUnity
@@ -74,3 +77,5 @@ namespace CesiumForUnity
         }
     }
 }
+
+#endif

@@ -315,9 +315,9 @@ namespace CesiumForUnity
             test = string.Join(" ", stringArray);
             string.IsNullOrEmpty("value");
 
+#if UNITY_EDITOR
             CesiumRuntimeSettings.GetDefaultIonAccessToken();
 
-#if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;
             Camera svc = sv.camera;
 
