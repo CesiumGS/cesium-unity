@@ -343,4 +343,3 @@ namespace CesiumForUnity
         }
     }
 }
-//
