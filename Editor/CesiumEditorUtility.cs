@@ -15,7 +15,7 @@ namespace CesiumForUnity
         }
 
         static void
-            HandleCesium3DTilesetLoadFailure(Cesium3DTilesetLoadFailureDetails details)
+        HandleCesium3DTilesetLoadFailure(Cesium3DTilesetLoadFailureDetails details)
         {
             // Don't open a troubleshooting panel during play mode.
             if (EditorApplication.isPlaying)
@@ -33,8 +33,8 @@ namespace CesiumForUnity
             }
         }
 
-        static void HandleCesiumRasterOverlayLoadFailure(
-            CesiumRasterOverlayLoadFailureDetails details)
+        static void
+        HandleCesiumRasterOverlayLoadFailure(CesiumRasterOverlayLoadFailureDetails details)
         {
             // Don't open a troubleshooting panel during play mode.
             if (EditorApplication.isPlaying)

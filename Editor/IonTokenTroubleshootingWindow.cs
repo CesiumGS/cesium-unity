@@ -153,21 +153,6 @@ namespace CesiumForUnity
             get => this._assetDetails;
         }
 
-        public static bool HasExistingWindow(CesiumIonAsset ionAsset)
-        {
-            for (int i = 0; i < IonTokenTroubleshootingWindow._existingWindows.Count; i++)
-            {
-                IonTokenTroubleshootingWindow existingWindow =
-                    IonTokenTroubleshootingWindow._existingWindows[i];
-                if (existingWindow._ionAsset == ionAsset)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         private static void RemoveWindowWithPredicate(
             Predicate<CesiumIonAsset> pred, bool closeWindow)
         {
@@ -473,10 +458,10 @@ namespace CesiumForUnity
 
             GUILayout.FlexibleSpace();
                 
-            // Force the window to repaint if the cursor is hovered over it.
-            // By default, it only repaints sporadically, so the token details
-            // will take a long time to update.
-            if (EditorWindow.mouseOverWindow == this)
+            // Force the window to repaint if it is focused. By default,
+            // it only repaints sporadically, so the token details will
+            // take a long time to visually update.
+            if (EditorWindow.focusedWindow == this)
             {
                 this.Repaint();
             }
