@@ -228,7 +228,7 @@ namespace CesiumForUnity
 
             CesiumRasterOverlay[] overlaysArray = go.GetComponents<CesiumRasterOverlay>();
             int len = overlaysArray.Length;
-            CesiumRasterOverlay first = overlaysArray[0];
+            overlay = overlaysArray[0];
 
             MonoBehaviour mb = tileset;
             mb.StartCoroutine(new NativeCoroutine(endIteration => endIteration).GetEnumerator());
@@ -317,9 +317,17 @@ namespace CesiumForUnity
 
             string token = CesiumRuntimeSettings.defaultIonAccessToken;
 
-            Cesium3DTilesetLoadFailureDetails details
+            Cesium3DTilesetLoadFailureDetails tilesetDetails
                 = new Cesium3DTilesetLoadFailureDetails(tileset, Cesium3DTilesetLoadType.Unknown, 0, "");
-            Cesium3DTileset.BroadcastTilesetLoadFailure(details);
+            Cesium3DTileset.BroadcastCesium3DTilesetLoadFailure(tilesetDetails);
+
+            CesiumRasterOverlayLoadFailureDetails
+                overlayDetails = new CesiumRasterOverlayLoadFailureDetails(
+                                                overlay,
+                                                CesiumRasterOverlayLoadType.Unknown,
+                                                0,
+                                                "");
+            CesiumRasterOverlay.BroadcastCesiumRasterOverlayLoadFailure(overlayDetails);
 
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;

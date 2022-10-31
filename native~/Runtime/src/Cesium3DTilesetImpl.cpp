@@ -280,8 +280,7 @@ void Cesium3DTilesetImpl::LoadTileset(
   options.enableLodTransitionPeriod = tileset.useLodTransitions();
   options.lodTransitionLength = tileset.lodTransitionLength();
   options.loadErrorCallback =
-      [this, tileset](
-          const Cesium3DTilesSelection::TilesetLoadFailureDetails& details) {
+      [this, tileset](const TilesetLoadFailureDetails& details) {
         int typeValue = (int)details.type;
         CesiumForUnity::Cesium3DTilesetLoadFailureDetails unityDetails(
             tileset,
@@ -289,7 +288,7 @@ void Cesium3DTilesetImpl::LoadTileset(
             details.statusCode,
             System::String(details.message));
 
-        CesiumForUnity::Cesium3DTileset::BroadcastTilesetLoadFailure(
+        CesiumForUnity::Cesium3DTileset::BroadcastCesium3DTilesetLoadFailure(
             unityDetails);
       };
 

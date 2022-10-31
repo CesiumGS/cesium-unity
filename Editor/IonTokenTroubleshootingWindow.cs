@@ -472,7 +472,7 @@ namespace CesiumForUnity
             }
 
             GUILayout.FlexibleSpace();
-
+                
             // Force the window to repaint if the cursor is hovered over it.
             // By default, it only repaints sporadically, so the token details
             // will take a long time to update.
@@ -563,7 +563,7 @@ namespace CesiumForUnity
 
         private bool CannotRemedyToken(TokenTroubleshootingDetails details)
         {
-            return string.IsNullOrEmpty(details.token) && !details.allowsAccessToAsset;
+            return string.IsNullOrEmpty(details.token) || !details.allowsAccessToAsset;
         }
 
         private bool HasNoAutomaticRemedies()

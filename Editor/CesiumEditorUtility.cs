@@ -8,11 +8,14 @@ namespace CesiumForUnity
     {
         static CesiumEditorUtility()
         {
-            Cesium3DTileset.OnTilesetLoadFailure += HandleTilesetLoadFailure;
+            Cesium3DTileset.OnCesium3DTilesetLoadFailure +=
+                HandleCesium3DTilesetLoadFailure;
+            CesiumRasterOverlay.OnCesiumRasterOverlayLoadFailure +=
+                HandleCesiumRasterOverlayLoadFailure;
         }
 
         static void
-            HandleTilesetLoadFailure(Cesium3DTilesetLoadFailureDetails details)
+            HandleCesium3DTilesetLoadFailure(Cesium3DTilesetLoadFailureDetails details)
         {
             // Don't open a troubleshooting panel during play mode.
             if (EditorApplication.isPlaying)
@@ -27,6 +30,25 @@ namespace CesiumForUnity
                 && (details.httpStatusCode == 401 || details.httpStatusCode == 404))
             {
                 IonTokenTroubleshootingWindow.ShowWindow(details.tileset, true);
+            }
+        }
+
+        static void HandleCesiumRasterOverlayLoadFailure(
+            CesiumRasterOverlayLoadFailureDetails details)
+        {
+            // Don't open a troubleshooting panel during play mode.
+            if (EditorApplication.isPlaying)
+            {
+                return;
+            }
+
+            // Check for a 401 connecting to Cesium ion, which means the token is invalid
+            // (or perhaps the asset ID is). Also check for a 404, because ion returns 404
+            // when the token is valid but not authorized for the asset.
+            if (details.type == CesiumRasterOverlayLoadType.CesiumIon
+                && (details.httpStatusCode == 401 || details.httpStatusCode == 404))
+            {
+                IonTokenTroubleshootingWindow.ShowWindow(details.overlay, true);
             }
         }
 
@@ -82,7 +104,8 @@ namespace CesiumForUnity
         {
             // Find a georeference in the scene, or create one if none exists.
             CesiumGeoreference? georeference = CesiumEditorUtility.FindFirstGeoreference();
-            if(georeference == null) { 
+            if (georeference == null)
+            {
                 GameObject georeferenceGameObject =
                     new GameObject("CesiumGeoreference");
                 georeference =
@@ -110,7 +133,8 @@ namespace CesiumForUnity
             if (overlay != null)
             {
                 Undo.RecordObject(overlay, "Update Base Overlay of Tileset");
-            } else
+            }
+            else
             {
                 overlay = Undo.AddComponent<CesiumIonRasterOverlay>(gameObject);
             }
