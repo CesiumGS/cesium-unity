@@ -77,7 +77,7 @@ namespace CesiumForUnity
             // Force the window to repaint if the cursor is hovered over it.
             // By default, it only repaints sporadically, so the hover and
             // selection behavior will appear delayed.
-            if (EditorWindow.mouseOverWindow == currentWindow)
+            if (EditorWindow.mouseOverWindow == this)
             {
                 this.Repaint();
             }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <DotNet/System/String.h>
+
 namespace DotNet::CesiumForUnity {
   class IonTokenTroubleshootingWindow;
 }
@@ -22,7 +24,10 @@ public:
   void AuthorizeToken(
       const DotNet::CesiumForUnity::IonTokenTroubleshootingWindow& window,
       DotNet::System::String token,
-      bool removeAssetToken);
+      bool isDefaultToken);
+
+  void SelectNewDefaultToken(
+      const DotNet::CesiumForUnity::IonTokenTroubleshootingWindow& window);
 
 private:
 };

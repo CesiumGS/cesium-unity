@@ -72,6 +72,7 @@ namespace CesiumForUnity
             Task.Run(() => { });
 
             CesiumIonSession session = CesiumIonSession.Ion();
+            session.IsConnected();
 
             EditorPrefs.HasKey("Key");
             EditorPrefs.GetString("Key");
@@ -192,8 +193,8 @@ namespace CesiumForUnity
             string componentType = asset.componentType;
             string accessToken = asset.ionAccessToken;
             long assetId = asset.ionAssetID;
+            bool isNull = asset.IsNull();
 
-            IonTokenTroubleshootingWindow.HasExistingWindow(asset);
             AssetTroubleshootingDetails assetDetails = troubleshootingWindow.assetDetails;
             assetDetails.assetExistsInUserAccount = true;
             assetDetails.loaded = true;

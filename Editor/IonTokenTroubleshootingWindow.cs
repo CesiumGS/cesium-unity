@@ -262,6 +262,7 @@ namespace CesiumForUnity
             window.titleContent =
                 new GUIContent(ionAsset.objectName + ": Cesium ion Token Troubleshooting");
             window.Show();
+            window.Focus();
 
             IonTokenTroubleshootingWindow._existingWindows.Add(window);
         }
@@ -421,6 +422,23 @@ namespace CesiumForUnity
 
         private void DrawSolutionPanel()
         {
+            if (this.HasNoAutomaticRemedies())
+            {
+                EditorGUILayout.LabelField(
+                    "No automatic remedies are possible for Asset ID " +
+                    this._ionAsset.ionAssetID + ", because:\n" +
+                    " - The current token does not authorize access to the specified " +
+                    "asset ID, and\n" +
+                    " - The asset ID does not exist in your Cesium ion account.\n" +
+                    "\n" +
+                    "Please click the button below to open Cesium ion and check:\n" +
+                    " - The " + this._ionAsset.type + "'s \"Ion Asset ID\" property " +
+                    "is correct.\n" +
+                    " - If the asset is from the \"Asset Depot\", verify that it has " +
+                    "been added to \"My Assets\".",
+                    EditorStyles.wordWrappedLabel);
+            }
+
             GUILayout.FlexibleSpace();
 
             if (!this._isConnectedToIon)
@@ -448,29 +466,20 @@ namespace CesiumForUnity
                 this.DrawSelectNewDefaultTokenButton();
             }
 
-            if (this.HasNoAutomaticRemedies())
-            {
-                EditorGUILayout.LabelField(
-                    "No automatic remedies are possible for Asset ID " +
-                    this._ionAsset.ionAssetID + ", because:\n" +
-                    " - The current token does not authorize access to the specified " +
-                    "asset ID, and\n" +
-                    " - The asset ID does not exist in your Cesium ion account.\n" +
-                    "\n" +
-                    "Please click the button below to open Cesium ion and check:\n" +
-                    " - The " + this._ionAsset.type + "'s \"Ion Asset ID\" property " +
-                    "is correct.\n" +
-                    " - If the asset is from the \"Asset Depot\", verify that it has " +
-                    "been added to \"My Assets\".",
-                    EditorStyles.wordWrappedLabel);
-            }
-
             if (this._isConnectedToIon)
             {
                 this.DrawOpenCesiumIonButton();
             }
 
             GUILayout.FlexibleSpace();
+
+            // Force the window to repaint if the cursor is hovered over it.
+            // By default, it only repaints sporadically, so the token details
+            // will take a long time to update.
+            if (EditorWindow.mouseOverWindow == this)
+            {
+                this.Repaint();
+            }
         }
 
         private bool CanUseDefaultToken()
@@ -491,7 +500,7 @@ namespace CesiumForUnity
             }
         }
 
-        private partial void AuthorizeToken(string token, bool removeAssetToken);
+        private partial void AuthorizeToken(string token, bool isDefaultToken);
 
         private bool CanAuthorizeToken(TokenTroubleshootingDetails tokenDetails)
         {
@@ -548,6 +557,7 @@ namespace CesiumForUnity
                 CesiumEditorStyle.cesiumButtonStyle))
             {
                 this.SelectNewDefaultToken();
+                this.Close();
             }
         }
 
