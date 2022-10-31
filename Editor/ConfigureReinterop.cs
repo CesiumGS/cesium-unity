@@ -126,12 +126,11 @@ namespace CesiumForUnity
             tokenWindow.RefreshExistingTokenList();
             tokenWindow.Close();
 
-            CesiumRuntimeSettings.HasDefaultIonAccessToken();
-            CesiumRuntimeSettings.HasDefaultIonAccessTokenId();
-            CesiumRuntimeSettings.GetDefaultIonAccessToken();
-            CesiumRuntimeSettings.GetDefaultIonAccessTokenId();
-            CesiumRuntimeSettings.SetDefaultIonAccessToken("token");
-            CesiumRuntimeSettings.SetDefaultIonAccessTokenId("id");
+            token = CesiumRuntimeSettings.defaultIonAccessToken;
+            CesiumRuntimeSettings.defaultIonAccessToken = "token";
+
+            string tokenID = CesiumRuntimeSettings.defaultIonAccessTokenID;
+            CesiumRuntimeSettings.defaultIonAccessTokenID = "tokenID";
 
             Cesium3DTileset[] tilesets = UnityEngine.Object.FindObjectsOfType<Cesium3DTileset>();
             Cesium3DTileset tileset = null!;

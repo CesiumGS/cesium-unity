@@ -315,7 +315,7 @@ namespace CesiumForUnity
             test = string.Join(" ", stringArray);
             string.IsNullOrEmpty("value");
 
-            CesiumRuntimeSettings.GetDefaultIonAccessToken();
+            string token = CesiumRuntimeSettings.defaultIonAccessToken;
 
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;

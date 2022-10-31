@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEditor;
 
 namespace CesiumForUnity
 {
@@ -76,6 +77,7 @@ namespace CesiumForUnity
             AddBaseOverlayToTileset(Cesium3DTileset tileset, long assetID)
         {
             GameObject gameObject = tileset.gameObject;
+            Undo.RecordObject(gameObject, "Add Base Overlay to Tileset");
             CesiumIonRasterOverlay overlay = gameObject.GetComponent<CesiumIonRasterOverlay>();
             if (overlay != null)
             {

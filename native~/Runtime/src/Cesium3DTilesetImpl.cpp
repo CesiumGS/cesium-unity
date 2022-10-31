@@ -10,7 +10,7 @@
 #include <DotNet/CesiumForUnity/CesiumDataSource.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
-//#include <DotNet/CesiumForUnity/CesiumRuntimeSettings.h>
+#include <DotNet/CesiumForUnity/CesiumRuntimeSettings.h>
 #include <DotNet/System/Action.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/Object.h>
@@ -289,7 +289,8 @@ void Cesium3DTilesetImpl::LoadTileset(
       CesiumForUnity::CesiumDataSource::FromCesiumIon) {
     System::String& ionAccessToken = tileset.ionAccessToken();
     if (System::String::IsNullOrEmpty(ionAccessToken)) {
-        // TODO: get default access token
+      ionAccessToken =
+          CesiumForUnity::CesiumRuntimeSettings::defaultIonAccessToken();
     }
 
     this->_pTileset = std::make_unique<Tileset>(

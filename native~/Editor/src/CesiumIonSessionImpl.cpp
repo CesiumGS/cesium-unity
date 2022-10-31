@@ -213,7 +213,7 @@ System::String CesiumIonSessionImpl::GetAuthorizeUrl(
 }
 
 void CesiumIonSessionImpl::RefreshProfile(
-  const DotNet::CesiumForUnity::CesiumIonSession& session) {
+    const DotNet::CesiumForUnity::CesiumIonSession& session) {
   this->refreshProfile();
 }
 
@@ -356,7 +356,7 @@ CesiumIonClient::Token defaultTokenFromSettings() {
   CesiumIonClient::Token result;
 
   const System::String& defaultToken =
-      CesiumForUnity::CesiumRuntimeSettings::GetDefaultIonAccessToken();
+      CesiumForUnity::CesiumRuntimeSettings::defaultIonAccessToken();
   result.token = defaultToken.ToStlString();
 
   return result;
@@ -364,11 +364,13 @@ CesiumIonClient::Token defaultTokenFromSettings() {
 
 CesiumAsync::Future<CesiumIonClient::Token>
 getDefaultTokenFuture(const CesiumIonSessionImpl& session) {
-  if (CesiumForUnity::CesiumRuntimeSettings::HasDefaultIonAccessTokenId()) {
+  System::String defaultTokenID =
+      CesiumForUnity::CesiumRuntimeSettings::defaultIonAccessTokenID();
+  System::String defaultToken =
+      CesiumForUnity::CesiumRuntimeSettings::defaultIonAccessToken();
+  if (!System::String::IsNullOrEmpty(defaultTokenID)) {
     return session.getConnection()
-        ->token(
-            CesiumForUnity::CesiumRuntimeSettings::GetDefaultIonAccessTokenId()
-                    .ToStlString())
+        ->token(defaultTokenID.ToStlString())
         .thenImmediately([](CesiumIonClient::Response<CesiumIonClient::Token>&&
                                 tokenResponse) {
           if (tokenResponse.value) {
@@ -377,12 +379,8 @@ getDefaultTokenFuture(const CesiumIonSessionImpl& session) {
             return defaultTokenFromSettings();
           }
         });
-  } else if (CesiumForUnity::CesiumRuntimeSettings::
-                 HasDefaultIonAccessToken()) {
-    return session
-        .findToken(
-            CesiumForUnity::CesiumRuntimeSettings::GetDefaultIonAccessToken()
-                       .ToStlString())
+  } else if (!System::String::IsNullOrEmpty(defaultToken)) {
+    return session.findToken(defaultToken.ToStlString())
         .thenImmediately(
             [](CesiumIonClient::Response<CesiumIonClient::Token>&& response) {
               if (response.value) {
@@ -405,7 +403,7 @@ CesiumIonSessionImpl::getProjectDefaultTokenDetails() {
     // default token, do the request again because the user probably specified a
     // new token.
     const System::String& defaultToken =
-        CesiumForUnity::CesiumRuntimeSettings::GetDefaultIonAccessToken();
+        CesiumForUnity::CesiumRuntimeSettings::defaultIonAccessToken();
     if (this->_projectDefaultTokenDetailsFuture->isReady() &&
         this->_projectDefaultTokenDetailsFuture->wait().token !=
             defaultToken.ToStlString()) {

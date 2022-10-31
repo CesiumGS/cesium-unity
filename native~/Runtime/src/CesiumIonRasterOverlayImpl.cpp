@@ -7,9 +7,11 @@
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/CesiumForUnity/CesiumIonRasterOverlay.h>
+#include <DotNet/CesiumForUnity/CesiumRuntimeSettings.h>
 #include <DotNet/System/String.h>
 
 using namespace Cesium3DTilesSelection;
+using namespace DotNet;
 
 namespace CesiumForUnityNative {
 
@@ -35,10 +37,16 @@ void CesiumIonRasterOverlayImpl::AddToTileset(
   if (!pTileset)
     return;
 
+  System::String& ionAccessToken = overlay.ionAccessToken();
+  if (System::String::IsNullOrEmpty(ionAccessToken)) {
+    ionAccessToken =
+        CesiumForUnity::CesiumRuntimeSettings::defaultIonAccessToken();
+  }
+
   this->_pOverlay = new IonRasterOverlay(
       overlay.name().ToStlString(),
       overlay.ionAssetID(),
-      overlay.ionAccessToken().ToStlString());
+      ionAccessToken.ToStlString());
 
   pTileset->getOverlays().add(this->_pOverlay);
 }
