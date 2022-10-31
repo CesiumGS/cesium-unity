@@ -413,7 +413,7 @@ CesiumIonSessionImpl::getProjectDefaultTokenDetails() {
     }
   }
 
-  if (!this->IsConnected(CesiumForUnity::CesiumIonSession::Ion())) {
+  if (!CesiumForUnity::CesiumIonSession::Ion().IsConnected()) {
     return this->getAsyncSystem()
         .createResolvedFuture(defaultTokenFromSettings())
         .share();

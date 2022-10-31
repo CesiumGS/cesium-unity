@@ -344,11 +344,11 @@ namespace CesiumForUnity
             GUILayout.BeginHorizontal();
             if (isChecked)
             {
-                GUILayout.Box(CesiumEditorStyle.checkIcon);
+                GUILayout.Box(CesiumEditorStyle.checkIcon, GUILayout.Width(20));
             }
             else
             {
-                GUILayout.Box(CesiumEditorStyle.xIcon);
+                GUILayout.Box(CesiumEditorStyle.xIcon, GUILayout.Width(20));
             }
             GUILayout.Label(text);
             GUILayout.EndHorizontal();

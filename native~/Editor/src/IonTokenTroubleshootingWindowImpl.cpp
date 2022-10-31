@@ -134,8 +134,7 @@ void IonTokenTroubleshootingWindowImpl::GetTroubleshootingDetails(
       defaultToken.ToStlString(),
       window.defaultTokenDetails());
 
-  if (CesiumIonSessionImpl::ion().IsConnected(
-          CesiumForUnity::CesiumIonSession::Ion())) {
+  if (CesiumForUnity::CesiumIonSession::Ion().IsConnected()) {
     getAssetTroubleshootingDetails(
         window,
         window.ionAsset().ionAssetID(),
