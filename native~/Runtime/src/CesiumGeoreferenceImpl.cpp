@@ -66,7 +66,8 @@ void CesiumGeoreferenceImpl::RecalculateOrigin(
 
   DotNet::System::Array1<DotNet::CesiumForUnity::CesiumGlobeAnchor> anchors =
       georeference.gameObject()
-          .GetComponentsInChildren<DotNet::CesiumForUnity::CesiumGlobeAnchor>();
+          .GetComponentsInChildren<DotNet::CesiumForUnity::CesiumGlobeAnchor>(
+              true);
 
   for (int32_t i = 0; i < anchors.Length(); ++i) {
     DotNet::CesiumForUnity::CesiumGlobeAnchor anchor = anchors[i];
@@ -97,14 +98,11 @@ void CesiumGeoreferenceImpl::RecalculateOrigin(
   }
 }
 
-void CesiumGeoreferenceImpl::OnValidate(
-    const DotNet::CesiumForUnity::CesiumGeoreference& georeference) {
-  georeference.UpdateOrigin();
-}
-
 void CesiumGeoreferenceImpl::Awake(
     const DotNet::CesiumForUnity::CesiumGeoreference& georeference) {
-  georeference.UpdateOrigin();
+  // Compute the initial coordinate system. Don't call RecalculateOrigin because
+  // that will also rotate objects based on the new origin.
+  this->_coordinateSystem = createCoordinateSystem(georeference);
 }
 
 DotNet::CesiumForUnity::CesiumVector3

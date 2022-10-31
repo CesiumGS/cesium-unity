@@ -34,16 +34,6 @@ ViewState unityCameraToViewState(
     Camera& camera) {
   Transform transform = camera.transform();
 
-  glm::dvec3 origin = Ellipsoid::WGS84.cartographicToCartesian(
-      Cartographic::fromDegrees(144.96133, -37.81510, 2250.0));
-  glm::dmat4 enuToFixed = Transforms::eastNorthUpToFixedFrame(origin);
-  glm::dmat4 swapYandZ(
-      glm::dvec4(1.0, 0.0, 0.0, 0.0),
-      glm::dvec4(0.0, 0.0, 1.0, 0.0),
-      glm::dvec4(0.0, 1.0, 0.0, 0.0),
-      glm::dvec4(0.0, 0.0, 0.0, 1.0));
-  glm::dmat4 unityToEcef = enuToFixed * swapYandZ;
-
   Vector3 cameraPositionUnity = transform.position();
   glm::dvec3 cameraPosition(
       cameraPositionUnity.x,

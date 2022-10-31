@@ -1,16 +1,19 @@
 using System;
 using System.Collections.Generic;
 using Reinterop;
+using UnityEditor;
 using UnityEngine;
 
 namespace CesiumForUnity
 {
+    [ExecuteInEditMode]
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumGeoreferenceImpl", "CesiumGeoreferenceImpl.h")]
-    public partial class CesiumGeoreference : MonoBehaviour
+    public partial class CesiumGeoreference : MonoBehaviour, INotifyOfChanges
     {
         [SerializeField]
         [Header("Origin")]
         [Tooltip("The latitude of the origin in degrees, in the range [-90, 90].")]
+        [NotifyOfChanges]
         private double _latitude = 39.736401;
 
         public double latitude
@@ -25,6 +28,7 @@ namespace CesiumForUnity
         
         [SerializeField]
         [Tooltip("The longitude of the origin in degrees, in the range [-180, 180].")]
+        [NotifyOfChanges]
         private double _longitude = -105.25737;
 
         public double longitude
@@ -42,6 +46,7 @@ namespace CesiumForUnity
                  "Do not confuse this with a geoid height or height above mean sea level, which " +
                  "can be tens of meters higher or lower depending on where in the world the " +
                  "origin is located.")]
+        [NotifyOfChanges]
         private double _height = 2250.0;
 
         public double height
@@ -57,6 +62,22 @@ namespace CesiumForUnity
         [Tooltip("An event raised when the georeference changes.")]
         public event Action? changed;
 
+        void INotifyOfChanges.NotifyPropertyChanged(SerializedProperty property)
+        {
+#if UNITY_EDITOR
+            switch (property.name)
+            {
+                case "_longitude":
+                case "_latitude":
+                case "_height":
+                    this.UpdateOrigin();
+                    break;
+            }
+
+            EditorApplication.QueuePlayerLoopUpdate();
+#endif
+        }
+
         public void UpdateOrigin()
         {
             this.RecalculateOrigin();
@@ -69,7 +90,6 @@ namespace CesiumForUnity
 
         private partial void RecalculateOrigin();
 
-        private partial void OnValidate();
         private partial void Awake();
 
         /// <summary>

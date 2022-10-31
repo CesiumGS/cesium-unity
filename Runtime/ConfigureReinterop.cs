@@ -321,6 +321,7 @@ namespace CesiumForUnity
             cv3.x = cv3.y = cv3.z;
 
             CesiumGlobeAnchor[] globeAnchors = go.GetComponentsInChildren<CesiumGlobeAnchor>();
+            globeAnchors = go.GetComponentsInChildren<CesiumGlobeAnchor>(true);
             CesiumGlobeAnchor globeAnchor = globeAnchors[globeAnchors.Length - 1];
             globeAnchor.ecefX = globeAnchor.ecefX;
             globeAnchor.ecefY = globeAnchor.ecefY;
