@@ -20,6 +20,18 @@ namespace CesiumForUnity
             }
         }
 
+        internal bool showCreditsOnScreen
+        {
+            get => this._tileset.showCreditsOnScreen;
+            set
+            {
+                if (this._tileset.showCreditsOnScreen != value)
+                {
+                    this._tileset.showCreditsOnScreen = value;
+                }
+            }
+        }
+
         internal CesiumDataSource tilesetSource
         {
             get => this._tileset.tilesetSource;
@@ -313,6 +325,8 @@ namespace CesiumForUnity
         {
             DrawInspectorButtons();
             EditorGUILayout.Space(5);
+            DrawShowCreditsOnScreenToggle();
+            EditorGUILayout.Space(5);
             DrawSourceProperties();
             EditorGUILayout.Space(5);
             DrawLevelOfDetailProperties();
@@ -331,15 +345,34 @@ namespace CesiumForUnity
         private void DrawInspectorButtons()
         {
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Refresh Tileset"))
+            GUIContent refreshTilesetContent = new GUIContent(
+                "Refresh Tileset",
+                "Refreshes this tileset, ensuring that all materials and other settings are " +
+                "applied. It is not usually necessary to invoke this, but when behind-the-scenes " +
+                "changes are made and not reflected in the tileset, this function can help.");
+            if (GUILayout.Button(refreshTilesetContent))
             {
                 this.tileset.RecreateTileset();
             }
-            if (GUILayout.Button("Troubleshoot Token"))
+
+            GUIContent troubleshootTokenContent = new GUIContent(
+                "Troubleshoot Token",
+                "Check if the Cesium ion token used to access this tileset is working correctly, " +
+                "and fix it if necessary.");
+            if (GUILayout.Button(troubleshootTokenContent))
             {
                 IonTokenTroubleshootingWindow.ShowWindow(this.tileset, false);
             }
             GUILayout.EndHorizontal();
+        }
+
+        private void DrawShowCreditsOnScreenToggle()
+        {
+            GUIContent showCreditsOnScreenContent = new GUIContent(
+              "Show Credits On Screen",
+              "Whether or not to show this tileset's credits on screen.");
+            this.showCreditsOnScreen =
+                EditorGUILayout.Toggle(showCreditsOnScreenContent, this.showCreditsOnScreen);
         }
 
         private void DrawSourceProperties()

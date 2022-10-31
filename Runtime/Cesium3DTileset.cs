@@ -27,6 +27,19 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
+        private bool _showCreditsOnScreen = false;
+        
+        public bool showCreditsOnScreen
+        {
+            get => this._showCreditsOnScreen;
+            set
+            {
+                this._showCreditsOnScreen = value;
+                this.RecreateTileset();
+            }
+        }
+
+        [SerializeField]
         private CesiumDataSource _tilesetSource = CesiumDataSource.FromCesiumIon;
 
         public CesiumDataSource tilesetSource
@@ -170,7 +183,6 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Header("Tile Culling")]
         private bool _enableFrustumCulling = true;
 
         public bool enableFrustumCulling

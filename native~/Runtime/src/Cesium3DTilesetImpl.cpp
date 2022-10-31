@@ -279,6 +279,7 @@ void Cesium3DTilesetImpl::LoadTileset(
   options.culledScreenSpaceError = tileset.culledScreenSpaceError();
   options.enableLodTransitionPeriod = tileset.useLodTransitions();
   options.lodTransitionLength = tileset.lodTransitionLength();
+  options.showCreditsOnScreen = tileset.showCreditsOnScreen();
   options.loadErrorCallback =
       [this, tileset](const TilesetLoadFailureDetails& details) {
         int typeValue = (int)details.type;

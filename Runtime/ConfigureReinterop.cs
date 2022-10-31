@@ -215,6 +215,7 @@ namespace CesiumForUnity
             tileset.suspendUpdate = tileset.suspendUpdate;
             tileset.previousSuspendUpdate = tileset.previousSuspendUpdate;
             tileset.updateInEditor = tileset.updateInEditor;
+            tileset.showCreditsOnScreen = tileset.showCreditsOnScreen;
 
             Cesium3DTileset tilesetFromGameObject = go.GetComponent<Cesium3DTileset>();
             MeshRenderer meshRendererFromGameObject = go.GetComponent<MeshRenderer>();
