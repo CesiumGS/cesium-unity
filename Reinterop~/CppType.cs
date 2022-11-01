@@ -232,7 +232,6 @@ namespace Reinterop
                     typeType = "enum class";
                 else if (Kind == InteropTypeKind.EnumFlags) {
                     typeType = "enum";
-                    // Enums are always marshalled across as uint32_t. 
                     // TODO: What if the original C# enum was some other 
                     // integral type though?
                     suffix = ": uint32_t";
@@ -331,13 +330,11 @@ namespace Reinterop
         /// </summary>
         public CppType AsReturnType()
         {
-            // TODO:
-            // Enums with the [flags] attribute may not be any of the enum
-            // options. Probably should use uint32 return type in that case.
-            // if (this.Kind == InteropTypeKind.EnumFlags) 
-            //    return Uint32;
+            if (this.Kind == InteropTypeKind.EnumFlags) 
+                // TODO: is there a way to access the static Uint32 object defined above?
+                return CreatePrimitiveType(StandardNamespace, "uint32_t", 0, IncludeCStdInt);
 
-            // All types are returned by value.
+            // All other types are returned by value.
             return this;
         }
 
