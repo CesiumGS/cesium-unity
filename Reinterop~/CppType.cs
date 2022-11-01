@@ -225,16 +225,23 @@ namespace Reinterop
             if (ns != null)
             {
                 string typeType;
+                string suffix = "";
                 if (Kind == InteropTypeKind.BlittableStruct || Kind == InteropTypeKind.NonBlittableStructWrapper)
                     typeType = "struct";
                 else if (Kind == InteropTypeKind.Enum)
                     typeType = "enum class";
-                else
+                else if (Kind == InteropTypeKind.EnumFlags) {
+                    typeType = "enum";
+                    // Enums are always marshalled across as uint32_t. 
+                    // TODO: What if the original C# enum was some other 
+                    // integral type though?
+                    suffix = ": uint32_t";
+                } else
                     typeType = "class";
                 forwardDeclarations.Add(
                     $$"""
                     namespace {{ns}} {
-                    {{template}}{{typeType}} {{Name}};
+                    {{template}}{{typeType}} {{Name}}{{suffix}};
                     }
                     """);
             }
@@ -324,6 +331,12 @@ namespace Reinterop
         /// </summary>
         public CppType AsReturnType()
         {
+            // TODO:
+            // Enums with the [flags] attribute may not be any of the enum
+            // options. Probably should use uint32 return type in that case.
+            // if (this.Kind == InteropTypeKind.EnumFlags) 
+            //    return Uint32;
+
             // All types are returned by value.
             return this;
         }
@@ -347,6 +360,12 @@ namespace Reinterop
                     // we can't easily tell from the generic parameter. So just pass all parameters
                     // of generic type by const reference.
                     return this.AsConstReference();
+                case InteropTypeKind.EnumFlags:
+                    // Enums flags can be combined together, so we want the underlying type to
+                    // be uint32_t.
+
+                    // TODO: is there a way to access the static Uint32 object defined above?
+                    return CreatePrimitiveType(StandardNamespace, "uint32_t", 0, IncludeCStdInt);
             }
 
             return this;
@@ -380,7 +399,7 @@ namespace Reinterop
                 return this;
             else if (this.Kind == InteropTypeKind.BlittableStruct)
                 return this.AsSimpleType();
-            else if (this.Kind == InteropTypeKind.Enum)
+            else if (this.Kind == InteropTypeKind.Enum || this.Kind == InteropTypeKind.EnumFlags)
                 return UInt32;
 
             return VoidPointer;
@@ -414,6 +433,7 @@ namespace Reinterop
                     else
                         return $"{variableName}.GetHandle().Release()";
                 case InteropTypeKind.Enum:
+                case InteropTypeKind.EnumFlags:
                     return $"::std::uint32_t({variableName})";
                 case InteropTypeKind.Primitive:
                 case InteropTypeKind.BlittableStruct:
@@ -437,6 +457,7 @@ namespace Reinterop
                 case InteropTypeKind.Delegate:
                     return $"{this.AsSimpleType().GetFullyQualifiedName()}({CppObjectHandle.GetCppType(context).GetFullyQualifiedName()}({variableName}))";
                 case InteropTypeKind.Enum:
+                case InteropTypeKind.EnumFlags:
                     return $"{this.AsSimpleType().GetFullyQualifiedName()}({variableName})";
                 case InteropTypeKind.Primitive:
                 case InteropTypeKind.BlittableStruct:

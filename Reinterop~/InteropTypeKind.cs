@@ -8,6 +8,7 @@
         NonBlittableStructWrapper,
         ClassWrapper,
         Enum,
+        EnumFlags,
         GenericParameter,
         Delegate
     }

@@ -391,7 +391,7 @@ UnityPrepareRendererResources::prepareInLoadThread(
 
               // Don't let Unity unload this mesh during the time in between
               // when we create it and when we attach it to a GameObject.
-              unityMesh.hideFlags(UnityEngine::HideFlags::HideAndDontSave);
+              unityMesh.hideFlags(UnityEngine::HideFlags::HideAndDontSave | UnityEngine::HideFlags::HideInHierarchy);
 
               meshes.Item(i, unityMesh);
             }
@@ -474,7 +474,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
   auto pModelGameObject =
       std::make_unique<UnityEngine::GameObject>(System::String(name));
-  pModelGameObject->hideFlags(UnityEngine::HideFlags::DontSave);
+  pModelGameObject->hideFlags(UnityEngine::HideFlags::DontSave | UnityEngine::HideFlags::HideInHierarchy);
   pModelGameObject->transform().parent(this->_tileset.transform());
   pModelGameObject->SetActive(false);
 
@@ -549,7 +549,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         int64_t primitiveIndex = &mesh.primitives[0] - &primitive;
         UnityEngine::GameObject primitiveGameObject(
             System::String("Primitive " + std::to_string(primitiveIndex)));
-        primitiveGameObject.hideFlags(UnityEngine::HideFlags::DontSave);
+        primitiveGameObject.hideFlags(UnityEngine::HideFlags::DontSave | UnityEngine::HideFlags::HideInHierarchy);
         primitiveGameObject.transform().parent(pModelGameObject->transform());
 
         glm::dmat4 fixedToUnity =

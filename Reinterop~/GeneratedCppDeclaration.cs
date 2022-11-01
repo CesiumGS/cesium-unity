@@ -15,6 +15,8 @@
             if (Type == null)
                 return;
 
+            string suffix = GetSuffix(headerFile.Includes);
+
             AddIncludes(headerFile.Includes);
             AddForwardDeclarations(headerFile.ForwardDeclarations);
 
@@ -27,14 +29,14 @@
                 ns.Members.Add(
                     $$"""
                     template <{{string.Join(", ", Type.GenericArguments.Select((CppType type, int index) => "typename T" + index))}}>
-                    {{GetTypeKind()}} {{Type.Name}};
+                    {{GetTypeKind()}} {{Type.Name}}{{suffix}};
                     """);
                 templateDeclaration = "template <> ";
                 templateSpecialization = $"<{string.Join(", ", Type.GenericArguments.Select(arg => arg.GetFullyQualifiedName()))}>";
             }
 
             ns.Members.Add($$"""
-                {{templateDeclaration}}{{GetTypeKind()}} {{Type.Name}}{{templateSpecialization}} {
+                {{templateDeclaration}}{{GetTypeKind()}} {{Type.Name}}{{templateSpecialization}}{{suffix}} {
                   {{GetElements().JoinAndIndent("  ")}}
                 };
                 """);
@@ -74,8 +76,26 @@
                 return "class";
             else if (Type.Kind == InteropTypeKind.Enum)
                 return "enum class";
+            else if (Type.Kind == InteropTypeKind.EnumFlags) 
+                return "enum";
             else
                 return "struct";
+        }
+
+        private string GetSuffix(HashSet<string> Includes)
+        {
+            if (Type == null)
+                // TODO: report a compiler error instead.
+                return "";
+
+            if (Type.Kind == InteropTypeKind.EnumFlags) {
+                // TODO: What if the original C# enum was some other 
+                // integral type though?
+                Includes.Add("<cstdint>");
+                return ": uint32_t";
+            } else
+                // TODO: support derived classes too? 
+                return "";
         }
 
         private IEnumerable<string> GetElements()
@@ -86,7 +106,7 @@
                     return "";
 
                 string access;
-                if (this.Type.Kind == InteropTypeKind.Enum)
+                if (this.Type.Kind == InteropTypeKind.Enum || this.Type.Kind == InteropTypeKind.EnumFlags)
                     access = "";
                 else if (decl.IsPrivate)
                     access = "private: ";

@@ -388,9 +388,14 @@ namespace Reinterop
                     return InteropTypeKind.Primitive;
             }
 
-            if (SymbolEqualityComparer.Default.Equals(type.BaseType, context.Compilation.GetSpecialType(SpecialType.System_Enum)))
+            if (SymbolEqualityComparer.Default.Equals(type.BaseType, context.Compilation.GetSpecialType(SpecialType.System_Enum))) {
+              if (type.GetAttributes().Select(attrib => attrib.ToString() == "FlagsAttribute").Any()) { 
+                //throw new Exception();
+                return InteropTypeKind.EnumFlags;
+              } else {
                 return InteropTypeKind.Enum;
-            else if (type.TypeKind == TypeKind.Delegate)
+              }
+            } else if (type.TypeKind == TypeKind.Delegate)
                 return InteropTypeKind.Delegate;
             else if (type.IsReferenceType)
                 return InteropTypeKind.ClassWrapper;
