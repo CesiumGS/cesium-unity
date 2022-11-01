@@ -26,7 +26,9 @@ public:
   void AddAssetFromIon(
       const DotNet::CesiumForUnity::CesiumEditorWindow& window,
       DotNet::System::String name,
+      DotNet::System::String tilesetName,
       int64_t tilesetID,
+      DotNet::System::String overlayName,
       int64_t overlayID);
 
 private:

@@ -11,8 +11,10 @@
 #include <DotNet/CesiumForUnity/IonAssetDetails.h>
 #include <DotNet/CesiumForUnity/IonAssetsTreeView.h>
 #include <DotNet/System/StringComparison.h>
+#include <DotNet/System/Object.h>
 #include <DotNet/UnityEditor/IMGUI/Controls/MultiColumnHeader.h>
 #include <DotNet/UnityEditor/Selection.h>
+#include <DotNet/UnityEngine/Debug.h>
 #include <DotNet/UnityEngine/GUI.h>
 #include <DotNet/UnityEngine/GameObject.h>
 
@@ -224,24 +226,39 @@ void IonAssetsTreeViewImpl::AddOverlayToTerrain(
   // This behavior needs to change when we support multiple overlays.
   std::shared_ptr<CesiumIonClient::Asset> pAsset = this->_assets[index];
   SelectIonTokenWindowImpl::SelectAndAuthorizeToken({pAsset->id})
-      .thenInMainThread(
-          [pAsset](
-              const std::optional<CesiumIonClient::Token>& /*maybeToken*/) {
-            CesiumForUnity::Cesium3DTileset tileset =
-                CesiumForUnity::CesiumEditorUtility::FindFirstTileset();
-            if (tileset == nullptr) {
-              tileset = CesiumForUnity::CesiumEditorUtility::CreateTileset(
-                  System::String("Cesium World Terrain"),
-                  1);
-            }
+      .thenInMainThread([pAsset](const std::optional<
+                                 CesiumIonClient::Token>& /*maybeToken*/) {
+        UnityEngine::GameObject selected =
+            UnityEditor::Selection::activeGameObject();
+        CesiumForUnity::Cesium3DTileset tileset = nullptr;
+        if (selected != nullptr) {
+          tileset = selected.GetComponent<CesiumForUnity::Cesium3DTileset>();
+        }
 
-            CesiumForUnity::CesiumEditorUtility::AddBaseOverlayToTileset(
-                tileset,
-                pAsset->id);
+        if (tileset == nullptr) {
+          tileset = CesiumForUnity::CesiumEditorUtility::FindFirstTileset();
 
-            tileset.RecreateTileset();
-            UnityEditor::Selection::activeGameObject(tileset.gameObject());
-          });
+          if (tileset != nullptr) {
+            UnityEngine::Debug::LogWarning(
+                System::String("No tileset was selected. The overlay will be "
+                               "added to the first tileset found."));
+          } else {
+            UnityEngine::Debug::LogWarning(System::String(
+                "No existing tileset was found. Cesium World "
+                "Terrain will be created with the overlay as a base layer."));
+            tileset = CesiumForUnity::CesiumEditorUtility::CreateTileset(
+                System::String("Cesium World Terrain"),
+                1);
+          }
+        }
+
+        UnityEditor::Selection::activeGameObject(tileset.gameObject());
+        CesiumForUnity::CesiumEditorUtility::AddBaseOverlayToTileset(
+            tileset,
+            pAsset->id);
+
+        tileset.RecreateTileset();
+      });
 }
 
 } // namespace CesiumForUnityNative

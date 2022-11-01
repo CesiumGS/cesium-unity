@@ -18,14 +18,15 @@ namespace CesiumForUnity
         public static GUIStyle cesiumButtonDisabledStyle;
         public static GUIStyle refreshButtonStyle;
 
-        public static GUIStyle descriptionHeaderStyle;
-        public static GUIStyle descriptionSubheaderStyle;
-        public static GUIStyle descriptionCenterTextStyle;
+        public static GUIStyle headerStyle;
+        public static GUIStyle subheaderStyle;
 
-        public static Texture2D cesiumForUnityLogo;
+        //public static Texture2D cesiumForUnityLogo;
         public static Texture2D quickAddIcon;
         public static Dictionary<CesiumEditorWindow.ToolbarButton, Texture2D> toolbarIcons;
         public static Texture2D refreshIcon;
+        public static Texture2D checkIcon;
+        public static Texture2D xIcon;
 
         private static readonly Color buttonColor = new Color(0.2945f, 0.6317f, 0.7930f);
         private static readonly Color buttonColorLighter = new Color(0.4475f, 0.7544f, 0.8904f);
@@ -36,18 +37,28 @@ namespace CesiumForUnity
         private static Texture2D buttonHoverTexture;
         private static Texture2D buttonPressedTexture;
 
-        static CesiumEditorStyle()
+        private static Texture2D LoadIcon(string resourcePath)
         {
-            LoadImages();
-            LoadStyles();
+            Texture2D icon = (Texture2D)Resources.Load(resourcePath);
+            icon.wrapMode = TextureWrapMode.Clamp;
+
+            return icon;
         }
 
-        private static void LoadImages()
+        static CesiumEditorStyle()
         {
             if (quickAddIcon == null)
             {
                 quickAddIcon = LoadIcon("FontAwesome/plus-solid");
             }
+
+            quickAddItemStyle = new GUIStyle();
+            quickAddItemStyle.margin = new RectOffset(5, 5, 10, 10);
+
+            quickAddButtonStyle = new GUIStyle();
+            quickAddButtonStyle.fixedWidth = 16.0f;
+            quickAddButtonStyle.fixedHeight = 16.0f;
+            quickAddButtonStyle.hover.background = Texture2D.grayTexture;
 
             if (toolbarIcons == null)
             {
@@ -71,6 +82,20 @@ namespace CesiumForUnity
                     CesiumEditorWindow.ToolbarButton.SignOut,
                     LoadIcon("FontAwesome/sign-out-alt-solid"));
             }
+
+            toolbarStyle = new GUIStyle();
+            toolbarStyle.margin = new RectOffset(5, 5, 5, 5);
+
+            toolbarButtonStyle = new GUIStyle();
+            toolbarButtonStyle.imagePosition = ImagePosition.ImageAbove;
+            toolbarButtonStyle.padding = new RectOffset(5, 5, 5, 5);
+            toolbarButtonStyle.alignment = TextAnchor.MiddleCenter;
+            toolbarButtonStyle.normal.textColor = EditorStyles.label.normal.textColor;
+            toolbarButtonStyle.hover.textColor = EditorStyles.label.normal.textColor;
+            toolbarButtonStyle.hover.background = Texture2D.grayTexture;
+
+            toolbarButtonDisabledStyle = new GUIStyle(toolbarButtonStyle);
+            toolbarButtonDisabledStyle.hover.background = null;
 
             if (refreshIcon == null)
             {
@@ -97,39 +122,6 @@ namespace CesiumForUnity
                 buttonPressedTexture.SetPixel(0, 0, buttonColorDarker);
                 buttonPressedTexture.Apply();
             }
-        }
-
-        private static Texture2D LoadIcon(string resourcePath)
-        {
-            Texture2D icon = (Texture2D)Resources.Load(resourcePath);
-            icon.wrapMode = TextureWrapMode.Clamp;
-
-            return icon;
-        }
-
-        private static void LoadStyles()
-        {
-            toolbarStyle = new GUIStyle();
-            toolbarStyle.margin = new RectOffset(5, 5, 5, 5);
-
-            toolbarButtonStyle = new GUIStyle();
-            toolbarButtonStyle.imagePosition = ImagePosition.ImageAbove;
-            toolbarButtonStyle.padding = new RectOffset(5, 5, 5, 5);
-            toolbarButtonStyle.alignment = TextAnchor.MiddleCenter;
-            toolbarButtonStyle.normal.textColor = EditorStyles.label.normal.textColor;
-            toolbarButtonStyle.hover.textColor = EditorStyles.label.normal.textColor;
-            toolbarButtonStyle.hover.background = Texture2D.grayTexture;
-
-            toolbarButtonDisabledStyle = new GUIStyle(toolbarButtonStyle);
-            toolbarButtonDisabledStyle.hover.background = null;
-
-            quickAddItemStyle = new GUIStyle();
-            quickAddItemStyle.margin = new RectOffset(5, 5, 10, 10);
-
-            quickAddButtonStyle = new GUIStyle();
-            quickAddButtonStyle.fixedWidth = 16.0f;
-            quickAddButtonStyle.fixedHeight = 16.0f;
-            quickAddButtonStyle.hover.background = Texture2D.grayTexture;
 
             cesiumButtonStyle = new GUIStyle();
             cesiumButtonStyle.padding = new RectOffset(25, 25, 10, 10);
@@ -156,15 +148,16 @@ namespace CesiumForUnity
             refreshButtonStyle.fixedHeight = 32;
             refreshButtonStyle.fixedWidth = 40;
 
-            descriptionHeaderStyle = new GUIStyle(EditorStyles.label);
-            descriptionHeaderStyle.fontSize = 18;
-            descriptionHeaderStyle.wordWrap = true;
+            headerStyle = new GUIStyle(EditorStyles.label);
+            headerStyle.fontSize = 18;
+            headerStyle.wordWrap = true;
 
-            descriptionSubheaderStyle = new GUIStyle(EditorStyles.label);
-            descriptionSubheaderStyle.fontSize = 14;
+            subheaderStyle = new GUIStyle(EditorStyles.label);
+            subheaderStyle.fontSize = 14;
+            subheaderStyle.margin = new RectOffset(5, 5, 5, 5);
 
-            descriptionCenterTextStyle = new GUIStyle(EditorStyles.label);
-            descriptionCenterTextStyle.alignment = TextAnchor.MiddleCenter;
+            checkIcon = LoadIcon("FontAwesome/check-solid");
+            xIcon = LoadIcon("FontAwesome/times-solid");
         }
 
     }
