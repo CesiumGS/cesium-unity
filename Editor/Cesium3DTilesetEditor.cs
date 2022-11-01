@@ -6,7 +6,6 @@ using UnityEngine;
 namespace CesiumForUnity
 {
     [CustomEditor(typeof(Cesium3DTileset))]
-    [CanEditMultipleObjects]
     public class Cesium3DTilesetEditor : Editor
     {
         private Cesium3DTileset _tileset;

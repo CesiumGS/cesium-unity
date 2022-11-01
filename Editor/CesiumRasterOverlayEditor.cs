@@ -3,95 +3,45 @@ using UnityEngine;
 
 namespace CesiumForUnity
 {
-    [CustomEditor(typeof(CesiumRasterOverlay), true)]
-    [CanEditMultipleObjects]
+    [CustomEditor(typeof(CesiumRasterOverlay))]
     public class CesiumRasterOverlayEditor : Editor
     {
         private CesiumRasterOverlay _overlay;
 
-        internal CesiumRasterOverlay overlay
-        {
-            get => this._overlay;
-            set
-            {
-                this._overlay = value;
-            }
-        }
-
-        internal bool showCreditsOnScreen
-        {
-            get => this._overlay.showCreditsOnScreen;
-            set
-            {
-                if (this._overlay.showCreditsOnScreen != value)
-                {
-                    this._overlay.showCreditsOnScreen = value;
-                }
-            }
-        }
-
-        internal float maximumScreenSpaceError
-        {
-            get => this._overlay.maximumScreenSpaceError;
-            set
-            {
-                if (this._overlay.maximumScreenSpaceError != value)
-                {
-                    this._overlay.maximumScreenSpaceError = value;
-                }
-            }
-        }
-
-        internal int maximumTextureSize
-        {
-            get => this._overlay.maximumTextureSize;
-            set
-            {
-                if (this._overlay.maximumTextureSize != value)
-                {
-                    this._overlay.maximumTextureSize = value;
-                }
-            }
-        }
-
-        internal int maximumSimultaneousTileLoads
-        {
-            get => this._overlay.maximumSimultaneousTileLoads;
-            set
-            {
-                if (this._overlay.maximumSimultaneousTileLoads != value)
-                {
-                    this._overlay.maximumSimultaneousTileLoads = value;
-                }
-            }
-        }
-
-        internal long subTileCacheBytes
-        {
-            get => this._overlay.subTileCacheBytes;
-            set
-            {
-                if (this._overlay.subTileCacheBytes != value)
-                {
-                    this._overlay.subTileCacheBytes = value;
-                }
-            }
-        }
+        private SerializedProperty _showCreditsOnScreen;
+        private SerializedProperty _maximumScreenSpaceError;
+        private SerializedProperty _maximumTextureSize;
+        private SerializedProperty _maximumSimultaneousTileLoads;
+        private SerializedProperty _subTileCacheBytes;
 
         private void OnEnable()
         {
-            this.overlay = (CesiumRasterOverlay)target;
+            this._overlay = (CesiumRasterOverlay)target;
+
+            this._showCreditsOnScreen = this.serializedObject.FindProperty("_showCreditsOnScreen");
+            this._maximumScreenSpaceError =
+                this.serializedObject.FindProperty("_maximumScreenSpaceError");
+            this._maximumTextureSize = this.serializedObject.FindProperty("_maximumTextureSize");
+            this._maximumSimultaneousTileLoads =
+                this.serializedObject.FindProperty("_maximumSimultaneousTileLoads");
+            this._subTileCacheBytes = this.serializedObject.FindProperty("_subTileCacheBytes");
         }
 
         public override void OnInspectorGUI()
         {
             EditorGUIUtility.labelWidth = CesiumEditorStyle.inspectorLabelWidth;
+            this.serializedObject.Update();
+            DrawRasterOverlayProperties();
+            this.serializedObject.ApplyModifiedProperties();
+        }
 
+        private void DrawRasterOverlayProperties()
+        {
             GUIContent showCreditsOnScreenContent = new GUIContent(
                 "Show Credits On Screen",
                 "Whether or not to show credits of this raster overlay on screen.");
-            this.showCreditsOnScreen =
-                EditorGUILayout.Toggle(showCreditsOnScreenContent, this.showCreditsOnScreen);
+            EditorGUILayout.PropertyField(
+                this._showCreditsOnScreen, showCreditsOnScreenContent);
 
             GUIContent maximumScreenSpaceErrorContent = new GUIContent(
                 "Maximum Screen Space Error",
@@ -102,9 +52,8 @@ namespace CesiumForUnity
                 "overlay images will be sized so that, when zoomed in closest, a single " +
                 "pixel in the raster overlay maps to approximately 2x2 pixels on the " +
                 "screen.");
-            this.maximumScreenSpaceError = EditorGUILayout.FloatField(
-                maximumScreenSpaceErrorContent,
-                this.maximumScreenSpaceError);
+            EditorGUILayout.PropertyField(
+                this._maximumScreenSpaceError, maximumScreenSpaceErrorContent);
 
             GUIContent maximumTextureSizeContent = new GUIContent(
                 "Maximum Texture Size",
@@ -113,20 +62,18 @@ namespace CesiumForUnity
                 "Images created by this overlay will be no more than this number of " +
                 "texels in either direction. This may result in reduced raster overlay " +
                 "detail in some cases.");
-            this.maximumTextureSize = EditorGUILayout.IntField(
-                maximumTextureSizeContent,
-                this.maximumTextureSize);
+            EditorGUILayout.PropertyField(
+                this._maximumTextureSize, maximumTextureSizeContent);
 
             GUIContent maximumSimultaneousTileLoadsContent = new GUIContent(
                 "Maximum Simultaneous Tile Loads",
                 "The maximum number of overlay tiles that may simultaneously be in " +
                 "the process of loading.");
-            this.maximumSimultaneousTileLoads = EditorGUILayout.IntField(
-                maximumSimultaneousTileLoadsContent,
-                this.maximumSimultaneousTileLoads);
+            EditorGUILayout.PropertyField(
+                this._maximumSimultaneousTileLoads, maximumSimultaneousTileLoadsContent);
 
             GUIContent subTileCacheBytesContent = new GUIContent(
-                "Sub-Tile Cache Bytes",
+                "Sub Tile Cache Bytes",
                 "The maximum number of bytes to use to cache sub-tiles in memory." +
                 "\n\n" +
                 "This is used by provider types, that have an underlying tiling " +
@@ -135,10 +82,8 @@ namespace CesiumForUnity
                 "single sub-tile may overlap multiple geometry tiles, it is useful " +
                 "to cache loaded sub-tiles in memory in case they're needed again " +
                 "soon. This property controls the maximum size of that cache.");
-            this.subTileCacheBytes = EditorGUILayout.LongField(
-                subTileCacheBytesContent,
-                this.subTileCacheBytes);
+            EditorGUILayout.PropertyField(
+                this._subTileCacheBytes, subTileCacheBytesContent);
         }
     }
-
 }
