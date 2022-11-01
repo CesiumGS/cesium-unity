@@ -281,7 +281,7 @@ void Cesium3DTilesetImpl::LoadTileset(
   options.lodTransitionLength = tileset.lodTransitionLength();
   options.showCreditsOnScreen = tileset.showCreditsOnScreen();
   options.loadErrorCallback =
-      [this, tileset](const TilesetLoadFailureDetails& details) {
+      [tileset](const TilesetLoadFailureDetails& details) {
         int typeValue = (int)details.type;
         CesiumForUnity::Cesium3DTilesetLoadFailureDetails unityDetails(
             tileset,

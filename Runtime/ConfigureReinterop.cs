@@ -226,6 +226,15 @@ namespace CesiumForUnity
             CesiumRasterOverlay overlay = go.GetComponent<CesiumRasterOverlay>();
             baseOverlay.AddToTileset();
             baseOverlay.RemoveFromTileset();
+            CesiumRasterOverlayOptions options = new CesiumRasterOverlayOptions();
+            options.showCreditsOnScreen = options.showCreditsOnScreen;
+            options.maximumScreenSpaceError = options.maximumScreenSpaceError;
+            options.maximumTextureSize = options.maximumTextureSize;
+            options.maximumSimultaneousTileLoads = options.maximumSimultaneousTileLoads;
+            options.subTileCacheBytes = options.subTileCacheBytes;
+            CesiumBingMapsRasterOverlay bingMapsRasterOverlay = go.GetComponent<CesiumBingMapsRasterOverlay>();
+            bingMapsRasterOverlay.bingMapsKey = bingMapsRasterOverlay.bingMapsKey;
+            bingMapsRasterOverlay.mapStyle = bingMapsRasterOverlay.mapStyle;
 
             CesiumRasterOverlay[] overlaysArray = go.GetComponents<CesiumRasterOverlay>();
             int len = overlaysArray.Length;

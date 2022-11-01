@@ -323,6 +323,7 @@ namespace CesiumForUnity
 
         public override void OnInspectorGUI()
         {
+            EditorGUIUtility.labelWidth = CesiumEditorStyle.inspectorLabelWidth;
             DrawInspectorButtons();
             EditorGUILayout.Space(5);
             DrawShowCreditsOnScreenToggle();

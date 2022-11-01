@@ -4,34 +4,35 @@
 
 namespace DotNet::CesiumForUnity {
 class Cesium3DTileset;
-class CesiumIonRasterOverlay;
+class CesiumBingMapsRasterOverlay;
 class CesiumRasterOverlayOptions;
 } // namespace DotNet::CesiumForUnity
 
 namespace Cesium3DTilesSelection {
-class IonRasterOverlay;
+class BingMapsRasterOverlay;
 }
 
 namespace CesiumForUnityNative {
 
-class CesiumIonRasterOverlayImpl {
+class CesiumBingMapsRasterOverlayImpl {
 public:
-  CesiumIonRasterOverlayImpl(
-      const DotNet::CesiumForUnity::CesiumIonRasterOverlay& overlay);
-  ~CesiumIonRasterOverlayImpl();
+  CesiumBingMapsRasterOverlayImpl(
+      const DotNet::CesiumForUnity::CesiumBingMapsRasterOverlay& overlay);
+  ~CesiumBingMapsRasterOverlayImpl();
 
   void JustBeforeDelete(
-      const ::DotNet::CesiumForUnity::CesiumIonRasterOverlay& overlay);
+      const ::DotNet::CesiumForUnity::CesiumBingMapsRasterOverlay& overlay);
   void AddToTileset(
-      const ::DotNet::CesiumForUnity::CesiumIonRasterOverlay& overlay,
+      const ::DotNet::CesiumForUnity::CesiumBingMapsRasterOverlay& overlay,
       const ::DotNet::CesiumForUnity::Cesium3DTileset& tileset,
       const ::DotNet::CesiumForUnity::CesiumRasterOverlayOptions& options);
   void RemoveFromTileset(
-      const ::DotNet::CesiumForUnity::CesiumIonRasterOverlay& overlay,
+      const ::DotNet::CesiumForUnity::CesiumBingMapsRasterOverlay& overlay,
       const ::DotNet::CesiumForUnity::Cesium3DTileset& tileset);
 
 private:
-  CesiumUtility::IntrusivePointer<Cesium3DTilesSelection::IonRasterOverlay>
+  CesiumUtility::IntrusivePointer<
+      Cesium3DTilesSelection::BingMapsRasterOverlay>
       _pOverlay;
 };
 
