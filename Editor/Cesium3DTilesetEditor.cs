@@ -11,318 +11,89 @@ namespace CesiumForUnity
     {
         private Cesium3DTileset _tileset;
 
-        internal Cesium3DTileset tileset
-        {
-            get => this._tileset;
-            set
-            {
-                this._tileset = value;
-            }
-        }
+        private SerializedProperty _showCreditsOnScreen;
 
-        internal bool showCreditsOnScreen
-        {
-            get => this._tileset.showCreditsOnScreen;
-            set
-            {
-                if (this._tileset.showCreditsOnScreen != value)
-                {
-                    this._tileset.showCreditsOnScreen = value;
-                }
-            }
-        }
+        private SerializedProperty _tilesetSource;
+        private SerializedProperty _url;
+        private SerializedProperty _ionAssetID;
+        private SerializedProperty _ionAccessToken;
 
-        internal CesiumDataSource tilesetSource
-        {
-            get => this._tileset.tilesetSource;
-            set
-            {
-                if (this._tileset.tilesetSource != value)
-                {
-                    this._tileset.tilesetSource = value;
-                }
-            }
-        }
+        private SerializedProperty _maximumScreenSpaceError;
 
-        internal string url
-        {
-            get => this._tileset.url;
-            set
-            {
-                if (this._tileset.url != value)
-                {
-                    this._tileset.url = value;
-                }
-            }
-        }
+        private SerializedProperty _preloadAncestors;
+        private SerializedProperty _preloadSiblings;
+        private SerializedProperty _forbidHoles;
+        private SerializedProperty _maximumSimultaneousTileLoads;
+        private SerializedProperty _maximumCachedBytes;
+        private SerializedProperty _loadingDescendantLimit;
 
-        internal long ionAssetID
-        {
-            get => this._tileset.ionAssetID;
-            set
-            {
-                if (this._tileset.ionAssetID != value)
-                {
-                    this._tileset.ionAssetID = value;
-                }
-            }
-        }
+        private SerializedProperty _enableFrustumCulling;
+        private SerializedProperty _enableFogCulling;
+        private SerializedProperty _enforceCulledScreenSpaceError;
+        private SerializedProperty _culledScreenSpaceError;
 
-        internal string ionAccessToken
-        {
-            get => this._tileset.ionAccessToken;
-            set
-            {
-                if (this._tileset.ionAccessToken != value)
-                {
-                    this._tileset.ionAccessToken = value;
-                }
-            }
-        }
+        private SerializedProperty _opaqueMaterial;
+        private SerializedProperty _useLodTransitions;
+        private SerializedProperty _lodTransitionLength;
+        private SerializedProperty _generateSmoothNormals;
 
-        internal float maximumScreenSpaceError
-        {
-            get => this._tileset.maximumScreenSpaceError;
-            set
-            {
-                if (this._tileset.maximumScreenSpaceError != value)
-                {
-                    this._tileset.maximumScreenSpaceError = value;
-                }
-            }
-        }
+        private SerializedProperty _suspendUpdate;
+        private SerializedProperty _updateInEditor;
+        private SerializedProperty _logSelectionStats;
 
-        internal bool preloadAncestors
-        {
-            get => this._tileset.preloadAncestors;
-            set
-            {
-                if (this._tileset.preloadAncestors != value)
-                {
-                    this._tileset.preloadAncestors = value;
-                }
-            }
-        }
-
-        internal bool preloadSiblings
-        {
-            get => this._tileset.preloadSiblings;
-            set
-            {
-                if (this._tileset.preloadSiblings != value)
-                {
-                    this._tileset.preloadSiblings = value;
-                }
-            }
-        }
-
-        internal bool forbidHoles
-        {
-            get => this._tileset.forbidHoles;
-            set
-            {
-                if (this._tileset.forbidHoles != value)
-                {
-                    this._tileset.forbidHoles = value;
-                }
-            }
-        }
-
-        internal uint maximumSimultaneousTileLoads
-        {
-            get => this._tileset.maximumSimultaneousTileLoads;
-            set
-            {
-                if (this._tileset.maximumSimultaneousTileLoads != value)
-                {
-                    this._tileset.maximumSimultaneousTileLoads = value;
-                }
-            }
-        }
-
-        internal long maximumCachedBytes
-        {
-            get => this._tileset.maximumCachedBytes;
-            set
-            {
-                if (this._tileset.maximumCachedBytes != value)
-                {
-                    this._tileset.maximumCachedBytes = value;
-                }
-            }
-        }
-
-        internal uint loadingDescendantLimit
-        {
-            get => this._tileset.loadingDescendantLimit;
-            set
-            {
-                if (this._tileset.loadingDescendantLimit != value)
-                {
-                    this._tileset.loadingDescendantLimit = value;
-                }
-            }
-        }
-
-        internal bool enableFrustumCulling
-        {
-            get => this._tileset.enableFrustumCulling;
-            set
-            {
-                if (this._tileset.enableFrustumCulling != value)
-                {
-                    this._tileset.enableFrustumCulling = value;
-                }
-            }
-        }
-
-        internal bool enableFogCulling
-        {
-            get => this._tileset.enableFogCulling;
-            set
-            {
-                if (this._tileset.enableFogCulling != value)
-                {
-                    this._tileset.enableFogCulling = value;
-                }
-            }
-        }
-
-        internal bool enforceCulledScreenSpaceError
-        {
-            get => this._tileset.enforceCulledScreenSpaceError;
-            set
-            {
-                if (this._tileset.enforceCulledScreenSpaceError != value)
-                {
-                    this._tileset.enforceCulledScreenSpaceError = value;
-                }
-            }
-        }
-
-        internal float culledScreenSpaceError
-        {
-            get => this._tileset.culledScreenSpaceError;
-            set
-            {
-                if (this._tileset.culledScreenSpaceError != value)
-                {
-                    this._tileset.culledScreenSpaceError = value;
-                }
-            }
-        }
-
-        internal Material? opaqueMaterial
-        {
-            get => this._tileset.opaqueMaterial;
-            set
-            {
-                if (this._tileset.opaqueMaterial != value)
-                {
-                    this._tileset.opaqueMaterial = value;
-                }
-            }
-        }
-
-        internal bool useLodTransitions
-        {
-            get => this._tileset.useLodTransitions;
-            set
-            {
-                if (this._tileset.useLodTransitions != value)
-                {
-                    this._tileset.useLodTransitions = value;
-                }
-            }
-        }
-
-        internal float lodTransitionLength
-        {
-            get => this._tileset.lodTransitionLength;
-            set
-            {
-                if (this._tileset.lodTransitionLength != value)
-                {
-                    this._tileset.lodTransitionLength = value;
-                }
-            }
-        }
-
-        internal bool generateSmoothNormals
-        {
-            get => this._tileset.generateSmoothNormals;
-            set
-            {
-                if (this._tileset.generateSmoothNormals != value)
-                {
-                    this._tileset.generateSmoothNormals = value;
-                }
-            }
-        }
-
-        internal bool suspendUpdate
-        {
-            get => this._tileset.suspendUpdate;
-            set
-            {
-                if (this._tileset.suspendUpdate != value)
-                {
-                    this._tileset.suspendUpdate = value;
-                }
-            }
-        }
-
-        internal bool updateInEditor
-        {
-            get => this._tileset.updateInEditor;
-            set
-            {
-                if (this._tileset.updateInEditor != value)
-                {
-                    this._tileset.updateInEditor = value;
-                }
-            }
-        }
-
-        internal bool logSelectionStats
-        {
-            get => this._tileset.logSelectionStats;
-            set
-            {
-                if (this._tileset.logSelectionStats != value)
-                {
-                    this._tileset.logSelectionStats = value;
-                }
-            }
-        }
-
-        internal bool createPhysicsMeshes
-        {
-            get => this._tileset.createPhysicsMeshes;
-            set
-            {
-                if (this._tileset.createPhysicsMeshes != value)
-                {
-                    this._tileset.createPhysicsMeshes = value;
-                }
-            }
-        }
-
-        // Unity doesn't provide a formal method for uints, so this
-        // is simulated with an IntField and a range check.
-        private static uint UintField(GUIContent content, uint value)
-        {
-            int result = EditorGUILayout.IntField(content, (int)value);
-            return (uint)Mathf.Max(result, 0);
-        }
+        private SerializedProperty _createPhysicsMeshes;
 
         private void OnEnable()
         {
-            this.tileset = (Cesium3DTileset)target;
+            this._tileset = (Cesium3DTileset)target;
+
+            this._showCreditsOnScreen =
+                this.serializedObject.FindProperty("_showCreditsOnScreen");
+
+            this._tilesetSource = this.serializedObject.FindProperty("_tilesetSource");
+            this._url = this.serializedObject.FindProperty("_url");
+            this._ionAssetID = this.serializedObject.FindProperty("_ionAssetID");
+            this._ionAccessToken = this.serializedObject.FindProperty("_ionAccessToken");
+
+            this._maximumScreenSpaceError =
+                this.serializedObject.FindProperty("_maximumScreenSpaceError");
+
+            this._preloadAncestors = this.serializedObject.FindProperty("_preloadAncestors");
+            this._preloadSiblings = this.serializedObject.FindProperty("_preloadSiblings");
+            this._forbidHoles = this.serializedObject.FindProperty("_forbidHoles");
+            this._maximumSimultaneousTileLoads =
+                this.serializedObject.FindProperty("_maximumSimultaneousTileLoads");
+            this._maximumCachedBytes = this.serializedObject.FindProperty("_maximumCachedBytes");
+            this._loadingDescendantLimit =
+                this.serializedObject.FindProperty("_loadingDescendantLimit");
+
+            this._enableFrustumCulling =
+                this.serializedObject.FindProperty("_enableFrustumCulling");
+            this._enableFogCulling = this.serializedObject.FindProperty("_enableFogCulling");
+            this._enforceCulledScreenSpaceError =
+                this.serializedObject.FindProperty("_enforceCulledScreenSpaceError");
+            this._culledScreenSpaceError =
+                this.serializedObject.FindProperty("_culledScreenSpaceError");
+
+            this._opaqueMaterial = this.serializedObject.FindProperty("_opaqueMaterial");
+            this._useLodTransitions = this.serializedObject.FindProperty("_useLodTransitions");
+            this._lodTransitionLength =
+                this.serializedObject.FindProperty("_lodTransitionLength");
+            this._generateSmoothNormals =
+                this.serializedObject.FindProperty("_generateSmoothNormals");
+
+            this._suspendUpdate = this.serializedObject.FindProperty("_suspendUpdate");
+            this._updateInEditor = this.serializedObject.FindProperty("_updateInEditor");
+            this._logSelectionStats = this.serializedObject.FindProperty("_logSelectionStats");
+
+            this._createPhysicsMeshes =
+                this.serializedObject.FindProperty("_createPhysicsMeshes");
         }
 
         public override void OnInspectorGUI()
         {
+            this.serializedObject.Update();
+
             EditorGUIUtility.labelWidth = CesiumEditorStyle.inspectorLabelWidth;
             DrawInspectorButtons();
             EditorGUILayout.Space(5);
@@ -341,6 +112,8 @@ namespace CesiumForUnity
             DrawDebugProperties();
             EditorGUILayout.Space(5);
             DrawPhysicsProperties();
+
+            this.serializedObject.ApplyModifiedProperties();
         }
 
         private void DrawInspectorButtons()
@@ -353,7 +126,7 @@ namespace CesiumForUnity
                 "changes are made and not reflected in the tileset, this function can help.");
             if (GUILayout.Button(refreshTilesetContent))
             {
-                this.tileset.RecreateTileset();
+                this._tileset.RecreateTileset();
             }
 
             GUIContent troubleshootTokenContent = new GUIContent(
@@ -362,7 +135,7 @@ namespace CesiumForUnity
                 "and fix it if necessary.");
             if (GUILayout.Button(troubleshootTokenContent))
             {
-                IonTokenTroubleshootingWindow.ShowWindow(this.tileset, false);
+                IonTokenTroubleshootingWindow.ShowWindow(this._tileset, false);
             }
             GUILayout.EndHorizontal();
         }
@@ -372,8 +145,7 @@ namespace CesiumForUnity
             GUIContent showCreditsOnScreenContent = new GUIContent(
               "Show Credits On Screen",
               "Whether or not to show this tileset's credits on screen.");
-            this.showCreditsOnScreen =
-                EditorGUILayout.Toggle(showCreditsOnScreenContent, this.showCreditsOnScreen);
+            EditorGUILayout.PropertyField(this._showCreditsOnScreen, showCreditsOnScreenContent);
         }
 
         private void DrawSourceProperties()
@@ -383,27 +155,26 @@ namespace CesiumForUnity
             GUIContent tilesetSourceContent = new GUIContent(
                 "Tileset Source",
                 "Whether this tileset should be loaded from a URL or from Cesium ion.");
-            this.tilesetSource = (CesiumDataSource)
-                EditorGUILayout.EnumPopup(tilesetSourceContent, tileset.tilesetSource);
+            EditorGUILayout.PropertyField(this._tilesetSource, tilesetSourceContent);
 
-            EditorGUI.BeginDisabledGroup(tileset.tilesetSource != CesiumDataSource.FromUrl);
+            CesiumDataSource tilesetSource = (CesiumDataSource)this._tilesetSource.enumValueIndex;
+
+            EditorGUI.BeginDisabledGroup(tilesetSource != CesiumDataSource.FromUrl);
             GUIContent urlContent = new GUIContent(
                 "URL",
                 "The URL of this tileset's \"tileset.json\" file.");
-            this.url = EditorGUILayout.DelayedTextField(urlContent, this.url);
+            EditorGUILayout.DelayedTextField(this._url, urlContent);
             EditorGUI.EndDisabledGroup();
 
-            EditorGUI.BeginDisabledGroup(tileset.tilesetSource != CesiumDataSource.FromCesiumIon);
+            EditorGUI.BeginDisabledGroup(tilesetSource != CesiumDataSource.FromCesiumIon);
             GUIContent ionAssetIDContent = new GUIContent(
                 "ion Asset ID",
                 "The ID of the Cesium ion asset to use.");
-            this.ionAssetID = EditorGUILayout.DelayedIntField(ionAssetIDContent, (int)this.ionAssetID);
+            EditorGUILayout.DelayedIntField(this._ionAssetID, ionAssetIDContent);
             GUIContent ionAccessTokenContent = new GUIContent(
                 "ion Access Token",
                 "The access token to use to access the Cesium ion resource.");
-            this.ionAccessToken = EditorGUILayout.DelayedTextField(
-                ionAccessTokenContent,
-                this.ionAccessToken);
+            EditorGUILayout.DelayedTextField(this._ionAccessToken, ionAccessTokenContent);
             EditorGUI.EndDisabledGroup();
         }
 
@@ -425,9 +196,8 @@ namespace CesiumForUnity
                 "than 3D Tiles, this value is effectively divided by 8.0. So the default " +
                 "value of 16.0 corresponds to the standard value for quantized-mesh " +
                 "terrain of 2.0.");
-            this.maximumScreenSpaceError
-                = EditorGUILayout.FloatField(maximumScreenSpaceErrorContent,
-                                           this.maximumScreenSpaceError);
+            EditorGUILayout.PropertyField(
+                this._maximumScreenSpaceError, maximumScreenSpaceErrorContent);
         }
 
         private void DrawTileLoadingProperties()
@@ -441,8 +211,7 @@ namespace CesiumForUnity
                 "Setting this to true optimizes the zoom-out experience and provides more " +
                 "detail in newly-exposed areas when panning. The down side is that it " +
                 "requires loading more tiles.");
-            this.preloadAncestors
-                = EditorGUILayout.Toggle(preloadAncestorsContent, this.preloadAncestors);
+            EditorGUILayout.PropertyField(this._preloadAncestors, preloadAncestorsContent);
 
             GUIContent preloadSiblingsContent = new GUIContent(
                 "Preload Siblings",
@@ -451,8 +220,7 @@ namespace CesiumForUnity
                 "Setting this to true causes tiles with the same parent as a rendered " +
                 "tile to be loaded, even if they are culled. Setting this to true may " +
                 "provide a better panning experience at the cost of loading more tiles.");
-            this.preloadSiblings
-                = EditorGUILayout.Toggle(preloadSiblingsContent, this.preloadSiblings);
+            EditorGUILayout.PropertyField(this._preloadSiblings, preloadSiblingsContent);
 
             GUIContent forbidHolesContent = new GUIContent(
                "Forbid Holes",
@@ -463,8 +231,7 @@ namespace CesiumForUnity
                "even though the tile that is rendered instead may have low resolution. " +
                "When false, overall loading will be faster, but newly-visible parts of the " +
                "tileset may initially be blank.");
-            this.forbidHoles
-                = EditorGUILayout.Toggle(forbidHolesContent, this.forbidHoles);
+            EditorGUILayout.PropertyField(this._forbidHoles, forbidHolesContent);
 
             GUIContent maximumSimultaneousTileLoadsContent =
                 new GUIContent(
@@ -476,9 +243,8 @@ namespace CesiumForUnity
                     "many of these tasks are processed at the same time. A higher value may " +
                     "cause the tiles to be loaded and rendered more quickly, at the cost of " +
                     "a higher network- and processing load.");
-            this.maximumSimultaneousTileLoads = UintField(
-                maximumSimultaneousTileLoadsContent,
-                this.maximumSimultaneousTileLoads);
+            EditorGUILayout.PropertyField(
+                this._maximumSimultaneousTileLoads, maximumSimultaneousTileLoadsContent);
 
             GUIContent maximumCachedBytesContent = new GUIContent(
                 "Maximum Cached Bytes",
@@ -489,9 +255,7 @@ namespace CesiumForUnity
                 "bytes is greater than this value, tiles will be unloaded until the " +
                 "total is under this number or until only required tiles remain, whichever " +
                 "comes first.");
-            this.maximumCachedBytes = EditorGUILayout.LongField(
-                maximumCachedBytesContent,
-                this.maximumCachedBytes);
+            EditorGUILayout.PropertyField(this._maximumCachedBytes, maximumCachedBytesContent);
 
             GUIContent loadingDescendantLimitContent = new GUIContent(
                 "Loading Descendant Limit",
@@ -504,16 +268,15 @@ namespace CesiumForUnity
                 "like 1000 will decrease the overall time until the desired level of detail " +
                 "is achieved, but this high-detail representation will appear at once, as " +
                 "soon as it is loaded completely.");
-            this.loadingDescendantLimit = UintField(
-                loadingDescendantLimitContent,
-                this.loadingDescendantLimit);
+            EditorGUILayout.PropertyField(
+                this._loadingDescendantLimit, loadingDescendantLimitContent);
         }
 
         private void DrawTileCullingProperties()
         {
             GUILayout.Label("Tile Culling", EditorStyles.boldLabel);
 
-            EditorGUI.BeginDisabledGroup(this.useLodTransitions);
+            EditorGUI.BeginDisabledGroup(this._useLodTransitions.boolValue);
             GUIContent enableFrustumCullingContent = new GUIContent(
                 "Enable Frustum Culling",
                 "Whether to cull tiles that are outside the frustum." +
@@ -526,8 +289,7 @@ namespace CesiumForUnity
                 "provides a more consistent mesh, which may be helpful for physics." +
                 "\n\n" +
                 "Note that this will always be disabled if \"Use Lod Transitions\" is set to true.");
-            this.enableFrustumCulling =
-                EditorGUILayout.Toggle(enableFrustumCullingContent, this.enableFrustumCulling);
+            EditorGUILayout.PropertyField(this._enableFrustumCulling, enableFrustumCullingContent);
 
             GUIContent enableFogCullingContent = new GUIContent(
                 "Enable Fog Culling",
@@ -539,8 +301,7 @@ namespace CesiumForUnity
                 "culled when this flag is enabled." +
                 "\n\n" +
                 "Note that this will always be disabled if \"Use Lod Transitions\" is set to true.");
-            this.enableFogCulling =
-                EditorGUILayout.Toggle(enableFogCullingContent, this.enableFogCulling);
+            EditorGUILayout.PropertyField(this._enableFogCulling, enableFogCullingContent);
             EditorGUI.EndDisabledGroup();
 
             GUIContent enforceCulledScreenSpaceErrorContent = new GUIContent(
@@ -563,12 +324,11 @@ namespace CesiumForUnity
                 "When set to true, these tiles are refined until they achieve the specified " +
                 "\"Culled Screen Space Error\". This allows control over the minimum quality " +
                 "of these would-be-culled tiles.");
-            this.enforceCulledScreenSpaceError =
-                EditorGUILayout.Toggle(
-                    enforceCulledScreenSpaceErrorContent,
-                    this.enforceCulledScreenSpaceError);
 
-            EditorGUI.BeginDisabledGroup(!this.enforceCulledScreenSpaceError);
+            EditorGUILayout.PropertyField(
+                this._enforceCulledScreenSpaceError, enforceCulledScreenSpaceErrorContent);
+
+            EditorGUI.BeginDisabledGroup(!this._enforceCulledScreenSpaceError.boolValue);
             GUIContent culledScreenSpaceErrorContent = new GUIContent(
                 "Culled Screen Space Error",
                 "The screen-space error to be enforced for tiles that are outside " +
@@ -589,10 +349,8 @@ namespace CesiumForUnity
                 "When set to true, these tiles are refined until they achieve the specified " +
                 "\"Culled Screen Space Error\". This allows control over the minimum quality " +
                 "of these would-be-culled tiles.");
-            this.culledScreenSpaceError =
-                EditorGUILayout.FloatField(
-                    culledScreenSpaceErrorContent,
-                    this.culledScreenSpaceError);
+            EditorGUILayout.PropertyField(
+                this._culledScreenSpaceError, culledScreenSpaceErrorContent);
             EditorGUI.EndDisabledGroup();
         }
 
@@ -603,27 +361,22 @@ namespace CesiumForUnity
             GUIContent opaqueMaterialContent = new GUIContent(
                 "Opaque Material",
                 "The Material to use to render opaque parts of tiles.");
-            this.opaqueMaterial = (Material)EditorGUILayout.ObjectField(
-                opaqueMaterialContent,
-                this.opaqueMaterial,
-                typeof(Material));
+            EditorGUILayout.PropertyField(this._opaqueMaterial, opaqueMaterialContent);
 
             GUIContent useLodTransitionsContent = new GUIContent(
                 "Use Lod Transitions",
                 "Use a dithering effect when transitioning between tiles of different LODs." +
                 "\n\n" +
                 "When this is set to true, Frustrum Culling and Fog Culling are always disabled.");
-            this.useLodTransitions =
-                EditorGUILayout.Toggle(useLodTransitionsContent, this.useLodTransitions);
+            EditorGUILayout.PropertyField(this._useLodTransitions, useLodTransitionsContent);
 
-            EditorGUI.BeginDisabledGroup(!this.useLodTransitions);
+            EditorGUI.BeginDisabledGroup(!this._useLodTransitions.boolValue);
             GUIContent lodTransitionLengthContent = new GUIContent(
                 "Lod Transition Length",
                 "How long dithered LOD transitions between different tiles should take, in seconds." +
                 "\n\n" +
                 "Only relevant if \"Use Lod Transitions\" is true.");
-            this.lodTransitionLength =
-                EditorGUILayout.FloatField(lodTransitionLengthContent, this.lodTransitionLength);
+            EditorGUILayout.PropertyField(this._lodTransitionLength, lodTransitionLengthContent);
             EditorGUI.EndDisabledGroup();
 
             GUIContent generateSmoothNormalsContent = new GUIContent(
@@ -634,8 +387,7 @@ namespace CesiumForUnity
                 "implementations should calculate flat normals.\" However, calculating flat " +
                 "normals requires duplicating vertices. This option allows the glTFs to be " +
                 "sent with explicit smooth normals when the original glTF was missing normals.");
-            this.generateSmoothNormals = 
-                EditorGUILayout.Toggle(generateSmoothNormalsContent, this.generateSmoothNormals);
+            EditorGUILayout.PropertyField(this._generateSmoothNormals, generateSmoothNormalsContent);
         }
 
         private void DrawDebugProperties()
@@ -645,21 +397,18 @@ namespace CesiumForUnity
             GUIContent suspendUpdateContent = new GUIContent(
                 "Suspend Update",
                 "Pauses level-of-detail and culling updates of this tileset.");
-            this.suspendUpdate =
-                EditorGUILayout.Toggle(suspendUpdateContent, this.suspendUpdate);
+            EditorGUILayout.PropertyField(this._suspendUpdate, suspendUpdateContent);
 
             GUIContent updateInEditorContent = new GUIContent(
                 "Update in Editor",
                 "If true, this tileset is ticked/updated in the editor. " +
                 "If false, it is only ticked while playing (including Play-in-Editor).");
-            this.updateInEditor =
-                EditorGUILayout.Toggle(updateInEditorContent, this.updateInEditor);
+            EditorGUILayout.PropertyField(this._updateInEditor, updateInEditorContent);
 
             GUIContent logSelectionStatsContent = new GUIContent(
                 "Log Selection Stats",
                 "Whether to log details about the tile selection process.");
-            this.logSelectionStats =
-                EditorGUILayout.Toggle(logSelectionStatsContent, this.logSelectionStats);
+            EditorGUILayout.PropertyField(this._logSelectionStats, logSelectionStatsContent);
         }
 
         private void DrawPhysicsProperties()
@@ -672,8 +421,7 @@ namespace CesiumForUnity
                 "Disabling this option will improve the performance of tile loading, " +
                 "but it will no longer be possible to collide with the tileset since " +
                 "the physics meshes will not be created.");
-            this.createPhysicsMeshes =
-                EditorGUILayout.Toggle(createPhysicsMeshesContent, this.createPhysicsMeshes);
+            EditorGUILayout.PropertyField(this._createPhysicsMeshes, createPhysicsMeshesContent);
         }
     }
 }
