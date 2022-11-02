@@ -74,6 +74,8 @@ namespace CesiumForUnity
             transform.position = transform.position;
             transform.rotation = transform.rotation;
             transform.localScale = transform.localScale;
+            Transform root = transform.root;
+            int siblingIndex = transform.GetSiblingIndex();
             Matrix4x4 m = transform.localToWorldMatrix;
 
             go.AddComponent<MeshFilter>();
@@ -215,6 +217,7 @@ namespace CesiumForUnity
             tileset.suspendUpdate = tileset.suspendUpdate;
             tileset.previousSuspendUpdate = tileset.previousSuspendUpdate;
             tileset.updateInEditor = tileset.updateInEditor;
+            tileset.showCreditsOnScreen = tileset.showCreditsOnScreen;
 
             Cesium3DTileset tilesetFromGameObject = go.GetComponent<Cesium3DTileset>();
             MeshRenderer meshRendererFromGameObject = go.GetComponent<MeshRenderer>();
@@ -228,10 +231,22 @@ namespace CesiumForUnity
 
             CesiumRasterOverlay[] overlaysArray = go.GetComponents<CesiumRasterOverlay>();
             int len = overlaysArray.Length;
-            CesiumRasterOverlay first = overlaysArray[0];
+            overlay = overlaysArray[0];
 
             MonoBehaviour mb = tileset;
             mb.StartCoroutine(new NativeCoroutine(endIteration => endIteration).GetEnumerator());
+
+            CesiumMetadata metadata = go.AddComponent<CesiumMetadata>();
+            metadata = go.GetComponent<CesiumMetadata>();
+            CesiumMetadata metadataParent = go.GetComponentInParent<CesiumMetadata>();
+            MetadataType type = MetadataType.String;
+            if(type == MetadataType.None){
+                type = MetadataType.Int16;
+            }
+            MetadataProperty[] properties = new MetadataProperty[3];
+            var property = properties[0];
+            properties[0] = property;
+            metadata.loadMetadata(t, 0, properties);
 
             CesiumGeoreference georeference = go.AddComponent<CesiumGeoreference>();
             georeference = go.GetComponent<CesiumGeoreference>();
@@ -315,7 +330,19 @@ namespace CesiumForUnity
             test = string.Join(" ", stringArray);
             string.IsNullOrEmpty("value");
 
-            CesiumRuntimeSettings.GetDefaultIonAccessToken();
+            string token = CesiumRuntimeSettings.defaultIonAccessToken;
+
+            Cesium3DTilesetLoadFailureDetails tilesetDetails
+                = new Cesium3DTilesetLoadFailureDetails(tileset, Cesium3DTilesetLoadType.Unknown, 0, "");
+            Cesium3DTileset.BroadcastCesium3DTilesetLoadFailure(tilesetDetails);
+
+            CesiumRasterOverlayLoadFailureDetails
+                overlayDetails = new CesiumRasterOverlayLoadFailureDetails(
+                                                overlay,
+                                                CesiumRasterOverlayLoadType.Unknown,
+                                                0,
+                                                "");
+            CesiumRasterOverlay.BroadcastCesiumRasterOverlayLoadFailure(overlayDetails);
 
             CesiumVector3 cv3 = new CesiumVector3();
             cv3.x = cv3.y = cv3.z;
