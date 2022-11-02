@@ -74,6 +74,8 @@ namespace CesiumForUnity
             transform.position = transform.position;
             transform.rotation = transform.rotation;
             transform.localScale = transform.localScale;
+            Transform root = transform.root;
+            int siblingIndex = transform.GetSiblingIndex();
             Matrix4x4 m = transform.localToWorldMatrix;
 
             go.AddComponent<MeshFilter>();
@@ -243,6 +245,18 @@ namespace CesiumForUnity
             MonoBehaviour mb = tileset;
             mb.StartCoroutine(new NativeCoroutine(endIteration => endIteration).GetEnumerator());
 
+            CesiumMetadata metadata = go.AddComponent<CesiumMetadata>();
+            metadata = go.GetComponent<CesiumMetadata>();
+            CesiumMetadata metadataParent = go.GetComponentInParent<CesiumMetadata>();
+            MetadataType type = MetadataType.String;
+            if(type == MetadataType.None){
+                type = MetadataType.Int16;
+            }
+            MetadataProperty[] properties = new MetadataProperty[3];
+            var property = properties[0];
+            properties[0] = property;
+            metadata.loadMetadata(t, 0, properties);
+
             CesiumGeoreference georeference = go.AddComponent<CesiumGeoreference>();
             georeference = go.GetComponent<CesiumGeoreference>();
             georeference.longitude = georeference.longitude;
@@ -349,4 +363,3 @@ namespace CesiumForUnity
         }
     }
 }
-//

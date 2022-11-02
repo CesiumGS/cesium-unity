@@ -200,4 +200,4 @@ namespace CesiumForUnity
             assetDetails.loaded = true;
         }
     }
-}//
+}
