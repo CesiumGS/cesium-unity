@@ -98,8 +98,9 @@ namespace CesiumForUnity
             get => this._positionAuthority;
             set
             {
+                CesiumGlobeAnchorAuthority previousAuthority = this._positionAuthority;
                 this._positionAuthority = value;
-                this.UpdateGlobePosition();
+                this.UpdateGlobePosition(previousAuthority);
             }
         }
 
@@ -333,20 +334,17 @@ namespace CesiumForUnity
                 case "_longitude":
                 case "_latitude":
                 case "_height":
-                    this._positionAuthority = CesiumGlobeAnchorAuthority.LongitudeLatitudeHeight;
-                    this.UpdateGlobePosition();
+                    this.positionAuthority = CesiumGlobeAnchorAuthority.LongitudeLatitudeHeight;
                     break;
                 case "_ecefX":
                 case "_ecefY":
                 case "_ecefZ":
-                    this._positionAuthority = CesiumGlobeAnchorAuthority.EarthCenteredEarthFixed;
-                    this.UpdateGlobePosition();
+                    this.positionAuthority = CesiumGlobeAnchorAuthority.EarthCenteredEarthFixed;
                     break;
                 case "_unityX":
                 case "_unityY":
                 case "_unityZ":
-                    this._positionAuthority = CesiumGlobeAnchorAuthority.UnityWorldCoordinates;
-                    this.UpdateGlobePosition();
+                    this.positionAuthority = CesiumGlobeAnchorAuthority.UnityWorldCoordinates;
                     break;
                 case "_detectTransformChanges":
                     this.StartOrStopDetectingTransformChanges();
@@ -363,7 +361,14 @@ namespace CesiumForUnity
 
         private void Start()
         {
-            this.UpdateGlobePosition();
+            this.UpdateGlobePosition(CesiumGlobeAnchorAuthority.None);
+        }
+
+        private void OnEnable()
+        {
+            // We must do this in OnEnable instead of Start because Start doesn't re-run on domain reload,
+            // so if we only did it in Start, then in the Editor, transform change detection would stop
+            // working whenever source files were changed.
             this.StartOrStopDetectingTransformChanges();
         }
 
@@ -408,7 +413,7 @@ namespace CesiumForUnity
 
         #region Updaters
 
-        private void UpdateGlobePosition()
+        private void UpdateGlobePosition(CesiumGlobeAnchorAuthority previousAuthority)
         {
             CesiumGeoreference? georeference = this.gameObject.GetComponentInParent<CesiumGeoreference>();
             if (georeference == null)
@@ -418,9 +423,10 @@ namespace CesiumForUnity
             if (this.positionAuthority == CesiumGlobeAnchorAuthority.None)
             {
                 Vector3 position = this.transform.position;
-                this.unityX = position.x;
-                this.unityY = position.y;
-                this.unityZ = position.z;
+                this._unityX = position.x;
+                this._unityY = position.y;
+                this._unityZ = position.z;
+                this._positionAuthority = CesiumGlobeAnchorAuthority.UnityWorldCoordinates;
             }
 
             // Convert the authoritative position to ECEF
@@ -480,15 +486,12 @@ namespace CesiumForUnity
 
             // If the ECEF position changes, update the orientation based on the
             // new position on the globe (if desired).
-            //if (this.adjustOrientationForGlobeWhenMoving &&
-            //    this._positionAuthority != CesiumGlobeAnchorAuthority.None &&
-            //    (this._lastPositionEcefX != this._ecefX || this._lastPositionEcefY != this._ecefY || this._lastPositionEcefZ != this._ecefZ))
-            //{
-            //    Debug.Log("Orientation change!");
-            //}
-
-            if (this._positionAuthority == CesiumGlobeAnchorAuthority.None)
-                this._positionAuthority = CesiumGlobeAnchorAuthority.EarthCenteredEarthFixed;
+            if (this.adjustOrientationForGlobeWhenMoving &&
+                previousAuthority != CesiumGlobeAnchorAuthority.None &&
+                (this._lastPositionEcefX != this._ecefX || this._lastPositionEcefY != this._ecefY || this._lastPositionEcefZ != this._ecefZ))
+            {
+                Debug.Log("Orientation change " + this.GetInstanceID());
+            }
 
             // Set the object's transform with the new position
             this.gameObject.transform.position = new Vector3((float)this._unityX, (float)this._unityY, (float)this._unityZ);
