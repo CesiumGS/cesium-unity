@@ -98,7 +98,7 @@ void CesiumGeoreferenceImpl::RecalculateOrigin(
   }
 }
 
-void CesiumGeoreferenceImpl::Awake(
+void CesiumGeoreferenceImpl::InitializeOrigin(
     const DotNet::CesiumForUnity::CesiumGeoreference& georeference) {
   // Compute the initial coordinate system. Don't call RecalculateOrigin because
   // that will also rotate objects based on the new origin.

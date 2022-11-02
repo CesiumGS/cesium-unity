@@ -90,7 +90,10 @@ namespace CesiumForUnity
 
         private partial void RecalculateOrigin();
 
-        private partial void Awake();
+        private void OnEnable()
+        {
+            this.InitializeOrigin();
+        }
 
         /// <summary>
         /// Transform a Unity world position to Earth-Centered, Earth-Fixed (ECEF) coordinates.
@@ -105,5 +108,7 @@ namespace CesiumForUnity
         /// <param name="earthCenteredEarthFixed">The ECEF coordinates in meters.</param>
         /// <returns>The corresponding Unity world coordinates.</returns>
         public partial CesiumVector3 TransformEarthCenteredEarthFixedPositionToUnityWorld(CesiumVector3 earthCenteredEarthFixed);
+
+        private partial void InitializeOrigin();
     }
 }
