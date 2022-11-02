@@ -7,9 +7,6 @@ namespace CesiumForUnity
     public partial class CesiumIonRasterOverlay : CesiumRasterOverlay
     {
         [SerializeField]
-        [Header("Source")]
-        [Tooltip("The ID of the Cesium ion asset to use.")]
-        [InspectorName("ion Asset ID")]
         private long _ionAssetID = 0;
 
         public long ionAssetID
@@ -23,8 +20,6 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Tooltip("The access token to use to access the Cesium ion resource.")]
-        [InspectorName("ion Access Token")]
         private string _ionAccessToken = "";
 
         public string ionAccessToken
@@ -37,8 +32,7 @@ namespace CesiumForUnity
             }
         }
 
-        protected override partial void
-            AddToTileset(Cesium3DTileset tileset, CesiumRasterOverlayOptions options);
+        protected override partial void AddToTileset(Cesium3DTileset tileset);
 
         protected override partial void RemoveFromTileset(Cesium3DTileset tileset);
     }

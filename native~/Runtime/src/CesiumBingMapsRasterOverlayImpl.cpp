@@ -1,6 +1,7 @@
 #include "CesiumBingMapsRasterOverlayImpl.h"
 
 #include "Cesium3DTilesetImpl.h"
+#include "CesiumRasterOverlayUtility.h"
 
 #include <Cesium3DTilesSelection/BingMapsRasterOverlay.h>
 #include <Cesium3DTilesSelection/Tileset.h>
@@ -9,8 +10,9 @@
 #include <DotNet/CesiumForUnity/BingMapsStyle.h>
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/CesiumForUnity/CesiumBingMapsRasterOverlay.h>
-#include <DotNet/CesiumForUnity/CesiumRasterOverlayOptions.h>
-#include <DotNet/System/String.h>
+#include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
+#include <DotNet/System/Object.h>
+#include <DotNet/UnityEngine/Debug.h>
 
 using namespace Cesium3DTilesSelection;
 using namespace DotNet;
@@ -28,10 +30,14 @@ void CesiumBingMapsRasterOverlayImpl::JustBeforeDelete(
 
 void CesiumBingMapsRasterOverlayImpl::AddToTileset(
     const ::DotNet::CesiumForUnity::CesiumBingMapsRasterOverlay& overlay,
-    const ::DotNet::CesiumForUnity::Cesium3DTileset& tileset,
-    const ::DotNet::CesiumForUnity::CesiumRasterOverlayOptions& options) {
+    const ::DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
   if (this->_pOverlay != nullptr) {
     // Overlay already added.
+    return;
+  }
+
+  if (System::String::IsNullOrEmpty(overlay.bingMapsKey())) {
+    // Don't create an overlay with an empty map key.
     return;
   }
 
@@ -69,13 +75,9 @@ void CesiumBingMapsRasterOverlayImpl::AddToTileset(
     break;
   }
 
-  Cesium3DTilesSelection::RasterOverlayOptions overlayOptions{};
-  overlayOptions.maximumScreenSpaceError = options.maximumScreenSpaceError();
-  overlayOptions.maximumSimultaneousTileLoads =
-      options.maximumSimultaneousTileLoads();
-  overlayOptions.maximumTextureSize = options.maximumTextureSize();
-  overlayOptions.subTileCacheBytes = options.subTileCacheBytes();
-  overlayOptions.showCreditsOnScreen = options.showCreditsOnScreen();
+  CesiumForUnity::CesiumRasterOverlay genericOverlay = overlay;
+  RasterOverlayOptions options =
+      CesiumRasterOverlayUtility::GetOverlayOptions(genericOverlay);
 
   this->_pOverlay = new BingMapsRasterOverlay(
       overlay.name().ToStlString(),
@@ -84,7 +86,7 @@ void CesiumBingMapsRasterOverlayImpl::AddToTileset(
       mapStyle,
       "",
       CesiumGeospatial::Ellipsoid::WGS84,
-      overlayOptions);
+      options);
 
   pTileset->getOverlays().add(this->_pOverlay);
 }

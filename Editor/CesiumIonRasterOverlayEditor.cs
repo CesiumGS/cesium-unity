@@ -9,13 +9,19 @@ namespace CesiumForUnity
         private CesiumIonRasterOverlay _ionOverlay;
         private CesiumRasterOverlayEditor _rasterOverlayEditor;
 
+        private SerializedProperty _ionAssetID;
+        private SerializedProperty _ionAccessToken;
+
         private void OnEnable()
         {
-            this._ionOverlay = (CesiumIonRasterOverlay)target;
-            this._rasterOverlayEditor =
+            this._ionOverlay = (CesiumIonRasterOverlay)this.target;
+            this._rasterOverlayEditor = 
                 (CesiumRasterOverlayEditor)Editor.CreateEditor(
-                                                        target,
-                                                        typeof(CesiumRasterOverlayEditor));
+                    this.target,
+                    typeof(CesiumRasterOverlayEditor));
+
+            this._ionAssetID = this.serializedObject.FindProperty("_ionAssetID");
+            this._ionAccessToken = this.serializedObject.FindProperty("_ionAccessToken");
         }
 
         private void OnDisable()
@@ -28,13 +34,19 @@ namespace CesiumForUnity
 
         public override void OnInspectorGUI()
         {
+            EditorGUIUtility.labelWidth = CesiumEditorStyle.inspectorLabelWidth;
+            this.serializedObject.Update();
+
             DrawTroubleshootButton();
             EditorGUILayout.Space(5);
-
-            if(this._rasterOverlayEditor != null)
+            DrawIonProperties();
+            EditorGUILayout.Space(5);
+            if (this._rasterOverlayEditor != null)
             {
                this._rasterOverlayEditor.OnInspectorGUI();
             }
+
+            this.serializedObject.ApplyModifiedProperties();
         }
 
         private void DrawTroubleshootButton()
@@ -47,6 +59,19 @@ namespace CesiumForUnity
             {
                 IonTokenTroubleshootingWindow.ShowWindow(this._ionOverlay, false);
             }
+        }
+
+        private void DrawIonProperties()
+        {
+            GUIContent ionAssetIDContent = new GUIContent(
+                "ion Asset ID",
+                "The ID of the Cesium ion asset to use.");
+            EditorGUILayout.DelayedIntField(this._ionAssetID, ionAssetIDContent);
+
+            GUIContent ionAccessTokenContent = new GUIContent(
+                "ion Access Token",
+                "The access token to use to access the Cesium ion resource.");
+            EditorGUILayout.DelayedTextField(this._ionAccessToken, ionAccessTokenContent);
         }
     }
 }

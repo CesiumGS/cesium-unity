@@ -17,7 +17,9 @@ namespace CesiumForUnity
         CollinsBart
     }
 
-    [ReinteropNativeImplementation("CesiumForUnityNative::CesiumBingMapsRasterOverlayImpl", "CesiumBingMapsRasterOverlayImpl.h")]
+    [ReinteropNativeImplementation(
+        "CesiumForUnityNative::CesiumBingMapsRasterOverlayImpl",
+        "CesiumBingMapsRasterOverlayImpl.h")]
     public partial class CesiumBingMapsRasterOverlay : CesiumRasterOverlay
     {
         [SerializeField]
@@ -28,7 +30,9 @@ namespace CesiumForUnity
             get => this._bingMapsKey;
             set
             {
+                Debug.Log("Key");
                 this._bingMapsKey = value;
+                this.Refresh();
             }
         }
 
@@ -41,11 +45,11 @@ namespace CesiumForUnity
             set
             {
                 this._mapStyle = value;
+                this.Refresh();
             }
         }
 
-        protected override partial void
-            AddToTileset(Cesium3DTileset tileset, CesiumRasterOverlayOptions options);
+        protected override partial void AddToTileset(Cesium3DTileset tileset);
 
         protected override partial void RemoveFromTileset(Cesium3DTileset tileset);
     }

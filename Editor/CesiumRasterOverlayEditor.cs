@@ -31,7 +31,9 @@ namespace CesiumForUnity
         {
             EditorGUIUtility.labelWidth = CesiumEditorStyle.inspectorLabelWidth;
             this.serializedObject.Update();
+
             DrawRasterOverlayProperties();
+
             this.serializedObject.ApplyModifiedProperties();
         }
 
@@ -46,7 +48,7 @@ namespace CesiumForUnity
             GUIContent maximumScreenSpaceErrorContent = new GUIContent(
                 "Maximum Screen Space Error",
                 "The maximum number of pixels of error when rendering this overlay. " +
-                "This is used to select an appropriate level - of - detail. " +
+                "This is used to select an appropriate level-of-detail. " +
                 "\n\n" +
                 "When this property has its default value, 2.0, it means that raster " +
                 "overlay images will be sized so that, when zoomed in closest, a single " +

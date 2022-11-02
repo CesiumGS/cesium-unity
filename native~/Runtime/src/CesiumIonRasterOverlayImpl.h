@@ -5,7 +5,6 @@
 namespace DotNet::CesiumForUnity {
 class Cesium3DTileset;
 class CesiumIonRasterOverlay;
-class CesiumRasterOverlayOptions;
 } // namespace DotNet::CesiumForUnity
 
 namespace Cesium3DTilesSelection {
@@ -24,8 +23,7 @@ public:
       const ::DotNet::CesiumForUnity::CesiumIonRasterOverlay& overlay);
   void AddToTileset(
       const ::DotNet::CesiumForUnity::CesiumIonRasterOverlay& overlay,
-      const ::DotNet::CesiumForUnity::Cesium3DTileset& tileset,
-      const ::DotNet::CesiumForUnity::CesiumRasterOverlayOptions& options);
+      const ::DotNet::CesiumForUnity::Cesium3DTileset& tileset);
   void RemoveFromTileset(
       const ::DotNet::CesiumForUnity::CesiumIonRasterOverlay& overlay,
       const ::DotNet::CesiumForUnity::Cesium3DTileset& tileset);

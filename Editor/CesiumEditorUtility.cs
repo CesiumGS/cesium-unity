@@ -17,6 +17,11 @@ namespace CesiumForUnity
         static void
         HandleCesium3DTilesetLoadFailure(Cesium3DTilesetLoadFailureDetails details)
         {
+            if (details.tileset == null)
+            {
+                return;
+            }
+
             // Don't open a troubleshooting panel during play mode.
             if (EditorApplication.isPlaying)
             {
@@ -31,11 +36,18 @@ namespace CesiumForUnity
             {
                 IonTokenTroubleshootingWindow.ShowWindow(details.tileset, true);
             }
+
+            Debug.Log(details.message);
         }
 
         static void
         HandleCesiumRasterOverlayLoadFailure(CesiumRasterOverlayLoadFailureDetails details)
         {
+            if (details.overlay == null)
+            {
+                return;
+            }
+
             // Don't open a troubleshooting panel during play mode.
             if (EditorApplication.isPlaying)
             {
@@ -50,6 +62,8 @@ namespace CesiumForUnity
             {
                 IonTokenTroubleshootingWindow.ShowWindow(details.overlay, true);
             }
+
+            Debug.Log(details.message);
         }
 
         public static Cesium3DTileset? FindFirstTileset()
