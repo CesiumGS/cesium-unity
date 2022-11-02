@@ -41,7 +41,7 @@ void CesiumIonRasterOverlayImpl::AddToTileset(
   if (!pTileset)
     return;
 
-  System::String& ionAccessToken = overlay.ionAccessToken();
+  System::String ionAccessToken = overlay.ionAccessToken();
   if (System::String::IsNullOrEmpty(ionAccessToken)) {
     ionAccessToken =
         CesiumForUnity::CesiumRuntimeSettings::defaultIonAccessToken();
