@@ -43,7 +43,8 @@ namespace CesiumForUnity
     }
 
     [ExecuteInEditMode]
-    public class CesiumGlobeAnchor : MonoBehaviour, INotifyOfChanges
+    [ReinteropNativeImplementation("CesiumForUnityNative::CesiumGlobeAnchorImpl", "CesiumGlobeAnchorImpl.h")]
+    public partial class CesiumGlobeAnchor : MonoBehaviour, INotifyOfChanges
     {
         #region User-editable properties
 
@@ -490,7 +491,19 @@ namespace CesiumForUnity
                 previousAuthority != CesiumGlobeAnchorAuthority.None &&
                 (this._lastPositionEcefX != this._ecefX || this._lastPositionEcefY != this._ecefY || this._lastPositionEcefZ != this._ecefZ))
             {
-                Debug.Log("Orientation change " + this.GetInstanceID());
+                CesiumVector3 oldPosition = new CesiumVector3()
+                {
+                    x = this._lastPositionEcefX,
+                    y = this._lastPositionEcefY,
+                    z = this._lastPositionEcefZ
+                };
+                CesiumVector3 newPosition = new CesiumVector3()
+                {
+                    x = this._ecefX,
+                    y = this._ecefY,
+                    z = this._ecefZ
+                };
+                CesiumGlobeAnchor.AdjustOrientation(this, oldPosition, newPosition);
             }
 
             // Set the object's transform with the new position
@@ -505,6 +518,9 @@ namespace CesiumForUnity
         {
             this.positionAuthority = CesiumGlobeAnchorAuthority.None;
         }
+
+        // This is static so that CesiumGlobeAnchor does not need finalization.
+        private static partial void AdjustOrientation(CesiumGlobeAnchor anchor, CesiumVector3 oldPositionEcef, CesiumVector3 newPositionEcef);
 
         #endregion
     }
