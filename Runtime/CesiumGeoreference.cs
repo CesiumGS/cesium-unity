@@ -88,10 +88,23 @@ namespace CesiumForUnity
             }
         }
 
+        /// <summary>
+        /// Initializes the C++ side of the georeference transformation, without regard for the
+        /// previous state (if any).
+        /// </summary>
+        private partial void InitializeOrigin();
+
+        /// <summary>
+        /// Updates to a new origin, shifting and rotating objects with CesiumGlobeAnchor
+        /// behaviors accordingly.
+        /// </summary>
         private partial void RecalculateOrigin();
 
         private void OnEnable()
         {
+            // We must initialize the origin in OnEnable because Unity does
+            // not always call Awake at the appropriate time for `ExecuteInEditMode`
+            // components like this one.
             this.InitializeOrigin();
         }
 
@@ -108,7 +121,5 @@ namespace CesiumForUnity
         /// <param name="earthCenteredEarthFixed">The ECEF coordinates in meters.</param>
         /// <returns>The corresponding Unity world coordinates.</returns>
         public partial CesiumVector3 TransformEarthCenteredEarthFixedPositionToUnityWorld(CesiumVector3 earthCenteredEarthFixed);
-
-        private partial void InitializeOrigin();
     }
 }
