@@ -72,6 +72,7 @@ namespace CesiumForUnity
             Task.Run(() => { });
 
             CesiumIonSession session = CesiumIonSession.Ion();
+            session.IsConnected();
 
             EditorPrefs.HasKey("Key");
             EditorPrefs.GetString("Key");
@@ -102,10 +103,10 @@ namespace CesiumForUnity
             Rect r = new Rect(0, 0, 50, 50);
             GUI.Label(r, "Label");
 
-            session.TriggerConnectionUpdate();
-            session.TriggerAssetsUpdate();
-            session.TriggerProfileUpdate();
-            session.TriggerTokensUpdate();
+            session.BroadcastConnectionUpdate();
+            session.BroadcastAssetsUpdate();
+            session.BroadcastProfileUpdate();
+            session.BroadcastTokensUpdate();
 
             CesiumEditorWindow editorWindow = CesiumEditorWindow.currentWindow;
 
@@ -126,15 +127,14 @@ namespace CesiumForUnity
             tokenWindow.RefreshExistingTokenList();
             tokenWindow.Close();
 
-            CesiumRuntimeSettings.HasDefaultIonAccessToken();
-            CesiumRuntimeSettings.HasDefaultIonAccessTokenId();
-            CesiumRuntimeSettings.GetDefaultIonAccessToken();
-            CesiumRuntimeSettings.GetDefaultIonAccessTokenId();
-            CesiumRuntimeSettings.SetDefaultIonAccessToken("token");
-            CesiumRuntimeSettings.SetDefaultIonAccessTokenId("id");
+            token = CesiumRuntimeSettings.defaultIonAccessToken;
+            CesiumRuntimeSettings.defaultIonAccessToken = "token";
+
+            string tokenID = CesiumRuntimeSettings.defaultIonAccessTokenID;
+            CesiumRuntimeSettings.defaultIonAccessTokenID = "tokenID";
 
             Cesium3DTileset[] tilesets = UnityEngine.Object.FindObjectsOfType<Cesium3DTileset>();
-            Cesium3DTileset tileset = null!;
+            Cesium3DTileset tileset = tilesets[0];
             for (int i = 0; i < tilesets.Length; i++)
             {
                 tileset = tilesets[i];
@@ -143,18 +143,24 @@ namespace CesiumForUnity
                 tileset.RecreateTileset();
             }
 
+            tileset = tileset.gameObject.GetComponent<Cesium3DTileset>();
+
             CesiumIonRasterOverlay ionOverlay = tileset.gameObject.GetComponent<CesiumIonRasterOverlay>();
             token = ionOverlay.ionAccessToken;
             ionOverlay.Refresh();
             GameObject gameObject = new GameObject("Name");
             tileset = gameObject.AddComponent<Cesium3DTileset>();
-            tileset.ionAssetID = 0;
             ionOverlay = gameObject.AddComponent<CesiumIonRasterOverlay>();
+            tileset.ionAssetID = 0;
             ionOverlay.ionAssetID = 0;
 
             CesiumRasterOverlay[] rasterOverlays = tileset.gameObject.GetComponents<CesiumRasterOverlay>();
             CesiumRasterOverlay overlay = rasterOverlays[0];
             UnityEngine.Object.DestroyImmediate(overlay);
+
+            CesiumIonRasterOverlay[] ionRasterOverlays =
+                tileset.gameObject.GetComponents<CesiumIonRasterOverlay>();
+            ionOverlay = ionRasterOverlays[0];
 
             string substring = "string";
             substring = string.Concat(substring, new long[] { 100 });
@@ -169,6 +175,29 @@ namespace CesiumForUnity
             CesiumEditorUtility.FindFirstTilesetWithAssetID(0);
             CesiumEditorUtility.CreateTileset("name", 0);
             CesiumEditorUtility.AddBaseOverlayToTileset(tileset, 0);
+
+            IonMissingAssetWindow.ShowWindow("Asset Name", 0);
+
+            IonTokenTroubleshootingWindow troubleshootingWindow = null!;
+            TokenTroubleshootingDetails tokenDetails = troubleshootingWindow.assetTokenDetails;
+            tokenDetails = troubleshootingWindow.defaultTokenDetails;
+            token = tokenDetails.token;
+            tokenDetails.isValid = true;
+            tokenDetails.allowsAccessToAsset = true;
+            tokenDetails.associatedWithUserAccount = true;
+            tokenDetails.loaded = true;
+
+            CesiumIonAsset asset = troubleshootingWindow.ionAsset;
+            name = asset.objectName;
+            string type = asset.type;
+            string componentType = asset.componentType;
+            string accessToken = asset.ionAccessToken;
+            long assetId = asset.ionAssetID;
+            bool isNull = asset.IsNull();
+
+            AssetTroubleshootingDetails assetDetails = troubleshootingWindow.assetDetails;
+            assetDetails.assetExistsInUserAccount = true;
+            assetDetails.loaded = true;
         }
     }
-}//
+}

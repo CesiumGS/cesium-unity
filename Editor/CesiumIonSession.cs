@@ -50,7 +50,7 @@ namespace CesiumForUnity
         public partial void RefreshTokens();
         public partial void RefreshAssets();
 
-        public void TriggerConnectionUpdate()
+        public void BroadcastConnectionUpdate()
         {
             if (OnConnectionUpdated != null)
             {
@@ -58,7 +58,7 @@ namespace CesiumForUnity
             }
         }
 
-        public void TriggerAssetsUpdate()
+        public void BroadcastAssetsUpdate()
         {
             if (OnAssetsUpdated != null)
             {
@@ -66,7 +66,7 @@ namespace CesiumForUnity
             }
         }
 
-        public void TriggerProfileUpdate()
+        public void BroadcastProfileUpdate()
         {
             if (OnProfileUpdated != null)
             {
@@ -74,7 +74,7 @@ namespace CesiumForUnity
             }
         }
 
-        public void TriggerTokensUpdate()
+        public void BroadcastTokensUpdate()
         {
             if (OnTokensUpdated != null)
             {

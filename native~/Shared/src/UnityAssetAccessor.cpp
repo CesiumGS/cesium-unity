@@ -192,7 +192,9 @@ UnityAssetAccessor::request(
              handler = std::move(downloadHandler)](
                 const UnityEngine::AsyncOperation& operation) mutable {
               ScopeGuard disposeHandler{[&handler]() { handler.Dispose(); }};
-              if (request.isDone() && request.error() == nullptr) {
+              if (request.isDone() &&
+                  request.result() !=
+                      UnityEngine::Networking::Result::ConnectionError) {
                 promise.resolve(
                     std::make_shared<UnityAssetRequest>(request, handler));
               } else {
