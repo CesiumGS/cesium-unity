@@ -205,7 +205,7 @@ namespace CesiumForUnity
                     ProcessStartInfo startInfo = new ProcessStartInfo();
                     startInfo.UseShellExecute = false;
                     if (library.Platform == BuildTarget.StandaloneOSX){
-                        startInfo.FileName = "/Applications/CMake.app/Contents/bin/cmake";
+                        startInfo.FileName = File.Exists("/Applications/CMake.app/Contents/bin/cmake") ? "/Applications/CMake.app/Contents/bin/cmake" : "cmake";
                     }
                     else {
                         startInfo.FileName = "cmake";
