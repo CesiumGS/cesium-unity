@@ -29,9 +29,9 @@ namespace CesiumForUnity
 
         public override void OnInspectorGUI()
         {
-            EditorGUIUtility.labelWidth = CesiumEditorStyle.inspectorLabelWidth;
             this.serializedObject.Update();
 
+            EditorGUIUtility.labelWidth = CesiumEditorStyle.inspectorLabelWidth;
             DrawRasterOverlayProperties();
 
             this.serializedObject.ApplyModifiedProperties();

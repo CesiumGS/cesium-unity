@@ -20,8 +20,8 @@ namespace CesiumForUnity
                 (CesiumTileMapServiceRasterOverlay)this.target;
             this._rasterOverlayEditor =
                 (CesiumRasterOverlayEditor)Editor.CreateEditor(
-                    this.target,
-                    typeof(CesiumRasterOverlayEditor));
+                                                    this.target,
+                                                    typeof(CesiumRasterOverlayEditor));
 
             this._url = this.serializedObject.FindProperty("_url");
             this._specifyZoomLevels = this.serializedObject.FindProperty("_specifyZoomLevels");
