@@ -17,7 +17,6 @@ namespace CesiumForUnity
             if (OnCesiumRasterOverlayLoadFailure != null)
             {
                 OnCesiumRasterOverlayLoadFailure(details);
-
             }
         }
 
@@ -126,8 +125,7 @@ namespace CesiumForUnity
             this.Refresh();
         }
 
-        protected abstract void
-            AddToTileset(Cesium3DTileset tileset);
+        protected abstract void AddToTileset(Cesium3DTileset tileset);
         protected abstract void RemoveFromTileset(Cesium3DTileset tileset);
     }
 }

@@ -39,15 +39,12 @@ namespace CesiumForUnity
 
         public override void OnInspectorGUI()
         {
-            EditorGUIUtility.labelWidth = CesiumEditorStyle.inspectorLabelWidth;
             this.serializedObject.Update();
 
+            EditorGUIUtility.labelWidth = CesiumEditorStyle.inspectorLabelWidth;
             DrawTileMapServiceProperties();
             EditorGUILayout.Space(5);
-            if (this._rasterOverlayEditor != null)
-            {
-                this._rasterOverlayEditor.OnInspectorGUI();
-            }
+            DrawRasterOverlayProperties();
 
             this.serializedObject.ApplyModifiedProperties();
         }
@@ -78,6 +75,14 @@ namespace CesiumForUnity
                 "Maximum zoom level.");
             EditorGUILayout.PropertyField(this._maximumLevel, maximumLevelContent);
             EditorGUI.EndDisabledGroup();
+        }
+
+        private void DrawRasterOverlayProperties()
+        {
+            if (this._rasterOverlayEditor != null)
+            {
+                this._rasterOverlayEditor.OnInspectorGUI();
+            }
         }
     }
 }

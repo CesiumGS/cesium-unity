@@ -91,7 +91,6 @@ namespace CesiumForUnity
         }
 
         protected override partial void AddToTileset(Cesium3DTileset tileset);
-
         protected override partial void RemoveFromTileset(Cesium3DTileset tileset);
     }
 }

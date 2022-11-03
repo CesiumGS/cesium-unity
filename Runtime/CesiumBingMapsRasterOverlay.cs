@@ -30,7 +30,6 @@ namespace CesiumForUnity
             get => this._bingMapsKey;
             set
             {
-                Debug.Log("Key");
                 this._bingMapsKey = value;
                 this.Refresh();
             }
@@ -50,7 +49,6 @@ namespace CesiumForUnity
         }
 
         protected override partial void AddToTileset(Cesium3DTileset tileset);
-
         protected override partial void RemoveFromTileset(Cesium3DTileset tileset);
     }
 }

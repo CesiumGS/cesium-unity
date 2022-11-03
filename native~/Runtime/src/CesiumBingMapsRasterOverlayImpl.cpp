@@ -11,8 +11,6 @@
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/CesiumForUnity/CesiumBingMapsRasterOverlay.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
-#include <DotNet/System/Object.h>
-#include <DotNet/UnityEngine/Debug.h>
 
 using namespace Cesium3DTilesSelection;
 using namespace DotNet;

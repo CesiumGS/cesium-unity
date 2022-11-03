@@ -22,8 +22,8 @@ namespace CesiumForUnity
                 (CesiumWebMapServiceRasterOverlay)this.target;
             this._rasterOverlayEditor =
                 (CesiumRasterOverlayEditor)Editor.CreateEditor(
-                    this.target,
-                    typeof(CesiumRasterOverlayEditor));
+                                                     this.target,
+                                                     typeof(CesiumRasterOverlayEditor));
 
             this._baseUrl = this.serializedObject.FindProperty("_baseUrl");
             this._layers = this.serializedObject.FindProperty("_layers");
@@ -43,15 +43,12 @@ namespace CesiumForUnity
 
         public override void OnInspectorGUI()
         {
-            EditorGUIUtility.labelWidth = CesiumEditorStyle.inspectorLabelWidth;
             this.serializedObject.Update();
 
+            EditorGUIUtility.labelWidth = CesiumEditorStyle.inspectorLabelWidth;
             DrawWebMapServiceProperties();
             EditorGUILayout.Space(5);
-            if (this._rasterOverlayEditor != null)
-            {
-                this._rasterOverlayEditor.OnInspectorGUI();
-            }
+            DrawRasterOverlayProperties();
 
             this.serializedObject.ApplyModifiedProperties();
         }
@@ -95,6 +92,14 @@ namespace CesiumForUnity
                 "Maximum Level",
                 "Maximum zoom level.");
             EditorGUILayout.PropertyField(this._maximumLevel, maximumLevelContent);
+        }
+
+        private void DrawRasterOverlayProperties()
+        {
+            if (this._rasterOverlayEditor != null)
+            {
+                this._rasterOverlayEditor.OnInspectorGUI();
+            }
         }
     }
 }

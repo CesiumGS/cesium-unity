@@ -17,8 +17,8 @@ namespace CesiumForUnity
             this._bingMapsOverlay = (CesiumBingMapsRasterOverlay)this.target;
             this._rasterOverlayEditor =
                 (CesiumRasterOverlayEditor)Editor.CreateEditor(
-                     this.target,
-                     typeof(CesiumRasterOverlayEditor));
+                                                     this.target,
+                                                     typeof(CesiumRasterOverlayEditor));
 
             this._bingMapsKey = this.serializedObject.FindProperty("_bingMapsKey");
             this._mapStyle = this.serializedObject.FindProperty("_mapStyle");
@@ -34,15 +34,12 @@ namespace CesiumForUnity
 
         public override void OnInspectorGUI()
         {
-            EditorGUIUtility.labelWidth = CesiumEditorStyle.inspectorLabelWidth;
             this.serializedObject.Update();
 
+            EditorGUIUtility.labelWidth = CesiumEditorStyle.inspectorLabelWidth;
             DrawBingMapsProperties();
             EditorGUILayout.Space(5);
-            if (this._rasterOverlayEditor != null)
-            {
-                this._rasterOverlayEditor.OnInspectorGUI();
-            }
+            DrawRasterOverlayProperties();
 
             this.serializedObject.ApplyModifiedProperties();
         }
@@ -50,14 +47,22 @@ namespace CesiumForUnity
         private void DrawBingMapsProperties()
         {
             GUIContent bingMapsKeyContent = new GUIContent(
-            "Bing Maps Key",
-            "The Bing Maps API key to use.");
+                "Bing Maps Key",
+                "The Bing Maps API key to use.");
             EditorGUILayout.DelayedTextField(this._bingMapsKey, bingMapsKeyContent);
 
             GUIContent mapStyleContent = new GUIContent(
                 "Map Style",
                 "The map style to use.");
             EditorGUILayout.PropertyField(this._mapStyle, mapStyleContent);
+        }
+
+        private void DrawRasterOverlayProperties()
+        {
+            if (this._rasterOverlayEditor != null)
+            {
+                this._rasterOverlayEditor.OnInspectorGUI();
+            }
         }
     }
 }

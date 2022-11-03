@@ -17,8 +17,8 @@ namespace CesiumForUnity
             this._ionOverlay = (CesiumIonRasterOverlay)this.target;
             this._rasterOverlayEditor = 
                 (CesiumRasterOverlayEditor)Editor.CreateEditor(
-                    this.target,
-                    typeof(CesiumRasterOverlayEditor));
+                                                    this.target,
+                                                    typeof(CesiumRasterOverlayEditor));
 
             this._ionAssetID = this.serializedObject.FindProperty("_ionAssetID");
             this._ionAccessToken = this.serializedObject.FindProperty("_ionAccessToken");
@@ -34,17 +34,14 @@ namespace CesiumForUnity
 
         public override void OnInspectorGUI()
         {
-            EditorGUIUtility.labelWidth = CesiumEditorStyle.inspectorLabelWidth;
             this.serializedObject.Update();
 
+            EditorGUIUtility.labelWidth = CesiumEditorStyle.inspectorLabelWidth;
             DrawTroubleshootButton();
             EditorGUILayout.Space(5);
             DrawIonProperties();
             EditorGUILayout.Space(5);
-            if (this._rasterOverlayEditor != null)
-            {
-               this._rasterOverlayEditor.OnInspectorGUI();
-            }
+            DrawRasterOverlayProperties();
 
             this.serializedObject.ApplyModifiedProperties();
         }
@@ -72,6 +69,14 @@ namespace CesiumForUnity
                 "ion Access Token",
                 "The access token to use to access the Cesium ion resource.");
             EditorGUILayout.DelayedTextField(this._ionAccessToken, ionAccessTokenContent);
+        }
+
+        private void DrawRasterOverlayProperties()
+        {
+            if (this._rasterOverlayEditor != null)
+            {
+                this._rasterOverlayEditor.OnInspectorGUI();
+            }
         }
     }
 }
