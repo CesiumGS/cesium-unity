@@ -5,6 +5,20 @@ namespace CesiumForUnity
     [ExecuteInEditMode]
     public abstract class CesiumRasterOverlay : MonoBehaviour
     {
+        public delegate void RasterOverlayLoadFailureDelegate(
+            CesiumRasterOverlayLoadFailureDetails details);
+        public static event
+            RasterOverlayLoadFailureDelegate OnCesiumRasterOverlayLoadFailure;
+
+        public static void BroadcastCesiumRasterOverlayLoadFailure(
+            CesiumRasterOverlayLoadFailureDetails details)
+        {
+            if (OnCesiumRasterOverlayLoadFailure != null)
+            {
+                OnCesiumRasterOverlayLoadFailure(details);
+            }
+        }
+
         public void AddToTileset()
         {
             Cesium3DTileset? tileset = this.gameObject.GetComponent<Cesium3DTileset>();

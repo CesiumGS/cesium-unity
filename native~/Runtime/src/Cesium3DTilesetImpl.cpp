@@ -7,10 +7,12 @@
 #include <Cesium3DTilesSelection/Tileset.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
+#include <DotNet/CesiumForUnity/Cesium3DTilesetLoadFailureDetails.h>
+#include <DotNet/CesiumForUnity/Cesium3DTilesetLoadType.h>
 #include <DotNet/CesiumForUnity/CesiumDataSource.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
-//#include <DotNet/CesiumForUnity/CesiumRuntimeSettings.h>
+#include <DotNet/CesiumForUnity/CesiumRuntimeSettings.h>
 #include <DotNet/System/Action.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/Object.h>
@@ -277,6 +279,19 @@ void Cesium3DTilesetImpl::LoadTileset(
   options.culledScreenSpaceError = tileset.culledScreenSpaceError();
   options.enableLodTransitionPeriod = tileset.useLodTransitions();
   options.lodTransitionLength = tileset.lodTransitionLength();
+  options.showCreditsOnScreen = tileset.showCreditsOnScreen();
+  options.loadErrorCallback =
+      [this, tileset](const TilesetLoadFailureDetails& details) {
+        int typeValue = (int)details.type;
+        CesiumForUnity::Cesium3DTilesetLoadFailureDetails unityDetails(
+            tileset,
+            CesiumForUnity::Cesium3DTilesetLoadType(typeValue),
+            details.statusCode,
+            System::String(details.message));
+
+        CesiumForUnity::Cesium3DTileset::BroadcastCesium3DTilesetLoadFailure(
+            unityDetails);
+      };
 
   TilesetContentOptions contentOptions{};
   contentOptions.generateMissingNormalsSmooth = tileset.generateSmoothNormals();
@@ -289,7 +304,8 @@ void Cesium3DTilesetImpl::LoadTileset(
       CesiumForUnity::CesiumDataSource::FromCesiumIon) {
     System::String& ionAccessToken = tileset.ionAccessToken();
     if (System::String::IsNullOrEmpty(ionAccessToken)) {
-        // TODO: get default access token
+      ionAccessToken =
+          CesiumForUnity::CesiumRuntimeSettings::defaultIonAccessToken();
     }
 
     this->_pTileset = std::make_unique<Tileset>(

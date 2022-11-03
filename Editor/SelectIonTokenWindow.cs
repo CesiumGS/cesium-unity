@@ -46,6 +46,7 @@ namespace CesiumForUnity
             CesiumIonSession.OnTokensUpdated += this.RefreshTokens;
 
             this._createdTokenName = GetDefaultNewTokenName();
+            this._specifiedToken = CesiumRuntimeSettings.defaultIonAccessToken;
             this._source = CesiumIonSession.Ion().IsConnected()
                 ? IonTokenSource.Create
                 : IonTokenSource.Specify;

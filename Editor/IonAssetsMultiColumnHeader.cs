@@ -11,7 +11,7 @@ namespace CesiumForUnity
             IonAssetsTreeView treeView) :
             base(state)
         {
-            _treeView = treeView;
+            this._treeView = treeView;
             ResizeToFit();
         }
 
@@ -43,7 +43,7 @@ namespace CesiumForUnity
         protected override void OnSortingChanged()
         {
             base.OnSortingChanged();
-            _treeView.Refresh();
+            this._treeView.Refresh();
         }
     }
 

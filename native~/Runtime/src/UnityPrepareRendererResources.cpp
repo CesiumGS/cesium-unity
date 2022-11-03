@@ -8,10 +8,13 @@
 #include <CesiumGeospatial/Ellipsoid.h>
 #include <CesiumGeospatial/Transforms.h>
 #include <CesiumGltf/AccessorView.h>
+#include <CesiumGltf/ExtensionMeshPrimitiveExtFeatureMetadata.h>
+#include <CesiumGltf/ExtensionModelExtFeatureMetadata.h>
 #include <CesiumUtility/ScopeGuard.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
+#include <DotNet/CesiumForUnity/CesiumMetadata.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/Object.h>
 #include <DotNet/System/String.h>
@@ -519,6 +522,19 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
   size_t meshIndex = 0;
 
+
+  DotNet::CesiumForUnity::CesiumMetadata pMetadataComponent = nullptr;
+  if (model.getExtension<ExtensionModelExtFeatureMetadata>()) {
+    pMetadataComponent = pModelGameObject->GetComponentInParent<DotNet::CesiumForUnity::CesiumMetadata>();
+    if(pMetadataComponent == nullptr){
+      pMetadataComponent =
+          pModelGameObject->transform()
+              .parent()
+              .gameObject()
+              .AddComponent<DotNet::CesiumForUnity::CesiumMetadata>();
+    }
+  }
+
   model.forEachPrimitiveInScene(
       -1,
       [&meshes,
@@ -528,7 +544,8 @@ void* UnityPrepareRendererResources::prepareInMainThread(
        opaqueMaterial,
        pCoordinateSystem,
        createPhysicsMeshes,
-       showTilesInHierarchy](
+       showTilesInHierarchy,
+       &pMetadataComponent](
           const Model& gltf,
           const Node& node,
           const Mesh& mesh,
@@ -652,6 +669,14 @@ void* UnityPrepareRendererResources::prepareInMainThread(
               primitiveGameObject.AddComponent<UnityEngine::MeshCollider>();
           meshCollider.sharedMesh(unityMesh);
         }
+        const ExtensionMeshPrimitiveExtFeatureMetadata* pMetadata =
+            primitive.getExtension<ExtensionMeshPrimitiveExtFeatureMetadata>();
+        if (pMetadata) {
+          pMetadataComponent.NativeImplementation().loadMetadata(
+              primitiveGameObject.transform().GetInstanceID(),
+              &gltf,
+              &primitive);
+        }
       });
 
   return pModelGameObject.release();
@@ -664,6 +689,15 @@ void UnityPrepareRendererResources::free(
   if (pMainThreadResult) {
     std::unique_ptr<UnityEngine::GameObject> pGameObject(
         static_cast<UnityEngine::GameObject*>(pMainThreadResult));
+
+    auto pMetadataComponent = pGameObject->GetComponentInParent<DotNet::CesiumForUnity::CesiumMetadata>();
+    if(pMetadataComponent != nullptr){
+      for (int32_t i = 0, len = pGameObject->transform().childCount(); i < len; ++i) {
+        pMetadataComponent.NativeImplementation().unloadMetadata(
+            pGameObject->transform().GetChild(i).GetInstanceID());
+        }
+      }
+
     UnityLifetime::Destroy(*pGameObject);
   }
 }

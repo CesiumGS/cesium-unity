@@ -15,6 +15,7 @@
 #include <DotNet/CesiumForUnity/CesiumEditorWindow.h>
 #include <DotNet/CesiumForUnity/CesiumIonRasterOverlay.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
+#include <DotNet/CesiumForUnity/IonMissingAssetWindow.h>
 #include <DotNet/System/Object.h>
 #include <DotNet/UnityEditor/Selection.h>
 #include <DotNet/UnityEngine/Debug.h>
@@ -38,12 +39,14 @@ void CesiumEditorWindowImpl::JustBeforeDelete(
 void CesiumEditorWindowImpl::AddAssetFromIon(
     const DotNet::CesiumForUnity::CesiumEditorWindow& window,
     DotNet::System::String name,
+    DotNet::System::String tilesetName,
     int64_t tilesetID,
+    DotNet::System::String overlayName,
     int64_t overlayID) {
   const std::optional<CesiumIonClient::Connection>& connection =
       CesiumIonSessionImpl::ion().getConnection();
   if (!connection) {
-    UnityEngine::Debug::LogWarning(
+    UnityEngine::Debug::LogError(
         System::String("Cannot add an ion asset without an active connection"));
     return;
   }
@@ -93,10 +96,18 @@ void CesiumEditorWindowImpl::AddAssetFromIon(
                   -1);
             }
           })
-      .thenInMainThread([this, name, tilesetID, overlayID](
-                            int64_t missingAsset) {
+      .thenInMainThread([this,
+                         name,
+                         tilesetName,
+                         overlayName,
+                         tilesetID,
+                         overlayID](int64_t missingAsset) {
         if (missingAsset != -1) {
-          // showAssetDepotConfirmWindow(itemName, missingAsset);
+          System::String assetName =
+              missingAsset == tilesetID ? tilesetName : overlayName;
+          CesiumForUnity::IonMissingAssetWindow::ShowWindow(
+              assetName,
+              missingAsset);
         } else {
           CesiumForUnity::Cesium3DTileset tileset =
               CesiumForUnity::CesiumEditorUtility::FindFirstTilesetWithAssetID(
@@ -104,7 +115,7 @@ void CesiumEditorWindowImpl::AddAssetFromIon(
 
           if (tileset == nullptr) {
             tileset = CesiumForUnity::CesiumEditorUtility::CreateTileset(
-                name,
+                tilesetName,
                 tilesetID);
           }
           tileset.ionAssetID(tilesetID);
