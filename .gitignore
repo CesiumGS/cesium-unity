@@ -2,6 +2,8 @@ bin/
 obj/
 build/
 build-*/
+build.bat
+publishReinterop.bat
 Plugins/
 Plugins.meta
 CesiumForUnityNativeBindings/native/
