@@ -253,6 +253,10 @@ namespace CesiumForUnity
             georeference.longitude = georeference.longitude;
             georeference.latitude = georeference.latitude;
             georeference.height = georeference.height;
+            georeference.ecefX = georeference.ecefX;
+            georeference.ecefY = georeference.ecefY;
+            georeference.ecefZ = georeference.ecefZ;
+            georeference.originAuthority = georeference.originAuthority;
 
             CesiumGeoreference inParent = go.GetComponentInParent<CesiumGeoreference>();
             inParent.UpdateOrigin();

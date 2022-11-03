@@ -6,8 +6,9 @@
 #include <CesiumUtility/Math.h>
 
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
+#include <DotNet/CesiumForUnity/CesiumGeoreferenceOriginAuthority.h>
 #include <DotNet/CesiumForUnity/CesiumGlobeAnchor.h>
-#include <DotNet/CesiumForUnity/CesiumGlobeAnchorAuthority.h>
+#include <DotNet/CesiumForUnity/CesiumGlobeAnchorPositionAuthority.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/UnityEngine/GameObject.h>
 #include <DotNet/UnityEngine/Matrix4x4.h>
@@ -23,14 +24,27 @@ namespace {
 
 LocalHorizontalCoordinateSystem createCoordinateSystem(
     const DotNet::CesiumForUnity::CesiumGeoreference& georeference) {
-  return LocalHorizontalCoordinateSystem(
-      Cartographic::fromDegrees(
-          georeference.longitude(),
-          georeference.latitude(),
-          georeference.height()),
-      LocalDirection::East,
-      LocalDirection::Up,
-      LocalDirection::North);
+  if (georeference.originAuthority() ==
+      DotNet::CesiumForUnity::CesiumGeoreferenceOriginAuthority::
+          LongitudeLatitudeHeight) {
+    return LocalHorizontalCoordinateSystem(
+        Cartographic::fromDegrees(
+            georeference.longitude(),
+            georeference.latitude(),
+            georeference.height()),
+        LocalDirection::East,
+        LocalDirection::Up,
+        LocalDirection::North);
+  } else {
+    return LocalHorizontalCoordinateSystem(
+        glm::dvec3(
+            georeference.ecefX(),
+            georeference.ecefY(),
+            georeference.ecefZ()),
+        LocalDirection::East,
+        LocalDirection::Up,
+        LocalDirection::North);
+  }
 }
 
 } // namespace
@@ -84,11 +98,12 @@ void CesiumGeoreferenceImpl::RecalculateOrigin(
 
     // The meaning of Unity coordinates will change with the georeference
     // change, so switch to ECEF if necessary.
-    DotNet::CesiumForUnity::CesiumGlobeAnchorAuthority authority =
+    DotNet::CesiumForUnity::CesiumGlobeAnchorPositionAuthority authority =
         anchor.positionAuthority();
-    if (authority == DotNet::CesiumForUnity::CesiumGlobeAnchorAuthority::
-                         UnityWorldCoordinates) {
-      authority = DotNet::CesiumForUnity::CesiumGlobeAnchorAuthority::
+    if (authority ==
+        DotNet::CesiumForUnity::CesiumGlobeAnchorPositionAuthority::
+            UnityWorldCoordinates) {
+      authority = DotNet::CesiumForUnity::CesiumGlobeAnchorPositionAuthority::
           EarthCenteredEarthFixed;
     }
 

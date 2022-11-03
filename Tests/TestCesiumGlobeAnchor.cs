@@ -21,12 +21,12 @@ public class TestCesiumGlobeAnchor
         goAnchored.transform.SetPositionAndRotation(new Vector3(100.0f, 200.0f, 300.0f), Quaternion.Euler(10.0f, 20.0f, 30.0f));
 
         CesiumGlobeAnchor anchor = goAnchored.AddComponent<CesiumGlobeAnchor>();
-        Assert.AreEqual(CesiumGlobeAnchorAuthority.None, anchor.positionAuthority);
+        Assert.AreEqual(CesiumGlobeAnchorPositionAuthority.None, anchor.positionAuthority);
 
         // Wait for the start of a new frame, which will cause Start to be invoked.
         yield return null;
 
-        Assert.AreEqual(CesiumGlobeAnchorAuthority.UnityWorldCoordinates, anchor.positionAuthority);
+        Assert.AreEqual(CesiumGlobeAnchorPositionAuthority.UnityWorldCoordinates, anchor.positionAuthority);
         Assert.That(anchor.unityX, Is.EqualTo(100.0).Using(FloatEqualityComparer.Instance));
         Assert.That(anchor.unityY, Is.EqualTo(200.0).Using(FloatEqualityComparer.Instance));
         Assert.That(anchor.unityZ, Is.EqualTo(300.0).Using(FloatEqualityComparer.Instance));
@@ -59,7 +59,7 @@ public class TestCesiumGlobeAnchor
         // Manually update the globe anchor properties without waiting for Unity to invoke Start on it.
         anchor.Sync();
 
-        Assert.AreEqual(CesiumGlobeAnchorAuthority.UnityWorldCoordinates, anchor.positionAuthority);
+        Assert.AreEqual(CesiumGlobeAnchorPositionAuthority.UnityWorldCoordinates, anchor.positionAuthority);
         Assert.That(anchor.unityX, Is.EqualTo(100.0).Using(FloatEqualityComparer.Instance));
         Assert.That(anchor.unityY, Is.EqualTo(200.0).Using(FloatEqualityComparer.Instance));
         Assert.That(anchor.unityZ, Is.EqualTo(300.0).Using(FloatEqualityComparer.Instance));
@@ -88,14 +88,14 @@ public class TestCesiumGlobeAnchor
 
         CesiumGlobeAnchor anchor = goAnchored.AddComponent<CesiumGlobeAnchor>();
         anchor.SetPositionLongitudeLatitudeHeight(45.0, -45.0, 101.0);
-        Assert.AreEqual(CesiumGlobeAnchorAuthority.LongitudeLatitudeHeight, anchor.positionAuthority);
+        Assert.AreEqual(CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight, anchor.positionAuthority);
         Assert.AreEqual(45.0, anchor.longitude);
         Assert.AreEqual(-45.0, anchor.latitude);
         Assert.AreEqual(101.0, anchor.height);
 
         yield return null;
 
-        Assert.AreEqual(CesiumGlobeAnchorAuthority.LongitudeLatitudeHeight, anchor.positionAuthority);
+        Assert.AreEqual(CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight, anchor.positionAuthority);
         Assert.AreEqual(45.0, anchor.longitude);
         Assert.AreEqual(-45.0, anchor.latitude);
         Assert.AreEqual(101.0, anchor.height);

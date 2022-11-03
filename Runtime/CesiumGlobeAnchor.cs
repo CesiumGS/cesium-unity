@@ -12,7 +12,7 @@ namespace CesiumForUnity
     /// Identifies the set of the coordinates that authoritatively define
     /// the position of this object.
     /// </summary>
-    public enum CesiumGlobeAnchorAuthority
+    public enum CesiumGlobeAnchorPositionAuthority
     {
         /// <summary>
         /// The `Transform` attached to the same object is the only authority for the position of
@@ -116,14 +116,14 @@ namespace CesiumForUnity
         [SerializeField]
         [Tooltip("The set of coordinates that authoritatively define the position of this game object.")]
         [NotifyOfChanges]
-        private CesiumGlobeAnchorAuthority _positionAuthority = CesiumGlobeAnchorAuthority.None;
+        private CesiumGlobeAnchorPositionAuthority _positionAuthority = CesiumGlobeAnchorPositionAuthority.None;
 
-        public CesiumGlobeAnchorAuthority positionAuthority
+        public CesiumGlobeAnchorPositionAuthority positionAuthority
         {
             get => this._positionAuthority;
             set
             {
-                CesiumGlobeAnchorAuthority previousAuthority = this._positionAuthority;
+                CesiumGlobeAnchorPositionAuthority previousAuthority = this._positionAuthority;
                 this._positionAuthority = value;
                 this.UpdateGlobePosition(previousAuthority);
             }
@@ -141,7 +141,7 @@ namespace CesiumForUnity
             set
             {
                 this._latitude = value;
-                this.positionAuthority = CesiumGlobeAnchorAuthority.LongitudeLatitudeHeight;
+                this.positionAuthority = CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight;
             }
         }
 
@@ -156,7 +156,7 @@ namespace CesiumForUnity
             set
             {
                 this._longitude = value;
-                this.positionAuthority = CesiumGlobeAnchorAuthority.LongitudeLatitudeHeight;
+                this.positionAuthority = CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight;
             }
         }
 
@@ -174,7 +174,7 @@ namespace CesiumForUnity
             set
             {
                 this._height = value;
-                this.positionAuthority = CesiumGlobeAnchorAuthority.LongitudeLatitudeHeight;
+                this.positionAuthority = CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight;
             }
         }
 
@@ -192,7 +192,7 @@ namespace CesiumForUnity
             set
             {
                 this._ecefX = value;
-                this.positionAuthority = CesiumGlobeAnchorAuthority.EarthCenteredEarthFixed;
+                this.positionAuthority = CesiumGlobeAnchorPositionAuthority.EarthCenteredEarthFixed;
             }
         }
 
@@ -209,7 +209,7 @@ namespace CesiumForUnity
             set
             {
                 this._ecefY = value;
-                this.positionAuthority = CesiumGlobeAnchorAuthority.EarthCenteredEarthFixed;
+                this.positionAuthority = CesiumGlobeAnchorPositionAuthority.EarthCenteredEarthFixed;
             }
         }
 
@@ -226,7 +226,7 @@ namespace CesiumForUnity
             set
             {
                 this._ecefZ = value;
-                this.positionAuthority = CesiumGlobeAnchorAuthority.EarthCenteredEarthFixed;
+                this.positionAuthority = CesiumGlobeAnchorPositionAuthority.EarthCenteredEarthFixed;
             }
         }
 
@@ -242,7 +242,7 @@ namespace CesiumForUnity
             set
             {
                 this._unityX = value;
-                this.positionAuthority = CesiumGlobeAnchorAuthority.UnityWorldCoordinates;
+                this.positionAuthority = CesiumGlobeAnchorPositionAuthority.UnityWorldCoordinates;
             }
         }
 
@@ -257,7 +257,7 @@ namespace CesiumForUnity
             set
             {
                 this._unityY = value;
-                this.positionAuthority = CesiumGlobeAnchorAuthority.UnityWorldCoordinates;
+                this.positionAuthority = CesiumGlobeAnchorPositionAuthority.UnityWorldCoordinates;
             }
         }
 
@@ -272,7 +272,7 @@ namespace CesiumForUnity
             set
             {
                 this._unityZ = value;
-                this.positionAuthority = CesiumGlobeAnchorAuthority.UnityWorldCoordinates;
+                this.positionAuthority = CesiumGlobeAnchorPositionAuthority.UnityWorldCoordinates;
             }
         }
 
@@ -298,7 +298,7 @@ namespace CesiumForUnity
             this._longitude = longitude;
             this._latitude = latitude;
             this._height = height;
-            this.positionAuthority = CesiumGlobeAnchorAuthority.LongitudeLatitudeHeight;
+            this.positionAuthority = CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight;
         }
 
         /// <summary>
@@ -316,7 +316,7 @@ namespace CesiumForUnity
             this._ecefX = x;
             this._ecefY = y;
             this._ecefZ = z;
-            this.positionAuthority = CesiumGlobeAnchorAuthority.EarthCenteredEarthFixed;
+            this.positionAuthority = CesiumGlobeAnchorPositionAuthority.EarthCenteredEarthFixed;
         }
 
         /// <summary>
@@ -334,7 +334,7 @@ namespace CesiumForUnity
             this._unityX = x;
             this._unityY = y;
             this._unityZ = z;
-            this.positionAuthority = CesiumGlobeAnchorAuthority.UnityWorldCoordinates;
+            this.positionAuthority = CesiumGlobeAnchorPositionAuthority.UnityWorldCoordinates;
         }
 
         /// <summary>
@@ -398,17 +398,17 @@ namespace CesiumForUnity
                 case "_longitude":
                 case "_latitude":
                 case "_height":
-                    this.positionAuthority = CesiumGlobeAnchorAuthority.LongitudeLatitudeHeight;
+                    this.positionAuthority = CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight;
                     break;
                 case "_ecefX":
                 case "_ecefY":
                 case "_ecefZ":
-                    this.positionAuthority = CesiumGlobeAnchorAuthority.EarthCenteredEarthFixed;
+                    this.positionAuthority = CesiumGlobeAnchorPositionAuthority.EarthCenteredEarthFixed;
                     break;
                 case "_unityX":
                 case "_unityY":
                 case "_unityZ":
-                    this.positionAuthority = CesiumGlobeAnchorAuthority.UnityWorldCoordinates;
+                    this.positionAuthority = CesiumGlobeAnchorPositionAuthority.UnityWorldCoordinates;
                     break;
                 case "_detectTransformChanges":
                     this.StartOrStopDetectingTransformChanges();
@@ -477,27 +477,27 @@ namespace CesiumForUnity
 
         #region Updaters
 
-        private void UpdateGlobePosition(CesiumGlobeAnchorAuthority previousAuthority)
+        private void UpdateGlobePosition(CesiumGlobeAnchorPositionAuthority previousAuthority)
         {
             CesiumGeoreference? georeference = this.gameObject.GetComponentInParent<CesiumGeoreference>();
             if (georeference == null)
                 throw new InvalidOperationException("CesiumGlobeAnchor is not nested inside a game object with a CesiumGeoreference.");
 
             // If there's no authoritative position, copy the position from the Transform.
-            if (this.positionAuthority == CesiumGlobeAnchorAuthority.None)
+            if (this.positionAuthority == CesiumGlobeAnchorPositionAuthority.None)
             {
                 Vector3 position = this.transform.position;
                 this._unityX = position.x;
                 this._unityY = position.y;
                 this._unityZ = position.z;
-                this._positionAuthority = CesiumGlobeAnchorAuthority.UnityWorldCoordinates;
+                this._positionAuthority = CesiumGlobeAnchorPositionAuthority.UnityWorldCoordinates;
             }
 
             // Convert the authoritative position to ECEF
             CesiumVector3 ecef;
             switch (this.positionAuthority)
             {
-                case CesiumGlobeAnchorAuthority.LongitudeLatitudeHeight:
+                case CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight:
                     ecef = CesiumTransforms.LongitudeLatitudeHeightToEarthCenteredEarthFixed(new CesiumVector3()
                     {
                         x = this.longitude,
@@ -505,13 +505,13 @@ namespace CesiumForUnity
                         z = this.height
                     });
                     break;
-                case CesiumGlobeAnchorAuthority.EarthCenteredEarthFixed:
+                case CesiumGlobeAnchorPositionAuthority.EarthCenteredEarthFixed:
                     ecef.x = this.ecefX;
                     ecef.y = this.ecefY;
                     ecef.z = this.ecefZ;
                     break;
-                case CesiumGlobeAnchorAuthority.None:
-                case CesiumGlobeAnchorAuthority.UnityWorldCoordinates:
+                case CesiumGlobeAnchorPositionAuthority.None:
+                case CesiumGlobeAnchorPositionAuthority.UnityWorldCoordinates:
                     ecef = georeference.TransformUnityWorldPositionToEarthCenteredEarthFixed(new CesiumVector3()
                     {
                         x = this.unityX,
@@ -525,7 +525,7 @@ namespace CesiumForUnity
 
             // Update the non-authoritative fields with the new position.
             // TODO: it might be more efficient to lazily update these if/when they're accessed, at least outside the Editor.
-            if (this.positionAuthority != CesiumGlobeAnchorAuthority.LongitudeLatitudeHeight)
+            if (this.positionAuthority != CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight)
             {
                 CesiumVector3 llh = CesiumTransforms.EarthCenteredEarthFixedToLongitudeLatitudeHeight(ecef);
                 this._longitude = llh.x;
@@ -533,14 +533,14 @@ namespace CesiumForUnity
                 this._height = llh.z;
             }
 
-            if (this.positionAuthority != CesiumGlobeAnchorAuthority.EarthCenteredEarthFixed)
+            if (this.positionAuthority != CesiumGlobeAnchorPositionAuthority.EarthCenteredEarthFixed)
             {
                 this._ecefX = ecef.x;
                 this._ecefY = ecef.y;
                 this._ecefZ = ecef.z;
             }
 
-            if (this.positionAuthority != CesiumGlobeAnchorAuthority.UnityWorldCoordinates)
+            if (this.positionAuthority != CesiumGlobeAnchorPositionAuthority.UnityWorldCoordinates)
             {
                 CesiumVector3 unityWorld = georeference.TransformEarthCenteredEarthFixedPositionToUnityWorld(ecef);
                 this._unityX = unityWorld.x;
@@ -551,7 +551,7 @@ namespace CesiumForUnity
             // If the ECEF position changes, update the orientation based on the
             // new position on the globe (if desired).
             if (this.adjustOrientationForGlobeWhenMoving &&
-                previousAuthority != CesiumGlobeAnchorAuthority.None &&
+                previousAuthority != CesiumGlobeAnchorPositionAuthority.None &&
                 this._lastPropertiesAreValid &&
                 (this._lastPositionEcefX != this._ecefX || this._lastPositionEcefY != this._ecefY || this._lastPositionEcefZ != this._ecefZ))
             {
@@ -581,7 +581,7 @@ namespace CesiumForUnity
 
         private void UpdateGlobePositionFromTransform()
         {
-            this.positionAuthority = CesiumGlobeAnchorAuthority.None;
+            this.positionAuthority = CesiumGlobeAnchorPositionAuthority.None;
         }
 
         // This is static so that CesiumGlobeAnchor does not need finalization.

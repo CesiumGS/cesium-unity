@@ -6,10 +6,46 @@ using UnityEngine;
 
 namespace CesiumForUnity
 {
+    /// <summary>
+    /// Identifies the set of the coordinates that authoritatively define
+    /// the origin of a <see cref="CesiumGeoreference"/>.
+    /// </summary>
+    public enum CesiumGeoreferenceOriginAuthority
+    {
+        /// <summary>
+        /// The <see cref="CesiumGeoreference.longitude"/>, <see cref="CesiumGeoreference.latitude"/>,
+        /// and <see cref="CesiumGeoreference.height"/> properties authoritatively define the position
+        /// of this object.
+        /// </summary>
+        LongitudeLatitudeHeight,
+
+        /// <summary>
+        /// The <see cref="CesiumGeoreference.ecefX"/>, <see cref="CesiumGeoreference.ecefY"/>,
+        /// and <see cref="CesiumGeoreference.ecefZ"/> properties authoritatively define the position
+        /// of this object.
+        /// </summary>
+        EarthCenteredEarthFixed
+    }
+
     [ExecuteInEditMode]
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumGeoreferenceImpl", "CesiumGeoreferenceImpl.h")]
     public partial class CesiumGeoreference : MonoBehaviour, INotifyOfChanges
     {
+        [SerializeField]
+        [Tooltip("The set of coordinates that authoritatively define the origin of this georeference.")]
+        [NotifyOfChanges]
+        private CesiumGeoreferenceOriginAuthority _originAuthority = CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight;
+
+        public CesiumGeoreferenceOriginAuthority originAuthority
+        {
+            get => this._originAuthority;
+            set
+            {
+                this._originAuthority = value;
+                this.UpdateOrigin();
+            }
+        }
+
         [SerializeField]
         [Header("Origin")]
         [Tooltip("The latitude of the origin in degrees, in the range [-90, 90].")]
@@ -59,8 +95,76 @@ namespace CesiumForUnity
             }
         }
 
+        [SerializeField]
+        [Header("Position (Earth Centered, Earth Fixed)")]
+        [Tooltip("The Earth-Centered, Earth-Fixed X-coordinate of the origin of this georeference in meters.\n" +
+                 "In the ECEF coordinate system, the origin is at the center of the Earth \n" +
+                 "and the positive X axis points toward where the Prime Meridian crosses the Equator.")]
+        [NotifyOfChanges]
+        private double _ecefX = 6378137.0;
+
+        public double ecefX
+        {
+            get => this._ecefX;
+            set
+            {
+                this._ecefX = value;
+                this.originAuthority = CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed;
+            }
+        }
+
+        [SerializeField]
+        [Tooltip("The Earth-Centered, Earth-Fixed Y-coordinate of the origin of this georeference in meters.\n" +
+                 "In the ECEF coordinate system, the origin is at the center of the Earth \n" +
+                 "and the positive Y axis points toward the Equator at 90 degrees longitude.")]
+        [NotifyOfChanges]
+        private double _ecefY = 0.0;
+
+        public double ecefY
+        {
+            get => this._ecefY;
+            set
+            {
+                this._ecefY = value;
+                this.originAuthority = CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed;
+            }
+        }
+
+        [SerializeField]
+        [Tooltip("The Earth-Centered, Earth-Fixed Z-coordinate of the origin of this georeference in meters.\n" +
+         "In the ECEF coordinate system, the origin is at the center of the Earth \n" +
+         "and the positive Z axis points toward the North pole.")]
+        [NotifyOfChanges]
+        private double _ecefZ = 0.0;
+
+        public double ecefZ
+        {
+            get => this._ecefZ;
+            set
+            {
+                this._ecefZ = value;
+                this.originAuthority = CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed;
+            }
+        }
+
         [Tooltip("An event raised when the georeference changes.")]
         public event Action? changed;
+
+        public void SetOriginEarthCenteredEarthFixed(double x, double y, double z)
+        {
+            this._ecefX = x;
+            this._ecefY = y;
+            this._ecefZ = z;
+            this.originAuthority = CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed;
+        }
+
+        public void SetOriginLongitudeLatitudeHeight(double longitude, double latitude, double height)
+        {
+            this._longitude = longitude;
+            this._latitude = latitude;
+            this._height = height;
+            this.originAuthority = CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight;
+        }
 
         void INotifyOfChanges.NotifyPropertyChanged(SerializedProperty property)
         {
@@ -70,7 +174,12 @@ namespace CesiumForUnity
                 case "_longitude":
                 case "_latitude":
                 case "_height":
-                    this.UpdateOrigin();
+                    this.originAuthority = CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight;
+                    break;
+                case "_ecefX":
+                case "_ecefY":
+                case "_ecefZ":
+                    this.originAuthority = CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed;
                     break;
             }
 
