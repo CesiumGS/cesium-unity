@@ -474,6 +474,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
   auto pModelGameObject =
       std::make_unique<UnityEngine::GameObject>(System::String(name));
+  auto flags = UnityEngine::HideFlags::DontSave | UnityEngine::HideFlags::HideInHierarchy;
   pModelGameObject->hideFlags(UnityEngine::HideFlags::DontSave | UnityEngine::HideFlags::HideInHierarchy);
   pModelGameObject->transform().parent(this->_tileset.transform());
   pModelGameObject->SetActive(false);

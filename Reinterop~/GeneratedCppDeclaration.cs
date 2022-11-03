@@ -15,8 +15,6 @@
             if (Type == null)
                 return;
 
-            string suffix = GetSuffix(headerFile.Includes);
-
             AddIncludes(headerFile.Includes);
             AddForwardDeclarations(headerFile.ForwardDeclarations);
 
@@ -29,17 +27,22 @@
                 ns.Members.Add(
                     $$"""
                     template <{{string.Join(", ", Type.GenericArguments.Select((CppType type, int index) => "typename T" + index))}}>
-                    {{GetTypeKind()}} {{Type.Name}}{{suffix}};
+                    {{GetTypeKind()}} {{Type.Name}}{{GetSuffix()}};
                     """);
                 templateDeclaration = "template <> ";
                 templateSpecialization = $"<{string.Join(", ", Type.GenericArguments.Select(arg => arg.GetFullyQualifiedName()))}>";
             }
 
             ns.Members.Add($$"""
-                {{templateDeclaration}}{{GetTypeKind()}} {{Type.Name}}{{templateSpecialization}}{{suffix}} {
+                {{templateDeclaration}}{{GetTypeKind()}} {{Type.Name}}{{templateSpecialization}}{{GetSuffix()}} {
                   {{GetElements().JoinAndIndent("  ")}}
                 };
                 """);
+
+            if (Type.Kind == InteropTypeKind.EnumFlags) {
+              CppSourceFileNamespace gns = headerFile.GetGlobalNamespace();
+              gns.Members.Add($$""""ALLOW_FLAGS_FOR_ENUM({{Type.GetFullyQualifiedNamespace(true)}}::{{Type.Name}})"""");
+            }
         }
 
         private void AddIncludes(ISet<string> includes)
@@ -47,6 +50,14 @@
             foreach (GeneratedCppDeclarationElement element in Elements)
             {
                 element.AddIncludesToSet(includes);
+            }
+
+            if (Type.Kind == InteropTypeKind.EnumFlags) {
+                // Enum flags will have an underlying type of uint32_t.
+                includes.Add("<cstdint>");
+                // We want to be able to create bitmasks with the enum flags. 
+                // This library lets us do that with enum classes.
+                includes.Add("<flags/flags.hpp>");
             }
         }
 
@@ -74,15 +85,13 @@
 
             if (Type.Kind == InteropTypeKind.ClassWrapper || Type.Kind == InteropTypeKind.Delegate)
                 return "class";
-            else if (Type.Kind == InteropTypeKind.Enum)
+            else if (Type.Kind == InteropTypeKind.Enum || Type.Kind == InteropTypeKind.EnumFlags)
                 return "enum class";
-            else if (Type.Kind == InteropTypeKind.EnumFlags) 
-                return "enum";
             else
                 return "struct";
         }
 
-        private string GetSuffix(HashSet<string> Includes)
+        private string GetSuffix()
         {
             if (Type == null)
                 // TODO: report a compiler error instead.
@@ -91,10 +100,8 @@
             if (Type.Kind == InteropTypeKind.EnumFlags) {
                 // TODO: What if the original C# enum was some other 
                 // integral type though?
-                Includes.Add("<cstdint>");
-                return ": uint32_t";
+                return " : uint32_t";
             } else
-                // TODO: support derived classes too? 
                 return "";
         }
 

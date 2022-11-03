@@ -23,10 +23,12 @@ namespace Reinterop
         public readonly string? HeaderOverride;
 
         private static readonly string[] StandardNamespace = { "std" };
+        private static readonly string[] FlagsNamespace = { "flags" };
         private static readonly string[] NoNamespace = { };
 
         private const string IncludeCStdInt = "<cstdint>";
         private const string IncludeCStdDef = "<cstddef>";
+        private const string IncludeEnumFlags = "<flags/flags.hpp>";
 
         public static readonly CppType Int8 = CreatePrimitiveType(StandardNamespace, "int8_t", 0, IncludeCStdInt);
         public static readonly CppType Int16 = CreatePrimitiveType(StandardNamespace, "int16_t", 0, IncludeCStdInt);
@@ -231,10 +233,10 @@ namespace Reinterop
                 else if (Kind == InteropTypeKind.Enum)
                     typeType = "enum class";
                 else if (Kind == InteropTypeKind.EnumFlags) {
-                    typeType = "enum";
+                    typeType = "enum class";
                     // TODO: What if the original C# enum was some other 
                     // integral type though?
-                    suffix = ": uint32_t";
+                    suffix = " : uint32_t";
                 } else
                     typeType = "class";
                 forwardDeclarations.Add(
@@ -269,12 +271,6 @@ namespace Reinterop
 
         private void AddIncludesToSet(ISet<string> includes, bool forHeader)
         {
-            if (this.HeaderOverride != null)
-            {
-                includes.Add(this.HeaderOverride);
-                return;
-            }
-
             if (Kind == InteropTypeKind.Primitive)
             {
                 // Special case for primitives in <cstdint>.
@@ -292,6 +288,12 @@ namespace Reinterop
                     genericType.AddIncludesToSet(includes, forHeader);
                 }
 
+            }
+
+            if (this.HeaderOverride != null)
+            {
+                includes.Add(this.HeaderOverride);
+                return;
             }
 
             bool canBeForwardDeclared = true; // Flags.HasFlag(CppTypeFlags.Reference) || Flags.HasFlag(CppTypeFlags.Pointer);
@@ -324,15 +326,18 @@ namespace Reinterop
             return new CppType(Kind, Namespaces, Name, GenericArguments, Flags | CppTypeFlags.Const | CppTypeFlags.Reference & ~CppTypeFlags.Pointer, HeaderOverride);
         }
 
+        public CppType AsEnumFlags() {
+          return new CppType(InteropTypeKind.EnumFlags, FlagsNamespace, "flags", new CppType[]{ this }, 0, IncludeEnumFlags);
+        }
+
         /// <summary>
         /// Gets a version of this type suitable for use as the return value
         /// of a wrapped method. This simply returns the type unmodified.
         /// </summary>
         public CppType AsReturnType()
         {
-            if (this.Kind == InteropTypeKind.EnumFlags) 
-                // TODO: is there a way to access the static Uint32 object defined above?
-                return CreatePrimitiveType(StandardNamespace, "uint32_t", 0, IncludeCStdInt);
+            if (this.Kind == InteropTypeKind.EnumFlags)
+                return this.AsEnumFlags();
 
             // All other types are returned by value.
             return this;
@@ -358,11 +363,8 @@ namespace Reinterop
                     // of generic type by const reference.
                     return this.AsConstReference();
                 case InteropTypeKind.EnumFlags:
-                    // Enums flags can be combined together, so we want the underlying type to
-                    // be uint32_t.
-
-                    // TODO: is there a way to access the static Uint32 object defined above?
-                    return CreatePrimitiveType(StandardNamespace, "uint32_t", 0, IncludeCStdInt);
+                    // Allows enums to be combined together as flags.
+                    return this.AsEnumFlags();
             }
 
             return this;
@@ -430,8 +432,9 @@ namespace Reinterop
                     else
                         return $"{variableName}.GetHandle().Release()";
                 case InteropTypeKind.Enum:
-                case InteropTypeKind.EnumFlags:
                     return $"::std::uint32_t({variableName})";
+                case InteropTypeKind.EnumFlags:
+                    return $"{variableName}.underlying_value()";
                 case InteropTypeKind.Primitive:
                 case InteropTypeKind.BlittableStruct:
                 case InteropTypeKind.Unknown:
@@ -454,8 +457,9 @@ namespace Reinterop
                 case InteropTypeKind.Delegate:
                     return $"{this.AsSimpleType().GetFullyQualifiedName()}({CppObjectHandle.GetCppType(context).GetFullyQualifiedName()}({variableName}))";
                 case InteropTypeKind.Enum:
-                case InteropTypeKind.EnumFlags:
                     return $"{this.AsSimpleType().GetFullyQualifiedName()}({variableName})";
+                case InteropTypeKind.EnumFlags:
+                    return $"{this.GenericArguments.ElementAt(0).AsSimpleType().GetFullyQualifiedName()}({variableName})";
                 case InteropTypeKind.Primitive:
                 case InteropTypeKind.BlittableStruct:
                 case InteropTypeKind.Unknown:
