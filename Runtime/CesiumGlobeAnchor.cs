@@ -42,6 +42,30 @@ namespace CesiumForUnity
         UnityWorldCoordinates
     }
 
+    /// <summary>
+    /// Anchors this game object to the globe. An anchored game object can be placed anywhere on the globe with
+    /// high precision, and it will stay in its proper place on the globe when the
+    /// <see cref="CesiumGeoreference"/> origin changes.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A game object with this component _must_ be nested inside a <see cref="CesiumGeoreference"/>. That is,
+    /// the game object itself, or one of its ancestors, must have a <see cref="CesiumGeoreference"/> attached.
+    /// Otherwise, this component will throw an exception at `Start`.
+    /// </para>
+    /// <para>
+    /// An anchored game object is still allowed to move. It may be moved either by setting the position
+    /// properties on this instance, or by updating the game object's `Transform`. If the object is
+    /// expected to move outside of the Editor via a `Transform` change, be sure that the
+    /// <see cref="detectTransformChanges"/> property is set to true so that this instance updates
+    /// accordingly.
+    /// </para>
+    /// <para>
+    /// When this component is moved relative to the globe and
+    /// <see cref="adjustOrientationForGlobeWhenMoving"/> is enabled, the orientation of the game object will
+    /// also be updated in order to keep the object upright.
+    /// </para>
+    /// </remarks>
     [ExecuteInEditMode]
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumGlobeAnchorImpl", "CesiumGlobeAnchorImpl.h")]
     public partial class CesiumGlobeAnchor : MonoBehaviour, INotifyOfChanges
@@ -313,10 +337,49 @@ namespace CesiumForUnity
             this.positionAuthority = CesiumGlobeAnchorAuthority.UnityWorldCoordinates;
         }
 
+        /// <summary>
+        /// Synchronizes the properties of this `CesiumGlobeAnchor`.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// It is usually not necessary to call this method because it is called automatically when
+        /// needed. However, it may be be useful in special situations or when the timing of the
+        /// automatic calls is not ideal. It performs the following actions.
+        /// </para>
+        /// <list type="bullet">
+        /// <item>
+        /// If none of the position properties on this instance have been set, it updates them all
+        /// from the game object's current `Transform`.
+        /// </item>
+        /// <item>
+        /// If the game object's `Transform` has changed since the last time `Start`, this method,
+        /// or a position setter was called, it updates all of this instance's position
+        /// properties from the current transform and sets <see cref="positionAuthority"/> to
+        /// `UnityWorldCoordinates`. This works even if <see cref="detectTransformChanges"/> is
+        /// disabled. It will also update the object's orientation if
+        /// <see cref="adjustOrientationForGlobeWhenMoving"/> is enabled.
+        /// </item>
+        /// <item>
+        /// Recomputes the _other_ position properties from the authoritative set. They may be different
+        /// if, for example, the `CesiumGeoreference` origin has changed. If this results in the position
+        /// on the globe changing, the object's orientation will be updated as well if
+        /// <see cref="adjustOrientationForGlobeWhenMoving"/> is enabled.
+        /// </item>
+        /// </list>
+        /// </remarks>
+        public void Sync()
+        {
+            if (this._lastPropertiesAreValid && this._lastLocalToWorld != this.transform.localToWorldMatrix)
+                this.UpdateGlobePositionFromTransform();
+            else
+                this.UpdateGlobePosition(this._positionAuthority);
+        }
+
         #endregion
 
         #region Private properties
 
+        private bool _lastPropertiesAreValid = false;
         private double _lastPositionEcefX = 0.0;
         private double _lastPositionEcefY = 0.0;
         private double _lastPositionEcefZ = 0.0;
@@ -362,7 +425,7 @@ namespace CesiumForUnity
 
         private void Start()
         {
-            this.UpdateGlobePosition(CesiumGlobeAnchorAuthority.None);
+            this.Sync();
         }
 
         private void OnEnable()
@@ -401,7 +464,7 @@ namespace CesiumForUnity
         {
             // Detect changes in the Transform component.
             // We don't use Transform.hasChanged because we can't control when it is reset to false.
-            WaitUntil waitForChanges = new WaitUntil(() => !this.transform.localToWorldMatrix.Equals(this._lastLocalToWorld));
+            WaitUntil waitForChanges = new WaitUntil(() => this._lastPropertiesAreValid && !this.transform.localToWorldMatrix.Equals(this._lastLocalToWorld));
 
             while (true)
             {
@@ -489,6 +552,7 @@ namespace CesiumForUnity
             // new position on the globe (if desired).
             if (this.adjustOrientationForGlobeWhenMoving &&
                 previousAuthority != CesiumGlobeAnchorAuthority.None &&
+                this._lastPropertiesAreValid &&
                 (this._lastPositionEcefX != this._ecefX || this._lastPositionEcefY != this._ecefY || this._lastPositionEcefZ != this._ecefZ))
             {
                 CesiumVector3 oldPosition = new CesiumVector3()
@@ -512,6 +576,7 @@ namespace CesiumForUnity
             this._lastPositionEcefX = this._ecefX;
             this._lastPositionEcefY = this._ecefY;
             this._lastPositionEcefZ = this._ecefZ;
+            this._lastPropertiesAreValid = true;
         }
 
         private void UpdateGlobePositionFromTransform()
