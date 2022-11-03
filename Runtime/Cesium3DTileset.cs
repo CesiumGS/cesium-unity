@@ -442,6 +442,22 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
+        [Header("Debug")]
+        [Tooltip("Whether to show tiles as individual components in the hierarchy window.")]
+        [InspectorName("ShowTilesInHierarchy")]
+        private bool _showTilesInHierarchy = false;
+
+        public bool showTilesInHierarchy
+        {
+            get => this._showTilesInHierarchy;
+            set
+            {
+                this._showTilesInHierarchy = value;
+                this.RecreateTileset();
+            }
+        }
+
+        [SerializeField]
         [Tooltip("If true, this tileset is ticked/updated in the editor. " +
             "If false, it is only ticked while playing (including Play-in-Editor).")]
         [InspectorName("Update in Editor")]

@@ -92,8 +92,6 @@
       "xstddef": "cpp",
       "xtr1common": "cpp",
       "xtree": "cpp",
-      "util": "cpp",
-      "codecvt": "cpp",
-      "expected": "cpp"
+      "util": "cpp"
     }
 }
