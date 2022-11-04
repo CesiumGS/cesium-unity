@@ -1,16 +1,15 @@
 #include "CesiumIonRasterOverlayImpl.h"
 
 #include "Cesium3DTilesetImpl.h"
+#include "CesiumRasterOverlayUtility.h"
 
 #include <Cesium3DTilesSelection/IonRasterOverlay.h>
 #include <Cesium3DTilesSelection/Tileset.h>
-
 #include <CesiumAsync/IAssetResponse.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/CesiumForUnity/CesiumIonRasterOverlay.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
-#include <DotNet/CesiumForUnity/CesiumRasterOverlayLoadFailureDetails.h>
 #include <DotNet/CesiumForUnity/CesiumRuntimeSettings.h>
 #include <DotNet/System/String.h>
 
@@ -36,6 +35,11 @@ void CesiumIonRasterOverlayImpl::AddToTileset(
     return;
   }
 
+  if (overlay.ionAssetID() <= 0) {
+    // Don't create an overlay for an invalid asset ID.
+    return;
+  }
+
   Cesium3DTilesetImpl& tilesetImpl = tileset.NativeImplementation();
   Tileset* pTileset = tilesetImpl.getTileset();
   if (!pTileset)
@@ -47,22 +51,9 @@ void CesiumIonRasterOverlayImpl::AddToTileset(
         CesiumForUnity::CesiumRuntimeSettings::defaultIonAccessToken();
   }
 
-  RasterOverlayOptions options{};
-  options.loadErrorCallback =
-      [this, overlay](const RasterOverlayLoadFailureDetails& details) {
-        int typeValue = (int)details.type;
-        long statusCode = details.pRequest && details.pRequest->response()
-                              ? details.pRequest->response()->statusCode()
-                              : 0;
-        CesiumForUnity::CesiumRasterOverlayLoadFailureDetails unityDetails(
-            overlay,
-            CesiumForUnity::CesiumRasterOverlayLoadType(typeValue),
-            statusCode,
-            System::String(details.message));
-
-        CesiumForUnity::CesiumRasterOverlay::
-            BroadcastCesiumRasterOverlayLoadFailure(unityDetails);
-      };
+  CesiumForUnity::CesiumRasterOverlay genericOverlay = overlay;
+  RasterOverlayOptions options =
+      CesiumRasterOverlayUtility::GetOverlayOptions(genericOverlay);
 
   this->_pOverlay = new IonRasterOverlay(
       overlay.name().ToStlString(),
