@@ -8,6 +8,20 @@ namespace CesiumForUnity
     public class CesiumSubLevel : MonoBehaviour, INotifyOfChanges
     {
         [SerializeField]
+        [Tooltip("The radius from the origin at which this sub-level becomes active. The sub-level may not become active even when the camera is inside this radius if another sub-level is closer.")]
+        [NotifyOfChanges]
+        private double _activationRadius = 1000;
+
+        public double activationRadius
+        {
+            get => this._activationRadius;
+            set
+            {
+                this._activationRadius = value;
+            }
+        }
+
+        [SerializeField]
         [Tooltip("The set of coordinates that authoritatively define the origin of this sub-level.")]
         [NotifyOfChanges]
         private CesiumGeoreferenceOriginAuthority _originAuthority = CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight;
@@ -143,6 +157,34 @@ namespace CesiumForUnity
 
         private void UpdateOrigin()
         {
+            if (this._originAuthority == CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight)
+            {
+                CesiumVector3 ecef = CesiumTransforms.LongitudeLatitudeHeightToEarthCenteredEarthFixed(new CesiumVector3()
+                {
+                    x = this._longitude,
+                    y = this._latitude,
+                    z = this._height
+                });
+
+                this._ecefX = ecef.x;
+                this._ecefY = ecef.y;
+                this._ecefZ = ecef.z;
+            }
+
+            if (this._originAuthority == CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed)
+            {
+                CesiumVector3 llh = CesiumTransforms.EarthCenteredEarthFixedToLongitudeLatitudeHeight(new CesiumVector3()
+                {
+                    x = this._ecefX,
+                    y = this._ecefY,
+                    z = this._ecefZ
+                });
+
+                this._longitude = llh.x;
+                this._latitude = llh.y;
+                this._height = llh.z;
+            }
+
             if (this.isActiveAndEnabled)
             {
                 CesiumGeoreference? georeference = this.GetComponentInParent<CesiumGeoreference>();
