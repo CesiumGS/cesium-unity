@@ -22,7 +22,7 @@ namespace Reinterop
             namespace Reinterop
             {
                 [Reinterop]
-                public static class ObjectHandleUtility
+                internal static class ObjectHandleUtility
                 {
                     public static IntPtr CreateHandle(object? o)
                     {

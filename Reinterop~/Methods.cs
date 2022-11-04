@@ -99,6 +99,8 @@ namespace Reinterop
                 interopParameters = new[] { (ParameterName: "thiz", CallSiteName: "(*this)", Type: result.CppDefinition.Type.AsParameterType(), InteropType: result.CppDefinition.Type.AsInteropType()) }.Concat(interopParameters);
             }
 
+            bool hasStructRewrite = Interop.RewriteStructReturn(ref interopParameters, ref returnType, ref interopReturnType);
+
             var interopParameterStrings = interopParameters.Select(parameter => $"{parameter.InteropType.GetFullyQualifiedName()} {parameter.ParameterName}");
 
             // A private, static field of function pointer type that will call
@@ -222,11 +224,21 @@ namespace Reinterop
             }
             else
             {
+                string[] invocation = new[] { $"auto result = {interopName}({string.Join(", ", parameterPassStrings)});" };
+                if (hasStructRewrite)
+                {
+                    invocation = new[]
+                    {
+                        $"{returnType.GetFullyQualifiedName()} result;",
+                        $"{interopName}({string.Join(", ", parameterPassStrings)});"
+                    };
+                }
+
                 definition.Elements.Add(new(
                     Content:
                         $$"""
                         {{templatePrefix}}{{returnType.GetFullyQualifiedName()}} {{definition.Type.Name}}{{typeTemplateSpecialization}}::{{method.Name}}{{templateSpecialization}}({{string.Join(", ", parameterStrings)}}){{afterModifiers}} {
-                            auto result = {{interopName}}({{string.Join(", ", parameterPassStrings)}});
+                            {{GenerationUtility.JoinAndIndent(invocation, "    ")}}
                             return {{returnType.GetConversionFromInteropType(context, "result")}};
                         }
                         """,

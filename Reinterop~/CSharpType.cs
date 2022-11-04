@@ -119,5 +119,10 @@ namespace Reinterop
 
             return false;
         }
+
+        public CSharpType AsPointer()
+        {
+            return new CSharpType(this.Context, InteropTypeKind.Primitive, this.Namespaces, this.Compilation.CreatePointerTypeSymbol(this.Symbol));            
+        }
     }
 }
