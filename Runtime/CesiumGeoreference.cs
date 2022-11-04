@@ -190,6 +190,7 @@ namespace CesiumForUnity
         public void UpdateOrigin()
         {
             this.RecalculateOrigin();
+            this.UpdateOtherCoordinates();
 
             if (this.changed != null)
             {
@@ -215,6 +216,35 @@ namespace CesiumForUnity
             // not always call Awake at the appropriate time for `ExecuteInEditMode`
             // components like this one.
             this.InitializeOrigin();
+            this.UpdateOtherCoordinates();
+        }
+
+        private void UpdateOtherCoordinates()
+        {
+            if (this._originAuthority == CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight)
+            {
+                CesiumVector3 ecef = CesiumTransforms.LongitudeLatitudeHeightToEarthCenteredEarthFixed(new CesiumVector3()
+                {
+                    x = this._longitude,
+                    y = this._latitude,
+                    z = this._height
+                });
+                this._ecefX = ecef.x;
+                this._ecefY = ecef.y;
+                this._ecefZ = ecef.z;
+            }
+            else if (this._originAuthority == CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed)
+            {
+                CesiumVector3 llh = CesiumTransforms.EarthCenteredEarthFixedToLongitudeLatitudeHeight(new CesiumVector3()
+                {
+                    x = this._ecefX,
+                    y = this._ecefY,
+                    z = this._ecefZ
+                });
+                this._longitude = llh.x;
+                this._latitude = llh.y;
+                this._height = llh.z;
+            }
         }
 
         /// <summary>
