@@ -5,10 +5,10 @@ using UnityEngine;
 namespace CesiumForUnity
 {
     [ExecuteInEditMode]
-    public class CesiumSubLevel : MonoBehaviour, INotifyOfChanges
+    public class CesiumSubScene : MonoBehaviour, INotifyOfChanges
     {
         [SerializeField]
-        [Tooltip("The radius from the origin at which this sub-level becomes active. The sub-level may not become active even when the camera is inside this radius if another sub-level is closer.")]
+        [Tooltip("The radius from the origin at which this sub-scene becomes active. The sub-scene may not become active even when the camera is inside this radius if another sub-scene is closer.")]
         [NotifyOfChanges]
         private double _activationRadius = 1000;
 
@@ -22,7 +22,7 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Tooltip("The set of coordinates that authoritatively define the origin of this sub-level.")]
+        [Tooltip("The set of coordinates that authoritatively define the origin of this sub-scene.")]
         [NotifyOfChanges]
         private CesiumGeoreferenceOriginAuthority _originAuthority = CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight;
 
@@ -38,7 +38,7 @@ namespace CesiumForUnity
 
         [SerializeField]
         [Header("Origin")]
-        [Tooltip("The latitude of the origin of this sub-level in degrees, in the range [-90, 90].")]
+        [Tooltip("The latitude of the origin of this sub-scene in degrees, in the range [-90, 90].")]
         [NotifyOfChanges]
         private double _latitude = 39.736401;
 
@@ -53,7 +53,7 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Tooltip("The longitude of the origin of this sub-level in degrees, in the range [-180, 180].")]
+        [Tooltip("The longitude of the origin of this sub-scene in degrees, in the range [-180, 180].")]
         [NotifyOfChanges]
         private double _longitude = -105.25737;
 
@@ -68,7 +68,7 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Tooltip("The height of the origin of this sub-level in meters above the ellipsoid (usually WGS84). " +
+        [Tooltip("The height of the origin of this sub-scene in meters above the ellipsoid (usually WGS84). " +
                  "Do not confuse this with a geoid height or height above mean sea level, which " +
                  "can be tens of meters higher or lower depending on where in the world the " +
                  "origin is located.")]
@@ -87,7 +87,7 @@ namespace CesiumForUnity
 
         [SerializeField]
         [Header("Position (Earth Centered, Earth Fixed)")]
-        [Tooltip("The Earth-Centered, Earth-Fixed X-coordinate of the origin of this sub-level in meters.\n" +
+        [Tooltip("The Earth-Centered, Earth-Fixed X-coordinate of the origin of this sub-scene in meters.\n" +
                  "In the ECEF coordinate system, the origin is at the center of the Earth \n" +
                  "and the positive X axis points toward where the Prime Meridian crosses the Equator.")]
         [NotifyOfChanges]
@@ -104,7 +104,7 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Tooltip("The Earth-Centered, Earth-Fixed Y-coordinate of the origin of this sub-level in meters.\n" +
+        [Tooltip("The Earth-Centered, Earth-Fixed Y-coordinate of the origin of this sub-scene in meters.\n" +
                  "In the ECEF coordinate system, the origin is at the center of the Earth \n" +
                  "and the positive Y axis points toward the Equator at 90 degrees longitude.")]
         [NotifyOfChanges]
@@ -121,7 +121,7 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Tooltip("The Earth-Centered, Earth-Fixed Z-coordinate of the origin of this sub-level in meters.\n" +
+        [Tooltip("The Earth-Centered, Earth-Fixed Z-coordinate of the origin of this sub-scene in meters.\n" +
          "In the ECEF coordinate system, the origin is at the center of the Earth \n" +
          "and the positive Z axis points toward the North pole.")]
         [NotifyOfChanges]
@@ -139,17 +139,17 @@ namespace CesiumForUnity
 
         private void OnEnable()
         {
-            // When this sub-level is enabled, all others are disabled.
+            // When this sub-scene is enabled, all others are disabled.
             CesiumGeoreference? georeference = this.GetComponentInParent<CesiumGeoreference>();
             if (georeference == null)
-                throw new InvalidOperationException("CesiumSubLevel is not nested inside a game object with a CesiumGeoreference.");
+                throw new InvalidOperationException("CesiumSubScene is not nested inside a game object with a CesiumGeoreference.");
 
-            CesiumSubLevel[] sublevels = georeference.GetComponentsInChildren<CesiumSubLevel>();
-            foreach (CesiumSubLevel level in sublevels)
+            CesiumSubScene[] subscenes = georeference.GetComponentsInChildren<CesiumSubScene>();
+            foreach (CesiumSubScene scene in subscenes)
             {
-                if (level == this)
+                if (scene == this)
                     continue;
-                level.gameObject.SetActive(false);
+                scene.gameObject.SetActive(false);
             }
 
             this.UpdateOrigin();
@@ -189,7 +189,7 @@ namespace CesiumForUnity
             {
                 CesiumGeoreference? georeference = this.GetComponentInParent<CesiumGeoreference>();
                 if (georeference == null)
-                    throw new InvalidOperationException("CesiumSubLevel is not nested inside a game object with a CesiumGeoreference.");
+                    throw new InvalidOperationException("CesiumSubScene is not nested inside a game object with a CesiumGeoreference.");
 
                 if (this.originAuthority == CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed)
                     georeference.SetOriginEarthCenteredEarthFixed(this._ecefX, this._ecefY, this._ecefZ);

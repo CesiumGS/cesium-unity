@@ -1,8 +1,5 @@
 using UnityEngine;
-using CesiumForUnity;
-using System;
 using System.Collections.Generic;
-using PlasticGui.Configuration.CloudEdition;
 
 namespace CesiumForUnity
 {
@@ -43,16 +40,16 @@ namespace CesiumForUnity
             this.UpdateFromEcef(georeference, ecef);
         }
 
-        private List<CesiumSubLevel> _sublevelsScratch = new List<CesiumSubLevel>();
+        private List<CesiumSubScene> _sublevelsScratch = new List<CesiumSubScene>();
 
         private void UpdateFromEcef(CesiumGeoreference georeference, CesiumVector3 ecef)
         {
-            CesiumSubLevel? closestLevel = null;
+            CesiumSubScene? closestLevel = null;
             double distanceSquaredToClosest = double.MaxValue;
 
             // Are we inside a sub-level?
-            georeference.GetComponentsInChildren<CesiumSubLevel>(true, this._sublevelsScratch);
-            foreach (CesiumSubLevel level in this._sublevelsScratch)
+            georeference.GetComponentsInChildren<CesiumSubScene>(true, this._sublevelsScratch);
+            foreach (CesiumSubScene level in this._sublevelsScratch)
             {
                 // TODO: Make sure ECEF position is actually up-to-date
                 double x = level.ecefX - ecef.x;
@@ -82,7 +79,7 @@ namespace CesiumForUnity
             else
             {
                 // Deactivate all active sub-levels
-                foreach (CesiumSubLevel level in this._sublevelsScratch)
+                foreach (CesiumSubScene level in this._sublevelsScratch)
                 {
                     if (level.isActiveAndEnabled)
                         level.gameObject.SetActive(false);
