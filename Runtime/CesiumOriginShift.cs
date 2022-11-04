@@ -4,7 +4,7 @@ using System;
 
 namespace CesiumForUnity
 {
-
+    [RequireComponent(typeof(CesiumGlobeAnchor))]
     public class CesiumOriginShift : MonoBehaviour
     {
         void LateUpdate()
@@ -39,5 +39,4 @@ namespace CesiumForUnity
             // TODO: account for a transform on the CesiumGeoreference
         }
     }
-
 }
