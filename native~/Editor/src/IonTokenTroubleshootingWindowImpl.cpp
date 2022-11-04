@@ -159,76 +159,76 @@ void IonTokenTroubleshootingWindowImpl::AuthorizeToken(
   }
 
   sessionImpl.findToken(token.ToStlString())
-      .thenInMainThread(
-          [window,
-           connection = *maybeConnection,
-           ionAsset = window.ionAsset(),
-           isDefaultToken](
-              CesiumIonClient::Response<CesiumIonClient::Token>&& response) {
-            if (ionAsset.IsNull()) {
-              return connection.getAsyncSystem().createResolvedFuture();
-            }
+      .thenInMainThread([window,
+                         connection = *maybeConnection,
+                         ionAsset = window.ionAsset(),
+                         isDefaultToken](
+                            CesiumIonClient::Response<CesiumIonClient::Token>&&
+                                response) {
+        if (ionAsset.IsNull()) {
+          return connection.getAsyncSystem().createResolvedFuture();
+        }
 
-            if (!response.value) {
-              UnityEngine::Debug::LogError(System::String(
-                  "Cannot grant a token access to an asset because the token "
-                  "was not found in the signed-in Cesium ion "
-                  "account."));
-              return connection.getAsyncSystem().createResolvedFuture();
-            }
+        if (!response.value) {
+          UnityEngine::Debug::LogError(System::String(
+              "Cannot grant a token access to an asset because the token "
+              "was not found in the signed-in Cesium ion "
+              "account."));
+          return connection.getAsyncSystem().createResolvedFuture();
+        }
 
-            if (!response.value->assetIds) {
-              UnityEngine::Debug::LogWarning(System::String(
-                  "Cannot grant a token access to an asset because the token "
-                  "appears to already have access to all assets."));
-              return connection.getAsyncSystem().createResolvedFuture();
-            }
+        if (!response.value->assetIds) {
+          UnityEngine::Debug::LogWarning(System::String(
+              "Cannot grant a token access to an asset because the token "
+              "appears to already have access to all assets."));
+          return connection.getAsyncSystem().createResolvedFuture();
+        }
 
-            int64_t ionAssetID = ionAsset.ionAssetID();
+        int64_t ionAssetID = ionAsset.ionAssetID();
 
-            auto it = std::find(
-                response.value->assetIds->begin(),
-                response.value->assetIds->end(),
-                ionAssetID);
-            if (it != response.value->assetIds->end()) {
-              UnityEngine::Debug::LogWarning(System::String(
-                  "Cannot grant a token access to an asset because the token "
-                  "appears to already have access to the asset."));
-              return connection.getAsyncSystem().createResolvedFuture();
-            }
+        auto it = std::find(
+            response.value->assetIds->begin(),
+            response.value->assetIds->end(),
+            ionAssetID);
+        if (it != response.value->assetIds->end()) {
+          UnityEngine::Debug::LogWarning(System::String(
+              "Cannot grant a token access to an asset because the token "
+              "appears to already have access to the asset."));
+          return connection.getAsyncSystem().createResolvedFuture();
+        }
 
-            response.value->assetIds->emplace_back(ionAssetID);
+        response.value->assetIds->emplace_back(ionAssetID);
 
-            return connection
-                .modifyToken(
-                    response.value->id,
-                    response.value->name,
-                    response.value->assetIds,
-                    response.value->scopes,
-                    response.value->allowedUrls)
-                .thenInMainThread([window, ionAsset, isDefaultToken](
-                                      CesiumIonClient::Response<
-                                          CesiumIonClient::NoValue>&& result) {
-                  if (result.value) {
-                    // Refresh the object now that the token is valid
-                    // (hopefully).
-                    if (!ionAsset.IsNull()) {
-                      if (isDefaultToken) {
-                        window.UseDefaultToken();
-                      } else {
-                        // Set the token to the same value to force a refresh.
-                        ionAsset.ionAccessToken(ionAsset.ionAccessToken());
-                      }
-                    }
+        return connection
+            .modifyToken(
+                response.value->id,
+                response.value->name,
+                response.value->assetIds,
+                response.value->scopes,
+                response.value->allowedUrls)
+            .thenInMainThread([ionAsset, isDefaultToken](
+                                  CesiumIonClient::Response<
+                                      CesiumIonClient::NoValue>&& result) {
+              if (result.value) {
+                // Refresh the object now that the token is valid (hopefully).
+                if (!ionAsset.IsNull()) {
+                  if (isDefaultToken) {
+                    CesiumForUnity::IonTokenTroubleshootingWindow::UseDefaultToken(
+                        ionAsset);
                   } else {
-                    UnityEngine::Debug::LogError(System::String(
-                        "An error occurred while attempting to modify a token "
-                        "to grant it access to an asset. Please visit "
-                        "https://cesium.com/ion/tokens to modify the token "
-                        "manually."));
+                    // Set the token to the same value to force a refresh.
+                    ionAsset.ionAccessToken(ionAsset.ionAccessToken());
                   }
-                });
-          });
+                }
+              } else {
+                UnityEngine::Debug::LogError(System::String(
+                    "An error occurred while attempting to modify a token "
+                    "to grant it access to an asset. Please visit "
+                    "https://cesium.com/ion/tokens to modify the token "
+                    "manually."));
+              }
+            });
+      });
 }
 
 void IonTokenTroubleshootingWindowImpl::SelectNewDefaultToken(
@@ -251,11 +251,8 @@ void IonTokenTroubleshootingWindowImpl::SelectNewDefaultToken(
           return;
         }
 
-        if (ionAsset.IsNull()) {
-          return;
-        }
-
-        ionAsset.ionAccessToken(System::String(""));
+        CesiumForUnity::IonTokenTroubleshootingWindow::UseDefaultToken(
+            ionAsset);
       });
 }
 

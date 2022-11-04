@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEditor;
 
@@ -6,6 +7,56 @@ namespace CesiumForUnity
     [InitializeOnLoad]
     public static class CesiumEditorUtility
     {
+        public static class InspectorGUI
+        {
+            public static void ClampedIntField(
+                SerializedProperty property, int min, int max, GUIContent label)
+            {
+                if (property.propertyType == SerializedPropertyType.Integer)
+                {
+                    int value = EditorGUILayout.IntField(label, property.intValue);
+                    property.intValue = Math.Clamp(value, min, max);
+                }
+                else
+                {
+                    EditorGUILayout.LabelField(
+                        label.text, "Use ClampedIntField for int only.");
+                }
+            }
+
+            public static void ClampedFloatField(
+                SerializedProperty property, float min, float max, GUIContent label)
+            {
+                if (property.propertyType == SerializedPropertyType.Float)
+                {
+                    float value = EditorGUILayout.FloatField(label, property.floatValue);
+                    property.floatValue = Math.Clamp(value, min, max);
+                }
+                else
+                {
+                    EditorGUILayout.LabelField(
+                        label.text, "Use ClampedFloatField for float only.");
+                }
+            }
+
+            public static void ClampedDoubleField(
+                SerializedProperty property, double min, double max, GUIContent label)
+            {
+                // SerializedPropertyType.Float is used for both float and double;
+                // SerializedPropertyType.Double does not exist.
+                if (property.propertyType == SerializedPropertyType.Float)
+                {
+                    double value = EditorGUILayout.DoubleField(label, property.doubleValue);
+                    property.doubleValue = Math.Clamp(value, min, max);
+                }
+                else
+                {
+                    EditorGUILayout.LabelField(
+                        label.text, "Use ClampedDoubleField for double only.");
+                }
+            }
+        }
+
         static CesiumEditorUtility()
         {
             Cesium3DTileset.OnCesium3DTilesetLoadFailure +=
@@ -69,7 +120,7 @@ namespace CesiumForUnity
         public static Cesium3DTileset? FindFirstTileset()
         {
             Cesium3DTileset[] tilesets =
-                Object.FindObjectsOfType<Cesium3DTileset>(true);
+                UnityEngine.Object.FindObjectsOfType<Cesium3DTileset>(true);
             for (int i = 0; i < tilesets.Length; i++)
             {
                 Cesium3DTileset tileset = tilesets[i];
@@ -85,7 +136,7 @@ namespace CesiumForUnity
         public static Cesium3DTileset? FindFirstTilesetWithAssetID(long assetID)
         {
             Cesium3DTileset[] tilesets =
-                Object.FindObjectsOfType<Cesium3DTileset>(true);
+                UnityEngine.Object.FindObjectsOfType<Cesium3DTileset>(true);
             for (int i = 0; i < tilesets.Length; i++)
             {
                 Cesium3DTileset tileset = tilesets[i];
@@ -101,7 +152,7 @@ namespace CesiumForUnity
         public static CesiumGeoreference? FindFirstGeoreference()
         {
             CesiumGeoreference[] georeferences =
-               Object.FindObjectsOfType<CesiumGeoreference>(true);
+               UnityEngine.Object.FindObjectsOfType<CesiumGeoreference>(true);
             for (int i = 0; i < georeferences.Length; i++)
             {
                 CesiumGeoreference georeference = georeferences[i];

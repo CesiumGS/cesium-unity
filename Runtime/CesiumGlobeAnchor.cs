@@ -100,7 +100,6 @@ namespace CesiumForUnity
                  "from physics, and update the precise coordinates accordingly. Disabling this option " +
                  "improves performance for game objects that will not move. Transform changes are " +
                  "always detected in Edit mode, no matter the state of this flag.")]
-        [NotifyOfChanges]
         private bool _detectTransformChanges = true;
 
         public bool detectTransformChanges
@@ -115,7 +114,6 @@ namespace CesiumForUnity
 
         [SerializeField]
         [Tooltip("The set of coordinates that authoritatively define the position of this game object.")]
-        [NotifyOfChanges]
         private CesiumGlobeAnchorPositionAuthority _positionAuthority = CesiumGlobeAnchorPositionAuthority.None;
 
         public CesiumGlobeAnchorPositionAuthority positionAuthority
@@ -440,7 +438,7 @@ namespace CesiumForUnity
 
         #region Coroutines
 
-        private void StartOrStopDetectingTransformChanges()
+        public void StartOrStopDetectingTransformChanges()
         {
             this.StopCoroutine("DetectTransformChanges");
 
