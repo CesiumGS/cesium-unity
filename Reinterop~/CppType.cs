@@ -271,16 +271,6 @@ namespace Reinterop
 
         private void AddIncludesToSet(ISet<string> includes, bool forHeader)
         {
-            if (Kind == InteropTypeKind.Primitive)
-            {
-                // Special case for primitives in <cstdint>.
-                if (Namespaces == StandardNamespace)
-                {
-                    includes.Add(IncludeCStdInt);
-                }
-                return;
-            }
-
             if (this.GenericArguments != null && this.GenericArguments.Count > 0)
             {
                 foreach (CppType genericType in this.GenericArguments)
@@ -293,6 +283,16 @@ namespace Reinterop
             if (this.HeaderOverride != null)
             {
                 includes.Add(this.HeaderOverride);
+                return;
+            }
+
+            if (Kind == InteropTypeKind.Primitive)
+            {
+                // Special case for primitives in <cstdint>.
+                if (Namespaces == StandardNamespace)
+                {
+                    includes.Add(IncludeCStdInt);
+                }
                 return;
             }
 
