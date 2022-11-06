@@ -37,6 +37,8 @@ namespace CesiumForUnity
         private static Texture2D buttonHoverTexture;
         private static Texture2D buttonPressedTexture;
 
+        public static readonly float inspectorLabelWidth = 205.0f;
+
         private static Texture2D LoadIcon(string resourcePath)
         {
             Texture2D icon = (Texture2D)Resources.Load(resourcePath);

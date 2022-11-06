@@ -15,7 +15,7 @@ namespace CesiumForUnity
     {
         public delegate void TilesetLoadFailureDelegate(
             Cesium3DTilesetLoadFailureDetails details);
-        public static event TilesetLoadFailureDelegate OnCesium3DTilesetLoadFailure;
+        public static event TilesetLoadFailureDelegate? OnCesium3DTilesetLoadFailure;
 
         public static void
             BroadcastCesium3DTilesetLoadFailure(Cesium3DTilesetLoadFailureDetails details)

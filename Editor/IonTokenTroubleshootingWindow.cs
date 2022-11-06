@@ -121,7 +121,6 @@ namespace CesiumForUnity
 
         private bool _triggeredByError = false;
         private CesiumIonAsset _ionAsset = new CesiumIonAsset();
-        private bool _requestedDetails = false;
 
         public CesiumIonAsset ionAsset
         {
@@ -480,9 +479,27 @@ namespace CesiumForUnity
             if (GUILayout.Button("Use the project default token for this "
                 + this._ionAsset.type, CesiumEditorStyle.cesiumButtonStyle))
             {
-                this._ionAsset.ionAccessToken = "";
+                this.UseDefaultToken();
                 this.Close();
             }
+        }
+
+        public void UseDefaultToken()
+        {
+            if (this._ionAsset.IsNull())
+            {
+                return;
+            }
+
+            if(this._ionAsset.tileset != null)
+            {
+                Undo.RecordObject(this._ionAsset.tileset, "Use Default ion Access Token for Tileset");
+            } else if(this._ionAsset.overlay != null)
+            {
+                Undo.RecordObject(this._ionAsset.overlay, "Use Default ion Access Token for Raster Overlay");
+            }
+
+            this._ionAsset.ionAccessToken = "";
         }
 
         private partial void AuthorizeToken(string token, bool isDefaultToken);
