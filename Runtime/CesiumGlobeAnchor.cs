@@ -1,8 +1,6 @@
 using Reinterop;
 using System;
 using System.Collections;
-using System.Reflection;
-using Unity.VisualScripting.YamlDotNet.Core.Tokens;
 using UnityEditor;
 using UnityEngine;
 
@@ -388,9 +386,9 @@ namespace CesiumForUnity
 
         #region INotifyOfChanges implementation
 
+#if UNITY_EDITOR
         void INotifyOfChanges.NotifyPropertyChanged(SerializedProperty property)
         {
-#if UNITY_EDITOR
             switch (property.name)
             {
                 case "_longitude":
@@ -414,8 +412,8 @@ namespace CesiumForUnity
             }
 
             EditorApplication.QueuePlayerLoopUpdate();
-#endif
         }
+#endif
 
         #endregion
 

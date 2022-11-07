@@ -28,7 +28,7 @@ namespace Reinterop
             GeneratedCppDefinition definition = result.CppDefinition;
             GeneratedInit init = result.Init;
 
-            CppType returnType = CppType.FromCSharp(context, method.ReturnType);
+            CppType returnType = CppType.FromCSharp(context, method.ReturnType).AsReturnType();
             CppType interopReturnType = returnType.AsInteropType();
             var parameters = method.Parameters.Select(parameter =>
             {
