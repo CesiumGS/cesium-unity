@@ -29,7 +29,8 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        private CesiumGeoreferenceOriginAuthority _originAuthority = CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight;
+        private CesiumGeoreferenceOriginAuthority _originAuthority =
+            CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight;
 
         public CesiumGeoreferenceOriginAuthority originAuthority
         {
@@ -89,7 +90,7 @@ namespace CesiumForUnity
             set
             {
                 this._ecefX = value;
-                this.originAuthority = CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed;
+                this.originAuthority =CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed;
             }
         }
 
@@ -119,12 +120,29 @@ namespace CesiumForUnity
             }
         }
 
+        public void SetOriginEarthCenteredEarthFixed(double x, double y, double z)
+        {
+            this._ecefX = x;
+            this._ecefY = y;
+            this._ecefZ = z;
+            this.originAuthority = CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed;
+        }
+
+        public void SetOriginLongitudeLatitudeHeight(double longitude, double latitude, double height)
+        {
+            this._longitude = longitude;
+            this._latitude = latitude;
+            this._height = height;
+            this.originAuthority = CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight;
+        }
+
         private void OnEnable()
         {
             // When this sub-scene is enabled, all others are disabled.
             CesiumGeoreference? georeference = this.GetComponentInParent<CesiumGeoreference>();
             if (georeference == null)
-                throw new InvalidOperationException("CesiumSubScene is not nested inside a game object with a CesiumGeoreference.");
+                throw new InvalidOperationException(
+                    "CesiumSubScene is not nested inside a game object with a CesiumGeoreference.");
 
             CesiumSubScene[] subscenes = georeference.GetComponentsInChildren<CesiumSubScene>();
             foreach (CesiumSubScene scene in subscenes)

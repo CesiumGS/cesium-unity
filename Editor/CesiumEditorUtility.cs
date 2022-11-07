@@ -208,5 +208,64 @@ namespace CesiumForUnity
 
             return overlay;
         }
+
+        private static CesiumVector3
+            TransformCameraPositionToEarthCenteredEarthFixed(CesiumGeoreference georeference)
+        {
+            Vector3 pivot = SceneView.lastActiveSceneView.pivot;
+            CesiumVector3 positionUnity = new CesiumVector3()
+            {
+                x = pivot.x,
+                y = pivot.y,
+                z = pivot.z
+            };
+
+            return georeference.TransformUnityWorldPositionToEarthCenteredEarthFixed(positionUnity);
+        }
+
+        public static void
+            PlaceGeoreferenceAtCameraPosition(CesiumGeoreference georeference)
+        {
+            Undo.RecordObject(georeference, "Place Georeference at Camera Position");
+            CesiumVector3 positionECEF =
+                CesiumEditorUtility.TransformCameraPositionToEarthCenteredEarthFixed(georeference);
+            georeference.SetOriginEarthCenteredEarthFixed(
+                positionECEF.x,
+                positionECEF.y,
+                positionECEF.z);
+
+            SceneView.lastActiveSceneView.pivot = Vector3.zero;
+            // TODO: rotation
+            SceneView.lastActiveSceneView.Repaint();
+        }
+
+        public static CesiumSubScene CreateSubScene(CesiumGeoreference georeference)
+        {
+            GameObject subSceneGameObject = new GameObject();
+            subSceneGameObject.transform.parent = georeference.gameObject.transform;
+            Undo.RegisterCreatedObjectUndo(subSceneGameObject, "Create Sub-Scene");
+
+            CesiumSubScene subScene = subSceneGameObject.AddComponent<CesiumSubScene>();
+            CesiumVector3 positionECEF =
+                CesiumEditorUtility.TransformCameraPositionToEarthCenteredEarthFixed(georeference);
+            subScene.SetOriginEarthCenteredEarthFixed(
+                positionECEF.x,
+                positionECEF.y,
+                positionECEF.z);
+
+            Selection.activeGameObject = subSceneGameObject;
+
+            // Prompt the user to rename the subscene once the hierarchy has updated.
+            EditorApplication.hierarchyChanged += RenameObject;
+
+            return subScene;
+        }
+
+        public static void RenameObject()
+        {
+            EditorApplication.hierarchyChanged -= RenameObject;
+            EditorApplication.ExecuteMenuItem("Window/General/Hierarchy");
+            EditorApplication.ExecuteMenuItem("Edit/Rename");
+        }
     }
 }

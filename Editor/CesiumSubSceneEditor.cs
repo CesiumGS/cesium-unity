@@ -54,7 +54,6 @@ namespace CesiumForUnity
         public override void OnInspectorGUI()
         {
             this.serializedObject.Update();
-
             DrawSubSceneProperties();
             EditorGUILayout.Space(5);
 

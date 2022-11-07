@@ -47,6 +47,9 @@ namespace CesiumForUnity
         {
             this.serializedObject.Update();
 
+            DrawInspectorButtons();
+            EditorGUILayout.Space(5);
+
             EditorGUI.BeginChangeCheck();
 
             this.DrawOriginAuthorityProperty();
@@ -61,6 +64,43 @@ namespace CesiumForUnity
             }
 
             this.serializedObject.ApplyModifiedProperties();
+        }
+
+        private void DrawInspectorButtons()
+        {
+            // Don't modify the georeference if the editor is in play mode.
+            EditorGUI.BeginDisabledGroup(EditorApplication.isPlaying);
+
+            GUILayout.BeginHorizontal();
+            GUIContent placeOriginHereContent = new GUIContent(
+                "Place Origin Here",
+                "Places the georeference origin at the camera's current location. " +
+                "Rotates the globe so the current longitude/latitude/height of the " +
+                "camera is at the Unity origin. The camera is also teleported to the " +
+                "Unity origin." +
+                "\n\n" +
+                "Warning: Before clicking, ensure that all non-Cesium objects in the " +
+                "persistent level are georeferenced with the \"CesiumGeoreference\" component " +
+                "or are children of a GameObject with that component. Ensure that static " +
+                "GameObjects only exist in georeferenced subscenes.");
+            if (GUILayout.Button(placeOriginHereContent))
+            {
+                CesiumEditorUtility.PlaceGeoreferenceAtCameraPosition(this._georeference);
+            }
+
+            GUIContent createSubSceneContent = new GUIContent(
+                "Create Sub-Scene Here",
+                "Creates a child GameObject with a \"CesiumSubScene\" component whose origin " +
+                "is set to the camera's current location. A \"CesiumSubScene\" describes a " +
+                "corresponding world location that can be jumped to, and only one sub-scene " +
+                "can be worked on in the editor at a time.");
+            if (GUILayout.Button("Create Sub-Scene Here"))
+            {
+                CesiumEditorUtility.CreateSubScene(this._georeference);
+            }
+            GUILayout.EndHorizontal();
+
+            EditorGUI.EndDisabledGroup();
         }
 
         private void DrawOriginAuthorityProperty()
