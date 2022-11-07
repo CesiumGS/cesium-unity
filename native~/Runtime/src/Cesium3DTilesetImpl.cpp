@@ -155,18 +155,6 @@ void Cesium3DTilesetImpl::OnEnable(
         this->_updateInEditorCallback);
   }
 #endif
-
-  // When the georeference changes, recreate the tileset.
-  // TODO: just update tile positions rather than recreating.
-  this->_georeference =
-      tileset.gameObject()
-          .GetComponentInParent<CesiumForUnity::CesiumGeoreference>();
-  this->_georeferenceChangedCallback = System::Action([this]() {
-    // Unity does not allow us to destroy GameObjects and MonoBehaviours in this
-    // callback. So instead mark it to happen later.
-    this->_destroyTilesetOnNextUpdate = true;
-  });
-  this->_georeference.add_changed(this->_georeferenceChangedCallback);
 }
 
 void Cesium3DTilesetImpl::OnDisable(
@@ -281,7 +269,7 @@ void Cesium3DTilesetImpl::LoadTileset(
   options.lodTransitionLength = tileset.lodTransitionLength();
   options.showCreditsOnScreen = tileset.showCreditsOnScreen();
   options.loadErrorCallback =
-      [this, tileset](const TilesetLoadFailureDetails& details) {
+      [tileset](const TilesetLoadFailureDetails& details) {
         int typeValue = (int)details.type;
         CesiumForUnity::Cesium3DTilesetLoadFailureDetails unityDetails(
             tileset,
@@ -302,7 +290,7 @@ void Cesium3DTilesetImpl::LoadTileset(
 
   if (tileset.tilesetSource() ==
       CesiumForUnity::CesiumDataSource::FromCesiumIon) {
-    System::String& ionAccessToken = tileset.ionAccessToken();
+    System::String ionAccessToken = tileset.ionAccessToken();
     if (System::String::IsNullOrEmpty(ionAccessToken)) {
       ionAccessToken =
           CesiumForUnity::CesiumRuntimeSettings::defaultIonAccessToken();

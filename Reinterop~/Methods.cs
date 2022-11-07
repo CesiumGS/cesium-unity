@@ -83,7 +83,7 @@ namespace Reinterop
                             template <{{string.Join(", ", method.TypeParameters.Select(parameter => "typename " + parameter.Name))}}>
                             {{modifiers}}{{genericReturn.GetFullyQualifiedName()}} {{method.Name}}({{genericParametersString}}){{afterModifiers}};
                             """,
-                        TypeDeclarationsReferenced: new[] { genericReturn }.Concat(genericMethod.Parameters.Select(p => CppType.FromCSharp(context, p.Type))),
+                        TypeDeclarationsReferenced: new[] { genericReturn }.Concat(genericMethod.Parameters.Select(p => CppType.FromCSharp(context, p.Type).AsParameterType())),
                         IsPrivate: isPrivate
                         ));
                 }
@@ -98,6 +98,8 @@ namespace Reinterop
             {
                 interopParameters = new[] { (ParameterName: "thiz", CallSiteName: "(*this)", Type: result.CppDefinition.Type.AsParameterType(), InteropType: result.CppDefinition.Type.AsInteropType()) }.Concat(interopParameters);
             }
+
+            bool hasStructRewrite = Interop.RewriteStructReturn(ref interopParameters, ref returnType, ref interopReturnType);
 
             var interopParameterStrings = interopParameters.Select(parameter => $"{parameter.InteropType.GetFullyQualifiedName()} {parameter.ParameterName}");
 
@@ -222,11 +224,21 @@ namespace Reinterop
             }
             else
             {
+                string[] invocation = new[] { $"auto result = {interopName}({string.Join(", ", parameterPassStrings)});" };
+                if (hasStructRewrite)
+                {
+                    invocation = new[]
+                    {
+                        $"{returnType.GetFullyQualifiedName()} result;",
+                        $"{interopName}({string.Join(", ", parameterPassStrings)});"
+                    };
+                }
+
                 definition.Elements.Add(new(
                     Content:
                         $$"""
                         {{templatePrefix}}{{returnType.GetFullyQualifiedName()}} {{definition.Type.Name}}{{typeTemplateSpecialization}}::{{method.Name}}{{templateSpecialization}}({{string.Join(", ", parameterStrings)}}){{afterModifiers}} {
-                            auto result = {{interopName}}({{string.Join(", ", parameterPassStrings)}});
+                            {{GenerationUtility.JoinAndIndent(invocation, "    ")}}
                             return {{returnType.GetConversionFromInteropType(context, "result")}};
                         }
                         """,

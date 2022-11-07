@@ -115,7 +115,7 @@ namespace Reinterop
 
                 namespace Reinterop
                 {
-                    public class ReinteropInitializer
+                    internal class ReinteropInitializer
                     {
                         public static void Initialize()
                         {

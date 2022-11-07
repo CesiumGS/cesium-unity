@@ -2,6 +2,7 @@
 
 #include "TextureLoader.h"
 #include "UnityLifetime.h"
+#include "UnityTransforms.h"
 
 #include <Cesium3DTilesSelection/GltfUtilities.h>
 #include <Cesium3DTilesSelection/Tile.h>
@@ -14,6 +15,7 @@
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
+#include <DotNet/CesiumForUnity/CesiumGlobeAnchor.h>
 #include <DotNet/CesiumForUnity/CesiumMetadata.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/Object.h>
@@ -384,6 +386,18 @@ UnityPrepareRendererResources::prepareInLoadThread(
           [asyncSystem, tileset = this->_tileset](
               std::pair<UnityEngine::MeshDataArray, TileLoadResult>&&
                   workerResult) mutable {
+            bool shouldCreatePhysicsMeshes = false;
+            bool shouldShowTilesInHierarchy = false;
+
+            DotNet::CesiumForUnity::Cesium3DTileset tilesetComponent =
+                tileset.GetComponent<DotNet::CesiumForUnity::Cesium3DTileset>();
+            if (tilesetComponent != nullptr) {
+              shouldCreatePhysicsMeshes =
+                  tilesetComponent.createPhysicsMeshes();
+              shouldShowTilesInHierarchy = 
+                  tilesetComponent.showTilesInHierarchy();
+            }
+
             // Create meshes and populate them from the MeshData created in
             // the worker thread. Sadly, this must be done in the main
             // thread, too.
@@ -394,7 +408,11 @@ UnityPrepareRendererResources::prepareInLoadThread(
 
               // Don't let Unity unload this mesh during the time in between
               // when we create it and when we attach it to a GameObject.
-              unityMesh.hideFlags(UnityEngine::HideFlags::HideAndDontSave);
+              if (shouldShowTilesInHierarchy) {
+                unityMesh.hideFlags(UnityEngine::HideFlags::HideAndDontSave);
+              } else {
+                unityMesh.hideFlags(UnityEngine::HideFlags::HideAndDontSave | UnityEngine::HideFlags::HideInHierarchy);
+              }
 
               meshes.Item(i, unityMesh);
             }
@@ -411,15 +429,6 @@ UnityPrepareRendererResources::prepareInLoadThread(
             // we have to do it manually.
             for (int32_t i = 0, len = meshes.Length(); i < len; ++i) {
               meshes[i].RecalculateBounds();
-            }
-
-            bool shouldCreatePhysicsMeshes = false;
-
-            DotNet::CesiumForUnity::Cesium3DTileset tilesetComponent =
-                tileset.GetComponent<DotNet::CesiumForUnity::Cesium3DTileset>();
-            if (tilesetComponent != nullptr) {
-              shouldCreatePhysicsMeshes =
-                  tilesetComponent.createPhysicsMeshes();
             }
 
             if (shouldCreatePhysicsMeshes) {
@@ -475,18 +484,24 @@ void* UnityPrepareRendererResources::prepareInMainThread(
     name = urlIt->second.getStringOrDefault("glTF");
   }
 
+  DotNet::CesiumForUnity::Cesium3DTileset tilesetComponent =
+      this->_tileset.GetComponent<DotNet::CesiumForUnity::Cesium3DTileset>();
+
   auto pModelGameObject =
       std::make_unique<UnityEngine::GameObject>(System::String(name));
-  pModelGameObject->hideFlags(UnityEngine::HideFlags::DontSave);
+  
+  if (tilesetComponent.showTilesInHierarchy()) {
+    pModelGameObject->hideFlags(UnityEngine::HideFlags::DontSave);
+  } else {
+    pModelGameObject->hideFlags(UnityEngine::HideFlags::DontSave | UnityEngine::HideFlags::HideInHierarchy);
+  }
+  
   pModelGameObject->transform().parent(this->_tileset.transform());
   pModelGameObject->SetActive(false);
 
   glm::dmat4 tileTransform = tile.getTransform();
   tileTransform = GltfUtilities::applyRtcCenter(model, tileTransform);
   tileTransform = GltfUtilities::applyGltfUpAxisTransform(model, tileTransform);
-
-  DotNet::CesiumForUnity::Cesium3DTileset tilesetComponent =
-      this->_tileset.GetComponent<DotNet::CesiumForUnity::Cesium3DTileset>();
 
   DotNet::CesiumForUnity::CesiumGeoreference georeferenceComponent =
       this->_tileset
@@ -505,14 +520,16 @@ void* UnityPrepareRendererResources::prepareInMainThread(
   }
 
   const bool createPhysicsMeshes = tilesetComponent.createPhysicsMeshes();
+  const bool showTilesInHierarchy = tilesetComponent.showTilesInHierarchy();
 
   size_t meshIndex = 0;
 
-
   DotNet::CesiumForUnity::CesiumMetadata pMetadataComponent = nullptr;
   if (model.getExtension<ExtensionModelExtFeatureMetadata>()) {
-    pMetadataComponent = pModelGameObject->GetComponentInParent<DotNet::CesiumForUnity::CesiumMetadata>();
-    if(pMetadataComponent == nullptr){
+    pMetadataComponent =
+        pModelGameObject
+            ->GetComponentInParent<DotNet::CesiumForUnity::CesiumMetadata>();
+    if (pMetadataComponent == nullptr) {
       pMetadataComponent =
           pModelGameObject->transform()
               .parent()
@@ -530,6 +547,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
        opaqueMaterial,
        pCoordinateSystem,
        createPhysicsMeshes,
+       showTilesInHierarchy,
        &pMetadataComponent](
           const Model& gltf,
           const Node& node,
@@ -566,7 +584,12 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         int64_t primitiveIndex = &mesh.primitives[0] - &primitive;
         UnityEngine::GameObject primitiveGameObject(
             System::String("Primitive " + std::to_string(primitiveIndex)));
-        primitiveGameObject.hideFlags(UnityEngine::HideFlags::DontSave);
+        if (showTilesInHierarchy) {
+          primitiveGameObject.hideFlags(UnityEngine::HideFlags::DontSave);
+        } else {
+          primitiveGameObject.hideFlags(UnityEngine::HideFlags::DontSave | UnityEngine::HideFlags::HideInHierarchy);
+        }
+
         primitiveGameObject.transform().parent(pModelGameObject->transform());
 
         glm::dmat4 fixedToUnity =
@@ -574,41 +597,34 @@ void* UnityPrepareRendererResources::prepareInMainThread(
                 ? pCoordinateSystem->getEcefToLocalTransformation()
                 : glm::dmat4(1.0);
 
-        glm::dmat4 fullTransform = fixedToUnity * (tileTransform * transform);
+        glm::dmat4 transformToEcef = tileTransform * transform;
+        glm::dvec3 ecefPosition = glm::dvec3(transformToEcef[3]);
 
-        glm::dvec3 translation = glm::dvec3(fullTransform[3]);
-        glm::dmat3 rotationScale = glm::dmat3(fullTransform);
-        double lengthColumn0 = glm::length(rotationScale[0]);
-        double lengthColumn1 = glm::length(rotationScale[1]);
-        double lengthColumn2 = glm::length(rotationScale[2]);
-        glm::dmat3 rotationMatrix(
-            rotationScale[0] / lengthColumn0,
-            rotationScale[1] / lengthColumn1,
-            rotationScale[2] / lengthColumn2);
+        glm::dmat4 transformToUnity = fixedToUnity * transformToEcef;
 
-        glm::dvec3 scale(lengthColumn0, lengthColumn1, lengthColumn2);
+        glm::dvec3 translation = glm::dvec3(transformToUnity[3]);
 
-        glm::dvec3 cross = glm::cross(rotationScale[0], rotationScale[1]);
-        if (glm::dot(cross, rotationScale[2]) < 0.0) {
-          rotationMatrix *= -1.0;
-          scale *= -1.0;
-        }
-
-        glm::dquat rotation = glm::quat_cast(rotationMatrix);
+        RotationAndScale rotationAndScale =
+            UnityTransforms::matrixToRotationAndScale(
+                glm::dmat3(transformToUnity));
 
         primitiveGameObject.transform().position(UnityEngine::Vector3{
             float(translation.x),
             float(translation.y),
             float(translation.z)});
-        primitiveGameObject.transform().rotation(UnityEngine::Quaternion{
-            float(rotation.x),
-            float(rotation.y),
-            float(rotation.z),
-            float(rotation.w)});
-        primitiveGameObject.transform().localScale(UnityEngine::Vector3{
-            float(scale.x),
-            float(scale.y),
-            float(scale.z)});
+        primitiveGameObject.transform().rotation(
+            UnityTransforms::toUnity(rotationAndScale.rotation));
+        primitiveGameObject.transform().localScale(
+            UnityTransforms::toUnity(rotationAndScale.scale));
+
+        CesiumForUnity::CesiumGlobeAnchor anchor =
+            primitiveGameObject
+                .AddComponent<CesiumForUnity::CesiumGlobeAnchor>();
+        anchor.detectTransformChanges(false);
+        anchor.SetPositionEarthCenteredEarthFixed(
+            ecefPosition.x,
+            ecefPosition.y,
+            ecefPosition.z);
 
         UnityEngine::MeshFilter meshFilter =
             primitiveGameObject.AddComponent<UnityEngine::MeshFilter>();
@@ -766,13 +782,16 @@ void UnityPrepareRendererResources::free(
     std::unique_ptr<UnityEngine::GameObject> pGameObject(
         static_cast<UnityEngine::GameObject*>(pMainThreadResult));
 
-    auto pMetadataComponent = pGameObject->GetComponentInParent<DotNet::CesiumForUnity::CesiumMetadata>();
-    if(pMetadataComponent != nullptr){
-      for (int32_t i = 0, len = pGameObject->transform().childCount(); i < len; ++i) {
+    auto pMetadataComponent =
+        pGameObject
+            ->GetComponentInParent<DotNet::CesiumForUnity::CesiumMetadata>();
+    if (pMetadataComponent != nullptr) {
+      for (int32_t i = 0, len = pGameObject->transform().childCount(); i < len;
+           ++i) {
         pMetadataComponent.NativeImplementation().unloadMetadata(
             pGameObject->transform().GetChild(i).GetInstanceID());
-        }
       }
+    }
 
     UnityLifetime::Destroy(*pGameObject);
   }

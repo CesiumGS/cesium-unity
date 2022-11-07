@@ -80,6 +80,22 @@ namespace Reinterop
 
             CSharpType csReturnType = CSharpType.FromSymbol(context, returnType);
             CSharpType csInteropReturnType = csReturnType.AsInteropType();
+
+            // Rewrite methods that return a blittable struct to instead taking a pointer to one.
+            // See Interop.RewriteStructReturn in this file for the C++ side of this and more
+            // explanation of why it's needed.
+            bool hasStructRewrite = false;
+            if (csReturnType.Kind == InteropTypeKind.BlittableStruct)
+            {
+                hasStructRewrite = true;
+                CSharpType csOriginalInteropReturnType = csInteropReturnType;
+                csInteropReturnType = CSharpType.FromSymbol(context, context.Compilation.GetSpecialType(SpecialType.System_Void));
+                interopParameterDetails = interopParameterDetails.Concat(new[]
+                {
+                    (Name: "pReturnValue", Type: csReturnType, InteropType: csOriginalInteropReturnType.AsPointer())
+                });
+            }
+
             string interopReturnTypeString = csInteropReturnType.GetFullyQualifiedName();
 
             string callParameterList = string.Join(", ", callParameterDetails.Select(parameter => parameter.Type.GetParameterConversionFromInteropType(parameter.Name)));
@@ -96,7 +112,6 @@ namespace Reinterop
                         {{beforeInvocation}}
                         var result = {{invocationTarget}}[{{callParameterList}}];
                         {{afterInvocation}}
-                        return {{csReturnType.GetConversionToInteropType("result")}};
                         """;
                 }
                 else
@@ -107,8 +122,16 @@ namespace Reinterop
                         {{beforeInvocation}}
                         var result = {{invocationTarget}};
                         {{afterInvocation}}
-                        return {{csReturnType.GetConversionToInteropType("result")}};
                         """;
+                }
+
+                if (hasStructRewrite)
+                {
+                    implementation += Environment.NewLine + $"*pReturnValue = result;";
+                }
+                else
+                {
+                    implementation += Environment.NewLine + $"return {csReturnType.GetConversionToInteropType("result")};";
                 }
 
             }
@@ -168,6 +191,17 @@ namespace Reinterop
                 implementation =
                     $$"""
                     {{beforeInvocation}}{{invocationTarget}}({{callParameterList}});{{afterInvocation}}
+                    """;
+            }
+            else if (hasStructRewrite)
+            {
+                // A method with a struct return value, rewritten to be a parameter instead for interop.
+                implementation =
+                    $$"""
+                    {{beforeInvocation}}
+                    var result = {{invocationTarget}}({{callParameterList}});
+                    {{afterInvocation}}
+                    *pReturnValue = result;
                     """;
             }
             else
@@ -388,12 +422,18 @@ namespace Reinterop
                     return InteropTypeKind.Primitive;
             }
 
-            if (SymbolEqualityComparer.Default.Equals(type.BaseType, context.Compilation.GetSpecialType(SpecialType.System_Enum)))
+            if (SymbolEqualityComparer.Default.Equals(type.BaseType, context.Compilation.GetSpecialType(SpecialType.System_Enum))) {
+              if (type.GetAttributes().Where(attrib => attrib.AttributeClass != null && (attrib.AttributeClass.Name == "FlagsAttribute" || attrib.AttributeClass.Name == "Flags")).Any()) { 
+                return InteropTypeKind.EnumFlags;
+              } else {
                 return InteropTypeKind.Enum;
-            else if (type.TypeKind == TypeKind.Delegate)
+              }
+            } else if (type.TypeKind == TypeKind.Delegate)
                 return InteropTypeKind.Delegate;
             else if (type.IsReferenceType)
                 return InteropTypeKind.ClassWrapper;
+            else if (type is IPointerTypeSymbol)
+                return InteropTypeKind.Primitive;
             else if (IsBlittableStruct(context, type))
                 return InteropTypeKind.BlittableStruct;
             else
@@ -500,6 +540,30 @@ namespace Reinterop
                 default:
                     throw new Exception("Unsupported operator " + methodName);
             }
+        }
+
+        /// <summary>
+        /// Mono has trouble return large structs from C# to C++. See https://github.com/CesiumGS/cesium-unity/issues/73.
+        /// This rewrites the interop for such a method so that the C++ code instead passes a pointer to the
+        /// struct which is filled in on the C# side.
+        /// </summary>
+        /// <param name="interopParameters">The parameters to the interop method.</param>
+        /// <param name="interopReturnType">The return type of the interop method.</param>
+        /// <returns>True if the method has been rewritten, otherwise false.</returns>
+        public static bool RewriteStructReturn(ref IEnumerable<(string ParameterName, string CallSiteName, CppType Type, CppType InteropType)> interopParameters, ref CppType returnType, ref CppType interopReturnType)
+        {
+            if (returnType.Kind != InteropTypeKind.BlittableStruct)
+                return false;
+
+            CppType originalInteropReturnType = interopReturnType;
+            interopReturnType = CppType.Void;
+
+            interopParameters = interopParameters.Concat(new[]
+            {
+                (ParameterName: "pReturnValue", CallSiteName: "&result", Type: returnType, InteropType: originalInteropReturnType.AsPointer())
+            });
+
+            return true;
         }
     }
 }

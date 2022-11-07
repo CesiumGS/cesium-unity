@@ -28,7 +28,7 @@ namespace Reinterop
             GeneratedCppDefinition definition = result.CppDefinition;
             GeneratedInit init = result.Init;
 
-            CppType returnType = CppType.FromCSharp(context, method.ReturnType);
+            CppType returnType = CppType.FromCSharp(context, method.ReturnType).AsReturnType();
             CppType interopReturnType = returnType.AsInteropType();
             var parameters = method.Parameters.Select(parameter =>
             {
@@ -42,6 +42,8 @@ namespace Reinterop
             {
                 interopParameters = new[] { (ParameterName: "thiz", CallSiteName: "(*this)", Type: result.CppDefinition.Type.AsParameterType(), InteropType: result.CppDefinition.Type.AsInteropType()) }.Concat(interopParameters);
             }
+
+            bool hasStructRewrite = Interop.RewriteStructReturn(ref interopParameters, ref returnType, ref interopReturnType);
 
             var interopParameterStrings = interopParameters.Select(parameter => $"{parameter.InteropType.GetFullyQualifiedName()} {parameter.ParameterName}");
 
@@ -114,11 +116,20 @@ namespace Reinterop
             }
             else
             {
+                string[] invocation = new[] { $"auto result = Property_{method.Name}({string.Join(", ", parameterPassStrings)});" };
+                if (hasStructRewrite)
+                {
+                    invocation = new[]
+                    {
+                        $"{returnType.GetFullyQualifiedName()} result;",
+                        $"Property_{method.Name}({string.Join(", ", parameterPassStrings)});"
+                    };
+                }
                 definition.Elements.Add(new(
                     Content:
                         $$"""
                         {{returnType.GetFullyQualifiedName()}} {{definition.Type.Name}}{{typeTemplateSpecialization}}::{{propertyName}}({{string.Join(", ", parameterStrings)}}){{afterModifiers}} {
-                            auto result = Property_{{method.Name}}({{string.Join(", ", parameterPassStrings)}});
+                            {{GenerationUtility.JoinAndIndent(invocation, "    ")}}
                             return {{returnType.GetConversionFromInteropType(context, "result")}};
                         }
                         """,

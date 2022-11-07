@@ -34,6 +34,13 @@
             {
                 if (type.CanBeForwardDeclared)
                     type.AddForwardDeclarationsToSet(set);
+                else if (type.GenericArguments != null && type.GenericArguments.Count > 0)
+                {
+                    foreach (CppType genericType in type.GenericArguments)
+                    {
+                      genericType.AddForwardDeclarationsToSet(set);
+                    }
+                }
             }
         }
     }

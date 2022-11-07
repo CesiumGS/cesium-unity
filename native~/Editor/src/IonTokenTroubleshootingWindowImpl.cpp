@@ -148,7 +148,7 @@ void IonTokenTroubleshootingWindowImpl::AuthorizeToken(
     bool isDefaultToken) {
   CesiumForUnity::CesiumIonSession session =
       CesiumForUnity::CesiumIonSession::Ion();
-  CesiumIonSessionImpl sessionImpl = session.NativeImplementation();
+  CesiumIonSessionImpl& sessionImpl = session.NativeImplementation();
   const std::optional<CesiumIonClient::Connection>& maybeConnection =
       sessionImpl.getConnection();
   if (!session.IsConnected() || !maybeConnection) {
@@ -160,7 +160,8 @@ void IonTokenTroubleshootingWindowImpl::AuthorizeToken(
 
   sessionImpl.findToken(token.ToStlString())
       .thenInMainThread(
-          [connection = *maybeConnection,
+          [window,
+           connection = *maybeConnection,
            ionAsset = window.ionAsset(),
            isDefaultToken](
               CesiumIonClient::Response<CesiumIonClient::Token>&& response) {
@@ -205,7 +206,7 @@ void IonTokenTroubleshootingWindowImpl::AuthorizeToken(
                     response.value->assetIds,
                     response.value->scopes,
                     response.value->allowedUrls)
-                .thenInMainThread([ionAsset, isDefaultToken](
+                .thenInMainThread([window, ionAsset, isDefaultToken](
                                       CesiumIonClient::Response<
                                           CesiumIonClient::NoValue>&& result) {
                   if (result.value) {
@@ -213,7 +214,7 @@ void IonTokenTroubleshootingWindowImpl::AuthorizeToken(
                     // (hopefully).
                     if (!ionAsset.IsNull()) {
                       if (isDefaultToken) {
-                        ionAsset.ionAccessToken(System::String(""));
+                        window.UseDefaultToken();
                       } else {
                         // Set the token to the same value to force a refresh.
                         ionAsset.ionAccessToken(ionAsset.ionAccessToken());

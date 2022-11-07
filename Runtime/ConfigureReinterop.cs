@@ -218,6 +218,7 @@ namespace CesiumForUnity
             tileset.createPhysicsMeshes = tileset.createPhysicsMeshes;
             tileset.suspendUpdate = tileset.suspendUpdate;
             tileset.previousSuspendUpdate = tileset.previousSuspendUpdate;
+            tileset.showTilesInHierarchy = tileset.showTilesInHierarchy;
             tileset.updateInEditor = tileset.updateInEditor;
             tileset.showCreditsOnScreen = tileset.showCreditsOnScreen;
 
@@ -226,10 +227,42 @@ namespace CesiumForUnity
             CesiumIonRasterOverlay ionOverlay = go.GetComponent<CesiumIonRasterOverlay>();
             ionOverlay.ionAssetID = ionOverlay.ionAssetID;
             ionOverlay.ionAccessToken = ionOverlay.ionAccessToken;
-            CesiumRasterOverlay baseOverlay = ionOverlay;
+
             CesiumRasterOverlay overlay = go.GetComponent<CesiumRasterOverlay>();
+            overlay.showCreditsOnScreen = overlay.showCreditsOnScreen;
+            overlay.maximumScreenSpaceError = overlay.maximumScreenSpaceError;
+            overlay.maximumTextureSize = overlay.maximumTextureSize;
+            overlay.maximumSimultaneousTileLoads = overlay.maximumSimultaneousTileLoads;
+            overlay.subTileCacheBytes = overlay.subTileCacheBytes;
+
+            CesiumRasterOverlay baseOverlay = ionOverlay;
             baseOverlay.AddToTileset();
             baseOverlay.RemoveFromTileset();
+
+            CesiumBingMapsRasterOverlay bingMapsRasterOverlay =
+                go.GetComponent<CesiumBingMapsRasterOverlay>();
+            bingMapsRasterOverlay.bingMapsKey = bingMapsRasterOverlay.bingMapsKey;
+            bingMapsRasterOverlay.mapStyle = bingMapsRasterOverlay.mapStyle;
+            baseOverlay = bingMapsRasterOverlay;
+            
+            CesiumTileMapServiceRasterOverlay tileMapServiceRasterOverlay =
+                go.GetComponent<CesiumTileMapServiceRasterOverlay>();
+            tileMapServiceRasterOverlay.url = tileMapServiceRasterOverlay.url;
+            tileMapServiceRasterOverlay.specifyZoomLevels =
+                tileMapServiceRasterOverlay.specifyZoomLevels;
+            tileMapServiceRasterOverlay.minimumLevel = tileMapServiceRasterOverlay.minimumLevel;
+            tileMapServiceRasterOverlay.maximumLevel = tileMapServiceRasterOverlay.maximumLevel;
+            baseOverlay = tileMapServiceRasterOverlay;
+
+            CesiumWebMapServiceRasterOverlay webMapServiceRasterOverlay =
+                go.GetComponent<CesiumWebMapServiceRasterOverlay>();
+            webMapServiceRasterOverlay.baseUrl = webMapServiceRasterOverlay.baseUrl;
+            webMapServiceRasterOverlay.layers = webMapServiceRasterOverlay.layers;
+            webMapServiceRasterOverlay.tileWidth = webMapServiceRasterOverlay.tileWidth;
+            webMapServiceRasterOverlay.tileHeight = webMapServiceRasterOverlay.tileHeight;
+            webMapServiceRasterOverlay.minimumLevel = webMapServiceRasterOverlay.minimumLevel;
+            webMapServiceRasterOverlay.maximumLevel = webMapServiceRasterOverlay.maximumLevel;
+            baseOverlay = webMapServiceRasterOverlay;
 
             CesiumRasterOverlay[] overlaysArray = go.GetComponents<CesiumRasterOverlay>();
             int len = overlaysArray.Length;
@@ -255,6 +288,10 @@ namespace CesiumForUnity
             georeference.longitude = georeference.longitude;
             georeference.latitude = georeference.latitude;
             georeference.height = georeference.height;
+            georeference.ecefX = georeference.ecefX;
+            georeference.ecefY = georeference.ecefY;
+            georeference.ecefZ = georeference.ecefZ;
+            georeference.originAuthority = georeference.originAuthority;
 
             CesiumGeoreference inParent = go.GetComponentInParent<CesiumGeoreference>();
             inParent.UpdateOrigin();
@@ -345,6 +382,23 @@ namespace CesiumForUnity
                                                 0,
                                                 "");
             CesiumRasterOverlay.BroadcastCesiumRasterOverlayLoadFailure(overlayDetails);
+
+            CesiumVector3 cv3 = new CesiumVector3();
+            cv3.x = cv3.y = cv3.z;
+
+            CesiumGlobeAnchor[] globeAnchors = go.GetComponentsInChildren<CesiumGlobeAnchor>();
+            globeAnchors = go.GetComponentsInChildren<CesiumGlobeAnchor>(true);
+            CesiumGlobeAnchor globeAnchor = globeAnchors[globeAnchors.Length - 1];
+            globeAnchor.ecefX = globeAnchor.ecefX;
+            globeAnchor.ecefY = globeAnchor.ecefY;
+            globeAnchor.ecefZ = globeAnchor.ecefZ;
+            globeAnchor.SetPositionEarthCenteredEarthFixed(globeAnchor.ecefX, globeAnchor.ecefY, globeAnchor.ecefZ);
+
+            globeAnchor = go.AddComponent<CesiumGlobeAnchor>();
+            globeAnchor.detectTransformChanges = globeAnchor.detectTransformChanges;
+            globeAnchor.SetPositionUnityWorld(0.0, 0.0, 0.0);
+            globeAnchor.SetPositionLongitudeLatitudeHeight(0.0, 0.0, 0.0);
+            globeAnchor.positionAuthority = globeAnchor.positionAuthority;
 
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;

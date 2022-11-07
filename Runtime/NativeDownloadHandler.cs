@@ -11,7 +11,7 @@ namespace CesiumForUnity
     }
 
     [ReinteropNativeImplementation("CesiumForUnityNative::NativeDownloadHandlerImpl", "NativeDownloadHandlerImpl.h")]
-    public partial class NativeDownloadHandler : DownloadHandlerScript
+    internal partial class NativeDownloadHandler : DownloadHandlerScript
     {
         public NativeDownloadHandler()
          : base(new byte[16384])
