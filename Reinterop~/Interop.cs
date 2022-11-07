@@ -389,7 +389,7 @@ namespace Reinterop
             }
 
             if (SymbolEqualityComparer.Default.Equals(type.BaseType, context.Compilation.GetSpecialType(SpecialType.System_Enum))) {
-              if (type.GetAttributes().Select(attrib => attrib.ToString() == "FlagsAttribute").Any()) { 
+              if (type.GetAttributes().Where(attrib => attrib.AttributeClass != null && (attrib.AttributeClass.Name == "FlagsAttribute" || attrib.AttributeClass.Name == "Flags")).Any()) { 
                 return InteropTypeKind.EnumFlags;
               } else {
                 return InteropTypeKind.Enum;
