@@ -33,6 +33,10 @@ option(BUILD_SHARED_LIB OFF)
 option( SUPPORT_CONSOLE_APP OFF)
 add_subdirectory(extern/tidy-html5 EXCLUDE_FROM_ALL)
 
+# Enum flags is a header-only library without a CMakeLists.txt
+file(GLOB ENUM_FLAGS_HEADERS ${CMAKE_CURRENT_LIST_DIR}/extern/enum-flags/include/*.hpp)
+add_library(enum-flags INTERFACE ${ENUM_FLAGS_HEADERS})
+
 add_subdirectory(Runtime)
 
 if (EDITOR)

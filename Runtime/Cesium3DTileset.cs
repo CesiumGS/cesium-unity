@@ -15,7 +15,7 @@ namespace CesiumForUnity
     {
         public delegate void TilesetLoadFailureDelegate(
             Cesium3DTilesetLoadFailureDetails details);
-        public static event TilesetLoadFailureDelegate OnCesium3DTilesetLoadFailure;
+        public static event TilesetLoadFailureDelegate? OnCesium3DTilesetLoadFailure;
 
         public static void
             BroadcastCesium3DTilesetLoadFailure(Cesium3DTilesetLoadFailureDetails details)
@@ -314,6 +314,22 @@ namespace CesiumForUnity
             set
             {
                 this._previousSuspendUpdate = value;
+            }
+        }
+
+        [SerializeField]
+        [Header("Debug")]
+        [Tooltip("Whether to show tiles as individual components in the hierarchy window.")]
+        [InspectorName("ShowTilesInHierarchy")]
+        private bool _showTilesInHierarchy = false;
+
+        public bool showTilesInHierarchy
+        {
+            get => this._showTilesInHierarchy;
+            set
+            {
+                this._showTilesInHierarchy = value;
+                this.RecreateTileset();
             }
         }
 

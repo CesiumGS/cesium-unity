@@ -15,6 +15,8 @@ namespace Reinterop
         public HashSet<string> ForwardDeclarations = new HashSet<string>();
         public Dictionary<string, CppSourceFileNamespace> Namespaces = new Dictionary<string, CppSourceFileNamespace>();
 
+        public CppSourceFileNamespace GlobalNamespace = new CppSourceFileNamespace();
+
         public CppSourceFileNamespace GetNamespace(string name)
         {
             CppSourceFileNamespace ns;
@@ -27,6 +29,11 @@ namespace Reinterop
             return ns;
         }
 
+        public CppSourceFileNamespace GetGlobalNamespace() 
+        {
+          return this.GlobalNamespace;
+        }
+
         public string ToContentString()
         {
             string content =
@@ -36,6 +43,8 @@ namespace Reinterop
                 {{ForwardDeclarations.JoinAndIndent("")}}
 
                 {{Namespaces.Select(kvp => GetNamespace(kvp.Key, kvp.Value)).JoinAndIndent("")}}
+
+                {{GetNamespace(null, GetGlobalNamespace())}}
                 """;
             if (IsHeaderFile)
                 return "#pragma once" + Environment.NewLine + Environment.NewLine + content;

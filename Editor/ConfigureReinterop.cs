@@ -179,6 +179,7 @@ namespace CesiumForUnity
             IonMissingAssetWindow.ShowWindow("Asset Name", 0);
 
             IonTokenTroubleshootingWindow troubleshootingWindow = null!;
+            troubleshootingWindow.UseDefaultToken();
             TokenTroubleshootingDetails tokenDetails = troubleshootingWindow.assetTokenDetails;
             tokenDetails = troubleshootingWindow.defaultTokenDetails;
             token = tokenDetails.token;
