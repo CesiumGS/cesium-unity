@@ -3,10 +3,13 @@ using UnityEngine;
 
 namespace CesiumForUnity
 {
-    [CustomEditor(typeof(CesiumGeoreference))]
-    public class CesiumGeoreferenceEditor : Editor
+    [CustomEditor(typeof(CesiumSubScene))]
+    public class CesiumSubSceneEditor : Editor
     {
-        private CesiumGeoreference _georeference;
+        private CesiumSubScene _subScene;
+
+        private SerializedProperty _activationRadius;
+        private SerializedProperty _showActivationRadius;
 
         private SerializedProperty _originAuthority;
 
@@ -31,13 +34,18 @@ namespace CesiumForUnity
 
         private void OnEnable()
         {
-            this._georeference = (CesiumGeoreference)this.target;
+            this._subScene = (CesiumSubScene)this.target;
 
+            this._activationRadius = this.serializedObject.FindProperty("_activationRadius");
+            this._showActivationRadius =
+                this.serializedObject.FindProperty("_showActivationRadius");
             this._originAuthority =
                 this.serializedObject.FindProperty("_originAuthority");
+
             this._latitude = this.serializedObject.FindProperty("_latitude");
             this._longitude = this.serializedObject.FindProperty("_longitude");
             this._height = this.serializedObject.FindProperty("_height");
+
             this._ecefX = this.serializedObject.FindProperty("_ecefX");
             this._ecefY = this.serializedObject.FindProperty("_ecefY");
             this._ecefZ = this.serializedObject.FindProperty("_ecefZ");
@@ -47,29 +55,49 @@ namespace CesiumForUnity
         {
             this.serializedObject.Update();
 
-            EditorGUI.BeginChangeCheck();
+            DrawSubSceneProperties();
+            EditorGUILayout.Space(5);
 
-            this.DrawOriginAuthorityProperty();
+            EditorGUI.BeginChangeCheck();
+            
+            DrawLongitudeLatitudeHeightProperties();
             EditorGUILayout.Space(5);
-            this.DrawLongitudeLatitudeHeightProperties();
-            EditorGUILayout.Space(5);
-            this.DrawEarthCenteredEarthFixedProperties();
+            DrawEarthCenteredEarthFixedProperties();
 
             if (EditorGUI.EndChangeCheck())
             {
-                this._georeference.UpdateOrigin();
+                this._subScene.UpdateOrigin();
             }
-
+            
             this.serializedObject.ApplyModifiedProperties();
         }
 
-        private void DrawOriginAuthorityProperty()
+        private void DrawSubSceneProperties()
         {
+            GUIContent activationRadiusContent = new GUIContent(
+                "Activation Radius",
+                "The radius from the origin at which this sub-scene becomes active. " +
+                "The sub-scene may not become active if another sub-scene is closer, " +
+                "even when the camera is inside this radius.");
+            EditorGUILayout.PropertyField(this._activationRadius, activationRadiusContent);
+
+            GUIContent showActivationRadiusContent = new GUIContent(
+                "Show Activation Radius",
+                "Whether to visualize the sub-scene loading radius in the editor. " +
+                "Helpful for initially positioning the sub-scene and choosing a load radius.");
+            EditorGUILayout.PropertyField(this._showActivationRadius, showActivationRadiusContent);
+
+            EditorGUI.BeginChangeCheck();
             GUIContent originAuthorityContent = new GUIContent(
                 "Origin Authority",
                 "The set of coordinates that authoritatively define the origin of " +
-                "this georeference.");
+                "this sub-scene.");
             EditorGUILayout.PropertyField(this._originAuthority, originAuthorityContent);
+
+            if (EditorGUI.EndChangeCheck())
+            {
+                this._subScene.UpdateOrigin();
+            }
         }
 
         private void DrawLongitudeLatitudeHeightProperties()
@@ -83,7 +111,7 @@ namespace CesiumForUnity
 
             GUIContent latitudeContent = new GUIContent(
                 "Latitude",
-                "The latitude of the origin in degrees, in the range [-90, 90].");
+                "The latitude of the origin of this sub-scene in degrees, in the range [-90, 90].");
             CesiumEditorUtility.InspectorGUI.ClampedDoubleField(
                 this._latitude,
                 -90.0,
@@ -92,7 +120,7 @@ namespace CesiumForUnity
 
             GUIContent longitudeContent = new GUIContent(
                 "Longitude",
-                "The longitude of the origin in degrees, in the range [-180, 180].");
+                "The longitude of the origin of this sub-scene in degrees, in the range [-180, 180].");
             CesiumEditorUtility.InspectorGUI.ClampedDoubleField(
                  this._longitude,
                  -180.0,
@@ -101,7 +129,7 @@ namespace CesiumForUnity
 
             GUIContent heightContent = new GUIContent(
                 "Height",
-                "The height of the origin in meters above the ellipsoid (usually WGS84)." +
+                "The height of the origin of this sub-scene in meters above the ellipsoid (usually WGS84)." +
                 "\n\n" +
                 "Do not confuse this with a geoid height or height above mean sea level, which " +
                 "can be tens of meters higher or lower depending on where in the world the " +
@@ -123,7 +151,7 @@ namespace CesiumForUnity
             GUIContent ecefXContent = new GUIContent(
                 "ECEF X",
                 "The Earth-Centered, Earth-Fixed X-coordinate of the origin of this " +
-                "georeference in meters." +
+                "sub-scene in meters." +
                 "\n\n" +
                  "In the ECEF coordinate system, the origin is at the center of the Earth " +
                  "and the positive X axis points toward where the Prime Meridian crosses " +
@@ -133,7 +161,7 @@ namespace CesiumForUnity
             GUIContent ecefYContent = new GUIContent(
                 "ECEF Y",
                 "The Earth-Centered, Earth-Fixed Y-coordinate of the origin of this " +
-                "georeference in meters." +
+                "sub-scene in meters." +
                 "\n\n" +
                 "In the ECEF coordinate system, the origin is at the center of the Earth " +
                 "and the positive Y axis points toward the Equator at 90 degrees longitude.");
@@ -142,7 +170,7 @@ namespace CesiumForUnity
             GUIContent ecefZContent = new GUIContent(
                 "ECEF Z",
                 "The Earth-Centered, Earth-Fixed Z-coordinate of the origin of this " +
-                "georeference in meters." +
+                "sub-scene in meters." +
                 "\n\n" +
                 "In the ECEF coordinate system, the origin is at the center of the Earth " +
                 "and the positive Z axis points toward the North pole.");

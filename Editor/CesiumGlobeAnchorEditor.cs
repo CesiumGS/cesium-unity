@@ -12,7 +12,7 @@ namespace CesiumForUnity
         private SerializedProperty _detectTransformChanges;
         private SerializedProperty _positionAuthority;
 
-        // Converts the SerializedProperty's value to CesiumGeoreferenceOriginAuthority
+        // Converts the SerializedProperty's value to the CesiumGeoreferenceOriginAuthority
         // enum it corresponds to, for convenience.
         internal CesiumGlobeAnchorPositionAuthority positionAuthority
         {   
@@ -55,12 +55,15 @@ namespace CesiumForUnity
                 this.serializedObject.FindProperty("_detectTransformChanges");
             this._positionAuthority =
                 this.serializedObject.FindProperty("_positionAuthority");
+
             this._latitude = this.serializedObject.FindProperty("_latitude");
             this._longitude = this.serializedObject.FindProperty("_longitude");
             this._height = this.serializedObject.FindProperty("_height");
+
             this._ecefX = this.serializedObject.FindProperty("_ecefX");
             this._ecefY = this.serializedObject.FindProperty("_ecefY");
             this._ecefZ = this.serializedObject.FindProperty("_ecefZ");
+
             this._unityX = this.serializedObject.FindProperty("_unityX");
             this._unityY = this.serializedObject.FindProperty("_unityY");
             this._unityZ = this.serializedObject.FindProperty("_unityZ");
@@ -71,8 +74,11 @@ namespace CesiumForUnity
             this.serializedObject.Update();
 
             DrawGlobeAnchorProperties();
-            DrawLatitudeLongitudeHeightProperties();
+            EditorGUILayout.Space(5);
+            DrawLongitudeLatitudeHeightProperties();
+            EditorGUILayout.Space(5);
             DrawEarthCenteredEarthFixedProperties();
+            EditorGUILayout.Space(5);
             DrawUnityPositionProperties();
 
             this.serializedObject.ApplyModifiedProperties();
@@ -140,7 +146,7 @@ namespace CesiumForUnity
             }
         }
 
-        private void DrawLatitudeLongitudeHeightProperties()
+        private void DrawLongitudeLatitudeHeightProperties()
         {
             EditorGUI.BeginDisabledGroup(
                 this.positionAuthority != CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight);

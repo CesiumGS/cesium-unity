@@ -5,11 +5,9 @@ using UnityEngine;
 namespace CesiumForUnity
 {
     [ExecuteInEditMode]
-    public class CesiumSubScene : MonoBehaviour, INotifyOfChanges
+    public class CesiumSubScene : MonoBehaviour
     {
         [SerializeField]
-        [Tooltip("The radius from the origin at which this sub-scene becomes active. The sub-scene may not become active even when the camera is inside this radius if another sub-scene is closer.")]
-        [NotifyOfChanges]
         private double _activationRadius = 1000;
 
         public double activationRadius
@@ -22,8 +20,15 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Tooltip("The set of coordinates that authoritatively define the origin of this sub-scene.")]
-        [NotifyOfChanges]
+        private bool _showActivationRadius = true;
+
+        public bool showActivationRadius
+        {
+            get => this._showActivationRadius;
+            set => this._showActivationRadius = value;
+        }
+
+        [SerializeField]
         private CesiumGeoreferenceOriginAuthority _originAuthority = CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight;
 
         public CesiumGeoreferenceOriginAuthority originAuthority
@@ -37,9 +42,6 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Header("Origin")]
-        [Tooltip("The latitude of the origin of this sub-scene in degrees, in the range [-90, 90].")]
-        [NotifyOfChanges]
         private double _latitude = 39.736401;
 
         public double latitude
@@ -53,8 +55,6 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Tooltip("The longitude of the origin of this sub-scene in degrees, in the range [-180, 180].")]
-        [NotifyOfChanges]
         private double _longitude = -105.25737;
 
         public double longitude
@@ -68,11 +68,6 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Tooltip("The height of the origin of this sub-scene in meters above the ellipsoid (usually WGS84). " +
-                 "Do not confuse this with a geoid height or height above mean sea level, which " +
-                 "can be tens of meters higher or lower depending on where in the world the " +
-                 "origin is located.")]
-        [NotifyOfChanges]
         private double _height = 2250.0;
 
         public double height
@@ -86,11 +81,6 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Header("Position (Earth Centered, Earth Fixed)")]
-        [Tooltip("The Earth-Centered, Earth-Fixed X-coordinate of the origin of this sub-scene in meters.\n" +
-                 "In the ECEF coordinate system, the origin is at the center of the Earth \n" +
-                 "and the positive X axis points toward where the Prime Meridian crosses the Equator.")]
-        [NotifyOfChanges]
         private double _ecefX = 6378137.0;
 
         public double ecefX
@@ -104,10 +94,6 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Tooltip("The Earth-Centered, Earth-Fixed Y-coordinate of the origin of this sub-scene in meters.\n" +
-                 "In the ECEF coordinate system, the origin is at the center of the Earth \n" +
-                 "and the positive Y axis points toward the Equator at 90 degrees longitude.")]
-        [NotifyOfChanges]
         private double _ecefY = 0.0;
 
         public double ecefY
@@ -121,10 +107,6 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Tooltip("The Earth-Centered, Earth-Fixed Z-coordinate of the origin of this sub-scene in meters.\n" +
-         "In the ECEF coordinate system, the origin is at the center of the Earth \n" +
-         "and the positive Z axis points toward the North pole.")]
-        [NotifyOfChanges]
         private double _ecefZ = 0.0;
 
         public double ecefZ
@@ -155,7 +137,7 @@ namespace CesiumForUnity
             this.UpdateOrigin();
         }
 
-        private void UpdateOrigin()
+        public void UpdateOrigin()
         {
             if (this._originAuthority == CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight)
             {
@@ -198,25 +180,18 @@ namespace CesiumForUnity
             }
         }
 
-#if UNITY_EDITOR
-        void INotifyOfChanges.NotifyPropertyChanged(SerializedProperty property)
+        #if UNITY_EDITOR
+        private void OnDrawGizmos()
         {
-            switch (property.name)
+            if (this._showActivationRadius)
             {
-                case "_longitude":
-                case "_latitude":
-                case "_height":
-                    this.originAuthority = CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight;
-                    break;
-                case "_ecefX":
-                case "_ecefY":
-                case "_ecefZ":
-                    this.originAuthority = CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed;
-                    break;
+                // TODO: would be nice to draw a better wireframe sphere.
+                Gizmos.color = Color.blue;
+                Gizmos.DrawWireSphere(
+                    this.transform.position,
+                    (float)this._activationRadius);
             }
-
-            EditorApplication.QueuePlayerLoopUpdate();
         }
-#endif
+        #endif
     }
 }
