@@ -27,7 +27,9 @@ target_include_directories(
         ${REINTEROP_GENERATED_DIRECTORY}/src
         ${REINTEROP_GENERATED_DIRECTORY}/include
         # tidy-html5 doesn't use target_include_directories, so add it manually
-        ../extern/tidy-html5/include)
+        ../extern/tidy-html5/include
+        # same with enum-flags
+        ../extern/enum-flags/include)
 
 target_link_libraries(
   CesiumForUnityNative-Runtime
@@ -36,6 +38,7 @@ target_link_libraries(
       CesiumAsync
     PRIVATE
       tidy-static
+      enum-flags
 )
 
 set_target_properties(

@@ -18,7 +18,7 @@ namespace Reinterop
             GeneratedResult? result = null;
 
             CppType itemType = CppType.FromCSharp(this.Options, item.Type);
-            if (itemType.Kind == InteropTypeKind.Enum)
+            if (itemType.Kind == InteropTypeKind.Enum || itemType.Kind == InteropTypeKind.EnumFlags)
                 result = GenerateEnum(item, itemType);
             else if (itemType.Kind == InteropTypeKind.ClassWrapper || itemType.Kind == InteropTypeKind.BlittableStruct || itemType.Kind == InteropTypeKind.NonBlittableStructWrapper || itemType.Kind == InteropTypeKind.Delegate)
                 result = GenerateClassOrStruct(item, itemType);

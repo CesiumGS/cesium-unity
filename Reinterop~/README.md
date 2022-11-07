@@ -79,9 +79,9 @@ If you change the generator, be sure to compile it and then restart Visual Studi
 The above won't work if Roslyn needs to be run by Unity. Instead, add this code to the `Initialize` method of `RoslynSourceGenerator.cs`:
 
 ```
-if (!Debugger.IsAttached)
+if (!System.Diagnostics.Debugger.IsAttached)
 {
-    Debugger.Launch();
+    System.Diagnostics.Debugger.Launch();
 }
 ```
 

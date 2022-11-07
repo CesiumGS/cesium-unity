@@ -26,12 +26,16 @@ target_include_directories(
         ../Shared/src
         ${REINTEROP_GENERATED_DIRECTORY}/src
         ${REINTEROP_GENERATED_DIRECTORY}/include
+        # enum-flags doesn't use target_include_directories, so add it manually
+        ../extern/enum-flags/include
 )
 
 target_link_libraries(
     CesiumForUnityNative-Editor
     PUBLIC
         CesiumIonClient
+    PRIVATE
+        enum-flags
 )
 
 set_target_properties(

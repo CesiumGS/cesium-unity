@@ -318,6 +318,22 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
+        [Header("Debug")]
+        [Tooltip("Whether to show tiles as individual components in the hierarchy window.")]
+        [InspectorName("ShowTilesInHierarchy")]
+        private bool _showTilesInHierarchy = false;
+
+        public bool showTilesInHierarchy
+        {
+            get => this._showTilesInHierarchy;
+            set
+            {
+                this._showTilesInHierarchy = value;
+                this.RecreateTileset();
+            }
+        }
+
+        [SerializeField]
         private bool _updateInEditor = true;
 
         public bool updateInEditor
