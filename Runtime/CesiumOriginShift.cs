@@ -1,6 +1,5 @@
 using UnityEngine;
-using CesiumForUnity;
-using System;
+using System.Collections.Generic;
 
 namespace CesiumForUnity
 {
@@ -41,10 +40,55 @@ namespace CesiumForUnity
             this.UpdateFromEcef(georeference, ecef);
         }
 
+        private List<CesiumSubScene> _sublevelsScratch = new List<CesiumSubScene>();
+
         private void UpdateFromEcef(CesiumGeoreference georeference, CesiumVector3 ecef)
         {
-            georeference.SetOriginEarthCenteredEarthFixed(ecef.x, ecef.y, ecef.z);
-            // TODO: account for a transform on the CesiumGeoreference
+            CesiumSubScene? closestLevel = null;
+            double distanceSquaredToClosest = double.MaxValue;
+
+            // Are we inside a sub-level?
+            georeference.GetComponentsInChildren<CesiumSubScene>(true, this._sublevelsScratch);
+            foreach (CesiumSubScene level in this._sublevelsScratch)
+            {
+                // TODO: Make sure ECEF position is actually up-to-date
+                double x = level.ecefX - ecef.x;
+                double y = level.ecefY - ecef.y;
+                double z = level.ecefZ - ecef.z;
+                double distanceSquared = x * x + y * y + z * z;
+                if (distanceSquared > level.activationRadius * level.activationRadius)
+                    // We're outside this level's activation radius
+                    continue;
+
+                if (closestLevel == null || distanceSquared < distanceSquaredToClosest)
+                {
+                    closestLevel = level;
+                    distanceSquaredToClosest = distanceSquared;
+                }
+            }
+
+            if (closestLevel != null)
+            {
+                if (!closestLevel.isActiveAndEnabled)
+                {
+                    // Setting a level active will automatically disable all other levels.
+                    closestLevel.gameObject.SetActive(true);
+                    closestLevel.enabled = true;
+                }
+            }
+            else
+            {
+                // Deactivate all active sub-levels
+                foreach (CesiumSubScene level in this._sublevelsScratch)
+                {
+                    if (level.isActiveAndEnabled)
+                        level.gameObject.SetActive(false);
+                }
+
+                // Update the origin continuously.
+                // TODO: account for a transform on the CesiumGeoreference
+                georeference.SetOriginEarthCenteredEarthFixed(ecef.x, ecef.y, ecef.z);
+            }
         }
     }
 }
