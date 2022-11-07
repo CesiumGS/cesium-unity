@@ -124,6 +124,8 @@ namespace CesiumForUnity
             meshRenderer.material.SetTexture("name", texture2D);
             meshRenderer.material.SetFloat("name", 1.0f);
             meshRenderer.material.SetVector("name", new Vector4());
+            meshRenderer.material.DisableKeyword("keywordName");
+            meshRenderer.material.EnableKeyword("keywordName");
             meshRenderer.sharedMaterial = meshRenderer.sharedMaterial;
             UnityEngine.Object.Destroy(meshGameObject);
             UnityEngine.Object.DestroyImmediate(meshGameObject);

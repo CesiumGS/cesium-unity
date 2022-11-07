@@ -23,7 +23,8 @@ Material:
   m_Name: CesiumDefaultTilesetMaterial
   m_Shader: {fileID: -6465566751694194690, guid: 407c0cff68611ac46a65eec87a5203f5,
     type: 3}
-  m_ValidKeywords: []
+  m_ValidKeywords:
+  - _OVERLAY_COUNT_NONE
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -38,7 +39,31 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _emissiveTexture:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _metallicRoughnessTexture:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _normalTexture:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _occlusionTexture:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _overlay0Texture:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _overlay1Texture:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _overlay2Texture:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -56,11 +81,27 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _HAS_BASE_COLOR: 0
+    - _HAS_EMISSIVE: 0
+    - _HAS_METALLIC_ROUGHNESS: 0
+    - _HAS_NORMAL_TEXTURE: 0
+    - _HAS_OCCLUSION: 0
+    - _OVERLAY_COUNT: 0
     - _QueueControl: 0
     - _QueueOffset: 0
     - _baseColorTextureCoordinateIndex: 0
+    - _emissiveTextureCoordinateIndex: 0
+    - _metallicRoughnessTextureCoordinateIndex: 0
+    - _normalTextureCoordinateIndex: 0
+    - _occlusionTextureCoordinateIndex: 0
     - _overlay0TextureCoordinateIndex: 0
+    - _overlay1TextureCoordinateIndex: 0
+    - _overlay2TextureCoordinateIndex: 0
     m_Colors:
     - _baseColorFactor: {r: 1, g: 1, b: 1, a: 1}
+    - _emissiveFactor: {r: 0, g: 0, b: 0, a: 0}
+    - _metallicRoughnessFactor: {r: 0, g: 0, b: 0, a: 0}
     - _overlay0TranslationAndScale: {r: 0, g: 0, b: 1, a: 1}
+    - _overlay1TranslationAndScale: {r: 0, g: 0, b: 1, a: 1}
+    - _overlay2TranslationAndScale: {r: 0, g: 0, b: 1, a: 1}
   m_BuildTextureStacks: []

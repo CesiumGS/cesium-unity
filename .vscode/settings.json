@@ -1,5 +1,5 @@
 {
-    "cmake.sourceDirectory": "${workspaceFolder}",
+    "cmake.sourceDirectory": "${workspaceFolder}/native~",
     "files.associations": {
         "iosfwd": "cpp",
         "algorithm": "cpp",

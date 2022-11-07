@@ -621,24 +621,120 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
         const Material* pMaterial =
             Model::getSafe(&gltf.materials, primitive.material);
-        if (pMaterial && pMaterial->pbrMetallicRoughness) {
-          const std::optional<TextureInfo>& baseColorTexture =
-              pMaterial->pbrMetallicRoughness->baseColorTexture;
-          if (baseColorTexture) {
-            UnityEngine::Texture texture =
-                TextureLoader::loadTexture(gltf, baseColorTexture->index);
+        if (pMaterial) {
+          if (pMaterial->pbrMetallicRoughness) {
+            const std::optional<TextureInfo>& baseColorTexture =
+                pMaterial->pbrMetallicRoughness->baseColorTexture;
+            if (baseColorTexture) {
+              UnityEngine::Texture texture =
+                  TextureLoader::loadTexture(gltf, baseColorTexture->index);
+              if (texture != nullptr) {
+                material.EnableKeyword(System::String("_HAS_BASE_COLOR"));
+                material.SetTexture(System::String("_baseColorTexture"), texture);
+                material.SetFloat(System::String("_baseColorTextureCoordinateIndex"), static_cast<float>(baseColorTexture->texCoord));
+
+                const std::vector<double>& baseColorFactorSrc = pMaterial->pbrMetallicRoughness->baseColorFactor;
+
+                // TODO: double check that the gltf base color factor is in RGBA order
+                // TODO: do these scale factors need to consider sRGB?
+                // If so, we might want to use material.SetColor
+                UnityEngine::Vector4 baseColorFactor;
+                baseColorFactor.x = baseColorFactorSrc.size() > 0 ? static_cast<float>(baseColorFactorSrc[0]) : 1.0f;
+                baseColorFactor.y = baseColorFactorSrc.size() > 1 ? static_cast<float>(baseColorFactorSrc[1]) : 1.0f;
+                baseColorFactor.z = baseColorFactorSrc.size() > 2 ? static_cast<float>(baseColorFactorSrc[2]) : 1.0f;
+                baseColorFactor.w = baseColorFactorSrc.size() > 3 ? static_cast<float>(baseColorFactorSrc[3]) : 1.0f;
+                material.SetVector(System::String("_baseColorFactor"), baseColorFactor);
+              }
+            }
+
+            const std::optional<TextureInfo>& metallicRoughness = 
+                pMaterial->pbrMetallicRoughness->metallicRoughnessTexture;
+            if (metallicRoughness) {
+              UnityEngine::Texture texture =
+                  TextureLoader::loadTexture(gltf, metallicRoughness->index);
+              if (texture != nullptr) {
+                material.EnableKeyword(System::String("_HAS_METALLIC_ROUGHNESS"));
+                material.SetTexture(System::String("_metallicRoughnessTexture"), texture);
+                material.SetFloat(System::String("_metallicRoughnessTextureCoordinateIndex"), static_cast<float>(metallicRoughness->texCoord));
+
+                UnityEngine::Vector4 metallicRoughnessFactor;
+                metallicRoughnessFactor.x = pMaterial->pbrMetallicRoughness->metallicFactor;
+                metallicRoughnessFactor.y = pMaterial->pbrMetallicRoughness->roughnessFactor;
+                material.SetVector(System::String("_metallicRoughnessFactor"), metallicRoughnessFactor);
+              }
+            }
+          }
+
+          if (pMaterial->normalTexture) {
+            UnityEngine::Texture texture = 
+                TextureLoader::loadTexture(gltf, pMaterial->normalTexture->index);
             if (texture != nullptr) {
-              material.SetTexture(System::String("_baseColorTexture"), texture);
+              material.EnableKeyword(System::String("_HAS_NORMAL_MAP"));
+              material.SetTexture(System::String("_normalMapTexture"), texture);
+              material.SetFloat(System::String("_normalMapTextureCoordinateIndex"), static_cast<float>(pMaterial->normalTexture->texCoord));
+              material.SetFloat(System::String("_normalMapScale"), static_cast<float>(pMaterial->normalTexture->scale));
+            }
+          }
+
+          if (pMaterial->occlusionTexture) {
+            UnityEngine::Texture texture = 
+                TextureLoader::loadTexture(gltf, pMaterial->occlusionTexture->index);
+            if (texture != nullptr) {
+              material.EnableKeyword(System::String("_HAS_OCCLUSION"));
+              material.SetTexture(System::String("_occlusionTexture"), texture);
+              material.SetFloat(System::String("_occlusionTextureCoordinateIndex"), static_cast<float>(pMaterial->occlusionTexture->texCoord));
+              material.SetFloat(System::String("_occlusionStrength"), static_cast<float>(pMaterial->occlusionTexture->strength));
+            }
+          }
+
+          if (pMaterial->emissiveTexture) {
+            UnityEngine::Texture texture = 
+                TextureLoader::loadTexture(gltf, pMaterial->emissiveTexture->index);
+            if (texture != nullptr) {
+              material.EnableKeyword(System::String("_HAS_EMISSIVE"));
+              material.SetTexture(System::String("_emissiveTexture"), texture);
+              material.SetFloat(System::String("_emissiveTextureCoordinateIndex"), static_cast<float>(pMaterial->emissiveTexture->texCoord));
+
+              const std::vector<double>& emissiveFactorSrc = pMaterial->emissiveFactor;
+
+              UnityEngine::Vector4 emissiveFactor;
+              emissiveFactor.x = emissiveFactorSrc.size() > 0 ? static_cast<float>(emissiveFactorSrc[0]) : 0.0f;
+              emissiveFactor.y = emissiveFactorSrc.size() > 1 ? static_cast<float>(emissiveFactorSrc[1]) : 0.0f;
+              emissiveFactor.z = emissiveFactorSrc.size() > 2 ? static_cast<float>(emissiveFactorSrc[2]) : 0.0f;
+
+              material.SetVector(System::String("_emissiveFactor"), emissiveFactor);
             }
           }
         }
 
-        auto overlay0AccessorIt = primitive.attributes.find("_CESIUMOVERLAY_0");
-        if (overlay0AccessorIt != primitive.attributes.end()) {
-          material.SetFloat(
-              System::String("_overlay0TextureCoordinateIndex"),
-              1);
+        uint32_t overlayCount = 0;
+        for (overlayCount; overlayCount < 3; ++overlayCount) {
+          std::string overlayCountStr = std::to_string(overlayCount);
+          auto overlay0AccessorIt = primitive.attributes.find("_CESIUMOVERLAY_" + overlayCountStr);
+          if (overlay0AccessorIt != primitive.attributes.end()) {
+            material.SetFloat(
+                System::String("_overlay" + overlayCountStr + "TextureCoordinateIndex"),
+                static_cast<float>(overlay0AccessorIt->second));
+          }
         }
+
+        switch (overlayCount) {
+          case 0:
+          material.EnableKeyword(System::String("_OVERLAY_COUNT_NONE"));
+          break;
+          case 1:
+          material.EnableKeyword(System::String("_OVERLAY_COUNT_ONE"));
+          material.DisableKeyword(System::String("_OVERLAY_COUNT_NONE"));
+          break;
+          case 2:
+          material.EnableKeyword(System::String("_OVERLAY_COUNT_TWO"));
+          material.DisableKeyword(System::String("_OVERLAY_COUNT_NONE"));
+          break;
+          case 3:
+          material.EnableKeyword(System::String("_OVERLAY_COUNT_THREE"));
+          material.DisableKeyword(System::String("_OVERLAY_COUNT_NONE"));
+          break;
+        };
 
         meshFilter.sharedMesh(unityMesh);
 
