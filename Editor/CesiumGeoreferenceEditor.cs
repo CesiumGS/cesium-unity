@@ -10,7 +10,7 @@ namespace CesiumForUnity
 
         private SerializedProperty _originAuthority;
 
-        // Converts the SerializedProperty's value to CesiumGeoreferenceOriginAuthority
+        // Converts the SerializedProperty's value to the CesiumGeoreferenceOriginAuthority
         // enum it corresponds to, for convenience.
         internal CesiumGeoreferenceOriginAuthority originAuthority
         {

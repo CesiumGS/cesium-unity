@@ -76,8 +76,6 @@ namespace CesiumForUnity
             DrawUnityPositionProperties();
 
             this.serializedObject.ApplyModifiedProperties();
-
-            base.OnInspectorGUI();
         }
 
         private void DrawGlobeAnchorProperties()
@@ -111,8 +109,9 @@ namespace CesiumForUnity
                 GUIContent.none);
             GUILayout.EndHorizontal();
 
-            EditorGUI.BeginChangeCheck();
             GUILayout.BeginHorizontal();
+            EditorGUI.BeginChangeCheck();
+
             GUIContent detectTransformChangesContent = new GUIContent(
                 "Detect Transform Changes",
                 "Whether this component should detect changes to the Transform component, " +
@@ -122,41 +121,161 @@ namespace CesiumForUnity
                 "state of this flag.");
             GUILayout.Label(detectTransformChangesContent, GUILayout.Width(labelWidth));
             EditorGUILayout.PropertyField(this._detectTransformChanges, GUIContent.none);
-            GUILayout.EndHorizontal();
+
             if (EditorGUI.EndChangeCheck())
             {
                 this._globeAnchor.StartOrStopDetectingTransformChanges();
             }
+            GUILayout.EndHorizontal();
 
             GUIContent positionAuthorityContent = new GUIContent(
                 "Position Authority",
                 "The set of coordinates that authoritatively define the position of this game object."
             );
-            this.positionAuthority = (CesiumGlobeAnchorPositionAuthority)
-                EditorGUILayout.EnumPopup(positionAuthorityContent, this.positionAuthority);
+            EditorGUI.BeginChangeCheck();
+            EditorGUILayout.PropertyField(this._positionAuthority);
+            if (EditorGUI.EndChangeCheck())
+            {
+                this._globeAnchor.Sync();
+            }
         }
 
         private void DrawLatitudeLongitudeHeightProperties()
         {
+            EditorGUI.BeginDisabledGroup(
+                this.positionAuthority != CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight);
+
             GUILayout.Label("Position (Longitude Latitude Height)", EditorStyles.boldLabel);
 
-            CesiumGlobeAnchorPositionAuthority authority =
-                (CesiumGlobeAnchorPositionAuthority)this._positionAuthority.enumValueIndex;
+            EditorGUI.BeginChangeCheck();
 
-            EditorGUI.BeginDisabledGroup(
-                authority != CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight);
+            GUIContent latitudeContent = new GUIContent(
+               "Latitude",
+               "The latitude of this game object in degrees, in the range [-90, 90].");
+            CesiumEditorUtility.InspectorGUI.ClampedDoubleField(
+                this._latitude,
+                -90.0,
+                90.0,
+                latitudeContent);
+
+            GUIContent longitudeContent = new GUIContent(
+                "Longitude",
+                "The longitude of this game object in degrees, in the range [-180, 180].");
+            CesiumEditorUtility.InspectorGUI.ClampedDoubleField(
+                 this._longitude,
+                 -180.0,
+                 180.0,
+                 longitudeContent);
+
+            GUIContent heightContent = new GUIContent(
+                "Height",
+                "The height of this game object in meters above the ellipsoid (usually WGS84)." +
+                "\n\n" +
+                "Do not confuse this with a geoid height or height above mean sea level, which " +
+                "can be tens of meters higher or lower depending on where in the world the " +
+                "object is located.");
+            EditorGUILayout.PropertyField(this._height, heightContent);
+
+            if (EditorGUI.EndChangeCheck())
+            {
+                // Manually trigger an update of the position of this object
+                // and its coordinates in other systems.
+                this._globeAnchor.SetPositionLongitudeLatitudeHeight(
+                    this._longitude.doubleValue,
+                    this._latitude.doubleValue,
+                    this._height.doubleValue);
+            }
 
             EditorGUI.EndDisabledGroup();
         }
 
         private void DrawEarthCenteredEarthFixedProperties()
         {
+            EditorGUI.BeginDisabledGroup(
+                this.positionAuthority != CesiumGlobeAnchorPositionAuthority.EarthCenteredEarthFixed);
 
+            GUILayout.Label("Position (Earth-Centered, Earth-Fixed)", EditorStyles.boldLabel);
+
+            EditorGUI.BeginChangeCheck();
+            GUIContent ecefXContent = new GUIContent(
+                "ECEF X",
+                "The Earth-Centered, Earth-Fixed X-coordinate of the origin of this " +
+                "game object in meters." +
+                "\n\n" +
+                 "In the ECEF coordinate system, the origin is at the center of the Earth " +
+                 "and the positive X axis points toward where the Prime Meridian crosses " +
+                 "the Equator.");
+            EditorGUILayout.PropertyField(this._ecefX, ecefXContent);
+
+            GUIContent ecefYContent = new GUIContent(
+                "ECEF Y",
+                "The Earth-Centered, Earth-Fixed Y-coordinate of the origin of this " +
+                "game object in meters." +
+                "\n\n" +
+                "In the ECEF coordinate system, the origin is at the center of the Earth " +
+                "and the positive Y axis points toward the Equator at 90 degrees longitude.");
+            EditorGUILayout.PropertyField(this._ecefY, ecefYContent);
+
+            GUIContent ecefZContent = new GUIContent(
+                "ECEF Z",
+                "The Earth-Centered, Earth-Fixed Z-coordinate of the origin of this " +
+                "game object in meters." +
+                "\n\n" +
+                "In the ECEF coordinate system, the origin is at the center of the Earth " +
+                "and the positive Z axis points toward the North pole.");
+            EditorGUILayout.PropertyField(this._ecefZ, ecefZContent);
+
+            if (EditorGUI.EndChangeCheck())
+            {
+                // Manually trigger an update of the position of this object
+                // and its coordinates in other systems.
+                this._globeAnchor.SetPositionEarthCenteredEarthFixed(
+                    this._ecefX.doubleValue,
+                    this._ecefY.doubleValue,
+                    this._ecefZ.doubleValue);
+            }
+
+            EditorGUI.EndDisabledGroup();
         }
 
         private void DrawUnityPositionProperties()
         {
+            EditorGUI.BeginDisabledGroup(
+                this.positionAuthority != CesiumGlobeAnchorPositionAuthority.UnityWorldCoordinates);
 
+            GUILayout.Label("Position (Unity Coordinates)", EditorStyles.boldLabel);
+
+            EditorGUI.BeginChangeCheck();
+
+            GUIContent unityXContent = new GUIContent(
+                "Unity X",
+                "The Unity world X coordinate of this game object. This is the same as the Transform's " +
+                "X coordinate but expressed in 64-bit (double) precision.");
+            EditorGUILayout.PropertyField(this._unityX, unityXContent);
+
+            GUIContent unityYContent = new GUIContent(
+                "Unity Y",
+                "The Unity world Y coordinate of this game object. This is the same as the Transform's " +
+                "Y coordinate but expressed in 64-bit (double) precision.");
+            EditorGUILayout.PropertyField(this._unityY, unityYContent);
+
+            GUIContent unityZContent = new GUIContent(
+                "Unity Z",
+                "The Unity world Z coordinate of this game object. This is the same as the Transform's " +
+                "Z coordinate but expressed in 64-bit (double) precision.");
+            EditorGUILayout.PropertyField(this._unityZ, unityZContent);
+
+            if (EditorGUI.EndChangeCheck())
+            {
+                // Manually trigger an update of the position of this object
+                // and its coordinates in other systems.
+                this._globeAnchor.SetPositionUnityWorld(
+                    this._unityX.doubleValue,
+                    this._unityY.doubleValue,
+                    this._unityZ.doubleValue);
+            }
+
+            EditorGUI.EndDisabledGroup();
         }
     }
 }
