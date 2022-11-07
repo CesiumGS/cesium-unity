@@ -155,18 +155,6 @@ void Cesium3DTilesetImpl::OnEnable(
         this->_updateInEditorCallback);
   }
 #endif
-
-  // When the georeference changes, recreate the tileset.
-  // TODO: just update tile positions rather than recreating.
-  this->_georeference =
-      tileset.gameObject()
-          .GetComponentInParent<CesiumForUnity::CesiumGeoreference>();
-  this->_georeferenceChangedCallback = System::Action([this]() {
-    // Unity does not allow us to destroy GameObjects and MonoBehaviours in this
-    // callback. So instead mark it to happen later.
-    this->_destroyTilesetOnNextUpdate = true;
-  });
-  this->_georeference.add_changed(this->_georeferenceChangedCallback);
 }
 
 void Cesium3DTilesetImpl::OnDisable(

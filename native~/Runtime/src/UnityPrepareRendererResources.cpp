@@ -2,6 +2,7 @@
 
 #include "TextureLoader.h"
 #include "UnityLifetime.h"
+#include "UnityTransforms.h"
 
 #include <Cesium3DTilesSelection/GltfUtilities.h>
 #include <Cesium3DTilesSelection/Tile.h>
@@ -14,6 +15,7 @@
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
+#include <DotNet/CesiumForUnity/CesiumGlobeAnchor.h>
 #include <DotNet/CesiumForUnity/CesiumMetadata.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/Object.h>
@@ -522,11 +524,12 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
   size_t meshIndex = 0;
 
-
   DotNet::CesiumForUnity::CesiumMetadata pMetadataComponent = nullptr;
   if (model.getExtension<ExtensionModelExtFeatureMetadata>()) {
-    pMetadataComponent = pModelGameObject->GetComponentInParent<DotNet::CesiumForUnity::CesiumMetadata>();
-    if(pMetadataComponent == nullptr){
+    pMetadataComponent =
+        pModelGameObject
+            ->GetComponentInParent<DotNet::CesiumForUnity::CesiumMetadata>();
+    if (pMetadataComponent == nullptr) {
       pMetadataComponent =
           pModelGameObject->transform()
               .parent()
@@ -594,41 +597,34 @@ void* UnityPrepareRendererResources::prepareInMainThread(
                 ? pCoordinateSystem->getEcefToLocalTransformation()
                 : glm::dmat4(1.0);
 
-        glm::dmat4 fullTransform = fixedToUnity * (tileTransform * transform);
+        glm::dmat4 transformToEcef = tileTransform * transform;
+        glm::dvec3 ecefPosition = glm::dvec3(transformToEcef[3]);
 
-        glm::dvec3 translation = glm::dvec3(fullTransform[3]);
-        glm::dmat3 rotationScale = glm::dmat3(fullTransform);
-        double lengthColumn0 = glm::length(rotationScale[0]);
-        double lengthColumn1 = glm::length(rotationScale[1]);
-        double lengthColumn2 = glm::length(rotationScale[2]);
-        glm::dmat3 rotationMatrix(
-            rotationScale[0] / lengthColumn0,
-            rotationScale[1] / lengthColumn1,
-            rotationScale[2] / lengthColumn2);
+        glm::dmat4 transformToUnity = fixedToUnity * transformToEcef;
 
-        glm::dvec3 scale(lengthColumn0, lengthColumn1, lengthColumn2);
+        glm::dvec3 translation = glm::dvec3(transformToUnity[3]);
 
-        glm::dvec3 cross = glm::cross(rotationScale[0], rotationScale[1]);
-        if (glm::dot(cross, rotationScale[2]) < 0.0) {
-          rotationMatrix *= -1.0;
-          scale *= -1.0;
-        }
-
-        glm::dquat rotation = glm::quat_cast(rotationMatrix);
+        RotationAndScale rotationAndScale =
+            UnityTransforms::matrixToRotationAndScale(
+                glm::dmat3(transformToUnity));
 
         primitiveGameObject.transform().position(UnityEngine::Vector3{
             float(translation.x),
             float(translation.y),
             float(translation.z)});
-        primitiveGameObject.transform().rotation(UnityEngine::Quaternion{
-            float(rotation.x),
-            float(rotation.y),
-            float(rotation.z),
-            float(rotation.w)});
-        primitiveGameObject.transform().localScale(UnityEngine::Vector3{
-            float(scale.x),
-            float(scale.y),
-            float(scale.z)});
+        primitiveGameObject.transform().rotation(
+            UnityTransforms::toUnity(rotationAndScale.rotation));
+        primitiveGameObject.transform().localScale(
+            UnityTransforms::toUnity(rotationAndScale.scale));
+
+        CesiumForUnity::CesiumGlobeAnchor anchor =
+            primitiveGameObject
+                .AddComponent<CesiumForUnity::CesiumGlobeAnchor>();
+        anchor.detectTransformChanges(false);
+        anchor.SetPositionEarthCenteredEarthFixed(
+            ecefPosition.x,
+            ecefPosition.y,
+            ecefPosition.z);
 
         UnityEngine::MeshFilter meshFilter =
             primitiveGameObject.AddComponent<UnityEngine::MeshFilter>();
@@ -690,13 +686,16 @@ void UnityPrepareRendererResources::free(
     std::unique_ptr<UnityEngine::GameObject> pGameObject(
         static_cast<UnityEngine::GameObject*>(pMainThreadResult));
 
-    auto pMetadataComponent = pGameObject->GetComponentInParent<DotNet::CesiumForUnity::CesiumMetadata>();
-    if(pMetadataComponent != nullptr){
-      for (int32_t i = 0, len = pGameObject->transform().childCount(); i < len; ++i) {
+    auto pMetadataComponent =
+        pGameObject
+            ->GetComponentInParent<DotNet::CesiumForUnity::CesiumMetadata>();
+    if (pMetadataComponent != nullptr) {
+      for (int32_t i = 0, len = pGameObject->transform().childCount(); i < len;
+           ++i) {
         pMetadataComponent.NativeImplementation().unloadMetadata(
             pGameObject->transform().GetChild(i).GetInstanceID());
-        }
       }
+    }
 
     UnityLifetime::Destroy(*pGameObject);
   }

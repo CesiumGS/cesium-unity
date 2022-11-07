@@ -286,6 +286,10 @@ namespace CesiumForUnity
             georeference.longitude = georeference.longitude;
             georeference.latitude = georeference.latitude;
             georeference.height = georeference.height;
+            georeference.ecefX = georeference.ecefX;
+            georeference.ecefY = georeference.ecefY;
+            georeference.ecefZ = georeference.ecefZ;
+            georeference.originAuthority = georeference.originAuthority;
 
             CesiumGeoreference inParent = go.GetComponentInParent<CesiumGeoreference>();
             inParent.UpdateOrigin();
@@ -376,6 +380,23 @@ namespace CesiumForUnity
                                                 0,
                                                 "");
             CesiumRasterOverlay.BroadcastCesiumRasterOverlayLoadFailure(overlayDetails);
+
+            CesiumVector3 cv3 = new CesiumVector3();
+            cv3.x = cv3.y = cv3.z;
+
+            CesiumGlobeAnchor[] globeAnchors = go.GetComponentsInChildren<CesiumGlobeAnchor>();
+            globeAnchors = go.GetComponentsInChildren<CesiumGlobeAnchor>(true);
+            CesiumGlobeAnchor globeAnchor = globeAnchors[globeAnchors.Length - 1];
+            globeAnchor.ecefX = globeAnchor.ecefX;
+            globeAnchor.ecefY = globeAnchor.ecefY;
+            globeAnchor.ecefZ = globeAnchor.ecefZ;
+            globeAnchor.SetPositionEarthCenteredEarthFixed(globeAnchor.ecefX, globeAnchor.ecefY, globeAnchor.ecefZ);
+
+            globeAnchor = go.AddComponent<CesiumGlobeAnchor>();
+            globeAnchor.detectTransformChanges = globeAnchor.detectTransformChanges;
+            globeAnchor.SetPositionUnityWorld(0.0, 0.0, 0.0);
+            globeAnchor.SetPositionLongitudeLatitudeHeight(0.0, 0.0, 0.0);
+            globeAnchor.positionAuthority = globeAnchor.positionAuthority;
 
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;
