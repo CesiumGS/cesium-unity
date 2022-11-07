@@ -198,9 +198,9 @@ namespace CesiumForUnity
             }
         }
 
+#if UNITY_EDITOR
         void INotifyOfChanges.NotifyPropertyChanged(SerializedProperty property)
         {
-#if UNITY_EDITOR
             switch (property.name)
             {
                 case "_longitude":
@@ -216,7 +216,7 @@ namespace CesiumForUnity
             }
 
             EditorApplication.QueuePlayerLoopUpdate();
-#endif
         }
+#endif
     }
 }
