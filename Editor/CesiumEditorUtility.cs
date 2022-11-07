@@ -235,7 +235,6 @@ namespace CesiumForUnity
                 positionECEF.z);
 
             SceneView.lastActiveSceneView.pivot = Vector3.zero;
-            // TODO: rotation
             SceneView.lastActiveSceneView.Repaint();
         }
 
