@@ -13,17 +13,25 @@ using System.Collections.Generic;
 
 namespace CesiumForUnity
 {
+    internal struct PlatformToBuild
+    {
+        public BuildTargetGroup platformGroup;
+        public BuildTarget platform;
+        public bool isDevelopment;
+        public bool isCleanBuild;
+    }
+
     /// <summary>
     /// When the user builds a Player (built game) in the Unity Editor, this class manages
     /// automatically compiling a suitable version of the native C++ CesiumForUnityNative
     /// shared library to go with it.
     /// </summary>
-    class CompileCesiumForUnityNative :
+    internal class CompileCesiumForUnityNative :
         AssetPostprocessor,
         IPreprocessBuildWithReport,
         IPostBuildPlayerScriptDLLs
     {
-        class LibraryToBuild
+        internal class LibraryToBuild
         {
             public BuildTarget Platform = BuildTarget.StandaloneWindows64;
             public BuildTargetGroup PlatformGroup = BuildTargetGroup.Standalone;
@@ -38,7 +46,7 @@ namespace CesiumForUnity
             public List<string> ExtraBuildArgs = new List<string>();
         }
 
-        // This field is static because OnPreprocessBuild and OnPreprocessAsset are called on difference
+        // This field is static because OnPreprocessBuild and OnPreprocessAsset are called on different
         // instances of this class.
         private static Dictionary<string, LibraryToBuild> importsInProgress = new Dictionary<string, LibraryToBuild>();
 
@@ -78,7 +86,29 @@ namespace CesiumForUnity
             }
         }
 
-        private void CreatePlaceholders(LibraryToBuild libraryToBuild, string sharedLibraryName)
+        internal static void CreateLibraryPlaceholders(params PlatformToBuild[] platforms)
+        {
+            importsInProgress.Clear();
+
+            AssetDatabase.StartAssetEditing();
+            try
+            {
+                foreach (PlatformToBuild platform in platforms)
+                {
+                    CreatePlaceholders(
+                        GetLibraryToBuild(platform),
+                        "CesiumForUnityNative-Runtime"
+                    );
+                }
+            }
+            finally
+            {
+                AssetDatabase.StopAssetEditing();
+                importsInProgress.Clear();
+            }
+        }
+
+        internal static void CreatePlaceholders(LibraryToBuild libraryToBuild, string sharedLibraryName)
         {
             Directory.CreateDirectory(libraryToBuild.InstallDirectory);
 
@@ -87,9 +117,10 @@ namespace CesiumForUnity
             if (!File.Exists(libraryPath))
                 File.WriteAllText(libraryPath, "This is not a real shared library, it is a placeholder.", Encoding.UTF8);
 
-            string assetPath = Path.Combine("Assets", Path.GetRelativePath(Application.dataPath, libraryPath)).Replace("\\", "/");
-            importsInProgress.Add(assetPath, libraryToBuild);
-            AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceSynchronousImport);
+            string projectPath = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
+            string importPath = Path.GetRelativePath(projectPath, libraryPath).Replace("\\", "/");
+            importsInProgress.Add(importPath, libraryToBuild);
+            AssetDatabase.ImportAsset(importPath, ImportAssetOptions.ForceSynchronousImport);
         }
 
         private static string GetSharedLibraryFilename(string baseName, BuildTarget target)
@@ -146,44 +177,55 @@ namespace CesiumForUnity
             BuildNativeLibrary(GetLibraryToBuild(report.summary));
         }
 
-        private LibraryToBuild GetLibraryToBuild(BuildSummary summary)
+        public static LibraryToBuild GetLibraryToBuild(BuildSummary summary)
+        {
+            return GetLibraryToBuild(new PlatformToBuild()
+            {
+                platform = summary.platform,
+                platformGroup = summary.platformGroup,
+                isDevelopment = summary.options.HasFlag(BuildOptions.Development),
+                isCleanBuild = summary.options.HasFlag(BuildOptions.CleanBuildCache)
+            });
+        }
+
+        public static LibraryToBuild GetLibraryToBuild(PlatformToBuild platform)
         {
             string sourceFilename = GetSourceFilePathName();
             string packagePath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(sourceFilename), $".."));
             string nativeDirectory = Path.Combine(packagePath, "native~");
 
-            string platformDirectoryName = GetDirectoryNameForPlatform(summary);
+            string platformDirectoryName = GetDirectoryNameForPlatform(platform);
 
             LibraryToBuild library = new LibraryToBuild();
-            library.Platform = summary.platform;
-            library.PlatformGroup = summary.platformGroup;
+            library.Platform = platform.platform;
+            library.PlatformGroup = platform.platformGroup;
             library.SourceDirectory = nativeDirectory;
             library.BuildDirectory = Path.Combine(nativeDirectory, $"build-{platformDirectoryName}");
             library.GeneratedDirectoryName = $"generated-{platformDirectoryName}";
-            library.Configuration = summary.options.HasFlag(BuildOptions.Development)
+            library.Configuration = platform.isDevelopment
                 ? "Debug"
                 : "RelWithDebInfo";
-            library.InstallDirectory = GetInstallDirectoryForPlatform(summary, packagePath);
-            library.CleanBuild = summary.options.HasFlag(BuildOptions.CleanBuildCache);
+            library.InstallDirectory = GetInstallDirectoryForPlatform(platform, packagePath);
+            library.CleanBuild = platform.isCleanBuild;
 
-            if (summary.platformGroup == BuildTargetGroup.Android)
+            if (platform.platformGroup == BuildTargetGroup.Android)
                 library.Toolchain = "extern/android-toolchain.cmake";
             return library;
         }
 
-        private string GetDirectoryNameForPlatform(BuildSummary summary)
+        private static string GetDirectoryNameForPlatform(PlatformToBuild platform)
         {
-            return GetDirectoryNameForPlatform(summary.platformGroup, summary.platform);
+            return GetDirectoryNameForPlatform(platform.platformGroup, platform.platform);
         }
 
-        private string GetDirectoryNameForPlatform(BuildTargetGroup platformGroup, BuildTarget platform)
+        private static string GetDirectoryNameForPlatform(BuildTargetGroup platformGroup, BuildTarget platform)
         {
             return platformGroup.ToString();
         }
 
-        private string GetInstallDirectoryForPlatform(BuildSummary summary, string packagePath)
+        private static string GetInstallDirectoryForPlatform(PlatformToBuild platform, string packagePath)
         {
-            return Path.Combine(packagePath, "Plugins", GetDirectoryNameForPlatform(summary));
+            return Path.Combine(packagePath, "Plugins", GetDirectoryNameForPlatform(platform));
         }
 
         private void BuildNativeLibrary(LibraryToBuild library)
