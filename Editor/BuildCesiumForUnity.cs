@@ -16,57 +16,95 @@ namespace CesiumForUnity
         {
             string sourcePath = GetSourceFilePathName();
             string packagePath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(sourcePath), ".."));
+
+            // Create working directories for the build
             string buildPath = Path.Combine(packagePath, "built~");
-            Directory.Delete(buildPath, true);
+            if (Directory.Exists(buildPath))
+                Directory.Delete(buildPath, true);
             Directory.CreateDirectory(buildPath);
 
-            // This _should_ happen automatically when we call BuildPlayer for each platform, but sadly
-            // the placeholder asset import doesn't work right when invoked this way. So we do it manually
-            // here.
-            CompileCesiumForUnityNative.CreateLibraryPlaceholders(
-                new PlatformToBuild()
-                {
-                    platformGroup = BuildTargetGroup.Standalone,
-                    platform = BuildTarget.StandaloneWindows64,
-                },
-                new PlatformToBuild()
-                {
-                    platformGroup = BuildTargetGroup.Android,
-                    platform = BuildTarget.Android,
-                });
+            string generatedPath = Path.Combine(packagePath, "generated~");
+            if (Directory.Exists(generatedPath))
+                Directory.Delete(generatedPath, true);
+            Directory.CreateDirectory(generatedPath);
+            string generatedRuntimePath = Path.Combine(generatedPath, "Runtime");
+            Directory.CreateDirectory(generatedRuntimePath);
+            string generatedEditorPath = Path.Combine(generatedPath, "Editor");
+            Directory.CreateDirectory(generatedEditorPath);
 
-            AddGeneratedFiles("UNITY_EDITOR", Path.Combine(packagePath, "generated~", "Runtime"), Path.Combine(buildPath, "Runtime", "generated"));
-            AddGeneratedFiles("UNITY_EDITOR", Path.Combine(packagePath, "generated~", "Editor"), Path.Combine(buildPath, "Editor", "generated"));
+            // Store the original contents of the response files so we can restore them later.
+            string runtimeCscRspPath = Path.Combine(packagePath, "Runtime", "csc.rsp");
+            string originalRuntimeCscRsp = File.ReadAllText(runtimeCscRspPath, Encoding.UTF8);
+            string editorCscRspPath = Path.Combine(packagePath, "Editor", "csc.rsp");
+            string originalEditorCscRsp = File.ReadAllText(editorCscRspPath, Encoding.UTF8);
 
+            try
+            {
+                // Tell the C# compiler to write the generated code to disk.
+                File.AppendAllText(runtimeCscRspPath, "-generatedfilesout:\"" + generatedRuntimePath + "\"" + Environment.NewLine, Encoding.UTF8);
+                File.AppendAllText(editorCscRspPath, "-generatedfilesout:\"" + generatedEditorPath + "\"" + Environment.NewLine, Encoding.UTF8);
+
+                // Trigger a recompile of the managed code, invoking Reinterop and generating code.
+                AssetDatabase.Refresh();
+
+                // Compile the native code for the Editor.
+                //CompileCesiumForUnityNative.BuildNativeLibrary(CompileCesiumForUnityNative.GetLibraryToBuild(new PlatformToBuild()
+                //{
+                //    platformGroup = BuildTargetGroup.Unknown,
+                //    platform = BuildTarget.NoTarget
+                //});
+
+                // Add the generated files (for the Editor) to the package
+                AddGeneratedFiles("UNITY_EDITOR", Path.Combine(packagePath, "generated~", "Runtime"), Path.Combine(buildPath, "Runtime", "generated"));
+                AddGeneratedFiles("UNITY_EDITOR", Path.Combine(packagePath, "generated~", "Editor"), Path.Combine(buildPath, "Editor", "generated"));
+
+                // Build the Windows player
+                BuildPlayer(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64, Path.Combine(buildPath, "Windows"));
+
+                // Add the generated files for the Windows player to the package
+                AddGeneratedFiles("!UNITY_EDITOR && UNITY_STANDALONE_WIN", Path.Combine(packagePath, "generated~", "Runtime"), Path.Combine(buildPath, "Runtime", "generated"));
+                AddGeneratedFiles("!UNITY_EDITOR && UNITY_STANDALONE_WIN", Path.Combine(packagePath, "generated~", "Editor"), Path.Combine(buildPath, "Editor", "generated"));
+
+                // Build the Android player
+                BuildPlayer(BuildTargetGroup.Android, BuildTarget.Android, Path.Combine(buildPath, "Android"));
+
+                // Add the generated files for the Android player to the package
+                AddGeneratedFiles("!UNITY_EDITOR && UNITY_ANDROID", Path.Combine(packagePath, "generated~", "Runtime"), Path.Combine(buildPath, "Runtime", "generated"));
+                AddGeneratedFiles("!UNITY_EDITOR && UNITY_ANDROID", Path.Combine(packagePath, "generated~", "Editor"), Path.Combine(buildPath, "Editor", "generated"));
+
+                // TODO: build additional players and only build supported platforms (i.e. don't try to build for Windows on macOS)
+
+                // Copy additional code and assets to the package
+                CopyPackageContents(packagePath, buildPath);
+
+                // Create the package .tar.gz in the package's root directory.
+                Client.Pack(buildPath, packagePath);
+            }
+            finally
+            {
+                // Clean up
+                File.WriteAllText(Path.Combine(packagePath, "Runtime", "csc.rsp"), originalRuntimeCscRsp, Encoding.UTF8);
+                File.WriteAllText(Path.Combine(packagePath, "Runtime", "csc.rsp"), originalEditorCscRsp, Encoding.UTF8);
+                if (Directory.Exists(buildPath))
+                    Directory.Delete(buildPath, true);
+                if (Directory.Exists(generatedPath))
+                    Directory.Delete(generatedPath, true);
+            }
+        }
+
+        private static void BuildPlayer(BuildTargetGroup targetGroup, BuildTarget target, string outputPath)
+        {
             BuildPipeline.BuildPlayer(new BuildPlayerOptions()
             {
-                locationPathName = Path.Combine(buildPath, "Windows-x64", "game.exe"),
-                targetGroup = BuildTargetGroup.Standalone,
-                target = BuildTarget.StandaloneWindows64,
+                locationPathName = Path.Combine(outputPath, "game"),
+                targetGroup = targetGroup,
+                target = target,
                 //options = BuildOptions.BuildScriptsOnly
             });
 
-            Directory.Delete(Path.Combine(buildPath, "Windows-x64"), true);
-
-            AddGeneratedFiles("!UNITY_EDITOR && UNITY_STANDALONE_WIN", Path.Combine(packagePath, "generated~", "Runtime"), Path.Combine(buildPath, "Runtime", "generated"));
-            AddGeneratedFiles("!UNITY_EDITOR && UNITY_STANDALONE_WIN", Path.Combine(packagePath, "generated~", "Editor"), Path.Combine(buildPath, "Editor", "generated"));
-
-            BuildPipeline.BuildPlayer(new BuildPlayerOptions()
-            {
-                locationPathName = Path.Combine(buildPath, "Android", "game"),
-                targetGroup = BuildTargetGroup.Android,
-                target = BuildTarget.Android,
-                //options = BuildOptions.BuildScriptsOnly
-            });
-
-            Directory.Delete(Path.Combine(buildPath, "Android"), true);
-
-            AddGeneratedFiles("!UNITY_EDITOR && UNITY_ANDROID", Path.Combine(packagePath, "generated~", "Runtime"), Path.Combine(buildPath, "Runtime", "generated"));
-            AddGeneratedFiles("!UNITY_EDITOR && UNITY_ANDROID", Path.Combine(packagePath, "generated~", "Editor"), Path.Combine(buildPath, "Editor", "generated"));
-
-            CopyPackageContents(packagePath, buildPath);
-
-            Client.Pack(buildPath, buildPath);
+            // We don't actually need the built project; delete it.
+            if (Directory.Exists(outputPath))
+                Directory.Delete(outputPath, true);
         }
 
         private static void CopyPackageContents(string sourcePath, string targetPath)
@@ -110,12 +148,18 @@ namespace CesiumForUnity
                 "Editor/CompileCesiumForUnityNative.cs",
                 "Editor/CompileCesiumForUnityNative.cs.meta",
                 "Editor/BuildCesiumForUnity.cs",
-                "Editor/BuildCesiumForUnity.cs.meta"
+                "Editor/BuildCesiumForUnity.cs.meta",
+                "Editor/ConfigureReinterop.cs",
+                "Editor/ConfigureReinterop.cs.meta",
+                "Runtime/ConfigureReinterop.cs",
+                "Runtime/ConfigureReinterop.cs.meta"
             };
             
             foreach (string fileToDelete in filesToDelete)
             {
-                File.Delete(Path.Combine(targetPath, fileToDelete));
+                string path = Path.Combine(targetPath, fileToDelete);
+                if (File.Exists(path))
+                    File.Delete(path);
             }
         }
 

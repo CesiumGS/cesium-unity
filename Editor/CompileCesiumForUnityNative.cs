@@ -228,7 +228,7 @@ namespace CesiumForUnity
             return Path.Combine(packagePath, "Plugins", GetDirectoryNameForPlatform(platform));
         }
 
-        private void BuildNativeLibrary(LibraryToBuild library)
+        internal static void BuildNativeLibrary(LibraryToBuild library)
         {
             if (library.CleanBuild && library.BuildDirectory.Length > 2 && Directory.Exists(library.BuildDirectory))
                 Directory.Delete(library.BuildDirectory, true);
@@ -300,7 +300,7 @@ namespace CesiumForUnity
             }
         }
 
-        private void RunAndLog(ProcessStartInfo startInfo, StreamWriter log, string logFilename)
+        private static void RunAndLog(ProcessStartInfo startInfo, StreamWriter log, string logFilename)
         {
             using (Process configure = new Process())
             {
@@ -327,7 +327,7 @@ namespace CesiumForUnity
             }
         }
 
-        private void ConfigureEnvironmentVariables(IDictionary<string, string> environment, LibraryToBuild library)
+        private static void ConfigureEnvironmentVariables(IDictionary<string, string> environment, LibraryToBuild library)
         {
             // CMake can't deal with back slashes (Windows) in the ANDROID_NDK_ROOT environment variable.
             // So replace them with forward slashes.
