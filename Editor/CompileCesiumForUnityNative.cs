@@ -2,8 +2,6 @@ using UnityEditor;
 using UnityEngine;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
-using UnityEditor.Callbacks;
-using UnityEditor.Compilation;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.IO;
@@ -208,9 +206,22 @@ namespace CesiumForUnity
             library.InstallDirectory = GetInstallDirectoryForPlatform(platform, packagePath);
             library.CleanBuild = platform.isCleanBuild;
 
+            if (IsEditor(platform))
+                library.ExtraConfigureArgs.Add("-DEDITOR=on");
+
             if (platform.platformGroup == BuildTargetGroup.Android)
                 library.Toolchain = "extern/android-toolchain.cmake";
             return library;
+        }
+
+        private static bool IsEditor(PlatformToBuild platform)
+        {
+            return IsEditor(platform.platformGroup, platform.platform);
+        }
+
+        private static bool IsEditor(BuildTargetGroup platformGroup, BuildTarget platform)
+        {
+            return platformGroup == BuildTargetGroup.Unknown && platform == BuildTarget.NoTarget;
         }
 
         private static string GetDirectoryNameForPlatform(PlatformToBuild platform)
@@ -220,14 +231,14 @@ namespace CesiumForUnity
 
         private static string GetDirectoryNameForPlatform(BuildTargetGroup platformGroup, BuildTarget platform)
         {
-            if (platformGroup == BuildTargetGroup.Unknown && platform == BuildTarget.NoTarget)
+            if (IsEditor(platformGroup, platform))
                 return "Editor";
             return platformGroup.ToString();
         }
 
         private static string GetInstallDirectoryForPlatform(PlatformToBuild platform, string packagePath)
         {
-            if (platform.platform == BuildTarget.NoTarget && platform.platformGroup == BuildTargetGroup.Unknown)
+            if (IsEditor(platform))
                 return Path.Combine(packagePath, "Editor");
             return Path.Combine(packagePath, "Plugins", GetDirectoryNameForPlatform(platform));
         }

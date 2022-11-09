@@ -85,9 +85,9 @@ namespace CesiumForUnity
         private static void CreateMetaFilesForEditorAssemblies(string buildPath)
         {
             string editorPath = Path.Combine(buildPath, "Editor");
-            var nativeAssemblies = Directory.GetFiles(editorPath, "CesiumForUnityNative_*.dll")
-                .Concat(Directory.GetFiles(editorPath, "libCesiumForUnityNative_*.so"))
-                .Concat(Directory.GetFiles(editorPath, "libCesiumForUnityNative_*.dylib"));
+            var nativeAssemblies = Directory.GetFiles(editorPath, "CesiumForUnityNative-*.dll")
+                .Concat(Directory.GetFiles(editorPath, "libCesiumForUnityNative-*.so"))
+                .Concat(Directory.GetFiles(editorPath, "libCesiumForUnityNative-*.dylib"));
             foreach (string nativeAssembly in nativeAssemblies)
             {
                 using (StreamWriter writer = new StreamWriter(nativeAssembly + ".meta", append: false, Encoding.UTF8))
