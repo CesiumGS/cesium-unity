@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using UnityEditor;
@@ -19,76 +20,106 @@ namespace CesiumForUnity
 
             // Create working directories for the build
             string buildPath = Path.Combine(packagePath, "built~");
-            if (Directory.Exists(buildPath))
-                Directory.Delete(buildPath, true);
             Directory.CreateDirectory(buildPath);
 
             string generatedPath = Path.Combine(packagePath, "generated~");
-            if (Directory.Exists(generatedPath))
-                Directory.Delete(generatedPath, true);
             Directory.CreateDirectory(generatedPath);
             string generatedRuntimePath = Path.Combine(generatedPath, "Runtime");
             Directory.CreateDirectory(generatedRuntimePath);
             string generatedEditorPath = Path.Combine(generatedPath, "Editor");
             Directory.CreateDirectory(generatedEditorPath);
 
-            // Store the original contents of the response files so we can restore them later.
             string runtimeCscRspPath = Path.Combine(packagePath, "Runtime", "csc.rsp");
-            string originalRuntimeCscRsp = File.ReadAllText(runtimeCscRspPath, Encoding.UTF8);
             string editorCscRspPath = Path.Combine(packagePath, "Editor", "csc.rsp");
-            string originalEditorCscRsp = File.ReadAllText(editorCscRspPath, Encoding.UTF8);
 
-            try
+            if (!File.ReadAllText(runtimeCscRspPath, Encoding.UTF8).Contains("-generatedfilesout") ||
+                !File.ReadAllText(editorCscRspPath, Encoding.UTF8).Contains("-generatedfilesout"))
             {
-                // Tell the C# compiler to write the generated code to disk.
+                // Tell the C# compiler to write the generated code to disk, and then let that take effect.
                 File.AppendAllText(runtimeCscRspPath, "-generatedfilesout:\"" + generatedRuntimePath + "\"" + Environment.NewLine, Encoding.UTF8);
                 File.AppendAllText(editorCscRspPath, "-generatedfilesout:\"" + generatedEditorPath + "\"" + Environment.NewLine, Encoding.UTF8);
-
-                // Trigger a recompile of the managed code, invoking Reinterop and generating code.
+                Debug.Log("C# compiler options have been changed to write generated code to disk. Please run the build again after the assemblies are recompiled.");
                 AssetDatabase.Refresh();
-
-                // Compile the native code for the Editor.
-                //CompileCesiumForUnityNative.BuildNativeLibrary(CompileCesiumForUnityNative.GetLibraryToBuild(new PlatformToBuild()
-                //{
-                //    platformGroup = BuildTargetGroup.Unknown,
-                //    platform = BuildTarget.NoTarget
-                //});
-
-                // Add the generated files (for the Editor) to the package
-                AddGeneratedFiles("UNITY_EDITOR", Path.Combine(packagePath, "generated~", "Runtime"), Path.Combine(buildPath, "Runtime", "generated"));
-                AddGeneratedFiles("UNITY_EDITOR", Path.Combine(packagePath, "generated~", "Editor"), Path.Combine(buildPath, "Editor", "generated"));
-
-                // Build the Windows player
-                BuildPlayer(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64, Path.Combine(buildPath, "Windows"));
-
-                // Add the generated files for the Windows player to the package
-                AddGeneratedFiles("!UNITY_EDITOR && UNITY_STANDALONE_WIN", Path.Combine(packagePath, "generated~", "Runtime"), Path.Combine(buildPath, "Runtime", "generated"));
-                AddGeneratedFiles("!UNITY_EDITOR && UNITY_STANDALONE_WIN", Path.Combine(packagePath, "generated~", "Editor"), Path.Combine(buildPath, "Editor", "generated"));
-
-                // Build the Android player
-                BuildPlayer(BuildTargetGroup.Android, BuildTarget.Android, Path.Combine(buildPath, "Android"));
-
-                // Add the generated files for the Android player to the package
-                AddGeneratedFiles("!UNITY_EDITOR && UNITY_ANDROID", Path.Combine(packagePath, "generated~", "Runtime"), Path.Combine(buildPath, "Runtime", "generated"));
-                AddGeneratedFiles("!UNITY_EDITOR && UNITY_ANDROID", Path.Combine(packagePath, "generated~", "Editor"), Path.Combine(buildPath, "Editor", "generated"));
-
-                // TODO: build additional players and only build supported platforms (i.e. don't try to build for Windows on macOS)
-
-                // Copy additional code and assets to the package
-                CopyPackageContents(packagePath, buildPath);
-
-                // Create the package .tar.gz in the package's root directory.
-                Client.Pack(buildPath, packagePath);
+                return;
             }
-            finally
+
+            // Add the generated files (for the Editor) to the package
+            AddGeneratedFiles("UNITY_EDITOR", Path.Combine(packagePath, "generated~", "Runtime"), Path.Combine(buildPath, "Runtime", "generated"));
+            AddGeneratedFiles("UNITY_EDITOR", Path.Combine(packagePath, "generated~", "Editor"), Path.Combine(buildPath, "Editor", "generated"));
+
+            // Build the Windows player
+            BuildPlayer(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64, Path.Combine(buildPath, "Windows"));
+
+            // Add the generated files for the Windows player to the package
+            AddGeneratedFiles("!UNITY_EDITOR && UNITY_STANDALONE_WIN", Path.Combine(packagePath, "generated~", "Runtime"), Path.Combine(buildPath, "Runtime", "generated"));
+            AddGeneratedFiles("!UNITY_EDITOR && UNITY_STANDALONE_WIN", Path.Combine(packagePath, "generated~", "Editor"), Path.Combine(buildPath, "Editor", "generated"));
+
+            // Build the Android player
+            BuildPlayer(BuildTargetGroup.Android, BuildTarget.Android, Path.Combine(buildPath, "Android"));
+
+            // Add the generated files for the Android player to the package
+            AddGeneratedFiles("!UNITY_EDITOR && UNITY_ANDROID", Path.Combine(packagePath, "generated~", "Runtime"), Path.Combine(buildPath, "Runtime", "generated"));
+            AddGeneratedFiles("!UNITY_EDITOR && UNITY_ANDROID", Path.Combine(packagePath, "generated~", "Editor"), Path.Combine(buildPath, "Editor", "generated"));
+
+            // TODO: build additional players and only build supported platforms (i.e. don't try to build for Windows on macOS)
+
+            // Copy additional code and assets to the package
+            CopyPackageContents(packagePath, buildPath);
+
+            // Compile the native code for the Editor.
+            // Install to the built~ directory, because the normal location will not be writeable if Unity already has the assemblies open.
+            // We do this after CopyPackageContents so that we don't accidentally overwrite a newer native assembly with an older one.
+            CompileCesiumForUnityNative.LibraryToBuild editorLibrary = CompileCesiumForUnityNative.GetLibraryToBuild(new PlatformToBuild()
             {
-                // Clean up
-                File.WriteAllText(Path.Combine(packagePath, "Runtime", "csc.rsp"), originalRuntimeCscRsp, Encoding.UTF8);
-                File.WriteAllText(Path.Combine(packagePath, "Runtime", "csc.rsp"), originalEditorCscRsp, Encoding.UTF8);
-                if (Directory.Exists(buildPath))
-                    Directory.Delete(buildPath, true);
-                if (Directory.Exists(generatedPath))
-                    Directory.Delete(generatedPath, true);
+                platformGroup = BuildTargetGroup.Unknown,
+                platform = BuildTarget.NoTarget
+            });
+            editorLibrary.InstallDirectory = Path.Combine(buildPath, "Editor");
+            CompileCesiumForUnityNative.BuildNativeLibrary(editorLibrary);
+            CreateMetaFilesForEditorAssemblies(buildPath);
+
+            // Create the package .tar.gz in the package's root directory.
+            Client.Pack(buildPath, packagePath);
+        }
+
+        private static void CreateMetaFilesForEditorAssemblies(string buildPath)
+        {
+            string editorPath = Path.Combine(buildPath, "Editor");
+            var nativeAssemblies = Directory.GetFiles(editorPath, "CesiumForUnityNative_*.dll")
+                .Concat(Directory.GetFiles(editorPath, "libCesiumForUnityNative_*.so"))
+                .Concat(Directory.GetFiles(editorPath, "libCesiumForUnityNative_*.dylib"));
+            foreach (string nativeAssembly in nativeAssemblies)
+            {
+                using (StreamWriter writer = new StreamWriter(nativeAssembly + ".meta", append: false, Encoding.UTF8))
+                {
+                    writer.WriteLine("fileFormatVersion: 2");
+                    writer.WriteLine("guid: 6880e124d43b52d479b1f02a840a3261");
+                    writer.WriteLine("PluginImporter:");
+                    writer.WriteLine("  externalObjects: {}");
+                    writer.WriteLine("  serializedVersion: 2");
+                    writer.WriteLine("  iconMap: {}");
+                    writer.WriteLine("  executionOrder: {}");
+                    writer.WriteLine("  defineConstraints: []");
+                    writer.WriteLine("  isPreloaded: 0");
+                    writer.WriteLine("  isOverridable: 1");
+                    writer.WriteLine("  isExplicitlyReferenced: 0");
+                    writer.WriteLine("  validateReferences: 1");
+                    writer.WriteLine("  platformData:");
+                    writer.WriteLine("  - first:");
+                    writer.WriteLine("      Any: ");
+                    writer.WriteLine("    second:");
+                    writer.WriteLine("      enabled: 0");
+                    writer.WriteLine("      settings: {}");
+                    writer.WriteLine("  - first:");
+                    writer.WriteLine("      Editor: Editor");
+                    writer.WriteLine("    second:");
+                    writer.WriteLine("      enabled: 1");
+                    writer.WriteLine("      settings:");
+                    writer.WriteLine("        DefaultValueInitialized: true");
+                    writer.WriteLine("  userData: ");
+                    writer.WriteLine("  assetBundleName: ");
+                    writer.WriteLine("  assetBundleVariant: ");
+                }
             }
         }
 

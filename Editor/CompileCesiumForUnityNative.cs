@@ -220,11 +220,15 @@ namespace CesiumForUnity
 
         private static string GetDirectoryNameForPlatform(BuildTargetGroup platformGroup, BuildTarget platform)
         {
+            if (platformGroup == BuildTargetGroup.Unknown && platform == BuildTarget.NoTarget)
+                return "Editor";
             return platformGroup.ToString();
         }
 
         private static string GetInstallDirectoryForPlatform(PlatformToBuild platform, string packagePath)
         {
+            if (platform.platform == BuildTarget.NoTarget && platform.platformGroup == BuildTargetGroup.Unknown)
+                return Path.Combine(packagePath, "Editor");
             return Path.Combine(packagePath, "Plugins", GetDirectoryNameForPlatform(platform));
         }
 
