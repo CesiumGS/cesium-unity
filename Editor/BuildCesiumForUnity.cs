@@ -125,13 +125,15 @@ namespace CesiumForUnity
 
         private static void BuildPlayer(BuildTargetGroup targetGroup, BuildTarget target, string outputPath)
         {
-            BuildPipeline.BuildPlayer(new BuildPlayerOptions()
+            BuildReport report = BuildPipeline.BuildPlayer(new BuildPlayerOptions()
             {
                 locationPathName = Path.Combine(outputPath, "game"),
                 targetGroup = targetGroup,
                 target = target,
                 //options = BuildOptions.BuildScriptsOnly
             });
+            if (report.summary.totalErrors > 0)
+                throw new Exception("Build failed");
 
             // We don't actually need the built project; delete it.
             if (Directory.Exists(outputPath))
