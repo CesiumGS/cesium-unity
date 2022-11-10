@@ -106,7 +106,7 @@ void getAssetTroubleshootingDetails(
     long assetID,
     CesiumForUnity::AssetTroubleshootingDetails details) {
   CesiumIonSessionImpl::ion().getConnection()->asset(assetID).thenInMainThread(
-      [window, ionAsset = window.ionAsset(), details](
+      [ionAsset = window.ionAsset(), details](
           CesiumIonClient::Response<CesiumIonClient::Asset>&& asset) {
         if (ionAsset.IsNull()) {
           return;
@@ -159,8 +159,7 @@ void IonTokenTroubleshootingWindowImpl::AuthorizeToken(
   }
 
   sessionImpl.findToken(token.ToStlString())
-      .thenInMainThread([window,
-                         connection = *maybeConnection,
+      .thenInMainThread([connection = *maybeConnection,
                          ionAsset = window.ionAsset(),
                          isDefaultToken](
                             CesiumIonClient::Response<CesiumIonClient::Token>&&

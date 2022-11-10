@@ -90,7 +90,7 @@ namespace CesiumForUnity
             set
             {
                 this._ecefX = value;
-                this.originAuthority =CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed;
+                this.originAuthority = CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed;
             }
         }
 
@@ -121,6 +121,7 @@ namespace CesiumForUnity
         }
 
         // The Unity world-space position that the coordinates currently correspond to.
+        // This is used to visualize the sub-scene activation radius.
         private Vector3 _unityWorldPosition;
 
         public Vector3 unityWorldPosition
@@ -219,6 +220,7 @@ namespace CesiumForUnity
 
                 CesiumVector3 unityWorldPosition =
                     georeference.TransformEarthCenteredEarthFixedPositionToUnityWorld(ecefPosition);
+
                 this._unityWorldPosition = new Vector3(
                     (float)unityWorldPosition.x,
                     (float)unityWorldPosition.y,
@@ -226,6 +228,7 @@ namespace CesiumForUnity
             }
         }
 
+        #if UNITY_EDITOR
         private void OnDrawGizmos()
         {
             if (this._showActivationRadius)
@@ -235,5 +238,6 @@ namespace CesiumForUnity
                 Gizmos.DrawWireSphere(this._unityWorldPosition, (float)this._activationRadius);
             }
         }
+        #endif
     }
 }

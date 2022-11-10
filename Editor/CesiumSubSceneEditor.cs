@@ -76,6 +76,9 @@ namespace CesiumForUnity
 
         private void DrawToolbarButton()
         {
+            // Don't modify the sub-scene if the editor is in play mode.
+            EditorGUI.BeginDisabledGroup(EditorApplication.isPlaying);
+
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
 
@@ -97,6 +100,8 @@ namespace CesiumForUnity
 
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
+
+            EditorGUI.EndDisabledGroup();
         }
 
         private void DrawSubSceneProperties()
