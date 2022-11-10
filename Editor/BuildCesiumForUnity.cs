@@ -3,15 +3,62 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
+using UnityEditor.Compilation;
 using UnityEditor.PackageManager;
+using UnityEditor.PackageManager.Requests;
 using UnityEngine;
 
 namespace CesiumForUnity
 {
     public class BuildCesiumForUnity
     {
+        public static void CompileForEditorAndExit()
+        {
+            CompilationPipeline.compilationFinished += OnEditorCompilationFinished;
+            CompilationPipeline.RequestScriptCompilation(RequestScriptCompilationOptions.CleanBuildCache);
+        }
+
+        private static void OnEditorCompilationFinished(object o)
+        {
+            CompilationPipeline.compilationFinished -= OnEditorCompilationFinished;
+            EditorApplication.Exit(0);
+        }
+
+        public static void CompileForAndroidAndExit()
+        {
+            string buildPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(buildPath);
+            try
+            {
+                BuildPlayer(BuildTargetGroup.Android, BuildTarget.Android, Path.Combine(buildPath, "Android"));
+            }
+            finally
+            {
+                Directory.Delete(buildPath, true);
+            }
+            EditorApplication.Exit(0);
+        }
+
+        public static void PackAndExit()
+        {
+            string tempPath = Environment.GetEnvironmentVariable("CESIUM_PACKAGE_TEMP_PATH");
+            if (string.IsNullOrEmpty(tempPath))
+            {
+                Debug.Log("Cannot pack because the CESIUM_PACKAGE_TEMP_PATH environment variable is not set.");
+                return;
+            }
+
+            PackRequest request = Client.Pack(Path.Combine(tempPath, "package"), Path.GetFullPath(Path.Combine(Application.dataPath, "..")));
+            EditorApplication.update += () =>
+            {
+                if (request.IsCompleted)
+                    EditorApplication.Exit(0);
+            };
+        }
+
         [MenuItem("Cesium/Build/All")]
         public static void BuildAll()
         {
@@ -130,8 +177,9 @@ namespace CesiumForUnity
                 locationPathName = Path.Combine(outputPath, "game"),
                 targetGroup = targetGroup,
                 target = target,
-                //options = BuildOptions.BuildScriptsOnly
-            });
+                scenes = new[] { "Assets/Scenes/SampleScene.unity" }
+            //options = BuildOptions.BuildScriptsOnly
+        });
             if (report.summary.totalErrors > 0)
                 throw new Exception("Build failed");
 
