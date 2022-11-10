@@ -54,6 +54,9 @@ namespace CesiumForUnity
         public override void OnInspectorGUI()
         {
             this.serializedObject.Update();
+
+            DrawToolbarButton();
+            EditorGUILayout.Space(5);
             DrawSubSceneProperties();
             EditorGUILayout.Space(5);
 
@@ -63,12 +66,37 @@ namespace CesiumForUnity
             EditorGUILayout.Space(5);
             DrawEarthCenteredEarthFixedProperties();
 
+            this.serializedObject.ApplyModifiedProperties();
+
             if (EditorGUI.EndChangeCheck())
             {
                 this._subScene.UpdateOrigin();
             }
-            
-            this.serializedObject.ApplyModifiedProperties();
+        }
+
+        private void DrawToolbarButton()
+        {
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+
+            GUIContent placeOriginHereContent = new GUIContent(
+                "Place Origin Here",
+                "Places the sub-scene origin at the camera's current location. " +
+                "Rotates the globe so the current longitude/latitude/height of the " +
+                "camera is at the Unity origin. The camera is also teleported to the " +
+                "Unity origin." +
+                "\n\n" +
+                "Warning: Before clicking, ensure that all non-Cesium objects in the " +
+                "persistent level are georeferenced with the \"CesiumGeoreference\" component " +
+                "or are children of a GameObject with that component. Ensure that static " +
+                "GameObjects only exist in georeferenced sub-scenes.");
+            if (GUILayout.Button(placeOriginHereContent, GUILayout.Width(200)))
+            {
+                CesiumEditorUtility.PlaceSubSceneAtCameraPosition(this._subScene);
+            }
+
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
         }
 
         private void DrawSubSceneProperties()

@@ -58,12 +58,15 @@ namespace CesiumForUnity
             EditorGUILayout.Space(5);
             this.DrawEarthCenteredEarthFixedProperties();
 
+            // Apply the modified properties before updating the origin.
+            // Otherwise, they will overwrite the georeference's computation
+            // of the other coordinates.
+            this.serializedObject.ApplyModifiedProperties();
+
             if (EditorGUI.EndChangeCheck())
             {
                 this._georeference.UpdateOrigin();
             }
-
-            this.serializedObject.ApplyModifiedProperties();
         }
 
         private void DrawInspectorButtons()
@@ -82,7 +85,7 @@ namespace CesiumForUnity
                 "Warning: Before clicking, ensure that all non-Cesium objects in the " +
                 "persistent level are georeferenced with the \"CesiumGeoreference\" component " +
                 "or are children of a GameObject with that component. Ensure that static " +
-                "GameObjects only exist in georeferenced subscenes.");
+                "GameObjects only exist in georeferenced sub-scenes.");
             if (GUILayout.Button(placeOriginHereContent))
             {
                 CesiumEditorUtility.PlaceGeoreferenceAtCameraPosition(this._georeference);

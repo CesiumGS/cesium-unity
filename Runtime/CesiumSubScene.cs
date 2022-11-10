@@ -120,6 +120,14 @@ namespace CesiumForUnity
             }
         }
 
+        // The Unity world-space position that the coordinates currently correspond to.
+        private Vector3 _unityWorldPosition;
+
+        public Vector3 unityWorldPosition
+        {
+            get => this._unityWorldPosition;
+        }
+
         public void SetOriginEarthCenteredEarthFixed(double x, double y, double z)
         {
             this._ecefX = x;
@@ -190,26 +198,42 @@ namespace CesiumForUnity
                 CesiumGeoreference? georeference = this.GetComponentInParent<CesiumGeoreference>();
                 if (georeference == null)
                     throw new InvalidOperationException("CesiumSubScene is not nested inside a game object with a CesiumGeoreference.");
+              
+                CesiumVector3 ecefPosition = new CesiumVector3()
+                {
+                    x = this._ecefX,
+                    y = this._ecefY,
+                    z = this._ecefZ
+                };
 
                 if (this.originAuthority == CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed)
-                    georeference.SetOriginEarthCenteredEarthFixed(this._ecefX, this._ecefY, this._ecefZ);
+                    georeference.SetOriginEarthCenteredEarthFixed(
+                        this._ecefX,
+                        this._ecefY,
+                        this._ecefZ);
                 else
-                    georeference.SetOriginLongitudeLatitudeHeight(this._longitude, this._latitude, this._height);
+                    georeference.SetOriginLongitudeLatitudeHeight(
+                        this._longitude,
+                        this._latitude, 
+                        this._height);
+
+                CesiumVector3 unityWorldPosition =
+                    georeference.TransformEarthCenteredEarthFixedPositionToUnityWorld(ecefPosition);
+                this._unityWorldPosition = new Vector3(
+                    (float)unityWorldPosition.x,
+                    (float)unityWorldPosition.y,
+                    (float)unityWorldPosition.z);
             }
         }
 
-        #if UNITY_EDITOR
         private void OnDrawGizmos()
         {
             if (this._showActivationRadius)
             {
                 // TODO: would be nice to draw a better wireframe sphere.
                 Gizmos.color = Color.blue;
-                Gizmos.DrawWireSphere(
-                    this.transform.position,
-                    (float)this._activationRadius);
+                Gizmos.DrawWireSphere(this._unityWorldPosition, (float)this._activationRadius);
             }
         }
-        #endif
     }
 }

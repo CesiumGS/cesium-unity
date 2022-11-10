@@ -212,21 +212,41 @@ namespace CesiumForUnity
         private static CesiumVector3
             TransformCameraPositionToEarthCenteredEarthFixed(CesiumGeoreference georeference)
         {
-            Vector3 pivot = SceneView.lastActiveSceneView.pivot;
+            Camera camera = SceneView.lastActiveSceneView.camera;
+            Vector3 position = camera.transform.position;
             CesiumVector3 positionUnity = new CesiumVector3()
             {
-                x = pivot.x,
-                y = pivot.y,
-                z = pivot.z
+                x = position.x,
+                y = position.y,
+                z = position.z
             };
 
             return georeference.TransformUnityWorldPositionToEarthCenteredEarthFixed(positionUnity);
         }
 
+        static void SetSceneViewPositionRotation(
+            Vector3 position,
+            Quaternion rotation)
+        {
+            SceneView sceneView = SceneView.lastActiveSceneView;
+            sceneView.pivot = position;
+            sceneView.pivot += sceneView.camera.transform.forward * sceneView.cameraDistance;
+            SceneView.lastActiveSceneView.Repaint();
+        }
+
         public static void
             PlaceGeoreferenceAtCameraPosition(CesiumGeoreference georeference)
         {
-            Undo.RecordObject(georeference, "Place Georeference at Camera Position");
+            Undo.RecordObject(georeference, "Place Georeference Origin at Camera Position");
+
+            // Disable all sub-scenes before repositioning the georeference.
+            CesiumSubScene[] subScenes =
+                georeference.gameObject.GetComponentsInChildren<CesiumSubScene>();
+            for (int i = 0; i < subScenes.Length; i++)
+            {
+                subScenes[i].gameObject.SetActive(false);
+            }
+
             CesiumVector3 positionECEF =
                 CesiumEditorUtility.TransformCameraPositionToEarthCenteredEarthFixed(georeference);
             georeference.SetOriginEarthCenteredEarthFixed(
@@ -234,30 +254,63 @@ namespace CesiumForUnity
                 positionECEF.y,
                 positionECEF.z);
 
-            SceneView.lastActiveSceneView.pivot = Vector3.zero;
-            SceneView.lastActiveSceneView.Repaint();
+            // TODO: rotate camera 
+
+            CesiumEditorUtility.SetSceneViewPositionRotation(
+                Vector3.zero, SceneView.lastActiveSceneView.rotation);
         }
 
         public static CesiumSubScene CreateSubScene(CesiumGeoreference georeference)
         {
             GameObject subSceneGameObject = new GameObject();
-            subSceneGameObject.transform.parent = georeference.gameObject.transform;
+            subSceneGameObject.transform.parent = georeference.transform;
             Undo.RegisterCreatedObjectUndo(subSceneGameObject, "Create Sub-Scene");
 
             CesiumSubScene subScene = subSceneGameObject.AddComponent<CesiumSubScene>();
             CesiumVector3 positionECEF =
                 CesiumEditorUtility.TransformCameraPositionToEarthCenteredEarthFixed(georeference);
+
             subScene.SetOriginEarthCenteredEarthFixed(
                 positionECEF.x,
                 positionECEF.y,
                 positionECEF.z);
 
-            Selection.activeGameObject = subSceneGameObject;
+            // The georeference will take on the sub-scene's coordinates, so teleport the camera
+            // back to the georeference's position so it stays at the middle of the subscene.
+            // TODO: this will have to change when we factor in Unity transforms.
+            // TODO: rotate camera 
+            CesiumEditorUtility.SetSceneViewPositionRotation(
+                Vector3.zero, SceneView.lastActiveSceneView.rotation);
 
             // Prompt the user to rename the subscene once the hierarchy has updated.
+            Selection.activeGameObject = subSceneGameObject;
             EditorApplication.hierarchyChanged += RenameObject;
 
             return subScene;
+        }
+
+        public static void
+        PlaceSubSceneAtCameraPosition(CesiumSubScene subscene)
+        {
+            CesiumGeoreference? georeference =
+                subscene.gameObject.GetComponentInParent<CesiumGeoreference>();
+            if (georeference == null)
+            {
+                throw new InvalidOperationException("CesiumSubScene is not nested inside a game " +
+                    "object with a CesiumGeoreference.");
+            }
+
+            Undo.RecordObject(subscene, "Place Sub-Scene Origin at Camera Position");
+            
+            // TODO: rotate camera
+            CesiumVector3 positionECEF =
+                CesiumEditorUtility.TransformCameraPositionToEarthCenteredEarthFixed(georeference);
+            subscene.SetOriginEarthCenteredEarthFixed(
+                    positionECEF.x,
+                    positionECEF.y,
+                    positionECEF.z);
+            CesiumEditorUtility.SetSceneViewPositionRotation(
+                Vector3.zero, SceneView.lastActiveSceneView.rotation);
         }
 
         public static void RenameObject()

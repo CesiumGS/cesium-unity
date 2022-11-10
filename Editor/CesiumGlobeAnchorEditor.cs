@@ -81,7 +81,9 @@ namespace CesiumForUnity
             EditorGUILayout.Space(5);
             DrawUnityPositionProperties();
 
-            this.serializedObject.ApplyModifiedProperties();
+            // ApplyModifiedProperties() is called within the Draw____Properties
+            // functions themselves. Otherwise, calling it here would override
+            // the computations that CesiumGlobeAnchor does on its other coordinates.
         }
 
         private void DrawGlobeAnchorProperties()
@@ -142,6 +144,7 @@ namespace CesiumForUnity
             EditorGUILayout.PropertyField(this._positionAuthority);
             if (EditorGUI.EndChangeCheck())
             {
+                this.serializedObject.ApplyModifiedProperties();
                 this._globeAnchor.Sync();
             }
         }
@@ -184,6 +187,8 @@ namespace CesiumForUnity
 
             if (EditorGUI.EndChangeCheck())
             {
+                this.serializedObject.ApplyModifiedProperties();
+
                 // Manually trigger an update of the position of this object
                 // and its coordinates in other systems.
                 this._globeAnchor.SetPositionLongitudeLatitudeHeight(
@@ -233,6 +238,8 @@ namespace CesiumForUnity
 
             if (EditorGUI.EndChangeCheck())
             {
+                this.serializedObject.ApplyModifiedProperties();
+
                 // Manually trigger an update of the position of this object
                 // and its coordinates in other systems.
                 this._globeAnchor.SetPositionEarthCenteredEarthFixed(
@@ -273,6 +280,8 @@ namespace CesiumForUnity
 
             if (EditorGUI.EndChangeCheck())
             {
+                this.serializedObject.ApplyModifiedProperties();
+
                 // Manually trigger an update of the position of this object
                 // and its coordinates in other systems.
                 this._globeAnchor.SetPositionUnityWorld(
