@@ -11,7 +11,7 @@ namespace Build
         public static int Run(string executable, IEnumerable<string> args, bool throwOnError = true)
         {
             ProcessStartInfo startInfo = new ProcessStartInfo(executable);
-            startInfo.WorkingDirectory = Utility.ProjectRoot;
+            startInfo.WorkingDirectory = Utility.PackageRoot;
             foreach (string arg in args)
                 startInfo.ArgumentList.Add(arg);
 
@@ -56,10 +56,19 @@ namespace Build
         {
             get
             {
-                // Assumes this source file is in the project's Packages/com.cesium.unity/Build~ or similar.
-                return Path.GetFullPath(Path.Combine(Path.GetDirectoryName(GetSourceFilePathName()) ?? "", "..", "..", ".."));
+                // Assumes this package is in the project's Packages/com.cesium.unity directory or similar.
+                return Path.GetFullPath(Path.Combine(PackageRoot, "..", ".."));
             }
         }
+
+        public static string PackageRoot
+        {
+            get
+            {
+                return Path.GetFullPath(Path.Combine(Path.GetDirectoryName(GetSourceFilePathName()) ?? "", ".."));
+            }
+        }
+
         private static string GetSourceFilePathName([CallerFilePath] string? callerFilePath = null)
         {
             return callerFilePath == null ? "" : callerFilePath;

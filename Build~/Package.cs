@@ -19,9 +19,9 @@ namespace Build
             string tempPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             Environment.SetEnvironmentVariable("CESIUM_PACKAGE_TEMP_PATH", tempPath);
 
-            string runtimeCscRspPath = Path.Combine(Utility.ProjectRoot, "Runtime", "csc.rsp");
+            string runtimeCscRspPath = Path.Combine(Utility.PackageRoot, "Runtime", "csc.rsp");
             string runtimeCscRsp = File.ReadAllText(runtimeCscRspPath, Encoding.UTF8);
-            string editorCscRspPath = Path.Combine(Utility.ProjectRoot, "Editor", "csc.rsp");
+            string editorCscRspPath = Path.Combine(Utility.PackageRoot, "Editor", "csc.rsp");
             string editorCscRsp = File.ReadAllText(editorCscRspPath, Encoding.UTF8);
 
             try
@@ -119,7 +119,7 @@ namespace Build
                 AddGeneratedFiles("!UNITY_EDITOR && UNITY_ANDROID", generatedRuntimePath, Path.Combine(outputPackagePath, "Runtime", "generated"));
 
                 Console.WriteLine("**** Copying the rest of the package");
-                CopyPackageContents(Utility.ProjectRoot, outputPackagePath);
+                CopyPackageContents(Utility.PackageRoot, outputPackagePath);
 
                 Console.WriteLine("**** Building the package");
                 unity.Run(new[]
