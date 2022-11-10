@@ -40,6 +40,19 @@ namespace Build
                 File.AppendAllText(runtimeCscRspPath, "-generatedfilesout:\"" + generatedRuntimePath + "\"" + Environment.NewLine, Encoding.UTF8);
                 File.AppendAllText(editorCscRspPath, "-generatedfilesout:\"" + generatedEditorPath + "\"" + Environment.NewLine, Encoding.UTF8);
 
+                string sceneDirectory = Path.Combine(Utility.ProjectRoot, "Assets", "Scenes");
+                Directory.CreateDirectory(sceneDirectory);
+                string emptyScenePath = Path.Combine(sceneDirectory, "Empty.unity");
+                if (!File.Exists(emptyScenePath))
+                {
+                    Console.WriteLine("**** Creating an empty scene");
+                    using (StreamWriter emptyScene = new StreamWriter(emptyScenePath))
+                    {
+                        emptyScene.WriteLine("%YAML 1.1");
+                        emptyScene.WriteLine("%TAG !u! tag:unity3d.com,2011:");
+                    }
+                }
+
                 Console.WriteLine("**** Compiling C# code for the Editor");
                 unity.Run(new[]
                 {
