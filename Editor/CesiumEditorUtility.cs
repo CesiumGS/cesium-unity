@@ -1,6 +1,6 @@
 using System;
-using UnityEngine;
 using UnityEditor;
+using UnityEngine;
 
 namespace CesiumForUnity
 {
@@ -59,10 +59,25 @@ namespace CesiumForUnity
 
         static CesiumEditorUtility()
         {
+            EditorApplication.update += CheckProjectFilesForTextMeshPro;
+
             Cesium3DTileset.OnCesium3DTilesetLoadFailure +=
                 HandleCesium3DTilesetLoadFailure;
             CesiumRasterOverlay.OnCesiumRasterOverlayLoadFailure +=
                 HandleCesiumRasterOverlayLoadFailure;
+        }
+
+        static void CheckProjectFilesForTextMeshPro()
+        {
+            Object tmpSettings = Resources.Load("TMP Settings");
+            if (tmpSettings != null)
+            {
+                return;
+            }
+
+            TextMeshProPromptWindow.ShowWindow();
+
+            EditorApplication.update -= CheckProjectFilesForTextMeshPro;
         }
 
         static void
