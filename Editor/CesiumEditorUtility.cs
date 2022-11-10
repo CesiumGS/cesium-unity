@@ -69,7 +69,7 @@ namespace CesiumForUnity
 
         static void CheckProjectFilesForTextMeshPro()
         {
-            Object tmpSettings = Resources.Load("TMP Settings");
+            UnityEngine.Object tmpSettings = Resources.Load("TMP Settings");
             if (tmpSettings != null)
             {
                 return;
@@ -272,7 +272,6 @@ namespace CesiumForUnity
             // Teleport the camera back to the georeference's position so it stays
             // at the middle of the subscene.
             // TODO: this will have to change when we factor in Unity transforms.
-            // TODO: rotate camera 
             CesiumEditorUtility.SetSceneViewPositionRotation(
                 Vector3.zero, SceneView.lastActiveSceneView.rotation);
         }
@@ -317,7 +316,6 @@ namespace CesiumForUnity
 
             Undo.RecordObject(subscene, "Place Sub-Scene Origin at Camera Position");
             
-            // TODO: rotate camera
             CesiumVector3 positionECEF =
                 CesiumEditorUtility.TransformCameraPositionToEarthCenteredEarthFixed(georeference);
             subscene.SetOriginEarthCenteredEarthFixed(
