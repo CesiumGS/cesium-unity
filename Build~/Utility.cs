@@ -56,7 +56,8 @@ namespace Build
         {
             get
             {
-                return Path.GetFullPath(Path.Combine(Path.GetDirectoryName(GetSourceFilePathName()) ?? "", ".."));
+                // Assumes this source file is in the project's Packages/com.cesium.unity/Build~ or similar.
+                return Path.GetFullPath(Path.Combine(Path.GetDirectoryName(GetSourceFilePathName()) ?? "", "..", "..", ".."));
             }
         }
         private static string GetSourceFilePathName([CallerFilePath] string? callerFilePath = null)
