@@ -254,33 +254,33 @@ namespace CesiumForUnity
                 positionECEF.y,
                 positionECEF.z);
 
+            // Teleport the camera back to the georeference's position so it stays
+            // at the middle of the subscene.
+            // TODO: this will have to change when we factor in Unity transforms.
             // TODO: rotate camera 
-
             CesiumEditorUtility.SetSceneViewPositionRotation(
                 Vector3.zero, SceneView.lastActiveSceneView.rotation);
         }
 
         public static CesiumSubScene CreateSubScene(CesiumGeoreference georeference)
         {
+            CesiumEditorUtility.PlaceGeoreferenceAtCameraPosition(georeference);
+            CesiumVector3 positionECEF = new CesiumVector3()
+            {
+                x = georeference.ecefX,
+                y = georeference.ecefY,
+                z = georeference.ecefZ
+            };
+            
             GameObject subSceneGameObject = new GameObject();
             subSceneGameObject.transform.parent = georeference.transform;
             Undo.RegisterCreatedObjectUndo(subSceneGameObject, "Create Sub-Scene");
 
             CesiumSubScene subScene = subSceneGameObject.AddComponent<CesiumSubScene>();
-            CesiumVector3 positionECEF =
-                CesiumEditorUtility.TransformCameraPositionToEarthCenteredEarthFixed(georeference);
-
             subScene.SetOriginEarthCenteredEarthFixed(
                 positionECEF.x,
                 positionECEF.y,
                 positionECEF.z);
-
-            // The georeference will take on the sub-scene's coordinates, so teleport the camera
-            // back to the georeference's position so it stays at the middle of the subscene.
-            // TODO: this will have to change when we factor in Unity transforms.
-            // TODO: rotate camera 
-            CesiumEditorUtility.SetSceneViewPositionRotation(
-                Vector3.zero, SceneView.lastActiveSceneView.rotation);
 
             // Prompt the user to rename the subscene once the hierarchy has updated.
             Selection.activeGameObject = subSceneGameObject;
