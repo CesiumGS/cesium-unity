@@ -59,7 +59,7 @@ namespace CesiumForUnity
             _popupText = "";
             _onScreenText = "";
 
-            // If no EventSystem exists, create one.
+            // If no EventSystem exists, create one to handle clicking on credit links.
             if (EventSystem.current == null)
             {
                 GameObject eventSystemGameObject = new GameObject("EventSystem");
@@ -84,7 +84,10 @@ namespace CesiumForUnity
             int linkIndex;
             if (_popupGameObject.activeSelf)
             {
-                linkIndex = TMP_TextUtilities.FindIntersectingLink(_popupTextComponent, eventData.position, null);
+                linkIndex = TMP_TextUtilities.FindIntersectingLink(
+                                _popupTextComponent,
+                                eventData.position,
+                                null);
                 if (linkIndex != -1)
                 {
                     TMP_LinkInfo linkInfo = _popupTextComponent.textInfo.linkInfo[linkIndex];
@@ -93,7 +96,10 @@ namespace CesiumForUnity
                 }
             }
 
-            linkIndex = TMP_TextUtilities.FindIntersectingLink(_onScreenTextComponent, eventData.position, null);
+            linkIndex = TMP_TextUtilities.FindIntersectingLink(
+                            _onScreenTextComponent,
+                            eventData.position,
+                            null);
             if (linkIndex != -1)
             {
                 TMP_LinkInfo linkInfo = _onScreenTextComponent.textInfo.linkInfo[linkIndex];
@@ -139,7 +145,8 @@ namespace CesiumForUnity
 
             if (url.LastIndexOf(base64Prefix, base64Prefix.Length) == 0)
             {
-                // Load an image from a string that contains the "data:image/png;base64," prefix
+                // Load an image from a string that contains the
+                // "data:image/png;base64," prefix
                 string byteString = url.Substring(base64Prefix.Length);
                 byte[] bytes = Convert.FromBase64String(byteString);
                 if (!texture.LoadImage(bytes))
@@ -188,13 +195,22 @@ namespace CesiumForUnity
             spriteAsset.hashCode = TMP_TextUtilities.GetSimpleHashCode(spriteAsset.name);
 
             // Make a single sprite with the sprite sheet.
-            Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f), 100.0f);
+            Sprite sprite = Sprite.Create(
+                texture,
+                new Rect(0, 0, texture.width, texture.height),
+                new Vector2(0.5f, 0.5f),
+                100.0f);
 
             // Create a sprite glyph that treats the entire sprite as one glyph.
             TMP_SpriteGlyph spriteGlyph = new TMP_SpriteGlyph();
             spriteGlyph.sprite = sprite;
             spriteGlyph.index = 0;
-            spriteGlyph.metrics = new GlyphMetrics(texture.width, texture.height, -0.5f, texture.height - 0.5f, texture.width);
+            spriteGlyph.metrics = new GlyphMetrics(
+                texture.width,
+                texture.height,
+                -0.5f,
+                texture.height - 0.5f,
+                texture.width);
             spriteGlyph.glyphRect = new GlyphRect(sprite.rect);
             spriteGlyph.scale = 1.0f;
             spriteAsset.spriteGlyphTable.Add(spriteGlyph);
@@ -214,11 +230,12 @@ namespace CesiumForUnity
             return spriteAsset;
         }
 
-        public void ClearLoadedImages()
+        private void OnDestroy()
         {
-            List<TMP_SpriteAsset> fallbackSpriteAssets = TMP_Settings.defaultSpriteAsset.fallbackSpriteAssets;
+            List<TMP_SpriteAsset> fallbackSpriteAssets = 
+                TMP_Settings.defaultSpriteAsset.fallbackSpriteAssets;
             int count = fallbackSpriteAssets.Count;
-            TMP_Settings.defaultSpriteAsset.fallbackSpriteAssets.RemoveRange(count - _numImages, _numImages);
+            fallbackSpriteAssets.RemoveRange(count - _numImages, _numImages);
         }
     }
 }

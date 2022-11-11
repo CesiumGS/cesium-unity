@@ -355,7 +355,6 @@ namespace CesiumForUnity
             int numImages = creditSystem.numberOfImages;
             creditSystem.SetCreditsText("Popup", "OnScreen");
             creditSystem.StartCoroutine(creditSystem.LoadImage("string"));
-            creditSystem.ClearLoadedImages();
             string delimiter = creditSystem.defaultDelimiter;
 
             List<string> stringList = new List<string>();
