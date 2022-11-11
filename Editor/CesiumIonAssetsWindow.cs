@@ -194,10 +194,18 @@ namespace CesiumForUnity
             {
                 GUILayout.BeginHorizontal();
                 GUILayout.FlexibleSpace();
-                // Once multiple overlays are supported, we need the option to
+                // TODO: once multiple overlays are supported, we need the option to
                 // add the asset as a layer.
+                GUIContent addOverlayAsBaseLayerContent = new GUIContent(
+                    "Use as Tileset Base Layer",
+                    "Makes this asset the base overlay on the selected tileset. " +
+                    "If no tileset is selected, then the overlay will be applied to the " +
+                    "first found tileset." +
+                    "\n\n" +
+                    "If the tileset already has an overlay it will be replaced. " +
+                    "If no tileset exists in the level, Cesium World Terrain is added.");
                 if (GUILayout.Button(
-                    "Use as Terrain Tileset Base Layer",
+                    addOverlayAsBaseLayerContent,
                     CesiumEditorStyle.cesiumButtonStyle))
                 {
                     // Asset indices are offset from the tree item IDs by 1.

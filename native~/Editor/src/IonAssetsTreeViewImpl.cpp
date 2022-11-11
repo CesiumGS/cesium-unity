@@ -12,6 +12,7 @@
 #include <DotNet/CesiumForUnity/IonAssetsTreeView.h>
 #include <DotNet/System/StringComparison.h>
 #include <DotNet/System/Object.h>
+#include <DotNet/UnityEditor/EditorApplication.h>
 #include <DotNet/UnityEditor/IMGUI/Controls/MultiColumnHeader.h>
 #include <DotNet/UnityEditor/Selection.h>
 #include <DotNet/UnityEngine/Debug.h>
@@ -217,6 +218,8 @@ void IonAssetsTreeViewImpl::AddAssetToLevel(
             tileset.RecreateTileset();
 
             UnityEditor::Selection::activeGameObject(tileset.gameObject());
+            UnityEditor::EditorApplication::ExecuteMenuItem(
+                System::String("Window/General/Hierarchy"));
           });
 }
 
@@ -252,12 +255,13 @@ void IonAssetsTreeViewImpl::AddOverlayToTerrain(
           }
         }
 
-        UnityEditor::Selection::activeGameObject(tileset.gameObject());
         CesiumForUnity::CesiumEditorUtility::AddBaseOverlayToTileset(
             tileset,
             pAsset->id);
 
         tileset.RecreateTileset();
+
+        UnityEditor::Selection::activeGameObject(tileset.gameObject());
       });
 }
 

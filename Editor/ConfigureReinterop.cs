@@ -199,6 +199,8 @@ namespace CesiumForUnity
             AssetTroubleshootingDetails assetDetails = troubleshootingWindow.assetDetails;
             assetDetails.assetExistsInUserAccount = true;
             assetDetails.loaded = true;
+
+            EditorApplication.ExecuteMenuItem("Window/General/Hierarchy");
         }
     }
 }

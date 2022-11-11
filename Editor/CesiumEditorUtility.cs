@@ -158,19 +158,16 @@ namespace CesiumForUnity
             AddBaseOverlayToTileset(Cesium3DTileset tileset, long assetID)
         {
             GameObject gameObject = tileset.gameObject;
-            CesiumIonRasterOverlay overlay = gameObject.GetComponent<CesiumIonRasterOverlay>();
+            CesiumRasterOverlay overlay = gameObject.GetComponent<CesiumRasterOverlay>();
             if (overlay != null)
             {
-                Undo.RecordObject(overlay, "Update Base Overlay of Tileset");
-            }
-            else
-            {
-                overlay = Undo.AddComponent<CesiumIonRasterOverlay>(gameObject);
+                Undo.DestroyObjectImmediate(overlay);
             }
 
-            overlay.ionAssetID = assetID;
+            CesiumIonRasterOverlay ionOverlay = Undo.AddComponent<CesiumIonRasterOverlay>(gameObject);
+            ionOverlay.ionAssetID = assetID;
 
-            return overlay;
+            return ionOverlay;
         }
     }
 }

@@ -36,10 +36,12 @@ namespace CesiumForUnity
             CesiumIonSession.Ion().Resume();
         }
 
-        private bool _isConnected = false;
-        private bool _isConnecting = false;
-        private bool _isProfileLoaded = false;
-        private bool _isLoadingProfile = false;
+        private bool _isIonConnected = false;
+        private bool _isIonConnecting = false;
+        private bool _isIonProfileLoaded = false;
+        private bool _isIonLoadingProfile = false;
+
+        private Vector2 _scrollPosition = Vector2.zero;
 
         void OnGUI()
         {
@@ -52,17 +54,19 @@ namespace CesiumForUnity
             if (Event.current.type == EventType.Layout)
             {
                 CesiumIonSession ion = CesiumIonSession.Ion();
-                this._isConnected = ion.IsConnected();
-                this._isConnecting = ion.IsConnecting();
-                this._isProfileLoaded = ion.IsProfileLoaded();
-                this._isLoadingProfile = ion.IsLoadingProfile();
+                this._isIonConnected = ion.IsConnected();
+                this._isIonConnecting = ion.IsConnecting();
+                this._isIonProfileLoaded = ion.IsProfileLoaded();
+                this._isIonLoadingProfile = ion.IsLoadingProfile();
             }
 
             this.DrawCesiumToolbar();
+
+            this._scrollPosition = EditorGUILayout.BeginScrollView(this._scrollPosition);
             this.DrawQuickAddBasicAssetsPanel();
 
             GUILayout.Space(10);
-            if (_isConnected)
+            if (this._isIonConnected)
             {
                 this.DrawQuickAddIonAssetsPanel();
             }
@@ -73,6 +77,8 @@ namespace CesiumForUnity
 
             GUILayout.Space(10);
             this.DrawConnectionStatusPanel();
+
+            EditorGUILayout.EndScrollView();
 
             // Force the window to repaint if the cursor is hovered over it.
             // By default, it only repaints sporadically, so the hover and
@@ -103,7 +109,7 @@ namespace CesiumForUnity
             GUIContent content = new GUIContent(name, CesiumEditorStyle.toolbarIcons[button], tooltip);
             GUIStyle style = CesiumEditorStyle.toolbarButtonStyle;
 
-            if (enableForIonOnly && !this._isConnected)
+            if (enableForIonOnly && !this._isIonConnected)
             {
                 GUI.color = Color.grey;
                 style = CesiumEditorStyle.toolbarButtonDisabledStyle;
@@ -111,7 +117,7 @@ namespace CesiumForUnity
 
             if (GUILayout.Button(content, style))
             {
-                if (!enableForIonOnly || this._isConnected)
+                if (!enableForIonOnly || this._isIonConnected)
                 {
                     func();
                 }
@@ -202,7 +208,8 @@ namespace CesiumForUnity
             new QuickAddItem(
                 QuickAddItemType.BlankTileset,
                 "Blank 3D Tiles Tileset",
-                "An empty tileset that can be configured to show Cesium ion assets or tilesets from other sources.",
+                "An empty tileset that can be configured to show Cesium ion assets " +
+                "or tilesets from other sources.",
                 "Cesium3DTileset",
                 -1,
                 "",
@@ -214,7 +221,8 @@ namespace CesiumForUnity
             new QuickAddItem(
                 QuickAddItemType.IonTileset,
                 "Cesium World Terrain + Bing Maps Aerial imagery",
-                "High-resolution global terrain tileset curated from several data sources, textured with Bing Maps satellite imagery.",
+                "High-resolution global terrain tileset curated from several data sources, " +
+                "textured with Bing Maps satellite imagery.",
                 "Cesium World Terrain",
                 1,
                 "Bing Maps Aerial imagery",
@@ -222,7 +230,8 @@ namespace CesiumForUnity
             new QuickAddItem(
                 QuickAddItemType.IonTileset,
                 "Cesium World Terrain + Bing Maps Aerial with Labels imagery",
-                "High-resolution global terrain tileset curated from several data sources, textured with labeled Bing Maps satellite imagery.",
+                "High-resolution global terrain tileset curated from several data sources, " +
+                "textured with labeled Bing Maps satellite imagery.",
                 "Cesium World Terrain",
                 1,
                 "Bing Maps Aerial with Labels imagery",
@@ -230,7 +239,8 @@ namespace CesiumForUnity
             new QuickAddItem(
                 QuickAddItemType.IonTileset,
                 "Cesium World Terrain + Bing Maps Road imagery",
-                "High-resolution global terrain tileset curated from several data sources, textured with labeled Bing Maps imagery.",
+                "High-resolution global terrain tileset curated from several data sources, " +
+                "textured with labeled Bing Maps imagery.",
                 "Cesium World Terrain",
                 1,
                 "Bing Maps Road imagery",
@@ -238,7 +248,8 @@ namespace CesiumForUnity
             new QuickAddItem(
                 QuickAddItemType.IonTileset,
                 "Cesium World Terrain + Sentinel-2 imagery",
-                "High-resolution global terrain tileset curated from several data sources, textured with high-resolution satellite imagery from the Sentinel-2 project.",
+                "High-resolution global terrain tileset curated from several data sources, " +
+                "textured with high-resolution satellite imagery from the Sentinel-2 project.",
                 "Cesium World Terrain",
                 1,
                 "Sentinel-2 imagery",
@@ -296,6 +307,8 @@ namespace CesiumForUnity
                 default:
                     break;
             }
+
+            EditorApplication.ExecuteMenuItem("Window/General/Hierarchy");
         }
 
         private partial void AddAssetFromIon(
@@ -328,16 +341,30 @@ namespace CesiumForUnity
             }
         }
 
+
         void DrawIonLoginPanel()
         {
-            //GUILayout.Box(cesiumForUnityLogo, GUILayout.Width(500.0f));
+            Texture2D logo = EditorGUIUtility.isProSkin ? 
+                CesiumEditorStyle.cesiumForUnityLogoLight : 
+                CesiumEditorStyle.cesiumForUnityLogoDark;
+            GUIContent logoContent = new GUIContent(logo);
+
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.LabelField(
+                logoContent,
+                GUILayout.Height(175));
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(10);
 
             EditorGUILayout.LabelField("Access global high - resolution 3D content, " +
                 "including photogrammetry, terrain, imagery, and buildings. " +
                 "Bring your own data for tiling, hosting, and streaming to Unity.",
                 EditorStyles.wordWrappedLabel);
 
-            GUILayout.Space(20);
+            GUILayout.Space(10);
 
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
@@ -351,7 +378,7 @@ namespace CesiumForUnity
 
         void DrawConnectionStatusPanel()
         {
-            if (this._isConnecting)
+            if (this._isIonConnecting)
             {
                 EditorGUILayout.LabelField(
                     "Waiting for you to sign into Cesium ion with your web browser...",
@@ -379,7 +406,7 @@ namespace CesiumForUnity
                 }
                 GUILayout.EndHorizontal();
             }
-            else if (this._isProfileLoaded)
+            else if (this._isIonProfileLoaded)
             {
                 GUILayout.FlexibleSpace();
                 GUILayout.BeginHorizontal();
@@ -393,21 +420,21 @@ namespace CesiumForUnity
                     this.VisitIon();
                 }
                 GUILayout.EndHorizontal();
-                GUILayout.Space(5);
             }
-            else if (this._isLoadingProfile)
+            else if (this._isIonLoadingProfile)
             {
                 GUILayout.FlexibleSpace();
                 GUILayout.BeginHorizontal();
                 GUILayout.FlexibleSpace();
                 GUILayout.Label("Loading user information...");
                 GUILayout.EndHorizontal();
-                GUILayout.Space(5);
             }
-            else if (this._isConnected)
+            else if (this._isIonConnected)
             {
                 CesiumIonSession.Ion().RefreshProfile();
             }
+
+            GUILayout.Space(5);
         }
 
         void AddFromIon()
