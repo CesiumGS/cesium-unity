@@ -148,6 +148,8 @@ dotnet publish Reinterop~ -o .
 dotnet run --project Build~
 ```
 
+On success, the built .tar.gz package is found in the root directory of the project (e.g. `c:\cesium\CesiumForUnityBuildProject`).
+
 ### :green_book:License
 
 [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.html). Cesium for Unity is free to use for both commercial and non-commercial use.
