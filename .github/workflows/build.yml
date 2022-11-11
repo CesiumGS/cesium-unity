@@ -18,4 +18,6 @@ jobs:
         run: |
           choco install wget
           wget https://download.unity3d.com/download_unity/9e7d58001ecf/Windows64EditorInstaller/UnitySetup64-2021.3.13f1.exe
-          .\UnitySetup64-2021.3.13f1.exe /S
+          echo Installing
+          ./UnitySetup64-2021.3.13f1.exe /S
+          echo Done
