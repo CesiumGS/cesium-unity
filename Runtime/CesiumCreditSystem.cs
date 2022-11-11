@@ -78,7 +78,6 @@ namespace CesiumForUnity
         }
 
         private partial void Update();
-        private partial void OnApplicationQuit();
 
         public void OnPointerClick(PointerEventData eventData)
         {

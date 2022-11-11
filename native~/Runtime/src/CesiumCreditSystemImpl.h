@@ -31,8 +31,6 @@ public:
   void JustBeforeDelete(
       const DotNet::CesiumForUnity::CesiumCreditSystem& creditSystem);
   void Update(const DotNet::CesiumForUnity::CesiumCreditSystem& creditSystem);
-  void OnApplicationQuit(
-      const DotNet::CesiumForUnity::CesiumCreditSystem& creditSystem);
 
   const std::shared_ptr<Cesium3DTilesSelection::CreditSystem>&
   getExternalCreditSystem() const;
@@ -42,9 +40,6 @@ public:
 private:
   // The underlying cesium-native credit system.
   std::shared_ptr<Cesium3DTilesSelection::CreditSystem> _pCreditSystem;
-
-  // The GameObject prefab used to host the CreditSystem script and UI.
-  static DotNet::UnityEngine::GameObject _creditSystemPrefab;
 
   const std::string convertHtmlToRtf(
       const std::string& html,

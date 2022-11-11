@@ -9,12 +9,10 @@
 #include <DotNet/CesiumForUnity/CesiumCreditSystem.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
-
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/Collections/IEnumerator.h>
 #include <DotNet/System/Object.h>
 #include <DotNet/System/String.h>
-
 #include <DotNet/UnityEngine/Application.h>
 #include <DotNet/UnityEngine/Coroutine.h>
 #include <DotNet/UnityEngine/GameObject.h>
@@ -22,15 +20,12 @@
 #include <DotNet/UnityEngine/Resources.h>
 #include <DotNet/UnityEngine/Texture2D.h>
 #include <DotNet/UnityEngine/Transform.h>
-
 #include <tidybuffio.h>
 
 using namespace Cesium3DTilesSelection;
 using namespace DotNet;
 
 namespace CesiumForUnityNative {
-
-UnityEngine::GameObject CesiumCreditSystemImpl::_creditSystemPrefab = nullptr;
 
 CesiumCreditSystemImpl::CesiumCreditSystemImpl(
     const CesiumForUnity::CesiumCreditSystem& creditSystem)
@@ -88,9 +83,8 @@ void CesiumCreditSystemImpl::Update(
       }
     }
 
-    System::String popupCredits = System::String::Join(
-        System::String("\n"),
-        _popupCreditsList.ToArray());
+    System::String popupCredits =
+        System::String::Join(System::String("\n"), _popupCreditsList.ToArray());
 
     System::String onScreenCredits = System::String::Join(
         creditSystem.defaultDelimiter(),
@@ -100,7 +94,9 @@ void CesiumCreditSystemImpl::Update(
         onScreenCredits,
         System::String("<link=\"popup\"><u>Data Attribution</u></link>"));
 
-    creditSystem.SetCreditsText(System::String(popupCredits), System::String(onScreenCredits));
+    creditSystem.SetCreditsText(
+        System::String(popupCredits),
+        System::String(onScreenCredits));
 
     _lastCreditsCount = creditsCount;
   }
@@ -153,8 +149,9 @@ void htmlToRtf(
           creditSystem.StartCoroutine(
               creditSystem.LoadImage(System::String(srcString)));
 
-          // Output is <link="url"><size=150%><sprite name="credit-image-ID"></size></link>
-          // The ID of the image is just the number of images before it was added.
+          // Output is <link="url"><size=150%><sprite
+          // name="credit-image-ID"></size></link> The ID of the image is just
+          // the number of images before it was added.
           if (!parentUrl.empty()) {
             output += "<link=\"" + parentUrl + "\">";
           }
@@ -207,13 +204,6 @@ const std::string CesiumCreditSystemImpl::convertHtmlToRtf(
   return output.c_str();
 }
 
-void CesiumCreditSystemImpl::OnApplicationQuit(
-    const DotNet::CesiumForUnity::CesiumCreditSystem& creditSystem) {
-  // Dereference the prefab. If this isn't done, the Editor will try to
-  // use the destroyed prefab when it re-enters play mode.
-  CesiumCreditSystemImpl::_creditSystemPrefab = nullptr;
-}
-
 const std::shared_ptr<Cesium3DTilesSelection::CreditSystem>&
 CesiumCreditSystemImpl::getExternalCreditSystem() const {
   return _pCreditSystem;
@@ -239,14 +229,12 @@ CesiumCreditSystemImpl::getDefaultCreditSystem() {
 
   // If no default credit system was found, instantiate one.
   if (defaultCreditSystemObject == nullptr) {
-    if (CesiumCreditSystemImpl::_creditSystemPrefab == nullptr) {
-      CesiumCreditSystemImpl::_creditSystemPrefab =
-          UnityEngine::Resources::Load<UnityEngine::GameObject>(
-              System::String("CesiumCreditSystem"));
-    }
+    UnityEngine::GameObject creditSystemPrefab =
+        UnityEngine::Resources::Load<UnityEngine::GameObject>(
+            System::String("CesiumCreditSystem"));
 
     defaultCreditSystemObject =
-        UnityEngine::Object::Instantiate(_creditSystemPrefab);
+        UnityEngine::Object::Instantiate(creditSystemPrefab);
     defaultCreditSystemObject.name(defaultName);
   }
 
