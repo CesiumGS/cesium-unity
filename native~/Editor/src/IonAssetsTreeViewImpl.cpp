@@ -252,12 +252,13 @@ void IonAssetsTreeViewImpl::AddOverlayToTerrain(
           }
         }
 
-        UnityEditor::Selection::activeGameObject(tileset.gameObject());
         CesiumForUnity::CesiumEditorUtility::AddBaseOverlayToTileset(
             tileset,
             pAsset->id);
 
         tileset.RecreateTileset();
+
+        UnityEditor::Selection::activeGameObject(tileset.gameObject());
       });
 }
 
