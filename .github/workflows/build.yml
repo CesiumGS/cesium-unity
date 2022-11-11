@@ -18,5 +18,9 @@ jobs:
         run: |
           choco install wget --no-progress
           wget --quiet https://download.unity3d.com/download_unity/9e7d58001ecf/Windows64EditorInstaller/UnitySetup64-2021.3.13f1.exe
-          start -FilePath ./UnitySetup64-2021.3.13f1.exe -ArgumentList "/S" -wait
+          start -FilePath ./UnitySetup64-2021.3.13f1.exe -ArgumentList "/S /D=C:\Program Files\Unity\Hub\Editor\2021.3.13f1" -wait
+          dir "C:\Program Files"
           dir "C:\Program Files\Unity"
+          dir "C:\Program Files\Unity\Hub"
+          dir "C:\Program Files\Unity\Hub\Editor"
+          dir "C:\Program Files\Unity\Hub\Editor\2021.3.13f1"
