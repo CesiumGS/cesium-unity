@@ -16,6 +16,7 @@ jobs:
       #     echo "CESIUM_UNITY_VERSION=${ENV:CESIUM_UNITY_VERSION}" >> $ENV:GITHUB_ENV
       - name: Install Unity
         run: |
-          choco install wget
-          wget https://download.unity3d.com/download_unity/9e7d58001ecf/Windows64EditorInstaller/UnitySetup64-2021.3.13f1.exe
+          choco install wget --no-progress
+          wget --quiet https://download.unity3d.com/download_unity/9e7d58001ecf/Windows64EditorInstaller/UnitySetup64-2021.3.13f1.exe
           start -FilePath ./UnitySetup64-2021.3.13f1.exe -ArgumentList "/S" -wait
+          dir "C:\Program Files\Unity"
