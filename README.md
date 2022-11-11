@@ -134,6 +134,20 @@ The cesium-unity-samples project has several scenes that help you to quickly get
 4. Go to Player Settings, and in XR Plug-in Management, go to the Android section and check OpenXR.
 5. Finally, in the Build Settings, click Build And Run to build an APK.
 
+## Packaging Cesium for Unity
+
+To create a release package of Cesium for Unity, suitable to be installed with the Unity Package Manager, do the following (adjust the Unity path for your system):
+
+```
+$ENV:UNITY="C:\Program Files\Unity\Hub\Editor\2021.3.13f1\Editor\Unity.exe"
+start -FilePath $ENV:UNITY -ArgumentList "-batchmode -quit -createProject c:\cesium\CesiumForUnityBuildProject" -wait
+cd c:\cesium\CesiumForUnityBuildProject\Packages
+git clone --recurse-submodules git@github.com:CesiumGS/cesium-unity.git com.cesium.unity
+cd com.cesium.unity
+dotnet publish Reinterop~ -o .
+dotnet run --project Build~
+```
+
 ### :green_book:License
 
 [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.html). Cesium for Unity is free to use for both commercial and non-commercial use.
