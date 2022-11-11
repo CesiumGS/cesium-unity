@@ -8,6 +8,7 @@ using System.IO;
 using System.Text;
 using System;
 using System.Collections.Generic;
+using UnityEditor.Android;
 
 namespace CesiumForUnity
 {
@@ -347,19 +348,27 @@ namespace CesiumForUnity
             // CMake can't deal with back slashes (Windows) in the ANDROID_NDK_ROOT environment variable.
             // So replace them with forward slashes.
             string? ndkRoot = environment.ContainsKey("ANDROID_NDK_ROOT") ? environment["ANDROID_NDK_ROOT"] : null;
-            if (ndkRoot != null)
+            if (ndkRoot == null)
             {
-                // On Windows, use the make program included in the NDK. Because Visual Studio (which is usually
-                // the default) won't work to build for Android.
-                if (library.Platform == BuildTarget.Android && Environment.OSVersion.Platform == PlatformID.Win32NT)
+                // We're building for Android but don't have a known NDK root. Try asking Unity for it.
+                ndkRoot = AndroidExternalToolsSettings.ndkRootPath;
+            }
+
+            // On Windows, use the make program included in the NDK. Because Visual Studio (which is usually
+            // the default) won't work to build for Android.
+            if (library.Platform == BuildTarget.Android && Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                library.ExtraConfigureArgs.Add("-G \"Unix Makefiles\"");
+
+                if (!string.IsNullOrEmpty(ndkRoot))
                 {
-                    library.ExtraConfigureArgs.Add("-G \"Unix Makefiles\"");
                     string make = Path.Combine(ndkRoot, "prebuilt", "windows-x86_64", "bin", "make.exe").Replace('\\', '/');
                     library.ExtraConfigureArgs.Add($"-DCMAKE_MAKE_PROGRAM=\"{make}\"");
                 }
-
-                environment["ANDROID_NDK_ROOT"] = ndkRoot.Replace('\\', '/');
             }
+
+            if (!string.IsNullOrEmpty(ndkRoot))
+                environment["ANDROID_NDK_ROOT"] = ndkRoot.Replace('\\', '/');
         }
 
         private static string GetSourceFilePathName([CallerFilePath] string? callerFilePath = null)

@@ -30,7 +30,7 @@ using namespace DotNet;
 
 namespace CesiumForUnityNative {
 
-UnityEngine::GameObject CesiumCreditSystemImpl::_creditSystemPrefab = nullptr;
+// UnityEngine::GameObject CesiumCreditSystemImpl::_creditSystemPrefab = nullptr;
 
 CesiumCreditSystemImpl::CesiumCreditSystemImpl(
     const CesiumForUnity::CesiumCreditSystem& creditSystem)
@@ -211,7 +211,7 @@ void CesiumCreditSystemImpl::OnApplicationQuit(
     const DotNet::CesiumForUnity::CesiumCreditSystem& creditSystem) {
   // Dereference the prefab. If this isn't done, the Editor will try to
   // use the destroyed prefab when it re-enters play mode.
-  CesiumCreditSystemImpl::_creditSystemPrefab = nullptr;
+  // CesiumCreditSystemImpl::_creditSystemPrefab = nullptr;
 }
 
 const std::shared_ptr<Cesium3DTilesSelection::CreditSystem>&
@@ -239,14 +239,11 @@ CesiumCreditSystemImpl::getDefaultCreditSystem() {
 
   // If no default credit system was found, instantiate one.
   if (defaultCreditSystemObject == nullptr) {
-    if (CesiumCreditSystemImpl::_creditSystemPrefab == nullptr) {
-      CesiumCreditSystemImpl::_creditSystemPrefab =
-          UnityEngine::Resources::Load<UnityEngine::GameObject>(
-              System::String("CesiumCreditSystem"));
-    }
+    UnityEngine::GameObject creditSystemPrefab = UnityEngine::Resources::Load<UnityEngine::GameObject>(
+        System::String("CesiumCreditSystem"));
 
     defaultCreditSystemObject =
-        UnityEngine::Object::Instantiate(_creditSystemPrefab);
+        UnityEngine::Object::Instantiate(creditSystemPrefab);
     defaultCreditSystemObject.name(defaultName);
   }
 

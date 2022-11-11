@@ -27,6 +27,7 @@ namespace CesiumForUnity
             EditorApplication.Exit(0);
         }
 
+        [MenuItem("Cesium/Build/Compile for Android and Exit")]
         public static void CompileForAndroidAndExit()
         {
             string buildPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
@@ -42,6 +43,23 @@ namespace CesiumForUnity
             EditorApplication.Exit(0);
         }
 
+        [MenuItem("Cesium/Build/Compile for Windows and Exit")]
+        public static void CompileForWindowsAndExit()
+        {
+            string buildPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(buildPath);
+            try
+            {
+                BuildPlayer(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64, Path.Combine(buildPath, "Windows"));
+            }
+            finally
+            {
+                Directory.Delete(buildPath, true);
+            }
+            Debug.Log("**** Exiting with code zero");
+            EditorApplication.Exit(0);
+        }
+
         public static void PackAndExit()
         {
             string tempPath = Environment.GetEnvironmentVariable("CESIUM_PACKAGE_TEMP_PATH");
@@ -51,7 +69,12 @@ namespace CesiumForUnity
                 return;
             }
 
-            PackRequest request = Client.Pack(Path.Combine(tempPath, "package"), Path.GetFullPath(Path.Combine(Application.dataPath, "..")));
+            string packSource = Path.Combine(tempPath, "package");
+            string packTarget = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
+            
+            Debug.Log("Packing directory " + packSource + " to output directory " + packTarget);
+
+            PackRequest request = Client.Pack(packSource, packTarget);
             EditorApplication.update += () =>
             {
                 if (request.IsCompleted)
@@ -177,7 +200,7 @@ namespace CesiumForUnity
                 locationPathName = Path.Combine(outputPath, "game"),
                 targetGroup = targetGroup,
                 target = target,
-                scenes = new[] { "Assets/Scenes/SampleScene.unity" }
+                scenes = new[] { "Assets/Scenes/Empty.unity" }
             //options = BuildOptions.BuildScriptsOnly
         });
             if (report.summary.totalErrors > 0)

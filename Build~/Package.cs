@@ -19,6 +19,8 @@ namespace Build
             string tempPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             Environment.SetEnvironmentVariable("CESIUM_PACKAGE_TEMP_PATH", tempPath);
 
+            Console.WriteLine("**** Output directory " + tempPath);
+
             string runtimeCscRspPath = Path.Combine(Utility.PackageRoot, "Runtime", "csc.rsp");
             string runtimeCscRsp = File.ReadAllText(runtimeCscRspPath, Encoding.UTF8);
             string editorCscRspPath = Path.Combine(Utility.PackageRoot, "Editor", "csc.rsp");
@@ -57,7 +59,7 @@ namespace Build
                 unity.Run(new[]
                 {
                     "-batchmode",
-                    "-project",
+                    "-projectPath",
                     Utility.ProjectRoot,
                     "-executeMethod",
                     "CesiumForUnity.BuildCesiumForUnity.CompileForEditorAndExit"
@@ -102,11 +104,12 @@ namespace Build
                 unity.Run(new[]
                 {
                     "-batchmode",
-                    "-quit",
-                    "-project",
+                    "-projectPath",
                     Utility.ProjectRoot,
-                    "-buildWindows64Player",
-                    Path.Combine(tempPath, "built", "Windows", "game.exe")
+                    "-buildTarget",
+                    "Win64",
+                    "-executeMethod",
+                    "CesiumForUnity.BuildCesiumForUnity.CompileForWindowsAndExit"
                 });
 
                 Console.WriteLine("**** Adding generated files (for the Windows Player) to the package");
@@ -120,7 +123,7 @@ namespace Build
                 unity.Run(new[]
                 {
                     "-batchmode",
-                    "-project",
+                    "-projectPath",
                     Utility.ProjectRoot,
                     "-buildTarget",
                     "Android",
@@ -138,7 +141,7 @@ namespace Build
                 unity.Run(new[]
                 {
                     "-batchmode",
-                    "-project",
+                    "-projectPath",
                     Utility.ProjectRoot,
                     "-executeMethod",
                     "CesiumForUnity.BuildCesiumForUnity.PackAndExit"

@@ -46,7 +46,7 @@ namespace Build
                 Console.WriteLine(logText);
 
                 if (result != 0)
-                    throw new Exception("An error occurred while executing Unity.");
+                    throw new Exception("An error occurred while executing Unity. Code: " + result);
             }
             finally
             {
