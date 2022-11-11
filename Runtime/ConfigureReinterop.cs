@@ -52,6 +52,8 @@ namespace CesiumForUnity
             Vector3 u = t.up;
             Vector3 f = t.forward;
 
+            Vector4 v = new Vector4(1.0f, 0.0f, 1.0f, 0.0f);
+
             t.position = new Vector3();
             Vector3 p = t.position;
             float x = p.x;
@@ -122,7 +124,7 @@ namespace CesiumForUnity
             GameObject meshGameObject = meshRenderer.gameObject;
             meshRenderer.material = UnityEngine.Object.Instantiate(meshRenderer.material);
             meshRenderer.material.SetTexture("name", texture2D);
-            meshRenderer.material.SetFloat("name", 1.0f);
+            meshRenderer.material.SetFloat("name", 1.0f); 
             meshRenderer.material.SetVector("name", new Vector4());
             meshRenderer.material.DisableKeyword("keywordName");
             meshRenderer.material.EnableKeyword("keywordName");
@@ -325,6 +327,7 @@ namespace CesiumForUnity
 
             NativeArray<Vector3> positionNormal = meshData.GetVertexData<Vector3>(0);
             NativeArray<Vector2> texCoord = meshData.GetVertexData<Vector2>(0);
+            NativeArray<byte> vertexData = meshData.GetVertexData<byte>(0);
             NativeArray<ushort> indices = meshData.GetIndexData<ushort>();
             NativeArray<uint> indices32 = meshData.GetIndexData<uint>();
 

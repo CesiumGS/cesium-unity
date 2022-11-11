@@ -24,14 +24,16 @@ Material:
   m_Shader: {fileID: -6465566751694194690, guid: 407c0cff68611ac46a65eec87a5203f5,
     type: 3}
   m_ValidKeywords:
-  - _OVERLAY_COUNT_NONE
+  - _OVERLAY_COUNT_ONE
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
-  stringTagMap: {}
-  disabledShaderPasses: []
+  stringTagMap:
+    RenderType: Opaque
+  disabledShaderPasses:
+  - SHADOWCASTER
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -44,6 +46,10 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _metallicRoughnessTexture:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _normalMapTexture:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -81,18 +87,34 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _AlphaClip: 0
+    - _Blend: 0
+    - _CastShadows: 0
+    - _Cull: 2
+    - _DstBlend: 0
     - _HAS_BASE_COLOR: 0
     - _HAS_EMISSIVE: 0
     - _HAS_METALLIC_ROUGHNESS: 0
+    - _HAS_NORMAL_MAP: 0
     - _HAS_NORMAL_TEXTURE: 0
     - _HAS_OCCLUSION: 0
     - _OVERLAY_COUNT: 0
     - _QueueControl: 0
     - _QueueOffset: 0
+    - _ReceiveShadows: 1
+    - _SrcBlend: 1
+    - _Surface: 0
+    - _WorkflowMode: 1
+    - _ZTest: 4
+    - _ZWrite: 1
+    - _ZWriteControl: 0
     - _baseColorTextureCoordinateIndex: 0
     - _emissiveTextureCoordinateIndex: 0
     - _metallicRoughnessTextureCoordinateIndex: 0
+    - _normalMapScale: 0
+    - _normalMapTextureCoordinateIndex: 0
     - _normalTextureCoordinateIndex: 0
+    - _occlusionStrength: 0
     - _occlusionTextureCoordinateIndex: 0
     - _overlay0TextureCoordinateIndex: 0
     - _overlay1TextureCoordinateIndex: 0

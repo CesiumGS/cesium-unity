@@ -37,6 +37,7 @@ namespace CesiumForUnity
         private SerializedProperty _generateSmoothNormals;
 
         private SerializedProperty _suspendUpdate;
+        private SerializedProperty _showTilesInHierarchy;
         private SerializedProperty _updateInEditor;
         private SerializedProperty _logSelectionStats;
 
@@ -82,6 +83,7 @@ namespace CesiumForUnity
                 this.serializedObject.FindProperty("_generateSmoothNormals");
 
             this._suspendUpdate = this.serializedObject.FindProperty("_suspendUpdate");
+            this._showTilesInHierarchy = this.serializedObject.FindProperty("_showTilesInHierarchy");
             this._updateInEditor = this.serializedObject.FindProperty("_updateInEditor");
             this._logSelectionStats = this.serializedObject.FindProperty("_logSelectionStats");
 
@@ -397,6 +399,11 @@ namespace CesiumForUnity
                 "Suspend Update",
                 "Pauses level-of-detail and culling updates of this tileset.");
             EditorGUILayout.PropertyField(this._suspendUpdate, suspendUpdateContent);
+
+            GUIContent showTilesInHierarchyContent = new GUIContent(
+                "Show Tiles in Hierarchy",
+                "Whether to show tiles as individual components in the hierarchy window.");
+            EditorGUILayout.PropertyField(this._showTilesInHierarchy, showTilesInHierarchyContent);
 
             GUIContent updateInEditorContent = new GUIContent(
                 "Update in Editor",
