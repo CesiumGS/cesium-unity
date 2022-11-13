@@ -25,16 +25,21 @@ jobs:
       #   run: rm ./UnitySetup-Android-Support-for-Editor-2021.3.13f1.exe
       - name: Create SSH tunnel to Unity license server
         run: ssh -V
-      - name: Build Package
+      - name: Create Empty Project
         run: |
-          $ENV:REPO_ROOT=$PWD
           $ENV:UNITY="C:\Program Files\Unity\Hub\Editor\2021.3.13f1\Editor\Unity.exe"
           mkdir c:\cesium
-          start -FilePath $ENV:UNITY -ArgumentList "-batchmode -quit -createProject c:\cesium\CesiumForUnityBuildProject" -wait
+          start -FilePath $ENV:UNITY -ArgumentList "-batchmode -quit -createProject c:\cesium\CesiumForUnityBuildProject -logFile c:\cesium\unity.log" -wait
+          cat c:\cesium\unity.log
+      - name: Move cesium-unity Repo Under Project
+        run: |
           cd c:\cesium\CesiumForUnityBuildProject\Packages
-          mv $ENV:REPO_ROOT ./com.cesium.unity
-          dir
-          dir ./com.cesium.unity
-          cd com.cesium.unity
+          mv $ENV:GITHUB_WORKSPACE ./com.cesium.unity
+      - name: Build Reinterop
+        run: |
+          c:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
           dotnet publish Reinterop~ -o .
+      - name: Build Package
+        run: |
+          c:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
           dotnet run --project Build~
