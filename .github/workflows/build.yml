@@ -23,3 +23,16 @@ jobs:
           # wget --quiet https://download.unity3d.com/download_unity/9e7d58001ecf/TargetSupportInstaller/UnitySetup-Android-Support-for-Editor-2021.3.13f1.exe
           # start -FilePath ./UnitySetup-Android-Support-for-Editor-2021.3.13f1.exe -ArgumentList "/S /D=C:\Program Files\Unity\Hub\Editor\2021.3.13f1" -wait
           ssh -V
+      - name: Build Package
+        run: |
+          $ENV:REPO_ROOT=$PWD
+          $ENV:UNITY="C:\Program Files\Unity\Hub\Editor\2021.3.13f1\Editor\Unity.exe"
+          mkdir c:\cesium
+          start -FilePath $ENV:UNITY -ArgumentList "-batchmode -quit -createProject c:\cesium\CesiumForUnityBuildProject" -wait
+          cd c:\cesium\CesiumForUnityBuildProject\Packages
+          mv $ENV:REPO_ROOT ./com.cesium.unity
+          dir
+          dir ./com.cesium.unity
+          cd com.cesium.unity
+          dotnet publish Reinterop~ -o .
+          dotnet run --project Build~
