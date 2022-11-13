@@ -9,20 +9,22 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0 # so that `git describe` works.
-      # - name: Set environment variables
-      #   run: |
-      #     $ENV:CESIUM_UNITY_VERSION=$(git describe)
-      #     # Make these available to subsequent steps
-      #     echo "CESIUM_UNITY_VERSION=${ENV:CESIUM_UNITY_VERSION}" >> $ENV:GITHUB_ENV
+      - name: Install wget
+        run: choco install wget --no-progress
+      - name: Download Unity
+        run: wget --quiet https://download.unity3d.com/download_unity/9e7d58001ecf/Windows64EditorInstaller/UnitySetup64-2021.3.13f1.exe
       - name: Install Unity
-        run: |
-          choco install wget --no-progress
-          wget --quiet https://download.unity3d.com/download_unity/9e7d58001ecf/Windows64EditorInstaller/UnitySetup64-2021.3.13f1.exe
-          start -FilePath ./UnitySetup64-2021.3.13f1.exe -ArgumentList "/S /D=C:\Program Files\Unity\Hub\Editor\2021.3.13f1" -wait
-          rm ./UnitySetup64-2021.3.13f1.exe
-          # wget --quiet https://download.unity3d.com/download_unity/9e7d58001ecf/TargetSupportInstaller/UnitySetup-Android-Support-for-Editor-2021.3.13f1.exe
-          # start -FilePath ./UnitySetup-Android-Support-for-Editor-2021.3.13f1.exe -ArgumentList "/S /D=C:\Program Files\Unity\Hub\Editor\2021.3.13f1" -wait
-          ssh -V
+        run: start -FilePath ./UnitySetup64-2021.3.13f1.exe -ArgumentList "/S /D=C:\Program Files\Unity\Hub\Editor\2021.3.13f1" -wait
+      - name: Delete Unity Installer
+        run: rm ./UnitySetup64-2021.3.13f1.exe
+      # - name: Download Unity Android Support
+      #   run: wget --quiet https://download.unity3d.com/download_unity/9e7d58001ecf/TargetSupportInstaller/UnitySetup-Android-Support-for-Editor-2021.3.13f1.exe
+      # - name: Install Unity Android Support
+      #   run: start -FilePath ./UnitySetup-Android-Support-for-Editor-2021.3.13f1.exe -ArgumentList "/S /D=C:\Program Files\Unity\Hub\Editor\2021.3.13f1" -wait
+      # - name: Delete Unity Android Support Installer
+      #   run: rm ./UnitySetup-Android-Support-for-Editor-2021.3.13f1.exe
+      - name: Create SSH tunnel to Unity license server
+        run: ssh -V
       - name: Build Package
         run: |
           $ENV:REPO_ROOT=$PWD
