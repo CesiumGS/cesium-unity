@@ -16,6 +16,9 @@ jobs:
           start -FilePath ssh -ArgumentList "-i ~/unity-client-ssh-key -L 8080:localhost:8080 unity-client@$($ENV:UNITY_LICENSE_SERVER_HOST)"
           mkdir -p $ENV:PROGRAMDATA/Unity/config
           '{"licensingServiceBaseUrl": "http://localhost:8080","enableEntitlementLicensing": true,"clientConnectTimeoutSec": 5,"clientHandshakeTimeoutSec": 10}' > $ENV:PROGRAMDATA/Unity/config/services-config.json
+          sleep 5
+          wget http://127.0.0.1:8080/v1/admin/status
+          cat status
       - name: Install wget
         run: choco install wget --no-progress
       - name: Download Unity
