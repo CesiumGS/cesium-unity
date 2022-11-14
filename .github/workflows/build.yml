@@ -11,8 +11,8 @@ jobs:
         #   fetch-depth: 0 # so that `git describe` works.
       - name: Test Moving
         run: |
-          mkdir foo
-          mv $ENV:GITHUB_WORKSPACE/* foo
+          mkdir -p c:\cesium\foo
+          mv $ENV:GITHUB_WORKSPACE/* c:\cesium\foo
       - name: Install wget
         run: choco install wget --no-progress
       - name: Create SSH tunnel to Unity License Server
