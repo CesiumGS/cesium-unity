@@ -9,6 +9,10 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0 # so that `git describe` works.
+      - name: Test Moving
+        run: |
+          mkdir foo
+          mv $ENV:GITHUB_WORKSPACE foo
       - name: Install wget
         run: choco install wget --no-progress
       - name: Create SSH tunnel to Unity License Server
@@ -19,6 +23,13 @@ jobs:
           echo $ENV:GITHUB_WORKSPACE
           ls $ENV:GITHUB_WORKSPACE
           $ENV:UNITY_LICENSE_SERVER_SSH_KEY | Set-Content ~/unity-client-ssh-key
+          # Without StrictHostKeyChecking, OpenSSH will sit forever waiting for local input to confirm the server key is ok.
+          # We don't really care if the server is authentic, because we're not sending anything sensitive to it.
+          # The license server VM's sshd_config also needed to be modified with the following options, in order to prevent
+          # the tunnel from being closed between here and when we're ready to use it.
+          #   TCPKeepAlive yes
+          #   ClientAliveInterval 30
+          #   ClientAliveCountMax 9999
           start -FilePath ssh -ArgumentList "-o StrictHostKeyChecking=no -i ~/unity-client-ssh-key -L 127.0.0.1:12331:127.0.0.1:8080 unity-client@ec2-44-204-244-196.compute-1.amazonaws.com"
           sleep 5
       - name: Test Connection to Unity License Server
