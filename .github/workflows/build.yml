@@ -9,6 +9,8 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0 # so that `git describe` works.
+      - name: Install wget
+        run: choco install wget --no-progress
       - name: Create SSH tunnel to Unity License Server
         run: |
           $ENV:UNITY_LICENSE_SERVER_SSH_KEY > ~/unity-client-ssh-key
@@ -19,8 +21,6 @@ jobs:
           sleep 5
           wget http://127.0.0.1:8080/v1/admin/status
           cat status
-      - name: Install wget
-        run: choco install wget --no-progress
       - name: Download Unity
         run: wget --quiet https://download.unity3d.com/download_unity/9e7d58001ecf/Windows64EditorInstaller/UnitySetup64-2021.3.13f1.exe
       - name: Test License Server
