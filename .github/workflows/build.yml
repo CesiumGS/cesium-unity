@@ -15,6 +15,7 @@ jobs:
         run: |
           $ErrorView = 'NormalView'
           $ENV:UNITY_LICENSE_SERVER_SSH_KEY | Set-Content ~/unity-client-ssh-key
+          ls -l ~/unity-client-ssh-key
           cat ~/unity-client-ssh-key
           echo "-i ~/unity-client-ssh-key -L 8080:localhost:8080 unity-client@ec2-44-204-244-196.compute-1.amazonaws.com -N"
           start -FilePath ssh -ArgumentList "-i ~/unity-client-ssh-key -L 8080:localhost:8080 unity-client@ec2-44-204-244-196.compute-1.amazonaws.com -N" -RedirectStandardOutput stdout.log -RedirectStandardError stderr.log
