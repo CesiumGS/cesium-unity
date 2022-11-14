@@ -23,7 +23,7 @@ jobs:
           echo OUT!
           cat stdout.log
           echo ERR!
-          cat stderror.log
+          cat stderr.log
           # ssh -i ~/dne -L 8080:localhost:8080 unity-client@ec2-44-204-244-196.compute-1.amazonaws.com -N
           # ssh -i ~/unity-client-ssh-key -L 8080:localhost:8080 unity-client@ec2-44-204-244-196.compute-1.amazonaws.com -N
           wget http://127.0.0.1:8080/v1/admin/status
