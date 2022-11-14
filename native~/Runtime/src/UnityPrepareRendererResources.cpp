@@ -858,6 +858,24 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             }
           }
 
+          const std::vector<double>& emissiveFactorSrc =
+              pMaterial->emissiveFactor;
+          UnityEngine::Vector4 emissiveFactor;
+          emissiveFactor.x =
+              emissiveFactorSrc.size() > 0
+                  ? static_cast<float>(emissiveFactorSrc[0])
+                  : 0.0f;
+          emissiveFactor.y =
+              emissiveFactorSrc.size() > 1
+                  ? static_cast<float>(emissiveFactorSrc[1])
+                  : 0.0f;
+          emissiveFactor.z =
+              emissiveFactorSrc.size() > 2
+                  ? static_cast<float>(emissiveFactorSrc[2])
+                  : 0.0f;
+          material.SetVector(
+              System::String("_emissiveFactor"),
+              emissiveFactor);
           if (pMaterial->emissiveTexture) {
             auto texCoordIndexIt = primitiveInfo.uvIndexMap.find(
                 pMaterial->emissiveTexture->texCoord);
@@ -872,26 +890,6 @@ void* UnityPrepareRendererResources::prepareInMainThread(
                 material.SetFloat(
                     System::String("_emissiveTextureCoordinateIndex"),
                     static_cast<float>(texCoordIndexIt->second));
-
-                const std::vector<double>& emissiveFactorSrc =
-                    pMaterial->emissiveFactor;
-
-                UnityEngine::Vector4 emissiveFactor;
-                emissiveFactor.x =
-                    emissiveFactorSrc.size() > 0
-                        ? static_cast<float>(emissiveFactorSrc[0])
-                        : 0.0f;
-                emissiveFactor.y =
-                    emissiveFactorSrc.size() > 1
-                        ? static_cast<float>(emissiveFactorSrc[1])
-                        : 0.0f;
-                emissiveFactor.z =
-                    emissiveFactorSrc.size() > 2
-                        ? static_cast<float>(emissiveFactorSrc[2])
-                        : 0.0f;
-                material.SetVector(
-                    System::String("_emissiveFactor"),
-                    emissiveFactor);
 
                 material.EnableKeyword(System::String("_HASEMISSIVE_ON"));
               }
