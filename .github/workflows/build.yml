@@ -6,13 +6,13 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
-        with:
-          submodules: recursive
-          fetch-depth: 0 # so that `git describe` works.
+        # with:
+        #   submodules: recursive
+        #   fetch-depth: 0 # so that `git describe` works.
       - name: Test Moving
         run: |
           mkdir foo
-          mv $ENV:GITHUB_WORKSPACE foo
+          mv $ENV:GITHUB_WORKSPACE/* foo
       - name: Install wget
         run: choco install wget --no-progress
       - name: Create SSH tunnel to Unity License Server
