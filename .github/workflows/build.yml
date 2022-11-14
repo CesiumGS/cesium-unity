@@ -28,11 +28,11 @@ jobs:
           echo version
           & "C:\Program Files\OpenSSH\ssh.exe" -V
           echo "bad key"
-          & "C:\Program Files\OpenSSH\ssh.exe" -i foo.txt unity-client@ec2-44-204-244-196.compute-1.amazonaws.com ls
+          & "C:\Program Files\OpenSSH\ssh.exe" -o StrictHostKeyChecking=no -i foo.txt unity-client@ec2-44-204-244-196.compute-1.amazonaws.com ls
           echo "good key"
-          & "C:\Program Files\OpenSSH\ssh.exe" -i ~/unity-client-ssh-key unity-client@ec2-44-204-244-196.compute-1.amazonaws.com ls
+          & "C:\Program Files\OpenSSH\ssh.exe" -o StrictHostKeyChecking=no -i ~/unity-client-ssh-key unity-client@ec2-44-204-244-196.compute-1.amazonaws.com ls
           echo done
-          start -FilePath ssh -ArgumentList "-i ~/unity-client-ssh-key -L 127.0.0.1:12331:127.0.0.1:8080 unity-client@ec2-44-204-244-196.compute-1.amazonaws.com"
+          start -FilePath ssh -ArgumentList "-o StrictHostKeyChecking=no -i ~/unity-client-ssh-key -L 127.0.0.1:12331:127.0.0.1:8080 unity-client@ec2-44-204-244-196.compute-1.amazonaws.com"
           mkdir -p $ENV:PROGRAMDATA/Unity/config
           '{"licensingServiceBaseUrl": "http://localhost:12331","enableEntitlementLicensing": true,"clientConnectTimeoutSec": 5,"clientHandshakeTimeoutSec": 10}' > $ENV:PROGRAMDATA/Unity/config/services-config.json
           sleep 5
