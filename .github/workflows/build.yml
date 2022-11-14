@@ -15,6 +15,9 @@ jobs:
         env:
           UNITY_LICENSE_SERVER_SSH_KEY: ${{ secrets.UNITY_LICENSE_SERVER_SSH_KEY }}
         run: |
+          echo GITHUB_WORKSPACE
+          echo $ENV:GITHUB_WORKSPACE
+          ls $ENV:GITHUB_WORKSPACE
           $ENV:UNITY_LICENSE_SERVER_SSH_KEY | Set-Content ~/unity-client-ssh-key
           start -FilePath ssh -ArgumentList "-o StrictHostKeyChecking=no -i ~/unity-client-ssh-key -L 127.0.0.1:12331:127.0.0.1:8080 unity-client@ec2-44-204-244-196.compute-1.amazonaws.com"
           sleep 5
@@ -34,11 +37,11 @@ jobs:
       #   run: start -FilePath ./UnitySetup-Android-Support-for-Editor-2021.3.13f1.exe -ArgumentList "/S /D=C:\Program Files\Unity\Hub\Editor\2021.3.13f1" -wait
       # - name: Delete Unity Android Support Installer
       #   run: rm ./UnitySetup-Android-Support-for-Editor-2021.3.13f1.exe
-      - name: Test Connection to Unity License Server
+      - name: Test Connection to Unity License Server Again
         run: |
           wget http://127.0.0.1:12331/v1/admin/status
           cat status
-      - name: Configure Unity to Use the License Server Again
+      - name: Configure Unity to Use the License Server
         run: |
           mkdir -p $ENV:PROGRAMDATA/Unity/config
           '{"licensingServiceBaseUrl": "http://localhost:12331","enableEntitlementLicensing": true,"clientConnectTimeoutSec": 5,"clientHandshakeTimeoutSec": 10}' > $ENV:PROGRAMDATA/Unity/config/services-config.json
