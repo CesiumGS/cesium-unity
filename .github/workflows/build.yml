@@ -11,6 +11,10 @@ jobs:
           fetch-depth: 0 # so that `git describe` works.
       - name: Install wget
         run: choco install wget --no-progress
+      - name: Install Latest OpenSSH
+        run: |
+          wget https://github.com/PowerShell/Win32-OpenSSH/releases/download/v8.9.1.0p1-Beta/OpenSSH-Win64-v8.9.1.0.msi
+          start OpenSSH-Win64-v8.9.1.0.msi -ArgumentList "/quiet" -wait
       - name: Create SSH tunnel to Unity License Server
         shell: pwsh
         env:
@@ -22,9 +26,9 @@ jobs:
           cat ~/unity-client-ssh-key
           echo hi > foo.txt
           echo bad key
-          ssh -i foo.txt unity-client@ec2-44-204-244-196.compute-1.amazonaws.com ls
+          & "C:\Program Files\OpenSSH\ssh.exe" -i foo.txt unity-client@ec2-44-204-244-196.compute-1.amazonaws.com ls
           echo good key
-          ssh -i ~/unity-client-ssh-key unity-client@ec2-44-204-244-196.compute-1.amazonaws.com ls
+          & "C:\Program Files\OpenSSH\ssh.exe" -i ~/unity-client-ssh-key unity-client@ec2-44-204-244-196.compute-1.amazonaws.com ls
           echo done
           start -FilePath ssh -ArgumentList "-i ~/unity-client-ssh-key -L 127.0.0.1:12331:127.0.0.1:8080 unity-client@ec2-44-204-244-196.compute-1.amazonaws.com"
           mkdir -p $ENV:PROGRAMDATA/Unity/config
