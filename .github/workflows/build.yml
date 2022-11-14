@@ -58,7 +58,9 @@ jobs:
         run: |
           $ENV:UNITY="C:\Program Files\Unity\Hub\Editor\2021.3.13f1\Editor\Unity.exe"
           mkdir \cesium
-          start -FilePath $ENV:UNITY -ArgumentList "-batchmode -quit -createProject \cesium\CesiumForUnityBuildProject -logFile \cesium\unity.log" -wait
+          cd \cesium
+          $ENV:CESIUM_DIR=$PWD
+          start -FilePath $ENV:UNITY -ArgumentList "-batchmode -quit -createProject $ENV:CESIUM_DIR\CesiumForUnityBuildProject -logFile $ENV:CESIUM_DIR\unity.log" -wait
           cat \cesium\unity.log
       - name: Move cesium-unity Repo Under Project
         run: |
