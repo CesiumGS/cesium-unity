@@ -17,6 +17,7 @@ jobs:
         run: |
           $ENV:UNITY_LICENSE_SERVER_SSH_KEY | Set-Content ~/unity-client-ssh-key
           start -FilePath ssh -ArgumentList "-o StrictHostKeyChecking=no -i ~/unity-client-ssh-key -L 127.0.0.1:12331:127.0.0.1:8080 unity-client@ec2-44-204-244-196.compute-1.amazonaws.com"
+          sleep 5
       - name: Test Connection to Unity License Server
         run: |
           wget http://127.0.0.1:12331/v1/admin/status
