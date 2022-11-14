@@ -11,41 +11,14 @@ jobs:
           fetch-depth: 0 # so that `git describe` works.
       - name: Install wget
         run: choco install wget --no-progress
-      - name: Install Latest OpenSSH
-        run: |
-          wget https://github.com/PowerShell/Win32-OpenSSH/releases/download/v8.9.1.0p1-Beta/OpenSSH-Win64-v8.9.1.0.msi
-          start OpenSSH-Win64-v8.9.1.0.msi -ArgumentList "/quiet" -wait
       - name: Create SSH tunnel to Unity License Server
-        shell: pwsh
         env:
           UNITY_LICENSE_SERVER_SSH_KEY: ${{ secrets.UNITY_LICENSE_SERVER_SSH_KEY }}
         run: |
-          $ErrorView = 'NormalView'
           $ENV:UNITY_LICENSE_SERVER_SSH_KEY | Set-Content ~/unity-client-ssh-key
-          ls -l ~/unity-client-ssh-key
-          cat ~/unity-client-ssh-key
-          echo hi > foo.txt
-          echo version
-          & "C:\Program Files\OpenSSH\ssh.exe" -V
-          echo "bad key"
-          & "C:\Program Files\OpenSSH\ssh.exe" -o StrictHostKeyChecking=no -i foo.txt unity-client@ec2-44-204-244-196.compute-1.amazonaws.com ls
-          echo "good key"
-          & "C:\Program Files\OpenSSH\ssh.exe" -o StrictHostKeyChecking=no -i ~/unity-client-ssh-key unity-client@ec2-44-204-244-196.compute-1.amazonaws.com ls
-          echo done
           start -FilePath ssh -ArgumentList "-o StrictHostKeyChecking=no -i ~/unity-client-ssh-key -L 127.0.0.1:12331:127.0.0.1:8080 unity-client@ec2-44-204-244-196.compute-1.amazonaws.com"
-          mkdir -p $ENV:PROGRAMDATA/Unity/config
-          '{"licensingServiceBaseUrl": "http://localhost:12331","enableEntitlementLicensing": true,"clientConnectTimeoutSec": 5,"clientHandshakeTimeoutSec": 10}' > $ENV:PROGRAMDATA/Unity/config/services-config.json
-          sleep 5
-          # ssh -i ~/dne -L 8080:localhost:8080 unity-client@ec2-44-204-244-196.compute-1.amazonaws.com -N
-          # ssh -i ~/unity-client-ssh-key -L 8080:localhost:8080 unity-client@ec2-44-204-244-196.compute-1.amazonaws.com -N
-          wget http://127.0.0.1:12331/v1/admin/status
-          cat status
       - name: Download Unity
         run: wget --quiet https://download.unity3d.com/download_unity/9e7d58001ecf/Windows64EditorInstaller/UnitySetup64-2021.3.13f1.exe
-      - name: Test License Server
-        run: |
-          wget http://127.0.0.1:12331/v1/admin/status
-          cat status
       - name: Install Unity
         run: start -FilePath ./UnitySetup64-2021.3.13f1.exe -ArgumentList "/S /D=C:\Program Files\Unity\Hub\Editor\2021.3.13f1" -wait
       - name: Delete Unity Installer
@@ -56,6 +29,14 @@ jobs:
       #   run: start -FilePath ./UnitySetup-Android-Support-for-Editor-2021.3.13f1.exe -ArgumentList "/S /D=C:\Program Files\Unity\Hub\Editor\2021.3.13f1" -wait
       # - name: Delete Unity Android Support Installer
       #   run: rm ./UnitySetup-Android-Support-for-Editor-2021.3.13f1.exe
+      - name: Test Connection to Unity License Server
+        run: |
+          wget http://127.0.0.1:12331/v1/admin/status
+          cat status
+      - name: Configure Unity to Use the License Server
+        run: |
+          mkdir -p $ENV:PROGRAMDATA/Unity/config
+          '{"licensingServiceBaseUrl": "http://localhost:12331","enableEntitlementLicensing": true,"clientConnectTimeoutSec": 5,"clientHandshakeTimeoutSec": 10}' > $ENV:PROGRAMDATA/Unity/config/services-config.json
       - name: Create Empty Project
         run: |
           $ENV:UNITY="C:\Program Files\Unity\Hub\Editor\2021.3.13f1\Editor\Unity.exe"
@@ -74,3 +55,9 @@ jobs:
         run: |
           c:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
           dotnet run --project Build~
+      - name: Publish package artifact
+        if: ${{ success() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: Windows Package
+          path: c:\cesium\CesiumForUnityBuildProject\*.tar.gz
