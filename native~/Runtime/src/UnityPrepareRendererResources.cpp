@@ -54,8 +54,9 @@
 #include <DotNet/UnityEngine/Vector4.h>
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <unordered_map>
+
 #include <algorithm>
+#include <unordered_map>
 
 using namespace Cesium3DTilesSelection;
 using namespace CesiumForUnityNative;
@@ -96,7 +97,7 @@ int32_t countPrimitives(const CesiumGltf::Model& model) {
 }
 
 /**
- * @brief The result after populating Unity mesh data with loaded glTF content. 
+ * @brief The result after populating Unity mesh data with loaded glTF content.
  */
 struct MeshDataResult {
   UnityEngine::MeshDataArray meshDataArray;
@@ -108,11 +109,8 @@ uint32_t packColorChannel(float c) {
 }
 
 uint32_t packColor(float r, float g, float b, float a) {
-  return 
-      (packColorChannel(r) << 24) | 
-      (packColorChannel(g) << 16) | 
-      (packColorChannel(b) << 8) | 
-      packColorChannel(a);
+  return (packColorChannel(r) << 24) | (packColorChannel(g) << 16) |
+         (packColorChannel(b) << 8) | packColorChannel(a);
 }
 
 void populateMeshDataArray(
@@ -135,8 +133,9 @@ void populateMeshDataArray(
           const Mesh& mesh,
           const MeshPrimitive& primitive,
           const glm::dmat4& transform) {
-        UnityEngine::MeshData meshData = meshDataResult.meshDataArray[meshDataInstance++];
-        CesiumPrimitiveInfo& primitiveInfo = 
+        UnityEngine::MeshData meshData =
+            meshDataResult.meshDataArray[meshDataInstance++];
+        CesiumPrimitiveInfo& primitiveInfo =
             meshDataResult.primitiveInfos.emplace_back();
 
         using namespace DotNet::UnityEngine;
@@ -179,7 +178,6 @@ void populateMeshDataArray(
         descriptor[numberOfAttributes].stream = streamIndex;
         ++numberOfAttributes;
 
-
         // Add the NORMAL attribute, if it exists.
         auto normalAccessorIt = primitive.attributes.find("NORMAL");
         AccessorView<UnityEngine::Vector3> normalView =
@@ -200,7 +198,6 @@ void populateMeshDataArray(
           ++numberOfAttributes;
         }
 
-        
         // Add the COLOR_0 attribute, if it exists.
         // It may originally be a vec3 or vec4 attribute, but we
         // will pack it into a Color32 in both cases.
@@ -219,17 +216,15 @@ void populateMeshDataArray(
                 : AccessorView<UnityEngine::Vector4>();
 
         if ((colorViewVec3.status() == AccessorViewStatus::Valid &&
-             colorViewVec3.size() >= positionView.size()) || 
+             colorViewVec3.size() >= positionView.size()) ||
             (colorViewVec4.status() == AccessorViewStatus::Valid &&
              colorViewVec4.size() >= positionView.size())) {
           assert(numberOfAttributes < MAX_ATTRIBUTES);
+
+          // Unity expects the vertex colors to come as 4 normalized uint8s.
           descriptor[numberOfAttributes].attribute = VertexAttribute::Color;
-          descriptor[numberOfAttributes].format = VertexAttributeFormat::UInt32;
-          // TODO: check if this dimension count is correct -
-          // my current understanding is we pack the color into
-          // a single int32, so 1 dimension...?
-          // Maybe 4 dimensions of SInt8?
-          descriptor[numberOfAttributes].dimension = 1;
+          descriptor[numberOfAttributes].format = VertexAttributeFormat::UNorm8;
+          descriptor[numberOfAttributes].dimension = 4;
           descriptor[numberOfAttributes].stream = streamIndex;
           ++numberOfAttributes;
         }
@@ -244,7 +239,8 @@ void populateMeshDataArray(
           // E.g., might not need UV coords for metadata.
 
           // Build accessor view for glTF attribute.
-          auto texCoordAccessorIt = primitive.attributes.find("TEXCOORD_" + std::to_string(i));
+          auto texCoordAccessorIt =
+              primitive.attributes.find("TEXCOORD_" + std::to_string(i));
           if (texCoordAccessorIt == primitive.attributes.end()) {
             continue;
           }
@@ -260,12 +256,14 @@ void populateMeshDataArray(
 
           texCoordViews[numTexCoords] = texCoordView;
           primitiveInfo.uvIndexMap[i] = numTexCoords;
-          
+
           // Build Unity descriptor for this attribute.
           assert(numberOfAttributes < MAX_ATTRIBUTES);
 
-          descriptor[numberOfAttributes].attribute = (VertexAttribute)((int)VertexAttribute::TexCoord0 + numTexCoords);
-          descriptor[numberOfAttributes].format = VertexAttributeFormat::Float32;
+          descriptor[numberOfAttributes].attribute =
+              (VertexAttribute)((int)VertexAttribute::TexCoord0 + numTexCoords);
+          descriptor[numberOfAttributes].format =
+              VertexAttributeFormat::Float32;
           descriptor[numberOfAttributes].dimension = 2;
           descriptor[numberOfAttributes].stream = streamIndex;
 
@@ -273,11 +271,11 @@ void populateMeshDataArray(
           ++numberOfAttributes;
         }
 
-
         // Add all texture coordinate sets _CESIUMOVERLAY_i
         for (int i = 0; i < 8 && numTexCoords < MAX_TEX_COORDS; ++i) {
           // Build accessor view for glTF attribute.
-          auto overlayAccessorIt = primitive.attributes.find("_CESIUMOVERLAY_" + std::to_string(i));
+          auto overlayAccessorIt =
+              primitive.attributes.find("_CESIUMOVERLAY_" + std::to_string(i));
           if (overlayAccessorIt == primitive.attributes.end()) {
             continue;
           }
@@ -290,22 +288,23 @@ void populateMeshDataArray(
             // TODO: report invalid accessor?
             continue;
           }
-          
+
           texCoordViews[numTexCoords] = overlayTexCoordView;
           primitiveInfo.rasterOverlayUvIndexMap[i] = numTexCoords;
 
           // Build Unity descriptor for this attribute.
           assert(numberOfAttributes < MAX_ATTRIBUTES);
 
-          descriptor[numberOfAttributes].attribute = (VertexAttribute)((int)VertexAttribute::TexCoord0 + numTexCoords);
-          descriptor[numberOfAttributes].format = VertexAttributeFormat::Float32;
+          descriptor[numberOfAttributes].attribute =
+              (VertexAttribute)((int)VertexAttribute::TexCoord0 + numTexCoords);
+          descriptor[numberOfAttributes].format =
+              VertexAttributeFormat::Float32;
           descriptor[numberOfAttributes].dimension = 2;
           descriptor[numberOfAttributes].stream = streamIndex;
 
           ++numTexCoords;
           ++numberOfAttributes;
         }
-
 
         System::Array1<VertexAttributeDescriptor> attributes(
             numberOfAttributes);
@@ -315,20 +314,19 @@ void populateMeshDataArray(
 
         meshData.SetVertexBufferParams(positionView.size(), attributes);
 
-
         // TODO: double check this is safe!!
-        NativeArray1<uint8_t> nativeVertexBuffer = 
+        NativeArray1<uint8_t> nativeVertexBuffer =
             meshData.GetVertexData<uint8_t>(streamIndex);
         uint8_t* pWritePos = static_cast<uint8_t*>(
             NativeArrayUnsafeUtility::GetUnsafeBufferPointerWithoutChecks(
-              nativeVertexBuffer));
-        
-        // Since the vertex buffer is dynamically interleaved, we don't have a 
+                nativeVertexBuffer));
+
+        // Since the vertex buffer is dynamically interleaved, we don't have a
         // convenient struct to represent the vertex data.
         // The vertex layout will be as follows:
         // 1. position
         // 2. normals (skip if N/A)
-        // 3. vertex colors (skip if N/A) 
+        // 3. vertex colors (skip if N/A)
         // 4. texcoords (first all TEXCOORD_i, then all _CESIUMOVERLAY_i)
         for (int64_t i = 0; i < positionView.size(); ++i) {
           *reinterpret_cast<Vector3*>(pWritePos) = positionView[i];
@@ -339,26 +337,32 @@ void populateMeshDataArray(
             pWritePos += sizeof(Vector3);
           }
 
+          // Unity assumes Color32 is packed in rgba order, with 1 byte for each
+          // channel.
           if (colorViewVec3.status() == AccessorViewStatus::Valid) {
             const Vector3& color = colorViewVec3[i];
-            *reinterpret_cast<uint32_t*>(pWritePos) = packColor(color.x, color.y, color.z, 1.0f);
+            *reinterpret_cast<uint32_t*>(pWritePos) =
+                packColor(color.x, color.y, color.z, 1.0f);
             pWritePos += sizeof(uint32_t);
           } else if (colorViewVec4.status() == AccessorViewStatus::Valid) {
             const Vector4& color = colorViewVec4[i];
-            *reinterpret_cast<uint32_t*>(pWritePos) = packColor(color.x, color.y, color.z, color.w);
+            *reinterpret_cast<uint32_t*>(pWritePos) =
+                packColor(color.x, color.y, color.z, color.w);
             pWritePos += sizeof(uint32_t);
           }
 
-          for (uint32_t texCoordIndex = 0; texCoordIndex < numTexCoords; ++texCoordIndex) {
-            *reinterpret_cast<Vector2*>(pWritePos) = texCoordViews[texCoordIndex][i];
-            pWritePos += sizeof(Vector2);            
+          for (uint32_t texCoordIndex = 0; texCoordIndex < numTexCoords;
+               ++texCoordIndex) {
+            *reinterpret_cast<Vector2*>(pWritePos) =
+                texCoordViews[texCoordIndex][i];
+            pWritePos += sizeof(Vector2);
           }
         }
 
-        // TODO: previously when there were more normals / texcoords then positions,
-        // we just filled the vertex data with 0s. Now we don't add them at all, and
-        // instead consider those attributes as "invalid". Which is the actual desired
-        // behavior?
+        // TODO: previously when there were more normals / texcoords then
+        // positions, we just filled the vertex data with 0s. Now we don't add
+        // them at all, and instead consider those attributes as "invalid".
+        // Which is the actual desired behavior?
 
         int32_t indexCount = 0;
 
@@ -408,7 +412,7 @@ void populateMeshDataArray(
 }
 
 /**
- * @brief The result of the async part of mesh loading. 
+ * @brief The result of the async part of mesh loading.
  */
 struct LoadThreadResult {
   System::Array1<UnityEngine::Mesh> meshes;
@@ -451,9 +455,9 @@ UnityPrepareRendererResources::prepareInLoadThread(
             // Free the MeshDataArray if something goes wrong.
             ScopeGuard sg([&meshDataArray]() { meshDataArray.Dispose(); });
 
-            MeshDataResult meshDataResult {
-              std::move(meshDataArray),
-              {}};
+            // TODO: This messes up the scope-guard release mechanism to release
+            // the meshDataArray on exceptions, fix this.
+            MeshDataResult meshDataResult{std::move(meshDataArray), {}};
             populateMeshDataArray(meshDataResult, tileLoadResult);
 
             // We're returning the MeshDataArray, so don't free it.
@@ -477,7 +481,7 @@ UnityPrepareRendererResources::prepareInLoadThread(
                   tilesetComponent.showTilesInHierarchy();
             }
 
-            const UnityEngine::MeshDataArray& meshDataArray = 
+            const UnityEngine::MeshDataArray& meshDataArray =
                 workerResult.meshDataResult.meshDataArray;
 
             // Create meshes and populate them from the MeshData created in
@@ -550,14 +554,15 @@ UnityPrepareRendererResources::prepareInLoadThread(
           });
 }
 
-
 void* UnityPrepareRendererResources::prepareInMainThread(
     Cesium3DTilesSelection::Tile& tile,
     void* pLoadThreadResult_) {
-  std::unique_ptr<LoadThreadResult> pLoadThreadResult(static_cast<LoadThreadResult*>(pLoadThreadResult_));
+  std::unique_ptr<LoadThreadResult> pLoadThreadResult(
+      static_cast<LoadThreadResult*>(pLoadThreadResult_));
 
   const System::Array1<UnityEngine::Mesh>& meshes = pLoadThreadResult->meshes;
-  const std::vector<CesiumPrimitiveInfo>& primitiveInfos = pLoadThreadResult->primitiveInfos;
+  const std::vector<CesiumPrimitiveInfo>& primitiveInfos =
+      pLoadThreadResult->primitiveInfos;
 
   const Cesium3DTilesSelection::TileContent& content = tile.getContent();
   const Cesium3DTilesSelection::TileRenderContent* pRenderContent =
@@ -732,65 +737,98 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             Model::getSafe(&gltf.materials, primitive.material);
         if (pMaterial) {
           if (pMaterial->pbrMetallicRoughness) {
+            // Add base color factor and metallic-roughness factor regardless of
+            // if the textures are present.
+            const std::vector<double>& baseColorFactorSrc =
+                pMaterial->pbrMetallicRoughness->baseColorFactor;
+            UnityEngine::Vector4 baseColorFactor;
+            baseColorFactor.x = baseColorFactorSrc.size() > 0
+                                    ? static_cast<float>(baseColorFactorSrc[0])
+                                    : 1.0f;
+            baseColorFactor.y = baseColorFactorSrc.size() > 1
+                                    ? static_cast<float>(baseColorFactorSrc[1])
+                                    : 1.0f;
+            baseColorFactor.z = baseColorFactorSrc.size() > 2
+                                    ? static_cast<float>(baseColorFactorSrc[2])
+                                    : 1.0f;
+            baseColorFactor.w = baseColorFactorSrc.size() > 3
+                                    ? static_cast<float>(baseColorFactorSrc[3])
+                                    : 1.0f;
+            material.SetVector(
+                System::String("_baseColorFactor"),
+                baseColorFactor);
+
+            UnityEngine::Vector4 metallicRoughnessFactor;
+            metallicRoughnessFactor.x =
+                pMaterial->pbrMetallicRoughness->metallicFactor;
+            metallicRoughnessFactor.y =
+                pMaterial->pbrMetallicRoughness->roughnessFactor;
+            material.SetVector(
+                System::String("_metallicRoughnessFactor"),
+                metallicRoughnessFactor);
+
             const std::optional<TextureInfo>& baseColorTexture =
                 pMaterial->pbrMetallicRoughness->baseColorTexture;
             if (baseColorTexture) {
-              auto texCoordIndexIt = primitiveInfo.uvIndexMap.find(baseColorTexture->texCoord);
+              auto texCoordIndexIt =
+                  primitiveInfo.uvIndexMap.find(baseColorTexture->texCoord);
               if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
                 UnityEngine::Texture texture =
                     TextureLoader::loadTexture(gltf, baseColorTexture->index);
                 if (texture != nullptr) {
-                  material.SetTexture(System::String("_baseColorTexture"), texture);
-                  material.SetFloat(System::String("_baseColorTextureCoordinateIndex"), static_cast<float>(texCoordIndexIt->second));
-
-                  const std::vector<double>& baseColorFactorSrc = pMaterial->pbrMetallicRoughness->baseColorFactor;
-
-                  // TODO: double check that the gltf base color factor is in RGBA order
-                  // TODO: do these scale factors need to consider sRGB?
-                  // If so, we might want to use material.SetColor
-                  UnityEngine::Vector4 baseColorFactor;
-                  baseColorFactor.x = baseColorFactorSrc.size() > 0 ? static_cast<float>(baseColorFactorSrc[0]) : 1.0f;
-                  baseColorFactor.y = baseColorFactorSrc.size() > 1 ? static_cast<float>(baseColorFactorSrc[1]) : 1.0f;
-                  baseColorFactor.z = baseColorFactorSrc.size() > 2 ? static_cast<float>(baseColorFactorSrc[2]) : 1.0f;
-                  baseColorFactor.w = baseColorFactorSrc.size() > 3 ? static_cast<float>(baseColorFactorSrc[3]) : 1.0f;
-                  material.SetVector(System::String("_baseColorFactor"), baseColorFactor);
+                  material.SetTexture(
+                      System::String("_baseColorTexture"),
+                      texture);
+                  material.SetFloat(
+                      System::String("_baseColorTextureCoordinateIndex"),
+                      static_cast<float>(texCoordIndexIt->second));
 
                   material.EnableKeyword(System::String("_HASBASECOLOR_ON"));
                 }
               }
             }
 
-            const std::optional<TextureInfo>& metallicRoughness = 
+            const std::optional<TextureInfo>& metallicRoughness =
                 pMaterial->pbrMetallicRoughness->metallicRoughnessTexture;
             if (metallicRoughness) {
-              auto texCoordIndexIt = primitiveInfo.uvIndexMap.find(metallicRoughness->texCoord);
+              auto texCoordIndexIt =
+                  primitiveInfo.uvIndexMap.find(metallicRoughness->texCoord);
               if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
                 UnityEngine::Texture texture =
                     TextureLoader::loadTexture(gltf, metallicRoughness->index);
                 if (texture != nullptr) {
-                  material.SetTexture(System::String("_metallicRoughnessTexture"), texture);
-                  material.SetFloat(System::String("_metallicRoughnessTextureCoordinateIndex"), static_cast<float>(texCoordIndexIt->second));
+                  material.SetTexture(
+                      System::String("_metallicRoughnessTexture"),
+                      texture);
+                  material.SetFloat(
+                      System::String(
+                          "_metallicRoughnessTextureCoordinateIndex"),
+                      static_cast<float>(texCoordIndexIt->second));
 
-                  UnityEngine::Vector4 metallicRoughnessFactor;
-                  metallicRoughnessFactor.x = pMaterial->pbrMetallicRoughness->metallicFactor;
-                  metallicRoughnessFactor.y = pMaterial->pbrMetallicRoughness->roughnessFactor;
-                  material.SetVector(System::String("_metallicRoughnessFactor"), metallicRoughnessFactor);
-                  
-                  material.EnableKeyword(System::String("_HASMETALLICROUGHNESS_ON"));
+                  material.EnableKeyword(
+                      System::String("_HASMETALLICROUGHNESS_ON"));
                 }
               }
             }
           }
 
           if (pMaterial->normalTexture) {
-            auto texCoordIndexIt = primitiveInfo.uvIndexMap.find(pMaterial->normalTexture->texCoord);
+            auto texCoordIndexIt = primitiveInfo.uvIndexMap.find(
+                pMaterial->normalTexture->texCoord);
             if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
-              UnityEngine::Texture texture = 
-                  TextureLoader::loadTexture(gltf, pMaterial->normalTexture->index);
+              UnityEngine::Texture texture = TextureLoader::loadTexture(
+                  gltf,
+                  pMaterial->normalTexture->index);
               if (texture != nullptr) {
-                material.SetTexture(System::String("_normalMapTexture"), texture);
-                material.SetFloat(System::String("_normalMapTextureCoordinateIndex"), static_cast<float>(texCoordIndexIt->second));
-                material.SetFloat(System::String("_normalMapScale"), static_cast<float>(pMaterial->normalTexture->scale));
+                material.SetTexture(
+                    System::String("_normalMapTexture"),
+                    texture);
+                material.SetFloat(
+                    System::String("_normalMapTextureCoordinateIndex"),
+                    static_cast<float>(texCoordIndexIt->second));
+                material.SetFloat(
+                    System::String("_normalMapScale"),
+                    static_cast<float>(pMaterial->normalTexture->scale));
 
                 material.EnableKeyword(System::String("_HASNORMALMAP_ON"));
               }
@@ -798,14 +836,22 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           }
 
           if (pMaterial->occlusionTexture) {
-            auto texCoordIndexIt = primitiveInfo.uvIndexMap.find(pMaterial->occlusionTexture->texCoord);
+            auto texCoordIndexIt = primitiveInfo.uvIndexMap.find(
+                pMaterial->occlusionTexture->texCoord);
             if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
-              UnityEngine::Texture texture = 
-                  TextureLoader::loadTexture(gltf, pMaterial->occlusionTexture->index);
+              UnityEngine::Texture texture = TextureLoader::loadTexture(
+                  gltf,
+                  pMaterial->occlusionTexture->index);
               if (texture != nullptr) {
-                material.SetTexture(System::String("_occlusionTexture"), texture);
-                material.SetFloat(System::String("_occlusionTextureCoordinateIndex"), static_cast<float>(texCoordIndexIt->second));
-                material.SetFloat(System::String("_occlusionStrength"), static_cast<float>(pMaterial->occlusionTexture->strength));
+                material.SetTexture(
+                    System::String("_occlusionTexture"),
+                    texture);
+                material.SetFloat(
+                    System::String("_occlusionTextureCoordinateIndex"),
+                    static_cast<float>(texCoordIndexIt->second));
+                material.SetFloat(
+                    System::String("_occlusionStrength"),
+                    static_cast<float>(pMaterial->occlusionTexture->strength));
 
                 material.EnableKeyword(System::String("_HASOCCLUSION_ON"));
               }
@@ -813,21 +859,39 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           }
 
           if (pMaterial->emissiveTexture) {
-            auto texCoordIndexIt = primitiveInfo.uvIndexMap.find(pMaterial->emissiveTexture->texCoord);
+            auto texCoordIndexIt = primitiveInfo.uvIndexMap.find(
+                pMaterial->emissiveTexture->texCoord);
             if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
-              UnityEngine::Texture texture = 
-                  TextureLoader::loadTexture(gltf, pMaterial->emissiveTexture->index);
+              UnityEngine::Texture texture = TextureLoader::loadTexture(
+                  gltf,
+                  pMaterial->emissiveTexture->index);
               if (texture != nullptr) {
-                material.SetTexture(System::String("_emissiveTexture"), texture);
-                material.SetFloat(System::String("_emissiveTextureCoordinateIndex"), static_cast<float>(texCoordIndexIt->second));
+                material.SetTexture(
+                    System::String("_emissiveTexture"),
+                    texture);
+                material.SetFloat(
+                    System::String("_emissiveTextureCoordinateIndex"),
+                    static_cast<float>(texCoordIndexIt->second));
 
-                const std::vector<double>& emissiveFactorSrc = pMaterial->emissiveFactor;
+                const std::vector<double>& emissiveFactorSrc =
+                    pMaterial->emissiveFactor;
 
                 UnityEngine::Vector4 emissiveFactor;
-                emissiveFactor.x = emissiveFactorSrc.size() > 0 ? static_cast<float>(emissiveFactorSrc[0]) : 0.0f;
-                emissiveFactor.y = emissiveFactorSrc.size() > 1 ? static_cast<float>(emissiveFactorSrc[1]) : 0.0f;
-                emissiveFactor.z = emissiveFactorSrc.size() > 2 ? static_cast<float>(emissiveFactorSrc[2]) : 0.0f;
-                material.SetVector(System::String("_emissiveFactor"), emissiveFactor);
+                emissiveFactor.x =
+                    emissiveFactorSrc.size() > 0
+                        ? static_cast<float>(emissiveFactorSrc[0])
+                        : 0.0f;
+                emissiveFactor.y =
+                    emissiveFactorSrc.size() > 1
+                        ? static_cast<float>(emissiveFactorSrc[1])
+                        : 0.0f;
+                emissiveFactor.z =
+                    emissiveFactorSrc.size() > 2
+                        ? static_cast<float>(emissiveFactorSrc[2])
+                        : 0.0f;
+                material.SetVector(
+                    System::String("_emissiveFactor"),
+                    emissiveFactor);
 
                 material.EnableKeyword(System::String("_HASEMISSIVE_ON"));
               }
@@ -836,30 +900,32 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         }
 
         // TODO: Actually prevent interleaving more than 3 overlay UVs.
-        uint32_t overlayCount = std::min(primitiveInfo.rasterOverlayUvIndexMap.size(), 3ull);
+        uint32_t overlayCount =
+            std::min(primitiveInfo.rasterOverlayUvIndexMap.size(), 3ull);
         for (uint32_t i = 0; i < overlayCount; ++i) {
           auto texCoordIndexIt = primitiveInfo.rasterOverlayUvIndexMap.find(i);
           if (texCoordIndexIt != primitiveInfo.rasterOverlayUvIndexMap.end()) {
             material.SetFloat(
-                System::String("_overlay" + std::to_string(i) + "TextureCoordinateIndex"),
+                System::String(
+                    "_overlay" + std::to_string(i) + "TextureCoordinateIndex"),
                 static_cast<float>(texCoordIndexIt->second));
           }
         }
 
         switch (overlayCount) {
-          case 0:
+        case 0:
           material.EnableKeyword(System::String("_OVERLAYCOUNT_NONE"));
           break;
-          case 1:
+        case 1:
           material.DisableKeyword(System::String("_OVERLAYCOUNT_NONE"));
           material.EnableKeyword(System::String("_OVERLAYCOUNT_ONE"));
           break;
-          case 2:
+        case 2:
           material.DisableKeyword(System::String("_OVERLAYCOUNT_NONE"));
           material.EnableKeyword(System::String("_OVERLAYCOUNT_TWO"));
           break;
-          // case 3:
-          default:
+        // case 3:
+        default:
           material.DisableKeyword(System::String("_OVERLAYCOUNT_NONE"));
           material.EnableKeyword(System::String("_OVERLAYCOUNT_THREE"));
         };
@@ -883,10 +949,9 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         }
       });
 
-  CesiumGltfGameObject* pCesiumGameObject = new CesiumGltfGameObject {
-    std::move(pModelGameObject),
-    std::move(pLoadThreadResult->primitiveInfos)
-  };
+  CesiumGltfGameObject* pCesiumGameObject = new CesiumGltfGameObject{
+      std::move(pModelGameObject),
+      std::move(pLoadThreadResult->primitiveInfos)};
 
   return pCesiumGameObject;
 }
@@ -903,10 +968,15 @@ void UnityPrepareRendererResources::free(
         pCesiumGameObject->pGameObject
             ->GetComponentInParent<DotNet::CesiumForUnity::CesiumMetadata>();
     if (pMetadataComponent != nullptr) {
-      for (int32_t i = 0, len = pCesiumGameObject->pGameObject->transform().childCount(); i < len;
+      for (int32_t
+               i = 0,
+               len = pCesiumGameObject->pGameObject->transform().childCount();
+           i < len;
            ++i) {
         pMetadataComponent.NativeImplementation().unloadMetadata(
-            pCesiumGameObject->pGameObject->transform().GetChild(i).GetInstanceID());
+            pCesiumGameObject->pGameObject->transform()
+                .GetChild(i)
+                .GetInstanceID());
       }
     }
 
@@ -956,8 +1026,8 @@ void UnityPrepareRendererResources::attachRasterInMainThread(
     return;
   }
 
-  CesiumGltfGameObject* pCesiumGameObject = static_cast<CesiumGltfGameObject*>(
-      pRenderContent->getRenderResources());
+  CesiumGltfGameObject* pCesiumGameObject =
+      static_cast<CesiumGltfGameObject*>(pRenderContent->getRenderResources());
   UnityEngine::Texture* pTexture =
       static_cast<UnityEngine::Texture*>(pMainThreadRendererResources);
   if (!pCesiumGameObject || !pCesiumGameObject->pGameObject || !pTexture)
@@ -967,7 +1037,8 @@ void UnityPrepareRendererResources::attachRasterInMainThread(
   // to match the order of primitives using gltf->forEachPrimitive??
   uint32_t primitiveIndex = 0;
 
-  UnityEngine::Transform transform = pCesiumGameObject->pGameObject->transform();
+  UnityEngine::Transform transform =
+      pCesiumGameObject->pGameObject->transform();
   for (int32_t i = 0, len = transform.childCount(); i < len; ++i) {
     UnityEngine::Transform childTransform = transform.GetChild(i);
     if (childTransform == nullptr)
@@ -986,8 +1057,10 @@ void UnityPrepareRendererResources::attachRasterInMainThread(
     if (material == nullptr)
       continue;
 
-    const CesiumPrimitiveInfo& primitiveInfo = pCesiumGameObject->primitiveInfos[primitiveIndex++];
-    auto texCoordIndexIt = primitiveInfo.rasterOverlayUvIndexMap.find(overlayTextureCoordinateID);
+    const CesiumPrimitiveInfo& primitiveInfo =
+        pCesiumGameObject->primitiveInfos[primitiveIndex++];
+    auto texCoordIndexIt =
+        primitiveInfo.rasterOverlayUvIndexMap.find(overlayTextureCoordinateID);
     if (texCoordIndexIt == primitiveInfo.rasterOverlayUvIndexMap.end()) {
       // The associated UV coords for this overlay are missing.
       // TODO: log warning?
@@ -995,7 +1068,9 @@ void UnityPrepareRendererResources::attachRasterInMainThread(
     }
 
     std::string overlayIndexStr = std::to_string(overlayTextureCoordinateID);
-    material.SetTexture(System::String("_overlay" + overlayIndexStr + "Texture"), *pTexture);
+    material.SetTexture(
+        System::String("_overlay" + overlayIndexStr + "Texture"),
+        *pTexture);
 
     UnityEngine::Vector4 translationAndScale{
         float(translation.x),
@@ -1020,14 +1095,15 @@ void UnityPrepareRendererResources::detachRasterInMainThread(
     return;
   }
 
-  CesiumGltfGameObject* pCesiumGameObject = static_cast<CesiumGltfGameObject*>(
-      pRenderContent->getRenderResources());
+  CesiumGltfGameObject* pCesiumGameObject =
+      static_cast<CesiumGltfGameObject*>(pRenderContent->getRenderResources());
   UnityEngine::Texture* pTexture =
       static_cast<UnityEngine::Texture*>(pMainThreadRendererResources);
-  if (!pCesiumGameObject || !pCesiumGameObject->pGameObject || !pTexture) 
+  if (!pCesiumGameObject || !pCesiumGameObject->pGameObject || !pTexture)
     return;
 
-  UnityEngine::Transform transform = pCesiumGameObject->pGameObject->transform();
+  UnityEngine::Transform transform =
+      pCesiumGameObject->pGameObject->transform();
   for (int32_t i = 0, len = transform.childCount(); i < len; ++i) {
     UnityEngine::Transform childTransform = transform.GetChild(i);
     if (childTransform == nullptr)
@@ -1047,7 +1123,9 @@ void UnityPrepareRendererResources::detachRasterInMainThread(
       continue;
 
     material.SetTexture(
-        System::String("_overlay" + std::to_string(overlayTextureCoordinateID) + "Texture"),
+        System::String(
+            "_overlay" + std::to_string(overlayTextureCoordinateID) +
+            "Texture"),
         UnityEngine::Texture(nullptr));
   }
 }
