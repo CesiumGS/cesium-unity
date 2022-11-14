@@ -12,18 +12,19 @@ jobs:
       - name: Install wget
         run: choco install wget --no-progress
       - name: Create SSH tunnel to Unity License Server
-        shell: cmd
+        shell: pwsh
         env:
           UNITY_LICENSE_SERVER_SSH_KEY: ${{ secrets.UNITY_LICENSE_SERVER_SSH_KEY }}
         run: |
-          echo %UNITY_LICENSE_SERVER_SSH_KEY% > ~/unity-client-ssh-key
+          $ErrorView = 'NormalView'
+          $ENV:UNITY_LICENSE_SERVER_SSH_KEY | Set-Content ~/unity-client-ssh-key
           ls -l ~/unity-client-ssh-key
           cat ~/unity-client-ssh-key
           echo hi > foo.txt
           echo bad key
-          ssh -i foo.txt -L 127.0.0.1:12331:127.0.0.1:8080 unity-client@ec2-44-204-244-196.compute-1.amazonaws.com ls
+          ssh -i foo.txt unity-client@ec2-44-204-244-196.compute-1.amazonaws.com ls
           echo good key
-          ssh -i ~/unity-client-ssh-key -L 127.0.0.1:12331:127.0.0.1:8080 unity-client@ec2-44-204-244-196.compute-1.amazonaws.com ls
+          ssh -i ~/unity-client-ssh-key unity-client@ec2-44-204-244-196.compute-1.amazonaws.com ls
           echo done
           start -FilePath ssh -ArgumentList "-i ~/unity-client-ssh-key -L 127.0.0.1:12331:127.0.0.1:8080 unity-client@ec2-44-204-244-196.compute-1.amazonaws.com"
           mkdir -p $ENV:PROGRAMDATA/Unity/config
