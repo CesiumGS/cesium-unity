@@ -25,9 +25,11 @@ jobs:
           ls -l ~/unity-client-ssh-key
           cat ~/unity-client-ssh-key
           echo hi > foo.txt
-          echo bad key
+          echo version
+          & "C:\Program Files\OpenSSH\ssh.exe" -V
+          echo "bad key"
           & "C:\Program Files\OpenSSH\ssh.exe" -i foo.txt unity-client@ec2-44-204-244-196.compute-1.amazonaws.com ls
-          echo good key
+          echo "good key"
           & "C:\Program Files\OpenSSH\ssh.exe" -i ~/unity-client-ssh-key unity-client@ec2-44-204-244-196.compute-1.amazonaws.com ls
           echo done
           start -FilePath ssh -ArgumentList "-i ~/unity-client-ssh-key -L 127.0.0.1:12331:127.0.0.1:8080 unity-client@ec2-44-204-244-196.compute-1.amazonaws.com"
