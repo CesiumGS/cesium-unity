@@ -19,8 +19,9 @@ jobs:
           mkdir -p $ENV:PROGRAMDATA/Unity/config
           '{"licensingServiceBaseUrl": "http://localhost:8080","enableEntitlementLicensing": true,"clientConnectTimeoutSec": 5,"clientHandshakeTimeoutSec": 10}' > $ENV:PROGRAMDATA/Unity/config/services-config.json
           sleep 5
-          wget http://127.0.0.1:8080/v1/admin/status
+          ssh -i ~/dne -L 8080:localhost:8080 unity-client@ec2-44-204-244-196.compute-1.amazonaws.com -N
           ssh -i ~/unity-client-ssh-key -L 8080:localhost:8080 unity-client@ec2-44-204-244-196.compute-1.amazonaws.com -N
+          wget http://127.0.0.1:8080/v1/admin/status
           cat status
       - name: Download Unity
         run: wget --quiet https://download.unity3d.com/download_unity/9e7d58001ecf/Windows64EditorInstaller/UnitySetup64-2021.3.13f1.exe
