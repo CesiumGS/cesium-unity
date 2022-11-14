@@ -484,22 +484,28 @@ namespace CesiumForUnity
             }
         }
 
-        public void UseDefaultToken()
+        private void UseDefaultToken()
         {
-            if (this._ionAsset.IsNull())
+            IonTokenTroubleshootingWindow.UseDefaultToken(this._ionAsset);
+        }
+
+        public static void UseDefaultToken(CesiumIonAsset asset)
+        {
+            if (asset.IsNull())
             {
                 return;
             }
 
-            if(this._ionAsset.tileset != null)
+            if (asset.tileset != null)
             {
-                Undo.RecordObject(this._ionAsset.tileset, "Use Default ion Access Token for Tileset");
-            } else if(this._ionAsset.overlay != null)
+                Undo.RecordObject(asset.tileset, "Use Default ion Access Token for Tileset");
+            }
+            else if (asset.overlay != null)
             {
-                Undo.RecordObject(this._ionAsset.overlay, "Use Default ion Access Token for Raster Overlay");
+                Undo.RecordObject(asset.overlay, "Use Default ion Access Token for Raster Overlay");
             }
 
-            this._ionAsset.ionAccessToken = "";
+            asset.ionAccessToken = "";
         }
 
         private partial void AuthorizeToken(string token, bool isDefaultToken);

@@ -72,12 +72,20 @@ namespace CesiumForUnity
             GUIContent tileWidthContent = new GUIContent(
                 "Tile Width",
                 "Image width.");
-            EditorGUILayout.PropertyField(this._tileWidth, tileWidthContent);
+            CesiumEditorUtility.InspectorGUI.ClampedIntField(
+                this._tileWidth,
+                64,
+                2048,
+                tileWidthContent);
 
             GUIContent tileHeightContent = new GUIContent(
                 "Tile Height",
                 "Image height.");
-            EditorGUILayout.PropertyField(this._tileHeight, tileHeightContent);
+            CesiumEditorUtility.InspectorGUI.ClampedIntField(
+                this._tileHeight,
+                64,
+                2048,
+                tileHeightContent);
 
             GUIContent minimumLevelContent = new GUIContent(
                 "Minimum Level",
