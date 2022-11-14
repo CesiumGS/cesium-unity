@@ -57,24 +57,24 @@ jobs:
       - name: Create Empty Project
         run: |
           $ENV:UNITY="C:\Program Files\Unity\Hub\Editor\2021.3.13f1\Editor\Unity.exe"
-          mkdir c:\cesium
-          start -FilePath $ENV:UNITY -ArgumentList "-batchmode -quit -createProject c:\cesium\CesiumForUnityBuildProject -logFile c:\cesium\unity.log" -wait
-          cat c:\cesium\unity.log
+          mkdir \cesium
+          start -FilePath $ENV:UNITY -ArgumentList "-batchmode -quit -createProject \cesium\CesiumForUnityBuildProject -logFile \cesium\unity.log" -wait
+          cat \cesium\unity.log
       - name: Move cesium-unity Repo Under Project
         run: |
-          mkdir -p c:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
-          mv $ENV:GITHUB_WORKSPACE/* c:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
+          mkdir -p \cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
+          mv $ENV:GITHUB_WORKSPACE/* \cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
       - name: Build Reinterop
         run: |
-          cd c:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
+          cd \cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
           dotnet publish Reinterop~ -o .
       - name: Build Package
         run: |
-          cd c:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
+          cd \cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
           dotnet run --project Build~
       - name: Publish package artifact
         if: ${{ success() }}
         uses: actions/upload-artifact@v3
         with:
           name: Windows Package
-          path: c:\cesium\CesiumForUnityBuildProject\*.tar.gz
+          path: \cesium\CesiumForUnityBuildProject\*.tar.gz
