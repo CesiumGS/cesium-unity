@@ -6,13 +6,9 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
-        # with:
-        #   submodules: recursive
+        with:
+          submodules: recursive
         #   fetch-depth: 0 # so that `git describe` works.
-      - name: Test Moving
-        run: |
-          mkdir -p c:\cesium\foo
-          mv $ENV:GITHUB_WORKSPACE/* c:\cesium\foo
       - name: Install wget
         run: choco install wget --no-progress
       - name: Create SSH tunnel to Unity License Server
@@ -64,15 +60,15 @@ jobs:
           cat c:\cesium\unity.log
       - name: Move cesium-unity Repo Under Project
         run: |
-          cd c:\cesium\CesiumForUnityBuildProject\Packages
-          mv $ENV:GITHUB_WORKSPACE ./com.cesium.unity
+          mkdir -p c:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
+          mv $ENV:GITHUB_WORKSPACE/* c:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
       - name: Build Reinterop
         run: |
-          c:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
+          cd c:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
           dotnet publish Reinterop~ -o .
       - name: Build Package
         run: |
-          c:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
+          cd c:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
           dotnet run --project Build~
       - name: Publish package artifact
         if: ${{ success() }}
