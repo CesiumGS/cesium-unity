@@ -13,7 +13,7 @@ jobs:
         run: choco install wget --no-progress
       - name: Create SSH tunnel to Unity License Server
         run: |
-          $ENV:UNITY_LICENSE_SERVER_SSH_KEY > ~/unity-client-ssh-key
+          $ENV:UNITY_LICENSE_SERVER_SSH_KEY | Set-Content ~/unity-client-ssh-key
           echo "-i ~/unity-client-ssh-key -L 8080:localhost:8080 unity-client@$($ENV:UNITY_LICENSE_SERVER_HOST)"
           start -FilePath ssh -ArgumentList "-i ~/unity-client-ssh-key -L 8080:localhost:8080 unity-client@$($ENV:UNITY_LICENSE_SERVER_HOST)"
           mkdir -p $ENV:PROGRAMDATA/Unity/config
