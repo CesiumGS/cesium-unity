@@ -20,6 +20,10 @@ jobs:
         run: choco install wget --no-progress
       - name: Download Unity
         run: wget --quiet https://download.unity3d.com/download_unity/9e7d58001ecf/Windows64EditorInstaller/UnitySetup64-2021.3.13f1.exe
+      - name: Test License Server
+        run: |
+          wget http://127.0.0.1:8080/v1/admin/status
+          cat status
       - name: Install Unity
         run: start -FilePath ./UnitySetup64-2021.3.13f1.exe -ArgumentList "/S /D=C:\Program Files\Unity\Hub\Editor\2021.3.13f1" -wait
       - name: Delete Unity Installer
