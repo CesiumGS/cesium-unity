@@ -12,6 +12,7 @@ jobs:
       - name: Install wget
         run: choco install wget --no-progress
       - name: Create SSH tunnel to Unity License Server
+        shell: pwsh
         env:
           UNITY_LICENSE_SERVER_SSH_KEY: ${{ secrets.UNITY_LICENSE_SERVER_SSH_KEY }}
         run: |
