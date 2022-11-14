@@ -40,12 +40,12 @@ jobs:
         run: start -FilePath ./UnitySetup64-2021.3.13f1.exe -ArgumentList "/S /D=C:\Program Files\Unity\Hub\Editor\2021.3.13f1" -wait
       - name: Delete Unity Installer
         run: rm ./UnitySetup64-2021.3.13f1.exe
-      # - name: Download Unity Android Support
-      #   run: wget --quiet https://download.unity3d.com/download_unity/9e7d58001ecf/TargetSupportInstaller/UnitySetup-Android-Support-for-Editor-2021.3.13f1.exe
-      # - name: Install Unity Android Support
-      #   run: start -FilePath ./UnitySetup-Android-Support-for-Editor-2021.3.13f1.exe -ArgumentList "/S /D=C:\Program Files\Unity\Hub\Editor\2021.3.13f1" -wait
-      # - name: Delete Unity Android Support Installer
-      #   run: rm ./UnitySetup-Android-Support-for-Editor-2021.3.13f1.exe
+      - name: Download Unity Android Support
+        run: wget --quiet https://download.unity3d.com/download_unity/9e7d58001ecf/TargetSupportInstaller/UnitySetup-Android-Support-for-Editor-2021.3.13f1.exe
+      - name: Install Unity Android Support
+        run: start -FilePath ./UnitySetup-Android-Support-for-Editor-2021.3.13f1.exe -ArgumentList "/S /D=C:\Program Files\Unity\Hub\Editor\2021.3.13f1" -wait
+      - name: Delete Unity Android Support Installer
+        run: rm ./UnitySetup-Android-Support-for-Editor-2021.3.13f1.exe
       - name: Test Connection to Unity License Server Again
         run: |
           wget http://127.0.0.1:12331/v1/admin/status
