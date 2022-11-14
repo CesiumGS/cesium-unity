@@ -12,12 +12,11 @@ jobs:
       - name: Install wget
         run: choco install wget --no-progress
       - name: Create SSH tunnel to Unity License Server
-        shell: pwsh
+        shell: cmd
         env:
           UNITY_LICENSE_SERVER_SSH_KEY: ${{ secrets.UNITY_LICENSE_SERVER_SSH_KEY }}
         run: |
-          $ErrorView = 'NormalView'
-          $ENV:UNITY_LICENSE_SERVER_SSH_KEY | Set-Content ~/unity-client-ssh-key
+          echo %UNITY_LICENSE_SERVER_SSH_KEY% > ~/unity-client-ssh-key
           ls -l ~/unity-client-ssh-key
           cat ~/unity-client-ssh-key
           echo hi > foo.txt
