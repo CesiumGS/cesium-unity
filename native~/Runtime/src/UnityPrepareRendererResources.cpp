@@ -473,7 +473,7 @@ UnityPrepareRendererResources::prepareInLoadThread(
             if (tilesetComponent != nullptr) {
               shouldCreatePhysicsMeshes =
                   tilesetComponent.createPhysicsMeshes();
-              shouldShowTilesInHierarchy = 
+              shouldShowTilesInHierarchy =
                   tilesetComponent.showTilesInHierarchy();
             }
 
@@ -492,7 +492,9 @@ UnityPrepareRendererResources::prepareInLoadThread(
               if (shouldShowTilesInHierarchy) {
                 unityMesh.hideFlags(UnityEngine::HideFlags::HideAndDontSave);
               } else {
-                unityMesh.hideFlags(UnityEngine::HideFlags::HideAndDontSave | UnityEngine::HideFlags::HideInHierarchy);
+                unityMesh.hideFlags(
+                    UnityEngine::HideFlags::HideAndDontSave |
+                    UnityEngine::HideFlags::HideInHierarchy);
               }
 
               meshes.Item(i, unityMesh);
@@ -577,13 +579,15 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
   auto pModelGameObject =
       std::make_unique<UnityEngine::GameObject>(System::String(name));
-  
+
   if (tilesetComponent.showTilesInHierarchy()) {
     pModelGameObject->hideFlags(UnityEngine::HideFlags::DontSave);
   } else {
-    pModelGameObject->hideFlags(UnityEngine::HideFlags::DontSave | UnityEngine::HideFlags::HideInHierarchy);
+    pModelGameObject->hideFlags(
+        UnityEngine::HideFlags::DontSave |
+        UnityEngine::HideFlags::HideInHierarchy);
   }
-  
+
   pModelGameObject->transform().parent(this->_tileset.transform());
   pModelGameObject->SetActive(false);
 
@@ -619,10 +623,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             ->GetComponentInParent<DotNet::CesiumForUnity::CesiumMetadata>();
     if (pMetadataComponent == nullptr) {
       pMetadataComponent =
-          pModelGameObject->transform()
-              .parent()
-              .gameObject()
-              .AddComponent<DotNet::CesiumForUnity::CesiumMetadata>();
+          this->_tileset.AddComponent<DotNet::CesiumForUnity::CesiumMetadata>();
     }
   }
 
@@ -677,7 +678,9 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         if (showTilesInHierarchy) {
           primitiveGameObject.hideFlags(UnityEngine::HideFlags::DontSave);
         } else {
-          primitiveGameObject.hideFlags(UnityEngine::HideFlags::DontSave | UnityEngine::HideFlags::HideInHierarchy);
+          primitiveGameObject.hideFlags(
+              UnityEngine::HideFlags::DontSave |
+              UnityEngine::HideFlags::HideInHierarchy);
         }
 
         primitiveGameObject.transform().parent(pModelGameObject->transform());

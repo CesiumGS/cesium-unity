@@ -36,6 +36,7 @@ namespace CesiumForUnity
         private SerializedProperty _lodTransitionLength;
         private SerializedProperty _generateSmoothNormals;
 
+        private SerializedProperty _showTilesInHierarchy;
         private SerializedProperty _suspendUpdate;
         private SerializedProperty _showTilesInHierarchy;
         private SerializedProperty _updateInEditor;
@@ -82,6 +83,8 @@ namespace CesiumForUnity
             this._generateSmoothNormals =
                 this.serializedObject.FindProperty("_generateSmoothNormals");
 
+            this._showTilesInHierarchy =
+                this.serializedObject.FindProperty("_showTilesInHierarchy");
             this._suspendUpdate = this.serializedObject.FindProperty("_suspendUpdate");
             this._showTilesInHierarchy = this.serializedObject.FindProperty("_showTilesInHierarchy");
             this._updateInEditor = this.serializedObject.FindProperty("_updateInEditor");
@@ -394,6 +397,11 @@ namespace CesiumForUnity
         private void DrawDebugProperties()
         {
             GUILayout.Label("Debug", EditorStyles.boldLabel);
+
+            GUIContent showTilesInHierarchyContent = new GUIContent(
+                "Show Tiles In Hierarchy",
+                "Whether to show tiles as individual game objects in the hierarchy window.");
+            EditorGUILayout.PropertyField(this._showTilesInHierarchy, showTilesInHierarchyContent);
 
             GUIContent suspendUpdateContent = new GUIContent(
                 "Suspend Update",

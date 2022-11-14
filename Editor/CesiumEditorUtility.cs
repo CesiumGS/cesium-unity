@@ -1,5 +1,5 @@
-using UnityEngine;
 using UnityEditor;
+using UnityEngine;
 
 namespace CesiumForUnity
 {
@@ -8,10 +8,25 @@ namespace CesiumForUnity
     {
         static CesiumEditorUtility()
         {
+            EditorApplication.update += CheckProjectFilesForTextMeshPro;
+
             Cesium3DTileset.OnCesium3DTilesetLoadFailure +=
                 HandleCesium3DTilesetLoadFailure;
             CesiumRasterOverlay.OnCesiumRasterOverlayLoadFailure +=
                 HandleCesiumRasterOverlayLoadFailure;
+        }
+
+        static void CheckProjectFilesForTextMeshPro()
+        {
+            Object tmpSettings = Resources.Load("TMP Settings");
+            if (tmpSettings != null)
+            {
+                return;
+            }
+
+            TextMeshProPromptWindow.ShowWindow();
+
+            EditorApplication.update -= CheckProjectFilesForTextMeshPro;
         }
 
         static void
@@ -143,19 +158,16 @@ namespace CesiumForUnity
             AddBaseOverlayToTileset(Cesium3DTileset tileset, long assetID)
         {
             GameObject gameObject = tileset.gameObject;
-            CesiumIonRasterOverlay overlay = gameObject.GetComponent<CesiumIonRasterOverlay>();
+            CesiumRasterOverlay overlay = gameObject.GetComponent<CesiumRasterOverlay>();
             if (overlay != null)
             {
-                Undo.RecordObject(overlay, "Update Base Overlay of Tileset");
-            }
-            else
-            {
-                overlay = Undo.AddComponent<CesiumIonRasterOverlay>(gameObject);
+                Undo.DestroyObjectImmediate(overlay);
             }
 
-            overlay.ionAssetID = assetID;
+            CesiumIonRasterOverlay ionOverlay = Undo.AddComponent<CesiumIonRasterOverlay>(gameObject);
+            ionOverlay.ionAssetID = assetID;
 
-            return overlay;
+            return ionOverlay;
         }
     }
 }
