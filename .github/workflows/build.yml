@@ -36,7 +36,7 @@ jobs:
           cat status
       - name: Install Unity Hub
         run: |
-          wget https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.exe
+          wget --quiet https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.exe
           start -FilePath ./UnityHubSetup.exe -ArgumentList "/S" -Wait
           rm ./UnityHubSetup.exe
       - name: Install Unity 2021.3.13f1
@@ -66,11 +66,12 @@ jobs:
       - name: Create Empty Project
         run: |
           $ENV:UNITY="C:\Program Files\Unity\Hub\Editor\2021.3.13f1\Editor\Unity.exe"
-          mkdir \cesium
-          cd \cesium
-          $ENV:CESIUM_DIR=$PWD
-          start -FilePath $ENV:UNITY -ArgumentList "-batchmode -quit -createProject $ENV:CESIUM_DIR\CesiumForUnityBuildProject -logFile $ENV:CESIUM_DIR\unity.log" -wait
-          cat \cesium\unity.log
+          dir $ENV:UNITY
+          # mkdir \cesium
+          # cd \cesium
+          # $ENV:CESIUM_DIR=$PWD
+          # start -FilePath $ENV:UNITY -ArgumentList "-batchmode -quit -createProject $ENV:CESIUM_DIR\CesiumForUnityBuildProject -logFile $ENV:CESIUM_DIR\unity.log" -wait
+          # cat \cesium\unity.log
       - name: Move cesium-unity Repo Under Project
         run: |
           mkdir -p \cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
