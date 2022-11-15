@@ -90,7 +90,8 @@ namespace Build
                     "-B",
                     "native~/build",
                     "-S",
-                    "native~"
+                    "native~",
+                    "-DCMAKE_BUILD_TYPE=RelWithDebInfo"
                 });
                 Utility.Run("cmake", new[]
                 {
@@ -99,6 +100,8 @@ namespace Build
                     "--target",
                     "install",
                     "-j14"
+                    "--config",
+                    "RelWithDebInfo"
                 });
 
                 Console.WriteLine("**** Compiling for Windows Player");

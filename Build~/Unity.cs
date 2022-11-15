@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace Build
 {
@@ -81,7 +82,21 @@ namespace Build
             }
             finally
             {
-                File.Delete(log);
+                // Unity seems to keep the log file open longer than expected sometimes, preventing
+                // us from deleting it.
+                // Don't let this fail the build, but do retry a few times.
+                for (int i = 0; i < 5; ++i)
+                {
+                    try
+                    {
+                        File.Delete(log);
+                        break;
+                    }
+                    catch (IOException)
+                    {
+                    }
+                    Thread.Sleep(1000);
+                }
             }
         }
 
