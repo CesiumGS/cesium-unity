@@ -59,6 +59,7 @@ namespace Build
                 unity.Run(new[]
                 {
                     "-batchmode",
+                    "-nographics",
                     "-projectPath",
                     Utility.ProjectRoot,
                     "-executeMethod",
@@ -104,6 +105,7 @@ namespace Build
                 unity.Run(new[]
                 {
                     "-batchmode",
+                    "-nographics",
                     "-projectPath",
                     Utility.ProjectRoot,
                     "-buildTarget",
@@ -123,6 +125,7 @@ namespace Build
                 unity.Run(new[]
                 {
                     "-batchmode",
+                    "-nographics",
                     "-projectPath",
                     Utility.ProjectRoot,
                     "-buildTarget",
@@ -141,6 +144,7 @@ namespace Build
                 unity.Run(new[]
                 {
                     "-batchmode",
+                    "-nographics",
                     "-projectPath",
                     Utility.ProjectRoot,
                     "-executeMethod",
