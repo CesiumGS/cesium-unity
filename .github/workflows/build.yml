@@ -84,9 +84,10 @@ jobs:
         run: |
           cd \cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
           dotnet run --project Build~
+          dir D:\cesium\CesiumForUnityBuildProject
       - name: Publish package artifact
         if: ${{ success() }}
         uses: actions/upload-artifact@v3
         with:
           name: Windows Package
-          path: \cesium\CesiumForUnityBuildProject\*.tar.gz
+          path: D:\cesium\CesiumForUnityBuildProject\*.tar.gz
