@@ -57,6 +57,7 @@
 
 #include <algorithm>
 #include <unordered_map>
+#include <variant>
 
 using namespace Cesium3DTilesSelection;
 using namespace CesiumForUnityNative;
@@ -104,13 +105,104 @@ struct MeshDataResult {
   std::vector<CesiumPrimitiveInfo> primitiveInfos;
 };
 
-uint32_t packColorChannel(float c) {
-  return c >= 1.0f ? 255 : static_cast<uint32_t>(std::floor(256.0f * c));
-}
+struct CopyVertexColors {
+  uint8_t* pWritePos;
+  size_t stride;
+  size_t vertexCount;
 
-uint32_t packColor(float r, float g, float b, float a) {
-  return (packColorChannel(r) << 24) | (packColorChannel(g) << 16) |
-         (packColorChannel(b) << 8) | packColorChannel(a);
+  struct Color32 {
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+    uint8_t a;
+  };
+
+  bool operator()(AccessorView<nullptr_t>&& invalidView) { return false; }
+
+  template <typename TColorView> bool operator()(TColorView&& colorView) {
+    if (colorView.status() != AccessorViewStatus::Valid) {
+      return false;
+    }
+
+    bool success = true;
+    for (size_t i = 0; success && i < vertexCount; ++i) {
+      if (i >= colorView.size()) {
+        success = false;
+      } else {
+        Color32& packedColor = *reinterpret_cast<Color32*>(pWritePos);
+        success = CopyVertexColors::convertColor(colorView[i], packedColor);
+        pWritePos += stride;
+      }
+    }
+
+    return success;
+  }
+  
+  bool packColorChannel(uint8_t c, uint8_t& result) {
+    result = c;
+    return true;
+  }
+
+  bool packColorChannel(uint16_t c, uint8_t& result) {
+    result = static_cast<uint8_t>(c >> 8);
+    return true;
+  }
+
+  bool packColorChannel(float c, uint8_t& result) {
+    result = static_cast<uint8_t>(static_cast<uint32_t>(255.0f * c) & 255);
+    return true;
+  }
+
+  template <typename T>
+  bool packColorChannel(T c, uint8_t& result) {
+    // Invalid accessor type.
+    return false;
+  }
+
+  template <typename TChannel>
+  bool convertColor(const AccessorTypes::VEC3<TChannel>& color, Color32& result) {
+    result.a = 255;
+    return packColorChannel(color.value[0], result.r) && 
+           packColorChannel(color.value[1], result.g) &&
+           packColorChannel(color.value[2], result.b);
+  }
+
+  template <typename TChannel>
+  bool convertColor(const AccessorTypes::VEC4<TChannel>& color, Color32& result) {
+    return packColorChannel(color.value[0], result.r) && 
+           packColorChannel(color.value[1], result.g) &&
+           packColorChannel(color.value[2], result.b) &&
+           packColorChannel(color.value[3], result.a);
+  }
+
+  template <typename T>
+  bool convertColor(T color, Color32& result) {
+    // Not an accessor.
+    return false;
+  }
+};
+
+bool validateVertexColors(const Model& model, uint32_t accessorId, size_t vertexCount) {
+  if (accessorId >= model.accessors.size()) {
+    return false;
+  }
+
+  const Accessor& colorAccessor = model.accessors[accessorId];
+  if (colorAccessor.type != Accessor::Type::VEC3 && colorAccessor.type != Accessor::Type::VEC4) {
+    return false;
+  }
+
+  if (colorAccessor.componentType != Accessor::ComponentType::UNSIGNED_BYTE &&
+      colorAccessor.componentType != Accessor::ComponentType::UNSIGNED_SHORT &&
+      colorAccessor.componentType != Accessor::ComponentType::FLOAT) {
+    return false;
+  }   
+
+  if (colorAccessor.count < vertexCount) {
+    return false;
+  }  
+
+  return true;
 }
 
 void populateMeshDataArray(
@@ -199,26 +291,11 @@ void populateMeshDataArray(
         }
 
         // Add the COLOR_0 attribute, if it exists.
-        // It may originally be a vec3 or vec4 attribute, but we
-        // will pack it into a Color32 in both cases.
         auto colorAccessorIt = primitive.attributes.find("COLOR_0");
-        AccessorView<UnityEngine::Vector3> colorViewVec3 =
-            colorAccessorIt != primitive.attributes.end()
-                ? AccessorView<UnityEngine::Vector3>(
-                      gltf,
-                      normalAccessorIt->second)
-                : AccessorView<UnityEngine::Vector3>();
-        AccessorView<UnityEngine::Vector4> colorViewVec4 =
-            colorAccessorIt != primitive.attributes.end()
-                ? AccessorView<UnityEngine::Vector4>(
-                      gltf,
-                      normalAccessorIt->second)
-                : AccessorView<UnityEngine::Vector4>();
-
-        if ((colorViewVec3.status() == AccessorViewStatus::Valid &&
-             colorViewVec3.size() >= positionView.size()) ||
-            (colorViewVec4.status() == AccessorViewStatus::Valid &&
-             colorViewVec4.size() >= positionView.size())) {
+        bool hasVertexColors = 
+            colorAccessorIt != primitive.attributes.end() && 
+            validateVertexColors(gltf, colorAccessorIt->second, positionView.size());
+        if (hasVertexColors) {
           assert(numberOfAttributes < MAX_ATTRIBUTES);
 
           // Unity expects the vertex colors to come as 4 normalized uint8s.
@@ -317,9 +394,10 @@ void populateMeshDataArray(
         // TODO: double check this is safe!!
         NativeArray1<uint8_t> nativeVertexBuffer =
             meshData.GetVertexData<uint8_t>(streamIndex);
-        uint8_t* pWritePos = static_cast<uint8_t*>(
+        uint8_t* pBufferStart = static_cast<uint8_t*>(
             NativeArrayUnsafeUtility::GetUnsafeBufferPointerWithoutChecks(
                 nativeVertexBuffer));
+        uint8_t* pWritePos = pBufferStart;
 
         // Since the vertex buffer is dynamically interleaved, we don't have a
         // convenient struct to represent the vertex data.
@@ -337,17 +415,8 @@ void populateMeshDataArray(
             pWritePos += sizeof(Vector3);
           }
 
-          // Unity assumes Color32 is packed in rgba order, with 1 byte for each
-          // channel.
-          if (colorViewVec3.status() == AccessorViewStatus::Valid) {
-            const Vector3& color = colorViewVec3[i];
-            *reinterpret_cast<uint32_t*>(pWritePos) =
-                packColor(color.x, color.y, color.z, 1.0f);
-            pWritePos += sizeof(uint32_t);
-          } else if (colorViewVec4.status() == AccessorViewStatus::Valid) {
-            const Vector4& color = colorViewVec4[i];
-            *reinterpret_cast<uint32_t*>(pWritePos) =
-                packColor(color.x, color.y, color.z, color.w);
+          // Skip the slot allocated for vertex colors, we will fill them in bulk later.
+          if (hasVertexColors) {
             pWritePos += sizeof(uint32_t);
           }
 
@@ -359,6 +428,30 @@ void populateMeshDataArray(
           }
         }
 
+        // Fill in vertex colors separately, if they exist.
+        if (hasVertexColors) {
+          // Color comes after position and normal.
+          size_t colorByteOffset = sizeof(Vector3);
+          if (normalView.status() == AccessorViewStatus::Valid) {
+            colorByteOffset += sizeof(Vector3);
+          }
+
+          // Stride includes position, normal, ... 
+          size_t stride = colorByteOffset;
+          // color, ...
+          stride += sizeof(uint32_t);
+          // and tex coords.
+          stride += numTexCoords * sizeof(Vector2);
+          
+          createAccessorView(
+              gltf, 
+              colorAccessorIt->second, 
+              CopyVertexColors{
+                  pBufferStart + colorByteOffset, 
+                  stride, 
+                  static_cast<size_t>(positionView.size())});
+        }
+        
         // TODO: previously when there were more normals / texcoords then
         // positions, we just filled the vertex data with 0s. Now we don't add
         // them at all, and instead consider those attributes as "invalid".
