@@ -9,17 +9,21 @@ jobs:
         with:
           submodules: recursive
         #   fetch-depth: 0 # so that `git describe` works.
-      - name: Enable Long Paths
-        run: New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
       - name: Install wget
         run: choco install wget --no-progress
+      - name: Install Unity Hub
+        run: |
+          wget --quiet https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.exe
+          start -FilePath ./UnityHubSetup.exe -ArgumentList "/S" -Wait
+          rm ./UnityHubSetup.exe
+      - name: Install Unity 2021.3.13f1
+        run: start -FilePath "C:\Program Files\Unity Hub\Unity Hub.exe" -ArgumentList "-- --headless install --version 2021.3.13f1 --changeset 9e7d58001ecf" -Wait
+      - name: Install Unity Android Support
+        run: start -FilePath "C:\Program Files\Unity Hub\Unity Hub.exe" -ArgumentList "-- --headless install-modules --version 2021.3.13f1 --changeset 9e7d58001ecf --module android android-sdk-ndk-tools" -Wait
       - name: Create SSH tunnel to Unity License Server
         env:
           UNITY_LICENSE_SERVER_SSH_KEY: ${{ secrets.UNITY_LICENSE_SERVER_SSH_KEY }}
         run: |
-          echo GITHUB_WORKSPACE
-          echo $ENV:GITHUB_WORKSPACE
-          ls $ENV:GITHUB_WORKSPACE
           $ENV:UNITY_LICENSE_SERVER_SSH_KEY | Set-Content ~/unity-client-ssh-key
           # Without StrictHostKeyChecking, OpenSSH will sit forever waiting for local input to confirm the server key is ok.
           # We don't really care if the server is authentic, because we're not sending anything sensitive to it.
@@ -34,45 +38,12 @@ jobs:
         run: |
           wget http://127.0.0.1:12331/v1/admin/status
           cat status
-      - name: Install Unity Hub
-        run: |
-          wget --quiet https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.exe
-          start -FilePath ./UnityHubSetup.exe -ArgumentList "/S" -Wait
-          rm ./UnityHubSetup.exe
-      - name: Install Unity 2021.3.13f1
-        run: start -FilePath "C:\Program Files\Unity Hub\Unity Hub.exe" -ArgumentList "-- --headless install --version 2021.3.13f1 --changeset 9e7d58001ecf" -Wait
-      - name: Install Unity Android Support
-        run: start -FilePath "C:\Program Files\Unity Hub\Unity Hub.exe" -ArgumentList "-- --headless install-modules --version 2021.3.13f1 --changeset 9e7d58001ecf --module android android-sdk-ndk-tools" -Wait
-      # - name: Download Unity
-      #   run: wget --quiet https://download.unity3d.com/download_unity/9e7d58001ecf/Windows64EditorInstaller/UnitySetup64-2021.3.13f1.exe
-      # - name: Install Unity
-      #   run: start -FilePath ./UnitySetup64-2021.3.13f1.exe -ArgumentList "/S /D=C:\Program Files\Unity\Hub\Editor\2021.3.13f1" -wait
-      # - name: Delete Unity Installer
-      #   run: rm ./UnitySetup64-2021.3.13f1.exe
-      # - name: Download Unity Android Support
-      #   run: wget --quiet https://download.unity3d.com/download_unity/9e7d58001ecf/TargetSupportInstaller/UnitySetup-Android-Support-for-Editor-2021.3.13f1.exe
-      # - name: Install Unity Android Support
-      #   run: start -FilePath ./UnitySetup-Android-Support-for-Editor-2021.3.13f1.exe -ArgumentList "/S /D=C:\Program Files\Unity\Hub\Editor\2021.3.13f1" -wait
-      # - name: Delete Unity Android Support Installer
-      #   run: rm ./UnitySetup-Android-Support-for-Editor-2021.3.13f1.exe
-      - name: Test Connection to Unity License Server Again
-        run: |
-          wget http://127.0.0.1:12331/v1/admin/status
-          cat status
+          rm status
       - name: Configure Unity to Use the License Server
         run: |
           mkdir -p $ENV:PROGRAMDATA/Unity/config
           '{"licensingServiceBaseUrl": "http://localhost:12331","enableEntitlementLicensing": true,"clientConnectTimeoutSec": 60,"clientHandshakeTimeoutSec": 120}' > $ENV:PROGRAMDATA/Unity/config/services-config.json
-      - name: Create Empty Project
-        run: |
-          $ENV:UNITY="C:\Program Files\Unity\Hub\Editor\2021.3.13f1\Editor\Unity.exe"
-          dir $ENV:UNITY
-          # mkdir \cesium
-          # cd \cesium
-          # $ENV:CESIUM_DIR=$PWD
-          # start -FilePath $ENV:UNITY -ArgumentList "-batchmode -quit -createProject $ENV:CESIUM_DIR\CesiumForUnityBuildProject -logFile $ENV:CESIUM_DIR\unity.log" -wait
-          # cat \cesium\unity.log
-      - name: Move cesium-unity Repo Under Project
+      - name: Move cesium-unity Repo Under Empty Project
         run: |
           mkdir -p \cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
           mv $ENV:GITHUB_WORKSPACE/* \cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
@@ -90,4 +61,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: Windows Package
-          path: D:\cesium\CesiumForUnityBuildProject\*.tar.gz
+          path: D:\cesium\CesiumForUnityBuildProject\*.tgz
