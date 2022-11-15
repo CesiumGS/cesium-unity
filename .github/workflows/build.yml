@@ -53,7 +53,7 @@ jobs:
       - name: Configure Unity to Use the License Server
         run: |
           mkdir -p $ENV:PROGRAMDATA/Unity/config
-          '{"licensingServiceBaseUrl": "http://localhost:12331","enableEntitlementLicensing": true,"clientConnectTimeoutSec": 5,"clientHandshakeTimeoutSec": 10}' > $ENV:PROGRAMDATA/Unity/config/services-config.json
+          '{"licensingServiceBaseUrl": "http://localhost:12331","enableEntitlementLicensing": true,"clientConnectTimeoutSec": 60,"clientHandshakeTimeoutSec": 120}' > $ENV:PROGRAMDATA/Unity/config/services-config.json
       - name: Create Empty Project
         run: |
           $ENV:UNITY="C:\Program Files\Unity\Hub\Editor\2021.3.13f1\Editor\Unity.exe"
