@@ -8,9 +8,7 @@ using System.IO;
 using System.Text;
 using System;
 using System.Collections.Generic;
-#if UNITY_ANDROID
 using UnityEditor.Android;
-#endif
 
 namespace CesiumForUnity
 {
@@ -352,10 +350,8 @@ namespace CesiumForUnity
             string? ndkRoot = environment.ContainsKey("ANDROID_NDK_ROOT") ? environment["ANDROID_NDK_ROOT"] : null;
             if (ndkRoot == null)
             {
-#if UNITY_ANDROID
                 // We're building for Android but don't have a known NDK root. Try asking Unity for it.
                 ndkRoot = AndroidExternalToolsSettings.ndkRootPath;
-#endif
             }
 
             // On Windows, use the make program included in the NDK. Because Visual Studio (which is usually
