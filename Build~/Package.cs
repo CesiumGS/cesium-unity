@@ -99,7 +99,7 @@ namespace Build
                     "native~/build",
                     "--target",
                     "install",
-                    "-j14"
+                    "-j14",
                     "--config",
                     "RelWithDebInfo"
                 });
