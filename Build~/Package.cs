@@ -99,7 +99,7 @@ namespace Build
                     "native~/build",
                     "--target",
                     "install",
-                    "-j14",
+                    "-j" + (Environment.ProcessorCount + 1),
                     "--config",
                     "RelWithDebInfo"
                 });
