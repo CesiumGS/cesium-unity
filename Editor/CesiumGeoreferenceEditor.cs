@@ -35,12 +35,22 @@ namespace CesiumForUnity
 
             this._originAuthority =
                 this.serializedObject.FindProperty("_originAuthority");
+
             this._latitude = this.serializedObject.FindProperty("_latitude");
             this._longitude = this.serializedObject.FindProperty("_longitude");
             this._height = this.serializedObject.FindProperty("_height");
+
             this._ecefX = this.serializedObject.FindProperty("_ecefX");
             this._ecefY = this.serializedObject.FindProperty("_ecefY");
             this._ecefZ = this.serializedObject.FindProperty("_ecefZ");
+            
+            // Hide the Move, Rotate, and Resize tools in the SceneView.
+            Tools.hidden = true;
+        }
+
+        private void OnDisable()
+        {
+            Tools.hidden = false;
         }
 
         public override void OnInspectorGUI()

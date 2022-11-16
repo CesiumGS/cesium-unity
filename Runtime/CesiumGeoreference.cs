@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Reinterop;
-using UnityEditor;
 using UnityEngine;
 
 namespace CesiumForUnity
@@ -124,6 +123,14 @@ namespace CesiumForUnity
 
         [Tooltip("An event raised when the georeference changes.")]
         public event Action? changed;
+
+        private void OnValidate()
+        {
+            this.transform.position = Vector3.zero;
+            this.transform.rotation = Quaternion.identity;
+            this.transform.localScale = new Vector3(1, 1, 1);
+            this.transform.hideFlags = HideFlags.NotEditable | HideFlags.HideInInspector;
+        }
 
         public void SetOriginEarthCenteredEarthFixed(double x, double y, double z)
         {
