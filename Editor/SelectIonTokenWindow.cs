@@ -218,6 +218,7 @@ namespace CesiumForUnity
         public void RefreshExistingTokenList()
         {
             this._existingTokenArray = this._existingTokenList.ToArray();
+            this.Repaint();
         }
     }
 }

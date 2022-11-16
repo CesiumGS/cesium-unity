@@ -92,7 +92,7 @@ std::vector<ViewState> CameraManager::getAllCameras(const GameObject& context) {
   SceneView lastActiveEditorView = SceneView::lastActiveSceneView();
   if (lastActiveEditorView != nullptr) {
     Camera editorCamera = lastActiveEditorView.camera();
-    if (camera != nullptr) {
+    if (editorCamera != nullptr) {
       result.emplace_back(
           unityCameraToViewState(pCoordinateSystem, editorCamera));
     }

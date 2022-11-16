@@ -35,7 +35,6 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Range(64, 2048)]
         private int _tileWidth = 256;
 
         public int tileWidth
@@ -49,7 +48,6 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Range(64, 2048)]
         private int _tileHeight = 256;
 
         public int tileHeight
