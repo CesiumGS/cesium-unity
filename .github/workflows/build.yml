@@ -75,10 +75,7 @@ jobs:
           wget --quiet https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.dmg
           mkdir UnityHubSetup
           hdiutil attach UnityHubSetup.dmg -mountpoint ./UnityHubSetup
-          cd UnityHubSetup
-          ls
-          ls Applications
-          sudo installer -pkg UnityHubSetup.app -target "/"
-          cd ..
+          sudo cp -R "./UnityHubSetup/Unity Hub.app" /Applications
           hdiutil detach ./UnityHubSetup
           rm ./UnityHubSetup.dmg
+          /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub -- --headless help
