@@ -62,3 +62,21 @@ jobs:
         with:
           name: Windows Package
           path: D:\cesium\CesiumForUnityBuildProject\*.tgz
+  MacOS:
+    runs-on: macos-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+        #   fetch-depth: 0 # so that `git describe` works.
+      - name: Install Unity Hub
+        run: |
+          wget --quiet https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.dmg
+          hdiutil attach UnityHubSetup.dmg
+          pushd /Volumes/UnityHubSetup/
+          ls
+          sudo installer -pkg UnityHubSetup.pkg -target "/"
+          hdiutil detach /Volumes/UnityHubSetup/
+          popd
+          rm ./UnityHubSetup.dmg
