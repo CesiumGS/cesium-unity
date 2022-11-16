@@ -104,41 +104,67 @@ namespace Build
                     "RelWithDebInfo"
                 });
 
-                Console.WriteLine("**** Compiling for Windows Player");
-                unity.Run(new[]
+                if (OperatingSystem.IsWindows())
                 {
-                    "-batchmode",
-                    "-nographics",
-                    "-projectPath",
-                    Utility.ProjectRoot,
-                    "-buildTarget",
-                    "Win64",
-                    "-executeMethod",
-                    "CesiumForUnity.BuildCesiumForUnity.CompileForWindowsAndExit"
-                });
+                    Console.WriteLine("**** Compiling for Windows Player");
+                    unity.Run(new[]
+                    {
+                        "-batchmode",
+                        "-nographics",
+                        "-projectPath",
+                        Utility.ProjectRoot,
+                        "-buildTarget",
+                        "Win64",
+                        "-executeMethod",
+                        "CesiumForUnity.BuildCesiumForUnity.CompileForWindowsAndExit"
+                    });
 
-                Console.WriteLine("**** Adding generated files (for the Windows Player) to the package");
-                AddGeneratedFiles("!UNITY_EDITOR && UNITY_STANDALONE_WIN", generatedRuntimePath, Path.Combine(outputPackagePath, "Runtime", "generated"));
+                    Console.WriteLine("**** Adding generated files (for the Windows Player) to the package");
+                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_STANDALONE_WIN", generatedRuntimePath, Path.Combine(outputPackagePath, "Runtime", "generated"));
 
-                // Clean the generated code directory.
-                Directory.Delete(generatedRuntimePath, true);
-                Directory.CreateDirectory(generatedRuntimePath);
+                    // Clean the generated code directory.
+                    Directory.Delete(generatedRuntimePath, true);
+                    Directory.CreateDirectory(generatedRuntimePath);
 
-                Console.WriteLine("**** Compiling for Android Player");
-                unity.Run(new[]
+                    // TODO: we're currently only building for Android on Windows. This should be an option, or a separate build command.
+                    Console.WriteLine("**** Compiling for Android Player");
+                    unity.Run(new[]
+                    {
+                        "-batchmode",
+                        "-nographics",
+                        "-projectPath",
+                        Utility.ProjectRoot,
+                        "-buildTarget",
+                        "Android",
+                        "-executeMethod",
+                        "CesiumForUnity.BuildCesiumForUnity.CompileForAndroidAndExit"
+                    });
+
+                    Console.WriteLine("**** Adding generated files (for the Android Player) to the package");
+                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_ANDROID", generatedRuntimePath, Path.Combine(outputPackagePath, "Runtime", "generated"));
+                }
+                else if (OperatingSystem.IsMacOS())
                 {
-                    "-batchmode",
-                    "-nographics",
-                    "-projectPath",
-                    Utility.ProjectRoot,
-                    "-buildTarget",
-                    "Android",
-                    "-executeMethod",
-                    "CesiumForUnity.BuildCesiumForUnity.CompileForAndroidAndExit"
-                });
+                    Console.WriteLine("**** Compiling for macOS Player");
+                    unity.Run(new[]
+                    {
+                        "-batchmode",
+                        "-nographics",
+                        "-projectPath",
+                        Utility.ProjectRoot,
+                        "-buildTarget",
+                        "OSXUniversal",
+                        "-executeMethod",
+                        "CesiumForUnity.BuildCesiumForUnity.CompileForMacAndExit"
+                    });
 
-                Console.WriteLine("**** Adding generated files (for the Android Player) to the package");
-                AddGeneratedFiles("!UNITY_EDITOR && UNITY_ANDROID", generatedRuntimePath, Path.Combine(outputPackagePath, "Runtime", "generated"));
+                    Console.WriteLine("**** Adding generated files (for the Windows Player) to the package");
+                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_STANDALONE_WIN", generatedRuntimePath, Path.Combine(outputPackagePath, "Runtime", "generated"));
+
+                    // Clean the generated code directory.
+                    Directory.Delete(generatedRuntimePath, true);
+                    Directory.CreateDirectory(generatedRuntimePath);
+                }
 
                 Console.WriteLine("**** Copying the rest of the package");
                 CopyPackageContents(Utility.PackageRoot, outputPackagePath);

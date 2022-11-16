@@ -65,17 +65,30 @@ jobs:
   MacOS:
     runs-on: macos-latest
     steps:
-      # - name: Check out repository code
-      #   uses: actions/checkout@v3
-      #   with:
-      #     submodules: recursive
-      #   #   fetch-depth: 0 # so that `git describe` works.
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+        #   fetch-depth: 0 # so that `git describe` works.
+      - name: Install Unity Hub
+        run: |
+          wget --quiet https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.dmg
+          mkdir UnityHubSetup
+          hdiutil attach UnityHubSetup.dmg -mountpoint ./UnityHubSetup
+          sudo cp -R "./UnityHubSetup/Unity Hub.app" /Applications
+          hdiutil detach ./UnityHubSetup
+          rm ./UnityHubSetup.dmg
+      - name: Install Unity 2021.3.13f1
+        run: /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub -- --headless install --version 2021.3.13f1 --changeset 9e7d58001ecf
+      - name: Configure Unity to Use the License Server
+        run: |
+          sudo mkdir -p /Library/Application Support/Unity/config/
+          sudo echo '{"licensingServiceBaseUrl": "http://localhost:12331","enableEntitlementLicensing": true,"clientConnectTimeoutSec": 60,"clientHandshakeTimeoutSec": 120}' > /Library/Application Support/Unity/config/services-config.json
       - name: Create SSH tunnel to Unity License Server
         env:
           UNITY_LICENSE_SERVER_SSH_KEY: ${{ secrets.UNITY_LICENSE_SERVER_SSH_KEY }}
         run: |
           echo "$UNITY_LICENSE_SERVER_SSH_KEY" > ~/unity-client-ssh-key
-          cat ~/unity-client-ssh-key
           chmod 600 ~/unity-client-ssh-key
           # Without StrictHostKeyChecking, OpenSSH will sit forever waiting for local input to confirm the server key is ok.
           # We don't really care if the server is authentic, because we're not sending anything sensitive to it.
@@ -91,13 +104,22 @@ jobs:
           wget http://127.0.0.1:12331/v1/admin/status
           cat status
           rm status
-      - name: Install Unity Hub
+      - name: Move cesium-unity Repo Under Empty Project
         run: |
-          wget --quiet https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.dmg
-          mkdir UnityHubSetup
-          hdiutil attach UnityHubSetup.dmg -mountpoint ./UnityHubSetup
-          sudo cp -R "./UnityHubSetup/Unity Hub.app" /Applications
-          hdiutil detach ./UnityHubSetup
-          rm ./UnityHubSetup.dmg
-      - name: Install Unity 2021.3.13f1
-        run: /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub -- --headless install --version 2021.3.13f1 --changeset 9e7d58001ecf
+          mkdir -p ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
+          mv $GITHUB_WORKSPACE/* ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
+      - name: Build Reinterop
+        run: |
+          cd ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
+          dotnet publish Reinterop~ -o .
+      - name: Build Package
+        run: |
+          cd ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
+          dotnet run --project Build~
+          dir ~/cesium/CesiumForUnityBuildProject
+      - name: Publish package artifact
+        if: ${{ success() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: macOS Package
+          path: ~/cesium/CesiumForUnityBuildProject/*.tgz
