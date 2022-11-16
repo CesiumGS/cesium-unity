@@ -235,8 +235,8 @@ void populateMeshDataArray(
         using namespace DotNet::Unity::Collections;
         using namespace DotNet::Unity::Collections::LowLevel::Unsafe;
 
-        // TODO: might have to change this limit
-        const int MAX_ATTRIBUTES = 8;
+        // Max attribute count supported by Unity, see VertexAttribute.
+        const int MAX_ATTRIBUTES = 14;
         VertexAttributeDescriptor descriptor[MAX_ATTRIBUTES];
 
         // Interleave all attributes into single stream.
@@ -306,6 +306,7 @@ void populateMeshDataArray(
           ++numberOfAttributes;
         }
 
+        // Max number of texture coordinates supported by Unity, see VertexAttribute.
         constexpr int MAX_TEX_COORDS = 8;
         int numTexCoords = 0;
         AccessorView<UnityEngine::Vector2> texCoordViews[MAX_TEX_COORDS];
@@ -391,7 +392,6 @@ void populateMeshDataArray(
 
         meshData.SetVertexBufferParams(positionView.size(), attributes);
 
-        // TODO: double check this is safe!!
         NativeArray1<uint8_t> nativeVertexBuffer =
             meshData.GetVertexData<uint8_t>(streamIndex);
         uint8_t* pBufferStart = static_cast<uint8_t*>(
@@ -451,11 +451,6 @@ void populateMeshDataArray(
                   stride, 
                   static_cast<size_t>(positionView.size())});
         }
-        
-        // TODO: previously when there were more normals / texcoords then
-        // positions, we just filled the vertex data with 0s. Now we don't add
-        // them at all, and instead consider those attributes as "invalid".
-        // Which is the actual desired behavior?
 
         int32_t indexCount = 0;
 
@@ -545,12 +540,10 @@ UnityPrepareRendererResources::prepareInLoadThread(
       .thenInWorkerThread(
           [tileLoadResult = std::move(tileLoadResult)](
               UnityEngine::MeshDataArray&& meshDataArray) mutable {
-            // Free the MeshDataArray if something goes wrong.
-            ScopeGuard sg([&meshDataArray]() { meshDataArray.Dispose(); });
-
-            // TODO: This messes up the scope-guard release mechanism to release
-            // the meshDataArray on exceptions, fix this.
             MeshDataResult meshDataResult{std::move(meshDataArray), {}};
+            // Free the MeshDataArray if something goes wrong.
+            ScopeGuard sg([&meshDataResult]() { meshDataResult.meshDataArray.Dispose(); });
+
             populateMeshDataArray(meshDataResult, tileLoadResult);
 
             // We're returning the MeshDataArray, so don't free it.
