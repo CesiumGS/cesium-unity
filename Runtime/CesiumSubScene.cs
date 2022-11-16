@@ -128,6 +128,14 @@ namespace CesiumForUnity
             get => this._unityWorldPosition;
         }
 
+        private void OnValidate()
+        {
+            this.transform.position = Vector3.zero;
+            this.transform.rotation = Quaternion.identity;
+            this.transform.localScale = new Vector3(1, 1, 1);
+            this.transform.hideFlags = HideFlags.NotEditable | HideFlags.HideInInspector;
+        }
+
         public void SetOriginEarthCenteredEarthFixed(double x, double y, double z)
         {
             this._ecefX = x;
