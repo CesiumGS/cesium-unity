@@ -8,7 +8,9 @@ using System.IO;
 using System.Text;
 using System;
 using System.Collections.Generic;
+#if UNITY_ANDROID
 using UnityEditor.Android;
+#endif
 
 namespace CesiumForUnity
 {
@@ -348,11 +350,13 @@ namespace CesiumForUnity
             // CMake can't deal with back slashes (Windows) in the ANDROID_NDK_ROOT environment variable.
             // So replace them with forward slashes.
             string? ndkRoot = environment.ContainsKey("ANDROID_NDK_ROOT") ? environment["ANDROID_NDK_ROOT"] : null;
+#if UNITY_ANDROID
             if (ndkRoot == null)
             {
                 // We're building for Android but don't have a known NDK root. Try asking Unity for it.
                 ndkRoot = AndroidExternalToolsSettings.ndkRootPath;
             }
+#endif
 
             // On Windows, use the make program included in the NDK. Because Visual Studio (which is usually
             // the default) won't work to build for Android.
