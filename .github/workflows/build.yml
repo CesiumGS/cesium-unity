@@ -70,21 +70,12 @@ jobs:
       #   with:
       #     submodules: recursive
       #   #   fetch-depth: 0 # so that `git describe` works.
-      - name: Install Unity Hub
-        run: |
-          wget --quiet https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.dmg
-          mkdir UnityHubSetup
-          hdiutil attach UnityHubSetup.dmg -mountpoint ./UnityHubSetup
-          sudo cp -R "./UnityHubSetup/Unity Hub.app" /Applications
-          hdiutil detach ./UnityHubSetup
-          rm ./UnityHubSetup.dmg
-      - name: Install Unity 2021.3.13f1
-        run: /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub -- --headless install --version 2021.3.13f1 --changeset 9e7d58001ecf
       - name: Create SSH tunnel to Unity License Server
         env:
           UNITY_LICENSE_SERVER_SSH_KEY: ${{ secrets.UNITY_LICENSE_SERVER_SSH_KEY }}
         run: |
           echo $UNITY_LICENSE_SERVER_SSH_KEY > ~/unity-client-ssh-key
+          chmod 600 ~/unity-client-ssh-key
           # Without StrictHostKeyChecking, OpenSSH will sit forever waiting for local input to confirm the server key is ok.
           # We don't really care if the server is authentic, because we're not sending anything sensitive to it.
           # The license server VM's sshd_config also needed to be modified with the following options, in order to prevent
@@ -99,3 +90,13 @@ jobs:
           wget http://127.0.0.1:12331/v1/admin/status
           cat status
           rm status
+      - name: Install Unity Hub
+        run: |
+          wget --quiet https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.dmg
+          mkdir UnityHubSetup
+          hdiutil attach UnityHubSetup.dmg -mountpoint ./UnityHubSetup
+          sudo cp -R "./UnityHubSetup/Unity Hub.app" /Applications
+          hdiutil detach ./UnityHubSetup
+          rm ./UnityHubSetup.dmg
+      - name: Install Unity 2021.3.13f1
+        run: /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub -- --headless install --version 2021.3.13f1 --changeset 9e7d58001ecf
