@@ -75,7 +75,10 @@ namespace CesiumForUnity
             EditorApplication.update += () =>
             {
                 if (request.IsCompleted)
+                {
+                    Debug.Log("Packing complete, exiting.");
                     EditorApplication.Exit(0);
+                }
             };
         }
 

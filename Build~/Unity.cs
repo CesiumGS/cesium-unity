@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace Build
 {
@@ -19,38 +20,83 @@ namespace Build
         public void Run(IEnumerable<string> args)
         {
             string log = Path.GetTempFileName();
+            File.WriteAllText(log, "", Encoding.UTF8);
 
             try
             {
-                int result = Utility.Run(this.ExecutablePath, args.Concat(new[]
+                using (Process unity = new Process())
                 {
-                    "-logFile",
-                    log
-                }), false);
+                    unity.OutputDataReceived += (sender, e) =>
+                    {
+                        Console.WriteLine(e.Data);
+                        //Console.Flush();
+                    };
+                    unity.ErrorDataReceived += (sender, e) =>
+                    {
+                        Console.WriteLine(e.Data);
+                        //log.Flush();
+                    };
 
-                // Some part of Unity, maybe its crash reporter, will sometimes continue to
-                // write to the log after the process has ended. That will prevent us from
-                // being able to read it. Just keep trying.
-                string? logText = null;
-                while (logText == null)
+                    ProcessStartInfo startInfo = new ProcessStartInfo(this.ExecutablePath);
+                    startInfo.WorkingDirectory = Utility.PackageRoot;
+                    foreach (string arg in args)
+                        startInfo.ArgumentList.Add(arg);
+                    startInfo.ArgumentList.Add("-logFile");
+                    startInfo.ArgumentList.Add(log);
+
+                    unity.StartInfo = startInfo;
+                    unity.StartInfo.RedirectStandardOutput = true;
+                    unity.StartInfo.RedirectStandardError = true;
+                    unity.Start();
+                    unity.BeginOutputReadLine();
+                    unity.BeginErrorReadLine();
+
+                    using (StreamReader reader = new StreamReader(log, Encoding.UTF8, false, new FileStreamOptions()
+                    {
+                        Mode = FileMode.Open,
+                        Access = FileAccess.Read,
+                        Share = FileShare.ReadWrite
+                    }))
+                    {
+                        string? output = null;
+                        while (!unity.HasExited)
+                        {
+                            output = reader.ReadLine();
+                            if (output != null)
+                                Console.WriteLine(output);
+                        }
+
+                        output = reader.ReadLine();
+                        if (output != null)
+                            Console.WriteLine(output);
+                    }
+
+                    // This should return immediately.
+                    unity.WaitForExit();
+
+                    if (unity.ExitCode != 0)
+                    {
+                        throw new Exception($"An error (code {unity.ExitCode}) occurred while executing:{Environment.NewLine}{startInfo.FileName} {string.Join(' ', startInfo.ArgumentList)}");
+                    }
+                }
+            }
+            finally
+            {
+                // Unity seems to keep the log file open longer than expected sometimes, preventing
+                // us from deleting it.
+                // Don't let this fail the build, but do retry a few times.
+                for (int i = 0; i < 5; ++i)
                 {
                     try
                     {
-                        logText = File.ReadAllText(log);
+                        File.Delete(log);
+                        break;
                     }
                     catch (IOException)
                     {
                     }
+                    Thread.Sleep(1000);
                 }
-
-                Console.WriteLine(logText);
-
-                if (result != 0)
-                    throw new Exception("An error occurred while executing Unity. Code: " + result);
-            }
-            finally
-            {
-                File.Delete(log);
             }
         }
 

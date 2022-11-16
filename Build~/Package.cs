@@ -59,6 +59,7 @@ namespace Build
                 unity.Run(new[]
                 {
                     "-batchmode",
+                    "-nographics",
                     "-projectPath",
                     Utility.ProjectRoot,
                     "-executeMethod",
@@ -89,7 +90,8 @@ namespace Build
                     "-B",
                     "native~/build",
                     "-S",
-                    "native~"
+                    "native~",
+                    "-DCMAKE_BUILD_TYPE=RelWithDebInfo"
                 });
                 Utility.Run("cmake", new[]
                 {
@@ -97,13 +99,16 @@ namespace Build
                     "native~/build",
                     "--target",
                     "install",
-                    "-j14"
+                    "-j14",
+                    "--config",
+                    "RelWithDebInfo"
                 });
 
                 Console.WriteLine("**** Compiling for Windows Player");
                 unity.Run(new[]
                 {
                     "-batchmode",
+                    "-nographics",
                     "-projectPath",
                     Utility.ProjectRoot,
                     "-buildTarget",
@@ -123,6 +128,7 @@ namespace Build
                 unity.Run(new[]
                 {
                     "-batchmode",
+                    "-nographics",
                     "-projectPath",
                     Utility.ProjectRoot,
                     "-buildTarget",
@@ -141,6 +147,7 @@ namespace Build
                 unity.Run(new[]
                 {
                     "-batchmode",
+                    "-nographics",
                     "-projectPath",
                     Utility.ProjectRoot,
                     "-executeMethod",
