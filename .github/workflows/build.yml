@@ -69,13 +69,6 @@ jobs:
     # Only allow a single macOS build at a time, for Unity licensing reasons
     concurrency: mac
     steps:
-      - name: Setup upterm session
-        uses: lhotari/action-upterm@v1
-        with:
-          ## limits ssh access and adds the ssh public key for the user which triggered the workflow
-          limit-access-to-actor: true
-          ## limits ssh access and adds the ssh public keys of the listed GitHub users
-          limit-access-to-users: kring
       - name: Check out repository code
         uses: actions/checkout@v3
         with:
@@ -96,8 +89,10 @@ jobs:
           /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub -- --headless install --version 2021.3.13f1 --changeset 9e7d58001ecf
       - name: Configure Unity to Use the License Server
         run: |
-          mkdir -p "~/Library/Application Support/Unity/config"
-          sudo echo '{"licensingServiceBaseUrl": "http://localhost:12331","enableEntitlementLicensing": true,"clientConnectTimeoutSec": 60,"clientHandshakeTimeoutSec": 120}' > "~/Library/Application Support/Unity/config/services-config.json"
+          sudo mkdir -p "/Library/Application Support/Unity/config"
+          sudo chmod g+w "/Library/Application Support/Unity"
+          sudo chmod g+w "/Library/Application Support/Unity/config"
+          sudo echo '{"licensingServiceBaseUrl": "http://localhost:12331","enableEntitlementLicensing": true,"clientConnectTimeoutSec": 60,"clientHandshakeTimeoutSec": 120}' > "/Library/Application Support/Unity/config/services-config.json"
       - name: Create SSH tunnel to Unity License Server
         env:
           UNITY_LICENSE_SERVER_SSH_KEY: ${{ secrets.UNITY_LICENSE_SERVER_SSH_KEY }}
@@ -137,3 +132,11 @@ jobs:
         with:
           name: macOS Package
           path: ~/cesium/CesiumForUnityBuildProject/*.tgz
+      - name: Setup upterm session
+        if: always()
+        uses: lhotari/action-upterm@v1
+        with:
+          ## limits ssh access and adds the ssh public key for the user which triggered the workflow
+          limit-access-to-actor: true
+          ## limits ssh access and adds the ssh public keys of the listed GitHub users
+          limit-access-to-users: kring
