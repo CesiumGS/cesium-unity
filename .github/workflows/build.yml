@@ -79,7 +79,7 @@ jobs:
           hdiutil detach ./UnityHubSetup
           rm ./UnityHubSetup.dmg
       - name: Install Unity 2021.3.13f1
-          /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub -- --headless install --version 2021.3.13f1 --changeset 9e7d58001ecf
+        run: /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub -- --headless install --version 2021.3.13f1 --changeset 9e7d58001ecf
       - name: Create SSH tunnel to Unity License Server
         env:
           UNITY_LICENSE_SERVER_SSH_KEY: ${{ secrets.UNITY_LICENSE_SERVER_SSH_KEY }}
