@@ -28,8 +28,29 @@ struct CesiumPrimitiveInfo {
  * @brief The fully loaded game object for this glTF and associated information.
  */
 struct CesiumGltfGameObject {
+  /**
+   * @brief The fully loaded Unity game objet for this glTF.
+   */
   std::unique_ptr<::DotNet::UnityEngine::GameObject> pGameObject{};
+  
+  /**
+   * @brief Information about how glTF mesh primitives were translated to Unity 
+   * meshes. 
+   */
   std::vector<CesiumPrimitiveInfo> primitiveInfos{};
+
+  /**
+   * @brief The number of raster tiles that have been attached, should be less
+   * than or equal to the raster tile capacity. 
+   */
+  uint32_t attachedRasterTileCount{};
+
+  /**
+   * @brief The number of raster tiles that the current shader variant can 
+   * support. If more raster tiles are added, a different shader variant should
+   * be used and this should be incremented. 
+   */
+  uint32_t rasterTileCapacity{};
 };
 
 class UnityPrepareRendererResources

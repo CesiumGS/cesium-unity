@@ -657,6 +657,9 @@ void* UnityPrepareRendererResources::prepareInMainThread(
     return nullptr;
   }
 
+  uint32_t currentOverlayCount = 
+      static_cast<uint32_t>(tile.getMappedRasterTiles().size());
+
   const Model& model = pRenderContent->getModel();
 
   std::string name = "glTF";
@@ -729,6 +732,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
        pCoordinateSystem,
        createPhysicsMeshes,
        showTilesInHierarchy,
+       currentOverlayCount,
        &pMetadataComponent](
           const Model& gltf,
           const Node& node,
@@ -982,21 +986,18 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             }
           }
         }
-
-        // TODO: Actually prevent interleaving more than 3 overlay UVs.
-        uint32_t overlayCount =
-            std::min(primitiveInfo.rasterOverlayUvIndexMap.size(), 3ull);
-        for (uint32_t i = 0; i < overlayCount; ++i) {
-          auto texCoordIndexIt = primitiveInfo.rasterOverlayUvIndexMap.find(i);
-          if (texCoordIndexIt != primitiveInfo.rasterOverlayUvIndexMap.end()) {
-            material.SetFloat(
-                System::String(
-                    "_overlay" + std::to_string(i) + "TextureCoordinateIndex"),
-                static_cast<float>(texCoordIndexIt->second));
-          }
+ 
+        // Initialize overlay UVs to all use index 0, attachRasterTile will update
+        // the uniforms with the correct UV index.
+        for (uint32_t i = 0; i < currentOverlayCount; ++i) {
+          material.SetFloat(
+              System::String(
+                  "_overlay" + std::to_string(i) + "TextureCoordinateIndex"),
+              0);
         }
 
-        switch (overlayCount) {
+        // Use a shader variant that supports the expected number of overlays.
+        switch (currentOverlayCount) {
         case 0:
           material.EnableKeyword(System::String("_OVERLAYCOUNT_NONE"));
           break;
@@ -1035,7 +1036,9 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
   CesiumGltfGameObject* pCesiumGameObject = new CesiumGltfGameObject{
       std::move(pModelGameObject),
-      std::move(pLoadThreadResult->primitiveInfos)};
+      std::move(pLoadThreadResult->primitiveInfos),
+      0,
+      currentOverlayCount};
 
   return pCesiumGameObject;
 }
@@ -1117,6 +1120,10 @@ void UnityPrepareRendererResources::attachRasterInMainThread(
   if (!pCesiumGameObject || !pCesiumGameObject->pGameObject || !pTexture)
     return;
 
+  // Currently support a map of 3 raster overlays.
+  if (pCesiumGameObject->attachedRasterTileCount >= 3)
+    return;
+
   // TODO: Can we count on the order of primitives in the transform chain
   // to match the order of primitives using gltf->forEachPrimitive??
   uint32_t primitiveIndex = 0;
@@ -1143,6 +1150,10 @@ void UnityPrepareRendererResources::attachRasterInMainThread(
 
     const CesiumPrimitiveInfo& primitiveInfo =
         pCesiumGameObject->primitiveInfos[primitiveIndex++];
+
+    // Note: The overlay texture coordinate index corresponds to the glTF attribute
+    // _CESIUMOVERLAY_<i>. Here we retrieve the Unity texture coordinate index 
+    // corresponding to the glTF texture coordinate index for this primitive.
     auto texCoordIndexIt =
         primitiveInfo.rasterOverlayUvIndexMap.find(overlayTextureCoordinateID);
     if (texCoordIndexIt == primitiveInfo.rasterOverlayUvIndexMap.end()) {
@@ -1151,7 +1162,20 @@ void UnityPrepareRendererResources::attachRasterInMainThread(
       continue;
     }
 
-    std::string overlayIndexStr = std::to_string(overlayTextureCoordinateID);
+    // TODO: Indexing raster overlays in the order that they get attached feels a bit 
+    // brittle and may even be incorrect behavior. We probably need to thread an overlay
+    // index through the raster tile.
+
+    // Note: The overlay index is NOT the same as the overlay texture coordinate index.
+    // For instance, multiple overlays could point to the same overlay UV index -
+    // multiple overlays can use the _CESIUMOVERLAY_0 attribute for example. The 
+    // _CESIUMOVERLAY_<i> attributes correspond to unique _projections_, not unique overlays.
+    std::string overlayIndexStr = std::to_string(pCesiumGameObject->attachedRasterTileCount);
+    material.SetFloat(
+        System::String(
+            "_overlay" + overlayIndexStr + "TextureCoordinateIndex"),
+        static_cast<float>(texCoordIndexIt->second));
+
     material.SetTexture(
         System::String("_overlay" + overlayIndexStr + "Texture"),
         *pTexture);
@@ -1164,6 +1188,29 @@ void UnityPrepareRendererResources::attachRasterInMainThread(
     material.SetVector(
         System::String("_overlay" + overlayIndexStr + "TranslationAndScale"),
         translationAndScale);
+    
+    // We just added a raster tile, so if it is going to exceed capacity we need to pick
+    // a new variant with enough raster overlay slots.
+    if (pCesiumGameObject->attachedRasterTileCount == pCesiumGameObject->rasterTileCapacity) {
+      switch (pCesiumGameObject->attachedRasterTileCount) {
+      case 0:
+        material.DisableKeyword(System::String("_OVERLAYCOUNT_NONE"));
+        material.EnableKeyword(System::String("_OVERLAYCOUNT_ONE"));
+        break;
+      case 1:
+        material.DisableKeyword(System::String("_OVERLAYCOUNT_ONE"));
+        material.EnableKeyword(System::String("_OVERLAYCOUNT_TWO"));
+        break;
+      case 2:
+        material.DisableKeyword(System::String("_OVERLAYCOUNT_TWO"));
+        material.EnableKeyword(System::String("_OVERLAYCOUNT_THREE"));
+      };
+    }
+  }
+
+  ++pCesiumGameObject->attachedRasterTileCount;
+  if (pCesiumGameObject->attachedRasterTileCount > pCesiumGameObject->rasterTileCapacity) {
+    pCesiumGameObject->rasterTileCapacity = pCesiumGameObject->attachedRasterTileCount;
   }
 }
 
