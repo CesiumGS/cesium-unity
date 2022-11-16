@@ -66,6 +66,8 @@ jobs:
           path: D:\cesium\CesiumForUnityBuildProject\*.tgz
   MacOS:
     runs-on: macos-latest
+    # Only allow a single macOS build at a time, for Unity licensing reasons
+    concurrency: mac
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
