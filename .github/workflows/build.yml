@@ -65,18 +65,19 @@ jobs:
   MacOS:
     runs-on: macos-latest
     steps:
-      - name: Check out repository code
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
-        #   fetch-depth: 0 # so that `git describe` works.
+      # - name: Check out repository code
+      #   uses: actions/checkout@v3
+      #   with:
+      #     submodules: recursive
+      #   #   fetch-depth: 0 # so that `git describe` works.
       - name: Install Unity Hub
         run: |
           wget --quiet https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.dmg
-          hdiutil attach UnityHubSetup.dmg
-          pushd /Volumes/UnityHubSetup/
+          mkdir UnityHubSetup
+          hdiutil attach UnityHubSetup.dmg -mountpoint ./UnityHubSetup
+          cd UnityHubSetup
           ls
           sudo installer -pkg UnityHubSetup.pkg -target "/"
-          hdiutil detach /Volumes/UnityHubSetup/
-          popd
+          cd ..
+          hdiutil detach ./UnityHubSetup
           rm ./UnityHubSetup.dmg
