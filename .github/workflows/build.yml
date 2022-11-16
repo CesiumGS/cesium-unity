@@ -80,7 +80,7 @@ jobs:
           rm ./UnityHubSetup.dmg
       - name: Install Unity 2021.3.13f1
         run: |
-          /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub -- --headless install --version 2021.3.13f1 --changeset 9e7d58001ecf
+          /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub -- --headless install ---changeset 9e7d58001ecf
           # The above command sometimes returns exit code 130, despite reporting success
           # The below should succeed as long as the installed version actually exists.
           ls /Applications/Unity/Hub/Editor/2021.3.13f1/Unity.app
