@@ -77,7 +77,8 @@ jobs:
           hdiutil attach UnityHubSetup.dmg -mountpoint ./UnityHubSetup
           cd UnityHubSetup
           ls
-          sudo installer -pkg UnityHubSetup.pkg -target "/"
+          ls Applications
+          sudo installer -pkg UnityHubSetup.app -target "/"
           cd ..
           hdiutil detach ./UnityHubSetup
           rm ./UnityHubSetup.dmg
