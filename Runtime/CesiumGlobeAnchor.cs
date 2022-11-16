@@ -66,25 +66,11 @@ namespace CesiumForUnity
     /// </remarks>
     [ExecuteInEditMode]
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumGlobeAnchorImpl", "CesiumGlobeAnchorImpl.h")]
-    public partial class CesiumGlobeAnchor : MonoBehaviour, INotifyOfChanges
+    public partial class CesiumGlobeAnchor : MonoBehaviour
     {
         #region User-editable properties
 
         [SerializeField]
-        [Tooltip("Whether to adjust the game object's orientation based on globe curvature as the game object moves.\n" +
-                 "\n" +
-                 "The Earth is not flat, so as we move across its surface, the direction of \"up\" changes. " +
-                 "If we ignore this fact and leave an object's orientation unchanged as it moves over the " +
-                 "globe surface, the object will become increasingly tilted and eventually be completely " +
-                 "upside-down when we arrive at the opposite side of the globe.\n" +
-                 "\n" +
-                 "When this setting is enabled, this component will automatically apply a rotation to the " +
-                 "Transform to account for globe curvature any time the game object's position on the " +
-                 "globe changes.\n" +
-                 "\n" +
-                 "This property should usually be enabled, but it may be useful to disable it when your " +
-                 "application already accounts for globe curvature itself when it updates a game " +
-                 "object's transform, because in that case game object would be over-rotated.")]
         private bool _adjustOrientationForGlobeWhenMoving = true;
 
         public bool adjustOrientationForGlobeWhenMoving
@@ -94,11 +80,6 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Tooltip("Whether this component should detect changes to the Transform component, such as " +
-                 "from physics, and update the precise coordinates accordingly. Disabling this option " +
-                 "improves performance for game objects that will not move. Transform changes are " +
-                 "always detected in Edit mode, no matter the state of this flag.")]
-        [NotifyOfChanges]
         private bool _detectTransformChanges = true;
 
         public bool detectTransformChanges
@@ -112,8 +93,6 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Tooltip("The set of coordinates that authoritatively define the position of this game object.")]
-        [NotifyOfChanges]
         private CesiumGlobeAnchorPositionAuthority _positionAuthority = CesiumGlobeAnchorPositionAuthority.None;
 
         public CesiumGlobeAnchorPositionAuthority positionAuthority
@@ -128,9 +107,6 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Header("Position (Longitude Latitude Height)")]
-        [Tooltip("The latitude of this game object in degrees, in the range [-90, 90].")]
-        [NotifyOfChanges]
         private double _latitude = 0.0;
 
         public double latitude
@@ -144,8 +120,6 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Tooltip("The longitude of this game object in degrees, in the range [-180, 180].")]
-        [NotifyOfChanges]
         private double _longitude = 0.0;
 
         public double longitude
@@ -159,11 +133,6 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Tooltip("The height of this game object in meters above the ellipsoid (usually WGS84). " +
-                 "Do not confuse this with a geoid height or height above mean sea level, which " +
-                 "can be tens of meters higher or lower depending on where in the world the " +
-                 "object is located.")]
-        [NotifyOfChanges]
         private double _height = 0.0;
 
         public double height
@@ -177,11 +146,6 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Header("Position (Earth Centered, Earth Fixed)")]
-        [Tooltip("The Earth-Centered, Earth-Fixed X-coordinate of this game object in meters.\n" +
-                 "In the ECEF coordinate system, the origin is at the center of the Earth \n" +
-                 "and the positive X axis points toward where the Prime Meridian crosses the Equator.")]
-        [NotifyOfChanges]
         private double _ecefX = 6378137.0;
 
         public double ecefX
@@ -195,10 +159,6 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Tooltip("The Earth-Centered, Earth-Fixed Y-coordinate of this game object in meters.\n" +
-                 "In the ECEF coordinate system, the origin is at the center of the Earth \n" +
-                 "and the positive Y axis points toward the Equator at 90 degrees longitude.")]
-        [NotifyOfChanges]
         private double _ecefY = 0.0;
 
         public double ecefY
@@ -212,10 +172,6 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Tooltip("The Earth-Centered, Earth-Fixed Z-coordinate of this game object in meters.\n" +
-         "In the ECEF coordinate system, the origin is at the center of the Earth \n" +
-         "and the positive Z axis points toward the North pole.")]
-        [NotifyOfChanges]
         private double _ecefZ = 0.0;
 
         public double ecefZ
@@ -229,9 +185,6 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Header("Position (Unity coordinates)")]
-        [Tooltip("The Unity world X coordinate of this game object. This is the same as the Transform's X coordinate but expressed in 64-bit (double) precision.")]
-        [NotifyOfChanges]
         private double _unityX = 0.0;
 
         public double unityX
@@ -245,8 +198,6 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Tooltip("The Unity world Y coordinate of this game object. This is the same as the Transform's Y coordinate but expressed in 64-bit (double) precision.")]
-        [NotifyOfChanges]
         private double _unityY = 0.0;
 
         public double unityY
@@ -260,8 +211,6 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Tooltip("The Unity world Z coordinate of this game object. This is the same as the Transform's Y coordinate but expressed in 64-bit (double) precision.")]
-        [NotifyOfChanges]
         private double _unityZ = 0.0;
 
         public double unityZ
@@ -386,39 +335,6 @@ namespace CesiumForUnity
 
         #endregion
 
-        #region INotifyOfChanges implementation
-
-#if UNITY_EDITOR
-        void INotifyOfChanges.NotifyPropertyChanged(SerializedProperty property)
-        {
-            switch (property.name)
-            {
-                case "_longitude":
-                case "_latitude":
-                case "_height":
-                    this.positionAuthority = CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight;
-                    break;
-                case "_ecefX":
-                case "_ecefY":
-                case "_ecefZ":
-                    this.positionAuthority = CesiumGlobeAnchorPositionAuthority.EarthCenteredEarthFixed;
-                    break;
-                case "_unityX":
-                case "_unityY":
-                case "_unityZ":
-                    this.positionAuthority = CesiumGlobeAnchorPositionAuthority.UnityWorldCoordinates;
-                    break;
-                case "_detectTransformChanges":
-                    this.StartOrStopDetectingTransformChanges();
-                    break;
-            }
-
-            EditorApplication.QueuePlayerLoopUpdate();
-        }
-#endif
-
-        #endregion
-
         #region Unity Messages
 
         private void Start()
@@ -438,7 +354,7 @@ namespace CesiumForUnity
 
         #region Coroutines
 
-        private void StartOrStopDetectingTransformChanges()
+        public void StartOrStopDetectingTransformChanges()
         {
             this.StopCoroutine("DetectTransformChanges");
 

@@ -39,7 +39,6 @@ CesiumCreditSystemImpl::~CesiumCreditSystemImpl() {}
 
 void CesiumCreditSystemImpl::JustBeforeDelete(
     const CesiumForUnity::CesiumCreditSystem& creditSystem) {
-  creditSystem.ClearLoadedImages();
 }
 
 void CesiumCreditSystemImpl::Update(

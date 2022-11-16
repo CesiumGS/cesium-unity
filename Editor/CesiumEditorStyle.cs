@@ -21,7 +21,11 @@ namespace CesiumForUnity
         public static GUIStyle headerStyle;
         public static GUIStyle subheaderStyle;
 
-        //public static Texture2D cesiumForUnityLogo;
+        public static Texture2D cesiumForUnityLogoLight;
+        public static Texture2D cesiumForUnityLogoDark;
+        private static readonly int logoWidth = 400;
+        private static readonly int logoHeight = 330;
+
         public static Texture2D quickAddIcon;
         public static Dictionary<CesiumEditorWindow.ToolbarButton, Texture2D> toolbarIcons;
         public static Texture2D refreshIcon;
@@ -39,7 +43,7 @@ namespace CesiumForUnity
 
         public static readonly float inspectorLabelWidth = 205.0f;
 
-        private static Texture2D LoadIcon(string resourcePath)
+        private static Texture2D LoadImage(string resourcePath)
         {
             Texture2D icon = (Texture2D)Resources.Load(resourcePath);
             icon.wrapMode = TextureWrapMode.Clamp;
@@ -47,12 +51,40 @@ namespace CesiumForUnity
             return icon;
         }
 
+        private static Texture2D LoadImage(
+            string resourcePath,
+            int desiredWidth, 
+            int desiredHeight)
+        {
+            // This is a roundabout way of resizing the image, since Reinitialize()
+            // doesn't work on textures that aren't readable and the textures
+            // from Resources.Load are non-readable by default.
+            Texture2D original = LoadImage(resourcePath);
+            RenderTexture renderTexture = new RenderTexture(
+                desiredWidth,
+                desiredHeight,
+                0);
+            RenderTexture oldActive = RenderTexture.active;
+            RenderTexture.active = renderTexture;
+            Graphics.Blit(original, renderTexture);
+
+            Texture2D resized = new Texture2D(desiredWidth, desiredHeight);
+            resized.ReadPixels(new Rect(0, 0, desiredWidth, desiredHeight), 0, 0);
+            resized.Apply();
+
+            RenderTexture.active = oldActive;
+
+            return resized;
+        }
+
         static CesiumEditorStyle()
         {
-            if (quickAddIcon == null)
-            {
-                quickAddIcon = LoadIcon("FontAwesome/plus-solid");
-            }
+            cesiumForUnityLogoDark =
+                LoadImage("Cesium-for-Unity-dark", logoWidth, logoHeight);
+            cesiumForUnityLogoLight =
+                LoadImage("Cesium-for-Unity-light", logoWidth, logoHeight);
+
+            quickAddIcon = LoadImage("FontAwesome/plus-solid");
 
             quickAddItemStyle = new GUIStyle();
             quickAddItemStyle.margin = new RectOffset(5, 5, 10, 10);
@@ -62,28 +94,25 @@ namespace CesiumForUnity
             quickAddButtonStyle.fixedHeight = 16.0f;
             quickAddButtonStyle.hover.background = Texture2D.grayTexture;
 
-            if (toolbarIcons == null)
-            {
-                toolbarIcons = new Dictionary<CesiumEditorWindow.ToolbarButton, Texture2D>();
-                toolbarIcons.Add(
-                    CesiumEditorWindow.ToolbarButton.Add,
-                    quickAddIcon);
-                toolbarIcons.Add(
-                    CesiumEditorWindow.ToolbarButton.Upload,
-                    LoadIcon("FontAwesome/cloud-upload-alt-solid"));
-                toolbarIcons.Add(
-                    CesiumEditorWindow.ToolbarButton.Token,
-                    LoadIcon("FontAwesome/key-solid"));
-                toolbarIcons.Add(
-                    CesiumEditorWindow.ToolbarButton.Learn,
-                    LoadIcon("FontAwesome/book-reader-solid"));
-                toolbarIcons.Add(
-                    CesiumEditorWindow.ToolbarButton.Help,
-                    LoadIcon("FontAwesome/hands-helping-solid"));
-                toolbarIcons.Add(
-                    CesiumEditorWindow.ToolbarButton.SignOut,
-                    LoadIcon("FontAwesome/sign-out-alt-solid"));
-            }
+            toolbarIcons = new Dictionary<CesiumEditorWindow.ToolbarButton, Texture2D>();
+            toolbarIcons.Add(
+                CesiumEditorWindow.ToolbarButton.Add,
+                quickAddIcon);
+            toolbarIcons.Add(
+                CesiumEditorWindow.ToolbarButton.Upload,
+                LoadImage("FontAwesome/cloud-upload-alt-solid"));
+            toolbarIcons.Add(
+                CesiumEditorWindow.ToolbarButton.Token,
+                LoadImage("FontAwesome/key-solid"));
+            toolbarIcons.Add(
+                CesiumEditorWindow.ToolbarButton.Learn,
+                LoadImage("FontAwesome/book-reader-solid"));
+            toolbarIcons.Add(
+                CesiumEditorWindow.ToolbarButton.Help,
+                LoadImage("FontAwesome/hands-helping-solid"));
+            toolbarIcons.Add(
+                CesiumEditorWindow.ToolbarButton.SignOut,
+                LoadImage("FontAwesome/sign-out-alt-solid"));
 
             toolbarStyle = new GUIStyle();
             toolbarStyle.margin = new RectOffset(5, 5, 5, 5);
@@ -99,31 +128,19 @@ namespace CesiumForUnity
             toolbarButtonDisabledStyle = new GUIStyle(toolbarButtonStyle);
             toolbarButtonDisabledStyle.hover.background = null;
 
-            if (refreshIcon == null)
-            {
-                refreshIcon = LoadIcon("FontAwesome/sync-alt-solid");
-            }
+            refreshIcon = LoadImage("FontAwesome/sync-alt-solid");
 
-            if (buttonTexture == null)
-            {
-                buttonTexture = new Texture2D(1, 1);
-                buttonTexture.SetPixel(0, 0, buttonColor);
-                buttonTexture.Apply();
-            }
+            buttonTexture = new Texture2D(1, 1);
+            buttonTexture.SetPixel(0, 0, buttonColor);
+            buttonTexture.Apply();
 
-            if (buttonHoverTexture == null)
-            {
-                buttonHoverTexture = new Texture2D(1, 1);
-                buttonHoverTexture.SetPixel(0, 0, buttonColorLighter);
-                buttonHoverTexture.Apply();
-            }
+            buttonHoverTexture = new Texture2D(1, 1);
+            buttonHoverTexture.SetPixel(0, 0, buttonColorLighter);
+            buttonHoverTexture.Apply();
 
-            if (buttonPressedTexture == null)
-            {
-                buttonPressedTexture = new Texture2D(1, 1);
-                buttonPressedTexture.SetPixel(0, 0, buttonColorDarker);
-                buttonPressedTexture.Apply();
-            }
+            buttonPressedTexture = new Texture2D(1, 1);
+            buttonPressedTexture.SetPixel(0, 0, buttonColorDarker);
+            buttonPressedTexture.Apply();
 
             cesiumButtonStyle = new GUIStyle();
             cesiumButtonStyle.padding = new RectOffset(25, 25, 10, 10);
@@ -158,8 +175,8 @@ namespace CesiumForUnity
             subheaderStyle.fontSize = 14;
             subheaderStyle.margin = new RectOffset(5, 5, 5, 5);
 
-            checkIcon = LoadIcon("FontAwesome/check-solid");
-            xIcon = LoadIcon("FontAwesome/times-solid");
+            checkIcon = LoadImage("FontAwesome/check-solid");
+            xIcon = LoadImage("FontAwesome/times-solid");
         }
 
     }

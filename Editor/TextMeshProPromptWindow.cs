@@ -20,7 +20,8 @@ namespace CesiumForUnity
             position.y = (Screen.height / 2);
             currentWindow.position = position;
 
-            currentWindow.ShowModalUtility();
+            currentWindow.Show();
+            currentWindow.Focus();
         }
 
         private void OnEnable()
