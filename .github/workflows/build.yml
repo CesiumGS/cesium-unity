@@ -74,7 +74,7 @@ jobs:
         env:
           UNITY_LICENSE_SERVER_SSH_KEY: ${{ secrets.UNITY_LICENSE_SERVER_SSH_KEY }}
         run: |
-          echo $UNITY_LICENSE_SERVER_SSH_KEY > ~/unity-client-ssh-key
+          echo "$UNITY_LICENSE_SERVER_SSH_KEY" > ~/unity-client-ssh-key
           cat ~/unity-client-ssh-key
           chmod 600 ~/unity-client-ssh-key
           # Without StrictHostKeyChecking, OpenSSH will sit forever waiting for local input to confirm the server key is ok.
