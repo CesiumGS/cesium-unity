@@ -125,7 +125,7 @@ jobs:
         run: |
           cd ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
           dotnet run --project Build~
-          dir ~/cesium/CesiumForUnityBuildProject
+          ls -l ~/cesium/CesiumForUnityBuildProject
       - name: Publish package artifact
         if: ${{ success() }}
         uses: actions/upload-artifact@v3
