@@ -67,10 +67,10 @@ jobs:
     steps:
       - name: Configure Unity to Use the License Server
         run: |
-          sudo mkdir -p "/Library/Application Support/Unity/config/"
-          ls -l "/Library/Application Support/Unity/config/"
-          sudo echo '{"licensingServiceBaseUrl": "http://localhost:12331","enableEntitlementLicensing": true,"clientConnectTimeoutSec": 60,"clientHandshakeTimeoutSec": 120}' > "/Library/Application Support/Unity/config/services-config.json"
-          ls -l "/Library/Application Support/Unity/config/"
+          mkdir -p "~/Library/Application Support/Unity/config"
+          ls -l "~/Library/Application Support/Unity/config/"
+          sudo echo '{"licensingServiceBaseUrl": "http://localhost:12331","enableEntitlementLicensing": true,"clientConnectTimeoutSec": 60,"clientHandshakeTimeoutSec": 120}' > "~/Library/Application Support/Unity/config/services-config.json"
+          ls -l "~/Library/Application Support/Unity/config/"
       - name: Check out repository code
         uses: actions/checkout@v3
         with:
