@@ -128,7 +128,7 @@ namespace Build
             {
                 if (version != null)
                 {
-                    string path = "/Applications/Unity/Hub/Editor/{version}/Unity.app";
+                    string path = "/Applications/Unity/Hub/Editor/{version}/Unity.app/Contents/MacOS/Unity";
                     if (File.Exists(path))
                         return new Unity(path);
                 }
@@ -179,7 +179,7 @@ namespace Build
             if (OperatingSystem.IsWindows())
                 return new Unity(Path.Combine(versions.Last()!.FullPath, "Editor", "Unity.exe"));
             else if (OperatingSystem.IsMacOS())
-                return new Unity(Path.Combine(versions.Last()!.FullPath, "Unity.app"));
+                return new Unity(Path.Combine(versions.Last()!.FullPath, "Unity.app", "Contents", "MacOS", "Unity"));
 
             return null;
         }

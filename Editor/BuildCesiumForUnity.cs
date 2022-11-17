@@ -57,6 +57,21 @@ namespace CesiumForUnity
             EditorApplication.Exit(0);
         }
 
+        public static void CompileForMacAndExit()
+        {
+            string buildPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(buildPath);
+            try
+            {
+                BuildPlayer(BuildTargetGroup.Standalone, BuildTarget.StandaloneOSX, Path.Combine(buildPath, "Mac"));
+            }
+            finally
+            {
+                Directory.Delete(buildPath, true);
+            }
+            EditorApplication.Exit(0);
+        }
+
         public static void PackAndExit()
         {
             string tempPath = Environment.GetEnvironmentVariable("CESIUM_PACKAGE_TEMP_PATH");

@@ -64,3 +64,79 @@ jobs:
         with:
           name: Windows Package
           path: D:\cesium\CesiumForUnityBuildProject\*.tgz
+  MacOS:
+    runs-on: macos-latest
+    # Only allow a single macOS build at a time, for Unity licensing reasons
+    concurrency: mac
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+        #   fetch-depth: 0 # so that `git describe` works.
+      - name: Install Unity Hub
+        run: |
+          wget --quiet https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.dmg
+          mkdir UnityHubSetup
+          hdiutil attach UnityHubSetup.dmg -mountpoint ./UnityHubSetup
+          sudo cp -R "./UnityHubSetup/Unity Hub.app" /Applications
+          hdiutil detach ./UnityHubSetup
+          rm ./UnityHubSetup.dmg
+      - name: Install Unity 2021.3.13f1
+        # This command sometimes returns exit code 130, despite actually succeeding.
+        continue-on-error: true
+        run: |
+          /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub -- --headless install --version 2021.3.13f1 --changeset 9e7d58001ecf
+      - name: Configure Unity to Use the License Server
+        run: |
+          sudo mkdir -p "/Library/Application Support/Unity/config"
+          sudo chmod g+w "/Library/Application Support/Unity"
+          sudo chmod g+w "/Library/Application Support/Unity/config"
+          sudo echo '{"licensingServiceBaseUrl": "http://localhost:12331","enableEntitlementLicensing": true,"clientConnectTimeoutSec": 60,"clientHandshakeTimeoutSec": 120}' > "/Library/Application Support/Unity/config/services-config.json"
+      - name: Create SSH tunnel to Unity License Server
+        env:
+          UNITY_LICENSE_SERVER_SSH_KEY: ${{ secrets.UNITY_LICENSE_SERVER_SSH_KEY }}
+        run: |
+          echo "$UNITY_LICENSE_SERVER_SSH_KEY" > ~/unity-client-ssh-key
+          chmod 600 ~/unity-client-ssh-key
+          # Without StrictHostKeyChecking, OpenSSH will sit forever waiting for local input to confirm the server key is ok.
+          # We don't really care if the server is authentic, because we're not sending anything sensitive to it.
+          # The license server VM's sshd_config also needed to be modified with the following options, in order to prevent
+          # the tunnel from being closed between here and when we're ready to use it.
+          #   TCPKeepAlive yes
+          #   ClientAliveInterval 30
+          #   ClientAliveCountMax 9999
+          ssh -fNT -o StrictHostKeyChecking=no -i ~/unity-client-ssh-key -L 127.0.0.1:12331:127.0.0.1:8080 unity-client@ec2-44-204-244-196.compute-1.amazonaws.com
+          sleep 5
+      - name: Test Connection to Unity License Server
+        run: |
+          wget http://127.0.0.1:12331/v1/admin/status
+          cat status
+          rm status
+      - name: Move cesium-unity Repo Under Empty Project
+        run: |
+          mkdir -p ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
+          mv $GITHUB_WORKSPACE/* ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
+      - name: Build Reinterop
+        run: |
+          cd ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
+          dotnet publish Reinterop~ -o .
+      - name: Build Package
+        run: |
+          cd ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
+          dotnet run --project Build~
+          ls -l ~/cesium/CesiumForUnityBuildProject
+      - name: Publish package artifact
+        if: ${{ success() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: macOS Package
+          path: ~/cesium/CesiumForUnityBuildProject/*.tgz
+      - name: Setup upterm session
+        if: always()
+        uses: lhotari/action-upterm@v1
+        with:
+          ## limits ssh access and adds the ssh public key for the user which triggered the workflow
+          limit-access-to-actor: true
+          ## limits ssh access and adds the ssh public keys of the listed GitHub users
+          limit-access-to-users: kring
