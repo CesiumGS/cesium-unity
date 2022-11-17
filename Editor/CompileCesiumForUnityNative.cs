@@ -36,6 +36,7 @@ namespace CesiumForUnity
         {
             public BuildTarget Platform = BuildTarget.StandaloneWindows64;
             public BuildTargetGroup PlatformGroup = BuildTargetGroup.Standalone;
+            public string? Cpu = null;
             public string SourceDirectory = "";
             public string BuildDirectory = "build";
             public string GeneratedDirectoryName = "generated-Unknown";
@@ -75,6 +76,18 @@ namespace CesiumForUnity
             AssetDatabase.StartAssetEditing();
             try
             {
+                if (report.summary.platform == BuildTarget.StandaloneOSX)
+                {
+                    // On macOS, build separately for x64 and arm64.
+                    CreatePlaceholders(
+                        GetLibraryToBuild(report.summary, "x86_64"),
+                        "CesiumForUnityNative-Runtime"
+                    );
+                    CreatePlaceholders(
+                        GetLibraryToBuild(report.summary, "arm64"),
+                        "CesiumForUnityNative-Runtime"
+                    );
+                }
                 CreatePlaceholders(
                     GetLibraryToBuild(report.summary),
                     "CesiumForUnityNative-Runtime"
@@ -162,6 +175,11 @@ namespace CesiumForUnity
             {
                 importer.SetPlatformData(BuildTarget.Android, "CPU", "ARM64");
             }
+            else if (libraryToBuild.Platform == BuildTarget.StandaloneOSX)
+            {
+                if (libraryToBuild.Cpu != null)
+                    importer.SetPlatformData(BuildTarget.StandaloneOSX, "CPU", libraryToBuild.Cpu);
+            }
         }
 
         public int callbackOrder => 0;
@@ -175,10 +193,18 @@ namespace CesiumForUnity
         /// <param name="report"></param>
         public void OnPostBuildPlayerScriptDLLs(BuildReport report)
         {
-            BuildNativeLibrary(GetLibraryToBuild(report.summary));
+            if (report.summary.platform == BuildTarget.StandaloneOSX)
+            {
+                BuildNativeLibrary(GetLibraryToBuild(report.summary, "x86_64"));
+                BuildNativeLibrary(GetLibraryToBuild(report.summary, "arm64"));
+            }
+            else
+            {
+                BuildNativeLibrary(GetLibraryToBuild(report.summary));
+            }
         }
 
-        public static LibraryToBuild GetLibraryToBuild(BuildSummary summary)
+        public static LibraryToBuild GetLibraryToBuild(BuildSummary summary, string? cpu = null)
         {
             return GetLibraryToBuild(new PlatformToBuild()
             {
@@ -186,10 +212,10 @@ namespace CesiumForUnity
                 platformGroup = summary.platformGroup,
                 isDevelopment = summary.options.HasFlag(BuildOptions.Development),
                 isCleanBuild = summary.options.HasFlag(BuildOptions.CleanBuildCache)
-            });
+            }, cpu);
         }
 
-        public static LibraryToBuild GetLibraryToBuild(PlatformToBuild platform)
+        public static LibraryToBuild GetLibraryToBuild(PlatformToBuild platform, string? cpu = null)
         {
             string sourceFilename = GetSourceFilePathName();
             string packagePath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(sourceFilename), $".."));
@@ -200,6 +226,7 @@ namespace CesiumForUnity
             LibraryToBuild library = new LibraryToBuild();
             library.Platform = platform.platform;
             library.PlatformGroup = platform.platformGroup;
+            library.Cpu = cpu;
             library.SourceDirectory = nativeDirectory;
             library.BuildDirectory = Path.Combine(nativeDirectory, $"build-{platformDirectoryName}");
             library.GeneratedDirectoryName = $"generated-{platformDirectoryName}";
@@ -214,12 +241,14 @@ namespace CesiumForUnity
 
             if (platform.platformGroup == BuildTargetGroup.Android)
                 library.Toolchain = "extern/android-toolchain.cmake";
-            else if (platform.platform == BuildTarget.StandaloneOSX)
+
+            if (platform.platform == BuildTarget.StandaloneOSX && cpu != null)
             {
-                library.ExtraConfigureArgs.Add("-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64");
-                library.ExtraConfigureArgs.Add("-DKTX_FORCE_BUILD_UNIVERSAL=ON");
-                library.ExtraConfigureArgs.Add("-DBASISU_SUPPORT_SSE=OFF");
+                library.ExtraConfigureArgs.Add("-DCMAKE_OSX_ARCHITECTURES=" + cpu);
+                library.InstallDirectory = Path.Combine(library.InstallDirectory, cpu);
+                library.BuildDirectory += "-" + cpu;
             }
+
             return library;
         }
 
