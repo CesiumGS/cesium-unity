@@ -1,8 +1,11 @@
 using Reinterop;
 using System;
 using System.Collections;
-using UnityEditor;
 using UnityEngine;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace CesiumForUnity
 {
@@ -68,7 +71,7 @@ namespace CesiumForUnity
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumGlobeAnchorImpl", "CesiumGlobeAnchorImpl.h")]
     public partial class CesiumGlobeAnchor : MonoBehaviour
     {
-        #region User-editable properties
+#region User-editable properties
 
         [SerializeField]
         private bool _adjustOrientationForGlobeWhenMoving = true;
@@ -223,9 +226,9 @@ namespace CesiumForUnity
             }
         }
 
-        #endregion
+#endregion
 
-        #region Set Helpers
+#region Set Helpers
 
         /// <summary>
         /// Sets the position of this object to a particular longitude, latitude, and height.
@@ -322,9 +325,9 @@ namespace CesiumForUnity
                 this.UpdateGlobePosition(this._positionAuthority);
         }
 
-        #endregion
+#endregion
 
-        #region Private properties
+#region Private properties
 
         private bool _lastPropertiesAreValid = false;
         private double _lastPositionEcefX = 0.0;
@@ -333,9 +336,9 @@ namespace CesiumForUnity
         // TODO: use just the position instead of the entire transform?
         private Matrix4x4 _lastLocalToWorld;
 
-        #endregion
+#endregion
 
-        #region Unity Messages
+#region Unity Messages
 
         private void Start()
         {
@@ -350,9 +353,9 @@ namespace CesiumForUnity
             this.StartOrStopDetectingTransformChanges();
         }
 
-        #endregion
+#endregion
 
-        #region Coroutines
+#region Coroutines
 
         public void StartOrStopDetectingTransformChanges()
         {
@@ -360,11 +363,11 @@ namespace CesiumForUnity
 
             bool start = this._detectTransformChanges;
 
-#if UNITY_EDITOR
+            #if UNITY_EDITOR
             // Always detect changes in Edit mode.
             if (!EditorApplication.isPlaying)
                 start = true;
-#endif
+            #endif
 
             // Can't start a coroutine on an inactive game object
             if (!this.isActiveAndEnabled)
@@ -387,9 +390,9 @@ namespace CesiumForUnity
             }
         }
 
-        #endregion
+#endregion
 
-        #region Updaters
+#region Updaters
 
         private void UpdateGlobePosition(CesiumGlobeAnchorPositionAuthority previousAuthority)
         {
@@ -501,6 +504,6 @@ namespace CesiumForUnity
         // This is static so that CesiumGlobeAnchor does not need finalization.
         private static partial void AdjustOrientation(CesiumGlobeAnchor anchor, CesiumVector3 oldPositionEcef, CesiumVector3 newPositionEcef);
 
-        #endregion
+#endregion
     }
 }
