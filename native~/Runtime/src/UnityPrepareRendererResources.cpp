@@ -6,6 +6,7 @@
 
 #include <Cesium3DTilesSelection/GltfUtilities.h>
 #include <Cesium3DTilesSelection/Tile.h>
+#include <Cesium3DTilesSelection/Tileset.h>
 #include <CesiumGeospatial/Ellipsoid.h>
 #include <CesiumGeospatial/Transforms.h>
 #include <CesiumGltf/AccessorView.h>
@@ -657,9 +658,6 @@ void* UnityPrepareRendererResources::prepareInMainThread(
     return nullptr;
   }
 
-  uint32_t currentOverlayCount = 
-      static_cast<uint32_t>(tile.getMappedRasterTiles().size());
-
   const Model& model = pRenderContent->getModel();
 
   std::string name = "glTF";
@@ -670,6 +668,10 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
   DotNet::CesiumForUnity::Cesium3DTileset tilesetComponent =
       this->_tileset.GetComponent<DotNet::CesiumForUnity::Cesium3DTileset>();
+  
+  uint32_t currentOverlayCount = 
+      static_cast<uint32_t>(
+        tilesetComponent.NativeImplementation().getTileset()->getOverlays().size());
 
   auto pModelGameObject =
       std::make_unique<UnityEngine::GameObject>(System::String(name));
@@ -1124,6 +1126,31 @@ void UnityPrepareRendererResources::attachRasterInMainThread(
   if (pCesiumGameObject->attachedRasterTileCount >= 3)
     return;
 
+  
+  DotNet::CesiumForUnity::Cesium3DTileset tilesetComponent =
+      this->_tileset.GetComponent<DotNet::CesiumForUnity::Cesium3DTileset>();
+  Tileset* pTileset = tilesetComponent.NativeImplementation().getTileset();
+  if (!pTileset) 
+    return;
+
+  uint32_t overlayIndex = 0;
+  bool overlayFound = false;
+  for (const CesiumUtility::IntrusivePointer<RasterOverlay>& pOverlay : 
+       pTileset->getOverlays()) {
+    // TODO: Is it safe to compare pointers like this?
+    if (&rasterTile.getOverlay() == pOverlay.get()) {
+      overlayFound = true;
+      break;
+    }
+
+    ++overlayIndex;
+  }
+
+  if (!overlayFound) 
+    return;  
+    
+  std::string overlayIndexStr = std::to_string(overlayIndex);
+
   // TODO: Can we count on the order of primitives in the transform chain
   // to match the order of primitives using gltf->forEachPrimitive??
   uint32_t primitiveIndex = 0;
@@ -1162,15 +1189,10 @@ void UnityPrepareRendererResources::attachRasterInMainThread(
       continue;
     }
 
-    // TODO: Indexing raster overlays in the order that they get attached feels a bit 
-    // brittle and may even be incorrect behavior. We probably need to thread an overlay
-    // index through the raster tile.
-
     // Note: The overlay index is NOT the same as the overlay texture coordinate index.
     // For instance, multiple overlays could point to the same overlay UV index -
     // multiple overlays can use the _CESIUMOVERLAY_0 attribute for example. The 
     // _CESIUMOVERLAY_<i> attributes correspond to unique _projections_, not unique overlays.
-    std::string overlayIndexStr = std::to_string(pCesiumGameObject->attachedRasterTileCount);
     material.SetFloat(
         System::String(
             "_overlay" + overlayIndexStr + "TextureCoordinateIndex"),
@@ -1258,5 +1280,7 @@ void UnityPrepareRendererResources::detachRasterInMainThread(
             "_overlay" + std::to_string(overlayTextureCoordinateID) +
             "Texture"),
         UnityEngine::Texture(nullptr));
+
+    --pCesiumGameObject->attachedRasterTileCount;
   }
 }
