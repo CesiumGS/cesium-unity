@@ -96,7 +96,10 @@ namespace Build
                 };
 
                 if (OperatingSystem.IsMacOS())
+                {
                     args.Add("-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64");
+                    args.Add("-DKTX_FORCE_BUILD_UNIVERSAL=ON");
+                }
 
                 Utility.Run("cmake", args);
                 Utility.Run("cmake", new[]
