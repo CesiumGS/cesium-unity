@@ -88,10 +88,14 @@ namespace CesiumForUnity
                         "CesiumForUnityNative-Runtime"
                     );
                 }
-                CreatePlaceholders(
-                    GetLibraryToBuild(report.summary),
-                    "CesiumForUnityNative-Runtime"
-                );
+                else
+                {
+                    // On other platforms, just build once for the default CPU
+                    CreatePlaceholders(
+                        GetLibraryToBuild(report.summary),
+                        "CesiumForUnityNative-Runtime"
+                    );
+                }
             }
             finally
             {
@@ -178,7 +182,7 @@ namespace CesiumForUnity
             else if (libraryToBuild.Platform == BuildTarget.StandaloneOSX)
             {
                 if (libraryToBuild.Cpu != null)
-                    importer.SetPlatformData(BuildTarget.StandaloneOSX, "CPU", libraryToBuild.Cpu);
+                    importer.SetPlatformData(BuildTarget.StandaloneOSX, "CPU", libraryToBuild.Cpu == "arm64" ? "ARM64" : libraryToBuild.Cpu);
             }
         }
 
