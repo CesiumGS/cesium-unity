@@ -162,10 +162,6 @@ namespace CesiumForUnity
             {
                 importer.SetPlatformData(BuildTarget.Android, "CPU", "ARM64");
             }
-            else
-            {
-                importer.SetPlatformData(libraryToBuild.Platform, "CPU", "x86_64");
-            }
         }
 
         public int callbackOrder => 0;
