@@ -99,6 +99,7 @@ namespace Build
                 {
                     args.Add("-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64");
                     args.Add("-DKTX_FORCE_BUILD_UNIVERSAL=ON");
+                    args.Add("-DBASISU_SUPPORT_SSE=OFF");
                 }
 
                 Utility.Run("cmake", args);

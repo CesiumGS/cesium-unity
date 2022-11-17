@@ -218,6 +218,7 @@ namespace CesiumForUnity
             {
                 library.ExtraConfigureArgs.Add("-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64");
                 library.ExtraConfigureArgs.Add("-DKTX_FORCE_BUILD_UNIVERSAL=ON");
+                library.ExtraConfigureArgs.Add("-DBASISU_SUPPORT_SSE=OFF");
             }
             return library;
         }
