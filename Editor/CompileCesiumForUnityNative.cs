@@ -2,28 +2,37 @@ using UnityEditor;
 using UnityEngine;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
-using UnityEditor.Callbacks;
-using UnityEditor.Compilation;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.IO;
 using System.Text;
 using System;
 using System.Collections.Generic;
+#if UNITY_ANDROID
+using UnityEditor.Android;
+#endif
 
 namespace CesiumForUnity
 {
+    internal struct PlatformToBuild
+    {
+        public BuildTargetGroup platformGroup;
+        public BuildTarget platform;
+        public bool isDevelopment;
+        public bool isCleanBuild;
+    }
+
     /// <summary>
     /// When the user builds a Player (built game) in the Unity Editor, this class manages
     /// automatically compiling a suitable version of the native C++ CesiumForUnityNative
     /// shared library to go with it.
     /// </summary>
-    class CompileCesiumForUnityNative :
+    internal class CompileCesiumForUnityNative :
         AssetPostprocessor,
         IPreprocessBuildWithReport,
         IPostBuildPlayerScriptDLLs
     {
-        class LibraryToBuild
+        internal class LibraryToBuild
         {
             public BuildTarget Platform = BuildTarget.StandaloneWindows64;
             public BuildTargetGroup PlatformGroup = BuildTargetGroup.Standalone;
@@ -38,7 +47,7 @@ namespace CesiumForUnity
             public List<string> ExtraBuildArgs = new List<string>();
         }
 
-        // This field is static because OnPreprocessBuild and OnPreprocessAsset are called on difference
+        // This field is static because OnPreprocessBuild and OnPreprocessAsset are called on different
         // instances of this class.
         private static Dictionary<string, LibraryToBuild> importsInProgress = new Dictionary<string, LibraryToBuild>();
 
@@ -78,7 +87,29 @@ namespace CesiumForUnity
             }
         }
 
-        private void CreatePlaceholders(LibraryToBuild libraryToBuild, string sharedLibraryName)
+        internal static void CreateLibraryPlaceholders(params PlatformToBuild[] platforms)
+        {
+            importsInProgress.Clear();
+
+            AssetDatabase.StartAssetEditing();
+            try
+            {
+                foreach (PlatformToBuild platform in platforms)
+                {
+                    CreatePlaceholders(
+                        GetLibraryToBuild(platform),
+                        "CesiumForUnityNative-Runtime"
+                    );
+                }
+            }
+            finally
+            {
+                AssetDatabase.StopAssetEditing();
+                importsInProgress.Clear();
+            }
+        }
+
+        internal static void CreatePlaceholders(LibraryToBuild libraryToBuild, string sharedLibraryName)
         {
             Directory.CreateDirectory(libraryToBuild.InstallDirectory);
 
@@ -87,9 +118,10 @@ namespace CesiumForUnity
             if (!File.Exists(libraryPath))
                 File.WriteAllText(libraryPath, "This is not a real shared library, it is a placeholder.", Encoding.UTF8);
 
-            string assetPath = Path.Combine("Assets", Path.GetRelativePath(Application.dataPath, libraryPath)).Replace("\\", "/");
-            importsInProgress.Add(assetPath, libraryToBuild);
-            AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceSynchronousImport);
+            string projectPath = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
+            string importPath = Path.GetRelativePath(projectPath, libraryPath).Replace("\\", "/");
+            importsInProgress.Add(importPath, libraryToBuild);
+            AssetDatabase.ImportAsset(importPath, ImportAssetOptions.ForceSynchronousImport);
         }
 
         private static string GetSharedLibraryFilename(string baseName, BuildTarget target)
@@ -130,6 +162,10 @@ namespace CesiumForUnity
             {
                 importer.SetPlatformData(BuildTarget.Android, "CPU", "ARM64");
             }
+            else
+            {
+                importer.SetPlatformData(libraryToBuild.Platform, "CPU", "x86_64");
+            }
         }
 
         public int callbackOrder => 0;
@@ -146,47 +182,75 @@ namespace CesiumForUnity
             BuildNativeLibrary(GetLibraryToBuild(report.summary));
         }
 
-        private LibraryToBuild GetLibraryToBuild(BuildSummary summary)
+        public static LibraryToBuild GetLibraryToBuild(BuildSummary summary)
+        {
+            return GetLibraryToBuild(new PlatformToBuild()
+            {
+                platform = summary.platform,
+                platformGroup = summary.platformGroup,
+                isDevelopment = summary.options.HasFlag(BuildOptions.Development),
+                isCleanBuild = summary.options.HasFlag(BuildOptions.CleanBuildCache)
+            });
+        }
+
+        public static LibraryToBuild GetLibraryToBuild(PlatformToBuild platform)
         {
             string sourceFilename = GetSourceFilePathName();
             string packagePath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(sourceFilename), $".."));
             string nativeDirectory = Path.Combine(packagePath, "native~");
 
-            string platformDirectoryName = GetDirectoryNameForPlatform(summary);
+            string platformDirectoryName = GetDirectoryNameForPlatform(platform);
 
             LibraryToBuild library = new LibraryToBuild();
-            library.Platform = summary.platform;
-            library.PlatformGroup = summary.platformGroup;
+            library.Platform = platform.platform;
+            library.PlatformGroup = platform.platformGroup;
             library.SourceDirectory = nativeDirectory;
             library.BuildDirectory = Path.Combine(nativeDirectory, $"build-{platformDirectoryName}");
             library.GeneratedDirectoryName = $"generated-{platformDirectoryName}";
-            library.Configuration = summary.options.HasFlag(BuildOptions.Development)
+            library.Configuration = platform.isDevelopment
                 ? "Debug"
                 : "RelWithDebInfo";
-            library.InstallDirectory = GetInstallDirectoryForPlatform(summary, packagePath);
-            library.CleanBuild = summary.options.HasFlag(BuildOptions.CleanBuildCache);
+            library.InstallDirectory = GetInstallDirectoryForPlatform(platform, packagePath);
+            library.CleanBuild = platform.isCleanBuild;
 
-            if (summary.platformGroup == BuildTargetGroup.Android)
+            if (IsEditor(platform))
+                library.ExtraConfigureArgs.Add("-DEDITOR=on");
+
+            if (platform.platformGroup == BuildTargetGroup.Android)
                 library.Toolchain = "extern/android-toolchain.cmake";
             return library;
         }
 
-        private string GetDirectoryNameForPlatform(BuildSummary summary)
+        private static bool IsEditor(PlatformToBuild platform)
         {
-            return GetDirectoryNameForPlatform(summary.platformGroup, summary.platform);
+            return IsEditor(platform.platformGroup, platform.platform);
         }
 
-        private string GetDirectoryNameForPlatform(BuildTargetGroup platformGroup, BuildTarget platform)
+        private static bool IsEditor(BuildTargetGroup platformGroup, BuildTarget platform)
         {
+            return platformGroup == BuildTargetGroup.Unknown && platform == BuildTarget.NoTarget;
+        }
+
+        private static string GetDirectoryNameForPlatform(PlatformToBuild platform)
+        {
+            return GetDirectoryNameForPlatform(platform.platformGroup, platform.platform);
+        }
+
+        private static string GetDirectoryNameForPlatform(BuildTargetGroup platformGroup, BuildTarget platform)
+        {
+            if (IsEditor(platformGroup, platform))
+                return "Editor";
             return platformGroup.ToString();
         }
 
-        private string GetInstallDirectoryForPlatform(BuildSummary summary, string packagePath)
+        private static string GetInstallDirectoryForPlatform(PlatformToBuild platform, string packagePath)
         {
-            return Path.Combine(packagePath, "Plugins", GetDirectoryNameForPlatform(summary));
+            if (IsEditor(platform))
+                return Path.Combine(packagePath, "Editor");
+            return Path.Combine(packagePath, "Plugins", GetDirectoryNameForPlatform(platform));
         }
 
-        private void BuildNativeLibrary(LibraryToBuild library)
+        internal static void BuildNativeLibrary(LibraryToBuild library)
         {
             if (library.CleanBuild && library.BuildDirectory.Length > 2 && Directory.Exists(library.BuildDirectory))
                 Directory.Delete(library.BuildDirectory, true);
@@ -243,7 +307,7 @@ namespace CesiumForUnity
                         "--config",
                         library.Configuration,
                         "--parallel",
-                        "14",
+                        (Environment.ProcessorCount + 1).ToString(),
                         "--target",
                         "install"
                     };
@@ -258,7 +322,7 @@ namespace CesiumForUnity
             }
         }
 
-        private void RunAndLog(ProcessStartInfo startInfo, StreamWriter log, string logFilename)
+        private static void RunAndLog(ProcessStartInfo startInfo, StreamWriter log, string logFilename)
         {
             using (Process configure = new Process())
             {
@@ -285,24 +349,34 @@ namespace CesiumForUnity
             }
         }
 
-        private void ConfigureEnvironmentVariables(IDictionary<string, string> environment, LibraryToBuild library)
+        private static void ConfigureEnvironmentVariables(IDictionary<string, string> environment, LibraryToBuild library)
         {
             // CMake can't deal with back slashes (Windows) in the ANDROID_NDK_ROOT environment variable.
             // So replace them with forward slashes.
             string? ndkRoot = environment.ContainsKey("ANDROID_NDK_ROOT") ? environment["ANDROID_NDK_ROOT"] : null;
-            if (ndkRoot != null)
+#if UNITY_ANDROID
+            if (ndkRoot == null)
             {
-                // On Windows, use the make program included in the NDK. Because Visual Studio (which is usually
-                // the default) won't work to build for Android.
-                if (library.Platform == BuildTarget.Android && Environment.OSVersion.Platform == PlatformID.Win32NT)
+                // We're building for Android but don't have a known NDK root. Try asking Unity for it.
+                ndkRoot = AndroidExternalToolsSettings.ndkRootPath;
+            }
+#endif
+
+            // On Windows, use the make program included in the NDK. Because Visual Studio (which is usually
+            // the default) won't work to build for Android.
+            if (library.Platform == BuildTarget.Android && Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                library.ExtraConfigureArgs.Add("-G \"Unix Makefiles\"");
+
+                if (!string.IsNullOrEmpty(ndkRoot))
                 {
-                    library.ExtraConfigureArgs.Add("-G \"Unix Makefiles\"");
                     string make = Path.Combine(ndkRoot, "prebuilt", "windows-x86_64", "bin", "make.exe").Replace('\\', '/');
                     library.ExtraConfigureArgs.Add($"-DCMAKE_MAKE_PROGRAM=\"{make}\"");
                 }
-
-                environment["ANDROID_NDK_ROOT"] = ndkRoot.Replace('\\', '/');
             }
+
+            if (!string.IsNullOrEmpty(ndkRoot))
+                environment["ANDROID_NDK_ROOT"] = ndkRoot.Replace('\\', '/');
         }
 
         private static string GetSourceFilePathName([CallerFilePath] string? callerFilePath = null)
