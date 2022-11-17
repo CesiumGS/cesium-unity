@@ -218,6 +218,8 @@ namespace CesiumForUnity
 
             if (platform.platformGroup == BuildTargetGroup.Android)
                 library.Toolchain = "extern/android-toolchain.cmake";
+            else if (platform.platform == BuildTarget.StandaloneOSX)
+                library.ExtraConfigureArgs.Add("-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64");
             return library;
         }
 

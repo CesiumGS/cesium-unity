@@ -85,14 +85,19 @@ namespace Build
                 Directory.CreateDirectory(generatedEditorPath);
 
                 Console.WriteLine("**** Compiling C++ code for the Editor");
-                Utility.Run("cmake", new[]
+                List<string> args = new List<string>()
                 {
                     "-B",
                     "native~/build",
                     "-S",
                     "native~",
                     "-DCMAKE_BUILD_TYPE=RelWithDebInfo"
-                });
+                };
+
+                if (OperatingSystem.IsMacOS())
+                    args.Add("-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64");
+
+                Utility.Run("cmake", args);
                 Utility.Run("cmake", new[]
                 {
                     "--build",
@@ -158,8 +163,8 @@ namespace Build
                         "CesiumForUnity.BuildCesiumForUnity.CompileForMacAndExit"
                     });
 
-                    Console.WriteLine("**** Adding generated files (for the Windows Player) to the package");
-                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_STANDALONE_WIN", generatedRuntimePath, Path.Combine(outputPackagePath, "Runtime", "generated"));
+                    Console.WriteLine("**** Adding generated files (for the macOS Player) to the package");
+                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_STANDALONE_OSX", generatedRuntimePath, Path.Combine(outputPackagePath, "Runtime", "generated"));
 
                     // Clean the generated code directory.
                     Directory.Delete(generatedRuntimePath, true);
