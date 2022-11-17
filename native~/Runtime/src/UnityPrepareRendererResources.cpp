@@ -874,8 +874,6 @@ void* UnityPrepareRendererResources::prepareInMainThread(
                   material.SetFloat(
                       System::String("_baseColorTextureCoordinateIndex"),
                       static_cast<float>(texCoordIndexIt->second));
-
-                  material.EnableKeyword(System::String("_HASBASECOLOR_ON"));
                 }
               }
             }
@@ -896,9 +894,6 @@ void* UnityPrepareRendererResources::prepareInMainThread(
                       System::String(
                           "_metallicRoughnessTextureCoordinateIndex"),
                       static_cast<float>(texCoordIndexIt->second));
-
-                  material.EnableKeyword(
-                      System::String("_HASMETALLICROUGHNESS_ON"));
                 }
               }
             }
@@ -921,8 +916,6 @@ void* UnityPrepareRendererResources::prepareInMainThread(
                 material.SetFloat(
                     System::String("_normalMapScale"),
                     static_cast<float>(pMaterial->normalTexture->scale));
-
-                material.EnableKeyword(System::String("_HASNORMALMAP_ON"));
               }
             }
           }
@@ -944,8 +937,6 @@ void* UnityPrepareRendererResources::prepareInMainThread(
                 material.SetFloat(
                     System::String("_occlusionStrength"),
                     static_cast<float>(pMaterial->occlusionTexture->strength));
-
-                material.EnableKeyword(System::String("_HASOCCLUSION_ON"));
               }
             }
           }
@@ -982,8 +973,6 @@ void* UnityPrepareRendererResources::prepareInMainThread(
                 material.SetFloat(
                     System::String("_emissiveTextureCoordinateIndex"),
                     static_cast<float>(texCoordIndexIt->second));
-
-                material.EnableKeyword(System::String("_HASEMISSIVE_ON"));
               }
             }
           }
@@ -997,25 +986,6 @@ void* UnityPrepareRendererResources::prepareInMainThread(
                   "_overlay" + std::to_string(i) + "TextureCoordinateIndex"),
               0);
         }
-
-        // Use a shader variant that supports the expected number of overlays.
-        switch (currentOverlayCount) {
-        case 0:
-          material.EnableKeyword(System::String("_OVERLAYCOUNT_NONE"));
-          break;
-        case 1:
-          material.DisableKeyword(System::String("_OVERLAYCOUNT_NONE"));
-          material.EnableKeyword(System::String("_OVERLAYCOUNT_ONE"));
-          break;
-        case 2:
-          material.DisableKeyword(System::String("_OVERLAYCOUNT_NONE"));
-          material.EnableKeyword(System::String("_OVERLAYCOUNT_TWO"));
-          break;
-        // case 3:
-        default:
-          material.DisableKeyword(System::String("_OVERLAYCOUNT_NONE"));
-          material.EnableKeyword(System::String("_OVERLAYCOUNT_THREE"));
-        };
 
         meshFilter.sharedMesh(unityMesh);
 
@@ -1038,9 +1008,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
   CesiumGltfGameObject* pCesiumGameObject = new CesiumGltfGameObject{
       std::move(pModelGameObject),
-      std::move(pLoadThreadResult->primitiveInfos),
-      0,
-      currentOverlayCount};
+      std::move(pLoadThreadResult->primitiveInfos)};
 
   return pCesiumGameObject;
 }
@@ -1121,11 +1089,6 @@ void UnityPrepareRendererResources::attachRasterInMainThread(
       static_cast<UnityEngine::Texture*>(pMainThreadRendererResources);
   if (!pCesiumGameObject || !pCesiumGameObject->pGameObject || !pTexture)
     return;
-
-  // Currently support a map of 3 raster overlays.
-  if (pCesiumGameObject->attachedRasterTileCount >= 3)
-    return;
-
   
   DotNet::CesiumForUnity::Cesium3DTileset tilesetComponent =
       this->_tileset.GetComponent<DotNet::CesiumForUnity::Cesium3DTileset>();
@@ -1210,29 +1173,6 @@ void UnityPrepareRendererResources::attachRasterInMainThread(
     material.SetVector(
         System::String("_overlay" + overlayIndexStr + "TranslationAndScale"),
         translationAndScale);
-    
-    // We just added a raster tile, so if it is going to exceed capacity we need to pick
-    // a new variant with enough raster overlay slots.
-    if (pCesiumGameObject->attachedRasterTileCount == pCesiumGameObject->rasterTileCapacity) {
-      switch (pCesiumGameObject->attachedRasterTileCount) {
-      case 0:
-        material.DisableKeyword(System::String("_OVERLAYCOUNT_NONE"));
-        material.EnableKeyword(System::String("_OVERLAYCOUNT_ONE"));
-        break;
-      case 1:
-        material.DisableKeyword(System::String("_OVERLAYCOUNT_ONE"));
-        material.EnableKeyword(System::String("_OVERLAYCOUNT_TWO"));
-        break;
-      case 2:
-        material.DisableKeyword(System::String("_OVERLAYCOUNT_TWO"));
-        material.EnableKeyword(System::String("_OVERLAYCOUNT_THREE"));
-      };
-    }
-  }
-
-  ++pCesiumGameObject->attachedRasterTileCount;
-  if (pCesiumGameObject->attachedRasterTileCount > pCesiumGameObject->rasterTileCapacity) {
-    pCesiumGameObject->rasterTileCapacity = pCesiumGameObject->attachedRasterTileCount;
   }
 }
 
@@ -1280,7 +1220,5 @@ void UnityPrepareRendererResources::detachRasterInMainThread(
             "_overlay" + std::to_string(overlayTextureCoordinateID) +
             "Texture"),
         UnityEngine::Texture(nullptr));
-
-    --pCesiumGameObject->attachedRasterTileCount;
   }
 }

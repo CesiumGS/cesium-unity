@@ -38,19 +38,6 @@ struct CesiumGltfGameObject {
    * meshes. 
    */
   std::vector<CesiumPrimitiveInfo> primitiveInfos{};
-
-  /**
-   * @brief The number of raster tiles that have been attached, should be less
-   * than or equal to the raster tile capacity. 
-   */
-  uint32_t attachedRasterTileCount{};
-
-  /**
-   * @brief The number of raster tiles that the current shader variant can 
-   * support. If more raster tiles are added, a different shader variant should
-   * be used and this should be incremented. 
-   */
-  uint32_t rasterTileCapacity{};
 };
 
 class UnityPrepareRendererResources
