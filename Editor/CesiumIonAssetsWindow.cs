@@ -77,10 +77,6 @@ namespace CesiumForUnity
                 Repaint();
             }
         }
-        void Update()
-        {
-            CesiumIonSession.Ion().Tick();
-        }
 
         void DrawAssetListPanel()
         {

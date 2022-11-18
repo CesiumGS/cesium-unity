@@ -1,7 +1,7 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using System.Collections.Generic;
 
 namespace CesiumForUnity
 {
@@ -71,6 +71,7 @@ namespace CesiumForUnity
             Texture2D resized = new Texture2D(desiredWidth, desiredHeight);
             resized.ReadPixels(new Rect(0, 0, desiredWidth, desiredHeight), 0, 0);
             resized.Apply();
+            resized.hideFlags = HideFlags.HideAndDontSave;
 
             RenderTexture.active = oldActive;
 
@@ -133,14 +134,17 @@ namespace CesiumForUnity
             buttonTexture = new Texture2D(1, 1);
             buttonTexture.SetPixel(0, 0, buttonColor);
             buttonTexture.Apply();
+            buttonTexture.hideFlags = HideFlags.HideAndDontSave;
 
             buttonHoverTexture = new Texture2D(1, 1);
             buttonHoverTexture.SetPixel(0, 0, buttonColorLighter);
             buttonHoverTexture.Apply();
+            buttonHoverTexture.hideFlags = HideFlags.HideAndDontSave;
 
             buttonPressedTexture = new Texture2D(1, 1);
             buttonPressedTexture.SetPixel(0, 0, buttonColorDarker);
             buttonPressedTexture.Apply();
+            buttonPressedTexture.hideFlags = HideFlags.HideAndDontSave;
 
             cesiumButtonStyle = new GUIStyle();
             cesiumButtonStyle.padding = new RectOffset(25, 25, 10, 10);
@@ -178,6 +182,5 @@ namespace CesiumForUnity
             checkIcon = LoadImage("FontAwesome/check-solid");
             xIcon = LoadImage("FontAwesome/times-solid");
         }
-
     }
 }

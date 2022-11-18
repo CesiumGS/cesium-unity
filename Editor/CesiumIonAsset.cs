@@ -125,6 +125,7 @@ namespace CesiumForUnity
                 if (this._type == AssetType.Tileset && this._tileset != null)
                 {
                     this._tileset.ionAccessToken = value;
+                    this._tileset.RecreateTileset();
                 }
 
                 if (this._type == AssetType.Overlay)
@@ -133,6 +134,7 @@ namespace CesiumForUnity
                     if (ionOverlay != null)
                     {
                         ionOverlay.ionAccessToken = value;
+                        ionOverlay.Refresh();
                     }
                 }
             }
