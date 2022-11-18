@@ -78,6 +78,7 @@ namespace CesiumForUnity
             {
                 if (report.summary.platform == BuildTarget.StandaloneOSX)
                 {
+                    UnityEngine.Debug.Log("***** Creating macOS placeholders");
                     // On macOS, build separately for x64 and arm64.
                     CreatePlaceholders(
                         GetLibraryToBuild(report.summary, "x86_64"),
@@ -96,16 +97,20 @@ namespace CesiumForUnity
                         "CesiumForUnityNative-Runtime"
                     );
                 }
+                UnityEngine.Debug.Log("***** End of OnPreprocessBuild without an exception");
             }
             finally
             {
+                UnityEngine.Debug.Log("***** Before StopAssetEditing");
                 AssetDatabase.StopAssetEditing();
+                UnityEngine.Debug.Log("***** After StopAssetEditing");
                 importsInProgress.Clear();
             }
         }
 
         internal static void CreateLibraryPlaceholders(params PlatformToBuild[] platforms)
         {
+            UnityEngine.Debug.Log("***** We shouldn't get here");
             importsInProgress.Clear();
 
             AssetDatabase.StartAssetEditing();
@@ -171,10 +176,11 @@ namespace CesiumForUnity
             if (importer == null)
                 return;
 
+            UnityEngine.Debug.Log("***** OnPreprocessAsset " + this.assetPath);
             importer.SetCompatibleWithAnyPlatform(false);
             importer.SetCompatibleWithEditor(false);
             importer.SetCompatibleWithPlatform(libraryToBuild.Platform, true);
-            
+
             if (libraryToBuild.Platform == BuildTarget.Android)
             {
                 importer.SetPlatformData(BuildTarget.Android, "CPU", "ARM64");
@@ -182,7 +188,51 @@ namespace CesiumForUnity
             else if (libraryToBuild.Platform == BuildTarget.StandaloneOSX)
             {
                 if (libraryToBuild.Cpu != null)
+                {
                     importer.SetPlatformData(BuildTarget.StandaloneOSX, "CPU", libraryToBuild.Cpu == "arm64" ? "ARM64" : libraryToBuild.Cpu);
+                    UnityEngine.Debug.Log("***** Setting platform data  " + this.assetPath + " cpu " + libraryToBuild.Cpu);
+                }
+            }
+            UnityEngine.Debug.Log("***** Finished OnPreprocessAsset without exception " + this.assetPath);
+        }
+
+        private static void OnPostprocessAllAssets(
+            string[] importedAssets,
+            string[] deletedAssets,
+            string[] movedAssets,
+            string[] movedFromAssetPaths,
+            bool didDomainReload)
+        {
+            foreach (string imported in importedAssets)
+            {
+                LibraryToBuild? libraryToBuild;
+                if (!importsInProgress.TryGetValue(imported, out libraryToBuild))
+                    continue;
+
+                PluginImporter? importer = AssetImporter.GetAtPath(imported) as PluginImporter;
+                if (importer == null)
+                    continue;
+
+                UnityEngine.Debug.Log("***** OnPostprocessAllAssets for " + imported);
+
+                importer.SetCompatibleWithAnyPlatform(false);
+                importer.SetCompatibleWithEditor(false);
+                importer.SetCompatibleWithPlatform(libraryToBuild.Platform, true);
+                
+                if (libraryToBuild.Platform == BuildTarget.Android)
+                {
+                    importer.SetPlatformData(BuildTarget.Android, "CPU", "ARM64");
+                }
+                else if (libraryToBuild.Platform == BuildTarget.StandaloneOSX)
+                {
+                    if (libraryToBuild.Cpu != null)
+                    {
+                        importer.SetPlatformData(BuildTarget.StandaloneOSX, "CPU", libraryToBuild.Cpu == "arm64" ? "ARM64" : libraryToBuild.Cpu);
+                        UnityEngine.Debug.Log("***** Setting platform data  " + imported + " cpu " + libraryToBuild.Cpu);
+                    }
+                }
+
+                UnityEngine.Debug.Log("***** IsCompatibleWithEditor " + importer.GetCompatibleWithEditor());
             }
         }
 
