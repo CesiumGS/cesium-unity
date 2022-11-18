@@ -108,6 +108,10 @@ namespace CesiumForUnity
             {
                 IonTokenTroubleshootingWindow.ShowWindow(details.tileset, true);
             }
+            else
+            {
+                Debug.Log(details.message);
+            }
         }
 
         static void
@@ -131,6 +135,10 @@ namespace CesiumForUnity
                 && (details.httpStatusCode == 401 || details.httpStatusCode == 404))
             {
                 IonTokenTroubleshootingWindow.ShowWindow(details.overlay, true);
+            }
+            else
+            {
+                Debug.Log(details.message);
             }
         }
 
