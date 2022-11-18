@@ -68,11 +68,6 @@ namespace CesiumForUnity
                 HandleCesiumRasterOverlayLoadFailure;
         }
 
-        static void UpdateIonSession()
-        {
-            CesiumIonSession.Ion().Tick();
-        }
-
         static void CheckProjectFilesForTextMeshPro()
         {
             UnityEngine.Object tmpSettings = Resources.Load("TMP Settings");
@@ -84,6 +79,11 @@ namespace CesiumForUnity
             TextMeshProPromptWindow.ShowWindow();
 
             EditorApplication.update -= CheckProjectFilesForTextMeshPro;
+        }
+
+        static void UpdateIonSession()
+        {
+            CesiumIonSession.Ion().Tick();
         }
 
         static void
