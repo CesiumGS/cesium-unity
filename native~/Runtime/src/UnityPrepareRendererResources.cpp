@@ -1018,7 +1018,6 @@ void UnityPrepareRendererResources::free(
     void* pLoadThreadResult,
     void* pMainThreadResult) noexcept {
   if (pLoadThreadResult) {
-    // TODO: is any more cleanup necessary here.
     delete static_cast<LoadThreadResult*>(pLoadThreadResult);
   }
 
