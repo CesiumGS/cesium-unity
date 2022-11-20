@@ -76,27 +76,27 @@ namespace CesiumForUnity
             AssetDatabase.StartAssetEditing();
             try
             {
-                if (report.summary.platform == BuildTarget.StandaloneOSX)
-                {
-                    UnityEngine.Debug.Log("***** Creating macOS placeholders");
-                    // On macOS, build separately for x64 and arm64.
-                    CreatePlaceholders(
-                        GetLibraryToBuild(report.summary, "x86_64"),
-                        "CesiumForUnityNative-Runtime"
-                    );
-                    CreatePlaceholders(
-                        GetLibraryToBuild(report.summary, "arm64"),
-                        "CesiumForUnityNative-Runtime"
-                    );
-                }
-                else
-                {
+                // if (report.summary.platform == BuildTarget.StandaloneOSX)
+                // {
+                //     UnityEngine.Debug.Log("***** Creating macOS placeholders");
+                //     // On macOS, build separately for x64 and arm64.
+                //     CreatePlaceholders(
+                //         GetLibraryToBuild(report.summary, "x86_64"),
+                //         "CesiumForUnityNative-Runtime"
+                //     );
+                //     CreatePlaceholders(
+                //         GetLibraryToBuild(report.summary, "arm64"),
+                //         "CesiumForUnityNative-Runtime"
+                //     );
+                // }
+                // else
+                // {
                     // On other platforms, just build once for the default CPU
                     CreatePlaceholders(
                         GetLibraryToBuild(report.summary),
                         "CesiumForUnityNative-Runtime"
                     );
-                }
+                // }
                 UnityEngine.Debug.Log("***** End of OnPreprocessBuild without an exception");
             }
             finally
@@ -249,8 +249,25 @@ namespace CesiumForUnity
         {
             if (report.summary.platform == BuildTarget.StandaloneOSX)
             {
-                BuildNativeLibrary(GetLibraryToBuild(report.summary, "x86_64"));
-                BuildNativeLibrary(GetLibraryToBuild(report.summary, "arm64"));
+                LibraryToBuild x64 = GetLibraryToBuild(report.summary, "x86_64");
+                BuildNativeLibrary(x64);
+                LibraryToBuild arm64 = GetLibraryToBuild(report.summary, "arm64");
+                BuildNativeLibrary(arm64);
+
+                string[] args = new[]
+                {
+                    "-create",
+                    Path.Combine(x64.InstallDirectory, "libCesiumForUnityNative-Runtime.dylib"),
+                    Path.Combine(arm64.InstallDirectory, "libCesiumForUnityNative-Runtime.dylib"),
+                    "-output",
+                    Path.GetFullPath(Path.Combine(x64.InstallDirectory, "..", "libCesiumForUnityNative-Runtime.dylib"))
+                };
+                Process p = Process.Start("lipo", string.Join(' ', args));
+                p.WaitForExit();
+                if (p.ExitCode != 0)
+                    throw new Exception("lipo failed");
+                Directory.Delete(x64.InstallDirectory, true);
+                Directory.Delete(arm64.InstallDirectory, true);
             }
             else
             {
