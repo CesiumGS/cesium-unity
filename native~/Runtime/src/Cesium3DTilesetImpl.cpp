@@ -6,6 +6,7 @@
 
 #include <Cesium3DTilesSelection/IonRasterOverlay.h>
 #include <Cesium3DTilesSelection/Tileset.h>
+#include <CesiumGeospatial/Transforms.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/CesiumForUnity/Cesium3DTilesetLoadFailureDetails.h>
@@ -21,10 +22,17 @@
 #include <DotNet/UnityEngine/Application.h>
 #include <DotNet/UnityEngine/GameObject.h>
 #include <DotNet/UnityEngine/Time.h>
+#include <DotNet/UnityEngine/Camera.h>
+#include <DotNet/UnityEngine/Transform.h>
+#include <DotNet/UnityEngine/Vector3.h>
+#include <DotNet/UnityEngine/Quaternion.h>
+
+#include <variant>
 
 #if UNITY_EDITOR
 #include <DotNet/UnityEditor/CallbackFunction.h>
 #include <DotNet/UnityEditor/EditorApplication.h>
+#include <DotNet/UnityEditor/SceneView.h>
 #endif
 
 using namespace Cesium3DTilesSelection;
@@ -39,8 +47,6 @@ Cesium3DTilesetImpl::Cesium3DTilesetImpl(
 #if UNITY_EDITOR
       _updateInEditorCallback(nullptr),
 #endif
-      _georeference(nullptr),
-      _georeferenceChangedCallback(nullptr),
       _creditSystem(nullptr),
       _destroyTilesetOnNextUpdate(false) {
 }
@@ -171,12 +177,6 @@ void Cesium3DTilesetImpl::OnDisable(
   }
 #endif
 
-  if (this->_georeferenceChangedCallback != nullptr) {
-    this->_georeference.remove_changed(this->_georeferenceChangedCallback);
-  }
-
-  this->_georeferenceChangedCallback = nullptr;
-  this->_georeference = nullptr;
   this->_creditSystem = nullptr;
 
   this->DestroyTileset(tileset);
@@ -184,7 +184,116 @@ void Cesium3DTilesetImpl::OnDisable(
 
 void Cesium3DTilesetImpl::RecreateTileset(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
+  // TODO: remove, just for quick testing
+  this->FocusTileset(tileset);
   this->DestroyTileset(tileset);
+}
+
+namespace {
+
+struct CalculateECEFCameraPosition {
+  const CesiumGeospatial::Ellipsoid& ellipsoid;
+
+  glm::dvec3 operator()(const CesiumGeometry::BoundingSphere& sphere) {
+    const glm::dvec3& center = sphere.getCenter();
+    glm::dmat4 enuToEcef =
+        glm::dmat4(CesiumGeospatial::Transforms::eastNorthUpToFixedFrame(center, ellipsoid));
+    glm::dvec3 offset =
+        sphere.getRadius() *
+        glm::normalize(
+            glm::dvec3(enuToEcef[0]) + glm::dvec3(enuToEcef[1]) + glm::dvec3(enuToEcef[2]));
+    glm::dvec3 position = center + offset;
+    return position;
+  }
+
+  glm::dvec3
+  operator()(const CesiumGeometry::OrientedBoundingBox& orientedBoundingBox) {
+    const glm::dvec3& center = orientedBoundingBox.getCenter();
+    glm::dmat4 enuToEcef =
+        glm::dmat4(CesiumGeospatial::Transforms::eastNorthUpToFixedFrame(center, ellipsoid));
+    const glm::dmat3& halfAxes = orientedBoundingBox.getHalfAxes();
+    glm::dvec3 offset =
+        glm::length(halfAxes[0] + halfAxes[1] + halfAxes[2]) *
+        glm::normalize(
+            glm::dvec3(enuToEcef[0]) + glm::dvec3(enuToEcef[1]) + glm::dvec3(enuToEcef[2]));
+    glm::dvec3 position = center + offset;
+    return position;
+  }
+
+  glm::dvec3
+  operator()(const CesiumGeospatial::BoundingRegion& boundingRegion) {
+    return (*this)(boundingRegion.getBoundingBox());
+  }
+
+  glm::dvec3
+  operator()(const CesiumGeospatial::BoundingRegionWithLooseFittingHeights&
+                  boundingRegionWithLooseFittingHeights) {
+    return (*this)(boundingRegionWithLooseFittingHeights.getBoundingRegion()
+                        .getBoundingBox());
+  }
+
+  glm::dvec3 operator()(const CesiumGeospatial::S2CellBoundingVolume& s2) {
+    return (*this)(s2.computeBoundingRegion());
+  }
+};
+} // namespace
+
+void Cesium3DTilesetImpl::FocusTileset(
+    const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
+  
+#if UNITY_EDITOR
+  // this->_georeference.NativeImplementation().TransformEarthCenteredEarthFixedPositionToUnityWorld) {
+  UnityEditor::SceneView lastActiveEditorView = UnityEditor::SceneView::lastActiveSceneView();
+  if (!this->_pTileset || !this->_pTileset->getRootTile() || lastActiveEditorView == nullptr) {
+    return;
+  }
+  
+  UnityEngine::Camera editorCamera = lastActiveEditorView.camera();
+  if (editorCamera == nullptr) {
+    return;
+  }
+
+  DotNet::CesiumForUnity::CesiumGeoreference georeferenceComponent = 
+      tileset.gameObject().GetComponentInParent<DotNet::CesiumForUnity::CesiumGeoreference>();
+  
+  const CesiumGeospatial::LocalHorizontalCoordinateSystem& georeferenceCrs =
+      georeferenceComponent.NativeImplementation().getCoordinateSystem();
+  const glm::dmat4& ecefToUnityWorld = georeferenceCrs.getEcefToLocalTransformation();
+  
+  const BoundingVolume& boundingVolume = this->_pTileset->getRootTile()->getBoundingVolume();
+  glm::dvec3 ecefCameraPosition = std::visit(
+        CalculateECEFCameraPosition{CesiumGeospatial::Ellipsoid::WGS84},
+        boundingVolume);
+  glm::dvec3 unityCameraPosition = 
+      glm::dvec3(ecefToUnityWorld * glm::dvec4(ecefCameraPosition, 1.0));
+  
+  // TODO: fix forward direction?
+  glm::dvec3 ecefCenter =
+      Cesium3DTilesSelection::getBoundingVolumeCenter(boundingVolume);
+  glm::dvec3 unityCenter = glm::dvec3(ecefToUnityWorld * glm::dvec4(ecefCenter, 1.0));
+  glm::dvec3 unityCameraFront =
+      glm::normalize(unityCenter - unityCameraPosition);
+  glm::dvec3 unityCameraRight =
+      glm::normalize(glm::cross(glm::dvec3(0.0, 0.0, 1.0), unityCameraFront));
+  glm::dvec3 unityCameraUp =
+      glm::normalize(glm::cross(unityCameraFront, unityCameraRight));
+
+  UnityEngine::Vector3 unityCameraPositionf;
+  unityCameraPositionf.x = static_cast<float>(unityCameraPosition.x);
+  unityCameraPositionf.y = static_cast<float>(unityCameraPosition.y);
+  unityCameraPositionf.z = static_cast<float>(unityCameraPosition.z);
+
+  UnityEngine::Vector3 unityCameraFrontf;
+  unityCameraFrontf.x = static_cast<float>(unityCameraFront.x);
+  unityCameraFrontf.y = static_cast<float>(unityCameraFront.y);
+  unityCameraFrontf.z = static_cast<float>(unityCameraFront.z);
+
+  lastActiveEditorView.pivot(unityCameraPositionf);
+  lastActiveEditorView.rotation(
+      UnityEngine::Quaternion::LookRotation(
+        unityCameraFrontf, 
+        UnityEngine::Vector3::up()));
+#endif
 }
 
 Tileset* Cesium3DTilesetImpl::getTileset() { return this->_pTileset.get(); }
