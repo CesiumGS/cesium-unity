@@ -184,8 +184,6 @@ void Cesium3DTilesetImpl::OnDisable(
 
 void Cesium3DTilesetImpl::RecreateTileset(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
-  // TODO: remove, just for quick testing
-  this->FocusTileset(tileset);
   this->DestroyTileset(tileset);
 }
 

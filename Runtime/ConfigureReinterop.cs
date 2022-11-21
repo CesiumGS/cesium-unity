@@ -118,6 +118,8 @@ namespace CesiumForUnity
             mesh.RecalculateBounds();
             int instanceID = mesh.GetInstanceID();
 
+            Bounds bounds = new Bounds(new Vector3(0, 0, 0), new Vector3(1, 2, 1));
+
             MeshCollider meshCollider = go.AddComponent<MeshCollider>();
             meshCollider.sharedMesh = mesh;
 
