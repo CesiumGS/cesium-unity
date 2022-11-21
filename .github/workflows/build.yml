@@ -76,7 +76,7 @@ jobs:
           name: Windows Package
           path: D:\cesium\CesiumForUnityBuildProject\*.tgz
   MacOS:
-    needs: [Quick Checks]
+    needs: [QuickChecks]
     runs-on: macos-latest
     # Only allow a single macOS build at a time, for Unity licensing reasons
     concurrency: mac
