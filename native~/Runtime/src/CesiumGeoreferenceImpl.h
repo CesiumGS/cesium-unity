@@ -19,7 +19,8 @@ public:
       const DotNet::CesiumForUnity::CesiumGeoreference& georeference);
   void RecalculateOrigin(
       const DotNet::CesiumForUnity::CesiumGeoreference& georeference);
-  void InitializeOrigin(const DotNet::CesiumForUnity::CesiumGeoreference& georeference);
+  void InitializeOrigin(
+      const DotNet::CesiumForUnity::CesiumGeoreference& georeference);
 
   DotNet::CesiumForUnity::CesiumVector3
   TransformUnityWorldPositionToEarthCenteredEarthFixed(

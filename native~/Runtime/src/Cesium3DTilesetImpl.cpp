@@ -1,8 +1,8 @@
 #include "Cesium3DTilesetImpl.h"
 
 #include "CameraManager.h"
-#include "UnityTilesetExternals.h"
 #include "UnityPrepareRendererResources.h"
+#include "UnityTilesetExternals.h"
 
 #include <Cesium3DTilesSelection/IonRasterOverlay.h>
 #include <Cesium3DTilesSelection/Tileset.h>
@@ -20,12 +20,12 @@
 #include <DotNet/System/Object.h>
 #include <DotNet/System/String.h>
 #include <DotNet/UnityEngine/Application.h>
-#include <DotNet/UnityEngine/GameObject.h>
-#include <DotNet/UnityEngine/Time.h>
 #include <DotNet/UnityEngine/Camera.h>
+#include <DotNet/UnityEngine/GameObject.h>
+#include <DotNet/UnityEngine/Quaternion.h>
+#include <DotNet/UnityEngine/Time.h>
 #include <DotNet/UnityEngine/Transform.h>
 #include <DotNet/UnityEngine/Vector3.h>
-#include <DotNet/UnityEngine/Quaternion.h>
 
 #include <variant>
 
@@ -107,9 +107,9 @@ void Cesium3DTilesetImpl::Update(
     const Cesium3DTilesSelection::TileRenderContent* pRenderContent =
         content.getRenderContent();
     if (pRenderContent) {
-      CesiumGltfGameObject* pCesiumGameObject = 
+      CesiumGltfGameObject* pCesiumGameObject =
           static_cast<CesiumGltfGameObject*>(
-            pRenderContent->getRenderResources());
+              pRenderContent->getRenderResources());
       if (pCesiumGameObject && pCesiumGameObject->pGameObject) {
         pCesiumGameObject->pGameObject->SetActive(false);
       }
@@ -125,9 +125,9 @@ void Cesium3DTilesetImpl::Update(
     const Cesium3DTilesSelection::TileRenderContent* pRenderContent =
         content.getRenderContent();
     if (pRenderContent) {
-      CesiumGltfGameObject* pCesiumGameObject = 
+      CesiumGltfGameObject* pCesiumGameObject =
           static_cast<CesiumGltfGameObject*>(
-            pRenderContent->getRenderResources());
+              pRenderContent->getRenderResources());
       if (pCesiumGameObject && pCesiumGameObject->pGameObject) {
         pCesiumGameObject->pGameObject->SetActive(true);
       }
@@ -195,11 +195,13 @@ struct CalculateECEFCameraPosition {
   glm::dvec3 operator()(const CesiumGeometry::BoundingSphere& sphere) {
     const glm::dvec3& center = sphere.getCenter();
     glm::dmat4 enuToEcef =
-        glm::dmat4(CesiumGeospatial::Transforms::eastNorthUpToFixedFrame(center, ellipsoid));
-    glm::dvec3 offset =
-        sphere.getRadius() *
-        glm::normalize(
-            glm::dvec3(enuToEcef[0]) + glm::dvec3(enuToEcef[1]) + glm::dvec3(enuToEcef[2]));
+        glm::dmat4(CesiumGeospatial::Transforms::eastNorthUpToFixedFrame(
+            center,
+            ellipsoid));
+    glm::dvec3 offset = sphere.getRadius() * glm::normalize(
+                                                 glm::dvec3(enuToEcef[0]) +
+                                                 glm::dvec3(enuToEcef[1]) +
+                                                 glm::dvec3(enuToEcef[2]));
     glm::dvec3 position = center + offset;
     return position;
   }
@@ -208,12 +210,15 @@ struct CalculateECEFCameraPosition {
   operator()(const CesiumGeometry::OrientedBoundingBox& orientedBoundingBox) {
     const glm::dvec3& center = orientedBoundingBox.getCenter();
     glm::dmat4 enuToEcef =
-        glm::dmat4(CesiumGeospatial::Transforms::eastNorthUpToFixedFrame(center, ellipsoid));
+        glm::dmat4(CesiumGeospatial::Transforms::eastNorthUpToFixedFrame(
+            center,
+            ellipsoid));
     const glm::dmat3& halfAxes = orientedBoundingBox.getHalfAxes();
     glm::dvec3 offset =
         glm::length(halfAxes[0] + halfAxes[1] + halfAxes[2]) *
         glm::normalize(
-            glm::dvec3(enuToEcef[0]) + glm::dvec3(enuToEcef[1]) + glm::dvec3(enuToEcef[2]));
+            glm::dvec3(enuToEcef[0]) + glm::dvec3(enuToEcef[1]) +
+            glm::dvec3(enuToEcef[2]));
     glm::dvec3 position = center + offset;
     return position;
   }
@@ -225,9 +230,9 @@ struct CalculateECEFCameraPosition {
 
   glm::dvec3
   operator()(const CesiumGeospatial::BoundingRegionWithLooseFittingHeights&
-                  boundingRegionWithLooseFittingHeights) {
+                 boundingRegionWithLooseFittingHeights) {
     return (*this)(boundingRegionWithLooseFittingHeights.getBoundingRegion()
-                        .getBoundingBox());
+                       .getBoundingBox());
   }
 
   glm::dvec3 operator()(const CesiumGeospatial::S2CellBoundingVolume& s2) {
@@ -238,37 +243,43 @@ struct CalculateECEFCameraPosition {
 
 void Cesium3DTilesetImpl::FocusTileset(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
-  
+
 #if UNITY_EDITOR
-  // this->_georeference.NativeImplementation().TransformEarthCenteredEarthFixedPositionToUnityWorld) {
-  UnityEditor::SceneView lastActiveEditorView = UnityEditor::SceneView::lastActiveSceneView();
-  if (!this->_pTileset || !this->_pTileset->getRootTile() || lastActiveEditorView == nullptr) {
+  // this->_georeference.NativeImplementation().TransformEarthCenteredEarthFixedPositionToUnityWorld)
+  // {
+  UnityEditor::SceneView lastActiveEditorView =
+      UnityEditor::SceneView::lastActiveSceneView();
+  if (!this->_pTileset || !this->_pTileset->getRootTile() ||
+      lastActiveEditorView == nullptr) {
     return;
   }
-  
+
   UnityEngine::Camera editorCamera = lastActiveEditorView.camera();
   if (editorCamera == nullptr) {
     return;
   }
 
-  DotNet::CesiumForUnity::CesiumGeoreference georeferenceComponent = 
-      tileset.gameObject().GetComponentInParent<DotNet::CesiumForUnity::CesiumGeoreference>();
-  
+  DotNet::CesiumForUnity::CesiumGeoreference georeferenceComponent =
+      tileset.gameObject()
+          .GetComponentInParent<DotNet::CesiumForUnity::CesiumGeoreference>();
+
   const CesiumGeospatial::LocalHorizontalCoordinateSystem& georeferenceCrs =
       georeferenceComponent.NativeImplementation().getCoordinateSystem();
-  const glm::dmat4& ecefToUnityWorld = georeferenceCrs.getEcefToLocalTransformation();
-  
-  const BoundingVolume& boundingVolume = this->_pTileset->getRootTile()->getBoundingVolume();
+  const glm::dmat4& ecefToUnityWorld =
+      georeferenceCrs.getEcefToLocalTransformation();
+
+  const BoundingVolume& boundingVolume =
+      this->_pTileset->getRootTile()->getBoundingVolume();
   glm::dvec3 ecefCameraPosition = std::visit(
-        CalculateECEFCameraPosition{CesiumGeospatial::Ellipsoid::WGS84},
-        boundingVolume);
-  glm::dvec3 unityCameraPosition = 
+      CalculateECEFCameraPosition{CesiumGeospatial::Ellipsoid::WGS84},
+      boundingVolume);
+  glm::dvec3 unityCameraPosition =
       glm::dvec3(ecefToUnityWorld * glm::dvec4(ecefCameraPosition, 1.0));
-  
-  // TODO: fix forward direction?
+
   glm::dvec3 ecefCenter =
       Cesium3DTilesSelection::getBoundingVolumeCenter(boundingVolume);
-  glm::dvec3 unityCenter = glm::dvec3(ecefToUnityWorld * glm::dvec4(ecefCenter, 1.0));
+  glm::dvec3 unityCenter =
+      glm::dvec3(ecefToUnityWorld * glm::dvec4(ecefCenter, 1.0));
   glm::dvec3 unityCameraFront =
       glm::normalize(unityCenter - unityCameraPosition);
   glm::dvec3 unityCameraRight =
@@ -287,10 +298,9 @@ void Cesium3DTilesetImpl::FocusTileset(
   unityCameraFrontf.z = static_cast<float>(unityCameraFront.z);
 
   lastActiveEditorView.pivot(unityCameraPositionf);
-  lastActiveEditorView.rotation(
-      UnityEngine::Quaternion::LookRotation(
-        unityCameraFrontf, 
-        UnityEngine::Vector3::up()));
+  lastActiveEditorView.rotation(UnityEngine::Quaternion::LookRotation(
+      unityCameraFrontf,
+      UnityEngine::Vector3::up()));
 #endif
 }
 
