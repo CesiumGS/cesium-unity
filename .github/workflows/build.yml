@@ -1,6 +1,16 @@
 name: Cesium for Unity
 on: [push]
 jobs:
+  Quick Checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Install clang-format
+        run: pip install clang-format
+      - name: Check source formatting
+        run: |
+          find native~/ \( -iname '*.cpp' -o -iname '*.h' \) -print0 | xargs -0 clang-format --dry-run -Werror
   Windows:
     runs-on: windows-latest
     # Only allow a single Windows build at a time, for Unity licensing reasons
