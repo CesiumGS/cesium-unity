@@ -245,8 +245,6 @@ void Cesium3DTilesetImpl::FocusTileset(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
 
 #if UNITY_EDITOR
-  // this->_georeference.NativeImplementation().TransformEarthCenteredEarthFixedPositionToUnityWorld)
-  // {
   UnityEditor::SceneView lastActiveEditorView =
       UnityEditor::SceneView::lastActiveSceneView();
   if (!this->_pTileset || !this->_pTileset->getRootTile() ||
