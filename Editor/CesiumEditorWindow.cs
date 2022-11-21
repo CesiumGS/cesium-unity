@@ -89,11 +89,6 @@ namespace CesiumForUnity
             }
         }
 
-        private void Update()
-        {
-            CesiumIonSession.Ion().Tick();
-        }
-
         public enum ToolbarButton
         {
             Add,

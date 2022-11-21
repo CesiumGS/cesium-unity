@@ -60,6 +60,7 @@ namespace CesiumForUnity
         static CesiumEditorUtility()
         {
             EditorApplication.update += CheckProjectFilesForTextMeshPro;
+            EditorApplication.update += UpdateIonSession;
 
             Cesium3DTileset.OnCesium3DTilesetLoadFailure +=
                 HandleCesium3DTilesetLoadFailure;
@@ -78,6 +79,11 @@ namespace CesiumForUnity
             TextMeshProPromptWindow.ShowWindow();
 
             EditorApplication.update -= CheckProjectFilesForTextMeshPro;
+        }
+
+        static void UpdateIonSession()
+        {
+            CesiumIonSession.Ion().Tick();
         }
 
         static void
@@ -102,8 +108,10 @@ namespace CesiumForUnity
             {
                 IonTokenTroubleshootingWindow.ShowWindow(details.tileset, true);
             }
-
-            Debug.Log(details.message);
+            else
+            {
+                Debug.Log(details.message);
+            }
         }
 
         static void
@@ -128,8 +136,10 @@ namespace CesiumForUnity
             {
                 IonTokenTroubleshootingWindow.ShowWindow(details.overlay, true);
             }
-
-            Debug.Log(details.message);
+            else
+            {
+                Debug.Log(details.message);
+            }
         }
 
         public static Cesium3DTileset? FindFirstTileset()
