@@ -5,6 +5,40 @@
 #include <DotNet/UnityEngine/GameObject.h>
 
 namespace CesiumForUnityNative {
+  
+/**
+ * @brief Information about how a given glTF primitive was converted into 
+ * Unity MeshData. 
+ */
+struct CesiumPrimitiveInfo {
+  /**
+   * @brief Maps a texture coordinate index i (TEXCOORD_<i>) to the 
+   * corresponding Unity texture coordinate index. 
+   */
+  std::unordered_map<uint32_t, uint32_t> uvIndexMap{};
+
+  /**
+   * @brief Maps an overlay texture coordinate index i (_CESIUMOVERLAY_<i>) to
+   * the corresponding Unity texture coordinate index. 
+   */
+  std::unordered_map<uint32_t, uint32_t> rasterOverlayUvIndexMap{};
+};
+
+/**
+ * @brief The fully loaded game object for this glTF and associated information.
+ */
+struct CesiumGltfGameObject {
+  /**
+   * @brief The fully loaded Unity game objet for this glTF.
+   */
+  std::unique_ptr<::DotNet::UnityEngine::GameObject> pGameObject{};
+  
+  /**
+   * @brief Information about how glTF mesh primitives were translated to Unity 
+   * meshes. 
+   */
+  std::vector<CesiumPrimitiveInfo> primitiveInfos{};
+};
 
 class UnityPrepareRendererResources
     : public Cesium3DTilesSelection::IPrepareRendererResources {

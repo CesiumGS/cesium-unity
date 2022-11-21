@@ -112,7 +112,8 @@ namespace CesiumForUnity
         }
     }
 
-    [ReinteropNativeImplementation("CesiumForUnityNative::IonTokenTroubleshootingWindowImpl",
+    [ReinteropNativeImplementation(
+        "CesiumForUnityNative::IonTokenTroubleshootingWindowImpl",
         "IonTokenTroubleshootingWindowImpl.h")]
     public partial class IonTokenTroubleshootingWindow : EditorWindow
     {
@@ -275,8 +276,6 @@ namespace CesiumForUnity
             {
                 this.Close();
             }
-
-            CesiumIonSession.Ion().Tick();
         }
 
         private void OnDisable()
