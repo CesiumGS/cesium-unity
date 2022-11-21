@@ -76,53 +76,10 @@ namespace CesiumForUnity
             AssetDatabase.StartAssetEditing();
             try
             {
-                // if (report.summary.platform == BuildTarget.StandaloneOSX)
-                // {
-                //     UnityEngine.Debug.Log("***** Creating macOS placeholders");
-                //     // On macOS, build separately for x64 and arm64.
-                //     CreatePlaceholders(
-                //         GetLibraryToBuild(report.summary, "x86_64"),
-                //         "CesiumForUnityNative-Runtime"
-                //     );
-                //     CreatePlaceholders(
-                //         GetLibraryToBuild(report.summary, "arm64"),
-                //         "CesiumForUnityNative-Runtime"
-                //     );
-                // }
-                // else
-                // {
-                    // On other platforms, just build once for the default CPU
-                    CreatePlaceholders(
-                        GetLibraryToBuild(report.summary),
-                        "CesiumForUnityNative-Runtime"
-                    );
-                // }
-                UnityEngine.Debug.Log("***** End of OnPreprocessBuild without an exception");
-            }
-            finally
-            {
-                UnityEngine.Debug.Log("***** Before StopAssetEditing");
-                AssetDatabase.StopAssetEditing();
-                UnityEngine.Debug.Log("***** After StopAssetEditing");
-                importsInProgress.Clear();
-            }
-        }
-
-        internal static void CreateLibraryPlaceholders(params PlatformToBuild[] platforms)
-        {
-            UnityEngine.Debug.Log("***** We shouldn't get here");
-            importsInProgress.Clear();
-
-            AssetDatabase.StartAssetEditing();
-            try
-            {
-                foreach (PlatformToBuild platform in platforms)
-                {
-                    CreatePlaceholders(
-                        GetLibraryToBuild(platform),
-                        "CesiumForUnityNative-Runtime"
-                    );
-                }
+                CreatePlaceholders(
+                    GetLibraryToBuild(report.summary),
+                    "CesiumForUnityNative-Runtime"
+                );
             }
             finally
             {
@@ -169,31 +126,31 @@ namespace CesiumForUnity
         private void OnPreprocessAsset()
         {
             LibraryToBuild? libraryToBuild;
-            if (!importsInProgress.TryGetValue(this.assetPath, out libraryToBuild))
+            if (!importsInProgress.TryGetValue(assetPath, out libraryToBuild))
                 return;
 
             PluginImporter? importer = this.assetImporter as PluginImporter;
             if (importer == null)
                 return;
 
-            UnityEngine.Debug.Log("***** OnPreprocessAsset " + this.assetPath);
+            CompileCesiumForUnityNative.ConfigurePlugin(libraryToBuild, importer);
+        }
+
+        private static void ConfigurePlugin(LibraryToBuild library, PluginImporter importer)
+        {
             importer.SetCompatibleWithAnyPlatform(false);
             importer.SetCompatibleWithEditor(false);
-            importer.SetCompatibleWithPlatform(libraryToBuild.Platform, true);
+            importer.SetCompatibleWithPlatform(library.Platform, true);
 
-            if (libraryToBuild.Platform == BuildTarget.Android)
+            if (library.Platform == BuildTarget.Android)
             {
                 importer.SetPlatformData(BuildTarget.Android, "CPU", "ARM64");
             }
-            else if (libraryToBuild.Platform == BuildTarget.StandaloneOSX)
+            else if (library.Platform == BuildTarget.StandaloneOSX)
             {
-                if (libraryToBuild.Cpu != null)
-                {
-                    importer.SetPlatformData(BuildTarget.StandaloneOSX, "CPU", libraryToBuild.Cpu == "arm64" ? "ARM64" : libraryToBuild.Cpu);
-                    UnityEngine.Debug.Log("***** Setting platform data  " + this.assetPath + " cpu " + libraryToBuild.Cpu);
-                }
+                if (library.Cpu != null)
+                    importer.SetPlatformData(BuildTarget.StandaloneOSX, "CPU", library.Cpu == "arm64" ? "ARM64" : library.Cpu);
             }
-            UnityEngine.Debug.Log("***** Finished OnPreprocessAsset without exception " + this.assetPath);
         }
 
         private static void OnPostprocessAllAssets(
@@ -203,6 +160,8 @@ namespace CesiumForUnity
             string[] movedFromAssetPaths,
             bool didDomainReload)
         {
+            // On macOS, the settings in OnPreprocessAsset above seem to be ignored.
+            // So reapply here as well.
             foreach (string imported in importedAssets)
             {
                 LibraryToBuild? libraryToBuild;
@@ -213,26 +172,7 @@ namespace CesiumForUnity
                 if (importer == null)
                     continue;
 
-                UnityEngine.Debug.Log("***** OnPostprocessAllAssets for " + imported);
-
-                importer.SetCompatibleWithAnyPlatform(false);
-                importer.SetCompatibleWithEditor(false);
-                importer.SetCompatibleWithPlatform(libraryToBuild.Platform, true);
-                
-                if (libraryToBuild.Platform == BuildTarget.Android)
-                {
-                    importer.SetPlatformData(BuildTarget.Android, "CPU", "ARM64");
-                }
-                else if (libraryToBuild.Platform == BuildTarget.StandaloneOSX)
-                {
-                    if (libraryToBuild.Cpu != null)
-                    {
-                        importer.SetPlatformData(BuildTarget.StandaloneOSX, "CPU", libraryToBuild.Cpu == "arm64" ? "ARM64" : libraryToBuild.Cpu);
-                        UnityEngine.Debug.Log("***** Setting platform data  " + imported + " cpu " + libraryToBuild.Cpu);
-                    }
-                }
-
-                UnityEngine.Debug.Log("***** IsCompatibleWithEditor " + importer.GetCompatibleWithEditor());
+                CompileCesiumForUnityNative.ConfigurePlugin(libraryToBuild, importer);
             }
         }
 
@@ -249,6 +189,8 @@ namespace CesiumForUnity
         {
             if (report.summary.platform == BuildTarget.StandaloneOSX)
             {
+                // On macOS, build for both ARM64 and x64, and then use the lipo tool to combine
+                // the libraries for the two CPUs into a single library.
                 LibraryToBuild x64 = GetLibraryToBuild(report.summary, "x86_64");
                 BuildNativeLibrary(x64);
                 LibraryToBuild arm64 = GetLibraryToBuild(report.summary, "arm64");
