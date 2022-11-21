@@ -2,6 +2,8 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Build
 {
@@ -85,15 +87,17 @@ namespace Build
                 Directory.CreateDirectory(generatedEditorPath);
 
                 Console.WriteLine("**** Compiling C++ code for the Editor");
-                Utility.Run("cmake", new[]
+
+                List<string> configureArgs = new List<string>()
                 {
                     "-B",
                     "native~/build",
                     "-S",
                     "native~",
                     "-DCMAKE_BUILD_TYPE=RelWithDebInfo"
-                });
-                Utility.Run("cmake", new[]
+                };
+
+                List<string> buildArgs = new List<string>()
                 {
                     "--build",
                     "native~/build",
@@ -102,7 +106,41 @@ namespace Build
                     "-j" + (Environment.ProcessorCount + 1),
                     "--config",
                     "RelWithDebInfo"
-                });
+                };
+
+                if (OperatingSystem.IsMacOS())
+                {
+                    // On macOS, we must build the native code twice, once for x86_64 and once for arm64.
+                    // In theory we can build universal binaries, but some of our third party libraries don't
+                    // handle this well.
+                    configureArgs[1] = "native~/build-x64";
+                    var x64ConfigureArgs = configureArgs.Concat(new[]
+                    {
+                        "-DCMAKE_OSX_ARCHITECTURES=x86_64",
+                        "-DCMAKE_INSTALL_PREFIX=" + Path.Combine(Utility.PackageRoot, "Editor", "x86_64")
+                    });
+                    Utility.Run("cmake", x64ConfigureArgs);
+
+                    buildArgs[1] = "native~/build-x64";
+                    Utility.Run("cmake", buildArgs);
+
+                    configureArgs[1] = "native~/build-arm64";
+                    var armConfigureArgs = configureArgs.Concat(new[]
+                    {
+                        "-DCMAKE_OSX_ARCHITECTURES=arm64",
+                        "-DCMAKE_INSTALL_PREFIX=" + Path.Combine(Utility.PackageRoot, "Editor", "arm64")
+                    });
+                    Utility.Run("cmake", armConfigureArgs);
+
+                    buildArgs[1] = "native~/build-arm64";
+                    Utility.Run("cmake", buildArgs);
+                }
+                else
+                {
+                    // On other platforms, just build once.
+                    Utility.Run("cmake", configureArgs);
+                    Utility.Run("cmake", buildArgs);
+                }
 
                 if (OperatingSystem.IsWindows())
                 {
@@ -158,8 +196,8 @@ namespace Build
                         "CesiumForUnity.BuildCesiumForUnity.CompileForMacAndExit"
                     });
 
-                    Console.WriteLine("**** Adding generated files (for the Windows Player) to the package");
-                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_STANDALONE_WIN", generatedRuntimePath, Path.Combine(outputPackagePath, "Runtime", "generated"));
+                    Console.WriteLine("**** Adding generated files (for the macOS Player) to the package");
+                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_STANDALONE_OSX", generatedRuntimePath, Path.Combine(outputPackagePath, "Runtime", "generated"));
 
                     // Clean the generated code directory.
                     Directory.Delete(generatedRuntimePath, true);

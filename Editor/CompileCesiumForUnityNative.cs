@@ -36,6 +36,7 @@ namespace CesiumForUnity
         {
             public BuildTarget Platform = BuildTarget.StandaloneWindows64;
             public BuildTargetGroup PlatformGroup = BuildTargetGroup.Standalone;
+            public string? Cpu = null;
             public string SourceDirectory = "";
             public string BuildDirectory = "build";
             public string GeneratedDirectoryName = "generated-Unknown";
@@ -87,28 +88,6 @@ namespace CesiumForUnity
             }
         }
 
-        internal static void CreateLibraryPlaceholders(params PlatformToBuild[] platforms)
-        {
-            importsInProgress.Clear();
-
-            AssetDatabase.StartAssetEditing();
-            try
-            {
-                foreach (PlatformToBuild platform in platforms)
-                {
-                    CreatePlaceholders(
-                        GetLibraryToBuild(platform),
-                        "CesiumForUnityNative-Runtime"
-                    );
-                }
-            }
-            finally
-            {
-                AssetDatabase.StopAssetEditing();
-                importsInProgress.Clear();
-            }
-        }
-
         internal static void CreatePlaceholders(LibraryToBuild libraryToBuild, string sharedLibraryName)
         {
             Directory.CreateDirectory(libraryToBuild.InstallDirectory);
@@ -147,24 +126,53 @@ namespace CesiumForUnity
         private void OnPreprocessAsset()
         {
             LibraryToBuild? libraryToBuild;
-            if (!importsInProgress.TryGetValue(this.assetPath, out libraryToBuild))
+            if (!importsInProgress.TryGetValue(assetPath, out libraryToBuild))
                 return;
 
             PluginImporter? importer = this.assetImporter as PluginImporter;
             if (importer == null)
                 return;
 
+            CompileCesiumForUnityNative.ConfigurePlugin(libraryToBuild, importer);
+        }
+
+        private static void ConfigurePlugin(LibraryToBuild library, PluginImporter importer)
+        {
             importer.SetCompatibleWithAnyPlatform(false);
             importer.SetCompatibleWithEditor(false);
-            importer.SetCompatibleWithPlatform(libraryToBuild.Platform, true);
-            
-            if (libraryToBuild.Platform == BuildTarget.Android)
+            importer.SetCompatibleWithPlatform(library.Platform, true);
+
+            if (library.Platform == BuildTarget.Android)
             {
                 importer.SetPlatformData(BuildTarget.Android, "CPU", "ARM64");
             }
-            else
+            else if (library.Platform == BuildTarget.StandaloneOSX)
             {
-                importer.SetPlatformData(libraryToBuild.Platform, "CPU", "x86_64");
+                if (library.Cpu != null)
+                    importer.SetPlatformData(BuildTarget.StandaloneOSX, "CPU", library.Cpu == "arm64" ? "ARM64" : library.Cpu);
+            }
+        }
+
+        private static void OnPostprocessAllAssets(
+            string[] importedAssets,
+            string[] deletedAssets,
+            string[] movedAssets,
+            string[] movedFromAssetPaths,
+            bool didDomainReload)
+        {
+            // On macOS, the settings in OnPreprocessAsset above seem to be ignored.
+            // So reapply here as well.
+            foreach (string imported in importedAssets)
+            {
+                LibraryToBuild? libraryToBuild;
+                if (!importsInProgress.TryGetValue(imported, out libraryToBuild))
+                    continue;
+
+                PluginImporter? importer = AssetImporter.GetAtPath(imported) as PluginImporter;
+                if (importer == null)
+                    continue;
+
+                CompileCesiumForUnityNative.ConfigurePlugin(libraryToBuild, importer);
             }
         }
 
@@ -179,10 +187,37 @@ namespace CesiumForUnity
         /// <param name="report"></param>
         public void OnPostBuildPlayerScriptDLLs(BuildReport report)
         {
-            BuildNativeLibrary(GetLibraryToBuild(report.summary));
+            if (report.summary.platform == BuildTarget.StandaloneOSX)
+            {
+                // On macOS, build for both ARM64 and x64, and then use the lipo tool to combine
+                // the libraries for the two CPUs into a single library.
+                LibraryToBuild x64 = GetLibraryToBuild(report.summary, "x86_64");
+                BuildNativeLibrary(x64);
+                LibraryToBuild arm64 = GetLibraryToBuild(report.summary, "arm64");
+                BuildNativeLibrary(arm64);
+
+                string[] args = new[]
+                {
+                    "-create",
+                    Path.Combine(x64.InstallDirectory, "libCesiumForUnityNative-Runtime.dylib"),
+                    Path.Combine(arm64.InstallDirectory, "libCesiumForUnityNative-Runtime.dylib"),
+                    "-output",
+                    Path.GetFullPath(Path.Combine(x64.InstallDirectory, "..", "libCesiumForUnityNative-Runtime.dylib"))
+                };
+                Process p = Process.Start("lipo", string.Join(' ', args));
+                p.WaitForExit();
+                if (p.ExitCode != 0)
+                    throw new Exception("lipo failed");
+                Directory.Delete(x64.InstallDirectory, true);
+                Directory.Delete(arm64.InstallDirectory, true);
+            }
+            else
+            {
+                BuildNativeLibrary(GetLibraryToBuild(report.summary));
+            }
         }
 
-        public static LibraryToBuild GetLibraryToBuild(BuildSummary summary)
+        public static LibraryToBuild GetLibraryToBuild(BuildSummary summary, string? cpu = null)
         {
             return GetLibraryToBuild(new PlatformToBuild()
             {
@@ -190,10 +225,10 @@ namespace CesiumForUnity
                 platformGroup = summary.platformGroup,
                 isDevelopment = summary.options.HasFlag(BuildOptions.Development),
                 isCleanBuild = summary.options.HasFlag(BuildOptions.CleanBuildCache)
-            });
+            }, cpu);
         }
 
-        public static LibraryToBuild GetLibraryToBuild(PlatformToBuild platform)
+        public static LibraryToBuild GetLibraryToBuild(PlatformToBuild platform, string? cpu = null)
         {
             string sourceFilename = GetSourceFilePathName();
             string packagePath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(sourceFilename), $".."));
@@ -204,6 +239,7 @@ namespace CesiumForUnity
             LibraryToBuild library = new LibraryToBuild();
             library.Platform = platform.platform;
             library.PlatformGroup = platform.platformGroup;
+            library.Cpu = cpu;
             library.SourceDirectory = nativeDirectory;
             library.BuildDirectory = Path.Combine(nativeDirectory, $"build-{platformDirectoryName}");
             library.GeneratedDirectoryName = $"generated-{platformDirectoryName}";
@@ -218,6 +254,14 @@ namespace CesiumForUnity
 
             if (platform.platformGroup == BuildTargetGroup.Android)
                 library.Toolchain = "extern/android-toolchain.cmake";
+
+            if (platform.platform == BuildTarget.StandaloneOSX && cpu != null)
+            {
+                library.ExtraConfigureArgs.Add("-DCMAKE_OSX_ARCHITECTURES=" + cpu);
+                library.InstallDirectory = Path.Combine(library.InstallDirectory, cpu);
+                library.BuildDirectory += "-" + cpu;
+            }
+
             return library;
         }
 
