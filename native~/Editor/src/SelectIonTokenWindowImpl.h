@@ -38,14 +38,12 @@ public:
   void
   RefreshTokens(const DotNet::CesiumForUnity::SelectIonTokenWindow& window);
 
-  void CreateToken(
-      const DotNet::CesiumForUnity::SelectIonTokenWindow& window);
+  void CreateToken(const DotNet::CesiumForUnity::SelectIonTokenWindow& window);
 
-  void UseExistingToken(
-      const DotNet::CesiumForUnity::SelectIonTokenWindow& window);
+  void
+  UseExistingToken(const DotNet::CesiumForUnity::SelectIonTokenWindow& window);
 
-  void SpecifyToken(
-      const DotNet::CesiumForUnity::SelectIonTokenWindow& window);
+  void SpecifyToken(const DotNet::CesiumForUnity::SelectIonTokenWindow& window);
 
 private:
   std::optional<CesiumAsync::Promise<std::optional<CesiumIonClient::Token>>>

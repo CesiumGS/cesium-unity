@@ -1,8 +1,8 @@
 #include "Cesium3DTilesetImpl.h"
 
 #include "CameraManager.h"
-#include "UnityTilesetExternals.h"
 #include "UnityPrepareRendererResources.h"
+#include "UnityTilesetExternals.h"
 
 #include <Cesium3DTilesSelection/IonRasterOverlay.h>
 #include <Cesium3DTilesSelection/Tileset.h>
@@ -101,9 +101,9 @@ void Cesium3DTilesetImpl::Update(
     const Cesium3DTilesSelection::TileRenderContent* pRenderContent =
         content.getRenderContent();
     if (pRenderContent) {
-      CesiumGltfGameObject* pCesiumGameObject = 
+      CesiumGltfGameObject* pCesiumGameObject =
           static_cast<CesiumGltfGameObject*>(
-            pRenderContent->getRenderResources());
+              pRenderContent->getRenderResources());
       if (pCesiumGameObject && pCesiumGameObject->pGameObject) {
         pCesiumGameObject->pGameObject->SetActive(false);
       }
@@ -119,9 +119,9 @@ void Cesium3DTilesetImpl::Update(
     const Cesium3DTilesSelection::TileRenderContent* pRenderContent =
         content.getRenderContent();
     if (pRenderContent) {
-      CesiumGltfGameObject* pCesiumGameObject = 
+      CesiumGltfGameObject* pCesiumGameObject =
           static_cast<CesiumGltfGameObject*>(
-            pRenderContent->getRenderResources());
+              pRenderContent->getRenderResources());
       if (pCesiumGameObject && pCesiumGameObject->pGameObject) {
         pCesiumGameObject->pGameObject->SetActive(true);
       }

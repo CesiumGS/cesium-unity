@@ -1,15 +1,17 @@
 #pragma once
 
-#include <variant>
 #include <CesiumGltf/MetadataPropertyView.h>
+
 #include <DotNet/CesiumForUnity/MetadataType.h>
+
+#include <variant>
 
 namespace DotNet::CesiumForUnity {
 class MetadataProperty;
 }
 
 namespace DotNet::System {
-  class String;
+class String;
 }
 
 namespace CesiumForUnityNative {
@@ -40,8 +42,6 @@ using ValueType = std::variant<
     CesiumGltf::MetadataArrayView<bool>,
     CesiumGltf::MetadataArrayView<std::string_view>>;
 
-
-
 using PropertyType = std::variant<
     CesiumGltf::MetadataPropertyView<int8_t>,
     CesiumGltf::MetadataPropertyView<uint8_t>,
@@ -69,19 +69,29 @@ using PropertyType = std::variant<
     CesiumGltf::MetadataPropertyView<
         CesiumGltf::MetadataArrayView<std::string_view>>>;
 
-
-
 class MetadataPropertyImpl {
 public:
   ~MetadataPropertyImpl(){};
-  MetadataPropertyImpl(const DotNet::CesiumForUnity::MetadataProperty& property){};
-  void JustBeforeDelete(const DotNet::CesiumForUnity::MetadataProperty& property){};
-  DotNet::System::String GetPropertyName(const DotNet::CesiumForUnity::MetadataProperty& property);
-  void SetProperty(const std::string& propertyName, const PropertyType& property, ValueType value);
-  int GetComponentCount(const DotNet::CesiumForUnity::MetadataProperty& property);
-  void GetComponent(const DotNet::CesiumForUnity::MetadataProperty& property, const DotNet::CesiumForUnity::MetadataProperty& component, int index);
-  DotNet::CesiumForUnity::MetadataType GetMetadataType(const DotNet::CesiumForUnity::MetadataProperty& property);
-  DotNet::CesiumForUnity::MetadataType GetComponentType(const DotNet::CesiumForUnity::MetadataProperty& property);
+  MetadataPropertyImpl(
+      const DotNet::CesiumForUnity::MetadataProperty& property){};
+  void
+  JustBeforeDelete(const DotNet::CesiumForUnity::MetadataProperty& property){};
+  DotNet::System::String
+  GetPropertyName(const DotNet::CesiumForUnity::MetadataProperty& property);
+  void SetProperty(
+      const std::string& propertyName,
+      const PropertyType& property,
+      ValueType value);
+  int GetComponentCount(
+      const DotNet::CesiumForUnity::MetadataProperty& property);
+  void GetComponent(
+      const DotNet::CesiumForUnity::MetadataProperty& property,
+      const DotNet::CesiumForUnity::MetadataProperty& component,
+      int index);
+  DotNet::CesiumForUnity::MetadataType
+  GetMetadataType(const DotNet::CesiumForUnity::MetadataProperty& property);
+  DotNet::CesiumForUnity::MetadataType
+  GetComponentType(const DotNet::CesiumForUnity::MetadataProperty& property);
   bool IsNormalized(const DotNet::CesiumForUnity::MetadataProperty& property);
 
   std::int8_t GetInt8(
@@ -121,10 +131,9 @@ public:
       const DotNet::CesiumForUnity::MetadataProperty& value,
       const DotNet::System::String& defaultValue);
 
-  private:
-    std::string _propertyName;
-    PropertyType _propertyType;
-    ValueType _value;
-    
+private:
+  std::string _propertyName;
+  PropertyType _propertyType;
+  ValueType _value;
 };
 } // namespace CesiumForUnityNative
