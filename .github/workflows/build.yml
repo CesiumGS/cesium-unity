@@ -10,8 +10,9 @@ jobs:
         run: pip install clang-format
       - name: Check source formatting
         run: |
-          find native~/ \( -iname '*.cpp' -o -iname '*.h' \) -print0 | xargs -0 clang-format --dry-run -Werror
+          find native~/Runtime native~/Editor native~/Shared \( -iname '*.cpp' -o -iname '*.h' \) -print0 | xargs -0 clang-format --dry-run -Werror
   Windows:
+    needs: [Quick Checks]
     runs-on: windows-latest
     # Only allow a single Windows build at a time, for Unity licensing reasons
     concurrency: windows
@@ -74,6 +75,7 @@ jobs:
           name: Windows Package
           path: D:\cesium\CesiumForUnityBuildProject\*.tgz
   MacOS:
+    needs: [Quick Checks]
     runs-on: macos-latest
     # Only allow a single macOS build at a time, for Unity licensing reasons
     concurrency: mac
