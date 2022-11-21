@@ -134,8 +134,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [Windows, MacOS]
     steps:
-      - name: Check out repository code
-        uses: actions/checkout@v3
+      - name: Install jq
+        run: sudo apt install jq
       - name: Download macOS build
         uses: actions/download-artifact@v3
         with:
@@ -159,7 +159,9 @@ jobs:
       - name: Create combined package
         run: |
           cd combine
-          tar czf com.cesium.unity-0.1.0.tgz package
+          export NAME=$(jq -r ".name" package.json)
+          export VERSION=$(jq -r ".version" package.json)
+          tar czf $NAME-$VERSION.tgz package
       - name: Publish combined package
         if: ${{ success() }}
         uses: actions/upload-artifact@v3
