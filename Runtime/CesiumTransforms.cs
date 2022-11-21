@@ -26,5 +26,7 @@ namespace CesiumForUnity
         /// </returns>
         public static partial CesiumVector3
             EarthCenteredEarthFixedToLongitudeLatitudeHeight(CesiumVector3 earthCenteredEarthFixed);
+
+        public static partial CesiumVector3 ScaleCartesianToEllipsoidGeodeticSurface(CesiumVector3 cartesian);
     }
 }

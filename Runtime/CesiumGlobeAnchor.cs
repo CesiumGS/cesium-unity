@@ -411,7 +411,7 @@ namespace CesiumForUnity
             }
 
             // Convert the authoritative position to ECEF
-            CesiumVector3 ecef;
+            CesiumVector3 ecef = new CesiumVector3();
             switch (this.positionAuthority)
             {
                 case CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight:

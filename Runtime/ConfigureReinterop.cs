@@ -388,6 +388,7 @@ namespace CesiumForUnity
             CesiumRasterOverlay.BroadcastCesiumRasterOverlayLoadFailure(overlayDetails);
 
             CesiumVector3 cv3 = new CesiumVector3();
+            cv3 = new CesiumVector3(0, 0, 0);
             cv3.x = cv3.y = cv3.z;
 
             CesiumGlobeAnchor[] globeAnchors = go.GetComponentsInChildren<CesiumGlobeAnchor>();

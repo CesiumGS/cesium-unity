@@ -32,11 +32,15 @@ namespace CesiumForUnityNative {
 
   // Find the rotation from the old up to the new up.
   glm::dvec3 oldNormal = coordinateSystem.ecefDirectionToLocal(
-      Ellipsoid::WGS84.geodeticSurfaceNormal(
-          glm::dvec3(oldPositionEcef.x, oldPositionEcef.y, oldPositionEcef.z)));
+      Ellipsoid::WGS84.geodeticSurfaceNormal(glm::dvec3(
+          oldPositionEcef.x(),
+          oldPositionEcef.y(),
+          oldPositionEcef.z())));
   glm::dvec3 newNormal = coordinateSystem.ecefDirectionToLocal(
-      Ellipsoid::WGS84.geodeticSurfaceNormal(
-          glm::dvec3(newPositionEcef.x, newPositionEcef.y, newPositionEcef.z)));
+      Ellipsoid::WGS84.geodeticSurfaceNormal(glm::dvec3(
+          newPositionEcef.x(),
+          newPositionEcef.y(),
+          newPositionEcef.z())));
 
   glm::dquat deltaRotation = glm::rotation(oldNormal, newNormal);
 

@@ -10,8 +10,15 @@ namespace CesiumForUnityNative {
 
 class CesiumTransformsImpl {
 public:
-  static DotNet::CesiumForUnity::CesiumVector3 LongitudeLatitudeHeightToEarthCenteredEarthFixed(DotNet::CesiumForUnity::CesiumVector3 longitudeLatitudeHeight);
-  static DotNet::CesiumForUnity::CesiumVector3 EarthCenteredEarthFixedToLongitudeLatitudeHeight(DotNet::CesiumForUnity::CesiumVector3 earthCenteredEarthFixed);
+  static DotNet::CesiumForUnity::CesiumVector3
+  LongitudeLatitudeHeightToEarthCenteredEarthFixed(
+      const DotNet::CesiumForUnity::CesiumVector3& longitudeLatitudeHeight);
+  static DotNet::CesiumForUnity::CesiumVector3
+  EarthCenteredEarthFixedToLongitudeLatitudeHeight(
+      const DotNet::CesiumForUnity::CesiumVector3& earthCenteredEarthFixed);
+  static DotNet::CesiumForUnity::CesiumVector3
+  ScaleCartesianToEllipsoidGeodeticSurface(
+      const DotNet::CesiumForUnity::CesiumVector3& cartesian);
 };
 
 } // namespace CesiumForUnityNative

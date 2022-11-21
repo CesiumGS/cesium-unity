@@ -24,11 +24,11 @@ public:
   DotNet::CesiumForUnity::CesiumVector3
   TransformUnityWorldPositionToEarthCenteredEarthFixed(
       const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
-      DotNet::CesiumForUnity::CesiumVector3 unityWorldPosition);
+      const DotNet::CesiumForUnity::CesiumVector3& unityWorldPosition);
   DotNet::CesiumForUnity::CesiumVector3
   TransformEarthCenteredEarthFixedPositionToUnityWorld(
       const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
-      DotNet::CesiumForUnity::CesiumVector3 earthCenteredEarthFixed);
+      const DotNet::CesiumForUnity::CesiumVector3& earthCenteredEarthFixed);
 
   const CesiumGeospatial::LocalHorizontalCoordinateSystem&
   getCoordinateSystem() const {
