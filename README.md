@@ -12,7 +12,7 @@ Have questions? Ask them on the [community forum](https://community.cesium.com/c
 
 ### :clap: Featured Demos
 
-<a href="https://github.com/CesiumGS/cesium-unity-samples"><img src="Documentation~/cesium-for-unity-screenshot.jpg" width="48%" title="Cesium for Unity Samples" /></a>
+<a href="https://github.com/CesiumGS/cesium-unity-samples"><img src="Documentation~/images/cesium-for-unity-screenshot.jpg" width="48%" title="Cesium for Unity Samples" /></a>
 
 ### :house_with_garden: Cesium for Unity and the 3D Geospatial Ecosystem
 
