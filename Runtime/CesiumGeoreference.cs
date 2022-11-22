@@ -227,5 +227,21 @@ namespace CesiumForUnity
         /// <returns>The corresponding Unity world coordinates.</returns>
         public partial CesiumVector3
             TransformEarthCenteredEarthFixedPositionToUnityWorld(CesiumVector3 earthCenteredEarthFixed);
+
+        /// <summary>
+        /// Transform a Unity world direction to a direction in Earth-Centered, Earth-Fixed (ECEF) coordinates.
+        /// </summary>
+        /// <param name="unityWorldDirection">The Unity world direction to convert.</param>
+        /// <returns>The ECEF direction in meters.</returns>
+        public partial CesiumVector3
+            TransformUnityWorldDirectionToEarthCenteredEarthFixed(CesiumVector3 unityWorldDirection);
+
+        /// <summary>
+        /// Transform an Earth-Centered, Earth-Fixed position to Unity world coordinates.
+        /// </summary>
+        /// <param name="earthCenteredEarthFixedDirection">The direction in ECEF coordinates, in meters.</param>
+        /// <returns>The corresponding Unity world direction.</returns>
+        public partial CesiumVector3
+            TransformEarthCenteredEarthFixedDirectionToUnityWorld(CesiumVector3 earthCenteredEarthFixedDirection);
     }
 }

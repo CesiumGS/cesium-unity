@@ -30,6 +30,14 @@ public:
   TransformEarthCenteredEarthFixedPositionToUnityWorld(
       const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
       DotNet::CesiumForUnity::CesiumVector3 earthCenteredEarthFixed);
+  DotNet::CesiumForUnity::CesiumVector3
+  TransformUnityWorldDirectionToEarthCenteredEarthFixed(
+      const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
+      DotNet::CesiumForUnity::CesiumVector3 unityWorldDirection);
+  DotNet::CesiumForUnity::CesiumVector3
+  TransformEarthCenteredEarthFixedDirectionToUnityWorld(
+      const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
+      DotNet::CesiumForUnity::CesiumVector3 earthCenteredEarthFixedDirection);
 
   const CesiumGeospatial::LocalHorizontalCoordinateSystem&
   getCoordinateSystem() const {
