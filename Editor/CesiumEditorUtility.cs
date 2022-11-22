@@ -142,7 +142,7 @@ namespace CesiumForUnity
             }
         }
 
-        public static Cesium3DTileset? FindFirstTileset()
+        public static Cesium3DTileset FindFirstTileset()
         {
             Cesium3DTileset[] tilesets =
                 UnityEngine.Object.FindObjectsOfType<Cesium3DTileset>(true);
@@ -158,7 +158,7 @@ namespace CesiumForUnity
             return null;
         }
 
-        public static Cesium3DTileset? FindFirstTilesetWithAssetID(long assetID)
+        public static Cesium3DTileset FindFirstTilesetWithAssetID(long assetID)
         {
             Cesium3DTileset[] tilesets =
                 UnityEngine.Object.FindObjectsOfType<Cesium3DTileset>(true);
@@ -174,7 +174,7 @@ namespace CesiumForUnity
             return null;
         }
 
-        public static CesiumGeoreference? FindFirstGeoreference()
+        public static CesiumGeoreference FindFirstGeoreference()
         {
             CesiumGeoreference[] georeferences =
                UnityEngine.Object.FindObjectsOfType<CesiumGeoreference>(true);
@@ -193,7 +193,7 @@ namespace CesiumForUnity
         public static Cesium3DTileset CreateTileset(string name, long assetID)
         {
             // Find a georeference in the scene, or create one if none exists.
-            CesiumGeoreference? georeference = CesiumEditorUtility.FindFirstGeoreference();
+            CesiumGeoreference georeference = CesiumEditorUtility.FindFirstGeoreference();
             if (georeference == null)
             {
                 GameObject georeferenceGameObject =
@@ -332,7 +332,7 @@ namespace CesiumForUnity
 
         public static void PlaceSubSceneAtCameraPosition(CesiumSubScene subscene)
         {
-            CesiumGeoreference? georeference =
+            CesiumGeoreference georeference =
                 subscene.gameObject.GetComponentInParent<CesiumGeoreference>();
             if (georeference == null)
             {

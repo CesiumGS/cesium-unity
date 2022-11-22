@@ -44,7 +44,7 @@ namespace CesiumForUnity
 
         private void UpdateFromEcef(CesiumGeoreference georeference, CesiumVector3 ecef)
         {
-            CesiumSubScene? closestLevel = null;
+            CesiumSubScene closestLevel = null;
             double distanceSquaredToClosest = double.MaxValue;
 
             // Are we inside a sub-level?

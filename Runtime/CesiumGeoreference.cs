@@ -122,7 +122,7 @@ namespace CesiumForUnity
         }
 
         [Tooltip("An event raised when the georeference changes.")]
-        public event Action? changed;
+        public event Action changed;
 
         private void OnValidate()
         {

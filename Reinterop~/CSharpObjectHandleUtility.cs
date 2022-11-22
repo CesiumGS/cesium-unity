@@ -11,7 +11,7 @@ namespace Reinterop
     {
         public static void Generate(GeneratorExecutionContext context)
         {
-            context.AddSource("ObjectHandle", Source);
+            context.AddSource("ObjectHandleUtility", Source);
         }
 
         public const string Source =
@@ -24,7 +24,7 @@ namespace Reinterop
                 [Reinterop]
                 internal static class ObjectHandleUtility
                 {
-                    public static IntPtr CreateHandle(object? o)
+                    public static IntPtr CreateHandle(object o)
                     {
                         if (o == null)
                             return IntPtr.Zero;
@@ -49,7 +49,7 @@ namespace Reinterop
                         GCHandle.FromIntPtr(handle).Free();
                     }
 
-                    public static object? GetObjectFromHandle(IntPtr handle)
+                    public static object GetObjectFromHandle(IntPtr handle)
                     {
                         if (handle == IntPtr.Zero)
                             return null;
@@ -57,13 +57,13 @@ namespace Reinterop
                         return GCHandle.FromIntPtr(handle).Target;
                     }
 
-                    public static object? GetObjectAndFreeHandle(IntPtr handle)
+                    public static object GetObjectAndFreeHandle(IntPtr handle)
                     {
                         if (handle == IntPtr.Zero)
                             return null;
 
                         GCHandle gcHandle = GCHandle.FromIntPtr(handle);
-                        object? result = gcHandle.Target;
+                        object result = gcHandle.Target;
                         gcHandle.Free();
                         return result;
                     }

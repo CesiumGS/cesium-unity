@@ -98,8 +98,6 @@ namespace CesiumForUnity
             string.Equals("stringA", "stringB");
             string.IsNullOrEmpty("value");
 
-            IonAssetsColumn column = IonAssetsColumn.Name;
-
             Rect r = new Rect(0, 0, 50, 50);
             GUI.Label(r, "Label");
 

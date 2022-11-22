@@ -122,7 +122,7 @@ namespace Reinterop
             this.AddProperty(property, containingType);
         }
 
-        private TypeToGenerate AddType(ITypeSymbol type)
+        public TypeToGenerate AddType(ITypeSymbol type)
         {
             // Drop the nullability ("?") from the type if present.
             if (type.NullableAnnotation == NullableAnnotation.Annotated && type.OriginalDefinition != null)
@@ -224,7 +224,7 @@ namespace Reinterop
             return generationItem;
         }
 
-        private TypeToGenerate AddMethod(IMethodSymbol symbol)
+        public TypeToGenerate AddMethod(IMethodSymbol symbol)
         {
             TypeToGenerate item = this.AddType(symbol.ContainingType);
             item.Methods.Add(symbol);
@@ -240,7 +240,7 @@ namespace Reinterop
             return item;
         }
 
-        private TypeToGenerate AddProperty(IPropertySymbol symbol, ITypeSymbol? containingType = null)
+        public TypeToGenerate AddProperty(IPropertySymbol symbol, ITypeSymbol? containingType = null)
         {
             if (containingType == null)
                 containingType = symbol.ContainingType;
@@ -254,7 +254,7 @@ namespace Reinterop
             return item;
         }
 
-        private void AddEvent(IEventSymbol symbol)
+        public void AddEvent(IEventSymbol symbol)
         {
             TypeToGenerate item = this.AddType(symbol.ContainingType);
             item.Events.Add(symbol);
@@ -263,7 +263,7 @@ namespace Reinterop
             this.AddType(symbol.Type);
         }
 
-        private TypeToGenerate AddField(IFieldSymbol symbol)
+        public TypeToGenerate AddField(IFieldSymbol symbol)
         {
             TypeToGenerate item = this.AddType(symbol.ContainingType);
             item.Fields.Add(symbol);
@@ -274,7 +274,7 @@ namespace Reinterop
             return item;
         }
 
-        private TypeToGenerate AddConstructor(IMethodSymbol symbol)
+        public TypeToGenerate AddConstructor(IMethodSymbol symbol)
         {
             TypeToGenerate item = this.AddType(symbol.ContainingType);
             item.Constructors.Add(symbol);

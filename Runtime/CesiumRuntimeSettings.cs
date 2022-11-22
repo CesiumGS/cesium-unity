@@ -11,7 +11,7 @@ namespace CesiumForUnity
         private static readonly string _filePath =
             "Assets/Settings/Resources/CesiumRuntimeSettings.asset";
 
-        private static CesiumRuntimeSettings? _instance;
+        private static CesiumRuntimeSettings _instance;
 
         public static CesiumRuntimeSettings instance
         {
