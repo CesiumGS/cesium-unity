@@ -161,9 +161,9 @@ void CesiumMetadataImpl::loadMetadata(
   this->_pModels.insert({instanceID, {pModel, pPrimitive}});
 }
 
-void CesiumMetadataImpl::unloadMetadata(int32_t instanceID){
+void CesiumMetadataImpl::unloadMetadata(int32_t instanceID) {
   auto find = this->_pModels.find(instanceID);
-  if(find != this->_pModels.end()){
+  if (find != this->_pModels.end()) {
     this->_pModels.erase(find);
   }
 }

@@ -29,8 +29,7 @@ public:
       const ::DotNet::CesiumForUnity::Cesium3DTileset& tileset);
 
 private:
-  CesiumUtility::IntrusivePointer<
-      Cesium3DTilesSelection::BingMapsRasterOverlay>
+  CesiumUtility::IntrusivePointer<Cesium3DTilesSelection::BingMapsRasterOverlay>
       _pOverlay;
 };
 

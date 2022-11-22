@@ -138,7 +138,7 @@ struct CopyVertexColors {
 
     return success;
   }
-  
+
   bool packColorChannel(uint8_t c, uint8_t& result) {
     result = c;
     return true;
@@ -154,42 +154,46 @@ struct CopyVertexColors {
     return true;
   }
 
-  template <typename T>
-  bool packColorChannel(T c, uint8_t& result) {
+  template <typename T> bool packColorChannel(T c, uint8_t& result) {
     // Invalid accessor type.
     return false;
   }
 
   template <typename TChannel>
-  bool convertColor(const AccessorTypes::VEC3<TChannel>& color, Color32& result) {
+  bool
+  convertColor(const AccessorTypes::VEC3<TChannel>& color, Color32& result) {
     result.a = 255;
-    return packColorChannel(color.value[0], result.r) && 
+    return packColorChannel(color.value[0], result.r) &&
            packColorChannel(color.value[1], result.g) &&
            packColorChannel(color.value[2], result.b);
   }
 
   template <typename TChannel>
-  bool convertColor(const AccessorTypes::VEC4<TChannel>& color, Color32& result) {
-    return packColorChannel(color.value[0], result.r) && 
+  bool
+  convertColor(const AccessorTypes::VEC4<TChannel>& color, Color32& result) {
+    return packColorChannel(color.value[0], result.r) &&
            packColorChannel(color.value[1], result.g) &&
            packColorChannel(color.value[2], result.b) &&
            packColorChannel(color.value[3], result.a);
   }
 
-  template <typename T>
-  bool convertColor(T color, Color32& result) {
+  template <typename T> bool convertColor(T color, Color32& result) {
     // Not an accessor.
     return false;
   }
 };
 
-bool validateVertexColors(const Model& model, uint32_t accessorId, size_t vertexCount) {
+bool validateVertexColors(
+    const Model& model,
+    uint32_t accessorId,
+    size_t vertexCount) {
   if (accessorId >= model.accessors.size()) {
     return false;
   }
 
   const Accessor& colorAccessor = model.accessors[accessorId];
-  if (colorAccessor.type != Accessor::Type::VEC3 && colorAccessor.type != Accessor::Type::VEC4) {
+  if (colorAccessor.type != Accessor::Type::VEC3 &&
+      colorAccessor.type != Accessor::Type::VEC4) {
     return false;
   }
 
@@ -197,11 +201,11 @@ bool validateVertexColors(const Model& model, uint32_t accessorId, size_t vertex
       colorAccessor.componentType != Accessor::ComponentType::UNSIGNED_SHORT &&
       colorAccessor.componentType != Accessor::ComponentType::FLOAT) {
     return false;
-  }   
+  }
 
   if (colorAccessor.count < vertexCount) {
     return false;
-  }  
+  }
 
   return true;
 }
@@ -293,9 +297,11 @@ void populateMeshDataArray(
 
         // Add the COLOR_0 attribute, if it exists.
         auto colorAccessorIt = primitive.attributes.find("COLOR_0");
-        bool hasVertexColors = 
-            colorAccessorIt != primitive.attributes.end() && 
-            validateVertexColors(gltf, colorAccessorIt->second, positionView.size());
+        bool hasVertexColors = colorAccessorIt != primitive.attributes.end() &&
+                               validateVertexColors(
+                                   gltf,
+                                   colorAccessorIt->second,
+                                   positionView.size());
         if (hasVertexColors) {
           assert(numberOfAttributes < MAX_ATTRIBUTES);
 
@@ -307,7 +313,8 @@ void populateMeshDataArray(
           ++numberOfAttributes;
         }
 
-        // Max number of texture coordinates supported by Unity, see VertexAttribute.
+        // Max number of texture coordinates supported by Unity, see
+        // VertexAttribute.
         constexpr int MAX_TEX_COORDS = 8;
         int numTexCoords = 0;
         AccessorView<UnityEngine::Vector2> texCoordViews[MAX_TEX_COORDS];
@@ -416,7 +423,8 @@ void populateMeshDataArray(
             pWritePos += sizeof(Vector3);
           }
 
-          // Skip the slot allocated for vertex colors, we will fill them in bulk later.
+          // Skip the slot allocated for vertex colors, we will fill them in
+          // bulk later.
           if (hasVertexColors) {
             pWritePos += sizeof(uint32_t);
           }
@@ -437,19 +445,19 @@ void populateMeshDataArray(
             colorByteOffset += sizeof(Vector3);
           }
 
-          // Stride includes position, normal, ... 
+          // Stride includes position, normal, ...
           size_t stride = colorByteOffset;
           // color, ...
           stride += sizeof(uint32_t);
           // and tex coords.
           stride += numTexCoords * sizeof(Vector2);
-          
+
           createAccessorView(
-              gltf, 
-              colorAccessorIt->second, 
+              gltf,
+              colorAccessorIt->second,
               CopyVertexColors{
-                  pBufferStart + colorByteOffset, 
-                  stride, 
+                  pBufferStart + colorByteOffset,
+                  stride,
                   static_cast<size_t>(positionView.size())});
         }
 
@@ -543,7 +551,9 @@ UnityPrepareRendererResources::prepareInLoadThread(
               UnityEngine::MeshDataArray&& meshDataArray) mutable {
             MeshDataResult meshDataResult{std::move(meshDataArray), {}};
             // Free the MeshDataArray if something goes wrong.
-            ScopeGuard sg([&meshDataResult]() { meshDataResult.meshDataArray.Dispose(); });
+            ScopeGuard sg([&meshDataResult]() {
+              meshDataResult.meshDataArray.Dispose();
+            });
 
             populateMeshDataArray(meshDataResult, tileLoadResult);
 
@@ -668,10 +678,12 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
   DotNet::CesiumForUnity::Cesium3DTileset tilesetComponent =
       this->_tileset.GetComponent<DotNet::CesiumForUnity::Cesium3DTileset>();
-  
-  uint32_t currentOverlayCount = 
-      static_cast<uint32_t>(
-        tilesetComponent.NativeImplementation().getTileset()->getOverlays().size());
+
+  uint32_t currentOverlayCount =
+      static_cast<uint32_t>(tilesetComponent.NativeImplementation()
+                                .getTileset()
+                                ->getOverlays()
+                                .size());
 
   auto pModelGameObject =
       std::make_unique<UnityEngine::GameObject>(System::String(name));
@@ -944,21 +956,16 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           const std::vector<double>& emissiveFactorSrc =
               pMaterial->emissiveFactor;
           UnityEngine::Vector4 emissiveFactor;
-          emissiveFactor.x =
-              emissiveFactorSrc.size() > 0
-                  ? static_cast<float>(emissiveFactorSrc[0])
-                  : 0.0f;
-          emissiveFactor.y =
-              emissiveFactorSrc.size() > 1
-                  ? static_cast<float>(emissiveFactorSrc[1])
-                  : 0.0f;
-          emissiveFactor.z =
-              emissiveFactorSrc.size() > 2
-                  ? static_cast<float>(emissiveFactorSrc[2])
-                  : 0.0f;
-          material.SetVector(
-              System::String("_emissiveFactor"),
-              emissiveFactor);
+          emissiveFactor.x = emissiveFactorSrc.size() > 0
+                                 ? static_cast<float>(emissiveFactorSrc[0])
+                                 : 0.0f;
+          emissiveFactor.y = emissiveFactorSrc.size() > 1
+                                 ? static_cast<float>(emissiveFactorSrc[1])
+                                 : 0.0f;
+          emissiveFactor.z = emissiveFactorSrc.size() > 2
+                                 ? static_cast<float>(emissiveFactorSrc[2])
+                                 : 0.0f;
+          material.SetVector(System::String("_emissiveFactor"), emissiveFactor);
           if (pMaterial->emissiveTexture) {
             auto texCoordIndexIt = primitiveInfo.uvIndexMap.find(
                 pMaterial->emissiveTexture->texCoord);
@@ -977,9 +984,9 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             }
           }
         }
- 
-        // Initialize overlay UVs to all use index 0, attachRasterTile will update
-        // the uniforms with the correct UV index.
+
+        // Initialize overlay UVs to all use index 0, attachRasterTile will
+        // update the uniforms with the correct UV index.
         for (uint32_t i = 0; i < currentOverlayCount; ++i) {
           material.SetFloat(
               System::String(
@@ -1093,16 +1100,16 @@ void UnityPrepareRendererResources::attachRasterInMainThread(
       static_cast<UnityEngine::Texture*>(pMainThreadRendererResources);
   if (!pCesiumGameObject || !pCesiumGameObject->pGameObject || !pTexture)
     return;
-  
+
   DotNet::CesiumForUnity::Cesium3DTileset tilesetComponent =
       this->_tileset.GetComponent<DotNet::CesiumForUnity::Cesium3DTileset>();
   Tileset* pTileset = tilesetComponent.NativeImplementation().getTileset();
-  if (!pTileset) 
+  if (!pTileset)
     return;
 
   uint32_t overlayIndex = 0;
   bool overlayFound = false;
-  for (const CesiumUtility::IntrusivePointer<RasterOverlay>& pOverlay : 
+  for (const CesiumUtility::IntrusivePointer<RasterOverlay>& pOverlay :
        pTileset->getOverlays()) {
     // TODO: Is it safe to compare pointers like this?
     if (&rasterTile.getOverlay() == pOverlay.get()) {
@@ -1113,9 +1120,9 @@ void UnityPrepareRendererResources::attachRasterInMainThread(
     ++overlayIndex;
   }
 
-  if (!overlayFound) 
-    return;  
-    
+  if (!overlayFound)
+    return;
+
   std::string overlayIndexStr = std::to_string(overlayIndex);
 
   // TODO: Can we count on the order of primitives in the transform chain
@@ -1145,9 +1152,10 @@ void UnityPrepareRendererResources::attachRasterInMainThread(
     const CesiumPrimitiveInfo& primitiveInfo =
         pCesiumGameObject->primitiveInfos[primitiveIndex++];
 
-    // Note: The overlay texture coordinate index corresponds to the glTF attribute
-    // _CESIUMOVERLAY_<i>. Here we retrieve the Unity texture coordinate index 
-    // corresponding to the glTF texture coordinate index for this primitive.
+    // Note: The overlay texture coordinate index corresponds to the glTF
+    // attribute _CESIUMOVERLAY_<i>. Here we retrieve the Unity texture
+    // coordinate index corresponding to the glTF texture coordinate index for
+    // this primitive.
     auto texCoordIndexIt =
         primitiveInfo.rasterOverlayUvIndexMap.find(overlayTextureCoordinateID);
     if (texCoordIndexIt == primitiveInfo.rasterOverlayUvIndexMap.end()) {
@@ -1156,13 +1164,13 @@ void UnityPrepareRendererResources::attachRasterInMainThread(
       continue;
     }
 
-    // Note: The overlay index is NOT the same as the overlay texture coordinate index.
-    // For instance, multiple overlays could point to the same overlay UV index -
-    // multiple overlays can use the _CESIUMOVERLAY_0 attribute for example. The 
-    // _CESIUMOVERLAY_<i> attributes correspond to unique _projections_, not unique overlays.
+    // Note: The overlay index is NOT the same as the overlay texture coordinate
+    // index. For instance, multiple overlays could point to the same overlay UV
+    // index - multiple overlays can use the _CESIUMOVERLAY_0 attribute for
+    // example. The _CESIUMOVERLAY_<i> attributes correspond to unique
+    // _projections_, not unique overlays.
     material.SetFloat(
-        System::String(
-            "_overlay" + overlayIndexStr + "TextureCoordinateIndex"),
+        System::String("_overlay" + overlayIndexStr + "TextureCoordinateIndex"),
         static_cast<float>(texCoordIndexIt->second));
 
     material.SetTexture(
