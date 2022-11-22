@@ -9,7 +9,7 @@ namespace CesiumForUnity
         public delegate void RasterOverlayLoadFailureDelegate(
             CesiumRasterOverlayLoadFailureDetails details);
         public static event
-            RasterOverlayLoadFailureDelegate? OnCesiumRasterOverlayLoadFailure;
+            RasterOverlayLoadFailureDelegate OnCesiumRasterOverlayLoadFailure;
 
         public static void BroadcastCesiumRasterOverlayLoadFailure(
             CesiumRasterOverlayLoadFailureDetails details)
@@ -87,7 +87,7 @@ namespace CesiumForUnity
 
         public void AddToTileset()
         {
-            Cesium3DTileset? tileset = this.gameObject.GetComponent<Cesium3DTileset>();
+            Cesium3DTileset tileset = this.gameObject.GetComponent<Cesium3DTileset>();
             if (tileset == null)
                 return;
 
@@ -96,7 +96,7 @@ namespace CesiumForUnity
 
         public void RemoveFromTileset()
         {
-            Cesium3DTileset? tileset = this.gameObject.GetComponent<Cesium3DTileset>();
+            Cesium3DTileset tileset = this.gameObject.GetComponent<Cesium3DTileset>();
             if (tileset == null)
                 return;
 

@@ -155,7 +155,7 @@ namespace CesiumForUnity
         private void OnEnable()
         {
             // When this sub-scene is enabled, all others are disabled.
-            CesiumGeoreference? georeference = this.GetComponentInParent<CesiumGeoreference>();
+            CesiumGeoreference georeference = this.GetComponentInParent<CesiumGeoreference>();
             if (georeference == null)
                 throw new InvalidOperationException(
                     "CesiumSubScene is not nested inside a game object with a CesiumGeoreference.");
@@ -203,7 +203,7 @@ namespace CesiumForUnity
 
             if (this.isActiveAndEnabled)
             {
-                CesiumGeoreference? georeference = this.GetComponentInParent<CesiumGeoreference>();
+                CesiumGeoreference georeference = this.GetComponentInParent<CesiumGeoreference>();
                 if (georeference == null)
                     throw new InvalidOperationException("CesiumSubScene is not nested inside a game object with a CesiumGeoreference.");
               

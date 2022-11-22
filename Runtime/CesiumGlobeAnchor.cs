@@ -396,7 +396,7 @@ namespace CesiumForUnity
 
         private void UpdateGlobePosition(CesiumGlobeAnchorPositionAuthority previousAuthority)
         {
-            CesiumGeoreference? georeference = this.gameObject.GetComponentInParent<CesiumGeoreference>();
+            CesiumGeoreference georeference = this.gameObject.GetComponentInParent<CesiumGeoreference>();
             if (georeference == null)
                 throw new InvalidOperationException("CesiumGlobeAnchor is not nested inside a game object with a CesiumGeoreference.");
 

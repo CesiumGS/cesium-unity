@@ -9,7 +9,7 @@ namespace CesiumForUnity
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumEditorWindowImpl", "CesiumEditorWindowImpl.h")]
     public partial class CesiumEditorWindow : EditorWindow
     {
-        public static CesiumEditorWindow? currentWindow = null;
+        public static CesiumEditorWindow currentWindow = null;
 
         [MenuItem("Cesium/Cesium")]
         public static void ShowWindow()

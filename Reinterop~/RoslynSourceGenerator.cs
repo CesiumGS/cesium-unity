@@ -113,12 +113,7 @@ namespace Reinterop
 
                 if (type != null)
                 {
-                    TypeToGenerate item;
-                    if (!walker.GenerationItems.TryGetValue(type, out item))
-                    {
-                        item = new TypeToGenerate(type);
-                        walker.GenerationItems.Add(type, item);
-                    }
+                    TypeToGenerate item = walker.AddType(type);
 
                     item.ImplementationClassName = implClassName;
                     item.ImplementationHeaderName = implHeaderName;
@@ -134,6 +129,13 @@ namespace Reinterop
                             IMethodSymbol? symbol = semanticModel.GetDeclaredSymbol(methodSyntax) as IMethodSymbol;
                             if (symbol != null)
                             {
+                                walker.AddType(symbol.ReturnType);
+
+                                foreach (IParameterSymbol parameter in symbol.Parameters)
+                                {
+                                    walker.AddType(parameter.Type);
+                                }
+
                                 item.MethodsImplementedInCpp.Add(symbol);
                             }
                         }

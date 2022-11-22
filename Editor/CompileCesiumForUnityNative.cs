@@ -36,14 +36,14 @@ namespace CesiumForUnity
         {
             public BuildTarget Platform = BuildTarget.StandaloneWindows64;
             public BuildTargetGroup PlatformGroup = BuildTargetGroup.Standalone;
-            public string? Cpu = null;
+            public string Cpu = null;
             public string SourceDirectory = "";
             public string BuildDirectory = "build";
             public string GeneratedDirectoryName = "generated-Unknown";
             public string Configuration = "RelWithDebInfo";
             public string InstallDirectory = "";
             public bool CleanBuild = false;
-            public string? Toolchain;
+            public string Toolchain;
             public List<string> ExtraConfigureArgs = new List<string>();
             public List<string> ExtraBuildArgs = new List<string>();
         }
@@ -125,11 +125,11 @@ namespace CesiumForUnity
         /// </summary>
         private void OnPreprocessAsset()
         {
-            LibraryToBuild? libraryToBuild;
+            LibraryToBuild libraryToBuild;
             if (!importsInProgress.TryGetValue(assetPath, out libraryToBuild))
                 return;
 
-            PluginImporter? importer = this.assetImporter as PluginImporter;
+            PluginImporter importer = this.assetImporter as PluginImporter;
             if (importer == null)
                 return;
 
@@ -164,11 +164,11 @@ namespace CesiumForUnity
             // So reapply here as well.
             foreach (string imported in importedAssets)
             {
-                LibraryToBuild? libraryToBuild;
+                LibraryToBuild libraryToBuild;
                 if (!importsInProgress.TryGetValue(imported, out libraryToBuild))
                     continue;
 
-                PluginImporter? importer = AssetImporter.GetAtPath(imported) as PluginImporter;
+                PluginImporter importer = AssetImporter.GetAtPath(imported) as PluginImporter;
                 if (importer == null)
                     continue;
 
@@ -217,7 +217,7 @@ namespace CesiumForUnity
             }
         }
 
-        public static LibraryToBuild GetLibraryToBuild(BuildSummary summary, string? cpu = null)
+        public static LibraryToBuild GetLibraryToBuild(BuildSummary summary, string cpu = null)
         {
             return GetLibraryToBuild(new PlatformToBuild()
             {
@@ -228,7 +228,7 @@ namespace CesiumForUnity
             }, cpu);
         }
 
-        public static LibraryToBuild GetLibraryToBuild(PlatformToBuild platform, string? cpu = null)
+        public static LibraryToBuild GetLibraryToBuild(PlatformToBuild platform, string cpu = null)
         {
             string sourceFilename = GetSourceFilePathName();
             string packagePath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(sourceFilename), $".."));
@@ -397,7 +397,7 @@ namespace CesiumForUnity
         {
             // CMake can't deal with back slashes (Windows) in the ANDROID_NDK_ROOT environment variable.
             // So replace them with forward slashes.
-            string? ndkRoot = environment.ContainsKey("ANDROID_NDK_ROOT") ? environment["ANDROID_NDK_ROOT"] : null;
+            string ndkRoot = environment.ContainsKey("ANDROID_NDK_ROOT") ? environment["ANDROID_NDK_ROOT"] : null;
 #if UNITY_ANDROID
             if (ndkRoot == null)
             {
@@ -423,7 +423,7 @@ namespace CesiumForUnity
                 environment["ANDROID_NDK_ROOT"] = ndkRoot.Replace('\\', '/');
         }
 
-        private static string GetSourceFilePathName([CallerFilePath] string? callerFilePath = null)
+        private static string GetSourceFilePathName([CallerFilePath] string callerFilePath = null)
         {
             return callerFilePath == null ? "" : callerFilePath;
         }

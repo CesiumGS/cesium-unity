@@ -8,7 +8,7 @@ namespace CesiumForUnity
 {
     public class CesiumIonAssetsWindow : EditorWindow
     {
-        public static CesiumIonAssetsWindow? currentWindow = null;
+        public static CesiumIonAssetsWindow currentWindow = null;
 
         [MenuItem("Cesium/Cesium ion Assets")]
         public static void ShowWindow()

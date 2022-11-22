@@ -18,8 +18,8 @@ namespace CesiumForUnity
         }
 
         private AssetType _type = AssetType.Null;
-        private Cesium3DTileset? _tileset;
-        private CesiumRasterOverlay? _overlay;
+        private Cesium3DTileset _tileset;
+        private CesiumRasterOverlay _overlay;
 
         public CesiumIonAsset()
         {
@@ -38,12 +38,12 @@ namespace CesiumForUnity
             this._overlay = overlay;
         }
 
-        public Cesium3DTileset? tileset
+        public Cesium3DTileset tileset
         {
             get => this._type == AssetType.Tileset ? this._tileset : null;
         }
 
-        public CesiumRasterOverlay? overlay
+        public CesiumRasterOverlay overlay
         {
             get => this._type == AssetType.Overlay ? this._overlay : null;
         }
@@ -114,7 +114,7 @@ namespace CesiumForUnity
 
                 if (this._type == AssetType.Overlay)
                 {
-                    CesiumIonRasterOverlay? ionOverlay = this._overlay as CesiumIonRasterOverlay;
+                    CesiumIonRasterOverlay ionOverlay = this._overlay as CesiumIonRasterOverlay;
                     return ionOverlay != null ? ionOverlay.ionAccessToken : "";
                 }
 
@@ -129,7 +129,7 @@ namespace CesiumForUnity
 
                 if (this._type == AssetType.Overlay)
                 {
-                    CesiumIonRasterOverlay? ionOverlay = this._overlay as CesiumIonRasterOverlay;
+                    CesiumIonRasterOverlay ionOverlay = this._overlay as CesiumIonRasterOverlay;
                     if (ionOverlay != null)
                     {
                         ionOverlay.ionAccessToken = value;
@@ -150,7 +150,7 @@ namespace CesiumForUnity
 
                 if (this._type == AssetType.Overlay && this._overlay != null)
                 {
-                    CesiumIonRasterOverlay? ionOverlay = this._overlay as CesiumIonRasterOverlay;
+                    CesiumIonRasterOverlay ionOverlay = this._overlay as CesiumIonRasterOverlay;
                     return ionOverlay != null ? ionOverlay.ionAssetID : 0;
                 }
 
@@ -182,7 +182,7 @@ namespace CesiumForUnity
 
             if (this._type == AssetType.Overlay && this._overlay != null)
             {
-                CesiumIonRasterOverlay? ionOverlay = this._overlay as CesiumIonRasterOverlay;
+                CesiumIonRasterOverlay ionOverlay = this._overlay as CesiumIonRasterOverlay;
                 return ionOverlay != null;
             }
 
