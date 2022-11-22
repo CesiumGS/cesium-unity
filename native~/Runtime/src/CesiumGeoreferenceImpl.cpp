@@ -145,3 +145,29 @@ CesiumGeoreferenceImpl::TransformEarthCenteredEarthFixedPositionToUnityWorld(
       earthCenteredEarthFixed.z));
   return DotNet::CesiumForUnity::CesiumVector3{result.x, result.y, result.z};
 }
+
+DotNet::CesiumForUnity::CesiumVector3
+CesiumGeoreferenceImpl::TransformUnityWorldDirectionToEarthCenteredEarthFixed(
+    const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
+    DotNet::CesiumForUnity::CesiumVector3 unityWorldDirection) {
+  const LocalHorizontalCoordinateSystem& coordinateSystem =
+      this->getCoordinateSystem();
+  glm::dvec3 result = coordinateSystem.localDirectionToEcef(glm::dvec3(
+      unityWorldDirection.x,
+      unityWorldDirection.y,
+      unityWorldDirection.z));
+  return DotNet::CesiumForUnity::CesiumVector3{result.x, result.y, result.z};
+}
+
+DotNet::CesiumForUnity::CesiumVector3
+CesiumGeoreferenceImpl::TransformEarthCenteredEarthFixedDirectionToUnityWorld(
+    const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
+    DotNet::CesiumForUnity::CesiumVector3 earthCenteredEarthFixedDirection) {
+  const LocalHorizontalCoordinateSystem& coordinateSystem =
+      this->getCoordinateSystem();
+  glm::dvec3 result = coordinateSystem.ecefDirectionToLocal(glm::dvec3(
+      earthCenteredEarthFixedDirection.x,
+      earthCenteredEarthFixedDirection.y,
+      earthCenteredEarthFixedDirection.z));
+  return DotNet::CesiumForUnity::CesiumVector3{result.x, result.y, result.z};
+}

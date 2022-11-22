@@ -254,6 +254,7 @@ namespace CesiumForUnity
             SceneView sceneView = SceneView.lastActiveSceneView;
             sceneView.pivot =
                 position + sceneView.camera.transform.forward * sceneView.cameraDistance;
+            sceneView.rotation = rotation;
             SceneView.lastActiveSceneView.Repaint();
         }
 
@@ -269,6 +270,16 @@ namespace CesiumForUnity
                 subScenes[i].gameObject.SetActive(false);
             }
 
+            // Want to restore current forward direction, relative to the globe.
+            Quaternion currentCameraRotationUnity = SceneView.lastActiveSceneView.rotation;
+            Vector3 cameraForwardUnity = currentCameraRotationUnity * Vector3.forward;
+            CesiumVector3 cameraForwardEcef = 
+                georeference.TransformUnityWorldDirectionToEarthCenteredEarthFixed(
+                  new CesiumVector3() {
+                    x = cameraForwardUnity.x, 
+                    y = cameraForwardUnity.y, 
+                    z = cameraForwardUnity.z});
+
             CesiumVector3 positionECEF =
                 CesiumEditorUtility.TransformCameraPositionToEarthCenteredEarthFixed(georeference);
             georeference.SetOriginEarthCenteredEarthFixed(
@@ -276,11 +287,20 @@ namespace CesiumForUnity
                 positionECEF.y,
                 positionECEF.z);
 
+            CesiumVector3 newCameraForwardUnity = 
+                georeference.TransformEarthCenteredEarthFixedDirectionToUnityWorld(cameraForwardEcef);
+
             // Teleport the camera back to the georeference's position so it stays
-            // at the middle of the subscene.
+            // at the middle of the subscene. Restore the original forward direction, wrt the globe.
             // TODO: This will have to change when we factor in Unity transforms.
             CesiumEditorUtility.SetSceneViewPositionRotation(
-                Vector3.zero, SceneView.lastActiveSceneView.rotation);
+                Vector3.zero, 
+                Quaternion.LookRotation(
+                    new Vector3(
+                      (float)newCameraForwardUnity.x, 
+                      (float)newCameraForwardUnity.y, 
+                      (float)newCameraForwardUnity.z),
+                    Vector3.up));
         }
 
         public static CesiumSubScene CreateSubScene(CesiumGeoreference georeference)

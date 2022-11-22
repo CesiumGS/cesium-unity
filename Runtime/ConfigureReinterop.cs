@@ -59,6 +59,8 @@ namespace CesiumForUnity
             float x = p.x;
             float y = p.y;
             float z = p.z;
+            Quaternion q = new Quaternion();
+            q = Quaternion.LookRotation(Vector3.forward, Vector3.up);
             c.GetStereoViewMatrix(Camera.StereoscopicEye.Right);
             float fov = c.fieldOfView;
             int pixelHeight = c.pixelHeight;
@@ -76,6 +78,7 @@ namespace CesiumForUnity
             transform.position = transform.position;
             transform.rotation = transform.rotation;
             transform.localScale = transform.localScale;
+            transform.SetPositionAndRotation(transform.position, transform.rotation);
             Transform root = transform.root;
             int siblingIndex = transform.GetSiblingIndex();
             Matrix4x4 m = transform.localToWorldMatrix;
@@ -114,6 +117,8 @@ namespace CesiumForUnity
             mesh.SetIndices(new NativeArray<int>(), MeshTopology.Triangles, 0, true, 0);
             mesh.RecalculateBounds();
             int instanceID = mesh.GetInstanceID();
+
+            Bounds bounds = new Bounds(new Vector3(0, 0, 0), new Vector3(1, 2, 1));
 
             MeshCollider meshCollider = go.AddComponent<MeshCollider>();
             meshCollider.sharedMesh = mesh;
@@ -406,7 +411,10 @@ namespace CesiumForUnity
 
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;
+            sv.pivot = sv.pivot;
+            sv.rotation = sv.rotation;
             Camera svc = sv.camera;
+            svc.transform.SetPositionAndRotation(p, q);
 
             bool isPlaying = EditorApplication.isPlaying;
             EditorApplication.update += () => {};

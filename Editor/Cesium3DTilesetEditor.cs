@@ -118,6 +118,26 @@ namespace CesiumForUnity
             this.serializedObject.ApplyModifiedProperties();
         }
 
+        public bool HasFrameBounds()
+        {
+          return true;
+        }
+
+        public Bounds OnGetFrameBounds()
+        {
+          // HACK: This function only gets called by Unity's editor when it is trying to focus the tileset.
+          // Return dummy bounds with infinite extent so Unity's built in focusing fails. This allows us to
+          // focus the editor view as we want, without it getting overwritten.
+
+          // TODO: Maybe we can use reflection or something to only do this hack when the SceneView is 
+          // invoking this method. It is not ideal for this method to have a side-effect when it is invoked
+          // from anywhere else. 
+          this._tileset.FocusTileset();
+          return new Bounds(
+              new Vector3(0, 0, 0), 
+              new Vector3(float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity));
+        }
+
         private void DrawInspectorButtons()
         {
             GUILayout.BeginHorizontal();
