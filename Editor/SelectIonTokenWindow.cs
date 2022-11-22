@@ -21,7 +21,7 @@ namespace CesiumForUnity
         {
             if (currentWindow == null)
             {
-                currentWindow = GetWindow<SelectIonTokenWindow>();
+                currentWindow = GetWindow<SelectIonTokenWindow>("Select Cesium ion Token");
             }
 
             currentWindow.Show();

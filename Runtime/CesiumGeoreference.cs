@@ -232,14 +232,14 @@ namespace CesiumForUnity
         /// Transform a Unity world direction to a direction in Earth-Centered, Earth-Fixed (ECEF) coordinates.
         /// </summary>
         /// <param name="unityWorldDirection">The Unity world direction to convert.</param>
-        /// <returns>The ECEF direction in meters.</returns>
+        /// <returns>The ECEF direction.</returns>
         public partial CesiumVector3
             TransformUnityWorldDirectionToEarthCenteredEarthFixed(CesiumVector3 unityWorldDirection);
 
         /// <summary>
-        /// Transform an Earth-Centered, Earth-Fixed position to Unity world coordinates.
+        /// Transform an Earth-Centered, Earth-Fixed direction to Unity world coordinates.
         /// </summary>
-        /// <param name="earthCenteredEarthFixedDirection">The direction in ECEF coordinates, in meters.</param>
+        /// <param name="earthCenteredEarthFixedDirection">The direction in ECEF coordinates.</param>
         /// <returns>The corresponding Unity world direction.</returns>
         public partial CesiumVector3
             TransformEarthCenteredEarthFixedDirectionToUnityWorld(CesiumVector3 earthCenteredEarthFixedDirection);
