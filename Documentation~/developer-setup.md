@@ -40,7 +40,7 @@ Be sure to also clone the submodules. If you forgot the `--recurse-submodules` o
 
 Reinterop is a Roslyn (C# compiler) source generator that is automatically invoked by Unity while compiling the Cesium for Unity C# code, and generates C# <-> C++ interop layer.
 
-To build Reinterop and publish it to Cesium for Unity's `Assets` directory, run the following from the `Packages/com.cesium.unity` directory:
+To build Reinterop and publish it to Cesium for Unity's directory, run the following from the `Packages/com.cesium.unity` directory:
 
 ```
 dotnet publish Reinterop~ -o .
