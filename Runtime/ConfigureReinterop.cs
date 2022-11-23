@@ -168,6 +168,7 @@ namespace CesiumForUnity
 
             string temporaryCachePath = Application.temporaryCachePath;
             bool isEditor = Application.isEditor;
+            string applicationVersion = Application.version;
 
             Marshal.FreeCoTaskMem(Marshal.StringToCoTaskMemUTF8("hi"));
 

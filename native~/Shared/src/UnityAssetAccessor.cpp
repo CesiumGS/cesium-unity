@@ -10,6 +10,7 @@
 #include <DotNet/Unity/Collections/LowLevel/Unsafe/NativeArrayUnsafeUtility.h>
 #include <DotNet/Unity/Collections/NativeArray1.h>
 #include <DotNet/Unity/Collections/NativeArrayOptions.h>
+#include <DotNet/UnityEngine/Application.h>
 #include <DotNet/UnityEngine/Networking/DownloadHandler.h>
 #include <DotNet/UnityEngine/Networking/Result.h>
 #include <DotNet/UnityEngine/Networking/UnityWebRequest.h>
@@ -106,6 +107,10 @@ UnityAssetAccessor::get(
           System::String(header.first),
           System::String(header.second));
     }
+
+    request.SetRequestHeader(
+        System::String("X-Cesium-Version"),
+        UnityEngine::Application::version());
 
     auto promise =
         asyncSystem

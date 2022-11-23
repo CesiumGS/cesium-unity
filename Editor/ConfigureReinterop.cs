@@ -80,6 +80,7 @@ namespace CesiumForUnity
             EditorPrefs.DeleteKey("Key");
 
             Application.OpenURL("URL");
+            string applicationVersion = Application.version;
 
             TreeViewItem root = new TreeViewItem(0, -1, "root");
             int id = root.id;
