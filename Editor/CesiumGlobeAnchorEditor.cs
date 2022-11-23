@@ -41,9 +41,13 @@ namespace CesiumForUnity
         private SerializedProperty _ecefY;
         private SerializedProperty _ecefZ;
 
-        private SerializedProperty _unityX;
-        private SerializedProperty _unityY;
-        private SerializedProperty _unityZ;
+        private SerializedProperty _unityWorldX;
+        private SerializedProperty _unityWorldY;
+        private SerializedProperty _unityWorldZ;
+
+        private SerializedProperty _unityLocalX;
+        private SerializedProperty _unityLocalY;
+        private SerializedProperty _unityLocalZ;
 
         private void OnEnable()
         {
@@ -64,9 +68,13 @@ namespace CesiumForUnity
             this._ecefY = this.serializedObject.FindProperty("_ecefY");
             this._ecefZ = this.serializedObject.FindProperty("_ecefZ");
 
-            this._unityX = this.serializedObject.FindProperty("_unityX");
-            this._unityY = this.serializedObject.FindProperty("_unityY");
-            this._unityZ = this.serializedObject.FindProperty("_unityZ");
+            this._unityWorldX = this.serializedObject.FindProperty("_unityWorldX");
+            this._unityWorldY = this.serializedObject.FindProperty("_unityWorldY");
+            this._unityWorldZ = this.serializedObject.FindProperty("_unityWorldZ");
+
+            this._unityLocalX = this.serializedObject.FindProperty("_unityLocalX");
+            this._unityLocalY = this.serializedObject.FindProperty("_unityLocalY");
+            this._unityLocalZ = this.serializedObject.FindProperty("_unityLocalZ");
         }
 
         public override void OnInspectorGUI()
@@ -79,7 +87,9 @@ namespace CesiumForUnity
             EditorGUILayout.Space(5);
             DrawEarthCenteredEarthFixedProperties();
             EditorGUILayout.Space(5);
-            DrawUnityPositionProperties();
+            DrawUnityWorldPositionProperties();
+            EditorGUILayout.Space(5);
+            DrawUnityLocalPositionProperties();
 
             // ApplyModifiedProperties() is called within the Draw____Properties
             // functions themselves. Otherwise, calling it here would override
@@ -251,32 +261,29 @@ namespace CesiumForUnity
             EditorGUI.EndDisabledGroup();
         }
 
-        private void DrawUnityPositionProperties()
+        private void DrawUnityWorldPositionProperties()
         {
             EditorGUI.BeginDisabledGroup(
                 this.positionAuthority != CesiumGlobeAnchorPositionAuthority.UnityWorldCoordinates);
 
-            GUILayout.Label("Position (Unity Coordinates)", EditorStyles.boldLabel);
+            GUILayout.Label("Position (Unity World Coordinates)", EditorStyles.boldLabel);
 
             EditorGUI.BeginChangeCheck();
 
             GUIContent unityXContent = new GUIContent(
-                "Unity X",
-                "The Unity world X coordinate of this game object. This is the same as the Transform's " +
-                "X coordinate but expressed in 64-bit (double) precision.");
-            EditorGUILayout.PropertyField(this._unityX, unityXContent);
+                "Unity World X",
+                "The Unity world X coordinate of this game object.");
+            EditorGUILayout.PropertyField(this._unityWorldX, unityXContent);
 
             GUIContent unityYContent = new GUIContent(
-                "Unity Y",
-                "The Unity world Y coordinate of this game object. This is the same as the Transform's " +
-                "Y coordinate but expressed in 64-bit (double) precision.");
-            EditorGUILayout.PropertyField(this._unityY, unityYContent);
+                "Unity World Y",
+                "The Unity world Y coordinate of this game object.");
+            EditorGUILayout.PropertyField(this._unityWorldY, unityYContent);
 
             GUIContent unityZContent = new GUIContent(
-                "Unity Z",
-                "The Unity world Z coordinate of this game object. This is the same as the Transform's " +
-                "Z coordinate but expressed in 64-bit (double) precision.");
-            EditorGUILayout.PropertyField(this._unityZ, unityZContent);
+                "Unity World Z",
+                "The Unity world Z coordinate of this game object.");
+            EditorGUILayout.PropertyField(this._unityWorldZ, unityZContent);
 
             if (EditorGUI.EndChangeCheck())
             {
@@ -285,9 +292,51 @@ namespace CesiumForUnity
                 // Manually trigger an update of the position of this object
                 // and its coordinates in other systems.
                 this._globeAnchor.SetPositionUnityWorld(
-                    this._unityX.doubleValue,
-                    this._unityY.doubleValue,
-                    this._unityZ.doubleValue);
+                    this._unityWorldX.doubleValue,
+                    this._unityWorldY.doubleValue,
+                    this._unityWorldZ.doubleValue);
+            }
+
+            EditorGUI.EndDisabledGroup();
+        }
+
+        private void DrawUnityLocalPositionProperties()
+        {
+            EditorGUI.BeginDisabledGroup(
+                this.positionAuthority != CesiumGlobeAnchorPositionAuthority.UnityLocalCoordinates);
+
+            GUILayout.Label("Position (Unity Local Coordinates)", EditorStyles.boldLabel);
+
+            EditorGUI.BeginChangeCheck();
+
+            GUIContent unityXContent = new GUIContent(
+                "Unity Local X",
+                "The Unity local X coordinate of this game object. This is the same as the Transform's " +
+                "X coordinate but expressed in 64-bit (double) precision.");
+            EditorGUILayout.PropertyField(this._unityLocalX, unityXContent);
+
+            GUIContent unityYContent = new GUIContent(
+                "Unity Local Y",
+                "The Unity local Y coordinate of this game object. This is the same as the Transform's " +
+                "Y coordinate but expressed in 64-bit (double) precision.");
+            EditorGUILayout.PropertyField(this._unityLocalY, unityYContent);
+
+            GUIContent unityZContent = new GUIContent(
+                "Unity Local Z",
+                "The Unity local Z coordinate of this game object. This is the same as the Transform's " +
+                "Z coordinate but expressed in 64-bit (double) precision.");
+            EditorGUILayout.PropertyField(this._unityLocalZ, unityZContent);
+
+            if (EditorGUI.EndChangeCheck())
+            {
+                this.serializedObject.ApplyModifiedProperties();
+
+                // Manually trigger an update of the position of this object
+                // and its coordinates in other systems.
+                this._globeAnchor.SetPositionUnityLocal(
+                    this._unityLocalX.doubleValue,
+                    this._unityLocalY.doubleValue,
+                    this._unityLocalZ.doubleValue);
             }
 
             EditorGUI.EndDisabledGroup();

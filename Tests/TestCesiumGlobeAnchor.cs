@@ -27,15 +27,15 @@ public class TestCesiumGlobeAnchor
         yield return null;
 
         Assert.AreEqual(CesiumGlobeAnchorPositionAuthority.UnityWorldCoordinates, anchor.positionAuthority);
-        Assert.That(anchor.unityX, Is.EqualTo(100.0).Using(FloatEqualityComparer.Instance));
-        Assert.That(anchor.unityY, Is.EqualTo(200.0).Using(FloatEqualityComparer.Instance));
-        Assert.That(anchor.unityZ, Is.EqualTo(300.0).Using(FloatEqualityComparer.Instance));
+        Assert.That(anchor.unityWorldX, Is.EqualTo(100.0).Using(FloatEqualityComparer.Instance));
+        Assert.That(anchor.unityWorldY, Is.EqualTo(200.0).Using(FloatEqualityComparer.Instance));
+        Assert.That(anchor.unityWorldZ, Is.EqualTo(300.0).Using(FloatEqualityComparer.Instance));
 
         anchor.SetPositionUnityWorld(1.0, 2.0, 3.0);
 
-        Assert.That(anchor.unityX, Is.EqualTo(1.0).Using(FloatEqualityComparer.Instance));
-        Assert.That(anchor.unityY, Is.EqualTo(2.0).Using(FloatEqualityComparer.Instance));
-        Assert.That(anchor.unityZ, Is.EqualTo(3.0).Using(FloatEqualityComparer.Instance));
+        Assert.That(anchor.unityWorldX, Is.EqualTo(1.0).Using(FloatEqualityComparer.Instance));
+        Assert.That(anchor.unityWorldY, Is.EqualTo(2.0).Using(FloatEqualityComparer.Instance));
+        Assert.That(anchor.unityWorldZ, Is.EqualTo(3.0).Using(FloatEqualityComparer.Instance));
         Assert.That(goAnchored.transform.position.x, Is.EqualTo(1.0).Using(FloatEqualityComparer.Instance));
         Assert.That(goAnchored.transform.position.y, Is.EqualTo(2.0).Using(FloatEqualityComparer.Instance));
         Assert.That(goAnchored.transform.position.z, Is.EqualTo(3.0).Using(FloatEqualityComparer.Instance));
@@ -60,15 +60,15 @@ public class TestCesiumGlobeAnchor
         anchor.Sync();
 
         Assert.AreEqual(CesiumGlobeAnchorPositionAuthority.UnityWorldCoordinates, anchor.positionAuthority);
-        Assert.That(anchor.unityX, Is.EqualTo(100.0).Using(FloatEqualityComparer.Instance));
-        Assert.That(anchor.unityY, Is.EqualTo(200.0).Using(FloatEqualityComparer.Instance));
-        Assert.That(anchor.unityZ, Is.EqualTo(300.0).Using(FloatEqualityComparer.Instance));
+        Assert.That(anchor.unityWorldX, Is.EqualTo(100.0).Using(FloatEqualityComparer.Instance));
+        Assert.That(anchor.unityWorldY, Is.EqualTo(200.0).Using(FloatEqualityComparer.Instance));
+        Assert.That(anchor.unityWorldZ, Is.EqualTo(300.0).Using(FloatEqualityComparer.Instance));
 
         anchor.SetPositionUnityWorld(1.0, 2.0, 3.0);
 
-        Assert.That(anchor.unityX, Is.EqualTo(1.0).Using(FloatEqualityComparer.Instance));
-        Assert.That(anchor.unityY, Is.EqualTo(2.0).Using(FloatEqualityComparer.Instance));
-        Assert.That(anchor.unityZ, Is.EqualTo(3.0).Using(FloatEqualityComparer.Instance));
+        Assert.That(anchor.unityWorldX, Is.EqualTo(1.0).Using(FloatEqualityComparer.Instance));
+        Assert.That(anchor.unityWorldY, Is.EqualTo(2.0).Using(FloatEqualityComparer.Instance));
+        Assert.That(anchor.unityWorldZ, Is.EqualTo(3.0).Using(FloatEqualityComparer.Instance));
         Assert.That(goAnchored.transform.position.x, Is.EqualTo(1.0).Using(FloatEqualityComparer.Instance));
         Assert.That(goAnchored.transform.position.y, Is.EqualTo(2.0).Using(FloatEqualityComparer.Instance));
         Assert.That(goAnchored.transform.position.z, Is.EqualTo(3.0).Using(FloatEqualityComparer.Instance));
