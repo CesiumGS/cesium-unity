@@ -399,6 +399,10 @@ void Cesium3DTilesetImpl::LoadTileset(
             unityDetails);
       };
 
+  // Generous per-frame time limits for loading / unloading on main thread.
+  options.mainThreadLoadingTimeLimit = 5.0;
+  options.tileCacheUnloadTimeLimit = 5.0;
+
   TilesetContentOptions contentOptions{};
   contentOptions.generateMissingNormalsSmooth = tileset.generateSmoothNormals();
 
