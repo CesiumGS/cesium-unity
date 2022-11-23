@@ -174,8 +174,8 @@ jobs:
       - name: Create combined package
         run: |
           cd combine
-          export NAME=$(jq -r ".name" package.json)
-          export VERSION=$(jq -r ".version" package.json)
+          export NAME=$(jq -r ".name" $GITHUB_WORKSPACE/package.json)
+          export VERSION=$(jq -r ".version" $GITHUB_WORKSPACE/package.json)
           tar czf $NAME-$VERSION.tgz package
       - name: Publish combined package
         if: ${{ success() }}
