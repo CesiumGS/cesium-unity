@@ -19,6 +19,7 @@
 #include <DotNet/CesiumForUnity/CesiumGlobeAnchor.h>
 #include <DotNet/CesiumForUnity/CesiumMetadata.h>
 #include <DotNet/System/Array1.h>
+#include <DotNet/System/Collections/Generic/List1.h>
 #include <DotNet/System/Object.h>
 #include <DotNet/System/String.h>
 #include <DotNet/System/Text/Encoding.h>
@@ -696,7 +697,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         UnityEngine::HideFlags::HideInHierarchy);
   }
 
-  pModelGameObject->transform().parent(this->_tileset.transform());
+  pModelGameObject->transform().SetParent(this->_tileset.transform(), false);
   pModelGameObject->SetActive(false);
 
   glm::dmat4 tileTransform = tile.getTransform();
@@ -794,27 +795,35 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
         primitiveGameObject.transform().parent(pModelGameObject->transform());
 
-        glm::dmat4 fixedToUnity =
+        // The Georeference defines the mapping of ECEF coordinates to the game
+        // object's coordinates. And then the game object's transform maps the
+        // coordinates to the Unity world. This way a transform on a tileset or
+        // georeference can position/rotate/scale some or all of the globe
+        // within the Unity world. But usually tilesets and georeferences should
+        // have identity transforms.
+
+        glm::dmat4 ecefToGameObject =
             pCoordinateSystem
                 ? pCoordinateSystem->getEcefToLocalTransformation()
                 : glm::dmat4(1.0);
 
-        glm::dmat4 transformToEcef = tileTransform * transform;
-        glm::dvec3 ecefPosition = glm::dvec3(transformToEcef[3]);
+        glm::dmat4 modelToEcef = tileTransform * transform;
 
-        glm::dmat4 transformToUnity = fixedToUnity * transformToEcef;
+        glm::dmat4 modelToGameObject = ecefToGameObject * modelToEcef;
+        glm::dmat4 gameObjectToUnityWorld = UnityTransforms::fromUnity(
+            pModelGameObject->transform().localToWorldMatrix());
 
-        glm::dvec3 translation = glm::dvec3(transformToUnity[3]);
+        glm::dvec3 translation = glm::dvec3(modelToGameObject[3]);
 
         RotationAndScale rotationAndScale =
             UnityTransforms::matrixToRotationAndScale(
-                glm::dmat3(transformToUnity));
+                glm::dmat3(modelToGameObject));
 
-        primitiveGameObject.transform().position(UnityEngine::Vector3{
+        primitiveGameObject.transform().localPosition(UnityEngine::Vector3{
             float(translation.x),
             float(translation.y),
             float(translation.z)});
-        primitiveGameObject.transform().rotation(
+        primitiveGameObject.transform().localRotation(
             UnityTransforms::toUnity(rotationAndScale.rotation));
         primitiveGameObject.transform().localScale(
             UnityTransforms::toUnity(rotationAndScale.scale));
@@ -823,10 +832,11 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             primitiveGameObject
                 .AddComponent<CesiumForUnity::CesiumGlobeAnchor>();
         anchor.detectTransformChanges(false);
-        anchor.SetPositionEarthCenteredEarthFixed(
-            ecefPosition.x,
-            ecefPosition.y,
-            ecefPosition.z);
+        anchor.adjustOrientationForGlobeWhenMoving(false);
+        anchor.SetPositionUnityLocal(
+            translation.x,
+            translation.y,
+            translation.z);
 
         UnityEngine::MeshFilter meshFilter =
             primitiveGameObject.AddComponent<UnityEngine::MeshFilter>();
@@ -835,6 +845,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
         UnityEngine::Material material =
             UnityEngine::Object::Instantiate(opaqueMaterial);
+        material.hideFlags(UnityEngine::HideFlags::HideAndDontSave);
         meshRenderer.material(material);
 
         const Material* pMaterial =
@@ -1020,32 +1031,73 @@ void* UnityPrepareRendererResources::prepareInMainThread(
   return pCesiumGameObject;
 }
 
+namespace {
+
+void freePrimitiveGameObject(
+    const DotNet::UnityEngine::GameObject& primitiveGameObject,
+    const DotNet::CesiumForUnity::CesiumMetadata& maybeMetadata) {
+  if (maybeMetadata != nullptr) {
+    maybeMetadata.NativeImplementation().unloadMetadata(
+        primitiveGameObject.transform().GetInstanceID());
+  }
+
+  UnityEngine::MeshRenderer meshRenderer =
+      primitiveGameObject.GetComponent<UnityEngine::MeshRenderer>();
+  if (meshRenderer != nullptr) {
+    UnityEngine::Material material = meshRenderer.sharedMaterial();
+
+    System::Collections::Generic::List1<int> textureIDs;
+    material.GetTexturePropertyNameIDs(textureIDs);
+    for (int32_t i = 0, len = textureIDs.Count(); i < len; ++i) {
+      int32_t textureID = textureIDs[i];
+      UnityEngine::Texture texture = material.GetTexture(textureID);
+      if (texture != nullptr)
+        UnityLifetime::Destroy(texture);
+    }
+
+    UnityLifetime::Destroy(material);
+  }
+
+  UnityEngine::MeshFilter meshFilter =
+      primitiveGameObject.GetComponent<UnityEngine::MeshFilter>();
+  if (meshFilter != nullptr) {
+    UnityLifetime::Destroy(meshFilter.sharedMesh());
+  }
+
+  // The MeshCollider shares a mesh with the MeshFilter, so no need to
+  // destroy it explicitly.
+}
+
+} // namespace
+
 void UnityPrepareRendererResources::free(
     Cesium3DTilesSelection::Tile& tile,
     void* pLoadThreadResult,
     void* pMainThreadResult) noexcept {
   if (pLoadThreadResult) {
-    delete static_cast<LoadThreadResult*>(pLoadThreadResult);
+    LoadThreadResult* pTyped =
+        static_cast<LoadThreadResult*>(pLoadThreadResult);
+    for (int32_t i = 0, len = pTyped->meshes.Length(); i < len; ++i) {
+      UnityLifetime::Destroy(pTyped->meshes[i]);
+    }
+    delete pTyped;
   }
 
   if (pMainThreadResult) {
     std::unique_ptr<CesiumGltfGameObject> pCesiumGameObject(
         static_cast<CesiumGltfGameObject*>(pMainThreadResult));
 
-    auto pMetadataComponent =
+    auto metadataComponent =
         pCesiumGameObject->pGameObject
             ->GetComponentInParent<DotNet::CesiumForUnity::CesiumMetadata>();
-    if (pMetadataComponent != nullptr) {
-      for (int32_t
-               i = 0,
-               len = pCesiumGameObject->pGameObject->transform().childCount();
-           i < len;
-           ++i) {
-        pMetadataComponent.NativeImplementation().unloadMetadata(
-            pCesiumGameObject->pGameObject->transform()
-                .GetChild(i)
-                .GetInstanceID());
-      }
+
+    UnityEngine::Transform parentTransform =
+        pCesiumGameObject->pGameObject->transform();
+    for (int32_t i = 0, len = parentTransform.childCount(); i < len; ++i) {
+      UnityEngine::GameObject primitiveGameObject =
+          parentTransform.GetChild(i).gameObject();
+      freePrimitiveGameObject(primitiveGameObject, metadataComponent);
+      UnityLifetime::Destroy(primitiveGameObject);
     }
 
     UnityLifetime::Destroy(*pCesiumGameObject->pGameObject);

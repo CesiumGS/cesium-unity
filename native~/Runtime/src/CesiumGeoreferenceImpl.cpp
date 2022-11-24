@@ -134,6 +134,38 @@ CesiumGeoreferenceImpl::TransformUnityWorldPositionToEarthCenteredEarthFixed(
 }
 
 DotNet::CesiumForUnity::CesiumVector3
+CesiumGeoreferenceImpl::TransformUnityLocalPositionToEarthCenteredEarthFixed(
+    const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
+    const DotNet::UnityEngine::Transform& parent,
+    DotNet::CesiumForUnity::CesiumVector3 unityLocalPosition) {
+  if (parent != nullptr) {
+    // Transform the local position to a world position.
+    // TODO: we could achieve better position by composing the transform chain
+    // ourselves rather than letting Unity do it in single precision.
+    glm::dvec4 position =
+        UnityTransforms::fromUnity(parent.localToWorldMatrix()) *
+        glm::dvec4(
+            unityLocalPosition.x,
+            unityLocalPosition.y,
+            unityLocalPosition.z,
+            1.0);
+
+    // Transform the world position to ECEF
+    return this->TransformUnityWorldPositionToEarthCenteredEarthFixed(
+        georeference,
+        DotNet::CesiumForUnity::CesiumVector3{
+            position.x,
+            position.y,
+            position.z});
+  } else {
+    // Local and world coordinates are equivalent
+    return this->TransformUnityWorldPositionToEarthCenteredEarthFixed(
+        georeference,
+        unityLocalPosition);
+  }
+}
+
+DotNet::CesiumForUnity::CesiumVector3
 CesiumGeoreferenceImpl::TransformEarthCenteredEarthFixedPositionToUnityWorld(
     const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
     DotNet::CesiumForUnity::CesiumVector3 earthCenteredEarthFixed) {
@@ -144,6 +176,31 @@ CesiumGeoreferenceImpl::TransformEarthCenteredEarthFixedPositionToUnityWorld(
       earthCenteredEarthFixed.y,
       earthCenteredEarthFixed.z));
   return DotNet::CesiumForUnity::CesiumVector3{result.x, result.y, result.z};
+}
+
+DotNet::CesiumForUnity::CesiumVector3
+CesiumGeoreferenceImpl::TransformEarthCenteredEarthFixedPositionToUnityLocal(
+    const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
+    const DotNet::UnityEngine::Transform& parent,
+    DotNet::CesiumForUnity::CesiumVector3 earthCenteredEarthFixed) {
+  // Transform ECEF to Unity world
+  DotNet::CesiumForUnity::CesiumVector3 worldPosition =
+      this->TransformEarthCenteredEarthFixedPositionToUnityWorld(
+          georeference,
+          earthCenteredEarthFixed);
+  if (parent == nullptr) {
+    // World and Local are equivalent
+    return worldPosition;
+  } else {
+    // Transform Unity World to Unity Local
+    glm::dvec4 position =
+        UnityTransforms::fromUnity(parent.worldToLocalMatrix()) *
+        glm::dvec4(worldPosition.x, worldPosition.y, worldPosition.z, 1.0);
+    return DotNet::CesiumForUnity::CesiumVector3{
+        position.x,
+        position.y,
+        position.z};
+  }
 }
 
 DotNet::CesiumForUnity::CesiumVector3

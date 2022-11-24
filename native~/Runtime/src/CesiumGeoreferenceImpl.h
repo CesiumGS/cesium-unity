@@ -8,6 +8,10 @@ namespace DotNet::CesiumForUnity {
 class CesiumGeoreference;
 }
 
+namespace DotNet::UnityEngine {
+class Transform;
+}
+
 namespace CesiumForUnityNative {
 class CesiumGeoreferenceImpl {
 public:
@@ -27,8 +31,18 @@ public:
       const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
       DotNet::CesiumForUnity::CesiumVector3 unityWorldPosition);
   DotNet::CesiumForUnity::CesiumVector3
+  TransformUnityLocalPositionToEarthCenteredEarthFixed(
+      const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
+      const DotNet::UnityEngine::Transform& parent,
+      DotNet::CesiumForUnity::CesiumVector3 unityLocalPosition);
+  DotNet::CesiumForUnity::CesiumVector3
   TransformEarthCenteredEarthFixedPositionToUnityWorld(
       const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
+      DotNet::CesiumForUnity::CesiumVector3 earthCenteredEarthFixed);
+  DotNet::CesiumForUnity::CesiumVector3
+  TransformEarthCenteredEarthFixedPositionToUnityLocal(
+      const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
+      const DotNet::UnityEngine::Transform& parent,
       DotNet::CesiumForUnity::CesiumVector3 earthCenteredEarthFixed);
   DotNet::CesiumForUnity::CesiumVector3
   TransformUnityWorldDirectionToEarthCenteredEarthFixed(

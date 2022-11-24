@@ -36,11 +36,18 @@ namespace CesiumForUnity
         EarthCenteredEarthFixed,
 
         /// <summary>
-        /// The <see cref="CesiumGlobeAnchor.unityX"/>, <see cref="CesiumGlobeAnchor.unityY"/>,
-        /// and <see cref="CesiumGlobeAnchor.unityZ"/> properties authoritatively define the position
+        /// The <see cref="CesiumGlobeAnchor.unityWorldX"/>, <see cref="CesiumGlobeAnchor.unityWorldY"/>,
+        /// and <see cref="CesiumGlobeAnchor.unityWorldZ"/> properties authoritatively define the position
         /// of this object.
         /// </summary>
-        UnityWorldCoordinates
+        UnityWorldCoordinates,
+
+        /// <summary>
+        /// The <see cref="CesiumGlobeAnchor.unityLocalX"/>, <see cref="CesiumGlobeAnchor.unityLocalY"/>,
+        /// and <see cref="CesiumGlobeAnchor.unityLocalZ"/> properties authoritatively define the position
+        /// of this object.
+        /// </summary>
+        UnityLocalCoordinates
     }
 
     /// <summary>
@@ -188,47 +195,86 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        private double _unityX = 0.0;
+        private double _unityWorldX = 0.0;
 
-        public double unityX
+        public double unityWorldX
         {
-            get => this._unityX;
+            get => this._unityWorldX;
             set
             {
-                this._unityX = value;
+                this._unityWorldX = value;
                 this.positionAuthority = CesiumGlobeAnchorPositionAuthority.UnityWorldCoordinates;
             }
         }
 
         [SerializeField]
-        private double _unityY = 0.0;
+        private double _unityWorldY = 0.0;
 
-        public double unityY
+        public double unityWorldY
         {
-            get => this._unityY;
+            get => this._unityWorldY;
             set
             {
-                this._unityY = value;
+                this._unityWorldY = value;
                 this.positionAuthority = CesiumGlobeAnchorPositionAuthority.UnityWorldCoordinates;
             }
         }
 
         [SerializeField]
-        private double _unityZ = 0.0;
+        private double _unityWorldZ = 0.0;
 
-        public double unityZ
+        public double unityWorldZ
         {
-            get => this._unityZ;
+            get => this._unityWorldZ;
             set
             {
-                this._unityZ = value;
-                this.positionAuthority = CesiumGlobeAnchorPositionAuthority.UnityWorldCoordinates;
+                this._unityWorldZ = value;
+                this.positionAuthority = CesiumGlobeAnchorPositionAuthority.UnityLocalCoordinates;
             }
         }
 
-#endregion
+        [SerializeField]
+        private double _unityLocalX = 0.0;
 
-#region Set Helpers
+        public double unityLocalX
+        {
+            get => this._unityLocalX;
+            set
+            {
+                this._unityLocalX = value;
+                this.positionAuthority = CesiumGlobeAnchorPositionAuthority.UnityLocalCoordinates;
+            }
+        }
+
+        [SerializeField]
+        private double _unityLocalY = 0.0;
+
+        public double unityLocalY
+        {
+            get => this._unityLocalY;
+            set
+            {
+                this._unityLocalY = value;
+                this.positionAuthority = CesiumGlobeAnchorPositionAuthority.UnityLocalCoordinates;
+            }
+        }
+
+        [SerializeField]
+        private double _unityLocalZ = 0.0;
+
+        public double unityLocalZ
+        {
+            get => this._unityLocalZ;
+            set
+            {
+                this._unityLocalZ = value;
+                this.positionAuthority = CesiumGlobeAnchorPositionAuthority.UnityLocalCoordinates;
+            }
+        }
+
+        #endregion
+
+        #region Set Helpers
 
         /// <summary>
         /// Sets the position of this object to a particular longitude, latitude, and height.
@@ -281,10 +327,28 @@ namespace CesiumForUnity
         /// <param name="z">The Z coordinate.</param>
         public void SetPositionUnityWorld(double x, double y, double z)
         {
-            this._unityX = x;
-            this._unityY = y;
-            this._unityZ = z;
+            this._unityWorldX = x;
+            this._unityWorldY = y;
+            this._unityWorldZ = z;
             this.positionAuthority = CesiumGlobeAnchorPositionAuthority.UnityWorldCoordinates;
+        }
+
+        /// <summary>
+        /// Sets the position of this object to particular X, Y, Z coordinates in the
+        /// local coordinate system defined by this object's parent.
+        /// </summary>
+        /// <remarks>
+        /// Calling this method is more efficient than setting the properties individually.
+        /// </remarks>
+        /// <param name="x">The X coordinate.</param>
+        /// <param name="y">The Y coordinate.</param>
+        /// <param name="z">The Z coordinate.</param>
+        public void SetPositionUnityLocal(double x, double y, double z)
+        {
+            this._unityLocalX = x;
+            this._unityLocalY = y;
+            this._unityLocalZ = z;
+            this.positionAuthority = CesiumGlobeAnchorPositionAuthority.UnityLocalCoordinates;
         }
 
         /// <summary>
@@ -403,11 +467,11 @@ namespace CesiumForUnity
             // If there's no authoritative position, copy the position from the Transform.
             if (this.positionAuthority == CesiumGlobeAnchorPositionAuthority.None)
             {
-                Vector3 position = this.transform.position;
-                this._unityX = position.x;
-                this._unityY = position.y;
-                this._unityZ = position.z;
-                this._positionAuthority = CesiumGlobeAnchorPositionAuthority.UnityWorldCoordinates;
+                Vector3 position = this.transform.localPosition;
+                this._unityLocalX = position.x;
+                this._unityLocalY = position.y;
+                this._unityLocalZ = position.z;
+                this._positionAuthority = CesiumGlobeAnchorPositionAuthority.UnityLocalCoordinates;
             }
 
             // Convert the authoritative position to ECEF
@@ -427,13 +491,20 @@ namespace CesiumForUnity
                     ecef.y = this.ecefY;
                     ecef.z = this.ecefZ;
                     break;
-                case CesiumGlobeAnchorPositionAuthority.None:
                 case CesiumGlobeAnchorPositionAuthority.UnityWorldCoordinates:
                     ecef = georeference.TransformUnityWorldPositionToEarthCenteredEarthFixed(new CesiumVector3()
                     {
-                        x = this.unityX,
-                        y = this.unityY,
-                        z = this.unityZ
+                        x = this.unityWorldX,
+                        y = this.unityWorldY,
+                        z = this.unityWorldZ
+                    });
+                    break;
+                case CesiumGlobeAnchorPositionAuthority.UnityLocalCoordinates:
+                    ecef = georeference.TransformUnityLocalPositionToEarthCenteredEarthFixed(this.transform.parent, new CesiumVector3()
+                    {
+                        x = this.unityLocalX,
+                        y = this.unityLocalY,
+                        z = this.unityLocalZ
                     });
                     break;
                 default:
@@ -460,9 +531,17 @@ namespace CesiumForUnity
             if (this.positionAuthority != CesiumGlobeAnchorPositionAuthority.UnityWorldCoordinates)
             {
                 CesiumVector3 unityWorld = georeference.TransformEarthCenteredEarthFixedPositionToUnityWorld(ecef);
-                this._unityX = unityWorld.x;
-                this._unityY = unityWorld.y;
-                this._unityZ = unityWorld.z;
+                this._unityWorldX = unityWorld.x;
+                this._unityWorldY = unityWorld.y;
+                this._unityWorldZ = unityWorld.z;
+            }
+
+            if (this.positionAuthority != CesiumGlobeAnchorPositionAuthority.UnityLocalCoordinates)
+            {
+                CesiumVector3 unityLocal = georeference.TransformEarthCenteredEarthFixedPositionToUnityLocal(this.transform.parent, ecef);
+                this._unityLocalX = unityLocal.x;
+                this._unityLocalY = unityLocal.y;
+                this._unityLocalZ = unityLocal.z;
             }
 
             // If the ECEF position changes, update the orientation based on the
@@ -488,7 +567,7 @@ namespace CesiumForUnity
             }
 
             // Set the object's transform with the new position
-            this.gameObject.transform.position = new Vector3((float)this._unityX, (float)this._unityY, (float)this._unityZ);
+            this.gameObject.transform.localPosition = new Vector3((float)this._unityLocalX, (float)this._unityLocalY, (float)this._unityLocalZ);
             this._lastLocalToWorld = this.transform.localToWorldMatrix;
             this._lastPositionEcefX = this._ecefX;
             this._lastPositionEcefY = this._ecefY;

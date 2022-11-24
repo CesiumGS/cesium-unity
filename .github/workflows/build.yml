@@ -147,6 +147,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [Windows, MacOS]
     steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
       - name: Install jq
         run: sudo apt install jq
       - name: Download macOS build
@@ -172,8 +174,8 @@ jobs:
       - name: Create combined package
         run: |
           cd combine
-          export NAME=$(jq -r ".name" package.json)
-          export VERSION=$(jq -r ".version" package.json)
+          export NAME=$(jq -r ".name" $GITHUB_WORKSPACE/package.json)
+          export VERSION=$(jq -r ".version" $GITHUB_WORKSPACE/package.json)
           tar czf $NAME-$VERSION.tgz package
       - name: Publish combined package
         if: ${{ success() }}

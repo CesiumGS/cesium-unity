@@ -75,13 +75,17 @@ namespace CesiumForUnity
             go.SetActive(go.activeSelf);
             Transform transform = go.transform;
             transform.parent = transform.parent;
+            transform.SetParent(transform.parent, false);
             transform.position = transform.position;
             transform.rotation = transform.rotation;
+            transform.localPosition = transform.localPosition;
+            transform.localRotation = transform.localRotation;
             transform.localScale = transform.localScale;
             transform.SetPositionAndRotation(transform.position, transform.rotation);
             Transform root = transform.root;
             int siblingIndex = transform.GetSiblingIndex();
             Matrix4x4 m = transform.localToWorldMatrix;
+            Matrix4x4 m2 = transform.worldToLocalMatrix;
 
             go.AddComponent<MeshFilter>();
             go.AddComponent<MeshRenderer>();
@@ -133,6 +137,13 @@ namespace CesiumForUnity
             meshRenderer.material.SetVector("name", new Vector4());
             meshRenderer.material.DisableKeyword("keywordName");
             meshRenderer.material.EnableKeyword("keywordName");
+            meshRenderer.material.GetTexture("name");
+            var ids = new List<int>();
+            meshRenderer.material.GetTexturePropertyNameIDs(ids);
+            for (int i = 0; i < ids.Count; ++i)
+            {
+                meshRenderer.material.GetTexture(ids[i]);
+            }
             meshRenderer.material.shaderKeywords = meshRenderer.material.shaderKeywords;
             meshRenderer.sharedMaterial = meshRenderer.sharedMaterial;
             meshRenderer.material.shader = meshRenderer.material.shader;
@@ -234,6 +245,7 @@ namespace CesiumForUnity
 
             Cesium3DTileset tilesetFromGameObject = go.GetComponent<Cesium3DTileset>();
             MeshRenderer meshRendererFromGameObject = go.GetComponent<MeshRenderer>();
+            MeshFilter meshFilterFromGameObject = go.GetComponent<MeshFilter>();
             CesiumIonRasterOverlay ionOverlay = go.GetComponent<CesiumIonRasterOverlay>();
             ionOverlay.ionAssetID = ionOverlay.ionAssetID;
             ionOverlay.ionAccessToken = ionOverlay.ionAccessToken;
@@ -406,7 +418,9 @@ namespace CesiumForUnity
 
             globeAnchor = go.AddComponent<CesiumGlobeAnchor>();
             globeAnchor.detectTransformChanges = globeAnchor.detectTransformChanges;
+            globeAnchor.adjustOrientationForGlobeWhenMoving = globeAnchor.adjustOrientationForGlobeWhenMoving;
             globeAnchor.SetPositionUnityWorld(0.0, 0.0, 0.0);
+            globeAnchor.SetPositionUnityLocal(0.0, 0.0, 0.0);
             globeAnchor.SetPositionLongitudeLatitudeHeight(0.0, 0.0, 0.0);
             globeAnchor.positionAuthority = globeAnchor.positionAuthority;
 

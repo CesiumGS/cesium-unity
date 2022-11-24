@@ -23,6 +23,7 @@ TextureLoader::loadTexture(const CesiumGltf::ImageCesium& image) {
       UnityEngine::TextureFormat::RGBA32,
       true,
       false);
+  result.hideFlags(UnityEngine::HideFlags::HideAndDontSave);
 
   Unity::Collections::NativeArray1<std::uint8_t> textureData =
       result.GetRawTextureData<std::uint8_t>();
