@@ -26,10 +26,10 @@ public class TestCesiumGlobeAnchor
         // Wait for the start of a new frame, which will cause Start to be invoked.
         yield return null;
 
-        Assert.AreEqual(CesiumGlobeAnchorPositionAuthority.UnityWorldCoordinates, anchor.positionAuthority);
-        Assert.That(anchor.unityWorldX, Is.EqualTo(100.0).Using(FloatEqualityComparer.Instance));
-        Assert.That(anchor.unityWorldY, Is.EqualTo(200.0).Using(FloatEqualityComparer.Instance));
-        Assert.That(anchor.unityWorldZ, Is.EqualTo(300.0).Using(FloatEqualityComparer.Instance));
+        Assert.AreEqual(CesiumGlobeAnchorPositionAuthority.UnityLocalCoordinates, anchor.positionAuthority);
+        Assert.That(anchor.unityLocalX, Is.EqualTo(100.0).Using(FloatEqualityComparer.Instance));
+        Assert.That(anchor.unityLocalY, Is.EqualTo(200.0).Using(FloatEqualityComparer.Instance));
+        Assert.That(anchor.unityLocalZ, Is.EqualTo(300.0).Using(FloatEqualityComparer.Instance));
 
         anchor.SetPositionUnityWorld(1.0, 2.0, 3.0);
 
@@ -59,10 +59,10 @@ public class TestCesiumGlobeAnchor
         // Manually update the globe anchor properties without waiting for Unity to invoke Start on it.
         anchor.Sync();
 
-        Assert.AreEqual(CesiumGlobeAnchorPositionAuthority.UnityWorldCoordinates, anchor.positionAuthority);
-        Assert.That(anchor.unityWorldX, Is.EqualTo(100.0).Using(FloatEqualityComparer.Instance));
-        Assert.That(anchor.unityWorldY, Is.EqualTo(200.0).Using(FloatEqualityComparer.Instance));
-        Assert.That(anchor.unityWorldZ, Is.EqualTo(300.0).Using(FloatEqualityComparer.Instance));
+        Assert.AreEqual(CesiumGlobeAnchorPositionAuthority.UnityLocalCoordinates, anchor.positionAuthority);
+        Assert.That(anchor.unityLocalX, Is.EqualTo(100.0).Using(FloatEqualityComparer.Instance));
+        Assert.That(anchor.unityLocalY, Is.EqualTo(200.0).Using(FloatEqualityComparer.Instance));
+        Assert.That(anchor.unityLocalZ, Is.EqualTo(300.0).Using(FloatEqualityComparer.Instance));
 
         anchor.SetPositionUnityWorld(1.0, 2.0, 3.0);
 
