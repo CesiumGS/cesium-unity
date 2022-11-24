@@ -75,13 +75,17 @@ namespace CesiumForUnity
             go.SetActive(go.activeSelf);
             Transform transform = go.transform;
             transform.parent = transform.parent;
+            transform.SetParent(transform.parent, false);
             transform.position = transform.position;
             transform.rotation = transform.rotation;
+            transform.localPosition = transform.localPosition;
+            transform.localRotation = transform.localRotation;
             transform.localScale = transform.localScale;
             transform.SetPositionAndRotation(transform.position, transform.rotation);
             Transform root = transform.root;
             int siblingIndex = transform.GetSiblingIndex();
             Matrix4x4 m = transform.localToWorldMatrix;
+            Matrix4x4 m2 = transform.worldToLocalMatrix;
 
             go.AddComponent<MeshFilter>();
             go.AddComponent<MeshRenderer>();
@@ -413,7 +417,9 @@ namespace CesiumForUnity
 
             globeAnchor = go.AddComponent<CesiumGlobeAnchor>();
             globeAnchor.detectTransformChanges = globeAnchor.detectTransformChanges;
+            globeAnchor.adjustOrientationForGlobeWhenMoving = globeAnchor.adjustOrientationForGlobeWhenMoving;
             globeAnchor.SetPositionUnityWorld(0.0, 0.0, 0.0);
+            globeAnchor.SetPositionUnityLocal(0.0, 0.0, 0.0);
             globeAnchor.SetPositionLongitudeLatitudeHeight(0.0, 0.0, 0.0);
             globeAnchor.positionAuthority = globeAnchor.positionAuthority;
 

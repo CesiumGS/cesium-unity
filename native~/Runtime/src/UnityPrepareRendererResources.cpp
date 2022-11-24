@@ -697,7 +697,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         UnityEngine::HideFlags::HideInHierarchy);
   }
 
-  pModelGameObject->transform().parent(this->_tileset.transform());
+  pModelGameObject->transform().SetParent(this->_tileset.transform(), false);
   pModelGameObject->SetActive(false);
 
   glm::dmat4 tileTransform = tile.getTransform();
@@ -795,27 +795,35 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
         primitiveGameObject.transform().parent(pModelGameObject->transform());
 
-        glm::dmat4 fixedToUnity =
+        // The Georeference defines the mapping of ECEF coordinates to the game
+        // object's coordinates. And then the game object's transform maps the
+        // coordinates to the Unity world. This way a transform on a tileset or
+        // georeference can position/rotate/scale some or all of the globe
+        // within the Unity world. But usually tilesets and georeferences should
+        // have identity transforms.
+
+        glm::dmat4 ecefToGameObject =
             pCoordinateSystem
                 ? pCoordinateSystem->getEcefToLocalTransformation()
                 : glm::dmat4(1.0);
 
-        glm::dmat4 transformToEcef = tileTransform * transform;
-        glm::dvec3 ecefPosition = glm::dvec3(transformToEcef[3]);
+        glm::dmat4 modelToEcef = tileTransform * transform;
 
-        glm::dmat4 transformToUnity = fixedToUnity * transformToEcef;
+        glm::dmat4 modelToGameObject = ecefToGameObject * modelToEcef;
+        glm::dmat4 gameObjectToUnityWorld = UnityTransforms::fromUnity(
+            pModelGameObject->transform().localToWorldMatrix());
 
-        glm::dvec3 translation = glm::dvec3(transformToUnity[3]);
+        glm::dvec3 translation = glm::dvec3(modelToGameObject[3]);
 
         RotationAndScale rotationAndScale =
             UnityTransforms::matrixToRotationAndScale(
-                glm::dmat3(transformToUnity));
+                glm::dmat3(modelToGameObject));
 
-        primitiveGameObject.transform().position(UnityEngine::Vector3{
+        primitiveGameObject.transform().localPosition(UnityEngine::Vector3{
             float(translation.x),
             float(translation.y),
             float(translation.z)});
-        primitiveGameObject.transform().rotation(
+        primitiveGameObject.transform().localRotation(
             UnityTransforms::toUnity(rotationAndScale.rotation));
         primitiveGameObject.transform().localScale(
             UnityTransforms::toUnity(rotationAndScale.scale));
@@ -824,10 +832,11 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             primitiveGameObject
                 .AddComponent<CesiumForUnity::CesiumGlobeAnchor>();
         anchor.detectTransformChanges(false);
-        anchor.SetPositionEarthCenteredEarthFixed(
-            ecefPosition.x,
-            ecefPosition.y,
-            ecefPosition.z);
+        anchor.adjustOrientationForGlobeWhenMoving(false);
+        anchor.SetPositionUnityLocal(
+            translation.x,
+            translation.y,
+            translation.z);
 
         UnityEngine::MeshFilter meshFilter =
             primitiveGameObject.AddComponent<UnityEngine::MeshFilter>();
