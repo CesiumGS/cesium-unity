@@ -836,6 +836,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
         UnityEngine::Material material =
             UnityEngine::Object::Instantiate(opaqueMaterial);
+        material.hideFlags(UnityEngine::HideFlags::HideAndDontSave);
         meshRenderer.material(material);
 
         const Material* pMaterial =
