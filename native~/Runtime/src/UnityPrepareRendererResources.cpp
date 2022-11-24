@@ -19,6 +19,7 @@
 #include <DotNet/CesiumForUnity/CesiumGlobeAnchor.h>
 #include <DotNet/CesiumForUnity/CesiumMetadata.h>
 #include <DotNet/System/Array1.h>
+#include <DotNet/System/Collections/Generic/List1.h>
 #include <DotNet/System/Object.h>
 #include <DotNet/System/String.h>
 #include <DotNet/System/Text/Encoding.h>
@@ -1020,32 +1021,74 @@ void* UnityPrepareRendererResources::prepareInMainThread(
   return pCesiumGameObject;
 }
 
+namespace {
+
+void freePrimitiveGameObject(
+    const DotNet::UnityEngine::GameObject& primitiveGameObject,
+    const DotNet::CesiumForUnity::CesiumMetadata& maybeMetadata) {
+  if (maybeMetadata != nullptr) {
+    maybeMetadata.NativeImplementation().unloadMetadata(
+        primitiveGameObject.transform().GetInstanceID());
+  }
+
+  UnityEngine::MeshRenderer meshRenderer =
+      primitiveGameObject.GetComponent<UnityEngine::MeshRenderer>();
+  if (meshRenderer != nullptr) {
+    UnityEngine::Material material = meshRenderer.sharedMaterial();
+
+    System::Collections::Generic::List1<int> textureIDs;
+    material.GetTexturePropertyNameIDs(textureIDs);
+    for (int32_t i = 0, len = textureIDs.Count(); i < len; ++i) {
+      int32_t textureID = textureIDs[i];
+      UnityEngine::Texture texture = material.GetTexture(textureID);
+      if (texture != nullptr)
+        UnityLifetime::Destroy(texture);
+    }
+
+    UnityLifetime::Destroy(material);
+  }
+
+  UnityEngine::MeshFilter meshFilter =
+      primitiveGameObject.GetComponent<UnityEngine::MeshFilter>();
+  if (meshFilter != nullptr) {
+    UnityLifetime::Destroy(meshFilter.sharedMesh());
+  }
+
+  // The MeshCollider shares a mesh with the MeshFilter, so no need to
+  // destroy it explicitly.
+}
+
+} // namespace
+
 void UnityPrepareRendererResources::free(
     Cesium3DTilesSelection::Tile& tile,
     void* pLoadThreadResult,
     void* pMainThreadResult) noexcept {
   if (pLoadThreadResult) {
-    delete static_cast<LoadThreadResult*>(pLoadThreadResult);
+    LoadThreadResult* pTyped =
+        static_cast<LoadThreadResult*>(pLoadThreadResult);
+    for (int32_t i = 0, len = pTyped->meshes.Length(); i < len; ++i) {
+      UnityLifetime::Destroy(pTyped->meshes[i]);
+    }
+    delete pTyped;
   }
 
   if (pMainThreadResult) {
     std::unique_ptr<CesiumGltfGameObject> pCesiumGameObject(
         static_cast<CesiumGltfGameObject*>(pMainThreadResult));
 
-    auto pMetadataComponent =
+    auto metadataComponent =
         pCesiumGameObject->pGameObject
             ->GetComponentInParent<DotNet::CesiumForUnity::CesiumMetadata>();
-    if (pMetadataComponent != nullptr) {
-      for (int32_t
-               i = 0,
-               len = pCesiumGameObject->pGameObject->transform().childCount();
-           i < len;
-           ++i) {
-        pMetadataComponent.NativeImplementation().unloadMetadata(
-            pCesiumGameObject->pGameObject->transform()
-                .GetChild(i)
-                .GetInstanceID());
-      }
+
+    UnityEngine::Transform parentTransform =
+        pCesiumGameObject->pGameObject->transform();
+    for (int32_t i = 0, len = parentTransform.childCount(); i < len; ++i) {
+      UnityEngine::GameObject primitiveGameObject = parentTransform.GetChild(i).gameObject();
+      freePrimitiveGameObject(
+          primitiveGameObject,
+          metadataComponent);
+      UnityLifetime::Destroy(primitiveGameObject);
     }
 
     UnityLifetime::Destroy(*pCesiumGameObject->pGameObject);
