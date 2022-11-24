@@ -12,8 +12,8 @@
 #include <glm/trigonometric.hpp>
 
 #if UNITY_EDITOR
-#include <DotNet/UnityEditor/SceneView.h>
 #include <DotNet/UnityEditor/EditorApplication.h>
+#include <DotNet/UnityEditor/SceneView.h>
 #endif
 
 using namespace Cesium3DTilesSelection;

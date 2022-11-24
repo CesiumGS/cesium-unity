@@ -1084,10 +1084,9 @@ void UnityPrepareRendererResources::free(
     UnityEngine::Transform parentTransform =
         pCesiumGameObject->pGameObject->transform();
     for (int32_t i = 0, len = parentTransform.childCount(); i < len; ++i) {
-      UnityEngine::GameObject primitiveGameObject = parentTransform.GetChild(i).gameObject();
-      freePrimitiveGameObject(
-          primitiveGameObject,
-          metadataComponent);
+      UnityEngine::GameObject primitiveGameObject =
+          parentTransform.GetChild(i).gameObject();
+      freePrimitiveGameObject(primitiveGameObject, metadataComponent);
       UnityLifetime::Destroy(primitiveGameObject);
     }
 
