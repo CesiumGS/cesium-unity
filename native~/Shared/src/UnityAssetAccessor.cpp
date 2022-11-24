@@ -1,5 +1,7 @@
 #include "UnityAssetAccessor.h"
 
+#include "Cesium.h"
+
 #include <CesiumAsync/IAssetResponse.h>
 #include <CesiumUtility/ScopeGuard.h>
 
@@ -110,7 +112,7 @@ UnityAssetAccessor::get(
 
     request.SetRequestHeader(
         System::String("X-Cesium-Version"),
-        UnityEngine::Application::version());
+        Cesium::version);
 
     auto promise =
         asyncSystem
@@ -182,6 +184,10 @@ UnityAssetAccessor::request(
               System::String(header.first),
               System::String(header.second));
         }
+
+        request.SetRequestHeader(
+            System::String("X-Cesium-Version"),
+            Cesium::version);
 
         auto promise =
             asyncSystem
