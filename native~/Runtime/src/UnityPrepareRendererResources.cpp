@@ -697,7 +697,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         UnityEngine::HideFlags::HideInHierarchy);
   }
 
-  pModelGameObject->transform().parent(this->_tileset.transform());
+  pModelGameObject->transform().SetParent(this->_tileset.transform(), false);
   pModelGameObject->SetActive(false);
 
   glm::dmat4 tileTransform = tile.getTransform();
@@ -832,6 +832,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             primitiveGameObject
                 .AddComponent<CesiumForUnity::CesiumGlobeAnchor>();
         anchor.detectTransformChanges(false);
+        anchor.adjustOrientationForGlobeWhenMoving(false);
         anchor.SetPositionUnityLocal(
             translation.x,
             translation.y,

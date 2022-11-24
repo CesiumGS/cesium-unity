@@ -75,6 +75,7 @@ namespace CesiumForUnity
             go.SetActive(go.activeSelf);
             Transform transform = go.transform;
             transform.parent = transform.parent;
+            transform.SetParent(transform.parent, false);
             transform.position = transform.position;
             transform.rotation = transform.rotation;
             transform.localPosition = transform.localPosition;
@@ -416,6 +417,7 @@ namespace CesiumForUnity
 
             globeAnchor = go.AddComponent<CesiumGlobeAnchor>();
             globeAnchor.detectTransformChanges = globeAnchor.detectTransformChanges;
+            globeAnchor.adjustOrientationForGlobeWhenMoving = globeAnchor.adjustOrientationForGlobeWhenMoving;
             globeAnchor.SetPositionUnityWorld(0.0, 0.0, 0.0);
             globeAnchor.SetPositionUnityLocal(0.0, 0.0, 0.0);
             globeAnchor.SetPositionLongitudeLatitudeHeight(0.0, 0.0, 0.0);
