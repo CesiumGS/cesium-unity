@@ -12,6 +12,7 @@
 #include <glm/trigonometric.hpp>
 
 #if UNITY_EDITOR
+#include <DotNet/UnityEditor/EditorApplication.h>
 #include <DotNet/UnityEditor/SceneView.h>
 #endif
 
@@ -89,12 +90,14 @@ std::vector<ViewState> CameraManager::getAllCameras(const GameObject& context) {
   }
 
 #if UNITY_EDITOR
-  SceneView lastActiveEditorView = SceneView::lastActiveSceneView();
-  if (lastActiveEditorView != nullptr) {
-    Camera editorCamera = lastActiveEditorView.camera();
-    if (editorCamera != nullptr) {
-      result.emplace_back(
-          unityCameraToViewState(pCoordinateSystem, editorCamera));
+  if (!EditorApplication::isPlaying()) {
+    SceneView lastActiveEditorView = SceneView::lastActiveSceneView();
+    if (lastActiveEditorView != nullptr) {
+      Camera editorCamera = lastActiveEditorView.camera();
+      if (editorCamera != nullptr) {
+        result.emplace_back(
+            unityCameraToViewState(pCoordinateSystem, editorCamera));
+      }
     }
   }
 #endif

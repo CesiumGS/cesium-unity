@@ -133,6 +133,13 @@ namespace CesiumForUnity
             meshRenderer.material.SetVector("name", new Vector4());
             meshRenderer.material.DisableKeyword("keywordName");
             meshRenderer.material.EnableKeyword("keywordName");
+            meshRenderer.material.GetTexture("name");
+            var ids = new List<int>();
+            meshRenderer.material.GetTexturePropertyNameIDs(ids);
+            for (int i = 0; i < ids.Count; ++i)
+            {
+                meshRenderer.material.GetTexture(ids[i]);
+            }
             meshRenderer.material.shaderKeywords = meshRenderer.material.shaderKeywords;
             meshRenderer.sharedMaterial = meshRenderer.sharedMaterial;
             meshRenderer.material.shader = meshRenderer.material.shader;
@@ -233,6 +240,7 @@ namespace CesiumForUnity
 
             Cesium3DTileset tilesetFromGameObject = go.GetComponent<Cesium3DTileset>();
             MeshRenderer meshRendererFromGameObject = go.GetComponent<MeshRenderer>();
+            MeshFilter meshFilterFromGameObject = go.GetComponent<MeshFilter>();
             CesiumIonRasterOverlay ionOverlay = go.GetComponent<CesiumIonRasterOverlay>();
             ionOverlay.ionAssetID = ionOverlay.ionAssetID;
             ionOverlay.ionAccessToken = ionOverlay.ionAccessToken;
