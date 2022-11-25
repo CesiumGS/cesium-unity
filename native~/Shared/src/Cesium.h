@@ -10,4 +10,4 @@ public:
   static const std::string commit;
 };
 
-}
+} // namespace CesiumForUnityNative
