@@ -246,4 +246,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: Combined Package
-          path: combine/*.tgz
+          path: combine/merged/*.tgz
