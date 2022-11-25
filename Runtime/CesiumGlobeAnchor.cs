@@ -2,6 +2,7 @@ using Reinterop;
 using System;
 using System.Collections;
 using UnityEngine;
+using Unity.Mathematics;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -475,16 +476,15 @@ namespace CesiumForUnity
             }
 
             // Convert the authoritative position to ECEF
-            CesiumVector3 ecef;
+            double3 ecef;
             switch (this.positionAuthority)
             {
                 case CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight:
-                    ecef = CesiumTransforms.LongitudeLatitudeHeightToEarthCenteredEarthFixed(new CesiumVector3()
-                    {
-                        x = this.longitude,
-                        y = this.latitude,
-                        z = this.height
-                    });
+                    ecef = CesiumTransforms.LongitudeLatitudeHeightToEarthCenteredEarthFixed(new double3(
+                        this.longitude,
+                        this.latitude,
+                        this.height
+                    ));
                     break;
                 case CesiumGlobeAnchorPositionAuthority.EarthCenteredEarthFixed:
                     ecef.x = this.ecefX;
@@ -492,20 +492,18 @@ namespace CesiumForUnity
                     ecef.z = this.ecefZ;
                     break;
                 case CesiumGlobeAnchorPositionAuthority.UnityWorldCoordinates:
-                    ecef = georeference.TransformUnityWorldPositionToEarthCenteredEarthFixed(new CesiumVector3()
-                    {
-                        x = this.unityWorldX,
-                        y = this.unityWorldY,
-                        z = this.unityWorldZ
-                    });
+                    ecef = georeference.TransformUnityWorldPositionToEarthCenteredEarthFixed(new double3(
+                        this.unityWorldX,
+                        this.unityWorldY,
+                        this.unityWorldZ
+                    ));
                     break;
                 case CesiumGlobeAnchorPositionAuthority.UnityLocalCoordinates:
-                    ecef = georeference.TransformUnityLocalPositionToEarthCenteredEarthFixed(this.transform.parent, new CesiumVector3()
-                    {
-                        x = this.unityLocalX,
-                        y = this.unityLocalY,
-                        z = this.unityLocalZ
-                    });
+                    ecef = georeference.TransformUnityLocalPositionToEarthCenteredEarthFixed(this.transform.parent, new double3(
+                        this.unityLocalX,
+                        this.unityLocalY,
+                        this.unityLocalZ
+                    ));
                     break;
                 default:
                     throw new InvalidOperationException("Unknown value for positionAuthority.");
@@ -515,7 +513,7 @@ namespace CesiumForUnity
             // TODO: it might be more efficient to lazily update these if/when they're accessed, at least outside the Editor.
             if (this.positionAuthority != CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight)
             {
-                CesiumVector3 llh = CesiumTransforms.EarthCenteredEarthFixedToLongitudeLatitudeHeight(ecef);
+                double3 llh = CesiumTransforms.EarthCenteredEarthFixedToLongitudeLatitudeHeight(ecef);
                 this._longitude = llh.x;
                 this._latitude = llh.y;
                 this._height = llh.z;
@@ -530,7 +528,7 @@ namespace CesiumForUnity
 
             if (this.positionAuthority != CesiumGlobeAnchorPositionAuthority.UnityWorldCoordinates)
             {
-                CesiumVector3 unityWorld = georeference.TransformEarthCenteredEarthFixedPositionToUnityWorld(ecef);
+                double3 unityWorld = georeference.TransformEarthCenteredEarthFixedPositionToUnityWorld(ecef);
                 this._unityWorldX = unityWorld.x;
                 this._unityWorldY = unityWorld.y;
                 this._unityWorldZ = unityWorld.z;
@@ -538,7 +536,7 @@ namespace CesiumForUnity
 
             if (this.positionAuthority != CesiumGlobeAnchorPositionAuthority.UnityLocalCoordinates)
             {
-                CesiumVector3 unityLocal = georeference.TransformEarthCenteredEarthFixedPositionToUnityLocal(this.transform.parent, ecef);
+                double3 unityLocal = georeference.TransformEarthCenteredEarthFixedPositionToUnityLocal(this.transform.parent, ecef);
                 this._unityLocalX = unityLocal.x;
                 this._unityLocalY = unityLocal.y;
                 this._unityLocalZ = unityLocal.z;
@@ -551,18 +549,12 @@ namespace CesiumForUnity
                 this._lastPropertiesAreValid &&
                 (this._lastPositionEcefX != this._ecefX || this._lastPositionEcefY != this._ecefY || this._lastPositionEcefZ != this._ecefZ))
             {
-                CesiumVector3 oldPosition = new CesiumVector3()
-                {
-                    x = this._lastPositionEcefX,
-                    y = this._lastPositionEcefY,
-                    z = this._lastPositionEcefZ
-                };
-                CesiumVector3 newPosition = new CesiumVector3()
-                {
-                    x = this._ecefX,
-                    y = this._ecefY,
-                    z = this._ecefZ
-                };
+                double3 oldPosition = new double3(
+                    this._lastPositionEcefX,
+                    this._lastPositionEcefY,
+                    this._lastPositionEcefZ
+                );
+                double3 newPosition = new double3(this._ecefX, this._ecefY, this._ecefZ);
                 CesiumGlobeAnchor.AdjustOrientation(this, oldPosition, newPosition);
             }
 
@@ -581,7 +573,7 @@ namespace CesiumForUnity
         }
 
         // This is static so that CesiumGlobeAnchor does not need finalization.
-        private static partial void AdjustOrientation(CesiumGlobeAnchor anchor, CesiumVector3 oldPositionEcef, CesiumVector3 newPositionEcef);
+        private static partial void AdjustOrientation(CesiumGlobeAnchor anchor, double3 oldPositionEcef, double3 newPositionEcef);
 
 #endregion
     }

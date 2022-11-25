@@ -9,6 +9,7 @@ using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.Rendering;
+using Unity.Mathematics;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -408,8 +409,9 @@ namespace CesiumForUnity
                                                 "");
             CesiumRasterOverlay.BroadcastCesiumRasterOverlayLoadFailure(overlayDetails);
 
-            CesiumVector3 cv3 = new CesiumVector3();
+            double3 cv3 = new double3();
             cv3.x = cv3.y = cv3.z;
+            double3 cv4 = new double3(1.0, 2.0, 3.0);
 
             CesiumGlobeAnchor[] globeAnchors = go.GetComponentsInChildren<CesiumGlobeAnchor>();
             globeAnchors = go.GetComponentsInChildren<CesiumGlobeAnchor>(true);

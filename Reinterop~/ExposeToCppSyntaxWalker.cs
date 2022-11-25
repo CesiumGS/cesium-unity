@@ -160,23 +160,28 @@ namespace Reinterop
                         this.AddMethod(invokeMethod);
                 }
 
+                bool isBlittableStruct = Interop.IsBlittableStruct(this._context, type);
+
                 // If this type has overloaded operator==, generate wrappers for it, because we need it
-                // to even compare to null.
-                IEnumerable<ISymbol> equalityOperators = CSharpTypeUtility.FindMembers(type, "op_Equality");
-                foreach (ISymbol equalityOperator in equalityOperators)
+                // to even compare to null. But we don't need to compare blittable structs to null.
+                if (!isBlittableStruct)
                 {
-                    if (equalityOperator is IMethodSymbol method)
-                        AddMethod(method);
-                }
-                IEnumerable<ISymbol> inequalityOperators = CSharpTypeUtility.FindMembers(type, "op_Inequality");
-                foreach (ISymbol inequalityOperator in inequalityOperators)
-                {
-                    if (inequalityOperator is IMethodSymbol method)
-                        AddMethod(method);
+                    IEnumerable<ISymbol> equalityOperators = CSharpTypeUtility.FindMembers(type, "op_Equality");
+                    foreach (ISymbol equalityOperator in equalityOperators)
+                    {
+                        if (equalityOperator is IMethodSymbol method)
+                            AddMethod(method);
+                    }
+                    IEnumerable<ISymbol> inequalityOperators = CSharpTypeUtility.FindMembers(type, "op_Inequality");
+                    foreach (ISymbol inequalityOperator in inequalityOperators)
+                    {
+                        if (inequalityOperator is IMethodSymbol method)
+                            AddMethod(method);
+                    }
                 }
 
                 // If this is a blittable struct, we need to generate all the field types, too.
-                if (type.TypeKind != TypeKind.Enum && Interop.IsBlittableStruct(this._context, type))
+                if (type.TypeKind != TypeKind.Enum && isBlittableStruct)
                 {
                     ImmutableArray<ISymbol> members = type.GetMembers();
                     foreach (ISymbol member in members)

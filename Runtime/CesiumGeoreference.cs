@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Reinterop;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace CesiumForUnity
@@ -184,28 +185,18 @@ namespace CesiumForUnity
         {
             if (this._originAuthority == CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight)
             {
-                CesiumVector3 ecef =
+                double3 ecef =
                     CesiumTransforms.LongitudeLatitudeHeightToEarthCenteredEarthFixed(
-                        new CesiumVector3()
-                        {
-                            x = this._longitude,
-                            y = this._latitude,
-                            z = this._height
-                        });
+                        new double3(this._longitude, this._latitude, this._height));
                 this._ecefX = ecef.x;
                 this._ecefY = ecef.y;
                 this._ecefZ = ecef.z;
             }
             else if (this._originAuthority == CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed)
             {
-                CesiumVector3 llh =
+                double3 llh =
                     CesiumTransforms.EarthCenteredEarthFixedToLongitudeLatitudeHeight(
-                        new CesiumVector3()
-                        {
-                            x = this._ecefX,
-                            y = this._ecefY,
-                            z = this._ecefZ
-                        });
+                        new double3(this._ecefX, this._ecefY, this._ecefZ));
                 this._longitude = llh.x;
                 this._latitude = llh.y;
                 this._height = llh.z;
@@ -217,8 +208,8 @@ namespace CesiumForUnity
         /// </summary>
         /// <param name="unityWorldPosition">The Unity world position to convert.</param>
         /// <returns>The ECEF coordinates in meters.</returns>
-        public partial CesiumVector3
-            TransformUnityWorldPositionToEarthCenteredEarthFixed(CesiumVector3 unityWorldPosition);
+        public partial double3
+            TransformUnityWorldPositionToEarthCenteredEarthFixed(double3 unityWorldPosition);
 
         /// <summary>
         /// Transforms a local position expressed relative to a parent transform into Earth-Centered,
@@ -227,15 +218,15 @@ namespace CesiumForUnity
         /// <param name="parent">The parent transform in which the local position is defined.</param>
         /// <param name="unityLocalPosition">The local position to convert.</param>
         /// <returns>The ECEF coordinates in meters.</returns>
-        public partial CesiumVector3 TransformUnityLocalPositionToEarthCenteredEarthFixed(Transform parent, CesiumVector3 unityLocalPosition);
+        public partial double3 TransformUnityLocalPositionToEarthCenteredEarthFixed(Transform parent, double3 unityLocalPosition);
 
         /// <summary>
         /// Transform an Earth-Centered, Earth-Fixed position to Unity world coordinates.
         /// </summary>
         /// <param name="earthCenteredEarthFixed">The ECEF coordinates in meters.</param>
         /// <returns>The corresponding Unity world coordinates.</returns>
-        public partial CesiumVector3
-            TransformEarthCenteredEarthFixedPositionToUnityWorld(CesiumVector3 earthCenteredEarthFixed);
+        public partial double3
+            TransformEarthCenteredEarthFixedPositionToUnityWorld(double3 earthCenteredEarthFixed);
 
         /// <summary>
         /// Transform an Earth-Centered, Earth-Fixed position to local coordinates relative to a parent transform.
@@ -243,22 +234,22 @@ namespace CesiumForUnity
         /// <param name="parent">The parent transform in which the local position is defined.</param>
         /// <param name="earthCenteredEarthFixed">The ECEF coordinates in meters</param>
         /// <returns>The corresponding Unity local coordinates.</returns>
-        public partial CesiumVector3 TransformEarthCenteredEarthFixedPositionToUnityLocal(Transform parent, CesiumVector3 earthCenteredEarthFixed);
+        public partial double3 TransformEarthCenteredEarthFixedPositionToUnityLocal(Transform parent, double3 earthCenteredEarthFixed);
 
         /// <summary>
         /// Transform a Unity world direction to a direction in Earth-Centered, Earth-Fixed (ECEF) coordinates.
         /// </summary>
         /// <param name="unityWorldDirection">The Unity world direction to convert.</param>
         /// <returns>The ECEF direction.</returns>
-        public partial CesiumVector3
-            TransformUnityWorldDirectionToEarthCenteredEarthFixed(CesiumVector3 unityWorldDirection);
+        public partial double3
+            TransformUnityWorldDirectionToEarthCenteredEarthFixed(double3 unityWorldDirection);
 
         /// <summary>
         /// Transform an Earth-Centered, Earth-Fixed direction to Unity world coordinates.
         /// </summary>
         /// <param name="earthCenteredEarthFixedDirection">The direction in ECEF coordinates.</param>
         /// <returns>The corresponding Unity world direction.</returns>
-        public partial CesiumVector3
-            TransformEarthCenteredEarthFixedDirectionToUnityWorld(CesiumVector3 earthCenteredEarthFixedDirection);
+        public partial double3
+            TransformEarthCenteredEarthFixedDirectionToUnityWorld(double3 earthCenteredEarthFixedDirection);
     }
 }
