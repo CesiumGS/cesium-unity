@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using System.Diagnostics;
 
 namespace Reinterop
 {
@@ -91,6 +92,23 @@ namespace Reinterop
                 templatePrefix = "template <> ";
                 var templateParameters = method.TypeArguments.Select(typeArgument => CppType.FromCSharp(context, typeArgument).GetFullyQualifiedName());
                 templateSpecialization = $"<{string.Join(", ", templateParameters)}>";
+
+                // Parameters of generic type are always passed as const references for maximum compatibility
+                var parameterArray = parameters.ToArray();
+                parameters = parameterArray;
+
+                Debug.Assert(parameterArray.Length == genericMethod.Parameters.Length);
+                for (int i = 0; i < parameterArray.Length && i < genericMethod.Parameters.Length; ++i)
+                {
+                    IParameterSymbol genericParameter = genericMethod.Parameters[i];
+                    var parameter = parameterArray[i];
+
+                    if (genericParameter.Type.TypeKind == TypeKind.TypeParameter && (!parameter.Type.Flags.HasFlag(CppTypeFlags.Reference) || !parameter.Type.Flags.HasFlag(CppTypeFlags.Const)))
+                    {
+                        parameter.Type = parameter.Type.AsConstReference();
+                        parameterArray[i] = parameter;
+                    }
+                }
             }
 
             // If this is an instance method, pass the current object as the first parameter.

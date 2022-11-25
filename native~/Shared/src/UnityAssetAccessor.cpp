@@ -5,8 +5,11 @@
 #include <CesiumAsync/IAssetResponse.h>
 #include <CesiumUtility/ScopeGuard.h>
 
+#include <DotNet/CesiumForUnity/Helpers.h>
 #include <DotNet/CesiumForUnity/NativeDownloadHandler.h>
 #include <DotNet/System/Action1.h>
+#include <DotNet/System/Environment.h>
+#include <DotNet/System/OperatingSystem.h>
 #include <DotNet/System/String.h>
 #include <DotNet/Unity/Collections/Allocator.h>
 #include <DotNet/Unity/Collections/LowLevel/Unsafe/NativeArrayUnsafeUtility.h>
@@ -92,7 +95,13 @@ private:
 namespace CesiumForUnityNative {
 
 UnityAssetAccessor::UnityAssetAccessor()
-    : _cesiumVersionHeader(
+    : _cesiumPlatformHeader(
+          CesiumForUnity::Helpers::ToString(
+              UnityEngine::Application::platform())
+              .ToStlString() +
+          " " + System::Environment::OSVersion().VersionString().ToStlString() +
+          " " + UnityEngine::Application::productName().ToStlString()),
+      _cesiumVersionHeader(
           CesiumForUnityNative::Cesium::version + " " +
           CesiumForUnityNative::Cesium::commit) {}
 
@@ -105,6 +114,8 @@ UnityAssetAccessor::get(
   return asyncSystem.runInMainThread([asyncSystem,
                                       url,
                                       headers,
+                                      cesiumPlatformHeader =
+                                          this->_cesiumPlatformHeader,
                                       cesiumVersionHeader =
                                           this->_cesiumVersionHeader]() {
     UnityEngine::Networking::UnityWebRequest request =
@@ -119,6 +130,9 @@ UnityAssetAccessor::get(
           System::String(header.second));
     }
 
+    request.SetRequestHeader(
+        System::String("X-Cesium-Platform"),
+        cesiumPlatformHeader);
     request.SetRequestHeader(
         System::String("X-Cesium-Version"),
         cesiumVersionHeader);
@@ -181,6 +195,8 @@ UnityAssetAccessor::request(
                                       verb,
                                       headers,
                                       payloadBytes,
+                                      cesiumPlatformHeader =
+                                          this->_cesiumPlatformHeader,
                                       cesiumVersionHeader =
                                           this->_cesiumVersionHeader]() {
     DotNet::CesiumForUnity::NativeDownloadHandler downloadHandler{};
@@ -197,6 +213,9 @@ UnityAssetAccessor::request(
           System::String(header.second));
     }
 
+    request.SetRequestHeader(
+        System::String("X-Cesium-Platform"),
+        cesiumPlatformHeader);
     request.SetRequestHeader(
         System::String("X-Cesium-Version"),
         cesiumVersionHeader);

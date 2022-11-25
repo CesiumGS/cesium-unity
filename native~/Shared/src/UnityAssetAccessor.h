@@ -24,6 +24,7 @@ public:
   virtual void tick() noexcept override;
 
 private:
+  const std::string _cesiumPlatformHeader;
   const std::string _cesiumVersionHeader;
 };
 
