@@ -175,25 +175,69 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: macOS Package
-          path: combine
+          path: combine/macos
       - name: Extract macOS build
         run: |
-          cd combine
+          cd combine/macos
           tar xzf *.tgz
           rm *.tgz
       - name: Download Windows build
         uses: actions/download-artifact@v3
         with:
           name: Windows Package
-          path: combine
+          path: combine/windows
       - name: Extract Windows build
         run: |
-          cd combine
+          cd combine/windows
           tar xzf *.tgz
           rm *.tgz
       - name: Create combined package
         run: |
-          cd combine
+          mkdir -p combine/merged
+          cd combine/merged
+          
+          # Copy the everything. For files that exist in multiple packages, the Windows one will win.
+          cp -r ../macos/* .
+          cp -r ../windows/* .
+          
+          # Remove the generated C# files
+          for file in $(find package/Runtime/generated -name '*.cs');
+          do
+            rm $file
+          done;
+          for file in $(find package/Editor/generated -name '*.cs');
+          do
+            rm $file
+          done;
+          
+          # Merge the generated files by concatentation
+          cd ../macos
+          for file in $(find package/Runtime/generated -name '*.cs');
+          do
+            mkdir -p $(dirname "../merged/$file")
+            cp "$file" "../merged/$file"
+          done;
+          for file in $(find package/Editor/generated -name '*.cs');
+          do
+            mkdir -p $(dirname "../merged/$file")
+            cp "$file" "../merged/$file"
+          done;
+          cd ../windows
+          for file in $(find package/Runtime/generated -name '*.cs');
+          do
+            echo Merging $file
+            mkdir -p $(dirname "../merged/$file")
+            cat "$file" >> "../merged/$file"
+          done;
+          for file in $(find package/Editor/generated -name '*.cs');
+          do
+            echo Merging $file
+            mkdir -p $(dirname "../merged/$file")
+            cat "$file" >> "../merged/$file"
+          done;
+          
+          # Create the package
+          cd ../merged
           export NAME=$(jq -r ".name" $GITHUB_WORKSPACE/package.json)
           export VERSION=$(jq -r ".version" $GITHUB_WORKSPACE/package.json)
           tar czf $NAME-$VERSION.tgz package
