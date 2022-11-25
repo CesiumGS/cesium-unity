@@ -57,7 +57,7 @@ jobs:
           mkdir -p $ENV:PROGRAMDATA/Unity/config
           '{"licensingServiceBaseUrl": "http://localhost:12331","enableEntitlementLicensing": true,"clientConnectTimeoutSec": 60,"clientHandshakeTimeoutSec": 120}' > $ENV:PROGRAMDATA/Unity/config/services-config.json
       - name: Update the version in Cesium.cpp
-        script: |
+        run: |
           $VERSION = (Get-Content -path package.json | ConvertFrom-Json).version
           $COMMIT = $(git rev-parse --short HEAD)
           ((Get-Content -path native~/Shared/src/Cesium.cpp -Raw) -replace 'Cesium::version = "Development Build"',"Cesium::version = ""$VERSION""") | Set-Content -Path native~/Shared/src/Cesium.cpp
@@ -136,7 +136,7 @@ jobs:
           cat status
           rm status
       - name: Update the version in Cesium.cpp
-        script: |
+        run: |
           export VERSION=$(jq -r ".version" package.json)
           export COMMIT=$(git rev-parse --short HEAD)
           sed -i '' 's/Cesium::version = "Development Build"/Cesium::version = "'$VERSION'"/g' native~/Shared/src/Cesium.cpp
