@@ -32,8 +32,8 @@ namespace CesiumForUnity
         private SerializedProperty _culledScreenSpaceError;
 
         private SerializedProperty _opaqueMaterial;
-        private SerializedProperty _useLodTransitions;
-        private SerializedProperty _lodTransitionLength;
+        //private SerializedProperty _useLodTransitions;
+        //private SerializedProperty _lodTransitionLength;
         private SerializedProperty _generateSmoothNormals;
 
         private SerializedProperty _showTilesInHierarchy;
@@ -76,9 +76,9 @@ namespace CesiumForUnity
                 this.serializedObject.FindProperty("_culledScreenSpaceError");
 
             this._opaqueMaterial = this.serializedObject.FindProperty("_opaqueMaterial");
-            this._useLodTransitions = this.serializedObject.FindProperty("_useLodTransitions");
-            this._lodTransitionLength =
-                this.serializedObject.FindProperty("_lodTransitionLength");
+            //this._useLodTransitions = this.serializedObject.FindProperty("_useLodTransitions");
+            //this._lodTransitionLength =
+            //    this.serializedObject.FindProperty("_lodTransitionLength");
             this._generateSmoothNormals =
                 this.serializedObject.FindProperty("_generateSmoothNormals");
 
@@ -246,7 +246,7 @@ namespace CesiumForUnity
 
             GUIContent forbidHolesContent = new GUIContent(
                "Forbid Holes",
-               "Whether to unrefine back to a parent tile when a child isn't done loading." +
+               "Whether to prevent refinement of a parent tile when a child isn't done loading." +
                "\n\n" +
                "When this is set to true, the tileset will guarantee that the tileset will " +
                "never be rendered with holes in place of tiles that are not yet loaded," +
@@ -264,7 +264,7 @@ namespace CesiumForUnity
                     "corresponding tiles are put into a queue. This value determines how " +
                     "many of these tasks are processed at the same time. A higher value may " +
                     "cause the tiles to be loaded and rendered more quickly, at the cost of " +
-                    "a higher network- and processing load.");
+                    "a higher network and processing load.");
             EditorGUILayout.PropertyField(
                 this._maximumSimultaneousTileLoads, maximumSimultaneousTileLoadsContent);
 
@@ -298,7 +298,7 @@ namespace CesiumForUnity
         {
             GUILayout.Label("Tile Culling", EditorStyles.boldLabel);
 
-            EditorGUI.BeginDisabledGroup(this._useLodTransitions.boolValue);
+            //EditorGUI.BeginDisabledGroup(this._useLodTransitions.boolValue);
             GUIContent enableFrustumCullingContent = new GUIContent(
                 "Enable Frustum Culling",
                 "Whether to cull tiles that are outside the frustum." +
@@ -308,7 +308,7 @@ namespace CesiumForUnity
                 "so that these tiles are still considered for loading, refinement and rendering." +
                 "\n\n" +
                 "This will cause more tiles to be loaded, but helps to avoid holes and " +
-                "provides a more consistent mesh, which may be helpful for physics." +
+                "provides a more consistent mesh, which may be helpful for physics and shadows." +
                 "\n\n" +
                 "Note that this will always be disabled if \"Use Lod Transitions\" is set to true.");
             EditorGUILayout.PropertyField(this._enableFrustumCulling, enableFrustumCullingContent);
@@ -324,7 +324,7 @@ namespace CesiumForUnity
                 "\n\n" +
                 "Note that this will always be disabled if \"Use Lod Transitions\" is set to true.");
             EditorGUILayout.PropertyField(this._enableFogCulling, enableFogCullingContent);
-            EditorGUI.EndDisabledGroup();
+            //EditorGUI.EndDisabledGroup();
 
             GUIContent enforceCulledScreenSpaceErrorContent = new GUIContent(
                 "Enforce Culled Screen Space Error",
@@ -385,21 +385,21 @@ namespace CesiumForUnity
                 "The Material to use to render opaque parts of tiles.");
             EditorGUILayout.PropertyField(this._opaqueMaterial, opaqueMaterialContent);
 
-            GUIContent useLodTransitionsContent = new GUIContent(
-                "Use Lod Transitions",
-                "Use a dithering effect when transitioning between tiles of different LODs." +
-                "\n\n" +
-                "When this is set to true, Frustrum Culling and Fog Culling are always disabled.");
-            EditorGUILayout.PropertyField(this._useLodTransitions, useLodTransitionsContent);
+            //GUIContent useLodTransitionsContent = new GUIContent(
+            //    "Use Lod Transitions",
+            //    "Use a dithering effect when transitioning between tiles of different LODs." +
+            //    "\n\n" +
+            //    "When this is set to true, Frustrum Culling and Fog Culling are always disabled.");
+            //EditorGUILayout.PropertyField(this._useLodTransitions, useLodTransitionsContent);
 
-            EditorGUI.BeginDisabledGroup(!this._useLodTransitions.boolValue);
-            GUIContent lodTransitionLengthContent = new GUIContent(
-                "Lod Transition Length",
-                "How long dithered LOD transitions between different tiles should take, in seconds." +
-                "\n\n" +
-                "Only relevant if \"Use Lod Transitions\" is true.");
-            EditorGUILayout.PropertyField(this._lodTransitionLength, lodTransitionLengthContent);
-            EditorGUI.EndDisabledGroup();
+            //EditorGUI.BeginDisabledGroup(!this._useLodTransitions.boolValue);
+            //GUIContent lodTransitionLengthContent = new GUIContent(
+            //    "Lod Transition Length",
+            //    "How long dithered LOD transitions between different tiles should take, in seconds." +
+            //    "\n\n" +
+            //    "Only relevant if \"Use Lod Transitions\" is true.");
+            //EditorGUILayout.PropertyField(this._lodTransitionLength, lodTransitionLengthContent);
+            //EditorGUI.EndDisabledGroup();
 
             GUIContent generateSmoothNormalsContent = new GUIContent(
                 "Generate Smooth Normals",
@@ -408,7 +408,7 @@ namespace CesiumForUnity
                 "According to the glTF spec: \"When normals are not specified, client " +
                 "implementations should calculate flat normals.\" However, calculating flat " +
                 "normals requires duplicating vertices. This option allows the glTFs to be " +
-                "sent with explicit smooth normals when the original glTF was missing normals.");
+                "rendered with smooth normals instead when the original glTF is missing normals.");
             EditorGUILayout.PropertyField(this._generateSmoothNormals, generateSmoothNormalsContent);
         }
 

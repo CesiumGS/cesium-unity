@@ -237,8 +237,8 @@ namespace CesiumForUnity
             tileset.enableFogCulling = tileset.enableFogCulling;
             tileset.enforceCulledScreenSpaceError = tileset.enforceCulledScreenSpaceError;
             tileset.culledScreenSpaceError = tileset.culledScreenSpaceError;
-            tileset.useLodTransitions = tileset.useLodTransitions;
-            tileset.lodTransitionLength = tileset.lodTransitionLength;
+            //tileset.useLodTransitions = tileset.useLodTransitions;
+            //tileset.lodTransitionLength = tileset.lodTransitionLength;
             tileset.generateSmoothNormals = tileset.generateSmoothNormals;
             tileset.createPhysicsMeshes = tileset.createPhysicsMeshes;
             tileset.suspendUpdate = tileset.suspendUpdate;
