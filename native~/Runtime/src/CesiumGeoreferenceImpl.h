@@ -2,7 +2,7 @@
 
 #include <CesiumGeospatial/LocalHorizontalCoordinateSystem.h>
 
-#include <DotNet/CesiumForUnity/CesiumVector3.h>
+#include <DotNet/Unity/Mathematics/double3.h>
 
 namespace DotNet::CesiumForUnity {
 class CesiumGeoreference;
@@ -26,32 +26,32 @@ public:
   void InitializeOrigin(
       const DotNet::CesiumForUnity::CesiumGeoreference& georeference);
 
-  DotNet::CesiumForUnity::CesiumVector3
+  DotNet::Unity::Mathematics::double3
   TransformUnityWorldPositionToEarthCenteredEarthFixed(
       const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
-      DotNet::CesiumForUnity::CesiumVector3 unityWorldPosition);
-  DotNet::CesiumForUnity::CesiumVector3
+      DotNet::Unity::Mathematics::double3 unityWorldPosition);
+  DotNet::Unity::Mathematics::double3
   TransformUnityLocalPositionToEarthCenteredEarthFixed(
       const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
       const DotNet::UnityEngine::Transform& parent,
-      DotNet::CesiumForUnity::CesiumVector3 unityLocalPosition);
-  DotNet::CesiumForUnity::CesiumVector3
+      DotNet::Unity::Mathematics::double3 unityLocalPosition);
+  DotNet::Unity::Mathematics::double3
   TransformEarthCenteredEarthFixedPositionToUnityWorld(
       const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
-      DotNet::CesiumForUnity::CesiumVector3 earthCenteredEarthFixed);
-  DotNet::CesiumForUnity::CesiumVector3
+      DotNet::Unity::Mathematics::double3 earthCenteredEarthFixed);
+  DotNet::Unity::Mathematics::double3
   TransformEarthCenteredEarthFixedPositionToUnityLocal(
       const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
       const DotNet::UnityEngine::Transform& parent,
-      DotNet::CesiumForUnity::CesiumVector3 earthCenteredEarthFixed);
-  DotNet::CesiumForUnity::CesiumVector3
+      DotNet::Unity::Mathematics::double3 earthCenteredEarthFixed);
+  DotNet::Unity::Mathematics::double3
   TransformUnityWorldDirectionToEarthCenteredEarthFixed(
       const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
-      DotNet::CesiumForUnity::CesiumVector3 unityWorldDirection);
-  DotNet::CesiumForUnity::CesiumVector3
+      DotNet::Unity::Mathematics::double3 unityWorldDirection);
+  DotNet::Unity::Mathematics::double3
   TransformEarthCenteredEarthFixedDirectionToUnityWorld(
       const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
-      DotNet::CesiumForUnity::CesiumVector3 earthCenteredEarthFixedDirection);
+      DotNet::Unity::Mathematics::double3 earthCenteredEarthFixedDirection);
 
   const CesiumGeospatial::LocalHorizontalCoordinateSystem&
   getCoordinateSystem() const {

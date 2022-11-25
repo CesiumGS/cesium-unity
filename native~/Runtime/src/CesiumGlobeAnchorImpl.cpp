@@ -6,7 +6,7 @@
 
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/CesiumForUnity/CesiumGlobeAnchor.h>
-#include <DotNet/CesiumForUnity/CesiumVector3.h>
+#include <DotNet/Unity/Mathematics/double3.h>
 #include <DotNet/UnityEngine/GameObject.h>
 #include <DotNet/UnityEngine/Quaternion.h>
 #include <DotNet/UnityEngine/Transform.h>
@@ -19,8 +19,8 @@ namespace CesiumForUnityNative {
 
 /*static*/ void CesiumGlobeAnchorImpl::AdjustOrientation(
     const CesiumForUnity::CesiumGlobeAnchor& globeAnchor,
-    const CesiumForUnity::CesiumVector3& oldPositionEcef,
-    const CesiumForUnity::CesiumVector3& newPositionEcef) {
+    const Unity::Mathematics::double3& oldPositionEcef,
+    const Unity::Mathematics::double3& newPositionEcef) {
   CesiumForUnity::CesiumGeoreference georeference =
       globeAnchor.gameObject()
           .GetComponentInParent<CesiumForUnity::CesiumGeoreference>();

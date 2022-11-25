@@ -1,4 +1,5 @@
 using System;
+using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
 
@@ -231,17 +232,16 @@ namespace CesiumForUnity
             return ionOverlay;
         }
 
-        private static CesiumVector3
+        private static double3
         TransformCameraPositionToEarthCenteredEarthFixed(CesiumGeoreference georeference)
         {
             Camera camera = SceneView.lastActiveSceneView.camera;
             Vector3 position = camera.transform.position;
-            CesiumVector3 positionUnity = new CesiumVector3()
-            {
-                x = position.x,
-                y = position.y,
-                z = position.z
-            };
+            double3 positionUnity = new double3(
+                position.x,
+                position.y,
+                position.z
+            );
 
             return georeference.TransformUnityWorldPositionToEarthCenteredEarthFixed(
                 positionUnity);
@@ -273,21 +273,21 @@ namespace CesiumForUnity
             // Want to restore current forward direction, relative to the globe.
             Quaternion currentCameraRotationUnity = SceneView.lastActiveSceneView.rotation;
             Vector3 cameraForwardUnity = currentCameraRotationUnity * Vector3.forward;
-            CesiumVector3 cameraForwardEcef = 
+            double3 cameraForwardEcef = 
                 georeference.TransformUnityWorldDirectionToEarthCenteredEarthFixed(
-                  new CesiumVector3() {
-                    x = cameraForwardUnity.x, 
-                    y = cameraForwardUnity.y, 
-                    z = cameraForwardUnity.z});
+                  new double3(
+                    cameraForwardUnity.x, 
+                    cameraForwardUnity.y, 
+                    cameraForwardUnity.z));
 
-            CesiumVector3 positionECEF =
+            double3 positionECEF =
                 CesiumEditorUtility.TransformCameraPositionToEarthCenteredEarthFixed(georeference);
             georeference.SetOriginEarthCenteredEarthFixed(
                 positionECEF.x,
                 positionECEF.y,
                 positionECEF.z);
 
-            CesiumVector3 newCameraForwardUnity = 
+            double3 newCameraForwardUnity = 
                 georeference.TransformEarthCenteredEarthFixedDirectionToUnityWorld(cameraForwardEcef);
 
             // Teleport the camera back to the georeference's position so it stays
@@ -306,12 +306,11 @@ namespace CesiumForUnity
         public static CesiumSubScene CreateSubScene(CesiumGeoreference georeference)
         {
             CesiumEditorUtility.PlaceGeoreferenceAtCameraPosition(georeference);
-            CesiumVector3 positionECEF = new CesiumVector3()
-            {
-                x = georeference.ecefX,
-                y = georeference.ecefY,
-                z = georeference.ecefZ
-            };
+            double3 positionECEF = new double3(
+                georeference.ecefX,
+                georeference.ecefY,
+                georeference.ecefZ
+            );
             
             GameObject subSceneGameObject = new GameObject();
             subSceneGameObject.transform.parent = georeference.transform;
@@ -341,8 +340,8 @@ namespace CesiumForUnity
             }
 
             Undo.RecordObject(subscene, "Place Sub-Scene Origin at Camera Position");
-            
-            CesiumVector3 positionECEF =
+
+            double3 positionECEF =
                 CesiumEditorUtility.TransformCameraPositionToEarthCenteredEarthFixed(georeference);
             subscene.SetOriginEarthCenteredEarthFixed(
                     positionECEF.x,

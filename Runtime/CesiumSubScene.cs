@@ -1,4 +1,5 @@
 using System;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace CesiumForUnity
@@ -175,12 +176,11 @@ namespace CesiumForUnity
         {
             if (this._originAuthority == CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight)
             {
-                CesiumVector3 ecef = CesiumTransforms.LongitudeLatitudeHeightToEarthCenteredEarthFixed(new CesiumVector3()
-                {
-                    x = this._longitude,
-                    y = this._latitude,
-                    z = this._height
-                });
+                double3 ecef = CesiumTransforms.LongitudeLatitudeHeightToEarthCenteredEarthFixed(new double3(
+                    this._longitude,
+                    this._latitude,
+                    this._height
+                ));
 
                 this._ecefX = ecef.x;
                 this._ecefY = ecef.y;
@@ -189,12 +189,11 @@ namespace CesiumForUnity
 
             if (this._originAuthority == CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed)
             {
-                CesiumVector3 llh = CesiumTransforms.EarthCenteredEarthFixedToLongitudeLatitudeHeight(new CesiumVector3()
-                {
-                    x = this._ecefX,
-                    y = this._ecefY,
-                    z = this._ecefZ
-                });
+                double3 llh = CesiumTransforms.EarthCenteredEarthFixedToLongitudeLatitudeHeight(new double3(
+                    this._ecefX,
+                    this._ecefY,
+                    this._ecefZ
+                ));
 
                 this._longitude = llh.x;
                 this._latitude = llh.y;
@@ -206,13 +205,12 @@ namespace CesiumForUnity
                 CesiumGeoreference georeference = this.GetComponentInParent<CesiumGeoreference>();
                 if (georeference == null)
                     throw new InvalidOperationException("CesiumSubScene is not nested inside a game object with a CesiumGeoreference.");
-              
-                CesiumVector3 ecefPosition = new CesiumVector3()
-                {
-                    x = this._ecefX,
-                    y = this._ecefY,
-                    z = this._ecefZ
-                };
+
+                double3 ecefPosition = new double3(
+                    this._ecefX,
+                    this._ecefY,
+                    this._ecefZ
+                );
 
                 if (this.originAuthority == CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed)
                     georeference.SetOriginEarthCenteredEarthFixed(
@@ -225,7 +223,7 @@ namespace CesiumForUnity
                         this._latitude, 
                         this._height);
 
-                CesiumVector3 unityWorldPosition =
+                double3 unityWorldPosition =
                     georeference.TransformEarthCenteredEarthFixedPositionToUnityWorld(ecefPosition);
 
                 this._unityWorldPosition = new Vector3(
