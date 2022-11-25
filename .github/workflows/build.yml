@@ -56,6 +56,15 @@ jobs:
         run: |
           mkdir -p $ENV:PROGRAMDATA/Unity/config
           '{"licensingServiceBaseUrl": "http://localhost:12331","enableEntitlementLicensing": true,"clientConnectTimeoutSec": 60,"clientHandshakeTimeoutSec": 120}' > $ENV:PROGRAMDATA/Unity/config/services-config.json
+      - name: Update the version in Cesium.cpp
+        script: |
+          $VERSION = (Get-Content -path package.json | ConvertFrom-Json).version
+          $COMMIT = $(git rev-parse --short HEAD)
+          ((Get-Content -path native~/Shared/src/Cesium.cpp -Raw) -replace 'Cesium::version = "Development Build"',"Cesium::version = ""$VERSION""") | Set-Content -Path native~/Shared/src/Cesium.cpp
+          ((Get-Content -path native~/Shared/src/Cesium.cpp -Raw) -replace 'Cesium::commit = "Unknown"',"Cesium::commit = ""$COMMIT""") | Set-Content -Path native~/Shared/src/Cesium.cpp
+          # Sanity check that the replacements happened
+          if (-Not ((Get-Content -path native~/Shared/src/Cesium.cpp -Raw) -match "$COMMIT")) { throw "Commit does not exist in file after replacement" }
+          if (-Not ((Get-Content -path native~/Shared/src/Cesium.cpp -Raw) -match "$VERSION")) { throw "Version does not exist in file after replacement" }
       - name: Move cesium-unity Repo Under Empty Project
         run: |
           mkdir -p \cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
@@ -85,6 +94,8 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: recursive
+      - name: Install jq
+        run: brew install jq
       - name: Install Unity Hub
         run: |
           wget --quiet https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.dmg
@@ -124,6 +135,15 @@ jobs:
           wget http://127.0.0.1:12331/v1/admin/status
           cat status
           rm status
+      - name: Update the version in Cesium.cpp
+        script: |
+          export VERSION=$(jq -r ".version" package.json)
+          export COMMIT=$(git rev-parse --short HEAD)
+          sed -i '' 's/Cesium::version = "Development Build"/Cesium::version = "'$VERSION'"/g' native~/Shared/src/Cesium.cpp
+          sed -i '' 's/Cesium::commit = "Unknown"/Cesium::commit = "'$COMMIT'"/g' native~/Shared/src/Cesium.cpp
+          # Sanity check that the replacements happened
+          grep $VERSION native~/Shared/src/Cesium.cpp
+          grep $COMMIT native~/Shared/src/Cesium.cpp
       - name: Move cesium-unity Repo Under Empty Project
         run: |
           mkdir -p ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
