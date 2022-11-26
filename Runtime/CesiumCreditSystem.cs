@@ -14,6 +14,9 @@ using UnityEngine.InputSystem.UI;
 
 namespace CesiumForUnity
 {
+    /// <summary>
+    /// Manages credits / attribution for <see cref="Cesium3DTileset"/> and <see cref="CesiumRasterOverlay"/>.
+    /// </summary>
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumCreditSystemImpl", "CesiumCreditSystemImpl.h")]
     public partial class CesiumCreditSystem : MonoBehaviour, IPointerClickHandler
     {
@@ -28,7 +31,7 @@ namespace CesiumForUnity
         // when they are presented on-screen.
         private string _defaultDelimiter = " \u2022 ";
 
-        public string defaultDelimiter
+        internal string defaultDelimiter
         {
             get => this._defaultDelimiter;
         }
@@ -36,7 +39,7 @@ namespace CesiumForUnity
         private Shader _defaultSpriteShader = null!;
 
         private int _numImages = 0;
-        public int numberOfImages
+        internal int numberOfImages
         {
             get => this._numImages;
         }
@@ -79,7 +82,7 @@ namespace CesiumForUnity
 
         private partial void Update();
 
-        public void OnPointerClick(PointerEventData eventData)
+        void IPointerClickHandler.OnPointerClick(PointerEventData eventData)
         {
             int linkIndex;
             if (_popupGameObject.activeSelf)
@@ -124,7 +127,7 @@ namespace CesiumForUnity
             }
         }
 
-        public void SetCreditsText(string popupCredits, string onScreenCredits)
+        internal void SetCreditsText(string popupCredits, string onScreenCredits)
         {
             _popupText = popupCredits;
             _onScreenText = onScreenCredits;
@@ -134,7 +137,7 @@ namespace CesiumForUnity
 
         const string base64Prefix = "data:image/png;base64,";
 
-        public IEnumerator LoadImage(string url)
+        internal IEnumerator LoadImage(string url)
         {
             // Each image is identified by its index.
             int imageId = _numImages;

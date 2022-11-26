@@ -1,5 +1,8 @@
 namespace CesiumForUnity
 {
+    /// <summary>
+    /// The type of <see cref="Cesium3DTileset"/> load that encountered an error.
+    /// </summary>
     public enum Cesium3DTilesetLoadType
     {
         /**
@@ -16,6 +19,9 @@ namespace CesiumForUnity
         TilesetJson
     }
 
+    /// <summary>
+    /// Holds details of a <see cref="Cesium3DTileset"/> load failure.
+    /// </summary>
     public struct Cesium3DTilesetLoadFailureDetails
     {
         /**

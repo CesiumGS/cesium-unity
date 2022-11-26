@@ -27,6 +27,29 @@ namespace CesiumForUnity
         EarthCenteredEarthFixed
     }
 
+    /// <summary>
+    /// Controls how global geospatial coordinates are mapped to coordinates in the Unity scene.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Internally, Cesium uses a global Earth-centered,
+    /// Earth-fixed (ECEF) ellipsoid-centered coordinate system, where the ellipsoid
+    /// is usually the World Geodetic System 1984(WGS84) ellipsoid. This is a
+    /// right - handed system centered at the Earth's center of mass, where +X is in
+    /// the direction of the intersection of the Equator and the Prime Meridian(zero
+    /// degrees longitude), +Y is in the direction of the intersection of the Equator
+    /// and +90 degrees longitude, and +Z is through the North Pole.
+    /// </para>
+    /// <para>
+    /// This component controls how this coordinate system is mapped into the Unity world.
+    /// </para>
+    /// <para>
+    /// This component should be added to a GameObject that is a parent of all GameObjects
+    /// with the <see cref="Cesium3DTileset"/> or <see cref="CesiumGlobeAnchor"/> components.
+    /// See the documentation for these component types to learn how they are affected by
+    /// the <see cref="CesiumGeoreference"/>.
+    /// </para>
+    /// </remarks>
     [ExecuteInEditMode]
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumGeoreferenceImpl", "CesiumGeoreferenceImpl.h")]
     public partial class CesiumGeoreference : MonoBehaviour
