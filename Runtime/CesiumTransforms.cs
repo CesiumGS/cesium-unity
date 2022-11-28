@@ -1,9 +1,11 @@
 ﻿using Reinterop;
-using System;
 using Unity.Mathematics;
 
 namespace CesiumForUnity
 {
+    /// <summary>
+    /// Holds static methods for transforming between geospatial coordinate systems.
+    /// </summary>
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumTransformsImpl", "CesiumTransformsImpl.h")]
     public static partial class CesiumTransforms
     {

@@ -92,7 +92,6 @@ namespace CesiumForUnity
                 }
 
                 // Update the origin continuously.
-                // TODO: account for a transform on the CesiumGeoreference
                 georeference.SetOriginEarthCenteredEarthFixed(ecef.x, ecef.y, ecef.z);
             }
         }

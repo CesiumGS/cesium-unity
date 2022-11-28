@@ -65,6 +65,10 @@ namespace CesiumForUnity
         [SerializeField]
         private CesiumGeoreferenceOriginAuthority _originAuthority = CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight;
 
+        /// <summary>
+        /// Identifies which set of coordinates authoritatively defines the origin
+        /// of this georeference.
+        /// </summary>
         public CesiumGeoreferenceOriginAuthority originAuthority
         {
             get => this._originAuthority;
