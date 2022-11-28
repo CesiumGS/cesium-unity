@@ -5,13 +5,24 @@ using Unity.Mathematics;
 namespace CesiumForUnity
 {
     /// <summary>
-    /// This component is typically attached to a camera, and it automatically updates the CesiumGeoreference
+    /// Automatically shifts the origin of a <see cref="CesiumGeoreference"/> as the object to which
+    /// it is attached moves. This improves rendering precision by keeping coordinate values small.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This component is typically attached to a camera, and it automatically updates the <see cref="CesiumGeoreference"/>
     /// to keep its origin near the location of the camera. This improves rendering precision by keeping the
     /// coordinate values of objects that are near the camera as small as possible. A game object with this
     /// component must be nested inside a <see cref="CesiumGeoreference"/>, and it must also have a
     /// <see cref="CesiumGlobeAnchor"/>. It is essential to add a <see cref="CesiumGlobeAnchor"/> to all
     /// other objects in the scene as well; otherwise, they will appear to move when the origin is shifted.
-    /// </summary>
+    /// </para>
+    /// <para>
+    /// This component also switches between <see cref="CesiumSubScene"/> instances based on the distance
+    /// to them. When inside a sub-scene, the origin shifting described above is not performed. This allows
+    /// relatively normal Unity scenes to be defined at different locations on the globe.
+    /// </para>
+    /// </remarks>
     [RequireComponent(typeof(CesiumGlobeAnchor))]
     public class CesiumOriginShift : MonoBehaviour
     {
@@ -81,7 +92,6 @@ namespace CesiumForUnity
                 }
 
                 // Update the origin continuously.
-                // TODO: account for a transform on the CesiumGeoreference
                 georeference.SetOriginEarthCenteredEarthFixed(ecef.x, ecef.y, ecef.z);
             }
         }

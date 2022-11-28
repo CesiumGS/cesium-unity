@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace CesiumForUnity
 {
-    public partial class NativeCoroutine : IEnumerable
+    internal partial class NativeCoroutine : IEnumerable
     {
         private Func<object, object> _callback;
 

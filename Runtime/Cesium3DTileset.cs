@@ -26,6 +26,17 @@ namespace CesiumForUnity
     /// heterogenous 3D geospatial content across desktop, web, and mobile applications. The tileset is
     /// streamed incrementally into Unity based on the current camera view(s).
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A GameObject with this component must be nested inside one with a <see cref="CesiumGeoreference"/>
+    /// component. The georeference controls how this tileset is mapped into the Unity world.
+    /// </para>
+    /// <para>
+    /// In most cases, the Transform of the GameObject that contains this component, and its ancestors, should
+    /// be an identity transform: 0 position, 0 rotation, 1 scale. Otherwise, this tileset will be misaligned
+    /// with other globe tilesets. However, it is sometimes useful to purposely offset a tileset.
+    /// </para>
+    /// </remarks>
     [ExecuteInEditMode]
     [ReinteropNativeImplementation("CesiumForUnityNative::Cesium3DTilesetImpl", "Cesium3DTilesetImpl.h")]
     public partial class Cesium3DTileset : MonoBehaviour

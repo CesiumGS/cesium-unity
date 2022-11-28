@@ -32,22 +32,30 @@ namespace CesiumForUnity
     /// </summary>
     /// <remarks>
     /// <para>
+    /// This component should be added to a GameObject that is a parent of all GameObjects
+    /// with the <see cref="Cesium3DTileset"/> or <see cref="CesiumGlobeAnchor"/> components.
+    /// </para>
+    /// <para>
     /// Internally, Cesium uses a global Earth-centered,
     /// Earth-fixed (ECEF) ellipsoid-centered coordinate system, where the ellipsoid
-    /// is usually the World Geodetic System 1984(WGS84) ellipsoid. This is a
-    /// right - handed system centered at the Earth's center of mass, where +X is in
-    /// the direction of the intersection of the Equator and the Prime Meridian(zero
+    /// is usually the World Geodetic System 1984 (WGS84) ellipsoid. This is a
+    /// right-handed system centered at the Earth's center of mass, where +X is in
+    /// the direction of the intersection of the Equator and the Prime Meridian (zero
     /// degrees longitude), +Y is in the direction of the intersection of the Equator
     /// and +90 degrees longitude, and +Z is through the North Pole.
     /// </para>
     /// <para>
     /// This component controls how this coordinate system is mapped into the Unity world.
+    /// It creates a left-handed, Unity-friendly coordinate system centered at the specified
+    /// georeference origin, where +X points East, +Y points up, and +Z points North, and
+    /// transforms coordinates between that coordinate system and ECEF.
     /// </para>
     /// <para>
-    /// This component should be added to a GameObject that is a parent of all GameObjects
-    /// with the <see cref="Cesium3DTileset"/> or <see cref="CesiumGlobeAnchor"/> components.
-    /// See the documentation for these component types to learn how they are affected by
-    /// the <see cref="CesiumGeoreference"/>.
+    /// The Unity <code>Transform</code> is applied _after_ the georeference transformation,
+    /// in the normal way. For example, if a <see cref="Cesium3DTileset"/>'s <code>position</code>
+    /// property is set to <code>(5000.0, 100.0, 0.0)</code>, then that tileset will be shifted
+    /// East 5000 units and up 100 units. If the <see cref="CesiumGeoreference"/> has a scale of
+    /// 0.5, the entire globe will be half of its normal size in the Unity world.
     /// </para>
     /// </remarks>
     [ExecuteInEditMode]
@@ -57,6 +65,10 @@ namespace CesiumForUnity
         [SerializeField]
         private CesiumGeoreferenceOriginAuthority _originAuthority = CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight;
 
+        /// <summary>
+        /// Identifies which set of coordinates authoritatively defines the origin
+        /// of this georeference.
+        /// </summary>
         public CesiumGeoreferenceOriginAuthority originAuthority
         {
             get => this._originAuthority;
@@ -70,45 +82,71 @@ namespace CesiumForUnity
         [SerializeField]
         private double _latitude = 39.736401;
 
+        /// <summary>
+        /// The latitude of the origin of the coordinate system, in degrees, in the range -90 to 90.
+        /// This property is ignored unless <see cref="originAuthority"/> is
+        /// <see cref="CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight"/>.
+        /// Setting this property changes the <see cref="originAuthority"/> accordingly.
+        /// </summary>
         public double latitude
         {
             get => this._latitude;
             set
             {
                 this._latitude = value;
-                this.UpdateOrigin();
+                this.originAuthority = CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight;
             }
         }
         
         [SerializeField]
         private double _longitude = -105.25737;
 
+        /// <summary>
+        /// The longitude of the origin of the coordinate system, in degrees, in the range -180 to 180.
+        /// This property is ignored unless <see cref="originAuthority"/> is
+        /// <see cref="CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight"/>.
+        /// Setting this property changes the <see cref="originAuthority"/> accordingly.
+        /// </summary>
         public double longitude
         {
             get => this._longitude;
             set
             {
                 this._longitude = value;
-                this.UpdateOrigin();
+                this.originAuthority = CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight;
             }
         }
 
         [SerializeField]
         private double _height = 2250.0;
 
+        /// <summary>
+        /// The height in the origin of the coordinate system, in meters above the ellipsoid. Do not
+        /// confuse this with a geoid height or height above mean sea level, which can be tens of
+        /// meters higher or lower depending on where in the world the object is located. This
+        /// property is ignored unless <see cref="originAuthority"/> is
+        /// <see cref="CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight"/>.
+        /// Setting this property changes the <see cref="originAuthority"/> accordingly.
+        /// </summary>
         public double height
         {
             get => this._height;
             set
             {
                 this._height = value;
-                this.UpdateOrigin();
+                this.originAuthority = CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight;
             }
         }
 
         [SerializeField]
         private double _ecefX = 6378137.0;
 
+        /// <summary>
+        /// The Earth-Centered, Earth-Fixed X coordinate of the origin of the coordinate system, in meters.
+        /// This property is ignored unless <see cref="originAuthority"/> is
+        /// <see cref="CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed"/>.
+        /// Setting this property changes the <see cref="originAuthority"/> accordingly.
+        /// </summary>
         public double ecefX
         {
             get => this._ecefX;
@@ -122,6 +160,12 @@ namespace CesiumForUnity
         [SerializeField]
         private double _ecefY = 0.0;
 
+        /// <summary>
+        /// The Earth-Centered, Earth-Fixed Y coordinate of the origin of the coordinate system, in meters.
+        /// This property is ignored unless <see cref="originAuthority"/> is
+        /// <see cref="CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed"/>.
+        /// Setting this property changes the <see cref="originAuthority"/> accordingly.
+        /// </summary>
         public double ecefY
         {
             get => this._ecefY;
@@ -135,6 +179,12 @@ namespace CesiumForUnity
         [SerializeField]
         private double _ecefZ = 0.0;
 
+        /// <summary>
+        /// The Earth-Centered, Earth-Fixed Z coordinate of the origin of the coordinate system, in meters.
+        /// This property is ignored unless <see cref="originAuthority"/> is
+        /// <see cref="CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed"/>.
+        /// Setting this property changes the <see cref="originAuthority"/> accordingly.
+        /// </summary>
         public double ecefZ
         {
             get => this._ecefZ;
@@ -145,9 +195,22 @@ namespace CesiumForUnity
             }
         }
 
-        [Tooltip("An event raised when the georeference changes.")]
+        /// <summary>
+        /// An event raised when the georeference changes.
+        /// </summary>
+        [Tooltip("An event raised when the georeference origin changes.")]
         public event Action changed;
 
+        /// <summary>
+        /// Sets the origin of the coordinate system to particular <see cref="ecefX"/>, <see cref="ecefY"/>,
+        /// <see cref="ecefZ"/> coordinates in the Earth-Centered, Earth-Fixed (ECEF) frame.
+        /// </summary>
+        /// <remarks>
+        /// Calling this method is more efficient than setting the properties individually.
+        /// </remarks>
+        /// <param name="x">The X coordinate in meters.</param>
+        /// <param name="y">The Y coordinate in meters.</param>
+        /// <param name="z">The Z coordinate in meters.</param>
         public void SetOriginEarthCenteredEarthFixed(double x, double y, double z)
         {
             this._ecefX = x;
@@ -156,6 +219,20 @@ namespace CesiumForUnity
             this.originAuthority = CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed;
         }
 
+        /// <summary>
+        /// Sets the origin of the coordinate system to a particular <see cref="longitude"/>,
+        /// <see cref="latitude"/>, and <see cref="height"/>.
+        /// </summary>
+        /// <remarks>
+        /// Calling this method is more efficient than setting the properties individually.
+        /// </remarks>
+        /// <param name="longitude">The longitude in degrees, in the range -180 to 180.</param>
+        /// <param name="latitude">The latitude in degrees, in the range -90 to 90.</param>
+        /// <param name="height">
+        /// The height in meters above the ellipsoid. Do not confuse this with a geoid height
+        /// or height above mean sea level, which can be tens of meters higher or lower
+        /// depending on where in the world the object is located.
+        /// </param>
         public void SetOriginLongitudeLatitudeHeight(double longitude, double latitude, double height)
         {
             this._longitude = longitude;
@@ -164,6 +241,10 @@ namespace CesiumForUnity
             this.originAuthority = CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight;
         }
 
+        /// <summary>
+        /// Recomputes the coordinate system based on an updated origin. It is usually not
+        /// necessary to call this directly as it is called automatically when needed.
+        /// </summary>
         public void UpdateOrigin()
         {
             this.RecalculateOrigin();

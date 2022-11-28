@@ -132,7 +132,9 @@ namespace CesiumForUnity
 
             if (EditorGUI.EndChangeCheck())
             {
-                this._globeAnchor.StartOrStopDetectingTransformChanges();
+                // Explicitly set the flag so that the object starts or stops detecting.
+                this.serializedObject.ApplyModifiedProperties();
+                this._globeAnchor.detectTransformChanges = this._globeAnchor.detectTransformChanges;
             }
             GUILayout.EndHorizontal();
 

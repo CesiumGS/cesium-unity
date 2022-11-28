@@ -3,6 +3,10 @@ using UnityEngine;
 
 namespace CesiumForUnity
 {
+    /// <summary>
+    /// A raster overlay that directly accesses a Web Map Service (WMS) server.
+    /// https://www.ogc.org/standards/wms
+    /// </summary>
     [ReinteropNativeImplementation(
         "CesiumForUnityNative::CesiumWebMapServiceRasterOverlayImpl",
         "CesiumWebMapServiceRasterOverlayImpl.h")]
@@ -11,6 +15,13 @@ namespace CesiumForUnity
         [SerializeField]
         private string _baseUrl = "";
 
+        /// <summary>
+        /// The base URL of the Web Map Service (WMS).
+        /// </summary>
+        /// <remarks>
+        /// This URL should not include query parameters. For example:
+        /// https://services.ga.gov.au/gis/services/NM_Culture_and_Infrastructure/MapServer/WMSServer
+        /// </remarks>
         public string baseUrl
         {
             get => this._baseUrl;
@@ -24,6 +35,9 @@ namespace CesiumForUnity
         [SerializeField]
         private string _layers = "";
 
+        /// <summary>
+        /// Comma-separated layer names to request from the server.
+        /// </summary>
         public string layers
         {
             get => this._layers;
@@ -37,6 +51,9 @@ namespace CesiumForUnity
         [SerializeField]
         private int _tileWidth = 256;
 
+        /// <summary>
+        /// Image width
+        /// </summary>
         public int tileWidth
         {
             get => this._tileWidth;
@@ -50,6 +67,9 @@ namespace CesiumForUnity
         [SerializeField]
         private int _tileHeight = 256;
 
+        /// <summary>
+        /// Image height
+        /// </summary>
         public int tileHeight
         {
             get => this._tileHeight;
@@ -64,6 +84,14 @@ namespace CesiumForUnity
         [Min(0)]
         private int _minimumLevel = 0;
 
+        /// <summary>
+        /// The minimum zoom level.
+        /// </summary>
+        /// <remarks>
+        /// Take care when specifying this that the number of tiles at the minimum
+        /// level is small, such as four or less. A larger number is likely to
+        /// result in rendering problems.
+        /// </remarks>
         public int minimumLevel
         {
             get => this._minimumLevel;
@@ -78,6 +106,9 @@ namespace CesiumForUnity
         [Min(0)]
         private int _maximumLevel = 14;
 
+        /// <summary>
+        /// The maximum zoom level.
+        /// </summary>
         public int maximumLevel
         {
             get => this._maximumLevel;
