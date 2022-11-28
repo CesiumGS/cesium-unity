@@ -1,5 +1,3 @@
-using static UnityEditor.PlayerSettings;
-
 namespace CesiumForUnity
 {
     /// <summary>
