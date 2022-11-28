@@ -84,7 +84,14 @@ namespace CesiumForUnity
 
         static void UpdateIonSession()
         {
-            CesiumIonSession.Ion().Tick();
+            try
+            {
+                CesiumIonSession.Ion().Tick();
+            }
+            catch (DllNotFoundException)
+            {
+                // Don't let a missing / out-of-sync native DLL crash everything.
+            }
         }
 
         static void
