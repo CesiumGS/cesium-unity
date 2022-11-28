@@ -26,16 +26,16 @@ public class TestCesiumGlobeAnchor
         // Wait for the start of a new frame, which will cause Start to be invoked.
         yield return null;
 
-        Assert.AreEqual(CesiumGlobeAnchorPositionAuthority.UnityLocalCoordinates, anchor.positionAuthority);
-        Assert.That(anchor.unityLocalX, Is.EqualTo(100.0).Using(FloatEqualityComparer.Instance));
-        Assert.That(anchor.unityLocalY, Is.EqualTo(200.0).Using(FloatEqualityComparer.Instance));
-        Assert.That(anchor.unityLocalZ, Is.EqualTo(300.0).Using(FloatEqualityComparer.Instance));
+        Assert.AreEqual(CesiumGlobeAnchorPositionAuthority.UnityCoordinates, anchor.positionAuthority);
+        Assert.That(anchor.unityX, Is.EqualTo(100.0).Using(FloatEqualityComparer.Instance));
+        Assert.That(anchor.unityY, Is.EqualTo(200.0).Using(FloatEqualityComparer.Instance));
+        Assert.That(anchor.unityZ, Is.EqualTo(300.0).Using(FloatEqualityComparer.Instance));
 
-        anchor.SetPositionUnityWorld(1.0, 2.0, 3.0);
+        anchor.SetPositionUnity(1.0, 2.0, 3.0);
 
-        Assert.That(anchor.unityWorldX, Is.EqualTo(1.0).Using(FloatEqualityComparer.Instance));
-        Assert.That(anchor.unityWorldY, Is.EqualTo(2.0).Using(FloatEqualityComparer.Instance));
-        Assert.That(anchor.unityWorldZ, Is.EqualTo(3.0).Using(FloatEqualityComparer.Instance));
+        Assert.That(anchor.unityX, Is.EqualTo(1.0).Using(FloatEqualityComparer.Instance));
+        Assert.That(anchor.unityY, Is.EqualTo(2.0).Using(FloatEqualityComparer.Instance));
+        Assert.That(anchor.unityZ, Is.EqualTo(3.0).Using(FloatEqualityComparer.Instance));
         Assert.That(goAnchored.transform.position.x, Is.EqualTo(1.0).Using(FloatEqualityComparer.Instance));
         Assert.That(goAnchored.transform.position.y, Is.EqualTo(2.0).Using(FloatEqualityComparer.Instance));
         Assert.That(goAnchored.transform.position.z, Is.EqualTo(3.0).Using(FloatEqualityComparer.Instance));
@@ -59,16 +59,16 @@ public class TestCesiumGlobeAnchor
         // Manually update the globe anchor properties without waiting for Unity to invoke Start on it.
         anchor.Sync();
 
-        Assert.AreEqual(CesiumGlobeAnchorPositionAuthority.UnityLocalCoordinates, anchor.positionAuthority);
-        Assert.That(anchor.unityLocalX, Is.EqualTo(100.0).Using(FloatEqualityComparer.Instance));
-        Assert.That(anchor.unityLocalY, Is.EqualTo(200.0).Using(FloatEqualityComparer.Instance));
-        Assert.That(anchor.unityLocalZ, Is.EqualTo(300.0).Using(FloatEqualityComparer.Instance));
+        Assert.AreEqual(CesiumGlobeAnchorPositionAuthority.UnityCoordinates, anchor.positionAuthority);
+        Assert.That(anchor.unityX, Is.EqualTo(100.0).Using(FloatEqualityComparer.Instance));
+        Assert.That(anchor.unityY, Is.EqualTo(200.0).Using(FloatEqualityComparer.Instance));
+        Assert.That(anchor.unityZ, Is.EqualTo(300.0).Using(FloatEqualityComparer.Instance));
 
-        anchor.SetPositionUnityWorld(1.0, 2.0, 3.0);
+        anchor.SetPositionUnity(1.0, 2.0, 3.0);
 
-        Assert.That(anchor.unityWorldX, Is.EqualTo(1.0).Using(FloatEqualityComparer.Instance));
-        Assert.That(anchor.unityWorldY, Is.EqualTo(2.0).Using(FloatEqualityComparer.Instance));
-        Assert.That(anchor.unityWorldZ, Is.EqualTo(3.0).Using(FloatEqualityComparer.Instance));
+        Assert.That(anchor.unityX, Is.EqualTo(1.0).Using(FloatEqualityComparer.Instance));
+        Assert.That(anchor.unityY, Is.EqualTo(2.0).Using(FloatEqualityComparer.Instance));
+        Assert.That(anchor.unityZ, Is.EqualTo(3.0).Using(FloatEqualityComparer.Instance));
         Assert.That(goAnchored.transform.position.x, Is.EqualTo(1.0).Using(FloatEqualityComparer.Instance));
         Assert.That(goAnchored.transform.position.y, Is.EqualTo(2.0).Using(FloatEqualityComparer.Instance));
         Assert.That(goAnchored.transform.position.z, Is.EqualTo(3.0).Using(FloatEqualityComparer.Instance));

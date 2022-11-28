@@ -236,14 +236,18 @@ namespace CesiumForUnity
         TransformCameraPositionToEarthCenteredEarthFixed(CesiumGeoreference georeference)
         {
             Camera camera = SceneView.lastActiveSceneView.camera;
+
+            // Find the camera position in the Georeference's reference frame.
             Vector3 position = camera.transform.position;
+            position = georeference.transform.worldToLocalMatrix * new Vector4(position.x, position.y, position.z, 1.0f);
+
             double3 positionUnity = new double3(
                 position.x,
                 position.y,
                 position.z
             );
 
-            return georeference.TransformUnityWorldPositionToEarthCenteredEarthFixed(
+            return georeference.TransformUnityPositionToEarthCenteredEarthFixed(
                 positionUnity);
         }
 
@@ -271,14 +275,15 @@ namespace CesiumForUnity
             }
 
             // Want to restore current forward direction, relative to the globe.
-            Quaternion currentCameraRotationUnity = SceneView.lastActiveSceneView.rotation;
-            Vector3 cameraForwardUnity = currentCameraRotationUnity * Vector3.forward;
-            double3 cameraForwardEcef = 
-                georeference.TransformUnityWorldDirectionToEarthCenteredEarthFixed(
+            // Remember that "the globe" in Unity world coordinates is defined by both the georeference origin and its Transform.
+            Vector3 forward = SceneView.lastActiveSceneView.camera.transform.forward;
+            forward = georeference.transform.worldToLocalMatrix * new Vector4(forward.x, forward.y, forward.z, 0.0f);
+            double3 cameraForwardEcef =
+                georeference.TransformUnityDirectionToEarthCenteredEarthFixed(
                   new double3(
-                    cameraForwardUnity.x, 
-                    cameraForwardUnity.y, 
-                    cameraForwardUnity.z));
+                    forward.x,
+                    forward.y,
+                    forward.z));
 
             double3 positionECEF =
                 CesiumEditorUtility.TransformCameraPositionToEarthCenteredEarthFixed(georeference);
@@ -287,19 +292,20 @@ namespace CesiumForUnity
                 positionECEF.y,
                 positionECEF.z);
 
-            double3 newCameraForwardUnity = 
-                georeference.TransformEarthCenteredEarthFixedDirectionToUnityWorld(cameraForwardEcef);
+            double3 newCameraForwardUnity =
+                georeference.TransformEarthCenteredEarthFixedDirectionToUnity(cameraForwardEcef);
 
             // Teleport the camera back to the georeference's position so it stays
             // at the middle of the subscene. Restore the original forward direction, wrt the globe.
-            // TODO: This will have to change when we factor in Unity transforms.
+            // Always use +Y (Vector3.up) as the up direction, even if a Transform on the CesiumGeoreference tilts the globe.
             CesiumEditorUtility.SetSceneViewPositionRotation(
-                Vector3.zero, 
+                georeference.transform.position,
                 Quaternion.LookRotation(
-                    new Vector3(
-                      (float)newCameraForwardUnity.x, 
-                      (float)newCameraForwardUnity.y, 
-                      (float)newCameraForwardUnity.z),
+                    georeference.transform.localToWorldMatrix * new Vector4(
+                      (float)newCameraForwardUnity.x,
+                      (float)newCameraForwardUnity.y,
+                      (float)newCameraForwardUnity.z,
+                      0.0f),
                     Vector3.up));
         }
 
@@ -311,7 +317,7 @@ namespace CesiumForUnity
                 georeference.ecefY,
                 georeference.ecefZ
             );
-            
+
             GameObject subSceneGameObject = new GameObject();
             subSceneGameObject.transform.parent = georeference.transform;
             Undo.RegisterCreatedObjectUndo(subSceneGameObject, "Create Sub-Scene");

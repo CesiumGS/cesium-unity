@@ -148,14 +148,6 @@ namespace CesiumForUnity
         [Tooltip("An event raised when the georeference changes.")]
         public event Action changed;
 
-        private void OnValidate()
-        {
-            this.transform.position = Vector3.zero;
-            this.transform.rotation = Quaternion.identity;
-            this.transform.localScale = new Vector3(1, 1, 1);
-            this.transform.hideFlags = HideFlags.NotEditable | HideFlags.HideInInspector;
-        }
-
         public void SetOriginEarthCenteredEarthFixed(double x, double y, double z)
         {
             this._ecefX = x;
@@ -227,52 +219,47 @@ namespace CesiumForUnity
         }
 
         /// <summary>
-        /// Transform a Unity world position to Earth-Centered, Earth-Fixed (ECEF) coordinates.
+        /// Transform a Unity position to Earth-Centered, Earth-Fixed (ECEF) coordinates. The position should generally
+        /// not be a Unity _world_ position, but rather a position expressed in some parent GameObject's reference frame as
+        /// defined by its Transform. This way, the chain of Unity transforms places and orients the "globe" in the
+        /// Unity world.
         /// </summary>
-        /// <param name="unityWorldPosition">The Unity world position to convert.</param>
+        /// <param name="unityPosition">The Unity position to convert.</param>
         /// <returns>The ECEF coordinates in meters.</returns>
         public partial double3
-            TransformUnityWorldPositionToEarthCenteredEarthFixed(double3 unityWorldPosition);
+            TransformUnityPositionToEarthCenteredEarthFixed(double3 unityPosition);
 
         /// <summary>
-        /// Transforms a local position expressed relative to a parent transform into Earth-Centered,
-        /// Earth-Fixed (ECEF) coordinates.
-        /// </summary>
-        /// <param name="parent">The parent transform in which the local position is defined.</param>
-        /// <param name="unityLocalPosition">The local position to convert.</param>
-        /// <returns>The ECEF coordinates in meters.</returns>
-        public partial double3 TransformUnityLocalPositionToEarthCenteredEarthFixed(Transform parent, double3 unityLocalPosition);
-
-        /// <summary>
-        /// Transform an Earth-Centered, Earth-Fixed position to Unity world coordinates.
+        /// Transform an Earth-Centered, Earth-Fixed position to Unity coordinates. The resulting position should generally
+        /// not be interpreted as a Unity _world_ position, but rather a position expressed in some parent
+        /// GameObject's reference frame as defined by its Transform. This way, the chain of Unity transforms
+        /// places and orients the "globe" in the Unity world.
         /// </summary>
         /// <param name="earthCenteredEarthFixed">The ECEF coordinates in meters.</param>
-        /// <returns>The corresponding Unity world coordinates.</returns>
+        /// <returns>The corresponding Unity coordinates.</returns>
         public partial double3
-            TransformEarthCenteredEarthFixedPositionToUnityWorld(double3 earthCenteredEarthFixed);
+            TransformEarthCenteredEarthFixedPositionToUnity(double3 earthCenteredEarthFixed);
 
         /// <summary>
-        /// Transform an Earth-Centered, Earth-Fixed position to local coordinates relative to a parent transform.
+        /// Transform a Unity direction to a direction in Earth-Centered, Earth-Fixed (ECEF) coordinates. The
+        /// direction should generally not be a Unity _world_ direction, but rather a direction expressed in
+        /// some parent GameObject's reference frame as defined by its Transform. This way, the chain of
+        /// Unity transforms orients the "globe" in the Unity world.
         /// </summary>
-        /// <param name="parent">The parent transform in which the local position is defined.</param>
-        /// <param name="earthCenteredEarthFixed">The ECEF coordinates in meters</param>
-        /// <returns>The corresponding Unity local coordinates.</returns>
-        public partial double3 TransformEarthCenteredEarthFixedPositionToUnityLocal(Transform parent, double3 earthCenteredEarthFixed);
-
-        /// <summary>
-        /// Transform a Unity world direction to a direction in Earth-Centered, Earth-Fixed (ECEF) coordinates.
-        /// </summary>
-        /// <param name="unityWorldDirection">The Unity world direction to convert.</param>
+        /// <param name="unityDirection">The Unity direction to convert.</param>
         /// <returns>The ECEF direction.</returns>
         public partial double3
-            TransformUnityWorldDirectionToEarthCenteredEarthFixed(double3 unityWorldDirection);
+            TransformUnityDirectionToEarthCenteredEarthFixed(double3 unityDirection);
 
         /// <summary>
-        /// Transform an Earth-Centered, Earth-Fixed direction to Unity world coordinates.
+        /// Transform an Earth-Centered, Earth-Fixed direction to Unity coordinates. The resulting direction
+        /// should generally not be interpreted as a Unity _world_ direction, but rather a direction expressed
+        /// in some parent GameObject's reference frame as defined by its Transform. This way, the chain of
+        /// Unity transforms orients the "globe" in the Unity world.
         /// </summary>
         /// <param name="earthCenteredEarthFixedDirection">The direction in ECEF coordinates.</param>
-        /// <returns>The corresponding Unity world direction.</returns>
+        /// <returns>The corresponding Unity direction.</returns>
         public partial double3
-            TransformEarthCenteredEarthFixedDirectionToUnityWorld(double3 earthCenteredEarthFixedDirection);
+            TransformEarthCenteredEarthFixedDirectionToUnity(double3 earthCenteredEarthFixedDirection);
     }
 }

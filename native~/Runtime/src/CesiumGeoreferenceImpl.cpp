@@ -72,11 +72,11 @@ void CesiumGeoreferenceImpl::RecalculateOrigin(
   // Update all globe anchors based on the new origin.
   std::swap(this->_coordinateSystem, coordinateSystem);
 
-  glm::dmat3 oldToEcef =
+  glm::dmat3 oldLocalToEcef =
       glm::dmat3(coordinateSystem.getLocalToEcefTransformation());
-  glm::dmat3 ecefToNew =
+  glm::dmat3 ecefToNewLocal =
       glm::dmat3(this->_coordinateSystem.getEcefToLocalTransformation());
-  glm::dmat3 oldToNew = ecefToNew * oldToEcef;
+  glm::dmat3 oldLocalToNewLocal = ecefToNewLocal * oldLocalToEcef;
 
   DotNet::System::Array1<DotNet::CesiumForUnity::CesiumGlobeAnchor> anchors =
       georeference.gameObject()
@@ -87,29 +87,37 @@ void CesiumGeoreferenceImpl::RecalculateOrigin(
     DotNet::CesiumForUnity::CesiumGlobeAnchor anchor = anchors[i];
 
     DotNet::UnityEngine::Transform transform = anchor.transform();
-    glm::dmat3 modelToOld =
+    glm::dmat3 worldToOldLocal = glm::dmat3(
+        UnityTransforms::fromUnity(transform.parent().worldToLocalMatrix()));
+    glm::dmat3 modelToOldWorld =
         glm::dmat3(UnityTransforms::fromUnity(transform.localToWorldMatrix()));
-    glm::dmat3 modelToNew = oldToNew * modelToOld;
+    glm::dmat3 modelToNew =
+        oldLocalToNewLocal * worldToOldLocal * modelToOldWorld;
     RotationAndScale rotationAndScale =
         UnityTransforms::matrixToRotationAndScale(modelToNew);
 
-    transform.rotation(UnityTransforms::toUnity(rotationAndScale.rotation));
+    transform.localRotation(
+        UnityTransforms::toUnity(rotationAndScale.rotation));
     transform.localScale(UnityTransforms::toUnity(rotationAndScale.scale));
 
     // The meaning of Unity coordinates will change with the georeference
     // change, so switch to ECEF if necessary.
     DotNet::CesiumForUnity::CesiumGlobeAnchorPositionAuthority authority =
         anchor.positionAuthority();
-    if (authority ==
-        DotNet::CesiumForUnity::CesiumGlobeAnchorPositionAuthority::
-            UnityWorldCoordinates) {
+    if (authority == DotNet::CesiumForUnity::
+                         CesiumGlobeAnchorPositionAuthority::UnityCoordinates) {
       authority = DotNet::CesiumForUnity::CesiumGlobeAnchorPositionAuthority::
           EarthCenteredEarthFixed;
     }
 
     // Re-assign the (probably unchanged) authority to recompute Unity
-    // coordinates with the new georeference.
-    anchor.positionAuthority(authority);
+    // coordinates with the new georeference. Unless it's still None,
+    // because in that case setting the authority now could lock in the
+    // globe location too early (e.g. before the CesiumGeoreference has
+    // its final origin values).
+    if (authority !=
+        DotNet::CesiumForUnity::CesiumGlobeAnchorPositionAuthority::None)
+      anchor.positionAuthority(authority);
   }
 }
 
@@ -121,52 +129,18 @@ void CesiumGeoreferenceImpl::InitializeOrigin(
 }
 
 DotNet::Unity::Mathematics::double3
-CesiumGeoreferenceImpl::TransformUnityWorldPositionToEarthCenteredEarthFixed(
+CesiumGeoreferenceImpl::TransformUnityPositionToEarthCenteredEarthFixed(
     const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
-    DotNet::Unity::Mathematics::double3 unityWorldPosition) {
+    DotNet::Unity::Mathematics::double3 unityPosition) {
   const LocalHorizontalCoordinateSystem& coordinateSystem =
       this->getCoordinateSystem();
-  glm::dvec3 result = coordinateSystem.localPositionToEcef(glm::dvec3(
-      unityWorldPosition.x,
-      unityWorldPosition.y,
-      unityWorldPosition.z));
+  glm::dvec3 result = coordinateSystem.localPositionToEcef(
+      glm::dvec3(unityPosition.x, unityPosition.y, unityPosition.z));
   return DotNet::Unity::Mathematics::double3{result.x, result.y, result.z};
 }
 
 DotNet::Unity::Mathematics::double3
-CesiumGeoreferenceImpl::TransformUnityLocalPositionToEarthCenteredEarthFixed(
-    const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
-    const DotNet::UnityEngine::Transform& parent,
-    DotNet::Unity::Mathematics::double3 unityLocalPosition) {
-  if (parent != nullptr) {
-    // Transform the local position to a world position.
-    // TODO: we could achieve better position by composing the transform chain
-    // ourselves rather than letting Unity do it in single precision.
-    glm::dvec4 position =
-        UnityTransforms::fromUnity(parent.localToWorldMatrix()) *
-        glm::dvec4(
-            unityLocalPosition.x,
-            unityLocalPosition.y,
-            unityLocalPosition.z,
-            1.0);
-
-    // Transform the world position to ECEF
-    return this->TransformUnityWorldPositionToEarthCenteredEarthFixed(
-        georeference,
-        DotNet::Unity::Mathematics::double3{
-            position.x,
-            position.y,
-            position.z});
-  } else {
-    // Local and world coordinates are equivalent
-    return this->TransformUnityWorldPositionToEarthCenteredEarthFixed(
-        georeference,
-        unityLocalPosition);
-  }
-}
-
-DotNet::Unity::Mathematics::double3
-CesiumGeoreferenceImpl::TransformEarthCenteredEarthFixedPositionToUnityWorld(
+CesiumGeoreferenceImpl::TransformEarthCenteredEarthFixedPositionToUnity(
     const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
     DotNet::Unity::Mathematics::double3 earthCenteredEarthFixed) {
   const LocalHorizontalCoordinateSystem& coordinateSystem =
@@ -179,45 +153,18 @@ CesiumGeoreferenceImpl::TransformEarthCenteredEarthFixedPositionToUnityWorld(
 }
 
 DotNet::Unity::Mathematics::double3
-CesiumGeoreferenceImpl::TransformEarthCenteredEarthFixedPositionToUnityLocal(
+CesiumGeoreferenceImpl::TransformUnityDirectionToEarthCenteredEarthFixed(
     const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
-    const DotNet::UnityEngine::Transform& parent,
-    DotNet::Unity::Mathematics::double3 earthCenteredEarthFixed) {
-  // Transform ECEF to Unity world
-  DotNet::Unity::Mathematics::double3 worldPosition =
-      this->TransformEarthCenteredEarthFixedPositionToUnityWorld(
-          georeference,
-          earthCenteredEarthFixed);
-  if (parent == nullptr) {
-    // World and Local are equivalent
-    return worldPosition;
-  } else {
-    // Transform Unity World to Unity Local
-    glm::dvec4 position =
-        UnityTransforms::fromUnity(parent.worldToLocalMatrix()) *
-        glm::dvec4(worldPosition.x, worldPosition.y, worldPosition.z, 1.0);
-    return DotNet::Unity::Mathematics::double3{
-        position.x,
-        position.y,
-        position.z};
-  }
-}
-
-DotNet::Unity::Mathematics::double3
-CesiumGeoreferenceImpl::TransformUnityWorldDirectionToEarthCenteredEarthFixed(
-    const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
-    DotNet::Unity::Mathematics::double3 unityWorldDirection) {
+    DotNet::Unity::Mathematics::double3 unityDirection) {
   const LocalHorizontalCoordinateSystem& coordinateSystem =
       this->getCoordinateSystem();
-  glm::dvec3 result = coordinateSystem.localDirectionToEcef(glm::dvec3(
-      unityWorldDirection.x,
-      unityWorldDirection.y,
-      unityWorldDirection.z));
+  glm::dvec3 result = coordinateSystem.localDirectionToEcef(
+      glm::dvec3(unityDirection.x, unityDirection.y, unityDirection.z));
   return DotNet::Unity::Mathematics::double3{result.x, result.y, result.z};
 }
 
 DotNet::Unity::Mathematics::double3
-CesiumGeoreferenceImpl::TransformEarthCenteredEarthFixedDirectionToUnityWorld(
+CesiumGeoreferenceImpl::TransformEarthCenteredEarthFixedDirectionToUnity(
     const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
     DotNet::Unity::Mathematics::double3 earthCenteredEarthFixedDirection) {
   const LocalHorizontalCoordinateSystem& coordinateSystem =

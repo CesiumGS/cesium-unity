@@ -49,14 +49,6 @@ namespace CesiumForUnity
             this._ecefX = this.serializedObject.FindProperty("_ecefX");
             this._ecefY = this.serializedObject.FindProperty("_ecefY");
             this._ecefZ = this.serializedObject.FindProperty("_ecefZ");
-
-            // Hide the Move, Rotate, and Resize tools in the SceneView.
-            Tools.hidden = true;
-        }
-
-        private void OnDisable()
-        {
-            Tools.hidden = false;
         }
 
         public override void OnInspectorGUI()

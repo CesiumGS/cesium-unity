@@ -41,13 +41,9 @@ namespace CesiumForUnity
         private SerializedProperty _ecefY;
         private SerializedProperty _ecefZ;
 
-        private SerializedProperty _unityWorldX;
-        private SerializedProperty _unityWorldY;
-        private SerializedProperty _unityWorldZ;
-
-        private SerializedProperty _unityLocalX;
-        private SerializedProperty _unityLocalY;
-        private SerializedProperty _unityLocalZ;
+        private SerializedProperty _unityX;
+        private SerializedProperty _unityY;
+        private SerializedProperty _unityZ;
 
         private void OnEnable()
         {
@@ -68,13 +64,9 @@ namespace CesiumForUnity
             this._ecefY = this.serializedObject.FindProperty("_ecefY");
             this._ecefZ = this.serializedObject.FindProperty("_ecefZ");
 
-            this._unityWorldX = this.serializedObject.FindProperty("_unityWorldX");
-            this._unityWorldY = this.serializedObject.FindProperty("_unityWorldY");
-            this._unityWorldZ = this.serializedObject.FindProperty("_unityWorldZ");
-
-            this._unityLocalX = this.serializedObject.FindProperty("_unityLocalX");
-            this._unityLocalY = this.serializedObject.FindProperty("_unityLocalY");
-            this._unityLocalZ = this.serializedObject.FindProperty("_unityLocalZ");
+            this._unityX = this.serializedObject.FindProperty("_unityX");
+            this._unityY = this.serializedObject.FindProperty("_unityY");
+            this._unityZ = this.serializedObject.FindProperty("_unityZ");
         }
 
         public override void OnInspectorGUI()
@@ -87,9 +79,7 @@ namespace CesiumForUnity
             EditorGUILayout.Space(5);
             DrawEarthCenteredEarthFixedProperties();
             EditorGUILayout.Space(5);
-            DrawUnityWorldPositionProperties();
-            EditorGUILayout.Space(5);
-            DrawUnityLocalPositionProperties();
+            DrawUnityPositionProperties();
 
             // ApplyModifiedProperties() is called within the Draw____Properties
             // functions themselves. Otherwise, calling it here would override
@@ -261,71 +251,32 @@ namespace CesiumForUnity
             EditorGUI.EndDisabledGroup();
         }
 
-        private void DrawUnityWorldPositionProperties()
+        private void DrawUnityPositionProperties()
         {
             EditorGUI.BeginDisabledGroup(
-                this.positionAuthority != CesiumGlobeAnchorPositionAuthority.UnityWorldCoordinates);
-
-            GUILayout.Label("Position (Unity World Coordinates)", EditorStyles.boldLabel);
-
-            EditorGUI.BeginChangeCheck();
-
-            GUIContent unityXContent = new GUIContent(
-                "Unity World X",
-                "The Unity world X coordinate of this game object.");
-            EditorGUILayout.PropertyField(this._unityWorldX, unityXContent);
-
-            GUIContent unityYContent = new GUIContent(
-                "Unity World Y",
-                "The Unity world Y coordinate of this game object.");
-            EditorGUILayout.PropertyField(this._unityWorldY, unityYContent);
-
-            GUIContent unityZContent = new GUIContent(
-                "Unity World Z",
-                "The Unity world Z coordinate of this game object.");
-            EditorGUILayout.PropertyField(this._unityWorldZ, unityZContent);
-
-            if (EditorGUI.EndChangeCheck())
-            {
-                this.serializedObject.ApplyModifiedProperties();
-
-                // Manually trigger an update of the position of this object
-                // and its coordinates in other systems.
-                this._globeAnchor.SetPositionUnityWorld(
-                    this._unityWorldX.doubleValue,
-                    this._unityWorldY.doubleValue,
-                    this._unityWorldZ.doubleValue);
-            }
-
-            EditorGUI.EndDisabledGroup();
-        }
-
-        private void DrawUnityLocalPositionProperties()
-        {
-            EditorGUI.BeginDisabledGroup(
-                this.positionAuthority != CesiumGlobeAnchorPositionAuthority.UnityLocalCoordinates);
+                this.positionAuthority != CesiumGlobeAnchorPositionAuthority.UnityCoordinates);
 
             GUILayout.Label("Position (Unity Local Coordinates)", EditorStyles.boldLabel);
 
             EditorGUI.BeginChangeCheck();
 
             GUIContent unityXContent = new GUIContent(
-                "Unity Local X",
-                "The Unity local X coordinate of this game object. This is the same as the Transform's " +
+                "Unity X",
+                "The Unity X coordinate of this game object. This is the same as the Transform's " +
                 "X coordinate but expressed in 64-bit (double) precision.");
-            EditorGUILayout.PropertyField(this._unityLocalX, unityXContent);
+            EditorGUILayout.PropertyField(this._unityX, unityXContent);
 
             GUIContent unityYContent = new GUIContent(
-                "Unity Local Y",
-                "The Unity local Y coordinate of this game object. This is the same as the Transform's " +
+                "Unity Y",
+                "The Unity Y coordinate of this game object. This is the same as the Transform's " +
                 "Y coordinate but expressed in 64-bit (double) precision.");
-            EditorGUILayout.PropertyField(this._unityLocalY, unityYContent);
+            EditorGUILayout.PropertyField(this._unityY, unityYContent);
 
             GUIContent unityZContent = new GUIContent(
-                "Unity Local Z",
-                "The Unity local Z coordinate of this game object. This is the same as the Transform's " +
+                "Unity Z",
+                "The Unity Z coordinate of this game object. This is the same as the Transform's " +
                 "Z coordinate but expressed in 64-bit (double) precision.");
-            EditorGUILayout.PropertyField(this._unityLocalZ, unityZContent);
+            EditorGUILayout.PropertyField(this._unityZ, unityZContent);
 
             if (EditorGUI.EndChangeCheck())
             {
@@ -333,10 +284,10 @@ namespace CesiumForUnity
 
                 // Manually trigger an update of the position of this object
                 // and its coordinates in other systems.
-                this._globeAnchor.SetPositionUnityLocal(
-                    this._unityLocalX.doubleValue,
-                    this._unityLocalY.doubleValue,
-                    this._unityLocalZ.doubleValue);
+                this._globeAnchor.SetPositionUnity(
+                    this._unityX.doubleValue,
+                    this._unityY.doubleValue,
+                    this._unityZ.doubleValue);
             }
 
             EditorGUI.EndDisabledGroup();

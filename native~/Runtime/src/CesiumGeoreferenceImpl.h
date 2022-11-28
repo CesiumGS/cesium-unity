@@ -27,29 +27,19 @@ public:
       const DotNet::CesiumForUnity::CesiumGeoreference& georeference);
 
   DotNet::Unity::Mathematics::double3
-  TransformUnityWorldPositionToEarthCenteredEarthFixed(
+  TransformUnityPositionToEarthCenteredEarthFixed(
       const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
-      DotNet::Unity::Mathematics::double3 unityWorldPosition);
+      DotNet::Unity::Mathematics::double3 unityPosition);
   DotNet::Unity::Mathematics::double3
-  TransformUnityLocalPositionToEarthCenteredEarthFixed(
-      const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
-      const DotNet::UnityEngine::Transform& parent,
-      DotNet::Unity::Mathematics::double3 unityLocalPosition);
-  DotNet::Unity::Mathematics::double3
-  TransformEarthCenteredEarthFixedPositionToUnityWorld(
+  TransformEarthCenteredEarthFixedPositionToUnity(
       const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
       DotNet::Unity::Mathematics::double3 earthCenteredEarthFixed);
   DotNet::Unity::Mathematics::double3
-  TransformEarthCenteredEarthFixedPositionToUnityLocal(
+  TransformUnityDirectionToEarthCenteredEarthFixed(
       const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
-      const DotNet::UnityEngine::Transform& parent,
-      DotNet::Unity::Mathematics::double3 earthCenteredEarthFixed);
+      DotNet::Unity::Mathematics::double3 unityDirection);
   DotNet::Unity::Mathematics::double3
-  TransformUnityWorldDirectionToEarthCenteredEarthFixed(
-      const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
-      DotNet::Unity::Mathematics::double3 unityWorldDirection);
-  DotNet::Unity::Mathematics::double3
-  TransformEarthCenteredEarthFixedDirectionToUnityWorld(
+  TransformEarthCenteredEarthFixedDirectionToUnity(
       const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
       DotNet::Unity::Mathematics::double3 earthCenteredEarthFixedDirection);
 

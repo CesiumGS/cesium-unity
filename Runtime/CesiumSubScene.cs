@@ -4,6 +4,18 @@ using UnityEngine;
 
 namespace CesiumForUnity
 {
+    /// <summary>
+    /// A sub-scene with its own georeference origin. When a game object with a <see cref="CesiumOriginShift"/>
+    /// comes close to a sub-scene, that sub-scene is activated and all other sub-scenes are deactivated.
+    /// This allows relatively normal Unity scenes to be designed at multiple locations on the globe.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// When determining the distance to a sub-scene, only the <see cref="CesiumGeoreference"/>'s Transform
+    /// is considered. The Transform associated with the sub-scene is ignored. The sub-scene transform _will_
+    /// affect the transformation of the objects inside it once activated, however.
+    /// </para>
+    /// </remarks>
     [ExecuteInEditMode]
     public class CesiumSubScene : MonoBehaviour
     {
@@ -120,23 +132,6 @@ namespace CesiumForUnity
             }
         }
 
-        // The Unity world-space position that the coordinates currently correspond to.
-        // This is used to visualize the sub-scene activation radius.
-        private Vector3 _unityWorldPosition;
-
-        public Vector3 unityWorldPosition
-        {
-            get => this._unityWorldPosition;
-        }
-
-        private void OnValidate()
-        {
-            this.transform.position = Vector3.zero;
-            this.transform.rotation = Quaternion.identity;
-            this.transform.localScale = new Vector3(1, 1, 1);
-            this.transform.hideFlags = HideFlags.NotEditable | HideFlags.HideInInspector;
-        }
-
         public void SetOriginEarthCenteredEarthFixed(double x, double y, double z)
         {
             this._ecefX = x;
@@ -222,14 +217,6 @@ namespace CesiumForUnity
                         this._longitude,
                         this._latitude, 
                         this._height);
-
-                double3 unityWorldPosition =
-                    georeference.TransformEarthCenteredEarthFixedPositionToUnityWorld(ecefPosition);
-
-                this._unityWorldPosition = new Vector3(
-                    (float)unityWorldPosition.x,
-                    (float)unityWorldPosition.y,
-                    (float)unityWorldPosition.z);
             }
         }
 
@@ -240,7 +227,7 @@ namespace CesiumForUnity
             {
                 // TODO: would be nice to draw a better wireframe sphere.
                 Gizmos.color = Color.blue;
-                Gizmos.DrawWireSphere(this._unityWorldPosition, (float)this._activationRadius);
+                Gizmos.DrawWireSphere(this.transform.position, (float)this._activationRadius);
             }
         }
         #endif
