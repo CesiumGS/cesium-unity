@@ -67,6 +67,12 @@ namespace CesiumForUnity
     /// <see cref="adjustOrientationForGlobeWhenMoving"/> is enabled, the orientation of the game object will
     /// also be updated in order to keep the object upright.
     /// </para>
+    /// <para>
+    /// In most cases, the Transform of the ancestors of the GameObject that contains this component should
+    /// be an identity transform: 0 position, 0 rotation, 1 scale. Otherwise, this globe anchor's position will
+    /// be misaligned with other globe-aligned objects. However, it is sometimes useful to purposely offset an
+    /// object or group of objects.
+    /// </para>
     /// </remarks>
     [ExecuteInEditMode]
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumGlobeAnchorImpl", "CesiumGlobeAnchorImpl.h")]
@@ -77,6 +83,30 @@ namespace CesiumForUnity
         [SerializeField]
         private bool _adjustOrientationForGlobeWhenMoving = true;
 
+        /// <summary>
+        /// Whether to adjust the game object's orientation based on globe curvature as the
+        /// game object moves.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The Earth is not flat, so as we move across its surface, the direction of
+        /// "up" changes. If we ignore this fact and leave an object's orientation
+        /// unchanged as it moves over the globe surface, the object will become
+        /// increasingly tilted and eventually be completely upside-down when we arrive
+        /// at the opposite side of the globe.
+        /// </para>
+        /// <para>
+        /// When this setting is enabled, this component will automatically apply a
+        /// rotation to the game object to account for globe curvature any time the game
+        /// object's position on the globe changes.
+        /// </para>
+        /// <para>
+        /// This property should usually be enabled, but it may be useful to disable it
+        /// when your application already accounts for globe curvature itself when it
+        /// updates a game object's position and orientation, because in that case the
+        /// game object would be over-rotated.
+        /// </para>
+        /// </remarks>
         public bool adjustOrientationForGlobeWhenMoving
         {
             get => this._adjustOrientationForGlobeWhenMoving;
@@ -86,6 +116,23 @@ namespace CesiumForUnity
         [SerializeField]
         private bool _detectTransformChanges = true;
 
+        /// <summary>
+        /// Whether to automatically detect changes in the game object's <code>Transform</code>
+        /// and update the precise globe coordinates accordingly.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Setting this property to true runs a coroutine to poll for an update to the <code>Transform</code>
+        /// so that it can be reflected in the precise coordinates. When this is property is false,
+        /// the coroutine and polling are not necessary, but the precise coordinates may become out of sync
+        /// with the <code>Transform</code>.
+        /// </para>
+        /// <para>
+        /// When this is false, you can still directly set the precise coordinates, and the <code>Transform</code>
+        /// will update accordingly. You can also call <see cref="Sync"/> after setting the <code>Transform</code>
+        /// to manually update the precise coordinates.
+        /// </para>
+        /// </remarks>
         public bool detectTransformChanges
         {
             get => this._detectTransformChanges;
@@ -99,6 +146,9 @@ namespace CesiumForUnity
         [SerializeField]
         private CesiumGlobeAnchorPositionAuthority _positionAuthority = CesiumGlobeAnchorPositionAuthority.None;
 
+        /// <summary>
+        /// Identifies the set of coordinates that authoritatively define the position of this object.
+        /// </summary>
         public CesiumGlobeAnchorPositionAuthority positionAuthority
         {
             get => this._positionAuthority;
@@ -113,6 +163,12 @@ namespace CesiumForUnity
         [SerializeField]
         private double _latitude = 0.0;
 
+        /// <summary>
+        /// The latitude in degrees, in the range -90 to 90. This property is ignored
+        /// unless <see cref="positionAuthority"/> is
+        /// <see cref="CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight"/>.
+        /// Setting this property changes the <see cref="positionAuthority"/> accordingly.
+        /// </summary>
         public double latitude
         {
             get => this._latitude;
@@ -126,6 +182,12 @@ namespace CesiumForUnity
         [SerializeField]
         private double _longitude = 0.0;
 
+        /// <summary>
+        /// The longitude in degrees, in the range -180 to 180. This property is ignored
+        /// unless <see cref="positionAuthority"/> is
+        /// <see cref="CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight"/>.
+        /// Setting this property changes the <see cref="positionAuthority"/> accordingly.
+        /// </summary>
         public double longitude
         {
             get => this._longitude;
@@ -139,6 +201,14 @@ namespace CesiumForUnity
         [SerializeField]
         private double _height = 0.0;
 
+        /// <summary>
+        /// The height in meters above the ellipsoid. Do not confuse this with a geoid height
+        /// or height above mean sea level, which can be tens of meters higher or lower
+        /// depending on where in the world the object is located. This property is ignored
+        /// unless <see cref="positionAuthority"/> is
+        /// <see cref="CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight"/>.
+        /// Setting this property changes the <see cref="positionAuthority"/> accordingly.
+        /// </summary>
         public double height
         {
             get => this._height;
@@ -152,6 +222,12 @@ namespace CesiumForUnity
         [SerializeField]
         private double _ecefX = 6378137.0;
 
+        /// <summary>
+        /// The Earth-Centered, Earth-Fixed X coordinate in meters. This property is ignored
+        /// unless <see cref="positionAuthority"/> is
+        /// <see cref="CesiumGlobeAnchorPositionAuthority.EarthCenteredEarthFixed"/>.
+        /// Setting this property changes the <see cref="positionAuthority"/> accordingly.
+        /// </summary>
         public double ecefX
         {
             get => this._ecefX;
@@ -165,6 +241,12 @@ namespace CesiumForUnity
         [SerializeField]
         private double _ecefY = 0.0;
 
+        /// <summary>
+        /// The Earth-Centered, Earth-Fixed Y coordinate in meters. This property is ignored
+        /// unless <see cref="positionAuthority"/> is
+        /// <see cref="CesiumGlobeAnchorPositionAuthority.EarthCenteredEarthFixed"/>.
+        /// Setting this property changes the <see cref="positionAuthority"/> accordingly.
+        /// </summary>
         public double ecefY
         {
             get => this._ecefY;
@@ -178,6 +260,12 @@ namespace CesiumForUnity
         [SerializeField]
         private double _ecefZ = 0.0;
 
+        /// <summary>
+        /// The Earth-Centered, Earth-Fixed Z coordinate in meters. This property is ignored
+        /// unless <see cref="positionAuthority"/> is
+        /// <see cref="CesiumGlobeAnchorPositionAuthority.EarthCenteredEarthFixed"/>.
+        /// Setting this property changes the <see cref="positionAuthority"/> accordingly.
+        /// </summary>
         public double ecefZ
         {
             get => this._ecefZ;
@@ -191,6 +279,11 @@ namespace CesiumForUnity
         [SerializeField]
         private double _unityX = 0.0;
 
+        /// <summary>
+        /// The Unity local X coordinate, the same as the <code>position.x</code> coordinate on
+        /// the <code>Transform</code> but expressed in double-precision.
+        /// Setting this property changes the <see cref="positionAuthority"/> accordingly.
+        /// </summary>
         public double unityX
         {
             get => this._unityX;
@@ -204,6 +297,11 @@ namespace CesiumForUnity
         [SerializeField]
         private double _unityY = 0.0;
 
+        /// <summary>
+        /// The Unity local Y coordinate, the same as the <code>position.y</code> coordinate on
+        /// the <code>Transform</code> but expressed in double-precision.
+        /// Setting this property changes the <see cref="positionAuthority"/> accordingly.
+        /// </summary>
         public double unityY
         {
             get => this._unityY;
@@ -217,6 +315,11 @@ namespace CesiumForUnity
         [SerializeField]
         private double _unityZ = 0.0;
 
+        /// <summary>
+        /// The Unity local Z coordinate, the same as the <code>position.z</code> coordinate on
+        /// the <code>Transform</code> but expressed in double-precision.
+        /// Setting this property changes the <see cref="positionAuthority"/> accordingly.
+        /// </summary>
         public double unityZ
         {
             get => this._unityZ;
@@ -232,7 +335,8 @@ namespace CesiumForUnity
         #region Set Helpers
 
         /// <summary>
-        /// Sets the position of this object to a particular longitude, latitude, and height.
+        /// Sets the position of this object to a particular <see cref="longitude"/>,
+        /// <see cref="latitude"/>, and <see cref="height"/>.
         /// </summary>
         /// <remarks>
         /// Calling this method is more efficient than setting the properties individually.
@@ -253,8 +357,8 @@ namespace CesiumForUnity
         }
 
         /// <summary>
-        /// Sets the position of this object to particular X, Y, Z coordinates in the
-        /// Earth-Centered, Earth-Fixed (ECEF) frame.
+        /// Sets the position of this object to particular <see cref="ecefX"/>, <see cref="ecefY"/>,
+        /// <see cref="ecefZ"/> coordinates in the Earth-Centered, Earth-Fixed (ECEF) frame.
         /// </summary>
         /// <remarks>
         /// Calling this method is more efficient than setting the properties individually.
@@ -271,11 +375,11 @@ namespace CesiumForUnity
         }
 
         /// <summary>
-        /// Sets the position of this object to particular X, Y, Z coordinates in the
-        /// Unity coordinate system. The position should generally not be a Unity _world_ position,
-        /// but rather a position expressed in some parent GameObject's reference frame as defined
-        /// by its Transform. This way, the chain of Unity transforms places and orients the "globe" in the
-        /// Unity world.
+        /// Sets the position of this object to particular <see cref="unityX"/>, <see cref="unityY"/>,
+        /// <see cref="unityZ"/> coordinates in the Unity coordinate system. The position should
+        /// generally not be a Unity _world_ position, but rather a position expressed in some parent
+        /// GameObject's reference frame as defined by its Transform. This way, the chain of Unity
+        /// transforms places and orients the "globe" in the Unity world.
         /// </summary>
         /// <remarks>
         /// Calling this method is more efficient than setting the properties individually.
@@ -369,7 +473,7 @@ namespace CesiumForUnity
 
 #region Coroutines
 
-        public void StartOrStopDetectingTransformChanges()
+        private void StartOrStopDetectingTransformChanges()
         {
             this.StopCoroutine("DetectTransformChanges");
 
