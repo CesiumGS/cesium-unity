@@ -833,7 +833,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
                 .AddComponent<CesiumForUnity::CesiumGlobeAnchor>();
         anchor.detectTransformChanges(false);
         anchor.adjustOrientationForGlobeWhenMoving(false);
-        anchor.SetPositionUnityLocal(
+        anchor.SetPositionUnity(
             translation.x,
             translation.y,
             translation.z);

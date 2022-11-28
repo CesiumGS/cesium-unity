@@ -20,23 +20,19 @@ namespace CesiumForUnity
             CesiumGeoreference georeference = this.GetComponentInParent<CesiumGeoreference>();
 
             CesiumGlobeAnchor anchor = this.GetComponent<CesiumGlobeAnchor>();
-            if (anchor != null && anchor.positionAuthority != CesiumGlobeAnchorPositionAuthority.None)
-            {
-                this.UpdateFromEcef(georeference, new double3(
-                    anchor.ecefX,
-                    anchor.ecefY,
-                    anchor.ecefZ
-                ));
-                return;
-            }
 
-            Vector3 position = this.transform.position;
-            double3 ecef = georeference.TransformUnityWorldPositionToEarthCenteredEarthFixed(new double3(
-                position.x,
-                position.y,
-                position.z
+            // The RequireComponent attribute should ensure this assertion passes.
+            Debug.Assert(anchor != null);
+
+            // The anchor's ECEF properties must be valid.
+            if (anchor.positionAuthority == CesiumGlobeAnchorPositionAuthority.None)
+                anchor.Sync();
+
+            this.UpdateFromEcef(georeference, new double3(
+                anchor.ecefX,
+                anchor.ecefY,
+                anchor.ecefZ
             ));
-            this.UpdateFromEcef(georeference, ecef);
         }
 
         private List<CesiumSubScene> _sublevelsScratch = new List<CesiumSubScene>();
