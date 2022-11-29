@@ -122,7 +122,7 @@ namespace Reinterop
             this.AddProperty(property, containingType);
         }
 
-        private TypeToGenerate AddType(ITypeSymbol type)
+        public TypeToGenerate AddType(ITypeSymbol type)
         {
             // Drop the nullability ("?") from the type if present.
             if (type.NullableAnnotation == NullableAnnotation.Annotated && type.OriginalDefinition != null)
@@ -160,23 +160,28 @@ namespace Reinterop
                         this.AddMethod(invokeMethod);
                 }
 
+                bool isBlittableStruct = Interop.IsBlittableStruct(this._context, type);
+
                 // If this type has overloaded operator==, generate wrappers for it, because we need it
-                // to even compare to null.
-                IEnumerable<ISymbol> equalityOperators = CSharpTypeUtility.FindMembers(type, "op_Equality");
-                foreach (ISymbol equalityOperator in equalityOperators)
+                // to even compare to null. But we don't need to compare blittable structs to null.
+                if (!isBlittableStruct)
                 {
-                    if (equalityOperator is IMethodSymbol method)
-                        AddMethod(method);
-                }
-                IEnumerable<ISymbol> inequalityOperators = CSharpTypeUtility.FindMembers(type, "op_Inequality");
-                foreach (ISymbol inequalityOperator in inequalityOperators)
-                {
-                    if (inequalityOperator is IMethodSymbol method)
-                        AddMethod(method);
+                    IEnumerable<ISymbol> equalityOperators = CSharpTypeUtility.FindMembers(type, "op_Equality");
+                    foreach (ISymbol equalityOperator in equalityOperators)
+                    {
+                        if (equalityOperator is IMethodSymbol method)
+                            AddMethod(method);
+                    }
+                    IEnumerable<ISymbol> inequalityOperators = CSharpTypeUtility.FindMembers(type, "op_Inequality");
+                    foreach (ISymbol inequalityOperator in inequalityOperators)
+                    {
+                        if (inequalityOperator is IMethodSymbol method)
+                            AddMethod(method);
+                    }
                 }
 
                 // If this is a blittable struct, we need to generate all the field types, too.
-                if (type.TypeKind != TypeKind.Enum && Interop.IsBlittableStruct(this._context, type))
+                if (type.TypeKind != TypeKind.Enum && isBlittableStruct)
                 {
                     ImmutableArray<ISymbol> members = type.GetMembers();
                     foreach (ISymbol member in members)
@@ -224,7 +229,7 @@ namespace Reinterop
             return generationItem;
         }
 
-        private TypeToGenerate AddMethod(IMethodSymbol symbol)
+        public TypeToGenerate AddMethod(IMethodSymbol symbol)
         {
             TypeToGenerate item = this.AddType(symbol.ContainingType);
             item.Methods.Add(symbol);
@@ -240,7 +245,7 @@ namespace Reinterop
             return item;
         }
 
-        private TypeToGenerate AddProperty(IPropertySymbol symbol, ITypeSymbol? containingType = null)
+        public TypeToGenerate AddProperty(IPropertySymbol symbol, ITypeSymbol? containingType = null)
         {
             if (containingType == null)
                 containingType = symbol.ContainingType;
@@ -254,7 +259,7 @@ namespace Reinterop
             return item;
         }
 
-        private void AddEvent(IEventSymbol symbol)
+        public void AddEvent(IEventSymbol symbol)
         {
             TypeToGenerate item = this.AddType(symbol.ContainingType);
             item.Events.Add(symbol);
@@ -263,7 +268,7 @@ namespace Reinterop
             this.AddType(symbol.Type);
         }
 
-        private TypeToGenerate AddField(IFieldSymbol symbol)
+        public TypeToGenerate AddField(IFieldSymbol symbol)
         {
             TypeToGenerate item = this.AddType(symbol.ContainingType);
             item.Fields.Add(symbol);
@@ -274,7 +279,7 @@ namespace Reinterop
             return item;
         }
 
-        private TypeToGenerate AddConstructor(IMethodSymbol symbol)
+        public TypeToGenerate AddConstructor(IMethodSymbol symbol)
         {
             TypeToGenerate item = this.AddType(symbol.ContainingType);
             item.Constructors.Add(symbol);

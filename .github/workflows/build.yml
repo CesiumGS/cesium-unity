@@ -1,7 +1,19 @@
 name: Cesium for Unity
 on: [push]
 jobs:
+  QuickChecks:
+    name: "Quick Checks"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Install clang-format
+        run: pip install clang-format
+      - name: Check source formatting
+        run: |
+          find native~/Runtime native~/Editor native~/Shared \( -iname '*.cpp' -o -iname '*.h' \) -print0 | xargs -0 clang-format --dry-run -Werror
   Windows:
+    needs: [QuickChecks]
     runs-on: windows-latest
     # Only allow a single Windows build at a time, for Unity licensing reasons
     concurrency: windows
@@ -10,7 +22,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: recursive
-        #   fetch-depth: 0 # so that `git describe` works.
       - name: Install wget
         run: choco install wget --no-progress
       - name: Install Unity Hub
@@ -45,6 +56,15 @@ jobs:
         run: |
           mkdir -p $ENV:PROGRAMDATA/Unity/config
           '{"licensingServiceBaseUrl": "http://localhost:12331","enableEntitlementLicensing": true,"clientConnectTimeoutSec": 60,"clientHandshakeTimeoutSec": 120}' > $ENV:PROGRAMDATA/Unity/config/services-config.json
+      - name: Update the version in Cesium.cpp
+        run: |
+          $VERSION = (Get-Content -path package.json | ConvertFrom-Json).version
+          $COMMIT = $(git rev-parse --short HEAD)
+          ((Get-Content -path native~/Shared/src/Cesium.cpp -Raw) -replace 'Cesium::version = "Development Build"',"Cesium::version = ""$VERSION""") | Set-Content -Path native~/Shared/src/Cesium.cpp
+          ((Get-Content -path native~/Shared/src/Cesium.cpp -Raw) -replace 'Cesium::commit = "Unknown"',"Cesium::commit = ""$COMMIT""") | Set-Content -Path native~/Shared/src/Cesium.cpp
+          # Sanity check that the replacements happened
+          if (-Not ((Get-Content -path native~/Shared/src/Cesium.cpp -Raw) -match "$COMMIT")) { throw "Commit does not exist in file after replacement" }
+          if (-Not ((Get-Content -path native~/Shared/src/Cesium.cpp -Raw) -match "$VERSION")) { throw "Version does not exist in file after replacement" }
       - name: Move cesium-unity Repo Under Empty Project
         run: |
           mkdir -p \cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
@@ -65,6 +85,7 @@ jobs:
           name: Windows Package
           path: D:\cesium\CesiumForUnityBuildProject\*.tgz
   MacOS:
+    needs: [QuickChecks]
     runs-on: macos-latest
     # Only allow a single macOS build at a time, for Unity licensing reasons
     concurrency: mac
@@ -73,7 +94,8 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: recursive
-        #   fetch-depth: 0 # so that `git describe` works.
+      - name: Install jq
+        run: brew install jq
       - name: Install Unity Hub
         run: |
           wget --quiet https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.dmg
@@ -113,6 +135,15 @@ jobs:
           wget http://127.0.0.1:12331/v1/admin/status
           cat status
           rm status
+      - name: Update the version in Cesium.cpp
+        run: |
+          export VERSION=$(jq -r ".version" package.json)
+          export COMMIT=$(git rev-parse --short HEAD)
+          sed -i '' 's/Cesium::version = "Development Build"/Cesium::version = "'$VERSION'"/g' native~/Shared/src/Cesium.cpp
+          sed -i '' 's/Cesium::commit = "Unknown"/Cesium::commit = "'$COMMIT'"/g' native~/Shared/src/Cesium.cpp
+          # Sanity check that the replacements happened
+          grep $VERSION native~/Shared/src/Cesium.cpp
+          grep $COMMIT native~/Shared/src/Cesium.cpp
       - name: Move cesium-unity Repo Under Empty Project
         run: |
           mkdir -p ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
@@ -132,3 +163,87 @@ jobs:
         with:
           name: macOS Package
           path: ~/cesium/CesiumForUnityBuildProject/*.tgz
+  Combine:
+    runs-on: ubuntu-latest
+    needs: [Windows, MacOS]
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Install jq
+        run: sudo apt install jq
+      - name: Download macOS build
+        uses: actions/download-artifact@v3
+        with:
+          name: macOS Package
+          path: combine/macos
+      - name: Extract macOS build
+        run: |
+          cd combine/macos
+          tar xzf *.tgz
+          rm *.tgz
+      - name: Download Windows build
+        uses: actions/download-artifact@v3
+        with:
+          name: Windows Package
+          path: combine/windows
+      - name: Extract Windows build
+        run: |
+          cd combine/windows
+          tar xzf *.tgz
+          rm *.tgz
+      - name: Create combined package
+        run: |
+          mkdir -p combine/merged
+          cd combine/merged
+          
+          # Copy the everything. For files that exist in multiple packages, the Windows one will win.
+          cp -r ../macos/* .
+          cp -r ../windows/* .
+          
+          # Remove the generated C# files
+          for file in $(find package/Runtime/generated -name '*.cs');
+          do
+            rm $file
+          done;
+          for file in $(find package/Editor/generated -name '*.cs');
+          do
+            rm $file
+          done;
+          
+          # Merge the generated files by concatentation
+          cd ../macos
+          for file in $(find package/Runtime/generated -name '*.cs');
+          do
+            mkdir -p $(dirname "../merged/$file")
+            cp "$file" "../merged/$file"
+          done;
+          for file in $(find package/Editor/generated -name '*.cs');
+          do
+            mkdir -p $(dirname "../merged/$file")
+            cp "$file" "../merged/$file"
+          done;
+          cd ../windows
+          for file in $(find package/Runtime/generated -name '*.cs');
+          do
+            echo Merging $file
+            mkdir -p $(dirname "../merged/$file")
+            cat "$file" >> "../merged/$file"
+          done;
+          for file in $(find package/Editor/generated -name '*.cs');
+          do
+            echo Merging $file
+            mkdir -p $(dirname "../merged/$file")
+            cat "$file" >> "../merged/$file"
+          done;
+          
+          # Create the package
+          cd ../merged
+          export NAME=$(jq -r ".name" $GITHUB_WORKSPACE/package.json)
+          export VERSION=$(jq -r ".version" $GITHUB_WORKSPACE/package.json)
+          tar czf $NAME-$VERSION.tgz package
+      - name: Publish combined package
+        if: ${{ success() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: Combined Package
+          path: combine/merged/*.tgz

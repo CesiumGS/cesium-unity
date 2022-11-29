@@ -10,8 +10,8 @@
 #include <DotNet/CesiumForUnity/CesiumIonSession.h>
 #include <DotNet/CesiumForUnity/IonAssetDetails.h>
 #include <DotNet/CesiumForUnity/IonAssetsTreeView.h>
-#include <DotNet/System/StringComparison.h>
 #include <DotNet/System/Object.h>
+#include <DotNet/System/StringComparison.h>
 #include <DotNet/UnityEditor/EditorApplication.h>
 #include <DotNet/UnityEditor/IMGUI/Controls/MultiColumnHeader.h>
 #include <DotNet/UnityEditor/Selection.h>

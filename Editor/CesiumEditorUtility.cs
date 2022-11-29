@@ -1,4 +1,5 @@
 using System;
+using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
 
@@ -83,7 +84,14 @@ namespace CesiumForUnity
 
         static void UpdateIonSession()
         {
-            CesiumIonSession.Ion().Tick();
+            try
+            {
+                CesiumIonSession.Ion().Tick();
+            }
+            catch (DllNotFoundException)
+            {
+                // Don't let a missing / out-of-sync native DLL crash everything.
+            }
         }
 
         static void
@@ -142,7 +150,7 @@ namespace CesiumForUnity
             }
         }
 
-        public static Cesium3DTileset? FindFirstTileset()
+        public static Cesium3DTileset FindFirstTileset()
         {
             Cesium3DTileset[] tilesets =
                 UnityEngine.Object.FindObjectsOfType<Cesium3DTileset>(true);
@@ -158,7 +166,7 @@ namespace CesiumForUnity
             return null;
         }
 
-        public static Cesium3DTileset? FindFirstTilesetWithAssetID(long assetID)
+        public static Cesium3DTileset FindFirstTilesetWithAssetID(long assetID)
         {
             Cesium3DTileset[] tilesets =
                 UnityEngine.Object.FindObjectsOfType<Cesium3DTileset>(true);
@@ -174,7 +182,7 @@ namespace CesiumForUnity
             return null;
         }
 
-        public static CesiumGeoreference? FindFirstGeoreference()
+        public static CesiumGeoreference FindFirstGeoreference()
         {
             CesiumGeoreference[] georeferences =
                UnityEngine.Object.FindObjectsOfType<CesiumGeoreference>(true);
@@ -193,7 +201,7 @@ namespace CesiumForUnity
         public static Cesium3DTileset CreateTileset(string name, long assetID)
         {
             // Find a georeference in the scene, or create one if none exists.
-            CesiumGeoreference? georeference = CesiumEditorUtility.FindFirstGeoreference();
+            CesiumGeoreference georeference = CesiumEditorUtility.FindFirstGeoreference();
             if (georeference == null)
             {
                 GameObject georeferenceGameObject =
@@ -231,19 +239,22 @@ namespace CesiumForUnity
             return ionOverlay;
         }
 
-        private static CesiumVector3
+        private static double3
         TransformCameraPositionToEarthCenteredEarthFixed(CesiumGeoreference georeference)
         {
             Camera camera = SceneView.lastActiveSceneView.camera;
-            Vector3 position = camera.transform.position;
-            CesiumVector3 positionUnity = new CesiumVector3()
-            {
-                x = position.x,
-                y = position.y,
-                z = position.z
-            };
 
-            return georeference.TransformUnityWorldPositionToEarthCenteredEarthFixed(
+            // Find the camera position in the Georeference's reference frame.
+            Vector3 position = camera.transform.position;
+            position = georeference.transform.worldToLocalMatrix * new Vector4(position.x, position.y, position.z, 1.0f);
+
+            double3 positionUnity = new double3(
+                position.x,
+                position.y,
+                position.z
+            );
+
+            return georeference.TransformUnityPositionToEarthCenteredEarthFixed(
                 positionUnity);
         }
 
@@ -254,6 +265,7 @@ namespace CesiumForUnity
             SceneView sceneView = SceneView.lastActiveSceneView;
             sceneView.pivot =
                 position + sceneView.camera.transform.forward * sceneView.cameraDistance;
+            sceneView.rotation = rotation;
             SceneView.lastActiveSceneView.Repaint();
         }
 
@@ -269,30 +281,50 @@ namespace CesiumForUnity
                 subScenes[i].gameObject.SetActive(false);
             }
 
-            CesiumVector3 positionECEF =
+            // Want to restore current forward direction, relative to the globe.
+            // Remember that "the globe" in Unity world coordinates is defined by both the georeference origin and its Transform.
+            Vector3 forward = SceneView.lastActiveSceneView.camera.transform.forward;
+            forward = georeference.transform.worldToLocalMatrix * new Vector4(forward.x, forward.y, forward.z, 0.0f);
+            double3 cameraForwardEcef =
+                georeference.TransformUnityDirectionToEarthCenteredEarthFixed(
+                  new double3(
+                    forward.x,
+                    forward.y,
+                    forward.z));
+
+            double3 positionECEF =
                 CesiumEditorUtility.TransformCameraPositionToEarthCenteredEarthFixed(georeference);
             georeference.SetOriginEarthCenteredEarthFixed(
                 positionECEF.x,
                 positionECEF.y,
                 positionECEF.z);
 
+            double3 newCameraForwardUnity =
+                georeference.TransformEarthCenteredEarthFixedDirectionToUnity(cameraForwardEcef);
+
             // Teleport the camera back to the georeference's position so it stays
-            // at the middle of the subscene.
-            // TODO: This will have to change when we factor in Unity transforms.
+            // at the middle of the subscene. Restore the original forward direction, wrt the globe.
+            // Always use +Y (Vector3.up) as the up direction, even if a Transform on the CesiumGeoreference tilts the globe.
             CesiumEditorUtility.SetSceneViewPositionRotation(
-                Vector3.zero, SceneView.lastActiveSceneView.rotation);
+                georeference.transform.position,
+                Quaternion.LookRotation(
+                    georeference.transform.localToWorldMatrix * new Vector4(
+                      (float)newCameraForwardUnity.x,
+                      (float)newCameraForwardUnity.y,
+                      (float)newCameraForwardUnity.z,
+                      0.0f),
+                    Vector3.up));
         }
 
         public static CesiumSubScene CreateSubScene(CesiumGeoreference georeference)
         {
             CesiumEditorUtility.PlaceGeoreferenceAtCameraPosition(georeference);
-            CesiumVector3 positionECEF = new CesiumVector3()
-            {
-                x = georeference.ecefX,
-                y = georeference.ecefY,
-                z = georeference.ecefZ
-            };
-            
+            double3 positionECEF = new double3(
+                georeference.ecefX,
+                georeference.ecefY,
+                georeference.ecefZ
+            );
+
             GameObject subSceneGameObject = new GameObject();
             subSceneGameObject.transform.parent = georeference.transform;
             Undo.RegisterCreatedObjectUndo(subSceneGameObject, "Create Sub-Scene");
@@ -312,7 +344,7 @@ namespace CesiumForUnity
 
         public static void PlaceSubSceneAtCameraPosition(CesiumSubScene subscene)
         {
-            CesiumGeoreference? georeference =
+            CesiumGeoreference georeference =
                 subscene.gameObject.GetComponentInParent<CesiumGeoreference>();
             if (georeference == null)
             {
@@ -321,8 +353,8 @@ namespace CesiumForUnity
             }
 
             Undo.RecordObject(subscene, "Place Sub-Scene Origin at Camera Position");
-            
-            CesiumVector3 positionECEF =
+
+            double3 positionECEF =
                 CesiumEditorUtility.TransformCameraPositionToEarthCenteredEarthFixed(georeference);
             subscene.SetOriginEarthCenteredEarthFixed(
                     positionECEF.x,

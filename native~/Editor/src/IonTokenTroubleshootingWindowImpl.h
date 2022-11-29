@@ -3,7 +3,7 @@
 #include <DotNet/System/String.h>
 
 namespace DotNet::CesiumForUnity {
-  class IonTokenTroubleshootingWindow;
+class IonTokenTroubleshootingWindow;
 }
 
 namespace CesiumForUnityNative {

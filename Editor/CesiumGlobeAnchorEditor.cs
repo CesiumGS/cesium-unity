@@ -132,7 +132,9 @@ namespace CesiumForUnity
 
             if (EditorGUI.EndChangeCheck())
             {
-                this._globeAnchor.StartOrStopDetectingTransformChanges();
+                // Explicitly set the flag so that the object starts or stops detecting.
+                this.serializedObject.ApplyModifiedProperties();
+                this._globeAnchor.detectTransformChanges = this._globeAnchor.detectTransformChanges;
             }
             GUILayout.EndHorizontal();
 
@@ -254,27 +256,27 @@ namespace CesiumForUnity
         private void DrawUnityPositionProperties()
         {
             EditorGUI.BeginDisabledGroup(
-                this.positionAuthority != CesiumGlobeAnchorPositionAuthority.UnityWorldCoordinates);
+                this.positionAuthority != CesiumGlobeAnchorPositionAuthority.UnityCoordinates);
 
-            GUILayout.Label("Position (Unity Coordinates)", EditorStyles.boldLabel);
+            GUILayout.Label("Position (Unity Local Coordinates)", EditorStyles.boldLabel);
 
             EditorGUI.BeginChangeCheck();
 
             GUIContent unityXContent = new GUIContent(
                 "Unity X",
-                "The Unity world X coordinate of this game object. This is the same as the Transform's " +
+                "The Unity X coordinate of this game object. This is the same as the Transform's " +
                 "X coordinate but expressed in 64-bit (double) precision.");
             EditorGUILayout.PropertyField(this._unityX, unityXContent);
 
             GUIContent unityYContent = new GUIContent(
                 "Unity Y",
-                "The Unity world Y coordinate of this game object. This is the same as the Transform's " +
+                "The Unity Y coordinate of this game object. This is the same as the Transform's " +
                 "Y coordinate but expressed in 64-bit (double) precision.");
             EditorGUILayout.PropertyField(this._unityY, unityYContent);
 
             GUIContent unityZContent = new GUIContent(
                 "Unity Z",
-                "The Unity world Z coordinate of this game object. This is the same as the Transform's " +
+                "The Unity Z coordinate of this game object. This is the same as the Transform's " +
                 "Z coordinate but expressed in 64-bit (double) precision.");
             EditorGUILayout.PropertyField(this._unityZ, unityZContent);
 
@@ -284,7 +286,7 @@ namespace CesiumForUnity
 
                 // Manually trigger an update of the position of this object
                 // and its coordinates in other systems.
-                this._globeAnchor.SetPositionUnityWorld(
+                this._globeAnchor.SetPositionUnity(
                     this._unityX.doubleValue,
                     this._unityY.doubleValue,
                     this._unityZ.doubleValue);

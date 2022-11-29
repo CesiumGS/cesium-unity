@@ -3,7 +3,6 @@
 #include <CesiumAsync/AsyncSystem.h>
 #include <CesiumAsync/IAssetAccessor.h>
 #include <CesiumAsync/SharedFuture.h>
-
 #include <CesiumIonClient/Assets.h>
 #include <CesiumIonClient/Connection.h>
 #include <CesiumIonClient/Profile.h>
@@ -11,8 +10,8 @@
 
 #include <DotNet/System/String.h>
 
-#include <memory>
 #include <functional>
+#include <memory>
 #include <optional>
 #include <vector>
 
@@ -101,7 +100,6 @@ public:
   CesiumAsync::AsyncSystem& getAsyncSystem();
 
 private:
-
   CesiumAsync::AsyncSystem _asyncSystem;
   std::shared_ptr<CesiumAsync::IAssetAccessor> _pAssetAccessor;
 
@@ -122,7 +120,7 @@ private:
   bool _loadProfileQueued;
   bool _loadAssetsQueued;
   bool _loadTokensQueued;
-  
+
   std::function<void()> broadcastConnectionUpdate;
   std::function<void()> broadcastAssetsUpdate;
   std::function<void()> broadcastProfileUpdate;

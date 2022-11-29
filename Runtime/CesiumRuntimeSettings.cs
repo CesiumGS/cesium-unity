@@ -6,13 +6,20 @@ using UnityEditor;
 
 namespace CesiumForUnity
 {
+    /// <summary>
+    /// Holds Cesium settings used at runtime.
+    /// </summary>
     public sealed class CesiumRuntimeSettings : ScriptableObject
     {
         private static readonly string _filePath =
             "Assets/Settings/Resources/CesiumRuntimeSettings.asset";
 
-        private static CesiumRuntimeSettings? _instance;
+        private static CesiumRuntimeSettings _instance;
 
+        /// <summary>
+        /// Gets the singleton instance of this class. If the project does not yet contain an instance,
+        /// one is created and added at <code>Assets/Settings/Resources/CesiumRuntimeSettings.asset</code>.
+        /// </summary>
         public static CesiumRuntimeSettings instance
         {
             get
@@ -113,6 +120,9 @@ namespace CesiumForUnity
         [SerializeField]
         private string _defaultIonAccessTokenID = "";
 
+        /// <summary>
+        /// The ID of the default Cesium ion access token to use within the project.
+        /// </summary>
         public static string defaultIonAccessTokenID
         {
             get => instance._defaultIonAccessTokenID;
@@ -130,6 +140,9 @@ namespace CesiumForUnity
         [SerializeField]
         private string _defaultIonAccessToken = "";
 
+        /// <summary>
+        /// The default Cesium ion access token value to use within the project.
+        /// </summary>
         public static string defaultIonAccessToken
         {
             get => instance._defaultIonAccessToken;

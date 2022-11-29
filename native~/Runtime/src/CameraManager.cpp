@@ -1,5 +1,7 @@
 #include "CameraManager.h"
 
+#include "UnityTransforms.h"
+
 #include <CesiumGeospatial/Ellipsoid.h>
 #include <CesiumGeospatial/Transforms.h>
 #include <CesiumUtility/Math.h>
@@ -7,11 +9,13 @@
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/UnityEngine/Camera.h>
 #include <DotNet/UnityEngine/GameObject.h>
+#include <DotNet/UnityEngine/Matrix4x4.h>
 #include <DotNet/UnityEngine/Transform.h>
 #include <DotNet/UnityEngine/Vector3.h>
 #include <glm/trigonometric.hpp>
 
 #if UNITY_EDITOR
+#include <DotNet/UnityEditor/EditorApplication.h>
 #include <DotNet/UnityEditor/SceneView.h>
 #endif
 
@@ -31,24 +35,30 @@ namespace {
 
 ViewState unityCameraToViewState(
     const LocalHorizontalCoordinateSystem* pCoordinateSystem,
+    const glm::dmat4& unityWorldToTileset,
     Camera& camera) {
   Transform transform = camera.transform();
 
   Vector3 cameraPositionUnity = transform.position();
-  glm::dvec3 cameraPosition(
-      cameraPositionUnity.x,
-      cameraPositionUnity.y,
-      cameraPositionUnity.z);
+  glm::dvec3 cameraPosition = glm::dvec3(
+      unityWorldToTileset * glm::dvec4(
+                                cameraPositionUnity.x,
+                                cameraPositionUnity.y,
+                                cameraPositionUnity.z,
+                                1.0));
 
   Vector3 cameraDirectionUnity = transform.forward();
   glm::dvec3 cameraDirection = glm::dvec3(
-      cameraDirectionUnity.x,
-      cameraDirectionUnity.y,
-      cameraDirectionUnity.z);
+      unityWorldToTileset * glm::dvec4(
+                                cameraDirectionUnity.x,
+                                cameraDirectionUnity.y,
+                                cameraDirectionUnity.z,
+                                0.0));
 
   Vector3 cameraUpUnity = transform.up();
-  glm::dvec3 cameraUp =
-      glm::dvec3(cameraUpUnity.x, cameraUpUnity.y, cameraUpUnity.z);
+  glm::dvec3 cameraUp = glm::dvec3(
+      unityWorldToTileset *
+      glm::dvec4(cameraUpUnity.x, cameraUpUnity.y, cameraUpUnity.z, 0.0));
 
   if (pCoordinateSystem) {
     cameraPosition = pCoordinateSystem->localPositionToEcef(cameraPosition);
@@ -74,6 +84,9 @@ ViewState unityCameraToViewState(
 std::vector<ViewState> CameraManager::getAllCameras(const GameObject& context) {
   const LocalHorizontalCoordinateSystem* pCoordinateSystem = nullptr;
 
+  glm::dmat4 unityWorldToTileset =
+      UnityTransforms::fromUnity(context.transform().worldToLocalMatrix());
+
   CesiumGeoreference georeferenceComponent =
       context.GetComponentInParent<CesiumGeoreference>();
   if (georeferenceComponent != nullptr) {
@@ -85,16 +98,21 @@ std::vector<ViewState> CameraManager::getAllCameras(const GameObject& context) {
   std::vector<ViewState> result;
   Camera camera = Camera::main();
   if (camera != nullptr) {
-    result.emplace_back(unityCameraToViewState(pCoordinateSystem, camera));
+    result.emplace_back(
+        unityCameraToViewState(pCoordinateSystem, unityWorldToTileset, camera));
   }
 
 #if UNITY_EDITOR
-  SceneView lastActiveEditorView = SceneView::lastActiveSceneView();
-  if (lastActiveEditorView != nullptr) {
-    Camera editorCamera = lastActiveEditorView.camera();
-    if (editorCamera != nullptr) {
-      result.emplace_back(
-          unityCameraToViewState(pCoordinateSystem, editorCamera));
+  if (!EditorApplication::isPlaying()) {
+    SceneView lastActiveEditorView = SceneView::lastActiveSceneView();
+    if (lastActiveEditorView != nullptr) {
+      Camera editorCamera = lastActiveEditorView.camera();
+      if (editorCamera != nullptr) {
+        result.emplace_back(unityCameraToViewState(
+            pCoordinateSystem,
+            unityWorldToTileset,
+            editorCamera));
+      }
     }
   }
 #endif

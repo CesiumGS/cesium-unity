@@ -1,11 +1,12 @@
 #include "Cesium3DTilesetImpl.h"
 
 #include "CameraManager.h"
-#include "UnityTilesetExternals.h"
 #include "UnityPrepareRendererResources.h"
+#include "UnityTilesetExternals.h"
 
 #include <Cesium3DTilesSelection/IonRasterOverlay.h>
 #include <Cesium3DTilesSelection/Tileset.h>
+#include <CesiumGeospatial/Transforms.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/CesiumForUnity/Cesium3DTilesetLoadFailureDetails.h>
@@ -19,12 +20,19 @@
 #include <DotNet/System/Object.h>
 #include <DotNet/System/String.h>
 #include <DotNet/UnityEngine/Application.h>
+#include <DotNet/UnityEngine/Camera.h>
 #include <DotNet/UnityEngine/GameObject.h>
+#include <DotNet/UnityEngine/Quaternion.h>
 #include <DotNet/UnityEngine/Time.h>
+#include <DotNet/UnityEngine/Transform.h>
+#include <DotNet/UnityEngine/Vector3.h>
+
+#include <variant>
 
 #if UNITY_EDITOR
 #include <DotNet/UnityEditor/CallbackFunction.h>
 #include <DotNet/UnityEditor/EditorApplication.h>
+#include <DotNet/UnityEditor/SceneView.h>
 #endif
 
 using namespace Cesium3DTilesSelection;
@@ -39,8 +47,6 @@ Cesium3DTilesetImpl::Cesium3DTilesetImpl(
 #if UNITY_EDITOR
       _updateInEditorCallback(nullptr),
 #endif
-      _georeference(nullptr),
-      _georeferenceChangedCallback(nullptr),
       _creditSystem(nullptr),
       _destroyTilesetOnNextUpdate(false) {
 }
@@ -101,9 +107,9 @@ void Cesium3DTilesetImpl::Update(
     const Cesium3DTilesSelection::TileRenderContent* pRenderContent =
         content.getRenderContent();
     if (pRenderContent) {
-      CesiumGltfGameObject* pCesiumGameObject = 
+      CesiumGltfGameObject* pCesiumGameObject =
           static_cast<CesiumGltfGameObject*>(
-            pRenderContent->getRenderResources());
+              pRenderContent->getRenderResources());
       if (pCesiumGameObject && pCesiumGameObject->pGameObject) {
         pCesiumGameObject->pGameObject->SetActive(false);
       }
@@ -119,9 +125,9 @@ void Cesium3DTilesetImpl::Update(
     const Cesium3DTilesSelection::TileRenderContent* pRenderContent =
         content.getRenderContent();
     if (pRenderContent) {
-      CesiumGltfGameObject* pCesiumGameObject = 
+      CesiumGltfGameObject* pCesiumGameObject =
           static_cast<CesiumGltfGameObject*>(
-            pRenderContent->getRenderResources());
+              pRenderContent->getRenderResources());
       if (pCesiumGameObject && pCesiumGameObject->pGameObject) {
         pCesiumGameObject->pGameObject->SetActive(true);
       }
@@ -171,12 +177,6 @@ void Cesium3DTilesetImpl::OnDisable(
   }
 #endif
 
-  if (this->_georeferenceChangedCallback != nullptr) {
-    this->_georeference.remove_changed(this->_georeferenceChangedCallback);
-  }
-
-  this->_georeferenceChangedCallback = nullptr;
-  this->_georeference = nullptr;
   this->_creditSystem = nullptr;
 
   this->DestroyTileset(tileset);
@@ -185,6 +185,121 @@ void Cesium3DTilesetImpl::OnDisable(
 void Cesium3DTilesetImpl::RecreateTileset(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
   this->DestroyTileset(tileset);
+}
+
+namespace {
+
+struct CalculateECEFCameraPosition {
+  const CesiumGeospatial::Ellipsoid& ellipsoid;
+
+  glm::dvec3 operator()(const CesiumGeometry::BoundingSphere& sphere) {
+    const glm::dvec3& center = sphere.getCenter();
+    glm::dmat4 enuToEcef =
+        glm::dmat4(CesiumGeospatial::Transforms::eastNorthUpToFixedFrame(
+            center,
+            ellipsoid));
+    glm::dvec3 offset = sphere.getRadius() * glm::normalize(
+                                                 glm::dvec3(enuToEcef[0]) +
+                                                 glm::dvec3(enuToEcef[1]) +
+                                                 glm::dvec3(enuToEcef[2]));
+    glm::dvec3 position = center + offset;
+    return position;
+  }
+
+  glm::dvec3
+  operator()(const CesiumGeometry::OrientedBoundingBox& orientedBoundingBox) {
+    const glm::dvec3& center = orientedBoundingBox.getCenter();
+    glm::dmat4 enuToEcef =
+        glm::dmat4(CesiumGeospatial::Transforms::eastNorthUpToFixedFrame(
+            center,
+            ellipsoid));
+    const glm::dmat3& halfAxes = orientedBoundingBox.getHalfAxes();
+    glm::dvec3 offset =
+        glm::length(halfAxes[0] + halfAxes[1] + halfAxes[2]) *
+        glm::normalize(
+            glm::dvec3(enuToEcef[0]) + glm::dvec3(enuToEcef[1]) +
+            glm::dvec3(enuToEcef[2]));
+    glm::dvec3 position = center + offset;
+    return position;
+  }
+
+  glm::dvec3
+  operator()(const CesiumGeospatial::BoundingRegion& boundingRegion) {
+    return (*this)(boundingRegion.getBoundingBox());
+  }
+
+  glm::dvec3
+  operator()(const CesiumGeospatial::BoundingRegionWithLooseFittingHeights&
+                 boundingRegionWithLooseFittingHeights) {
+    return (*this)(boundingRegionWithLooseFittingHeights.getBoundingRegion()
+                       .getBoundingBox());
+  }
+
+  glm::dvec3 operator()(const CesiumGeospatial::S2CellBoundingVolume& s2) {
+    return (*this)(s2.computeBoundingRegion());
+  }
+};
+} // namespace
+
+void Cesium3DTilesetImpl::FocusTileset(
+    const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
+
+#if UNITY_EDITOR
+  UnityEditor::SceneView lastActiveEditorView =
+      UnityEditor::SceneView::lastActiveSceneView();
+  if (!this->_pTileset || !this->_pTileset->getRootTile() ||
+      lastActiveEditorView == nullptr) {
+    return;
+  }
+
+  UnityEngine::Camera editorCamera = lastActiveEditorView.camera();
+  if (editorCamera == nullptr) {
+    return;
+  }
+
+  DotNet::CesiumForUnity::CesiumGeoreference georeferenceComponent =
+      tileset.gameObject()
+          .GetComponentInParent<DotNet::CesiumForUnity::CesiumGeoreference>();
+
+  const CesiumGeospatial::LocalHorizontalCoordinateSystem& georeferenceCrs =
+      georeferenceComponent.NativeImplementation().getCoordinateSystem();
+  const glm::dmat4& ecefToUnityWorld =
+      georeferenceCrs.getEcefToLocalTransformation();
+
+  const BoundingVolume& boundingVolume =
+      this->_pTileset->getRootTile()->getBoundingVolume();
+  glm::dvec3 ecefCameraPosition = std::visit(
+      CalculateECEFCameraPosition{CesiumGeospatial::Ellipsoid::WGS84},
+      boundingVolume);
+  glm::dvec3 unityCameraPosition =
+      glm::dvec3(ecefToUnityWorld * glm::dvec4(ecefCameraPosition, 1.0));
+
+  glm::dvec3 ecefCenter =
+      Cesium3DTilesSelection::getBoundingVolumeCenter(boundingVolume);
+  glm::dvec3 unityCenter =
+      glm::dvec3(ecefToUnityWorld * glm::dvec4(ecefCenter, 1.0));
+  glm::dvec3 unityCameraFront =
+      glm::normalize(unityCenter - unityCameraPosition);
+  glm::dvec3 unityCameraRight =
+      glm::normalize(glm::cross(glm::dvec3(0.0, 0.0, 1.0), unityCameraFront));
+  glm::dvec3 unityCameraUp =
+      glm::normalize(glm::cross(unityCameraFront, unityCameraRight));
+
+  UnityEngine::Vector3 unityCameraPositionf;
+  unityCameraPositionf.x = static_cast<float>(unityCameraPosition.x);
+  unityCameraPositionf.y = static_cast<float>(unityCameraPosition.y);
+  unityCameraPositionf.z = static_cast<float>(unityCameraPosition.z);
+
+  UnityEngine::Vector3 unityCameraFrontf;
+  unityCameraFrontf.x = static_cast<float>(unityCameraFront.x);
+  unityCameraFrontf.y = static_cast<float>(unityCameraFront.y);
+  unityCameraFrontf.z = static_cast<float>(unityCameraFront.z);
+
+  lastActiveEditorView.pivot(unityCameraPositionf);
+  lastActiveEditorView.rotation(UnityEngine::Quaternion::LookRotation(
+      unityCameraFrontf,
+      UnityEngine::Vector3::up()));
+#endif
 }
 
 Tileset* Cesium3DTilesetImpl::getTileset() { return this->_pTileset.get(); }
@@ -268,8 +383,8 @@ void Cesium3DTilesetImpl::LoadTileset(
   options.enforceCulledScreenSpaceError =
       tileset.enforceCulledScreenSpaceError();
   options.culledScreenSpaceError = tileset.culledScreenSpaceError();
-  options.enableLodTransitionPeriod = tileset.useLodTransitions();
-  options.lodTransitionLength = tileset.lodTransitionLength();
+  // options.enableLodTransitionPeriod = tileset.useLodTransitions();
+  // options.lodTransitionLength = tileset.lodTransitionLength();
   options.showCreditsOnScreen = tileset.showCreditsOnScreen();
   options.loadErrorCallback =
       [tileset](const TilesetLoadFailureDetails& details) {
@@ -284,8 +399,13 @@ void Cesium3DTilesetImpl::LoadTileset(
             unityDetails);
       };
 
+  // Generous per-frame time limits for loading / unloading on main thread.
+  options.mainThreadLoadingTimeLimit = 5.0;
+  options.tileCacheUnloadTimeLimit = 5.0;
+
   TilesetContentOptions contentOptions{};
-  contentOptions.generateMissingNormalsSmooth = tileset.generateSmoothNormals();
+  contentOptions.generateMissingNormalsSmooth = true;
+  // .. = tileset.generateSmoothNormals();
 
   options.contentOptions = contentOptions;
 

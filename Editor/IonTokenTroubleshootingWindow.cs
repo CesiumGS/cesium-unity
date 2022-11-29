@@ -199,7 +199,7 @@ namespace CesiumForUnity
 
             // If this is a tileset, close any existing windows associated with its
             // overlays. Overlays won't appear until the tileset is working anyway.
-            Cesium3DTileset? tilesetAsset = ionAsset.tileset;
+            Cesium3DTileset tilesetAsset = ionAsset.tileset;
             if (tilesetAsset != null)
             {
                 CesiumRasterOverlay[] rasterOverlays =
@@ -219,7 +219,7 @@ namespace CesiumForUnity
 
             // If this is a raster overlay and this panel is already open for its attached
             // tileset, don't open the panel for the overlay for the same reason as above.
-            CesiumRasterOverlay? overlayAsset = ionAsset.overlay;
+            CesiumRasterOverlay overlayAsset = ionAsset.overlay;
             if (overlayAsset != null)
             {
                 Cesium3DTileset tileset

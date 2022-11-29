@@ -38,8 +38,7 @@ CesiumCreditSystemImpl::CesiumCreditSystemImpl(
 CesiumCreditSystemImpl::~CesiumCreditSystemImpl() {}
 
 void CesiumCreditSystemImpl::JustBeforeDelete(
-    const CesiumForUnity::CesiumCreditSystem& creditSystem) {
-}
+    const CesiumForUnity::CesiumCreditSystem& creditSystem) {}
 
 void CesiumCreditSystemImpl::Update(
     const CesiumForUnity::CesiumCreditSystem& creditSystem) {

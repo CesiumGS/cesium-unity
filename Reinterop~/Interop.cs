@@ -473,7 +473,7 @@ namespace Reinterop
                     continue;
 
                 IFieldSymbol? field = member as IFieldSymbol;
-                if (field == null)
+                if (field == null || field.IsStatic)
                     continue;
 
                 if (!IsBlittableStruct(context, field.Type, depth + 1))

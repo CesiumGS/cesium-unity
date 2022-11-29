@@ -1,16 +1,28 @@
 using UnityEngine;
 using System.Collections.Generic;
+using Unity.Mathematics;
 
 namespace CesiumForUnity
 {
     /// <summary>
-    /// This component is typically attached to a camera, and it automatically updates the CesiumGeoreference
+    /// Automatically shifts the origin of a <see cref="CesiumGeoreference"/> as the object to which
+    /// it is attached moves. This improves rendering precision by keeping coordinate values small.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This component is typically attached to a camera, and it automatically updates the <see cref="CesiumGeoreference"/>
     /// to keep its origin near the location of the camera. This improves rendering precision by keeping the
     /// coordinate values of objects that are near the camera as small as possible. A game object with this
     /// component must be nested inside a <see cref="CesiumGeoreference"/>, and it must also have a
     /// <see cref="CesiumGlobeAnchor"/>. It is essential to add a <see cref="CesiumGlobeAnchor"/> to all
     /// other objects in the scene as well; otherwise, they will appear to move when the origin is shifted.
-    /// </summary>
+    /// </para>
+    /// <para>
+    /// This component also switches between <see cref="CesiumSubScene"/> instances based on the distance
+    /// to them. When inside a sub-scene, the origin shifting described above is not performed. This allows
+    /// relatively normal Unity scenes to be defined at different locations on the globe.
+    /// </para>
+    /// </remarks>
     [RequireComponent(typeof(CesiumGlobeAnchor))]
     public class CesiumOriginShift : MonoBehaviour
     {
@@ -19,32 +31,26 @@ namespace CesiumForUnity
             CesiumGeoreference georeference = this.GetComponentInParent<CesiumGeoreference>();
 
             CesiumGlobeAnchor anchor = this.GetComponent<CesiumGlobeAnchor>();
-            if (anchor != null && anchor.positionAuthority != CesiumGlobeAnchorPositionAuthority.None)
-            {
-                this.UpdateFromEcef(georeference, new CesiumVector3()
-                {
-                    x = anchor.ecefX,
-                    y = anchor.ecefY,
-                    z = anchor.ecefZ,
-                });
-                return;
-            }
 
-            Vector3 position = this.transform.position;
-            CesiumVector3 ecef = georeference.TransformUnityWorldPositionToEarthCenteredEarthFixed(new CesiumVector3()
-            {
-                x = position.x,
-                y = position.y,
-                z = position.z
-            });
-            this.UpdateFromEcef(georeference, ecef);
+            // The RequireComponent attribute should ensure this assertion passes.
+            Debug.Assert(anchor != null);
+
+            // The anchor's ECEF properties must be valid.
+            if (anchor.positionAuthority == CesiumGlobeAnchorPositionAuthority.None)
+                anchor.Sync();
+
+            this.UpdateFromEcef(georeference, new double3(
+                anchor.ecefX,
+                anchor.ecefY,
+                anchor.ecefZ
+            ));
         }
 
         private List<CesiumSubScene> _sublevelsScratch = new List<CesiumSubScene>();
 
-        private void UpdateFromEcef(CesiumGeoreference georeference, CesiumVector3 ecef)
+        private void UpdateFromEcef(CesiumGeoreference georeference, double3 ecef)
         {
-            CesiumSubScene? closestLevel = null;
+            CesiumSubScene closestLevel = null;
             double distanceSquaredToClosest = double.MaxValue;
 
             // Are we inside a sub-level?
@@ -86,7 +92,6 @@ namespace CesiumForUnity
                 }
 
                 // Update the origin continuously.
-                // TODO: account for a transform on the CesiumGeoreference
                 georeference.SetOriginEarthCenteredEarthFixed(ecef.x, ecef.y, ecef.z);
             }
         }

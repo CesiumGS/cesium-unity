@@ -80,6 +80,10 @@ namespace CesiumForUnity
             EditorPrefs.DeleteKey("Key");
 
             Application.OpenURL("URL");
+            string applicationVersion = Application.version;
+            string applicationPlatform = Helpers.ToString(Application.platform);
+            string productName = Application.productName;
+            string osVersion = System.Environment.OSVersion.VersionString;
 
             TreeViewItem root = new TreeViewItem(0, -1, "root");
             int id = root.id;
@@ -97,8 +101,6 @@ namespace CesiumForUnity
             searchString.Contains("string", StringComparison.CurrentCultureIgnoreCase);
             string.Equals("stringA", "stringB");
             string.IsNullOrEmpty("value");
-
-            IonAssetsColumn column = IonAssetsColumn.Name;
 
             Rect r = new Rect(0, 0, 50, 50);
             GUI.Label(r, "Label");

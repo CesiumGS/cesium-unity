@@ -15,13 +15,13 @@ namespace CesiumForUnity
     [ReinteropNativeImplementation("CesiumForUnityNative::SelectIonTokenWindowImpl", "SelectIonTokenWindowImpl.h")]
     public partial class SelectIonTokenWindow : EditorWindow
     {
-        public static SelectIonTokenWindow? currentWindow = null;
+        public static SelectIonTokenWindow currentWindow = null;
 
         public static void ShowWindow()
         {
             if (currentWindow == null)
             {
-                currentWindow = GetWindow<SelectIonTokenWindow>();
+                currentWindow = GetWindow<SelectIonTokenWindow>("Select Cesium ion Token");
             }
 
             currentWindow.Show();

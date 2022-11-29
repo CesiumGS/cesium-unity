@@ -4,12 +4,6 @@ using UnityEngine.Networking;
 
 namespace CesiumForUnity
 {
-    public struct RawDownloadedData
-    {
-        public IntPtr pointer;
-        public int length;
-    }
-
     [ReinteropNativeImplementation("CesiumForUnityNative::NativeDownloadHandlerImpl", "NativeDownloadHandlerImpl.h")]
     internal partial class NativeDownloadHandler : DownloadHandlerScript
     {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Cesium3DTilesSelection/ViewUpdateResult.h>
+
 #include <DotNet/CesiumForUnity/CesiumCreditSystem.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/System/Action.h>
@@ -14,7 +15,7 @@
 namespace DotNet::CesiumForUnity {
 class Cesium3DTileset;
 class CesiumCreditSystem;
-}
+} // namespace DotNet::CesiumForUnity
 
 namespace Cesium3DTilesSelection {
 class Tileset;
@@ -35,12 +36,14 @@ public:
   void OnDisable(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
 
   void RecreateTileset(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
+  void FocusTileset(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
 
   Cesium3DTilesSelection::Tileset* getTileset();
   const Cesium3DTilesSelection::Tileset* getTileset() const;
 
   const DotNet::CesiumForUnity::CesiumCreditSystem& getCreditSystem() const;
-  void setCreditSystem(const DotNet::CesiumForUnity::CesiumCreditSystem& creditSystem);
+  void setCreditSystem(
+      const DotNet::CesiumForUnity::CesiumCreditSystem& creditSystem);
 
 private:
   void DestroyTileset(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
@@ -54,8 +57,6 @@ private:
 #if UNITY_EDITOR
   DotNet::UnityEditor::CallbackFunction _updateInEditorCallback;
 #endif
-  DotNet::CesiumForUnity::CesiumGeoreference _georeference;
-  DotNet::System::Action _georeferenceChangedCallback;
   DotNet::CesiumForUnity::CesiumCreditSystem _creditSystem;
   bool _destroyTilesetOnNextUpdate;
 };

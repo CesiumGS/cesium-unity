@@ -5,6 +5,14 @@
   "description": "Cesium for Unity brings the 3D geospatial ecosystem to Unity. By combining a high-accuracy full-scale WGS84 globe, open APIs and open standards for spatial indexing such as 3D Tiles, and cloud-based real-world content from [Cesium ion](https://cesium.com/cesium-ion) with Unity, this plugin enables 3D geospatial workflows and applications in Unity.",
   "license": "Apache-2.0",
   "unity": "2021.3",
+  "author": {
+    "name": "Cesium",
+    "email": "hello@cesium.com",
+    "url": "https://cesium.com"
+  },
+  "changelogUrl": "https://github.com/CesiumGS/cesium-unity/blob/main/CHANGES.md",
+  "documentationUrl": "https://cesium.com/learn/unity/",
+  "licensesUrl": "https://github.com/CesiumGS/cesium-unity/blob/main/LICENSE",
   "dependencies": {
     "com.unity.textmeshpro": "3.0.0",
     "com.unity.mathematics": "1.2.0",

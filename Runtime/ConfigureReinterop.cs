@@ -9,6 +9,7 @@ using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.Rendering;
+using Unity.Mathematics;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -59,6 +60,8 @@ namespace CesiumForUnity
             float x = p.x;
             float y = p.y;
             float z = p.z;
+            Quaternion q = new Quaternion();
+            q = Quaternion.LookRotation(Vector3.forward, Vector3.up);
             c.GetStereoViewMatrix(Camera.StereoscopicEye.Right);
             float fov = c.fieldOfView;
             int pixelHeight = c.pixelHeight;
@@ -73,12 +76,17 @@ namespace CesiumForUnity
             go.SetActive(go.activeSelf);
             Transform transform = go.transform;
             transform.parent = transform.parent;
+            transform.SetParent(transform.parent, false);
             transform.position = transform.position;
             transform.rotation = transform.rotation;
+            transform.localPosition = transform.localPosition;
+            transform.localRotation = transform.localRotation;
             transform.localScale = transform.localScale;
+            transform.SetPositionAndRotation(transform.position, transform.rotation);
             Transform root = transform.root;
             int siblingIndex = transform.GetSiblingIndex();
             Matrix4x4 m = transform.localToWorldMatrix;
+            Matrix4x4 m2 = transform.worldToLocalMatrix;
 
             go.AddComponent<MeshFilter>();
             go.AddComponent<MeshRenderer>();
@@ -115,6 +123,8 @@ namespace CesiumForUnity
             mesh.RecalculateBounds();
             int instanceID = mesh.GetInstanceID();
 
+            Bounds bounds = new Bounds(new Vector3(0, 0, 0), new Vector3(1, 2, 1));
+
             MeshCollider meshCollider = go.AddComponent<MeshCollider>();
             meshCollider.sharedMesh = mesh;
 
@@ -128,6 +138,13 @@ namespace CesiumForUnity
             meshRenderer.material.SetVector("name", new Vector4());
             meshRenderer.material.DisableKeyword("keywordName");
             meshRenderer.material.EnableKeyword("keywordName");
+            meshRenderer.material.GetTexture("name");
+            var ids = new List<int>();
+            meshRenderer.material.GetTexturePropertyNameIDs(ids);
+            for (int i = 0; i < ids.Count; ++i)
+            {
+                meshRenderer.material.GetTexture(ids[i]);
+            }
             meshRenderer.material.shaderKeywords = meshRenderer.material.shaderKeywords;
             meshRenderer.sharedMaterial = meshRenderer.sharedMaterial;
             meshRenderer.material.shader = meshRenderer.material.shader;
@@ -163,6 +180,10 @@ namespace CesiumForUnity
 
             string temporaryCachePath = Application.temporaryCachePath;
             bool isEditor = Application.isEditor;
+            string applicationVersion = Application.version;
+            string applicationPlatform = Helpers.ToString(Application.platform);
+            string productName = Application.productName;
+            string osVersion = System.Environment.OSVersion.VersionString;
 
             Marshal.FreeCoTaskMem(Marshal.StringToCoTaskMemUTF8("hi"));
 
@@ -216,9 +237,9 @@ namespace CesiumForUnity
             tileset.enableFogCulling = tileset.enableFogCulling;
             tileset.enforceCulledScreenSpaceError = tileset.enforceCulledScreenSpaceError;
             tileset.culledScreenSpaceError = tileset.culledScreenSpaceError;
-            tileset.useLodTransitions = tileset.useLodTransitions;
-            tileset.lodTransitionLength = tileset.lodTransitionLength;
-            tileset.generateSmoothNormals = tileset.generateSmoothNormals;
+            //tileset.useLodTransitions = tileset.useLodTransitions;
+            //tileset.lodTransitionLength = tileset.lodTransitionLength;
+            // tileset.generateSmoothNormals = tileset.generateSmoothNormals;
             tileset.createPhysicsMeshes = tileset.createPhysicsMeshes;
             tileset.suspendUpdate = tileset.suspendUpdate;
             tileset.previousSuspendUpdate = tileset.previousSuspendUpdate;
@@ -228,6 +249,7 @@ namespace CesiumForUnity
 
             Cesium3DTileset tilesetFromGameObject = go.GetComponent<Cesium3DTileset>();
             MeshRenderer meshRendererFromGameObject = go.GetComponent<MeshRenderer>();
+            MeshFilter meshFilterFromGameObject = go.GetComponent<MeshFilter>();
             CesiumIonRasterOverlay ionOverlay = go.GetComponent<CesiumIonRasterOverlay>();
             ionOverlay.ionAssetID = ionOverlay.ionAssetID;
             ionOverlay.ionAccessToken = ionOverlay.ionAccessToken;
@@ -387,9 +409,9 @@ namespace CesiumForUnity
                                                 "");
             CesiumRasterOverlay.BroadcastCesiumRasterOverlayLoadFailure(overlayDetails);
 
-            CesiumVector3 cv3 = new CesiumVector3();
-            cv3 = new CesiumVector3(0, 0, 0);
+            double3 cv3 = new double3();
             cv3.x = cv3.y = cv3.z;
+            double3 cv4 = new double3(1.0, 2.0, 3.0);
 
             CesiumGlobeAnchor[] globeAnchors = go.GetComponentsInChildren<CesiumGlobeAnchor>();
             globeAnchors = go.GetComponentsInChildren<CesiumGlobeAnchor>(true);
@@ -401,13 +423,17 @@ namespace CesiumForUnity
 
             globeAnchor = go.AddComponent<CesiumGlobeAnchor>();
             globeAnchor.detectTransformChanges = globeAnchor.detectTransformChanges;
-            globeAnchor.SetPositionUnityWorld(0.0, 0.0, 0.0);
+            globeAnchor.adjustOrientationForGlobeWhenMoving = globeAnchor.adjustOrientationForGlobeWhenMoving;
+            globeAnchor.SetPositionUnity(0.0, 0.0, 0.0);
             globeAnchor.SetPositionLongitudeLatitudeHeight(0.0, 0.0, 0.0);
             globeAnchor.positionAuthority = globeAnchor.positionAuthority;
 
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;
+            sv.pivot = sv.pivot;
+            sv.rotation = sv.rotation;
             Camera svc = sv.camera;
+            svc.transform.SetPositionAndRotation(p, q);
 
             bool isPlaying = EditorApplication.isPlaying;
             EditorApplication.update += () => {};
