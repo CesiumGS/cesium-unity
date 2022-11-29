@@ -404,7 +404,8 @@ void Cesium3DTilesetImpl::LoadTileset(
   options.tileCacheUnloadTimeLimit = 5.0;
 
   TilesetContentOptions contentOptions{};
-  contentOptions.generateMissingNormalsSmooth = tileset.generateSmoothNormals();
+  contentOptions.generateMissingNormalsSmooth = true;
+  // .. = tileset.generateSmoothNormals();
 
   options.contentOptions = contentOptions;
 

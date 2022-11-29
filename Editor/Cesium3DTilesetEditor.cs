@@ -34,7 +34,7 @@ namespace CesiumForUnity
         private SerializedProperty _opaqueMaterial;
         //private SerializedProperty _useLodTransitions;
         //private SerializedProperty _lodTransitionLength;
-        private SerializedProperty _generateSmoothNormals;
+        // private SerializedProperty _generateSmoothNormals;
 
         private SerializedProperty _showTilesInHierarchy;
         private SerializedProperty _suspendUpdate;
@@ -79,8 +79,8 @@ namespace CesiumForUnity
             //this._useLodTransitions = this.serializedObject.FindProperty("_useLodTransitions");
             //this._lodTransitionLength =
             //    this.serializedObject.FindProperty("_lodTransitionLength");
-            this._generateSmoothNormals =
-                this.serializedObject.FindProperty("_generateSmoothNormals");
+            // this._generateSmoothNormals =
+            //     this.serializedObject.FindProperty("_generateSmoothNormals");
 
             this._showTilesInHierarchy =
                 this.serializedObject.FindProperty("_showTilesInHierarchy");
@@ -401,15 +401,15 @@ namespace CesiumForUnity
             //EditorGUILayout.PropertyField(this._lodTransitionLength, lodTransitionLengthContent);
             //EditorGUI.EndDisabledGroup();
 
-            GUIContent generateSmoothNormalsContent = new GUIContent(
-                "Generate Smooth Normals",
-                "Whether to generate smooth normals when normals are missing in the glTF." +
-                "\n\n" +
-                "According to the glTF spec: \"When normals are not specified, client " +
-                "implementations should calculate flat normals.\" However, calculating flat " +
-                "normals requires duplicating vertices. This option allows the glTFs to be " +
-                "rendered with smooth normals instead when the original glTF is missing normals.");
-            EditorGUILayout.PropertyField(this._generateSmoothNormals, generateSmoothNormalsContent);
+            // GUIContent generateSmoothNormalsContent = new GUIContent(
+            //     "Generate Smooth Normals",
+            //     "Whether to generate smooth normals when normals are missing in the glTF." +
+            //     "\n\n" +
+            //     "According to the glTF spec: \"When normals are not specified, client " +
+            //     "implementations should calculate flat normals.\" However, calculating flat " +
+            //     "normals requires duplicating vertices. This option allows the glTFs to be " +
+            //     "rendered with smooth normals instead when the original glTF is missing normals.");
+            // EditorGUILayout.PropertyField(this._generateSmoothNormals, generateSmoothNormalsContent);
         }
 
         private void DrawDebugProperties()
