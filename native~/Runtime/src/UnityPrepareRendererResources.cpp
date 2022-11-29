@@ -10,6 +10,7 @@
 #include <CesiumGeospatial/Ellipsoid.h>
 #include <CesiumGeospatial/Transforms.h>
 #include <CesiumGltf/AccessorView.h>
+#include <CesiumGltf/ExtensionKhrMaterialsUnlit.h>
 #include <CesiumGltf/ExtensionMeshPrimitiveExtFeatureMetadata.h>
 #include <CesiumGltf/ExtensionModelExtFeatureMetadata.h>
 #include <CesiumUtility/ScopeGuard.h>
@@ -714,12 +715,6 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         &georeferenceComponent.NativeImplementation().getCoordinateSystem();
   }
 
-  UnityEngine::Material opaqueMaterial = tilesetComponent.opaqueMaterial();
-  if (opaqueMaterial == nullptr) {
-    opaqueMaterial = UnityEngine::Resources::Load<UnityEngine::Material>(
-        System::String("CesiumDefaultTilesetMaterial"));
-  }
-
   const bool createPhysicsMeshes = tilesetComponent.createPhysicsMeshes();
   const bool showTilesInHierarchy = tilesetComponent.showTilesInHierarchy();
 
@@ -743,7 +738,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
        &pModelGameObject,
        &tileTransform,
        &meshIndex,
-       opaqueMaterial,
+       &tilesetComponent,
        pCoordinateSystem,
        createPhysicsMeshes,
        showTilesInHierarchy,
@@ -840,13 +835,29 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         UnityEngine::MeshRenderer meshRenderer =
             primitiveGameObject.AddComponent<UnityEngine::MeshRenderer>();
 
+        const Material* pMaterial =
+            Model::getSafe(&gltf.materials, primitive.material);
+
+        UnityEngine::Material opaqueMaterial =
+            tilesetComponent.opaqueMaterial();
+        if (opaqueMaterial == nullptr) {
+          if (pMaterial &&
+              pMaterial->hasExtension<ExtensionKhrMaterialsUnlit>()) {
+            opaqueMaterial =
+                UnityEngine::Resources::Load<UnityEngine::Material>(
+                    System::String("CesiumUnlitTilesetMaterial"));
+          } else {
+            opaqueMaterial =
+                UnityEngine::Resources::Load<UnityEngine::Material>(
+                    System::String("CesiumDefaultTilesetMaterial"));
+          }
+        }
+
         UnityEngine::Material material =
             UnityEngine::Object::Instantiate(opaqueMaterial);
         material.hideFlags(UnityEngine::HideFlags::HideAndDontSave);
         meshRenderer.material(material);
 
-        const Material* pMaterial =
-            Model::getSafe(&gltf.materials, primitive.material);
         if (pMaterial) {
           if (pMaterial->pbrMetallicRoughness) {
             // Add base color factor and metallic-roughness factor regardless of
