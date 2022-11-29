@@ -105,38 +105,7 @@ If the log indicates that CMake cannot be found, make sure it is installed and i
 
 ## Running the Samples
 
-The cesium-unity-samples project has several scenes that help you to quickly get running with Cesium for Unity. Go to File -> Open Scene and navigate to the `Scenes` directory.
-
-## Adding Cesium for Unity to a New Project
-
-TODO: this belongs in the Quickstart
-
-1. Cesium for Unity has only been tested with the Universal Render Pipeline (URP), so use that for best results. Others _may_ work.
-2. To install Cesium for Unity into your project, clone the `cesium-unity` repo into your project's `Packages/com.cesium.unity` directory and build it as above.
-3. Change the Editor camera settings to accomodate globe-sized view distances. Disable "Dynamic Clipping" and set the near plane to 1 and the far plane to 1000000 (1 million). You may want to increase the maximum speed as well, to perhaps 200 or so.
-    ![Camera Settings](Documentation~/images/CameraSettings.png)
-4. Set the near and far planes for any cameras in your level as well.
-5. Add a new empty GameObject to your scene and name it "Cesium".
-6. Add a new `Cesium Georeference` component to the "Cesium" game object. By setting the Longitude, Latitude, and Height properties on this object, you define the position on the globe that becomes the center of the Unity world.
-7. Add another new GameObject as a _child_ of the "Cesium" game object, and name it "Cesium World Terrain".
-8. Add a new "Cesium 3D Tileset" component to the "Cesium World Terrain" game object and set the following properties:
-    * Set the "Opaque Material" to "CesiumDefaultTilesetMaterial". This step will not be necessary in the future, but failing to do so at the moment may lead to a crash.
-    * Set the "Ion Asset ID" to 1.
-    * Set the "Ion Access Token" to a valid token for Cesium World Terrain from your Cesium ion account. At this point Cesium World Terrain should appear, but it will be all white.
-9. Add a new "Cesium Ion Raster Overlay" component to the "Cesium World Terrain" game object and set the following properties:
-    * Set the "Ion Asset ID" to 2.
-    * Set the "Ion Access Token" to a valid Cesium ion token; the one from above is likely to work. At this point, the terrain surface should become textured.
-
-## :goggles: Running Cesium for Unity on Quest 2
-
-TODO: this belongs in the Quickstart
-
-1. Open the Cesium Unity Samples project.
-2. Open the Quest 2 Demo scene.
-3. Go to File -> Build Settings and change the platform to Android.
-3. Also in the Build Settings, click Add Open Scenes and remove the original Sample Scene.
-4. Go to Player Settings, and in XR Plug-in Management, go to the Android section and check OpenXR.
-5. Finally, in the Build Settings, click Build And Run to build an APK.
+The cesium-unity-samples project has several scenes that help you to quickly get running with Cesium for Unity. Go to `File -> Open Scene`, navigate to the `Scenes` directory, and select one of the sample scenes.
 
 ## Packaging Cesium for Unity
 

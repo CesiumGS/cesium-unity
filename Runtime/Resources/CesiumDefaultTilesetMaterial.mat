@@ -34,8 +34,7 @@ Material:
   m_CustomRenderQueue: -1
   stringTagMap:
     RenderType: Opaque
-  disabledShaderPasses:
-  - SHADOWCASTER
+  disabledShaderPasses: []
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -91,7 +90,7 @@ Material:
     m_Floats:
     - _AlphaClip: 0
     - _Blend: 0
-    - _CastShadows: 0
+    - _CastShadows: 1
     - _Cull: 2
     - _DstBlend: 0
     - _HASBASECOLOR: 0
