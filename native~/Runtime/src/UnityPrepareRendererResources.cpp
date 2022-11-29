@@ -1090,7 +1090,10 @@ void UnityPrepareRendererResources::free(
 
     UnityEngine::Transform parentTransform =
         pCesiumGameObject->pGameObject->transform();
-    for (int32_t i = 0, len = parentTransform.childCount(); i < len; ++i) {
+
+    // Destroying primitives will remove them from the child list, so
+    // work backwards.
+    for (int32_t i = parentTransform.childCount() - 1; i >= 0; --i) {
       UnityEngine::GameObject primitiveGameObject =
           parentTransform.GetChild(i).gameObject();
       freePrimitiveGameObject(primitiveGameObject, metadataComponent);
