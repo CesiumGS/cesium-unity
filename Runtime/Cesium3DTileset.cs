@@ -488,27 +488,27 @@ namespace CesiumForUnity
         //    }
         //}
 
-        [SerializeField]
-        private bool _generateSmoothNormals = false;
+        // [SerializeField]
+        // private bool _generateSmoothNormals = false;
 
-        /// <summary>
-        /// Whether to generate smooth normals when normals are missing in the glTF.
-        /// </summary>
-        /// <remarks>
-        /// According to the glTF spec: "When normals are not specified, client
-        /// implementations should calculate flat normals." However, calculating flat
-        /// normals requires duplicating vertices. This option allows the glTFs to be rendered
-        /// with smooth normals instead when the original glTF is missing normals.
-        /// </remarks>
-        public bool generateSmoothNormals
-        {
-            get => this._generateSmoothNormals;
-            set
-            {
-                this._generateSmoothNormals = value;
-                this.RecreateTileset();
-            }
-        }
+        // /// <summary>
+        // /// Whether to generate smooth normals when normals are missing in the glTF.
+        // /// </summary>
+        // /// <remarks>
+        // /// According to the glTF spec: "When normals are not specified, client
+        // /// implementations should calculate flat normals." However, calculating flat
+        // /// normals requires duplicating vertices. This option allows the glTFs to be rendered
+        // /// with smooth normals instead when the original glTF is missing normals.
+        // /// </remarks>
+        // public bool generateSmoothNormals
+        // {
+        //     get => this._generateSmoothNormals;
+        //     set
+        //     {
+        //         this._generateSmoothNormals = value;
+        //         this.RecreateTileset();
+        //     }
+        // }
 
         [SerializeField]
         private bool _suspendUpdate = false;
