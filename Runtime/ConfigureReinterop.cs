@@ -111,6 +111,10 @@ namespace CesiumForUnity
             texture2D.anisoLevel = 16;
             texture2D.filterMode = FilterMode.Trilinear;
             Texture texture = texture2D;
+            texture.wrapModeU = texture.wrapModeU;
+            texture.wrapModeV = texture.wrapModeV;
+            texture.wrapModeW = texture.wrapModeW;
+            
 
             Mesh mesh = new Mesh();
             Mesh[] meshes = new[] { mesh };
