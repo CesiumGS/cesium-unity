@@ -5,11 +5,11 @@
 
 #include <DotNet/Unity/Collections/LowLevel/Unsafe/NativeArrayUnsafeUtility.h>
 #include <DotNet/Unity/Collections/NativeArray1.h>
+#include <DotNet/UnityEngine/FilterMode.h>
 #include <DotNet/UnityEngine/Texture.h>
 #include <DotNet/UnityEngine/Texture2D.h>
 #include <DotNet/UnityEngine/TextureFormat.h>
 #include <DotNet/UnityEngine/TextureWrapMode.h>
-#include <DotNet/UnityEngine/FilterMode.h>
 
 #include <cstring>
 
@@ -64,7 +64,7 @@ UnityEngine::Texture TextureLoader::loadTexture(
 
   const ImageCesium& imageCesium = pImage->cesium;
   UnityEngine::Texture unityTexture = loadTexture(imageCesium);
-  
+
   const Sampler* pSampler = Model::getSafe(&model.samplers, texture.sampler);
   if (pSampler) {
     switch (pSampler->wrapS) {
@@ -92,7 +92,7 @@ UnityEngine::Texture TextureLoader::loadTexture(
     }
 
     if (!pSampler->minFilter) {
-      if (pSampler->magFilter && 
+      if (pSampler->magFilter &&
           *pSampler->magFilter == Sampler::MagFilter::NEAREST) {
         unityTexture.filterMode(UnityEngine::FilterMode::Point);
       } else {
@@ -100,22 +100,22 @@ UnityEngine::Texture TextureLoader::loadTexture(
       }
     } else {
       switch (*pSampler->minFilter) {
-        case Sampler::MinFilter::NEAREST:
-        case Sampler::MinFilter::NEAREST_MIPMAP_NEAREST:
-          unityTexture.filterMode(UnityEngine::FilterMode::Point);
-          break;
-        case Sampler::MinFilter::LINEAR:
-        case Sampler::MinFilter::LINEAR_MIPMAP_NEAREST:
-          unityTexture.filterMode(UnityEngine::FilterMode::Bilinear);
-          break;
-        // case Sampler::MinFilter::LINEAR_MIPMAP_LINEAR:
-        // case Sampler::MinFilter::NEAREST_MIPMAP_LINEAR:
-        default:
-          unityTexture.filterMode(UnityEngine::FilterMode::Trilinear);
+      case Sampler::MinFilter::NEAREST:
+      case Sampler::MinFilter::NEAREST_MIPMAP_NEAREST:
+        unityTexture.filterMode(UnityEngine::FilterMode::Point);
+        break;
+      case Sampler::MinFilter::LINEAR:
+      case Sampler::MinFilter::LINEAR_MIPMAP_NEAREST:
+        unityTexture.filterMode(UnityEngine::FilterMode::Bilinear);
+        break;
+      // case Sampler::MinFilter::LINEAR_MIPMAP_LINEAR:
+      // case Sampler::MinFilter::NEAREST_MIPMAP_LINEAR:
+      default:
+        unityTexture.filterMode(UnityEngine::FilterMode::Trilinear);
       }
     }
 
-    // Use anisotropic filtering if we have mipmaps.    
+    // Use anisotropic filtering if we have mipmaps.
     switch (pSampler->minFilter.value_or(
         CesiumGltf::Sampler::MinFilter::LINEAR_MIPMAP_LINEAR)) {
     case CesiumGltf::Sampler::MinFilter::LINEAR_MIPMAP_LINEAR:
