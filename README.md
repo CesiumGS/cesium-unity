@@ -1,12 +1,12 @@
 [![Cesium for Unity Logo](Documentation~/images/Cesium_for_Unity-Logo-WhiteBGH.jpg)](https://cesium.com/)
 
-Cesium for Unity brings the 3D geospatial ecosystem to Unity. By combining a high-accuracy full-scale WGS84 globe, open APIs and open standards for spatial indexing such as 3D Tiles, and cloud-based real-world content from [Cesium ion](https://cesium.com/cesium-ion) with Unity, this plugin enables 3D geospatial workflows and applications in Unity.
+Cesium for Unity enables building 3D geospatial applications and experiences with 3D Tiles and open standards using Unity 3D. By combining a high-accuracy full-scale WGS84 globe, open APIs and open standards for spatial indexing such as 3D Tiles, and cloud-based real-world content from [Cesium ion](https://cesium.com/cesium-ion) with Unity, this plugin enables rich 3D geospatial workflows and applications in Unity.
 
 [Cesium for Unity Homepage](https://cesium.com/platform/cesium-for-unity?utm_source=github&utm_medium=github&utm_campaign=unity)
 
 ### :rocket: Get Started
 
-**[Download Cesium for Unity Samples](https://github.com/CesiumGS/cesium-unity/releases)**
+**[Download Cesium for Unity Samples](https://github.com/CesiumGS/cesium-unity-samples/releases/latest)**
 
 **[Follow the Quickstart](https://cesium.com/learn/unity/unity-quickstart/)**
 
@@ -22,13 +22,13 @@ Cesium for Unity streams real-world 3D content such as high-resolution photogram
 
 Cesium for Unity supports cloud and private network content and services based on open standards and APIs. You are free to use any combination of supported content sources, standards, APIs with Cesium for Unity.
 
-![Cesium for Unity Architecture](Documentation~/images/Cesium_for_Unity_Architecture.jpg)
+![Cesium for Unity Architecture](./Documentation~/images/integration-workflow_Unity.png)
 
 Using Cesium ion helps support Cesium for Unity development. :heart:
 
 ### :chains: Unity Integration
 
-Cesium for Unity is tightly integrated with Unity making it possible to visualize and interact with real-world content in editor and at runtime. The plugin also has support for Unity physics, collisions, and character interaction. Leverage decades worth of cutting-edge advancements in Unity and geospatial to create cohesive, interactive, and realistic simulations and applications with Cesium for Unity.
+Cesium for Unity is tightly integrated with Unity making it possible to visualize and interact with real-world content in editor and at runtime. The plugin also has support for Unity game objects, physics, collisions, and character interaction. Leverage decades worth of cutting-edge advancements in Unity and geospatial to create cohesive, interactive, and realistic simulations and applications with Cesium for Unity.
 
 ### :green_book: License
 
