@@ -323,7 +323,9 @@ namespace Build
                 "CHANGES.md",
                 "CHANGES.md.meta",
                 "Runtime.meta",
-                "Tests.meta"
+                "Tests.meta",
+                "ThirdParty.json",
+                "ThirdParty.json.meta"
             };
 
             foreach (string file in filesToCopy)
