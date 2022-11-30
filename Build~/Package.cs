@@ -320,6 +320,8 @@ namespace Build
                 "Plugins.meta",
                 "README.md",
                 "README.md.meta",
+                "CHANGES.md",
+                "CHANGES.md.meta",
                 "Runtime.meta",
                 "Tests.meta"
             };
