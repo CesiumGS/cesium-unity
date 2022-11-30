@@ -469,6 +469,11 @@ namespace CesiumForUnity
             this.StartOrStopDetectingTransformChanges();
         }
 
+        private void OnTransformParentChanged()
+        {
+            this.Sync();
+        }
+
 #endregion
 
 #region Coroutines
