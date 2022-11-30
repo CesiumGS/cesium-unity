@@ -76,26 +76,7 @@
             "m_Id": "7de6510c684046cb8ace0a0049c1c2f7"
         }
     ],
-    "m_Keywords": [
-        {
-            "m_Id": "1679e449a79d4f5f98573c53b0ae98c9"
-        },
-        {
-            "m_Id": "a6adc6e16aa34416b597e61664c4ffd2"
-        },
-        {
-            "m_Id": "d2dbe1ce118e432488d1d42c773c4e8e"
-        },
-        {
-            "m_Id": "7c44c52a3cb24724a8d3753aebb093c4"
-        },
-        {
-            "m_Id": "fe8b62e4ea9642b5a2c78827e83b3f75"
-        },
-        {
-            "m_Id": "938d30cd4a84481e9b0f2135fc5237bd"
-        }
-    ],
+    "m_Keywords": [],
     "m_Dropdowns": [],
     "m_CategoryData": [
         {
@@ -1698,30 +1679,6 @@
         "x": 0.0,
         "y": 1.0
     }
-}
-
-{
-    "m_SGVersion": 1,
-    "m_Type": "UnityEditor.ShaderGraph.ShaderKeyword",
-    "m_ObjectId": "1679e449a79d4f5f98573c53b0ae98c9",
-    "m_Guid": {
-        "m_GuidSerialized": "8688f38a-2340-4a8c-b693-808700a86b8d"
-    },
-    "m_Name": "HASBASECOLOR",
-    "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "HASBASECOLOR",
-    "m_DefaultReferenceName": "_HASBASECOLOR",
-    "m_OverrideReferenceName": "_HASBASECOLOR_ON",
-    "m_GeneratePropertyBlock": false,
-    "m_UseCustomSlotLabel": false,
-    "m_CustomSlotLabel": "",
-    "m_KeywordType": 0,
-    "m_KeywordDefinition": 0,
-    "m_KeywordScope": 0,
-    "m_KeywordStages": 63,
-    "m_Entries": [],
-    "m_Value": 0,
-    "m_IsEditable": true
 }
 
 {
@@ -3850,9 +3807,6 @@
             "m_Id": "6f7975d05f0e490c85685da73a7d1657"
         },
         {
-            "m_Id": "1679e449a79d4f5f98573c53b0ae98c9"
-        },
-        {
             "m_Id": "598ab387339a4cce8002387e6c00e3f9"
         },
         {
@@ -3862,25 +3816,16 @@
             "m_Id": "a8b280220caf41ffbb8b087ac44a23ed"
         },
         {
-            "m_Id": "a6adc6e16aa34416b597e61664c4ffd2"
-        },
-        {
             "m_Id": "bfc65ac9b9c54affac3f90f53d623591"
         },
         {
             "m_Id": "cc08e4ccb6ff4e449415b92130856196"
         },
         {
-            "m_Id": "d2dbe1ce118e432488d1d42c773c4e8e"
-        },
-        {
             "m_Id": "4e0650c964aa42ea98069648953d928d"
         },
         {
             "m_Id": "965bf93aed2947908ec82cf30287ea9d"
-        },
-        {
-            "m_Id": "7c44c52a3cb24724a8d3753aebb093c4"
         },
         {
             "m_Id": "aa996c40f4d44a7fa509717977b8c9ff"
@@ -3890,12 +3835,6 @@
         },
         {
             "m_Id": "5a121aaee7a340748e40ddcaf811d129"
-        },
-        {
-            "m_Id": "fe8b62e4ea9642b5a2c78827e83b3f75"
-        },
-        {
-            "m_Id": "938d30cd4a84481e9b0f2135fc5237bd"
         },
         {
             "m_Id": "e3bbd79339e64d009e31960a31e3ff05"
@@ -4292,30 +4231,6 @@
     ],
     "m_Dropdowns": [],
     "m_DropdownSelectedEntries": []
-}
-
-{
-    "m_SGVersion": 1,
-    "m_Type": "UnityEditor.ShaderGraph.ShaderKeyword",
-    "m_ObjectId": "7c44c52a3cb24724a8d3753aebb093c4",
-    "m_Guid": {
-        "m_GuidSerialized": "073198e0-f5d0-4bda-81d9-c38072392250"
-    },
-    "m_Name": "HASNORMALMAP",
-    "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "HASNORMALMAP",
-    "m_DefaultReferenceName": "_HASNORMALMAP",
-    "m_OverrideReferenceName": "_HASNORMALMAP_ON",
-    "m_GeneratePropertyBlock": false,
-    "m_UseCustomSlotLabel": false,
-    "m_CustomSlotLabel": "",
-    "m_KeywordType": 0,
-    "m_KeywordDefinition": 0,
-    "m_KeywordScope": 0,
-    "m_KeywordStages": 63,
-    "m_Entries": [],
-    "m_Value": 0,
-    "m_IsEditable": true
 }
 
 {
@@ -5113,51 +5028,6 @@
 }
 
 {
-    "m_SGVersion": 1,
-    "m_Type": "UnityEditor.ShaderGraph.ShaderKeyword",
-    "m_ObjectId": "938d30cd4a84481e9b0f2135fc5237bd",
-    "m_Guid": {
-        "m_GuidSerialized": "97432230-ed68-4a25-a845-78395efa3fb8"
-    },
-    "m_Name": "OVERLAYCOUNT",
-    "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "OVERLAYCOUNT",
-    "m_DefaultReferenceName": "_OVERLAYCOUNT",
-    "m_OverrideReferenceName": "",
-    "m_GeneratePropertyBlock": false,
-    "m_UseCustomSlotLabel": false,
-    "m_CustomSlotLabel": "",
-    "m_KeywordType": 1,
-    "m_KeywordDefinition": 0,
-    "m_KeywordScope": 0,
-    "m_KeywordStages": 63,
-    "m_Entries": [
-        {
-            "id": 4,
-            "displayName": "NONE",
-            "referenceName": "NONE"
-        },
-        {
-            "id": 2,
-            "displayName": "ONE",
-            "referenceName": "ONE"
-        },
-        {
-            "id": 3,
-            "displayName": "TWO",
-            "referenceName": "TWO"
-        },
-        {
-            "id": 5,
-            "displayName": "THREE",
-            "referenceName": "THREE"
-        }
-    ],
-    "m_Value": 0,
-    "m_IsEditable": true
-}
-
-{
     "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.Internal.Texture2DShaderProperty",
     "m_ObjectId": "965bf93aed2947908ec82cf30287ea9d",
@@ -5575,30 +5445,6 @@
         "w": 0.0
     },
     "m_Labels": []
-}
-
-{
-    "m_SGVersion": 1,
-    "m_Type": "UnityEditor.ShaderGraph.ShaderKeyword",
-    "m_ObjectId": "a6adc6e16aa34416b597e61664c4ffd2",
-    "m_Guid": {
-        "m_GuidSerialized": "85f17a4f-bebe-41e9-b6e9-25e763fd9fa6"
-    },
-    "m_Name": "HASMETALLICROUGHNESS",
-    "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "HASMETALLICROUGHNESS",
-    "m_DefaultReferenceName": "_HASMETALLICROUGHNESS",
-    "m_OverrideReferenceName": "_HASMETALLICROUGHNESS_ON",
-    "m_GeneratePropertyBlock": false,
-    "m_UseCustomSlotLabel": false,
-    "m_CustomSlotLabel": "",
-    "m_KeywordType": 0,
-    "m_KeywordDefinition": 0,
-    "m_KeywordScope": 0,
-    "m_KeywordStages": 63,
-    "m_Entries": [],
-    "m_Value": 0,
-    "m_IsEditable": true
 }
 
 {
@@ -6779,30 +6625,6 @@
     "m_Property": {
         "m_Id": "bfc65ac9b9c54affac3f90f53d623591"
     }
-}
-
-{
-    "m_SGVersion": 1,
-    "m_Type": "UnityEditor.ShaderGraph.ShaderKeyword",
-    "m_ObjectId": "d2dbe1ce118e432488d1d42c773c4e8e",
-    "m_Guid": {
-        "m_GuidSerialized": "8635e7cf-d9cc-40ec-828f-50d938335117"
-    },
-    "m_Name": "HASOCCLUSION",
-    "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "HASOCCLUSION",
-    "m_DefaultReferenceName": "_HASOCCLUSION",
-    "m_OverrideReferenceName": "_HASOCCLUSION_ON",
-    "m_GeneratePropertyBlock": false,
-    "m_UseCustomSlotLabel": false,
-    "m_CustomSlotLabel": "",
-    "m_KeywordType": 0,
-    "m_KeywordDefinition": 0,
-    "m_KeywordScope": 0,
-    "m_KeywordStages": 63,
-    "m_Entries": [],
-    "m_Value": 0,
-    "m_IsEditable": true
 }
 
 {
@@ -7989,30 +7811,6 @@
     "m_Labels": [
         "Z"
     ]
-}
-
-{
-    "m_SGVersion": 1,
-    "m_Type": "UnityEditor.ShaderGraph.ShaderKeyword",
-    "m_ObjectId": "fe8b62e4ea9642b5a2c78827e83b3f75",
-    "m_Guid": {
-        "m_GuidSerialized": "27432a4c-19b5-4a6e-8073-868a8c5b2ad2"
-    },
-    "m_Name": "HASEMISSIVE",
-    "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "HASEMISSIVE",
-    "m_DefaultReferenceName": "_HASEMISSIVE",
-    "m_OverrideReferenceName": "_HASEMISSIVE_ON",
-    "m_GeneratePropertyBlock": false,
-    "m_UseCustomSlotLabel": false,
-    "m_CustomSlotLabel": "",
-    "m_KeywordType": 0,
-    "m_KeywordDefinition": 0,
-    "m_KeywordScope": 0,
-    "m_KeywordStages": 63,
-    "m_Entries": [],
-    "m_Value": 0,
-    "m_IsEditable": true
 }
 
 {
