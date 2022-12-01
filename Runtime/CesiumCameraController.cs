@@ -9,6 +9,11 @@ using UnityEngine.InputSystem;
 
 namespace CesiumForUnity
 {
+    /// <summary>
+    /// A camera controller that can easily move around the globe while maintaining a
+    /// sensible orientation. As the camera moves across the horizon, it automatically
+    /// changes its own up direction such that the world always looks right-side up.
+    /// </summary>
     public class CesiumCameraController : MonoBehaviour
     {
         #region User-editable properties
@@ -129,6 +134,7 @@ namespace CesiumForUnity
 
         #region Private variables
 
+        private CharacterController _controller;
         private CesiumGeoreference _georeference;
         private CesiumGlobeAnchor _globeAnchor;
 
@@ -185,10 +191,21 @@ namespace CesiumForUnity
 
         #endregion
 
-        #region Monobehaviour Functions
+        #region MonoBehaviour Functions
 
         void OnEnable()
         {
+            this._controller = this.gameObject.GetComponent<CharacterController>();
+            if(this._controller == null)
+            {
+                this._controller = this.gameObject.AddComponent<CharacterController>();
+            }
+
+            this._controller.radius = 1.0f;
+            this._controller.height = 1.0f;
+            this._controller.center = Vector3.zero;
+            this._controller.detectCollisions = true;
+
             this._georeference = this.gameObject.GetComponentInParent<CesiumGeoreference>();
             if (this._georeference == null)
             {
@@ -197,12 +214,13 @@ namespace CesiumForUnity
                     "with a CesiumGeoreference.");
             }
 
-            this._globeAnchor = this.gameObject.GetComponent<CesiumGlobeAnchor>();
-            if (this._globeAnchor == null)
+            if(this.gameObject.GetComponent<CesiumOriginShift>() == null)
             {
-                Debug.LogError(
-                    "CesiumCameraController must also have a CesiumGlobeAnchor component to work.");
+                this.gameObject.AddComponent<CesiumOriginShift>();
             }
+
+            // Adding a CesiumOriginShift also adds a CesiumGlobeAnchor automatically.
+            this._globeAnchor = this.gameObject.GetComponent<CesiumGlobeAnchor>();
 
             #if ENABLE_INPUT_SYSTEM
             ConfigureInputs();
@@ -221,9 +239,10 @@ namespace CesiumForUnity
 
         #endregion
 
-        #region Movement
+        #region Player movement
 
         private float _mouseSensitivity = 0.2f;
+        private float _movementSpeed = 24.0f;
 
         private void HandlePlayerInputs()
         {
@@ -250,15 +269,28 @@ namespace CesiumForUnity
             float inputUp = Input.GetAxis("YAxis");
 #endif
 
-            // These inputs may seem flipped, but rotation around the Y-axis
-            // corresponds to lateral rotation, while rotation around the X-axis
-            // corresponds to vertical rotation.
-            this.Rotate(inputRotateAxisY, inputRotateAxisX);
+            if (!this._flyingToLocation)
+            {
+                // The rotation inputs may seem flipped, but this is correct.
+                // The X-movement of the mouse corresponds to rotation around the Y-axis,
+                // while the Y-movement of the mouse corresponds to rotation around the X-axis.
+                this.Rotate(inputRotateAxisY, inputRotateAxisX);
+            }
+
             this.MoveForward(inputForward);
             this.MoveRight(inputRight);
             this.MoveUp(inputUp);
         }
 
+        /// <summary>
+        /// Rotate the camera around its local X- and Y-axes with the specified amounts.
+        /// </summary>
+        /// <remarks>
+        /// Rotation around the X-axis corresponds to vertical rotation (i.e. looking up or down).
+        /// Rotation around the Y-axis corresponds to lateral rotation (i.e. looking left or right).
+        /// </remarks>
+        /// <param name="valueX">The amount to rotate around the X-axis.</param>
+        /// <param name="valueY">The amount to rotate around the Y-axis.</param>
         void Rotate(float valueX, float valueY)
         {
             if(valueX == 0.0f && valueY == 0.0f)
@@ -266,18 +298,18 @@ namespace CesiumForUnity
                 return;
             }
 
-            float newRotationX = this.transform.localEulerAngles.x - valueX;
-            newRotationX = Mathf.Clamp(newRotationX, 0.0f, 180.0f); // TODO: positive rotation goes down towards ground, not up.
+            // Rotation around the X-axis occurs counter-clockwise, so the look range of the camera
+            // maps to [270, 360] degrees for the upper hemisphere of motion, and [0, 90] degrees
+            // for the lower. Euler angles only work with positive values, so map the [0, 90] range
+            // to [360, 450] instead to easily clamp the values.
+            float rotationX = this.transform.localEulerAngles.x;
+            if(rotationX <= 90.0f)
+            {
+                rotationX += 360.0f;
+            }
 
+            float newRotationX = Mathf.Clamp(rotationX - valueX, 270.0f, 450.0f);
             float newRotationY = this.transform.localEulerAngles.y + valueY;
-
-            // Weird clamping code due to weird Euler angle mapping...
-            /*if (rotationX <= 90.0f && newRotationX >= 0.0f)
-                newRotationX = Mathf.Clamp(newRotationX, 0.0f, 90.0f);
-            if (rotationX >= 270.0f)
-                newRotationX = Mathf.Clamp(newRotationX, 270.0f, 360.0f);
-            */
-
             this.transform.localRotation = Quaternion.Euler(newRotationX, newRotationY, this.transform.localEulerAngles.z);
         }
 
@@ -323,7 +355,7 @@ namespace CesiumForUnity
 
         private void MoveAlongVector(Vector3 vector, float value)
         {
-            this.transform.position += vector * value;
+            this._controller.Move(vector * value * Time.deltaTime * this._movementSpeed);
 
             if (this._flyingToLocation && this._canInterruptFlight)
             {
@@ -333,7 +365,7 @@ namespace CesiumForUnity
 
         #endregion
 
-        #region Fly-To private helpers
+        #region Fly-To helper functions
         /// <summary>
         /// Advance the camera flight based on the given time delta.
         /// </summary>
@@ -377,7 +409,10 @@ namespace CesiumForUnity
                 this._flyingToLocation = false;
                 this._currentFlyToTime = 0.0;
 
-                OnFlightComplete();
+                if(OnFlightComplete != null)
+                {
+                    OnFlightComplete();
+                }
 
                 return;
             }
@@ -429,7 +464,10 @@ namespace CesiumForUnity
             angles.z = 0.0f;
             this.transform.eulerAngles = angles;
 
-            OnFlightInterrupted();
+            if(OnFlightInterrupted != null)
+            {
+                OnFlightInterrupted();
+            }
         }
 
         private void ComputeFlightPath(
@@ -536,7 +574,7 @@ namespace CesiumForUnity
 
         #region Fly-To public API
 
-        public void FlyToLocationEarthCenteredEarthFixed(
+        internal void FlyToLocationEarthCenteredEarthFixed(
             double3 destination,
             float yawAtDestination,
             float pitchAtDestination,
@@ -582,7 +620,7 @@ namespace CesiumForUnity
                 canInterruptByMoving);
         }
 
-        public void FlyToLocationLongitudeLatitudeHeight(
+        internal void FlyToLocationLongitudeLatitudeHeight(
             double3 destination,
             float yawAtDestination,
             float pitchAtDestination,
