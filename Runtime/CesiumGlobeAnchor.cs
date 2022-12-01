@@ -332,7 +332,7 @@ namespace CesiumForUnity
 
         #endregion
 
-        #region Set Helpers
+#region Set Helpers
 
         /// <summary>
         /// Sets the position of this object to a particular <see cref="longitude"/>,
