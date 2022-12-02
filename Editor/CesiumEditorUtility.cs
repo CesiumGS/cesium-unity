@@ -299,6 +299,8 @@ namespace CesiumForUnity
                 positionECEF.y,
                 positionECEF.z);
 
+            georeference.UpdateOrigin();
+
             double3 newCameraForwardUnity =
                 georeference.TransformEarthCenteredEarthFixedDirectionToUnity(cameraForwardEcef);
 
