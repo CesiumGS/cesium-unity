@@ -46,7 +46,7 @@ namespace Reinterop
                 accessName += $"<{string.Join(", ", method.TypeArguments.Select(t => t.ToDisplayString()))}>";
             }
 
-            var callParameterDetails = parameters.Select(parameter => (Name: parameter.Name, Type: CSharpType.FromSymbol(context, parameter.Type), InteropType: CSharpType.FromSymbol(context, parameter.Type).AsInteropType()));
+            var callParameterDetails = parameters.Select(parameter => (Name: parameter.Name, Type: CSharpType.FromSymbol(context, parameter.Type), InteropType: CSharpType.FromSymbol(context, parameter.Type).AsInteropTypeParameter()));
             var interopParameterDetails = callParameterDetails;
 
             string invocationTarget;
@@ -61,7 +61,7 @@ namespace Reinterop
             else if (!method.IsStatic && csType.Kind == InteropTypeKind.NonBlittableStructWrapper)
             {
                 // Structs must be unboxed, modified, and then reboxed.
-                interopParameterDetails = new[] { (Name: "thiz", Type: csType, InteropType: csType.AsInteropType()) }.Concat(interopParameterDetails);
+                interopParameterDetails = new[] { (Name: "thiz", Type: csType, InteropType: csType.AsInteropTypeParameter()) }.Concat(interopParameterDetails);
                 beforeInvocation = $"var thizUnboxed = {csType.GetParameterConversionFromInteropType("thiz")};";
                 invocationTarget = $"thizUnboxed{accessName}";
                 afterInvocation = $"Reinterop.ObjectHandleUtility.ResetHandleObject(thiz, thizUnboxed);";
@@ -69,7 +69,7 @@ namespace Reinterop
             else if (!method.IsStatic)
             {
                 // Instance method or property
-                interopParameterDetails = new[] { (Name: "thiz", Type: csType, InteropType: csType.AsInteropType()) }.Concat(interopParameterDetails);
+                interopParameterDetails = new[] { (Name: "thiz", Type: csType, InteropType: csType.AsInteropTypeParameter()) }.Concat(interopParameterDetails);
                 invocationTarget = $"({csType.GetParameterConversionFromInteropType("thiz")}){accessName}";
             }
             else
@@ -79,17 +79,20 @@ namespace Reinterop
             }
 
             CSharpType csReturnType = CSharpType.FromSymbol(context, returnType);
-            CSharpType csInteropReturnType = csReturnType.AsInteropType();
+            CSharpType csInteropReturnType = csReturnType.AsInteropTypeReturn();
 
             // Rewrite methods that return a blittable struct to instead taking a pointer to one.
             // See Interop.RewriteStructReturn in this file for the C++ side of this and more
             // explanation of why it's needed.
             bool hasStructRewrite = false;
-            if (csReturnType.Kind == InteropTypeKind.BlittableStruct)
+            CSharpType csOriginalInteropReturnType = csInteropReturnType;
+            if (csReturnType.Kind == InteropTypeKind.BlittableStruct || csReturnType.Kind == InteropTypeKind.Nullable)
             {
                 hasStructRewrite = true;
-                CSharpType csOriginalInteropReturnType = csInteropReturnType;
-                csInteropReturnType = CSharpType.FromSymbol(context, context.Compilation.GetSpecialType(SpecialType.System_Void));
+                if (csReturnType.Kind == InteropTypeKind.Nullable)
+                    csInteropReturnType = CSharpType.FromSymbol(context, context.Compilation.GetSpecialType(SpecialType.System_Byte));
+                else
+                    csInteropReturnType = CSharpType.FromSymbol(context, context.Compilation.GetSpecialType(SpecialType.System_Void));
                 interopParameterDetails = interopParameterDetails.Concat(new[]
                 {
                     (Name: "pReturnValue", Type: csReturnType, InteropType: csOriginalInteropReturnType.AsPointer())
@@ -127,7 +130,10 @@ namespace Reinterop
 
                 if (hasStructRewrite)
                 {
-                    implementation += Environment.NewLine + $"*pReturnValue = result;";
+                    if (csReturnType.Kind == InteropTypeKind.Nullable)
+                        implementation += Environment.NewLine + $$"""if (result != null) { *pReturnValue = ({{csOriginalInteropReturnType.GetFullyQualifiedName()}})result; return 1; } else { return 0; }""";
+                    else
+                        implementation += Environment.NewLine + $"*pReturnValue = result;";
                 }
                 else
                 {
@@ -201,8 +207,11 @@ namespace Reinterop
                     {{beforeInvocation}}
                     var result = {{invocationTarget}}({{callParameterList}});
                     {{afterInvocation}}
-                    *pReturnValue = result;
                     """;
+                if (csReturnType.Kind == InteropTypeKind.Nullable)
+                    implementation += Environment.NewLine + $$"""if (result != null) { *pReturnValue = ({{csOriginalInteropReturnType.GetFullyQualifiedName()}})result; return 1; } else { return 0; }""";
+                else
+                    implementation += Environment.NewLine + $"*pReturnValue = result;";
             }
             else
             {
@@ -256,14 +265,14 @@ namespace Reinterop
 
             string accessName = field.Name;
 
-            var callParameterDetails = parameters.Select(parameter => (Name: parameter.Name, Type: CSharpType.FromSymbol(context, parameter.Type), InteropType: CSharpType.FromSymbol(context, parameter.Type).AsInteropType()));
+            var callParameterDetails = parameters.Select(parameter => (Name: parameter.Name, Type: CSharpType.FromSymbol(context, parameter.Type), InteropType: CSharpType.FromSymbol(context, parameter.Type).AsInteropTypeParameter()));
             var interopParameterDetails = callParameterDetails;
 
             string invocationTarget;
             if (!field.IsStatic)
             {
                 // Instance method or property
-                interopParameterDetails = new[] { (Name: "thiz", Type: csType, InteropType: csType.AsInteropType()) }.Concat(interopParameterDetails);
+                interopParameterDetails = new[] { (Name: "thiz", Type: csType, InteropType: csType.AsInteropTypeParameter()) }.Concat(interopParameterDetails);
                 invocationTarget = $"(({csType.GetFullyQualifiedName()})ObjectHandleUtility.GetObjectFromHandle(thiz)!).{accessName}";
             }
             else
@@ -273,7 +282,7 @@ namespace Reinterop
             }
 
             CSharpType csReturnType = CSharpType.FromSymbol(context, returnType);
-            CSharpType csInteropReturnType = csReturnType.AsInteropType();
+            CSharpType csInteropReturnType = csReturnType.AsInteropTypeParameter();
             string interopReturnTypeString = csInteropReturnType.GetFullyQualifiedName();
 
             string callParameterList = string.Join(", ", callParameterDetails.Select(parameter => parameter.Type.GetParameterConversionFromInteropType(parameter.Name)));
@@ -422,7 +431,10 @@ namespace Reinterop
                     return InteropTypeKind.Primitive;
             }
 
-            if (SymbolEqualityComparer.Default.Equals(type.BaseType, context.Compilation.GetSpecialType(SpecialType.System_Enum))) {
+            INamedTypeSymbol? named = type as INamedTypeSymbol;
+            if (named != null && named.Name == "Nullable" && named.TypeArguments.Length == 1)
+                return InteropTypeKind.Nullable;
+            else if (SymbolEqualityComparer.Default.Equals(type.BaseType, context.Compilation.GetSpecialType(SpecialType.System_Enum))) {
               if (type.GetAttributes().Where(attrib => attrib.AttributeClass != null && (attrib.AttributeClass.Name == "FlagsAttribute" || attrib.AttributeClass.Name == "Flags")).Any()) { 
                 return InteropTypeKind.EnumFlags;
               } else {
@@ -552,18 +564,32 @@ namespace Reinterop
         /// <returns>True if the method has been rewritten, otherwise false.</returns>
         public static bool RewriteStructReturn(ref IEnumerable<(string ParameterName, string CallSiteName, CppType Type, CppType InteropType)> interopParameters, ref CppType returnType, ref CppType interopReturnType)
         {
-            if (returnType.Kind != InteropTypeKind.BlittableStruct)
-                return false;
-
-            CppType originalInteropReturnType = interopReturnType;
-            interopReturnType = CppType.Void;
-
-            interopParameters = interopParameters.Concat(new[]
+            if (returnType.Kind == InteropTypeKind.BlittableStruct)
             {
-                (ParameterName: "pReturnValue", CallSiteName: "&result", Type: returnType, InteropType: originalInteropReturnType.AsPointer())
-            });
+                CppType originalInteropReturnType = interopReturnType;
+                interopReturnType = CppType.Void;
 
-            return true;
+                interopParameters = interopParameters.Concat(new[]
+                {
+                    (ParameterName: "pReturnValue", CallSiteName: "result", Type: returnType.AsReference(), InteropType: originalInteropReturnType.AsPointer())
+                });
+
+                return true;
+            }
+            else if (returnType.Kind == InteropTypeKind.Nullable && interopReturnType.Kind == InteropTypeKind.BlittableStruct)
+            {
+                CppType originalInteropReturnType = interopReturnType;
+                interopReturnType = CppType.Boolean;
+
+                interopParameters = interopParameters.Concat(new[]
+                {
+                    (ParameterName: "pReturnValue", CallSiteName: "result", Type: originalInteropReturnType.AsReference(), InteropType: originalInteropReturnType.AsPointer())
+                });
+
+                return true;
+            }
+
+            return false;
         }
     }
 }

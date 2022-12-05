@@ -245,9 +245,10 @@ namespace Reinterop
                 string[] invocation = new[] { $"auto result = {interopName}({string.Join(", ", parameterPassStrings)});" };
                 if (hasStructRewrite)
                 {
+                    CppType resultType = returnType.Kind == InteropTypeKind.Nullable ? returnType.GenericArguments.FirstOrDefault() : returnType;
                     invocation = new[]
                     {
-                        $"{returnType.GetFullyQualifiedName()} result;",
+                        $"{resultType.GetFullyQualifiedName()} result;",
                         $"{interopName}({string.Join(", ", parameterPassStrings)});"
                     };
                 }

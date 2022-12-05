@@ -10,6 +10,7 @@
         Enum,
         EnumFlags,
         GenericParameter,
-        Delegate
+        Delegate,
+        Nullable
     }
 }

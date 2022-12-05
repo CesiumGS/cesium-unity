@@ -364,14 +364,17 @@ namespace Reinterop
                     $$"""
                     {{modifiers}} partial {{csReturnType.GetFullyQualifiedName()}} {{method.Name}}({{string.Join(", ", csParameters.Select(parameter => $"{parameter.Type.GetFullyQualifiedName()} {parameter.Name}"))}})
                     {
-                        {{GenerationUtility.JoinAndIndent(new[] { implementationCheck }, "    ")}}
-                        {{new[] { csImplementation }.JoinAndIndent("    ")}}
+                        unsafe
+                        {
+                            {{GenerationUtility.JoinAndIndent(new[] { implementationCheck }, "        ")}}
+                            {{new[] { csImplementation }.JoinAndIndent("        ")}}
+                        }
                     }
                     """,
                 interopFunctionDeclaration:
                     $$"""
                     [DllImport("{{context.NativeLibraryName}}", CallingConvention=CallingConvention.Cdecl)]
-                    private static extern {{csReturnType.AsInteropType().GetFullyQualifiedName()}} {{name}}({{string.Join(", ", csParametersInterop.Select(parameter => parameter.Type.AsInteropType().GetFullyQualifiedName() + " " + parameter.Name))}});
+                    private static unsafe extern {{csReturnType.AsInteropTypeReturn().GetFullyQualifiedName()}} {{name}}({{string.Join(", ", csParametersInterop.Select(parameter => parameter.Type.AsInteropTypeParameter().GetFullyQualifiedName() + " " + parameter.Name))}});
                     """));
         }
     }

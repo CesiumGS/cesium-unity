@@ -55,16 +55,43 @@ namespace Reinterop
             return Symbol.ToDisplayString();
         }
 
-        public CSharpType AsInteropType()
+        private CSharpType AsInteropTypeCommon()
         {
             // C++ doesn't specify the size of a bool, and C# uses different sizes in different contexts.
             // So we explicitly marshal bools as uint8_t / System.Byte.
             if (this.Symbol.SpecialType == SpecialType.System_Boolean)
                 return CSharpType.FromSymbol(Context, Compilation.GetSpecialType(SpecialType.System_Byte));
-            if (this.Kind == InteropTypeKind.ClassWrapper || this.Kind == InteropTypeKind.NonBlittableStructWrapper || this.Kind == InteropTypeKind.Delegate)
+            else if (this.Kind == InteropTypeKind.ClassWrapper || this.Kind == InteropTypeKind.NonBlittableStructWrapper || this.Kind == InteropTypeKind.Delegate)
                 return new CSharpType(Context, InteropTypeKind.Primitive, new string[] { "System" }, Compilation.GetSpecialType(SpecialType.System_IntPtr));
+            else
+                return this;
+        }
 
-            return this;
+        public CSharpType AsInteropTypeParameter()
+        {
+            if (this.Kind == InteropTypeKind.BlittableStruct)
+                return this.AsPointer();
+            else if (this.Kind == InteropTypeKind.Nullable && this.Symbol is INamedTypeSymbol named)
+            {
+                ITypeSymbol? nullabledTypeSymbol = named.TypeArguments.FirstOrDefault();
+                if (nullabledTypeSymbol != null)
+                    return CSharpType.FromSymbol(this.Context, nullabledTypeSymbol).AsPointer();
+                else
+                    return this.AsPointer();
+            }
+            else
+                return this.AsInteropTypeCommon();
+        }
+
+        public CSharpType AsInteropTypeReturn()
+        {
+            if (this.Kind == InteropTypeKind.Nullable && this.Symbol is INamedTypeSymbol named)
+            {
+                ITypeSymbol? nullabledTypeSymbol = named.TypeArguments.FirstOrDefault();
+                if (nullabledTypeSymbol != null)
+                    return CSharpType.FromSymbol(this.Context, nullabledTypeSymbol);
+            }
+            return this.AsInteropTypeCommon();
         }
 
         /// <summary>
@@ -77,6 +104,10 @@ namespace Reinterop
                 return $"{variableName} ? (byte)1 : (byte)0";
             else if (this.Kind == InteropTypeKind.ClassWrapper || this.Kind == InteropTypeKind.NonBlittableStructWrapper || this.Kind == InteropTypeKind.Delegate)
                 return $"Reinterop.ObjectHandleUtility.CreateHandle({variableName})";
+            else if (this.Kind == InteropTypeKind.BlittableStruct)
+                return $"&{variableName}";
+            else if (this.Kind == InteropTypeKind.Nullable)
+                return $"{variableName} == null ? null : &{variableName}";
             else
                 return variableName;
         }
@@ -87,6 +118,10 @@ namespace Reinterop
                 return $"{variableName} != 0";
             else if (this.Kind == InteropTypeKind.ClassWrapper || this.Kind == InteropTypeKind.NonBlittableStructWrapper || this.Kind == InteropTypeKind.Delegate)
                 return $"({this.GetFullyQualifiedName()})Reinterop.ObjectHandleUtility.GetObjectFromHandle({variableName})!";
+            else if (this.Kind == InteropTypeKind.BlittableStruct)
+                return $"*{variableName}";
+            else if (this.Kind == InteropTypeKind.Nullable)
+                return $"{variableName} == null ? null : *{variableName}";
             else
                 return variableName;
         }
