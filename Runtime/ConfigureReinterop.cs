@@ -48,8 +48,6 @@ namespace CesiumForUnity
 
         public void ExposeToCPP()
         {
-            Helpers.Foo(new double3(1.0, 2.0, 3.0));
-
             Camera c = Camera.main;
             Transform t = c.transform;
             Vector3 u = t.up;

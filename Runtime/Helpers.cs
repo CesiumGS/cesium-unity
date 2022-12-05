@@ -8,10 +8,5 @@ namespace CesiumForUnity
         {
             return value.ToString();
         }
-
-        public static double3? Foo(double3? foo)
-        {
-            return foo;
-        }
     }
 }
