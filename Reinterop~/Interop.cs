@@ -579,7 +579,7 @@ namespace Reinterop
             else if (returnType.Kind == InteropTypeKind.Nullable && interopReturnType.Kind == InteropTypeKind.BlittableStruct)
             {
                 CppType originalInteropReturnType = interopReturnType;
-                interopReturnType = CppType.Boolean;
+                interopReturnType = CppType.UInt8;
 
                 interopParameters = interopParameters.Concat(new[]
                 {

@@ -243,14 +243,26 @@ namespace Reinterop
             else
             {
                 string[] invocation = new[] { $"auto result = {interopName}({string.Join(", ", parameterPassStrings)});" };
+                string returnStatement = $"return {returnType.GetConversionFromInteropType(context, "result")};";
                 if (hasStructRewrite)
                 {
-                    CppType resultType = returnType.Kind == InteropTypeKind.Nullable ? returnType.GenericArguments.FirstOrDefault() : returnType;
-                    invocation = new[]
+                    if (returnType.Kind == InteropTypeKind.Nullable)
                     {
-                        $"{resultType.GetFullyQualifiedName()} result;",
-                        $"{interopName}({string.Join(", ", parameterPassStrings)});"
-                    };
+                        invocation = new[]
+                        {
+                            $"{returnType.GenericArguments.FirstOrDefault().GetFullyQualifiedName()} result;",
+                            $"std::uint8_t resultIsValid = {interopName}({string.Join(", ", parameterPassStrings)});"
+                        };
+                        returnStatement = $"return resultIsValid ? std::make_optional(std::move({returnType.GetConversionFromInteropType(context, "result")})) : std::nullopt;";
+                    }
+                    else
+                    {
+                        invocation = new[]
+                        {
+                            $"{returnType.GetFullyQualifiedName()} result;",
+                            $"{interopName}({string.Join(", ", parameterPassStrings)});"
+                        };
+                    }
                 }
 
                 definition.Elements.Add(new(
@@ -258,7 +270,7 @@ namespace Reinterop
                         $$"""
                         {{templatePrefix}}{{returnType.GetFullyQualifiedName()}} {{definition.Type.Name}}{{typeTemplateSpecialization}}::{{method.Name}}{{templateSpecialization}}({{string.Join(", ", parameterStrings)}}){{afterModifiers}} {
                             {{GenerationUtility.JoinAndIndent(invocation, "    ")}}
-                            return {{returnType.GetConversionFromInteropType(context, "result")}};
+                            {{returnStatement}}
                         }
                         """,
                     TypeDefinitionsReferenced: new[]
