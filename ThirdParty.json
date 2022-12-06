@@ -1,0 +1,27 @@
+[
+  {
+    "name": "cesium-native",
+    "url": "https://github.com/CesiumGS/cesium-native",
+    "version": "Latest",
+    "license": ["Apache 2.0"]
+  },
+  {
+    "name": "Font Awesome Icons",
+    "url": "https://fontawesome.com/",
+    "version": "N/A",
+    "license": ["CC BY 4.0 License"],
+    "notes": "See Editor/Resources/FontAwesome/attribution.txt"
+  },
+  {
+    "name": "enum-flags",
+    "url": "https://github.com/grisumbras/enum-flags",
+    "version": "48d25b470ee6971d0db15f020937abf6017ebf51",
+    "license": ["MIT"]
+  },
+  {
+    "name": "HTML Tidy",
+    "url": "https://github.com/htacg/tidy-html5",
+    "version": "5.9.14-next",
+    "license": ["HTML Tidy License"]
+  }
+]
