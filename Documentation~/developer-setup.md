@@ -122,3 +122,13 @@ dotnet run --project Build~
 ```
 
 On success, the built .tar.gz package is found in the root directory of the project (e.g. `c:\cesium\CesiumForUnityBuildProject`).
+
+## Running Tests
+
+In the Unity Editor, go to Window -> General -> Test Runner. Switch to the "Play Mode" tests and click "Run All".
+
+You can also run the Cesium for Unity tests when the plugin is installed from the Package Manager. In this case, the tests won't show up in the Test Runner by default, though. To make them appear, edit the project's `Packages/manifest.json` file and add the following property to the JSON:
+
+```
+"testables": ["com.cesium.unity"]
+```
