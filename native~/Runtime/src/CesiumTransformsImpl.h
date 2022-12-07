@@ -16,9 +16,6 @@ public:
   static DotNet::Unity::Mathematics::double3
   EarthCenteredEarthFixedToLongitudeLatitudeHeight(
       DotNet::Unity::Mathematics::double3 earthCenteredEarthFixed);
-  static DotNet::Unity::Mathematics::double3
-  ScaleCartesianToEllipsoidGeodeticSurface(
-      DotNet::Unity::Mathematics::double3 cartesian);
 };
 
 } // namespace CesiumForUnityNative

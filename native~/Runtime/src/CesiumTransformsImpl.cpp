@@ -24,9 +24,9 @@ double3 CesiumTransformsImpl::EarthCenteredEarthFixedToLongitudeLatitudeHeight(
     double3 earthCenteredEarthFixed) {
   std::optional<Cartographic> result =
       Ellipsoid::WGS84.cartesianToCartographic(glm::dvec3(
-          earthCenteredEarthFixed.x(),
-          earthCenteredEarthFixed.y(),
-          earthCenteredEarthFixed.z()));
+          earthCenteredEarthFixed.x,
+          earthCenteredEarthFixed.y,
+          earthCenteredEarthFixed.z));
   if (result) {
     return double3{
         Math::radiansToDegrees(result->longitude),
@@ -35,18 +35,6 @@ double3 CesiumTransformsImpl::EarthCenteredEarthFixedToLongitudeLatitudeHeight(
   } else {
     return double3{0.0, 0.0, 0.0};
   }
-}
-
-double3 CesiumTransformsImpl::ScaleCartesianToEllipsoidGeodeticSurface(
-    double3 cartesian) {
-  const Ellipsoid& ellipsoid = Ellipsoid::WGS84;
-  const glm::dvec3 glmCartesian(cartesian.x(), cartesian.y(), cartesian.z());
-  auto result = ellipsoid.scaleToGeodeticSurface(glmCartesian);
-  if (result) {
-    return double3{result->x, result->y, result->z};
-  }
-
-  return nullptr;
 }
 
 } // namespace CesiumForUnityNative
