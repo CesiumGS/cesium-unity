@@ -47,6 +47,14 @@ namespace Reinterop
 
         public static CppType FromCSharp(CppGenerationContext context, ITypeSymbol type)
         {
+            INamedTypeSymbol? named = type as INamedTypeSymbol;
+            if (named != null && named.Name == "Nullable" && named.TypeArguments.Length == 1)
+            {
+                CppType nullabledType = CppType.FromCSharp(context, named.TypeArguments[0]);
+                if (nullabledType.Kind == InteropTypeKind.BlittableStruct)
+                    return new CppType(InteropTypeKind.Nullable, new[] {"std"}, "optional", new[] { nullabledType }, 0, "<optional>");
+            }
+
             IPointerTypeSymbol? pointer = type as IPointerTypeSymbol;
             if (pointer != null)
             {
@@ -124,7 +132,6 @@ namespace Reinterop
 
             string name = type.Name;
 
-            INamedTypeSymbol? named = type as INamedTypeSymbol;
             if (named != null && named.IsGenericType)
             {
                 genericArguments = named.TypeArguments.Select(symbol => CppType.FromCSharp(context, symbol)).ToList();
@@ -326,6 +333,11 @@ namespace Reinterop
             return new CppType(Kind, Namespaces, Name, GenericArguments, Flags | CppTypeFlags.Const | CppTypeFlags.Reference & ~CppTypeFlags.Pointer, HeaderOverride);
         }
 
+        public CppType AsConstPointer()
+        {
+            return new CppType(Kind, Namespaces, Name, GenericArguments, Flags | CppTypeFlags.Const | CppTypeFlags.Pointer & ~CppTypeFlags.Reference, HeaderOverride);
+        }
+
         public CppType AsEnumFlags() {
           return new CppType(InteropTypeKind.EnumFlags, FlagsNamespace, "flags", new CppType[]{ this }, 0, IncludeEnumFlags);
         }
@@ -356,6 +368,7 @@ namespace Reinterop
                 case InteropTypeKind.BlittableStruct:
                 case InteropTypeKind.NonBlittableStructWrapper:
                 case InteropTypeKind.Delegate:
+                case InteropTypeKind.Nullable:
                     return this.AsConstReference();
                 case InteropTypeKind.GenericParameter:
                     // TODO: ideally, we wouldn't pass primitives by const reference, but
@@ -397,7 +410,22 @@ namespace Reinterop
             else if (this.Kind == InteropTypeKind.Primitive)
                 return this;
             else if (this.Kind == InteropTypeKind.BlittableStruct)
+            {
+                // If this is a parameter, it will be a const reference; turn it into a const pointer.
+                // Otherwise, it's a return valu; just return the simple type for now.
+                if (this.Flags.HasFlag(CppTypeFlags.Const) && this.Flags.HasFlag(CppTypeFlags.Reference))
+                    return this.AsConstPointer();
                 return this.AsSimpleType();
+            }
+            else if (this.Kind == InteropTypeKind.Nullable)
+            {
+                // If this is a parameter, it will be a const reference; turn it into a const pointer.
+                // Otherwise, it's a return valu; just return the simple type for now.
+                CppType underlying = this.GenericArguments.FirstOrDefault();
+                if (this.Flags.HasFlag(CppTypeFlags.Const) && this.Flags.HasFlag(CppTypeFlags.Reference))
+                    return underlying.AsConstPointer();
+                return underlying.AsSimpleType();
+            }
             else if (this.Kind == InteropTypeKind.Enum || this.Kind == InteropTypeKind.EnumFlags)
                 return UInt32;
 
@@ -435,8 +463,17 @@ namespace Reinterop
                     return $"::std::uint32_t({variableName})";
                 case InteropTypeKind.EnumFlags:
                     return $"{variableName}.underlying_value()";
-                case InteropTypeKind.Primitive:
                 case InteropTypeKind.BlittableStruct:
+                    if (this.Flags.HasFlag(CppTypeFlags.Reference))
+                        return $"&{variableName}";
+                    else
+                        return variableName;
+                case InteropTypeKind.Nullable:
+                    if (this.Flags.HasFlag(CppTypeFlags.Reference))
+                        return $"{variableName}.has_value() ? &{variableName}.value() : nullptr";
+                    else
+                        return variableName;
+                case InteropTypeKind.Primitive:
                 case InteropTypeKind.Unknown:
                 default:
                     return variableName;
@@ -460,8 +497,13 @@ namespace Reinterop
                     return $"{this.AsSimpleType().GetFullyQualifiedName()}({variableName})";
                 case InteropTypeKind.EnumFlags:
                     return $"{this.GenericArguments.ElementAt(0).AsSimpleType().GetFullyQualifiedName()}({variableName})";
-                case InteropTypeKind.Primitive:
                 case InteropTypeKind.BlittableStruct:
+                case InteropTypeKind.Nullable:
+                    if (this.Flags.HasFlag(CppTypeFlags.Reference))
+                        return $"*{variableName}";
+                    else
+                        return variableName;
+                case InteropTypeKind.Primitive:
                 case InteropTypeKind.Unknown:
                 default:
                     return variableName;

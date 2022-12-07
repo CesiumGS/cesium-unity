@@ -1,4 +1,6 @@
-﻿namespace CesiumForUnity
+﻿using Unity.Mathematics;
+
+namespace CesiumForUnity
 {
     internal class Helpers
     {

@@ -88,7 +88,7 @@ namespace Reinterop
             string disposeCallbackName = $"{csType.GetFullyQualifiedNamespace().Replace(".", "_")}_{item.Type.Name}{genericTypeHash}_DisposeCallback";
 
             var invokeParameters = callbackParameters.Select(p => $"{p.CsType.GetFullyQualifiedName()} {p.Name}");
-            var invokeInteropParameters = new[] { "IntPtr callbackFunction" }.Concat(callbackParameters.Select(p => $"{p.CsType.AsInteropType().GetFullyQualifiedName()} {p.Name}"));
+            var invokeInteropParameters = new[] { "IntPtr callbackFunction" }.Concat(callbackParameters.Select(p => $"{p.CsType.AsInteropTypeParameter().GetFullyQualifiedName()} {p.Name}"));
             var callInvokeInteropParameters = new[] { "_callbackFunction" }.Concat(callbackParameters.Select(p => p.CsType.GetConversionToInteropType(p.Name)));
             var csReturnType = CSharpType.FromSymbol(context, invokeMethod.ReturnType);
 
@@ -148,7 +148,7 @@ namespace Reinterop
                         [System.Runtime.InteropServices.DllImport("{{context.NativeLibraryName}}", CallingConvention=System.Runtime.InteropServices.CallingConvention.Cdecl)]
                         private static extern void {{disposeCallbackName}}(IntPtr callbackFunction);
                         [System.Runtime.InteropServices.DllImport("{{context.NativeLibraryName}}", CallingConvention=System.Runtime.InteropServices.CallingConvention.Cdecl)]
-                        private static extern {{csReturnType.AsInteropType().GetFullyQualifiedName()}} {{invokeCallbackName}}({{string.Join(", ", invokeInteropParameters)}});
+                        private static extern {{csReturnType.AsInteropTypeReturn().GetFullyQualifiedName()}} {{invokeCallbackName}}({{string.Join(", ", invokeInteropParameters)}});
                     }
                     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
                     private unsafe delegate IntPtr {{csBaseName}}Type(IntPtr callbackFunction);
