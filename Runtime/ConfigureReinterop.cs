@@ -432,9 +432,6 @@ namespace CesiumForUnity
             globeAnchor.SetPositionLongitudeLatitudeHeight(0.0, 0.0, 0.0);
             globeAnchor.positionAuthority = globeAnchor.positionAuthority;
 
-            double3? double3Nullable = null;
-            double3Nullable = new double3(0.0, 0.0, 0.0);
-
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;
             sv.pivot = sv.pivot;

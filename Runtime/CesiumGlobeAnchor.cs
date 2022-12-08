@@ -78,7 +78,7 @@ namespace CesiumForUnity
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumGlobeAnchorImpl", "CesiumGlobeAnchorImpl.h")]
     public partial class CesiumGlobeAnchor : MonoBehaviour
     {
-#region User-editable properties
+        #region User-editable properties
 
         [SerializeField]
         private bool _adjustOrientationForGlobeWhenMoving = true;
@@ -332,7 +332,7 @@ namespace CesiumForUnity
 
         #endregion
 
-#region Set Helpers
+        #region Set Helpers
 
         /// <summary>
         /// Sets the position of this object to a particular <see cref="longitude"/>,
@@ -441,9 +441,9 @@ namespace CesiumForUnity
                 this.UpdateGlobePosition(this._positionAuthority);
         }
 
-#endregion
+        #endregion
 
-#region Private properties
+        #region Private properties
 
         private bool _lastPropertiesAreValid = false;
         private double _lastPositionEcefX = 0.0;
@@ -452,9 +452,9 @@ namespace CesiumForUnity
         // TODO: use just the position instead of the entire transform?
         private Matrix4x4 _lastLocalToWorld;
 
-#endregion
+        #endregion
 
-#region Unity Messages
+        #region Unity Messages
 
         private void Start()
         {
@@ -474,9 +474,9 @@ namespace CesiumForUnity
             this.Sync();
         }
 
-#endregion
+        #endregion
 
-#region Coroutines
+        #region Coroutines
 
         private void StartOrStopDetectingTransformChanges()
         {
@@ -511,9 +511,9 @@ namespace CesiumForUnity
             }
         }
 
-#endregion
+        #endregion
 
-#region Updaters
+        #region Updaters
 
         private void UpdateGlobePosition(CesiumGlobeAnchorPositionAuthority previousAuthority)
         {
@@ -616,6 +616,6 @@ namespace CesiumForUnity
         // This is static so that CesiumGlobeAnchor does not need finalization.
         private static partial void AdjustOrientation(CesiumGlobeAnchor anchor, double3 oldPositionEcef, double3 newPositionEcef);
 
-#endregion
+        #endregion
     }
 }

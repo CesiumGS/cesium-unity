@@ -8,6 +8,7 @@ using namespace CesiumGeospatial;
 using namespace DotNet::Unity::Mathematics;
 
 namespace CesiumForUnityNative {
+
 std::optional<double3>
 CesiumEllipsoidImpl::ScaleToGeodeticSurface(double3 earthCenteredEarthFixed) {
   const glm::dvec3 cartesian(
@@ -34,4 +35,5 @@ CesiumEllipsoidImpl::GeodeticSurfaceNormal(double3 earthCenteredEarthFixed) {
 
   return double3{result.x, result.y, result.z};
 }
+
 } // namespace CesiumForUnityNative

@@ -199,7 +199,7 @@ namespace CesiumForUnity
 
         #region Input configuration
 
-#if ENABLE_INPUT_SYSTEM
+        #if ENABLE_INPUT_SYSTEM
         InputAction lookAction;
         InputAction moveAction;
         InputAction moveUpAction;
@@ -247,7 +247,7 @@ namespace CesiumForUnity
             speedChangeAction.Enable();
             speedResetAction.Enable();
         }
-#endif
+        #endif
 
         #endregion
 
@@ -261,7 +261,7 @@ namespace CesiumForUnity
                 this._camera = this.gameObject.AddComponent<Camera>();
             }
 
-            this._camera.farClipPlane = 100000.0f;
+            this._camera.farClipPlane = 1000000.0f;
 
             this._controller = this.gameObject.GetComponent<CharacterController>();
             if (this._controller == null)
@@ -351,7 +351,7 @@ namespace CesiumForUnity
             else
             {
                 this.HandleSpeedChange(
-                    inputSpeedChange, 
+                    inputSpeedChange,
                     new Vector3(inputRight, inputUp, inputForward));
             }
 
@@ -373,10 +373,11 @@ namespace CesiumForUnity
 
             if (speedChangeInput != 0.0f)
             {
-                if(speedChangeInput > 0.0f)
+                if (speedChangeInput > 0.0f)
                 {
                     this._speedMultiplier *= this._speedIncrementMultiplier;
-                } else
+                }
+                else
                 {
                     this._speedMultiplier /= this._speedIncrementMultiplier;
                 }
@@ -579,7 +580,7 @@ namespace CesiumForUnity
             float newSpeed;
             if (this.GetDynamicSpeed(out overrideSpeed, out newSpeed))
             {
-                if(overrideSpeed || newSpeed >= this._maxSpeedPreMultiplier)
+                if (overrideSpeed || newSpeed >= this._maxSpeedPreMultiplier)
                 {
                     this._maxSpeedPreMultiplier = newSpeed;
                 }
