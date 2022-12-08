@@ -142,7 +142,6 @@ CesiumGeoreferenceImpl::TransformUnityPositionToEarthCenteredEarthFixed(
 DotNet::Unity::Mathematics::double3
 CesiumGeoreferenceImpl::TransformEarthCenteredEarthFixedPositionToUnity(
     const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
-
     DotNet::Unity::Mathematics::double3 earthCenteredEarthFixed) {
   const LocalHorizontalCoordinateSystem& coordinateSystem =
       this->getCoordinateSystem();

@@ -335,7 +335,7 @@ namespace CesiumForUnity
             float inputRight = Input.GetAxis("Horizontal");
             float inputUp = Input.GetAxis("YAxis");
 
-            float inputSpeedChange = Input.GetAxis("Mouse ScrollWheel").y;
+            float inputSpeedChange = Input.GetAxis("Mouse ScrollWheel");
             bool inputSpeedReset = Input.GetMouseButtonDown(2);
             #endif
 
