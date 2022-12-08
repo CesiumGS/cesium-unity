@@ -107,7 +107,7 @@ namespace Reinterop
             else if (this.Kind == InteropTypeKind.BlittableStruct)
                 return $"&{variableName}";
             else if (this.Kind == InteropTypeKind.Nullable)
-                return $"{variableName} == null ? null : &{variableName}";
+                return $"{variableName} is {this.AsInteropTypeReturn().GetFullyQualifiedName()} {variableName}NonNull ? &{variableName}NonNull : null";
             else
                 return variableName;
         }

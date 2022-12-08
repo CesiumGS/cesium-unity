@@ -497,11 +497,19 @@ namespace Reinterop
                     return $"{this.AsSimpleType().GetFullyQualifiedName()}({variableName})";
                 case InteropTypeKind.EnumFlags:
                     return $"{this.GenericArguments.ElementAt(0).AsSimpleType().GetFullyQualifiedName()}({variableName})";
-                case InteropTypeKind.BlittableStruct:
                 case InteropTypeKind.Nullable:
                     if (this.Flags.HasFlag(CppTypeFlags.Reference))
+                        // parameter
+                        return $"{variableName} == nullptr ? std::nullopt : std::make_optional(*{variableName})";
+                    else
+                        // return value
+                        return variableName;
+                case InteropTypeKind.BlittableStruct:
+                    if (this.Flags.HasFlag(CppTypeFlags.Reference))
+                        // parameter
                         return $"*{variableName}";
                     else
+                        // return value
                         return variableName;
                 case InteropTypeKind.Primitive:
                 case InteropTypeKind.Unknown:
