@@ -19,8 +19,42 @@ namespace CesiumForUnity
         #region User-editable properties
 
         [SerializeField]
-        private bool _enableAltitudeProfileCurve = false;
+        [Tooltip("If enabled, the controller's speed will change dynamically based on " +
+            "elevation and other factors. If disabled, speed is manually changed with " +
+            "the scroll wheel.")]
+        private bool _enableDynamicSpeed = true;
 
+        /// <summary>
+        /// Whether to enable dynamic speed on this controller.
+        /// </summary>
+        /// <remarks>
+        /// If enabled, the controller's speed will change dynamically based on 
+        /// elevation and other factors. If disabled, speed is manually changed with 
+        /// the scroll wheel.
+        /// </remarks>
+        public bool enableDynamicSpeed
+        {
+            get => this._enableDynamicSpeed;
+            set => this._enableDynamicSpeed = value;
+        }
+
+        [SerializeField]
+        [Min(0.0f)]
+        [Tooltip("The maximum height from the Earth's center at which the current speed " +
+            "will be set to the height value.")]
+        private float _dynamicSpeedMaxHeight = 2000.0f;
+
+        /// <summary>
+        /// The maximum height at which speed will be set to the object's
+        /// height from the Earth.
+        /// </summary>
+        public float dynamicSpeedMaxHeight
+        {
+            get => this._dynamicSpeedMaxHeight;
+            set => this._dynamicSpeedMaxHeight = Mathf.Max(value, 0.0f);
+        }
+
+        [Header("Fly-To Options")]
         [SerializeField]
         [Tooltip("This curve dictates what percentage of the max altitude the " +
             "camera should take at a given time on the curve." +
@@ -46,9 +80,6 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        private bool _enableProgressCurve = false;
-
-        [SerializeField]
         [Tooltip("This curve is used to determine the progress percentage for " +
             "all the other curves. This allows us to accelerate and deaccelerate " +
             "as wanted throughout the curve.")]
@@ -63,9 +94,6 @@ namespace CesiumForUnity
             get => this._flyToProgressCurve;
             set => this._flyToProgressCurve = value;
         }
-
-        [SerializeField]
-        private bool _enableMaximumAltitudeCurve = false;
 
         [SerializeField]
         [Tooltip("This curve dictates the maximum altitude at each point along " +
@@ -143,9 +171,20 @@ namespace CesiumForUnity
 
         #region Private variables
 
+        private Camera _camera;
         private CharacterController _controller;
+
         private CesiumGeoreference _georeference;
         private CesiumGlobeAnchor _globeAnchor;
+
+        private float _baseTurnSpeed = 10.0f;
+        private float _baseMoveSpeed = 24.0f;
+
+        private float _speedMultiplier = 1.0f;
+        private float _speedIncrementMultiplier = 1.5f;
+
+        private float _maxSpeed = 100000.0f; // Maximum speed with the multiplier applied.
+        private float _maxSpeedPreMultiplier = 0.0f; // Max speed before the multiplier is applied.
 
         private List<double3> _keypoints = new List<double3>();
 
@@ -164,6 +203,8 @@ namespace CesiumForUnity
         InputAction lookAction;
         InputAction moveAction;
         InputAction moveUpAction;
+        InputAction speedChangeAction;
+        InputAction speedResetAction;
 
         void ConfigureInputs()
         {
@@ -189,12 +230,22 @@ namespace CesiumForUnity
                 .With("Down", "<Keyboard>/c")
                 .With("Up", "<Keyboard>/e")
                 .With("Down", "<Keyboard>/q")
-                .With("Up", "<Gamepad>/rightshoulder")
-                .With("Down", "<Gamepad>/leftshoulder");
+                .With("Up", "<Gamepad>/rightTrigger")
+                .With("Down", "<Gamepad>/leftTrigger");
+
+            speedChangeAction = map.AddAction("speedChange", binding: "<Mouse>/scroll");
+            speedChangeAction.AddCompositeBinding("Dpad")
+                .With("Up", "<Gamepad>/rightShoulder")
+                .With("Down", "<Gamepad>/leftShoulder");
+
+            speedResetAction = map.AddAction("speedReset", binding: "<Mouse>/middleButton");
+            speedResetAction.AddBinding("<Gamepad>/buttonNorth");
 
             moveAction.Enable();
             lookAction.Enable();
             moveUpAction.Enable();
+            speedChangeAction.Enable();
+            speedResetAction.Enable();
         }
 #endif
 
@@ -204,9 +255,16 @@ namespace CesiumForUnity
 
         void OnEnable()
         {
+            this._camera = this.gameObject.GetComponent<Camera>();
+            if (this._camera == null)
+            {
+                this._camera = this.gameObject.AddComponent<Camera>();
+            }
+
+            this._camera.farClipPlane = 100000.0f;
+
             this._controller = this.gameObject.GetComponent<CharacterController>();
-            
-            if(this._controller == null)
+            if (this._controller == null)
             {
                 this._controller = this.gameObject.AddComponent<CharacterController>();
             }
@@ -217,7 +275,6 @@ namespace CesiumForUnity
             this._controller.detectCollisions = true;
 
             this._georeference = this.gameObject.GetComponentInParent<CesiumGeoreference>();
-            
             if (this._georeference == null)
             {
                 Debug.LogError(
@@ -225,12 +282,12 @@ namespace CesiumForUnity
                     "with a CesiumGeoreference.");
             }
 
-            if(this.gameObject.GetComponent<CesiumOriginShift>() == null)
+            if (this.gameObject.GetComponent<CesiumOriginShift>() == null)
             {
                 this.gameObject.AddComponent<CesiumOriginShift>();
             }
 
-            // Adding a CesiumOriginShift also adds a CesiumGlobeAnchor automatically.
+            // Adding a CesiumOriginShift will add a CesiumGlobeAnchor automatically.
             this._globeAnchor = this.gameObject.GetComponent<CesiumGlobeAnchor>();
 
             #if ENABLE_INPUT_SYSTEM
@@ -252,15 +309,12 @@ namespace CesiumForUnity
 
         #region Player movement
 
-        private float _mouseSensitivity = 0.2f;
-        private float _movementSpeed = 24.0f;
-
         private void HandlePlayerInputs()
         {
             #if ENABLE_INPUT_SYSTEM
             Vector2 lookDelta = lookAction.ReadValue<Vector2>();
-            float inputRotateAxisX = lookDelta.x * this._mouseSensitivity;
-            float inputRotateAxisY = lookDelta.y * this._mouseSensitivity;
+            float inputRotateHorizontal = lookDelta.x;
+            float inputRotateVertical = lookDelta.y;
 
             Vector2 moveDelta = moveAction.ReadValue<Vector2>();
             float inputForward = moveDelta.y;
@@ -268,24 +322,37 @@ namespace CesiumForUnity
 
             float inputUp = moveUpAction.ReadValue<Vector2>().y;
 
+            float inputSpeedChange = speedChangeAction.ReadValue<Vector2>().y;
+            bool inputSpeedReset = speedResetAction.ReadValue<float>() > 0.5f;
             #else
-            float inputRotateAxisX = Input.GetAxis("Mouse X") * this._mouseSensitivity;
-            inputRotateAxisX += Input.GetAxis("Controller Right Stick X");
+            float inputRotateHorizontal = Input.GetAxis("Mouse X");
+            inputRotateHorizontal += Input.GetAxis("Controller Right Stick X");
 
-            float inputRotateAxisY = Input.GetAxis("Mouse Y") * this._mouseSensitivity;
-            inputRotateAxisY += Input.GetAxis("Controller Right Stick Y");
+            float inputRotateVertical = Input.GetAxis("Mouse Y");
+            inputRotateVertical += Input.GetAxis("Controller Right Stick Y");
 
             float inputForward = Input.GetAxis("Vertical");
             float inputRight = Input.GetAxis("Horizontal");
             float inputUp = Input.GetAxis("YAxis");
-#endif
+
+            float inputSpeedChange = Input.GetAxis("Mouse ScrollWheel").y;
+            bool inputSpeedReset = Input.GetMouseButtonDown(2);
+            #endif
 
             if (!this._flyingToLocation)
             {
-                // The rotation inputs may seem flipped, but this is correct.
-                // The X-movement of the mouse corresponds to rotation around the Y-axis,
-                // while the Y-movement of the mouse corresponds to rotation around the X-axis.
-                this.Rotate(inputRotateAxisY, inputRotateAxisX);
+                this.Rotate(inputRotateHorizontal, inputRotateVertical);
+            }
+
+            if (inputSpeedReset)
+            {
+                this.ResetSpeed();
+            }
+            else
+            {
+                this.HandleSpeedChange(
+                    inputSpeedChange, 
+                    new Vector3(inputRight, inputUp, inputForward));
             }
 
             this.MoveForward(inputForward);
@@ -293,21 +360,50 @@ namespace CesiumForUnity
             this.MoveUp(inputUp);
         }
 
+        private void HandleSpeedChange(float speedChangeInput, Vector3 movementInput)
+        {
+            if (this._enableDynamicSpeed)
+            {
+                this.UpdateDynamicSpeed(movementInput);
+            }
+            else
+            {
+                this.SetMaxSpeed(10000.0f);
+            }
+
+            if (speedChangeInput != 0.0f)
+            {
+                if(speedChangeInput > 0.0f)
+                {
+                    this._speedMultiplier *= this._speedIncrementMultiplier;
+                } else
+                {
+                    this._speedMultiplier /= this._speedIncrementMultiplier;
+                }
+
+                float max = this._enableDynamicSpeed ? 50.0f : 50000.0f;
+                this._speedMultiplier = Mathf.Clamp(this._speedMultiplier, 0.0f, max);
+            }
+        }
+
         /// <summary>
-        /// Rotate the camera around its local X- and Y-axes with the specified amounts.
+        /// Rotate the camera with the specified amounts.
         /// </summary>
         /// <remarks>
-        /// Rotation around the X-axis corresponds to vertical rotation (i.e. looking up or down).
-        /// Rotation around the Y-axis corresponds to lateral rotation (i.e. looking left or right).
+        /// Horizontal rotation (i.e. looking left or right) corresponds to rotation around the Y-axis.
+        /// Vertical rotation (i.e. looking up or down) corresponds to rotation around the X-axis.
         /// </remarks>
-        /// <param name="valueX">The amount to rotate around the X-axis.</param>
-        /// <param name="valueY">The amount to rotate around the Y-axis.</param>
-        void Rotate(float valueX, float valueY)
+        /// <param name="horizontalRotation">The amount to rotate horizontally, i.e. around the Y-axis.</param>
+        /// <param name="verticalRotation">The amount to rotate vertically, i.e. around the X-axis.</param>
+        void Rotate(float horizontalRotation, float verticalRotation)
         {
-            if(valueX == 0.0f && valueY == 0.0f)
+            if (horizontalRotation == 0.0f && verticalRotation == 0.0f)
             {
                 return;
             }
+
+            float valueX = verticalRotation * this._baseTurnSpeed * Time.deltaTime;
+            float valueY = horizontalRotation * this._baseTurnSpeed * Time.deltaTime;
 
             // Rotation around the X-axis occurs counter-clockwise, so the look range
             // maps to [270, 360] degrees for the upper quarter-sphere of motion, and
@@ -315,19 +411,20 @@ namespace CesiumForUnity
             // so map the [0, 90] range to [360, 450] so the entire range is [270, 450].
             // This makes it easy to clamp the values.
             float rotationX = this.transform.localEulerAngles.x;
-            if(rotationX <= 90.0f)
+            if (rotationX <= 90.0f)
             {
                 rotationX += 360.0f;
             }
 
             float newRotationX = Mathf.Clamp(rotationX - valueX, 270.0f, 450.0f);
             float newRotationY = this.transform.localEulerAngles.y + valueY;
-            this.transform.localRotation = Quaternion.Euler(newRotationX, newRotationY, this.transform.localEulerAngles.z);
+            this.transform.localRotation =
+                Quaternion.Euler(newRotationX, newRotationY, this.transform.localEulerAngles.z);
         }
 
         void MoveRight(float value)
         {
-            if(value == 0.0f)
+            if (value == 0.0f)
             {
                 return;
             }
@@ -337,7 +434,7 @@ namespace CesiumForUnity
 
         void MoveForward(float value)
         {
-            if(value == 0.0f)
+            if (value == 0.0f)
             {
                 return;
             }
@@ -367,12 +464,128 @@ namespace CesiumForUnity
 
         private void MoveAlongVector(Vector3 vector, float value)
         {
-            this._controller.Move(vector * value * Time.deltaTime * this._movementSpeed);
+            float speed = Mathf.Min(this._baseMoveSpeed * this._speedMultiplier, this._maxSpeed);
+            this._controller.Move(vector * value * Time.deltaTime * speed);
 
             if (this._flyingToLocation && this._canInterruptFlight)
             {
                 InterruptFlight();
             }
+        }
+
+        #endregion
+
+        #region Speed computation
+
+        /// <summary>
+        /// Gets the dynamic speed of the controller based on the camera's height from 
+        /// the earth's center and its distance from objects along the forward vector.
+        /// </summary>
+        /// <param name="overrideSpeed">Whether the returned speed should be used to override the previous speed.</param>
+        /// <param name="newSpeed">The new dynamic speed of the controller.</param>
+        /// <returns>Whether a valid speed value was found.</returns>
+        private bool GetDynamicSpeed(out bool overrideSpeed, out float newSpeed)
+        {
+            if (this._georeference == null)
+            {
+                overrideSpeed = false;
+                newSpeed = 0.0f;
+
+                return false;
+            }
+
+            float height = 0.0f;
+            float viewDistance = 0.0f;
+
+            // Raycast from the camera to the Earth's center and compute the distance.
+            double3 center =
+                this._georeference.TransformEarthCenteredEarthFixedPositionToUnity(new double3(0.0));
+            Vector3 line = (float3)center - (float3)this.transform.position;
+
+            RaycastHit hitInfo;
+            if (Physics.Raycast(this.transform.position, line.normalized, out hitInfo, line.magnitude))
+            {
+                height = Vector3.Distance(this.transform.position, hitInfo.point);
+            }
+
+            // Ignore the result if the height is 0.
+            if (Mathf.Approximately(height, 0.0f))
+            {
+                overrideSpeed = false;
+                newSpeed = 0.0f;
+
+                return false;
+            }
+
+            // Also ignore the result if the speed will increase by too much at once.
+            // This can be an issue when 3D tiles are loaded/unloaded from the scene.
+            if (
+                !Mathf.Approximately(this._maxSpeedPreMultiplier, 0.0f) &&
+                (height / this._maxSpeedPreMultiplier) >= 100.0f)
+            {
+                overrideSpeed = false;
+                newSpeed = 0.0f;
+
+                return false;
+            }
+
+            // Raycast along the camera's view (forward) vector.
+            float distance = this._maxSpeed * 3.0f;
+            float maxDistance = 1000 * 1000; // 1000 km
+            distance = Mathf.Clamp(distance, 0.0f, maxDistance);
+
+            if (Physics.Raycast(this.transform.position, this.transform.forward, out hitInfo, distance))
+            {
+                viewDistance = Vector3.Distance(this.transform.position, hitInfo.point);
+            }
+
+            // Set the speed to be the height of the camera from the Earth's center.
+            newSpeed = height;
+
+            // If the raycast does not hit, then only override speed if the height
+            // is lower than the maximum threshold. Otherwise, if both raycasts hit,
+            // override the speed.
+            if (Mathf.Approximately(viewDistance, 0.0f))
+            {
+                overrideSpeed = height < this._dynamicSpeedMaxHeight;
+            }
+            else
+            {
+                overrideSpeed = true;
+            }
+
+            return true;
+        }
+
+        private void ResetSpeed()
+        {
+            this._speedMultiplier = 1.0f;
+        }
+
+        private void SetMaxSpeed(float value)
+        {
+            this._maxSpeed = this._speedMultiplier * value;
+        }
+
+        private void UpdateDynamicSpeed(Vector3 inputVector)
+        {
+            if (inputVector == Vector3.zero)
+            {
+                this.ResetSpeed();
+                return;
+            }
+
+            bool overrideSpeed;
+            float newSpeed;
+            if (this.GetDynamicSpeed(out overrideSpeed, out newSpeed))
+            {
+                if(overrideSpeed || newSpeed >= this._maxSpeedPreMultiplier)
+                {
+                    this._maxSpeedPreMultiplier = newSpeed;
+                }
+            }
+
+            this.SetMaxSpeed(this._maxSpeedPreMultiplier);
         }
 
         #endregion
@@ -435,7 +648,7 @@ namespace CesiumForUnity
             // In order to accelerate at start and slow down at end, we use a progress
             // profile curve
             double flyPercentage = percentage;
-            if (this._enableProgressCurve)
+            if (this._flyToProgressCurve != null && this._flyToProgressCurve.length > 0)
             {
                 flyPercentage = Math.Clamp(
                     (double)this._flyToProgressCurve.Evaluate((float)percentage),
@@ -443,7 +656,6 @@ namespace CesiumForUnity
                     1.0);
             }
 
-            Debug.Log(flyPercentage);
             // Find the keypoint indexes corresponding to the current percentage
             double keypointValue = flyPercentage * (this._keypoints.Count - 1);
             int lastKeypointIndex = (int)Math.Floor(keypointValue);
@@ -553,7 +765,7 @@ namespace CesiumForUnity
             double flyToDistance = math.length(destinationECEF - sourceECEF);
 
             this._keypoints.Add(sourceECEF);
-            
+
             for (int step = 1; step <= steps; step++)
             {
                 double stepDouble = (double)step;
@@ -570,15 +782,16 @@ namespace CesiumForUnity
 
                     // Add an altitude if we have a profile curve for it
                     double offsetAltitude = 0;
-                    if (this._enableAltitudeProfileCurve)
+                    if (this._flyToAltitudeProfileCurve != null && this._flyToAltitudeProfileCurve.length > 0)
                     {
                         double maxAltitude = 30000;
-                        if (this._enableMaximumAltitudeCurve)
+                        if (this._flyToMaximumAltitudeCurve != null && this._flyToMaximumAltitudeCurve.length > 0)
                         {
                             maxAltitude = (double)
-                                    this.flyToMaximumAltitudeCurve.Evaluate((float)flyToDistance);
+                                    this._flyToMaximumAltitudeCurve.Evaluate((float)flyToDistance);
                         }
-                        offsetAltitude = (double)maxAltitude * this.flyToAltitudeProfileCurve.Evaluate((float)percentage);
+                        offsetAltitude =
+                            (double)maxAltitude * this._flyToAltitudeProfileCurve.Evaluate((float)percentage);
                     }
 
                     double3 point = scaledValue + upVector * (altitude + offsetAltitude);
