@@ -18,20 +18,17 @@ namespace CesiumForUnity
     {
         #region User-editable properties
 
+        [Header("Dynamic Speed")]
         [SerializeField]
         [Tooltip("If enabled, the controller's speed will change dynamically based on " +
-            "elevation and other factors. If disabled, speed is manually changed with " +
-            "the scroll wheel.")]
+            "elevation and other factors.")]
         private bool _enableDynamicSpeed = true;
 
         /// <summary>
-        /// Whether to enable dynamic speed on this controller.
+        /// Whether to enable dynamic speed on this controller. If enabled, 
+        /// the controller's speed will change dynamically based on elevation 
+        /// and other factors.
         /// </summary>
-        /// <remarks>
-        /// If enabled, the controller's speed will change dynamically based on 
-        /// elevation and other factors. If disabled, speed is manually changed with 
-        /// the scroll wheel.
-        /// </remarks>
         public bool enableDynamicSpeed
         {
             get => this._enableDynamicSpeed;
@@ -40,7 +37,7 @@ namespace CesiumForUnity
 
         [SerializeField]
         [Min(0.0f)]
-        [Tooltip("The maximum height from the Earth's center at which the current speed " +
+        [Tooltip("The maximum height from the Earth at which the current speed " +
             "will be set to the height value.")]
         private float _dynamicSpeedMaxHeight = 2000.0f;
 
@@ -54,7 +51,7 @@ namespace CesiumForUnity
             set => this._dynamicSpeedMaxHeight = Mathf.Max(value, 0.0f);
         }
 
-        [Header("Fly-To Options")]
+        [Header("Fly-To Controls")]
         [SerializeField]
         [Tooltip("This curve dictates what percentage of the max altitude the " +
             "camera should take at a given time on the curve." +
@@ -177,14 +174,19 @@ namespace CesiumForUnity
         private CesiumGeoreference _georeference;
         private CesiumGlobeAnchor _globeAnchor;
 
-        private float _baseTurnSpeed = 10.0f;
-        private float _baseMoveSpeed = 24.0f;
+        private float _lookSpeed = 10.0f;
+
+        // These numbers are borrowed from Cesium for Unreal.
+        private Vector3 _velocity = Vector3.zero;
+        private float _acceleration = 20000.0f;
+        private float _deceleration = 9999999959.0f;
+
+        private float _maxSpeed = 100.0f; // Maximum speed with the speed multiplier applied.
+        private float _maxSpeedPreMultiplier = 0.0f; // Max speed without the multiplier applied.
+        private AnimationCurve _maxSpeedCurve;
 
         private float _speedMultiplier = 1.0f;
         private float _speedIncrementMultiplier = 1.5f;
-
-        private float _maxSpeed = 100000.0f; // Maximum speed with the multiplier applied.
-        private float _maxSpeedPreMultiplier = 0.0f; // Max speed before the multiplier is applied.
 
         private List<double3> _keypoints = new List<double3>();
 
@@ -199,12 +201,13 @@ namespace CesiumForUnity
 
         #region Input configuration
 
-        #if ENABLE_INPUT_SYSTEM
+#if ENABLE_INPUT_SYSTEM
         InputAction lookAction;
         InputAction moveAction;
         InputAction moveUpAction;
         InputAction speedChangeAction;
         InputAction speedResetAction;
+        InputAction toggleDynamicSpeedAction;
 
         void ConfigureInputs()
         {
@@ -241,17 +244,22 @@ namespace CesiumForUnity
             speedResetAction = map.AddAction("speedReset", binding: "<Mouse>/middleButton");
             speedResetAction.AddBinding("<Gamepad>/buttonNorth");
 
+            toggleDynamicSpeedAction =
+                map.AddAction("toggleDynamicSpeed", binding: "<Keyboard>/g");
+            toggleDynamicSpeedAction.AddBinding("<Gamepad>/buttonEast");
+
             moveAction.Enable();
             lookAction.Enable();
             moveUpAction.Enable();
             speedChangeAction.Enable();
             speedResetAction.Enable();
+            toggleDynamicSpeedAction.Enable();
         }
-        #endif
+#endif
 
         #endregion
 
-        #region MonoBehaviour Functions
+        #region OnEnable and Update
 
         void OnEnable()
         {
@@ -290,9 +298,37 @@ namespace CesiumForUnity
             // Adding a CesiumOriginShift will add a CesiumGlobeAnchor automatically.
             this._globeAnchor = this.gameObject.GetComponent<CesiumGlobeAnchor>();
 
+            this.CreateMaxSpeedCurve();
+
             #if ENABLE_INPUT_SYSTEM
-            ConfigureInputs();
+            this.ConfigureInputs();
             #endif
+        }
+
+        private void CreateMaxSpeedCurve()
+        {
+            // This creates a curve that is linear between the first two keys,
+            // then smoothly interpolated between the last two keys.
+            Keyframe[] keyframes = {
+                new Keyframe(0.0f, 15.0f),
+                new Keyframe(10000000.0f, 10000000.0f),
+                new Keyframe(13000000.0f, 2000000.0f)
+            };
+
+            keyframes[0].weightedMode = WeightedMode.Out;
+            keyframes[0].outTangent = keyframes[1].value / keyframes[0].value;
+            keyframes[0].outWeight = 0.0f;
+
+            keyframes[1].weightedMode = WeightedMode.In;
+            keyframes[1].inWeight = 0.0f;
+            keyframes[1].inTangent = keyframes[1].value / keyframes[0].value;
+            keyframes[1].outTangent = 0.0f;
+
+            keyframes[2].inTangent = 0.0f;
+
+            this._maxSpeedCurve = new AnimationCurve(keyframes);
+            this._maxSpeedCurve.preWrapMode = WrapMode.ClampForever;
+            this._maxSpeedCurve.postWrapMode = WrapMode.ClampForever;
         }
 
         void Update()
@@ -324,6 +360,8 @@ namespace CesiumForUnity
 
             float inputSpeedChange = speedChangeAction.ReadValue<Vector2>().y;
             bool inputSpeedReset = speedResetAction.ReadValue<float>() > 0.5f;
+
+            bool toggleDynamicSpeed = toggleDynamicSpeedAction.ReadValue<float>() > 0.5f;
             #else
             float inputRotateHorizontal = Input.GetAxis("Mouse X");
             inputRotateHorizontal += Input.GetAxis("Controller Right Stick X");
@@ -336,39 +374,50 @@ namespace CesiumForUnity
             float inputUp = Input.GetAxis("YAxis");
 
             float inputSpeedChange = Input.GetAxis("Mouse ScrollWheel");
-            bool inputSpeedReset = Input.GetMouseButtonDown(2);
+            bool inputSpeedReset =
+                Input.GetMouseButtonDown(2) || Input.GetKeyDown("joystick button 3");
+
+            bool toggleDynamicSpeed =
+                Input.GetKeyDown("g") || Input.GetKeyDown("joystick button 1");
             #endif
+
+            Vector3 movementInput = new Vector3(inputRight, inputUp, inputForward);
 
             if (!this._flyingToLocation)
             {
                 this.Rotate(inputRotateHorizontal, inputRotateVertical);
             }
 
-            if (inputSpeedReset)
+            if (toggleDynamicSpeed)
             {
-                this.ResetSpeed();
+                this._enableDynamicSpeed = !this._enableDynamicSpeed;
+            }
+
+            if (inputSpeedReset || 
+                (this._enableDynamicSpeed && movementInput == Vector3.zero))
+            {
+                this.ResetSpeedMultiplier();
             }
             else
             {
-                this.HandleSpeedChange(
-                    inputSpeedChange,
-                    new Vector3(inputRight, inputUp, inputForward));
+                this.HandleSpeedChange(inputSpeedChange);
             }
 
-            this.MoveForward(inputForward);
-            this.MoveRight(inputRight);
-            this.MoveUp(inputUp);
+            if(!this._flyingToLocation || this._canInterruptFlight)
+            {
+                this.Move(movementInput);
+            }
         }
 
-        private void HandleSpeedChange(float speedChangeInput, Vector3 movementInput)
+        private void HandleSpeedChange(float speedChangeInput)
         {
             if (this._enableDynamicSpeed)
             {
-                this.UpdateDynamicSpeed(movementInput);
+                this.UpdateDynamicSpeed();
             }
             else
             {
-                this.SetMaxSpeed(10000.0f);
+                this.SetMaxSpeed(100.0f);
             }
 
             if (speedChangeInput != 0.0f)
@@ -383,7 +432,7 @@ namespace CesiumForUnity
                 }
 
                 float max = this._enableDynamicSpeed ? 50.0f : 50000.0f;
-                this._speedMultiplier = Mathf.Clamp(this._speedMultiplier, 0.0f, max);
+                this._speedMultiplier = Mathf.Clamp(this._speedMultiplier, 0.1f, max);
             }
         }
 
@@ -403,8 +452,8 @@ namespace CesiumForUnity
                 return;
             }
 
-            float valueX = verticalRotation * this._baseTurnSpeed * Time.deltaTime;
-            float valueY = horizontalRotation * this._baseTurnSpeed * Time.deltaTime;
+            float valueX = verticalRotation * this._lookSpeed * Time.deltaTime;
+            float valueY = horizontalRotation * this._lookSpeed * Time.deltaTime;
 
             // Rotation around the X-axis occurs counter-clockwise, so the look range
             // maps to [270, 360] degrees for the upper quarter-sphere of motion, and
@@ -423,55 +472,66 @@ namespace CesiumForUnity
                 Quaternion.Euler(newRotationX, newRotationY, this.transform.localEulerAngles.z);
         }
 
-        void MoveRight(float value)
+        /// <summary>
+        /// Moves the controller with the given player input.
+        /// </summary>
+        /// <remarks>
+        /// The x-coordinate affects movement along the transform's right axis.
+        /// The y-coordinate affects movement along the georeferenced up axis.
+        /// The z-corodinate affects movement along the transform's forward axis.
+        /// </remarks>
+        /// <param name="movementInput">The player input.</param>
+        void Move(Vector3 movementInput)
         {
-            if (value == 0.0f)
+            Vector3 inputDirection =
+                this.transform.right * movementInput.x + 
+                this.transform.forward * movementInput.z;
+
+            if (this._georeference != null && this._globeAnchor != null)
             {
-                return;
+                double3 positionECEF = new double3()
+                {
+                    x = this._globeAnchor.ecefX,
+                    y = this._globeAnchor.ecefY,
+                    z = this._globeAnchor.ecefZ,
+                };
+                double3 upECEF = CesiumEllipsoid.GeodeticSurfaceNormal(positionECEF);
+                double3 upUnity =
+                    this._georeference.TransformEarthCenteredEarthFixedDirectionToUnity(upECEF);
+
+                inputDirection = 
+                    (float3)inputDirection + (float3)upUnity * movementInput.y;
             }
 
-            this.MoveAlongVector(this.transform.right, value);
-        }
-
-        void MoveForward(float value)
-        {
-            if (value == 0.0f)
+            if(inputDirection != Vector3.zero)
             {
-                return;
+                if (this._flyingToLocation)
+                {
+                    InterruptFlight();
+                }
+
+                // If the controller was already moving, handle the direction change
+                // separately from the magnitude of the velocity.
+                if (this._velocity.magnitude > 0.0f)
+                {
+                    Vector3 directionChange = inputDirection - this._velocity.normalized;
+                    this._velocity +=
+                        directionChange * this._velocity.magnitude * Time.deltaTime;
+                }
+
+                this._velocity += inputDirection * this._acceleration * Time.deltaTime;
+                this._velocity = Vector3.ClampMagnitude(this._velocity, this._maxSpeed);
+            } else
+            {
+                // Decelerate
+                float speed = Mathf.Max(
+                    this._velocity.magnitude - this._deceleration * Time.deltaTime,
+                    0.0f);
+
+                this._velocity = Vector3.ClampMagnitude(this._velocity, speed);
             }
 
-            this.MoveAlongVector(this.transform.forward, value);
-        }
-
-        void MoveUp(float value)
-        {
-            if (value == 0.0f || this._globeAnchor == null)
-            {
-                return;
-            }
-
-            double3 positionECEF = new double3()
-            {
-                x = this._globeAnchor.ecefX,
-                y = this._globeAnchor.ecefY,
-                z = this._globeAnchor.ecefZ,
-            };
-            double3 upECEF = CesiumEllipsoid.GeodeticSurfaceNormal(positionECEF);
-            double3 upUnity =
-                this._georeference.TransformEarthCenteredEarthFixedDirectionToUnity(upECEF);
-
-            this.MoveAlongVector((float3)upUnity, value);
-        }
-
-        private void MoveAlongVector(Vector3 vector, float value)
-        {
-            float speed = Mathf.Min(this._baseMoveSpeed * this._speedMultiplier, this._maxSpeed);
-            this._controller.Move(vector * value * Time.deltaTime * speed);
-
-            if (this._flyingToLocation && this._canInterruptFlight)
-            {
-                InterruptFlight();
-            }
+            this._controller.Move(this._velocity * Time.deltaTime);
         }
 
         #endregion
@@ -482,7 +542,8 @@ namespace CesiumForUnity
         /// Gets the dynamic speed of the controller based on the camera's height from 
         /// the earth's center and its distance from objects along the forward vector.
         /// </summary>
-        /// <param name="overrideSpeed">Whether the returned speed should be used to override the previous speed.</param>
+        /// <param name="overrideSpeed">Whether the returned speed should override the 
+        /// previous speed, even if the new value is lower.</param>
         /// <param name="newSpeed">The new dynamic speed of the controller.</param>
         /// <returns>Whether a valid speed value was found.</returns>
         private bool GetDynamicSpeed(out bool overrideSpeed, out float newSpeed)
@@ -558,24 +619,21 @@ namespace CesiumForUnity
             return true;
         }
 
-        private void ResetSpeed()
+        private void ResetSpeedMultiplier()
         {
             this._speedMultiplier = 1.0f;
         }
 
         private void SetMaxSpeed(float value)
         {
-            this._maxSpeed = this._speedMultiplier * value;
+            float speed = this._maxSpeedCurve.Evaluate(value);
+            this._maxSpeed = Mathf.Max(this._speedMultiplier * speed, 15.0f);
+            this._acceleration = 
+                Mathf.Clamp(this._maxSpeed * 5.0f, 20000.0f, 10000000.0f);
         }
 
-        private void UpdateDynamicSpeed(Vector3 inputVector)
+        private void UpdateDynamicSpeed()
         {
-            if (inputVector == Vector3.zero)
-            {
-                this.ResetSpeed();
-                return;
-            }
-
             bool overrideSpeed;
             float newSpeed;
             if (this.GetDynamicSpeed(out overrideSpeed, out newSpeed))
