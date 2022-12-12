@@ -12,6 +12,7 @@ namespace CesiumForUnityNative {
 
 class CesiumEllipsoidImpl {
 public:
+  static DotNet::Unity::Mathematics::double3 GetRadii();
   static std::optional<DotNet::Unity::Mathematics::double3>
   ScaleToGeodeticSurface(
       DotNet::Unity::Mathematics::double3 earthCenteredEarthFixed);

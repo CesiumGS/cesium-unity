@@ -9,6 +9,11 @@ using namespace DotNet::Unity::Mathematics;
 
 namespace CesiumForUnityNative {
 
+double3 CesiumEllipsoidImpl::GetRadii() {
+  const glm::dvec3 radii = Ellipsoid::WGS84.getRadii();
+  return double3{radii.x, radii.y, radii.z};
+}
+
 std::optional<double3>
 CesiumEllipsoidImpl::ScaleToGeodeticSurface(double3 earthCenteredEarthFixed) {
   const glm::dvec3 cartesian(

@@ -52,7 +52,44 @@ namespace CesiumForUnity
             set => this._dynamicSpeedMinHeight = Mathf.Max(value, 0.0f);
         }
 
-        [Header("Fly-To Controls")]
+        [Header("Dynamic Camera Settings")]
+        [SerializeField]
+        [Tooltip("If enabled, the camera will dynamically reposition its clipping " +
+            "planes so that tilesets will not get clipped from far away." +
+            "\n\n" +
+            "If this option is disabled, tilesets may not render at large distances " +
+            "because they will be clipped by the camera.")]
+        private bool _enableDynamicClippingPlanes = true;
+
+        /// <summary>
+        /// Whether to dynamically adjust the camera's clipping planes so that
+        /// tilesets will not be clipped from far away.
+        /// </summary>
+        public bool enableDynamicClippingPlanes
+        {
+            get => this._enableDynamicClippingPlanes;
+            set => this._enableDynamicClippingPlanes = value;
+        }
+
+        [SerializeField]
+        [Min(0.0f)]
+        [Tooltip("The height above which to dynamically adjust the clipping " +
+            "planes. Below this height, the clipping planes of the camera will be " +
+            "set to fixed values.")]
+        private float _dynamicClippingPlanesMinHeight = 2000.0f;
+
+        /// <summary>
+        /// The height above which to dynamically adjust the clipping planes. 
+        /// Below this height, the clipping planes of the camera will be set 
+        /// to fixed values.
+        /// </summary>
+        public float dynamicClippingPlanesMinHeight
+        {
+            get => this._dynamicClippingPlanesMinHeight;
+            set => this._dynamicClippingPlanesMinHeight = Mathf.Max(value, 0.0f);
+        }
+
+        [Header("Fly-To Properties")]
         [SerializeField]
         [Tooltip("This curve dictates what percentage of the max altitude the " +
             "camera should take at a given time on the curve." +
@@ -170,23 +207,28 @@ namespace CesiumForUnity
         #region Private variables
 
         private Camera _camera;
+
+        private float _initialNearClipPlane;
+        private float _initialFarClipPlane;
+
         private CharacterController _controller;
 
         private CesiumGeoreference _georeference;
         private CesiumGlobeAnchor _globeAnchor;
 
+        private Vector3 _velocity = Vector3.zero;
         private float _lookSpeed = 10.0f;
 
         // These numbers are borrowed from Cesium for Unreal.
-        private Vector3 _velocity = Vector3.zero;
-        public float _acceleration = 20000.0f;
+        private float _acceleration = 20000.0f;
         private float _deceleration = 9999999959.0f;
+        private float _maxRaycastDistance = 1000 * 1000; // 1000 km;
 
-        public float _maxSpeed = 100.0f; // Maximum speed with the speed multiplier applied.
-        public float _maxSpeedPreMultiplier = 0.0f; // Max speed without the multiplier applied.
+        private float _maxSpeed = 100.0f; // Maximum speed with the speed multiplier applied.
+        private float _maxSpeedPreMultiplier = 0.0f; // Max speed without the multiplier applied.
         private AnimationCurve _maxSpeedCurve;
 
-        public float _speedMultiplier = 1.0f;
+        private float _speedMultiplier = 1.0f;
         private float _speedMultiplierIncrement = 1.5f;
 
         private List<double3> _keypoints = new List<double3>();
@@ -202,7 +244,7 @@ namespace CesiumForUnity
 
         #region Input configuration
 
-#if ENABLE_INPUT_SYSTEM
+        #if ENABLE_INPUT_SYSTEM
         InputAction lookAction;
         InputAction moveAction;
         InputAction moveUpAction;
@@ -256,7 +298,7 @@ namespace CesiumForUnity
             speedResetAction.Enable();
             toggleDynamicSpeedAction.Enable();
         }
-#endif
+        #endif
 
         #endregion
 
@@ -270,10 +312,18 @@ namespace CesiumForUnity
                 this._camera = this.gameObject.AddComponent<Camera>();
             }
 
-            this._camera.farClipPlane = 1000000.0f;
+            this._initialNearClipPlane = this._camera.nearClipPlane;
+            this._initialFarClipPlane = this._camera.farClipPlane;
 
-            this._controller = this.gameObject.GetComponent<CharacterController>();
-            if (this._controller == null)
+            if (this.gameObject.GetComponent<CharacterController>() != null)
+            {
+                Debug.LogWarning("A CharacterController component was manually " +
+                    "added to the CesiumCameraController's game object. " +
+                    "This may interfere with the CesiumCameraController's movement.");
+
+                this._controller = this.gameObject.GetComponent<CharacterController>();
+            }
+            else
             {
                 this._controller = this.gameObject.AddComponent<CharacterController>();
             }
@@ -306,40 +356,57 @@ namespace CesiumForUnity
             #endif
         }
 
-        private void CreateMaxSpeedCurve()
-        {
-            // This creates a curve that is linear between the first two keys,
-            // then smoothly interpolated between the last two keys.
-            Keyframe[] keyframes = {
-                new Keyframe(0.0f, 4.0f),
-                new Keyframe(10000000.0f, 10000000.0f),
-                new Keyframe(13000000.0f, 2000000.0f)
-            };
-
-            keyframes[0].weightedMode = WeightedMode.Out;
-            keyframes[0].outTangent = keyframes[1].value / keyframes[0].value;
-            keyframes[0].outWeight = 0.0f;
-
-            keyframes[1].weightedMode = WeightedMode.In;
-            keyframes[1].inWeight = 0.0f;
-            keyframes[1].inTangent = keyframes[1].value / keyframes[0].value;
-            keyframes[1].outTangent = 0.0f;
-
-            keyframes[2].inTangent = 0.0f;
-
-            this._maxSpeedCurve = new AnimationCurve(keyframes);
-            this._maxSpeedCurve.preWrapMode = WrapMode.ClampForever;
-            this._maxSpeedCurve.postWrapMode = WrapMode.ClampForever;
-        }
-
         void Update()
         {
-            HandlePlayerInputs();
+            this.HandlePlayerInputs();
 
             if (this._flyingToLocation)
             {
-                HandleFlightStep(Time.deltaTime);
+                this.HandleFlightStep(Time.deltaTime);
             }
+
+            if (this._enableDynamicClippingPlanes)
+            {
+                this.UpdateClippingPlanes();
+            }
+        }
+
+        #endregion
+
+        #region Raycasting helpers
+
+        private bool RaycastTowardsEarthCenter(out float hitDistance)
+        {
+            double3 center =
+                this._georeference.TransformEarthCenteredEarthFixedPositionToUnity(new double3(0.0));
+            Vector3 line = (float3)center - (float3)this.transform.position;
+
+            RaycastHit hitInfo;
+            if (Physics.Raycast(this.transform.position, line.normalized, out hitInfo, line.magnitude))
+            {
+                hitDistance = Vector3.Distance(this.transform.position, hitInfo.point);
+                return true;
+            }
+
+            hitDistance = 0.0f;
+            return false;
+        }
+
+        private bool RaycastAlongForwardVector(float raycastDistance, out float hitDistance)
+        {
+            RaycastHit hitInfo;
+            if (Physics.Raycast(
+                this.transform.position,
+                this.transform.forward,
+                out hitInfo,
+                raycastDistance))
+            {
+                hitDistance = Vector3.Distance(this.transform.position, hitInfo.point);
+                return true;
+            }
+
+            hitDistance = 0.0f;
+            return false;
         }
 
         #endregion
@@ -394,7 +461,7 @@ namespace CesiumForUnity
                 this._enableDynamicSpeed = !this._enableDynamicSpeed;
             }
 
-            if (inputSpeedReset || 
+            if (inputSpeedReset ||
                 (this._enableDynamicSpeed && movementInput == Vector3.zero))
             {
                 this.ResetSpeedMultiplier();
@@ -404,7 +471,7 @@ namespace CesiumForUnity
                 this.HandleSpeedChange(inputSpeedChange);
             }
 
-            if(!this._flyingToLocation || this._canInterruptFlight)
+            if (!this._flyingToLocation || this._canInterruptFlight)
             {
                 this.Move(movementInput);
             }
@@ -446,7 +513,7 @@ namespace CesiumForUnity
         /// </remarks>
         /// <param name="horizontalRotation">The amount to rotate horizontally, i.e. around the Y-axis.</param>
         /// <param name="verticalRotation">The amount to rotate vertically, i.e. around the X-axis.</param>
-        void Rotate(float horizontalRotation, float verticalRotation)
+        private void Rotate(float horizontalRotation, float verticalRotation)
         {
             if (horizontalRotation == 0.0f && verticalRotation == 0.0f)
             {
@@ -482,10 +549,10 @@ namespace CesiumForUnity
         /// The z-corodinate affects movement along the transform's forward axis.
         /// </remarks>
         /// <param name="movementInput">The player input.</param>
-        void Move(Vector3 movementInput)
+        private void Move(Vector3 movementInput)
         {
             Vector3 inputDirection =
-                this.transform.right * movementInput.x + 
+                this.transform.right * movementInput.x +
                 this.transform.forward * movementInput.z;
 
             if (this._georeference != null && this._globeAnchor != null)
@@ -500,11 +567,11 @@ namespace CesiumForUnity
                 double3 upUnity =
                     this._georeference.TransformEarthCenteredEarthFixedDirectionToUnity(upECEF);
 
-                inputDirection = 
+                inputDirection =
                     (float3)inputDirection + (float3)upUnity * movementInput.y;
             }
 
-            if(inputDirection != Vector3.zero)
+            if (inputDirection != Vector3.zero)
             {
                 if (this._flyingToLocation)
                 {
@@ -522,7 +589,8 @@ namespace CesiumForUnity
 
                 this._velocity += inputDirection * this._acceleration * Time.deltaTime;
                 this._velocity = Vector3.ClampMagnitude(this._velocity, this._maxSpeed);
-            } else
+            }
+            else
             {
                 // Decelerate
                 float speed = Mathf.Max(
@@ -537,7 +605,38 @@ namespace CesiumForUnity
 
         #endregion
 
-        #region Speed computation
+        #region Dynamic speed computation
+
+        /// <summary>
+        /// Creates a curve to control the bounds of the maximum speed before it is
+        /// multiplied by the speed multiplier. This prevents the camera from achieving 
+        /// an unreasonably low or high speed.
+        /// </summary>
+        private void CreateMaxSpeedCurve()
+        {
+            // This creates a curve that is linear between the first two keys,
+            // then smoothly interpolated between the last two keys.
+            Keyframe[] keyframes = {
+                new Keyframe(0.0f, 4.0f),
+                new Keyframe(10000000.0f, 10000000.0f),
+                new Keyframe(13000000.0f, 2000000.0f)
+            };
+
+            keyframes[0].weightedMode = WeightedMode.Out;
+            keyframes[0].outTangent = keyframes[1].value / keyframes[0].value;
+            keyframes[0].outWeight = 0.0f;
+
+            keyframes[1].weightedMode = WeightedMode.In;
+            keyframes[1].inWeight = 0.0f;
+            keyframes[1].inTangent = keyframes[1].value / keyframes[0].value;
+            keyframes[1].outTangent = 0.0f;
+
+            keyframes[2].inTangent = 0.0f;
+
+            this._maxSpeedCurve = new AnimationCurve(keyframes);
+            this._maxSpeedCurve.preWrapMode = WrapMode.ClampForever;
+            this._maxSpeedCurve.postWrapMode = WrapMode.ClampForever;
+        }
 
         /// <summary>
         /// Gets the dynamic speed of the controller based on the camera's height from 
@@ -557,22 +656,11 @@ namespace CesiumForUnity
                 return false;
             }
 
-            float height = 0.0f;
-            float viewDistance = 0.0f;
+            float height, viewDistance;
 
             // Raycast from the camera to the Earth's center and compute the distance.
-            double3 center =
-                this._georeference.TransformEarthCenteredEarthFixedPositionToUnity(new double3(0.0));
-            Vector3 line = (float3)center - (float3)this.transform.position;
-
-            RaycastHit hitInfo;
-            if (Physics.Raycast(this.transform.position, line.normalized, out hitInfo, line.magnitude))
-            {
-                height = Vector3.Distance(this.transform.position, hitInfo.point);
-            }
-
             // Ignore the result if the height is approximately 0.
-            if (height < 0.000001f)
+            if (!this.RaycastTowardsEarthCenter(out height) || height < 0.000001f)
             {
                 overrideSpeed = false;
                 newSpeed = 0.0f;
@@ -584,7 +672,7 @@ namespace CesiumForUnity
             // This can be an issue when 3D tiles are loaded/unloaded from the scene.
             if (
                 this._maxSpeedPreMultiplier > 0.5f &&
-                (height / this._maxSpeedPreMultiplier) >= 1000.0f)
+                (height / this._maxSpeedPreMultiplier) > 1000.0f)
             {
                 overrideSpeed = false;
                 newSpeed = 0.0f;
@@ -593,22 +681,14 @@ namespace CesiumForUnity
             }
 
             // Raycast along the camera's view (forward) vector.
-            float distance = this._maxSpeed * 3.0f;
-            float maxDistance = 1000 * 1000; // 1000 km
-            distance = Mathf.Clamp(distance, 0.0f, maxDistance);
-
-            if (Physics.Raycast(this.transform.position, this.transform.forward, out hitInfo, distance))
-            {
-                viewDistance = Vector3.Distance(this.transform.position, hitInfo.point);
-            }
-
-            // Set the speed to be the height of the camera from the Earth's center.
-            newSpeed = height;
+            float raycastDistance = 
+                Mathf.Clamp(this._maxSpeed * 3.0f, 0.0f, this._maxRaycastDistance);
 
             // If the raycast does not hit, then only override speed if the height
             // is lower than the maximum threshold. Otherwise, if both raycasts hit,
-            // override the speed.
-            if (viewDistance < 0.000001f)
+            // always override the speed.
+            if (!this.RaycastAlongForwardVector(raycastDistance, out viewDistance) ||
+                viewDistance < 0.000001f)
             {
                 overrideSpeed = height <= this._dynamicSpeedMinHeight;
             }
@@ -616,6 +696,9 @@ namespace CesiumForUnity
             {
                 overrideSpeed = true;
             }
+
+            // Set the speed to be the height of the camera from the Earth's center.
+            newSpeed = height;
 
             return true;
         }
@@ -629,7 +712,7 @@ namespace CesiumForUnity
         {
             float actualSpeed = this._maxSpeedCurve.Evaluate(speed);
             this._maxSpeed = this._speedMultiplier * actualSpeed;
-            this._acceleration = 
+            this._acceleration =
                 Mathf.Clamp(this._maxSpeed * 5.0f, 20000.0f, 10000000.0f);
         }
 
@@ -982,6 +1065,39 @@ namespace CesiumForUnity
                 yawAtDestination,
                 pitchAtDestination,
                 canInterruptByMoving);
+        }
+
+        #endregion
+
+        #region Dynamic clipping plane adjustment
+
+        private void UpdateClippingPlanes()
+        {
+            if(this._camera == null)
+            {
+                return;
+            }
+
+            // Raycast from the camera to the Earth's center and compute the distance.
+            float height = 0.0f;
+            if (!this.RaycastTowardsEarthCenter(out height))
+            {
+                return;
+            }
+
+            float nearClipPlane = this._initialNearClipPlane;
+            float farClipPlane = this._initialFarClipPlane;
+
+            if (height >= this._dynamicClippingPlanesMinHeight)
+            {
+                nearClipPlane = Mathf.Max(height * 0.75f, nearClipPlane);
+                farClipPlane = Mathf.Max(
+                    nearClipPlane + (float)CesiumEllipsoid.GetMaximumRadius(),
+                    farClipPlane);
+            }
+
+            this._camera.nearClipPlane = nearClipPlane;
+            this._camera.farClipPlane = farClipPlane;
         }
 
         #endregion

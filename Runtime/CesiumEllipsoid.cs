@@ -10,6 +10,22 @@ namespace CesiumForUnity
     public static partial class CesiumEllipsoid
     {
         /// <summary>
+        /// Returns the radii of the ellipsoid in its x-, y-, and z-directions.
+        /// </summary>
+        /// <returns></returns>
+        public static partial double3 GetRadii();
+
+        public static double GetMaximumRadius()
+        {
+            return math.cmax(CesiumEllipsoid.GetRadii());
+        }
+
+        public static double GetMinimumRadius()
+        {
+            return math.cmin(CesiumEllipsoid.GetRadii());
+        }
+
+        /// <summary>
         /// Scale the given Earth-Centered, Earth-Fixed position along the geodetic surface normal 
         /// so that it is on the surface of the ellipsoid. If the position is at the center of the
         /// ellipsoid, the result will be null.
