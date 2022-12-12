@@ -37,18 +37,19 @@ namespace CesiumForUnity
 
         [SerializeField]
         [Min(0.0f)]
-        [Tooltip("The maximum height from the Earth at which the current speed " +
-            "will be set to the height value.")]
-        private float _dynamicSpeedMaxHeight = 2000.0f;
+        [Tooltip("Below this height, the current speed will be set as the height of " +
+            "the camera above tilesets in the scene. This forces the camera to move " +
+            "more slowly when it is right above a tileset.")]
+        private float _dynamicSpeedMinHeight = 20.0f;
 
         /// <summary>
-        /// The maximum height at which speed will be set to the object's
+        /// The height below which the speed will be set to the object's
         /// height from the Earth.
         /// </summary>
-        public float dynamicSpeedMaxHeight
+        public float dynamicSpeedMinHeight
         {
-            get => this._dynamicSpeedMaxHeight;
-            set => this._dynamicSpeedMaxHeight = Mathf.Max(value, 0.0f);
+            get => this._dynamicSpeedMinHeight;
+            set => this._dynamicSpeedMinHeight = Mathf.Max(value, 0.0f);
         }
 
         [Header("Fly-To Controls")]
@@ -178,15 +179,15 @@ namespace CesiumForUnity
 
         // These numbers are borrowed from Cesium for Unreal.
         private Vector3 _velocity = Vector3.zero;
-        private float _acceleration = 20000.0f;
+        public float _acceleration = 20000.0f;
         private float _deceleration = 9999999959.0f;
 
-        private float _maxSpeed = 100.0f; // Maximum speed with the speed multiplier applied.
-        private float _maxSpeedPreMultiplier = 0.0f; // Max speed without the multiplier applied.
+        public float _maxSpeed = 100.0f; // Maximum speed with the speed multiplier applied.
+        public float _maxSpeedPreMultiplier = 0.0f; // Max speed without the multiplier applied.
         private AnimationCurve _maxSpeedCurve;
 
-        private float _speedMultiplier = 1.0f;
-        private float _speedIncrementMultiplier = 1.5f;
+        public float _speedMultiplier = 1.0f;
+        private float _speedMultiplierIncrement = 1.5f;
 
         private List<double3> _keypoints = new List<double3>();
 
@@ -310,7 +311,7 @@ namespace CesiumForUnity
             // This creates a curve that is linear between the first two keys,
             // then smoothly interpolated between the last two keys.
             Keyframe[] keyframes = {
-                new Keyframe(0.0f, 15.0f),
+                new Keyframe(0.0f, 4.0f),
                 new Keyframe(10000000.0f, 10000000.0f),
                 new Keyframe(13000000.0f, 2000000.0f)
             };
@@ -424,11 +425,11 @@ namespace CesiumForUnity
             {
                 if (speedChangeInput > 0.0f)
                 {
-                    this._speedMultiplier *= this._speedIncrementMultiplier;
+                    this._speedMultiplier *= this._speedMultiplierIncrement;
                 }
                 else
                 {
-                    this._speedMultiplier /= this._speedIncrementMultiplier;
+                    this._speedMultiplier /= this._speedMultiplierIncrement;
                 }
 
                 float max = this._enableDynamicSpeed ? 50.0f : 50000.0f;
@@ -570,8 +571,8 @@ namespace CesiumForUnity
                 height = Vector3.Distance(this.transform.position, hitInfo.point);
             }
 
-            // Ignore the result if the height is 0.
-            if (Mathf.Approximately(height, 0.0f))
+            // Ignore the result if the height is approximately 0.
+            if (height < 0.000001f)
             {
                 overrideSpeed = false;
                 newSpeed = 0.0f;
@@ -582,8 +583,8 @@ namespace CesiumForUnity
             // Also ignore the result if the speed will increase by too much at once.
             // This can be an issue when 3D tiles are loaded/unloaded from the scene.
             if (
-                !Mathf.Approximately(this._maxSpeedPreMultiplier, 0.0f) &&
-                (height / this._maxSpeedPreMultiplier) >= 100.0f)
+                this._maxSpeedPreMultiplier > 0.5f &&
+                (height / this._maxSpeedPreMultiplier) >= 1000.0f)
             {
                 overrideSpeed = false;
                 newSpeed = 0.0f;
@@ -607,9 +608,9 @@ namespace CesiumForUnity
             // If the raycast does not hit, then only override speed if the height
             // is lower than the maximum threshold. Otherwise, if both raycasts hit,
             // override the speed.
-            if (Mathf.Approximately(viewDistance, 0.0f))
+            if (viewDistance < 0.000001f)
             {
-                overrideSpeed = height < this._dynamicSpeedMaxHeight;
+                overrideSpeed = height <= this._dynamicSpeedMinHeight;
             }
             else
             {
@@ -624,10 +625,10 @@ namespace CesiumForUnity
             this._speedMultiplier = 1.0f;
         }
 
-        private void SetMaxSpeed(float value)
+        private void SetMaxSpeed(float speed)
         {
-            float speed = this._maxSpeedCurve.Evaluate(value);
-            this._maxSpeed = Mathf.Max(this._speedMultiplier * speed, 15.0f);
+            float actualSpeed = this._maxSpeedCurve.Evaluate(speed);
+            this._maxSpeed = this._speedMultiplier * actualSpeed;
             this._acceleration = 
                 Mathf.Clamp(this._maxSpeed * 5.0f, 20000.0f, 10000000.0f);
         }
@@ -865,7 +866,7 @@ namespace CesiumForUnity
 
         #region Fly-To public API
 
-        internal void FlyToLocationEarthCenteredEarthFixed(
+        public void FlyToLocationEarthCenteredEarthFixed(
             double3 destination,
             float yawAtDestination,
             float pitchAtDestination,
@@ -927,7 +928,7 @@ namespace CesiumForUnity
                 canInterruptByMoving);
         }
 
-        internal void FlyToLocationLongitudeLatitudeHeight(
+        public void FlyToLocationLongitudeLatitudeHeight(
             double3 destination,
             float yawAtDestination,
             float pitchAtDestination,
