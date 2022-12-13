@@ -10,16 +10,24 @@ namespace CesiumForUnity
     public static partial class CesiumEllipsoid
     {
         /// <summary>
-        /// Returns the radii of the ellipsoid in its x-, y-, and z-directions.
+        /// Gets the radii of the ellipsoid in its x-, y-, and z-directions.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The radii of the ellipsoid in its x-, y-, and z-directions.</returns>
         public static partial double3 GetRadii();
 
+        /// <summary>
+        /// Gets the maximum radius of the ellipsoid in any dimension.
+        /// </summary>
+        /// <returns>The maximum radius of the ellipsoid.</returns>
         public static double GetMaximumRadius()
         {
             return math.cmax(CesiumEllipsoid.GetRadii());
         }
 
+        /// <summary>
+        /// Gets the minimum radius of the ellipsoid in any dimension.
+        /// </summary>
+        /// <returns>The minimum radius of the ellipsoid.</returns>
         public static double GetMinimumRadius()
         {
             return math.cmin(CesiumEllipsoid.GetRadii());

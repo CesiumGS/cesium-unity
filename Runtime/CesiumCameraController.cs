@@ -10,9 +10,10 @@ using UnityEngine.InputSystem;
 namespace CesiumForUnity
 {
     /// <summary>
-    /// A camera controller that can easily move around the globe while maintaining a
-    /// sensible orientation. As the camera moves across the horizon, it automatically
-    /// changes its own up direction such that the world always looks right-side up.
+    /// A camera controller that can easily move around and view the globe while 
+    /// maintaining a sensible orientation. As the camera moves across the horizon, 
+    /// it automatically changes its own up direction such that the world always 
+    /// looks right-side up.
     /// </summary>
     public class CesiumCameraController : MonoBehaviour
     {
@@ -332,6 +333,7 @@ namespace CesiumForUnity
             this._controller.height = 1.0f;
             this._controller.center = Vector3.zero;
             this._controller.detectCollisions = true;
+            this._controller.hideFlags = HideFlags.HideInInspector;
 
             this._georeference = this.gameObject.GetComponentInParent<CesiumGeoreference>();
             if (this._georeference == null)
