@@ -19,10 +19,7 @@ namespace CesiumForUnity
     {
         #region User-editable properties
 
-        [Header("Dynamic Speed")]
         [SerializeField]
-        [Tooltip("If enabled, the controller's speed will change dynamically based on " +
-            "elevation and other factors.")]
         private bool _enableDynamicSpeed = true;
 
         /// <summary>
@@ -38,14 +35,12 @@ namespace CesiumForUnity
 
         [SerializeField]
         [Min(0.0f)]
-        [Tooltip("Below this height, the current speed will be set as the height of " +
-            "the camera above tilesets in the scene. This forces the camera to move " +
-            "more slowly when it is right above a tileset.")]
         private float _dynamicSpeedMinHeight = 20.0f;
 
         /// <summary>
-        /// The height below which the speed will be set to the object's
-        /// height from the Earth.
+        /// The minimum height where dynamic speed starts to take effect.
+        /// Below this height, the speed will be set to the object's height 
+        /// from the Earth, which makes it move slowly when it is right above a tileset.
         /// </summary>
         public float dynamicSpeedMinHeight
         {
@@ -53,13 +48,7 @@ namespace CesiumForUnity
             set => this._dynamicSpeedMinHeight = Mathf.Max(value, 0.0f);
         }
 
-        [Header("Dynamic Camera Settings")]
         [SerializeField]
-        [Tooltip("If enabled, the camera will dynamically reposition its clipping " +
-            "planes so that tilesets will not get clipped from far away." +
-            "\n\n" +
-            "If this option is disabled, tilesets may not render at large distances " +
-            "because they will be clipped by the camera.")]
         private bool _enableDynamicClippingPlanes = true;
 
         /// <summary>
@@ -74,15 +63,11 @@ namespace CesiumForUnity
 
         [SerializeField]
         [Min(0.0f)]
-        [Tooltip("The height above which to dynamically adjust the clipping " +
-            "planes. Below this height, the clipping planes of the camera will be " +
-            "set to fixed values.")]
-        private float _dynamicClippingPlanesMinHeight = 2000.0f;
+        private float _dynamicClippingPlanesMinHeight = 10000.0f;
 
         /// <summary>
-        /// The height above which to dynamically adjust the clipping planes. 
-        /// Below this height, the clipping planes of the camera will be set 
-        /// to fixed values.
+        /// The height to start dynamically adjusting the camera's clipping planes. 
+        /// Below this height, the clipping planes will be set to their initial values.
         /// </summary>
         public float dynamicClippingPlanesMinHeight
         {
@@ -90,14 +75,7 @@ namespace CesiumForUnity
             set => this._dynamicClippingPlanesMinHeight = Mathf.Max(value, 0.0f);
         }
 
-        [Header("Fly-To Properties")]
         [SerializeField]
-        [Tooltip("This curve dictates what percentage of the max altitude the " +
-            "camera should take at a given time on the curve." +
-            "\n\n" +
-            "This curve must be kept in the 0 to 1 range on both axes. The " +
-            "\"Fly To Maximum Altitude Curve\" dictates the actual max " +
-            "altitude at each point along the curve.")]
         private AnimationCurve _flyToAltitudeProfileCurve;
 
         /// <summary>
@@ -116,9 +94,6 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Tooltip("This curve is used to determine the progress percentage for " +
-            "all the other curves. This allows us to accelerate and deaccelerate " +
-            "as wanted throughout the curve.")]
         private AnimationCurve _flyToProgressCurve;
 
         /// <summary>
@@ -132,11 +107,6 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Tooltip("This curve dictates the maximum altitude at each point along " +
-            "the curve." +
-            "\n\n" +
-            "This can be used in conjunction with the \"Fly To Altitude Profile " +
-            "Curve\" to allow the camera to take some altitude during the flight.")]
         private AnimationCurve _flyToMaximumAltitudeCurve;
 
         /// <summary>
@@ -154,7 +124,6 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Tooltip("The length in seconds that the flight should last.")]
         [Min(0.0f)]
         private double _flyToDuration = 5.0;
 
@@ -168,8 +137,6 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Tooltip("The granularity in degrees with which keypoints should be generated " +
-            "for the flight interpolation.")]
         [Min(0.0f)]
         private double _flyToGranularityDegrees = 0.01;
 
@@ -191,7 +158,7 @@ namespace CesiumForUnity
         /// <summary>
         /// An event that is raised when the camera finishes flying.
         /// </summary>
-        public static event CompletedFlightDelegate OnFlightComplete;
+        public event CompletedFlightDelegate OnFlightComplete;
 
         /// <summary>
         /// Encapsulates a method that is called whenever the camera's flight is interrupted.
@@ -201,7 +168,7 @@ namespace CesiumForUnity
         /// <summary>
         /// An event that is raised when the camera's flight is interrupted.
         /// </summary>
-        public static event InterruptedFlightDelegate OnFlightInterrupted;
+        public event InterruptedFlightDelegate OnFlightInterrupted;
 
         #endregion
 
@@ -768,22 +735,7 @@ namespace CesiumForUnity
             // If we reached the end, set actual destination location and orientation
             if (this._currentFlyToTime >= this._flyToDuration)
             {
-                double3 finalPoint = this._keypoints[this._keypoints.Count - 1];
-                this._globeAnchor.SetPositionEarthCenteredEarthFixed(
-                    finalPoint.x,
-                    finalPoint.y,
-                    finalPoint.z);
-
-                this.transform.rotation = this._flyToDestinationRotation;
-
-                this._flyingToLocation = false;
-                this._currentFlyToTime = 0.0;
-
-                if (OnFlightComplete != null)
-                {
-                    OnFlightComplete();
-                }
-
+                this.CompleteFlight();
                 return;
             }
 
@@ -799,6 +751,12 @@ namespace CesiumForUnity
                     (double)this._flyToProgressCurve.Evaluate((float)percentage),
                     0.0,
                     1.0);
+            }
+
+            if(Mathf.Approximately((float)flyPercentage, 1.0f))
+            {
+                this.CompleteFlight();
+                return;
             }
 
             // Find the keypoint indexes corresponding to the current percentage
@@ -824,6 +782,25 @@ namespace CesiumForUnity
                 (float)flyPercentage);
         }
 
+        private void CompleteFlight()
+        {
+            double3 finalPoint = this._keypoints[this._keypoints.Count - 1];
+            this._globeAnchor.SetPositionEarthCenteredEarthFixed(
+                finalPoint.x,
+                finalPoint.y,
+                finalPoint.z);
+
+            this.transform.rotation = this._flyToDestinationRotation;
+
+            this._flyingToLocation = false;
+            this._currentFlyToTime = 0.0;
+
+            if (this.OnFlightComplete != null)
+            {
+                this.OnFlightComplete();
+            }
+        }
+
         private void InterruptFlight()
         {
             this._flyingToLocation = false;
@@ -836,9 +813,9 @@ namespace CesiumForUnity
             this._globeAnchor.adjustOrientationForGlobeWhenMoving = true;
             this._globeAnchor.detectTransformChanges = true;
 
-            if (OnFlightInterrupted != null)
+            if (this.OnFlightInterrupted != null)
             {
-                OnFlightInterrupted();
+                this.OnFlightInterrupted();
             }
         }
 
