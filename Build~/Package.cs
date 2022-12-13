@@ -356,8 +356,12 @@ namespace Build
                 "Editor/BuildCesiumForUnity.cs.meta",
                 "Editor/ConfigureReinterop.cs",
                 "Editor/ConfigureReinterop.cs.meta",
+                "Editor/csc.rsp",
+                "Editor/csc.rsp.meta",
                 "Runtime/ConfigureReinterop.cs",
-                "Runtime/ConfigureReinterop.cs.meta"
+                "Runtime/ConfigureReinterop.cs.meta",
+                "Runtime/csc.rsp",
+                "Runtime/csc.rsp.meta"
             };
 
             foreach (string fileToDelete in filesToDelete)
