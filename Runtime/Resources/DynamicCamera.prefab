@@ -134,7 +134,7 @@ MonoBehaviour:
   _enableDynamicSpeed: 1
   _dynamicSpeedMinHeight: 20
   _enableDynamicClippingPlanes: 1
-  _dynamicClippingPlanesMinHeight: 2000
+  _dynamicClippingPlanesMinHeight: 10000
   _flyToAltitudeProfileCurve:
     serializedVersion: 2
     m_Curve:
