@@ -393,9 +393,9 @@ namespace CesiumForUnity
             GameObject dynamicCameraPrefab = Resources.Load<GameObject>("DynamicCamera");
             GameObject dynamicCameraObject =
                 UnityEngine.Object.Instantiate(dynamicCameraPrefab);
-            Undo.RegisterCreatedObjectUndo(dynamicCameraObject, "Create Dynamic Camera");
+            Undo.RegisterCreatedObjectUndo(dynamicCameraObject, "Create DynamicCamera");
 
-            dynamicCameraObject.name = "Dynamic Camera";
+            dynamicCameraObject.name = "DynamicCamera";
             dynamicCameraObject.transform.parent = georeference.gameObject.transform;
 
             return dynamicCameraObject.GetComponent<CesiumCameraController>();
