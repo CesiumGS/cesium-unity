@@ -1071,8 +1071,12 @@ namespace CesiumForUnity
             {
                 nearClipPlane = Mathf.Max(height * 0.75f, nearClipPlane);
                 farClipPlane = Mathf.Max(
-                    nearClipPlane + (float)CesiumEllipsoid.GetMaximumRadius(),
+                    nearClipPlane + 1.2f * (float)CesiumEllipsoid.GetMaximumRadius(),
                     farClipPlane);
+
+                // If the near-clip plane is set too large, it will cause
+                // "Screen position out of view frustum" errors.
+                nearClipPlane = Mathf.Min(nearClipPlane, 450000);
             }
 
             this._camera.nearClipPlane = nearClipPlane;
