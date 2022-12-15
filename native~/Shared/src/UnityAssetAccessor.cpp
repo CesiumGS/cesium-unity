@@ -23,9 +23,7 @@
 #include <DotNet/UnityEngine/Networking/UploadHandler.h>
 #include <DotNet/UnityEngine/Networking/UploadHandlerRaw.h>
 
-#include <fstream>
 #include <sstream>
-
 
 using namespace CesiumAsync;
 using namespace CesiumUtility;
