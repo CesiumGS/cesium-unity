@@ -15,6 +15,7 @@ namespace CesiumForUnity
     /// it automatically changes its own up direction such that the world always 
     /// looks right-side up.
     /// </summary>
+    [RequireComponent(typeof(CesiumOriginShift))]
     public class CesiumCameraController : MonoBehaviour
     {
         #region User-editable properties
@@ -310,12 +311,7 @@ namespace CesiumForUnity
                     "with a CesiumGeoreference.");
             }
 
-            if (this.gameObject.GetComponent<CesiumOriginShift>() == null)
-            {
-                this.gameObject.AddComponent<CesiumOriginShift>();
-            }
-
-            // Adding a CesiumOriginShift will add a CesiumGlobeAnchor automatically.
+            // CesiumOriginShift will add a CesiumGlobeAnchor automatically.
             this._globeAnchor = this.gameObject.GetComponent<CesiumGlobeAnchor>();
 
             this.CreateMaxSpeedCurve();
