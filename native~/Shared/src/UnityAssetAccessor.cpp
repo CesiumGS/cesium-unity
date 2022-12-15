@@ -41,7 +41,7 @@ std::string encodeUTF8toASCII(const std::string& input) {
       ss << c;
     } else {
       includePrefix = true;
-      ss << std::hex << static_cast<int>(c);
+      ss << "%" << std::hex << static_cast<int>(c);
     }
   }
   return includePrefix ? "utf-8''" + ss.str() : ss.str();
