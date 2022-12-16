@@ -22,17 +22,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: recursive
-      - name: Install wget
-        run: choco install wget --no-progress
-      - name: Install Unity Hub
-        run: |
-          wget --quiet https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.exe
-          start -FilePath ./UnityHubSetup.exe -ArgumentList "/S" -Wait
-          rm ./UnityHubSetup.exe
-      - name: Install Unity 2021.3.13f1
-        run: start -FilePath "C:\Program Files\Unity Hub\Unity Hub.exe" -ArgumentList "-- --headless install --version 2021.3.13f1 --changeset 9e7d58001ecf" -Wait
-      - name: Install Unity Android Support
-        run: start -FilePath "C:\Program Files\Unity Hub\Unity Hub.exe" -ArgumentList "-- --headless install-modules --version 2021.3.13f1 --changeset 9e7d58001ecf --module android android-sdk-ndk-tools" -Wait
       - name: Create SSH tunnel to Unity License Server
         env:
           UNITY_LICENSE_SERVER_SSH_KEY: ${{ secrets.UNITY_LICENSE_SERVER_SSH_KEY }}
