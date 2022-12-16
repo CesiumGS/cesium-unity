@@ -23,7 +23,7 @@ jobs:
         with:
           submodules: recursive
       - name: Install wget
-        run: choco install wget --no-progress
+        run: choco install wget --no-progress -y
       - name: Create SSH tunnel to Unity License Server
         env:
           UNITY_LICENSE_SERVER_SSH_KEY: ${{ secrets.UNITY_LICENSE_SERVER_SSH_KEY }}
