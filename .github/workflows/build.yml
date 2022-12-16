@@ -40,7 +40,7 @@ jobs:
           sleep 5
       - name: Test Connection to Unity License Server
         run: |
-          wget http://127.0.0.1:12331/v1/admin/status
+          wget.exe http://127.0.0.1:12331/v1/admin/status
           cat status
           rm status
       - name: Configure Unity to Use the License Server
