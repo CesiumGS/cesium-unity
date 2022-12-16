@@ -14,7 +14,7 @@ jobs:
           find native~/Runtime native~/Editor native~/Shared \( -iname '*.cpp' -o -iname '*.h' \) -print0 | xargs -0 clang-format --dry-run -Werror
   Windows:
     needs: [QuickChecks]
-    runs-on: windows-latest
+    runs-on: ["self-hosted","windows","x64","unity-2021-3"]
     # Only allow a single Windows build at a time, for Unity licensing reasons
     concurrency: windows
     steps:
