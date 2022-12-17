@@ -46,7 +46,9 @@ jobs:
       - name: Configure Unity to Use the License Server
         run: |
           mkdir -p $ENV:PROGRAMDATA/Unity/config
-          '{"licensingServiceBaseUrl": "http://localhost:12331",\r\n"enableEntitlementLicensing": true,\r\n"clientConnectTimeoutSec": 600,\r\n"clientHandshakeTimeoutSec": 1200}' > $ENV:PROGRAMDATA/Unity/config/services-config.json
+          $filename="$ENV:PROGRAMDATA/Unity/config/services-config.json"
+          $text='{"licensingServiceBaseUrl":"http://localhost:12331","enableEntitlementLicensing":true,"clientConnectTimeoutSec":120,"clientHandshakeTimeoutSec":60}'
+          [IO.File]::WriteAllLines($filename,$text)
       - name: Update the version in Cesium.cpp
         run: |
           $VERSION = (Get-Content -path package.json | ConvertFrom-Json).version
