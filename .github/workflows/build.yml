@@ -69,6 +69,8 @@ jobs:
       - name: Build Package
         run: |
           cd d:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
+          start -FilePath 'C:\Program Files\Unity\Hub\Editor\2021.3.13f1\Editor\Data\Resources\Licensing\Client\Unity.Licensing.Client.exe'
+          sleep 120
           dotnet run --project Build~
           dir d:\cesium\CesiumForUnityBuildProject
       - name: Publish package artifact
