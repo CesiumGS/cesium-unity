@@ -18,6 +18,8 @@ jobs:
     # Only allow a single Windows build at a time, for Unity licensing reasons
     concurrency: windows
     steps:
+      - name: Disable real-time scanning
+        run: Set-MpPreference -DisableRealtimeMonitoring $true
       - name: Check out repository code
         uses: actions/checkout@v3
         with:
