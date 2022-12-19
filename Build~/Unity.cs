@@ -64,6 +64,8 @@ namespace Build
                             output = reader.ReadLine();
                             if (output != null)
                                 Console.WriteLine(output);
+                            else
+                                Thread.Sleep(1);
                         }
 
                         output = reader.ReadLine();
