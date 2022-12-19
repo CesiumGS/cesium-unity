@@ -23,11 +23,29 @@
 #include <DotNet/UnityEngine/Networking/UploadHandler.h>
 #include <DotNet/UnityEngine/Networking/UploadHandlerRaw.h>
 
+#include <sstream>
+
 using namespace CesiumAsync;
 using namespace CesiumUtility;
 using namespace DotNet;
 
 namespace {
+
+std::string encodeUTF8toASCII(const std::string& input) {
+  std::ostringstream ss;
+  bool includePrefix = false;
+  for (const unsigned char c : input) {
+    if (c == 32) {
+      ss << "%20"; // replace spaces with %20
+    } else if (c < 128) {
+      ss << c;
+    } else {
+      includePrefix = true;
+      ss << "%" << std::hex << static_cast<int>(c);
+    }
+  }
+  return includePrefix ? "utf-8''" + ss.str() : ss.str();
+}
 
 class UnityAssetResponse : public IAssetResponse {
 public:
@@ -95,12 +113,12 @@ private:
 namespace CesiumForUnityNative {
 
 UnityAssetAccessor::UnityAssetAccessor()
-    : _cesiumPlatformHeader(
+    : _cesiumPlatformHeader(encodeUTF8toASCII(
           CesiumForUnity::Helpers::ToString(
               UnityEngine::Application::platform())
               .ToStlString() +
           " " + System::Environment::OSVersion().VersionString().ToStlString() +
-          " " + UnityEngine::Application::productName().ToStlString()),
+          " " + UnityEngine::Application::productName().ToStlString())),
       _cesiumVersionHeader(
           CesiumForUnityNative::Cesium::version + " " +
           CesiumForUnityNative::Cesium::commit) {}
