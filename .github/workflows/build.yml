@@ -18,14 +18,10 @@ jobs:
     # Only allow a single Windows build at a time, for Unity licensing reasons
     concurrency: windows
     steps:
-      - name: Disable real-time scanning
-        run: Set-MpPreference -DisableRealtimeMonitoring $true
       - name: Check out repository code
         uses: actions/checkout@v3
         with:
           submodules: recursive
-      - name: Install wget
-        run: choco install wget --no-progress -y
       - name: Create SSH tunnel to Unity License Server
         env:
           UNITY_LICENSE_SERVER_SSH_KEY: ${{ secrets.UNITY_LICENSE_SERVER_SSH_KEY }}
