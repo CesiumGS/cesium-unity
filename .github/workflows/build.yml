@@ -69,8 +69,9 @@ jobs:
       - name: Build Package
         run: |
           cd d:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
-          start -FilePath 'C:\Program Files\Unity\Hub\Editor\2021.3.13f1\Editor\Data\Resources\Licensing\Client\Unity.Licensing.Client.exe'
-          sleep 120
+          mkdir -p d:\cesium\temp
+          # Store temp files on the D drive, which is much faster than the EBS-backed C drive.
+          $ENV:TEMP="d:\cesium\temp"
           dotnet run --project Build~
           dir d:\cesium\CesiumForUnityBuildProject
       - name: Publish package artifact
