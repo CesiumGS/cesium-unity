@@ -200,7 +200,7 @@ namespace CesiumForUnity
 
         public static Cesium3DTileset CreateTileset(string name, long assetID)
         {
-            // Find a georeference in the scene, or create one if none exists.
+            // Find a georeference in the scene, or create one if none exist.
             CesiumGeoreference georeference = CesiumEditorUtility.FindFirstGeoreference();
             if (georeference == null)
             {
@@ -245,7 +245,7 @@ namespace CesiumForUnity
 
             // Find the camera position in the Georeference's reference frame.
             Vector3 position = camera.transform.position;
-            position = georeference.transform.worldToLocalMatrix * 
+            position = georeference.transform.worldToLocalMatrix *
                 new Vector4(position.x, position.y, position.z, 1.0f);
 
             double3 positionUnity = new double3(
@@ -373,14 +373,14 @@ namespace CesiumForUnity
 
         public static CesiumCameraController CreateDynamicCamera()
         {
-            CesiumCameraController dynamicCamera = 
+            CesiumCameraController dynamicCamera =
                 UnityEngine.Object.FindObjectOfType<CesiumCameraController>(true);
-            if(dynamicCamera != null)
+            if (dynamicCamera != null)
             {
                 return dynamicCamera;
             }
 
-            // Find a georeference in the scene, or create one if none exists.
+            // Find a georeference in the scene, or create one if none exist.
             CesiumGeoreference georeference = CesiumEditorUtility.FindFirstGeoreference();
             if (georeference == null)
             {

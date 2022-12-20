@@ -94,10 +94,12 @@ namespace CesiumForUnity
             GUIContent enableDynamicClippingPlanesContent = new GUIContent(
                 "Enable Dynamic Clipping Planes",
                 "If enabled, the camera will dynamically reposition its clipping " +
-                "planes so that tilesets will not get clipped from far away." +
+                "planes so that the globe will not get clipped from far away. " +
+                "If this option is disabled, the globe and other tilesets may not render " +
+                "at large distances because they will be clipped by the camera." +
                 "\n\n" +
-                "If this option is disabled, tilesets may not render at large distances " +
-                "because they will be clipped by the camera.");
+                "This setting may not work well for rendering objects that are far " +
+                "above the Earth but still close to the camera as it zooms out.");
             GUILayout.Label(enableDynamicClippingPlanesContent, GUILayout.Width(labelWidth));
             EditorGUILayout.PropertyField(this._enableDynamicClippingPlanes, GUIContent.none);
             GUILayout.EndHorizontal();

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering;
 using Unity.Mathematics;
 
 #if ENABLE_INPUT_SYSTEM
@@ -178,12 +177,10 @@ namespace CesiumForUnity
         #region Private variables
 
         private Camera _camera;
-
         private float _initialNearClipPlane;
         private float _initialFarClipPlane;
 
         private CharacterController _controller;
-
         private CesiumGeoreference _georeference;
         private CesiumGlobeAnchor _globeAnchor;
 
@@ -310,13 +307,44 @@ namespace CesiumForUnity
             else
             {
                 this._controller = this.gameObject.AddComponent<CharacterController>();
+                this._controller.hideFlags = HideFlags.HideInInspector;
             }
 
             this._controller.radius = 1.0f;
             this._controller.height = 1.0f;
             this._controller.center = Vector3.zero;
             this._controller.detectCollisions = true;
-            this._controller.hideFlags = HideFlags.HideInInspector;
+        }
+
+        /// <summary>
+        /// Creates a curve to control the bounds of the maximum speed before it is
+        /// multiplied by the speed multiplier. This prevents the camera from achieving 
+        /// an unreasonably low or high speed.
+        /// </summary>
+        private void CreateMaxSpeedCurve()
+        {
+            // This creates a curve that is linear between the first two keys,
+            // then smoothly interpolated between the last two keys.
+            Keyframe[] keyframes = {
+                new Keyframe(0.0f, 4.0f),
+                new Keyframe(10000000.0f, 10000000.0f),
+                new Keyframe(13000000.0f, 2000000.0f)
+            };
+
+            keyframes[0].weightedMode = WeightedMode.Out;
+            keyframes[0].outTangent = keyframes[1].value / keyframes[0].value;
+            keyframes[0].outWeight = 0.0f;
+
+            keyframes[1].weightedMode = WeightedMode.In;
+            keyframes[1].inWeight = 0.0f;
+            keyframes[1].inTangent = keyframes[1].value / keyframes[0].value;
+            keyframes[1].outTangent = 0.0f;
+
+            keyframes[2].inTangent = 0.0f;
+
+            this._maxSpeedCurve = new AnimationCurve(keyframes);
+            this._maxSpeedCurve.preWrapMode = WrapMode.ClampForever;
+            this._maxSpeedCurve.postWrapMode = WrapMode.ClampForever;
         }
 
         void Awake()
@@ -405,7 +433,7 @@ namespace CesiumForUnity
 
         private void HandlePlayerInputs()
         {
-#if ENABLE_INPUT_SYSTEM
+            #if ENABLE_INPUT_SYSTEM
             Vector2 lookDelta = lookAction.ReadValue<Vector2>();
             float inputRotateHorizontal = lookDelta.x;
             float inputRotateVertical = lookDelta.y;
@@ -420,7 +448,7 @@ namespace CesiumForUnity
             bool inputSpeedReset = speedResetAction.ReadValue<float>() > 0.5f;
 
             bool toggleDynamicSpeed = toggleDynamicSpeedAction.ReadValue<float>() > 0.5f;
-#else
+            #else
             float inputRotateHorizontal = Input.GetAxis("Mouse X");
             inputRotateHorizontal += Input.GetAxis("Controller Right Stick X");
 
@@ -437,7 +465,7 @@ namespace CesiumForUnity
 
             bool toggleDynamicSpeed =
                 Input.GetKeyDown("g") || Input.GetKeyDown("joystick button 1");
-#endif
+            #endif
 
             Vector3 movementInput = new Vector3(inputRight, inputUp, inputForward);
 
@@ -536,7 +564,7 @@ namespace CesiumForUnity
         /// <remarks>
         /// The x-coordinate affects movement along the transform's right axis.
         /// The y-coordinate affects movement along the georeferenced up axis.
-        /// The z-corodinate affects movement along the transform's forward axis.
+        /// The z-coordinate affects movement along the transform's forward axis.
         /// </remarks>
         /// <param name="movementInput">The player input.</param>
         private void Move(Vector3 movementInput)
@@ -596,37 +624,6 @@ namespace CesiumForUnity
 #endregion
 
         #region Dynamic speed computation
-
-        /// <summary>
-        /// Creates a curve to control the bounds of the maximum speed before it is
-        /// multiplied by the speed multiplier. This prevents the camera from achieving 
-        /// an unreasonably low or high speed.
-        /// </summary>
-        private void CreateMaxSpeedCurve()
-        {
-            // This creates a curve that is linear between the first two keys,
-            // then smoothly interpolated between the last two keys.
-            Keyframe[] keyframes = {
-                new Keyframe(0.0f, 4.0f),
-                new Keyframe(10000000.0f, 10000000.0f),
-                new Keyframe(13000000.0f, 2000000.0f)
-            };
-
-            keyframes[0].weightedMode = WeightedMode.Out;
-            keyframes[0].outTangent = keyframes[1].value / keyframes[0].value;
-            keyframes[0].outWeight = 0.0f;
-
-            keyframes[1].weightedMode = WeightedMode.In;
-            keyframes[1].inWeight = 0.0f;
-            keyframes[1].inTangent = keyframes[1].value / keyframes[0].value;
-            keyframes[1].outTangent = 0.0f;
-
-            keyframes[2].inTangent = 0.0f;
-
-            this._maxSpeedCurve = new AnimationCurve(keyframes);
-            this._maxSpeedCurve.preWrapMode = WrapMode.ClampForever;
-            this._maxSpeedCurve.postWrapMode = WrapMode.ClampForever;
-        }
 
         /// <summary>
         /// Gets the dynamic speed of the controller based on the camera's height from 
@@ -724,6 +721,7 @@ namespace CesiumForUnity
         #endregion
 
         #region Fly-To helper functions
+
         /// <summary>
         /// Advance the camera flight based on the given time delta.
         /// </summary>
@@ -949,6 +947,22 @@ namespace CesiumForUnity
 
         #region Fly-To public API
 
+        /// <summary>
+        /// Begin a smooth camera flight to the given Earth-Centered, Earth-Fixed (ECEF) 
+        /// destination such that the camera ends at the specified yaw and pitch.
+        /// </summary>
+        /// <remarks>
+        /// The characteristics of the flight can be configured with 
+        /// <see cref="CesiumCameraController.flyToAltitudeProfileCurve"/>,
+        /// <see cref="CesiumCameraController.flyToProgressCurve"/>, 
+        /// <see cref="CesiumCameraController.flyToMaximumAltitudeCurve"/>,
+        /// <see cref="CesiumCameraController.flyToDuration"/>, and
+        /// <see cref="CesiumCameraController.flyToGranularityDegrees"/>.
+        /// </remarks>
+        /// <param name="destination">The destination in ECEF coordinates.</param>
+        /// <param name="yawAtDestination">The yaw of the camera at the destination.</param>
+        /// <param name="pitchAtDestination">The pitch of the camera at the destination.</param>
+        /// <param name="canInterruptByMoving">Whether the camera flight can be interrupted with movement inputs.</param>
         public void FlyToLocationEarthCenteredEarthFixed(
             double3 destination,
             float yawAtDestination,
@@ -1011,6 +1025,23 @@ namespace CesiumForUnity
                 canInterruptByMoving);
         }
 
+        /// <summary>
+        /// Begin a smooth camera flight to the given  WGS84 longitude in degrees (x),
+        /// latitude in degrees (y), and height in meters (z) such that the camera ends 
+        /// at the specified yaw and pitch.
+        /// </summary>
+        /// <remarks>
+        /// The characteristics of the flight can be configured with 
+        /// <see cref="CesiumCameraController.flyToAltitudeProfileCurve"/>,
+        /// <see cref="CesiumCameraController.flyToProgressCurve"/>, 
+        /// <see cref="CesiumCameraController.flyToMaximumAltitudeCurve"/>,
+        /// <see cref="CesiumCameraController.flyToDuration"/>, and
+        /// <see cref="CesiumCameraController.flyToGranularityDegrees"/>.
+        /// </remarks>
+        /// <param name="destination">The longitude (x), latitude (y), and height (z) of the destination.</param>
+        /// <param name="yawAtDestination">The yaw of the camera at the destination.</param>
+        /// <param name="pitchAtDestination">The pitch of the camera at the destination.</param>
+        /// <param name="canInterruptByMoving">Whether the camera flight can be interrupted with movement inputs.</param>
         public void FlyToLocationLongitudeLatitudeHeight(
             double3 destination,
             float yawAtDestination,
@@ -1091,8 +1122,10 @@ namespace CesiumForUnity
             if (height >= this._dynamicClippingPlanesMinHeight)
             {
                 farClipPlane = height + (float)(2.0 * CesiumEllipsoid.GetMaximumRadius());
+                farClipPlane = Mathf.Min(farClipPlane, this._maximumFarClipPlane);
 
                 float farClipRatio = farClipPlane / this._maximumNearToFarRatio;
+
                 if (farClipRatio > nearClipPlane)
                 {
                     nearClipPlane = Mathf.Min(farClipRatio, this._maximumNearClipPlane);
@@ -1106,6 +1139,7 @@ namespace CesiumForUnity
             this._camera.nearClipPlane = nearClipPlane;
             this._camera.farClipPlane = farClipPlane;
         }
+
         #endregion
     }
 }
