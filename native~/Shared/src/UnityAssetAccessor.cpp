@@ -92,13 +92,14 @@ private:
   UnityAssetResponse _response;
 };
 
-std::string replaceInvalidChars(std::string& input) {
+std::string replaceInvalidChars(const std::string& input) {
+  std::string result(input.size(), '?');
   std::transform(
       input.cbegin(),
       input.cend(),
-      input.begin(),
-      [](unsigned char c) { return (c >= 0 && c < 128) ? c : '?'; });
-  return input;
+      result.begin(),
+      [](unsigned char c) { return (c >= 32 && c <= 126) ? c : '?'; });
+  return result;
 }
 
 } // namespace
