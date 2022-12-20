@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 using Unity.Mathematics;
 
 #if ENABLE_INPUT_SYSTEM
@@ -54,7 +55,8 @@ namespace CesiumForUnity
 
         /// <summary>
         /// Whether to dynamically adjust the camera's clipping planes so that
-        /// tilesets will not be clipped from far away.
+        /// the globe will not be clipped from far away. Objects that are close 
+        /// to the camera but far above the globe in space may not appear.
         /// </summary>
         public bool enableDynamicClippingPlanes
         {
@@ -209,6 +211,16 @@ namespace CesiumForUnity
         private bool _flyingToLocation = false;
         private bool _canInterruptFlight = true;
 
+        // If the near clip gets too large, Unity will throw errors. Keeping it 
+        // at this value works fine even when the far clip plane gets large.
+        private float _maximumNearClipPlane = 1000.0f;
+        private float _maximumFarClipPlane = 500000000.0f;
+
+        // The maximum ratio that the far clip plane is allowed to be larger
+        // than the near clip plane. The near clip plane is set so that this
+        // ratio is never exceeded.
+        private float _maximumNearToFarRatio = 100000.0f;
+
         #endregion
 
         #region Input configuration
@@ -271,9 +283,9 @@ namespace CesiumForUnity
 
         #endregion
 
-        #region OnEnable and Update
+        #region Initialization
 
-        void OnEnable()
+        void InitializeCamera()
         {
             this._camera = this.gameObject.GetComponent<Camera>();
             if (this._camera == null)
@@ -283,7 +295,10 @@ namespace CesiumForUnity
 
             this._initialNearClipPlane = this._camera.nearClipPlane;
             this._initialFarClipPlane = this._camera.farClipPlane;
+        }
 
+        void InitializeController()
+        {
             if (this.gameObject.GetComponent<CharacterController>() != null)
             {
                 Debug.LogWarning("A CharacterController component was manually " +
@@ -302,6 +317,10 @@ namespace CesiumForUnity
             this._controller.center = Vector3.zero;
             this._controller.detectCollisions = true;
             this._controller.hideFlags = HideFlags.HideInInspector;
+        }
+
+        void Awake()
+        {
 
             this._georeference = this.gameObject.GetComponentInParent<CesiumGeoreference>();
             if (this._georeference == null)
@@ -314,12 +333,19 @@ namespace CesiumForUnity
             // CesiumOriginShift will add a CesiumGlobeAnchor automatically.
             this._globeAnchor = this.gameObject.GetComponent<CesiumGlobeAnchor>();
 
+            this.InitializeCamera();
+            this.InitializeController();
+
             this.CreateMaxSpeedCurve();
 
             #if ENABLE_INPUT_SYSTEM
             this.ConfigureInputs();
             #endif
         }
+
+        #endregion
+
+        #region Update
 
         void Update()
         {
@@ -344,10 +370,9 @@ namespace CesiumForUnity
         {
             double3 center =
                 this._georeference.TransformEarthCenteredEarthFixedPositionToUnity(new double3(0.0));
-            Vector3 line = (float3)center - (float3)this.transform.position;
 
             RaycastHit hitInfo;
-            if (Physics.Raycast(this.transform.position, line.normalized, out hitInfo, line.magnitude))
+            if (Physics.Linecast(this.transform.position, (float3)center, out hitInfo))
             {
                 hitDistance = Vector3.Distance(this.transform.position, hitInfo.point);
                 return true;
@@ -380,7 +405,7 @@ namespace CesiumForUnity
 
         private void HandlePlayerInputs()
         {
-            #if ENABLE_INPUT_SYSTEM
+#if ENABLE_INPUT_SYSTEM
             Vector2 lookDelta = lookAction.ReadValue<Vector2>();
             float inputRotateHorizontal = lookDelta.x;
             float inputRotateVertical = lookDelta.y;
@@ -395,7 +420,7 @@ namespace CesiumForUnity
             bool inputSpeedReset = speedResetAction.ReadValue<float>() > 0.5f;
 
             bool toggleDynamicSpeed = toggleDynamicSpeedAction.ReadValue<float>() > 0.5f;
-            #else
+#else
             float inputRotateHorizontal = Input.GetAxis("Mouse X");
             inputRotateHorizontal += Input.GetAxis("Controller Right Stick X");
 
@@ -412,7 +437,7 @@ namespace CesiumForUnity
 
             bool toggleDynamicSpeed =
                 Input.GetKeyDown("g") || Input.GetKeyDown("joystick button 1");
-            #endif
+#endif
 
             Vector3 movementInput = new Vector3(inputRight, inputUp, inputForward);
 
@@ -568,7 +593,7 @@ namespace CesiumForUnity
             this._controller.Move(this._velocity * Time.deltaTime);
         }
 
-        #endregion
+#endregion
 
         #region Dynamic speed computation
 
@@ -1048,7 +1073,7 @@ namespace CesiumForUnity
 
         private void UpdateClippingPlanes()
         {
-            if(this._camera == null)
+            if (this._camera == null)
             {
                 return;
             }
@@ -1065,20 +1090,22 @@ namespace CesiumForUnity
 
             if (height >= this._dynamicClippingPlanesMinHeight)
             {
-                nearClipPlane = Mathf.Max(height * 0.75f, nearClipPlane);
-                farClipPlane = Mathf.Max(
-                    nearClipPlane + 1.2f * (float)CesiumEllipsoid.GetMaximumRadius(),
-                    farClipPlane);
+                farClipPlane = height + (float)(2.0 * CesiumEllipsoid.GetMaximumRadius());
 
-                // If the near-clip plane is set too large, it will cause
-                // "Screen position out of view frustum" errors.
-                nearClipPlane = Mathf.Min(nearClipPlane, 450000);
+                float farClipRatio = farClipPlane / this._maximumNearToFarRatio;
+                if (farClipRatio > nearClipPlane)
+                {
+                    nearClipPlane = Mathf.Min(farClipRatio, this._maximumNearClipPlane);
+                }
+                else
+                {
+                    nearClipPlane = 10.0f;
+                }
             }
 
             this._camera.nearClipPlane = nearClipPlane;
             this._camera.farClipPlane = farClipPlane;
         }
-
         #endregion
     }
 }
