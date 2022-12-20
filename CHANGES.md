@@ -1,5 +1,12 @@
 # Change Log
 
+### v0.1.3
+
+##### Additions :tada:
+
+- Added `CesiumCameraController`, a globe-aware controller that adapts its speed and clipping planes based on its height from the globe.
+- Added an option to add a `DynamicCamera` from the Cesium panel to the scene. The `DynamicCamera` contains `Camera` and `CesiumCameraController` components and offers easy navigation of the globe.
+
 ### v0.1.2
 
 ##### Fixes :wrench:
