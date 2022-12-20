@@ -81,9 +81,11 @@ namespace CesiumForUnity
             EditorGUILayout.Space(5);
             DrawUnityPositionProperties();
 
-            // ApplyModifiedProperties() is called within the Draw____Properties
-            // functions themselves. Otherwise, calling it here would override
-            // the computations that CesiumGlobeAnchor does on its other coordinates.
+            if (this.serializedObject.ApplyModifiedProperties() || CesiumEditorUtility.WasUndoRedoPerformed())
+            {
+                this._globeAnchor.detectTransformChanges = this._globeAnchor.detectTransformChanges;
+                this._globeAnchor.Sync();
+            }
         }
 
         private void DrawGlobeAnchorProperties()
@@ -118,8 +120,6 @@ namespace CesiumForUnity
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
-            EditorGUI.BeginChangeCheck();
-
             GUIContent detectTransformChangesContent = new GUIContent(
                 "Detect Transform Changes",
                 "Whether this component should detect changes to the Transform component, " +
@@ -129,26 +129,13 @@ namespace CesiumForUnity
                 "state of this flag.");
             GUILayout.Label(detectTransformChangesContent, GUILayout.Width(labelWidth));
             EditorGUILayout.PropertyField(this._detectTransformChanges, GUIContent.none);
-
-            if (EditorGUI.EndChangeCheck())
-            {
-                // Explicitly set the flag so that the object starts or stops detecting.
-                this.serializedObject.ApplyModifiedProperties();
-                this._globeAnchor.detectTransformChanges = this._globeAnchor.detectTransformChanges;
-            }
             GUILayout.EndHorizontal();
 
             GUIContent positionAuthorityContent = new GUIContent(
                 "Position Authority",
                 "The set of coordinates that authoritatively define the position of this game object."
             );
-            EditorGUI.BeginChangeCheck();
             EditorGUILayout.PropertyField(this._positionAuthority);
-            if (EditorGUI.EndChangeCheck())
-            {
-                this.serializedObject.ApplyModifiedProperties();
-                this._globeAnchor.Sync();
-            }
         }
 
         private void DrawLongitudeLatitudeHeightProperties()
@@ -158,7 +145,6 @@ namespace CesiumForUnity
 
             GUILayout.Label("Position (Longitude Latitude Height)", EditorStyles.boldLabel);
 
-            EditorGUI.BeginChangeCheck();
 
             GUIContent latitudeContent = new GUIContent(
                "Latitude",
@@ -187,17 +173,6 @@ namespace CesiumForUnity
                 "object is located.");
             EditorGUILayout.PropertyField(this._height, heightContent);
 
-            if (EditorGUI.EndChangeCheck())
-            {
-                this.serializedObject.ApplyModifiedProperties();
-
-                // Manually trigger an update of the position of this object
-                // and its coordinates in other systems.
-                this._globeAnchor.SetPositionLongitudeLatitudeHeight(
-                    this._longitude.doubleValue,
-                    this._latitude.doubleValue,
-                    this._height.doubleValue);
-            }
 
             EditorGUI.EndDisabledGroup();
         }
@@ -209,7 +184,6 @@ namespace CesiumForUnity
 
             GUILayout.Label("Position (Earth-Centered, Earth-Fixed)", EditorStyles.boldLabel);
 
-            EditorGUI.BeginChangeCheck();
             GUIContent ecefXContent = new GUIContent(
                 "ECEF X",
                 "The Earth-Centered, Earth-Fixed X-coordinate of the origin of this " +
@@ -238,17 +212,6 @@ namespace CesiumForUnity
                 "and the positive Z axis points toward the North pole.");
             EditorGUILayout.PropertyField(this._ecefZ, ecefZContent);
 
-            if (EditorGUI.EndChangeCheck())
-            {
-                this.serializedObject.ApplyModifiedProperties();
-
-                // Manually trigger an update of the position of this object
-                // and its coordinates in other systems.
-                this._globeAnchor.SetPositionEarthCenteredEarthFixed(
-                    this._ecefX.doubleValue,
-                    this._ecefY.doubleValue,
-                    this._ecefZ.doubleValue);
-            }
 
             EditorGUI.EndDisabledGroup();
         }
@@ -259,8 +222,6 @@ namespace CesiumForUnity
                 this.positionAuthority != CesiumGlobeAnchorPositionAuthority.UnityCoordinates);
 
             GUILayout.Label("Position (Unity Local Coordinates)", EditorStyles.boldLabel);
-
-            EditorGUI.BeginChangeCheck();
 
             GUIContent unityXContent = new GUIContent(
                 "Unity X",
@@ -279,18 +240,6 @@ namespace CesiumForUnity
                 "The Unity Z coordinate of this game object. This is the same as the Transform's " +
                 "Z coordinate but expressed in 64-bit (double) precision.");
             EditorGUILayout.PropertyField(this._unityZ, unityZContent);
-
-            if (EditorGUI.EndChangeCheck())
-            {
-                this.serializedObject.ApplyModifiedProperties();
-
-                // Manually trigger an update of the position of this object
-                // and its coordinates in other systems.
-                this._globeAnchor.SetPositionUnity(
-                    this._unityX.doubleValue,
-                    this._unityY.doubleValue,
-                    this._unityZ.doubleValue);
-            }
 
             EditorGUI.EndDisabledGroup();
         }
