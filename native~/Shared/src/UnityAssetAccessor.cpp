@@ -23,6 +23,8 @@
 #include <DotNet/UnityEngine/Networking/UploadHandler.h>
 #include <DotNet/UnityEngine/Networking/UploadHandlerRaw.h>
 
+#include <algorithm>
+
 using namespace CesiumAsync;
 using namespace CesiumUtility;
 using namespace DotNet;
@@ -90,6 +92,16 @@ private:
   UnityAssetResponse _response;
 };
 
+std::string replaceInvalidChars(const std::string& input) {
+  std::string result(input.size(), '?');
+  std::transform(
+      input.cbegin(),
+      input.cend(),
+      result.begin(),
+      [](unsigned char c) { return (c >= 32 && c <= 126) ? c : '?'; });
+  return result;
+}
+
 } // namespace
 
 namespace CesiumForUnityNative {
@@ -100,7 +112,9 @@ UnityAssetAccessor::UnityAssetAccessor()
               UnityEngine::Application::platform())
               .ToStlString() +
           " " + System::Environment::OSVersion().VersionString().ToStlString() +
-          " " + UnityEngine::Application::productName().ToStlString()),
+          " " +
+          replaceInvalidChars(
+              UnityEngine::Application::productName().ToStlString())),
       _cesiumVersionHeader(
           CesiumForUnityNative::Cesium::version + " " +
           CesiumForUnityNative::Cesium::commit) {}
