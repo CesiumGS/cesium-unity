@@ -8,6 +8,8 @@ namespace CesiumForUnity
     [InitializeOnLoad]
     public static class CesiumEditorUtility
     {
+        #region Custom inspector fields
+
         public static class InspectorGUI
         {
             public static void ClampedIntField(
@@ -57,6 +59,10 @@ namespace CesiumForUnity
                 }
             }
         }
+
+        #endregion
+
+        #region Constructor and delegates
 
         static CesiumEditorUtility()
         {
@@ -150,6 +156,17 @@ namespace CesiumForUnity
             }
         }
 
+        static void RenameObject()
+        {
+            EditorApplication.hierarchyChanged -= RenameObject;
+            EditorApplication.ExecuteMenuItem("Window/General/Hierarchy");
+            EditorApplication.ExecuteMenuItem("Edit/Rename");
+        }
+
+        #endregion
+
+        #region Find functions
+
         public static Cesium3DTileset FindFirstTileset()
         {
             Cesium3DTileset[] tilesets =
@@ -198,13 +215,18 @@ namespace CesiumForUnity
             return null;
         }
 
+        #endregion
+
+        #region Create functions
+
         public static Cesium3DTileset CreateTileset(string name, long assetID)
         {
-            // Find a georeference in the scene, or create one if none exist.
+            // Find a georeference in the scene, or create one if none exists.
             CesiumGeoreference georeference = CesiumEditorUtility.FindFirstGeoreference();
             if (georeference == null)
             {
-                GameObject georeferenceGameObject = new GameObject("CesiumGeoreference");
+                GameObject georeferenceGameObject =
+                    new GameObject("CesiumGeoreference");
                 georeference =
                     georeferenceGameObject.AddComponent<CesiumGeoreference>();
                 Undo.RegisterCreatedObjectUndo(georeferenceGameObject, "Create Georeference");
@@ -238,6 +260,66 @@ namespace CesiumForUnity
             return ionOverlay;
         }
 
+        public static CesiumSubScene CreateSubScene(CesiumGeoreference georeference)
+        {
+            CesiumEditorUtility.PlaceGeoreferenceAtCameraPosition(georeference);
+            double3 positionECEF = new double3(
+                georeference.ecefX,
+                georeference.ecefY,
+                georeference.ecefZ
+            );
+
+            GameObject subSceneGameObject = new GameObject();
+            subSceneGameObject.transform.parent = georeference.transform;
+            Undo.RegisterCreatedObjectUndo(subSceneGameObject, "Create Sub-Scene");
+
+            CesiumSubScene subScene = subSceneGameObject.AddComponent<CesiumSubScene>();
+            subScene.SetOriginEarthCenteredEarthFixed(
+                positionECEF.x,
+                positionECEF.y,
+                positionECEF.z);
+
+            // Prompt the user to rename the subscene once the hierarchy has updated.
+            Selection.activeGameObject = subSceneGameObject;
+            EditorApplication.hierarchyChanged += RenameObject;
+
+            return subScene;
+        }
+
+        public static CesiumCameraController CreateDynamicCamera()
+        {
+            CesiumCameraController dynamicCamera =
+                UnityEngine.Object.FindObjectOfType<CesiumCameraController>(true);
+            if (dynamicCamera != null)
+            {
+                return dynamicCamera;
+            }
+
+            // Find a georeference in the scene, or create one if none exist.
+            CesiumGeoreference georeference = CesiumEditorUtility.FindFirstGeoreference();
+            if (georeference == null)
+            {
+                GameObject georeferenceGameObject = new GameObject("CesiumGeoreference");
+                georeference =
+                    georeferenceGameObject.AddComponent<CesiumGeoreference>();
+                Undo.RegisterCreatedObjectUndo(georeferenceGameObject, "Create Georeference");
+            }
+
+            GameObject dynamicCameraPrefab = Resources.Load<GameObject>("DynamicCamera");
+            GameObject dynamicCameraObject =
+                UnityEngine.Object.Instantiate(dynamicCameraPrefab);
+            Undo.RegisterCreatedObjectUndo(dynamicCameraObject, "Create DynamicCamera");
+
+            dynamicCameraObject.name = "DynamicCamera";
+            dynamicCameraObject.transform.parent = georeference.gameObject.transform;
+
+            return dynamicCameraObject.GetComponent<CesiumCameraController>();
+        }
+
+        #endregion
+
+        #region Georeference and subscene placement
+
         private static double3
         TransformCameraPositionToEarthCenteredEarthFixed(CesiumGeoreference georeference)
         {
@@ -245,8 +327,7 @@ namespace CesiumForUnity
 
             // Find the camera position in the Georeference's reference frame.
             Vector3 position = camera.transform.position;
-            position = georeference.transform.worldToLocalMatrix *
-                new Vector4(position.x, position.y, position.z, 1.0f);
+            position = georeference.transform.worldToLocalMatrix * new Vector4(position.x, position.y, position.z, 1.0f);
 
             double3 positionUnity = new double3(
                 position.x,
@@ -316,31 +397,6 @@ namespace CesiumForUnity
                     Vector3.up));
         }
 
-        public static CesiumSubScene CreateSubScene(CesiumGeoreference georeference)
-        {
-            CesiumEditorUtility.PlaceGeoreferenceAtCameraPosition(georeference);
-            double3 positionECEF = new double3(
-                georeference.ecefX,
-                georeference.ecefY,
-                georeference.ecefZ
-            );
-
-            GameObject subSceneGameObject = new GameObject();
-            subSceneGameObject.transform.parent = georeference.transform;
-            Undo.RegisterCreatedObjectUndo(subSceneGameObject, "Create Sub-Scene");
-
-            CesiumSubScene subScene = subSceneGameObject.AddComponent<CesiumSubScene>();
-            subScene.SetOriginEarthCenteredEarthFixed(
-                positionECEF.x,
-                positionECEF.y,
-                positionECEF.z);
-
-            // Prompt the user to rename the subscene once the hierarchy has updated.
-            Selection.activeGameObject = subSceneGameObject;
-            EditorApplication.hierarchyChanged += RenameObject;
-
-            return subScene;
-        }
 
         public static void PlaceSubSceneAtCameraPosition(CesiumSubScene subscene)
         {
@@ -364,41 +420,18 @@ namespace CesiumForUnity
                 Vector3.zero, SceneView.lastActiveSceneView.rotation);
         }
 
-        public static void RenameObject()
+        #endregion
+
+        #region Undo / redo handling
+
+        private static string _undoRedoCommandName = "UndoRedoPerformed";
+
+        public static bool WasUndoRedoPerformed()
         {
-            EditorApplication.hierarchyChanged -= RenameObject;
-            EditorApplication.ExecuteMenuItem("Window/General/Hierarchy");
-            EditorApplication.ExecuteMenuItem("Edit/Rename");
+            return (Event.current.type == EventType.ValidateCommand || Event.current.type == EventType.ExecuteCommand)
+                && Event.current.commandName == _undoRedoCommandName;
         }
 
-        public static CesiumCameraController CreateDynamicCamera()
-        {
-            CesiumCameraController dynamicCamera =
-                UnityEngine.Object.FindObjectOfType<CesiumCameraController>(true);
-            if (dynamicCamera != null)
-            {
-                return dynamicCamera;
-            }
-
-            // Find a georeference in the scene, or create one if none exist.
-            CesiumGeoreference georeference = CesiumEditorUtility.FindFirstGeoreference();
-            if (georeference == null)
-            {
-                GameObject georeferenceGameObject = new GameObject("CesiumGeoreference");
-                georeference =
-                    georeferenceGameObject.AddComponent<CesiumGeoreference>();
-                Undo.RegisterCreatedObjectUndo(georeferenceGameObject, "Create Georeference");
-            }
-
-            GameObject dynamicCameraPrefab = Resources.Load<GameObject>("DynamicCamera");
-            GameObject dynamicCameraObject =
-                UnityEngine.Object.Instantiate(dynamicCameraPrefab);
-            Undo.RegisterCreatedObjectUndo(dynamicCameraObject, "Create DynamicCamera");
-
-            dynamicCameraObject.name = "DynamicCamera";
-            dynamicCameraObject.transform.parent = georeference.gameObject.transform;
-
-            return dynamicCameraObject.GetComponent<CesiumCameraController>();
-        }
+        #endregion
     }
 }
