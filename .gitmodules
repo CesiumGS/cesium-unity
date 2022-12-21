@@ -6,4 +6,4 @@
 	url = https://github.com/htacg/tidy-html5.git
 [submodule "native~/extern/enum-flags"]
 	path = native~/extern/enum-flags
-	url = git@github.com:grisumbras/enum-flags.git
+	url = https://github.com/grisumbras/enum-flags.git
