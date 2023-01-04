@@ -58,10 +58,7 @@ namespace CesiumForUnity
             EditorGUILayout.Space(5);
             this.DrawEarthCenteredEarthFixedProperties();
 
-            if (this.serializedObject.ApplyModifiedProperties() || CesiumEditorUtility.WasUndoRedoPerformed())
-            {
-                this._georeference.UpdateOrigin();
-            }
+            this.serializedObject.ApplyModifiedProperties();
         }
 
         private void DrawInspectorButtons()

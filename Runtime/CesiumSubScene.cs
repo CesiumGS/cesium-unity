@@ -224,6 +224,11 @@ namespace CesiumForUnity
             this.originAuthority = CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight;
         }
 
+        private void OnValidate()
+        {
+            this.UpdateOrigin();
+        }
+
         private void OnEnable()
         {
             // When this sub-scene is enabled, all others are disabled.

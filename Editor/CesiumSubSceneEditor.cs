@@ -64,10 +64,7 @@ namespace CesiumForUnity
             EditorGUILayout.Space(5);
             DrawEarthCenteredEarthFixedProperties();
 
-            if (this.serializedObject.ApplyModifiedProperties() || CesiumEditorUtility.WasUndoRedoPerformed())
-            {
-                this._subScene.UpdateOrigin();
-            }
+            this.serializedObject.ApplyModifiedProperties();
         }
 
         private void DrawToolbarButton()

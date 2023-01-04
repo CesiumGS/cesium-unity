@@ -421,17 +421,5 @@ namespace CesiumForUnity
         }
 
         #endregion
-
-        #region Undo / redo handling
-
-        private static string _undoRedoCommandName = "UndoRedoPerformed";
-
-        public static bool WasUndoRedoPerformed()
-        {
-            return (Event.current.type == EventType.ValidateCommand || Event.current.type == EventType.ExecuteCommand)
-                && Event.current.commandName == _undoRedoCommandName;
-        }
-
-        #endregion
     }
 }

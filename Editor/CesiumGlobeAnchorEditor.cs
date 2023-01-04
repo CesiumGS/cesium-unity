@@ -21,16 +21,6 @@ namespace CesiumForUnity
                 return (CesiumGlobeAnchorPositionAuthority)
                     this._positionAuthority.enumValueIndex;
             }
-            set
-            {
-                // Since changing the position authority has more consequences, this setter
-                // bypasses the SerializedProperty and invokes the globe anchor's setter
-                // itself, in order to trigger its internal UpdateGlobePosition() method.
-                if (value != this.positionAuthority)
-                {
-                    this._globeAnchor.positionAuthority = value;
-                }
-            }
         }
 
         private SerializedProperty _latitude;
@@ -81,11 +71,7 @@ namespace CesiumForUnity
             EditorGUILayout.Space(5);
             DrawUnityPositionProperties();
 
-            if (this.serializedObject.ApplyModifiedProperties() || CesiumEditorUtility.WasUndoRedoPerformed())
-            {
-                this._globeAnchor.detectTransformChanges = this._globeAnchor.detectTransformChanges;
-                this._globeAnchor.Sync();
-            }
+            this.serializedObject.ApplyModifiedProperties();
         }
 
         private void DrawGlobeAnchorProperties()
@@ -145,7 +131,6 @@ namespace CesiumForUnity
 
             GUILayout.Label("Position (Longitude Latitude Height)", EditorStyles.boldLabel);
 
-
             GUIContent latitudeContent = new GUIContent(
                "Latitude",
                "The latitude of this game object in degrees, in the range [-90, 90].");
@@ -172,7 +157,6 @@ namespace CesiumForUnity
                 "can be tens of meters higher or lower depending on where in the world the " +
                 "object is located.");
             EditorGUILayout.PropertyField(this._height, heightContent);
-
 
             EditorGUI.EndDisabledGroup();
         }
@@ -211,7 +195,6 @@ namespace CesiumForUnity
                 "In the ECEF coordinate system, the origin is at the center of the Earth " +
                 "and the positive Z axis points toward the North pole.");
             EditorGUILayout.PropertyField(this._ecefZ, ecefZContent);
-
 
             EditorGUI.EndDisabledGroup();
         }

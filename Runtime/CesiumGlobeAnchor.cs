@@ -461,6 +461,12 @@ namespace CesiumForUnity
             this.Sync();
         }
 
+        private void OnValidate()
+        {
+            this.StartOrStopDetectingTransformChanges();
+            this.Sync();
+        }
+
         private void OnEnable()
         {
             // We must do this in OnEnable instead of Start because Start doesn't re-run on domain reload,
