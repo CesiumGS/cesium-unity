@@ -180,9 +180,10 @@ namespace CesiumForUnity
         private float _initialNearClipPlane;
         private float _initialFarClipPlane;
 
-        private CharacterController _controller;
         private CesiumGeoreference _georeference;
         private CesiumGlobeAnchor _globeAnchor;
+
+        private float _colliderRadius = 0.5f;
 
         private Vector3 _velocity = Vector3.zero;
         private float _lookSpeed = 10.0f;
@@ -294,28 +295,6 @@ namespace CesiumForUnity
             this._initialFarClipPlane = this._camera.farClipPlane;
         }
 
-        void InitializeController()
-        {
-            if (this.gameObject.GetComponent<CharacterController>() != null)
-            {
-                Debug.LogWarning("A CharacterController component was manually " +
-                    "added to the CesiumCameraController's game object. " +
-                    "This may interfere with the CesiumCameraController's movement.");
-
-                this._controller = this.gameObject.GetComponent<CharacterController>();
-            }
-            else
-            {
-                this._controller = this.gameObject.AddComponent<CharacterController>();
-                this._controller.hideFlags = HideFlags.HideInInspector;
-            }
-
-            this._controller.radius = 1.0f;
-            this._controller.height = 1.0f;
-            this._controller.center = Vector3.zero;
-            this._controller.detectCollisions = true;
-        }
-
         /// <summary>
         /// Creates a curve to control the bounds of the maximum speed before it is
         /// multiplied by the speed multiplier. This prevents the camera from achieving 
@@ -349,7 +328,6 @@ namespace CesiumForUnity
 
         void Awake()
         {
-
             this._georeference = this.gameObject.GetComponentInParent<CesiumGeoreference>();
             if (this._georeference == null)
             {
@@ -362,8 +340,6 @@ namespace CesiumForUnity
             this._globeAnchor = this.gameObject.GetComponent<CesiumGlobeAnchor>();
 
             this.InitializeCamera();
-            this.InitializeController();
-
             this.CreateMaxSpeedCurve();
 
             #if ENABLE_INPUT_SYSTEM
@@ -489,7 +465,13 @@ namespace CesiumForUnity
                 this.HandleSpeedChange(inputSpeedChange);
             }
 
-            if (!this._flyingToLocation || this._canInterruptFlight)
+            bool canInterruptFlight = this._flyingToLocation && this._canInterruptFlight;
+            if(canInterruptFlight && movementInput != Vector3.zero)
+            {
+                this.InterruptFlight();
+            }
+
+            if (!this._flyingToLocation)
             {
                 this.Move(movementInput);
             }
@@ -559,7 +541,45 @@ namespace CesiumForUnity
         }
 
         /// <summary>
-        /// Moves the controller with the given player input.
+        /// Returns the true velocity of the controller after accounting for collisions
+        /// with other objects.
+        /// </summary>
+        /// <param name="velocity">The original velocity.</param>
+        /// <returns>The velocity adjusted for collisions.</returns>
+        private Vector3 AdjustVelocityForCollisions(Vector3 velocity)
+        {
+            Vector3 newVelocity = velocity;
+
+            RaycastHit hitInfo;
+            float maxDistance = this._colliderRadius + velocity.magnitude * Time.deltaTime;
+
+            Vector3 collisionDirection = Vector3.right * velocity.x;
+            if (Physics.SphereCast(
+                this.transform.position, this._colliderRadius, collisionDirection, out hitInfo, maxDistance))
+            {
+                newVelocity.x = 0.0f;
+            }
+
+            collisionDirection = Vector3.up * velocity.y;
+            if (Physics.SphereCast(
+                this.transform.position, this._colliderRadius, collisionDirection, out hitInfo, maxDistance))
+            {
+                newVelocity.y = 0.0f;
+            }
+
+            collisionDirection = Vector3.forward * velocity.z;
+            if (Physics.SphereCast(
+                this.transform.position, this._colliderRadius, collisionDirection, out hitInfo, maxDistance))
+            {
+                newVelocity.z = 0.0f;
+            }
+
+            return newVelocity;
+        }
+
+        /// <summary>
+        /// Moves the controller based on the given input while accounting for
+        /// collisions in the scene.
         /// </summary>
         /// <remarks>
         /// The x-coordinate affects movement along the transform's right axis.
@@ -570,8 +590,7 @@ namespace CesiumForUnity
         private void Move(Vector3 movementInput)
         {
             Vector3 inputDirection =
-                this.transform.right * movementInput.x +
-                this.transform.forward * movementInput.z;
+                this.transform.right * movementInput.x + this.transform.forward * movementInput.z;
 
             if (this._georeference != null && this._globeAnchor != null)
             {
@@ -585,17 +604,11 @@ namespace CesiumForUnity
                 double3 upUnity =
                     this._georeference.TransformEarthCenteredEarthFixedDirectionToUnity(upECEF);
 
-                inputDirection =
-                    (float3)inputDirection + (float3)upUnity * movementInput.y;
+                inputDirection = (float3)inputDirection + (float3)upUnity * movementInput.y;
             }
 
             if (inputDirection != Vector3.zero)
             {
-                if (this._flyingToLocation)
-                {
-                    InterruptFlight();
-                }
-
                 // If the controller was already moving, handle the direction change
                 // separately from the magnitude of the velocity.
                 if (this._velocity.magnitude > 0.0f)
@@ -618,10 +631,11 @@ namespace CesiumForUnity
                 this._velocity = Vector3.ClampMagnitude(this._velocity, speed);
             }
 
-            this._controller.Move(this._velocity * Time.deltaTime);
+            this.transform.position += 
+                this.AdjustVelocityForCollisions(this._velocity) * Time.deltaTime;
         }
 
-#endregion
+        #endregion
 
         #region Dynamic speed computation
 
@@ -631,7 +645,7 @@ namespace CesiumForUnity
         /// </summary>
         /// <param name="overrideSpeed">Whether the returned speed should override the 
         /// previous speed, even if the new value is lower.</param>
-        /// <param name="newSpeed">The new dynamic speed of the controller.</param>
+        /// <param name="newSpeeFd">The new dynamic speed of the controller.</param>
         /// <returns>Whether a valid speed value was found.</returns>
         private bool GetDynamicSpeed(out bool overrideSpeed, out float newSpeed)
         {
@@ -814,6 +828,8 @@ namespace CesiumForUnity
             this._flyingToLocation = false;
             this._currentFlyToTime = 0.0;
 
+            this._globeAnchor.adjustOrientationForGlobeWhenMoving = true;
+
             if (this.OnFlightComplete != null)
             {
                 this.OnFlightComplete();
@@ -830,7 +846,6 @@ namespace CesiumForUnity
             this.transform.eulerAngles = angles;
 
             this._globeAnchor.adjustOrientationForGlobeWhenMoving = true;
-            this._globeAnchor.detectTransformChanges = true;
 
             if (this.OnFlightInterrupted != null)
             {
@@ -989,6 +1004,7 @@ namespace CesiumForUnity
             // Indicate that the camera will be flying from now
             this._flyingToLocation = true;
             this._canInterruptFlight = canInterruptByMoving;
+            this._globeAnchor.adjustOrientationForGlobeWhenMoving = false;
         }
 
         /// <summary>
