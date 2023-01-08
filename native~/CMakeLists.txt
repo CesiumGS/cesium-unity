@@ -35,18 +35,31 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
     add_subdirectory(extern/cesium-native EXCLUDE_FROM_ALL)
     install(TARGETS tidy-static)
     install(TARGETS 
+        Async++
         Cesium3DTilesSelection 
         CesiumAsync
         CesiumGeospatial
         CesiumGeometry
         CesiumGltf
         CesiumGltfReader
+        CesiumJsonReader
         CesiumUtility
+        draco_static
+        expected-lite
+        GSL
+        httplib
+        ktx_read
+        modp_b64
         spdlog
+        sqlite3
+        s2geometry
+        tinyxml2
+        uriparser
+        webpdecoder
     PUBLIC_HEADER EXCLUDE_FROM_ALL
+)
     set_target_properties(cesium-native-tests PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
     set_target_properties(tidy-static PROPERTIES EXCLUDE_FROM_ALL 0 EXCLUDE_FROM_DEFAULT_BUILD 0)
-)
 else()
     add_subdirectory(extern/cesium-native EXCLUDE_FROM_ALL)
 endif()
