@@ -224,6 +224,7 @@ namespace CesiumForUnity
         
         public void OnPostprocessBuild(BuildReport report)
         {
+#if UNITY_IOS
             if(report.summary.platform == BuildTarget.iOS)
             {
                 string projectPath = report.summary.outputPath + "/Unity-iPhone.xcodeproj/project.pbxproj";
@@ -235,6 +236,7 @@ namespace CesiumForUnity
                 pbxProject.SetBuildProperty(target, "ENABLE_BITCODE", "NO");
                 pbxProject.WriteToFile(projectPath);
             }
+#endif
         }
 
         public static LibraryToBuild GetLibraryToBuild(BuildSummary summary, string cpu = null)
