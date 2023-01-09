@@ -31,8 +31,9 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Android")
   set(ANDROID_NDK ${CMAKE_ANDROID_NDK})
 endif()
 
+add_subdirectory(extern/cesium-native EXCLUDE_FROM_ALL)
+
 if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
-    add_subdirectory(extern/cesium-native EXCLUDE_FROM_ALL)
     install(TARGETS tidy-static)
     install(TARGETS 
         Async++
@@ -60,8 +61,6 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
 )
     set_target_properties(cesium-native-tests PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
     set_target_properties(tidy-static PROPERTIES EXCLUDE_FROM_ALL 0 EXCLUDE_FROM_DEFAULT_BUILD 0)
-else()
-    add_subdirectory(extern/cesium-native EXCLUDE_FROM_ALL)
 endif()
 
 # Enum flags is a header-only library without a CMakeLists.txt
