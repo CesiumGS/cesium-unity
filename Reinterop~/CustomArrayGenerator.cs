@@ -125,7 +125,7 @@ namespace Reinterop
 
             CSharpType csType = CSharpType.FromSymbol(context, arrayType);
             CSharpType csElementType = CSharpType.FromSymbol(context, arrayType.ElementType);
-            CSharpType csElementInteropType = csElementType.AsInteropType();
+            CSharpType csElementInteropType = csElementType.AsInteropTypeParameter();
 
             string baseName = $"{Interop.GetUniqueNameForType(csType)}_SetItem";
             init.Functions.Add(new(

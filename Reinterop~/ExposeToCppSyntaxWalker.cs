@@ -125,9 +125,10 @@ namespace Reinterop
         public TypeToGenerate AddType(ITypeSymbol type)
         {
             // Drop the nullability ("?") from the type if present.
-            if (type.NullableAnnotation == NullableAnnotation.Annotated && type.OriginalDefinition != null)
+            INamedTypeSymbol? named = type as INamedTypeSymbol;
+            if (named != null && named.Name == "Nullable" && named.IsGenericType && named.TypeArguments.Length == 1)
             {
-                type = type.OriginalDefinition;
+                type = named.TypeArguments[0];
             }
 
             // Don't add error types.
@@ -210,7 +211,6 @@ namespace Reinterop
             }
 
             // If this is an instantiated generic, we also need the types it's instantiated with.
-            INamedTypeSymbol? named = type as INamedTypeSymbol;
             if (named != null && named.IsGenericType)
             {
                 foreach (ITypeSymbol arg in named.TypeArguments)
