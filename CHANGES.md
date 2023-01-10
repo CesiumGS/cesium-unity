@@ -1,5 +1,12 @@
 # Change Log
 
+### v0.1.2
+
+##### Fixes :wrench:
+
+- Fixed a bug that caused Cesium for Unity to fail to compile in Unity 2022.2 and potentially in other scenarios.
+- Fixed a bug that led to an exception when the project name included characters outside the printable ASCII range.
+
 ### v0.1.1
 
 ##### Fixes :wrench:
