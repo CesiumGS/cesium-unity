@@ -16,6 +16,8 @@ namespace CesiumForUnity
     /// looks right-side up.
     /// </summary>
     [RequireComponent(typeof(CesiumOriginShift))]
+    [RequireComponent(typeof(Camera))]
+    [DisallowMultipleComponent]
     public class CesiumCameraController : MonoBehaviour
     {
         #region User-editable properties
@@ -285,11 +287,6 @@ namespace CesiumForUnity
         void InitializeCamera()
         {
             this._camera = this.gameObject.GetComponent<Camera>();
-            if (this._camera == null)
-            {
-                this._camera = this.gameObject.AddComponent<Camera>();
-            }
-
             this._initialNearClipPlane = this._camera.nearClipPlane;
             this._initialFarClipPlane = this._camera.farClipPlane;
         }
@@ -577,7 +574,7 @@ namespace CesiumForUnity
             Vector3 inputDirection =
                 this.transform.right * movementInput.x + this.transform.forward * movementInput.z;
 
-            if (this._georeference != null && this._globeAnchor != null)
+            if (this._georeference != null)
             {
                 double3 positionECEF = new double3()
                 {
@@ -585,7 +582,7 @@ namespace CesiumForUnity
                     y = this._globeAnchor.ecefY,
                     z = this._globeAnchor.ecefZ,
                 };
-                double3 upECEF = CesiumEllipsoid.GeodeticSurfaceNormal(positionECEF);
+                double3 upECEF = CesiumWgs84Ellipsoid.GeodeticSurfaceNormal(positionECEF);
                 double3 upUnity =
                     this._georeference.TransformEarthCenteredEarthFixedDirectionToUnity(upECEF);
 
@@ -725,7 +722,7 @@ namespace CesiumForUnity
         /// </summary>
         /// <remarks>
         /// <para>
-        /// This function requires the CesiumGlobeAnchor to be valid. If it is not valid,
+        /// This function requires the CesiumGeoreference to be valid. If it is not valid,
         /// then this function will do nothing.
         /// </para>
         /// <para>
@@ -888,13 +885,13 @@ namespace CesiumForUnity
             // Compute actual altitude at source and destination points by scaling on
             // ellipsoid.
             double sourceAltitude = 0.0, destinationAltitude = 0.0;
-            double3? scaled = CesiumEllipsoid.ScaleToGeodeticSurface(sourceECEF);
+            double3? scaled = CesiumWgs84Ellipsoid.ScaleToGeodeticSurface(sourceECEF);
             if (scaled != null)
             {
                 sourceAltitude = math.length(sourceECEF - (double3)scaled);
             }
 
-            scaled = CesiumEllipsoid.ScaleToGeodeticSurface(destinationECEF);
+            scaled = CesiumWgs84Ellipsoid.ScaleToGeodeticSurface(destinationECEF);
             if (scaled != null)
             {
                 destinationAltitude = math.length(destinationECEF - (double3)scaled);
@@ -914,7 +911,7 @@ namespace CesiumForUnity
                 double phi = Mathf.Deg2Rad * this.flyToGranularityDegrees * stepDouble;
 
                 float3 rotated = Quaternion.AngleAxis((float)phi, flyRotationAxis) * (float3)sourceUpVector;
-                scaled = CesiumEllipsoid.ScaleToGeodeticSurface((double3)rotated);
+                scaled = CesiumWgs84Ellipsoid.ScaleToGeodeticSurface((double3)rotated);
                 if (scaled != null)
                 {
                     double3 scaledValue = (double3)scaled;
@@ -968,7 +965,7 @@ namespace CesiumForUnity
             float pitchAtDestination,
             bool canInterruptByMoving)
         {
-            if (this._flyingToLocation || this._globeAnchor == null)
+            if (this._flyingToLocation)
             {
                 return;
             }
@@ -1049,7 +1046,7 @@ namespace CesiumForUnity
             bool canInterruptByMoving)
         {
             double3 destinationECEF =
-                CesiumTransforms.LongitudeLatitudeHeightToEarthCenteredEarthFixed(destination);
+                CesiumWgs84Ellipsoid.LongitudeLatitudeHeightToEarthCenteredEarthFixed(destination);
 
             this.FlyToLocationEarthCenteredEarthFixed(
                 destinationECEF,
@@ -1088,7 +1085,7 @@ namespace CesiumForUnity
                 z = destination.z
             };
             double3 destinationECEF =
-                CesiumTransforms.LongitudeLatitudeHeightToEarthCenteredEarthFixed(
+                CesiumWgs84Ellipsoid.LongitudeLatitudeHeightToEarthCenteredEarthFixed(
                     destinationCoordinates);
 
             this.FlyToLocationEarthCenteredEarthFixed(
@@ -1121,7 +1118,7 @@ namespace CesiumForUnity
 
             if (height >= this._dynamicClippingPlanesMinHeight)
             {
-                farClipPlane = height + (float)(2.0 * CesiumEllipsoid.GetMaximumRadius());
+                farClipPlane = height + (float)(2.0 * CesiumWgs84Ellipsoid.GetMaximumRadius());
                 farClipPlane = Mathf.Min(farClipPlane, this._maximumFarClipPlane);
 
                 float farClipRatio = farClipPlane / this._maximumNearToFarRatio;
@@ -1132,7 +1129,7 @@ namespace CesiumForUnity
                 }
                 else
                 {
-                    nearClipPlane = 10.0f;
+                    //nearClipPlane = 10.0f;
                 }
             }
 
