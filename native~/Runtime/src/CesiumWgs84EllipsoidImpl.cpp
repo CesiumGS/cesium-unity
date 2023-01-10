@@ -17,8 +17,8 @@ double3 CesiumWgs84EllipsoidImpl::GetRadii() {
   return double3{radii.x, radii.y, radii.z};
 }
 
-std::optional<double3>
-CesiumWgs84EllipsoidImpl::ScaleToGeodeticSurface(double3 earthCenteredEarthFixed) {
+std::optional<double3> CesiumWgs84EllipsoidImpl::ScaleToGeodeticSurface(
+    double3 earthCenteredEarthFixed) {
   const glm::dvec3 cartesian(
       earthCenteredEarthFixed.x,
       earthCenteredEarthFixed.y,
@@ -32,8 +32,8 @@ CesiumWgs84EllipsoidImpl::ScaleToGeodeticSurface(double3 earthCenteredEarthFixed
   return std::nullopt;
 }
 
-double3
-CesiumWgs84EllipsoidImpl::GeodeticSurfaceNormal(double3 earthCenteredEarthFixed) {
+double3 CesiumWgs84EllipsoidImpl::GeodeticSurfaceNormal(
+    double3 earthCenteredEarthFixed) {
   const glm::dvec3 cartesian(
       earthCenteredEarthFixed.x,
       earthCenteredEarthFixed.y,

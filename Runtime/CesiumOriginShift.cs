@@ -24,6 +24,7 @@ namespace CesiumForUnity
     /// </para>
     /// </remarks>
     [RequireComponent(typeof(CesiumGlobeAnchor))]
+    [DisallowMultipleComponent]
     public class CesiumOriginShift : MonoBehaviour
     {
         void LateUpdate()
