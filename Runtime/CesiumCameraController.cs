@@ -23,6 +23,20 @@ namespace CesiumForUnity
         #region User-editable properties
 
         [SerializeField]
+        [Min(0.0f)]
+        private float _defaultMaximumSpeed = 100.0f;
+
+        /// <summary>
+        /// The maximum speed of this controller when dynamic speed is disabled.
+        /// If dynamic speed is enabled, this value will not be used.
+        /// </summary>
+        public float defaultMaximumSpeed
+        {
+            get => this._defaultMaximumSpeed;
+            set => this._defaultMaximumSpeed = Mathf.Max(value, 0.0f);
+        }
+
+        [SerializeField]
         private bool _enableDynamicSpeed = true;
 
         /// <summary>
@@ -146,8 +160,14 @@ namespace CesiumForUnity
 
         /// <summary>
         /// The granularity in degrees with which keypoints should be generated for the 
-        /// flight interpolation.
+        /// flight interpolation. This value should be greater than 0.0, otherwise
+        /// the controller will not take flight.
         /// </summary>
+        /// <remarks>
+        /// This represents the difference in degrees between each keypoint on the flight path.
+        /// The lower the value, the more keypoints are generated, and the smoother the flight
+        /// interpolation will be.
+        /// </remarks>
         public double flyToGranularityDegrees
         {
             get => this._flyToGranularityDegrees;
@@ -505,7 +525,7 @@ namespace CesiumForUnity
             }
             else
             {
-                this.SetMaxSpeed(100.0f);
+                this.SetMaxSpeed(this._defaultMaximumSpeed);
             }
 
             if (speedChangeInput != 0.0f)
@@ -856,18 +876,25 @@ namespace CesiumForUnity
             Vector3 flyRotationAxis = Vector3.zero;
             flyQuat.ToAngleAxis(out flyTotalAngle, out flyRotationAxis);
 
-            int steps = Math.Max(
-                (int)(flyTotalAngle / (Mathf.Deg2Rad * this.flyToGranularityDegrees)) - 1,
-                0);
-
             this._keypoints.Clear();
             this._currentFlyToTime = 0.0;
+
+            if (Mathf.Approximately((float)this.flyToGranularityDegrees, 0.0f))
+            {
+                Debug.LogError("CesiumCameraController cannot fly when flyToGranularityDegrees " +
+                    "is set to 0.");
+                return;
+            }
 
             if (flyTotalAngle == 0.0f &&
                 this._flyToSourceRotation == this._flyToDestinationRotation)
             {
                 return;
             }
+
+            int steps = Math.Max(
+                (int)(flyTotalAngle / (Mathf.Deg2Rad * this.flyToGranularityDegrees)) - 1,
+                0);
 
             // We will not create a curve projected along the ellipsoid because we want to take
             // altitude while flying. The radius of the current point will evolve as follows:

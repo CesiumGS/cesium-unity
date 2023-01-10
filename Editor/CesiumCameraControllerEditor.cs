@@ -8,6 +8,8 @@ namespace CesiumForUnity
     {
         private CesiumCameraController _cameraController;
 
+        private SerializedProperty _defaultMaximumSpeed;
+
         private SerializedProperty _enableDynamicSpeed;
         private SerializedProperty _dynamicSpeedMinHeight;
 
@@ -23,6 +25,9 @@ namespace CesiumForUnity
         private void OnEnable()
         {
             this._cameraController = (CesiumCameraController)this.target;
+
+            this._defaultMaximumSpeed =
+                this.serializedObject.FindProperty("_defaultMaximumSpeed");
 
             this._enableDynamicSpeed =
                 this.serializedObject.FindProperty("_enableDynamicSpeed");
@@ -62,6 +67,15 @@ namespace CesiumForUnity
             // The labels for this component are particularly long, so use a custom value
             // instead of the editor style's default.
             int labelWidth = 215;
+
+            GUILayout.BeginHorizontal();
+            GUIContent defaultMaximumSpeedContent = new GUIContent(
+                "Default Maximum Speed",
+                "The controller's maximum speed when dynamic speed is disabled. " +
+                "If dynamic speed is enabled, this value will not be used.");
+            GUILayout.Label(defaultMaximumSpeedContent, GUILayout.Width(labelWidth));
+            EditorGUILayout.PropertyField(this._defaultMaximumSpeed, GUIContent.none);
+            GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
             GUIContent enableDynamicSpeedContent = new GUIContent(
@@ -161,7 +175,12 @@ namespace CesiumForUnity
             GUIContent flyToGranularityDegreesContent = new GUIContent(
                 "Granularity Degrees",
                 "The granularity in degrees with which keypoints should be generated " +
-                "for the flight interpolation.");
+                "for the flight interpolation. This value should be greater than 0.0, otherwise " +
+                "the controller will not take flight." +
+                "\n\n" +
+                "This represents the difference in degrees between each keypoint on the flight path. " +
+                "The lower the value, the more keypoints are generated, and the smoother the flight " +
+                "interpolation will be.");
             EditorGUILayout.PropertyField(
                 this._flyToGranularityDegrees, flyToGranularityDegreesContent);
         }
