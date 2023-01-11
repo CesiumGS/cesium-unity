@@ -8,6 +8,9 @@ namespace CesiumForUnity
     {
         private CesiumCameraController _cameraController;
 
+        private SerializedProperty _enableMovement;
+        private SerializedProperty _enableRotation;
+
         private SerializedProperty _defaultMaximumSpeed;
 
         private SerializedProperty _enableDynamicSpeed;
@@ -16,15 +19,20 @@ namespace CesiumForUnity
         private SerializedProperty _enableDynamicClippingPlanes;
         private SerializedProperty _dynamicClippingPlanesMinHeight;
 
-        private SerializedProperty _flyToAltitudeProfileCurve;
+        /*private SerializedProperty _flyToAltitudeProfileCurve;
         private SerializedProperty _flyToProgressCurve;
         private SerializedProperty _flyToMaximumAltitudeCurve;
         private SerializedProperty _flyToDuration;
-        private SerializedProperty _flyToGranularityDegrees;
+        private SerializedProperty _flyToGranularityDegrees;*/
 
         private void OnEnable()
         {
             this._cameraController = (CesiumCameraController)this.target;
+
+            this._enableMovement =
+                this.serializedObject.FindProperty("_enableMovement");
+            this._enableRotation =
+                this.serializedObject.FindProperty("_enableRotation");
 
             this._defaultMaximumSpeed =
                 this.serializedObject.FindProperty("_defaultMaximumSpeed");
@@ -39,7 +47,7 @@ namespace CesiumForUnity
             this._dynamicClippingPlanesMinHeight =
                 this.serializedObject.FindProperty("_dynamicClippingPlanesMinHeight");
 
-            this._flyToAltitudeProfileCurve =
+            /*this._flyToAltitudeProfileCurve =
                 this.serializedObject.FindProperty("_flyToAltitudeProfileCurve");
             this._flyToProgressCurve =
                 this.serializedObject.FindProperty("_flyToProgressCurve");
@@ -48,25 +56,44 @@ namespace CesiumForUnity
             this._flyToDuration =
                 this.serializedObject.FindProperty("_flyToDuration");
             this._flyToGranularityDegrees =
-                this.serializedObject.FindProperty("_flyToGranularityDegrees");
+                this.serializedObject.FindProperty("_flyToGranularityDegrees");*/
         }
 
         public override void OnInspectorGUI()
         {
             this.serializedObject.Update();
 
-            this.DrawDynamicProperties();
-            EditorGUILayout.Space(5);
-            this.DrawFlyToProperties();
+            this.DrawProperties();
 
             this.serializedObject.ApplyModifiedProperties();
         }
 
-        private void DrawDynamicProperties()
+        private void DrawProperties()
         {
             // The labels for this component are particularly long, so use a custom value
             // instead of the editor style's default.
             int labelWidth = 215;
+
+            GUILayout.BeginHorizontal();
+            GUIContent enableMovementContent = new GUIContent(
+                "Enable Movement",
+                "Whether movement is enabled on this controller. Movement is controlled " +
+                "using the W, A, S, D keys, as well as the Q and E keys for vertical " +
+                "movement with respect to the globe.");
+            GUILayout.Label(enableMovementContent, GUILayout.Width(labelWidth));
+            EditorGUILayout.PropertyField(this._enableMovement, GUIContent.none);
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            GUIContent enableRotationContent = new GUIContent(
+                "Enable Rotation",
+                "Whether rotation is enabled on this controller. Rotation is controlled " +
+                "by movement of the mouse.");
+            GUILayout.Label(enableRotationContent, GUILayout.Width(labelWidth));
+            EditorGUILayout.PropertyField(this._enableRotation, GUIContent.none);
+            GUILayout.EndHorizontal();
+
+            EditorGUILayout.Space(5);
 
             GUILayout.BeginHorizontal();
             GUIContent defaultMaximumSpeedContent = new GUIContent(
@@ -133,7 +160,7 @@ namespace CesiumForUnity
             EditorGUI.EndDisabledGroup();
         }
 
-        private void DrawFlyToProperties()
+        /*private void DrawFlyToProperties()
         {
             GUILayout.Label("Fly-To Properties", EditorStyles.boldLabel);
 
@@ -183,6 +210,6 @@ namespace CesiumForUnity
                 "interpolation will be.");
             EditorGUILayout.PropertyField(
                 this._flyToGranularityDegrees, flyToGranularityDegreesContent);
-        }
+        }*/
     }
 }
