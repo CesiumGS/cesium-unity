@@ -4,10 +4,11 @@ using Unity.Mathematics;
 
 namespace CesiumForUnity
 {   /// <summary>
-    /// Holds static methods for ellipsoid math using the World Geodetic System (WGS84) standard.
+    /// Holds static methods for ellipsoid math and transforming between geospatial coordinate systems
+    /// using the World Geodetic System (WGS84) standard.
     /// </summary>
-    [ReinteropNativeImplementation("CesiumForUnityNative::CesiumEllipsoidImpl", "CesiumEllipsoidImpl.h")]
-    public static partial class CesiumEllipsoid
+    [ReinteropNativeImplementation("CesiumForUnityNative::CesiumWgs84EllipsoidImpl", "CesiumWgs84EllipsoidImpl.h")]
+    public static partial class CesiumWgs84Ellipsoid
     {
         /// <summary>
         /// Gets the radii of the ellipsoid in its x-, y-, and z-directions.
@@ -21,7 +22,7 @@ namespace CesiumForUnity
         /// <returns>The maximum radius of the ellipsoid.</returns>
         public static double GetMaximumRadius()
         {
-            return math.cmax(CesiumEllipsoid.GetRadii());
+            return math.cmax(CesiumWgs84Ellipsoid.GetRadii());
         }
 
         /// <summary>
@@ -30,7 +31,7 @@ namespace CesiumForUnity
         /// <returns>The minimum radius of the ellipsoid.</returns>
         public static double GetMinimumRadius()
         {
-            return math.cmin(CesiumEllipsoid.GetRadii());
+            return math.cmin(CesiumWgs84Ellipsoid.GetRadii());
         }
 
         /// <summary>
@@ -49,5 +50,26 @@ namespace CesiumForUnity
         /// <param name="earthCenteredEarthFixed">The ECEF position in meters.</param>
         /// <returns>The normal at the ECEF position</returns>
         public static partial double3 GeodeticSurfaceNormal(double3 earthCenteredEarthFixed);
+
+        /// <summary>
+        /// Convert longitude, latitude, and height to Earth-Centered, Earth-Fixed (ECEF) coordinates.
+        /// </summary>
+        /// <param name="longitudeLatitudeHeight">
+        /// The longitude (X) and latitude (Y) are in degrees. The height (Z) is in meters above the ellipsoid,
+        /// and should not be confused with a geoid, orthometric, or mean sea level height.</param>
+        /// <returns>The ECEF coordinates in meters.</returns>
+        public static partial double3
+            LongitudeLatitudeHeightToEarthCenteredEarthFixed(double3 longitudeLatitudeHeight);
+
+        /// <summary>
+        /// Convert Earth-Centered, Earth-Fixed (ECEF) coordinates to longitude, latitude, and height.
+        /// </summary>
+        /// <param name="earthCenteredEarthFixed">The ECEF coordinates in meters.</param>
+        /// <returns>
+        /// The longitude (X) and latitude (Y) are in degrees. The height (Z) is in meters above the ellipsoid,
+        /// and should not be confused with a geoid, orthometric, or mean sea level height.
+        /// </returns>
+        public static partial double3
+            EarthCenteredEarthFixedToLongitudeLatitudeHeight(double3 earthCenteredEarthFixed);
     }
 }

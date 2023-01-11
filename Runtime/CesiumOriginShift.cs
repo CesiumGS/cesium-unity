@@ -24,6 +24,7 @@ namespace CesiumForUnity
     /// </para>
     /// </remarks>
     [RequireComponent(typeof(CesiumGlobeAnchor))]
+    [DisallowMultipleComponent]
     public class CesiumOriginShift : MonoBehaviour
     {
         void LateUpdate()
@@ -80,19 +81,31 @@ namespace CesiumForUnity
                     // Setting a level active will automatically disable all other levels.
                     closestLevel.gameObject.SetActive(true);
                     closestLevel.enabled = true;
+
+                    Physics.SyncTransforms();
                 }
             }
             else
             {
+                bool deactivatedAnySublevel = false;
+
                 // Deactivate all active sub-levels
                 foreach (CesiumSubScene level in this._sublevelsScratch)
                 {
                     if (level.isActiveAndEnabled)
+                    {
                         level.gameObject.SetActive(false);
+                        deactivatedAnySublevel = true;
+                    }
                 }
 
                 // Update the origin continuously.
                 georeference.SetOriginEarthCenteredEarthFixed(ecef.x, ecef.y, ecef.z);
+
+                if (deactivatedAnySublevel)
+                {
+                    Physics.SyncTransforms();
+                }
             }
         }
     }

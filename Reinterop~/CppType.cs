@@ -412,7 +412,7 @@ namespace Reinterop
             else if (this.Kind == InteropTypeKind.BlittableStruct)
             {
                 // If this is a parameter, it will be a const reference; turn it into a const pointer.
-                // Otherwise, it's a return valu; just return the simple type for now.
+                // Otherwise, it's a return value; just return the simple type for now.
                 if (this.Flags.HasFlag(CppTypeFlags.Const) && this.Flags.HasFlag(CppTypeFlags.Reference))
                     return this.AsConstPointer();
                 return this.AsSimpleType();
@@ -420,7 +420,7 @@ namespace Reinterop
             else if (this.Kind == InteropTypeKind.Nullable)
             {
                 // If this is a parameter, it will be a const reference; turn it into a const pointer.
-                // Otherwise, it's a return valu; just return the simple type for now.
+                // Otherwise, it's a return value; just return the simple type for now.
                 CppType underlying = this.GenericArguments.FirstOrDefault();
                 if (this.Flags.HasFlag(CppTypeFlags.Const) && this.Flags.HasFlag(CppTypeFlags.Reference))
                     return underlying.AsConstPointer();

@@ -75,6 +75,7 @@ namespace CesiumForUnity
     /// </para>
     /// </remarks>
     [ExecuteInEditMode]
+    [DisallowMultipleComponent]
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumGlobeAnchorImpl", "CesiumGlobeAnchorImpl.h")]
     public partial class CesiumGlobeAnchor : MonoBehaviour
     {
@@ -542,7 +543,7 @@ namespace CesiumForUnity
             switch (this.positionAuthority)
             {
                 case CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight:
-                    ecef = CesiumTransforms.LongitudeLatitudeHeightToEarthCenteredEarthFixed(new double3(
+                    ecef = CesiumWgs84Ellipsoid.LongitudeLatitudeHeightToEarthCenteredEarthFixed(new double3(
                         this.longitude,
                         this.latitude,
                         this.height
@@ -568,7 +569,7 @@ namespace CesiumForUnity
             // TODO: it might be more efficient to lazily update these if/when they're accessed, at least outside the Editor.
             if (this.positionAuthority != CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight)
             {
-                double3 llh = CesiumTransforms.EarthCenteredEarthFixedToLongitudeLatitudeHeight(ecef);
+                double3 llh = CesiumWgs84Ellipsoid.EarthCenteredEarthFixedToLongitudeLatitudeHeight(ecef);
                 this._longitude = llh.x;
                 this._latitude = llh.y;
                 this._height = llh.z;
