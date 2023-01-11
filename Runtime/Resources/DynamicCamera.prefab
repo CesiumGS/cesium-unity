@@ -12,10 +12,10 @@ GameObject:
   - component: {fileID: 5627069538230183848}
   - component: {fileID: 5627069538230183849}
   - component: {fileID: 5627069538230183850}
-  - component: {fileID: 5627069538230183853}
-  - component: {fileID: 8528432420222559245}
-  - component: {fileID: 1633123674612423661}
-  - component: {fileID: 7650680105844837213}
+  - component: {fileID: 7346015802769307894}
+  - component: {fileID: 6699122987835876609}
+  - component: {fileID: 1447381297153131539}
+  - component: {fileID: 5807880088939110505}
   m_Layer: 0
   m_Name: DynamicCamera
   m_TagString: MainCamera
@@ -122,7 +122,7 @@ MonoBehaviour:
   m_RequiresDepthTexture: 0
   m_RequiresColorTexture: 0
   m_Version: 2
---- !u!114 &5627069538230183853
+--- !u!114 &7346015802769307894
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -141,7 +141,7 @@ MonoBehaviour:
   _dynamicSpeedMinHeight: 20
   _enableDynamicClippingPlanes: 1
   _dynamicClippingPlanesMinHeight: 10000
---- !u!114 &8528432420222559245
+--- !u!114 &6699122987835876609
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -165,7 +165,7 @@ MonoBehaviour:
   _unityX: 0
   _unityY: 0
   _unityZ: 0
---- !u!114 &1633123674612423661
+--- !u!114 &1447381297153131539
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -177,7 +177,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3bef32f31a547984f88be1ab98b65f04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &7650680105844837213
+--- !u!114 &5807880088939110505
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

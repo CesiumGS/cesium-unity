@@ -443,7 +443,6 @@ namespace CesiumForUnity
             this._keypoints.Add(destinationECEF);
         }
 
-
         /// <summary>
         /// Begin a smooth flight to the given Earth-Centered, Earth-Fixed (ECEF) 
         /// destination such that the controller ends at the specified yaw and pitch.

@@ -597,8 +597,11 @@ namespace CesiumForUnity
             {
                 float heightToMaxSpeedRatio = height / this._maxSpeedPreMultiplier;
 
-                // The asymmetry of these ratios is intentional. It is more likely that the 
-                if (heightToMaxSpeedRatio > 1000.0f)// || heightToMaxSpeedRatio < 0.01f)
+                // The asymmetry of these ratios is intentional. When traversing tilesets
+                // with many height differences (e.g. a city with tall buildings), flying over
+                // taller geometry will cause the camera to slow down suddenly, and sometimes
+                // cause it to stutter.
+                if (heightToMaxSpeedRatio > 1000.0f || heightToMaxSpeedRatio < 0.01f)
                 {
                     overrideSpeed = false;
                     newSpeed = 0.0f;
