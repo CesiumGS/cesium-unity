@@ -7,7 +7,7 @@ namespace CesiumForUnity
 {
     /// <summary>
     /// A controller that can smoothly fly to locations around the globe while 
-    /// offering control over the qualities of its flights.
+    /// offering control over the characteristics of its flights.
     /// </summary>
     /// <remarks>
     /// This controller is compatible with CesiumCameraController. During flights,

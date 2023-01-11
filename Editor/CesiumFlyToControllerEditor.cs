@@ -85,5 +85,4 @@ namespace CesiumForUnity
                 this._flyToGranularityDegrees, flyToGranularityDegreesContent);
         }
     }
-
 }

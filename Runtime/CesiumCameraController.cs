@@ -665,6 +665,7 @@ namespace CesiumForUnity
         {
             this._maxSpeed = this._defaultMaximumSpeed;
             this._maxSpeedPreMultiplier = 0.0f;
+            this.ResetSpeedMultiplier();
         }
 
         #endregion
