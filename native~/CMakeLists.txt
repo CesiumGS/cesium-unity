@@ -33,9 +33,20 @@ endif()
 
 add_subdirectory(extern/cesium-native EXCLUDE_FROM_ALL)
 
+# Enum flags is a header-only library without a CMakeLists.txt
+file(GLOB ENUM_FLAGS_HEADERS ${CMAKE_CURRENT_LIST_DIR}/extern/enum-flags/include/*.hpp)
+add_library(enum-flags INTERFACE ${ENUM_FLAGS_HEADERS})
+
+add_subdirectory(Runtime)
+
+if (EDITOR)
+  add_subdirectory(Editor)
+endif()
+
+# Specify all targets that need to compile bitcode
 if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
-    install(TARGETS tidy-static)
-    install(TARGETS 
+    set (ALL_TARGETS 
+        CesiumForUnityNative-Runtime
         Async++
         Cesium3DTilesSelection 
         CesiumAsync
@@ -45,6 +56,19 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
         CesiumGltfReader
         CesiumJsonReader
         CesiumUtility
+        draco_attributes
+        draco_compression_attributes_dec
+        draco_compression_bit_coders 
+        draco_compression_entropy 
+        draco_compression_decode
+        draco_compression_mesh_dec
+        draco_compression_point_cloud_dec
+        draco_core
+        draco_mesh
+        draco_metadata 
+        draco_metadata_dec 
+        draco_point_cloud
+        draco_points_dec
         draco_static
         expected-lite
         GSL
@@ -55,20 +79,18 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
         sqlite3
         s2geometry
         tinyxml2
+        tidy-static
         uriparser
+        webpdecode 
         webpdecoder
-    PUBLIC_HEADER EXCLUDE_FROM_ALL
-)
+        webpdspdecode 
+        webputilsdecode
+    )
+    install(TARGETS tidy-static)
+    install(TARGETS ${ALL_TARGETS} PUBLIC_HEADER EXCLUDE_FROM_ALL)
     set_target_properties(cesium-native-tests PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
     set_target_properties(tidy-static PROPERTIES EXCLUDE_FROM_ALL 0 EXCLUDE_FROM_DEFAULT_BUILD 0)
+    set_target_properties(${ALL_TARGETS} PROPERTIES XCODE_ATTRIBUTE_ENABLE_BITCODE "YES")
 endif()
 
-# Enum flags is a header-only library without a CMakeLists.txt
-file(GLOB ENUM_FLAGS_HEADERS ${CMAKE_CURRENT_LIST_DIR}/extern/enum-flags/include/*.hpp)
-add_library(enum-flags INTERFACE ${ENUM_FLAGS_HEADERS})
 
-add_subdirectory(Runtime)
-
-if (EDITOR)
-  add_subdirectory(Editor)
-endif()

@@ -11,9 +11,6 @@ using System.Collections.Generic;
 #if UNITY_ANDROID
 using UnityEditor.Android;
 #endif
-#if UNITY_IOS
-using UnityEditor.iOS.Xcode;
-#endif
 
 namespace CesiumForUnity
 {
@@ -33,8 +30,7 @@ namespace CesiumForUnity
     internal class CompileCesiumForUnityNative :
         AssetPostprocessor,
         IPreprocessBuildWithReport,
-        IPostBuildPlayerScriptDLLs,
-        IPostprocessBuildWithReport
+        IPostBuildPlayerScriptDLLs
     {
         internal class LibraryToBuild
         {
@@ -221,24 +217,6 @@ namespace CesiumForUnity
                 BuildNativeLibrary(GetLibraryToBuild(report.summary));
             }
         }
-        
-        public void OnPostprocessBuild(BuildReport report)
-        {
-#if UNITY_IOS
-            if(report.summary.platform == BuildTarget.iOS)
-            {
-                string projectPath = report.summary.outputPath + "/Unity-iPhone.xcodeproj/project.pbxproj";
-                PBXProject pbxProject = new PBXProject();
-                pbxProject.ReadFromFile(projectPath);
-                string target = pbxProject.GetUnityMainTargetGuid();
-                pbxProject.SetBuildProperty(target, "ENABLE_BITCODE", "NO");
-                target = pbxProject.GetUnityFrameworkTargetGuid();
-                pbxProject.SetBuildProperty(target, "ENABLE_BITCODE", "NO");
-                pbxProject.WriteToFile(projectPath);
-            }
-#endif
-        }
-
         public static LibraryToBuild GetLibraryToBuild(BuildSummary summary, string cpu = null)
         {
             return GetLibraryToBuild(new PlatformToBuild()
