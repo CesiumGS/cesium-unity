@@ -218,7 +218,6 @@ namespace Build
 
                     Console.WriteLine("**** Adding generated files (for the iOS Player) to the package");
                     AddGeneratedFiles("!UNITY_EDITOR && UNITY_IOS", generatedRuntimePath, Path.Combine(outputPackagePath, "Runtime", "generated"));
-  
                 }
 
                 Console.WriteLine("**** Copying the rest of the package");
