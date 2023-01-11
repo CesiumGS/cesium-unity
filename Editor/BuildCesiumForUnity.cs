@@ -48,7 +48,7 @@ namespace CesiumForUnity
             Directory.CreateDirectory(buildPath);
             try
             {
-                BuildPlayer((BuildTargetGroup)4, (BuildTarget)9, Path.Combine(buildPath, "iOS"));
+                BuildPlayer(BuildTargetGroup.iOS, BuildTarget.iOS, Path.Combine(buildPath, "iOS"));
             }
             finally
             {

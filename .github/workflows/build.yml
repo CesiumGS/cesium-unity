@@ -109,6 +109,9 @@ jobs:
           sudo chmod g+w "/Library/Application Support/Unity"
           sudo chmod g+w "/Library/Application Support/Unity/config"
           sudo echo '{"licensingServiceBaseUrl": "http://localhost:12331","enableEntitlementLicensing": true,"clientConnectTimeoutSec": 60,"clientHandshakeTimeoutSec": 120}' > "/Library/Application Support/Unity/config/services-config.json"
+      - name: Install Unity iOS Support
+        run: |
+          /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub -ArgumentList "-- --headless install-modules --version 2021.3.13f1 --changeset 9e7d58001ecf --module ios" -Wait 
       - name: Create SSH tunnel to Unity License Server
         env:
           UNITY_LICENSE_SERVER_SSH_KEY: ${{ secrets.UNITY_LICENSE_SERVER_SSH_KEY }}
