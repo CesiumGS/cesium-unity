@@ -11,6 +11,9 @@ using System.Collections.Generic;
 #if UNITY_ANDROID
 using UnityEditor.Android;
 #endif
+#if UNITY_IOS
+using UnityEditor.iOS.Xcode;
+#endif
 
 namespace CesiumForUnity
 {
@@ -30,7 +33,8 @@ namespace CesiumForUnity
     internal class CompileCesiumForUnityNative :
         AssetPostprocessor,
         IPreprocessBuildWithReport,
-        IPostBuildPlayerScriptDLLs
+        IPostBuildPlayerScriptDLLs,
+        IPostprocessBuildWithReport
     {
         internal class LibraryToBuild
         {
@@ -111,6 +115,7 @@ namespace CesiumForUnity
                 case BuildTarget.StandaloneWindows64:
                     return $"{baseName}.dll";
                 case BuildTarget.iOS:
+                    return $"lib{baseName}.a";
                 case BuildTarget.StandaloneOSX:
                     return $"lib{baseName}.dylib";
                 default:
@@ -216,6 +221,23 @@ namespace CesiumForUnity
                 BuildNativeLibrary(GetLibraryToBuild(report.summary));
             }
         }
+        
+        public void OnPostprocessBuild(BuildReport report)
+        {
+#if UNITY_IOS
+            if(report.summary.platform == BuildTarget.iOS)
+            {
+                string projectPath = report.summary.outputPath + "/Unity-iPhone.xcodeproj/project.pbxproj";
+                PBXProject pbxProject = new PBXProject();
+                pbxProject.ReadFromFile(projectPath);
+                string target = pbxProject.GetUnityMainTargetGuid();
+                pbxProject.SetBuildProperty(target, "ENABLE_BITCODE", "NO");
+                target = pbxProject.GetUnityFrameworkTargetGuid();
+                pbxProject.SetBuildProperty(target, "ENABLE_BITCODE", "NO");
+                pbxProject.WriteToFile(projectPath);
+            }
+#endif
+        }
 
         public static LibraryToBuild GetLibraryToBuild(BuildSummary summary, string cpu = null)
         {
@@ -255,6 +277,17 @@ namespace CesiumForUnity
             if (platform.platformGroup == BuildTargetGroup.Android)
                 library.Toolchain = "extern/android-toolchain.cmake";
 
+            if (platform.platformGroup == BuildTargetGroup.iOS){
+                var outputPath = Path.Combine(library.SourceDirectory, "../Plugins/iOS");
+            if (Directory.Exists(outputPath))
+                Directory.Delete(outputPath, true);
+            Directory.CreateDirectory(outputPath);
+
+                library.Toolchain = "extern/ios-toolchain.cmake";
+                library.ExtraConfigureArgs.Add("-GXcode");
+                library.ExtraConfigureArgs.Add("-DCMAKE_INSTALL_PREFIX=../Plugins/iOS");
+            }
+
             if (platform.platform == BuildTarget.StandaloneOSX && cpu != null)
             {
                 library.ExtraConfigureArgs.Add("-DCMAKE_OSX_ARCHITECTURES=" + cpu);
@@ -275,6 +308,10 @@ namespace CesiumForUnity
             return platformGroup == BuildTargetGroup.Unknown && platform == BuildTarget.NoTarget;
         }
 
+        private static bool IsIOS(BuildTargetGroup platformGroup, BuildTarget platform){
+            return platformGroup == BuildTargetGroup.iOS && platform == BuildTarget.iOS;
+        }
+
         private static string GetDirectoryNameForPlatform(PlatformToBuild platform)
         {
             return GetDirectoryNameForPlatform(platform.platformGroup, platform.platform);
@@ -284,6 +321,8 @@ namespace CesiumForUnity
         {
             if (IsEditor(platformGroup, platform))
                 return "Editor";
+            else if (IsIOS(platformGroup, platform))
+                return "iOS";
             return platformGroup.ToString();
         }
 
@@ -312,7 +351,7 @@ namespace CesiumForUnity
                 {
                     ProcessStartInfo startInfo = new ProcessStartInfo();
                     startInfo.UseShellExecute = false;
-                    if (library.Platform == BuildTarget.StandaloneOSX){
+                    if (library.Platform == BuildTarget.StandaloneOSX || library.Platform == BuildTarget.iOS){
                         startInfo.FileName = File.Exists("/Applications/CMake.app/Contents/bin/cmake") ? "/Applications/CMake.app/Contents/bin/cmake" : "cmake";
                     }
                     else {
@@ -358,6 +397,9 @@ namespace CesiumForUnity
                     args.AddRange(library.ExtraBuildArgs);
                     startInfo.Arguments = string.Join(' ', args);
                     RunAndLog(startInfo, log, logFilename);
+                 
+                    if(library.Platform == BuildTarget.iOS)
+                        AssetDatabase.Refresh();
                 }
             }
             finally

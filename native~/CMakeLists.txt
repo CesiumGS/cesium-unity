@@ -20,6 +20,10 @@ set(REINTEROP_GENERATED_DIRECTORY "generated-Editor" CACHE STRING "The subdirect
 # position independent code.
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+set(BUILD_SHARED_LIB OFF)
+set( SUPPORT_CONSOLE_APP OFF)
+add_subdirectory(extern/tidy-html5 EXCLUDE_FROM_ALL)
+
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Android")
   set(CESIUM_ARCHITECTURE "aarch64")
   set(HTTPLIB_USE_OPENSSL_IF_AVAILABLE OFF)
@@ -29,9 +33,35 @@ endif()
 
 add_subdirectory(extern/cesium-native EXCLUDE_FROM_ALL)
 
-option(BUILD_SHARED_LIB OFF)
-option( SUPPORT_CONSOLE_APP OFF)
-add_subdirectory(extern/tidy-html5 EXCLUDE_FROM_ALL)
+if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
+    install(TARGETS tidy-static)
+    install(TARGETS 
+        Async++
+        Cesium3DTilesSelection 
+        CesiumAsync
+        CesiumGeospatial
+        CesiumGeometry
+        CesiumGltf
+        CesiumGltfReader
+        CesiumJsonReader
+        CesiumUtility
+        draco_static
+        expected-lite
+        GSL
+        httplib
+        ktx_read
+        modp_b64
+        spdlog
+        sqlite3
+        s2geometry
+        tinyxml2
+        uriparser
+        webpdecoder
+    PUBLIC_HEADER EXCLUDE_FROM_ALL
+)
+    set_target_properties(cesium-native-tests PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
+    set_target_properties(tidy-static PROPERTIES EXCLUDE_FROM_ALL 0 EXCLUDE_FROM_DEFAULT_BUILD 0)
+endif()
 
 # Enum flags is a header-only library without a CMakeLists.txt
 file(GLOB ENUM_FLAGS_HEADERS ${CMAKE_CURRENT_LIST_DIR}/extern/enum-flags/include/*.hpp)

@@ -9,7 +9,11 @@ project(CesiumForUnityNative
 file(GLOB CESIUMFORUNITYNATIVE_SOURCES CONFIGURE_DEPENDS src/*.cpp ../Shared/src/*.cpp ${REINTEROP_GENERATED_DIRECTORY}/src/*.cpp)
 file(GLOB CESIUMFORUNITYNATIVE_HEADERS CONFIGURE_DEPENDS src/*.h ${REINTEROP_GENERATED_DIRECTORY}/src/*.h)
 
-add_library(CesiumForUnityNative-Runtime SHARED)
+if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
+    add_library(CesiumForUnityNative-Runtime STATIC)
+else()
+    add_library(CesiumForUnityNative-Runtime SHARED)
+endif()
 
 target_sources(
   CesiumForUnityNative-Runtime
