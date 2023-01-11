@@ -279,9 +279,12 @@ namespace CesiumForUnity
 
             if (platform.platformGroup == BuildTargetGroup.iOS){
                 var outputPath = Path.Combine(library.SourceDirectory, "../Plugins/iOS");
-            if (Directory.Exists(outputPath))
+
+            if(platform.isCleanBuild)
                 Directory.Delete(outputPath, true);
-            Directory.CreateDirectory(outputPath);
+
+            if (!Directory.Exists(outputPath))
+                Directory.CreateDirectory(outputPath);
 
                 library.Toolchain = "extern/ios-toolchain.cmake";
                 library.ExtraConfigureArgs.Add("-GXcode");
