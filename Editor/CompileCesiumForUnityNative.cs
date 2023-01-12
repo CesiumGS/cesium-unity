@@ -256,10 +256,7 @@ namespace CesiumForUnity
                 library.Toolchain = "extern/android-toolchain.cmake";
 
             if (platform.platformGroup == BuildTargetGroup.iOS)
-            {
                 library.Toolchain = "extern/ios-toolchain.cmake";
-                library.ExtraConfigureArgs.Add("-GXcode");
-            }
 
             if (platform.platform == BuildTarget.StandaloneOSX && cpu != null)
             {
