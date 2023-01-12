@@ -325,7 +325,7 @@ namespace CesiumForUnity
                 georeference.ecefZ
             );
 
-            GameObject subSceneGameObject = new GameObject();
+            GameObject subSceneGameObject = new GameObject("New Sub-Scene");
             subSceneGameObject.transform.parent = georeference.transform;
             Undo.RegisterCreatedObjectUndo(subSceneGameObject, "Create Sub-Scene");
 
