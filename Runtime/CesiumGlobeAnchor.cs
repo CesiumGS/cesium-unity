@@ -464,8 +464,11 @@ namespace CesiumForUnity
 
         private void OnValidate()
         {
-            this.StartOrStopDetectingTransformChanges();
-            this.Sync();
+            CesiumGeoreference georeference = this.gameObject.GetComponentInParent<CesiumGeoreference>();
+            if (georeference != null) {
+                this.StartOrStopDetectingTransformChanges();
+                this.Sync();
+            }
         }
 
         private void OnEnable()
