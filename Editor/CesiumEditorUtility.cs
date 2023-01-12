@@ -200,12 +200,11 @@ namespace CesiumForUnity
 
         public static Cesium3DTileset CreateTileset(string name, long assetID)
         {
-            // Find a georeference in the scene, or create one if none exists.
+            // Find a georeference in the scene, or create one if none exist.
             CesiumGeoreference georeference = CesiumEditorUtility.FindFirstGeoreference();
             if (georeference == null)
             {
-                GameObject georeferenceGameObject =
-                    new GameObject("CesiumGeoreference");
+                GameObject georeferenceGameObject = new GameObject("CesiumGeoreference");
                 georeference =
                     georeferenceGameObject.AddComponent<CesiumGeoreference>();
                 Undo.RegisterCreatedObjectUndo(georeferenceGameObject, "Create Georeference");
@@ -246,7 +245,8 @@ namespace CesiumForUnity
 
             // Find the camera position in the Georeference's reference frame.
             Vector3 position = camera.transform.position;
-            position = georeference.transform.worldToLocalMatrix * new Vector4(position.x, position.y, position.z, 1.0f);
+            position = georeference.transform.worldToLocalMatrix *
+                new Vector4(position.x, position.y, position.z, 1.0f);
 
             double3 positionUnity = new double3(
                 position.x,
@@ -369,6 +369,36 @@ namespace CesiumForUnity
             EditorApplication.hierarchyChanged -= RenameObject;
             EditorApplication.ExecuteMenuItem("Window/General/Hierarchy");
             EditorApplication.ExecuteMenuItem("Edit/Rename");
+        }
+
+        public static CesiumCameraController CreateDynamicCamera()
+        {
+            CesiumCameraController dynamicCamera =
+                UnityEngine.Object.FindObjectOfType<CesiumCameraController>(true);
+            if (dynamicCamera != null)
+            {
+                return dynamicCamera;
+            }
+
+            // Find a georeference in the scene, or create one if none exist.
+            CesiumGeoreference georeference = CesiumEditorUtility.FindFirstGeoreference();
+            if (georeference == null)
+            {
+                GameObject georeferenceGameObject = new GameObject("CesiumGeoreference");
+                georeference =
+                    georeferenceGameObject.AddComponent<CesiumGeoreference>();
+                Undo.RegisterCreatedObjectUndo(georeferenceGameObject, "Create Georeference");
+            }
+
+            GameObject dynamicCameraPrefab = Resources.Load<GameObject>("DynamicCamera");
+            GameObject dynamicCameraObject =
+                UnityEngine.Object.Instantiate(dynamicCameraPrefab);
+            Undo.RegisterCreatedObjectUndo(dynamicCameraObject, "Create DynamicCamera");
+
+            dynamicCameraObject.name = "DynamicCamera";
+            dynamicCameraObject.transform.parent = georeference.gameObject.transform;
+
+            return dynamicCameraObject.GetComponent<CesiumCameraController>();
         }
     }
 }
