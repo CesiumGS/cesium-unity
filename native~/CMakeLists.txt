@@ -93,5 +93,3 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
     set_target_properties(tidy-static PROPERTIES EXCLUDE_FROM_ALL 0 EXCLUDE_FROM_DEFAULT_BUILD 0)
     set_target_properties(${ALL_TARGETS} PROPERTIES XCODE_ATTRIBUTE_ENABLE_BITCODE "YES")
 endif()
-
-
