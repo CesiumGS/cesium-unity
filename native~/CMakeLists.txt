@@ -84,6 +84,7 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
         webpdecode 
         webpdecoder
         webpdspdecode 
+        webputils
         webputilsdecode
     )
     install(TARGETS tidy-static)

@@ -255,18 +255,10 @@ namespace CesiumForUnity
             if (platform.platformGroup == BuildTargetGroup.Android)
                 library.Toolchain = "extern/android-toolchain.cmake";
 
-            if (platform.platformGroup == BuildTargetGroup.iOS){
-                var outputPath = Path.Combine(library.SourceDirectory, "../Plugins/iOS");
-
-            if(platform.isCleanBuild)
-                Directory.Delete(outputPath, true);
-
-            if (!Directory.Exists(outputPath))
-                Directory.CreateDirectory(outputPath);
-
+            if (platform.platformGroup == BuildTargetGroup.iOS)
+            {
                 library.Toolchain = "extern/ios-toolchain.cmake";
                 library.ExtraConfigureArgs.Add("-GXcode");
-                library.ExtraConfigureArgs.Add("-DCMAKE_INSTALL_PREFIX=../Plugins/iOS");
             }
 
             if (platform.platform == BuildTarget.StandaloneOSX && cpu != null)
