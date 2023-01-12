@@ -299,7 +299,8 @@ namespace CesiumForUnity
                     startInfo.Arguments = string.Join(' ', args);
                     RunAndLog(startInfo, log, logFilename);
                  
-                    string libraryPath = Path.Combine(library.InstallDirectory, GetSharedLibraryFilename("CesiumForUnityNative-Runtime", library.Platform));
+                    string libraryPath = Path.Combine(library.InstallDirectory, 
+                        GetSharedLibraryFilename("CesiumForUnityNative-Runtime", library.Platform));
                     string importPath = Path.GetRelativePath(projectPath, libraryPath).Replace("\\", "/");
                     importsInProgress.Add(importPath, library);
                     AssetDatabase.Refresh();
