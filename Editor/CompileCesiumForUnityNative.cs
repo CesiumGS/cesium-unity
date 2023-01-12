@@ -302,8 +302,6 @@ namespace CesiumForUnity
                     string libraryPath = Path.Combine(library.InstallDirectory, GetSharedLibraryFilename("CesiumForUnityNative-Runtime", library.Platform));
                     string importPath = Path.GetRelativePath(projectPath, libraryPath).Replace("\\", "/");
                     importsInProgress.Add(importPath, library);
-                    UnityEngine.Debug.Log($"{importPath}");
-
                     AssetDatabase.Refresh();
                 }
             }
