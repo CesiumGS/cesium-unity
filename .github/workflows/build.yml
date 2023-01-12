@@ -103,6 +103,9 @@ jobs:
         continue-on-error: true
         run: |
           /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub -- --headless install --version 2021.3.13f1 --changeset 9e7d58001ecf
+      - name: Install Unity iOS Support 
+        run: |
+          /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub -- --headless install-modules --version 2021.3.13f1 --changeset 9e7d58001ecf --module ios
       - name: Configure Unity to Use the License Server
         run: |
           sudo mkdir -p "/Library/Application Support/Unity/config"
@@ -129,9 +132,6 @@ jobs:
           wget http://127.0.0.1:12331/v1/admin/status
           cat status
           rm status
-      - name: Install Unity iOS Support 
-        run: |
-          /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub -- --headless install-modules --version 2021.3.13f1 --changeset 9e7d58001ecf --module ios
       - name: Update the version in Cesium.cpp
         run: |
           export VERSION=$(jq -r ".version" package.json)
