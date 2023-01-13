@@ -12,6 +12,10 @@
 - Added `CesiumFlyToController`, a controller that can smoothly fly to locations across the globe.
 - Added an option to add a `DynamicCamera` from the Cesium panel to the scene. The `DynamicCamera` contains `CesiumCameraController` and `CesiumFlyToController` components and offers easy navigation of the globe.
 
+##### Fixes :wrench:
+
+- Fixed a bug where `CesiumGeoreference`, `CesiumGlobeAnchor`, and `CesiumSubScene` would not properly update when their values were changed by undos or pasted values.
+
 ### v0.1.2
 
 ##### Fixes :wrench:
