@@ -5,10 +5,9 @@ using Unity.Mathematics;
 
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
-#endif
-
 #if UNITY_IOS || UNITY_ANDROID
 using EnhancedTouch = UnityEngine.InputSystem.EnhancedTouch;
+#endif
 #endif
 
 namespace CesiumForUnity
