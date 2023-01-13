@@ -29,6 +29,7 @@ namespace CesiumForUnity
     /// </summary>
     internal class CompileCesiumForUnityNative :
         AssetPostprocessor,
+        IPreprocessBuildWithReport,
         IPostBuildPlayerScriptDLLs
     {
         internal class LibraryToBuild
@@ -51,6 +52,57 @@ namespace CesiumForUnity
         // instances of this class.
         private static Dictionary<string, LibraryToBuild> importsInProgress = new Dictionary<string, LibraryToBuild>();
 
+        /// <summary>
+        /// At the start of the build, create placeholders for the CesiumForUnityNative shared
+        /// libraries that will be produced during the build.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This is necessary because, if a shared library is not present at the start of the build,
+        /// Unity won't pick it up if it is created during the build. However, as long as it exists,
+        /// Unity will pick up the latest version.
+        /// </para>
+        /// <para>
+        /// The shared library assets are imported synchronously, and Unity will call
+        /// `OnPreprocessAsset` at the start of the import in order to allow us to set
+        /// the import settings.
+        /// </para>
+        /// </remarks>
+        /// <param name="report"></param>
+        public void OnPreprocessBuild(BuildReport report)
+        {
+            importsInProgress.Clear();
+
+            AssetDatabase.StartAssetEditing();
+            try
+            {
+                CreatePlaceholders(
+                    GetLibraryToBuild(report.summary),
+                    "CesiumForUnityNative-Runtime"
+                );
+            }
+            finally
+            {
+                AssetDatabase.StopAssetEditing();
+                importsInProgress.Clear();
+            }
+        }
+
+        internal static void CreatePlaceholders(LibraryToBuild libraryToBuild, string sharedLibraryName)
+        {
+            Directory.CreateDirectory(libraryToBuild.InstallDirectory);
+
+            string libraryFilename = GetSharedLibraryFilename(sharedLibraryName, libraryToBuild.Platform);
+            string libraryPath = Path.Combine(libraryToBuild.InstallDirectory, libraryFilename);
+            if (!File.Exists(libraryPath))
+                File.WriteAllText(libraryPath, "This is not a real shared library, it is a placeholder.", Encoding.UTF8);
+
+            string projectPath = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
+            string importPath = Path.GetRelativePath(projectPath, libraryPath).Replace("\\", "/");
+            importsInProgress.Add(importPath, libraryToBuild);
+            AssetDatabase.ImportAsset(importPath, ImportAssetOptions.ForceSynchronousImport);
+        }
+
         private static string GetSharedLibraryFilename(string baseName, BuildTarget target)
         {
             switch (target)
@@ -66,6 +118,23 @@ namespace CesiumForUnity
                     // Assume Linux-ish
                     return $"lib{baseName}.so";
             }
+        }
+
+        /// <summary>
+        /// This Unity message is invoked at the start of the asset imports initiated in OnPreprocessBuild
+        /// above and allows us to configure how the placeholder shared libraries are imported.
+        /// </summary>
+        private void OnPreprocessAsset()
+        {
+            LibraryToBuild libraryToBuild;
+            if (!importsInProgress.TryGetValue(assetPath, out libraryToBuild))
+                return;
+
+            PluginImporter importer = this.assetImporter as PluginImporter;
+            if (importer == null)
+                return;
+
+            CompileCesiumForUnityNative.ConfigurePlugin(libraryToBuild, importer);
         }
 
         private static void ConfigurePlugin(LibraryToBuild library, PluginImporter importer)
@@ -186,7 +255,8 @@ namespace CesiumForUnity
             if (platform.platformGroup == BuildTargetGroup.Android)
                 library.Toolchain = "extern/android-toolchain.cmake";
 
-            if (platform.platformGroup == BuildTargetGroup.iOS){
+            if (platform.platformGroup == BuildTargetGroup.iOS)
+            {
                 library.Toolchain = "extern/ios-toolchain.cmake";
                 library.ExtraConfigureArgs.Add("-GXcode");
             }
@@ -301,11 +371,8 @@ namespace CesiumForUnity
                     startInfo.Arguments = string.Join(' ', args);
                     RunAndLog(startInfo, log, logFilename);
                  
-                    string libraryPath = Path.Combine(library.InstallDirectory, 
-                        GetSharedLibraryFilename("CesiumForUnityNative-Runtime", library.Platform));
-                    string importPath = Path.GetRelativePath(projectPath, libraryPath).Replace("\\", "/");
-                    importsInProgress.Add(importPath, library);
-                    AssetDatabase.Refresh();
+                    if(library.Platform == BuildTarget.iOS)
+                        AssetDatabase.Refresh();
                 }
             }
             finally
