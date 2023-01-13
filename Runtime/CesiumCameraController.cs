@@ -8,7 +8,7 @@ using UnityEngine.InputSystem;
 #endif
 
 #if UNITY_IOS || UNITY_ANDROID
-using Touch = UnityEngine.InputSystem.EnhancedTouch;
+using EnhancedTouch = UnityEngine.InputSystem.EnhancedTouch;
 #endif
 
 namespace CesiumForUnity
@@ -259,7 +259,7 @@ namespace CesiumForUnity
         void ConfigureInputs()
         {
 #if UNITY_IOS || UNITY_ANDROID
-            Touch.EnhancedTouchSupport.Enable();
+            EnhancedTouch.EnhancedTouchSupport.Enable();
 #endif
             InputActionMap map = new InputActionMap("Cesium Camera Controller");
 
@@ -465,7 +465,7 @@ namespace CesiumForUnity
             bool handledMove = false;
             bool handledLook = false;
 
-            foreach(var touch in Touch.Touch.activeTouches)
+            foreach(var touch in EnhancedTouch.Touch.activeTouches)
             {
                 if(touch.startScreenPosition.x < Screen.width / 2)
                 {
