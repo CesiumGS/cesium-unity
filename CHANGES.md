@@ -1,5 +1,11 @@
 # Change Log
 
+### v?.?.? 
+
+##### Additions :tada:
+
+- Added support for building to iOS.
+
 ### v0.1.2
 
 ##### Fixes :wrench:
