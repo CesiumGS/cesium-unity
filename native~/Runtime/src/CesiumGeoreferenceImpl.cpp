@@ -55,9 +55,6 @@ CesiumGeoreferenceImpl::CesiumGeoreferenceImpl(
 
 CesiumGeoreferenceImpl::~CesiumGeoreferenceImpl() {}
 
-void CesiumGeoreferenceImpl::JustBeforeDelete(
-    const DotNet::CesiumForUnity::CesiumGeoreference& georeference) {}
-
 void CesiumGeoreferenceImpl::RecalculateOrigin(
     const DotNet::CesiumForUnity::CesiumGeoreference& georeference) {
   LocalHorizontalCoordinateSystem coordinateSystem =

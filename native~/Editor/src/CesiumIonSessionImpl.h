@@ -38,9 +38,6 @@ public:
   CesiumIonSessionImpl(const DotNet::CesiumForUnity::CesiumIonSession& session);
   ~CesiumIonSessionImpl();
 
-  void
-  JustBeforeDelete(const DotNet::CesiumForUnity::CesiumIonSession& session);
-
   bool IsConnected(const DotNet::CesiumForUnity::CesiumIonSession& session);
   bool IsConnecting(const DotNet::CesiumForUnity::CesiumIonSession& session);
   bool IsResuming(const DotNet::CesiumForUnity::CesiumIonSession& session);

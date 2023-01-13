@@ -33,9 +33,6 @@ public:
   ~SelectIonTokenWindowImpl();
 
   void
-  JustBeforeDelete(const DotNet::CesiumForUnity::SelectIonTokenWindow& window);
-
-  void
   RefreshTokens(const DotNet::CesiumForUnity::SelectIonTokenWindow& window);
 
   void CreateToken(const DotNet::CesiumForUnity::SelectIonTokenWindow& window);

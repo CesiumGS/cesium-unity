@@ -7,18 +7,22 @@ namespace Reinterop
         public readonly CppGenerationContext Context;
         public readonly InteropTypeKind Kind;
         public readonly IReadOnlyCollection<string> Namespaces;
-        public readonly ITypeSymbol Symbol;
+        public readonly string Name;
+        public readonly SpecialType SpecialType;
+        public readonly ITypeSymbol? Symbol;
 
         public Compilation Compilation
         {
             get { return Context.Compilation; }
         }
 
-        public CSharpType(CppGenerationContext context, InteropTypeKind kind, IReadOnlyCollection<string> namespaces, ITypeSymbol symbol)
+        public CSharpType(CppGenerationContext context, InteropTypeKind kind, IReadOnlyCollection<string> namespaces, string name, SpecialType specialType, ITypeSymbol? symbol = null)
         {
             this.Context = context;
             this.Kind = kind;
             this.Namespaces = new List<string>(namespaces);
+            this.Name = name;
+            this.SpecialType = specialType;
             this.Symbol = symbol;
         }
 
@@ -38,31 +42,41 @@ namespace Reinterop
 
             namespaces.Reverse();
 
-            return new CSharpType(context, kind, namespaces, symbol);
+            return new CSharpType(context, kind, namespaces, symbol.Name, symbol.SpecialType, symbol);
         }
 
         public string GetFullyQualifiedNamespace()
         {
-            IArrayTypeSymbol? arraySymbol = this.Symbol as IArrayTypeSymbol;
-            if (arraySymbol != null)
-                return CSharpType.FromSymbol(this.Context, arraySymbol.ElementType).GetFullyQualifiedNamespace();
+            if (this.Symbol != null)
+            {
+                IArrayTypeSymbol? arraySymbol = this.Symbol as IArrayTypeSymbol;
+                if (arraySymbol != null)
+                    return CSharpType.FromSymbol(this.Context, arraySymbol.ElementType).GetFullyQualifiedNamespace();
+                else
+                    return Symbol.ContainingNamespace.ToDisplayString();
+            }
             else
-                return Symbol.ContainingNamespace.ToDisplayString();
+            {
+                return string.Join(".", this.Namespaces);
+            }
         }
 
         public string GetFullyQualifiedName()
         {
-            return Symbol.ToDisplayString();
+            if (this.Symbol != null)
+                return this.Symbol.ToDisplayString();
+            else
+                return this.GetFullyQualifiedNamespace() + "." + this.Name;
         }
 
         private CSharpType AsInteropTypeCommon()
         {
             // C++ doesn't specify the size of a bool, and C# uses different sizes in different contexts.
             // So we explicitly marshal bools as uint8_t / System.Byte.
-            if (this.Symbol.SpecialType == SpecialType.System_Boolean)
+            if (this.SpecialType == SpecialType.System_Boolean)
                 return CSharpType.FromSymbol(Context, Compilation.GetSpecialType(SpecialType.System_Byte));
             else if (this.Kind == InteropTypeKind.ClassWrapper || this.Kind == InteropTypeKind.NonBlittableStructWrapper || this.Kind == InteropTypeKind.Delegate)
-                return new CSharpType(Context, InteropTypeKind.Primitive, new string[] { "System" }, Compilation.GetSpecialType(SpecialType.System_IntPtr));
+                return CSharpType.FromSymbol(Context, Compilation.GetSpecialType(SpecialType.System_IntPtr));
             else
                 return this;
         }
@@ -100,7 +114,7 @@ namespace Reinterop
         /// </summary>
         public string GetConversionToInteropType(string variableName)
         {
-            if (this.Symbol.SpecialType == SpecialType.System_Boolean)
+            if (this.SpecialType == SpecialType.System_Boolean)
                 return $"{variableName} ? (byte)1 : (byte)0";
             else if (this.Kind == InteropTypeKind.ClassWrapper || this.Kind == InteropTypeKind.NonBlittableStructWrapper || this.Kind == InteropTypeKind.Delegate)
                 return $"Reinterop.ObjectHandleUtility.CreateHandle({variableName})";
@@ -114,7 +128,7 @@ namespace Reinterop
 
         public string GetParameterConversionFromInteropType(string variableName)
         {
-            if (this.Symbol.SpecialType == SpecialType.System_Boolean)
+            if (this.SpecialType == SpecialType.System_Boolean)
                 return $"{variableName} != 0";
             else if (this.Kind == InteropTypeKind.ClassWrapper || this.Kind == InteropTypeKind.NonBlittableStructWrapper || this.Kind == InteropTypeKind.Delegate)
                 return $"({this.GetFullyQualifiedName()})Reinterop.ObjectHandleUtility.GetObjectFromHandle({variableName})!";
@@ -128,7 +142,7 @@ namespace Reinterop
 
         public string GetReturnValueConversionFromInteropType(string variableName)
         {
-            if (this.Symbol.SpecialType == SpecialType.System_Boolean)
+            if (this.SpecialType == SpecialType.System_Boolean)
                 return $"{variableName} != 0";
             else if (this.Kind == InteropTypeKind.ClassWrapper || this.Kind == InteropTypeKind.NonBlittableStructWrapper || this.Kind == InteropTypeKind.Delegate)
                 return $"({this.GetFullyQualifiedName()})Reinterop.ObjectHandleUtility.GetObjectAndFreeHandle({variableName})!";
@@ -157,7 +171,9 @@ namespace Reinterop
 
         public CSharpType AsPointer()
         {
-            return new CSharpType(this.Context, InteropTypeKind.Primitive, this.Namespaces, this.Compilation.CreatePointerTypeSymbol(this.Symbol));            
+            if (this.Symbol == null)
+                return this;
+            return new CSharpType(this.Context, InteropTypeKind.Primitive, this.Namespaces, this.Symbol.Name, this.Symbol.SpecialType, this.Compilation.CreatePointerTypeSymbol(this.Symbol));            
         }
     }
 }

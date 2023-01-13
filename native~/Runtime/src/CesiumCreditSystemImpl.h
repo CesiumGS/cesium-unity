@@ -28,8 +28,6 @@ public:
       const DotNet::CesiumForUnity::CesiumCreditSystem& creditSystem);
   ~CesiumCreditSystemImpl();
 
-  void JustBeforeDelete(
-      const DotNet::CesiumForUnity::CesiumCreditSystem& creditSystem);
   void Update(const DotNet::CesiumForUnity::CesiumCreditSystem& creditSystem);
 
   const std::shared_ptr<Cesium3DTilesSelection::CreditSystem>&

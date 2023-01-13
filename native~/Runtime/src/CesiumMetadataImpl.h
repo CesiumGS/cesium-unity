@@ -32,8 +32,6 @@ class CesiumMetadataImpl {
 public:
   ~CesiumMetadataImpl(){};
   CesiumMetadataImpl(const DotNet::CesiumForUnity::CesiumMetadata& metadata){};
-  void
-  JustBeforeDelete(const DotNet::CesiumForUnity::CesiumMetadata& metadata){};
   void loadMetadata(
       int32_t instanceID,
       const CesiumGltf::Model* pModel,

@@ -83,7 +83,7 @@ namespace Reinterop
                 genericTypeHash = Interop.HashParameters(null, named.TypeArguments);
             }
 
-            string csBaseName = $"{csType.GetFullyQualifiedNamespace().Replace(".", "_")}_{csType.Symbol.Name}{genericTypeHash}_CreateDelegate";
+            string csBaseName = $"{csType.GetFullyQualifiedNamespace().Replace(".", "_")}_{csType.Name}{genericTypeHash}_CreateDelegate";
             string invokeCallbackName = $"{csType.GetFullyQualifiedNamespace().Replace(".", "_")}_{item.Type.Name}{genericTypeHash}_InvokeCallback";
             string disposeCallbackName = $"{csType.GetFullyQualifiedNamespace().Replace(".", "_")}_{item.Type.Name}{genericTypeHash}_DisposeCallback";
 
@@ -107,16 +107,16 @@ namespace Reinterop
                 CSharpName: csBaseName + "Delegate",
                 CSharpContent:
                     $$"""
-                    private class {{csType.Symbol.Name}}{{genericTypeHash}}NativeFunction : System.IDisposable
+                    private class {{csType.Name}}{{genericTypeHash}}NativeFunction : System.IDisposable
                     {
                         private IntPtr _callbackFunction;
 
-                        public {{csType.Symbol.Name}}{{genericTypeHash}}NativeFunction(IntPtr callbackFunction)
+                        public {{csType.Name}}{{genericTypeHash}}NativeFunction(IntPtr callbackFunction)
                         {
                             _callbackFunction = callbackFunction;
                         }
 
-                        ~{{csType.Symbol.Name}}{{genericTypeHash}}NativeFunction()
+                        ~{{csType.Name}}{{genericTypeHash}}NativeFunction()
                         {
                             Dispose(false);
                         }
@@ -139,7 +139,7 @@ namespace Reinterop
                         public {{csReturnType.GetFullyQualifiedName()}} Invoke({{string.Join(", ", invokeParameters)}})
                         {
                             if (_callbackFunction == null)
-                                throw new System.ObjectDisposedException("{{csType.Symbol.Name}}");
+                                throw new System.ObjectDisposedException("{{csType.Name}}");
                     
                             {{csResultImplementation}}{{invokeCallbackName}}({{string.Join(", ", callInvokeInteropParameters)}});
                             {{csReturnImplementation}};
@@ -156,7 +156,7 @@ namespace Reinterop
                     [AOT.MonoPInvokeCallback(typeof({{csBaseName}}Type))]
                     private static unsafe IntPtr {{csBaseName}}(IntPtr callbackFunction)
                     {
-                        var receiver = new {{csType.Symbol.Name}}{{genericTypeHash}}NativeFunction(callbackFunction);
+                        var receiver = new {{csType.Name}}{{genericTypeHash}}NativeFunction(callbackFunction);
                         return Reinterop.ObjectHandleUtility.CreateHandle(new {{csType.GetFullyQualifiedName()}}(receiver.Invoke));
                     }
                     """
