@@ -72,6 +72,16 @@ jobs:
           $ENV:TEMP="d:\cesium\temp"
           dotnet run --project Build~
           dir d:\cesium\CesiumForUnityBuildProject
+      - name: Run Tests
+        run: |
+          "C:\Program Files\Unity\Hub\Editor\2021.3.14f1\Editor\Unity.exe" -runTests -batchmode -projectPath "d:\cesium\CesiumForUnityBuildProject" -testResults "d:\cesium\temp\TestsResults.xml" -testPlatform PlayMode
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: success() || failure()    # run this step even if previous step failed
+        with:
+          name: Tests
+          path: d:/cesium/temp/TestsResults.xml
+          reporter: dotnet-trx
       - name: Publish package artifact
         if: ${{ success() }}
         uses: actions/upload-artifact@v3
