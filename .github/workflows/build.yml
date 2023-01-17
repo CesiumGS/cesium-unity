@@ -74,7 +74,7 @@ jobs:
           dir d:\cesium\CesiumForUnityBuildProject
       - name: Run Tests
         run: |
-          "C:\Program Files\Unity\Hub\Editor\2021.3.14f1\Editor\Unity.exe" -runTests -batchmode -projectPath "d:\cesium\CesiumForUnityBuildProject" -testResults "d:\cesium\temp\TestsResults.xml" -testPlatform PlayMode
+          start -FilePath "C:\Program Files\Unity\Hub\Editor\2021.3.13f1\Editor\Unity.exe" -ArgumentList "-runTests -batchmode -projectPath ""d:\cesium\CesiumForUnityBuildProject"" -testResults ""d:\cesium\temp\TestResults.xml"" -testPlatform PlayMode" -Wait
       - name: Test Report
         uses: dorny/test-reporter@v1
         if: success() || failure()    # run this step even if previous step failed
