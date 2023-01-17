@@ -202,6 +202,22 @@ namespace Build
                     // Clean the generated code directory.
                     Directory.Delete(generatedRuntimePath, true);
                     Directory.CreateDirectory(generatedRuntimePath);
+                     
+                    Console.WriteLine("**** Compiling for iOS Player");
+                    unity.Run(new[]
+                    {
+                        "-batchmode",
+                        "-nographics",
+                        "-projectPath",
+                        Utility.ProjectRoot,
+                        "-buildTarget",
+                        "iOS",
+                        "-executeMethod",
+                        "CesiumForUnity.BuildCesiumForUnity.CompileForIOSAndExit"
+                    });
+
+                    Console.WriteLine("**** Adding generated files (for the iOS Player) to the package");
+                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_IOS", generatedRuntimePath, Path.Combine(outputPackagePath, "Runtime", "generated"));
                 }
 
                 Console.WriteLine("**** Copying the rest of the package");

@@ -111,6 +111,7 @@ namespace CesiumForUnity
                 case BuildTarget.StandaloneWindows64:
                     return $"{baseName}.dll";
                 case BuildTarget.iOS:
+                    return $"lib{baseName}.a";
                 case BuildTarget.StandaloneOSX:
                     return $"lib{baseName}.dylib";
                 default:
@@ -216,7 +217,6 @@ namespace CesiumForUnity
                 BuildNativeLibrary(GetLibraryToBuild(report.summary));
             }
         }
-
         public static LibraryToBuild GetLibraryToBuild(BuildSummary summary, string cpu = null)
         {
             return GetLibraryToBuild(new PlatformToBuild()
@@ -255,6 +255,12 @@ namespace CesiumForUnity
             if (platform.platformGroup == BuildTargetGroup.Android)
                 library.Toolchain = "extern/android-toolchain.cmake";
 
+            if (platform.platformGroup == BuildTargetGroup.iOS)
+            {
+                library.Toolchain = "extern/ios-toolchain.cmake";
+                library.ExtraConfigureArgs.Add("-GXcode");
+            }
+
             if (platform.platform == BuildTarget.StandaloneOSX && cpu != null)
             {
                 library.ExtraConfigureArgs.Add("-DCMAKE_OSX_ARCHITECTURES=" + cpu);
@@ -275,6 +281,10 @@ namespace CesiumForUnity
             return platformGroup == BuildTargetGroup.Unknown && platform == BuildTarget.NoTarget;
         }
 
+        private static bool IsIOS(BuildTargetGroup platformGroup, BuildTarget platform){
+            return platformGroup == BuildTargetGroup.iOS && platform == BuildTarget.iOS;
+        }
+
         private static string GetDirectoryNameForPlatform(PlatformToBuild platform)
         {
             return GetDirectoryNameForPlatform(platform.platformGroup, platform.platform);
@@ -284,6 +294,8 @@ namespace CesiumForUnity
         {
             if (IsEditor(platformGroup, platform))
                 return "Editor";
+            else if (IsIOS(platformGroup, platform))
+                return "iOS";
             return platformGroup.ToString();
         }
 
@@ -312,7 +324,7 @@ namespace CesiumForUnity
                 {
                     ProcessStartInfo startInfo = new ProcessStartInfo();
                     startInfo.UseShellExecute = false;
-                    if (library.Platform == BuildTarget.StandaloneOSX){
+                    if (library.Platform == BuildTarget.StandaloneOSX || library.Platform == BuildTarget.iOS){
                         startInfo.FileName = File.Exists("/Applications/CMake.app/Contents/bin/cmake") ? "/Applications/CMake.app/Contents/bin/cmake" : "cmake";
                     }
                     else {
@@ -358,6 +370,9 @@ namespace CesiumForUnity
                     args.AddRange(library.ExtraBuildArgs);
                     startInfo.Arguments = string.Join(' ', args);
                     RunAndLog(startInfo, log, logFilename);
+                 
+                    if(library.Platform == BuildTarget.iOS)
+                        AssetDatabase.Refresh();
                 }
             }
             finally
