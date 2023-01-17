@@ -42,7 +42,7 @@ namespace CesiumForUnity
     public partial class Cesium3DTileset : MonoBehaviour
     {
         /// <summary>
-        /// Encapsulatess a method that receives details of a tileset load failure.
+        /// Encapsulates a method that receives details of a tileset load failure.
         /// </summary>
         /// <param name="details">The details of the load failure.</param>
         public delegate void TilesetLoadFailureDelegate(

@@ -75,10 +75,11 @@ namespace CesiumForUnity
     /// </para>
     /// </remarks>
     [ExecuteInEditMode]
+    [DisallowMultipleComponent]
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumGlobeAnchorImpl", "CesiumGlobeAnchorImpl.h")]
     public partial class CesiumGlobeAnchor : MonoBehaviour
     {
-#region User-editable properties
+        #region User-editable properties
 
         [SerializeField]
         private bool _adjustOrientationForGlobeWhenMoving = true;
@@ -441,9 +442,9 @@ namespace CesiumForUnity
                 this.UpdateGlobePosition(this._positionAuthority);
         }
 
-#endregion
+        #endregion
 
-#region Private properties
+        #region Private properties
 
         private bool _lastPropertiesAreValid = false;
         private double _lastPositionEcefX = 0.0;
@@ -452,9 +453,9 @@ namespace CesiumForUnity
         // TODO: use just the position instead of the entire transform?
         private Matrix4x4 _lastLocalToWorld;
 
-#endregion
+        #endregion
 
-#region Unity Messages
+        #region Unity Messages
 
         private void Start()
         {
@@ -474,9 +475,9 @@ namespace CesiumForUnity
             this.Sync();
         }
 
-#endregion
+        #endregion
 
-#region Coroutines
+        #region Coroutines
 
         private void StartOrStopDetectingTransformChanges()
         {
@@ -511,9 +512,9 @@ namespace CesiumForUnity
             }
         }
 
-#endregion
+        #endregion
 
-#region Updaters
+        #region Updaters
 
         private void UpdateGlobePosition(CesiumGlobeAnchorPositionAuthority previousAuthority)
         {
@@ -536,7 +537,7 @@ namespace CesiumForUnity
             switch (this.positionAuthority)
             {
                 case CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight:
-                    ecef = CesiumTransforms.LongitudeLatitudeHeightToEarthCenteredEarthFixed(new double3(
+                    ecef = CesiumWgs84Ellipsoid.LongitudeLatitudeHeightToEarthCenteredEarthFixed(new double3(
                         this.longitude,
                         this.latitude,
                         this.height
@@ -562,7 +563,7 @@ namespace CesiumForUnity
             // TODO: it might be more efficient to lazily update these if/when they're accessed, at least outside the Editor.
             if (this.positionAuthority != CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight)
             {
-                double3 llh = CesiumTransforms.EarthCenteredEarthFixedToLongitudeLatitudeHeight(ecef);
+                double3 llh = CesiumWgs84Ellipsoid.EarthCenteredEarthFixedToLongitudeLatitudeHeight(ecef);
                 this._longitude = llh.x;
                 this._latitude = llh.y;
                 this._height = llh.z;
@@ -616,6 +617,6 @@ namespace CesiumForUnity
         // This is static so that CesiumGlobeAnchor does not need finalization.
         private static partial void AdjustOrientation(CesiumGlobeAnchor anchor, double3 oldPositionEcef, double3 newPositionEcef);
 
-#endregion
+        #endregion
     }
 }

@@ -282,7 +282,7 @@ namespace CesiumForUnity
             if (this._originAuthority == CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight)
             {
                 double3 ecef =
-                    CesiumTransforms.LongitudeLatitudeHeightToEarthCenteredEarthFixed(
+                    CesiumWgs84Ellipsoid.LongitudeLatitudeHeightToEarthCenteredEarthFixed(
                         new double3(this._longitude, this._latitude, this._height));
                 this._ecefX = ecef.x;
                 this._ecefY = ecef.y;
@@ -291,7 +291,7 @@ namespace CesiumForUnity
             else if (this._originAuthority == CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed)
             {
                 double3 llh =
-                    CesiumTransforms.EarthCenteredEarthFixedToLongitudeLatitudeHeight(
+                    CesiumWgs84Ellipsoid.EarthCenteredEarthFixedToLongitudeLatitudeHeight(
                         new double3(this._ecefX, this._ecefY, this._ecefZ));
                 this._longitude = llh.x;
                 this._latitude = llh.y;

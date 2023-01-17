@@ -166,6 +166,7 @@ namespace CesiumForUnity
         private enum QuickAddItemType
         {
             BlankTileset,
+            DynamicCamera,
             IonTileset
         }
 
@@ -206,6 +207,15 @@ namespace CesiumForUnity
                 "An empty tileset that can be configured to show Cesium ion assets " +
                 "or tilesets from other sources.",
                 "Cesium3DTileset",
+                -1,
+                "",
+                -1),
+            new QuickAddItem(
+                QuickAddItemType.DynamicCamera,
+                "Dynamic Camera",
+                "A free camera that can be used to intuitively navigate in a " +
+                "geospatial environment.",
+                "",
                 -1,
                 "",
                 -1)
@@ -298,6 +308,11 @@ namespace CesiumForUnity
                     Cesium3DTileset blankTileset =
                         CesiumEditorUtility.CreateTileset(item.tilesetName, 0);
                     Selection.activeGameObject = blankTileset.gameObject;
+                    break;
+                case QuickAddItemType.DynamicCamera:
+                    CesiumCameraController dynamicCamera
+                        = CesiumEditorUtility.CreateDynamicCamera();
+                    Selection.activeGameObject = dynamicCamera.gameObject;
                     break;
                 default:
                     break;

@@ -236,15 +236,12 @@ namespace Reinterop
             CppType wrapperType = result.CppDefinition.Type;
             CppType implType = result.CppImplementationInvoker.ImplementationType;
 
-            // TODO: support static methods
-            // TODO: support return values
-
             CppType returnType = CppType.FromCSharp(context, method.ReturnType).AsReturnType();
             CppType interopReturnType = returnType.AsInteropType();
             var parameters = method.Parameters.Select(parameter =>
             {
                 CppType type = CppType.FromCSharp(context, parameter.Type).AsParameterType();
-                return (Name: parameter.Name, Type: type, InteropType: type.AsInteropType());
+                return (ParameterName: parameter.Name, CallSiteName: parameter.Name, Type: type, InteropType: type.AsInteropType());
             });
 
             string name = $"{wrapperType.GetFullyQualifiedName(false).Replace("::", "_")}_{method.Name}";
@@ -252,16 +249,17 @@ namespace Reinterop
             CppType objectHandleType = CppObjectHandle.GetCppType(context);
 
             // Start off assuming a static method
-            var parameterList = parameters.Select(parameter => $"{parameter.InteropType.GetFullyQualifiedName()} {parameter.Name}");
-            var callParameterList = parameters.Select(parameter => parameter.Type.GetConversionFromInteropType(context, parameter.Name));
             string callTarget = $"{implType.GetFullyQualifiedName()}::";
             string getCallTarget = "";
 
             // If its an instance method, we need some extra parameters.
             if (!method.IsStatic)
             {
-                parameterList = new[] { "void* handle", "void* pImpl" }.Concat(parameterList);
-                callParameterList = new[] { "wrapper" }.Concat(callParameterList);
+                parameters = new[]
+                {
+                    (ParameterName: "handle", CallSiteName: "wrapper", Type: CppType.VoidPointer, InteropType: CppType.VoidPointer.AsInteropType()),
+                    (ParameterName: "pImpl", CallSiteName: "", Type: CppType.VoidPointer, InteropType: CppType.VoidPointer.AsInteropType())
+                }.Concat(parameters);
                 callTarget = "pImplTyped->";
                 getCallTarget =
                     $$"""
@@ -269,6 +267,38 @@ namespace Reinterop
                     auto pImplTyped = reinterpret_cast<{{implType.GetFullyQualifiedName()}}*>(pImpl);
                     """;
             }
+
+            bool hasStructRewrite = false;
+            string returnResult = $"return {returnType.GetConversionToInteropType(context, "result")};";
+            if (returnType.Kind == InteropTypeKind.BlittableStruct)
+            {
+                CppType originalInteropReturnType = interopReturnType;
+                interopReturnType = CppType.Void;
+
+                parameters = parameters.Concat(new[]
+                {
+                    (ParameterName: "pReturnValue", CallSiteName: "", Type: returnType.AsReference(), InteropType: originalInteropReturnType.AsPointer())
+                });
+
+                returnResult = "*pReturnValue = std::move(result);";
+                hasStructRewrite = true;
+            }
+            else if (returnType.Kind == InteropTypeKind.Nullable && interopReturnType.Kind == InteropTypeKind.BlittableStruct)
+            {
+                CppType originalInteropReturnType = interopReturnType;
+                interopReturnType = CppType.UInt8;
+
+                parameters = parameters.Concat(new[]
+                {
+                    (ParameterName: "pReturnValue", CallSiteName: "", Type: originalInteropReturnType.AsReference(), InteropType: originalInteropReturnType.AsPointer())
+                });
+
+                returnResult = "if (result.has_value()) { *pReturnValue = std::move(result.value()); return true; } else { return false; }";
+                hasStructRewrite = true;
+            }
+
+            var parameterList = parameters.Select(parameter => $"{parameter.InteropType.GetFullyQualifiedName()} {parameter.ParameterName}");
+            var callParameterList = parameters.Where(parameter => parameter.CallSiteName.Length > 0).Select(parameter => parameter.Type.GetConversionFromInteropType(context, parameter.CallSiteName));
 
             string parameterListString = string.Join(", ", parameterList);
             string callParameterListString = string.Join(", ", callParameterList);
@@ -286,7 +316,7 @@ namespace Reinterop
                 implementation =
                     $$"""
                     auto result = {{callTarget}}{{method.Name}}({{callParameterListString}});
-                    return {{returnType.GetConversionToInteropType(context, "result")}};
+                    {{returnResult}}
                     """;
             }
 
@@ -308,7 +338,8 @@ namespace Reinterop
                     returnType,
                     objectHandleType
                 }.Concat(parameters.Select(parameter => parameter.Type))
-                 .Concat(parameters.Select(parameter => parameter.InteropType))
+                 .Concat(parameters.Select(parameter => parameter.InteropType)),
+                AdditionalIncludes: hasStructRewrite ? new[] { "<utility>" } : null // for std::move
             ));
 
             CSharpType csWrapperType = CSharpType.FromSymbol(context, item.Type);
@@ -322,21 +353,41 @@ namespace Reinterop
                 csParametersInterop = new[] { (Name: "thiz", CallName: "this", Type: csWrapperType), (Name: "implementation", CallName: "_implementation", Type: implementationPointer) }.Concat(csParametersInterop);
             }
 
-            string csImplementation;
-            if (csReturnType.Symbol.SpecialType == SpecialType.System_Void)
+            CSharpType csInteropReturnType = csReturnType.AsInteropTypeReturn();
+            CSharpType csOriginalInteropReturnType = csInteropReturnType;
+            if (hasStructRewrite)
             {
-                csImplementation =
-                    $$"""
-                    {{name}}({{string.Join(", ", csParametersInterop.Select(parameter => parameter.Type.GetConversionToInteropType(parameter.CallName)))}});
-                    """;
+                csParametersInterop = csParametersInterop.Concat(new[]
+                {
+                    (Name: "pReturnValue", CallName: "&returnValue", Type: csInteropReturnType.AsPointer())
+                });
+                csInteropReturnType = CSharpType.FromSymbol(context, returnType.Kind == InteropTypeKind.Nullable ? context.Compilation.GetSpecialType(SpecialType.System_Byte) : context.Compilation.GetSpecialType(SpecialType.System_Void));
             }
-            else
+
+            List<string> csImplementationLines = new List<string>();
+            if (hasStructRewrite)
             {
-                csImplementation =
-                    $$"""
-                    var result = {{name}}({{string.Join(", ", csParametersInterop.Select(parameter => parameter.Type.GetConversionToInteropType(parameter.CallName)))}});
-                    return {{csReturnType.GetReturnValueConversionFromInteropType("result")}};
-                    """;
+                csImplementationLines.Add($"var returnValue = new {csOriginalInteropReturnType.AsInteropTypeReturn().GetFullyQualifiedName()}();");
+            }
+
+            if (csInteropReturnType.Symbol.SpecialType == SpecialType.System_Void)
+                csImplementationLines.Add($"{name}({string.Join(", ", csParametersInterop.Select(parameter => parameter.Type.GetConversionToInteropType(parameter.CallName)))});");
+            else
+                csImplementationLines.Add($"var result = {name}({string.Join(", ", csParametersInterop.Select(parameter => parameter.Type.GetConversionToInteropType(parameter.CallName)))});");
+
+            if (csReturnType.Symbol.SpecialType != SpecialType.System_Void)
+            {
+                if (hasStructRewrite)
+                {
+                    if (csReturnType.Kind == InteropTypeKind.Nullable)
+                        csImplementationLines.Add("return result == 1 ? returnValue : null;");
+                    else
+                        csImplementationLines.Add("return returnValue;");
+                }
+                else
+                {
+                    csImplementationLines.Add($"return {csReturnType.GetReturnValueConversionFromInteropType("result")};");
+                }
             }
 
             string modifiers = CSharpTypeUtility.GetAccessString(method.DeclaredAccessibility);
@@ -364,14 +415,17 @@ namespace Reinterop
                     $$"""
                     {{modifiers}} partial {{csReturnType.GetFullyQualifiedName()}} {{method.Name}}({{string.Join(", ", csParameters.Select(parameter => $"{parameter.Type.GetFullyQualifiedName()} {parameter.Name}"))}})
                     {
-                        {{GenerationUtility.JoinAndIndent(new[] { implementationCheck }, "    ")}}
-                        {{new[] { csImplementation }.JoinAndIndent("    ")}}
+                        unsafe
+                        {
+                            {{GenerationUtility.JoinAndIndent(new[] { implementationCheck }, "        ")}}
+                            {{csImplementationLines.JoinAndIndent("        ")}}
+                        }
                     }
                     """,
                 interopFunctionDeclaration:
                     $$"""
                     [DllImport("{{context.NativeLibraryName}}", CallingConvention=CallingConvention.Cdecl)]
-                    private static extern {{csReturnType.AsInteropType().GetFullyQualifiedName()}} {{name}}({{string.Join(", ", csParametersInterop.Select(parameter => parameter.Type.AsInteropType().GetFullyQualifiedName() + " " + parameter.Name))}});
+                    private static unsafe extern {{csInteropReturnType.GetFullyQualifiedName()}} {{name}}({{string.Join(", ", csParametersInterop.Select(parameter => parameter.Type.AsInteropTypeParameter().GetFullyQualifiedName() + " " + parameter.Name))}});
                     """));
         }
     }
