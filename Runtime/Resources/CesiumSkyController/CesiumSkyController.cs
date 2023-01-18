@@ -1,12 +1,11 @@
 using UnityEngine;
 using UnityEditor;
 
-[ExecuteAlways]
+[ExecuteInEditMode]
 public class CesiumSkyController : MonoBehaviour
 {
     /* TODO
     Support game camera as well as scene camera
-    Update skybox when outside of the blend min/max - perhaps on GUI update
     Add options for time of day, latitude, longitude
 
     */
@@ -31,21 +30,46 @@ public class CesiumSkyController : MonoBehaviour
     [Range(0.0f, 1.0f)]
     float groundSpaceBlend = 0.0f;
 
-    float groundBlendHeight = 2000.0f;
-    float spaceBlendHeight = 200000.0f;
+    float lastBlendValue;
 
-    new Camera camera;
+    float groundBlendHeight = 2000.0f;
+    float spaceBlendHeight = 800000.0f;
+
+    Camera camera;
+
+    void Awake()
+    {
+        ResolveCamera();
+
+    }
 
     void LateUpdate()
     {
         SetSunPosition();  
-        //Shader.SetGlobalFloat("_GroundSpaceBlend", groundSpaceBlend);
         if (checkForCameraUpdates) 
         {
             GetCameraHeight(); 
 
         }
-        
+    }
+
+    void ResolveCamera()
+    {
+        if (Application.IsPlaying(gameObject))
+        {
+            camera = Camera.main;
+
+
+        }
+        else
+        {
+            if (SceneView.GetAllSceneCameras()[0] != null)
+            {
+                camera = SceneView.GetAllSceneCameras()[0];
+
+            }
+
+        }
     }
 
     void SetSunPosition()
@@ -61,21 +85,32 @@ public class CesiumSkyController : MonoBehaviour
 
     void GetCameraHeight()
     {
-        if (SceneView.GetAllSceneCameras()[0] != null)
-        {
-            camera = SceneView.GetAllSceneCameras()[0];
-            //Debug.Log("Scene camera position is " + camera.transform.position + ". Disable Check for Camera Updates on Sky Controller.");
 
-        }
         if (camera != null)
         {
             float camHeight = camera.transform.position.y;
-            if (camHeight > groundBlendHeight && camHeight < spaceBlendHeight)
+            if (camHeight <= groundBlendHeight)
+            {
+                groundSpaceBlend = 0.0f;
+            }
+            else if (camHeight >= spaceBlendHeight)
+            {
+                groundSpaceBlend = 1.0f;
+            }
+            else
             {
                 groundSpaceBlend = 0.0f + (1.0f - 0.0f) * ((camHeight - groundBlendHeight) / (spaceBlendHeight - groundBlendHeight));
+            }
+            if (groundSpaceBlend != lastBlendValue)
+            {
                 Shader.SetGlobalFloat("_GroundSpaceBlend", groundSpaceBlend);
+                lastBlendValue = groundSpaceBlend;
+
+                Debug.Log(groundSpaceBlend);
+                Debug.Log("Scene camera position is " + camera.transform.position + ". Disable Check for Camera Updates on Sky Controller.");
             }
         }
+        else ResolveCamera();
 
     }
 }
