@@ -5,11 +5,6 @@ using CesiumForUnity;
 [ExecuteInEditMode]
 public class CesiumSkyController : MonoBehaviour
 {
-    /* TODO
-    Support game camera as well as scene camera
-    Add options for time of day, latitude, longitude
-
-    */
 
     [SerializeField]
     Transform sunLight = default;
@@ -19,6 +14,9 @@ public class CesiumSkyController : MonoBehaviour
 
     //bool checkForSunUpdates = false;
 
+    float latitude = 0.0f;
+    float longitude = 0.0f;
+
     [SerializeField]
     [Range(0.0f, 24.0f)]
     public float timeOfDay = 12.0f;
@@ -26,6 +24,23 @@ public class CesiumSkyController : MonoBehaviour
     [SerializeField]
     [Range(0.0f, 360.0f)]
     float northOffset = 90.0f;
+
+
+    [SerializeField]
+    [Range(1, 31)]
+    int date = 1;
+
+    [SerializeField]
+    [Range(1, 12)]
+    int month = 6;
+
+    [SerializeField]
+    int year = 2022;
+
+    float timeZone = 0.0f;
+
+
+
 
     //[SerializeField]
     [Range(0.0f, 1.0f)]
@@ -37,6 +52,7 @@ public class CesiumSkyController : MonoBehaviour
     float spaceBlendHeight = 800000.0f;
 
     Camera camera;
+
     CesiumGlobeAnchor globeAnchor;
 
     void Awake()

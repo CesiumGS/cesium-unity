@@ -100,6 +100,7 @@ Material:
     - _ClearCoatSmoothness: 0
     - _Cull: 2
     - _Cutoff: 0.5
+    - _DebugFloat: 0.678
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
@@ -124,7 +125,7 @@ Material:
     - _SunBloomIntensity: 0.5
     - _SunBloomRadius: 0.85
     - _SunDisk: 2
-    - _SunRadius: 0.01
+    - _SunRadius: 0.005
     - _SunSize: 0.04
     - _SunSizeConvergence: 5
     - _Surface: 0

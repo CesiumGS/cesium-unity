@@ -1,11 +1,5 @@
 Shader "Cesium/DynamicSky"
 {
-    // TODO 
-    // Figure out why north offset isn't working
-    // Atmosphere-like effect
-    // Improved sunset colors - all around horizon
-    // Implement optional ground color
-    //
     Properties
     {
         //_SkyColorGround ("Ground Color", Color) = (1.000000,0.500000,0.500000,1.000000)
@@ -19,11 +13,12 @@ Shader "Cesium/DynamicSky"
 
         // Debug only
         //_GroundSpaceBlend ("Ground Space Blend", Range(0.0, 1.0)) = 0.0
+        //_DebugFloat ("Debug Float", Range(0.0, 1.0)) = 0.5
 
     }
     SubShader
     {
-        Tags { "Queue"="Background" "RenderType"="Background" "PreviewType"="Skybox" "LightMode" = "ForwardBase" "PassFlags" = "OnlyDirectional" }
+        Tags { "Queue"="Background" "RenderType"="Background" "PreviewType"="Skybox" }
         Cull Off ZWrite Off
 
         HLSLINCLUDE
@@ -77,6 +72,9 @@ Shader "Cesium/DynamicSky"
             float3 _SunDirection;
             float _GroundSpaceBlend;
 
+            // Debug only
+            float _DebugFloat;
+
             float4 frag (v2f i) : SV_Target 
             {
 
@@ -86,18 +84,21 @@ Shader "Cesium/DynamicSky"
 
                 // Remap sun height from (-1, 1) to 0, 1)
                 float sunHeightFactor = ((_SunDirection.y + 1.0) * 0.5);
-                float sunsetFactor = 1 - abs(_SunDirection.y);
                 float sunHeightBlend = smoothstep(0.4, 0.7, sunHeightFactor);
-                float sunsetBlend = smoothstep(0.7, 1.0, sunsetFactor);
 
-                float stepRadius = 1 - _SunRadius * _SunRadius;
-                float sunDisk = smoothstep(stepRadius-0.001, stepRadius, sunDot);
-
-                float sunBloom = clamp(smoothstep(1-_SunBloomRadius, 1.5, sunDot), 0, 1) * _SunBloomIntensity;
-
-                float3 sunColor = float3(1, 1, 1) * sunDisk;
+                float sunsetFactor = 1 - abs(_SunDirection.y);
+                float sunsetBlend = smoothstep(0.6, 1.0, sunsetFactor);
 
                 float horizonBlend = saturate(pow(1-abs(viewDir.y), 2)); //viewDir.y + _GroundSpaceBlend.x
+
+                float sunRadius = 1 - _SunRadius * _SunRadius;
+                float sunDisk = smoothstep(sunRadius-0.001, sunRadius, sunDot);
+
+                float sunBloom = saturate(smoothstep(1-_SunBloomRadius, 1.5, sunDot)) * _SunBloomIntensity;
+                float sunBloom2 = pow(smoothstep(sunRadius-0.01, sunRadius, sunDot) * 0.4, 2);
+                sunBloom = sunBloom + sunBloom2;
+
+                float3 sunColor = float3(1, 1, 1) * sunDisk;
 
                 float3 skyColor = _SkyColorDay + sunBloom;
 
@@ -108,7 +109,8 @@ Shader "Cesium/DynamicSky"
                 // Blend between day horizon color and night horizon color.
                 float3 horizonColor = lerp(float3(0.0100, 0.03000, 0.06000), 0.5, sunHeightBlend);
                 // Blend in orange at sunrise/sunset
-                horizonColor = lerp(horizonColor, float3(1.0, 0.5, 0.0), saturate((sunsetBlend-(1-sunDot) + 1.0) * 0.5 ));
+                float3 sunsetColor = lerp(horizonColor, float3(1.0, 0.5, 0.0), (sunsetBlend-(1-sunDot) + 1.0) * 0.5);
+                horizonColor = lerp(horizonColor, sunsetColor, pow(sunsetBlend, 4));
                 // mask to horizon only
                 horizonColor = lerp(0, horizonColor, horizonBlend);
 
@@ -121,7 +123,7 @@ Shader "Cesium/DynamicSky"
                 skyColor = skyColor + sunColor;
 
                 float4 c = float4(skyColor, 1);
-                //float4 c = float4(0, sunDisk, horizonBlend, 1); //DEBUG ONLY
+                //float4 c = float4(0, sunBloom2, sunDisk, 1); //DEBUG ONLY
 
                 return c;
             }
