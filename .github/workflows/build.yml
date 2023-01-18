@@ -81,7 +81,7 @@ jobs:
         if: success() || failure()    # run this step even if previous step failed
         with:
           name: Tests
-          path: d:\cesium\temp\TestResults.xml
+          path: d:/cesium/temp/TestResults.xml
           reporter: dotnet-trx
       - name: Publish package artifact
         if: ${{ success() }}
