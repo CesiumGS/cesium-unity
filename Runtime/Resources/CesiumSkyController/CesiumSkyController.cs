@@ -24,8 +24,8 @@ public class CesiumSkyController : MonoBehaviour
     public float timeOfDay = 12.0f;
 
     [SerializeField]
-    [Range(0.0f, 1.0f)]
-    float northOffset = 0.0f;
+    [Range(0.0f, 360.0f)]
+    float northOffset = 90.0f;
 
     //[SerializeField]
     [Range(0.0f, 1.0f)]
@@ -78,7 +78,7 @@ public class CesiumSkyController : MonoBehaviour
     void SetSunPosition()
     {
         float hourToAngle = ((timeOfDay*15.0f) - 90.0f);
-        Vector3 newSunRotation = new Vector3(hourToAngle, northOffset * 360, 0);
+        Vector3 newSunRotation = new Vector3(hourToAngle, northOffset, 0);
 
         if (sunLight != null) {
             sunLight.transform.localEulerAngles = newSunRotation;
@@ -110,6 +110,8 @@ public class CesiumSkyController : MonoBehaviour
             {
                 groundSpaceBlend = 0.0f + (1.0f - 0.0f) * ((camHeight - groundBlendHeight) / (spaceBlendHeight - groundBlendHeight));
             }
+
+            // TODO: Add a check to see if the scene is using the Cesium skybox material
             if (groundSpaceBlend != lastBlendValue)
             {
                 Shader.SetGlobalFloat("_GroundSpaceBlend", groundSpaceBlend);

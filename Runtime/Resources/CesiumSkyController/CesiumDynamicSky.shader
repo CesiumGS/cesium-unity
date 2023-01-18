@@ -108,7 +108,7 @@ Shader "Cesium/DynamicSky"
                 // Blend between day horizon color and night horizon color.
                 float3 horizonColor = lerp(float3(0.0100, 0.03000, 0.06000), 0.5, sunHeightBlend);
                 // Blend in orange at sunrise/sunset
-                horizonColor = lerp(horizonColor, float3(1.0, 0.5, 0.0), clamp(sunsetBlend-(1-sunDot), 0, 1));
+                horizonColor = lerp(horizonColor, float3(1.0, 0.5, 0.0), saturate((sunsetBlend-(1-sunDot) + 1.0) * 0.5 ));
                 // mask to horizon only
                 horizonColor = lerp(0, horizonColor, horizonBlend);
 
