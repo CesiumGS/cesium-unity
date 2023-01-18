@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEditor;
+using CesiumForUnity;
 
 [ExecuteInEditMode]
 public class CesiumSkyController : MonoBehaviour
@@ -36,6 +37,7 @@ public class CesiumSkyController : MonoBehaviour
     float spaceBlendHeight = 800000.0f;
 
     Camera camera;
+    CesiumGlobeAnchor globeAnchor;
 
     void Awake()
     {
@@ -58,6 +60,7 @@ public class CesiumSkyController : MonoBehaviour
         if (Application.IsPlaying(gameObject))
         {
             camera = Camera.main;
+            globeAnchor = camera.GetComponent<CesiumGlobeAnchor>();
 
 
         }
@@ -75,20 +78,26 @@ public class CesiumSkyController : MonoBehaviour
     void SetSunPosition()
     {
         float hourToAngle = ((timeOfDay*15.0f) - 90.0f);
-        Vector3 newSunRotation = new Vector3(hourToAngle, northOffset, 0);
+        Vector3 newSunRotation = new Vector3(hourToAngle, northOffset * 360, 0);
 
         if (sunLight != null) {
-            sunLight.transform.localEulerAngles = new Vector3(hourToAngle, 0, 0);
+            sunLight.transform.localEulerAngles = newSunRotation;
             Shader.SetGlobalVector("_SunDirection", -sunLight.transform.forward); 
         }
     }
 
     void GetCameraHeight()
     {
-
         if (camera != null)
         {
-            float camHeight = camera.transform.position.y;
+            float camHeight;
+            if (globeAnchor)
+            {
+                camHeight = (float)globeAnchor.height;
+            }
+            else camHeight = camera.transform.position.y;
+
+
             if (camHeight <= groundBlendHeight)
             {
                 groundSpaceBlend = 0.0f;
@@ -106,8 +115,7 @@ public class CesiumSkyController : MonoBehaviour
                 Shader.SetGlobalFloat("_GroundSpaceBlend", groundSpaceBlend);
                 lastBlendValue = groundSpaceBlend;
 
-                Debug.Log(groundSpaceBlend);
-                Debug.Log("Scene camera position is " + camera.transform.position + ". Disable Check for Camera Updates on Sky Controller.");
+                Debug.Log("camera height is " + camHeight + ". Blend factor is " + groundSpaceBlend + ". Disable Check for Camera Updates on Sky Controller.");
             }
         }
         else ResolveCamera();
