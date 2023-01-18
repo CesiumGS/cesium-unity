@@ -135,7 +135,7 @@ Material:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _GroundColor: {r: 0.36899996, g: 0.34899998, b: 0.34099993, a: 1}
-    - _SkyColorDay: {r: 0.3622641, g: 0.6982127, b: 1, a: 1}
+    - _SkyColorDay: {r: 0.33, g: 0.59, b: 0.83, a: 1}
     - _SkyColorGround: {r: 0.5019608, g: 0.18120785, b: 0.18120785, a: 1}
     - _SkyColorHorizon: {r: 1, g: 1, b: 1, a: 1}
     - _SkyColorNight: {r: 0.015882347, g: 0.015882347, b: 0.09803922, a: 1}

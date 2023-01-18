@@ -10,12 +10,15 @@ Shader "Cesium/DynamicSky"
     {
         //_SkyColorGround ("Ground Color", Color) = (1.000000,0.500000,0.500000,1.000000)
         //_SkyColorHorizon ("Horizon Color", Color) = (0.000000,0.000000,0.000000,1.000000)
-        _SkyColorDay ("Sky Color - Day", Color) = (0.3622641,0.6982127,1.000000,1.000000)
+        _SkyColorDay ("Sky Color - Day", Color) = (0.33,0.59,0.83,1.000000)
         _SkyColorNight ("Sky Color - Night", Color) = (0.016, 0.016, 0.1, 1.0)
         _HorizonBlend ("Horizon Color Blend", Float) = 1.0
         _SunRadius ("SunRadius", Range(0.0, 0.5)) = 0.01
         _SunBloomRadius ("Sun Bloom Radius", Range(0.0, 1.0)) = 0.85
         _SunBloomIntensity ("Sun Bloom Intensity", Float) = 0.5
+
+        // Debug only
+        //_GroundSpaceBlend ("Ground Space Blend", Range(0.0, 1.0)) = 0.0
 
     }
     SubShader
@@ -94,28 +97,31 @@ Shader "Cesium/DynamicSky"
 
                 float3 sunColor = float3(1, 1, 1) * sunDisk;
 
-                float horizonBlend = saturate(pow(1-abs(viewDir.y), 2));
+                float horizonBlend = saturate(pow(1-abs(viewDir.y), 2)); //viewDir.y + _GroundSpaceBlend.x
 
                 float3 skyColor = _SkyColorDay + sunBloom;
 
                 skyColor = lerp(_SkyColorNight.xyz, skyColor, sunHeightBlend);
 
+                //skyColor = lerp(skyColor, float3(0, 0, 0), _GroundSpaceBlend.x);
+
                 // Blend between day horizon color and night horizon color.
                 float3 horizonColor = lerp(float3(0.0100, 0.03000, 0.06000), 0.5, sunHeightBlend);
                 // Blend in orange at sunrise/sunset
                 horizonColor = lerp(horizonColor, float3(1.0, 0.5, 0.0), clamp(sunsetBlend-(1-sunDot), 0, 1));
-                // mask color to horizon only
+                // mask to horizon only
                 horizonColor = lerp(0, horizonColor, horizonBlend);
 
                 skyColor = clamp(skyColor + horizonColor, 0, 1); 
 
                 // Todo: create atmosphere effect by moving horizon down x axis while in space
+                // float spaceBlend = smoothstep(0.5, 0.6, ((viewDir.y + 0) * 0.5) + _GroundSpaceBlend.x);
                 skyColor = lerp(skyColor, float3(0, 0, 0), _GroundSpaceBlend.x);
 
                 skyColor = skyColor + sunColor;
 
                 float4 c = float4(skyColor, 1);
-                //float4 c = float4(sunDisk, sunBloom, horizonBlend, 1); //DEBUG ONLY
+                //float4 c = float4(0, sunDisk, horizonBlend, 1); //DEBUG ONLY
 
                 return c;
             }
