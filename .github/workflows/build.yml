@@ -175,12 +175,13 @@ jobs:
         run: |
           /Applications/Unity/Hub/Editor/2021.3.13f1/Unity.app/Contents/MacOS/Unity -runTests -batchmode -projectPath ~/cesium/CesiumForUnityBuildProject -testResults ~/cesium/CesiumForUnityBuildProject/TestResults.xml -testPlatform PlayMode -logFile ~/cesium/CesiumForUnityBuildProject/test-log.txt
           cat ~/cesium/CesiumForUnityBuildProject/test-log.txt
+          ls /Users/runner/cesium/CesiumForUnityBuildProject/TestResults.xml
       - name: Test Report
         uses: kring/test-reporter@v1.6.1-kring
         if: success() || failure()    # run this step even if previous step failed
         with:
           name: Tests - macOS
-          path: ~/cesium/CesiumForUnityBuildProject/TestResults.xml
+          path: /Users/runner/cesium/CesiumForUnityBuildProject/TestResults.xml
           reporter: dotnet-nunit
   Combine:
     runs-on: ubuntu-latest
