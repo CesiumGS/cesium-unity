@@ -85,7 +85,7 @@ jobs:
       #     $xslt.Load("nunit3-junit.xslt")
       #     $xslt.Transform("d:\cesium\temp\TestResults.xml", "d:\cesium\temp\TestResults-junit.xml")
       - name: Test Report
-        uses: kring/test-reporter@v1.6.0-kring
+        uses: kring/test-reporter@v1.6.1-kring
         if: success() || failure()    # run this step even if previous step failed
         with:
           name: Tests - Windows
