@@ -10,7 +10,10 @@ public class CesiumSkyController : MonoBehaviour
     Transform sunLight = default;
 
     [SerializeField]
-    bool checkForCameraUpdates = false;
+    bool updateOnTick = false;
+
+    [SerializeField]
+    bool updateInEditor = false;  //Todo: Make this work
 
     //bool checkForSunUpdates = false;
 
@@ -51,7 +54,7 @@ public class CesiumSkyController : MonoBehaviour
     float groundBlendHeight = 2000.0f;
     float spaceBlendHeight = 800000.0f;
 
-    Camera camera;
+    Camera activeCamera;
 
     CesiumGlobeAnchor globeAnchor;
 
@@ -62,32 +65,41 @@ public class CesiumSkyController : MonoBehaviour
     }
 
     void LateUpdate()
-    {
-        SetSunPosition();  
-        if (checkForCameraUpdates) 
+    { 
+        if (updateOnTick) 
         {
-            GetCameraHeight(); 
+            UpdateSky(); 
 
         }
+    }
+
+    public void UpdateSky()
+    {
+        SetSunPosition();
+        GetCameraHeight();
+
     }
 
     void ResolveCamera()
     {
         if (Application.IsPlaying(gameObject))
         {
-            camera = Camera.main;
-            globeAnchor = camera.GetComponent<CesiumGlobeAnchor>();
+            activeCamera = Camera.main;
+            globeAnchor = activeCamera.GetComponent<CesiumGlobeAnchor>();
 
 
         }
-        else
+        else if (updateInEditor)
         {
-            if (SceneView.GetAllSceneCameras()[0] != null)
-            {
-                camera = SceneView.GetAllSceneCameras()[0];
+            SceneView sceneWindow = SceneView.lastActiveSceneView;
+            if (sceneWindow)
+            {           
+                if (sceneWindow.camera != null)
+                {
+                    activeCamera = sceneWindow.camera;
 
+                }
             }
-
         }
     }
 
@@ -104,14 +116,11 @@ public class CesiumSkyController : MonoBehaviour
 
     void GetCameraHeight()
     {
-        if (camera != null)
+        if (activeCamera != null)
         {
             float camHeight;
-            if (globeAnchor)
-            {
-                camHeight = (float)globeAnchor.height;
-            }
-            else camHeight = camera.transform.position.y;
+            if (globeAnchor) camHeight = (float)globeAnchor.height;
+            else camHeight = activeCamera.transform.position.y;
 
 
             if (camHeight <= groundBlendHeight)
@@ -124,7 +133,7 @@ public class CesiumSkyController : MonoBehaviour
             }
             else
             {
-                groundSpaceBlend = 0.0f + (1.0f - 0.0f) * ((camHeight - groundBlendHeight) / (spaceBlendHeight - groundBlendHeight));
+                groundSpaceBlend = (camHeight - groundBlendHeight) / (spaceBlendHeight - groundBlendHeight);
             }
 
             // TODO: Add a check to see if the scene is using the Cesium skybox material
