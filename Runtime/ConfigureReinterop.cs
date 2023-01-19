@@ -40,8 +40,11 @@ namespace CesiumForUnity
         public const string BaseNamespace = "DotNet";
 
         // The name of the DLL or SO containing the C++ code.
+#if UNITY_IOS && !UNITY_EDITOR
+        public const string NativeLibraryName = "__Internal";
+#else
         public const string NativeLibraryName = "CesiumForUnityNative-Runtime";
-
+#endif
         // Comma-separated types to treat as non-blittable, even if their fields would
         // otherwise cause Reinterop to treat them as blittable.
         public const string NonBlittableTypes = "Unity.Collections.LowLevel.Unsafe.AtomicSafetyHandle,Unity.Collections.NativeArray,UnityEngine.MeshData,UnityEngine.MeshDataArray";

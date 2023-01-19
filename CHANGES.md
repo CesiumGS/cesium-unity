@@ -8,6 +8,7 @@
 
 ##### Additions :tada:
 
+- Added support for building to iOS.
 - Added `CesiumCameraController`, a globe-aware controller that adapts its speed and clipping planes based on its height from the globe.
 - Added `CesiumFlyToController`, a controller that can smoothly fly to locations across the globe.
 - Added an option to add a `DynamicCamera` from the Cesium panel to the scene. The `DynamicCamera` contains `CesiumCameraController` and `CesiumFlyToController` components and offers easy navigation of the globe.

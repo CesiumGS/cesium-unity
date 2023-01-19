@@ -42,6 +42,21 @@ namespace CesiumForUnity
             EditorApplication.Exit(0);
         }
 
+        public static void CompileForIOSAndExit()
+        {
+            string buildPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(buildPath);
+            try
+            {
+                BuildPlayer(BuildTargetGroup.iOS, BuildTarget.iOS, Path.Combine(buildPath, "iOS"));
+            }
+            finally
+            {
+                Directory.Delete(buildPath, true);
+            }
+            EditorApplication.Exit(0);
+        }
+
         public static void CompileForWindowsAndExit()
         {
             string buildPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
