@@ -173,7 +173,7 @@ jobs:
           path: ~/cesium/CesiumForUnityBuildProject/*.tgz
       - name: Run Tests
         run: |
-          /Applications/Unity/Hub/Editor/2021.3.13f1/Unity.app/Contents/MacOS/Unity -runTests -batchmode -projectPath ~/cesium/CesiumForUnityBuildProject -testResults ~/cesium/CesiumForUnityBuildProject\TestResults.xml -testPlatform PlayMode -logFile ~/cesium/CesiumForUnityBuildProject\test-log.txt
+          /Applications/Unity/Hub/Editor/2021.3.13f1/Unity.app/Contents/MacOS/Unity -runTests -batchmode -projectPath ~/cesium/CesiumForUnityBuildProject -testResults ~/cesium/CesiumForUnityBuildProject/TestResults.xml -testPlatform PlayMode -logFile ~/cesium/CesiumForUnityBuildProject/test-log.txt
           cat ~/cesium/CesiumForUnityBuildProject/test-log.txt
       - name: Test Report
         uses: kring/test-reporter@v1.6.1-kring
