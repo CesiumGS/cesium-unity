@@ -72,18 +72,16 @@ jobs:
           $ENV:TEMP="d:\cesium\temp"
           dotnet run --project Build~
           dir d:\cesium\CesiumForUnityBuildProject
+      - name: Publish package artifact
+        if: ${{ success() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: Windows Package
+          path: d:\cesium\CesiumForUnityBuildProject\*.tgz
       - name: Run Tests
         run: |
           start -FilePath "C:\Program Files\Unity\Hub\Editor\2021.3.13f1\Editor\Unity.exe" -ArgumentList "-runTests -batchmode -projectPath d:\cesium\CesiumForUnityBuildProject -testResults d:\cesium\temp\TestResults.xml -testPlatform PlayMode -logFile d:\cesium\temp\test-log.txt" -Wait
           cat d:\cesium\temp\test-log.txt
-      # - name: Transform Unity NUnit3 test results to JUnit
-      #   run: |
-      #     # Based on suggestion here, because test-reporter doesn't support NUnit3 directly:
-      #     # https://github.com/dorny/test-reporter/issues/98#issuecomment-867106931
-      #     wget.exe https://raw.githubusercontent.com/nunit/nunit-transforms/caadb5442cb1da0a3ade5a03cf169c3e1a13ac57/nunit3-junit/nunit3-junit.xslt
-      #     $xslt = New-Object System.Xml.Xsl.XslCompiledTransform
-      #     $xslt.Load("nunit3-junit.xslt")
-      #     $xslt.Transform("d:\cesium\temp\TestResults.xml", "d:\cesium\temp\TestResults-junit.xml")
       - name: Test Report
         uses: kring/test-reporter@v1.6.1-kring
         if: success() || failure()    # run this step even if previous step failed
@@ -91,12 +89,6 @@ jobs:
           name: Tests - Windows
           path: d:/cesium/temp/TestResults.xml
           reporter: dotnet-nunit
-      - name: Publish package artifact
-        if: ${{ success() }}
-        uses: actions/upload-artifact@v3
-        with:
-          name: Windows Package
-          path: d:\cesium\CesiumForUnityBuildProject\*.tgz
   MacOS:
     needs: [QuickChecks]
     runs-on: macos-latest
@@ -179,6 +171,17 @@ jobs:
         with:
           name: macOS Package
           path: ~/cesium/CesiumForUnityBuildProject/*.tgz
+      - name: Run Tests
+        run: |
+          /Applications/Unity/Hub/Editor/2021.3.13f1/Unity.app/Contents/MacOS/Unity -runTests -batchmode -projectPath ~/cesium/CesiumForUnityBuildProject -testResults ~/cesium/CesiumForUnityBuildProject\TestResults.xml -testPlatform PlayMode -logFile ~/cesium/CesiumForUnityBuildProject\test-log.txt
+          cat ~/cesium/CesiumForUnityBuildProject/test-log.txt
+      - name: Test Report
+        uses: kring/test-reporter@v1.6.1-kring
+        if: success() || failure()    # run this step even if previous step failed
+        with:
+          name: Tests - macOS
+          path: ~/cesium/CesiumForUnityBuildProject/TestResults.xml
+          reporter: dotnet-nunit
   Combine:
     runs-on: ubuntu-latest
     needs: [Windows, MacOS]
