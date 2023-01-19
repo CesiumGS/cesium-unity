@@ -109,7 +109,7 @@ namespace CesiumForUnity
                     AssetDatabase.CreateAsset(_instance, _filePath);
                     AssetDatabase.Refresh();
                     #else
-                    Debug.LogError("Cannot find a CesiumRuntimeSettings asset." +
+                    Debug.LogError("Cannot find a CesiumRuntimeSettings asset. " +
                         "Any assets that use the project's default token will not load.");
                     #endif
                 }
