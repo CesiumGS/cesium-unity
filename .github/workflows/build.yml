@@ -76,21 +76,21 @@ jobs:
         run: |
           start -FilePath "C:\Program Files\Unity\Hub\Editor\2021.3.13f1\Editor\Unity.exe" -ArgumentList "-runTests -batchmode -projectPath d:\cesium\CesiumForUnityBuildProject -testResults d:\cesium\temp\TestResults.xml -testPlatform PlayMode -logFile d:\cesium\temp\test-log.txt" -Wait
           cat d:\cesium\temp\test-log.txt
-      - name: Transform Unity NUnit3 test results to JUnit
-        run: |
-          # Based on suggestion here, because test-reporter doesn't support NUnit3 directly:
-          # https://github.com/dorny/test-reporter/issues/98#issuecomment-867106931
-          wget.exe https://raw.githubusercontent.com/nunit/nunit-transforms/caadb5442cb1da0a3ade5a03cf169c3e1a13ac57/nunit3-junit/nunit3-junit.xslt
-          $xslt = New-Object System.Xml.Xsl.XslCompiledTransform
-          $xslt.Load("nunit3-junit.xslt")
-          $xslt.Transform("d:\cesium\temp\TestResults.xml", "d:\cesium\temp\TestResults-junit.xml")
+      # - name: Transform Unity NUnit3 test results to JUnit
+      #   run: |
+      #     # Based on suggestion here, because test-reporter doesn't support NUnit3 directly:
+      #     # https://github.com/dorny/test-reporter/issues/98#issuecomment-867106931
+      #     wget.exe https://raw.githubusercontent.com/nunit/nunit-transforms/caadb5442cb1da0a3ade5a03cf169c3e1a13ac57/nunit3-junit/nunit3-junit.xslt
+      #     $xslt = New-Object System.Xml.Xsl.XslCompiledTransform
+      #     $xslt.Load("nunit3-junit.xslt")
+      #     $xslt.Transform("d:\cesium\temp\TestResults.xml", "d:\cesium\temp\TestResults-junit.xml")
       - name: Test Report
-        uses: dorny/test-reporter@v1
+        uses: kring/test-reporter@v1.6.0-kring
         if: success() || failure()    # run this step even if previous step failed
         with:
-          name: Tests
-          path: d:/cesium/temp/TestResults-junit.xml
-          reporter: jest-junit
+          name: Tests - Windows
+          path: d:/cesium/temp/TestResults.xml
+          reporter: dotnet-nunit
       - name: Publish package artifact
         if: ${{ success() }}
         uses: actions/upload-artifact@v3
