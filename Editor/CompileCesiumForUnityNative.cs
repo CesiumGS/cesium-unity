@@ -145,7 +145,7 @@ namespace CesiumForUnity
 
             if (library.Platform == BuildTarget.Android)
             {
-                importer.SetPlatformData(BuildTarget.Android, "CPU", "ARM64");
+                importer.SetPlatformData(BuildTarget.Android, "CPU", library.Cpu == "arm64" ? "ARM64" : library.Cpu);
             }
             else if (library.Platform == BuildTarget.StandaloneOSX)
             {
@@ -188,6 +188,7 @@ namespace CesiumForUnity
         /// <param name="report"></param>
         public void OnPostBuildPlayerScriptDLLs(BuildReport report)
         {
+            
             if (report.summary.platform == BuildTarget.StandaloneOSX)
             {
                 // On macOS, build for both ARM64 and x64, and then use the lipo tool to combine
@@ -211,6 +212,24 @@ namespace CesiumForUnity
                     throw new Exception("lipo failed");
                 Directory.Delete(x64.InstallDirectory, true);
                 Directory.Delete(arm64.InstallDirectory, true);
+            }
+            else if (report.summary.platform == BuildTarget.Android)
+            {
+                // We support ARM64 and x86_64. If any other architectures are enabled, log a warning.
+                AndroidArchitecture supported = AndroidArchitecture.ARM64 | AndroidArchitecture.X86_64;
+                if ((PlayerSettings.Android.targetArchitectures & ~supported) != 0)
+                    UnityEngine.Debug.LogWarning("Cesium for Unity only supports the ARM64 and x86_64 CPU architectures on Android. Other architectures will not work.");
+
+                if (PlayerSettings.Android.targetArchitectures.HasFlag(AndroidArchitecture.ARM64))
+                {
+                    LibraryToBuild arm64 = GetLibraryToBuild(report.summary, "arm64");
+                    BuildNativeLibrary(arm64);
+                }
+                if (PlayerSettings.Android.targetArchitectures.HasFlag(AndroidArchitecture.X86_64))
+                {
+                    LibraryToBuild x64 = GetLibraryToBuild(report.summary, "x86_64");
+                    BuildNativeLibrary(x64);
+                }
             }
             else
             {
@@ -253,7 +272,11 @@ namespace CesiumForUnity
                 library.ExtraConfigureArgs.Add("-DEDITOR=on");
 
             if (platform.platformGroup == BuildTargetGroup.Android)
-                library.Toolchain = "extern/android-toolchain.cmake";
+            {
+                if (cpu == null)
+                    cpu = "arm64";
+                library.Toolchain = $"extern/android-toolchain-${cpu}.cmake";
+            }
 
             if (platform.platformGroup == BuildTargetGroup.iOS)
             {
@@ -261,9 +284,10 @@ namespace CesiumForUnity
                 library.ExtraConfigureArgs.Add("-GXcode");
             }
 
-            if (platform.platform == BuildTarget.StandaloneOSX && cpu != null)
+            if (cpu != null)
             {
-                library.ExtraConfigureArgs.Add("-DCMAKE_OSX_ARCHITECTURES=" + cpu);
+                if (platform.platform == BuildTarget.StandaloneOSX)
+                    library.ExtraConfigureArgs.Add("-DCMAKE_OSX_ARCHITECTURES=" + cpu);
                 library.InstallDirectory = Path.Combine(library.InstallDirectory, cpu);
                 library.BuildDirectory += "-" + cpu;
             }
