@@ -33,6 +33,7 @@ namespace CesiumForUnity
             Directory.CreateDirectory(buildPath);
             try
             {
+                PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64 | AndroidArchitecture.X86_64;
                 BuildPlayer(BuildTargetGroup.Android, BuildTarget.Android, Path.Combine(buildPath, "Android"));
             }
             finally

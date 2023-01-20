@@ -76,10 +76,11 @@ namespace CesiumForUnity
             AssetDatabase.StartAssetEditing();
             try
             {
-                CreatePlaceholders(
-                    GetLibraryToBuild(report.summary),
-                    "CesiumForUnityNative-Runtime"
-                );
+                LibraryToBuild[] libraries = GetLibrariesToBuildForPlatform(report.summary);
+                foreach (LibraryToBuild library in libraries)
+                {
+                    CreatePlaceholders(library, "CesiumForUnityNative-Runtime");
+                }
             }
             finally
             {
@@ -188,32 +189,46 @@ namespace CesiumForUnity
         /// <param name="report"></param>
         public void OnPostBuildPlayerScriptDLLs(BuildReport report)
         {
-            
+            LibraryToBuild[] libraries = GetLibrariesToBuildForPlatform(report.summary);
+            foreach (LibraryToBuild library in libraries)
+            {
+                BuildNativeLibrary(library);
+            }
+
             if (report.summary.platform == BuildTarget.StandaloneOSX)
             {
                 // On macOS, build for both ARM64 and x64, and then use the lipo tool to combine
                 // the libraries for the two CPUs into a single library.
-                LibraryToBuild x64 = GetLibraryToBuild(report.summary, "x86_64");
-                BuildNativeLibrary(x64);
-                LibraryToBuild arm64 = GetLibraryToBuild(report.summary, "arm64");
-                BuildNativeLibrary(arm64);
-
-                string[] args = new[]
+                List<string> args = new List<string>();
+                args.Add("-create");
+                foreach (LibraryToBuild library in libraries)
                 {
-                    "-create",
-                    Path.Combine(x64.InstallDirectory, "libCesiumForUnityNative-Runtime.dylib"),
-                    Path.Combine(arm64.InstallDirectory, "libCesiumForUnityNative-Runtime.dylib"),
-                    "-output",
-                    Path.GetFullPath(Path.Combine(x64.InstallDirectory, "..", "libCesiumForUnityNative-Runtime.dylib"))
-                };
+                    args.Add(Path.Combine(library.InstallDirectory, "libCesiumForUnityNative-Runtime.dylib"));
+                }
+                args.Add("-output");
+                args.Add(Path.GetFullPath(Path.Combine(libraries[0].InstallDirectory, "..", "libCesiumForUnityNative-Runtime.dylib")));
                 Process p = Process.Start("lipo", string.Join(' ', args));
                 p.WaitForExit();
                 if (p.ExitCode != 0)
                     throw new Exception("lipo failed");
-                Directory.Delete(x64.InstallDirectory, true);
-                Directory.Delete(arm64.InstallDirectory, true);
+
+                foreach (LibraryToBuild library in libraries)
+                {
+                    Directory.Delete(library.InstallDirectory, true);
+                }
             }
-            else if (report.summary.platform == BuildTarget.Android)
+        }
+
+        private static LibraryToBuild[] GetLibrariesToBuildForPlatform(BuildSummary summary)
+        {
+            List<LibraryToBuild> result = new List<LibraryToBuild>();
+
+            if (summary.platform == BuildTarget.StandaloneOSX)
+            {
+                result.Add(GetLibraryToBuild(summary, "x86_64"));
+                result.Add(GetLibraryToBuild(summary, "arm64"));
+            }
+            else if (summary.platform == BuildTarget.Android)
             {
                 // We support ARM64 and x86_64. If any other architectures are enabled, log a warning.
                 AndroidArchitecture supported = AndroidArchitecture.ARM64 | AndroidArchitecture.X86_64;
@@ -221,21 +236,18 @@ namespace CesiumForUnity
                     UnityEngine.Debug.LogWarning("Cesium for Unity only supports the ARM64 and x86_64 CPU architectures on Android. Other architectures will not work.");
 
                 if (PlayerSettings.Android.targetArchitectures.HasFlag(AndroidArchitecture.ARM64))
-                {
-                    LibraryToBuild arm64 = GetLibraryToBuild(report.summary, "arm64");
-                    BuildNativeLibrary(arm64);
-                }
+                    result.Add(GetLibraryToBuild(summary, "arm64"));
                 if (PlayerSettings.Android.targetArchitectures.HasFlag(AndroidArchitecture.X86_64))
-                {
-                    LibraryToBuild x64 = GetLibraryToBuild(report.summary, "x86_64");
-                    BuildNativeLibrary(x64);
-                }
+                    result.Add(GetLibraryToBuild(summary, "x86_64"));
             }
             else
             {
-                BuildNativeLibrary(GetLibraryToBuild(report.summary));
+                result.Add(GetLibraryToBuild(summary));
             }
+
+            return result.ToArray();
         }
+
         public static LibraryToBuild GetLibraryToBuild(BuildSummary summary, string cpu = null)
         {
             return GetLibraryToBuild(new PlatformToBuild()
@@ -273,9 +285,13 @@ namespace CesiumForUnity
 
             if (platform.platformGroup == BuildTargetGroup.Android)
             {
+                library.Toolchain = $"extern/android-toolchain.cmake";
                 if (cpu == null)
                     cpu = "arm64";
-                library.Toolchain = $"extern/android-toolchain-${cpu}.cmake";
+                if (cpu == "x86_64")
+                    library.ExtraConfigureArgs.Add("-DCMAKE_ANDROID_ARCH_ABI=x86_64");
+                else
+                    library.ExtraConfigureArgs.Add("-DCMAKE_ANDROID_ARCH_ABI=arm64-v8a");
             }
 
             if (platform.platformGroup == BuildTargetGroup.iOS)
@@ -284,10 +300,14 @@ namespace CesiumForUnity
                 library.ExtraConfigureArgs.Add("-GXcode");
             }
 
+            if (platform.platform == BuildTarget.StandaloneOSX)
+            {
+                if (cpu != null)
+                    library.ExtraConfigureArgs.Add("-DCMAKE_OSX_ARCHITECTURES=" + cpu);
+            }
+
             if (cpu != null)
             {
-                if (platform.platform == BuildTarget.StandaloneOSX)
-                    library.ExtraConfigureArgs.Add("-DCMAKE_OSX_ARCHITECTURES=" + cpu);
                 library.InstallDirectory = Path.Combine(library.InstallDirectory, cpu);
                 library.BuildDirectory += "-" + cpu;
             }
