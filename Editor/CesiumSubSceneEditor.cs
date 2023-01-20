@@ -250,13 +250,13 @@ namespace CesiumForUnity
         {
             this._previousOriginAuthority = this._subScene.originAuthority;
 
-            this._previousLatitude = this._subscene.latitude;
-            this._previousLongitude = this._subscene.longitude;
-            this._previousHeight = this._subscene.height;
+            this._previousLatitude = this._subScene.latitude;
+            this._previousLongitude = this._subScene.longitude;
+            this._previousHeight = this._subScene.height;
 
-            this._previousEcefX = this._subscene.ecefX;
-            this._previousEcefY = this._subscene.ecefY;
-            this._previousEcefZ = this._subscene.ecefZ;
+            this._previousEcefX = this._subScene.ecefX;
+            this._previousEcefY = this._subScene.ecefY;
+            this._previousEcefZ = this._subScene.ecefZ;
         }
     }
 }
