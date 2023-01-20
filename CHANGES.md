@@ -13,6 +13,10 @@
 - Added `CesiumFlyToController`, a controller that can smoothly fly to locations across the globe.
 - Added an option to add a `DynamicCamera` from the Cesium panel to the scene. The `DynamicCamera` contains `CesiumCameraController` and `CesiumFlyToController` components and offers easy navigation of the globe.
 
+##### Fixes :wrench:
+
+- `CesiumRuntimeSettings` is now stored in `Assets/CesiumSettings/Resources` instead of `Assets/Settings/Resources`.
+
 ### v0.1.2
 
 ##### Fixes :wrench:
