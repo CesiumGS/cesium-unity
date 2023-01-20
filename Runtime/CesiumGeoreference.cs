@@ -268,11 +268,6 @@ namespace CesiumForUnity
         /// </summary>
         private partial void RecalculateOrigin();
 
-        private void OnValidate()
-        {
-            this.UpdateOrigin();
-        }
-
         private void OnEnable()
         {
             // We must initialize the origin in OnEnable because Unity does

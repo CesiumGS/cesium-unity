@@ -462,15 +462,6 @@ namespace CesiumForUnity
             this.Sync();
         }
 
-        private void OnValidate()
-        {
-            CesiumGeoreference georeference = this.gameObject.GetComponentInParent<CesiumGeoreference>();
-            if (georeference != null) {
-                this.StartOrStopDetectingTransformChanges();
-                this.Sync();
-            }
-        }
-
         private void OnEnable()
         {
             // We must do this in OnEnable instead of Start because Start doesn't re-run on domain reload,
