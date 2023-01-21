@@ -76,7 +76,7 @@ namespace CesiumForUnity
             AssetDatabase.StartAssetEditing();
             try
             {
-                LibraryToBuild[] libraries = GetLibrariesToBuildForPlatform(report.summary);
+                LibraryToBuild[] libraries = GetLibrariesToBuildForPlatform(report.summary, finalLibrariesOnly: true);
                 foreach (LibraryToBuild library in libraries)
                 {
                     CreatePlaceholders(library, "CesiumForUnityNative-Runtime");
@@ -189,7 +189,7 @@ namespace CesiumForUnity
         /// <param name="report"></param>
         public void OnPostBuildPlayerScriptDLLs(BuildReport report)
         {
-            LibraryToBuild[] libraries = GetLibrariesToBuildForPlatform(report.summary);
+            LibraryToBuild[] libraries = GetLibrariesToBuildForPlatform(report.summary, finalLibrariesOnly: false);
             foreach (LibraryToBuild library in libraries)
             {
                 BuildNativeLibrary(library);
@@ -219,14 +219,31 @@ namespace CesiumForUnity
             }
         }
 
-        private static LibraryToBuild[] GetLibrariesToBuildForPlatform(BuildSummary summary)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="summary"></param>
+        /// <param name="finalLibrariesOnly">
+        /// True if only the final libraries shipped to end users should be included, not any intermediate libraries created along the way.
+        /// This affects the macOS libraries, where two libraries are built (for x64 and ARM64), but then they are compiled into a
+        /// single library supporting both platforms.
+        /// </param>
+        /// <returns></returns>
+        private static LibraryToBuild[] GetLibrariesToBuildForPlatform(BuildSummary summary, bool finalLibrariesOnly)
         {
             List<LibraryToBuild> result = new List<LibraryToBuild>();
 
             if (summary.platform == BuildTarget.StandaloneOSX)
             {
-                result.Add(GetLibraryToBuild(summary, "x86_64"));
-                result.Add(GetLibraryToBuild(summary, "arm64"));
+                if (finalLibrariesOnly)
+                {
+                    result.Add(GetLibraryToBuild(summary, "x86_64"));
+                }
+                else
+                {
+                    result.Add(GetLibraryToBuild(summary, "x86_64"));
+                    result.Add(GetLibraryToBuild(summary, "arm64"));
+                }
             }
             else if (summary.platform == BuildTarget.Android)
             {
