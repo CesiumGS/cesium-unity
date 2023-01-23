@@ -11,14 +11,15 @@ namespace CesiumForUnity
     /// </summary>
     public sealed class CesiumRuntimeSettings : ScriptableObject
     {
+        private static readonly string _settingsName = "CesiumSettings";
         private static readonly string _filePath =
-            "Assets/Settings/Resources/CesiumRuntimeSettings.asset";
+            "Assets/" + _settingsName + "/Resources/CesiumRuntimeSettings.asset";
 
         private static CesiumRuntimeSettings _instance;
 
         /// <summary>
         /// Gets the singleton instance of this class. If the project does not yet contain an instance,
-        /// one is created and added at <code>Assets/Settings/Resources/CesiumRuntimeSettings.asset</code>.
+        /// one is created and added at the specified file path.
         /// </summary>
         public static CesiumRuntimeSettings instance
         {
@@ -41,14 +42,14 @@ namespace CesiumForUnity
                 if (_instance == null)
                 {
                     // Create the necessary folders if they don't already exist.
-                    if (!AssetDatabase.IsValidFolder("Assets/Settings"))
+                    if (!AssetDatabase.IsValidFolder("Assets/" + _settingsName))
                     {
-                        AssetDatabase.CreateFolder("Assets", "Settings");
+                        AssetDatabase.CreateFolder("Assets", _settingsName);
                     }
 
-                    if (!AssetDatabase.IsValidFolder("Assets/Settings/Resources"))
+                    if (!AssetDatabase.IsValidFolder("Assets/" + _settingsName + "/Resources"))
                     {
-                        AssetDatabase.CreateFolder("Assets/Settings", "Resources");
+                        AssetDatabase.CreateFolder("Assets/" + _settingsName, "Resources");
                     }
 
                     string typeString = "t:"+ typeof(CesiumRuntimeSettings).Name;
@@ -76,7 +77,7 @@ namespace CesiumForUnity
                             if (string.IsNullOrEmpty(result))
                             {
                                 Debug.LogWarning("A CesiumRuntimeSettings asset was found outside " +
-                                    "the Assets/Settings/Resources folder and has been moved " +
+                                    "the Assets/" + _settingsName + "/Resources folder and has been moved " +
                                     "appropriately.");
 
                                 return _instance;
@@ -84,16 +85,16 @@ namespace CesiumForUnity
                             else
                             {
                                 Debug.LogWarning("A CesiumRuntimeSettings asset was found outside " +
-                                    "the Assets/Settings/Resources folder, but could not be moved " +
-                                    "to the appropriate location. A new settings asset will be " +
+                                    "the Assets/" + _settingsName + "/Resources folder, but could not " +
+                                    "be moved to the appropriate location. A new settings asset will be " +
                                     "created instead.");
                             }
                         }
                         else
                         {
                             Debug.LogWarning("An invalid CesiumRuntimeSettings asset was found " +
-                                "outside the Assets/Settings/Resources folder. A new settings " +
-                                "asset will be created instead.");
+                                "outside the Assets/" + _settingsName + "/Resources folder. " +
+                                "A new settings asset will be created instead.");
                         }
                     }
                 }
@@ -108,7 +109,7 @@ namespace CesiumForUnity
                     AssetDatabase.CreateAsset(_instance, _filePath);
                     AssetDatabase.Refresh();
                     #else
-                    Debug.LogError("Cannot find a CesiumRuntimeSettings asset " +
+                    Debug.LogError("Cannot find a CesiumRuntimeSettings asset. " +
                         "Any assets that use the project's default token will not load.");
                     #endif
                 }
