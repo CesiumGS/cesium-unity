@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Security.Principal;
 using Reinterop;
 using Unity.Mathematics;
 using UnityEngine;
@@ -241,13 +242,75 @@ namespace CesiumForUnity
             this.originAuthority = CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight;
         }
 
+        private List<CesiumGlobeAnchor> _globeAnchorsScratch = new List<CesiumGlobeAnchor>();
+        private Dictionary<Transform, float3x3?> _parentTransformsScratch = new Dictionary<Transform, float3x3?>();
+
         /// <summary>
         /// Recomputes the coordinate system based on an updated origin. It is usually not
         /// necessary to call this directly as it is called automatically when needed.
         /// </summary>
         public void UpdateOrigin()
         {
-            this.RecalculateOrigin();
+            double3x3? oldLocalToNewLocalDouble = this.RecalculateOrigin();
+            if (oldLocalToNewLocalDouble == null)
+            {
+                // Origin didn't change meaningfully.
+                return;
+            }
+
+            float3x3 oldLocalToNewLocal = (float3x3)oldLocalToNewLocalDouble.Value;
+
+            List<CesiumGlobeAnchor> anchors = this._globeAnchorsScratch;
+            Dictionary<Transform, float3x3?> parentTransforms = this._parentTransformsScratch;
+            parentTransforms.Clear();
+            this.GetComponentsInChildren<CesiumGlobeAnchor>(true, anchors);
+
+            foreach (CesiumGlobeAnchor anchor in anchors)
+            {
+                Transform transform = anchor.transform;
+                Transform parent = transform.parent;
+
+                // Globe anchors are very likely to share common parents, so avoid repeatedly
+                // asking for the same world-to-local matrix. It's also very likely that this
+                // world-to-old-local matrix is identity, so optimize for that case.
+                float3x3? worldToOldLocal;
+                if (!parentTransforms.TryGetValue(parent, out worldToOldLocal))
+                {
+                    float3x3 worldToLocal = Helpers.ToMathematicsFloat3x3(parent.worldToLocalMatrix);
+                    if (worldToLocal.Equals(float3x3.identity))
+                        worldToOldLocal = null;
+                    else
+                        worldToOldLocal = worldToLocal;
+                    parentTransforms.Add(parent, worldToOldLocal);
+                }
+
+                float3x3 modelToOldWorld = Helpers.ToMathematicsFloat3x3(transform.localToWorldMatrix);
+                float3x3 modelToNew = worldToOldLocal.HasValue
+                    ? math.mul(math.mul(oldLocalToNewLocal, worldToOldLocal.Value), modelToOldWorld)
+                    : math.mul(oldLocalToNewLocal, modelToOldWorld);
+
+                Quaternion rotation;
+                Vector3 scale;
+                Helpers.MatrixToRotationAndScale(modelToNew, out rotation, out scale);
+
+                transform.localRotation = rotation;
+                transform.localScale = scale;
+
+                // The meaning of Unity coordinates will change with the georeference
+                // change, so switch to ECEF if necessary.
+                CesiumGlobeAnchorPositionAuthority authority = anchor.positionAuthority;
+                if (authority == CesiumGlobeAnchorPositionAuthority.UnityCoordinates)
+                    authority = CesiumGlobeAnchorPositionAuthority.EarthCenteredEarthFixed;
+
+                // Re-assign the (probably unchanged) authority to recompute Unity
+                // coordinates with the new georeference. Unless it's still None,
+                // because in that case setting the authority now could lock in the
+                // globe location too early (e.g. before the CesiumGeoreference has
+                // its final origin values).
+                if (authority != CesiumGlobeAnchorPositionAuthority.None)
+                    anchor.positionAuthority = authority;
+            }
+
             this.UpdateOtherCoordinates();
 
             if (this.changed != null)
@@ -266,7 +329,7 @@ namespace CesiumForUnity
         /// Updates to a new origin, shifting and rotating objects with CesiumGlobeAnchor
         /// behaviors accordingly.
         /// </summary>
-        private partial void RecalculateOrigin();
+        private partial double3x3? RecalculateOrigin();
 
         private void OnEnable()
         {

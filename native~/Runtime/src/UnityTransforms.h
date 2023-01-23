@@ -9,6 +9,10 @@ struct Quaternion;
 struct Vector3;
 } // namespace DotNet::UnityEngine
 
+namespace DotNet::Unity::Mathematics {
+struct double3x3;
+}
+
 namespace CesiumForUnityNative {
 
 struct RotationAndScale {
@@ -51,6 +55,13 @@ public:
    * Unity Matrix4x4.
    */
   static DotNet::UnityEngine::Matrix4x4 toUnity(const glm::dmat4& matrix);
+
+  /**
+   * @brief Convert a double-precision GLM 3x3 matrix to a double-precision
+   * Unity.Mathematics double3x3.
+   */
+  static DotNet::Unity::Mathematics::double3x3
+  toUnityMathematics(const glm::dmat3& matrix);
 
   /**
    * @brief Convert a 3-component, single-precision Unity Vector3 to a

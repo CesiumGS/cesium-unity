@@ -58,7 +58,8 @@ CesiumGeoreferenceImpl::~CesiumGeoreferenceImpl() {}
 void CesiumGeoreferenceImpl::JustBeforeDelete(
     const DotNet::CesiumForUnity::CesiumGeoreference& georeference) {}
 
-void CesiumGeoreferenceImpl::RecalculateOrigin(
+std::optional<DotNet::Unity::Mathematics::double3x3>
+CesiumGeoreferenceImpl::RecalculateOrigin(
     const DotNet::CesiumForUnity::CesiumGeoreference& georeference) {
   LocalHorizontalCoordinateSystem coordinateSystem =
       createCoordinateSystem(georeference);
@@ -66,7 +67,7 @@ void CesiumGeoreferenceImpl::RecalculateOrigin(
   if (coordinateSystem.getLocalToEcefTransformation() ==
       this->_coordinateSystem.getLocalToEcefTransformation()) {
     // No change
-    return;
+    return std::nullopt;
   }
 
   // Update all globe anchors based on the new origin.
@@ -78,47 +79,7 @@ void CesiumGeoreferenceImpl::RecalculateOrigin(
       glm::dmat3(this->_coordinateSystem.getEcefToLocalTransformation());
   glm::dmat3 oldLocalToNewLocal = ecefToNewLocal * oldLocalToEcef;
 
-  DotNet::System::Array1<DotNet::CesiumForUnity::CesiumGlobeAnchor> anchors =
-      georeference.gameObject()
-          .GetComponentsInChildren<DotNet::CesiumForUnity::CesiumGlobeAnchor>(
-              true);
-
-  for (int32_t i = 0; i < anchors.Length(); ++i) {
-    DotNet::CesiumForUnity::CesiumGlobeAnchor anchor = anchors[i];
-
-    DotNet::UnityEngine::Transform transform = anchor.transform();
-    glm::dmat3 worldToOldLocal = glm::dmat3(
-        UnityTransforms::fromUnity(transform.parent().worldToLocalMatrix()));
-    glm::dmat3 modelToOldWorld =
-        glm::dmat3(UnityTransforms::fromUnity(transform.localToWorldMatrix()));
-    glm::dmat3 modelToNew =
-        oldLocalToNewLocal * worldToOldLocal * modelToOldWorld;
-    RotationAndScale rotationAndScale =
-        UnityTransforms::matrixToRotationAndScale(modelToNew);
-
-    transform.localRotation(
-        UnityTransforms::toUnity(rotationAndScale.rotation));
-    transform.localScale(UnityTransforms::toUnity(rotationAndScale.scale));
-
-    // The meaning of Unity coordinates will change with the georeference
-    // change, so switch to ECEF if necessary.
-    DotNet::CesiumForUnity::CesiumGlobeAnchorPositionAuthority authority =
-        anchor.positionAuthority();
-    if (authority == DotNet::CesiumForUnity::
-                         CesiumGlobeAnchorPositionAuthority::UnityCoordinates) {
-      authority = DotNet::CesiumForUnity::CesiumGlobeAnchorPositionAuthority::
-          EarthCenteredEarthFixed;
-    }
-
-    // Re-assign the (probably unchanged) authority to recompute Unity
-    // coordinates with the new georeference. Unless it's still None,
-    // because in that case setting the authority now could lock in the
-    // globe location too early (e.g. before the CesiumGeoreference has
-    // its final origin values).
-    if (authority !=
-        DotNet::CesiumForUnity::CesiumGlobeAnchorPositionAuthority::None)
-      anchor.positionAuthority(authority);
-  }
+  return UnityTransforms::toUnityMathematics(oldLocalToNewLocal);
 }
 
 void CesiumGeoreferenceImpl::InitializeOrigin(

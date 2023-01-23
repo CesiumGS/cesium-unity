@@ -1,5 +1,6 @@
 #include "UnityTransforms.h"
 
+#include <DotNet/Unity/Mathematics/double3x3.h>
 #include <DotNet/UnityEngine/Matrix4x4.h>
 #include <DotNet/UnityEngine/Quaternion.h>
 #include <DotNet/UnityEngine/Vector3.h>
@@ -66,6 +67,21 @@ UnityTransforms::toUnity(const glm::dmat4& matrix) {
       float(matrix[3].y),
       float(matrix[3].z),
       float(matrix[3].w),
+  };
+}
+
+DotNet::Unity::Mathematics::double3x3
+UnityTransforms::toUnityMathematics(const glm::dmat3& matrix) {
+  return DotNet::Unity::Mathematics::double3x3{
+      matrix[0].x,
+      matrix[0].y,
+      matrix[0].z,
+      matrix[1].x,
+      matrix[1].y,
+      matrix[1].z,
+      matrix[2].x,
+      matrix[2].y,
+      matrix[2].z,
   };
 }
 

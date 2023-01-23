@@ -3,6 +3,7 @@
 #include <CesiumGeospatial/LocalHorizontalCoordinateSystem.h>
 
 #include <DotNet/Unity/Mathematics/double3.h>
+#include <DotNet/Unity/Mathematics/double3x3.h>
 
 namespace DotNet::CesiumForUnity {
 class CesiumGeoreference;
@@ -21,7 +22,7 @@ public:
 
   void JustBeforeDelete(
       const DotNet::CesiumForUnity::CesiumGeoreference& georeference);
-  void RecalculateOrigin(
+  std::optional<DotNet::Unity::Mathematics::double3x3> RecalculateOrigin(
       const DotNet::CesiumForUnity::CesiumGeoreference& georeference);
   void InitializeOrigin(
       const DotNet::CesiumForUnity::CesiumGeoreference& georeference);

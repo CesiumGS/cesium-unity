@@ -192,6 +192,8 @@ namespace CesiumForUnity
             string productName = Application.productName;
             string osVersion = System.Environment.OSVersion.VersionString;
 
+            int frames = Time.frameCount;
+
             Marshal.FreeCoTaskMem(Marshal.StringToCoTaskMemUTF8("hi"));
 
             UnityWebRequest request = UnityWebRequest.Get("url");
