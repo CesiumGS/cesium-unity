@@ -325,7 +325,7 @@ namespace CesiumForUnity
                 georeference.ecefZ
             );
 
-            GameObject subSceneGameObject = new GameObject();
+            GameObject subSceneGameObject = new GameObject("New Sub-Scene");
             subSceneGameObject.transform.parent = georeference.transform;
             Undo.RegisterCreatedObjectUndo(subSceneGameObject, "Create Sub-Scene");
 
@@ -393,10 +393,10 @@ namespace CesiumForUnity
             GameObject dynamicCameraPrefab = Resources.Load<GameObject>("DynamicCamera");
             GameObject dynamicCameraObject =
                 UnityEngine.Object.Instantiate(dynamicCameraPrefab);
-            Undo.RegisterCreatedObjectUndo(dynamicCameraObject, "Create DynamicCamera");
-
             dynamicCameraObject.name = "DynamicCamera";
             dynamicCameraObject.transform.parent = georeference.gameObject.transform;
+
+            Undo.RegisterCreatedObjectUndo(dynamicCameraObject, "Create DynamicCamera");
 
             return dynamicCameraObject.GetComponent<CesiumCameraController>();
         }

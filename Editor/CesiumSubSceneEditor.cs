@@ -32,6 +32,20 @@ namespace CesiumForUnity
         private SerializedProperty _ecefY;
         private SerializedProperty _ecefZ;
 
+        // These variables store the values from the previous frame. This is used to compare
+        // to the current serialized values, whether they were changed this frame via user input
+        // or by other means (undo, pasting component values).
+        private CesiumGeoreferenceOriginAuthority
+            _previousOriginAuthority = CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight;
+
+        private double _previousLatitude = 0.0;
+        private double _previousLongitude = 0.0;
+        private double _previousHeight = 0.0;
+
+        private double _previousEcefX = 0.0;
+        private double _previousEcefY = 0.0;
+        private double _previousEcefZ = 0.0;
+
         private void OnEnable()
         {
             this._subScene = (CesiumSubScene)this.target;
@@ -49,6 +63,8 @@ namespace CesiumForUnity
             this._ecefX = this.serializedObject.FindProperty("_ecefX");
             this._ecefY = this.serializedObject.FindProperty("_ecefY");
             this._ecefZ = this.serializedObject.FindProperty("_ecefZ");
+
+            this.UpdateSavedPropertyValues();
         }
 
         public override void OnInspectorGUI()
@@ -59,8 +75,6 @@ namespace CesiumForUnity
             EditorGUILayout.Space(5);
             DrawSubSceneProperties();
             EditorGUILayout.Space(5);
-
-            EditorGUI.BeginChangeCheck();
             
             DrawLongitudeLatitudeHeightProperties();
             EditorGUILayout.Space(5);
@@ -68,10 +82,8 @@ namespace CesiumForUnity
 
             this.serializedObject.ApplyModifiedProperties();
 
-            if (EditorGUI.EndChangeCheck())
-            {
-                this._subScene.UpdateOrigin();
-            }
+            this.UpdateSubScene();
+            this.UpdateSavedPropertyValues();
         }
 
         private void DrawToolbarButton()
@@ -90,9 +102,9 @@ namespace CesiumForUnity
                 "Unity origin." +
                 "\n\n" +
                 "Warning: Before clicking, ensure that all non-Cesium objects in the " +
-                "persistent level are georeferenced with the \"CesiumGeoreference\" component " +
-                "or are children of a GameObject with that component. Ensure that static " +
-                "GameObjects only exist in georeferenced sub-scenes.");
+                "persistent scene are georeferenced with the \"CesiumGlobeAnchor\" " +
+                "component or are children of a GameObject with that component. " +
+                "Ensure that static GameObjects only exist under georeferenced sub-scenes.");
             if (GUILayout.Button(placeOriginHereContent, GUILayout.Width(200)))
             {
                 CesiumEditorUtility.PlaceSubSceneAtCameraPosition(this._subScene);
@@ -119,17 +131,11 @@ namespace CesiumForUnity
                 "Helpful for initially positioning the sub-scene and choosing a load radius.");
             EditorGUILayout.PropertyField(this._showActivationRadius, showActivationRadiusContent);
 
-            EditorGUI.BeginChangeCheck();
             GUIContent originAuthorityContent = new GUIContent(
                 "Origin Authority",
                 "The set of coordinates that authoritatively define the origin of " +
                 "this sub-scene.");
             EditorGUILayout.PropertyField(this._originAuthority, originAuthorityContent);
-
-            if (EditorGUI.EndChangeCheck())
-            {
-                this._subScene.UpdateOrigin();
-            }
         }
 
         private void DrawLongitudeLatitudeHeightProperties()
@@ -209,6 +215,48 @@ namespace CesiumForUnity
             EditorGUILayout.PropertyField(this._ecefZ, ecefZContent);
 
             EditorGUI.EndDisabledGroup();
+        }
+
+        private bool OriginAuthorityChanged()
+        {
+            return this._previousOriginAuthority != this.originAuthority;
+        }
+
+        private bool LongitudeLatitudeHeightChanged()
+        {
+            return this._previousLatitude != this._latitude.doubleValue ||
+                this._previousLongitude != this._longitude.doubleValue ||
+                this._previousHeight != this._height.doubleValue;
+        }
+
+        private bool EarthCenteredEarthFixedChanged()
+        {
+            return this._previousEcefX != this._ecefX.doubleValue ||
+                this._previousEcefY != this._ecefY.doubleValue ||
+                this._previousEcefZ != this._ecefZ.doubleValue;
+        }
+
+        private void UpdateSubScene()
+        {
+            if (this.OriginAuthorityChanged() ||
+                this.LongitudeLatitudeHeightChanged() ||
+                this.EarthCenteredEarthFixedChanged())
+            {
+                this._subScene.UpdateOrigin();
+            }
+        }
+
+        private void UpdateSavedPropertyValues()
+        {
+            this._previousOriginAuthority = this._subScene.originAuthority;
+
+            this._previousLatitude = this._subScene.latitude;
+            this._previousLongitude = this._subScene.longitude;
+            this._previousHeight = this._subScene.height;
+
+            this._previousEcefX = this._subScene.ecefX;
+            this._previousEcefY = this._subScene.ecefY;
+            this._previousEcefZ = this._subScene.ecefZ;
         }
     }
 }
