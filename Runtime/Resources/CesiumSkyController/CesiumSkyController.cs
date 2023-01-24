@@ -21,7 +21,7 @@ public class CesiumSkyController : MonoBehaviour
     }
 
     [SerializeField]
-    bool _updateInEditor = false; 
+    bool _updateInEditor = false;
 
     public bool updateInEditor
     {
@@ -31,7 +31,6 @@ public class CesiumSkyController : MonoBehaviour
             this._updateInEditor = value;
         }
     }
-
 
     [SerializeField]
     [Range(-90.0f, 90.0f)]
@@ -45,7 +44,6 @@ public class CesiumSkyController : MonoBehaviour
             this._latitude = value;
         }
     }
-
 
     [SerializeField]
     [Range(-180.0f, 180.0f)]
@@ -88,7 +86,6 @@ public class CesiumSkyController : MonoBehaviour
             this.UpdateSky();
         }
     }
-
 
     [SerializeField]
     [Range(1, 31)]
@@ -144,6 +141,19 @@ public class CesiumSkyController : MonoBehaviour
         }
     }
 
+    [SerializeField]
+    private bool _useCesiumSkybox = true;
+
+    public bool useCesiumSkybox
+    {
+        get => this._useCesiumSkybox;
+        set
+        {
+            this._useCesiumSkybox = value;
+            this.ChangeSkyboxMaterial();
+        }
+    }
+
 
     //[SerializeField] // This can be serialized for easy testing of the skybox shader.
     [Range(0.0f, 1.0f)]
@@ -162,35 +172,15 @@ public class CesiumSkyController : MonoBehaviour
 
     CesiumGlobeAnchor globeAnchor;
 
-    void Awake()
-    {
-        ResolveCamera();
-
-        // If the application has started and the directional light reference is not set, set it to the prefab's child Directional Light object.
-        if (Application.IsPlaying(gameObject) && !_sunLight)
-        {
-            _sunLight = this.transform.Find("Directional Light").gameObject;
-
-        }
-
-    }
-
-    void LateUpdate()
-    { 
-        if (updateOnTick) 
-        {
-            if (Application.IsPlaying(gameObject) || _updateInEditor)
-            {
-                UpdateSky();
-            }
-
-        }
-    }
-
     public void UpdateSky()
     {
         SetSunPosition();
         GetCameraHeight();
+    }
+
+    public void ChangeSkyboxMaterial()
+    {
+
     }
 
     void ResolveCamera()
@@ -204,7 +194,7 @@ public class CesiumSkyController : MonoBehaviour
         {
             SceneView sceneWindow = SceneView.lastActiveSceneView;
             if (sceneWindow)
-            {           
+            {
                 if (sceneWindow.camera != null)
                 {
                     activeCamera = sceneWindow.camera;
@@ -222,18 +212,16 @@ public class CesiumSkyController : MonoBehaviour
         return positionToRotation;
     }
 
-
     public void SetSunPosition()
     {
         Vector3 newSunRotation = CalculateSunPosition();
 
-        if (_sunLight != null) {
+        if (_sunLight != null)
+        {
             _sunLight.transform.localEulerAngles = newSunRotation;
-            Shader.SetGlobalVector("_SunDirection", -_sunLight.transform.forward); 
+            Shader.SetGlobalVector("_SunDirection", -_sunLight.transform.forward);
         }
     }
-
-
 
     void GetCameraHeight()
     {
@@ -270,4 +258,31 @@ public class CesiumSkyController : MonoBehaviour
         else ResolveCamera();
 
     }
+
+    void Awake()
+    {
+        ResolveCamera();
+
+        // If the application has started and the directional light reference is not set, set it to the prefab's child Directional Light object.
+        if (Application.IsPlaying(gameObject) && !_sunLight)
+        {
+            _sunLight = this.transform.Find("Directional Light").gameObject;
+
+        }
+
+    }
+
+    void LateUpdate()
+    { 
+        if (updateOnTick) 
+        {
+            if (Application.IsPlaying(gameObject) || _updateInEditor)
+            {
+                UpdateSky();
+            }
+
+        }
+    }
+
+ 
 }
