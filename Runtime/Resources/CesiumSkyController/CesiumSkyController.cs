@@ -154,7 +154,6 @@ public class CesiumSkyController : MonoBehaviour
         }
     }
 
-
     //[SerializeField] // This can be serialized for easy testing of the skybox shader.
     [Range(0.0f, 1.0f)]
     private float groundSpaceBlend = 0.0f;
@@ -176,10 +175,17 @@ public class CesiumSkyController : MonoBehaviour
     {
         SetSunPosition();
         GetCameraHeight();
+
+        // ChangeSkyboxMaterial(); //WIP
     }
 
     public void ChangeSkyboxMaterial()
     {
+        if (_useCesiumSkybox)
+        {
+            RenderSettings.skybox = Resources.Load("CesiumSkyController/CesiumDynamicSkybox.mat", typeof(Material)) as Material;
+            DynamicGI.UpdateEnvironment();
+        }
 
     }
 
@@ -261,6 +267,7 @@ public class CesiumSkyController : MonoBehaviour
 
     void Awake()
     {
+
         ResolveCamera();
 
         // If the application has started and the directional light reference is not set, set it to the prefab's child Directional Light object.

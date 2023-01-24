@@ -24,6 +24,7 @@ namespace CesiumForUnity
         private SerializedProperty _year;
         private SerializedProperty _timeZone;
 
+        private SerializedProperty _useCesiumSkybox;
         private SerializedProperty _groundBlendHeight;
         private SerializedProperty _spaceBlendHeight;
 
@@ -45,6 +46,8 @@ namespace CesiumForUnity
             this._month = this.serializedObject.FindProperty("_month");
             this._year = this.serializedObject.FindProperty("_year");
             this._timeZone = this.serializedObject.FindProperty("_timeZone");
+
+            this._useCesiumSkybox = this.serializedObject.FindProperty("_useCesiumSkybox");
             this._groundBlendHeight = this.serializedObject.FindProperty("_groundBlendHeight");
             this._spaceBlendHeight = this.serializedObject.FindProperty("_spaceBlendHeight");
         }
@@ -108,6 +111,9 @@ namespace CesiumForUnity
         private void DrawSkyShadingProperties()
         {
             GUILayout.Label("Sky Shading", EditorStyles.boldLabel);
+
+            GUIContent useCesiumSkyboxContent = new GUIContent("Use Cesium Skybox", "Use the included Cesium skybox material for an atmosphere blending effect from earth to space.");
+            EditorGUILayout.PropertyField(this._useCesiumSkybox, useCesiumSkyboxContent);
 
             GUIContent groundBlendHeightContent = new GUIContent("Ground blend height", "Height at which to begin blending the atmosphere to space.");
             EditorGUILayout.PropertyField(this._groundBlendHeight, groundBlendHeightContent);
