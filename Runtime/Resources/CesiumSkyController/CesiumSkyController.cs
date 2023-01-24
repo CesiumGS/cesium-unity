@@ -5,54 +5,158 @@ using CesiumForUnity;
 [ExecuteInEditMode]
 public class CesiumSkyController : MonoBehaviour
 {
+    [SerializeField]
+    GameObject _sunLight = default;
 
     [SerializeField]
-    Transform sunLight = default;
+    private bool _updateOnTick = false;
+
+    public bool updateOnTick
+    {
+        get => this._updateOnTick;
+        set
+        {
+            this._updateOnTick = value;
+        }
+    }
 
     [SerializeField]
-    bool updateOnTick = false;
+    bool _updateInEditor = false; 
+
+    public bool updateInEditor
+    {
+        get => this._updateInEditor;
+        set
+        {
+            this._updateInEditor = value;
+        }
+    }
+
 
     [SerializeField]
-    bool updateInEditor = false;  //Todo: Make this work
+    [Range(-90.0f, 90.0f)]
+    private float _latitude = 0.0f;
 
-    //bool checkForSunUpdates = false;
+    public float latitude
+    {
+        get => this._latitude;
+        set
+        {
+            this._latitude = value;
+        }
+    }
 
-    float latitude = 0.0f;
-    float longitude = 0.0f;
+
+    [SerializeField]
+    [Range(-180.0f, 180.0f)]
+    private float _longitude = 0.0f;
+
+    public float longitude
+    {
+        get => this._longitude;
+        set
+        {
+            this._longitude = value;
+        }
+    }
 
     [SerializeField]
     [Range(0.0f, 24.0f)]
-    public float timeOfDay = 12.0f;
+    private float _timeOfDay = 12.0f;
 
+    public float timeOfDay
+    {
+        get => this._timeOfDay;
+        set
+        {
+            this._timeOfDay = value;
+            this.SetSunPosition();
+        }
+    }
+
+    // Pretty sure this should always be -90, so this should probably not be a variable and should instead be hardcoded into the native implementation.
     [SerializeField]
-    [Range(0.0f, 360.0f)]
-    float northOffset = 90.0f;
+    [Range(-360.0f, 360.0f)]
+    private float _northOffset = -90.0f;
+
+    public float northOffset
+    {
+        get => this._northOffset;
+        set
+        {
+            this._northOffset = value;
+            this.UpdateSky();
+        }
+    }
 
 
     [SerializeField]
     [Range(1, 31)]
-    int date = 1;
+    private int _day = 1;
+
+    public int day
+    {
+        get => this._day;
+        set
+        {
+            this._day = value;
+            this.UpdateSky();
+        }
+    }
 
     [SerializeField]
     [Range(1, 12)]
-    int month = 6;
+    private int _month = 6;
+
+    public int month
+    {
+        get => this._month;
+        set
+        {
+            this._month = value;
+            this.UpdateSky();
+        }
+    }
 
     [SerializeField]
-    int year = 2022;
+    private int _year = 2022;
 
-    float timeZone = 0.0f;
+    public int year
+    {
+        get => this._year;
+        set
+        {
+            this._year = value;
+            this.UpdateSky();
+        }
+    }
+
+    [SerializeField]
+    private float _timeZone = 0.0f;
+
+    public float timeZone
+    {
+        get => this._timeZone;
+        set
+        {
+            this._timeZone = value;
+            this.UpdateSky();
+        }
+    }
 
 
-
-
-    //[SerializeField]
+    //[SerializeField] // This can be serialized for easy testing of the skybox shader.
     [Range(0.0f, 1.0f)]
-    float groundSpaceBlend = 0.0f;
+    private float groundSpaceBlend = 0.0f;
 
-    float lastBlendValue;
+    private float lastBlendValue;
 
-    float groundBlendHeight = 2000.0f;
-    float spaceBlendHeight = 800000.0f;
+    [SerializeField]
+    float _groundBlendHeight = 2000.0f;
+    [SerializeField]
+    float _spaceBlendHeight = 800000.0f;
+
+    //Todo: Additional options for HDRP vs URP. In URP, skybox-specific options, including perhaps the ability to set the skybox used in the level. For HDRP, atmosphere scaling options for Physically Based Sky.
 
     Camera activeCamera;
 
@@ -62,13 +166,23 @@ public class CesiumSkyController : MonoBehaviour
     {
         ResolveCamera();
 
+        // If the application has started and the directional light reference is not set, set it to the prefab's child Directional Light object.
+        if (Application.IsPlaying(gameObject) && !_sunLight)
+        {
+            _sunLight = this.transform.Find("Directional Light").gameObject;
+
+        }
+
     }
 
     void LateUpdate()
     { 
         if (updateOnTick) 
         {
-            UpdateSky(); 
+            if (Application.IsPlaying(gameObject) || _updateInEditor)
+            {
+                UpdateSky();
+            }
 
         }
     }
@@ -77,7 +191,6 @@ public class CesiumSkyController : MonoBehaviour
     {
         SetSunPosition();
         GetCameraHeight();
-
     }
 
     void ResolveCamera()
@@ -86,10 +199,8 @@ public class CesiumSkyController : MonoBehaviour
         {
             activeCamera = Camera.main;
             globeAnchor = activeCamera.GetComponent<CesiumGlobeAnchor>();
-
-
         }
-        else if (updateInEditor)
+        else if (_updateInEditor)
         {
             SceneView sceneWindow = SceneView.lastActiveSceneView;
             if (sceneWindow)
@@ -103,16 +214,26 @@ public class CesiumSkyController : MonoBehaviour
         }
     }
 
-    void SetSunPosition()
+    public Vector3 CalculateSunPosition() // This will be a partial class that is entirely implemented in Cesium Native
     {
-        float hourToAngle = ((timeOfDay*15.0f) - 90.0f);
-        Vector3 newSunRotation = new Vector3(hourToAngle, northOffset, 0);
+        float hourToAngle = ((timeOfDay * 15.0f) - 90.0f);
+        Vector3 positionToRotation = new Vector3(hourToAngle, _northOffset, 0);
 
-        if (sunLight != null) {
-            sunLight.transform.localEulerAngles = newSunRotation;
-            Shader.SetGlobalVector("_SunDirection", -sunLight.transform.forward); 
+        return positionToRotation;
+    }
+
+
+    public void SetSunPosition()
+    {
+        Vector3 newSunRotation = CalculateSunPosition();
+
+        if (_sunLight != null) {
+            _sunLight.transform.localEulerAngles = newSunRotation;
+            Shader.SetGlobalVector("_SunDirection", -_sunLight.transform.forward); 
         }
     }
+
+
 
     void GetCameraHeight()
     {
@@ -123,17 +244,18 @@ public class CesiumSkyController : MonoBehaviour
             else camHeight = activeCamera.transform.position.y;
 
 
-            if (camHeight <= groundBlendHeight)
+            if (camHeight <= _groundBlendHeight)
             {
                 groundSpaceBlend = 0.0f;
             }
-            else if (camHeight >= spaceBlendHeight)
+            else if (camHeight >= _spaceBlendHeight)
             {
                 groundSpaceBlend = 1.0f;
             }
             else
             {
-                groundSpaceBlend = (camHeight - groundBlendHeight) / (spaceBlendHeight - groundBlendHeight);
+                groundSpaceBlend = (camHeight - _groundBlendHeight) / (_spaceBlendHeight - _groundBlendHeight);
+                // Linear interpolation seems too abrupt here at the beginning and end of the blend. That, or the math is wrong. Perhaps a smoother interpolation, especially in space.
             }
 
             // TODO: Add a check to see if the scene is using the Cesium skybox material
