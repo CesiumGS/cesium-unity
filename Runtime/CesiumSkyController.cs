@@ -150,7 +150,7 @@ public class CesiumSkyController : MonoBehaviour
         set
         {
             this._useCesiumSkybox = value;
-            this.ChangeSkyboxMaterial();
+            //this.ChangeSkyboxMaterial();
         }
     }
 
@@ -174,16 +174,18 @@ public class CesiumSkyController : MonoBehaviour
     public void UpdateSky()
     {
         SetSunPosition();
-        GetCameraHeight();
+        if (_useCesiumSkybox)
+        {        
+            GetCameraHeight();
 
-        // ChangeSkyboxMaterial(); //WIP
+        }
     }
 
     public void ChangeSkyboxMaterial()
     {
         if (_useCesiumSkybox)
         {
-            RenderSettings.skybox = Resources.Load("CesiumSkyController/CesiumDynamicSkybox.mat", typeof(Material)) as Material;
+            RenderSettings.skybox = Resources.Load("CesiumSkyController/CesiumDynamicSkybox", typeof(Material)) as Material;
             DynamicGI.UpdateEnvironment();
         }
 

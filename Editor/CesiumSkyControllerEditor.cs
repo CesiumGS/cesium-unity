@@ -115,11 +115,23 @@ namespace CesiumForUnity
             GUIContent useCesiumSkyboxContent = new GUIContent("Use Cesium Skybox", "Use the included Cesium skybox material for an atmosphere blending effect from earth to space.");
             EditorGUILayout.PropertyField(this._useCesiumSkybox, useCesiumSkyboxContent);
 
-            GUIContent groundBlendHeightContent = new GUIContent("Ground blend height", "Height at which to begin blending the atmosphere to space.");
-            EditorGUILayout.PropertyField(this._groundBlendHeight, groundBlendHeightContent);
+            using (new EditorGUI.DisabledScope(this._useCesiumSkybox.boolValue == false))
+            {
+                GUIContent updateSkyMat = new GUIContent(
+                "Update Skybox Material",
+                "Sets the level's skybox to the Cesium Dynamic Skybox material.");
+                if (GUILayout.Button(updateSkyMat))
+                {
+                    this.skyController.ChangeSkyboxMaterial();
+                }
 
-            GUIContent spaceBlendHeightContent = new GUIContent("Space blend height", "Height at which the atmosphere is completely replaced with the space color.");
-            EditorGUILayout.PropertyField(this._spaceBlendHeight, spaceBlendHeightContent);
+                GUIContent groundBlendHeightContent = new GUIContent("Ground blend height", "Height at which to begin blending the atmosphere to space.");
+                EditorGUILayout.PropertyField(this._groundBlendHeight, groundBlendHeightContent);
+
+                GUIContent spaceBlendHeightContent = new GUIContent("Space blend height", "Height at which the atmosphere is completely replaced with the space color.");
+                EditorGUILayout.PropertyField(this._spaceBlendHeight, spaceBlendHeightContent);
+
+            }
 
             EditorGUILayout.Space(10);
         }
