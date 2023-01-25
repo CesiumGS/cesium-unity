@@ -18,7 +18,12 @@ Shader "Cesium/DynamicSky"
     }
     SubShader
     {
-        Tags { "Queue"="Background" "RenderType"="Background" "PreviewType"="Skybox" }
+        PackageRequirements
+        {
+            "com.unity.render-pipelines.universal": "10.2.1"
+        }
+
+        Tags { "Queue"="Background" "RenderPipeline" = "UniversalPipeline" "RenderType"="Background" "PreviewType"="Skybox" }
         Cull Off ZWrite Off
 
         HLSLINCLUDE
@@ -28,6 +33,10 @@ Shader "Cesium/DynamicSky"
 
         Pass
         {
+            PackageRequirements
+            {
+                "com.unity.render-pipelines.universal": "10.2.1"
+            }
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
@@ -116,7 +125,7 @@ Shader "Cesium/DynamicSky"
 
                 skyColor = clamp(skyColor + horizonColor, 0, 1); 
 
-                // Todo: create atmosphere effect by moving horizon down x axis while in space
+                // Todo: create atmosphere effect by moving horizon down y axis while in space
                 // float spaceBlend = smoothstep(0.5, 0.6, ((viewDir.y + 0) * 0.5) + _GroundSpaceBlend.x);
                 skyColor = lerp(skyColor, float3(0, 0, 0), _GroundSpaceBlend.x);
 
