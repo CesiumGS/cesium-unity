@@ -29,20 +29,6 @@ namespace CesiumForUnity
         private SerializedProperty _ecefY;
         private SerializedProperty _ecefZ;
 
-        // These variables store the values from the previous frame. This is used to compare
-        // to the current serialized values, whether they were changed this frame via user input
-        // or by other means (undo, pasting component values).
-        private CesiumGeoreferenceOriginAuthority
-            _previousOriginAuthority = CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight;
-
-        private double _previousLatitude = 0.0;
-        private double _previousLongitude = 0.0;
-        private double _previousHeight = 0.0;
-
-        private double _previousEcefX = 0.0;
-        private double _previousEcefY = 0.0;
-        private double _previousEcefZ = 0.0;
-
         private void OnEnable()
         {
             this._georeference = (CesiumGeoreference)this.target;
@@ -57,8 +43,6 @@ namespace CesiumForUnity
             this._ecefX = this.serializedObject.FindProperty("_ecefX");
             this._ecefY = this.serializedObject.FindProperty("_ecefY");
             this._ecefZ = this.serializedObject.FindProperty("_ecefZ");
-
-            this.UpdateSavedPropertyValues();
         }
 
         public override void OnInspectorGUI()
@@ -75,9 +59,6 @@ namespace CesiumForUnity
             this.DrawEarthCenteredEarthFixedProperties();
 
             this.serializedObject.ApplyModifiedProperties();
-
-            this.UpdateGeoreference();
-            this.UpdateSavedPropertyValues();
         }
 
         private void DrawInspectorButtons()
@@ -203,48 +184,6 @@ namespace CesiumForUnity
             EditorGUILayout.PropertyField(this._ecefZ, ecefZContent);
 
             EditorGUI.EndDisabledGroup();
-        }
-
-        private bool OriginAuthorityChanged()
-        {
-            return this._previousOriginAuthority != this.originAuthority;
-        }
-
-        private bool LongitudeLatitudeHeightChanged()
-        {
-            return this._previousLatitude != this._latitude.doubleValue ||
-                this._previousLongitude != this._longitude.doubleValue ||
-                this._previousHeight != this._height.doubleValue;
-        }
-
-        private bool EarthCenteredEarthFixedChanged()
-        {
-            return this._previousEcefX != this._ecefX.doubleValue ||
-                this._previousEcefY != this._ecefY.doubleValue ||
-                this._previousEcefZ != this._ecefZ.doubleValue;
-        }
-
-        private void UpdateGeoreference()
-        {
-            if (this.OriginAuthorityChanged() ||
-                this.LongitudeLatitudeHeightChanged() ||
-                this.EarthCenteredEarthFixedChanged())
-            {
-                this._georeference.UpdateOrigin();
-            }
-        }
-
-        private void UpdateSavedPropertyValues()
-        {
-            this._previousOriginAuthority = this._georeference.originAuthority;
-
-            this._previousLatitude = this._georeference.latitude;
-            this._previousLongitude = this._georeference.longitude;
-            this._previousHeight = this._georeference.height;
-
-            this._previousEcefX = this._georeference.ecefX;
-            this._previousEcefY = this._georeference.ecefY;
-            this._previousEcefZ = this._georeference.ecefZ;
         }
     }
 }

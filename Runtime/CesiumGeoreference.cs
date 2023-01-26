@@ -247,14 +247,27 @@ namespace CesiumForUnity
         /// </summary>
         public void UpdateOrigin()
         {
-            this.RecalculateOrigin();
-            this.UpdateOtherCoordinates();
+            // Only update the origin when it has been initialized first.
+            // This check is here because the georeference may be modified by other scripts
+            // before it is enabled (e.g. CesiumSubScene.OnEnable). Without this check,
+            // objects may have incorrect orientations when the scene loads, both in Editor
+            // and in play mode. 
+            if (this._initialized)
+            {
+                this.RecalculateOrigin();
+            }
 
+            this.UpdateOtherCoordinates();
             if (this.changed != null)
             {
                 this.changed();
             }
         }
+
+        /// <summary>
+        ///  Whether InitializeOrigin() has been called yet.
+        /// </summary>
+        private bool _initialized = false;
 
         /// <summary>
         /// Initializes the C++ side of the georeference transformation, without regard for the
@@ -268,13 +281,28 @@ namespace CesiumForUnity
         /// </summary>
         private partial void RecalculateOrigin();
 
+        private void OnValidate()
+        {
+            if (this._initialized)
+            {
+                this.UpdateOrigin();
+            }
+        }
+
         private void OnEnable()
         {
             // We must initialize the origin in OnEnable because Unity does
             // not always call Awake at the appropriate time for `ExecuteInEditMode`
             // components like this one.
             this.InitializeOrigin();
+            this._initialized = true;
+
             this.UpdateOtherCoordinates();
+        }
+
+        private void OnDisable()
+        {
+            this._initialized = false;
         }
 
         private void UpdateOtherCoordinates()

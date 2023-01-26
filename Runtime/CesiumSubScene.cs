@@ -224,6 +224,15 @@ namespace CesiumForUnity
             this.originAuthority = CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight;
         }
 
+        private void OnValidate()
+        {
+            CesiumGeoreference georeference = this.GetComponentInParent<CesiumGeoreference>();
+            if (georeference != null)
+            {
+                this.UpdateOrigin();
+            }
+        }
+
         private void OnEnable()
         {
             // When this sub-scene is enabled, all others are disabled.
