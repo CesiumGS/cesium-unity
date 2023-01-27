@@ -1,5 +1,6 @@
 ﻿using System;
 using Unity.Mathematics;
+using UnityEditor;
 using UnityEngine;
 
 namespace CesiumForUnity
@@ -9,6 +10,19 @@ namespace CesiumForUnity
         public static string ToString<T>(T value)
         {
             return value.ToString();
+        }
+
+        public static void Destroy(UnityEngine.Object o)
+        {
+#if UNITY_EDITOR
+            if (!EditorApplication.isPlaying)
+            {
+                UnityEngine.Object.DestroyImmediate(o);
+                return;
+            }
+#endif
+
+            UnityEngine.Object.Destroy(o);
         }
 
         public static double4x4 ToMathematics(Matrix4x4 matrix)

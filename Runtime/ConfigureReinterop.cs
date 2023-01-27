@@ -422,6 +422,7 @@ namespace CesiumForUnity
             cv3.x = cv3.y = cv3.z;
             double3 cv4 = new double3(1.0, 2.0, 3.0);
 
+            go.GetComponent<CesiumGlobeAnchor>();
             CesiumGlobeAnchor[] globeAnchors = go.GetComponentsInChildren<CesiumGlobeAnchor>();
             globeAnchors = go.GetComponentsInChildren<CesiumGlobeAnchor>(true);
             CesiumGlobeAnchor globeAnchor = globeAnchors[globeAnchors.Length - 1];
@@ -433,7 +434,6 @@ namespace CesiumForUnity
             globeAnchor = go.AddComponent<CesiumGlobeAnchor>();
             globeAnchor.detectTransformChanges = globeAnchor.detectTransformChanges;
             globeAnchor.adjustOrientationForGlobeWhenMoving = globeAnchor.adjustOrientationForGlobeWhenMoving;
-            globeAnchor.SetPositionUnity(0.0, 0.0, 0.0);
             globeAnchor.SetPositionLongitudeLatitudeHeight(0.0, 0.0, 0.0);
             globeAnchor.positionAuthority = globeAnchor.positionAuthority;
 

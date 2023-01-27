@@ -5,6 +5,8 @@
 #include <DotNet/Unity/Mathematics/double3.h>
 #include <DotNet/Unity/Mathematics/double3x3.h>
 
+#include <optional>
+
 namespace DotNet::CesiumForUnity {
 class CesiumGeoreference;
 }
@@ -24,8 +26,6 @@ public:
       const DotNet::CesiumForUnity::CesiumGeoreference& georeference);
   std::optional<DotNet::Unity::Mathematics::double3x3> RecalculateOrigin(
       const DotNet::CesiumForUnity::CesiumGeoreference& georeference);
-  void InitializeOrigin(
-      const DotNet::CesiumForUnity::CesiumGeoreference& georeference);
 
   DotNet::Unity::Mathematics::double3
   TransformUnityPositionToEarthCenteredEarthFixed(
@@ -44,12 +44,11 @@ public:
       const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
       DotNet::Unity::Mathematics::double3 earthCenteredEarthFixedDirection);
 
-  const CesiumGeospatial::LocalHorizontalCoordinateSystem&
-  getCoordinateSystem() const {
-    return this->_coordinateSystem;
-  }
+  const CesiumGeospatial::LocalHorizontalCoordinateSystem& getCoordinateSystem(
+      const DotNet::CesiumForUnity::CesiumGeoreference& georeference);
 
 private:
-  CesiumGeospatial::LocalHorizontalCoordinateSystem _coordinateSystem;
+  std::optional<CesiumGeospatial::LocalHorizontalCoordinateSystem>
+      _coordinateSystem;
 };
 } // namespace CesiumForUnityNative

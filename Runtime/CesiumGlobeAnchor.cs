@@ -17,12 +17,6 @@ namespace CesiumForUnity
     public enum CesiumGlobeAnchorPositionAuthority
     {
         /// <summary>
-        /// The `Transform` attached to the same object is the only authority for the position of
-        /// this object.
-        /// </summary>
-        None,
-
-        /// <summary>
         /// The <see cref="CesiumGlobeAnchor.longitude"/>, <see cref="CesiumGlobeAnchor.latitude"/>,
         /// and <see cref="CesiumGlobeAnchor.height"/> properties authoritatively define the position
         /// of this object.
@@ -35,13 +29,6 @@ namespace CesiumForUnity
         /// of this object.
         /// </summary>
         EarthCenteredEarthFixed,
-
-        /// <summary>
-        /// The <see cref="CesiumGlobeAnchor.unityX"/>, <see cref="CesiumGlobeAnchor.unityY"/>,
-        /// and <see cref="CesiumGlobeAnchor.unityZ"/> properties authoritatively define the position
-        /// of this object.
-        /// </summary>
-        UnityCoordinates
     }
 
     /// <summary>
@@ -53,7 +40,7 @@ namespace CesiumForUnity
     /// <para>
     /// A game object with this component _must_ be nested inside a <see cref="CesiumGeoreference"/>. That is,
     /// the game object itself, or one of its ancestors, must have a <see cref="CesiumGeoreference"/> attached.
-    /// Otherwise, this component will throw an exception at `Start`.
+    /// Otherwise, this component will throw an exception in `OnEnable`.
     /// </para>
     /// <para>
     /// An anchored game object is still allowed to move. It may be moved either by setting the position
@@ -145,7 +132,7 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        private CesiumGlobeAnchorPositionAuthority _positionAuthority = CesiumGlobeAnchorPositionAuthority.None;
+        private CesiumGlobeAnchorPositionAuthority _positionAuthority = CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight;
 
         /// <summary>
         /// Identifies the set of coordinates that authoritatively define the position of this object.
@@ -277,60 +264,6 @@ namespace CesiumForUnity
             }
         }
 
-        [SerializeField]
-        private double _unityX = 0.0;
-
-        /// <summary>
-        /// The Unity local X coordinate, the same as the <code>position.x</code> coordinate on
-        /// the <code>Transform</code> but expressed in double-precision.
-        /// Setting this property changes the <see cref="positionAuthority"/> accordingly.
-        /// </summary>
-        public double unityX
-        {
-            get => this._unityX;
-            set
-            {
-                this._unityX = value;
-                this.positionAuthority = CesiumGlobeAnchorPositionAuthority.UnityCoordinates;
-            }
-        }
-
-        [SerializeField]
-        private double _unityY = 0.0;
-
-        /// <summary>
-        /// The Unity local Y coordinate, the same as the <code>position.y</code> coordinate on
-        /// the <code>Transform</code> but expressed in double-precision.
-        /// Setting this property changes the <see cref="positionAuthority"/> accordingly.
-        /// </summary>
-        public double unityY
-        {
-            get => this._unityY;
-            set
-            {
-                this._unityY = value;
-                this.positionAuthority = CesiumGlobeAnchorPositionAuthority.UnityCoordinates;
-            }
-        }
-
-        [SerializeField]
-        private double _unityZ = 0.0;
-
-        /// <summary>
-        /// The Unity local Z coordinate, the same as the <code>position.z</code> coordinate on
-        /// the <code>Transform</code> but expressed in double-precision.
-        /// Setting this property changes the <see cref="positionAuthority"/> accordingly.
-        /// </summary>
-        public double unityZ
-        {
-            get => this._unityZ;
-            set
-            {
-                this._unityZ = value;
-                this.positionAuthority = CesiumGlobeAnchorPositionAuthority.UnityCoordinates;
-            }
-        }
-
         #endregion
 
         #region Set Helpers
@@ -376,27 +309,6 @@ namespace CesiumForUnity
         }
 
         /// <summary>
-        /// Sets the position of this object to particular <see cref="unityX"/>, <see cref="unityY"/>,
-        /// <see cref="unityZ"/> coordinates in the Unity coordinate system. The position should
-        /// generally not be a Unity _world_ position, but rather a position expressed in some parent
-        /// GameObject's reference frame as defined by its Transform. This way, the chain of Unity
-        /// transforms places and orients the "globe" in the Unity world.
-        /// </summary>
-        /// <remarks>
-        /// Calling this method is more efficient than setting the properties individually.
-        /// </remarks>
-        /// <param name="x">The X coordinate.</param>
-        /// <param name="y">The Y coordinate.</param>
-        /// <param name="z">The Z coordinate.</param>
-        public void SetPositionUnity(double x, double y, double z)
-        {
-            this._unityX = x;
-            this._unityY = y;
-            this._unityZ = z;
-            this.positionAuthority = CesiumGlobeAnchorPositionAuthority.UnityCoordinates;
-        }
-
-        /// <summary>
         /// Synchronizes the properties of this `CesiumGlobeAnchor`.
         /// </summary>
         /// <remarks>
@@ -436,42 +348,78 @@ namespace CesiumForUnity
         /// </remarks>
         public void Sync()
         {
-            if (this._lastPropertiesAreValid && this._lastLocalToWorld != this.transform.localToWorldMatrix)
-                this.UpdateGlobePositionFromTransform();
-            else
-                this.UpdateGlobePosition(this._positionAuthority);
+            if (this._lastLocalToWorld != null && this._lastLocalToWorld != this.transform.localToWorldMatrix)
+                this._initializeFromTransform = true;
+
+            this.UpdateGlobePosition(this._positionAuthority);
         }
 
         #endregion
 
         #region Private properties
 
-        private bool _lastPropertiesAreValid = false;
-        private double _lastPositionEcefX = 0.0;
-        private double _lastPositionEcefY = 0.0;
-        private double _lastPositionEcefZ = 0.0;
-        // TODO: use just the position instead of the entire transform?
-        private Matrix4x4 _lastLocalToWorld;
+        // When this is true, the Transform will be used to populate all other fields the next
+        // time <see cref="UpdateGlobePosition"/> is called. Afterward, its value is reset to
+        // false. It is initially set to true for a brand new globe anchor and can be set to
+        // true again by the the transform change detection coroutine or when `Sync`
+        // detects a change in the Transform.
+        //
+        // This is serialized because we want to keep using the saved globe position after load,
+        // not recompute it (less precisely) from the Transform.
+        [SerializeField]
+        private bool _initializeFromTransform = true;
+
+        // The last known ECEF position, used to detect movement of the object so that
+        // its rotation can be updated when `adjustOrientationForGlobeWhenMoving` is enabled.
+        // This is null before OnEnable.
+        [NonSerialized]
+        private double3? _lastPositionEcef = null;
+
+        // The last known Transform, used to detect changes in the Transform so that
+        // the precise globe coordinates can be recomputed from it. This is null before OnEnable.
+        [NonSerialized]
+        private Matrix4x4? _lastLocalToWorld = null;
+
+        // The resolved georeference containing this globe anchor. This is just a cache
+        // of `GetComponentInParent<CesiumGeoreference>()`.
+        [NonSerialized]
+        private CesiumGeoreference _georeference;
 
         #endregion
 
         #region Unity Messages
 
-        private void Start()
+        private void UpdateGeoreference()
         {
-            this.Sync();
+            if (this._georeference != null)
+                this._georeference.RemoveGlobeAnchor(this);
+
+            this._georeference = this.gameObject.GetComponentInParent<CesiumGeoreference>();
+
+            if (this._georeference != null)
+            {
+                this._georeference.Initialize();
+                this._georeference.AddGlobeAnchor(this);
+            }
         }
 
         private void OnEnable()
         {
-            // We must do this in OnEnable instead of Start because Start doesn't re-run on domain reload,
-            // so if we only did it in Start, then in the Editor, transform change detection would stop
-            // working whenever source files were changed.
+            this.UpdateGeoreference();
+            this.Sync();
             this.StartOrStopDetectingTransformChanges();
+        }
+
+        private void OnDisable()
+        {
+            if (this._georeference != null)
+                this._georeference.RemoveGlobeAnchor(this);
+            this._georeference = null;
         }
 
         private void OnTransformParentChanged()
         {
+            this.UpdateGeoreference();
             this.Sync();
         }
 
@@ -503,7 +451,7 @@ namespace CesiumForUnity
         {
             // Detect changes in the Transform component.
             // We don't use Transform.hasChanged because we can't control when it is reset to false.
-            WaitUntil waitForChanges = new WaitUntil(() => this._lastPropertiesAreValid && !this.transform.localToWorldMatrix.Equals(this._lastLocalToWorld));
+            WaitUntil waitForChanges = new WaitUntil(() => this._lastLocalToWorld != null && !this.transform.localToWorldMatrix.Equals(this._lastLocalToWorld));
 
             while (true)
             {
@@ -516,47 +464,46 @@ namespace CesiumForUnity
 
         #region Updaters
 
-        private void UpdateGlobePosition(CesiumGlobeAnchorPositionAuthority previousAuthority)
+        private void UpdateGlobePosition(CesiumGlobeAnchorPositionAuthority? previousAuthority)
         {
-            CesiumGeoreference georeference = this.gameObject.GetComponentInParent<CesiumGeoreference>();
-            if (georeference == null)
-                throw new InvalidOperationException("CesiumGlobeAnchor is not nested inside a game object with a CesiumGeoreference.");
-
-            // If there's no authoritative position, copy the position from the Transform.
-            if (this.positionAuthority == CesiumGlobeAnchorPositionAuthority.None)
+            if (this._georeference == null)
             {
-                Vector3 position = this.transform.localPosition;
-                this._unityX = position.x;
-                this._unityY = position.y;
-                this._unityZ = position.z;
-                this._positionAuthority = CesiumGlobeAnchorPositionAuthority.UnityCoordinates;
+                this.UpdateGeoreference();
+                if (this._georeference == null)
+                    throw new InvalidOperationException("CesiumGlobeAnchor is not nested inside a game object with a CesiumGeoreference.");
             }
 
-            // Convert the authoritative position to ECEF
             double3 ecef;
-            switch (this.positionAuthority)
+            if (this._initializeFromTransform)
             {
-                case CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight:
-                    ecef = CesiumWgs84Ellipsoid.LongitudeLatitudeHeightToEarthCenteredEarthFixed(new double3(
-                        this.longitude,
-                        this.latitude,
-                        this.height
-                    ));
-                    break;
-                case CesiumGlobeAnchorPositionAuthority.EarthCenteredEarthFixed:
-                    ecef.x = this.ecefX;
-                    ecef.y = this.ecefY;
-                    ecef.z = this.ecefZ;
-                    break;
-                case CesiumGlobeAnchorPositionAuthority.UnityCoordinates:
-                    ecef = georeference.TransformUnityPositionToEarthCenteredEarthFixed(new double3(
-                        this.unityX,
-                        this.unityY,
-                        this.unityZ
-                    ));
-                    break;
-                default:
-                    throw new InvalidOperationException("Unknown value for positionAuthority.");
+                // There's no authoritative position, so copy the position from the Transform.
+                Vector3 position = this.transform.localPosition;
+                ecef = this._georeference.TransformUnityPositionToEarthCenteredEarthFixed(new double3(
+                    position.x,
+                    position.y,
+                    position.z
+                ));
+            }
+            else
+            {
+                // Convert the authoritative position to ECEF
+                switch (this.positionAuthority)
+                {
+                    case CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight:
+                        ecef = CesiumWgs84Ellipsoid.LongitudeLatitudeHeightToEarthCenteredEarthFixed(new double3(
+                            this.longitude,
+                            this.latitude,
+                            this.height
+                        ));
+                        break;
+                    case CesiumGlobeAnchorPositionAuthority.EarthCenteredEarthFixed:
+                        ecef.x = this.ecefX;
+                        ecef.y = this.ecefY;
+                        ecef.z = this.ecefZ;
+                        break;
+                    default:
+                        throw new InvalidOperationException("Unknown value for positionAuthority.");
+                }
             }
 
             // Update the non-authoritative fields with the new position.
@@ -576,42 +523,29 @@ namespace CesiumForUnity
                 this._ecefZ = ecef.z;
             }
 
-            if (this.positionAuthority != CesiumGlobeAnchorPositionAuthority.UnityCoordinates)
-            {
-                double3 unityLocal = georeference.TransformEarthCenteredEarthFixedPositionToUnity(ecef);
-                this._unityX = unityLocal.x;
-                this._unityY = unityLocal.y;
-                this._unityZ = unityLocal.z;
-            }
-
             // If the ECEF position changes, update the orientation based on the
             // new position on the globe (if desired).
             if (this.adjustOrientationForGlobeWhenMoving &&
-                previousAuthority != CesiumGlobeAnchorPositionAuthority.None &&
-                this._lastPropertiesAreValid &&
-                (this._lastPositionEcefX != this._ecefX || this._lastPositionEcefY != this._ecefY || this._lastPositionEcefZ != this._ecefZ))
+                this._lastPositionEcef != null &&
+                (this._lastPositionEcef.Value.x != this._ecefX || this._lastPositionEcef.Value.y != this._ecefY || this._lastPositionEcef.Value.z != this._ecefZ))
             {
-                double3 oldPosition = new double3(
-                    this._lastPositionEcefX,
-                    this._lastPositionEcefY,
-                    this._lastPositionEcefZ
-                );
                 double3 newPosition = new double3(this._ecefX, this._ecefY, this._ecefZ);
-                CesiumGlobeAnchor.AdjustOrientation(this, oldPosition, newPosition);
+                CesiumGlobeAnchor.AdjustOrientation(this, this._lastPositionEcef.Value, newPosition);
             }
 
+            double3 unityLocal = this._georeference.TransformEarthCenteredEarthFixedPositionToUnity(ecef);
+
             // Set the object's transform with the new position
-            this.gameObject.transform.localPosition = new Vector3((float)this._unityX, (float)this._unityY, (float)this._unityZ);
+            this.gameObject.transform.localPosition = new Vector3((float)unityLocal.x, (float)unityLocal.y, (float)unityLocal.z);
             this._lastLocalToWorld = this.transform.localToWorldMatrix;
-            this._lastPositionEcefX = this._ecefX;
-            this._lastPositionEcefY = this._ecefY;
-            this._lastPositionEcefZ = this._ecefZ;
-            this._lastPropertiesAreValid = true;
+            this._lastPositionEcef = new double3(this._ecefX, this._ecefY, this._ecefZ);
+            this._initializeFromTransform = false;
         }
 
         private void UpdateGlobePositionFromTransform()
         {
-            this.positionAuthority = CesiumGlobeAnchorPositionAuthority.None;
+            this._initializeFromTransform = true;
+            this.UpdateGlobePosition(this._positionAuthority);
         }
 
         // This is static so that CesiumGlobeAnchor does not need finalization.

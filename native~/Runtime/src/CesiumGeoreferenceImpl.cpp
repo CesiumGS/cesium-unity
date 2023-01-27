@@ -51,7 +51,7 @@ LocalHorizontalCoordinateSystem createCoordinateSystem(
 
 CesiumGeoreferenceImpl::CesiumGeoreferenceImpl(
     const DotNet::CesiumForUnity::CesiumGeoreference& georeference)
-    : _coordinateSystem(createCoordinateSystem(georeference)) {}
+    : _coordinateSystem() {}
 
 CesiumGeoreferenceImpl::~CesiumGeoreferenceImpl() {}
 
@@ -61,32 +61,32 @@ void CesiumGeoreferenceImpl::JustBeforeDelete(
 std::optional<DotNet::Unity::Mathematics::double3x3>
 CesiumGeoreferenceImpl::RecalculateOrigin(
     const DotNet::CesiumForUnity::CesiumGeoreference& georeference) {
+  // If there is no previous coordinate system, create the new one but return
+  // without computing a delta rotation.
+  if (!this->_coordinateSystem) {
+    this->_coordinateSystem = createCoordinateSystem(georeference);
+    return std::nullopt;
+  }
+
   LocalHorizontalCoordinateSystem coordinateSystem =
       createCoordinateSystem(georeference);
 
   if (coordinateSystem.getLocalToEcefTransformation() ==
-      this->_coordinateSystem.getLocalToEcefTransformation()) {
+      this->_coordinateSystem->getLocalToEcefTransformation()) {
     // No change
     return std::nullopt;
   }
 
   // Update all globe anchors based on the new origin.
-  std::swap(this->_coordinateSystem, coordinateSystem);
+  std::swap(*this->_coordinateSystem, coordinateSystem);
 
   glm::dmat3 oldLocalToEcef =
       glm::dmat3(coordinateSystem.getLocalToEcefTransformation());
   glm::dmat3 ecefToNewLocal =
-      glm::dmat3(this->_coordinateSystem.getEcefToLocalTransformation());
+      glm::dmat3(this->_coordinateSystem->getEcefToLocalTransformation());
   glm::dmat3 oldLocalToNewLocal = ecefToNewLocal * oldLocalToEcef;
 
   return UnityTransforms::toUnityMathematics(oldLocalToNewLocal);
-}
-
-void CesiumGeoreferenceImpl::InitializeOrigin(
-    const DotNet::CesiumForUnity::CesiumGeoreference& georeference) {
-  // Compute the initial coordinate system. Don't call RecalculateOrigin because
-  // that will also rotate objects based on the new origin.
-  this->_coordinateSystem = createCoordinateSystem(georeference);
 }
 
 DotNet::Unity::Mathematics::double3
@@ -135,4 +135,13 @@ CesiumGeoreferenceImpl::TransformEarthCenteredEarthFixedDirectionToUnity(
       earthCenteredEarthFixedDirection.y,
       earthCenteredEarthFixedDirection.z));
   return DotNet::Unity::Mathematics::double3{result.x, result.y, result.z};
+}
+
+const CesiumGeospatial::LocalHorizontalCoordinateSystem&
+CesiumGeoreferenceImpl::getCoordinateSystem(
+    const DotNet::CesiumForUnity::CesiumGeoreference& georeference) {
+  if (!this->_coordinateSystem) {
+    this->RecalculateOrigin(georeference);
+  }
+  return *this->_coordinateSystem;
 }

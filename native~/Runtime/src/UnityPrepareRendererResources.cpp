@@ -828,7 +828,9 @@ void* UnityPrepareRendererResources::prepareInMainThread(
                 .AddComponent<CesiumForUnity::CesiumGlobeAnchor>();
         anchor.detectTransformChanges(false);
         anchor.adjustOrientationForGlobeWhenMoving(false);
-        anchor.SetPositionUnity(translation.x, translation.y, translation.z);
+
+        glm::dvec3 ecef(modelToEcef[3]);
+        anchor.SetPositionEarthCenteredEarthFixed(ecef.x, ecef.y, ecef.z);
 
         UnityEngine::MeshFilter meshFilter =
             primitiveGameObject.AddComponent<UnityEngine::MeshFilter>();

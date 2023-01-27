@@ -242,7 +242,62 @@ namespace CesiumForUnity
             this.originAuthority = CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight;
         }
 
-        private List<CesiumGlobeAnchor> _globeAnchorsScratch = new List<CesiumGlobeAnchor>();
+        /// <summary>
+        /// Register a globe anchor with this georeference. When the georeference origin changes,
+        /// the registered anchor will be updated accordingly.
+        /// </summary>
+        /// <remarks>
+        /// This is called automatically by <see cref="CesiumGlobeAnchor.OnEnable"/> and usually
+        /// does not need to be called directly.
+        /// </remarks>
+        /// <param name="globeAnchor">The globe anchor.</param>
+        public void AddGlobeAnchor(CesiumGlobeAnchor globeAnchor)
+        {
+            this._globeAnchors.Add(globeAnchor);
+        }
+
+        /// <summary>
+        /// Deregisters a globe anchor with this georeference, so the globe anchor will no longer
+        /// be updated when the georeference origin changes.
+        /// </summary>
+        /// <remarks>
+        /// This is called automatically by <see cref="CesiumGlobeAnchor.OnDisable"/> and usually
+        /// does not need to be called directly.
+        /// </remarks>
+        /// <param name="globeAnchor">The globe anchor.</param>
+        public void RemoveGlobeAnchor(CesiumGlobeAnchor globeAnchor)
+        {
+            this._globeAnchors.Remove(globeAnchor);
+        }
+
+        /// <summary>
+        /// Initializes this georeference so that other objects may use it to locate the globe in the world.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// It is not usually necessary to call this directly because it is called automatically in
+        /// <see cref="OnEnable"/>. However, when other objects in the same scene need to use this
+        /// georeference from their own <code>OnEnable</code>, it is possible that the other object's
+        /// OnEnable will be called before the georeference's, leading to incorrect georeferencing.
+        /// Calling this method explicitly will avoid this problem.
+        /// </para>
+        /// <para>
+        /// However, this method should _not_ be called prior to the scene's <code>OnEnable</code> phase.
+        /// </para>
+        /// <para>
+        /// If this component has already been initialized, this method does nothing.
+        /// </para>
+        /// </remarks>
+        public void Initialize()
+        {
+            if (!this._isInitialized)
+            {
+                this._isInitialized = true;
+                this.UpdateOtherCoordinates();
+                this.RecalculateOrigin();
+            }
+        }
+
         private Dictionary<Transform, float3x3?> _parentTransformsScratch = new Dictionary<Transform, float3x3?>();
 
         /// <summary>
@@ -251,6 +306,11 @@ namespace CesiumForUnity
         /// </summary>
         public void UpdateOrigin()
         {
+            if (!this._isInitialized)
+                throw new InvalidOperationException("The origin of a CesiumGeoreference must not be set before its Initialize method is called, either explicitly or via OnEnable.");
+
+            this.UpdateOtherCoordinates();
+
             double3x3? oldLocalToNewLocalDouble = this.RecalculateOrigin();
             if (oldLocalToNewLocalDouble == null)
             {
@@ -260,13 +320,16 @@ namespace CesiumForUnity
 
             float3x3 oldLocalToNewLocal = (float3x3)oldLocalToNewLocalDouble.Value;
 
-            List<CesiumGlobeAnchor> anchors = this._globeAnchorsScratch;
+            //List<CesiumGlobeAnchor> anchors = this._globeAnchorsScratch;
             Dictionary<Transform, float3x3?> parentTransforms = this._parentTransformsScratch;
             parentTransforms.Clear();
-            this.GetComponentsInChildren<CesiumGlobeAnchor>(true, anchors);
+            //this.GetComponentsInChildren<CesiumGlobeAnchor>(true, anchors);
 
-            foreach (CesiumGlobeAnchor anchor in anchors)
+            foreach (CesiumGlobeAnchor anchor in this._globeAnchors)
             {
+                if (anchor == null)
+                    continue;
+
                 Transform transform = anchor.transform;
                 Transform parent = transform.parent;
 
@@ -294,36 +357,20 @@ namespace CesiumForUnity
                 Helpers.MatrixToRotationAndScale(modelToNew, out rotation, out scale);
 
                 transform.localRotation = rotation;
-                transform.localScale = scale;
+                //transform.localScale = scale;
 
-                // The meaning of Unity coordinates will change with the georeference
-                // change, so switch to ECEF if necessary.
                 CesiumGlobeAnchorPositionAuthority authority = anchor.positionAuthority;
-                if (authority == CesiumGlobeAnchorPositionAuthority.UnityCoordinates)
-                    authority = CesiumGlobeAnchorPositionAuthority.EarthCenteredEarthFixed;
 
                 // Re-assign the (probably unchanged) authority to recompute Unity
-                // coordinates with the new georeference. Unless it's still None,
-                // because in that case setting the authority now could lock in the
-                // globe location too early (e.g. before the CesiumGeoreference has
-                // its final origin values).
-                if (authority != CesiumGlobeAnchorPositionAuthority.None)
-                    anchor.positionAuthority = authority;
+                // coordinates with the new georeference.
+                anchor.positionAuthority = authority;
             }
-
-            this.UpdateOtherCoordinates();
 
             if (this.changed != null)
             {
                 this.changed();
             }
         }
-
-        /// <summary>
-        /// Initializes the C++ side of the georeference transformation, without regard for the
-        /// previous state (if any).
-        /// </summary>
-        private partial void InitializeOrigin();
 
         /// <summary>
         /// Updates to a new origin, shifting and rotating objects with CesiumGlobeAnchor
@@ -333,11 +380,7 @@ namespace CesiumForUnity
 
         private void OnEnable()
         {
-            // We must initialize the origin in OnEnable because Unity does
-            // not always call Awake at the appropriate time for `ExecuteInEditMode`
-            // components like this one.
-            this.InitializeOrigin();
-            this.UpdateOtherCoordinates();
+            this.Initialize();
         }
 
         private void UpdateOtherCoordinates()
@@ -405,5 +448,11 @@ namespace CesiumForUnity
         /// <returns>The corresponding Unity direction.</returns>
         public partial double3
             TransformEarthCenteredEarthFixedDirectionToUnity(double3 earthCenteredEarthFixedDirection);
+
+        [NonSerialized]
+        private bool _isInitialized = false;
+
+        [NonSerialized]
+        private HashSet<CesiumGlobeAnchor> _globeAnchors = new HashSet<CesiumGlobeAnchor>();
     }
 }

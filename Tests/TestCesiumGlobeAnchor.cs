@@ -7,8 +7,8 @@ using UnityEngine.TestTools.Utils;
 
 public class TestCesiumGlobeAnchor
 {
-    [UnityTest]
-    public IEnumerator SyncsUnityPositionFromTransformAndBackMultipleFrames()
+    [Test]
+    public void AddingGlobeAnchorImmediatelySyncsGlobePositionFromTransform()
     {
         GameObject goGeoreference = new GameObject("Georeference");
         CesiumGeoreference georeference = goGeoreference.AddComponent<CesiumGeoreference>();
@@ -18,31 +18,17 @@ public class TestCesiumGlobeAnchor
 
         GameObject goAnchored = new GameObject("Anchored");
         goAnchored.transform.parent = goGeoreference.transform;
-        goAnchored.transform.SetPositionAndRotation(new Vector3(100.0f, 200.0f, 300.0f), Quaternion.Euler(10.0f, 20.0f, 30.0f));
+        goAnchored.transform.SetPositionAndRotation(new Vector3(0.0f, 100.0f, 0.0f), Quaternion.Euler(10.0f, 20.0f, 30.0f));
 
         CesiumGlobeAnchor anchor = goAnchored.AddComponent<CesiumGlobeAnchor>();
-        Assert.AreEqual(CesiumGlobeAnchorPositionAuthority.None, anchor.positionAuthority);
 
-        // Wait for the start of a new frame, which will cause Start to be invoked.
-        yield return null;
-
-        Assert.AreEqual(CesiumGlobeAnchorPositionAuthority.UnityCoordinates, anchor.positionAuthority);
-        Assert.That(anchor.unityX, Is.EqualTo(100.0).Using(FloatEqualityComparer.Instance));
-        Assert.That(anchor.unityY, Is.EqualTo(200.0).Using(FloatEqualityComparer.Instance));
-        Assert.That(anchor.unityZ, Is.EqualTo(300.0).Using(FloatEqualityComparer.Instance));
-
-        anchor.SetPositionUnity(1.0, 2.0, 3.0);
-
-        Assert.That(anchor.unityX, Is.EqualTo(1.0).Using(FloatEqualityComparer.Instance));
-        Assert.That(anchor.unityY, Is.EqualTo(2.0).Using(FloatEqualityComparer.Instance));
-        Assert.That(anchor.unityZ, Is.EqualTo(3.0).Using(FloatEqualityComparer.Instance));
-        Assert.That(goAnchored.transform.position.x, Is.EqualTo(1.0).Using(FloatEqualityComparer.Instance));
-        Assert.That(goAnchored.transform.position.y, Is.EqualTo(2.0).Using(FloatEqualityComparer.Instance));
-        Assert.That(goAnchored.transform.position.z, Is.EqualTo(3.0).Using(FloatEqualityComparer.Instance));
+        Assert.That(anchor.longitude, Is.EqualTo(-55.0).Using(FloatEqualityComparer.Instance));
+        Assert.That(anchor.latitude, Is.EqualTo(55.0).Using(FloatEqualityComparer.Instance));
+        Assert.That(anchor.height, Is.EqualTo(100.0).Using(FloatEqualityComparer.Instance));
     }
 
     [Test]
-    public void SyncsUnityPositionFromTransformAndBackSingleFrame()
+    public void SettingGlobeAnchorPositionUpdatesTransform()
     {
         GameObject goGeoreference = new GameObject("Georeference");
         CesiumGeoreference georeference = goGeoreference.AddComponent<CesiumGeoreference>();
@@ -52,26 +38,21 @@ public class TestCesiumGlobeAnchor
 
         GameObject goAnchored = new GameObject("Anchored");
         goAnchored.transform.parent = goGeoreference.transform;
-        goAnchored.transform.SetPositionAndRotation(new Vector3(100.0f, 200.0f, 300.0f), Quaternion.Euler(10.0f, 20.0f, 30.0f));
+        goAnchored.transform.SetPositionAndRotation(new Vector3(0.0f, 100.0f, 0.0f), Quaternion.Euler(10.0f, 20.0f, 30.0f));
 
         CesiumGlobeAnchor anchor = goAnchored.AddComponent<CesiumGlobeAnchor>();
 
-        // Manually update the globe anchor properties without waiting for Unity to invoke Start on it.
-        anchor.Sync();
+        // Transform position should be unmodified by adding the globe anchor.
+        Assert.That(goAnchored.transform.position.x, Is.EqualTo(0.0f).Using(FloatEqualityComparer.Instance));
+        Assert.That(goAnchored.transform.position.y, Is.EqualTo(100.0f).Using(FloatEqualityComparer.Instance));
+        Assert.That(goAnchored.transform.position.z, Is.EqualTo(0.0f).Using(FloatEqualityComparer.Instance));
 
-        Assert.AreEqual(CesiumGlobeAnchorPositionAuthority.UnityCoordinates, anchor.positionAuthority);
-        Assert.That(anchor.unityX, Is.EqualTo(100.0).Using(FloatEqualityComparer.Instance));
-        Assert.That(anchor.unityY, Is.EqualTo(200.0).Using(FloatEqualityComparer.Instance));
-        Assert.That(anchor.unityZ, Is.EqualTo(300.0).Using(FloatEqualityComparer.Instance));
+        // Setting the globe anchor position should change the Transform position.
+        anchor.SetPositionLongitudeLatitudeHeight(-56.0, 56.0, 2000.0);
 
-        anchor.SetPositionUnity(1.0, 2.0, 3.0);
-
-        Assert.That(anchor.unityX, Is.EqualTo(1.0).Using(FloatEqualityComparer.Instance));
-        Assert.That(anchor.unityY, Is.EqualTo(2.0).Using(FloatEqualityComparer.Instance));
-        Assert.That(anchor.unityZ, Is.EqualTo(3.0).Using(FloatEqualityComparer.Instance));
-        Assert.That(goAnchored.transform.position.x, Is.EqualTo(1.0).Using(FloatEqualityComparer.Instance));
-        Assert.That(goAnchored.transform.position.y, Is.EqualTo(2.0).Using(FloatEqualityComparer.Instance));
-        Assert.That(goAnchored.transform.position.z, Is.EqualTo(3.0).Using(FloatEqualityComparer.Instance));
+        Assert.That(goAnchored.transform.position.x, Is.Not.EqualTo(0.0f).Using(FloatEqualityComparer.Instance));
+        Assert.That(goAnchored.transform.position.y, Is.Not.EqualTo(100.0f).Using(FloatEqualityComparer.Instance));
+        Assert.That(goAnchored.transform.position.z, Is.Not.EqualTo(0.0f).Using(FloatEqualityComparer.Instance));
     }
 
     [UnityTest]
@@ -141,5 +122,48 @@ public class TestCesiumGlobeAnchor
         Assert.That(goAnchored.transform.rotation.eulerAngles.x, Is.Not.EqualTo(10.0f).Using(FloatEqualityComparer.Instance));
         Assert.That(goAnchored.transform.rotation.eulerAngles.y, Is.Not.EqualTo(20.0f).Using(FloatEqualityComparer.Instance));
         Assert.That(goAnchored.transform.rotation.eulerAngles.z, Is.Not.EqualTo(30.0f).Using(FloatEqualityComparer.Instance));
+    }
+
+    [Test]
+    public void DisabledGlobeAnchorAdjustsForNewGeoreferenceWhenEnabled()
+    {
+        GameObject goGeoreference = new GameObject("Georeference");
+        CesiumGeoreference georeference = goGeoreference.AddComponent<CesiumGeoreference>();
+        georeference.longitude = -55.0;
+        georeference.latitude = 55.0;
+        georeference.height = 1000.0;
+
+        GameObject goAnchored = new GameObject("Anchored");
+        goAnchored.transform.parent = goGeoreference.transform;
+        goAnchored.transform.SetPositionAndRotation(new Vector3(100.0f, 200.0f, 300.0f), Quaternion.Euler(10.0f, 20.0f, 30.0f));
+
+        // Set the globe anchor to a known position on the globe.
+        CesiumGlobeAnchor anchor = goAnchored.AddComponent<CesiumGlobeAnchor>();
+        anchor.adjustOrientationForGlobeWhenMoving = false;
+        anchor.SetPositionLongitudeLatitudeHeight(-56.0, 56.0, 1001.0);
+
+        Assert.That(anchor.positionAuthority, Is.EqualTo(CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight));
+        Assert.That(anchor.longitude, Is.EqualTo(-56.0));
+        Assert.That(anchor.latitude, Is.EqualTo(56.0));
+        Assert.That(anchor.height, Is.EqualTo(1001.0));
+
+        Assert.That(goAnchored.transform.position.x, Is.Not.EqualTo(0.0f).Using(FloatEqualityComparer.Instance));
+        Assert.That(goAnchored.transform.position.y, Is.Not.EqualTo(0.0f).Using(FloatEqualityComparer.Instance));
+        Assert.That(goAnchored.transform.position.z, Is.Not.EqualTo(0.0f).Using(FloatEqualityComparer.Instance));
+
+        // Disable the game object and move the georeference
+        goAnchored.SetActive(false);
+        georeference.SetOriginLongitudeLatitudeHeight(-56.0, 56.0, 1001.0);
+
+        // The disabled object should not move.
+        Assert.That(goAnchored.transform.position.x, Is.Not.EqualTo(0.0f).Using(FloatEqualityComparer.Instance));
+        Assert.That(goAnchored.transform.position.y, Is.Not.EqualTo(0.0f).Using(FloatEqualityComparer.Instance));
+        Assert.That(goAnchored.transform.position.z, Is.Not.EqualTo(0.0f).Using(FloatEqualityComparer.Instance));
+
+        // But then when we enable the object, its position should be updated for the new georeference.
+        goAnchored.SetActive(true);
+        Assert.That(goAnchored.transform.position.x, Is.EqualTo(0.0f).Using(FloatEqualityComparer.Instance));
+        Assert.That(goAnchored.transform.position.y, Is.EqualTo(0.0f).Using(FloatEqualityComparer.Instance));
+        Assert.That(goAnchored.transform.position.z, Is.EqualTo(0.0f).Using(FloatEqualityComparer.Instance));
     }
 }

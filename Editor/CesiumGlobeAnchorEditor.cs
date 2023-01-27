@@ -15,7 +15,7 @@ namespace CesiumForUnity
         // Converts the SerializedProperty's value to the CesiumGeoreferenceOriginAuthority
         // enum it corresponds to, for convenience.
         internal CesiumGlobeAnchorPositionAuthority positionAuthority
-        {   
+        {
             get
             {
                 return (CesiumGlobeAnchorPositionAuthority)
@@ -31,14 +31,9 @@ namespace CesiumForUnity
         private SerializedProperty _ecefY;
         private SerializedProperty _ecefZ;
 
-        private SerializedProperty _unityX;
-        private SerializedProperty _unityY;
-        private SerializedProperty _unityZ;
-
         private bool _previousDetectTransformChanges = false;
 
-        private CesiumGlobeAnchorPositionAuthority 
-            _previousPositionAuthority = CesiumGlobeAnchorPositionAuthority.None;
+        private CesiumGlobeAnchorPositionAuthority? _previousPositionAuthority = null;
 
         private double _previousLatitude = 0.0;
         private double _previousLongitude = 0.0;
@@ -47,10 +42,6 @@ namespace CesiumForUnity
         private double _previousEcefX = 0.0;
         private double _previousEcefY = 0.0;
         private double _previousEcefZ = 0.0;
-
-        private double _previousUnityX = 0.0;
-        private double _previousUnityY = 0.0;
-        private double _previousUnityZ = 0.0;
 
         private void OnEnable()
         {
@@ -70,10 +61,6 @@ namespace CesiumForUnity
             this._ecefX = this.serializedObject.FindProperty("_ecefX");
             this._ecefY = this.serializedObject.FindProperty("_ecefY");
             this._ecefZ = this.serializedObject.FindProperty("_ecefZ");
-
-            this._unityX = this.serializedObject.FindProperty("_unityX");
-            this._unityY = this.serializedObject.FindProperty("_unityY");
-            this._unityZ = this.serializedObject.FindProperty("_unityZ");
         }
 
         public override void OnInspectorGUI()
@@ -86,11 +73,9 @@ namespace CesiumForUnity
             DrawLongitudeLatitudeHeightProperties();
             EditorGUILayout.Space(5);
             DrawEarthCenteredEarthFixedProperties();
-            EditorGUILayout.Space(5);
-            DrawUnityPositionProperties();
 
             this.serializedObject.ApplyModifiedProperties();
-            
+
             this.UpdateGlobeAnchor();
             this.UpdateSavedPropertyValues();
 
@@ -224,36 +209,6 @@ namespace CesiumForUnity
             EditorGUI.EndDisabledGroup();
         }
 
-        private void DrawUnityPositionProperties()
-        {
-            EditorGUI.BeginDisabledGroup(
-                this.positionAuthority != CesiumGlobeAnchorPositionAuthority.UnityCoordinates);
-
-            GUILayout.Label("Position (Unity Local Coordinates)", EditorStyles.boldLabel);
-
-            EditorGUI.BeginChangeCheck();
-
-            GUIContent unityXContent = new GUIContent(
-                "Unity X",
-                "The Unity X coordinate of this game object. This is the same as the Transform's " +
-                "X coordinate but expressed in 64-bit (double) precision.");
-            EditorGUILayout.PropertyField(this._unityX, unityXContent);
-
-            GUIContent unityYContent = new GUIContent(
-                "Unity Y",
-                "The Unity Y coordinate of this game object. This is the same as the Transform's " +
-                "Y coordinate but expressed in 64-bit (double) precision.");
-            EditorGUILayout.PropertyField(this._unityY, unityYContent);
-
-            GUIContent unityZContent = new GUIContent(
-                "Unity Z",
-                "The Unity Z coordinate of this game object. This is the same as the Transform's " +
-                "Z coordinate but expressed in 64-bit (double) precision.");
-            EditorGUILayout.PropertyField(this._unityZ, unityZContent);
-
-            EditorGUI.EndDisabledGroup();
-        }
-
         private bool DetectTransformChangesChanged()
         {
             return this._previousDetectTransformChanges != this._detectTransformChanges.boolValue;
@@ -278,13 +233,6 @@ namespace CesiumForUnity
                 this._previousEcefZ != this._ecefZ.doubleValue;
         }
 
-        private bool UnityPositionChanged()
-        {
-            return this._previousUnityX != this._unityX.doubleValue ||
-                this._previousUnityY != this._unityY.doubleValue ||
-                this._previousUnityZ != this._unityZ.doubleValue;
-        }
-
         private void UpdateGlobeAnchor()
         {
             if (this.DetectTransformChangesChanged())
@@ -294,14 +242,13 @@ namespace CesiumForUnity
             }
 
             bool llhChanged = this.LongitudeLatitudeHeightChanged(),
-                 ecefChanged = this.EarthCenteredEarthFixedChanged(),
-                 unityChanged = this.UnityPositionChanged();
+                 ecefChanged = this.EarthCenteredEarthFixedChanged();
 
             // If all coordinates were changed, either this CesiumGlobeAnchor was just
             // created, or a "Paste component values" action was done or undone on the
             // object. In any case, all the values were applied in ApplyModifiedProperties(), so
             // just update everything in one go.
-            if(llhChanged && ecefChanged && unityChanged)
+            if (llhChanged && ecefChanged)
             {
                 this._globeAnchor.positionAuthority = this._globeAnchor.positionAuthority;
                 return;
@@ -317,19 +264,13 @@ namespace CesiumForUnity
                     this._longitude.doubleValue,
                     this._latitude.doubleValue,
                     this._height.doubleValue);
-            } 
+            }
             else if (ecefChanged)
             {
                 this._globeAnchor.SetPositionEarthCenteredEarthFixed(
                     this._ecefX.doubleValue,
                     this._ecefY.doubleValue,
                     this._ecefZ.doubleValue);
-            } else if (unityChanged)
-            {
-                this._globeAnchor.SetPositionUnity(
-                    this._unityX.doubleValue,
-                    this._unityY.doubleValue,
-                    this._unityZ.doubleValue);
             }
 
             // This only checks for changes to the position authority via the Editor; it will
@@ -353,10 +294,6 @@ namespace CesiumForUnity
             this._previousEcefX = this._globeAnchor.ecefX;
             this._previousEcefY = this._globeAnchor.ecefY;
             this._previousEcefZ = this._globeAnchor.ecefZ;
-
-            this._previousUnityX = this._globeAnchor.unityX;
-            this._previousUnityY = this._globeAnchor.unityY;
-            this._previousUnityZ = this._globeAnchor.unityZ;
         }
     }
 }
