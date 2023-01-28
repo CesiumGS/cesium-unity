@@ -1,6 +1,10 @@
 using Unity.Mathematics;
 using UnityEngine;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 namespace CesiumForUnity
 {
     public enum CesiumGlobeAnchorPositionAuthorityBackwardCompatibility0dot1dot2
@@ -14,41 +18,33 @@ namespace CesiumForUnity
     [ExecuteInEditMode]
     [AddComponentMenu("")]
     [DefaultExecutionOrder(-1000000)]
-    public class CesiumGlobeAnchorBackwardCompatibility0dot1dot2 : MonoBehaviour
+    public class CesiumGlobeAnchorBackwardCompatibility0dot1dot2 : BackwardCompatibilityComponent
     {
-        [SerializeField]
         public bool _adjustOrientationForGlobeWhenMoving = true;
-        [SerializeField]
         public bool _detectTransformChanges = true;
-        [SerializeField]
         public CesiumGlobeAnchorPositionAuthorityBackwardCompatibility0dot1dot2 _positionAuthority = CesiumGlobeAnchorPositionAuthorityBackwardCompatibility0dot1dot2.None;
-        [SerializeField]
         public double _latitude = 0.0;
-        [SerializeField]
         public double _longitude = 0.0;
-        [SerializeField]
         public double _height = 0.0;
-        [SerializeField]
         public double _ecefX = 0.0;
-        [SerializeField]
         public double _ecefY = 0.0;
-        [SerializeField]
         public double _ecefZ = 0.0;
-        [SerializeField]
         public double _unityX = 0.0;
-        [SerializeField]
         public double _unityY = 0.0;
-        [SerializeField]
         public double _unityZ = 0.0;
 
-        void OnEnable()
+        protected override string UpgradedComponent => "CesiumGlobeAnchor";
+        protected override string UpgradedVersion => "v0.1.2";
+
+        protected override void Upgrade()
         {
             // Try getting the real CesiumGlobeAnchor before adding it, because it may have been
             // created automatically by Unity because of the RequireComponent attribute.
-            CesiumGlobeAnchor upgraded = this.gameObject.GetComponent<CesiumGlobeAnchor>();
+            GameObject go = this.gameObject;
+            CesiumGlobeAnchor upgraded = go.GetComponent<CesiumGlobeAnchor>();
             if (upgraded == null)
             {
-                upgraded = this.gameObject.AddComponent<CesiumGlobeAnchor>();
+                upgraded = go.AddComponent<CesiumGlobeAnchor>();
             }
 
             // Temporarily disable orientation adjustment so that we can set the position without
@@ -84,8 +80,6 @@ namespace CesiumForUnity
 
             upgraded.adjustOrientationForGlobeWhenMoving = this._adjustOrientationForGlobeWhenMoving;
             upgraded.detectTransformChanges = this._detectTransformChanges;
-
-            Helpers.Destroy(this);
         }
     }
 }
