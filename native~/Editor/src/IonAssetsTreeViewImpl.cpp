@@ -32,9 +32,6 @@ IonAssetsTreeViewImpl::IonAssetsTreeViewImpl(
 
 IonAssetsTreeViewImpl::~IonAssetsTreeViewImpl() {}
 
-void IonAssetsTreeViewImpl::JustBeforeDelete(
-    const DotNet::CesiumForUnity::IonAssetsTreeView& treeView) {}
-
 int IonAssetsTreeViewImpl::GetAssetsCount(
     const DotNet::CesiumForUnity::IonAssetsTreeView& treeView) {
   return this->_assets.size();

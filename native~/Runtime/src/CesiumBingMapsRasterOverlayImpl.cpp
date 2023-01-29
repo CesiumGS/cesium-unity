@@ -23,9 +23,6 @@ CesiumBingMapsRasterOverlayImpl::CesiumBingMapsRasterOverlayImpl(
 
 CesiumBingMapsRasterOverlayImpl::~CesiumBingMapsRasterOverlayImpl() {}
 
-void CesiumBingMapsRasterOverlayImpl::JustBeforeDelete(
-    const ::DotNet::CesiumForUnity::CesiumBingMapsRasterOverlay& overlay) {}
-
 void CesiumBingMapsRasterOverlayImpl::AddToTileset(
     const ::DotNet::CesiumForUnity::CesiumBingMapsRasterOverlay& overlay,
     const ::DotNet::CesiumForUnity::Cesium3DTileset& tileset) {

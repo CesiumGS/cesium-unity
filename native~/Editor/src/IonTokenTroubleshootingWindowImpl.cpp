@@ -24,9 +24,6 @@ IonTokenTroubleshootingWindowImpl::IonTokenTroubleshootingWindowImpl(
 
 IonTokenTroubleshootingWindowImpl::~IonTokenTroubleshootingWindowImpl() {}
 
-void IonTokenTroubleshootingWindowImpl::JustBeforeDelete(
-    const DotNet::CesiumForUnity::IonTokenTroubleshootingWindow& window) {}
-
 namespace {
 
 void getTokenTroubleShootingDetails(

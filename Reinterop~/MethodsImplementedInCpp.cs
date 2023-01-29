@@ -49,8 +49,8 @@ namespace Reinterop
                     private void CreateImplementation()
                     {
                         Reinterop.ReinteropInitializer.Initialize();
-                        System.Diagnostics.Debug.Assert(_implementation == System.IntPtr.Zero, "Implementation is already created. Be sure to call CreateImplementation only once.");
-                        _implementation = {{createName}}(Reinterop.ObjectHandleUtility.CreateHandle(this));
+                        System.Diagnostics.Debug.Assert(this._implementation == null, "Implementation is already created. Be sure to call CreateImplementation only once.");
+                        this._implementation = new ImplementationHandle(this);
                     }
                     """,
                     interopFunctionDeclaration:
@@ -59,17 +59,15 @@ namespace Reinterop
                     private static extern System.IntPtr {{createName}}(System.IntPtr thiz);
                     """));
 
-                string disposeName = $$"""{{wrapperType.GetFullyQualifiedName(false).Replace("::", "_")}}_Dispose""";
+                string destroyName = $$"""{{wrapperType.GetFullyQualifiedName(false).Replace("::", "_")}}_DestroyImplementation""";
                 result.CppImplementationInvoker.Functions.Add(new(
                     Content:
                         $$"""
                     #if defined(_WIN32)
                     __declspec(dllexport)
                     #endif
-                    void {{disposeName}}(void* handle, void* pImpl) {
-                      const {{wrapperType.GetFullyQualifiedName()}} wrapper{{{objectHandleType.GetFullyQualifiedName()}}(handle)};
+                    void {{destroyName}}(void* pImpl) {
                       auto pImplTyped = reinterpret_cast<{{implType.GetFullyQualifiedName()}}*>(pImpl);
-                      pImplTyped->JustBeforeDelete(wrapper);
                       delete pImplTyped;
                     }
                     """,
@@ -81,38 +79,24 @@ namespace Reinterop
                     }));
 
                 // Always add a protected DisposeImplementation method.
+                // This method must take a raw IntPtr to the implementation, rather than an ImplementationHandle.
+                // Otherwise .NET (or at least Unity's Mono) will complain that the handle has already been closed
+                // when we try to call the destroy method using it.
                 result.CSharpPartialMethodDefinitions.Methods.Add(new(
                     methodDefinition:
                         $$"""
                     protected void DisposeImplementation()
                     {
-                        if (_implementation != System.IntPtr.Zero)
-                        {
-                            {{disposeName}}(Reinterop.ObjectHandleUtility.CreateHandle(this), _implementation);
-                            _implementation = System.IntPtr.Zero;
-                        }
+                        if (this._implementation != null && !this._implementation.IsInvalid)
+                            this._implementation.Dispose();
+                        this._implementation = null;
                     }
                     """,
                     interopFunctionDeclaration:
                         $$"""
                     [DllImport("{{context.NativeLibraryName}}", CallingConvention=CallingConvention.Cdecl)]
-                    private static extern void {{disposeName}}(System.IntPtr thiz, System.IntPtr implementation);
+                    private static extern void {{destroyName}}(System.IntPtr implementation);
                     """));
-
-                // If there is no finalizer, create one that calls DisposeImplementation.
-                // But if the other half of this partial class has a finalizer already, we can't add one, so it's on
-                // the implementer of that other class to call DisposeImplementation themselves.
-                if (!item.Type.GetMembers("Finalize").Any())
-                {
-                    result.CSharpPartialMethodDefinitions.Methods.Add(new(
-                        methodDefinition:
-                            $$"""
-                        ~{{wrapperType.Name}}()
-                        {
-                            DisposeImplementation();
-                        }
-                        """));
-                }
 
                 // If there is no parameterless Dispose Method, add one. If the base class has one, call it (and mark it override if needed).
                 // But if the other half of this partial class implements Dispose, it's on the implementer of that other class to
@@ -126,8 +110,8 @@ namespace Reinterop
                         public {{(baseDisposeMethod != null && baseDisposeMethod.IsVirtual ? "override " : "")}}void Dispose()
                         {
                             {{(baseDisposeMethod != null
-                                        ? "base.Dispose();" // let the base class suppress finalization if desired
-                                        : "GC.SuppressFinalize(this);"
+                                        ? "base.Dispose();" // call the base class dispose if there is one.
+                                        : ""
                                     )}}
                             this.DisposeImplementation();
                         }
@@ -205,8 +189,11 @@ namespace Reinterop
                     genericTypeHash = Interop.HashParameters(null, named.TypeArguments);
                 }
 
-                string baseName = $"{csWrapperType.GetFullyQualifiedNamespace().Replace(".", "_")}_{csWrapperType.Symbol.Name}{genericTypeHash}_Property_get_NativeImplementation";
+                string baseName = $"{csWrapperType.GetFullyQualifiedNamespace().Replace(".", "_")}_{csWrapperType.Name}{genericTypeHash}_Property_get_NativeImplementation";
 
+                // Ideally the wrapper for NativeImplementation would return an ImplementationHandle.
+                // But Mono explodes, saying a managed function returning a SafeHandle is not implemented.
+                // So just use an IntPtr here instead.
                 result.Init.Functions.Add(new(
                     CppName: $"{wrapperType.GetFullyQualifiedName()}::Property_get_NativeImplementation",
                     CppTypeSignature: $"void* (*)(void*)",
@@ -214,12 +201,12 @@ namespace Reinterop
                     CSharpContent:
                         $$"""
                         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-                        private unsafe delegate IntPtr {{baseName}}Type(IntPtr thiz);
+                        private unsafe delegate System.IntPtr {{baseName}}Type(IntPtr thiz);
                         private static unsafe readonly {{baseName}}Type {{baseName}}Delegate = new {{baseName}}Type({{baseName}});
                         [AOT.MonoPInvokeCallback(typeof({{baseName}}Type))]
-                        private static unsafe IntPtr {{baseName}}(IntPtr thiz)
+                        private static unsafe System.IntPtr {{baseName}}(IntPtr thiz)
                         {
-                            return ({{csWrapperType.GetParameterConversionFromInteropType("thiz")}}).NativeImplementation;
+                            return ({{csWrapperType.GetParameterConversionFromInteropType("thiz")}}).NativeImplementation.DangerousGetHandle();
                         }
                         """
                 ));
@@ -346,7 +333,7 @@ namespace Reinterop
             CSharpType csReturnType = CSharpType.FromSymbol(context, method.ReturnType);
             var csParameters = method.Parameters.Select(parameter => (Name: parameter.Name, CallName: parameter.Name, Type: CSharpType.FromSymbol(context, parameter.Type)));
             var csParametersInterop = csParameters;
-            var implementationPointer = CSharpType.FromSymbol(context, context.Compilation.GetSpecialType(SpecialType.System_IntPtr));
+            var implementationPointer = new CSharpType(context, InteropTypeKind.Primitive, csWrapperType.Namespaces, csWrapperType.Name + ".ImplementationHandle", csWrapperType.SpecialType, null);
 
             if (!method.IsStatic)
             {
@@ -370,12 +357,12 @@ namespace Reinterop
                 csImplementationLines.Add($"var returnValue = new {csOriginalInteropReturnType.AsInteropTypeReturn().GetFullyQualifiedName()}();");
             }
 
-            if (csInteropReturnType.Symbol.SpecialType == SpecialType.System_Void)
+            if (csInteropReturnType.SpecialType == SpecialType.System_Void)
                 csImplementationLines.Add($"{name}({string.Join(", ", csParametersInterop.Select(parameter => parameter.Type.GetConversionToInteropType(parameter.CallName)))});");
             else
                 csImplementationLines.Add($"var result = {name}({string.Join(", ", csParametersInterop.Select(parameter => parameter.Type.GetConversionToInteropType(parameter.CallName)))});");
 
-            if (csReturnType.Symbol.SpecialType != SpecialType.System_Void)
+            if (csReturnType.SpecialType != SpecialType.System_Void)
             {
                 if (hasStructRewrite)
                 {
@@ -400,7 +387,7 @@ namespace Reinterop
             {
                 implementationCheck =
                     $$"""
-                    if (this._implementation == System.IntPtr.Zero)
+                    if (this._implementation == null || this._implementation.IsInvalid)
                         throw new NotImplementedException("The native implementation is missing so {{method.Name}} cannot be invoked. This may be caused by a missing call to CreateImplementation in one of your constructors, or it may be that the entire native implementation shared library is missing or out of date.");
                     """;
             }

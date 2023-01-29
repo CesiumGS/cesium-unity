@@ -33,9 +33,6 @@ CesiumEditorWindowImpl::CesiumEditorWindowImpl(
 
 CesiumEditorWindowImpl::~CesiumEditorWindowImpl() {}
 
-void CesiumEditorWindowImpl::JustBeforeDelete(
-    const DotNet::CesiumForUnity::CesiumEditorWindow& window) {}
-
 void CesiumEditorWindowImpl::AddAssetFromIon(
     const DotNet::CesiumForUnity::CesiumEditorWindow& window,
     DotNet::System::String name,

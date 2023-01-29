@@ -39,8 +39,14 @@ namespace CesiumForUnity
     /// </remarks>
     [ExecuteInEditMode]
     [ReinteropNativeImplementation("CesiumForUnityNative::Cesium3DTilesetImpl", "Cesium3DTilesetImpl.h")]
-    public partial class Cesium3DTileset : MonoBehaviour
+    public partial class Cesium3DTileset : MonoBehaviour, IDisposable
     {
+        public void Dispose()
+        {
+            this.OnDisable();
+            this.DisposeImplementation();
+        }
+
         /// <summary>
         /// Encapsulates a method that receives details of a tileset load failure.
         /// </summary>

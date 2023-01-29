@@ -326,7 +326,7 @@ namespace Reinterop
 
         public static string GetUniqueNameForType(CSharpType type)
         {
-            string name = type.Symbol.Name;
+            string name = type.Name;
             string genericTypeHash = "";
             INamedTypeSymbol? named = type.Symbol as INamedTypeSymbol;
             if (named != null && named.IsGenericType)

@@ -53,11 +53,6 @@ Cesium3DTilesetImpl::Cesium3DTilesetImpl(
 
 Cesium3DTilesetImpl::~Cesium3DTilesetImpl() {}
 
-void Cesium3DTilesetImpl::JustBeforeDelete(
-    const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
-  this->OnDisable(tileset);
-}
-
 void Cesium3DTilesetImpl::Start(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {}
 

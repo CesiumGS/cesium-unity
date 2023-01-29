@@ -19,8 +19,6 @@ public:
       const DotNet::CesiumForUnity::CesiumIonRasterOverlay& overlay);
   ~CesiumIonRasterOverlayImpl();
 
-  void JustBeforeDelete(
-      const ::DotNet::CesiumForUnity::CesiumIonRasterOverlay& overlay);
   void AddToTileset(
       const ::DotNet::CesiumForUnity::CesiumIonRasterOverlay& overlay,
       const ::DotNet::CesiumForUnity::Cesium3DTileset& tileset);

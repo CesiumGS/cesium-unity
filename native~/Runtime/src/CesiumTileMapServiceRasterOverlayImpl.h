@@ -19,9 +19,6 @@ public:
       const DotNet::CesiumForUnity::CesiumTileMapServiceRasterOverlay& overlay);
   ~CesiumTileMapServiceRasterOverlayImpl();
 
-  void JustBeforeDelete(
-      const ::DotNet::CesiumForUnity::CesiumTileMapServiceRasterOverlay&
-          overlay);
   void AddToTileset(
       const ::DotNet::CesiumForUnity::CesiumTileMapServiceRasterOverlay&
           overlay,

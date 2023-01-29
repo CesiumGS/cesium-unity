@@ -24,9 +24,6 @@ CesiumIonRasterOverlayImpl::CesiumIonRasterOverlayImpl(
 
 CesiumIonRasterOverlayImpl::~CesiumIonRasterOverlayImpl() {}
 
-void CesiumIonRasterOverlayImpl::JustBeforeDelete(
-    const ::DotNet::CesiumForUnity::CesiumIonRasterOverlay& overlay) {}
-
 void CesiumIonRasterOverlayImpl::AddToTileset(
     const ::DotNet::CesiumForUnity::CesiumIonRasterOverlay& overlay,
     const ::DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
