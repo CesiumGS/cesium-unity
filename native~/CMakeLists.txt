@@ -25,7 +25,6 @@ set( SUPPORT_CONSOLE_APP OFF)
 add_subdirectory(extern/tidy-html5 EXCLUDE_FROM_ALL)
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Android")
-  set(CESIUM_ARCHITECTURE "aarch64")
   set(HTTPLIB_USE_OPENSSL_IF_AVAILABLE OFF)
   set(ANDROID_ABI ${CMAKE_ANDROID_ARCH_ABI})
   set(ANDROID_NDK ${CMAKE_ANDROID_NDK})
@@ -45,10 +44,10 @@ endif()
 
 # Specify all targets that need to compile bitcode
 if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
-    set (ALL_TARGETS 
+    set (ALL_TARGETS
         CesiumForUnityNative-Runtime
         Async++
-        Cesium3DTilesSelection 
+        Cesium3DTilesSelection
         CesiumAsync
         CesiumGeospatial
         CesiumGeometry
@@ -58,15 +57,15 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
         CesiumUtility
         draco_attributes
         draco_compression_attributes_dec
-        draco_compression_bit_coders 
-        draco_compression_entropy 
+        draco_compression_bit_coders
+        draco_compression_entropy
         draco_compression_decode
         draco_compression_mesh_dec
         draco_compression_point_cloud_dec
         draco_core
         draco_mesh
-        draco_metadata 
-        draco_metadata_dec 
+        draco_metadata
+        draco_metadata_dec
         draco_point_cloud
         draco_points_dec
         draco_static
@@ -81,9 +80,9 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
         tinyxml2
         tidy-static
         uriparser
-        webpdecode 
+        webpdecode
         webpdecoder
-        webpdspdecode 
+        webpdspdecode
         webputils
         webputilsdecode
     )
