@@ -3,17 +3,17 @@
 #include <CesiumGltf/AccessorView.h>
 #include <CesiumGltf/Model.h>
 
+#include <DotNet/CesiumForUnity/MetadataProperty.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/String.h>
 #include <DotNet/UnityEngine/GameObject.h>
-#include <DotNet/CesiumForUnity/MetadataProperty.h>
 
 #include <unordered_map>
 
 namespace DotNet::CesiumForUnity {
 class CesiumMetadata;
 class FeatureReference;
-}
+} // namespace DotNet::CesiumForUnity
 
 namespace DotNet::UnityEngine {
 class Transform;
