@@ -1,6 +1,12 @@
 # Change Log
 
+### v?.?.?
+
 ### v0.2.0
+
+##### Additions :tada:
+
+- Metadata features are now separated based on feature tables. Properties can now be accessed by name.
 
 ##### Breaking Changes :mega:
 

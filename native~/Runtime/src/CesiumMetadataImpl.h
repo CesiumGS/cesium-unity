@@ -3,15 +3,16 @@
 #include <CesiumGltf/AccessorView.h>
 #include <CesiumGltf/Model.h>
 
-#include <DotNet/CesiumForUnity/MetadataProperty.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/String.h>
 #include <DotNet/UnityEngine/GameObject.h>
+#include <DotNet/CesiumForUnity/MetadataProperty.h>
 
 #include <unordered_map>
 
 namespace DotNet::CesiumForUnity {
 class CesiumMetadata;
+class FeatureReference;
 }
 
 namespace DotNet::UnityEngine {
@@ -32,27 +33,34 @@ class CesiumMetadataImpl {
 public:
   ~CesiumMetadataImpl(){};
   CesiumMetadataImpl(const DotNet::CesiumForUnity::CesiumMetadata& metadata){};
-  void loadMetadata(
+  void
+  JustBeforeDelete(const DotNet::CesiumForUnity::CesiumMetadata& metadata){};
+  void addMetadata(
       int32_t instanceID,
       const CesiumGltf::Model* pModel,
       const CesiumGltf::MeshPrimitive* pPrimitive);
 
-  void unloadMetadata(int32_t instanceID);
+  void removeMetadata(int32_t instanceID);
 
-  void loadMetadata(
-      const DotNet::CesiumForUnity::CesiumMetadata& metadata,
-      const DotNet::UnityEngine::Transform& transform,
-      int triangleIndex,
-      DotNet::System::Array1<DotNet::CesiumForUnity::MetadataProperty>
-          properties);
-
-  int getNumberOfProperties(
+  int getNumberOfFeatures(
       const DotNet::CesiumForUnity::CesiumMetadata& metadata,
       const DotNet::UnityEngine::Transform& transform);
 
-private:
-  void loadMetadata();
+  void getFeatureReferences(
+      const DotNet::CesiumForUnity::CesiumMetadata& metadata,
+      const DotNet::UnityEngine::Transform& transform,
+      int triangleIndex,
+      DotNet::System::Array1<DotNet::CesiumForUnity::FeatureReference>
+          attributes);
 
+  void getProperties(
+      const DotNet::CesiumForUnity::CesiumMetadata& metadata,
+      const DotNet::UnityEngine::Transform& transform,
+      DotNet::CesiumForUnity::FeatureReference attribute,
+      DotNet::System::Array1<DotNet::CesiumForUnity::MetadataProperty>
+          properties);
+
+private:
   std::unordered_map<
       int32_t,
       std::pair<const CesiumGltf::Model*, const CesiumGltf::MeshPrimitive*>>

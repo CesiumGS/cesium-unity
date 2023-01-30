@@ -314,7 +314,15 @@ namespace CesiumForUnity
             MetadataProperty[] properties = new MetadataProperty[3];
             var property = properties[0];
             properties[0] = property;
-            metadata.loadMetadata(t, 0, properties);
+            CesiumMetadata.FeatureReference[] references = new CesiumMetadata.FeatureReference[2];
+            var reference = references[0];
+            reference.className = "";
+            reference.featureTable = "";
+            reference.featureID = 0;
+            reference.numProperties = 0;
+            metadata.getFeatureReferences(transform, 0, references);
+            metadata.GetFeatures(transform, 3);
+            metadata.getNumberOfFeatures(transform);
 
             CesiumGeoreference georeference = go.AddComponent<CesiumGeoreference>();
             georeference = go.GetComponent<CesiumGeoreference>();

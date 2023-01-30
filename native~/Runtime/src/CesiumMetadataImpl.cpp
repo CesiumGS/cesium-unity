@@ -1,13 +1,14 @@
 #include "CesiumMetadataImpl.h"
 
 #include <CesiumGltf/AccessorView.h>
+#include <CesiumGltf/Class.h>
 #include <CesiumGltf/ExtensionMeshPrimitiveExtFeatureMetadata.h>
 #include <CesiumGltf/ExtensionModelExtFeatureMetadata.h>
 #include <CesiumGltf/MetadataFeatureTableView.h>
 #include <CesiumGltf/MetadataPropertyView.h>
 
+#include <DotNet/CesiumForUnity/FeatureReference.h>
 #include <DotNet/CesiumForUnity/CesiumMetadata.h>
-#include <DotNet/CesiumForUnity/MetadataProperty.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/UnityEngine/GameObject.h>
 #include <DotNet/UnityEngine/Mesh.h>
@@ -16,18 +17,9 @@
 using namespace CesiumForUnityNative;
 using namespace CesiumGltf;
 
-void CesiumMetadataImpl::loadMetadata(
-    const DotNet::CesiumForUnity::CesiumMetadata& metadata,
-    const DotNet::UnityEngine::Transform& transform,
-    int triangleIndex,
-    DotNet::System::Array1<DotNet::CesiumForUnity::MetadataProperty>
-        properties) {
-  auto find = this->_pModels.find(transform.GetInstanceID());
-  if (find != this->_pModels.end()) {
+namespace{
 
-    const Model* pModel = find->second.first;
-    const MeshPrimitive* pPrimitive = find->second.second;
-
+  int64_t getVertexIndexFromTriangleIndex(const CesiumGltf::Model* pModel, const CesiumGltf::MeshPrimitive* pPrimitive, int64_t triangleIndex){
     const Accessor& indicesAccessor =
         pModel->getSafe(pModel->accessors, pPrimitive->indices);
 
@@ -51,7 +43,7 @@ void CesiumMetadataImpl::loadMetadata(
       break;
     }
 
-    int64_t vertexIndex = std::visit(
+    return std::visit(
         [index = triangleIndex * 3](auto&& value) {
           if (index >= 0 && index < value.size()) {
             return static_cast<int64_t>(value[index].value[0]);
@@ -60,32 +52,26 @@ void CesiumMetadataImpl::loadMetadata(
           }
         },
         indicesView);
+  }
 
-    const ExtensionModelExtFeatureMetadata* pModelMetadata =
-        pModel->getExtension<ExtensionModelExtFeatureMetadata>();
-    const ExtensionMeshPrimitiveExtFeatureMetadata* pMetadata =
-        pPrimitive->getExtension<ExtensionMeshPrimitiveExtFeatureMetadata>();
-
-    int propertiesIndex = 0;
-    for (const CesiumGltf::FeatureIDAttribute& attribute :
-         pMetadata->featureIdAttributes) {
-      if (attribute.featureIds.attribute) {
+  int64_t getFeatureIdFromVertexIndex(const CesiumGltf::Model* pModel, const CesiumGltf::MeshPrimitive* pPrimitive,
+          const std::optional<std::string>& attribute, int64_t vertexIndex){
+      if (attribute){
         auto featureAttribute =
-            pPrimitive->attributes.find(attribute.featureIds.attribute.value());
+            pPrimitive->attributes.find(attribute.value());
         if (featureAttribute == pPrimitive->attributes.end()) {
-          continue;
+          return -1;
         }
         const CesiumGltf::Accessor* accessor =
             pModel->getSafe<CesiumGltf::Accessor>(
                 &pModel->accessors,
                 featureAttribute->second);
         if (!accessor) {
-          continue;
+          return -1;
         }
         if (accessor->type != CesiumGltf::Accessor::Type::SCALAR) {
-          continue;
+          return -1;
         }
-
         AccessorType featureIDAccessor;
         switch (accessor->componentType) {
         case CesiumGltf::Accessor::ComponentType::BYTE:
@@ -109,10 +95,9 @@ void CesiumMetadataImpl::loadMetadata(
               CesiumGltf::AccessorTypes::SCALAR<float>>(*pModel, *accessor);
           break;
         default:
-          continue;
+          return 0;
         }
-
-        int64_t featureID = std::visit(
+        return std::visit(
             [vertexIndex](auto&& value) {
               if (vertexIndex >= 0 && vertexIndex < value.size()) {
                 return static_cast<int64_t>(value[vertexIndex].value[0]);
@@ -121,74 +106,118 @@ void CesiumMetadataImpl::loadMetadata(
               }
             },
             featureIDAccessor);
-
-        auto find = pModelMetadata->featureTables.find(attribute.featureTable);
-        if (find != pModelMetadata->featureTables.end()) {
-          const CesiumGltf::FeatureTable& featureTable = find->second;
-          CesiumGltf::MetadataFeatureTableView featureTableView{
-              pModel,
-              &featureTable};
-          featureTableView.forEachProperty(
-              [featureID, &propertiesIndex, &properties](
-                  const std::string& propertyName,
-                  auto propertyType) {
-                ValueType propertyValue = std::visit(
-                    [featureID](auto&& value) {
-                      if (featureID >= 0 && featureID < value.size()) {
-                        return static_cast<ValueType>(value.get(featureID));
-                      } else {
-                        return static_cast<ValueType>(0);
-                      }
-                    },
-                    static_cast<PropertyType>(propertyType));
-                DotNet::CesiumForUnity::MetadataProperty property =
-                    properties[propertiesIndex++];
-                property.NativeImplementation().SetProperty(
-                    propertyName,
-                    propertyType,
-                    propertyValue);
-              });
-        }
-      }
     }
+    return -1;
+  }
+
+  void getProperties(const CesiumGltf::Model* pModel, const ExtensionModelExtFeatureMetadata* pModelMetadata,
+          const std::string& featureTable, int64_t featureID, DotNet::System::Array1<DotNet::CesiumForUnity::MetadataProperty> properties){
+      auto find = pModelMetadata->featureTables.find(featureTable);
+      if (find != pModelMetadata->featureTables.end()) {
+      const CesiumGltf::FeatureTable& featureTable = find->second;
+      CesiumGltf::MetadataFeatureTableView featureTableView{
+          pModel,
+          &featureTable};
+      int propertiesIndex = 0;
+      featureTableView.forEachProperty(
+          [featureID, &propertiesIndex, &properties](
+              const std::string& propertyName,
+              auto propertyType) {
+            ValueType propertyValue = std::visit(
+                [featureID](auto&& value) {
+                  if (featureID >= 0 && featureID < value.size()) {
+                    return static_cast<ValueType>(value.get(featureID));
+                  } else {
+                    return static_cast<ValueType>(0);
+                  }
+                },
+                static_cast<CesiumForUnityNative::PropertyType>(propertyType));
+            DotNet::CesiumForUnity::MetadataProperty property =
+                properties[propertiesIndex++];
+            property.NativeImplementation().SetProperty(
+                propertyName,
+                propertyType,
+                propertyValue);
+          });
+      }
   }
 }
 
-void CesiumMetadataImpl::loadMetadata(
+void CesiumMetadataImpl::addMetadata(
     int32_t instanceID,
     const CesiumGltf::Model* pModel,
     const CesiumGltf::MeshPrimitive* pPrimitive) {
   this->_pModels.insert({instanceID, {pModel, pPrimitive}});
 }
 
-void CesiumMetadataImpl::unloadMetadata(int32_t instanceID) {
+void CesiumMetadataImpl::removeMetadata(int32_t instanceID) {
   auto find = this->_pModels.find(instanceID);
   if (find != this->_pModels.end()) {
     this->_pModels.erase(find);
   }
 }
 
-int CesiumMetadataImpl::getNumberOfProperties(
+int CesiumForUnityNative::CesiumMetadataImpl::getNumberOfFeatures(
     const DotNet::CesiumForUnity::CesiumMetadata& metadata,
     const DotNet::UnityEngine::Transform& transform) {
-
-  int totalNumberOfProperties = 0;
-
   auto find = this->_pModels.find(transform.GetInstanceID());
   if (find != this->_pModels.end()) {
-    const CesiumGltf::Model* pModel = find->second.first;
     const CesiumGltf::MeshPrimitive* pPrimitive = find->second.second;
+    const ExtensionMeshPrimitiveExtFeatureMetadata* pMetadata =
+        pPrimitive->getExtension<ExtensionMeshPrimitiveExtFeatureMetadata>();
+    return pMetadata->featureIdAttributes.size();
+  }
+  return 0;
+}
+
+void CesiumForUnityNative::CesiumMetadataImpl::getFeatureReferences(
+      const DotNet::CesiumForUnity::CesiumMetadata& metadata,
+      const DotNet::UnityEngine::Transform& transform,
+      int triangleIndex,
+      DotNet::System::Array1<DotNet::CesiumForUnity::FeatureReference> references) {
+  auto find = this->_pModels.find(transform.GetInstanceID());
+  if (find != this->_pModels.end()) {
+
+    const Model* pModel = find->second.first;
+    const MeshPrimitive* pPrimitive = find->second.second;
+
+    int64_t vertexIndex = getVertexIndexFromTriangleIndex(pModel, pPrimitive, triangleIndex);
     const ExtensionModelExtFeatureMetadata* pModelMetadata =
         pModel->getExtension<ExtensionModelExtFeatureMetadata>();
     const ExtensionMeshPrimitiveExtFeatureMetadata* pMetadata =
         pPrimitive->getExtension<ExtensionMeshPrimitiveExtFeatureMetadata>();
-    for (const CesiumGltf::FeatureIDAttribute& attribute :
-         pMetadata->featureIdAttributes) {
-      auto find = pModelMetadata->featureTables.find(attribute.featureTable);
+
+    int referenceIndex = 0;
+    for(auto it = pMetadata->featureIdAttributes.begin(); it != pMetadata->featureIdAttributes.end(); it++, referenceIndex++){
+      DotNet::CesiumForUnity::FeatureReference reference = references[referenceIndex];
+      auto find = pModelMetadata->featureTables.find(it->featureTable);
       if (find != pModelMetadata->featureTables.end()) {
-        totalNumberOfProperties += find->second.properties.size();
+          reference.featureTable(find->first);
+          reference.numProperties(find->second.properties.size());
+          reference.featureID(getFeatureIdFromVertexIndex(pModel, pPrimitive, it->featureIds.attribute, vertexIndex));
+          if(find->second.classProperty && pModelMetadata->schema.has_value())
+          {
+              auto classIt = pModelMetadata->schema->classes.find(*find->second.classProperty);
+              if(classIt != pModelMetadata->schema->classes.end() && classIt->second.name.has_value()){
+                reference.className(*classIt->second.name);
+              }
+          }
       }
     }
   }
-  return totalNumberOfProperties;
+}
+
+void CesiumForUnityNative::CesiumMetadataImpl::getProperties(
+      const DotNet::CesiumForUnity::CesiumMetadata& metadata,
+      const DotNet::UnityEngine::Transform& transform,
+      DotNet::CesiumForUnity::FeatureReference reference,
+      DotNet::System::Array1<DotNet::CesiumForUnity::MetadataProperty>
+          properties){
+  auto find = this->_pModels.find(transform.GetInstanceID());
+  if (find != this->_pModels.end()) {
+    const Model* pModel = find->second.first;
+    const ExtensionModelExtFeatureMetadata* pModelMetadata =
+        pModel->getExtension<ExtensionModelExtFeatureMetadata>();
+    ::getProperties(pModel, pModelMetadata, reference.featureTable().ToStlString(), reference.featureID(), properties);
+  }
 }
