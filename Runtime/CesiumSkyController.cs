@@ -227,7 +227,7 @@ public class CesiumSkyController : MonoBehaviour
         if (_sunLight != null)
         {
             _sunLight.transform.localEulerAngles = newSunRotation;
-            Shader.SetGlobalVector("_SunDirectionSG", -_sunLight.transform.forward);
+            Shader.SetGlobalVector("_SunDirection", -_sunLight.transform.forward);
         }
     }
 
@@ -289,7 +289,6 @@ public class CesiumSkyController : MonoBehaviour
             {
                 UpdateSky();
             }
-
         }
     }
 
