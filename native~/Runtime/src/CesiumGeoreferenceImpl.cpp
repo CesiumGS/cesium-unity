@@ -94,7 +94,7 @@ CesiumGeoreferenceImpl::TransformUnityPositionToEarthCenteredEarthFixed(
     const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
     DotNet::Unity::Mathematics::double3 unityPosition) {
   const LocalHorizontalCoordinateSystem& coordinateSystem =
-      this->getCoordinateSystem();
+      this->getCoordinateSystem(georeference);
   glm::dvec3 result = coordinateSystem.localPositionToEcef(
       glm::dvec3(unityPosition.x, unityPosition.y, unityPosition.z));
   return DotNet::Unity::Mathematics::double3{result.x, result.y, result.z};
@@ -105,7 +105,7 @@ CesiumGeoreferenceImpl::TransformEarthCenteredEarthFixedPositionToUnity(
     const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
     DotNet::Unity::Mathematics::double3 earthCenteredEarthFixed) {
   const LocalHorizontalCoordinateSystem& coordinateSystem =
-      this->getCoordinateSystem();
+      this->getCoordinateSystem(georeference);
   glm::dvec3 result = coordinateSystem.ecefPositionToLocal(glm::dvec3(
       earthCenteredEarthFixed.x,
       earthCenteredEarthFixed.y,
@@ -118,7 +118,7 @@ CesiumGeoreferenceImpl::TransformUnityDirectionToEarthCenteredEarthFixed(
     const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
     DotNet::Unity::Mathematics::double3 unityDirection) {
   const LocalHorizontalCoordinateSystem& coordinateSystem =
-      this->getCoordinateSystem();
+      this->getCoordinateSystem(georeference);
   glm::dvec3 result = coordinateSystem.localDirectionToEcef(
       glm::dvec3(unityDirection.x, unityDirection.y, unityDirection.z));
   return DotNet::Unity::Mathematics::double3{result.x, result.y, result.z};
@@ -129,7 +129,7 @@ CesiumGeoreferenceImpl::TransformEarthCenteredEarthFixedDirectionToUnity(
     const DotNet::CesiumForUnity::CesiumGeoreference& georeference,
     DotNet::Unity::Mathematics::double3 earthCenteredEarthFixedDirection) {
   const LocalHorizontalCoordinateSystem& coordinateSystem =
-      this->getCoordinateSystem();
+      this->getCoordinateSystem(georeference);
   glm::dvec3 result = coordinateSystem.ecefDirectionToLocal(glm::dvec3(
       earthCenteredEarthFixedDirection.x,
       earthCenteredEarthFixedDirection.y,

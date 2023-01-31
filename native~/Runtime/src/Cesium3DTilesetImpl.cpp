@@ -267,7 +267,8 @@ void Cesium3DTilesetImpl::FocusTileset(
           .GetComponentInParent<DotNet::CesiumForUnity::CesiumGeoreference>();
 
   const CesiumGeospatial::LocalHorizontalCoordinateSystem& georeferenceCrs =
-      georeferenceComponent.NativeImplementation().getCoordinateSystem();
+      georeferenceComponent.NativeImplementation().getCoordinateSystem(
+          georeferenceComponent);
   const glm::dmat4& ecefToUnityWorld =
       georeferenceCrs.getEcefToLocalTransformation();
 

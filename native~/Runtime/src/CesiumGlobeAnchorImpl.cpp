@@ -28,7 +28,7 @@ namespace CesiumForUnityNative {
     return;
 
   const LocalHorizontalCoordinateSystem& coordinateSystem =
-      georeference.NativeImplementation().getCoordinateSystem();
+      georeference.NativeImplementation().getCoordinateSystem(georeference);
 
   // Find the rotation from the old up to the new up.
   glm::dvec3 oldNormal = coordinateSystem.ecefDirectionToLocal(

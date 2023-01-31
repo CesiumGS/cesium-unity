@@ -712,7 +712,8 @@ void* UnityPrepareRendererResources::prepareInMainThread(
   const LocalHorizontalCoordinateSystem* pCoordinateSystem = nullptr;
   if (georeferenceComponent != nullptr) {
     pCoordinateSystem =
-        &georeferenceComponent.NativeImplementation().getCoordinateSystem();
+        &georeferenceComponent.NativeImplementation().getCoordinateSystem(
+            georeferenceComponent);
   }
 
   const bool createPhysicsMeshes = tilesetComponent.createPhysicsMeshes();

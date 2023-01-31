@@ -92,7 +92,8 @@ std::vector<ViewState> CameraManager::getAllCameras(const GameObject& context) {
   if (georeferenceComponent != nullptr) {
     CesiumGeoreferenceImpl& georeference =
         georeferenceComponent.NativeImplementation();
-    pCoordinateSystem = &georeference.getCoordinateSystem();
+    pCoordinateSystem =
+        &georeference.getCoordinateSystem(georeferenceComponent);
   }
 
   std::vector<ViewState> result;
