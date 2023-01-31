@@ -40,24 +40,48 @@ namespace Reinterop
 
         public string ToSourceFileString()
         {
+            if (Type.Symbol == null)
+                throw new Exception("Type with partial method definitions must have a Symbol.");
+
             // TODO: support structs
             string kind = "class";
+
+            string interopPrefix = Type.GetFullyQualifiedName().Replace(".", "_");
+            if (!string.IsNullOrEmpty(this.Type.Context.BaseNamespace))
+                interopPrefix = this.Type.Context.BaseNamespace + "_" + interopPrefix;
 
             if (needsInstance)
             {
                 return
                     $$"""
+                    using Microsoft.Win32.SafeHandles;
                     using System;
+                    using System.Runtime.ConstrainedExecution;
                     using System.Runtime.InteropServices;
 
                     namespace {{Type.GetFullyQualifiedNamespace()}}
                     {
                         {{CSharpTypeUtility.GetAccessString(Type.Symbol.DeclaredAccessibility)}} partial {{kind}} {{Type.Symbol.Name}} : System.IDisposable
                         {
+                            internal class ImplementationHandle : SafeHandleZeroOrMinusOneIsInvalid
+                            {
+                                public ImplementationHandle({{Type.Symbol.Name}} managed) : base(true)
+                                {
+                                    SetHandle({{interopPrefix}}_CreateImplementation(Reinterop.ObjectHandleUtility.CreateHandle(managed)));
+                                }
+                    
+                                [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+                                protected override bool ReleaseHandle()
+                                {
+                                    {{interopPrefix}}_DestroyImplementation(this.handle);
+                                    return true;
+                                }
+                            }
+                    
                             [System.NonSerialized]
-                            private System.IntPtr _implementation = System.IntPtr.Zero;
+                            private ImplementationHandle _implementation = null;
 
-                            public IntPtr NativeImplementation
+                            internal ImplementationHandle NativeImplementation
                             {
                                 get { return _implementation; }
                             }

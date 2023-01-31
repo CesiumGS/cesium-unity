@@ -15,9 +15,6 @@ public:
       const DotNet::CesiumForUnity::IonTokenTroubleshootingWindow& window);
   ~IonTokenTroubleshootingWindowImpl();
 
-  void JustBeforeDelete(
-      const DotNet::CesiumForUnity::IonTokenTroubleshootingWindow& window);
-
   void GetTroubleshootingDetails(
       const DotNet::CesiumForUnity::IonTokenTroubleshootingWindow& window);
 

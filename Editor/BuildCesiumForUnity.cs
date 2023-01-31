@@ -33,7 +33,24 @@ namespace CesiumForUnity
             Directory.CreateDirectory(buildPath);
             try
             {
+                PlayerSettings.SetScriptingBackend(BuildTargetGroup.Android, ScriptingImplementation.IL2CPP);
+                PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64 | AndroidArchitecture.X86_64;
                 BuildPlayer(BuildTargetGroup.Android, BuildTarget.Android, Path.Combine(buildPath, "Android"));
+            }
+            finally
+            {
+                Directory.Delete(buildPath, true);
+            }
+            EditorApplication.Exit(0);
+        }
+
+        public static void CompileForIOSAndExit()
+        {
+            string buildPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(buildPath);
+            try
+            {
+                BuildPlayer(BuildTargetGroup.iOS, BuildTarget.iOS, Path.Combine(buildPath, "iOS"));
             }
             finally
             {

@@ -1,11 +1,22 @@
 # Change Log
 
-### v0.1.3
+### v0.2.0
+
+##### Breaking Changes :mega:
+
+- Renamed `CesiumTransforms` to `CesiumWgs84Ellipsoid`.
 
 ##### Additions :tada:
 
+- Added support for building to iOS.
 - Added `CesiumCameraController`, a globe-aware controller that adapts its speed and clipping planes based on its height from the globe.
-- Added an option to add a `DynamicCamera` from the Cesium panel to the scene. The `DynamicCamera` contains `Camera` and `CesiumCameraController` components and offers easy navigation of the globe.
+- Added `CesiumFlyToController`, a controller that can smoothly fly to locations across the globe.
+- Added an option to add a `DynamicCamera` from the Cesium panel to the scene. The `DynamicCamera` contains `CesiumCameraController` and `CesiumFlyToController` components and offers easy navigation of the globe.
+
+##### Fixes :wrench:
+
+- Fixed a bug where `CesiumGeoreference`, `CesiumGlobeAnchor`, and `CesiumSubScene` would not properly update when their values were changed by undos or pasted values.
+- `CesiumRuntimeSettings` is now stored in `Assets/CesiumSettings/Resources` instead of `Assets/Settings/Resources`.
 
 ### v0.1.2
 

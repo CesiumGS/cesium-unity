@@ -457,6 +457,16 @@ namespace CesiumForUnity
 
         #region Unity Messages
 
+        private void OnValidate()
+        {
+            CesiumGeoreference georeference = this.gameObject.GetComponentInParent<CesiumGeoreference>();
+            if (georeference != null && this._lastPropertiesAreValid)
+            {
+                this.StartOrStopDetectingTransformChanges();
+                this.Sync();
+            }
+        }
+
         private void Start()
         {
             this.Sync();
@@ -468,6 +478,11 @@ namespace CesiumForUnity
             // so if we only did it in Start, then in the Editor, transform change detection would stop
             // working whenever source files were changed.
             this.StartOrStopDetectingTransformChanges();
+        }
+
+        private void OnDisable()
+        {
+            this._lastPropertiesAreValid = false;
         }
 
         private void OnTransformParentChanged()

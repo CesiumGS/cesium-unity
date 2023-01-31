@@ -26,6 +26,37 @@ namespace CesiumForUnity
         #region User-editable properties
 
         [SerializeField]
+        private bool _enableMovement = true;
+
+        /// <summary>
+        /// Whether movement is enabled on this controller. Movement is
+        /// controlled using the W, A, S, D keys, as well as the Q and E
+        /// keys for vertical movement with respect to the globe.
+        /// </summary>
+        public bool enableMovement
+        {
+            get => this._enableMovement;
+            set
+            {
+                this._enableMovement = value;
+                this.ResetSpeed();
+            }
+        }
+
+        [SerializeField]
+        private bool _enableRotation = true;
+
+        /// <summary>
+        /// Whether rotation is enabled on this controller. Rotation is
+        /// controlled by movement of the mouse.
+        /// </summary>
+        public bool enableRotation
+        {
+            get => this._enableRotation;
+            set => this._enableRotation = value;
+        }
+
+        [SerializeField]
         [Min(0.0f)]
         private float _defaultMaximumSpeed = 100.0f;
 
@@ -96,107 +127,6 @@ namespace CesiumForUnity
             set => this._dynamicClippingPlanesMinHeight = Mathf.Max(value, 0.0f);
         }
 
-        [SerializeField]
-        private AnimationCurve _flyToAltitudeProfileCurve;
-
-        /// <summary>
-        /// A curve that dictates what percentage of the max altitude the camera 
-        /// should take at a given time on the curve.
-        /// </summary>
-        /// <remarks>
-        /// This curve must be kept in the 0 to 1 range on both axes. The 
-        /// <see cref="CesiumCameraController.flyToMaximumAltitudeCurve"/>
-        /// dictates the actual max altitude at each point along the curve.
-        /// </remarks>
-        public AnimationCurve flyToAltitudeProfileCurve
-        {
-            get => this._flyToAltitudeProfileCurve;
-            set => this._flyToAltitudeProfileCurve = value;
-        }
-
-        [SerializeField]
-        private AnimationCurve _flyToProgressCurve;
-
-        /// <summary>
-        /// A curve that is used to determine the progress percentage for all the other 
-        /// curves.
-        /// </summary>
-        public AnimationCurve flyToProgressCurve
-        {
-            get => this._flyToProgressCurve;
-            set => this._flyToProgressCurve = value;
-        }
-
-        [SerializeField]
-        private AnimationCurve _flyToMaximumAltitudeCurve;
-
-        /// <summary>
-        /// A curve that dictates the maximum altitude at each point along the curve.
-        /// </summary>
-        /// <remarks>
-        /// This can be used in conjuction with 
-        /// <see cref="CesiumCameraController.flyToAltitudeProfileCurve"/> to allow the 
-        /// camera to take some altitude during the flight.
-        /// </remarks>
-        public AnimationCurve flyToMaximumAltitudeCurve
-        {
-            get => this._flyToMaximumAltitudeCurve;
-            set => this._flyToMaximumAltitudeCurve = value;
-        }
-
-        [SerializeField]
-        [Min(0.0f)]
-        private double _flyToDuration = 5.0;
-
-        /// <summary>
-        /// The length in seconds that the flight should last.
-        /// </summary>
-        public double flyToDuration
-        {
-            get => this._flyToDuration;
-            set => this._flyToDuration = Math.Max(value, 0.0);
-        }
-
-        [SerializeField]
-        [Min(0.0f)]
-        private double _flyToGranularityDegrees = 0.01;
-
-        /// <summary>
-        /// The granularity in degrees with which keypoints should be generated for the 
-        /// flight interpolation. This value should be greater than 0.0, otherwise
-        /// the controller will not take flight.
-        /// </summary>
-        /// <remarks>
-        /// This represents the difference in degrees between each keypoint on the flight path.
-        /// The lower the value, the more keypoints are generated, and the smoother the flight
-        /// interpolation will be.
-        /// </remarks>
-        public double flyToGranularityDegrees
-        {
-            get => this._flyToGranularityDegrees;
-            set => this._flyToGranularityDegrees = Math.Max(value, 0.0);
-        }
-
-        /// <summary>
-        /// Encapsulates a method that is called whenever the camera finishes flying.
-        /// </summary>
-        public delegate void CompletedFlightDelegate();
-
-        /// <summary>
-        /// An event that is raised when the camera finishes flying.
-        /// </summary>
-        public event CompletedFlightDelegate OnFlightComplete;
-
-        /// <summary>
-        /// Encapsulates a method that is called whenever the camera's flight is interrupted.
-        /// </summary>
-        public delegate void InterruptedFlightDelegate();
-
-        /// <summary>
-        /// An event that is raised when the camera's flight is interrupted.
-        /// </summary>
-        public event InterruptedFlightDelegate OnFlightInterrupted;
-
         #endregion
 
         #region Private variables
@@ -223,15 +153,6 @@ namespace CesiumForUnity
 
         private float _speedMultiplier = 1.0f;
         private float _speedMultiplierIncrement = 1.5f;
-
-        private List<double3> _keypoints = new List<double3>();
-
-        private double _currentFlyToTime = 0.0;
-        private Quaternion _flyToSourceRotation = Quaternion.identity;
-        private Quaternion _flyToDestinationRotation = Quaternion.identity;
-
-        private bool _flyingToLocation = false;
-        private bool _canInterruptFlight = true;
 
         // If the near clip gets too large, Unity will throw errors. Keeping it 
         // at this value works fine even when the far clip plane gets large.
@@ -321,7 +242,8 @@ namespace CesiumForUnity
         {
             if (this.gameObject.GetComponent<CharacterController>() != null)
             {
-                Debug.LogWarning("A CharacterController component was manually " +
+                Debug.LogWarning(
+                    "A CharacterController component was manually " +
                     "added to the CesiumCameraController's game object. " +
                     "This may interfere with the CesiumCameraController's movement.");
 
@@ -399,11 +321,6 @@ namespace CesiumForUnity
         void Update()
         {
             this.HandlePlayerInputs();
-
-            if (this._flyingToLocation)
-            {
-                this.HandleFlightStep(Time.deltaTime);
-            }
 
             if (this._enableDynamicClippingPlanes)
             {
@@ -518,7 +435,7 @@ namespace CesiumForUnity
 
             Vector3 movementInput = new Vector3(inputRight, inputUp, inputForward);
 
-            if (!this._flyingToLocation)
+            if (this._enableRotation)
             {
                 this.Rotate(inputRotateHorizontal, inputRotateVertical);
             }
@@ -538,14 +455,7 @@ namespace CesiumForUnity
                 this.HandleSpeedChange(inputSpeedChange);
             }
 
-            bool canInterruptFlight = this._flyingToLocation && this._canInterruptFlight;
-
-            if(canInterruptFlight && movementInput != Vector3.zero)
-            {
-                this.InterruptFlight();
-            }
-
-            if (!this._flyingToLocation)
+            if (this._enableMovement)
             {
                 this.Move(movementInput);
             }
@@ -667,7 +577,18 @@ namespace CesiumForUnity
                 this._velocity = Vector3.ClampMagnitude(this._velocity, speed);
             }
 
-            this._controller.Move(this._velocity * Time.deltaTime);
+            if (this._velocity != Vector3.zero)
+            {
+                this._controller.Move(this._velocity * Time.deltaTime);
+
+                // Other controllers may disable detectTransformChanges to control their own
+                // movement, but the globe anchor should be synced even if detectTransformChanges
+                // is false.
+                if (!this._globeAnchor.detectTransformChanges)
+                {
+                    this._globeAnchor.Sync();
+                }
+            }
         }
 
         #endregion
@@ -704,16 +625,23 @@ namespace CesiumForUnity
                 return false;
             }
 
-            // Also ignore the result if the speed will increase by too much at once.
+            // Also ignore the result if the speed will increase or decrease by too much at once.
             // This can be an issue when 3D tiles are loaded/unloaded from the scene.
-            if (
-                this._maxSpeedPreMultiplier > 0.5f &&
-                (height / this._maxSpeedPreMultiplier) > 1000.0f)
+            if (this._maxSpeedPreMultiplier > 0.5f)
             {
-                overrideSpeed = false;
-                newSpeed = 0.0f;
+                float heightToMaxSpeedRatio = height / this._maxSpeedPreMultiplier;
 
-                return false;
+                // The asymmetry of these ratios is intentional. When traversing tilesets
+                // with many height differences (e.g. a city with tall buildings), flying over
+                // taller geometry will cause the camera to slow down suddenly, and sometimes
+                // cause it to stutter.
+                if (heightToMaxSpeedRatio > 1000.0f || heightToMaxSpeedRatio < 0.01f)
+                {
+                    overrideSpeed = false;
+                    newSpeed = 0.0f;
+
+                    return false;
+                }
             }
 
             // Raycast along the camera's view (forward) vector.
@@ -767,393 +695,11 @@ namespace CesiumForUnity
             this.SetMaxSpeed(this._maxSpeedPreMultiplier);
         }
 
-        #endregion
-
-        #region Fly-To helper functions
-
-        /// <summary>
-        /// Advance the camera flight based on the given time delta.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// This function requires the CesiumGeoreference to be valid. If it is not valid,
-        /// then this function will do nothing.
-        /// </para>
-        /// <para>
-        /// The given delta will be added to the _currentFlyTime, and the position
-        /// and orientation will be computed by interpolating the _keypoints
-        /// and _flyToSourceRotation/_flyToDestinationRotation based on this time.
-        /// </para>
-        /// <para>
-        /// The position will be set via the globe anchor's setter, while the
-        /// orientation is assigned directly to the transform.
-        /// </para>
-        /// </remarks>
-        /// <param name="deltaTime"> The time delta in seconds.</param>
-        private void HandleFlightStep(float deltaTime)
+        private void ResetSpeed()
         {
-            if (this._georeference == null || this._keypoints.Count == 0)
-            {
-                this._flyingToLocation = false;
-                return;
-            }
-
-            this._currentFlyToTime += (double)deltaTime;
-
-            // If we reached the end, set actual destination location and orientation
-            if (this._currentFlyToTime >= this._flyToDuration)
-            {
-                this.CompleteFlight();
-                return;
-            }
-
-            // We're currently in flight. Interpolate the position and orientation:
-            double percentage = this._currentFlyToTime / this._flyToDuration;
-
-            // In order to accelerate at start and slow down at end, we use a progress
-            // profile curve
-            double flyPercentage = percentage;
-            if (this._flyToProgressCurve != null && this._flyToProgressCurve.length > 0)
-            {
-                flyPercentage = Math.Clamp(
-                    (double)this._flyToProgressCurve.Evaluate((float)percentage),
-                    0.0,
-                    1.0);
-            }
-
-            if(Mathf.Approximately((float)flyPercentage, 1.0f))
-            {
-                this.CompleteFlight();
-                return;
-            }
-
-            // Find the keypoint indexes corresponding to the current percentage
-            double keypointValue = flyPercentage * (this._keypoints.Count - 1);
-            int lastKeypointIndex = (int)Math.Floor(keypointValue);
-            double segmentPercentage = keypointValue - lastKeypointIndex;
-            int nextKeypointIndex = lastKeypointIndex + 1;
-
-            // Get the current position by interpolating linearly between those two points
-            double3 lastPosition = this._keypoints[lastKeypointIndex];
-            double3 nextPosition = this._keypoints[nextKeypointIndex];
-            double3 currentPosition = math.lerp(lastPosition, nextPosition, segmentPercentage);
-            this._globeAnchor.SetPositionEarthCenteredEarthFixed(
-                currentPosition.x,
-                currentPosition.y,
-                currentPosition.z);
-
-            // Interpolate rotation in the EUN frame. The local EUN rotation will
-            // be transformed to the appropriate world rotation as we fly.
-            this.transform.rotation = Quaternion.Slerp(
-                this._flyToSourceRotation,
-                this._flyToDestinationRotation,
-                (float)flyPercentage);
-        }
-
-        private void CompleteFlight()
-        {
-            double3 finalPoint = this._keypoints[this._keypoints.Count - 1];
-            this._globeAnchor.SetPositionEarthCenteredEarthFixed(
-                finalPoint.x,
-                finalPoint.y,
-                finalPoint.z);
-
-            this.transform.rotation = this._flyToDestinationRotation;
-
-            this._flyingToLocation = false;
-            this._currentFlyToTime = 0.0;
-
-            this._globeAnchor.adjustOrientationForGlobeWhenMoving = true;
-
-            if (this.OnFlightComplete != null)
-            {
-                this.OnFlightComplete();
-            }
-        }
-
-        private void InterruptFlight()
-        {
-            this._flyingToLocation = false;
-
-            // Set the camera roll to 0.0
-            Vector3 angles = this.transform.eulerAngles;
-            angles.z = 0.0f;
-            this.transform.eulerAngles = angles;
-
-            this._globeAnchor.adjustOrientationForGlobeWhenMoving = true;
-
-            if (this.OnFlightInterrupted != null)
-            {
-                this.OnFlightInterrupted();
-            }
-        }
-
-        private void ComputeFlightPath(
-            double3 sourceECEF,
-            double3 destinationECEF,
-            float yawAtDestination,
-            float pitchAtDestination)
-        {
-            // The source and destination rotations are expressed in East-Up-North
-            // coordinates.
-            this._flyToSourceRotation = this.transform.rotation;
-            this._flyToDestinationRotation =
-                Quaternion.Euler(pitchAtDestination, yawAtDestination, 0);
-
-            // Compute angle / axis transform and initialize key points
-            float3 normalizedSource = (float3)math.normalize(sourceECEF);
-            float3 normalizedDestination = (float3)math.normalize(destinationECEF);
-            Quaternion flyQuat =
-                Quaternion.FromToRotation(normalizedSource, normalizedDestination);
-
-            float flyTotalAngle = 0.0f;
-            Vector3 flyRotationAxis = Vector3.zero;
-            flyQuat.ToAngleAxis(out flyTotalAngle, out flyRotationAxis);
-
-            this._keypoints.Clear();
-            this._currentFlyToTime = 0.0;
-
-            if (Mathf.Approximately((float)this.flyToGranularityDegrees, 0.0f))
-            {
-                Debug.LogError("CesiumCameraController cannot fly when flyToGranularityDegrees " +
-                    "is set to 0.");
-                return;
-            }
-
-            if (flyTotalAngle == 0.0f &&
-                this._flyToSourceRotation == this._flyToDestinationRotation)
-            {
-                return;
-            }
-
-            int steps = Math.Max(
-                (int)(flyTotalAngle / (Mathf.Deg2Rad * this.flyToGranularityDegrees)) - 1,
-                0);
-
-            // We will not create a curve projected along the ellipsoid because we want to take
-            // altitude while flying. The radius of the current point will evolve as follows:
-            //  - Project the point on the ellipsoid: will give a default radius
-            //  depending on ellipsoid location.
-            //  - Interpolate the altitudes: get the source/destination altitudes, and make a
-            //  linear interpolation between them. This will allow for flying from / to any
-            //  point smoothly.
-            //  - Add a flight profile offset /-\ defined by a curve.
-
-            // Compute global radius at source and destination points
-            double sourceRadius = math.length(sourceECEF);
-            double3 sourceUpVector = sourceECEF;
-
-            // Compute actual altitude at source and destination points by scaling on
-            // ellipsoid.
-            double sourceAltitude = 0.0, destinationAltitude = 0.0;
-            double3? scaled = CesiumWgs84Ellipsoid.ScaleToGeodeticSurface(sourceECEF);
-            if (scaled != null)
-            {
-                sourceAltitude = math.length(sourceECEF - (double3)scaled);
-            }
-
-            scaled = CesiumWgs84Ellipsoid.ScaleToGeodeticSurface(destinationECEF);
-            if (scaled != null)
-            {
-                destinationAltitude = math.length(destinationECEF - (double3)scaled);
-            }
-
-            // Get distance between source and destination points to compute a wanted
-            // altitude from the curve.
-            double flyToDistance = math.length(destinationECEF - sourceECEF);
-
-            this._keypoints.Add(sourceECEF);
-
-            for (int step = 1; step <= steps; step++)
-            {
-                double stepDouble = (double)step;
-                double percentage = stepDouble / (steps + 1);
-                double altitude = math.lerp(sourceAltitude, destinationAltitude, percentage);
-                double phi = Mathf.Deg2Rad * this.flyToGranularityDegrees * stepDouble;
-
-                float3 rotated = Quaternion.AngleAxis((float)phi, flyRotationAxis) * (float3)sourceUpVector;
-                scaled = CesiumWgs84Ellipsoid.ScaleToGeodeticSurface((double3)rotated);
-                if (scaled != null)
-                {
-                    double3 scaledValue = (double3)scaled;
-                    double3 upVector = math.normalize(scaledValue);
-
-                    // Add an altitude if we have a profile curve for it
-                    double offsetAltitude = 0;
-                    if (this._flyToAltitudeProfileCurve != null && this._flyToAltitudeProfileCurve.length > 0)
-                    {
-                        double maxAltitude = 30000;
-                        if (this._flyToMaximumAltitudeCurve != null && this._flyToMaximumAltitudeCurve.length > 0)
-                        {
-                            maxAltitude = (double)
-                                    this._flyToMaximumAltitudeCurve.Evaluate((float)flyToDistance);
-                        }
-                        offsetAltitude =
-                            (double)maxAltitude * this._flyToAltitudeProfileCurve.Evaluate((float)percentage);
-                    }
-
-                    double3 point = scaledValue + upVector * (altitude + offsetAltitude);
-                    this._keypoints.Add(point);
-                }
-            }
-
-            this._keypoints.Add(destinationECEF);
-        }
-
-        #endregion
-
-        #region Fly-To public API
-
-        /// <summary>
-        /// Begin a smooth camera flight to the given Earth-Centered, Earth-Fixed (ECEF) 
-        /// destination such that the camera ends at the specified yaw and pitch.
-        /// </summary>
-        /// <remarks>
-        /// The characteristics of the flight can be configured with 
-        /// <see cref="CesiumCameraController.flyToAltitudeProfileCurve"/>,
-        /// <see cref="CesiumCameraController.flyToProgressCurve"/>, 
-        /// <see cref="CesiumCameraController.flyToMaximumAltitudeCurve"/>,
-        /// <see cref="CesiumCameraController.flyToDuration"/>, and
-        /// <see cref="CesiumCameraController.flyToGranularityDegrees"/>.
-        /// </remarks>
-        /// <param name="destination">The destination in ECEF coordinates.</param>
-        /// <param name="yawAtDestination">The yaw of the camera at the destination.</param>
-        /// <param name="pitchAtDestination">The pitch of the camera at the destination.</param>
-        /// <param name="canInterruptByMoving">Whether the camera flight can be interrupted with movement inputs.</param>
-        public void FlyToLocationEarthCenteredEarthFixed(
-            double3 destination,
-            float yawAtDestination,
-            float pitchAtDestination,
-            bool canInterruptByMoving)
-        {
-            if (this._flyingToLocation)
-            {
-                return;
-            }
-
-            pitchAtDestination = Mathf.Clamp(pitchAtDestination, -89.99f, 89.99f);
-
-            // Compute source location in ECEF
-            double3 source = new double3()
-            {
-                x = this._globeAnchor.ecefX,
-                y = this._globeAnchor.ecefY,
-                z = this._globeAnchor.ecefZ
-            };
-
-            this.ComputeFlightPath(source, destination, yawAtDestination, pitchAtDestination);
-
-            // Indicate that the camera will be flying from now
-            this._flyingToLocation = true;
-            this._canInterruptFlight = canInterruptByMoving;
-            this._globeAnchor.adjustOrientationForGlobeWhenMoving = false;
-        }
-
-        /// <summary>
-        /// Begin a smooth camera flight to the given Earth-Centered, Earth-Fixed (ECEF) 
-        /// destination such that the camera ends at the specified yaw and pitch.
-        /// </summary>
-        /// <remarks>
-        /// The characteristics of the flight can be configured with 
-        /// <see cref="CesiumCameraController.flyToAltitudeProfileCurve"/>,
-        /// <see cref="CesiumCameraController.flyToProgressCurve"/>, 
-        /// <see cref="CesiumCameraController.flyToMaximumAltitudeCurve"/>,
-        /// <see cref="CesiumCameraController.flyToDuration"/>, and
-        /// <see cref="CesiumCameraController.flyToGranularityDegrees"/>.
-        /// </remarks>
-        /// <param name="destination">The destination in ECEF coordinates.</param>
-        /// <param name="yawAtDestination">The yaw of the camera at the destination.</param>
-        /// <param name="pitchAtDestination">The pitch of the camera at the destination.</param>
-        /// <param name="canInterruptByMoving">Whether the camera flight can be interrupted with movement inputs.</param>
-        public void FlyToLocationEarthCenteredEarthFixed(
-            Vector3 destination,
-            float yawAtDestination,
-            float pitchAtDestination,
-            bool canInterruptByMoving)
-        {
-            this.FlyToLocationEarthCenteredEarthFixed(
-                new double3()
-                {
-                    x = destination.x,
-                    y = destination.y,
-                    z = destination.z,
-                },
-                yawAtDestination,
-                pitchAtDestination,
-                canInterruptByMoving);
-        }
-
-        /// <summary>
-        /// Begin a smooth camera flight to the given  WGS84 longitude in degrees (x),
-        /// latitude in degrees (y), and height in meters (z) such that the camera ends 
-        /// at the specified yaw and pitch.
-        /// </summary>
-        /// <remarks>
-        /// The characteristics of the flight can be configured with 
-        /// <see cref="CesiumCameraController.flyToAltitudeProfileCurve"/>,
-        /// <see cref="CesiumCameraController.flyToProgressCurve"/>, 
-        /// <see cref="CesiumCameraController.flyToMaximumAltitudeCurve"/>,
-        /// <see cref="CesiumCameraController.flyToDuration"/>, and
-        /// <see cref="CesiumCameraController.flyToGranularityDegrees"/>.
-        /// </remarks>
-        /// <param name="destination">The longitude (x), latitude (y), and height (z) of the destination.</param>
-        /// <param name="yawAtDestination">The yaw of the camera at the destination.</param>
-        /// <param name="pitchAtDestination">The pitch of the camera at the destination.</param>
-        /// <param name="canInterruptByMoving">Whether the camera flight can be interrupted with movement inputs.</param>
-        public void FlyToLocationLongitudeLatitudeHeight(
-            double3 destination,
-            float yawAtDestination,
-            float pitchAtDestination,
-            bool canInterruptByMoving)
-        {
-            double3 destinationECEF =
-                CesiumWgs84Ellipsoid.LongitudeLatitudeHeightToEarthCenteredEarthFixed(destination);
-
-            this.FlyToLocationEarthCenteredEarthFixed(
-                destinationECEF,
-                yawAtDestination,
-                pitchAtDestination,
-                canInterruptByMoving);
-        }
-
-        /// <summary>
-        /// Begin a smooth camera flight to the given  WGS84 longitude in degrees (x),
-        /// latitude in degrees (y), and height in meters (z) such that the camera ends 
-        /// at the specified yaw and pitch.
-        /// </summary>
-        /// <remarks>
-        /// The characteristics of the flight can be configured with 
-        /// <see cref="CesiumCameraController.flyToAltitudeProfileCurve"/>,
-        /// <see cref="CesiumCameraController.flyToProgressCurve"/>, 
-        /// <see cref="CesiumCameraController.flyToMaximumAltitudeCurve"/>,
-        /// <see cref="CesiumCameraController.flyToDuration"/>, and
-        /// <see cref="CesiumCameraController.flyToGranularityDegrees"/>.
-        /// </remarks>
-        /// <param name="destination">The longitude (x), latitude (y), and height (z) of the destination.</param>
-        /// <param name="yawAtDestination">The yaw of the camera at the destination.</param>
-        /// <param name="pitchAtDestination">The pitch of the camera at the destination.</param>
-        /// <param name="canInterruptByMoving">Whether the camera flight can be interrupted with movement inputs.</param>
-        public void FlyToLocationLongitudeLatitudeHeight(
-            Vector3 destination,
-            float yawAtDestination,
-            float pitchAtDestination,
-            bool canInterruptByMoving)
-        {
-            double3 destinationCoordinates = new double3()
-            {
-                x = destination.x,
-                y = destination.y,
-                z = destination.z
-            };
-            double3 destinationECEF =
-                CesiumWgs84Ellipsoid.LongitudeLatitudeHeightToEarthCenteredEarthFixed(
-                    destinationCoordinates);
-
-            this.FlyToLocationEarthCenteredEarthFixed(
-                destinationECEF,
-                yawAtDestination,
-                pitchAtDestination,
-                canInterruptByMoving);
+            this._maxSpeed = this._defaultMaximumSpeed;
+            this._maxSpeedPreMultiplier = 0.0f;
+            this.ResetSpeedMultiplier();
         }
 
         #endregion
@@ -1187,10 +733,6 @@ namespace CesiumForUnity
                 if (farClipRatio > nearClipPlane)
                 {
                     nearClipPlane = Mathf.Min(farClipRatio, this._maximumNearClipPlane);
-                }
-                else
-                {
-                    //nearClipPlane = 10.0f;
                 }
             }
 

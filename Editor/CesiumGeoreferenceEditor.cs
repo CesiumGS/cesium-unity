@@ -52,23 +52,13 @@ namespace CesiumForUnity
             DrawInspectorButtons();
             EditorGUILayout.Space(5);
 
-            EditorGUI.BeginChangeCheck();
-
             this.DrawOriginAuthorityProperty();
             EditorGUILayout.Space(5);
             this.DrawLongitudeLatitudeHeightProperties();
             EditorGUILayout.Space(5);
             this.DrawEarthCenteredEarthFixedProperties();
 
-            // Apply the modified properties before updating the origin.
-            // Otherwise, they will overwrite the georeference's computation
-            // of the other coordinates.
             this.serializedObject.ApplyModifiedProperties();
-
-            if (EditorGUI.EndChangeCheck())
-            {
-                this._georeference.UpdateOrigin();
-            }
         }
 
         private void DrawInspectorButtons()

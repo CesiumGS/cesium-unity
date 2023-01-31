@@ -23,10 +23,6 @@ CesiumTileMapServiceRasterOverlayImpl::CesiumTileMapServiceRasterOverlayImpl(
 CesiumTileMapServiceRasterOverlayImpl::
     ~CesiumTileMapServiceRasterOverlayImpl() {}
 
-void CesiumTileMapServiceRasterOverlayImpl::JustBeforeDelete(
-    const ::DotNet::CesiumForUnity::CesiumTileMapServiceRasterOverlay&
-        overlay) {}
-
 void CesiumTileMapServiceRasterOverlayImpl::AddToTileset(
     const ::DotNet::CesiumForUnity::CesiumTileMapServiceRasterOverlay& overlay,
     const ::DotNet::CesiumForUnity::Cesium3DTileset& tileset) {

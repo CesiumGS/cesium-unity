@@ -7,9 +7,6 @@ namespace CesiumForUnityNative {
 NativeDownloadHandlerImpl::NativeDownloadHandlerImpl(
     const NativeDownloadHandler& handler) {}
 
-void NativeDownloadHandlerImpl::JustBeforeDelete(
-    const NativeDownloadHandler& handler) {}
-
 bool NativeDownloadHandlerImpl::ReceiveDataNative(
     const NativeDownloadHandler& handler,
     void* data,

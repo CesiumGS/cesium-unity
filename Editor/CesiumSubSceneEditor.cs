@@ -59,19 +59,12 @@ namespace CesiumForUnity
             EditorGUILayout.Space(5);
             DrawSubSceneProperties();
             EditorGUILayout.Space(5);
-
-            EditorGUI.BeginChangeCheck();
             
             DrawLongitudeLatitudeHeightProperties();
             EditorGUILayout.Space(5);
             DrawEarthCenteredEarthFixedProperties();
 
             this.serializedObject.ApplyModifiedProperties();
-
-            if (EditorGUI.EndChangeCheck())
-            {
-                this._subScene.UpdateOrigin();
-            }
         }
 
         private void DrawToolbarButton()
@@ -90,9 +83,9 @@ namespace CesiumForUnity
                 "Unity origin." +
                 "\n\n" +
                 "Warning: Before clicking, ensure that all non-Cesium objects in the " +
-                "persistent level are georeferenced with the \"CesiumGeoreference\" component " +
-                "or are children of a GameObject with that component. Ensure that static " +
-                "GameObjects only exist in georeferenced sub-scenes.");
+                "persistent scene are georeferenced with the \"CesiumGlobeAnchor\" " +
+                "component or are children of a GameObject with that component. " +
+                "Ensure that static GameObjects only exist under georeferenced sub-scenes.");
             if (GUILayout.Button(placeOriginHereContent, GUILayout.Width(200)))
             {
                 CesiumEditorUtility.PlaceSubSceneAtCameraPosition(this._subScene);
@@ -119,17 +112,11 @@ namespace CesiumForUnity
                 "Helpful for initially positioning the sub-scene and choosing a load radius.");
             EditorGUILayout.PropertyField(this._showActivationRadius, showActivationRadiusContent);
 
-            EditorGUI.BeginChangeCheck();
             GUIContent originAuthorityContent = new GUIContent(
                 "Origin Authority",
                 "The set of coordinates that authoritatively define the origin of " +
                 "this sub-scene.");
             EditorGUILayout.PropertyField(this._originAuthority, originAuthorityContent);
-
-            if (EditorGUI.EndChangeCheck())
-            {
-                this._subScene.UpdateOrigin();
-            }
         }
 
         private void DrawLongitudeLatitudeHeightProperties()

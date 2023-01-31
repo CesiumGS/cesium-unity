@@ -20,9 +20,6 @@ public:
       const DotNet::CesiumForUnity::CesiumEditorWindow& window);
   ~CesiumEditorWindowImpl();
 
-  void
-  JustBeforeDelete(const DotNet::CesiumForUnity::CesiumEditorWindow& window);
-
   void AddAssetFromIon(
       const DotNet::CesiumForUnity::CesiumEditorWindow& window,
       DotNet::System::String name,

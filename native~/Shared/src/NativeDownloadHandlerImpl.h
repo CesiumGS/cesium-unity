@@ -16,8 +16,6 @@ class NativeDownloadHandlerImpl {
 public:
   NativeDownloadHandlerImpl(
       const ::DotNet::CesiumForUnity::NativeDownloadHandler& handler);
-  void JustBeforeDelete(
-      const ::DotNet::CesiumForUnity::NativeDownloadHandler& handler);
   bool ReceiveDataNative(
       const ::DotNet::CesiumForUnity::NativeDownloadHandler& handler,
       void* data,
