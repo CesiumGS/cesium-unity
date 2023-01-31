@@ -91,7 +91,7 @@ jobs:
           reporter: dotnet-nunit
   MacOS:
     needs: [QuickChecks]
-    runs-on: macos-latest
+    runs-on: macos-11
     # Only allow a single macOS build at a time, for Unity licensing reasons
     concurrency: mac
     steps:
