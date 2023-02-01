@@ -92,9 +92,9 @@ namespace CesiumForUnity
             catch (DllNotFoundException)
             {
             }
-            // catch (TypeInitializationException)
-            // {
-            // }
+            catch (TypeInitializationException)
+            {
+            }
         }
 
         static void
