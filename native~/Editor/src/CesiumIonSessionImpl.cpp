@@ -51,9 +51,6 @@ CesiumIonSessionImpl::CesiumIonSessionImpl(
 
 CesiumIonSessionImpl::~CesiumIonSessionImpl() {}
 
-void CesiumIonSessionImpl::JustBeforeDelete(
-    const DotNet::CesiumForUnity::CesiumIonSession& session) {}
-
 bool CesiumIonSessionImpl::IsConnected(
     const DotNet::CesiumForUnity::CesiumIonSession& session) {
   return this->_connection.has_value();

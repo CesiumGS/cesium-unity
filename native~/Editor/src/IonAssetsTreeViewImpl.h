@@ -21,9 +21,6 @@ public:
       const DotNet::CesiumForUnity::IonAssetsTreeView& treeView);
   ~IonAssetsTreeViewImpl();
 
-  void
-  JustBeforeDelete(const DotNet::CesiumForUnity::IonAssetsTreeView& treeView);
-
   int GetAssetsCount(const DotNet::CesiumForUnity::IonAssetsTreeView& treeView);
 
   void CellGUI(

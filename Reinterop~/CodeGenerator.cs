@@ -94,7 +94,7 @@ namespace Reinterop
                 if (partialMethods == null || partialMethods.Methods.Count == 0)
                     continue;
 
-                context.AddSource(partialMethods.Type.Symbol.Name + "-generated", partialMethods.ToSourceFileString());
+                context.AddSource(partialMethods.Type.Name + "-generated", partialMethods.ToSourceFileString());
             }
         }
 

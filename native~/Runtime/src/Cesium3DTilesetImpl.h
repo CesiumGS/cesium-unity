@@ -28,7 +28,6 @@ public:
   Cesium3DTilesetImpl(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
   ~Cesium3DTilesetImpl();
 
-  void JustBeforeDelete(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
   void Start(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
   void Update(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
   void OnValidate(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);

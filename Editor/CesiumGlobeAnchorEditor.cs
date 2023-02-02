@@ -31,18 +31,6 @@ namespace CesiumForUnity
         private SerializedProperty _ecefY;
         private SerializedProperty _ecefZ;
 
-        private bool _previousDetectTransformChanges = false;
-
-        private CesiumGlobeAnchorPositionAuthority? _previousPositionAuthority = null;
-
-        private double _previousLatitude = 0.0;
-        private double _previousLongitude = 0.0;
-        private double _previousHeight = 0.0;
-
-        private double _previousEcefX = 0.0;
-        private double _previousEcefY = 0.0;
-        private double _previousEcefZ = 0.0;
-
         private void OnEnable()
         {
             this._globeAnchor = (CesiumGlobeAnchor)this.target;
@@ -75,10 +63,6 @@ namespace CesiumForUnity
             DrawEarthCenteredEarthFixedProperties();
 
             this.serializedObject.ApplyModifiedProperties();
-
-            this.UpdateGlobeAnchor();
-            this.UpdateSavedPropertyValues();
-
         }
 
         private void DrawGlobeAnchorProperties()
@@ -207,93 +191,6 @@ namespace CesiumForUnity
             EditorGUILayout.PropertyField(this._ecefZ, ecefZContent);
 
             EditorGUI.EndDisabledGroup();
-        }
-
-        private bool DetectTransformChangesChanged()
-        {
-            return this._previousDetectTransformChanges != this._detectTransformChanges.boolValue;
-        }
-
-        private bool PositionAuthorityChanged()
-        {
-            return this._previousPositionAuthority != this.positionAuthority;
-        }
-
-        private bool LongitudeLatitudeHeightChanged()
-        {
-            return this._previousLatitude != this._latitude.doubleValue ||
-                this._previousLongitude != this._longitude.doubleValue ||
-                this._previousHeight != this._height.doubleValue;
-        }
-
-        private bool EarthCenteredEarthFixedChanged()
-        {
-            return this._previousEcefX != this._ecefX.doubleValue ||
-                this._previousEcefY != this._ecefY.doubleValue ||
-                this._previousEcefZ != this._ecefZ.doubleValue;
-        }
-
-        private void UpdateGlobeAnchor()
-        {
-            if (this.DetectTransformChangesChanged())
-            {
-                // Explicitly set the flag so that the object starts or stops detecting.
-                this._globeAnchor.detectTransformChanges = this._globeAnchor.detectTransformChanges;
-            }
-
-            bool llhChanged = this.LongitudeLatitudeHeightChanged(),
-                 ecefChanged = this.EarthCenteredEarthFixedChanged();
-
-            // If all coordinates were changed, either this CesiumGlobeAnchor was just
-            // created, or a "Paste component values" action was done or undone on the
-            // object. In any case, all the values were applied in ApplyModifiedProperties(), so
-            // just update everything in one go.
-            if (llhChanged && ecefChanged)
-            {
-                this._globeAnchor.positionAuthority = this._globeAnchor.positionAuthority;
-                return;
-            }
-
-            // Otherwise, the coordinates were changed via user input. It is only possible
-            // for the user to change one property field at a time, and setting one type of
-            // coordinates makes the anchor recompute the others, so only one set of
-            // coordinates needs to be checked.
-            if (llhChanged)
-            {
-                this._globeAnchor.SetPositionLongitudeLatitudeHeight(
-                    this._longitude.doubleValue,
-                    this._latitude.doubleValue,
-                    this._height.doubleValue);
-            }
-            else if (ecefChanged)
-            {
-                this._globeAnchor.SetPositionEarthCenteredEarthFixed(
-                    this._ecefX.doubleValue,
-                    this._ecefY.doubleValue,
-                    this._ecefZ.doubleValue);
-            }
-
-            // This only checks for changes to the position authority via the Editor; it will
-            // not override the position authority set by changing the coordinate values themselves.
-            if (this.PositionAuthorityChanged())
-            {
-                this._globeAnchor.positionAuthority = this.positionAuthority;
-            }
-        }
-
-        private void UpdateSavedPropertyValues()
-        {
-            this._previousDetectTransformChanges = this._globeAnchor.detectTransformChanges;
-
-            this._previousPositionAuthority = this._globeAnchor.positionAuthority;
-
-            this._previousLatitude = this._globeAnchor.latitude;
-            this._previousLongitude = this._globeAnchor.longitude;
-            this._previousHeight = this._globeAnchor.height;
-
-            this._previousEcefX = this._globeAnchor.ecefX;
-            this._previousEcefY = this._globeAnchor.ecefY;
-            this._previousEcefZ = this._globeAnchor.ecefZ;
         }
     }
 }

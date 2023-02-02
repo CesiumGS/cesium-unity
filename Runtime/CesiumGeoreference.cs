@@ -378,9 +378,22 @@ namespace CesiumForUnity
         /// </summary>
         private partial double3x3? RecalculateOrigin();
 
+        private void OnValidate()
+        {
+            if (this._initialized)
+            {
+                this.UpdateOrigin();
+            }
+        }
+
         private void OnEnable()
         {
             this.Initialize();
+        }
+
+        private void OnDisable()
+        {
+            this._initialized = false;
         }
 
         private void UpdateOtherCoordinates()

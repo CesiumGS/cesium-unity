@@ -55,9 +55,6 @@ CesiumGeoreferenceImpl::CesiumGeoreferenceImpl(
 
 CesiumGeoreferenceImpl::~CesiumGeoreferenceImpl() {}
 
-void CesiumGeoreferenceImpl::JustBeforeDelete(
-    const DotNet::CesiumForUnity::CesiumGeoreference& georeference) {}
-
 std::optional<DotNet::Unity::Mathematics::double3x3>
 CesiumGeoreferenceImpl::RecalculateOrigin(
     const DotNet::CesiumForUnity::CesiumGeoreference& georeference) {

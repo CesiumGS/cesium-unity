@@ -74,8 +74,6 @@ public:
   ~MetadataPropertyImpl(){};
   MetadataPropertyImpl(
       const DotNet::CesiumForUnity::MetadataProperty& property){};
-  void
-  JustBeforeDelete(const DotNet::CesiumForUnity::MetadataProperty& property){};
   DotNet::System::String
   GetPropertyName(const DotNet::CesiumForUnity::MetadataProperty& property);
   void SetProperty(

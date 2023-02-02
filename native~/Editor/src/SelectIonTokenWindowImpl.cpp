@@ -166,10 +166,7 @@ SelectIonTokenWindowImpl::SelectIonTokenWindowImpl(
                    .createPromise<std::optional<CesiumIonClient::Token>>()),
       _future(this->_promise->getFuture().share()) {}
 
-SelectIonTokenWindowImpl::~SelectIonTokenWindowImpl() {}
-
-void SelectIonTokenWindowImpl::JustBeforeDelete(
-    const DotNet::CesiumForUnity::SelectIonTokenWindow& window) {
+SelectIonTokenWindowImpl::~SelectIonTokenWindowImpl() {
   if (_promise) {
     this->_promise->resolve(std::nullopt);
   }

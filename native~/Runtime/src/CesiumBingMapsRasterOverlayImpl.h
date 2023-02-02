@@ -19,8 +19,6 @@ public:
       const DotNet::CesiumForUnity::CesiumBingMapsRasterOverlay& overlay);
   ~CesiumBingMapsRasterOverlayImpl();
 
-  void JustBeforeDelete(
-      const ::DotNet::CesiumForUnity::CesiumBingMapsRasterOverlay& overlay);
   void AddToTileset(
       const ::DotNet::CesiumForUnity::CesiumBingMapsRasterOverlay& overlay,
       const ::DotNet::CesiumForUnity::Cesium3DTileset& tileset);

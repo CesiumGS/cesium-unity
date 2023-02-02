@@ -22,8 +22,6 @@ public:
       const DotNet::CesiumForUnity::CesiumGeoreference& georeference);
   ~CesiumGeoreferenceImpl();
 
-  void JustBeforeDelete(
-      const DotNet::CesiumForUnity::CesiumGeoreference& georeference);
   std::optional<DotNet::Unity::Mathematics::double3x3> RecalculateOrigin(
       const DotNet::CesiumForUnity::CesiumGeoreference& georeference);
 
