@@ -73,17 +73,31 @@ using namespace DotNet;
 namespace {
 
 template <typename TDest, typename TSource>
-void setTriangles(
+void setIndices(
     const Unity::Collections::NativeArray1<TDest>& dest,
     const AccessorView<TSource>& source) {
   assert(dest.Length() == source.size());
 
-  TDest* triangles = static_cast<TDest*>(
+  TDest* indices = static_cast<TDest*>(
       Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
           GetUnsafeBufferPointerWithoutChecks(dest));
 
   for (int64_t i = 0; i < source.size(); ++i) {
-    triangles[i] = source[i];
+    indices[i] = source[i];
+  }
+}
+
+template <typename T>
+void generateIndices(
+    const Unity::Collections::NativeArray1<T>& dest,
+    const int32_t count) {
+  assert(dest.Length() == count);
+  T* indices = static_cast<T*>(
+      Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
+          GetUnsafeBufferPointerWithoutChecks(dest));
+
+  for (int64_t i = 0; i < count; ++i) {
+    indices[i] = static_cast<T>(i);
   }
 }
 
@@ -249,11 +263,6 @@ void populateMeshDataArray(
         // Interleave all attributes into single stream.
         std::int32_t numberOfAttributes = 0;
         std::int32_t streamIndex = 0;
-
-        if (primitive.indices < 0) {
-          // TODO: support non-indexed primitives.
-          return;
-        }
 
         auto positionAccessorIt = primitive.attributes.find("POSITION");
         if (positionAccessorIt == primitive.attributes.end()) {
@@ -465,25 +474,38 @@ void populateMeshDataArray(
 
         int32_t indexCount = 0;
 
-        AccessorView<uint8_t> indices8(gltf, primitive.indices);
-        if (indices8.status() == AccessorViewStatus::Valid) {
-          indexCount = indices8.size();
-          meshData.SetIndexBufferParams(indexCount, IndexFormat::UInt16);
-          setTriangles(meshData.GetIndexData<std::uint16_t>(), indices8);
-        }
+        if (primitive.indices >= 0) {
+          AccessorView<uint8_t> indices8(gltf, primitive.indices);
+          if (indices8.status() == AccessorViewStatus::Valid) {
+            indexCount = indices8.size();
+            meshData.SetIndexBufferParams(indexCount, IndexFormat::UInt16);
+            setIndices(meshData.GetIndexData<std::uint16_t>(), indices8);
+          }
 
-        AccessorView<uint16_t> indices16(gltf, primitive.indices);
-        if (indices16.status() == AccessorViewStatus::Valid) {
-          indexCount = indices16.size();
-          meshData.SetIndexBufferParams(indexCount, IndexFormat::UInt16);
-          setTriangles(meshData.GetIndexData<std::uint16_t>(), indices16);
-        }
+          AccessorView<uint16_t> indices16(gltf, primitive.indices);
+          if (indices16.status() == AccessorViewStatus::Valid) {
+            indexCount = indices16.size();
+            meshData.SetIndexBufferParams(indexCount, IndexFormat::UInt16);
+            setIndices(meshData.GetIndexData<std::uint16_t>(), indices16);
+          }
 
-        AccessorView<uint32_t> indices32(gltf, primitive.indices);
-        if (indices32.status() == AccessorViewStatus::Valid) {
-          indexCount = indices32.size();
-          meshData.SetIndexBufferParams(indexCount, IndexFormat::UInt32);
-          setTriangles(meshData.GetIndexData<std::uint32_t>(), indices32);
+          AccessorView<uint32_t> indices32(gltf, primitive.indices);
+          if (indices32.status() == AccessorViewStatus::Valid) {
+            indexCount = indices32.size();
+            meshData.SetIndexBufferParams(indexCount, IndexFormat::UInt32);
+            setIndices(meshData.GetIndexData<std::uint32_t>(), indices32);
+          }
+        } else {
+          // Generate indices for primitives without them.
+          indexCount = positionView.size();
+
+          if (indexCount > std::numeric_limits<uint16_t>::max()) {
+            meshData.SetIndexBufferParams(indexCount, IndexFormat::UInt32);
+            generateIndices(meshData.GetIndexData<std::uint32_t>(), indexCount);
+          } else {
+            meshData.SetIndexBufferParams(indexCount, IndexFormat::UInt16);
+            generateIndices(meshData.GetIndexData<std::uint16_t>(), indexCount);
+          }
         }
 
         meshData.subMeshCount(1);
@@ -491,7 +513,14 @@ void populateMeshDataArray(
         // TODO: use sub-meshes for glTF primitives, instead of a separate mesh
         // for each.
         SubMeshDescriptor subMeshDescriptor{};
-        subMeshDescriptor.topology = MeshTopology::Triangles;
+
+        if (primitive.mode == MeshPrimitive::Mode::POINTS) {
+          subMeshDescriptor.topology = MeshTopology::Points;
+          primitiveInfo.containsPoints = true;
+        } else {
+          subMeshDescriptor.topology = MeshTopology::Triangles;
+        }
+
         subMeshDescriptor.indexStart = 0;
         subMeshDescriptor.indexCount = indexCount;
         subMeshDescriptor.baseVertex = 0;
@@ -501,12 +530,6 @@ void populateMeshDataArray(
         subMeshDescriptor.vertexCount = 0;
 
         meshData.SetSubMesh(0, subMeshDescriptor, MeshUpdateFlags::Default);
-
-        // if (createPhysicsMeshes) {
-        //   UnityEngine::MeshCollider meshCollider =
-        //       primitiveGameObject.AddComponent<UnityEngine::MeshCollider>();
-        //   meshCollider.sharedMesh(unityMesh);
-        // }
       });
 }
 
@@ -582,6 +605,8 @@ UnityPrepareRendererResources::prepareInLoadThread(
 
             const UnityEngine::MeshDataArray& meshDataArray =
                 workerResult.meshDataResult.meshDataArray;
+            const std::vector<CesiumPrimitiveInfo>& primitiveInfos =
+                workerResult.meshDataResult.primitiveInfos;
 
             // Create meshes and populate them from the MeshData created in
             // the worker thread. Sadly, this must be done in the main
@@ -620,36 +645,43 @@ UnityPrepareRendererResources::prepareInLoadThread(
             if (shouldCreatePhysicsMeshes) {
               // Baking physics meshes takes awhile, so do that in a
               // worker thread.
-              std::int32_t len = meshes.Length();
-              std::vector<std::int32_t> instanceIDs(meshes.Length());
+              const std::int32_t len = meshes.Length();
+              std::vector<std::int32_t> instanceIDs;
               for (int32_t i = 0; i < len; ++i) {
-                instanceIDs[i] = meshes[i].GetInstanceID();
+                // Don't attempt to bake a physics mesh from a point cloud.
+                if (primitiveInfos[i].containsPoints) {
+                  continue;
+                }
+                instanceIDs.push_back(meshes[i].GetInstanceID());
               }
 
-              return asyncSystem.runInWorkerThread(
-                  [workerResult = std::move(workerResult),
-                   instanceIDs = std::move(instanceIDs),
-                   meshes = std::move(meshes)]() mutable {
-                    for (std::int32_t instanceID : instanceIDs) {
-                      UnityEngine::Physics::BakeMesh(instanceID, false);
-                    }
+              if (instanceIDs.size() > 0) {
+                return asyncSystem.runInWorkerThread(
+                    [workerResult = std::move(workerResult),
+                     instanceIDs = std::move(instanceIDs),
+                     meshes = std::move(meshes)]() mutable {
+                      for (std::int32_t instanceID : instanceIDs) {
+                        UnityEngine::Physics::BakeMesh(instanceID, false);
+                      }
 
-                    LoadThreadResult* pResult = new LoadThreadResult{
-                        std::move(meshes),
-                        std::move(workerResult.meshDataResult.primitiveInfos)};
-                    return TileLoadResultAndRenderResources{
-                        std::move(workerResult.tileLoadResult),
-                        pResult};
-                  });
-            } else {
-              LoadThreadResult* pResult = new LoadThreadResult{
-                  std::move(meshes),
-                  std::move(workerResult.meshDataResult.primitiveInfos)};
-              return asyncSystem.createResolvedFuture(
-                  TileLoadResultAndRenderResources{
-                      std::move(workerResult.tileLoadResult),
-                      pResult});
+                      LoadThreadResult* pResult = new LoadThreadResult{
+                          std::move(meshes),
+                          std::move(
+                              workerResult.meshDataResult.primitiveInfos)};
+                      return TileLoadResultAndRenderResources{
+                          std::move(workerResult.tileLoadResult),
+                          pResult};
+                    });
+              }
             }
+
+            LoadThreadResult* pResult = new LoadThreadResult{
+                std::move(meshes),
+                std::move(workerResult.meshDataResult.primitiveInfos)};
+            return asyncSystem.createResolvedFuture(
+                TileLoadResultAndRenderResources{
+                    std::move(workerResult.tileLoadResult),
+                    pResult});
           });
 }
 
@@ -755,11 +787,6 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         if (unityMesh == nullptr) {
           // This indicates Unity destroyed the mesh already, which really
           // shouldn't happen.
-          return;
-        }
-
-        if (primitive.indices < 0) {
-          // TODO: support non-indexed primitives.
           return;
         }
 
@@ -1018,7 +1045,8 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
         meshFilter.sharedMesh(unityMesh);
 
-        if (createPhysicsMeshes) {
+        if (createPhysicsMeshes &&
+            primitive.mode != MeshPrimitive::Mode::POINTS) {
           // This should not trigger mesh baking for physics, because the meshes
           // were already baked in the worker thread.
           UnityEngine::MeshCollider meshCollider =
