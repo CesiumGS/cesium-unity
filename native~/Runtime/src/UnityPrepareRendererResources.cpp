@@ -92,6 +92,7 @@ void generateIndices(
     const Unity::Collections::NativeArray1<T>& dest,
     const int32_t count) {
   assert(dest.Length() == count);
+
   T* indices = static_cast<T*>(
       Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
           GetUnsafeBufferPointerWithoutChecks(dest));

@@ -1,5 +1,11 @@
 # Change Log
 
+### v0.3.0
+
+##### Additions :tada:
+
+- Added support for rendering point clouds (`pnts`).
+
 ### v0.2.0
 
 ##### Breaking Changes :mega:
