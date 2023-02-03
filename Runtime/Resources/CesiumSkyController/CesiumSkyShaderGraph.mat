@@ -48,10 +48,14 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _GroundBlend: 0.277
+    - _GroundPos: 0
+    - _GroundPos2: 0.33
     - _QueueControl: 0
     - _QueueOffset: 0
     - _SunRadius: 0.02
     m_Colors:
+    - _GroundColor: {r: 0.2264151, g: 0.2264151, b: 0.2264151, a: 0}
     - _SkyColorDay: {r: 0.32999998, g: 0.59, b: 0.83, a: 1}
     - _SkyColorNight: {r: 0.016, g: 0.016, b: 0.09999997, a: 1}
     - _SunDirectionSG: {r: 0.8, g: 0.25, b: 0.25, a: 0}
