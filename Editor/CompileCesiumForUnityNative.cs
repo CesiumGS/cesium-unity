@@ -237,7 +237,7 @@ namespace CesiumForUnity
             {
                 if (finalLibrariesOnly)
                 {
-                    result.Add(GetLibraryToBuild(summary, "x86_64"));
+                    result.Add(GetLibraryToBuild(summary));
                 }
                 else
                 {
