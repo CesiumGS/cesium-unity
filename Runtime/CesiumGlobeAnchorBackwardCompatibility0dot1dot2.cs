@@ -1,5 +1,8 @@
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Serialization;
+using System;
+using UnityEditorInternal;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -18,7 +21,7 @@ namespace CesiumForUnity
     [ExecuteInEditMode]
     [AddComponentMenu("")]
     [DefaultExecutionOrder(-1000000)]
-    public class CesiumGlobeAnchorBackwardCompatibility0dot1dot2 : BackwardCompatibilityComponent
+    internal class CesiumGlobeAnchorBackwardCompatibility0dot1dot2 : CesiumGlobeAnchor, IBackwardCompatibilityComponent<CesiumGlobeAnchor>
     {
         public bool _adjustOrientationForGlobeWhenMoving = true;
         public bool _detectTransformChanges = true;
@@ -33,20 +36,17 @@ namespace CesiumForUnity
         public double _unityY = 0.0;
         public double _unityZ = 0.0;
 
-        protected override string UpgradedComponent => "CesiumGlobeAnchor";
-        protected override string UpgradedVersion => "v0.1.2";
-
-        protected override void Upgrade()
+#if UNITY_EDITOR
+        void OnEnable()
         {
-            // Try getting the real CesiumGlobeAnchor before adding it, because it may have been
-            // created automatically by Unity because of the RequireComponent attribute.
-            GameObject go = this.gameObject;
-            CesiumGlobeAnchor upgraded = go.GetComponent<CesiumGlobeAnchor>();
-            if (upgraded == null)
-            {
-                upgraded = go.AddComponent<CesiumGlobeAnchor>();
-            }
+            CesiumBackwardCompatibility<CesiumGlobeAnchor>.Upgrade(this);
+        }
+#endif
 
+        public string UpgradedVersion => "v0.2.0";
+
+        public void Upgrade(GameObject gameObject, CesiumGlobeAnchor upgraded)
+        {
             // Temporarily disable orientation adjustment so that we can set the position without
             // risking rotating the object.
             upgraded.adjustOrientationForGlobeWhenMoving = false;

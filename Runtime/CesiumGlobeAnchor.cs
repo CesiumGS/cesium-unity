@@ -62,7 +62,6 @@ namespace CesiumForUnity
     /// </para>
     /// </remarks>
     [ExecuteInEditMode]
-    [DisallowMultipleComponent]
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumGlobeAnchorImpl", "CesiumGlobeAnchorImpl.h")]
     public partial class CesiumGlobeAnchor : MonoBehaviour
     {
