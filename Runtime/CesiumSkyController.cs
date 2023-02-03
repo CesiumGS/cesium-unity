@@ -217,13 +217,6 @@ namespace CesiumForUnity
             }
         }
 
-        //public partial void CalculateSunPosition(float time) // This will be a partial class that is entirely implemented in Cesium Native
-        //{
-        // float hourToAngle = ((timeOfDay * 15.0f) - 90.0f);
-        //  Vector3 positionToRotation = new Vector3(hourToAngle, _northOffset, 0);
-
-        // return positionToRotation;
-        // }
         private partial Vector3 CalculateSunPosition(float t);
 
         public void SetSunPosition()
