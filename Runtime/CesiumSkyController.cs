@@ -5,7 +5,7 @@ using UnityEditor;
 using CesiumForUnity;
 
 namespace CesiumForUnity
-{ 
+{
     [ExecuteInEditMode]
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumSkyControllerImpl", "CesiumSkyControllerImpl.h")]
     public partial class CesiumSkyController : MonoBehaviour
@@ -180,7 +180,7 @@ namespace CesiumForUnity
         {
             SetSunPosition();
             if (_useCesiumSkybox)
-            {        
+            {
                 GetCameraHeight();
 
             }
@@ -281,8 +281,8 @@ namespace CesiumForUnity
         }
 
         void LateUpdate()
-        { 
-            if (updateOnTick) 
+        {
+            if (updateOnTick)
             {
                 if (Application.IsPlaying(gameObject) || _updateInEditor)
                 {
@@ -291,6 +291,6 @@ namespace CesiumForUnity
             }
         }
 
- 
+
     }
 }
