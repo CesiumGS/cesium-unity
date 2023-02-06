@@ -12,6 +12,12 @@ namespace CesiumForUnityNative {
  */
 struct CesiumPrimitiveInfo {
   /**
+   * @brief Whether or not the primitive's mode is set to POINTS.
+   * This affects whether or not it can be baked into a physics mesh.
+   */
+  bool containsPoints = false;
+
+  /**
    * @brief Maps a texture coordinate index i (TEXCOORD_<i>) to the
    * corresponding Unity texture coordinate index.
    */

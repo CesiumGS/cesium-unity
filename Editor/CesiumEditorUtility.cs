@@ -88,9 +88,12 @@ namespace CesiumForUnity
             {
                 CesiumIonSession.Ion().Tick();
             }
+            // Don't let a missing / out-of-sync native DLL crash everything.
             catch (DllNotFoundException)
             {
-                // Don't let a missing / out-of-sync native DLL crash everything.
+            }
+            catch (TypeInitializationException)
+            {
             }
         }
 

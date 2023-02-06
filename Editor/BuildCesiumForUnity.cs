@@ -123,8 +123,26 @@ namespace CesiumForUnity
                 target = target,
                 scenes = new[] { "Assets/Scenes/Empty.unity" }
             });
+
             if (report.summary.totalErrors > 0)
-                throw new Exception("Build failed");
+            {
+                StringBuilder errorReport = new StringBuilder();
+                errorReport.AppendLine("BuildPlayer failed:");
+                foreach (BuildStep step in report.steps)
+                {
+                    var errorMessages = step.messages.Where(message => message.type == LogType.Error || message.type == LogType.Exception);
+                    if (!errorMessages.Any())
+                        continue;
+
+                    errorReport.AppendLine("  In step " + step.name + ":");
+
+                    foreach (BuildStepMessage message in errorMessages)
+                    {
+                        errorReport.AppendLine("    - " + message.content);
+                    }
+                }
+                throw new Exception(errorReport.ToString());
+            }
 
             // We don't actually need the built project; delete it.
             if (Directory.Exists(outputPath))
