@@ -444,10 +444,13 @@ namespace CesiumForUnity
 
             GUIContent createPhysicsMeshesContent = new GUIContent(
                 "Create Physics Meshes",
-                "Whether to generate physics meshes for this tileset.\n\n" +
+                "Whether to generate physics meshes for this tileset." +
+                "\n\n" +
                 "Disabling this option will improve the performance of tile loading, " +
                 "but it will no longer be possible to collide with the tileset since " +
-                "the physics meshes will not be created.");
+                "the physics meshes will not be created." +
+                "\n\n" +
+                "Physics meshes cannot be generated for primitives containing points.");
             EditorGUILayout.PropertyField(this._createPhysicsMeshes, createPhysicsMeshesContent);
         }
     }
