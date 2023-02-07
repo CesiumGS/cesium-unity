@@ -56,6 +56,13 @@ namespace CesiumForUnity
             Vector3 u = t.up;
             Vector3 f = t.forward;
 
+            CesiumOrbitalFrustum frustum = new CesiumOrbitalFrustum();
+            frustum = CesiumOrbitalFrustum.Instance;
+            double3 cartographic = frustum.CartographicPosition;
+            double viewPortPixelWidth = frustum.ViewPortPixelWidth;
+            double verticalFov = frustum.VerticalFov;
+            double aspectRatio = frustum.AspectRatio;
+
             Vector4 v = new Vector4(1.0f, 0.0f, 1.0f, 0.0f);
 
             t.position = new Vector3();

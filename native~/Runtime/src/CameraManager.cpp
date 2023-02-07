@@ -7,6 +7,7 @@
 #include <CesiumUtility/Math.h>
 
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
+#include <DotNet/CesiumForUnity/CesiumOrbitalFrustum.h>
 #include <DotNet/UnityEngine/Camera.h>
 #include <DotNet/UnityEngine/GameObject.h>
 #include <DotNet/UnityEngine/Matrix4x4.h>
@@ -79,6 +80,36 @@ ViewState unityCameraToViewState(
       verticalFOV);
 }
 
+ViewState frustumToViewState(const CesiumOrbitalFrustum& globeFrustum) {
+
+  double verticalFOV = Math::degreesToRadians(globeFrustum.VerticalFov());
+  double aspectRatio = globeFrustum.AspectRatio();
+
+  double horizontalFOV =
+      2 * glm::atan(aspectRatio * glm::tan(verticalFOV * 0.5));
+
+  auto cartogrpahicDegrees = globeFrustum.CartographicPosition();
+  glm::dvec3 position =
+      Ellipsoid::WGS84.cartographicToCartesian(Cartographic::fromDegrees(
+          cartogrpahicDegrees.x,
+          cartogrpahicDegrees.y,
+          cartogrpahicDegrees.z));
+  glm::dvec3 forward = -glm::normalize(position);
+  glm::dvec3 right = glm::cross({0, 0, 1}, -forward);
+  glm::dvec3 up = glm::cross(right, forward);
+
+  double pixelWidth = globeFrustum.ViewPortPixelWidth();
+  double pixelHeight = (int)ceil(pixelWidth / aspectRatio);
+
+  return ViewState::create(
+      position,
+      forward,
+      up,
+      glm::dvec2(pixelWidth, pixelHeight),
+      horizontalFOV,
+      verticalFOV);
+}
+
 } // namespace
 
 std::vector<ViewState> CameraManager::getAllCameras(const GameObject& context) {
@@ -96,10 +127,17 @@ std::vector<ViewState> CameraManager::getAllCameras(const GameObject& context) {
   }
 
   std::vector<ViewState> result;
-  Camera camera = Camera::main();
-  if (camera != nullptr) {
-    result.emplace_back(
-        unityCameraToViewState(pCoordinateSystem, unityWorldToTileset, camera));
+  CesiumOrbitalFrustum frustum = CesiumOrbitalFrustum::Instance();
+  if (frustum != nullptr) {
+    result.emplace_back(frustumToViewState(frustum));
+  } else {
+    Camera camera = Camera::main();
+    if (camera != nullptr) {
+      result.emplace_back(unityCameraToViewState(
+          pCoordinateSystem,
+          unityWorldToTileset,
+          camera));
+    }
   }
 
 #if UNITY_EDITOR
