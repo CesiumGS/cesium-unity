@@ -59,7 +59,7 @@ namespace CesiumForUnity
         // True if _localToEcef has a valid value.
         // False if it has not yet been initialized from the Transform.
         [SerializeField]
-        private bool _localToEcefIsValid = false;
+        private bool _modelToEcefIsValid = false;
 
         // The last known Transform, used to detect changes in the Transform so that
         // the precise globe coordinates can be recomputed from it. This is null before OnEnable.
@@ -262,7 +262,7 @@ namespace CesiumForUnity
         /// </remarks>
         public void Sync()
         {
-            if (!this._localToEcefIsValid || (this._lastLocalToWorld != null && this._lastLocalToWorld != this.transform.localToWorldMatrix))
+            if (!this._modelToEcefIsValid || (this._lastLocalToWorld != null && this._lastLocalToWorld != this.transform.localToWorldMatrix))
             {
                 this.UpdateEcefFromTransform();
                 return;
@@ -352,11 +352,11 @@ namespace CesiumForUnity
 
         private void InitializeEcefIfNeeded()
         {
-            if (!this._localToEcefIsValid)
+            if (!this._modelToEcefIsValid)
             {
                 this.UpdateGeoreference();
                 this.UpdateEcefFromTransform();
-                this._localToEcefIsValid = true;
+                this._modelToEcefIsValid = true;
             }
         }
 
@@ -391,7 +391,7 @@ namespace CesiumForUnity
             // If the ECEF position changes, update the orientation based on the
             // new position on the globe (if enabled).
             if (this.adjustOrientationForGlobeWhenMoving &&
-                this._localToEcefIsValid)
+                this._modelToEcefIsValid)
             {
                 double3 oldPosition = this._modelToEcef.c3.xyz;
                 double3 newPosition = newModelToEcef.c3.xyz;
