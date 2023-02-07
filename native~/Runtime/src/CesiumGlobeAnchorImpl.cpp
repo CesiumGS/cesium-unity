@@ -44,6 +44,7 @@ namespace CesiumForUnityNative {
   UnityEngine::Transform transform = globeAnchor.transform();
   glm::dquat oldRotation = UnityTransforms::fromUnity(transform.rotation());
   glm::dquat newRotation = deltaRotation * oldRotation;
+  // TODO: should this be localRotation? I think so
   transform.rotation(UnityTransforms::toUnity(newRotation));
 }
 

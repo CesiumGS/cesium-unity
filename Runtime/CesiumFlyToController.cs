@@ -182,11 +182,7 @@ namespace CesiumForUnity
         /// <returns>Whether or not movement was detected.</returns>
         private bool DetectMovementInput()
         {
-            double3 currentPositionECEF = new double3(
-                this._globeAnchor.ecefX,
-                this._globeAnchor.ecefY,
-                this._globeAnchor.ecefZ);
-
+            double3 currentPositionECEF = this._globeAnchor.ecefPosition;
             bool3 positionEquality = currentPositionECEF == this._lastPositionECEF;
             return !positionEquality.x || !positionEquality.y || !positionEquality.z;
         }
@@ -263,10 +259,7 @@ namespace CesiumForUnity
             double3 lastPosition = this._keypoints[lastKeypointIndex];
             double3 nextPosition = this._keypoints[nextKeypointIndex];
             double3 currentPosition = math.lerp(lastPosition, nextPosition, segmentPercentage);
-            this._globeAnchor.SetPositionEarthCenteredEarthFixed(
-                currentPosition.x,
-                currentPosition.y,
-                currentPosition.z);
+            this._globeAnchor.ecefPosition = currentPosition;
             this._lastPositionECEF = currentPosition;
 
             // Interpolate rotation in the EUN frame. The local EUN rotation will
@@ -280,10 +273,7 @@ namespace CesiumForUnity
         private void CompleteFlight()
         {
             double3 finalPoint = this._keypoints[this._keypoints.Count - 1];
-            this._globeAnchor.SetPositionEarthCenteredEarthFixed(
-                finalPoint.x,
-                finalPoint.y,
-                finalPoint.z);
+            this._globeAnchor.ecefPosition = finalPoint;
 
             this.transform.rotation = this._flyToDestinationRotation;
 
@@ -473,12 +463,7 @@ namespace CesiumForUnity
             pitchAtDestination = Mathf.Clamp(pitchAtDestination, -89.99f, 89.99f);
 
             // Compute source location in ECEF
-            double3 source = new double3()
-            {
-                x = this._globeAnchor.ecefX,
-                y = this._globeAnchor.ecefY,
-                z = this._globeAnchor.ecefZ
-            };
+            double3 source = this._globeAnchor.ecefPosition;
 
             this.ComputeFlightPath(source, destination, yawAtDestination, pitchAtDestination);
 

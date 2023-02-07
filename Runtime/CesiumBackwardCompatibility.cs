@@ -13,7 +13,7 @@ namespace CesiumForUnity
 {
     public interface IBackwardCompatibilityComponent<TNew>
     {
-        public string UpgradedVersion { get; }
+        public string VersionToBeUpgraded { get; }
         public void Upgrade(GameObject gameObject, TNew newComponent);
     }
 
@@ -42,7 +42,7 @@ namespace CesiumForUnity
         {
             GameObject go = oldComponent.gameObject;
 
-            Debug.Log("Upgrading " + typeof(TNew).Name + " on game object \"" + go.name + "\" from Cesium for Unity " + oldComponent.UpgradedVersion + ".");
+            Debug.Log("Upgrading " + typeof(TNew).Name + " on game object \"" + go.name + "\" from Cesium for Unity " + oldComponent.VersionToBeUpgraded + ".");
 
             TNew newComponent = go.AddComponent<TNew>();
 

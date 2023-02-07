@@ -43,7 +43,7 @@ namespace CesiumForUnity
         }
 #endif
 
-        public string UpgradedVersion => "v0.2.0";
+        public string VersionToBeUpgraded => "v0.2.0";
 
         public void Upgrade(GameObject gameObject, CesiumGlobeAnchor upgraded)
         {
@@ -58,10 +58,10 @@ namespace CesiumForUnity
                     // This shouldn't happen, but if it does, just leave the position at the default.
                     break;
                 case CesiumGlobeAnchorPositionAuthorityBackwardCompatibility0dot1dot2.LongitudeLatitudeHeight:
-                    upgraded.SetPositionLongitudeLatitudeHeight(this._longitude, this._latitude, this._height);
+                    upgraded.longitudeLatitudeHeight = new double3(this._longitude, this._latitude, this._height);
                     break;
                 case CesiumGlobeAnchorPositionAuthorityBackwardCompatibility0dot1dot2.EarthCenteredEarthFixed:
-                    upgraded.SetPositionEarthCenteredEarthFixed(this._ecefX, this._ecefY, this._ecefZ);
+                    upgraded.ecefPosition = new double3(this._ecefX, this._ecefY, this._ecefZ);
                     break;
                 case CesiumGlobeAnchorPositionAuthorityBackwardCompatibility0dot1dot2.UnityCoordinates:
                     // Any backward compatibility for CesiumGeoreference must have a more negative
@@ -73,7 +73,7 @@ namespace CesiumForUnity
                     {
                         georeference.Initialize();
                         double3 ecef = georeference.TransformUnityPositionToEarthCenteredEarthFixed(new double3(this._unityX, this._unityY, this._unityZ));
-                        upgraded.SetPositionEarthCenteredEarthFixed(ecef.x, ecef.y, ecef.z);
+                        upgraded.ecefPosition = ecef;
                     }
                     break;
             }

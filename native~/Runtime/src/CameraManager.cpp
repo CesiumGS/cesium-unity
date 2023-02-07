@@ -1,5 +1,6 @@
 #include "CameraManager.h"
 
+#include "CesiumGeoreferenceImpl.h"
 #include "UnityTransforms.h"
 
 #include <CesiumGeospatial/Ellipsoid.h>

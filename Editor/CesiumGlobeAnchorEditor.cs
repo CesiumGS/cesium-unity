@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace CesiumForUnity
 {
+#if false
     [CustomEditor(typeof(CesiumGlobeAnchor))]
     public class CesiumGlobeAnchorEditor : Editor
     {
@@ -193,4 +194,5 @@ namespace CesiumForUnity
             EditorGUI.EndDisabledGroup();
         }
     }
+#endif
 }

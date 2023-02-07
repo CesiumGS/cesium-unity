@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using Unity.Mathematics;
+using UnityEngine.UIElements;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -10,27 +11,6 @@ using UnityEditor;
 
 namespace CesiumForUnity
 {
-    /// <summary>
-    /// Identifies the set of the coordinates that authoritatively define
-    /// the position of this object.
-    /// </summary>
-    public enum CesiumGlobeAnchorPositionAuthority
-    {
-        /// <summary>
-        /// The <see cref="CesiumGlobeAnchor.longitude"/>, <see cref="CesiumGlobeAnchor.latitude"/>,
-        /// and <see cref="CesiumGlobeAnchor.height"/> properties authoritatively define the position
-        /// of this object.
-        /// </summary>
-        LongitudeLatitudeHeight,
-
-        /// <summary>
-        /// The <see cref="CesiumGlobeAnchor.ecefX"/>, <see cref="CesiumGlobeAnchor.ecefY"/>,
-        /// and <see cref="CesiumGlobeAnchor.ecefZ"/> properties authoritatively define the position
-        /// of this object.
-        /// </summary>
-        EarthCenteredEarthFixed,
-    }
-
     /// <summary>
     /// Anchors this game object to the globe. An anchored game object can be placed anywhere on the globe with
     /// high precision, and it will stay in its proper place on the globe when the
@@ -65,10 +45,35 @@ namespace CesiumForUnity
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumGlobeAnchorImpl", "CesiumGlobeAnchorImpl.h")]
     public partial class CesiumGlobeAnchor : MonoBehaviour
     {
-        #region User-editable properties
+        #region Fields
 
         [SerializeField]
         private bool _adjustOrientationForGlobeWhenMoving = true;
+
+        [SerializeField]
+        private bool _detectTransformChanges = true;
+
+        [SerializeField]
+        private double4x4 _modelToEcef = double4x4.identity;
+
+        // True if _localToEcef has a valid value.
+        // False if it has not yet been initialized from the Transform.
+        [SerializeField]
+        private bool _localToEcefIsValid = false;
+
+        // The last known Transform, used to detect changes in the Transform so that
+        // the precise globe coordinates can be recomputed from it. This is null before OnEnable.
+        [NonSerialized]
+        private Matrix4x4? _lastLocalToWorld = null;
+
+        // The resolved georeference containing this globe anchor. This is just a cache
+        // of `GetComponentInParent<CesiumGeoreference>()`.
+        [NonSerialized]
+        private CesiumGeoreference _georeference;
+
+        #endregion
+
+        #region User-editable properties
 
         /// <summary>
         /// Whether to adjust the game object's orientation based on globe curvature as the
@@ -100,9 +105,6 @@ namespace CesiumForUnity
             set => this._adjustOrientationForGlobeWhenMoving = value;
         }
 
-        [SerializeField]
-        private bool _detectTransformChanges = true;
-
         /// <summary>
         /// Whether to automatically detect changes in the game object's <code>Transform</code>
         /// and update the precise globe coordinates accordingly.
@@ -130,182 +132,102 @@ namespace CesiumForUnity
             }
         }
 
-        [SerializeField]
-        private CesiumGlobeAnchorPositionAuthority _positionAuthority = CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight;
-
-        /// <summary>
-        /// Identifies the set of coordinates that authoritatively define the position of this object.
-        /// </summary>
-        public CesiumGlobeAnchorPositionAuthority positionAuthority
+        public double4x4 modelToEcef
         {
-            get => this._positionAuthority;
+            get
+            {
+                this.InitializeEcefIfNeeded();
+                return this._modelToEcef;
+            }
             set
             {
-                CesiumGlobeAnchorPositionAuthority previousAuthority = this._positionAuthority;
-                this._positionAuthority = value;
-                this.UpdateGlobePosition(previousAuthority);
+                this.InitializeEcefIfNeeded();
+                this.UpdateEcef(value);
             }
         }
 
-        [SerializeField]
-        private double _latitude = 0.0;
-
         /// <summary>
-        /// The latitude in degrees, in the range -90 to 90. This property is ignored
-        /// unless <see cref="positionAuthority"/> is
-        /// <see cref="CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight"/>.
-        /// Setting this property changes the <see cref="positionAuthority"/> accordingly.
+        /// Gets or sets the longitude, latitude, and height of this object. The Longitude (X) is in the range -180 to 180 degrees.
+        /// The Latitude (Y) is in the range -90 to 90 degrees. The Height (Z) is measured in meters above the WGS84
+        /// ellipsoid. Do not confused an ellipsoidal height with a geoid height or height above mean sea level, which
+        /// can be tens of meters higher or lower depending on where in the world the object is located.
         /// </summary>
-        public double latitude
+        public double3 longitudeLatitudeHeight
         {
-            get => this._latitude;
+            get => CesiumWgs84Ellipsoid.EarthCenteredEarthFixedToLongitudeLatitudeHeight(this.ecefPosition);
             set
             {
-                this._latitude = value;
-                this.positionAuthority = CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight;
+                this.ecefPosition = CesiumWgs84Ellipsoid.LongitudeLatitudeHeightToEarthCenteredEarthFixed(value);
             }
         }
 
-        [SerializeField]
-        private double _longitude = 0.0;
-
         /// <summary>
-        /// The longitude in degrees, in the range -180 to 180. This property is ignored
-        /// unless <see cref="positionAuthority"/> is
-        /// <see cref="CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight"/>.
-        /// Setting this property changes the <see cref="positionAuthority"/> accordingly.
+        /// Gets or sets the position in the Earth-Centered, Earth-Fixed (ECEF) coordinates in meters. The ECEF coordinate
+        /// system is a right-handed system located at the center of the Earth. The +X axis points to the intersection
+        /// of the Equator and Prime Meridian (zero degrees longitude). The +Y axis points to the intersection of
+        /// the Equator and +90 degrees longitude. The +Z axis points up through the North Pole.
         /// </summary>
-        public double longitude
+        public double3 ecefPosition
         {
-            get => this._longitude;
+            get => this.modelToEcef.c3.xyz;
             set
             {
-                this._longitude = value;
-                this.positionAuthority = CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight;
+                this.InitializeEcefIfNeeded();
+                double4x4 newModelToEcef = this._modelToEcef;
+                newModelToEcef.c3 = new double4(value.x, value.y, value.z, 1.0);
+                this.modelToEcef = newModelToEcef;
             }
         }
 
-        [SerializeField]
-        private double _height = 0.0;
-
         /// <summary>
-        /// The height in meters above the ellipsoid. Do not confuse this with a geoid height
-        /// or height above mean sea level, which can be tens of meters higher or lower
-        /// depending on where in the world the object is located. This property is ignored
-        /// unless <see cref="positionAuthority"/> is
-        /// <see cref="CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight"/>.
-        /// Setting this property changes the <see cref="positionAuthority"/> accordingly.
+        /// Gets or sets the rotation from the object's coordinate system to the
+        /// Earth-Centered, Earth-Fixed axes.
         /// </summary>
-        public double height
+        public quaternion localToEcefRotation
         {
-            get => this._height;
-            set
+            get
             {
-                this._height = value;
-                this.positionAuthority = CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight;
+                this.InitializeEcefIfNeeded();
+
+                double3 translation;
+                quaternion rotation;
+                double3 scale;
+
+                Helpers.MatrixToTranslationRotationAndScale(this._modelToEcef, out translation, out rotation, out scale);
+
+                return rotation;
             }
+            //set
+            //{
+            //    this.InitializeEcefIfNeeded();
+            //    this.UpdateGlobeRotation(value);
+            //}
         }
 
-        [SerializeField]
-        private double _ecefX = 6378137.0;
-
-        /// <summary>
-        /// The Earth-Centered, Earth-Fixed X coordinate in meters. This property is ignored
-        /// unless <see cref="positionAuthority"/> is
-        /// <see cref="CesiumGlobeAnchorPositionAuthority.EarthCenteredEarthFixed"/>.
-        /// Setting this property changes the <see cref="positionAuthority"/> accordingly.
-        /// </summary>
-        public double ecefX
+        public double3 localToEcefScale
         {
-            get => this._ecefX;
-            set
+            get
             {
-                this._ecefX = value;
-                this.positionAuthority = CesiumGlobeAnchorPositionAuthority.EarthCenteredEarthFixed;
+                this.InitializeEcefIfNeeded();
+
+                double3 translation;
+                quaternion rotation;
+                double3 scale;
+
+                Helpers.MatrixToTranslationRotationAndScale(this._modelToEcef, out translation, out rotation, out scale);
+
+                return scale;
             }
-        }
-
-        [SerializeField]
-        private double _ecefY = 0.0;
-
-        /// <summary>
-        /// The Earth-Centered, Earth-Fixed Y coordinate in meters. This property is ignored
-        /// unless <see cref="positionAuthority"/> is
-        /// <see cref="CesiumGlobeAnchorPositionAuthority.EarthCenteredEarthFixed"/>.
-        /// Setting this property changes the <see cref="positionAuthority"/> accordingly.
-        /// </summary>
-        public double ecefY
-        {
-            get => this._ecefY;
-            set
-            {
-                this._ecefY = value;
-                this.positionAuthority = CesiumGlobeAnchorPositionAuthority.EarthCenteredEarthFixed;
-            }
-        }
-
-        [SerializeField]
-        private double _ecefZ = 0.0;
-
-        /// <summary>
-        /// The Earth-Centered, Earth-Fixed Z coordinate in meters. This property is ignored
-        /// unless <see cref="positionAuthority"/> is
-        /// <see cref="CesiumGlobeAnchorPositionAuthority.EarthCenteredEarthFixed"/>.
-        /// Setting this property changes the <see cref="positionAuthority"/> accordingly.
-        /// </summary>
-        public double ecefZ
-        {
-            get => this._ecefZ;
-            set
-            {
-                this._ecefZ = value;
-                this.positionAuthority = CesiumGlobeAnchorPositionAuthority.EarthCenteredEarthFixed;
-            }
+            //set
+            //{
+            //    this.InitializeEcefIfNeeded();
+            //    this.UpdateGlobeScale(value);
+            //}
         }
 
         #endregion
 
         #region Set Helpers
-
-        /// <summary>
-        /// Sets the position of this object to a particular <see cref="longitude"/>,
-        /// <see cref="latitude"/>, and <see cref="height"/>.
-        /// </summary>
-        /// <remarks>
-        /// Calling this method is more efficient than setting the properties individually.
-        /// </remarks>
-        /// <param name="longitude">The longitude in degrees, in the range -180 to 180.</param>
-        /// <param name="latitude">The latitude in degrees, in the range -90 to 90.</param>
-        /// <param name="height">
-        /// The height in meters above the ellipsoid. Do not confuse this with a geoid height
-        /// or height above mean sea level, which can be tens of meters higher or lower
-        /// depending on where in the world the object is located.
-        /// </param>
-        public void SetPositionLongitudeLatitudeHeight(double longitude, double latitude, double height)
-        {
-            this._longitude = longitude;
-            this._latitude = latitude;
-            this._height = height;
-            this.positionAuthority = CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight;
-        }
-
-        /// <summary>
-        /// Sets the position of this object to particular <see cref="ecefX"/>, <see cref="ecefY"/>,
-        /// <see cref="ecefZ"/> coordinates in the Earth-Centered, Earth-Fixed (ECEF) frame.
-        /// </summary>
-        /// <remarks>
-        /// Calling this method is more efficient than setting the properties individually.
-        /// </remarks>
-        /// <param name="x">The X coordinate in meters.</param>
-        /// <param name="y">The Y coordinate in meters.</param>
-        /// <param name="z">The Z coordinate in meters.</param>
-        public void SetPositionEarthCenteredEarthFixed(double x, double y, double z)
-        {
-            this._ecefX = x;
-            this._ecefY = y;
-            this._ecefZ = z;
-            this.positionAuthority = CesiumGlobeAnchorPositionAuthority.EarthCenteredEarthFixed;
-        }
 
         /// <summary>
         /// Synchronizes the properties of this `CesiumGlobeAnchor`.
@@ -326,63 +248,28 @@ namespace CesiumForUnity
         /// </para>
         /// <list type="bullet">
         /// <item>
-        /// If none of the position properties on this instance have been set, it updates them all
+        /// If none of the ECEF properties on this instance have been set, it updates them all
         /// from the game object's current `Transform`.
         /// </item>
         /// <item>
-        /// If the game object's `Transform` has changed since the last time `Start`, this method,
+        /// If the game object's `Transform` has changed since the last time `OnEnable`, this method,
         /// or a position setter was called, it updates all of this instance's position
-        /// properties from the current transform and sets <see cref="positionAuthority"/> to
-        /// `UnityWorldCoordinates`. This works even if <see cref="detectTransformChanges"/> is
+        /// properties from the current transform. This works even if <see cref="detectTransformChanges"/> is
         /// disabled. It will also update the object's orientation if
-        /// <see cref="adjustOrientationForGlobeWhenMoving"/> is enabled.
-        /// </item>
-        /// <item>
-        /// Recomputes the _other_ position properties from the authoritative set. They may be different
-        /// if, for example, the `CesiumGeoreference` origin has changed. If this results in the position
-        /// on the globe changing, the object's orientation will be updated as well if
         /// <see cref="adjustOrientationForGlobeWhenMoving"/> is enabled.
         /// </item>
         /// </list>
         /// </remarks>
         public void Sync()
         {
-            if (this._lastLocalToWorld != null && this._lastLocalToWorld != this.transform.localToWorldMatrix)
-                this._initializeFromTransform = true;
+            if (!this._localToEcefIsValid || (this._lastLocalToWorld != null && this._lastLocalToWorld != this.transform.localToWorldMatrix))
+            {
+                this.UpdateEcefFromTransform();
+                return;
+            }
 
-            this.UpdateGlobePosition(this._positionAuthority);
+            this.UpdateEcef(this._modelToEcef);
         }
-
-        #endregion
-
-        #region Private properties
-
-        // When this is true, the Transform will be used to populate all other fields the next
-        // time <see cref="UpdateGlobePosition"/> is called. Afterward, its value is reset to
-        // false. It is initially set to true for a brand new globe anchor and can be set to
-        // true again by the the transform change detection coroutine or when `Sync`
-        // detects a change in the Transform.
-        //
-        // This is serialized because we want to keep using the saved globe position after load,
-        // not recompute it (less precisely) from the Transform.
-        [SerializeField]
-        private bool _initializeFromTransform = true;
-
-        // The last known ECEF position, used to detect movement of the object so that
-        // its rotation can be updated when `adjustOrientationForGlobeWhenMoving` is enabled.
-        // This is null before OnEnable.
-        [NonSerialized]
-        private double3? _lastPositionEcef = null;
-
-        // The last known Transform, used to detect changes in the Transform so that
-        // the precise globe coordinates can be recomputed from it. This is null before OnEnable.
-        [NonSerialized]
-        private Matrix4x4? _lastLocalToWorld = null;
-
-        // The resolved georeference containing this globe anchor. This is just a cache
-        // of `GetComponentInParent<CesiumGeoreference>()`.
-        [NonSerialized]
-        private CesiumGeoreference _georeference;
 
         #endregion
 
@@ -455,7 +342,7 @@ namespace CesiumForUnity
             while (true)
             {
                 yield return waitForChanges;
-                this.UpdateGlobePositionFromTransform();
+                this.UpdateEcefFromTransform();
             }
         }
 
@@ -463,7 +350,17 @@ namespace CesiumForUnity
 
         #region Updaters
 
-        private void UpdateGlobePosition(CesiumGlobeAnchorPositionAuthority? previousAuthority)
+        private void InitializeEcefIfNeeded()
+        {
+            if (!this._localToEcefIsValid)
+            {
+                this.UpdateGeoreference();
+                this.UpdateEcefFromTransform();
+                this._localToEcefIsValid = true;
+            }
+        }
+
+        private void UpdateEcef(double4x4 newModelToEcef)
         {
             if (this._georeference == null)
             {
@@ -472,79 +369,62 @@ namespace CesiumForUnity
                     throw new InvalidOperationException("CesiumGlobeAnchor is not nested inside a game object with a CesiumGeoreference.");
             }
 
-            double3 ecef;
-            if (this._initializeFromTransform)
+            // Update the Transform
+            double4x4 modelToLocal = math.mul(this._georeference.ecefToLocalMatrix, this._modelToEcef);
+
+            double3 localPosition;
+            quaternion localRotation;
+            double3 localScale;
+            Helpers.MatrixToTranslationRotationAndScale(
+                modelToLocal,
+                out localPosition,
+                out localRotation,
+                out localScale);
+
+            Transform transform = this.transform;
+            transform.localPosition = (float3)localPosition;
+            transform.localRotation = localRotation;
+            transform.localScale = (float3)localScale;
+
+            this._lastLocalToWorld = this.transform.localToWorldMatrix;
+
+            // If the ECEF position changes, update the orientation based on the
+            // new position on the globe (if enabled).
+            if (this.adjustOrientationForGlobeWhenMoving &&
+                this._localToEcefIsValid)
             {
-                // There's no authoritative position, so copy the position from the Transform.
-                Vector3 position = this.transform.localPosition;
-                ecef = this._georeference.TransformUnityPositionToEarthCenteredEarthFixed(new double3(
-                    position.x,
-                    position.y,
-                    position.z
-                ));
-            }
-            else
-            {
-                // Convert the authoritative position to ECEF
-                switch (this.positionAuthority)
+                double3 oldPosition = this._modelToEcef.c3.xyz;
+                double3 newPosition = newModelToEcef.c3.xyz;
+                if (!oldPosition.Equals(newPosition))
                 {
-                    case CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight:
-                        ecef = CesiumWgs84Ellipsoid.LongitudeLatitudeHeightToEarthCenteredEarthFixed(new double3(
-                            this.longitude,
-                            this.latitude,
-                            this.height
-                        ));
-                        break;
-                    case CesiumGlobeAnchorPositionAuthority.EarthCenteredEarthFixed:
-                        ecef.x = this.ecefX;
-                        ecef.y = this.ecefY;
-                        ecef.z = this.ecefZ;
-                        break;
-                    default:
-                        throw new InvalidOperationException("Unknown value for positionAuthority.");
+                    CesiumGlobeAnchor.AdjustOrientation(this, oldPosition, newPosition);
                 }
             }
 
-            // Update the non-authoritative fields with the new position.
-            // TODO: it might be more efficient to lazily update these if/when they're accessed, at least outside the Editor.
-            if (this.positionAuthority != CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight)
-            {
-                double3 llh = CesiumWgs84Ellipsoid.EarthCenteredEarthFixedToLongitudeLatitudeHeight(ecef);
-                this._longitude = llh.x;
-                this._latitude = llh.y;
-                this._height = llh.z;
-            }
-
-            if (this.positionAuthority != CesiumGlobeAnchorPositionAuthority.EarthCenteredEarthFixed)
-            {
-                this._ecefX = ecef.x;
-                this._ecefY = ecef.y;
-                this._ecefZ = ecef.z;
-            }
-
-            // If the ECEF position changes, update the orientation based on the
-            // new position on the globe (if desired).
-            if (this.adjustOrientationForGlobeWhenMoving &&
-                this._lastPositionEcef != null &&
-                (this._lastPositionEcef.Value.x != this._ecefX || this._lastPositionEcef.Value.y != this._ecefY || this._lastPositionEcef.Value.z != this._ecefZ))
-            {
-                double3 newPosition = new double3(this._ecefX, this._ecefY, this._ecefZ);
-                CesiumGlobeAnchor.AdjustOrientation(this, this._lastPositionEcef.Value, newPosition);
-            }
-
-            double3 unityLocal = this._georeference.TransformEarthCenteredEarthFixedPositionToUnity(ecef);
-
-            // Set the object's transform with the new position
-            this.gameObject.transform.localPosition = new Vector3((float)unityLocal.x, (float)unityLocal.y, (float)unityLocal.z);
-            this._lastLocalToWorld = this.transform.localToWorldMatrix;
-            this._lastPositionEcef = new double3(this._ecefX, this._ecefY, this._ecefZ);
-            this._initializeFromTransform = false;
+            this._modelToEcef = newModelToEcef;
         }
 
-        private void UpdateGlobePositionFromTransform()
+        private void UpdateEcefFromTransform()
         {
-            this._initializeFromTransform = true;
-            this.UpdateGlobePosition(this._positionAuthority);
+            if (this._georeference == null)
+            {
+                this.UpdateGeoreference();
+                if (this._georeference == null)
+                    throw new InvalidOperationException("CesiumGlobeAnchor is not nested inside a game object with a CesiumGeoreference.");
+            }
+
+            Transform transform = this.transform;
+
+            // Compute the local transformation matrix, model -> local
+            double4x4 modelToLocal = Helpers.ToMathematics(Matrix4x4.TRS(transform.localPosition, transform.localRotation, transform.localScale));
+
+            // Get the local -> ECEF transformation from the CesiumGeoreference
+            double4x4 localToEcef = this._georeference.localToEcefMatrix;
+
+            // Multiply to get a model -> ECEF transformation
+            double4x4 modelToEcef = math.mul(localToEcef, modelToLocal);
+
+            this.UpdateEcef(modelToEcef);
         }
 
         // This is static so that CesiumGlobeAnchor does not need finalization.

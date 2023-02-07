@@ -40,11 +40,7 @@ namespace CesiumForUnity
                 return;
             }
 
-            this.UpdateFromEcef(georeference, new double3(
-                anchor.ecefX,
-                anchor.ecefY,
-                anchor.ecefZ
-            ));
+            this.UpdateFromEcef(georeference, anchor.ecefPosition);
         }
 
         private List<CesiumSubScene> _sublevelsScratch = new List<CesiumSubScene>();

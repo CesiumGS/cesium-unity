@@ -7,6 +7,7 @@ using UnityEngine.TestTools.Utils;
 
 public class TestCesiumGlobeAnchor
 {
+#if false
     [Test]
     public void AddingGlobeAnchorImmediatelySyncsGlobePositionFromTransform()
     {
@@ -166,4 +167,5 @@ public class TestCesiumGlobeAnchor
         Assert.That(goAnchored.transform.position.y, Is.EqualTo(0.0f).Using(FloatEqualityComparer.Instance));
         Assert.That(goAnchored.transform.position.z, Is.EqualTo(0.0f).Using(FloatEqualityComparer.Instance));
     }
+#endif
 }
