@@ -12,7 +12,8 @@
 
 namespace DotNet::CesiumForUnity {
 class CesiumMetadata;
-class FeatureReference;
+class MetadataProperty;
+class Feature;
 } // namespace DotNet::CesiumForUnity
 
 namespace DotNet::UnityEngine {
@@ -42,23 +43,10 @@ public:
 
   void removeMetadata(int32_t instanceID);
 
-  int getNumberOfFeatures(
-      const DotNet::CesiumForUnity::CesiumMetadata& metadata,
-      const DotNet::UnityEngine::Transform& transform);
-
-  void getFeatureReferences(
+  DotNet::System::Array1<DotNet::CesiumForUnity::Feature> GetFeatures(
       const DotNet::CesiumForUnity::CesiumMetadata& metadata,
       const DotNet::UnityEngine::Transform& transform,
-      int triangleIndex,
-      DotNet::System::Array1<DotNet::CesiumForUnity::FeatureReference>
-          attributes);
-
-  void getProperties(
-      const DotNet::CesiumForUnity::CesiumMetadata& metadata,
-      const DotNet::UnityEngine::Transform& transform,
-      DotNet::CesiumForUnity::FeatureReference attribute,
-      DotNet::System::Array1<DotNet::CesiumForUnity::MetadataProperty>
-          properties);
+      int triangleIndex);
 
 private:
   std::unordered_map<
