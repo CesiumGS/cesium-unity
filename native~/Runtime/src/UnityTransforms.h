@@ -11,9 +11,10 @@ struct Vector3;
 
 namespace DotNet::Unity::Mathematics {
 struct double3;
+struct double4;
 struct double3x3;
 struct double4x4;
-}
+} // namespace DotNet::Unity::Mathematics
 
 namespace CesiumForUnityNative {
 
@@ -86,8 +87,22 @@ public:
   static glm::dvec3 fromUnity(const DotNet::UnityEngine::Vector3& vector);
 
   /**
-   * @brief Convert a single-precision Unity Quaternion to a double-precision
-   * GLM quaternion.
+   * @brief Convert a 3-component, double-precision Unity double3 to a
+   * 3-component, double-precision GLM vector.
+   */
+  static glm::dvec3
+  fromUnity(const DotNet::Unity::Mathematics::double3& vector);
+
+  /**
+   * @brief Convert a 4-component, double-precision Unity double4 to a
+   * 4-component, double-precision GLM vector.
+   */
+  static glm::dvec4
+  fromUnity(const DotNet::Unity::Mathematics::double4& vector);
+
+  /**
+   * @brief Convert a single-precision Unity Quaternion to a
+   * double-precision GLM quaternion.
    */
   static glm::dquat
   fromUnity(const DotNet::UnityEngine::Quaternion& quaternion);
@@ -97,6 +112,20 @@ public:
    * GLM 4x4 matrix.
    */
   static glm::dmat4 fromUnity(const DotNet::UnityEngine::Matrix4x4& matrix);
+
+  /**
+   * @brief Convert a double-precision Unity double4x4 to a double-precision
+   * GLM 4x4 matrix.
+   */
+  static glm::dmat4
+  fromUnity(const DotNet::Unity::Mathematics::double4x4& matrix);
+
+  /**
+   * @brief Convert a double-precision Unity double4x4 to a double-precision
+   * GLM 3x3 matrix by ignoring the last row and last column.
+   */
+  static glm::dmat3
+  fromUnity3x3(const DotNet::Unity::Mathematics::double4x4& matrix);
 };
 
 } // namespace CesiumForUnityNative

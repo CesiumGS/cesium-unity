@@ -17,35 +17,28 @@ using namespace DotNet;
 
 namespace CesiumForUnityNative {
 
-/*static*/ void CesiumGlobeAnchorImpl::AdjustOrientation(
+/*static*/ ::DotNet::Unity::Mathematics::double4x4
+CesiumGlobeAnchorImpl::AdjustOrientation(
     const CesiumForUnity::CesiumGlobeAnchor& globeAnchor,
     const Unity::Mathematics::double3& oldPositionEcef,
-    const Unity::Mathematics::double3& newPositionEcef) {
-  CesiumForUnity::CesiumGeoreference georeference =
-      globeAnchor.gameObject()
-          .GetComponentInParent<CesiumForUnity::CesiumGeoreference>();
-  if (georeference == nullptr)
-    return;
-
-  const LocalHorizontalCoordinateSystem& coordinateSystem =
-      georeference.NativeImplementation().getCoordinateSystem(georeference);
-
+    const Unity::Mathematics::double3& newPositionEcef,
+    const ::DotNet::Unity::Mathematics::double4x4& newModelToEcef) {
   // Find the rotation from the old up to the new up.
-  glm::dvec3 oldNormal = coordinateSystem.ecefDirectionToLocal(
-      Ellipsoid::WGS84.geodeticSurfaceNormal(
-          glm::dvec3(oldPositionEcef.x, oldPositionEcef.y, oldPositionEcef.z)));
-  glm::dvec3 newNormal = coordinateSystem.ecefDirectionToLocal(
-      Ellipsoid::WGS84.geodeticSurfaceNormal(
-          glm::dvec3(newPositionEcef.x, newPositionEcef.y, newPositionEcef.z)));
+  glm::dvec3 oldNormal = Ellipsoid::WGS84.geodeticSurfaceNormal(
+      glm::dvec3(oldPositionEcef.x, oldPositionEcef.y, oldPositionEcef.z));
+  glm::dvec3 newNormal = Ellipsoid::WGS84.geodeticSurfaceNormal(
+      glm::dvec3(newPositionEcef.x, newPositionEcef.y, newPositionEcef.z));
 
   glm::dquat deltaRotation = glm::rotation(oldNormal, newNormal);
-
-  // Rotate the game object by that same rotation
-  UnityEngine::Transform transform = globeAnchor.transform();
-  glm::dquat oldRotation = UnityTransforms::fromUnity(transform.rotation());
-  glm::dquat newRotation = deltaRotation * oldRotation;
-  // TODO: should this be localRotation? I think so
-  transform.rotation(UnityTransforms::toUnity(newRotation));
+  glm::dmat3 oldRotationAndScale =
+      UnityTransforms::fromUnity3x3(newModelToEcef);
+  glm::dmat3 newRotationAndScale =
+      glm::mat3_cast(deltaRotation) * oldRotationAndScale;
+  return UnityTransforms::toUnityMathematics(glm::dmat4(
+      glm::dvec4(newRotationAndScale[0], 0.0),
+      glm::dvec4(newRotationAndScale[1], 0.0),
+      glm::dvec4(newRotationAndScale[2], 0.0),
+      UnityTransforms::fromUnity(newModelToEcef.c3)));
 }
 
 } // namespace CesiumForUnityNative

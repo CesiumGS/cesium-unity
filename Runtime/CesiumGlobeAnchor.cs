@@ -319,11 +319,11 @@ namespace CesiumForUnity
 
             bool start = this._detectTransformChanges;
 
-            #if UNITY_EDITOR
+#if UNITY_EDITOR
             // Always detect changes in Edit mode.
             if (!EditorApplication.isPlaying)
                 start = true;
-            #endif
+#endif
 
             // Can't start a coroutine on an inactive game object
             if (!this.isActiveAndEnabled)
@@ -397,7 +397,7 @@ namespace CesiumForUnity
                 double3 newPosition = newModelToEcef.c3.xyz;
                 if (!oldPosition.Equals(newPosition))
                 {
-                    CesiumGlobeAnchor.AdjustOrientation(this, oldPosition, newPosition);
+                    newModelToEcef = CesiumGlobeAnchor.AdjustOrientation(this, oldPosition, newPosition, newModelToEcef);
                 }
             }
 
@@ -428,7 +428,7 @@ namespace CesiumForUnity
         }
 
         // This is static so that CesiumGlobeAnchor does not need finalization.
-        private static partial void AdjustOrientation(CesiumGlobeAnchor anchor, double3 oldPositionEcef, double3 newPositionEcef);
+        private static partial double4x4 AdjustOrientation(CesiumGlobeAnchor anchor, double3 oldPositionEcef, double3 newPositionEcef, double4x4 newModelToEcef);
 
         #endregion
     }

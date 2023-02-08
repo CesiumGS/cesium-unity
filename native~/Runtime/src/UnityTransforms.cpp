@@ -118,6 +118,16 @@ UnityTransforms::fromUnity(const DotNet::UnityEngine::Vector3& vector) {
   return glm::dvec3(vector.x, vector.y, vector.z);
 }
 
+glm::dvec3
+UnityTransforms::fromUnity(const DotNet::Unity::Mathematics::double3& vector) {
+  return glm::dvec3(vector.x, vector.y, vector.z);
+}
+
+glm::dvec4
+UnityTransforms::fromUnity(const DotNet::Unity::Mathematics::double4& vector) {
+  return glm::dvec4(vector.x, vector.y, vector.z, vector.w);
+}
+
 glm::dquat
 UnityTransforms::fromUnity(const DotNet::UnityEngine::Quaternion& quaternion) {
   return glm::dquat(quaternion.w, quaternion.x, quaternion.y, quaternion.z);
@@ -130,6 +140,23 @@ UnityTransforms::fromUnity(const DotNet::UnityEngine::Matrix4x4& matrix) {
       glm::dvec4(matrix.m01, matrix.m11, matrix.m21, matrix.m31),
       glm::dvec4(matrix.m02, matrix.m12, matrix.m22, matrix.m32),
       glm::dvec4(matrix.m03, matrix.m13, matrix.m23, matrix.m33));
+}
+
+glm::dmat4 UnityTransforms::fromUnity(
+    const DotNet::Unity::Mathematics::double4x4& matrix) {
+  return glm::dmat4(
+      fromUnity(matrix.c0),
+      fromUnity(matrix.c1),
+      fromUnity(matrix.c2),
+      fromUnity(matrix.c3));
+}
+
+glm::dmat3 UnityTransforms::fromUnity3x3(
+    const DotNet::Unity::Mathematics::double4x4& matrix) {
+  return glm::dmat3(
+      glm::dvec3(matrix.c0.x, matrix.c0.y, matrix.c0.z),
+      glm::dvec3(matrix.c1.x, matrix.c1.y, matrix.c1.z),
+      glm::dvec3(matrix.c2.x, matrix.c2.y, matrix.c2.z));
 }
 
 } // namespace CesiumForUnityNative
