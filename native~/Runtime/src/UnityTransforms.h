@@ -67,6 +67,13 @@ public:
   UnityTransforms::toUnityMathematics(const glm::dvec3& vector);
 
   /**
+   * Convert a double-precision GLM 4-component vector to a double-precision
+   * Unity.Mathematics double4.
+   */
+  static DotNet::Unity::Mathematics::double4
+  UnityTransforms::toUnityMathematics(const glm::dvec4& vector);
+
+  /**
    * @brief Convert a double-precision GLM 3x3 matrix to a double-precision
    * Unity.Mathematics double3x3.
    */

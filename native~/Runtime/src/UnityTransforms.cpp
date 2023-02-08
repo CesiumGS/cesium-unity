@@ -90,27 +90,20 @@ UnityTransforms::toUnityMathematics(const glm::dmat3& matrix) {
 DotNet::Unity::Mathematics::double4x4
 UnityTransforms::toUnityMathematics(const glm::dmat4& matrix) {
   return DotNet::Unity::Mathematics::double4x4{
-      matrix[0].x,
-      matrix[0].y,
-      matrix[0].z,
-      matrix[0].w,
-      matrix[1].x,
-      matrix[1].y,
-      matrix[1].z,
-      matrix[1].w,
-      matrix[2].x,
-      matrix[2].y,
-      matrix[2].z,
-      matrix[2].w,
-      matrix[3].x,
-      matrix[3].y,
-      matrix[3].z,
-      matrix[3].w};
+    toUnityMathematics(matrix[0]),
+    toUnityMathematics(matrix[1]),
+    toUnityMathematics(matrix[2]),
+    toUnityMathematics(matrix[3])};
 }
 
 DotNet::Unity::Mathematics::double3
 UnityTransforms::toUnityMathematics(const glm::dvec3& vector) {
   return DotNet::Unity::Mathematics::double3{vector.x, vector.y, vector.z};
+}
+
+DotNet::Unity::Mathematics::double4
+UnityTransforms::toUnityMathematics(const glm::dvec4& vector) {
+  return DotNet::Unity::Mathematics::double4{vector.x, vector.y, vector.z, vector.w};
 }
 
 glm::dvec3
