@@ -370,7 +370,7 @@ namespace CesiumForUnity
             }
 
             // Update the Transform
-            double4x4 modelToLocal = math.mul(this._georeference.ecefToLocalMatrix, this._modelToEcef);
+            double4x4 modelToLocal = math.mul(this._georeference.ecefToLocalMatrix, newModelToEcef);
 
             double3 localPosition;
             quaternion localRotation;
