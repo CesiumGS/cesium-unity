@@ -309,7 +309,7 @@ namespace CesiumForUnity
 
         #endregion
 
-        #region Set Helpers
+        #region Public Methods
 
         /// <summary>
         /// Synchronizes the properties of this `CesiumGlobeAnchor`.
@@ -357,6 +357,18 @@ namespace CesiumForUnity
             this.UpdateEcef(this._modelToEcef);
         }
 
+        /// <summary>
+        /// Completely re-initializes the state of this object from its serialized properties. This is called automatically
+        /// by `OnEnable` and is not usually necessary to call directly. It can sometimes be useful after Unity has
+        /// modified the private, serializable fields of this instance. For example: after an undo or redo operation.
+        /// </summary>
+        public void Restart()
+        {
+            this.UpdateGeoreference();
+            this.Sync();
+            this.StartOrStopDetectingTransformChanges();
+        }
+
         #endregion
 
         #region Unity Messages
@@ -383,9 +395,12 @@ namespace CesiumForUnity
 
         private void OnEnable()
         {
-            this.UpdateGeoreference();
-            this.Sync();
-            this.StartOrStopDetectingTransformChanges();
+            this.Restart();
+        }
+
+        private void Reset()
+        {
+            this.Restart();
         }
 
         private void OnDisable()
