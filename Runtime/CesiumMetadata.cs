@@ -10,12 +10,6 @@ namespace CesiumForUnity
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumMetadataImpl", "CesiumMetadataImpl.h")]
     public partial class CesiumMetadata : MonoBehaviour
     {
-        public class Feature {
-            public string className {get; set;}
-            public string featureTableName {get; set;}
-            public Dictionary<string, MetadataProperty> properties {get; set;}
-        }
-
         /// <summary>
         /// Gets the features corresponding to a particular triangle in a tile.
         /// </summary>
@@ -26,6 +20,6 @@ namespace CesiumForUnity
         /// The information to pass to this function can be obtained using the <code>Physics.Raycast</code>
         /// function.
         /// </remarks>
-        public partial Feature[] GetFeatures(Transform transform, int triangleIndex);
+        public partial CesiumFeature[] GetFeatures(Transform transform, int triangleIndex);
    }
 }

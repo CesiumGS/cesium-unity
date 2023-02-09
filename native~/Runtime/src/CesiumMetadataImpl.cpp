@@ -7,9 +7,7 @@
 #include <CesiumGltf/MetadataFeatureTableView.h>
 #include <CesiumGltf/MetadataPropertyView.h>
 
-#include <DotNet/CesiumForUnity/Feature.h>
 #include <DotNet/System/Array1.h>
-#include <DotNet/System/Collections/Generic/Dictionary2.h>
 #include <DotNet/UnityEngine/GameObject.h>
 #include <DotNet/UnityEngine/Mesh.h>
 #include <DotNet/UnityEngine/Transform.h>
@@ -138,7 +136,7 @@ void CesiumMetadataImpl::removeMetadata(int32_t instanceID) {
   }
 }
 
-DotNet::System::Array1<DotNet::CesiumForUnity::Feature>
+DotNet::System::Array1<DotNet::CesiumForUnity::CesiumFeature>
 CesiumForUnityNative::CesiumMetadataImpl::GetFeatures(
     const DotNet::CesiumForUnity::CesiumMetadata& metadata,
     const DotNet::UnityEngine::Transform& transform,
@@ -155,16 +153,16 @@ CesiumForUnityNative::CesiumMetadataImpl::GetFeatures(
         pModel->getExtension<ExtensionModelExtFeatureMetadata>();
     const ExtensionMeshPrimitiveExtFeatureMetadata* pMetadata =
         pPrimitive->getExtension<ExtensionMeshPrimitiveExtFeatureMetadata>();
-    DotNet::System::Array1<DotNet::CesiumForUnity::Feature> features =
-        DotNet::System::Array1<DotNet::CesiumForUnity::Feature>::Array1(
+    DotNet::System::Array1<DotNet::CesiumForUnity::CesiumFeature> features =
+        DotNet::System::Array1<DotNet::CesiumForUnity::CesiumFeature>::Array1(
             pMetadata->featureIdAttributes.size());
     for (int i = 0; i < pMetadata->featureIdAttributes.size(); i++) {
       const CesiumGltf::FeatureIDAttribute& featIDAttr =
           pMetadata->featureIdAttributes[i];
       auto find = pModelMetadata->featureTables.find(featIDAttr.featureTable);
       if (find != pModelMetadata->featureTables.end()) {
-        DotNet::CesiumForUnity::Feature feature =
-            DotNet::CesiumForUnity::Feature();
+        DotNet::CesiumForUnity::CesiumFeature feature =
+            DotNet::CesiumForUnity::CesiumFeature();
         features.Item(i, feature);
         const std::string& featureTableName = find->first;
         feature.featureTableName(featureTableName);
@@ -189,11 +187,15 @@ CesiumForUnityNative::CesiumMetadataImpl::GetFeatures(
               pModel,
               &featureTable};
           feature.properties(
-              DotNet::System::Collections::Generic::Dictionary2<
-                  ::DotNet::System::String,
-                  DotNet::CesiumForUnity::MetadataProperty>::Dictionary2());
+              DotNet::System::Array1<DotNet::System::String>::Array1(
+                  featureTable.properties.size()));
+          auto size = feature.properties().Length();
+          auto& nativeProperties = feature.NativeImplementation().properties;
+          int index = 0;
           featureTableView.forEachProperty([featureID,
-                                            properties = feature.properties()](
+                                            &index,
+                                            &properties = feature.properties(),
+                                            &nativeProperties](
                                                const std::string& propertyName,
                                                auto propertyType) {
             ValueType propertyValue = std::visit(
@@ -205,18 +207,15 @@ CesiumForUnityNative::CesiumMetadataImpl::GetFeatures(
                   }
                 },
                 static_cast<CesiumForUnityNative::PropertyType>(propertyType));
-            auto property =
-                DotNet::CesiumForUnity::MetadataProperty::MetadataProperty();
-            property.NativeImplementation().SetProperty(
-                propertyName,
-                propertyType,
-                propertyValue);
-            properties.Add(propertyName, property);
+            properties.Item(index++, propertyName);
+            nativeProperties.insert(
+                {propertyName, {propertyType, propertyValue}});
           });
         }
       }
     }
     return features;
   }
-  return DotNet::System::Array1<DotNet::CesiumForUnity::Feature>::Array1(0);
+  return DotNet::System::Array1<DotNet::CesiumForUnity::CesiumFeature>::Array1(
+      0);
 }

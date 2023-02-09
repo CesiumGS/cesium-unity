@@ -311,17 +311,13 @@ namespace CesiumForUnity
             if(type == MetadataType.None){
                 type = MetadataType.Int16;
             }
-            MetadataProperty[] properties = new MetadataProperty[3];
-            var property = properties[0];
-            property = new MetadataProperty();
-            properties[0] = property;
             metadata.GetFeatures(transform, 3);
-            CesiumMetadata.Feature[] features = new CesiumMetadata.Feature[2];
-            var feature = features[0] = new CesiumMetadata.Feature();
+            CesiumFeature[] features = new CesiumFeature[2];
+            var feature = features[0] = new CesiumFeature();
             feature.className = "";
             feature.featureTableName = "";
-            feature.properties = new Dictionary<string, MetadataProperty>();
-            feature.properties.Add("", property);
+            feature.properties = new string[4];
+            feature.properties[2] = "";
 
             CesiumGeoreference georeference = go.AddComponent<CesiumGeoreference>();
             georeference = go.GetComponent<CesiumGeoreference>();

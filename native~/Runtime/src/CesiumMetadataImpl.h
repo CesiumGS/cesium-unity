@@ -3,7 +3,7 @@
 #include <CesiumGltf/AccessorView.h>
 #include <CesiumGltf/Model.h>
 
-#include <DotNet/CesiumForUnity/MetadataProperty.h>
+#include <DotNet/CesiumForUnity/CesiumFeature.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/String.h>
 #include <DotNet/UnityEngine/GameObject.h>
@@ -12,8 +12,7 @@
 
 namespace DotNet::CesiumForUnity {
 class CesiumMetadata;
-class MetadataProperty;
-class Feature;
+class CesiumFeature;
 } // namespace DotNet::CesiumForUnity
 
 namespace DotNet::UnityEngine {
@@ -43,7 +42,7 @@ public:
 
   void removeMetadata(int32_t instanceID);
 
-  DotNet::System::Array1<DotNet::CesiumForUnity::Feature> GetFeatures(
+  DotNet::System::Array1<DotNet::CesiumForUnity::CesiumFeature> GetFeatures(
       const DotNet::CesiumForUnity::CesiumMetadata& metadata,
       const DotNet::UnityEngine::Transform& transform,
       int triangleIndex);
