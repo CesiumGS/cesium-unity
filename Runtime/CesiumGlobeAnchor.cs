@@ -23,7 +23,7 @@ namespace CesiumForUnity
     /// Otherwise, this component will throw an exception in `OnEnable`.
     /// </para>
     /// <para>
-    /// An anchored game object is still allowed to move. It may be moved either by setting the position
+    /// An anchored game object is still allowed to move. It may be moved either by setting
     /// properties on this instance, or by updating the game object's `Transform`. If the object is
     /// expected to move outside of the Editor via a `Transform` change, be sure that the
     /// <see cref="detectTransformChanges"/> property is set to true so that this instance updates
@@ -37,8 +37,8 @@ namespace CesiumForUnity
     /// <para>
     /// In most cases, the Transform of the ancestors of the GameObject that contains this component should
     /// be an identity transform: 0 position, 0 rotation, 1 scale. Otherwise, this globe anchor's position will
-    /// be misaligned with other globe-aligned objects. However, it is sometimes useful to purposely offset an
-    /// object or group of objects.
+    /// be misaligned with other globe-aligned objects that are transformed differently. However, it is
+    /// sometimes useful to purposely offset an object or group of objects.
     /// </para>
     /// </remarks>
     [ExecuteInEditMode]
@@ -132,6 +132,16 @@ namespace CesiumForUnity
             }
         }
 
+        /// <summary>
+        /// Gets or sets the 4x4 transformation matrix from this game object's local coordinate system
+        /// to the Earth-Centered, Earth-Fixed (ECEF) coordinate system.
+        /// </summary>
+        /// <remarks>
+        /// The ECEF coordinate system is a right-handed system located at the center of the Earth.
+        /// The +X axis points to the intersection of the Equator and Prime Meridian (zero degrees
+        /// longitude). The +Y axis points to the intersection of the Equator and +90 degrees
+        /// longitude. The +Z axis points up through the North Pole.
+        /// </remarks>
         public double4x4 modelToEcef
         {
             get
@@ -162,67 +172,139 @@ namespace CesiumForUnity
         }
 
         /// <summary>
-        /// Gets or sets the position in the Earth-Centered, Earth-Fixed (ECEF) coordinates in meters. The ECEF coordinate
-        /// system is a right-handed system located at the center of the Earth. The +X axis points to the intersection
-        /// of the Equator and Prime Meridian (zero degrees longitude). The +Y axis points to the intersection of
-        /// the Equator and +90 degrees longitude. The +Z axis points up through the North Pole.
+        /// Gets or sets the game object's position in the Earth-Centered, Earth-Fixed (ECEF) coordinates in meters.
         /// </summary>
+        /// <remarks>
+        /// See <see cref="modelToEcef"/> for an explanation of the ECEF coordinate system.
+        /// </remarks>
         public double3 ecefPosition
         {
             get => this.modelToEcef.c3.xyz;
             set
             {
-                this.InitializeEcefIfNeeded();
-                double4x4 newModelToEcef = this._modelToEcef;
+                double4x4 newModelToEcef = this.modelToEcef;
                 newModelToEcef.c3 = new double4(value.x, value.y, value.z, 1.0);
                 this.modelToEcef = newModelToEcef;
             }
         }
 
         /// <summary>
-        /// Gets or sets the rotation from the object's coordinate system to the
+        /// Gets the rotation from the game object's coordinate system to the
         /// Earth-Centered, Earth-Fixed axes.
         /// </summary>
+        /// <remarks>
+        /// See <see cref="modelToEcef"/> for an explanation of the ECEF coordinate system.
+        /// </remarks>
         public quaternion localToEcefRotation
         {
             get
             {
-                this.InitializeEcefIfNeeded();
-
                 double3 translation;
                 quaternion rotation;
                 double3 scale;
 
-                Helpers.MatrixToTranslationRotationAndScale(this._modelToEcef, out translation, out rotation, out scale);
+                Helpers.MatrixToTranslationRotationAndScale(this.modelToEcef, out translation, out rotation, out scale);
 
                 return rotation;
             }
-            //set
-            //{
-            //    this.InitializeEcefIfNeeded();
-            //    this.UpdateGlobeRotation(value);
-            //}
         }
 
+        /// <summary>
+        /// Gets the scale from the game object's coordinate system to the Earth-Centered,
+        /// Earth-Fixed coordinate system. Because ECEF is right-handed and Unity is left-handed,
+        /// this scale will usually be negative.
+        /// </summary>
+        /// <remarks>
+        /// See <see cref="modelToEcef"/> for an explanation of the ECEF coordinate system.
+        /// </remarks>
         public double3 localToEcefScale
         {
             get
             {
-                this.InitializeEcefIfNeeded();
-
                 double3 translation;
                 quaternion rotation;
                 double3 scale;
 
-                Helpers.MatrixToTranslationRotationAndScale(this._modelToEcef, out translation, out rotation, out scale);
+                Helpers.MatrixToTranslationRotationAndScale(this.modelToEcef, out translation, out rotation, out scale);
 
                 return scale;
             }
-            //set
-            //{
-            //    this.InitializeEcefIfNeeded();
-            //    this.UpdateGlobeScale(value);
-            //}
+        }
+
+        #endregion
+
+        #region Deprecated Properties
+
+        [Obsolete("Use ecefPosition.x instead.")]
+        public double ecefX
+        {
+            get => this.ecefPosition.x;
+            set
+            {
+                double3 position = this.ecefPosition;
+                position.x = value;
+                this.ecefPosition = position;
+            }
+        }
+
+        [Obsolete("Use ecefPosition.y instead.")]
+        public double ecefY
+        {
+            get => this.ecefPosition.y;
+            set
+            {
+                double3 position = this.ecefPosition;
+                position.y = value;
+                this.ecefPosition = position;
+            }
+        }
+
+        [Obsolete("Use ecefPosition.z instead.")]
+        public double ecefZ
+        {
+            get => this.ecefPosition.z;
+            set
+            {
+                double3 position = this.ecefPosition;
+                position.z = value;
+                this.ecefPosition = position;
+            }
+        }
+
+        [Obsolete("Use longitudeLatitudeHeight.x instead.")]
+        public double longitude
+        {
+            get => this.longitudeLatitudeHeight.x;
+            set
+            {
+                double3 position = this.longitudeLatitudeHeight;
+                position.x = value;
+                this.longitudeLatitudeHeight = position;
+            }
+        }
+
+        [Obsolete("Use longitudeLatitudeHeight.y instead.")]
+        public double latitude
+        {
+            get => this.longitudeLatitudeHeight.y;
+            set
+            {
+                double3 position = this.longitudeLatitudeHeight;
+                position.y = value;
+                this.longitudeLatitudeHeight = position;
+            }
+        }
+
+        [Obsolete("Use longitudeLatitudeHeight.z instead.")]
+        public double height
+        {
+            get => this.longitudeLatitudeHeight.z;
+            set
+            {
+                double3 position = this.longitudeLatitudeHeight;
+                position.z = value;
+                this.longitudeLatitudeHeight = position;
+            }
         }
 
         #endregion
@@ -248,7 +330,7 @@ namespace CesiumForUnity
         /// </para>
         /// <list type="bullet">
         /// <item>
-        /// If none of the ECEF properties on this instance have been set, it updates them all
+        /// If the <see cref="modelToEcef"/> transform has not yet been set, it is computed
         /// from the game object's current `Transform`.
         /// </item>
         /// <item>
@@ -257,6 +339,10 @@ namespace CesiumForUnity
         /// properties from the current transform. This works even if <see cref="detectTransformChanges"/> is
         /// disabled. It will also update the object's orientation if
         /// <see cref="adjustOrientationForGlobeWhenMoving"/> is enabled.
+        /// </item>
+        /// <item>
+        /// If the origin of the <see cref="CesiumGeoreference"/> has changed, the game object's `Transform` is
+        /// updated based on the <see cref="modelToEcef"/> transform and the new georeference origin.
         /// </item>
         /// </list>
         /// </remarks>
@@ -356,7 +442,6 @@ namespace CesiumForUnity
             {
                 this.UpdateGeoreference();
                 this.UpdateEcefFromTransform();
-                this._modelToEcefIsValid = true;
             }
         }
 
@@ -370,16 +455,10 @@ namespace CesiumForUnity
             }
 
             // Update the Transform
-            double4x4 modelToLocal = math.mul(this._georeference.ecefToLocalMatrix, newModelToEcef);
-
             double3 localPosition;
             quaternion localRotation;
             double3 localScale;
-            Helpers.MatrixToTranslationRotationAndScale(
-                modelToLocal,
-                out localPosition,
-                out localRotation,
-                out localScale);
+            this.ComputeTransformPropertiesFromEcef(newModelToEcef, out localPosition, out localRotation, out localScale);
 
             Transform transform = this.transform;
             transform.localPosition = (float3)localPosition;
@@ -402,6 +481,17 @@ namespace CesiumForUnity
             }
 
             this._modelToEcef = newModelToEcef;
+            this._modelToEcefIsValid = true;
+        }
+
+        private void ComputeTransformPropertiesFromEcef(double4x4 modelToEcef, out double3 localPosition, out quaternion localRotation, out double3 localScale)
+        {
+            double4x4 modelToLocal = math.mul(this._georeference.ecefToLocalMatrix, modelToEcef);
+            Helpers.MatrixToTranslationRotationAndScale(
+                modelToLocal,
+                out localPosition,
+                out localRotation,
+                out localScale);
         }
 
         private void UpdateEcefFromTransform()
