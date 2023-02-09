@@ -375,6 +375,12 @@ namespace CesiumForUnity
             }
         }
 
+        private void UpdateGeoreferenceIfNecessary()
+        {
+            if (this._georeference == null)
+                this.UpdateGeoreference();
+        }
+
         private void OnEnable()
         {
             this.UpdateGeoreference();
@@ -440,19 +446,16 @@ namespace CesiumForUnity
         {
             if (!this._modelToEcefIsValid)
             {
-                this.UpdateGeoreference();
+                this.UpdateGeoreferenceIfNecessary();
                 this.UpdateEcefFromTransform();
             }
         }
 
         private void UpdateEcef(double4x4 newModelToEcef)
         {
+            this.UpdateGeoreferenceIfNecessary();
             if (this._georeference == null)
-            {
-                this.UpdateGeoreference();
-                if (this._georeference == null)
-                    throw new InvalidOperationException("CesiumGlobeAnchor is not nested inside a game object with a CesiumGeoreference.");
-            }
+                throw new InvalidOperationException("CesiumGlobeAnchor is not nested inside a game object with a CesiumGeoreference.");
 
             // Update the Transform
             double3 localPosition;
@@ -496,12 +499,9 @@ namespace CesiumForUnity
 
         private void UpdateEcefFromTransform()
         {
+            this.UpdateGeoreferenceIfNecessary();
             if (this._georeference == null)
-            {
-                this.UpdateGeoreference();
-                if (this._georeference == null)
-                    throw new InvalidOperationException("CesiumGlobeAnchor is not nested inside a game object with a CesiumGeoreference.");
-            }
+                throw new InvalidOperationException("CesiumGlobeAnchor is not nested inside a game object with a CesiumGeoreference.");
 
             Transform transform = this.transform;
 
