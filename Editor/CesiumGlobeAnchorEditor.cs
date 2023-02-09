@@ -9,13 +9,6 @@ namespace CesiumForUnity
     {
         private CesiumGlobeAnchor _globeAnchor;
 
-        private enum PositionType
-        {
-            // TODO: add Unity
-            LongitudeLatitudeHeight,
-            EarthCenteredEarthFixed
-        }
-
         private void OnEnable()
         {
             Undo.undoRedoPerformed += OnUndoRedoPerformed;
