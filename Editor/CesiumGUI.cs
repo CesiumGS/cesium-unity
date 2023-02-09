@@ -23,7 +23,7 @@ namespace CesiumForUnity
 
         public static void Double(UnityEngine.Object target, double value, Action<double> set, string label, string tooltip)
         {
-            double newValue = EditorGUILayout.DelayedDoubleField(new GUIContent(label, FormatTooltip(tooltip)), value);
+            double newValue = EditorGUILayout.DoubleField(new GUIContent(label, FormatTooltip(tooltip)), value);
             if (newValue != value)
             {
                 if (target != null)
