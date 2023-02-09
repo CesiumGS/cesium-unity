@@ -1,7 +1,6 @@
 #include "CesiumMetadataImpl.h"
 
 #include <CesiumGltf/AccessorView.h>
-#include <CesiumGltf/Class.h>
 #include <CesiumGltf/ExtensionMeshPrimitiveExtFeatureMetadata.h>
 #include <CesiumGltf/ExtensionModelExtFeatureMetadata.h>
 #include <CesiumGltf/MetadataFeatureTableView.h>

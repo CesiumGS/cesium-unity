@@ -1,6 +1,5 @@
 using Reinterop;
 using UnityEngine;
-using System.Collections.Generic;
 
 namespace CesiumForUnity
 {
