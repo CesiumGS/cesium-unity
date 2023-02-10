@@ -153,7 +153,7 @@ CesiumForUnityNative::CesiumMetadataImpl::GetFeatures(
     const ExtensionMeshPrimitiveExtFeatureMetadata* pMetadata =
         pPrimitive->getExtension<ExtensionMeshPrimitiveExtFeatureMetadata>();
     DotNet::System::Array1<DotNet::CesiumForUnity::CesiumFeature> features =
-        DotNet::System::Array1<DotNet::CesiumForUnity::CesiumFeature>::Array1(
+        DotNet::System::Array1<DotNet::CesiumForUnity::CesiumFeature>(
             pMetadata->featureIdAttributes.size());
     for (int i = 0; i < pMetadata->featureIdAttributes.size(); i++) {
       const CesiumGltf::FeatureIDAttribute& featIDAttr =
@@ -186,14 +186,14 @@ CesiumForUnityNative::CesiumMetadataImpl::GetFeatures(
               pModel,
               &featureTable};
           feature.properties(
-              DotNet::System::Array1<DotNet::System::String>::Array1(
+              DotNet::System::Array1<DotNet::System::String>(
                   featureTable.properties.size()));
           auto size = feature.properties().Length();
           auto& nativeProperties = feature.NativeImplementation().properties;
           int index = 0;
           featureTableView.forEachProperty([featureID,
                                             &index,
-                                            &properties = feature.properties(),
+					    feature,
                                             &nativeProperties](
                                                const std::string& propertyName,
                                                auto propertyType) {
@@ -206,7 +206,7 @@ CesiumForUnityNative::CesiumMetadataImpl::GetFeatures(
                   }
                 },
                 static_cast<CesiumForUnityNative::PropertyType>(propertyType));
-            properties.Item(index++, propertyName);
+            feature.properties().Item(index++, propertyName);
             nativeProperties.insert(
                 {propertyName, {propertyType, propertyValue}});
           });
@@ -215,6 +215,5 @@ CesiumForUnityNative::CesiumMetadataImpl::GetFeatures(
     }
     return features;
   }
-  return DotNet::System::Array1<DotNet::CesiumForUnity::CesiumFeature>::Array1(
-      0);
+  return DotNet::System::Array1<DotNet::CesiumForUnity::CesiumFeature>(0);
 }
