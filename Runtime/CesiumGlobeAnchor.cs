@@ -43,7 +43,7 @@ namespace CesiumForUnity
     /// </remarks>
     [ExecuteInEditMode]
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumGlobeAnchorImpl", "CesiumGlobeAnchorImpl.h")]
-    public partial class CesiumGlobeAnchor : MonoBehaviour
+    public partial class CesiumGlobeAnchor : MonoBehaviour, ICesiumRestartable
     {
         #region Fields
 

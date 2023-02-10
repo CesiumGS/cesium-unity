@@ -8,23 +8,42 @@ namespace CesiumForUnity
     public class CesiumGlobeAnchorEditor : Editor
     {
         private CesiumGlobeAnchor _globeAnchor;
+        private CesiumGUI _gui;
 
         private void OnEnable()
         {
-            Undo.undoRedoPerformed += OnUndoRedoPerformed;
-
             this._globeAnchor = (CesiumGlobeAnchor)this.target;
+            this._gui = new CesiumGUI(this._globeAnchor);
         }
 
         private void OnDisable()
         {
-            Undo.undoRedoPerformed -= OnUndoRedoPerformed;
+            if (this._gui != null)
+            {
+                this._gui.Dispose();
+                this._gui = null;
+            }
         }
+        //private void OnWillFlushUndoRecord()
+        //{
+        //    Debug.Log("willFlushUndoRecord");
+        //}
 
-        private void OnUndoRedoPerformed()
-        {
-            this._globeAnchor.Restart();
-        }
+        //private void OnUndoRedoPerformed()
+        //{
+        //    Debug.Log("undoRedoPerformed");
+        //    this._globeAnchor.Restart();
+        //}
+
+        //private UndoPropertyModification[] OnPostProcessModifications(UndoPropertyModification[] modifications)
+        //{
+        //    Debug.Log("postprocessModifications longitude=" + this._globeAnchor.longitudeLatitudeHeight.y + " GetCurrentGroupName=" + Undo.GetCurrentGroupName());
+        //    foreach (UndoPropertyModification mod in modifications)
+        //    {
+        //        Debug.Log("- " + mod.currentValue.propertyPath + " keepPrefabOverride=" + mod.keepPrefabOverride);
+        //    }
+        //    return modifications;
+        //}
 
         public override void OnInspectorGUI()
         {
@@ -41,8 +60,7 @@ namespace CesiumForUnity
 
         private void DrawGlobeAnchorProperties()
         {
-            CesiumGUI.Toggle(
-                this._globeAnchor,
+            this._gui.Toggle(
                 this._globeAnchor.adjustOrientationForGlobeWhenMoving,
                 (value) => this._globeAnchor.adjustOrientationForGlobeWhenMoving = value,
                 "Adjust Orientation For Globe When Moving",
@@ -64,8 +82,7 @@ namespace CesiumForUnity
                 updates a game object's transform, because in that case game object would
                 be over-rotated.");
 
-            CesiumGUI.Toggle(
-                this._globeAnchor,
+            this._gui.Toggle(
                 this._globeAnchor.detectTransformChanges,
                 (value) => this._globeAnchor.detectTransformChanges = value,
                 "Detect Transform Changes",
@@ -80,8 +97,7 @@ namespace CesiumForUnity
         {
             GUILayout.Label("Position (Longitude Latitude Height)", EditorStyles.boldLabel);
 
-            CesiumGUI.Double(
-                this._globeAnchor,
+            this._gui.Double(
                 this._globeAnchor.longitudeLatitudeHeight.y,
                 (value) =>
                 {
@@ -92,8 +108,7 @@ namespace CesiumForUnity
                 "Latitude",
                 "The latitude of this game object in degrees, in the range [-90, 90].");
 
-            CesiumGUI.Double(
-                this._globeAnchor,
+            this._gui.Double(
                 this._globeAnchor.longitudeLatitudeHeight.x,
                 (value) =>
                 {
@@ -104,8 +119,7 @@ namespace CesiumForUnity
                 "Longitude",
                 "The longitude of this game object in degrees, in the range [-180, 180].");
 
-            CesiumGUI.Double(
-                this._globeAnchor,
+            this._gui.Double(
                 this._globeAnchor.longitudeLatitudeHeight.z,
                 (value) =>
                 {
@@ -125,8 +139,7 @@ namespace CesiumForUnity
         {
             GUILayout.Label("Position (Earth-Centered, Earth-Fixed)", EditorStyles.boldLabel);
 
-            CesiumGUI.Double(
-                this._globeAnchor,
+            this._gui.Double(
                 this._globeAnchor.ecefPosition.x,
                 (value) =>
                 {
@@ -142,8 +155,7 @@ namespace CesiumForUnity
                 and the positive X axis points toward where the Prime Meridian crosses
                 the Equator.");
 
-            CesiumGUI.Double(
-                this._globeAnchor,
+            this._gui.Double(
                 this._globeAnchor.ecefPosition.y,
                 (value) =>
                 {
@@ -158,8 +170,7 @@ namespace CesiumForUnity
                 In the ECEF coordinate system, the origin is at the center of the Earth
                 and the positive Y axis points toward the Equator at 90 degrees longitude.");
 
-            CesiumGUI.Double(
-                this._globeAnchor,
+            this._gui.Double(
                 this._globeAnchor.ecefPosition.z,
                 (value) =>
                 {
