@@ -6,7 +6,6 @@
 #include <DotNet/CesiumForUnity/CesiumFeature.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/String.h>
-#include <DotNet/UnityEngine/GameObject.h>
 
 #include <unordered_map>
 
@@ -16,8 +15,9 @@ class CesiumFeature;
 } // namespace DotNet::CesiumForUnity
 
 namespace DotNet::UnityEngine {
+class GameObject;
 class Transform;
-}
+} // namespace DotNet::UnityEngine
 
 namespace CesiumForUnityNative {
 
@@ -35,6 +35,7 @@ public:
   CesiumMetadataImpl(const DotNet::CesiumForUnity::CesiumMetadata& metadata){};
   void
   JustBeforeDelete(const DotNet::CesiumForUnity::CesiumMetadata& metadata){};
+
   void addMetadata(
       int32_t instanceID,
       const CesiumGltf::Model* pModel,

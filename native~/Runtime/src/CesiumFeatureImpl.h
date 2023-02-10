@@ -9,7 +9,7 @@
 
 namespace DotNet::CesiumForUnity {
 class CesiumFeature;
-}
+} // namespace DotNet::CesiumForUnity
 
 namespace DotNet::System {
 class String;
@@ -74,9 +74,6 @@ class CesiumFeatureImpl {
 public:
   ~CesiumFeatureImpl(){};
   CesiumFeatureImpl(const DotNet::CesiumForUnity::CesiumFeature& feature){};
-  DotNet::CesiumForUnity::MetadataType GetMetadataType(
-      const DotNet::CesiumForUnity::CesiumFeature& feature,
-      const DotNet::System::String& property);
   std::int8_t GetInt8(
       const DotNet::CesiumForUnity::CesiumFeature& feature,
       const DotNet::System::String& property,
@@ -126,11 +123,88 @@ public:
       const DotNet::System::String& property,
       const DotNet::System::String& defaultValue);
 
+  std::int8_t GetComponentInt8(
+      const DotNet::CesiumForUnity::CesiumFeature& feature,
+      const DotNet::System::String& property,
+      int index,
+      std::int8_t defaultValue);
+  std::uint8_t GetComponentUInt8(
+      const DotNet::CesiumForUnity::CesiumFeature& feature,
+      const DotNet::System::String& property,
+      int index,
+      std::uint8_t defaultValue);
+  std::int16_t GetComponentInt16(
+      const DotNet::CesiumForUnity::CesiumFeature& feature,
+      const DotNet::System::String& property,
+      int index,
+      std::int16_t defaultValue);
+  std::uint16_t GetComponentUInt16(
+      const DotNet::CesiumForUnity::CesiumFeature& feature,
+      const DotNet::System::String& property,
+      int index,
+      std::uint16_t defaultValue);
+  std::int32_t GetComponentInt32(
+      const DotNet::CesiumForUnity::CesiumFeature& feature,
+      const DotNet::System::String& property,
+      int index,
+      std::int32_t defaultValue);
+  std::uint32_t GetComponentUInt32(
+      const DotNet::CesiumForUnity::CesiumFeature& feature,
+      const DotNet::System::String& property,
+      int index,
+      std::uint32_t defaultValue);
+  std::int64_t GetComponentInt64(
+      const DotNet::CesiumForUnity::CesiumFeature& feature,
+      const DotNet::System::String& property,
+      int index,
+      std::int64_t defaultValue);
+  std::uint64_t GetComponentUInt64(
+      const DotNet::CesiumForUnity::CesiumFeature& feature,
+      const DotNet::System::String& property,
+      int index,
+      std::uint64_t defaultValue);
+  float GetComponentFloat32(
+      const DotNet::CesiumForUnity::CesiumFeature& feature,
+      const DotNet::System::String& property,
+      int index,
+      float defaultValue);
+  double GetComponentFloat64(
+      const DotNet::CesiumForUnity::CesiumFeature& feature,
+      const DotNet::System::String& property,
+      int index,
+      double defaultValue);
+  bool GetComponentBoolean(
+      const DotNet::CesiumForUnity::CesiumFeature& feature,
+      const DotNet::System::String& property,
+      int index,
+      bool defaultValue);
+  DotNet::System::String GetComponentString(
+      const DotNet::CesiumForUnity::CesiumFeature& feature,
+      const DotNet::System::String& property,
+      int index,
+      const DotNet::System::String& defaultValue);
+
+  int GetComponentCount(
+      const DotNet::CesiumForUnity::CesiumFeature& feature,
+      const DotNet::System::String& property);
+
+  DotNet::CesiumForUnity::MetadataType GetComponentType(
+      const DotNet::CesiumForUnity::CesiumFeature& feature,
+      const DotNet::System::String& property);
+
+  DotNet::CesiumForUnity::MetadataType GetMetadataType(
+      const DotNet::CesiumForUnity::CesiumFeature& feature,
+      const DotNet::System::String& property);
+
+  bool IsNormalized(
+      const DotNet::CesiumForUnity::CesiumFeature& feature,
+      const DotNet::System::String& property);
+
   std::unordered_map<std::string, std::pair<PropertyType, ValueType>>
       properties;
 
 private:
-  PropertyType getPropertyType(const DotNet::System::String& property);
-  ValueType getValueType(const DotNet::System::String& property);
+  PropertyType GetPropertyType(const DotNet::System::String& property);
+  ValueType GetValueType(const DotNet::System::String& property);
 };
 } // namespace CesiumForUnityNative
