@@ -185,31 +185,29 @@ CesiumForUnityNative::CesiumMetadataImpl::GetFeatures(
           CesiumGltf::MetadataFeatureTableView featureTableView{
               pModel,
               &featureTable};
-          feature.properties(
-              DotNet::System::Array1<DotNet::System::String>(
-                  featureTable.properties.size()));
+          feature.properties(DotNet::System::Array1<DotNet::System::String>(
+              featureTable.properties.size()));
           auto size = feature.properties().Length();
           auto& nativeProperties = feature.NativeImplementation().properties;
           int index = 0;
-          featureTableView.forEachProperty([featureID,
-                                            &index,
-					    feature,
-                                            &nativeProperties](
-                                               const std::string& propertyName,
-                                               auto propertyType) {
-            ValueType propertyValue = std::visit(
-                [featureID](auto&& value) {
-                  if (featureID >= 0 && featureID < value.size()) {
-                    return static_cast<ValueType>(value.get(featureID));
-                  } else {
-                    return static_cast<ValueType>(0);
-                  }
-                },
-                static_cast<CesiumForUnityNative::PropertyType>(propertyType));
-            feature.properties().Item(index++, propertyName);
-            nativeProperties.insert(
-                {propertyName, {propertyType, propertyValue}});
-          });
+          featureTableView.forEachProperty(
+              [featureID, &index, feature, &nativeProperties](
+                  const std::string& propertyName,
+                  auto propertyType) {
+                ValueType propertyValue = std::visit(
+                    [featureID](auto&& value) {
+                      if (featureID >= 0 && featureID < value.size()) {
+                        return static_cast<ValueType>(value.get(featureID));
+                      } else {
+                        return static_cast<ValueType>(0);
+                      }
+                    },
+                    static_cast<CesiumForUnityNative::PropertyType>(
+                        propertyType));
+                feature.properties().Item(index++, propertyName);
+                nativeProperties.insert(
+                    {propertyName, {propertyType, propertyValue}});
+              });
         }
       }
     }
