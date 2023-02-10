@@ -21,8 +21,14 @@ namespace CesiumForUnity
             Undo.postprocessModifications += OnPostProcessModifications;
         }
 
+        ~CesiumGUI()
+        {
+            Debug.Log("CesiumGUI was not disposed. Be sure to call Dispose in OnDisable.");
+        }
+
         public void Dispose()
         {
+            GC.SuppressFinalize(this);
             Undo.undoRedoPerformed -= OnUndoRedoPerformed;
             Undo.postprocessModifications -= OnPostProcessModifications;
         }
@@ -50,10 +56,10 @@ namespace CesiumForUnity
 
         private void ApplyChange<T>(string label, T newValue, Action<T> set)
         {
+            Undo.FlushUndoRecordObjects();
             this._ignoreModifications = true;
             try
             {
-                Undo.FlushUndoRecordObjects();
                 Undo.RecordObjects(this.targets, "Changed " + label);
                 set(newValue);
                 Undo.FlushUndoRecordObjects();

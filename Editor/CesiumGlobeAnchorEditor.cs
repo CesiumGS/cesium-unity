@@ -1,4 +1,5 @@
 using System;
+using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
 
@@ -24,26 +25,6 @@ namespace CesiumForUnity
                 this._gui = null;
             }
         }
-        //private void OnWillFlushUndoRecord()
-        //{
-        //    Debug.Log("willFlushUndoRecord");
-        //}
-
-        //private void OnUndoRedoPerformed()
-        //{
-        //    Debug.Log("undoRedoPerformed");
-        //    this._globeAnchor.Restart();
-        //}
-
-        //private UndoPropertyModification[] OnPostProcessModifications(UndoPropertyModification[] modifications)
-        //{
-        //    Debug.Log("postprocessModifications longitude=" + this._globeAnchor.longitudeLatitudeHeight.y + " GetCurrentGroupName=" + Undo.GetCurrentGroupName());
-        //    foreach (UndoPropertyModification mod in modifications)
-        //    {
-        //        Debug.Log("- " + mod.currentValue.propertyPath + " keepPrefabOverride=" + mod.keepPrefabOverride);
-        //    }
-        //    return modifications;
-        //}
 
         public override void OnInspectorGUI()
         {
@@ -54,6 +35,10 @@ namespace CesiumForUnity
             DrawLongitudeLatitudeHeightProperties();
             EditorGUILayout.Space(5);
             DrawEarthCenteredEarthFixedProperties();
+            EditorGUILayout.Space(5);
+            DrawEarthCenteredEarthFixedRotationProperties();
+            EditorGUILayout.Space(5);
+            DrawScaleProperties();
 
             this.serializedObject.ApplyModifiedProperties();
         }
@@ -96,6 +81,8 @@ namespace CesiumForUnity
         private void DrawLongitudeLatitudeHeightProperties()
         {
             GUILayout.Label("Position (Longitude Latitude Height)", EditorStyles.boldLabel);
+
+            // Note that Y is intentionally first here so that latitude is listed first.
 
             this._gui.Double(
                 this._globeAnchor.longitudeLatitudeHeight.y,
@@ -184,6 +171,90 @@ namespace CesiumForUnity
 
                 In the ECEF coordinate system, the origin is at the center of the Earth
                 and the positive Z axis points toward the North pole.");
+        }
+
+        private void DrawEarthCenteredEarthFixedRotationProperties()
+        {
+            GUILayout.Label("Rotation (Earth-Centered, Earth-Fixed)", EditorStyles.boldLabel);
+
+            quaternion rotation = this._globeAnchor.localToEcefRotation;
+
+            this._gui.Double(
+                rotation.value.x,
+                (value) =>
+                {
+                    rotation.value.x = (float)value;
+                    this._globeAnchor.localToEcefRotation = rotation;
+                },
+                "X",
+                @"");
+
+            this._gui.Double(
+                rotation.value.y,
+                (value) =>
+                {
+                    rotation.value.y = (float)value;
+                    this._globeAnchor.localToEcefRotation = rotation;
+                },
+                "Y",
+                @"");
+
+            this._gui.Double(
+                rotation.value.z,
+                (value) =>
+                {
+                    rotation.value.z = (float)value;
+                    this._globeAnchor.localToEcefRotation = rotation;
+                },
+                "Z",
+                @"");
+
+            this._gui.Double(
+                rotation.value.w,
+                (value) =>
+                {
+                    rotation.value.w = (float)value;
+                    this._globeAnchor.localToEcefRotation = rotation;
+                },
+                "W",
+                @"");
+        }
+
+        private void DrawScaleProperties()
+        {
+            GUILayout.Label("Scale", EditorStyles.boldLabel);
+
+            double3 positiveScale = -this._globeAnchor.localToEcefScale;
+
+            this._gui.Double(
+                positiveScale.x,
+                (value) =>
+                {
+                    positiveScale.x = value;
+                    this._globeAnchor.localToEcefScale = -positiveScale;
+                },
+                "Scale X",
+                @"");
+
+            this._gui.Double(
+                positiveScale.y,
+                (value) =>
+                {
+                    positiveScale.y = value;
+                    this._globeAnchor.localToEcefScale = -positiveScale;
+                },
+                "Scale Y",
+                @"");
+
+            this._gui.Double(
+                positiveScale.z,
+                (value) =>
+                {
+                    positiveScale.z = value;
+                    this._globeAnchor.localToEcefScale = -positiveScale;
+                },
+                "Scale Z",
+                @"");
         }
     }
 }

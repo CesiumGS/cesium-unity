@@ -118,5 +118,20 @@ namespace CesiumForUnity
                 out rotation,
                 out scale);
         }
+
+        internal static double4x4 TranslationRotationAndScaleToMatrix(double3 translation, quaternion rotation, double3 scale)
+        {
+            double3x3 scaleMatrix = new double3x3(
+                new double3(scale.x, 0.0, 0.0),
+                new double3(0.0, scale.y, 0.0),
+                new double3(0.0, 0.0, scale.z));
+            double3x3 rotationMatrix = new float3x3(rotation);
+            double3x3 scaleAndRotate = math.mul(rotationMatrix, scaleMatrix);
+            return new double4x4(
+                new double4(scaleAndRotate.c0, 0.0),
+                new double4(scaleAndRotate.c1, 0.0),
+                new double4(scaleAndRotate.c2, 0.0),
+                new double4(translation, 1.0));
+        }
     }
 }

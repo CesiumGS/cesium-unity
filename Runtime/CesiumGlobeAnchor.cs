@@ -207,12 +207,21 @@ namespace CesiumForUnity
 
                 return rotation;
             }
+            set
+            {
+                double3 translation;
+                quaternion rotation;
+                double3 scale;
+
+                Helpers.MatrixToTranslationRotationAndScale(this.modelToEcef, out translation, out rotation, out scale);
+                this.modelToEcef = Helpers.TranslationRotationAndScaleToMatrix(translation, value, scale);
+            }
         }
 
         /// <summary>
         /// Gets the scale from the game object's coordinate system to the Earth-Centered,
         /// Earth-Fixed coordinate system. Because ECEF is right-handed and Unity is left-handed,
-        /// this scale will usually be negative.
+        /// this scale will almost always be negative.
         /// </summary>
         /// <remarks>
         /// See <see cref="modelToEcef"/> for an explanation of the ECEF coordinate system.
@@ -228,6 +237,15 @@ namespace CesiumForUnity
                 Helpers.MatrixToTranslationRotationAndScale(this.modelToEcef, out translation, out rotation, out scale);
 
                 return scale;
+            }
+            set
+            {
+                double3 translation;
+                quaternion rotation;
+                double3 scale;
+
+                Helpers.MatrixToTranslationRotationAndScale(this.modelToEcef, out translation, out rotation, out scale);
+                this.modelToEcef = Helpers.TranslationRotationAndScaleToMatrix(translation, rotation, value);
             }
         }
 
