@@ -3,20 +3,21 @@
 #include <CesiumGltf/AccessorView.h>
 #include <CesiumGltf/Model.h>
 
-#include <DotNet/CesiumForUnity/MetadataProperty.h>
+#include <DotNet/CesiumForUnity/CesiumFeature.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/String.h>
-#include <DotNet/UnityEngine/GameObject.h>
 
 #include <unordered_map>
 
 namespace DotNet::CesiumForUnity {
 class CesiumMetadata;
-}
+class CesiumFeature;
+} // namespace DotNet::CesiumForUnity
 
 namespace DotNet::UnityEngine {
+class GameObject;
 class Transform;
-}
+} // namespace DotNet::UnityEngine
 
 namespace CesiumForUnityNative {
 
@@ -32,27 +33,22 @@ class CesiumMetadataImpl {
 public:
   ~CesiumMetadataImpl(){};
   CesiumMetadataImpl(const DotNet::CesiumForUnity::CesiumMetadata& metadata){};
-  void loadMetadata(
+  void
+  JustBeforeDelete(const DotNet::CesiumForUnity::CesiumMetadata& metadata){};
+
+  void addMetadata(
       int32_t instanceID,
       const CesiumGltf::Model* pModel,
       const CesiumGltf::MeshPrimitive* pPrimitive);
 
-  void unloadMetadata(int32_t instanceID);
+  void removeMetadata(int32_t instanceID);
 
-  void loadMetadata(
+  DotNet::System::Array1<DotNet::CesiumForUnity::CesiumFeature> GetFeatures(
       const DotNet::CesiumForUnity::CesiumMetadata& metadata,
       const DotNet::UnityEngine::Transform& transform,
-      int triangleIndex,
-      DotNet::System::Array1<DotNet::CesiumForUnity::MetadataProperty>
-          properties);
-
-  int getNumberOfProperties(
-      const DotNet::CesiumForUnity::CesiumMetadata& metadata,
-      const DotNet::UnityEngine::Transform& transform);
+      int triangleIndex);
 
 private:
-  void loadMetadata();
-
   std::unordered_map<
       int32_t,
       std::pair<const CesiumGltf::Model*, const CesiumGltf::MeshPrimitive*>>

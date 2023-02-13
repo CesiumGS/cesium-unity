@@ -5,6 +5,7 @@
 ##### Additions :tada:
 
 - Added support for rendering point clouds (`pnts`).
+- Metadata features are now separated based on feature tables. Properties can now be accessed by name.
 
 ### v0.2.0
 
