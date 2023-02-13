@@ -5,6 +5,9 @@ using Unity.Mathematics;
 
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
+#if UNITY_IOS || UNITY_ANDROID
+using EnhancedTouch = UnityEngine.InputSystem.EnhancedTouch;
+#endif
 #endif
 
 namespace CesiumForUnity
@@ -175,6 +178,9 @@ namespace CesiumForUnity
 
         void ConfigureInputs()
         {
+#if UNITY_IOS || UNITY_ANDROID
+            EnhancedTouch.EnhancedTouchSupport.Enable();
+#endif
             InputActionMap map = new InputActionMap("Cesium Camera Controller");
 
             lookAction = map.AddAction("look", binding: "<Mouse>/delta");
@@ -366,11 +372,39 @@ namespace CesiumForUnity
         private void HandlePlayerInputs()
         {
             #if ENABLE_INPUT_SYSTEM
-            Vector2 lookDelta = lookAction.ReadValue<Vector2>();
+            Vector2 lookDelta;
+            Vector2 moveDelta;
+            lookDelta = lookAction.ReadValue<Vector2>();
+            moveDelta = moveAction.ReadValue<Vector2>();
+
+#if UNITY_IOS || UNITY_ANDROID
+            bool handledMove = false;
+            bool handledLook = false;
+
+            foreach(var touch in EnhancedTouch.Touch.activeTouches)
+            {
+                if(touch.startScreenPosition.x < Screen.width / 2)
+                {
+                    if(!handledMove)
+                    {
+                        handledMove = true;
+                        moveDelta = touch.screenPosition - touch.startScreenPosition;
+                    }
+                }
+                else
+                {
+                    if(!handledLook)
+                    {
+                        handledLook = true;
+                        lookDelta = touch.delta;
+                    }
+                }
+            }
+#endif
+
             float inputRotateHorizontal = lookDelta.x;
             float inputRotateVertical = lookDelta.y;
 
-            Vector2 moveDelta = moveAction.ReadValue<Vector2>();
             float inputForward = moveDelta.y;
             float inputRight = moveDelta.x;
 
