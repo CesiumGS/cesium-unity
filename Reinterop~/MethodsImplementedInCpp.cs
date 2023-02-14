@@ -19,7 +19,7 @@ namespace Reinterop
             CppType objectHandleType = CppObjectHandle.GetCppType(context);
 
             // We only need a C++ instance if any partial methods are non-static
-            bool needsInstance = item.MethodsImplementedInCpp.Any(m => !m.IsStatic);
+            bool needsInstance = item.ImplementationStaticOnly != false && item.MethodsImplementedInCpp.Any(m => !m.IsStatic);
             result.CSharpPartialMethodDefinitions.needsInstance = needsInstance;
 
             if (needsInstance)
@@ -239,19 +239,30 @@ namespace Reinterop
             string callTarget = $"{implType.GetFullyQualifiedName()}::";
             string getCallTarget = "";
 
-            // If its an instance method, we need some extra parameters.
+            // If it's an instance method, we need some extra parameters.
             if (!method.IsStatic)
             {
+                // Only add the C++ instance pointer if we're using a C++ instance.
+                if (!item.ImplementationStaticOnly)
+                {
+                    parameters = new[]
+                    {
+                        (ParameterName: "pImpl", CallSiteName: "", Type: CppType.VoidPointer, InteropType: CppType.VoidPointer.AsInteropType())
+                    }.Concat(parameters);
+                    callTarget = "pImplTyped->";
+                    getCallTarget =
+                        $$"""
+                        auto pImplTyped = reinterpret_cast<{{implType.GetFullyQualifiedName()}}*>(pImpl);
+                        """;
+                }
+
                 parameters = new[]
                 {
                     (ParameterName: "handle", CallSiteName: "wrapper", Type: CppType.VoidPointer, InteropType: CppType.VoidPointer.AsInteropType()),
-                    (ParameterName: "pImpl", CallSiteName: "", Type: CppType.VoidPointer, InteropType: CppType.VoidPointer.AsInteropType())
                 }.Concat(parameters);
-                callTarget = "pImplTyped->";
-                getCallTarget =
+                getCallTarget +=
                     $$"""
                     const {{wrapperType.GetFullyQualifiedName()}} wrapper{{{objectHandleType.GetFullyQualifiedName()}}(handle)};
-                    auto pImplTyped = reinterpret_cast<{{implType.GetFullyQualifiedName()}}*>(pImpl);
                     """;
             }
 
@@ -337,7 +348,18 @@ namespace Reinterop
 
             if (!method.IsStatic)
             {
-                csParametersInterop = new[] { (Name: "thiz", CallName: "this", Type: csWrapperType), (Name: "implementation", CallName: "_implementation", Type: implementationPointer) }.Concat(csParametersInterop);
+                if (!item.ImplementationStaticOnly)
+                {
+                    csParametersInterop = new[]
+                    {
+                        (Name: "implementation", CallName: "_implementation", Type: implementationPointer)
+                    }.Concat(csParametersInterop);
+                }
+
+                csParametersInterop = new[]
+                {
+                    (Name: "thiz", CallName: "this", Type: csWrapperType),
+                }.Concat(csParametersInterop);
             }
 
             CSharpType csInteropReturnType = csReturnType.AsInteropTypeReturn();
