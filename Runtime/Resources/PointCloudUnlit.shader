@@ -1,7 +1,9 @@
-Shader "Cesium/PointCloudUnlit"
+Shader "Hidden/Cesium/PointCloudUnlit"
 {
 	Properties
 	{
+		_ColorGBuffer("Color G-Buffer", 2D) = "white" {}
+		_DepthGBuffer("Depth G-Buffer", 2D) = "white" {}
 	}
 
 	SubShader
@@ -11,7 +13,7 @@ Shader "Cesium/PointCloudUnlit"
 
 		Pass
 		{
-			Name "ForwardLit"
+			Name "Lighting Pass"
 			Tags { "LightMode" = "UniversalForward"}
 
 			HLSLPROGRAM
@@ -39,14 +41,10 @@ Shader "Cesium/PointCloudUnlit"
 		// lighting / color logic here.
 		Pass {
 
-			Name "ShadowCaster"
+			Name "Shadow Pass"
 			Tags { "LightMode" = "ShadowCaster" }
 
 			HLSLPROGRAM
-		// Signal this shader requires compute buffers
-		#pragma prefer_hlslcc gles
-		#pragma exclude_renderers d3d11_9x
-		#pragma target 5.0
 
 		// This sets up various keywords for different light types and shadow settings
 		#pragma multi_compile_shadowcaster
@@ -54,11 +52,12 @@ Shader "Cesium/PointCloudUnlit"
 		#pragma vertex Vertex
 		#pragma fragment Fragment
 
+		// TODO: find a way to calculate the aspect ratio relative to the screen in Unity,
+		// not the _ScreenParams in the shader (which are dependent on the render texture)
 		#define SHADOW_CASTER_PASS
 
 		#include "PointCloudShading.hlsl"
-
-	ENDHLSL
+		ENDHLSL
 
 	}
 	}
