@@ -19,7 +19,7 @@ namespace Reinterop
             CppType objectHandleType = CppObjectHandle.GetCppType(context);
 
             // We only need a C++ instance if any partial methods are non-static
-            bool needsInstance = item.ImplementationStaticOnly != false && item.MethodsImplementedInCpp.Any(m => !m.IsStatic);
+            bool needsInstance = !item.ImplementationStaticOnly && item.MethodsImplementedInCpp.Any(m => !m.IsStatic);
             result.CSharpPartialMethodDefinitions.needsInstance = needsInstance;
 
             if (needsInstance)
@@ -405,7 +405,7 @@ namespace Reinterop
             {
                 modifiers += " static";
             }
-            else
+            else if (!item.ImplementationStaticOnly)
             {
                 implementationCheck =
                     $$"""

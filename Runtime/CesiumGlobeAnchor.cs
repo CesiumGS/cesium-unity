@@ -612,7 +612,7 @@ namespace CesiumForUnity
                     this._lastPositionEcefZ
                 );
                 double3 newPosition = new double3(this._ecefX, this._ecefY, this._ecefZ);
-                CesiumGlobeAnchor.AdjustOrientation(this, oldPosition, newPosition);
+                this.AdjustOrientation(oldPosition, newPosition);
             }
 
             // Set the object's transform with the new position
@@ -630,7 +630,7 @@ namespace CesiumForUnity
         }
 
         // This is static so that CesiumGlobeAnchor does not need finalization.
-        private static partial void AdjustOrientation(CesiumGlobeAnchor anchor, double3 oldPositionEcef, double3 newPositionEcef);
+        private partial void AdjustOrientation(double3 oldPositionEcef, double3 newPositionEcef);
 
         #endregion
     }

@@ -104,7 +104,7 @@ namespace Reinterop
 
                 var implClassName = (args[0]?.Expression as LiteralExpressionSyntax)?.Token.ValueText;
                 var implHeaderName = (args[1]?.Expression as LiteralExpressionSyntax)?.Token.ValueText;
-                var implStaticOnly = args.Count > 2 ? (args[2]?.Expression as LiteralExpressionSyntax)?.Token.ValueText : null;
+                var implStaticOnly = args.Count > 2 ? (args[2]?.Expression as LiteralExpressionSyntax)?.Token.ValueText : "false";
 
                 // A C# class that is meant to be implemented in C++.
                 SemanticModel semanticModel = compilation.GetSemanticModel(attributeSyntax.SyntaxTree);
