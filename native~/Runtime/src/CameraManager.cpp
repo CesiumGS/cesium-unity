@@ -4,7 +4,7 @@
 #include "UnityTransforms.h"
 
 #include <CesiumGeospatial/Ellipsoid.h>
-#include <CesiumGeospatial/Transforms.h>
+#include <CesiumGeospatial/GlobeTransforms.h>
 #include <CesiumUtility/Math.h>
 
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>

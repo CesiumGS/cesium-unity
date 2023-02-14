@@ -6,7 +6,7 @@
 
 #include <Cesium3DTilesSelection/IonRasterOverlay.h>
 #include <Cesium3DTilesSelection/Tileset.h>
-#include <CesiumGeospatial/Transforms.h>
+#include <CesiumGeospatial/GlobeTransforms.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/CesiumForUnity/Cesium3DTilesetLoadFailureDetails.h>
@@ -195,7 +195,7 @@ struct CalculateECEFCameraPosition {
   glm::dvec3 operator()(const CesiumGeometry::BoundingSphere& sphere) {
     const glm::dvec3& center = sphere.getCenter();
     glm::dmat4 enuToEcef =
-        glm::dmat4(CesiumGeospatial::Transforms::eastNorthUpToFixedFrame(
+        glm::dmat4(CesiumGeospatial::GlobeTransforms::eastNorthUpToFixedFrame(
             center,
             ellipsoid));
     glm::dvec3 offset = sphere.getRadius() * glm::normalize(
@@ -210,7 +210,7 @@ struct CalculateECEFCameraPosition {
   operator()(const CesiumGeometry::OrientedBoundingBox& orientedBoundingBox) {
     const glm::dvec3& center = orientedBoundingBox.getCenter();
     glm::dmat4 enuToEcef =
-        glm::dmat4(CesiumGeospatial::Transforms::eastNorthUpToFixedFrame(
+        glm::dmat4(CesiumGeospatial::GlobeTransforms::eastNorthUpToFixedFrame(
             center,
             ellipsoid));
     const glm::dmat3& halfAxes = orientedBoundingBox.getHalfAxes();
