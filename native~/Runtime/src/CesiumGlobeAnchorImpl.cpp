@@ -92,6 +92,22 @@ void updateAnchorFromCpp(
   anchor._lastLocalToWorld(transform.localToWorldMatrix());
 }
 
+LocalHorizontalCoordinateSystem createEastUpNorth(const GlobeAnchor& anchor) {
+  glm::dvec3 ecefPosition;
+  Transforms::computeTranslationRotationScaleFromMatrix(
+      anchor.getAnchorToFixedTransform(),
+      &ecefPosition,
+      nullptr,
+      nullptr);
+
+  return LocalHorizontalCoordinateSystem(
+      ecefPosition,
+      LocalDirection::East,
+      LocalDirection::Up,
+      LocalDirection::North,
+      1.0);
+}
+
 } // namespace
 
 void CesiumGlobeAnchorImpl::SetNewEcef(
@@ -123,19 +139,7 @@ CesiumGlobeAnchorImpl::GetModelToEastUpNorthRotation(
     const CesiumForUnity::CesiumGlobeAnchor& anchor) {
   GlobeAnchor cppAnchor(UnityTransforms::fromUnity(anchor._modelToEcef()));
 
-  glm::dvec3 ecefPosition;
-  Transforms::computeTranslationRotationScaleFromMatrix(
-      cppAnchor.getAnchorToFixedTransform(),
-      &ecefPosition,
-      nullptr,
-      nullptr);
-
-  LocalHorizontalCoordinateSystem eastUpNorth(
-      ecefPosition,
-      LocalDirection::East,
-      LocalDirection::Up,
-      LocalDirection::North,
-      1.0);
+  LocalHorizontalCoordinateSystem eastUpNorth = createEastUpNorth(cppAnchor);
 
   glm::dmat4 modelToEastUpNorth =
       cppAnchor.getAnchorToLocalTransform(eastUpNorth);
@@ -151,6 +155,35 @@ CesiumGlobeAnchorImpl::GetModelToEastUpNorthRotation(
 
 void CesiumGlobeAnchorImpl::SetModelToEastUpNorthRotation(
     const ::DotNet::CesiumForUnity::CesiumGlobeAnchor& anchor,
-    const ::DotNet::Unity::Mathematics::quaternion& value) {}
+    const ::DotNet::Unity::Mathematics::quaternion& value) {
+  GlobeAnchor cppAnchor(UnityTransforms::fromUnity(anchor._modelToEcef()));
+
+  LocalHorizontalCoordinateSystem eastUpNorth = createEastUpNorth(cppAnchor);
+
+  glm::dmat4 modelToEastUpNorth =
+      cppAnchor.getAnchorToLocalTransform(eastUpNorth);
+
+  glm::dvec3 translation;
+  glm::dvec3 scale;
+  Transforms::computeTranslationRotationScaleFromMatrix(
+      modelToEastUpNorth,
+      &translation,
+      nullptr,
+      &scale);
+
+  glm::dmat4 newModelToEastUpNorth =
+      Transforms::createTranslationRotationScaleMatrix(
+          translation,
+          UnityTransforms::fromUnity(value),
+          scale);
+
+  cppAnchor.setAnchorToLocalTransform(
+      eastUpNorth,
+      newModelToEastUpNorth,
+      false);
+
+  anchor._modelToEcef(UnityTransforms::toUnityMathematics(
+      cppAnchor.getAnchorToFixedTransform()));
+}
 
 } // namespace CesiumForUnityNative

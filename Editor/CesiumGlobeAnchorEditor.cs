@@ -36,7 +36,7 @@ namespace CesiumForUnity
             EditorGUILayout.Space(5);
             DrawEarthCenteredEarthFixedProperties();
             EditorGUILayout.Space(5);
-            DrawEarthCenteredEarthFixedRotationProperties();
+            DrawEastUpNorthRotationProperties();
             EditorGUILayout.Space(5);
             DrawScaleProperties();
 
@@ -173,50 +173,41 @@ namespace CesiumForUnity
                 and the positive Z axis points toward the North pole.");
         }
 
-        private void DrawEarthCenteredEarthFixedRotationProperties()
+        private void DrawEastUpNorthRotationProperties()
         {
-            GUILayout.Label("Rotation (Earth-Centered, Earth-Fixed)", EditorStyles.boldLabel);
+            GUILayout.Label("Rotation to Local East-Up-North", EditorStyles.boldLabel);
 
-            quaternion rotation = this._globeAnchor.localToEcefRotation;
+            Quaternion rotation = this._globeAnchor.localToEastUpNorthRotation;
+            Vector3 eulerAngles = rotation.eulerAngles;
 
             this._gui.Double(
-                rotation.value.x,
+                eulerAngles.x,
                 (value) =>
                 {
-                    rotation.value.x = (float)value;
-                    this._globeAnchor.localToEcefRotation = rotation;
+                    eulerAngles.x = (float)value;
+                    this._globeAnchor.localToEastUpNorthRotation = quaternion.EulerZXY(eulerAngles);
                 },
                 "X",
                 @"");
 
             this._gui.Double(
-                rotation.value.y,
+                eulerAngles.y,
                 (value) =>
                 {
-                    rotation.value.y = (float)value;
-                    this._globeAnchor.localToEcefRotation = rotation;
+                    eulerAngles.y = (float)value;
+                    this._globeAnchor.localToEastUpNorthRotation = quaternion.EulerZXY(eulerAngles);
                 },
                 "Y",
                 @"");
 
             this._gui.Double(
-                rotation.value.z,
+                eulerAngles.z,
                 (value) =>
                 {
-                    rotation.value.z = (float)value;
-                    this._globeAnchor.localToEcefRotation = rotation;
+                    eulerAngles.z = (float)value;
+                    this._globeAnchor.localToEastUpNorthRotation = quaternion.EulerZXY(eulerAngles);
                 },
                 "Z",
-                @"");
-
-            this._gui.Double(
-                rotation.value.w,
-                (value) =>
-                {
-                    rotation.value.w = (float)value;
-                    this._globeAnchor.localToEcefRotation = rotation;
-                },
-                "W",
                 @"");
         }
 

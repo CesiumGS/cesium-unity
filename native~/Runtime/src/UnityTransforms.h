@@ -102,6 +102,13 @@ public:
   fromUnity(const DotNet::UnityEngine::Quaternion& quaternion);
 
   /**
+   * @brief Convert a single-precision Unity.Mathematics quaternion to a
+   * double-precision GLM quaternion.
+   */
+  static glm::dquat
+  fromUnity(const DotNet::Unity::Mathematics::quaternion& quaternion);
+
+  /**
    * @brief Convert a single-precision Unity Matrix4x4 to a double-precision
    * GLM 4x4 matrix.
    */

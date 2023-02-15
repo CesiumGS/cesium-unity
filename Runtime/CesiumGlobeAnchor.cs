@@ -235,21 +235,6 @@ namespace CesiumForUnity
             }
         }
 
-        ///// <summary>
-        ///// Gets or sets a set of Euler angles transforming from the object's frame to 
-        ///// </summary>
-        //public double3 localToEastUpNorthEulerAngles
-        //{
-        //    get
-        //    {
-
-        //    }
-        //    set
-        //    {
-
-        //    }
-        //}
-
         /// <summary>
         /// Gets the scale from the game object's coordinate system to the Earth-Centered,
         /// Earth-Fixed coordinate system. Because ECEF is right-handed and Unity is left-handed,

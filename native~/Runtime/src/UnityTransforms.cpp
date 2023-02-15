@@ -116,6 +116,15 @@ UnityTransforms::fromUnity(const DotNet::UnityEngine::Quaternion& quaternion) {
   return glm::dquat(quaternion.w, quaternion.x, quaternion.y, quaternion.z);
 }
 
+glm::dquat UnityTransforms::fromUnity(
+    const DotNet::Unity::Mathematics::quaternion& quaternion) {
+  return glm::dquat(
+      quaternion.value.w,
+      quaternion.value.x,
+      quaternion.value.y,
+      quaternion.value.z);
+}
+
 glm::dmat4
 UnityTransforms::fromUnity(const DotNet::UnityEngine::Matrix4x4& matrix) {
   return glm::dmat4(
