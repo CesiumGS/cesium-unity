@@ -185,7 +185,8 @@ namespace CesiumForUnity
                 (value) =>
                 {
                     eulerAngles.x = (float)value;
-                    this._globeAnchor.localToEastUpNorthRotation = quaternion.EulerZXY(eulerAngles);
+                    rotation.eulerAngles = eulerAngles;
+                    this._globeAnchor.localToEastUpNorthRotation = rotation;
                 },
                 "X",
                 @"");
@@ -195,7 +196,8 @@ namespace CesiumForUnity
                 (value) =>
                 {
                     eulerAngles.y = (float)value;
-                    this._globeAnchor.localToEastUpNorthRotation = quaternion.EulerZXY(eulerAngles);
+                    rotation.eulerAngles = eulerAngles;
+                    this._globeAnchor.localToEastUpNorthRotation = rotation;
                 },
                 "Y",
                 @"");
@@ -205,7 +207,8 @@ namespace CesiumForUnity
                 (value) =>
                 {
                     eulerAngles.z = (float)value;
-                    this._globeAnchor.localToEastUpNorthRotation = quaternion.EulerZXY(eulerAngles);
+                    rotation.eulerAngles = eulerAngles;
+                    this._globeAnchor.localToEastUpNorthRotation = rotation;
                 },
                 "Z",
                 @"");

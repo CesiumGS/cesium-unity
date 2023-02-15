@@ -68,6 +68,7 @@ void updateAnchorFromCpp(
     const GlobeAnchor& cppAnchor) {
   anchor._modelToEcef(UnityTransforms::toUnityMathematics(
       cppAnchor.getAnchorToFixedTransform()));
+  anchor._modelToEcefIsValid(true);
 
   // Update the Unity Transform
   CesiumForUnity::CesiumGeoreference georeference = anchor._georeference();
@@ -182,8 +183,7 @@ void CesiumGlobeAnchorImpl::SetModelToEastUpNorthRotation(
       newModelToEastUpNorth,
       false);
 
-  anchor._modelToEcef(UnityTransforms::toUnityMathematics(
-      cppAnchor.getAnchorToFixedTransform()));
+  updateAnchorFromCpp(anchor, cppAnchor);
 }
 
 } // namespace CesiumForUnityNative
