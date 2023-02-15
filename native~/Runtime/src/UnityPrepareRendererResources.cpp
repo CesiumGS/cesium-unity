@@ -1054,7 +1054,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         const ExtensionMeshPrimitiveExtFeatureMetadata* pMetadata =
             primitive.getExtension<ExtensionMeshPrimitiveExtFeatureMetadata>();
         if (pMetadata) {
-          pMetadataComponent.NativeImplementation().loadMetadata(
+          pMetadataComponent.NativeImplementation().addMetadata(
               primitiveGameObject.transform().GetInstanceID(),
               &gltf,
               &primitive);
@@ -1074,7 +1074,7 @@ void freePrimitiveGameObject(
     const DotNet::UnityEngine::GameObject& primitiveGameObject,
     const DotNet::CesiumForUnity::CesiumMetadata& maybeMetadata) {
   if (maybeMetadata != nullptr) {
-    maybeMetadata.NativeImplementation().unloadMetadata(
+    maybeMetadata.NativeImplementation().removeMetadata(
         primitiveGameObject.transform().GetInstanceID());
   }
 
