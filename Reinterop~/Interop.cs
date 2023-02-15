@@ -139,7 +139,6 @@ namespace Reinterop
                 {
                     implementation += Environment.NewLine + $"return {csReturnType.GetConversionToInteropType("result")};";
                 }
-
             }
             else if (property != null && SymbolEqualityComparer.Default.Equals(property.SetMethod, method))
             {
@@ -282,20 +281,45 @@ namespace Reinterop
             }
 
             CSharpType csReturnType = CSharpType.FromSymbol(context, returnType);
-            CSharpType csInteropReturnType = csReturnType.AsInteropTypeParameter();
-            string interopReturnTypeString = csInteropReturnType.GetFullyQualifiedName();
+            CSharpType csInteropReturnType = csReturnType.AsInteropTypeReturn();
 
+            // Rewrite getters that return a blittable struct to instead taking a pointer to one.
+            // See Interop.RewriteStructReturn in this file for the C++ side of this and more
+            // explanation of why it's needed.
+            bool hasStructRewrite = false;
+            CSharpType csOriginalInteropReturnType = csInteropReturnType;
+            if (csReturnType.Kind == InteropTypeKind.BlittableStruct || csReturnType.Kind == InteropTypeKind.Nullable)
+            {
+                hasStructRewrite = true;
+                if (csReturnType.Kind == InteropTypeKind.Nullable)
+                    csInteropReturnType = CSharpType.FromSymbol(context, context.Compilation.GetSpecialType(SpecialType.System_Byte));
+                else
+                    csInteropReturnType = CSharpType.FromSymbol(context, context.Compilation.GetSpecialType(SpecialType.System_Void));
+                interopParameterDetails = interopParameterDetails.Concat(new[]
+                {
+                    (Name: "pReturnValue", Type: csReturnType, InteropType: csOriginalInteropReturnType.AsPointer())
+                });
+            }
+
+            string interopReturnTypeString = csInteropReturnType.GetFullyQualifiedName();
             string callParameterList = string.Join(", ", callParameterDetails.Select(parameter => parameter.Type.GetParameterConversionFromInteropType(parameter.Name)));
             string interopParameterList = string.Join(", ", interopParameterDetails.Select(parameter => $"{parameter.InteropType.GetFullyQualifiedName()} {parameter.Name}"));
 
             string implementation;
             if (isGet)
             {
-                implementation =
-                    $$"""
-                    var result = {{invocationTarget}};
-                    return {{csReturnType.GetConversionToInteropType("result")}};
-                    """;
+                implementation = $"var result = {invocationTarget};";
+                if (hasStructRewrite)
+                {
+                    if (csReturnType.Kind == InteropTypeKind.Nullable)
+                        implementation += Environment.NewLine + $$"""if (result != null) { *pReturnValue = ({{csOriginalInteropReturnType.GetFullyQualifiedName()}})result; return 1; } else { return 0; }""";
+                    else
+                        implementation += Environment.NewLine + $"*pReturnValue = result;";
+                }
+                else
+                {
+                    implementation += Environment.NewLine + $"return {csReturnType.GetConversionToInteropType("result")};";
+                }
             }
             else
             {
