@@ -11,21 +11,16 @@ namespace CesiumForUnityNative {
 class IonTokenTroubleshootingWindowImpl {
 
 public:
-  IonTokenTroubleshootingWindowImpl(
-      const DotNet::CesiumForUnity::IonTokenTroubleshootingWindow& window);
-  ~IonTokenTroubleshootingWindowImpl();
-
-  void GetTroubleshootingDetails(
+  static void GetTroubleshootingDetails(
       const DotNet::CesiumForUnity::IonTokenTroubleshootingWindow& window);
 
-  void AuthorizeToken(
+  static void AuthorizeToken(
       const DotNet::CesiumForUnity::IonTokenTroubleshootingWindow& window,
       DotNet::System::String token,
       bool isDefaultToken);
 
-  void SelectNewDefaultToken(
+  static void SelectNewDefaultToken(
       const DotNet::CesiumForUnity::IonTokenTroubleshootingWindow& window);
-
-private:
 };
+
 } // namespace CesiumForUnityNative

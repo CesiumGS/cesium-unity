@@ -1,11 +1,9 @@
-#include "MetadataPropertyImpl.h"
+#include "CesiumFeatureImpl.h"
 
 #include "CesiumGltf/PropertyType.h"
 #include "CesiumGltf/PropertyTypeTraits.h"
 #include "CesiumUtility/JsonValue.h"
 
-#include <DotNet/CesiumForUnity/MetadataProperty.h>
-#include <DotNet/CesiumForUnity/MetadataType.h>
 #include <DotNet/System/String.h>
 #include <glm/common.hpp>
 
@@ -150,143 +148,100 @@ static TTo convertToUint(TFrom arg, TTo defaultValue) {
     return defaultValue;
   }
 }
-} // namespace
 
-DotNet::System::String MetadataPropertyImpl::GetPropertyName(
-    const DotNet::CesiumForUnity::MetadataProperty& property) {
-  return DotNet::System::String(this->_propertyName);
-}
-
-void MetadataPropertyImpl::SetProperty(
-    const std::string& propertyName,
-    const PropertyType& property,
-    ValueType value) {
-  this->_propertyName = propertyName;
-  this->_propertyType = property;
-  this->_value = value;
-}
-
-int MetadataPropertyImpl::GetComponentCount(
-    const DotNet::CesiumForUnity::MetadataProperty& property) {
-  return std::visit(
-      [](auto&& arg) { return arg.getComponentCount(); },
-      this->_propertyType);
-}
-
-int8_t MetadataPropertyImpl::GetInt8(
-    const DotNet::CesiumForUnity::MetadataProperty& property,
-    int8_t defaultValue) {
+int8_t GetInt8(const ValueType& value, int8_t defaultValue) {
   return std::visit(
       [defaultValue](auto&& arg) {
         return convertToInt<int8_t, std::decay_t<decltype(arg)>>(
             arg,
             defaultValue);
       },
-      _value);
+      value);
 }
-uint8_t MetadataPropertyImpl::GetUInt8(
-    const DotNet::CesiumForUnity::MetadataProperty& property,
-    uint8_t defaultValue) {
+uint8_t GetUInt8(const ValueType& value, uint8_t defaultValue) {
   return std::visit(
       [defaultValue](auto&& arg) {
         return convertToUint<uint8_t, std::decay_t<decltype(arg)>>(
             arg,
             defaultValue);
       },
-      _value);
+      value);
 }
-int16_t MetadataPropertyImpl::GetInt16(
-    const DotNet::CesiumForUnity::MetadataProperty& property,
-    int16_t defaultValue) {
+int16_t GetInt16(const ValueType& value, int16_t defaultValue) {
   return std::visit(
       [defaultValue](auto&& arg) {
         return convertToInt<int16_t, std::decay_t<decltype(arg)>>(
             arg,
             defaultValue);
       },
-      _value);
+      value);
 }
-uint16_t MetadataPropertyImpl::GetUInt16(
-    const DotNet::CesiumForUnity::MetadataProperty& value,
-    uint16_t defaultValue) {
+uint16_t GetUInt16(const ValueType& value, uint16_t defaultValue) {
   return std::visit(
       [defaultValue](auto&& arg) {
         return convertToUint<uint16_t, std::decay_t<decltype(arg)>>(
             arg,
             defaultValue);
       },
-      _value);
+      value);
 }
-int32_t MetadataPropertyImpl::GetInt32(
-    const DotNet::CesiumForUnity::MetadataProperty& value,
-    int32_t defaultValue) {
+int32_t GetInt32(const ValueType& value, int32_t defaultValue) {
   return std::visit(
       [defaultValue](auto&& arg) {
         return convertToInt<int32_t, std::decay_t<decltype(arg)>>(
             arg,
             defaultValue);
       },
-      _value);
+      value);
 }
-uint32_t MetadataPropertyImpl::GetUInt32(
-    const DotNet::CesiumForUnity::MetadataProperty& value,
-    uint32_t defaultValue) {
+uint32_t GetUInt32(const ValueType& value, uint32_t defaultValue) {
   return std::visit(
       [defaultValue](auto&& arg) {
         return convertToUint<uint32_t, std::decay_t<decltype(arg)>>(
             arg,
             defaultValue);
       },
-      _value);
+      value);
 }
-int64_t MetadataPropertyImpl::GetInt64(
-    const DotNet::CesiumForUnity::MetadataProperty& property,
-    int64_t defaultValue) {
+int64_t GetInt64(const ValueType& value, int64_t defaultValue) {
   return std::visit(
       [defaultValue](auto&& arg) {
         return convertToInt<int64_t, std::decay_t<decltype(arg)>>(
             arg,
             defaultValue);
       },
-      _value);
+      value);
 }
-uint64_t MetadataPropertyImpl::GetUInt64(
-    const DotNet::CesiumForUnity::MetadataProperty& property,
-    uint64_t defaultValue) {
+uint64_t GetUInt64(const ValueType& value, uint64_t defaultValue) {
   return std::visit(
       [defaultValue](auto&& arg) {
         return convertToUint<uint64_t, std::decay_t<decltype(arg)>>(
             arg,
             defaultValue);
       },
-      _value);
+      value);
 }
 
-float MetadataPropertyImpl::GetFloat32(
-    const DotNet::CesiumForUnity::MetadataProperty& property,
-    float defaultValue) {
+float GetFloat32(const ValueType& value, float defaultValue) {
   return std::visit(
       [defaultValue](auto&& arg) {
         return convertToFloat<float, std::decay_t<decltype(arg)>>(
             arg,
             defaultValue);
       },
-      _value);
+      value);
 }
-double MetadataPropertyImpl::GetFloat64(
-    const DotNet::CesiumForUnity::MetadataProperty& property,
-    double defaultValue) {
+double GetFloat64(const ValueType& value, double defaultValue) {
   return std::visit(
       [defaultValue](auto&& arg) {
         return convertToFloat<double, std::decay_t<decltype(arg)>>(
             arg,
             defaultValue);
       },
-      _value);
+      value);
 }
-bool MetadataPropertyImpl::GetBoolean(
-    const DotNet::CesiumForUnity::MetadataProperty& property,
-    bool defaultValue) {
+
+bool GetBoolean(const ValueType& value, bool defaultValue) {
   return std::visit(
       [defaultValue](auto&& arg) {
         using T = std::decay_t<decltype(arg)>;
@@ -307,12 +262,11 @@ bool MetadataPropertyImpl::GetBoolean(
         }
         return defaultValue;
       },
-      _value);
+      value);
 }
 
-DotNet::System::String MetadataPropertyImpl::GetString(
-    const DotNet::CesiumForUnity::MetadataProperty& property,
-    const DotNet::System::String& defaultValue) {
+DotNet::System::String
+GetString(const ValueType& value, const DotNet::System::String& defaultValue) {
   return std::visit(
       [defaultValue](auto&& arg) {
         using T = std::decay_t<decltype(arg)>;
@@ -327,14 +281,11 @@ DotNet::System::String MetadataPropertyImpl::GetString(
           return defaultValue;
         }
       },
-      _value);
+      value);
 }
 
-void MetadataPropertyImpl::GetComponent(
-    const DotNet::CesiumForUnity::MetadataProperty& property,
-    const DotNet::CesiumForUnity::MetadataProperty& component,
-    int index) {
-  ValueType value = std::visit(
+ValueType GetComponent(const ValueType& value, int index) {
+  return std::visit(
       [index](auto&& arg) {
         using T = std::decay_t<decltype(arg)>;
         if constexpr (CesiumGltf::IsMetadataArray<T>::value) {
@@ -344,26 +295,208 @@ void MetadataPropertyImpl::GetComponent(
         }
         return static_cast<ValueType>(0);
       },
-      _value);
-  component.NativeImplementation().SetProperty(
-      this->_propertyName,
-      this->_propertyType,
       value);
 }
 
-DotNet::CesiumForUnity::MetadataType MetadataPropertyImpl::GetMetadataType(
-    const DotNet::CesiumForUnity::MetadataProperty& property) {
-  CesiumGltf::PropertyType type = std::visit(
-      [](auto&& arg) {
-        using T = std::decay_t<decltype(arg)>;
-        return CesiumGltf::TypeToPropertyType<T>::value;
-      },
-      this->_value);
-  return ::GetMetadataType(type);
+} // namespace
+
+int8_t CesiumFeatureImpl::GetInt8(
+    const DotNet::CesiumForUnity::CesiumFeature& feature,
+    const DotNet::System::String& property,
+    int8_t defaultValue) {
+  return ::GetInt8(GetValueType(property), defaultValue);
 }
 
-DotNet::CesiumForUnity::MetadataType MetadataPropertyImpl::GetComponentType(
-    const DotNet::CesiumForUnity::MetadataProperty& property) {
+uint8_t CesiumFeatureImpl::GetUInt8(
+    const DotNet::CesiumForUnity::CesiumFeature& feature,
+    const DotNet::System::String& property,
+    uint8_t defaultValue) {
+  return ::GetUInt8(GetValueType(property), defaultValue);
+}
+
+int16_t CesiumFeatureImpl::GetInt16(
+    const DotNet::CesiumForUnity::CesiumFeature& feature,
+    const DotNet::System::String& property,
+    int16_t defaultValue) {
+  return ::GetInt16(GetValueType(property), defaultValue);
+}
+
+uint16_t CesiumFeatureImpl::GetUInt16(
+    const DotNet::CesiumForUnity::CesiumFeature& feature,
+    const DotNet::System::String& property,
+    uint16_t defaultValue) {
+  return ::GetUInt16(GetValueType(property), defaultValue);
+}
+
+int32_t CesiumFeatureImpl::GetInt32(
+    const DotNet::CesiumForUnity::CesiumFeature& feature,
+    const DotNet::System::String& property,
+    int32_t defaultValue) {
+  return ::GetInt32(GetValueType(property), defaultValue);
+}
+
+uint32_t CesiumFeatureImpl::GetUInt32(
+    const DotNet::CesiumForUnity::CesiumFeature& feature,
+    const DotNet::System::String& property,
+    uint32_t defaultValue) {
+  return ::GetUInt32(GetValueType(property), defaultValue);
+}
+
+int64_t CesiumFeatureImpl::GetInt64(
+    const DotNet::CesiumForUnity::CesiumFeature& feature,
+    const DotNet::System::String& property,
+    int64_t defaultValue) {
+  return ::GetInt64(GetValueType(property), defaultValue);
+}
+
+uint64_t CesiumFeatureImpl::GetUInt64(
+    const DotNet::CesiumForUnity::CesiumFeature& feature,
+    const DotNet::System::String& property,
+    uint64_t defaultValue) {
+  return ::GetUInt64(GetValueType(property), defaultValue);
+}
+
+float CesiumFeatureImpl::GetFloat32(
+    const DotNet::CesiumForUnity::CesiumFeature& feature,
+    const DotNet::System::String& property,
+    float defaultValue) {
+  return ::GetFloat32(GetValueType(property), defaultValue);
+}
+
+double CesiumFeatureImpl::GetFloat64(
+    const DotNet::CesiumForUnity::CesiumFeature& feature,
+    const DotNet::System::String& property,
+    double defaultValue) {
+  return ::GetFloat64(GetValueType(property), defaultValue);
+}
+
+bool CesiumFeatureImpl::GetBoolean(
+    const DotNet::CesiumForUnity::CesiumFeature& feature,
+    const DotNet::System::String& property,
+    bool defaultValue) {
+  return ::GetBoolean(GetValueType(property), defaultValue);
+}
+
+DotNet::System::String CesiumFeatureImpl::GetString(
+    const DotNet::CesiumForUnity::CesiumFeature& feature,
+    const DotNet::System::String& property,
+    const DotNet::System::String& defaultValue) {
+  return ::GetString(GetValueType(property), defaultValue);
+}
+
+std::int8_t CesiumFeatureImpl::GetComponentInt8(
+    const DotNet::CesiumForUnity::CesiumFeature& feature,
+    const DotNet::System::String& property,
+    int index,
+    std::int8_t defaultValue) {
+  return ::GetInt8(GetComponent(GetValueType(property), index), defaultValue);
+}
+
+std::uint8_t CesiumFeatureImpl::GetComponentUInt8(
+    const DotNet::CesiumForUnity::CesiumFeature& feature,
+    const DotNet::System::String& property,
+    int index,
+    std::uint8_t defaultValue) {
+  return ::GetUInt8(GetComponent(GetValueType(property), index), defaultValue);
+}
+
+std::int16_t CesiumFeatureImpl::GetComponentInt16(
+    const DotNet::CesiumForUnity::CesiumFeature& feature,
+    const DotNet::System::String& property,
+    int index,
+    std::int16_t defaultValue) {
+  return ::GetInt16(GetComponent(GetValueType(property), index), defaultValue);
+}
+
+std::uint16_t CesiumFeatureImpl::GetComponentUInt16(
+    const DotNet::CesiumForUnity::CesiumFeature& feature,
+    const DotNet::System::String& property,
+    int index,
+    std::uint16_t defaultValue) {
+  return ::GetUInt16(GetComponent(GetValueType(property), index), defaultValue);
+}
+
+std::int32_t CesiumFeatureImpl::GetComponentInt32(
+    const DotNet::CesiumForUnity::CesiumFeature& feature,
+    const DotNet::System::String& property,
+    int index,
+    std::int32_t defaultValue) {
+  return ::GetInt32(GetComponent(GetValueType(property), index), defaultValue);
+}
+
+std::uint32_t CesiumFeatureImpl::GetComponentUInt32(
+    const DotNet::CesiumForUnity::CesiumFeature& feature,
+    const DotNet::System::String& property,
+    int index,
+    std::uint32_t defaultValue) {
+  return ::GetUInt32(GetComponent(GetValueType(property), index), defaultValue);
+}
+
+std::int64_t CesiumFeatureImpl::GetComponentInt64(
+    const DotNet::CesiumForUnity::CesiumFeature& feature,
+    const DotNet::System::String& property,
+    int index,
+    std::int64_t defaultValue) {
+  return ::GetInt64(GetComponent(GetValueType(property), index), defaultValue);
+}
+
+std::uint64_t CesiumFeatureImpl::GetComponentUInt64(
+    const DotNet::CesiumForUnity::CesiumFeature& feature,
+    const DotNet::System::String& property,
+    int index,
+    std::uint64_t defaultValue) {
+  return ::GetUInt64(GetComponent(GetValueType(property), index), defaultValue);
+}
+
+float CesiumFeatureImpl::GetComponentFloat32(
+    const DotNet::CesiumForUnity::CesiumFeature& feature,
+    const DotNet::System::String& property,
+    int index,
+    float defaultValue) {
+  return ::GetFloat32(
+      GetComponent(GetValueType(property), index),
+      defaultValue);
+}
+
+double CesiumFeatureImpl::GetComponentFloat64(
+    const DotNet::CesiumForUnity::CesiumFeature& feature,
+    const DotNet::System::String& property,
+    int index,
+    double defaultValue) {
+  return ::GetFloat64(
+      GetComponent(GetValueType(property), index),
+      defaultValue);
+}
+
+bool CesiumFeatureImpl::GetComponentBoolean(
+    const DotNet::CesiumForUnity::CesiumFeature& feature,
+    const DotNet::System::String& property,
+    int index,
+    bool defaultValue) {
+  return ::GetBoolean(
+      GetComponent(GetValueType(property), index),
+      defaultValue);
+}
+
+DotNet::System::String CesiumFeatureImpl::GetComponentString(
+    const DotNet::CesiumForUnity::CesiumFeature& feature,
+    const DotNet::System::String& property,
+    int index,
+    const DotNet::System::String& defaultValue) {
+  return ::GetString(GetComponent(GetValueType(property), index), defaultValue);
+}
+
+int CesiumFeatureImpl::GetComponentCount(
+    const DotNet::CesiumForUnity::CesiumFeature& feature,
+    const DotNet::System::String& property) {
+  return std::visit(
+      [](auto&& arg) { return arg.getComponentCount(); },
+      GetPropertyType(property));
+}
+
+DotNet::CesiumForUnity::MetadataType CesiumFeatureImpl::GetComponentType(
+    const DotNet::CesiumForUnity::CesiumFeature& feature,
+    const DotNet::System::String& property) {
   return std::visit(
       [](auto&& arg) {
         using T = std::decay_t<decltype(arg)>;
@@ -380,12 +513,43 @@ DotNet::CesiumForUnity::MetadataType MetadataPropertyImpl::GetComponentType(
         }
         return DotNet::CesiumForUnity::MetadataType::None;
       },
-      this->_value);
+      GetValueType(property));
 }
 
-bool MetadataPropertyImpl::IsNormalized(
-    const DotNet::CesiumForUnity::MetadataProperty& property) {
+bool CesiumFeatureImpl::IsNormalized(
+    const DotNet::CesiumForUnity::CesiumFeature& feature,
+    const DotNet::System::String& property) {
   return std::visit(
       [](auto&& arg) { return arg.isNormalized(); },
-      this->_propertyType);
+      GetPropertyType(property));
+}
+
+DotNet::CesiumForUnity::MetadataType CesiumFeatureImpl::GetMetadataType(
+    const DotNet::CesiumForUnity::CesiumFeature& feature,
+    const DotNet::System::String& property) {
+  CesiumGltf::PropertyType type = std::visit(
+      [](auto&& arg) {
+        using T = std::decay_t<decltype(arg)>;
+        return CesiumGltf::TypeToPropertyType<T>::value;
+      },
+      GetValueType(property));
+  return ::GetMetadataType(type);
+}
+
+PropertyType CesiumForUnityNative::CesiumFeatureImpl::GetPropertyType(
+    const DotNet::System::String& property) {
+  auto find = properties.find(property.ToStlString());
+  if (find != properties.end()) {
+    return find->second.first;
+  }
+  return PropertyType();
+}
+
+ValueType CesiumForUnityNative::CesiumFeatureImpl::GetValueType(
+    const DotNet::System::String& property) {
+  auto find = properties.find(property.ToStlString());
+  if (find != properties.end()) {
+    return find->second.second;
+  }
+  return ValueType();
 }

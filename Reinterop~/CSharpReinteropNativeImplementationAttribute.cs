@@ -27,9 +27,12 @@ namespace Reinterop
 
                     public readonly string HeaderName;
 
-                    public ReinteropNativeImplementationAttribute(string implementationClassName, string headerName) {
+                    public readonly bool StaticOnly;
+
+                    public ReinteropNativeImplementationAttribute(string implementationClassName, string headerName, bool staticOnly = false) {
                         this.ImplementationClassName = implementationClassName;
                         this.HeaderName = headerName;
+                        this.StaticOnly = staticOnly;
                     }
                 }
             }
