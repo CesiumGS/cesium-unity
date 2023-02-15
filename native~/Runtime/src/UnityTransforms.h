@@ -14,6 +14,7 @@ struct double3;
 struct double4;
 struct double3x3;
 struct double4x4;
+struct quaternion;
 } // namespace DotNet::Unity::Mathematics
 
 namespace CesiumForUnityNative {
@@ -51,6 +52,13 @@ public:
    */
   static DotNet::Unity::Mathematics::double4
   UnityTransforms::toUnityMathematics(const glm::dvec4& vector);
+
+  /**
+   * Converts a double-precision GLM quaterion to a single-precision
+   * Unity.Mathematics quaternion.
+   */
+  static DotNet::Unity::Mathematics::quaternion
+  UnityTransforms::toUnityMathematics(const glm::dquat& quaternion);
 
   /**
    * @brief Convert a double-precision GLM 3x3 matrix to a double-precision

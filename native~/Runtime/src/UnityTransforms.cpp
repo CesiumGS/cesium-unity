@@ -3,6 +3,7 @@
 #include <DotNet/Unity/Mathematics/double3.h>
 #include <DotNet/Unity/Mathematics/double3x3.h>
 #include <DotNet/Unity/Mathematics/double4x4.h>
+#include <DotNet/Unity/Mathematics/quaternion.h>
 #include <DotNet/UnityEngine/Matrix4x4.h>
 #include <DotNet/UnityEngine/Quaternion.h>
 #include <DotNet/UnityEngine/Vector3.h>
@@ -84,6 +85,15 @@ UnityTransforms::toUnityMathematics(const glm::dvec4& vector) {
       vector.y,
       vector.z,
       vector.w};
+}
+
+DotNet::Unity::Mathematics::quaternion
+UnityTransforms::toUnityMathematics(const glm::dquat& quaternion) {
+  return DotNet::Unity::Mathematics::quaternion{
+      (float)quaternion.x,
+      (float)quaternion.y,
+      (float)quaternion.z,
+      (float)quaternion.w};
 }
 
 glm::dvec3

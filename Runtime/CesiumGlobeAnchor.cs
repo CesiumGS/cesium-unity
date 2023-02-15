@@ -79,7 +79,7 @@ namespace CesiumForUnity
         #region User-editable properties
 
         /// <summary>
-        /// Whether to adjust the game object's orientation based on globe curvature as the
+        /// Gets or sets whether to adjust the game object's orientation based on globe curvature as the
         /// game object moves.
         /// </summary>
         /// <remarks>
@@ -109,7 +109,7 @@ namespace CesiumForUnity
         }
 
         /// <summary>
-        /// Whether to automatically detect changes in the game object's <code>Transform</code>
+        /// Gets or sets whether to automatically detect changes in the game object's <code>Transform</code>
         /// and update the precise globe coordinates accordingly.
         /// </summary>
         /// <remarks>
@@ -192,7 +192,7 @@ namespace CesiumForUnity
         }
 
         /// <summary>
-        /// Gets the rotation from the game object's coordinate system to the
+        /// Gets or sets the rotation from the game object's coordinate system to the
         /// Earth-Centered, Earth-Fixed axes.
         /// </summary>
         /// <remarks>
@@ -220,6 +220,35 @@ namespace CesiumForUnity
                 this.modelToEcef = Helpers.TranslationRotationAndScaleToMatrix(translation, value, scale);
             }
         }
+
+        public quaternion localToEastUpNorthRotation
+        {
+            get
+            {
+                this.InitializeEcefIfNeeded();
+                return this.GetModelToEastUpNorthRotation();
+            }
+            set
+            {
+                this.InitializeEcefIfNeeded();
+                this.SetModelToEastUpNorthRotation(value);
+            }
+        }
+
+        ///// <summary>
+        ///// Gets or sets a set of Euler angles transforming from the object's frame to 
+        ///// </summary>
+        //public double3 localToEastUpNorthEulerAngles
+        //{
+        //    get
+        //    {
+
+        //    }
+        //    set
+        //    {
+
+        //    }
+        //}
 
         /// <summary>
         /// Gets the scale from the game object's coordinate system to the Earth-Centered,
@@ -503,9 +532,38 @@ namespace CesiumForUnity
             this.SetNewEcefFromTransform();
         }
 
+        /// <summary>
+        /// Sets a new model-to-ECEF matrix, rotating it for the new globe position if
+        /// <see cref="adjustOrientationForGlobeWhenMoving"/> is true and also updating
+        /// the object's Transform. Be sure the georeference is initialized before
+        /// calling this method.
+        /// </summary>
+        /// <param name="newModelToEcef">The new transformation matrix from the model to Earth-Centered, Earth-Fixed.</param>
         private partial void SetNewEcef(double4x4 newModelToEcef);
 
+        /// <summary>
+        /// Sets a new model-to-ECEF matrix from the current value of the object's
+        /// Transform. Also rotates the object for the new globe position if
+        /// <see cref="adjustOrientationForGlobeWhenMoving"/> is true. Be sure that the
+        /// georeference is intialized before calling this method.
+        /// </summary>
         private partial void SetNewEcefFromTransform();
+
+        /// <summary>
+        /// Gets the current rotation from the model's axes to a set of axes where
+        /// +X points East, +Y points Up, and +Z points East at the object's position.
+        /// Be sure that the georeference is initialized before calling this method.
+        /// </summary>
+        /// <returns>The rotation.</returns>
+        private partial quaternion GetModelToEastUpNorthRotation();
+
+        /// <summary>
+        /// Sets the current rotation from the model's axes to a set of axes where
+        /// +X points East, +Y points Up, and +Z points East at the object's position.
+        /// Be sure that the georeference is initialized before calling this method.
+        /// </summary>
+        /// <param name="value">The new rotation.</param>
+        private partial void SetModelToEastUpNorthRotation(quaternion value);
 
         #endregion
     }

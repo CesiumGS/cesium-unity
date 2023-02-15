@@ -9,6 +9,7 @@
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/CesiumForUnity/CesiumGlobeAnchor.h>
 #include <DotNet/Unity/Mathematics/double3.h>
+#include <DotNet/Unity/Mathematics/quaternion.h>
 #include <DotNet/UnityEngine/GameObject.h>
 #include <DotNet/UnityEngine/Quaternion.h>
 #include <DotNet/UnityEngine/Transform.h>
@@ -104,7 +105,7 @@ void CesiumGlobeAnchorImpl::SetNewEcef(
 }
 
 void CesiumGlobeAnchorImpl::SetNewEcefFromTransform(
-    const ::DotNet::CesiumForUnity::CesiumGlobeAnchor& anchor) {
+    const CesiumForUnity::CesiumGlobeAnchor& anchor) {
   // Update with the new local transform, also rotating based on the new
   // position if desired.
   UnityEngine::Transform transform = anchor.transform();
@@ -116,5 +117,40 @@ void CesiumGlobeAnchorImpl::SetNewEcefFromTransform(
       createOrUpdateNativeGlobeAnchorFromLocal(anchor, modelToLocal);
   updateAnchorFromCpp(anchor, cppAnchor);
 }
+
+Unity::Mathematics::quaternion
+CesiumGlobeAnchorImpl::GetModelToEastUpNorthRotation(
+    const CesiumForUnity::CesiumGlobeAnchor& anchor) {
+  GlobeAnchor cppAnchor(UnityTransforms::fromUnity(anchor._modelToEcef()));
+
+  glm::dvec3 ecefPosition;
+  Transforms::computeTranslationRotationScaleFromMatrix(
+      cppAnchor.getAnchorToFixedTransform(),
+      &ecefPosition,
+      nullptr,
+      nullptr);
+
+  LocalHorizontalCoordinateSystem eastUpNorth(
+      ecefPosition,
+      LocalDirection::East,
+      LocalDirection::Up,
+      LocalDirection::North,
+      1.0);
+
+  glm::dmat4 modelToEastUpNorth =
+      cppAnchor.getAnchorToLocalTransform(eastUpNorth);
+
+  glm::dquat rotationToEastUpNorth;
+  Transforms::computeTranslationRotationScaleFromMatrix(
+      modelToEastUpNorth,
+      nullptr,
+      &rotationToEastUpNorth,
+      nullptr);
+  return UnityTransforms::toUnityMathematics(rotationToEastUpNorth);
+}
+
+void CesiumGlobeAnchorImpl::SetModelToEastUpNorthRotation(
+    const ::DotNet::CesiumForUnity::CesiumGlobeAnchor& anchor,
+    const ::DotNet::Unity::Mathematics::quaternion& value) {}
 
 } // namespace CesiumForUnityNative

@@ -7,6 +7,7 @@ class CesiumGlobeAnchor;
 namespace DotNet::Unity::Mathematics {
 struct double3;
 struct double4x4;
+struct quaternion;
 } // namespace DotNet::Unity::Mathematics
 
 namespace CesiumForUnityNative {
@@ -19,6 +20,13 @@ public:
 
   static void SetNewEcefFromTransform(
       const ::DotNet::CesiumForUnity::CesiumGlobeAnchor& anchor);
+
+  static ::DotNet::Unity::Mathematics::quaternion GetModelToEastUpNorthRotation(
+      const ::DotNet::CesiumForUnity::CesiumGlobeAnchor& anchor);
+
+  static void SetModelToEastUpNorthRotation(
+      const ::DotNet::CesiumForUnity::CesiumGlobeAnchor& anchor,
+      const ::DotNet::Unity::Mathematics::quaternion& value);
 };
 
 } // namespace CesiumForUnityNative
