@@ -8,6 +8,9 @@
 #include <DotNet/CesiumForUnity/Helpers.h>
 #include <DotNet/CesiumForUnity/NativeDownloadHandler.h>
 #include <DotNet/System/Action1.h>
+#include <DotNet/System/Collections/Generic/Dictionary2.h>
+#include <DotNet/System/Collections/Generic/Enumerator0.h>
+#include <DotNet/System/Collections/Generic/KeyValuePair2.h>
 #include <DotNet/System/Environment.h>
 #include <DotNet/System/OperatingSystem.h>
 #include <DotNet/System/String.h>
@@ -39,13 +42,16 @@ public:
       : _statusCode(uint16_t(request.responseCode())),
         _contentType(),
         _data(std::move(handler.NativeImplementation().getData())) {
-    System::String contentTypeHeader =
-        request.GetResponseHeader(System::String("Content-Type"));
-    if (contentTypeHeader != nullptr) {
-      this->_contentType = contentTypeHeader.ToStlString();
-      this->_headers.emplace("Content-Type", this->_contentType);
+    System::Collections::Generic::Enumerator0 enumerator =
+        request.GetResponseHeaders().GetEnumerator();
+    while (enumerator.MoveNext()) {
+      std::string key = enumerator.Current().Key().ToStlString();
+      std::string value = enumerator.Current().Value().ToStlString();
+      if (value == "Content-Type") {
+        this->_contentType = value;
+      }
+      this->_headers.emplace(key, value);
     }
-    // TODO: get all response headers
   }
 
   virtual uint16_t statusCode() const override { return _statusCode; }
