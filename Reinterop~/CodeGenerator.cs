@@ -128,7 +128,8 @@ namespace Reinterop
                 generated.CppDeclaration.AddToHeaderFile(headerFile);
 
                 CppType definitionType = generated.CppDefinition.Type;
-                string sourcePath = Path.Combine("src", generated.CppDefinition.Type.Name + ".cpp");
+                string sourcePath = Path.Combine(new string[] { "src" }.Concat(declarationType.Namespaces).ToArray());
+                sourcePath = Path.Combine(sourcePath, generated.CppDefinition.Type.Name + ".cpp");
 
                 CppSourceFile? sourceFile = null;
                 if (!sourceFiles.TryGetValue(sourcePath, out sourceFile))
