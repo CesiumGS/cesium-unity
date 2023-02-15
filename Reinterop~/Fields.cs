@@ -101,9 +101,9 @@ namespace Reinterop
             if (!field.IsStatic)
             {
                 interopGetParameters = $"void* thiz";
-                interopGetParametersCall = $"{definition.Type.AsParameterType().GetConversionToInteropType(context, "thiz")}";
+                interopGetParametersCall = $"{definition.Type.AsParameterType().GetConversionToInteropType(context, "(*this)")}";
                 interopSetParameters = $"void* thiz, " + interopSetParameters;
-                interopSetParametersCall = $"{definition.Type.AsParameterType().GetConversionToInteropType(context, "thiz")}, {interopSetParametersCall}";
+                interopSetParametersCall = $"{definition.Type.AsParameterType().GetConversionToInteropType(context, "(*this)")}, {interopSetParametersCall}";
             }
 
             // Add the static fields for the get/set functions
