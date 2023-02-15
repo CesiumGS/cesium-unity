@@ -7,6 +7,10 @@
 - Added support for rendering point clouds (`pnts`).
 - Metadata features are now separated based on feature tables. Properties can now be accessed by name.
 
+##### Fixes :wrench:
+
+- Recategorized the Cesium tileset shaders from the `Shader Graphs` shader category to the new `Cesium` shader category. 
+
 ### v0.2.0
 
 ##### Breaking Changes :mega:
