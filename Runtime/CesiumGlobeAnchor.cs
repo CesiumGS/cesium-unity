@@ -47,29 +47,32 @@ namespace CesiumForUnity
     {
         #region Fields
 
-        [SerializeField]
-        private bool _adjustOrientationForGlobeWhenMoving = true;
+        // These fields are marked internal so that they can be accessed from C++.
+        // See https://github.com/CesiumGS/cesium-unity/issues/210
 
         [SerializeField]
-        private bool _detectTransformChanges = true;
+        internal bool _adjustOrientationForGlobeWhenMoving = true;
 
         [SerializeField]
-        private double4x4 _modelToEcef = double4x4.identity;
+        internal bool _detectTransformChanges = true;
+
+        [SerializeField]
+        internal double4x4 _modelToEcef = double4x4.identity;
 
         // True if _localToEcef has a valid value.
         // False if it has not yet been initialized from the Transform.
         [SerializeField]
-        private bool _modelToEcefIsValid = false;
+        internal bool _modelToEcefIsValid = false;
 
         // The last known Transform, used to detect changes in the Transform so that
         // the precise globe coordinates can be recomputed from it. This is null before OnEnable.
         [NonSerialized]
-        private Matrix4x4? _lastLocalToWorld = null;
+        internal Matrix4x4? _lastLocalToWorld = null;
 
         // The resolved georeference containing this globe anchor. This is just a cache
         // of `GetComponentInParent<CesiumGeoreference>()`.
         [NonSerialized]
-        private CesiumGeoreference _georeference;
+        internal CesiumGeoreference _georeference;
 
         #endregion
 
@@ -405,7 +408,7 @@ namespace CesiumForUnity
             }
         }
 
-        private void UpdateGeoreferenceIfNecessary()
+        internal void UpdateGeoreferenceIfNecessary()
         {
             if (this._georeference == null)
                 this.UpdateGeoreference();
@@ -489,45 +492,7 @@ namespace CesiumForUnity
             this.UpdateGeoreferenceIfNecessary();
             if (this._georeference == null)
                 throw new InvalidOperationException("CesiumGlobeAnchor is not nested inside a game object with a CesiumGeoreference.");
-
-            // Update the Transform
-            double3 localPosition;
-            quaternion localRotation;
-            double3 localScale;
-            this.ComputeTransformPropertiesFromEcef(newModelToEcef, out localPosition, out localRotation, out localScale);
-
-            Transform transform = this.transform;
-            transform.localPosition = (float3)localPosition;
-            transform.localRotation = localRotation;
-            transform.localScale = (float3)localScale;
-
-            this._lastLocalToWorld = this.transform.localToWorldMatrix;
-
-            // If the ECEF position changes, update the orientation based on the
-            // new position on the globe (if enabled).
-            if (this.adjustOrientationForGlobeWhenMoving &&
-                this._modelToEcefIsValid)
-            {
-                double3 oldPosition = this._modelToEcef.c3.xyz;
-                double3 newPosition = newModelToEcef.c3.xyz;
-                if (!oldPosition.Equals(newPosition))
-                {
-                    newModelToEcef = this.AdjustOrientation(oldPosition, newPosition, newModelToEcef);
-                }
-            }
-
-            this._modelToEcef = newModelToEcef;
-            this._modelToEcefIsValid = true;
-        }
-
-        private void ComputeTransformPropertiesFromEcef(double4x4 modelToEcef, out double3 localPosition, out quaternion localRotation, out double3 localScale)
-        {
-            double4x4 modelToLocal = math.mul(this._georeference.ecefToLocalMatrix, modelToEcef);
-            Helpers.MatrixToTranslationRotationAndScale(
-                modelToLocal,
-                out localPosition,
-                out localRotation,
-                out localScale);
+            this.SetNewEcef(newModelToEcef);
         }
 
         private void UpdateEcefFromTransform()
@@ -535,23 +500,12 @@ namespace CesiumForUnity
             this.UpdateGeoreferenceIfNecessary();
             if (this._georeference == null)
                 throw new InvalidOperationException("CesiumGlobeAnchor is not nested inside a game object with a CesiumGeoreference.");
-
-            Transform transform = this.transform;
-
-            // Compute the local transformation matrix, model -> local
-            double4x4 modelToLocal = Helpers.ToMathematics(Matrix4x4.TRS(transform.localPosition, transform.localRotation, transform.localScale));
-
-            // Get the local -> ECEF transformation from the CesiumGeoreference
-            double4x4 localToEcef = this._georeference.localToEcefMatrix;
-
-            // Multiply to get a model -> ECEF transformation
-            double4x4 modelToEcef = math.mul(localToEcef, modelToLocal);
-
-            this.UpdateEcef(modelToEcef);
+            this.SetNewEcefFromTransform();
         }
 
-        // This is static so that CesiumGlobeAnchor does not need finalization.
-        private partial double4x4 AdjustOrientation(double3 oldPositionEcef, double3 newPositionEcef, double4x4 newModelToEcef);
+        private partial void SetNewEcef(double4x4 newModelToEcef);
+
+        private partial void SetNewEcefFromTransform();
 
         #endregion
     }

@@ -7,6 +7,7 @@
 #include <Cesium3DTilesSelection/GltfUtilities.h>
 #include <Cesium3DTilesSelection/Tile.h>
 #include <Cesium3DTilesSelection/Tileset.h>
+#include <CesiumGeometry/Transforms.h>
 #include <CesiumGeospatial/Ellipsoid.h>
 #include <CesiumGltf/AccessorView.h>
 #include <CesiumGltf/ExtensionKhrMaterialsUnlit.h>
@@ -836,20 +837,23 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         glm::dmat4 gameObjectToUnityWorld = UnityTransforms::fromUnity(
             pModelGameObject->transform().localToWorldMatrix());
 
-        glm::dvec3 translation = glm::dvec3(modelToGameObject[3]);
-
-        RotationAndScale rotationAndScale =
-            UnityTransforms::matrixToRotationAndScale(
-                glm::dmat3(modelToGameObject));
+        glm::dvec3 translation;
+        glm::dquat rotation;
+        glm::dvec3 scale;
+        Transforms::computeTranslationRotationScaleFromMatrix(
+            modelToGameObject,
+            &translation,
+            &rotation,
+            &scale);
 
         primitiveGameObject.transform().localPosition(UnityEngine::Vector3{
             float(translation.x),
             float(translation.y),
             float(translation.z)});
         primitiveGameObject.transform().localRotation(
-            UnityTransforms::toUnity(rotationAndScale.rotation));
+            UnityTransforms::toUnity(rotation));
         primitiveGameObject.transform().localScale(
-            UnityTransforms::toUnity(rotationAndScale.scale));
+            UnityTransforms::toUnity(scale));
 
         CesiumForUnity::CesiumGlobeAnchor anchor =
             primitiveGameObject

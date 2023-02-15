@@ -437,6 +437,13 @@ namespace CesiumForUnity
             globeAnchor.adjustOrientationForGlobeWhenMoving = globeAnchor.adjustOrientationForGlobeWhenMoving;
             globeAnchor.longitudeLatitudeHeight = globeAnchor.longitudeLatitudeHeight;
 
+            // Private properties for use by the C++ class.
+            globeAnchor._georeference = null;
+            globeAnchor._modelToEcef = new double4x4();
+            globeAnchor._modelToEcefIsValid = true;
+            globeAnchor._lastLocalToWorld = new Matrix4x4();
+            globeAnchor.UpdateGeoreferenceIfNecessary();
+
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;
             sv.pivot = sv.pivot;

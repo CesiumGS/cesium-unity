@@ -13,11 +13,12 @@ namespace CesiumForUnityNative {
 
 class CesiumGlobeAnchorImpl {
 public:
-  static ::DotNet::Unity::Mathematics::double4x4 AdjustOrientation(
-      const ::DotNet::CesiumForUnity::CesiumGlobeAnchor& globeAnchor,
-      const ::DotNet::Unity::Mathematics::double3& oldPositionEcef,
-      const ::DotNet::Unity::Mathematics::double3& newPositionEcef,
+  static void SetNewEcef(
+      const ::DotNet::CesiumForUnity::CesiumGlobeAnchor& anchor,
       const ::DotNet::Unity::Mathematics::double4x4& newModelToEcef);
+
+  static void SetNewEcefFromTransform(
+      const ::DotNet::CesiumForUnity::CesiumGlobeAnchor& anchor);
 };
 
 } // namespace CesiumForUnityNative

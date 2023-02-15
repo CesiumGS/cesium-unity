@@ -2,6 +2,8 @@
 
 #include "UnityTransforms.h"
 
+#include <CesiumGeometry/Transforms.h>
+#include <CesiumGeospatial/GlobeAnchor.h>
 #include <CesiumGeospatial/LocalHorizontalCoordinateSystem.h>
 
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
@@ -10,35 +12,109 @@
 #include <DotNet/UnityEngine/GameObject.h>
 #include <DotNet/UnityEngine/Quaternion.h>
 #include <DotNet/UnityEngine/Transform.h>
+#include <DotNet/UnityEngine/Vector3.h>
 #include <glm/gtx/quaternion.hpp>
 
+using namespace CesiumGeometry;
 using namespace CesiumGeospatial;
 using namespace DotNet;
 
 namespace CesiumForUnityNative {
 
-/*static*/ ::DotNet::Unity::Mathematics::double4x4
-CesiumGlobeAnchorImpl::AdjustOrientation(
-    const CesiumForUnity::CesiumGlobeAnchor& globeAnchor,
-    const Unity::Mathematics::double3& oldPositionEcef,
-    const Unity::Mathematics::double3& newPositionEcef,
-    const ::DotNet::Unity::Mathematics::double4x4& newModelToEcef) {
-  // Find the rotation from the old up to the new up.
-  glm::dvec3 oldNormal = Ellipsoid::WGS84.geodeticSurfaceNormal(
-      glm::dvec3(oldPositionEcef.x, oldPositionEcef.y, oldPositionEcef.z));
-  glm::dvec3 newNormal = Ellipsoid::WGS84.geodeticSurfaceNormal(
-      glm::dvec3(newPositionEcef.x, newPositionEcef.y, newPositionEcef.z));
+namespace {
 
-  glm::dquat deltaRotation = glm::rotation(oldNormal, newNormal);
-  glm::dmat3 oldRotationAndScale =
-      UnityTransforms::fromUnity3x3(newModelToEcef);
-  glm::dmat3 newRotationAndScale =
-      glm::mat3_cast(deltaRotation) * oldRotationAndScale;
-  return UnityTransforms::toUnityMathematics(glm::dmat4(
-      glm::dvec4(newRotationAndScale[0], 0.0),
-      glm::dvec4(newRotationAndScale[1], 0.0),
-      glm::dvec4(newRotationAndScale[2], 0.0),
-      UnityTransforms::fromUnity(newModelToEcef.c3)));
+GlobeAnchor createOrUpdateNativeGlobeAnchorFromEcef(
+    const ::DotNet::CesiumForUnity::CesiumGlobeAnchor& anchor,
+    const ::DotNet::Unity::Mathematics::double4x4& newModelToEcef) {
+  if (!anchor._modelToEcefIsValid()) {
+    // Create a new anchor initialized at the new position, because there is no
+    // old one.
+    return GlobeAnchor(UnityTransforms::fromUnity(newModelToEcef));
+  } else {
+    // Create an anchor at the old position and move it to the new one.
+    GlobeAnchor cppAnchor(UnityTransforms::fromUnity(anchor._modelToEcef()));
+    cppAnchor.setAnchorToFixedTransform(
+        UnityTransforms::fromUnity(newModelToEcef),
+        anchor.adjustOrientationForGlobeWhenMoving());
+    return cppAnchor;
+  }
+}
+
+GlobeAnchor createOrUpdateNativeGlobeAnchorFromLocal(
+    const ::DotNet::CesiumForUnity::CesiumGlobeAnchor& anchor,
+    const glm::dmat4& newModelToLocal) {
+  CesiumForUnity::CesiumGeoreference georeference = anchor._georeference();
+  const LocalHorizontalCoordinateSystem& local =
+      georeference.NativeImplementation().getCoordinateSystem(georeference);
+
+  if (!anchor._modelToEcefIsValid()) {
+    // Create a new anchor initialized at the new position, because there is no
+    // old one.
+    return GlobeAnchor::fromAnchorToLocalTransform(local, newModelToLocal);
+  } else {
+    // Create an anchor at the old position and move it to the new one.
+    GlobeAnchor cppAnchor(UnityTransforms::fromUnity(anchor._modelToEcef()));
+    cppAnchor.setAnchorToLocalTransform(
+        local,
+        newModelToLocal,
+        anchor.adjustOrientationForGlobeWhenMoving());
+    return cppAnchor;
+  }
+}
+
+void updateAnchorFromCpp(
+    const CesiumForUnity::CesiumGlobeAnchor& anchor,
+    const GlobeAnchor& cppAnchor) {
+  anchor._modelToEcef(UnityTransforms::toUnityMathematics(
+      cppAnchor.getAnchorToFixedTransform()));
+
+  // Update the Unity Transform
+  CesiumForUnity::CesiumGeoreference georeference = anchor._georeference();
+  glm::dmat4 anchorToLocal = cppAnchor.getAnchorToLocalTransform(
+      georeference.NativeImplementation().getCoordinateSystem(georeference));
+
+  glm::dvec3 translation;
+  glm::dquat rotation;
+  glm::dvec3 scale;
+  Transforms::computeTranslationRotationScaleFromMatrix(
+      anchorToLocal,
+      &translation,
+      &rotation,
+      &scale);
+
+  UnityEngine::Transform transform = anchor.transform();
+
+  transform.localPosition(UnityTransforms::toUnity(translation));
+  transform.localRotation(UnityTransforms::toUnity(rotation));
+  transform.localScale(UnityTransforms::toUnity(scale));
+
+  anchor._lastLocalToWorld(transform.localToWorldMatrix());
+}
+
+} // namespace
+
+void CesiumGlobeAnchorImpl::SetNewEcef(
+    const CesiumForUnity::CesiumGlobeAnchor& anchor,
+    const Unity::Mathematics::double4x4& newModelToEcef) {
+  // Update with the new ECEF transform, also rotating based on the new position
+  // if desired.
+  GlobeAnchor cppAnchor =
+      createOrUpdateNativeGlobeAnchorFromEcef(anchor, newModelToEcef);
+  updateAnchorFromCpp(anchor, cppAnchor);
+}
+
+void CesiumGlobeAnchorImpl::SetNewEcefFromTransform(
+    const ::DotNet::CesiumForUnity::CesiumGlobeAnchor& anchor) {
+  // Update with the new local transform, also rotating based on the new
+  // position if desired.
+  UnityEngine::Transform transform = anchor.transform();
+  glm::dmat4 modelToLocal = Transforms::createTranslationRotationScaleMatrix(
+      UnityTransforms::fromUnity(transform.localPosition()),
+      UnityTransforms::fromUnity(transform.localRotation()),
+      UnityTransforms::fromUnity(transform.localScale()));
+  GlobeAnchor cppAnchor =
+      createOrUpdateNativeGlobeAnchorFromLocal(anchor, modelToLocal);
+  updateAnchorFromCpp(anchor, cppAnchor);
 }
 
 } // namespace CesiumForUnityNative
