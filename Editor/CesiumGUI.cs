@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Text.RegularExpressions;
+using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
 
@@ -33,23 +34,53 @@ namespace CesiumForUnity
             Undo.postprocessModifications -= OnPostProcessModifications;
         }
 
-        public void Toggle(bool value, Action<bool> set, string label, string tooltip)
+        public void Toggle(string label, bool value, Action<bool> set, string tooltip)
         {
-            bool newValue = EditorGUILayout.Toggle(new GUIContent(label, FormatTooltip(tooltip)), value);
+            bool newValue = EditorGUILayout.Toggle(new GUIContent(label, tooltip), value);
             if (newValue != value)
                 ApplyChange(label, newValue, set);
         }
 
-        public void Double(double value, Action<double> set, string label, string tooltip)
+        public void Double(string label, double value, Action<double> set, string tooltip)
         {
-            double newValue = EditorGUILayout.DoubleField(new GUIContent(label, FormatTooltip(tooltip)), value);
+            double newValue = EditorGUILayout.DoubleField(new GUIContent(label, tooltip), value);
             if (newValue != value)
                 ApplyChange(label, newValue, set);
         }
 
-        public void Enum<T>(T value, Action<T> set, string label, string tooltip) where T : Enum
+        private static GUIContent defaultXContent = new GUIContent("X");
+        private static GUIContent defaultYContent = new GUIContent("Y");
+        private static GUIContent defaultZContent = new GUIContent("Z");
+
+        public void Double3(string label, double3 value, Action<double3> set, string tooltip, GUIContent xContent = null, GUIContent yContent = null, GUIContent zContent = null)
         {
-            T newValue = (T)EditorGUILayout.EnumPopup(new GUIContent(label, FormatTooltip(tooltip)), (Enum)value);
+            xContent = xContent ?? defaultXContent;
+            yContent = yContent ?? defaultYContent;
+            zContent = zContent ?? defaultZContent;
+
+            float originalLabelWidth = EditorGUIUtility.labelWidth;
+
+            using (new EditorGUILayout.HorizontalScope())
+            using (var changeScope = new EditorGUI.ChangeCheckScope())
+            {
+                EditorGUILayout.PrefixLabel(new GUIContent(label, tooltip));
+                EditorGUIUtility.labelWidth = EditorStyles.label.CalcSize(xContent).x + 4.0f;
+                value.x = EditorGUILayout.DoubleField(xContent, value.x);
+                EditorGUIUtility.labelWidth = EditorStyles.label.CalcSize(yContent).x + 4.0f;
+                value.y = EditorGUILayout.DoubleField(yContent, value.y);
+                EditorGUIUtility.labelWidth = EditorStyles.label.CalcSize(zContent).x + 4.0f;
+                value.z = EditorGUILayout.DoubleField(zContent, value.z);
+
+                if (changeScope.changed)
+                    ApplyChange(label, value, set);
+            }
+
+            EditorGUIUtility.labelWidth = originalLabelWidth;
+        }
+
+        public void Enum<T>(string label, T value, Action<T> set, string tooltip) where T : Enum
+        {
+            T newValue = (T)EditorGUILayout.EnumPopup(new GUIContent(label, tooltip), (Enum)value);
             if (!value.Equals(newValue))
                 ApplyChange(label, newValue, set);
         }
@@ -80,7 +111,7 @@ namespace CesiumForUnity
         /// </summary>
         /// <param name="tooltip">The original tooltip.</param>
         /// <returns>The formatted tooltip.</returns>
-        private static string FormatTooltip(string tooltip)
+        public static string FormatTooltip(string tooltip)
         {
             return _findLineBreakSets.Replace(tooltip.Trim(), (match) =>
             {
