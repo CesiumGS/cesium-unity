@@ -57,12 +57,12 @@ namespace CesiumForUnity
         internal bool _detectTransformChanges = true;
 
         [SerializeField]
-        internal double4x4 _modelToEcef = double4x4.identity;
+        internal double4x4 _localToGlobeFixedMatrix = double4x4.identity;
 
-        // True if _localToEcef has a valid value.
+        // True if _localToGlobeFixedMatrix has a valid value.
         // False if it has not yet been initialized from the Transform.
         [SerializeField]
-        internal bool _modelToEcefIsValid = false;
+        internal bool _localToGlobeFixedMatrixIsValid = false;
 
         // The last known Transform, used to detect changes in the Transform so that
         // the precise globe coordinates can be recomputed from it. This is null before OnEnable.
@@ -145,12 +145,12 @@ namespace CesiumForUnity
         /// longitude). The +Y axis points to the intersection of the Equator and +90 degrees
         /// longitude. The +Z axis points up through the North Pole.
         /// </remarks>
-        public double4x4 modelToEcef
+        public double4x4 localToGlobeFixedMatrix
         {
             get
             {
                 this.InitializeEcefIfNeeded();
-                return this._modelToEcef;
+                return this._localToGlobeFixedMatrix;
             }
             set
             {
@@ -165,12 +165,17 @@ namespace CesiumForUnity
         /// ellipsoid. Do not confused an ellipsoidal height with a geoid height or height above mean sea level, which
         /// can be tens of meters higher or lower depending on where in the world the object is located.
         /// </summary>
+        /// <remarks>
+        /// When the position is set via this property, it is internally converted to and stored in Earth-Centered,
+        /// Earth-Fixed Coordinates. As a result, getting this property will not necessarily return exactly
+        /// the value that was set.
+        /// </remarks>
         public double3 longitudeLatitudeHeight
         {
-            get => CesiumWgs84Ellipsoid.EarthCenteredEarthFixedToLongitudeLatitudeHeight(this.ecefPosition);
+            get => CesiumWgs84Ellipsoid.EarthCenteredEarthFixedToLongitudeLatitudeHeight(this.positionGlobeFixed);
             set
             {
-                this.ecefPosition = CesiumWgs84Ellipsoid.LongitudeLatitudeHeightToEarthCenteredEarthFixed(value);
+                this.positionGlobeFixed = CesiumWgs84Ellipsoid.LongitudeLatitudeHeightToEarthCenteredEarthFixed(value);
             }
         }
 
@@ -178,16 +183,16 @@ namespace CesiumForUnity
         /// Gets or sets the game object's position in the Earth-Centered, Earth-Fixed (ECEF) coordinates in meters.
         /// </summary>
         /// <remarks>
-        /// See <see cref="modelToEcef"/> for an explanation of the ECEF coordinate system.
+        /// See <see cref="localToGlobeFixedMatrix"/> for an explanation of the ECEF coordinate system.
         /// </remarks>
-        public double3 ecefPosition
+        public double3 positionGlobeFixed
         {
-            get => this.modelToEcef.c3.xyz;
+            get => this.localToGlobeFixedMatrix.c3.xyz;
             set
             {
-                double4x4 newModelToEcef = this.modelToEcef;
+                double4x4 newModelToEcef = this.localToGlobeFixedMatrix;
                 newModelToEcef.c3 = new double4(value.x, value.y, value.z, 1.0);
-                this.modelToEcef = newModelToEcef;
+                this.localToGlobeFixedMatrix = newModelToEcef;
             }
         }
 
@@ -196,9 +201,16 @@ namespace CesiumForUnity
         /// Earth-Centered, Earth-Fixed axes.
         /// </summary>
         /// <remarks>
-        /// See <see cref="modelToEcef"/> for an explanation of the ECEF coordinate system.
+        /// <para>
+        /// See <see cref="localToGlobeFixedMatrix"/> for an explanation of the ECEF coordinate system.
+        /// </para>
+        /// <para>
+        /// When the rotation is set via this property, it is internally converted to and stored in the
+        /// <see cref="localToGlobeFixedMatrix"/> property. As a result, getting this property will not
+        /// necessarily return exactly the value that was set.
+        /// </para>
         /// </remarks>
-        public quaternion localToEcefRotation
+        public quaternion rotationGlobeFixed
         {
             get
             {
@@ -206,7 +218,7 @@ namespace CesiumForUnity
                 quaternion rotation;
                 double3 scale;
 
-                Helpers.MatrixToTranslationRotationAndScale(this.modelToEcef, out translation, out rotation, out scale);
+                Helpers.MatrixToTranslationRotationAndScale(this.localToGlobeFixedMatrix, out translation, out rotation, out scale);
 
                 return rotation;
             }
@@ -216,22 +228,32 @@ namespace CesiumForUnity
                 quaternion rotation;
                 double3 scale;
 
-                Helpers.MatrixToTranslationRotationAndScale(this.modelToEcef, out translation, out rotation, out scale);
-                this.modelToEcef = Helpers.TranslationRotationAndScaleToMatrix(translation, value, scale);
+                Helpers.MatrixToTranslationRotationAndScale(this.localToGlobeFixedMatrix, out translation, out rotation, out scale);
+                this.localToGlobeFixedMatrix = Helpers.TranslationRotationAndScaleToMatrix(translation, value, scale);
             }
         }
 
-        public quaternion localToEastUpNorthRotation
+        /// <summary>
+        /// Gets or sets the rotation from the game object's coordinate system to a local coordinate system
+        /// centered on this object where the +X points in the local East direction, the +Y axis points in
+        /// the local Up direction, and the +Z axis points in the local North direction.
+        /// </summary>
+        /// <remarks>
+        /// When the rotation is set via this property, it is internally converted to and stored in the
+        /// <see cref="localToGlobeFixedMatrix"/> property. As a result, getting this property will not
+        /// necessarily return exactly the value that was set.
+        /// </remarks>
+        public quaternion rotationEastUpNorth
         {
             get
             {
                 this.InitializeEcefIfNeeded();
-                return this.GetModelToEastUpNorthRotation();
+                return this.GetLocalToEastUpNorthRotation();
             }
             set
             {
                 this.InitializeEcefIfNeeded();
-                this.SetModelToEastUpNorthRotation(value);
+                this.SetLocalToEastUpNorthRotation(value);
             }
         }
 
@@ -241,9 +263,9 @@ namespace CesiumForUnity
         /// this scale will almost always be negative.
         /// </summary>
         /// <remarks>
-        /// See <see cref="modelToEcef"/> for an explanation of the ECEF coordinate system.
+        /// See <see cref="localToGlobeFixedMatrix"/> for an explanation of the ECEF coordinate system.
         /// </remarks>
-        public double3 localToEcefScale
+        public double3 scaleGlobeFixed
         {
             get
             {
@@ -251,7 +273,7 @@ namespace CesiumForUnity
                 quaternion rotation;
                 double3 scale;
 
-                Helpers.MatrixToTranslationRotationAndScale(this.modelToEcef, out translation, out rotation, out scale);
+                Helpers.MatrixToTranslationRotationAndScale(this.localToGlobeFixedMatrix, out translation, out rotation, out scale);
 
                 return scale;
             }
@@ -261,48 +283,64 @@ namespace CesiumForUnity
                 quaternion rotation;
                 double3 scale;
 
-                Helpers.MatrixToTranslationRotationAndScale(this.modelToEcef, out translation, out rotation, out scale);
-                this.modelToEcef = Helpers.TranslationRotationAndScaleToMatrix(translation, rotation, value);
+                Helpers.MatrixToTranslationRotationAndScale(this.localToGlobeFixedMatrix, out translation, out rotation, out scale);
+                this.localToGlobeFixedMatrix = Helpers.TranslationRotationAndScaleToMatrix(translation, rotation, value);
             }
+        }
+
+        /// <summary>
+        /// Gets or sets the scale from the game object's coordinate system to a local coordinate system
+        /// centered on this object where the +X points in the local East direction, the +Y axis points in
+        /// the local Up direction, and the +Z axis points in the local North direction.
+        /// </summary>
+        /// <remarks>
+        /// When the rotation is set via this property, it is internally converted to and stored in the
+        /// <see cref="localToGlobeFixedMatrix"/> property. As a result, getting this property will not
+        /// necessarily return exactly the value that was set.
+        /// </remarks>
+        public double3 scaleEastUpNorth
+        {
+            get => -this.scaleGlobeFixed;
+            set => this.scaleGlobeFixed = -value;
         }
 
         #endregion
 
         #region Deprecated Properties
 
-        [Obsolete("Use ecefPosition.x instead.")]
+        [Obsolete("Use positionGlobeFixed.x instead.")]
         public double ecefX
         {
-            get => this.ecefPosition.x;
+            get => this.positionGlobeFixed.x;
             set
             {
-                double3 position = this.ecefPosition;
+                double3 position = this.positionGlobeFixed;
                 position.x = value;
-                this.ecefPosition = position;
+                this.positionGlobeFixed = position;
             }
         }
 
-        [Obsolete("Use ecefPosition.y instead.")]
+        [Obsolete("Use positionGlobeFixed.y instead.")]
         public double ecefY
         {
-            get => this.ecefPosition.y;
+            get => this.positionGlobeFixed.y;
             set
             {
-                double3 position = this.ecefPosition;
+                double3 position = this.positionGlobeFixed;
                 position.y = value;
-                this.ecefPosition = position;
+                this.positionGlobeFixed = position;
             }
         }
 
-        [Obsolete("Use ecefPosition.z instead.")]
+        [Obsolete("Use positionGlobeFixed.z instead.")]
         public double ecefZ
         {
-            get => this.ecefPosition.z;
+            get => this.positionGlobeFixed.z;
             set
             {
-                double3 position = this.ecefPosition;
+                double3 position = this.positionGlobeFixed;
                 position.z = value;
-                this.ecefPosition = position;
+                this.positionGlobeFixed = position;
             }
         }
 
@@ -365,7 +403,7 @@ namespace CesiumForUnity
         /// </para>
         /// <list type="bullet">
         /// <item>
-        /// If the <see cref="modelToEcef"/> transform has not yet been set, it is computed
+        /// If the <see cref="localToGlobeFixedMatrix"/> transform has not yet been set, it is computed
         /// from the game object's current `Transform`.
         /// </item>
         /// <item>
@@ -377,19 +415,19 @@ namespace CesiumForUnity
         /// </item>
         /// <item>
         /// If the origin of the <see cref="CesiumGeoreference"/> has changed, the game object's `Transform` is
-        /// updated based on the <see cref="modelToEcef"/> transform and the new georeference origin.
+        /// updated based on the <see cref="localToGlobeFixedMatrix"/> transform and the new georeference origin.
         /// </item>
         /// </list>
         /// </remarks>
         public void Sync()
         {
-            if (!this._modelToEcefIsValid || (this._lastLocalToWorld != null && this._lastLocalToWorld != this.transform.localToWorldMatrix))
+            if (!this._localToGlobeFixedMatrixIsValid || (this._lastLocalToWorld != null && this._lastLocalToWorld != this.transform.localToWorldMatrix))
             {
                 this.UpdateEcefFromTransform();
                 return;
             }
 
-            this.UpdateEcef(this._modelToEcef);
+            this.UpdateEcef(this._localToGlobeFixedMatrix);
         }
 
         /// <summary>
@@ -494,7 +532,7 @@ namespace CesiumForUnity
 
         private void InitializeEcefIfNeeded()
         {
-            if (!this._modelToEcefIsValid)
+            if (!this._localToGlobeFixedMatrixIsValid)
             {
                 this.UpdateGeoreferenceIfNecessary();
                 this.UpdateEcefFromTransform();
@@ -506,7 +544,7 @@ namespace CesiumForUnity
             this.UpdateGeoreferenceIfNecessary();
             if (this._georeference == null)
                 throw new InvalidOperationException("CesiumGlobeAnchor is not nested inside a game object with a CesiumGeoreference.");
-            this.SetNewEcef(newModelToEcef);
+            this.SetNewLocalToGlobeFixedMatrix(newModelToEcef);
         }
 
         private void UpdateEcefFromTransform()
@@ -514,7 +552,7 @@ namespace CesiumForUnity
             this.UpdateGeoreferenceIfNecessary();
             if (this._georeference == null)
                 throw new InvalidOperationException("CesiumGlobeAnchor is not nested inside a game object with a CesiumGeoreference.");
-            this.SetNewEcefFromTransform();
+            this.SetNewLocalToGlobeFixedMatrixFromTransform();
         }
 
         /// <summary>
@@ -523,8 +561,8 @@ namespace CesiumForUnity
         /// the object's Transform. Be sure the georeference is initialized before
         /// calling this method.
         /// </summary>
-        /// <param name="newModelToEcef">The new transformation matrix from the model to Earth-Centered, Earth-Fixed.</param>
-        private partial void SetNewEcef(double4x4 newModelToEcef);
+        /// <param name="newLocalToGlobeFixedMatrix">The new transformation matrix from the local coordinate system to Earth-Centered, Earth-Fixed.</param>
+        private partial void SetNewLocalToGlobeFixedMatrix(double4x4 newLocalToGlobeFixedMatrix);
 
         /// <summary>
         /// Sets a new model-to-ECEF matrix from the current value of the object's
@@ -532,23 +570,23 @@ namespace CesiumForUnity
         /// <see cref="adjustOrientationForGlobeWhenMoving"/> is true. Be sure that the
         /// georeference is intialized before calling this method.
         /// </summary>
-        private partial void SetNewEcefFromTransform();
+        private partial void SetNewLocalToGlobeFixedMatrixFromTransform();
 
         /// <summary>
-        /// Gets the current rotation from the model's axes to a set of axes where
+        /// Gets the current rotation from the local axes to a set of axes where
         /// +X points East, +Y points Up, and +Z points East at the object's position.
         /// Be sure that the georeference is initialized before calling this method.
         /// </summary>
         /// <returns>The rotation.</returns>
-        private partial quaternion GetModelToEastUpNorthRotation();
+        private partial quaternion GetLocalToEastUpNorthRotation();
 
         /// <summary>
         /// Sets the current rotation from the model's axes to a set of axes where
         /// +X points East, +Y points Up, and +Z points East at the object's position.
         /// Be sure that the georeference is initialized before calling this method.
         /// </summary>
-        /// <param name="value">The new rotation.</param>
-        private partial void SetModelToEastUpNorthRotation(quaternion value);
+        /// <param name="newRotation">The new rotation.</param>
+        private partial void SetLocalToEastUpNorthRotation(quaternion newRotation);
 
         #endregion
     }

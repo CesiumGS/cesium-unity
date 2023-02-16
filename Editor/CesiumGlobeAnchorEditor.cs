@@ -135,7 +135,7 @@ namespace CesiumForUnity
 
         private void DrawEarthCenteredEarthFixedProperties()
         {
-            double3 ecefPosition = this._globeAnchor.ecefPosition;
+            double3 ecefPosition = this._globeAnchor.positionGlobeFixed;
             ecefPosition.x = Math.Round(ecefPosition.x, 4);
             ecefPosition.y = Math.Round(ecefPosition.y, 4);
             ecefPosition.z = Math.Round(ecefPosition.z, 4);
@@ -145,7 +145,7 @@ namespace CesiumForUnity
                 ecefPosition,
                 (value) =>
                 {
-                    this._globeAnchor.ecefPosition = value;
+                    this._globeAnchor.positionGlobeFixed = value;
                 },
                 ecefTooltip);
         }
@@ -159,7 +159,7 @@ namespace CesiumForUnity
 
         private void DrawEastUpNorthRotationProperties()
         {
-            Quaternion rotation = this._globeAnchor.localToEastUpNorthRotation;
+            Quaternion rotation = this._globeAnchor.rotationEastUpNorth;
             double3 eulerAngles = (float3)rotation.eulerAngles;
 
             eulerAngles.x = Math.Round(Math.Clamp(Helpers.Negative180To180(eulerAngles.x), -180.0f, 180.0f), 4);
@@ -172,7 +172,7 @@ namespace CesiumForUnity
                 (value) =>
                 {
                     rotation.eulerAngles = (float3)value;
-                    this._globeAnchor.localToEastUpNorthRotation = rotation;
+                    this._globeAnchor.rotationEastUpNorth = rotation;
                 },
                 rotationTooltip);
         }
@@ -181,19 +181,20 @@ namespace CesiumForUnity
 
         private void DrawScaleProperties()
         {
-            double3 positiveScale = -this._globeAnchor.localToEcefScale;
-            positiveScale.x = Math.Round(positiveScale.x, 4);
-            positiveScale.y = Math.Round(positiveScale.y, 4);
-            positiveScale.z = Math.Round(positiveScale.z, 4);
+            double3 scale = this._globeAnchor.scaleEastUpNorth;
+            scale.x = Math.Round(scale.x, 4);
+            scale.y = Math.Round(scale.y, 4);
+            scale.z = Math.Round(scale.z, 4);
 
             this._gui.Double3(
                 "Scale",
-                positiveScale,
+                scale,
                 (value) =>
                 {
+                    // Don't try to set a scale that is too close to zero.
                     if (math.cmin(math.abs(value)) < 1.0e-15)
                         return;
-                    this._globeAnchor.localToEcefScale = -value;
+                    this._globeAnchor.scaleEastUpNorth = value;
                 },
                 scaleTooltip);
         }

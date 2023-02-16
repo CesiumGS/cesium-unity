@@ -14,17 +14,17 @@ namespace CesiumForUnityNative {
 
 class CesiumGlobeAnchorImpl {
 public:
-  static void SetNewEcef(
+  static void SetNewLocalToGlobeFixedMatrix(
       const ::DotNet::CesiumForUnity::CesiumGlobeAnchor& anchor,
-      const ::DotNet::Unity::Mathematics::double4x4& newModelToEcef);
+      const ::DotNet::Unity::Mathematics::double4x4& newLocalToGlobeFixedMatrix);
 
-  static void SetNewEcefFromTransform(
+  static void SetNewLocalToGlobeFixedMatrixFromTransform(
       const ::DotNet::CesiumForUnity::CesiumGlobeAnchor& anchor);
 
-  static ::DotNet::Unity::Mathematics::quaternion GetModelToEastUpNorthRotation(
+  static ::DotNet::Unity::Mathematics::quaternion GetLocalToEastUpNorthRotation(
       const ::DotNet::CesiumForUnity::CesiumGlobeAnchor& anchor);
 
-  static void SetModelToEastUpNorthRotation(
+  static void SetLocalToEastUpNorthRotation(
       const ::DotNet::CesiumForUnity::CesiumGlobeAnchor& anchor,
       const ::DotNet::Unity::Mathematics::quaternion& value);
 };

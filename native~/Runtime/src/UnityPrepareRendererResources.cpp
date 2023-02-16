@@ -862,7 +862,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         anchor.adjustOrientationForGlobeWhenMoving(false);
 
         glm::dvec3 ecef(modelToEcef[3]);
-        anchor.ecefPosition(UnityTransforms::toUnityMathematics(ecef));
+        anchor.positionGlobeFixed(UnityTransforms::toUnityMathematics(ecef));
 
         UnityEngine::MeshFilter meshFilter =
             primitiveGameObject.AddComponent<UnityEngine::MeshFilter>();

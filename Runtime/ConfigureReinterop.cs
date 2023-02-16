@@ -430,7 +430,7 @@ namespace CesiumForUnity
             CesiumGlobeAnchor[] globeAnchors = go.GetComponentsInChildren<CesiumGlobeAnchor>();
             globeAnchors = go.GetComponentsInChildren<CesiumGlobeAnchor>(true);
             CesiumGlobeAnchor globeAnchor = globeAnchors[globeAnchors.Length - 1];
-            globeAnchor.ecefPosition = globeAnchor.ecefPosition;
+            globeAnchor.positionGlobeFixed = globeAnchor.positionGlobeFixed;
 
             globeAnchor = go.AddComponent<CesiumGlobeAnchor>();
             globeAnchor.detectTransformChanges = globeAnchor.detectTransformChanges;
@@ -439,8 +439,8 @@ namespace CesiumForUnity
 
             // Private properties for use by the C++ class.
             globeAnchor._georeference = null;
-            globeAnchor._modelToEcef = new double4x4();
-            globeAnchor._modelToEcefIsValid = true;
+            globeAnchor._localToGlobeFixedMatrix = new double4x4();
+            globeAnchor._localToGlobeFixedMatrixIsValid = true;
             globeAnchor._lastLocalToWorld = new Matrix4x4();
             globeAnchor.UpdateGeoreferenceIfNecessary();
 

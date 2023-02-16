@@ -23,8 +23,8 @@ namespace CesiumForUnity
     [DefaultExecutionOrder(-1000000)]
     internal class CesiumGlobeAnchorBackwardCompatibility0dot1dot2 : CesiumGlobeAnchor, IBackwardCompatibilityComponent<CesiumGlobeAnchor>
     {
-        public bool _adjustOrientationForGlobeWhenMoving = true;
-        public bool _detectTransformChanges = true;
+        public new bool _adjustOrientationForGlobeWhenMoving = true;
+        public new bool _detectTransformChanges = true;
         public CesiumGlobeAnchorPositionAuthorityBackwardCompatibility0dot1dot2 _positionAuthority = CesiumGlobeAnchorPositionAuthorityBackwardCompatibility0dot1dot2.None;
         public double _latitude = 0.0;
         public double _longitude = 0.0;
@@ -61,7 +61,7 @@ namespace CesiumForUnity
                     upgraded.longitudeLatitudeHeight = new double3(this._longitude, this._latitude, this._height);
                     break;
                 case CesiumGlobeAnchorPositionAuthorityBackwardCompatibility0dot1dot2.EarthCenteredEarthFixed:
-                    upgraded.ecefPosition = new double3(this._ecefX, this._ecefY, this._ecefZ);
+                    upgraded.positionGlobeFixed = new double3(this._ecefX, this._ecefY, this._ecefZ);
                     break;
                 case CesiumGlobeAnchorPositionAuthorityBackwardCompatibility0dot1dot2.UnityCoordinates:
                     // Any backward compatibility for CesiumGeoreference must have a more negative
@@ -73,7 +73,7 @@ namespace CesiumForUnity
                     {
                         georeference.Initialize();
                         double3 ecef = georeference.TransformUnityPositionToEarthCenteredEarthFixed(new double3(this._unityX, this._unityY, this._unityZ));
-                        upgraded.ecefPosition = ecef;
+                        upgraded.positionGlobeFixed = ecef;
                     }
                     break;
             }

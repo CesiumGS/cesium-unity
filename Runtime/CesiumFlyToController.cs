@@ -182,7 +182,7 @@ namespace CesiumForUnity
         /// <returns>Whether or not movement was detected.</returns>
         private bool DetectMovementInput()
         {
-            double3 currentPositionECEF = this._globeAnchor.ecefPosition;
+            double3 currentPositionECEF = this._globeAnchor.positionGlobeFixed;
             bool3 positionEquality = currentPositionECEF == this._lastPositionECEF;
             return !positionEquality.x || !positionEquality.y || !positionEquality.z;
         }
@@ -259,7 +259,7 @@ namespace CesiumForUnity
             double3 lastPosition = this._keypoints[lastKeypointIndex];
             double3 nextPosition = this._keypoints[nextKeypointIndex];
             double3 currentPosition = math.lerp(lastPosition, nextPosition, segmentPercentage);
-            this._globeAnchor.ecefPosition = currentPosition;
+            this._globeAnchor.positionGlobeFixed = currentPosition;
             this._lastPositionECEF = currentPosition;
 
             // Interpolate rotation in the EUN frame. The local EUN rotation will
@@ -273,7 +273,7 @@ namespace CesiumForUnity
         private void CompleteFlight()
         {
             double3 finalPoint = this._keypoints[this._keypoints.Count - 1];
-            this._globeAnchor.ecefPosition = finalPoint;
+            this._globeAnchor.positionGlobeFixed = finalPoint;
 
             this.transform.rotation = this._flyToDestinationRotation;
 
@@ -463,7 +463,7 @@ namespace CesiumForUnity
             pitchAtDestination = Mathf.Clamp(pitchAtDestination, -89.99f, 89.99f);
 
             // Compute source location in ECEF
-            double3 source = this._globeAnchor.ecefPosition;
+            double3 source = this._globeAnchor.positionGlobeFixed;
 
             this.ComputeFlightPath(source, destination, yawAtDestination, pitchAtDestination);
 

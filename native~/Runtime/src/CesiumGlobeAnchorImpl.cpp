@@ -26,16 +26,16 @@ namespace {
 
 GlobeAnchor createOrUpdateNativeGlobeAnchorFromEcef(
     const ::DotNet::CesiumForUnity::CesiumGlobeAnchor& anchor,
-    const ::DotNet::Unity::Mathematics::double4x4& newModelToEcef) {
-  if (!anchor._modelToEcefIsValid()) {
+    const ::DotNet::Unity::Mathematics::double4x4& newLocalToGlobeFixedMatrix) {
+  if (!anchor._localToGlobeFixedMatrixIsValid()) {
     // Create a new anchor initialized at the new position, because there is no
     // old one.
-    return GlobeAnchor(UnityTransforms::fromUnity(newModelToEcef));
+    return GlobeAnchor(UnityTransforms::fromUnity(newLocalToGlobeFixedMatrix));
   } else {
     // Create an anchor at the old position and move it to the new one.
-    GlobeAnchor cppAnchor(UnityTransforms::fromUnity(anchor._modelToEcef()));
+    GlobeAnchor cppAnchor(UnityTransforms::fromUnity(anchor._localToGlobeFixedMatrix()));
     cppAnchor.setAnchorToFixedTransform(
-        UnityTransforms::fromUnity(newModelToEcef),
+        UnityTransforms::fromUnity(newLocalToGlobeFixedMatrix),
         anchor.adjustOrientationForGlobeWhenMoving());
     return cppAnchor;
   }
@@ -48,13 +48,13 @@ GlobeAnchor createOrUpdateNativeGlobeAnchorFromLocal(
   const LocalHorizontalCoordinateSystem& local =
       georeference.NativeImplementation().getCoordinateSystem(georeference);
 
-  if (!anchor._modelToEcefIsValid()) {
+  if (!anchor._localToGlobeFixedMatrixIsValid()) {
     // Create a new anchor initialized at the new position, because there is no
     // old one.
     return GlobeAnchor::fromAnchorToLocalTransform(local, newModelToLocal);
   } else {
     // Create an anchor at the old position and move it to the new one.
-    GlobeAnchor cppAnchor(UnityTransforms::fromUnity(anchor._modelToEcef()));
+    GlobeAnchor cppAnchor(UnityTransforms::fromUnity(anchor._localToGlobeFixedMatrix()));
     cppAnchor.setAnchorToLocalTransform(
         local,
         newModelToLocal,
@@ -66,9 +66,9 @@ GlobeAnchor createOrUpdateNativeGlobeAnchorFromLocal(
 void updateAnchorFromCpp(
     const CesiumForUnity::CesiumGlobeAnchor& anchor,
     const GlobeAnchor& cppAnchor) {
-  anchor._modelToEcef(UnityTransforms::toUnityMathematics(
+  anchor._localToGlobeFixedMatrix(UnityTransforms::toUnityMathematics(
       cppAnchor.getAnchorToFixedTransform()));
-  anchor._modelToEcefIsValid(true);
+  anchor._localToGlobeFixedMatrixIsValid(true);
 
   // Update the Unity Transform
   CesiumForUnity::CesiumGeoreference georeference = anchor._georeference();
@@ -111,17 +111,17 @@ LocalHorizontalCoordinateSystem createEastUpNorth(const GlobeAnchor& anchor) {
 
 } // namespace
 
-void CesiumGlobeAnchorImpl::SetNewEcef(
+void CesiumGlobeAnchorImpl::SetNewLocalToGlobeFixedMatrix(
     const CesiumForUnity::CesiumGlobeAnchor& anchor,
-    const Unity::Mathematics::double4x4& newModelToEcef) {
+    const Unity::Mathematics::double4x4& newLocalToGlobeFixedMatrix) {
   // Update with the new ECEF transform, also rotating based on the new position
   // if desired.
   GlobeAnchor cppAnchor =
-      createOrUpdateNativeGlobeAnchorFromEcef(anchor, newModelToEcef);
+      createOrUpdateNativeGlobeAnchorFromEcef(anchor, newLocalToGlobeFixedMatrix);
   updateAnchorFromCpp(anchor, cppAnchor);
 }
 
-void CesiumGlobeAnchorImpl::SetNewEcefFromTransform(
+void CesiumGlobeAnchorImpl::SetNewLocalToGlobeFixedMatrixFromTransform(
     const CesiumForUnity::CesiumGlobeAnchor& anchor) {
   // Update with the new local transform, also rotating based on the new
   // position if desired.
@@ -136,9 +136,9 @@ void CesiumGlobeAnchorImpl::SetNewEcefFromTransform(
 }
 
 Unity::Mathematics::quaternion
-CesiumGlobeAnchorImpl::GetModelToEastUpNorthRotation(
+CesiumGlobeAnchorImpl::GetLocalToEastUpNorthRotation(
     const CesiumForUnity::CesiumGlobeAnchor& anchor) {
-  GlobeAnchor cppAnchor(UnityTransforms::fromUnity(anchor._modelToEcef()));
+  GlobeAnchor cppAnchor(UnityTransforms::fromUnity(anchor._localToGlobeFixedMatrix()));
 
   LocalHorizontalCoordinateSystem eastUpNorth = createEastUpNorth(cppAnchor);
 
@@ -154,10 +154,10 @@ CesiumGlobeAnchorImpl::GetModelToEastUpNorthRotation(
   return UnityTransforms::toUnityMathematics(rotationToEastUpNorth);
 }
 
-void CesiumGlobeAnchorImpl::SetModelToEastUpNorthRotation(
+void CesiumGlobeAnchorImpl::SetLocalToEastUpNorthRotation(
     const ::DotNet::CesiumForUnity::CesiumGlobeAnchor& anchor,
     const ::DotNet::Unity::Mathematics::quaternion& value) {
-  GlobeAnchor cppAnchor(UnityTransforms::fromUnity(anchor._modelToEcef()));
+  GlobeAnchor cppAnchor(UnityTransforms::fromUnity(anchor._localToGlobeFixedMatrix()));
 
   LocalHorizontalCoordinateSystem eastUpNorth = createEastUpNorth(cppAnchor);
 
