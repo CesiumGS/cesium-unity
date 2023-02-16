@@ -45,12 +45,13 @@ public:
     System::Collections::Generic::Enumerator0 enumerator =
         request.GetResponseHeaders().GetEnumerator();
     while (enumerator.MoveNext()) {
-      std::string key = enumerator.Current().Key().ToStlString();
-      std::string value = enumerator.Current().Value().ToStlString();
-      if (value == "Content-Type") {
-        this->_contentType = value;
-      }
-      this->_headers.emplace(key, value);
+      this->_headers.emplace(
+          enumerator.Current().Key().ToStlString(),
+          enumerator.Current().Value().ToStlString());
+    }
+    auto find = this->_headers.find("content-type");
+    if (find != this->_headers.end()) {
+      this->_contentType = find->second;
     }
   }
 
