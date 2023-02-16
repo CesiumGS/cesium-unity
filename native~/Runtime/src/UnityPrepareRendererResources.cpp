@@ -819,50 +819,15 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
         primitiveGameObject.transform().parent(pModelGameObject->transform());
 
-        // The Georeference defines the mapping of ECEF coordinates to the game
-        // object's coordinates. And then the game object's transform maps the
-        // coordinates to the Unity world. This way a transform on a tileset or
-        // georeference can position/rotate/scale some or all of the globe
-        // within the Unity world. But usually tilesets and georeferences should
-        // have identity transforms.
-
-        glm::dmat4 ecefToGameObject =
-            pCoordinateSystem
-                ? pCoordinateSystem->getEcefToLocalTransformation()
-                : glm::dmat4(1.0);
-
         glm::dmat4 modelToEcef = tileTransform * transform;
-
-        glm::dmat4 modelToGameObject = ecefToGameObject * modelToEcef;
-        glm::dmat4 gameObjectToUnityWorld = UnityTransforms::fromUnity(
-            pModelGameObject->transform().localToWorldMatrix());
-
-        glm::dvec3 translation;
-        glm::dquat rotation;
-        glm::dvec3 scale;
-        Transforms::computeTranslationRotationScaleFromMatrix(
-            modelToGameObject,
-            &translation,
-            &rotation,
-            &scale);
-
-        primitiveGameObject.transform().localPosition(UnityEngine::Vector3{
-            float(translation.x),
-            float(translation.y),
-            float(translation.z)});
-        primitiveGameObject.transform().localRotation(
-            UnityTransforms::toUnity(rotation));
-        primitiveGameObject.transform().localScale(
-            UnityTransforms::toUnity(scale));
 
         CesiumForUnity::CesiumGlobeAnchor anchor =
             primitiveGameObject
                 .AddComponent<CesiumForUnity::CesiumGlobeAnchor>();
         anchor.detectTransformChanges(false);
         anchor.adjustOrientationForGlobeWhenMoving(false);
-
-        glm::dvec3 ecef(modelToEcef[3]);
-        anchor.positionGlobeFixed(UnityTransforms::toUnityMathematics(ecef));
+        anchor.localToGlobeFixedMatrix(
+            UnityTransforms::toUnityMathematics(modelToEcef));
 
         UnityEngine::MeshFilter meshFilter =
             primitiveGameObject.AddComponent<UnityEngine::MeshFilter>();

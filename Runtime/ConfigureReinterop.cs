@@ -436,6 +436,7 @@ namespace CesiumForUnity
             globeAnchor.detectTransformChanges = globeAnchor.detectTransformChanges;
             globeAnchor.adjustOrientationForGlobeWhenMoving = globeAnchor.adjustOrientationForGlobeWhenMoving;
             globeAnchor.longitudeLatitudeHeight = globeAnchor.longitudeLatitudeHeight;
+            globeAnchor.localToGlobeFixedMatrix = globeAnchor.localToGlobeFixedMatrix;
 
             // Private properties for use by the C++ class.
             globeAnchor._georeference = null;
