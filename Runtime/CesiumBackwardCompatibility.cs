@@ -1,12 +1,11 @@
 ﻿using UnityEngine;
 using System;
-using UnityEditorInternal;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using UnityEngine.SceneManagement;
 
 #if UNITY_EDITOR
 using UnityEditor;
+using UnityEditorInternal;
 #endif
 
 namespace CesiumForUnity
@@ -21,20 +20,6 @@ namespace CesiumForUnity
         where TNew : MonoBehaviour
     {
 #if UNITY_EDITOR
-        // Compare references while ignoring Unity's comparison overrides.
-        //class ReferenceEqualityComparer : IEqualityComparer<MonoBehaviour>
-        //{
-        //    public bool Equals(MonoBehaviour x, MonoBehaviour y)
-        //    {
-        //        return ReferenceEquals(x, y);
-        //    }
-
-        //    public int GetHashCode(MonoBehaviour obj)
-        //    {
-        //        return RuntimeHelpers.GetHashCode(obj);
-        //    }
-        //}
-
         private static Dictionary<MonoBehaviour, MonoBehaviour> _instanceMap = null;
 
         public static TNew Upgrade<TOld>(TOld oldComponent)
