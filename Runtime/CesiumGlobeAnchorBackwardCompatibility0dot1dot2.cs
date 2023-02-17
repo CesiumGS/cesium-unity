@@ -1,12 +1,5 @@
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Serialization;
-using System;
-using UnityEditorInternal;
-
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 
 namespace CesiumForUnity
 {
