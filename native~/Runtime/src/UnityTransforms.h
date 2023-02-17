@@ -44,21 +44,21 @@ public:
    * Unity.Mathematics double3.
    */
   static DotNet::Unity::Mathematics::double3
-  UnityTransforms::toUnityMathematics(const glm::dvec3& vector);
+  toUnityMathematics(const glm::dvec3& vector);
 
   /**
    * Convert a double-precision GLM 4-component vector to a double-precision
    * Unity.Mathematics double4.
    */
   static DotNet::Unity::Mathematics::double4
-  UnityTransforms::toUnityMathematics(const glm::dvec4& vector);
+  toUnityMathematics(const glm::dvec4& vector);
 
   /**
    * Converts a double-precision GLM quaterion to a single-precision
    * Unity.Mathematics quaternion.
    */
   static DotNet::Unity::Mathematics::quaternion
-  UnityTransforms::toUnityMathematics(const glm::dquat& quaternion);
+  toUnityMathematics(const glm::dquat& quaternion);
 
   /**
    * @brief Convert a double-precision GLM 3x3 matrix to a double-precision
