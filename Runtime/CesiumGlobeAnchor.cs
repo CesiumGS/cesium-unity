@@ -3,7 +3,6 @@ using System;
 using System.Collections;
 using UnityEngine;
 using Unity.Mathematics;
-using UnityEngine.UIElements;
 
 #if UNITY_EDITOR
 using UnityEditor;

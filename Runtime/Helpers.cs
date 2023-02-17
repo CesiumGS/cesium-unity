@@ -11,19 +11,6 @@ namespace CesiumForUnity
             return value.ToString();
         }
 
-        public static void Destroy(UnityEngine.Object o)
-        {
-#if UNITY_EDITOR
-            if (!EditorApplication.isPlaying)
-            {
-                UnityEngine.Object.DestroyImmediate(o);
-                return;
-            }
-#endif
-
-            UnityEngine.Object.Destroy(o);
-        }
-
         public static Vector3 FromMathematics(double3 vector)
         {
             return new Vector3((float)vector.x, (float)vector.y, (float)vector.z);

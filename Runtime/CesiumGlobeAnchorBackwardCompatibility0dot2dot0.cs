@@ -1,22 +1,23 @@
 using Unity.Mathematics;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 namespace CesiumForUnity
 {
-    public enum CesiumGlobeAnchorPositionAuthorityBackwardCompatibility0dot1dot2
-    {
-        None,
-        LongitudeLatitudeHeight,
-        EarthCenteredEarthFixed,
-        UnityCoordinates
-    }
-
     [ExecuteInEditMode]
     [AddComponentMenu("")]
     [DefaultExecutionOrder(-1000000)]
     internal class CesiumGlobeAnchorBackwardCompatibility0dot2dot0 : CesiumGlobeAnchor, IBackwardCompatibilityComponent<CesiumGlobeAnchor>
     {
+        public enum CesiumGlobeAnchorPositionAuthorityBackwardCompatibility0dot1dot2
+        {
+            None,
+            LongitudeLatitudeHeight,
+            EarthCenteredEarthFixed,
+            UnityCoordinates
+        }
+
         [FormerlySerializedAs("_adjustOrientationForGlobeWhenMoving")]
         public bool _adjustOrientationForGlobeWhenMoving0dot2dot0 = false;
         [FormerlySerializedAs("_detectTransformChanges")]
@@ -43,6 +44,19 @@ namespace CesiumForUnity
         public double _unityZ0dot2dot0 = 0.0;
 
 #if UNITY_EDITOR
+        [CustomEditor(typeof(CesiumGlobeAnchorBackwardCompatibility0dot2dot0))]
+        internal class CesiumGlobeAnchorBackwardCompatibility0dot2dot0Editor : Editor
+        {
+            public override void OnInspectorGUI()
+            {
+                if (GUILayout.Button("Upgrade"))
+                {
+                    CesiumGlobeAnchorBackwardCompatibility0dot2dot0 o = (CesiumGlobeAnchorBackwardCompatibility0dot2dot0)this.target;
+                    CesiumBackwardCompatibility<CesiumGlobeAnchor>.Upgrade(o);
+                }
+            }
+        }
+
         void OnEnable()
         {
             CesiumBackwardCompatibility<CesiumGlobeAnchor>.Upgrade(this);

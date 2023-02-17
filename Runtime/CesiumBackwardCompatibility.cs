@@ -76,7 +76,7 @@ namespace CesiumForUnity
                 int indexOfOriginal = Array.IndexOf(components, oldComponent);
                 int indexOfUpgraded = Array.IndexOf(components, newComponent);
 
-                Helpers.Destroy(oldComponent);
+                UnityEngine.Object.DestroyImmediate(oldComponent, true);
 
                 if (indexOfOriginal >= 0 && indexOfUpgraded >= 0)
                 {
