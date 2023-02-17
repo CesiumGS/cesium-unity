@@ -16,7 +16,8 @@ class CesiumGlobeAnchorImpl {
 public:
   static void SetNewLocalToGlobeFixedMatrix(
       const ::DotNet::CesiumForUnity::CesiumGlobeAnchor& anchor,
-      const ::DotNet::Unity::Mathematics::double4x4& newLocalToGlobeFixedMatrix);
+      const ::DotNet::Unity::Mathematics::double4x4&
+          newLocalToGlobeFixedMatrix);
 
   static void SetNewLocalToGlobeFixedMatrixFromTransform(
       const ::DotNet::CesiumForUnity::CesiumGlobeAnchor& anchor);
