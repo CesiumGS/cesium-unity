@@ -1,6 +1,4 @@
-﻿using log4net.Util;
-using System;
-using Unity.Mathematics;
+﻿using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
 
