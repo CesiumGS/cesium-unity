@@ -437,6 +437,10 @@ namespace CesiumForUnity
         public void Restart()
         {
             this.UpdateGeoreference();
+
+            if (this._georeference == null)
+                Debug.LogWarning($"{this.gameObject.name} is not nested inside a game object with a CesiumGeoreference. Most of its CesiumGlobeAnchor functionality will not work.");
+
             this.Sync();
             this.StartOrStopDetectingTransformChanges();
         }
@@ -532,26 +536,20 @@ namespace CesiumForUnity
         private void InitializeEcefIfNeeded()
         {
             if (!this._localToGlobeFixedMatrixIsValid)
-            {
-                this.UpdateGeoreferenceIfNecessary();
                 this.UpdateEcefFromTransform();
-            }
         }
 
         private void UpdateEcef(double4x4 newModelToEcef)
         {
             this.UpdateGeoreferenceIfNecessary();
-            if (this._georeference == null)
-                throw new InvalidOperationException("CesiumGlobeAnchor is not nested inside a game object with a CesiumGeoreference.");
             this.SetNewLocalToGlobeFixedMatrix(newModelToEcef);
         }
 
         private void UpdateEcefFromTransform()
         {
             this.UpdateGeoreferenceIfNecessary();
-            if (this._georeference == null)
-                throw new InvalidOperationException("CesiumGlobeAnchor is not nested inside a game object with a CesiumGeoreference.");
-            this.SetNewLocalToGlobeFixedMatrixFromTransform();
+            if (this._georeference != null)
+                this.SetNewLocalToGlobeFixedMatrixFromTransform();
         }
 
         /// <summary>

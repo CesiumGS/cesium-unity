@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 5627069538230183849}
   - component: {fileID: 5627069538230183850}
   - component: {fileID: 7346015802769307894}
-  - component: {fileID: 6699122987835876609}
+  - component: {fileID: 7574593196070563001}
   - component: {fileID: 1447381297153131539}
   - component: {fileID: 5807880088939110505}
   m_Layer: 0
@@ -141,7 +141,7 @@ MonoBehaviour:
   _dynamicSpeedMinHeight: 20
   _enableDynamicClippingPlanes: 1
   _dynamicClippingPlanesMinHeight: 10000
---- !u!114 &6699122987835876609
+--- !u!114 &7574593196070563001
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -150,21 +150,33 @@ MonoBehaviour:
   m_GameObject: {fileID: 5627069538230183846}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f433d33c11d379a4a97ac9a1cdede88c, type: 3}
+  m_Script: {fileID: 11500000, guid: 74f14e1eb550b9a4fb6c0a2f0456845b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _adjustOrientationForGlobeWhenMoving: 1
   _detectTransformChanges: 1
-  _positionAuthority: 0
-  _latitude: 0
-  _longitude: 0
-  _height: 0
-  _ecefX: 6378137
-  _ecefY: 0
-  _ecefZ: 0
-  _unityX: 0
-  _unityY: 0
-  _unityZ: 0
+  _localToGlobeFixedMatrix:
+    c0:
+      x: 1
+      y: 0
+      z: 0
+      w: 0
+    c1:
+      x: 0
+      y: 1
+      z: 0
+      w: 0
+    c2:
+      x: 0
+      y: 0
+      z: 1
+      w: 0
+    c3:
+      x: 0
+      y: 0
+      z: 0
+      w: 1
+  _localToGlobeFixedMatrixIsValid: 0
 --- !u!114 &1447381297153131539
 MonoBehaviour:
   m_ObjectHideFlags: 0

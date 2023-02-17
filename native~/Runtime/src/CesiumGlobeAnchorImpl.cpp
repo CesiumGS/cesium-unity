@@ -46,6 +46,7 @@ GlobeAnchor createOrUpdateNativeGlobeAnchorFromLocal(
     const ::DotNet::CesiumForUnity::CesiumGlobeAnchor& anchor,
     const glm::dmat4& newModelToLocal) {
   CesiumForUnity::CesiumGeoreference georeference = anchor._georeference();
+  assert(georeference != nullptr);
   const LocalHorizontalCoordinateSystem& local =
       georeference.NativeImplementation().getCoordinateSystem(georeference);
 
@@ -74,25 +75,27 @@ void updateAnchorFromCpp(
 
   // Update the Unity Transform
   CesiumForUnity::CesiumGeoreference georeference = anchor._georeference();
-  glm::dmat4 anchorToLocal = cppAnchor.getAnchorToLocalTransform(
-      georeference.NativeImplementation().getCoordinateSystem(georeference));
+  if (georeference != nullptr) {
+    glm::dmat4 anchorToLocal = cppAnchor.getAnchorToLocalTransform(
+        georeference.NativeImplementation().getCoordinateSystem(georeference));
 
-  glm::dvec3 translation;
-  glm::dquat rotation;
-  glm::dvec3 scale;
-  Transforms::computeTranslationRotationScaleFromMatrix(
-      anchorToLocal,
-      &translation,
-      &rotation,
-      &scale);
+    glm::dvec3 translation;
+    glm::dquat rotation;
+    glm::dvec3 scale;
+    Transforms::computeTranslationRotationScaleFromMatrix(
+        anchorToLocal,
+        &translation,
+        &rotation,
+        &scale);
 
-  UnityEngine::Transform transform = anchor.transform();
+    UnityEngine::Transform transform = anchor.transform();
 
-  transform.localPosition(UnityTransforms::toUnity(translation));
-  transform.localRotation(UnityTransforms::toUnity(rotation));
-  transform.localScale(UnityTransforms::toUnity(scale));
+    transform.localPosition(UnityTransforms::toUnity(translation));
+    transform.localRotation(UnityTransforms::toUnity(rotation));
+    transform.localScale(UnityTransforms::toUnity(scale));
 
-  anchor._lastLocalToWorld(transform.localToWorldMatrix());
+    anchor._lastLocalToWorld(transform.localToWorldMatrix());
+  }
 }
 
 LocalHorizontalCoordinateSystem createEastUpNorth(const GlobeAnchor& anchor) {
