@@ -1,9 +1,5 @@
 using UnityEngine;
 
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
-
 namespace CesiumForUnity
 {
     internal struct Cesium3DTileInfo
@@ -50,7 +46,6 @@ namespace CesiumForUnity
 
             MeshFilter meshFilter = this.gameObject.GetComponent<MeshFilter>();
             this._mesh = meshFilter.sharedMesh;
-
             this._pointCount = this._mesh.vertexCount;
 
             this._material = UnityEngine.Object.Instantiate(
@@ -112,16 +107,12 @@ namespace CesiumForUnity
                 new Vector4(maximumPointSize, geometricError, depthMultplier, useConstantColor);
         }
 
-        private void EnableAttenuation()
+        private void InitializeResources()
         {
             if (this._initialized)
             {
                 return;
             }
-
-            // Disable the mesh renderer, since points will be rendered using
-            // the material and shaders.
-            this._meshRenderer.enabled = false;
 
             // Initialize and populate the compute buffers.
             this._positionsBuffer = new ComputeBuffer(this._pointCount, 3 * sizeof(float));
@@ -145,10 +136,9 @@ namespace CesiumForUnity
             }
             else
             {
-                this._constantColor = Vector4.one;
+                this._constantColor = Color.white;
             }
 
-            this._constantColor = Color.white;
             Vector3[] normals = this._mesh.normals;
             if (normals.Length > 0)
             {
@@ -167,19 +157,15 @@ namespace CesiumForUnity
                 new ComputeBuffer(1, args.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
             this._argsBuffer.SetData(args);
 
-            this.ComputeAttenuationParameters();
             this._initialized = true;
         }
 
-        private void DisableAttenuation()
+        private void DestroyResources()
         {
             if (!this._initialized)
             {
                 return;
             }
-
-            // Re-enable to mesh renderer to draw the points as normal.
-            this._meshRenderer.enabled = true;
 
             this._positionsBuffer.Release();
             this._positionsBuffer = null;
@@ -215,8 +201,10 @@ namespace CesiumForUnity
                 this._material.SetVector("_constantColor", this._constantColor);
             }
 
-            this._material.SetVector("_attenuationParameters", this._attenuationParameters);
             this._material.SetMatrix("_worldTransform", this.gameObject.transform.localToWorldMatrix);
+
+            this.ComputeAttenuationParameters();
+            this._material.SetVector("_attenuationParameters", this._attenuationParameters);
 
             Graphics.DrawProceduralIndirect(
                 this._material,
@@ -230,18 +218,23 @@ namespace CesiumForUnity
         {
             if (this._tileset.pointCloudShading.attenuation)
             {
-                this.EnableAttenuation();
+                this.InitializeResources();
+
+                // Disable the mesh renderer, since points will be rendered using
+                // the material and shaders.
+                this._meshRenderer.enabled = false;
                 DrawPointCloudWithAttenuation();
             }
             else
             {
-                this.DisableAttenuation();
+                // Re-enable to mesh renderer to draw the points as normal.
+                this._meshRenderer.enabled = true;
             }
         }
 
         void OnDisable()
         {
-            this.DisableAttenuation();
+            this.DestroyResources();
         }
     }
 }

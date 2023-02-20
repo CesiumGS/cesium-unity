@@ -60,27 +60,19 @@ namespace CesiumForUnity
         private float _baseResolution = 0.0f;
 
         /// <summary>
-        /// The average base resolution for the dataset in meters. For example, a base resolution of 0.05
-        /// assumes an original capture resolution of 5 centimeters between neighboring points.
+        /// The average base resolution for the dataset in meters. For example, 
+        /// a base resolution of 0.05 assumes an original capture resolution of
+        /// 5 centimeters between neighboring points.
         /// <para>
         /// This is used in place of geometric error when the tile's geometric error is 0. 
-        /// If this value is zero, each tile with a geometric error of 0 will have its geometric error
-        /// approximated instead.
+        /// If this value is zero, each tile with a geometric error of 0 will have its 
+        /// geometric error approximated instead.
         /// </para>
         /// </summary>
         public float baseResolution
         {
             get => this._baseResolution;
-            set => this._baseResolution = value;
-        }
-
-        private bool _previousAttenuation;
-        private float _previousGeometricErrorScale;
-
-        public CesiumPointCloudShading()
-        {
-            this._previousAttenuation = this._attenuation;
-            this._previousGeometricErrorScale = this._geometricErrorScale;
+            set => this._baseResolution = Mathf.Max(value, 0.0f);
         }
     }
 }
