@@ -36,6 +36,8 @@ namespace CesiumForUnity
         //private SerializedProperty _lodTransitionLength;
         // private SerializedProperty _generateSmoothNormals;
 
+        private SerializedProperty _pointCloudShading;
+
         private SerializedProperty _showTilesInHierarchy;
         private SerializedProperty _suspendUpdate;
         private SerializedProperty _updateInEditor;
@@ -82,6 +84,8 @@ namespace CesiumForUnity
             // this._generateSmoothNormals =
             //     this.serializedObject.FindProperty("_generateSmoothNormals");
 
+            this._pointCloudShading = this.serializedObject.FindProperty("_pointCloudShading");
+
             this._showTilesInHierarchy =
                 this.serializedObject.FindProperty("_showTilesInHierarchy");
             this._suspendUpdate = this.serializedObject.FindProperty("_suspendUpdate");
@@ -97,23 +101,25 @@ namespace CesiumForUnity
             this.serializedObject.Update();
 
             EditorGUIUtility.labelWidth = CesiumEditorStyle.inspectorLabelWidth;
-            DrawInspectorButtons();
+            this.DrawInspectorButtons();
             EditorGUILayout.Space(5);
-            DrawShowCreditsOnScreenToggle();
+            this.DrawShowCreditsOnScreenToggle();
             EditorGUILayout.Space(5);
-            DrawSourceProperties();
+            this.DrawSourceProperties();
             EditorGUILayout.Space(5);
-            DrawLevelOfDetailProperties();
+            this.DrawLevelOfDetailProperties();
             EditorGUILayout.Space(5);
-            DrawTileLoadingProperties();
+            this.DrawTileLoadingProperties();
             EditorGUILayout.Space(5);
-            DrawTileCullingProperties();
+            this.DrawTileCullingProperties();
             EditorGUILayout.Space(5);
-            DrawRenderProperties();
+            this.DrawRenderProperties();
             EditorGUILayout.Space(5);
-            DrawDebugProperties();
+            this.DrawPointCloudShadingProperties();
             EditorGUILayout.Space(5);
-            DrawPhysicsProperties();
+            this.DrawDebugProperties();
+            EditorGUILayout.Space(5);
+            this.DrawPhysicsProperties();
 
             this.serializedObject.ApplyModifiedProperties();
         }
@@ -410,6 +416,11 @@ namespace CesiumForUnity
             //     "normals requires duplicating vertices. This option allows the glTFs to be " +
             //     "rendered with smooth normals instead when the original glTF is missing normals.");
             // EditorGUILayout.PropertyField(this._generateSmoothNormals, generateSmoothNormalsContent);
+        }
+
+        private void DrawPointCloudShadingProperties()
+        {
+            EditorGUILayout.PropertyField(this._pointCloudShading, GUIContent.none);
         }
 
         private void DrawDebugProperties()

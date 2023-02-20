@@ -438,6 +438,15 @@ namespace CesiumForUnity
             globeAnchor.SetPositionLongitudeLatitudeHeight(0.0, 0.0, 0.0);
             globeAnchor.positionAuthority = globeAnchor.positionAuthority;
 
+            Cesium3DTileInfo info;
+            info.usesAdditiveRefinement = true;
+            info.geometricError = 1.0f;
+            info.nodeTransform = m2;
+            info.localDimensions = Vector3.zero;
+
+            CesiumPointCloudRenderer renderer = go.AddComponent<CesiumPointCloudRenderer>();
+            renderer.tileInfo = info;
+
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;
             sv.pivot = sv.pivot;

@@ -15,10 +15,12 @@
 #include <CesiumGltf/ExtensionModelExtFeatureMetadata.h>
 #include <CesiumUtility/ScopeGuard.h>
 
+#include <DotNet/CesiumForUnity/Cesium3DTileInfo.h>
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/CesiumForUnity/CesiumGlobeAnchor.h>
 #include <DotNet/CesiumForUnity/CesiumMetadata.h>
+#include <DotNet/CesiumForUnity/CesiumPointCloudRenderer.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/Collections/Generic/List1.h>
 #include <DotNet/System/Object.h>
@@ -776,7 +778,8 @@ void* UnityPrepareRendererResources::prepareInMainThread(
        createPhysicsMeshes,
        showTilesInHierarchy,
        currentOverlayCount,
-       &pMetadataComponent](
+       &pMetadataComponent,
+       &tile](
           const Model& gltf,
           const Node& node,
           const Mesh& mesh,
@@ -862,6 +865,18 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             primitiveGameObject.AddComponent<UnityEngine::MeshFilter>();
         UnityEngine::MeshRenderer meshRenderer =
             primitiveGameObject.AddComponent<UnityEngine::MeshRenderer>();
+
+        if (primitiveInfo.containsPoints) {
+          CesiumForUnity::Cesium3DTileInfo tileInfo;
+          tileInfo.usesAdditiveRefinement =
+              tile.getRefine() == Cesium3DTilesSelection::TileRefine::Add;
+          tileInfo.geometricError =
+              static_cast<float>(tile.getGeometricError());
+          CesiumForUnity::CesiumPointCloudRenderer pointCloudRenderer =
+              primitiveGameObject
+                  .AddComponent<CesiumForUnity::CesiumPointCloudRenderer>();
+          pointCloudRenderer.tileInfo(tileInfo);
+        }
 
         const Material* pMaterial =
             Model::getSafe(&gltf.materials, primitive.material);

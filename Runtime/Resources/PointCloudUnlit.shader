@@ -33,32 +33,30 @@ Shader "Hidden/Cesium/PointCloudUnlit"
 
 			#include "PointCloudShading.hlsl"
 
-		ENDHLSL
-
+			ENDHLSL
 		}
 
-		// The shadow caster pass renders to a shadow map, so we can remove any
-		// lighting / color logic here.
-		Pass {
+		Pass
+		{
 
 			Name "Shadow Pass"
 			Tags { "LightMode" = "ShadowCaster" }
 
 			HLSLPROGRAM
 
-		// This sets up various keywords for different light types and shadow settings
-		#pragma multi_compile_shadowcaster
+			// This sets up various keywords for different light types and shadow settings
+			#pragma multi_compile_shadowcaster
 
-		#pragma vertex Vertex
-		#pragma fragment Fragment
+			#pragma vertex Vertex
+			#pragma fragment Fragment
 
-		// TODO: find a way to calculate the aspect ratio relative to the screen in Unity,
-		// not the _ScreenParams in the shader (which are dependent on the render texture)
-		#define SHADOW_CASTER_PASS
+			// TODO: find a way to calculate the aspect ratio relative to the screen in Unity,
+			// not the _ScreenParams in the shader (which are dependent on the render texture)
+			#define SHADOW_CASTER_PASS
 
-		#include "PointCloudShading.hlsl"
-		ENDHLSL
+			#include "PointCloudShading.hlsl"
 
-	}
+			ENDHLSL
+		}
 	}
 }

@@ -7,19 +7,14 @@ StructuredBuffer<float3> _inPositions;
 StructuredBuffer<uint> _inColors;
 StructuredBuffer<float3> _inNormals;
 
-float4 _constantColor;
 float4x4 _worldTransform;
+float4 _constantColor;
+float4 _attenuationParameters;
 
 struct VertexOutput
 {
 	float4 positionClip : SV_POSITION; // Position in clip space
-	float4 color : COLOR0; // Vertex colors
-};
-
-struct FragmentOutput
-{
-	float4 colorGBuffer : COLOR0;
-	float4 depthGBuffer : COLOR1;
+	uint packedColor : COLOR_0; // Packed vertex colors
 };
 
 VertexOutput Vertex(uint vertexID : SV_VertexID) {
@@ -28,9 +23,6 @@ VertexOutput Vertex(uint vertexID : SV_VertexID) {
 	uint pointIndex = vertexID / 6;
 	uint vertexIndex = vertexID - (pointIndex * 6); // Modulo
 	float3 position = _inPositions[pointIndex];
-	float pointSize = 20.0;
-	float2 offset;
-
 	float4 positionWC = mul(_worldTransform, float4(position, 1.0));
 	float4 positionClip = mul(unity_MatrixVP, positionWC);
 
@@ -41,6 +33,8 @@ VertexOutput Vertex(uint vertexID : SV_VertexID) {
 	// |    /  |
 	// |   /   |
 	// 0/3 --- 5
+	float2 offset;
+
 	if (vertexIndex == 0 || vertexIndex == 3)
 	{
 		offset = float2(-0.5, -0.5);
@@ -58,6 +52,13 @@ VertexOutput Vertex(uint vertexID : SV_VertexID) {
 		offset = float2(0.5, -0.5);
 	}
 
+	float4 positionEC = mul(unity_MatrixV, positionWC);
+	float maximumPointSize = _attenuationParameters.x;
+	float geometricError = _attenuationParameters.y;
+	float depthMultiplier = _attenuationParameters.z;
+	float depth = -positionEC.z;
+
+	float pointSize = min((geometricError / depth) * depthMultiplier, maximumPointSize);
 	float2 pixelOffset = (pointSize * offset);
 	// Platforms can have different conventions of clip space (y-top vs. y-bottom).
 	// ProjectionParams.x will adjust the y-coordinate for clip space so that the output
@@ -67,21 +68,34 @@ VertexOutput Vertex(uint vertexID : SV_VertexID) {
 	// The clip space position xy in Unity is in [-w, w]
 	// (perspective divide with the w-coordinate is done between the shaders)
 	positionClip.xy += screenOffset * positionClip.w;
-	
-	uint packedColor = _inColors[pointIndex];
-	uint r = packedColor & 255;
-	uint g = (packedColor >> 8) & 255;
-	uint b = (packedColor >> 16) & 255;
-	uint a = packedColor >> 24;
-
 	output.positionClip = positionClip;
-	output.color = float4(r, g, b, a) / 255;
+	output.packedColor = _inColors[pointIndex];
 
 	return output;
 }
 
 float4 Fragment(VertexOutput input) : SV_TARGET{
-	return input.color;
+
+	// The shadow caster pass renders to a shadow map, so we can ignore
+	// the color logic here.
+	#ifndef SHADOW_CASTER_PASS
+	bool useConstantColor = _attenuationParameters.w > 0.0;
+	if (useConstantColor)
+	{
+		return _constantColor;
+	}
+	else
+	{
+		uint packedColor = input.packedColor;
+		uint r = packedColor & 255;
+		uint g = (packedColor >> 8) & 255;
+		uint b = (packedColor >> 16) & 255;
+		uint a = packedColor >> 24;
+		return float4(r, g, b, a) / 255;
+	}
+	#else
+	return float4(1, 1, 1, 1);
+	#endif
 }
 
 #endif
