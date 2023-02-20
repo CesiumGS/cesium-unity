@@ -64,6 +64,12 @@ namespace CesiumForUnity
             request.downloadHandler = new NativeDownloadHandler();
             request.SetRequestHeader("name", "value");
             request.GetResponseHeader("name");
+            Dictionary<string,string>.Enumerator enumerator = request.GetResponseHeaders().GetEnumerator();
+            while(enumerator.MoveNext())
+            {
+                string key = enumerator.Current.Key;
+                string value = enumerator.Current.Value;
+            }
             request.downloadHandler.Dispose();
             long responseCode = request.responseCode;
             UnityWebRequestAsyncOperation op = request.SendWebRequest();

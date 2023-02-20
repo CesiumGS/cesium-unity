@@ -6,6 +6,7 @@
 
 - Added support for rendering point clouds (`pnts`).
 - Metadata features are now separated based on feature tables. Properties can now be accessed by name.
+- Copy all response headers from UnityWebRequest to enable caching.
 
 ##### Fixes :wrench:
 
