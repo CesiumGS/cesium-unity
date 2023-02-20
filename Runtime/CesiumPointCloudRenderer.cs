@@ -10,8 +10,7 @@ namespace CesiumForUnity
     {
         public bool usesAdditiveRefinement;
         public float geometricError;
-        public Matrix4x4 nodeTransform;
-        public Vector3 localDimensions;
+        public Vector3 dimensions;
     }
 
     [ExecuteInEditMode]
@@ -33,6 +32,8 @@ namespace CesiumForUnity
         private Material _material;
         private Vector4 _constantColor;
         private Vector4 _attenuationParameters;
+
+        private float _estimatedGeometricError;
 
         private Cesium3DTileInfo _tileInfo;
 
@@ -69,7 +70,10 @@ namespace CesiumForUnity
                 return pointCloudShading.baseResolution;
             }
 
-            return 0;
+            // Estimate the geometric error.
+            Vector3 dimensions = this._tileInfo.dimensions;
+            float volume = dimensions.x * dimensions.y * dimensions.z;
+            return Mathf.Pow(volume / this._pointCount, 1.0f / 3.0f); 
         }
 
         private void ComputeAttenuationParameters()
@@ -78,6 +82,11 @@ namespace CesiumForUnity
                 this._tileInfo.usesAdditiveRefinement ?
                 5.0f :
                 this._tileset.maximumScreenSpaceError;
+
+            if (this._tileset.pointCloudShading.maximumAttenuation > 0.0f)
+            {
+                maximumPointSize = this._tileset.pointCloudShading.maximumAttenuation;
+            }
 
             if (Screen.dpi > 0)
             {

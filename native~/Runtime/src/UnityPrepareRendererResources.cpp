@@ -872,6 +872,23 @@ void* UnityPrepareRendererResources::prepareInMainThread(
               tile.getRefine() == Cesium3DTilesSelection::TileRefine::Add;
           tileInfo.geometricError =
               static_cast<float>(tile.getGeometricError());
+
+          // TODO: can we make AccessorView retrieve the min/max for us?
+          const Accessor* pPositionAccessor =
+              Model::getSafe(&gltf.accessors, positionAccessorID);
+          glm::vec3 min(
+              pPositionAccessor->min[0],
+              pPositionAccessor->min[1],
+              pPositionAccessor->min[2]);
+          glm::vec3 max(
+              pPositionAccessor->max[0],
+              pPositionAccessor->max[1],
+              pPositionAccessor->max[2]);
+          glm::vec3 dimensions(transform * glm::dvec4(max - min, 0));
+
+          tileInfo.dimensions =
+              UnityEngine::Vector3{dimensions.x, dimensions.y, dimensions.z};
+
           CesiumForUnity::CesiumPointCloudRenderer pointCloudRenderer =
               primitiveGameObject
                   .AddComponent<CesiumForUnity::CesiumPointCloudRenderer>();

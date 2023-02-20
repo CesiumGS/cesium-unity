@@ -441,8 +441,7 @@ namespace CesiumForUnity
             Cesium3DTileInfo info;
             info.usesAdditiveRefinement = true;
             info.geometricError = 1.0f;
-            info.nodeTransform = m2;
-            info.localDimensions = Vector3.zero;
+            info.dimensions = Vector3.zero;
 
             CesiumPointCloudRenderer renderer = go.AddComponent<CesiumPointCloudRenderer>();
             renderer.tileInfo = info;
