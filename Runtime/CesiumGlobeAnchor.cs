@@ -459,7 +459,8 @@ namespace CesiumForUnity
             if (this._georeference != null)
             {
                 this._georeference.Initialize();
-                this._georeference.AddGlobeAnchor(this);
+                if (this.isActiveAndEnabled)
+                    this._georeference.AddGlobeAnchor(this);
             }
         }
 
@@ -474,6 +475,11 @@ namespace CesiumForUnity
             this.Restart();
         }
 
+        /// <summary>
+        /// Called by the Editor when the user chooses to "reset" the component.
+        /// The implementation here makes sure the newly-reset values for the serialized
+        /// properties are applied.
+        /// </summary>
         private void Reset()
         {
             this.Restart();

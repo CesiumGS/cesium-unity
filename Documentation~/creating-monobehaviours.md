@@ -2,13 +2,15 @@ Guidelines and tips for creating MonoBehaviours in Cesium for Unity.
 
 ## Avoid implementing non-static methods in C++
 
-If you don't need C++-specific state, static methods are _much_ more efficient.
+If you don't need C++-specific state, static methods are _much_ more efficient. Consider adding the `staticOnly=true` parameter to the `[ReinteropNativeImplementation]` attribute, so that you - and other developers in the future - can't accidentally create C++ state.
 
-## Do initialization in OnEnable
+## Life Cycle and Methods to Implement.
 
-If you need to use some other Cesium component, its OnEnable might not be called yet. So initialize it explicitly.
+Do initialization in OnEnable
 
-## Backward compatibility
+If you need to use some other Cesium component (like a `CesiumGeoreference`, for instance), its OnEnable might not be called yet. So initialize it explicitly.
+
+Reset
 
 ## Serialization
 
@@ -16,4 +18,6 @@ If you need to use some other Cesium component, its OnEnable might not be called
 |-------------------------------|----------------------|--------------|-------------------|
 | Saved / Loaded with the Scene | ✅                   | ❌          | ❌                |
 | Preserved on script change / AppDomain reload | ✅   | ✅          | ❌                |
-| Transferring from Edit mode to Play mode      | ✅   | ❌          | ❌                |
+| Transfers from Edit mode to Play mode      | ✅   | ❌          | ❌                |
+
+## Backward compatibility
