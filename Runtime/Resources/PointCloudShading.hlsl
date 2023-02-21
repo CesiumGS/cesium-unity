@@ -7,6 +7,14 @@ StructuredBuffer<float3> _inPositions;
 StructuredBuffer<uint> _inColors;
 StructuredBuffer<float3> _inNormals;
 
+struct VertexInput
+{
+	float3 position;
+	uint packedColor;
+};
+
+StructuredBuffer<VertexInput> _inVertices;
+
 float4x4 _worldTransform;
 float4 _constantColor;
 float4 _attenuationParameters;
@@ -22,7 +30,8 @@ VertexOutput Vertex(uint vertexID : SV_VertexID) {
 
 	uint pointIndex = vertexID / 6;
 	uint vertexIndex = vertexID - (pointIndex * 6); // Modulo
-	float3 position = _inPositions[pointIndex];
+	VertexInput input = _inVertices[pointIndex];
+	float3 position = input.position;// _inPositions[pointIndex];
 	float4 positionWC = mul(_worldTransform, float4(position, 1.0));
 	float4 positionClip = mul(unity_MatrixVP, positionWC);
 
@@ -69,7 +78,7 @@ VertexOutput Vertex(uint vertexID : SV_VertexID) {
 	// (perspective divide with the w-coordinate is done between the shaders)
 	positionClip.xy += screenOffset * positionClip.w;
 	output.positionClip = positionClip;
-	output.packedColor = _inColors[pointIndex];
+	output.packedColor = input.packedColor;// _inColors[pointIndex];
 
 	return output;
 }

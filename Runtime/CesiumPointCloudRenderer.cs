@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.Rendering;
+using System.Collections.Generic;
 
 namespace CesiumForUnity
 {
@@ -19,15 +21,13 @@ namespace CesiumForUnity
 
         private int _pointCount = 0;
 
-        private ComputeBuffer _positionsBuffer;
-        private ComputeBuffer _colorsBuffer;
-        private ComputeBuffer _normalsBuffer;
-        private ComputeBuffer _argsBuffer; // The buffer containing the arguments for DrawProceduralIndirect.
-        private bool _initialized = false;
+        private GraphicsBuffer _meshVertexBuffer;
 
         private Material _material;
-        private Vector4 _constantColor;
         private Vector4 _attenuationParameters;
+
+        private bool _useConstantColor;
+        private Vector4 _constantColor;
 
         private float _estimatedGeometricError;
 
@@ -42,14 +42,37 @@ namespace CesiumForUnity
         void OnEnable()
         {
             this._tileset = this.gameObject.GetComponentInParent<Cesium3DTileset>();
+
+            // TODO: don't create with a mesh renderer
             this._meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
 
             MeshFilter meshFilter = this.gameObject.GetComponent<MeshFilter>();
             this._mesh = meshFilter.sharedMesh;
+            this._mesh.vertexBufferTarget |= GraphicsBuffer.Target.Structured;
+            this._meshVertexBuffer = this._mesh.GetVertexBuffer(0);
+
+            this._useConstantColor = !this._mesh.HasVertexAttribute(VertexAttribute.Color);
+            if (this._useConstantColor)
+            {
+                if (this._tileset.opaqueMaterial != null)
+                {
+                    Material tilesetMaterial = this._tileset.opaqueMaterial;
+                    Color color = tilesetMaterial.HasColor("baseColorFactor") ?
+                        tilesetMaterial.GetColor("baseColorFactor") :
+                        this._constantColor = tilesetMaterial.color;
+                    this._constantColor = color;
+                }
+                else
+                {
+                    this._constantColor = Color.white;
+                }
+            }
+
             this._pointCount = this._mesh.vertexCount;
 
             this._material = UnityEngine.Object.Instantiate(
                 Resources.Load<Material>("CesiumUnlitPointCloudMaterial"));
+            this._material.SetBuffer("_inVertices", this._meshVertexBuffer);
         }
 
         private float GetGeometricError(CesiumPointCloudShading pointCloudShading)
@@ -68,7 +91,7 @@ namespace CesiumForUnity
             // Estimate the geometric error.
             Vector3 dimensions = this._tileInfo.dimensions;
             float volume = dimensions.x * dimensions.y * dimensions.z;
-            return Mathf.Pow(volume / this._pointCount, 1.0f / 3.0f); 
+            return Mathf.Pow(volume / this._pointCount, 1.0f / 3.0f);
         }
 
         private void ComputeAttenuationParameters()
@@ -101,116 +124,54 @@ namespace CesiumForUnity
             float depthMultplier = camera.scaledPixelHeight / sseDenominator;
 
             // Whether or not to use constant color
-            float useConstantColor = this._colorsBuffer == null ? 1.0f : 0.0f;
+            float useConstantColor = 0.0f;
 
             this._attenuationParameters =
                 new Vector4(maximumPointSize, geometricError, depthMultplier, useConstantColor);
         }
 
-        private void InitializeResources()
-        {
-            if (this._initialized)
-            {
-                return;
-            }
-
-            // Initialize and populate the compute buffers.
-            this._positionsBuffer = new ComputeBuffer(this._pointCount, 3 * sizeof(float));
-            this._positionsBuffer.SetData(this._mesh.vertices);
-
-            Color32[] colors = this._mesh.colors32;
-            if (colors.Length > 0)
-            {
-                // The colors are sent as 32-bit unsigned integers and will be unpacked
-                // in the shader.
-                this._colorsBuffer = new ComputeBuffer(this._pointCount, sizeof(uint));
-                this._colorsBuffer.SetData(colors);
-            }
-            else if (this._tileset.opaqueMaterial != null)
-            {
-                Material tilesetMaterial = this._tileset.opaqueMaterial;
-                Color color = tilesetMaterial.HasColor("baseColorFactor") ?
-                    tilesetMaterial.GetColor("baseColorFactor") :
-                    this._constantColor = tilesetMaterial.color;
-                this._constantColor = color;
-            }
-            else
-            {
-                this._constantColor = Color.white;
-            }
-
-            Vector3[] normals = this._mesh.normals;
-            if (normals.Length > 0)
-            {
-                this._normalsBuffer = new ComputeBuffer(this._pointCount, 3 * sizeof(float));
-                this._normalsBuffer.SetData(normals);
-            }
-
-            // Argument buffer used by DrawProceduralIndirect.
-            uint[] args = new uint[] { 0, 0, 0, 0 };
-            // Arguments for drawing mesh.
-            args[0] = (uint)this._pointCount * 6; // Number of vertices to be drawn
-            args[1] = (uint)1; // Number of instances.
-            args[2] = (uint)0; // Only relevant if using GraphicsBuffer.
-            args[3] = (uint)0; // Same as above.
-            this._argsBuffer =
-                new ComputeBuffer(1, args.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
-            this._argsBuffer.SetData(args);
-
-            this._initialized = true;
-        }
-
         private void DestroyResources()
         {
-            if (!this._initialized)
+            if (this._meshVertexBuffer != null)
             {
-                return;
+                this._meshVertexBuffer.Release();
+                this._meshVertexBuffer = null;
             }
 
-            this._positionsBuffer.Release();
-            this._positionsBuffer = null;
-
-            if (this._colorsBuffer != null)
+            if (this._material != null)
             {
-                this._colorsBuffer.Release();
-                this._colorsBuffer = null;
+                DestroyImmediate(this._material);
+                this._material = null;
             }
-
-            if (this._normalsBuffer != null)
-            {
-                this._normalsBuffer.Release();
-                this._normalsBuffer = null;
-            }
-
-            this._argsBuffer.Release();
-            this._argsBuffer = null;
-
-            this._initialized = false;
         }
 
         private void DrawPointCloudWithAttenuation()
         {
-            this._material.SetBuffer("_inPositions", this._positionsBuffer);
-
-            if (this._colorsBuffer != null)
-            {
-                this._material.SetBuffer("_inColors", this._colorsBuffer);
-            }
-            else
+            if (this._useConstantColor)
             {
                 this._material.SetVector("_constantColor", this._constantColor);
             }
 
-            this._material.SetMatrix("_worldTransform", this.gameObject.transform.localToWorldMatrix);
+            Matrix4x4 transformMatrix = this.gameObject.transform.localToWorldMatrix;
+            this._material.SetMatrix("_worldTransform", transformMatrix);
 
             this.ComputeAttenuationParameters();
             this._material.SetVector("_attenuationParameters", this._attenuationParameters);
 
-            Graphics.DrawProceduralIndirect(
+            Bounds localBounds = this._mesh.bounds;
+            positionsScratch[0] = localBounds.center;
+            positionsScratch[1] = localBounds.min;
+            positionsScratch[2] = localBounds.max;
+
+            Bounds worldBounds = GeometryUtility.CalculateBounds(positionsScratch, transformMatrix);
+
+            Graphics.DrawProcedural(
                 this._material,
-                this._meshRenderer.bounds,
+                worldBounds,
                 MeshTopology.Triangles,
-                this._argsBuffer);
+                this._pointCount * 6, // vertex count
+                1                     // instance count
+             );
         }
 
         // Update is called once per frame
@@ -218,16 +179,11 @@ namespace CesiumForUnity
         {
             if (this._tileset.pointCloudShading.attenuation)
             {
-                this.InitializeResources();
-
-                // Disable the mesh renderer, since points will be rendered using
-                // the material and shaders.
                 this._meshRenderer.enabled = false;
                 DrawPointCloudWithAttenuation();
             }
             else
             {
-                // Re-enable to mesh renderer to draw the points as normal.
                 this._meshRenderer.enabled = true;
             }
         }

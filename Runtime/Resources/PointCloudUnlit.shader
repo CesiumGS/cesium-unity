@@ -2,13 +2,16 @@ Shader "Hidden/Cesium/PointCloudUnlit"
 {
 	Properties
 	{
-		_ColorGBuffer("Color G-Buffer", 2D) = "white" {}
-		_DepthGBuffer("Depth G-Buffer", 2D) = "white" {}
 	}
 
 	SubShader
 	{
-		Tags { "RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline" }
+		Tags { 
+			"Queue" = "Geometry"
+			"RenderType" = "Opaque"
+			"RenderPipeline" = "UniversalPipeline"
+		}
+
 		LOD 100 // Built-in LOD value for unlit shaders
 
 		Pass
@@ -50,8 +53,6 @@ Shader "Hidden/Cesium/PointCloudUnlit"
 			#pragma vertex Vertex
 			#pragma fragment Fragment
 
-			// TODO: find a way to calculate the aspect ratio relative to the screen in Unity,
-			// not the _ScreenParams in the shader (which are dependent on the render texture)
 			#define SHADOW_CASTER_PASS
 
 			#include "PointCloudShading.hlsl"
