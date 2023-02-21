@@ -64,7 +64,7 @@ void getTokenTroubleShootingDetails(
 
             // Query the tokens using the user's connection (_not_ the token
             // connection created above).
-            CesiumIonSessionImpl ionSession = CesiumIonSessionImpl::ion();
+            CesiumIonSessionImpl& ionSession = CesiumIonSessionImpl::ion();
             ionSession.Resume(CesiumForUnity::CesiumIonSession::Ion());
 
             const std::optional<CesiumIonClient::Connection>& userConnection =
