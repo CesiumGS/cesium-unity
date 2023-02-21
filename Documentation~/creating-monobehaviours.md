@@ -12,7 +12,7 @@ If you don't need C++-specific state, static methods are _much_ more efficient. 
 
 * Implement `ICesiumRestartable` and its `Restart` method. This method is called by the UI when Unity has updated the serialized fields in unspecified ways, and so the state of the object should be recreated from the serialized fields.
 
-* In most cases, your implemenation `OnEnable` should simply call `Restart`.
+* In most cases, the implemenation of `OnEnable` should simply call `Restart`.
 
 * Implement `Reset`, usually by simply calling `Restart`. This method is called when Unity has directly written to the serialized fields to reset them, and so the `Restart` method is the right way to synchronize the object's state.
 
@@ -66,7 +66,7 @@ public double _latitude0dot2dot0 = 0.0;
 
 If a field is an enum that has been eliminated entirely, or if its enum values were different in the old version, declare the enum type nested inside the backward compatibility class.
 
-Next, declare an `Editor` class that merely provides an Upgrade button, and an `OnEnable` that automatically upgrades. Put both inside an ifdef for `UNITY_EDITOR`:
+Next, declare an `Editor` class, nested inside `CesiumGlobeAnchorPositionAuthorityBackwardCompatibility0dot1dot2`, that merely provides an Upgrade button, and an `OnEnable` that automatically upgrades. Put both inside an ifdef for `UNITY_EDITOR`:
 
 ```cs
 #if UNITY_EDITOR
@@ -144,5 +144,5 @@ In the next Editor tick, after one or more backward compatible components have b
 * We walk through every component on every game object in all open scenes, looking for serialized fields contain a reference to any of the old, backward compatible instances.
 * For each we find, we replace it with a reference to the new instance.
 * The old backward compatible instances are destroyed.
-* The new components are moved up or done in their game object's component list so that they're in the same position as the backward compatible instance they replace.
-* Modified game objects are marked dirty (so the Editor will prompt the user to save the changes)
+* The new components are moved up or down in their game object's component list so that they're in the same position as the backward compatible instance they replace.
+* Modified game objects are marked dirty, so the Editor will prompt the user to save the changes.
