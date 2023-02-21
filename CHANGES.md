@@ -11,6 +11,7 @@
 ##### Fixes :wrench:
 
 - Recategorized the Cesium tileset shaders from the `Shader Graphs` shader category to the new `Cesium` shader category. 
+- Fixed a bug that could cause the Cesium ion Token Troubleshooting panel to crash the Unity Editor.
 
 ### v0.2.0
 
