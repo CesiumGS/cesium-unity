@@ -114,7 +114,8 @@ namespace CesiumForUnity
 
     [ReinteropNativeImplementation(
         "CesiumForUnityNative::IonTokenTroubleshootingWindowImpl",
-        "IonTokenTroubleshootingWindowImpl.h")]
+        "IonTokenTroubleshootingWindowImpl.h",
+        staticOnly: true)]
     public partial class IonTokenTroubleshootingWindow : EditorWindow
     {
         private static List<IonTokenTroubleshootingWindow> _existingWindows =
@@ -257,7 +258,6 @@ namespace CesiumForUnity
             this._assetTokenDetails = new TokenTroubleshootingDetails();
             this._defaultTokenDetails = new TokenTroubleshootingDetails();
             this._assetDetails = new AssetTroubleshootingDetails();
-            this.CreateImplementation();
         }
 
         private partial void GetTroubleshootingDetails();

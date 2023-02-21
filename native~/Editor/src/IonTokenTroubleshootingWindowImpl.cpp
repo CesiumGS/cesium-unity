@@ -19,11 +19,6 @@ using namespace DotNet;
 
 namespace CesiumForUnityNative {
 
-IonTokenTroubleshootingWindowImpl::IonTokenTroubleshootingWindowImpl(
-    const DotNet::CesiumForUnity::IonTokenTroubleshootingWindow& window) {}
-
-IonTokenTroubleshootingWindowImpl::~IonTokenTroubleshootingWindowImpl() {}
-
 namespace {
 
 void getTokenTroubleShootingDetails(
@@ -112,6 +107,7 @@ void getAssetTroubleshootingDetails(
         details.loaded(true);
       });
 }
+
 } // namespace
 
 void IonTokenTroubleshootingWindowImpl::GetTroubleshootingDetails(
