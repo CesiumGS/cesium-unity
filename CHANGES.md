@@ -6,6 +6,12 @@
 
 - Added support for rendering point clouds (`pnts`).
 - Metadata features are now separated based on feature tables. Properties can now be accessed by name.
+- Copy all response headers from UnityWebRequest to enable caching.
+
+##### Fixes :wrench:
+
+- Recategorized the Cesium tileset shaders from the `Shader Graphs` shader category to the new `Cesium` shader category. 
+- Fixed a bug that could cause the Cesium ion Token Troubleshooting panel to crash the Unity Editor.
 
 ### v0.2.0
 
