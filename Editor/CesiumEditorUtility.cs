@@ -7,7 +7,7 @@ using UnityEngine;
 namespace CesiumForUnity
 {
     [InitializeOnLoad]
-    public static partial class CesiumEditorUtility
+    public static class CesiumEditorUtility
     {
         static CesiumEditorUtility()
         {
