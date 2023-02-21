@@ -305,7 +305,7 @@ namespace CesiumForUnity
 
         #endregion
 
-        #region Deprecated Properties
+        #region Deprecated Functionality
 
         [Obsolete("Use positionGlobeFixed.x instead.")]
         public double ecefX
@@ -377,6 +377,19 @@ namespace CesiumForUnity
                 position.z = value;
                 this.longitudeLatitudeHeight = position;
             }
+        }
+
+        [Obsolete("Set the longitudeLatitudeHeight property instead.")]
+        public void SetPositionLongitudeLatitudeHeight(double longitude, double latitude, double height)
+        {
+            this.longitudeLatitudeHeight = new double3(longitude, latitude, height);
+        }
+
+         
+        [Obsolete("Set the positionGlobeFixed property instead.")]
+        public void SetPositionEarthCenteredEarthFixed(double x, double y, double z)
+        {
+            this.positionGlobeFixed = new double3(x, y, z);
         }
 
         #endregion

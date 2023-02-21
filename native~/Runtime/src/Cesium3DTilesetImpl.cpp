@@ -56,14 +56,9 @@ Cesium3DTilesetImpl::~Cesium3DTilesetImpl() {}
 void Cesium3DTilesetImpl::Start(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {}
 
-static int32_t lastFrameNumber = 0;
-
 void Cesium3DTilesetImpl::Update(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
   assert(tileset.enabled());
-
-  int32_t frameNumber = DotNet::UnityEngine::Time::frameCount();
-  lastFrameNumber = frameNumber;
 
   // If "Suspend Update" is true, return early.
   if (tileset.suspendUpdate()) {
