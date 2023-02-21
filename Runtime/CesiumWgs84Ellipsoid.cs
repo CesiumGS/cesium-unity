@@ -7,7 +7,7 @@ namespace CesiumForUnity
     /// Holds static methods for ellipsoid math and transforming between geospatial coordinate systems
     /// using the World Geodetic System (WGS84) standard.
     /// </summary>
-    [ReinteropNativeImplementation("CesiumForUnityNative::CesiumWgs84EllipsoidImpl", "CesiumWgs84EllipsoidImpl.h")]
+    [ReinteropNativeImplementation("CesiumForUnityNative::CesiumWgs84EllipsoidImpl", "CesiumWgs84EllipsoidImpl.h", staticOnly: true)]
     public static partial class CesiumWgs84Ellipsoid
     {
         /// <summary>
