@@ -119,7 +119,7 @@ namespace CesiumForUnity
             GUIContent latitudeContent = new GUIContent(
                 "Latitude",
                 "The latitude of the origin in degrees, in the range [-90, 90].");
-            CesiumEditorUtility.InspectorGUI.ClampedDoubleField(
+            CesiumInspectorGUI.ClampedDoubleField(
                 this._latitude,
                 -90.0,
                 90.0,
@@ -128,7 +128,7 @@ namespace CesiumForUnity
             GUIContent longitudeContent = new GUIContent(
                 "Longitude",
                 "The longitude of the origin in degrees, in the range [-180, 180].");
-            CesiumEditorUtility.InspectorGUI.ClampedDoubleField(
+            CesiumInspectorGUI.ClampedDoubleField(
                  this._longitude,
                  -180.0,
                  180.0,

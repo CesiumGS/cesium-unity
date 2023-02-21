@@ -9,12 +9,12 @@ namespace CesiumForUnity
     public class CesiumGlobeAnchorEditor : Editor
     {
         private CesiumGlobeAnchor _globeAnchor;
-        private CesiumGUI _gui;
+        private CesiumInspectorGUI _gui;
 
         private void OnEnable()
         {
             this._globeAnchor = (CesiumGlobeAnchor)this.target;
-            this._gui = new CesiumGUI(this._globeAnchor);
+            this._gui = new CesiumInspectorGUI(this._globeAnchor);
         }
 
         private void OnDisable()
@@ -43,7 +43,7 @@ namespace CesiumForUnity
             this.serializedObject.ApplyModifiedProperties();
         }
 
-        private static readonly string adjustOrientationForGlobeWhenMovingTooltip = CesiumGUI.FormatTooltip(@"
+        private static readonly string adjustOrientationForGlobeWhenMovingTooltip = CesiumEditorUtility.FormatTooltip(@"
             Whether to adjust the game object's orientation based on globe curvature
             as the game object moves.
 
@@ -62,7 +62,7 @@ namespace CesiumForUnity
             updates a game object's transform, because in that case game object would
             be over-rotated.");
 
-        private static readonly string detectTransformChangesTooltip = CesiumGUI.FormatTooltip(@"
+        private static readonly string detectTransformChangesTooltip = CesiumEditorUtility.FormatTooltip(@"
             Whether this component should detect changes to the Transform component,
             such as from physics, and update the precise coordinates accordingly.
             Disabling this option improves performance for game objects that will not
@@ -84,7 +84,7 @@ namespace CesiumForUnity
                 detectTransformChangesTooltip);
         }
 
-        private static readonly string longitudeLatitudeHeightTooltip = CesiumGUI.FormatTooltip(@"
+        private static readonly string longitudeLatitudeHeightTooltip = CesiumEditorUtility.FormatTooltip(@"
             The Latitude, Longitude, and Height of this game object.
 
             The Latitude (Lat) is expressed in degrees, in the range [-90, 90].
@@ -123,7 +123,7 @@ namespace CesiumForUnity
                 heightContent);
         }
 
-        private static readonly string ecefTooltip = CesiumGUI.FormatTooltip(@"
+        private static readonly string ecefTooltip = CesiumEditorUtility.FormatTooltip(@"
             The Earth-Centered, Earth-Fixed (ECEF) coordinates of the origin of this
             game object, in meters.
 
@@ -150,7 +150,7 @@ namespace CesiumForUnity
                 ecefTooltip);
         }
 
-        private static readonly string rotationTooltip = CesiumGUI.FormatTooltip(@"
+        private static readonly string rotationTooltip = CesiumEditorUtility.FormatTooltip(@"
             The rotation of the object relative to the local East-Up-North
             (EUP) frame centered at the object's position. In the EUP frame +X points East, +Y
             points Up, and +Z points North.
@@ -177,7 +177,7 @@ namespace CesiumForUnity
                 rotationTooltip);
         }
 
-        private static readonly string scaleTooltip = CesiumGUI.FormatTooltip(@"The local scaling of the object.");
+        private static readonly string scaleTooltip = CesiumEditorUtility.FormatTooltip(@"The local scaling of the object.");
 
         private void DrawScaleProperties()
         {
