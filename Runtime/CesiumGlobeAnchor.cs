@@ -629,7 +629,6 @@ namespace CesiumForUnity
             this.positionAuthority = CesiumGlobeAnchorPositionAuthority.None;
         }
 
-        // This is static so that CesiumGlobeAnchor does not need finalization.
         private partial void AdjustOrientation(double3 oldPositionEcef, double3 newPositionEcef);
 
         #endregion
