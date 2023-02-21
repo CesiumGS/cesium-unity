@@ -16,6 +16,12 @@
 - `CesiumGlobeAnchor` now stores a precise, globe-relative orientation and scale in addition to position.
 - Added `localToGlobeFixedMatrix`, `longitudeLatitudeHeight`, `positionGlobeFixed`, `rotationGlobeFixed`, `rotationEastUpNorth`, `scaleGlobeFixed`, and `scaleEastUpNorth` properties to `CesiumGlobeAnchor`.
 - Added the `Restart` method to `CesiumGlobeAnchor`, which can be use to reinitialize the component from its serialized values.
+- Copy all response headers from UnityWebRequest to enable caching.
+
+##### Fixes :wrench:
+
+- Recategorized the Cesium tileset shaders from the `Shader Graphs` shader category to the new `Cesium` shader category. 
+- Fixed a bug that could cause the Cesium ion Token Troubleshooting panel to crash the Unity Editor.
 
 ### v0.2.0
 
