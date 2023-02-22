@@ -17,6 +17,7 @@
 - Added `localToGlobeFixedMatrix`, `longitudeLatitudeHeight`, `positionGlobeFixed`, `rotationGlobeFixed`, `rotationEastUpNorth`, `scaleGlobeFixed`, and `scaleEastUpNorth` properties to `CesiumGlobeAnchor`.
 - Added the `Restart` method to `CesiumGlobeAnchor`, which can be use to reinitialize the component from its serialized values.
 - Copy all response headers from UnityWebRequest to enable caching.
+- Added `CesiumDebugColorizeTilesRasterOverlay` to visualize how a tileset is divided into tiles.
 
 ##### Fixes :wrench:
 
