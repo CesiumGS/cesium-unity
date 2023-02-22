@@ -21,6 +21,7 @@
 #include <DotNet/CesiumForUnity/CesiumGlobeAnchor.h>
 #include <DotNet/CesiumForUnity/CesiumMetadata.h>
 #include <DotNet/CesiumForUnity/CesiumPointCloudRenderer.h>
+#include <DotNet/CesiumForUnity/CesiumPointCloudShading.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/Collections/Generic/List1.h>
 #include <DotNet/System/Object.h>
@@ -31,6 +32,7 @@
 #include <DotNet/Unity/Collections/NativeArray1.h>
 #include <DotNet/Unity/Collections/NativeArrayOptions.h>
 #include <DotNet/UnityEngine/Application.h>
+#include <DotNet/UnityEngine/Color.h>
 #include <DotNet/UnityEngine/Debug.h>
 #include <DotNet/UnityEngine/FilterMode.h>
 #include <DotNet/UnityEngine/HideFlags.h>
@@ -543,6 +545,7 @@ struct LoadThreadResult {
   System::Array1<UnityEngine::Mesh> meshes;
   std::vector<CesiumPrimitiveInfo> primitiveInfos{};
 };
+
 } // namespace
 
 UnityPrepareRendererResources::UnityPrepareRendererResources(
@@ -863,10 +866,22 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
         UnityEngine::MeshFilter meshFilter =
             primitiveGameObject.AddComponent<UnityEngine::MeshFilter>();
+        meshFilter.sharedMesh(unityMesh);
+
         UnityEngine::MeshRenderer meshRenderer =
             primitiveGameObject.AddComponent<UnityEngine::MeshRenderer>();
 
+        const Material* pMaterial =
+            Model::getSafe(&gltf.materials, primitive.material);
+
+        UnityEngine::Material opaqueMaterial =
+            tilesetComponent.opaqueMaterial();
+
         if (primitiveInfo.containsPoints) {
+          CesiumForUnity::CesiumPointCloudRenderer pointCloudRenderer =
+              primitiveGameObject
+                  .AddComponent<CesiumForUnity::CesiumPointCloudRenderer>();
+
           CesiumForUnity::Cesium3DTileInfo tileInfo;
           tileInfo.usesAdditiveRefinement =
               tile.getRefine() == Cesium3DTilesSelection::TileRefine::Add;
@@ -888,18 +903,33 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
           tileInfo.dimensions =
               UnityEngine::Vector3{dimensions.x, dimensions.y, dimensions.z};
-
-          CesiumForUnity::CesiumPointCloudRenderer pointCloudRenderer =
-              primitiveGameObject
-                  .AddComponent<CesiumForUnity::CesiumPointCloudRenderer>();
           pointCloudRenderer.tileInfo(tileInfo);
         }
 
-        const Material* pMaterial =
-            Model::getSafe(&gltf.materials, primitive.material);
+        if (primitiveInfo.containsPoints) {
+          if (opaqueMaterial != nullptr) {
+            tilesetComponent.pointCloudShading().constantColor(
+                opaqueMaterial.color());
+          } else if (pMaterial) {
+            const std::vector<double>& baseColorFactor =
+                pMaterial->pbrMetallicRoughness->baseColorFactor;
+            float red = baseColorFactor.size() > 0
+                            ? static_cast<float>(baseColorFactor[0])
+                            : 1.0f;
+            float green = baseColorFactor.size() > 1
+                              ? static_cast<float>(baseColorFactor[1])
+                              : 1.0f;
+            float blue = baseColorFactor.size() > 2
+                             ? static_cast<float>(baseColorFactor[2])
+                             : 1.0f;
+            float alpha = baseColorFactor.size() > 3
+                              ? static_cast<float>(baseColorFactor[3])
+                              : 1.0f;
+            tilesetComponent.pointCloudShading().constantColor(
+                UnityEngine::Color({red, green, blue, alpha}));
+          }
+        }
 
-        UnityEngine::Material opaqueMaterial =
-            tilesetComponent.opaqueMaterial();
         if (opaqueMaterial == nullptr) {
           if (pMaterial &&
               pMaterial->hasExtension<ExtensionKhrMaterialsUnlit>()) {
@@ -920,8 +950,8 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
         if (pMaterial) {
           if (pMaterial->pbrMetallicRoughness) {
-            // Add base color factor and metallic-roughness factor regardless of
-            // if the textures are present.
+            // Add base color factor and metallic-roughness factor regardless
+            // of if the textures are present.
             const std::vector<double>& baseColorFactorSrc =
                 pMaterial->pbrMetallicRoughness->baseColorFactor;
             UnityEngine::Vector4 baseColorFactor;
@@ -1073,16 +1103,14 @@ void* UnityPrepareRendererResources::prepareInMainThread(
               0);
         }
 
-        meshFilter.sharedMesh(unityMesh);
-
-        if (createPhysicsMeshes &&
-            primitive.mode != MeshPrimitive::Mode::POINTS) {
-          // This should not trigger mesh baking for physics, because the meshes
-          // were already baked in the worker thread.
+        if (createPhysicsMeshes && !primitiveInfo.containsPoints) {
+          // This should not trigger mesh baking for physics, because the
+          // meshes were already baked in the worker thread.
           UnityEngine::MeshCollider meshCollider =
               primitiveGameObject.AddComponent<UnityEngine::MeshCollider>();
           meshCollider.sharedMesh(unityMesh);
         }
+
         const ExtensionMeshPrimitiveExtFeatureMetadata* pMetadata =
             primitive.getExtension<ExtensionMeshPrimitiveExtFeatureMetadata>();
         if (pMetadata) {

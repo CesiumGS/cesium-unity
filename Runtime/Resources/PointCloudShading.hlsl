@@ -2,10 +2,7 @@
 #define CESIUM_POINT_CLOUD_SHADING
 
 #include "UnityCG.cginc"
-
-StructuredBuffer<float3> _inPositions;
-StructuredBuffer<uint> _inColors;
-StructuredBuffer<float3> _inNormals;
+#include "UnityInstancing.cginc"
 
 struct VertexInput
 {
@@ -25,17 +22,14 @@ struct VertexOutput
 	uint packedColor : COLOR_0; // Packed vertex colors
 };
 
-VertexOutput Vertex(uint vertexID : SV_VertexID) {
+VertexOutput Vertex(uint vertexID : SV_VertexID, uint instanceID : SV_InstanceID) {
 	VertexOutput output;
-
 	uint pointIndex = vertexID / 6;
 	uint vertexIndex = vertexID - (pointIndex * 6); // Modulo
 	VertexInput input = _inVertices[pointIndex];
-	float3 position = input.position;// _inPositions[pointIndex];
-	float4 positionWC = mul(_worldTransform, float4(position, 1.0));
-	float4 positionClip = mul(unity_MatrixVP, positionWC);
+	float3 position = input.position;
 
-	// Using the vertex ID  saves us from creating extra attribute buffers 
+	// Using the vertex ID saves us from creating extra attribute buffers 
 	// for the corners. We can hardcode the corners of the quad as follows. 
 	// (Unity uses clockwise vertex winding.)
 	// 1 ---- 2/4
@@ -61,6 +55,8 @@ VertexOutput Vertex(uint vertexID : SV_VertexID) {
 		offset = float2(0.5, -0.5);
 	}
 
+	float4 positionWC = mul(_worldTransform, float4(position, 1.0));
+	float4 positionClip = mul(unity_MatrixVP, positionWC);
 	float4 positionEC = mul(unity_MatrixV, positionWC);
 	float maximumPointSize = _attenuationParameters.x;
 	float geometricError = _attenuationParameters.y;
@@ -78,7 +74,7 @@ VertexOutput Vertex(uint vertexID : SV_VertexID) {
 	// (perspective divide with the w-coordinate is done between the shaders)
 	positionClip.xy += screenOffset * positionClip.w;
 	output.positionClip = positionClip;
-	output.packedColor = input.packedColor;// _inColors[pointIndex];
+	output.packedColor = input.packedColor;
 
 	return output;
 }

@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace CesiumForUnity
@@ -73,6 +71,67 @@ namespace CesiumForUnity
         {
             get => this._baseResolution;
             set => this._baseResolution = Mathf.Max(value, 0.0f);
+        }
+
+        private Material _unlitMaterial;
+
+        internal Material unlitMaterial
+        {
+            get
+            {
+                if (this._unlitMaterial == null)
+                {
+                    this.CreateUnlitMaterial();
+                }
+
+                return this._unlitMaterial;
+            }
+        }
+
+        private Color _constantColor = Color.white;
+
+        internal Color constantColor
+        {
+            get => this._constantColor;
+            set
+            {
+                this._constantColor = value;
+                this.Update();
+            }
+        }
+
+        private void CreateUnlitMaterial()
+        {
+            this._unlitMaterial = UnityEngine.Object.Instantiate(
+                        Resources.Load<Material>("CesiumUnlitPointCloudMaterial"));
+            this._unlitMaterial.enableInstancing = true;
+            this.Update();
+
+        }
+
+        private void Update()
+        {
+            if (this._unlitMaterial != null)
+            {
+                this._unlitMaterial.SetVector("_constantColor", this._constantColor);
+            }
+        }
+
+        internal void DestroyMaterials()
+        {
+            if (this._unlitMaterial != null)
+            {
+                if (Application.isEditor)
+                {
+                    UnityEngine.Object.DestroyImmediate(this._unlitMaterial);
+                }
+                else
+                {
+                    UnityEngine.Object.Destroy(this._unlitMaterial);
+                }
+
+                this._unlitMaterial = null;
+            }
         }
     }
 }
