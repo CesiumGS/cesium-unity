@@ -966,7 +966,9 @@ void* UnityPrepareRendererResources::prepareInMainThread(
                   gltf,
                   pMaterial->normalTexture->index);
               if (texture != nullptr) {
-                material.SetTexture(shaderProperty.getNormalMapTextureID(), texture);
+                material.SetTexture(
+                    shaderProperty.getNormalMapTextureID(),
+                    texture);
                 material.SetFloat(
                     shaderProperty.getNormalMapTextureCoordinateIndexID(),
                     static_cast<float>(texCoordIndexIt->second));
@@ -985,7 +987,9 @@ void* UnityPrepareRendererResources::prepareInMainThread(
                   gltf,
                   pMaterial->occlusionTexture->index);
               if (texture != nullptr) {
-                material.SetTexture(shaderProperty.getOcclusionTextureID(), texture);
+                material.SetTexture(
+                    shaderProperty.getOcclusionTextureID(),
+                    texture);
                 material.SetFloat(
                     shaderProperty.getOcclusionTextureCoordinateIndexID(),
                     static_cast<float>(texCoordIndexIt->second));
@@ -1008,7 +1012,9 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           emissiveFactor.z = emissiveFactorSrc.size() > 2
                                  ? static_cast<float>(emissiveFactorSrc[2])
                                  : 0.0f;
-          material.SetVector(shaderProperty.getEmissiveFactorID(), emissiveFactor);
+          material.SetVector(
+              shaderProperty.getEmissiveFactorID(),
+              emissiveFactor);
           if (pMaterial->emissiveTexture) {
             auto texCoordIndexIt = primitiveInfo.uvIndexMap.find(
                 pMaterial->emissiveTexture->texCoord);
@@ -1017,7 +1023,9 @@ void* UnityPrepareRendererResources::prepareInMainThread(
                   gltf,
                   pMaterial->emissiveTexture->index);
               if (texture != nullptr) {
-                material.SetTexture(shaderProperty.getEmissiveTextureID(), texture);
+                material.SetTexture(
+                    shaderProperty.getEmissiveTextureID(),
+                    texture);
                 material.SetFloat(
                     shaderProperty.getEmissiveTextureCoordinateIndexID(),
                     static_cast<float>(texCoordIndexIt->second));

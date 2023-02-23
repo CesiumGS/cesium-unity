@@ -43,7 +43,8 @@ public:
   const int32_t getOverlayTextureCoordinateIndexID(int32_t index) {
     return overlayTextureCoordinateIndexID[index];
   }
-  const int32_t getOverlayTextureID(int32_t index) { return overlayTextureID[index];
+  const int32_t getOverlayTextureID(int32_t index) {
+    return overlayTextureID[index];
   }
   const int32_t getOverlayTranslationAndScaleID(int32_t index) {
     return overlayTranslationAndScaleID[index];

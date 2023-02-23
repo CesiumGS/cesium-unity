@@ -10,18 +10,21 @@ CesiumShaderProperties::CesiumShaderProperties() {
   baseColorFactorID = Shader::PropertyToID(System::String("_baseColorFactor"));
   metallicRoughnessFactorID =
       Shader::PropertyToID(System::String("_metallicRoughnessFactor"));
-  baseColorTextureID = Shader::PropertyToID(System::String("_baseColorTexture"));
+  baseColorTextureID =
+      Shader::PropertyToID(System::String("_baseColorTexture"));
   baseColorTextureCoordinateIndexID =
       Shader::PropertyToID(System::String("_baseColorTextureCoordinateIndex"));
   metallicRoughnessTextureID =
       Shader::PropertyToID(System::String("_metallicRoughnessTexture"));
   metallicRoughnessTextureCoordinateIndexID = Shader::PropertyToID(
       System::String("_metallicRoughnessTextureCoordinateIndex"));
-  normalMapTextureID = Shader::PropertyToID(System::String("_normalMapTexture"));
+  normalMapTextureID =
+      Shader::PropertyToID(System::String("_normalMapTexture"));
   normalMapTextureCoordinateIndexID =
       Shader::PropertyToID(System::String("_normalMapTextureCoordinateIndex"));
   normalMapScaleID = Shader::PropertyToID(System::String("_normalMapScale"));
-  occlusionTextureID = Shader::PropertyToID(System::String("_occlusionTexture"));
+  occlusionTextureID =
+      Shader::PropertyToID(System::String("_occlusionTexture"));
   occlusionTextureCoordinateIndexID =
       Shader::PropertyToID(System::String("_occlusionTextureCoordinateIndex"));
   occlusionStrengthID =
