@@ -19,11 +19,6 @@ using namespace DotNet;
 
 namespace CesiumForUnityNative {
 
-IonTokenTroubleshootingWindowImpl::IonTokenTroubleshootingWindowImpl(
-    const DotNet::CesiumForUnity::IonTokenTroubleshootingWindow& window) {}
-
-IonTokenTroubleshootingWindowImpl::~IonTokenTroubleshootingWindowImpl() {}
-
 namespace {
 
 void getTokenTroubleShootingDetails(
@@ -64,7 +59,7 @@ void getTokenTroubleShootingDetails(
 
             // Query the tokens using the user's connection (_not_ the token
             // connection created above).
-            CesiumIonSessionImpl ionSession = CesiumIonSessionImpl::ion();
+            CesiumIonSessionImpl& ionSession = CesiumIonSessionImpl::ion();
             ionSession.Resume(CesiumForUnity::CesiumIonSession::Ion());
 
             const std::optional<CesiumIonClient::Connection>& userConnection =
@@ -112,6 +107,7 @@ void getAssetTroubleshootingDetails(
         details.loaded(true);
       });
 }
+
 } // namespace
 
 void IonTokenTroubleshootingWindowImpl::GetTroubleshootingDetails(

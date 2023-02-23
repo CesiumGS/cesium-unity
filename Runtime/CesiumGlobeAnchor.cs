@@ -76,7 +76,7 @@ namespace CesiumForUnity
     /// </remarks>
     [ExecuteInEditMode]
     [DisallowMultipleComponent]
-    [ReinteropNativeImplementation("CesiumForUnityNative::CesiumGlobeAnchorImpl", "CesiumGlobeAnchorImpl.h")]
+    [ReinteropNativeImplementation("CesiumForUnityNative::CesiumGlobeAnchorImpl", "CesiumGlobeAnchorImpl.h", staticOnly: true)]
     public partial class CesiumGlobeAnchor : MonoBehaviour
     {
         #region User-editable properties
@@ -612,7 +612,7 @@ namespace CesiumForUnity
                     this._lastPositionEcefZ
                 );
                 double3 newPosition = new double3(this._ecefX, this._ecefY, this._ecefZ);
-                CesiumGlobeAnchor.AdjustOrientation(this, oldPosition, newPosition);
+                this.AdjustOrientation(oldPosition, newPosition);
             }
 
             // Set the object's transform with the new position
@@ -629,8 +629,7 @@ namespace CesiumForUnity
             this.positionAuthority = CesiumGlobeAnchorPositionAuthority.None;
         }
 
-        // This is static so that CesiumGlobeAnchor does not need finalization.
-        private static partial void AdjustOrientation(CesiumGlobeAnchor anchor, double3 oldPositionEcef, double3 newPositionEcef);
+        private partial void AdjustOrientation(double3 oldPositionEcef, double3 newPositionEcef);
 
         #endregion
     }

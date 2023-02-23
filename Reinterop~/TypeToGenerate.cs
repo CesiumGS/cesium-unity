@@ -40,6 +40,8 @@ namespace Reinterop
         /// </summary>
         public string? ImplementationHeaderName;
 
+        public bool ImplementationStaticOnly = true;
+
         public static Dictionary<ITypeSymbol, TypeToGenerate> Combine(IEnumerable<IEnumerable<TypeToGenerate>> listOfItems)
         {
             Dictionary<ITypeSymbol, TypeToGenerate> result = new Dictionary<ITypeSymbol, TypeToGenerate>(SymbolEqualityComparer.Default);
@@ -72,6 +74,8 @@ namespace Reinterop
                     {
                         // TODO: report conflicting implementation header name
                     }
+
+                    current.ImplementationStaticOnly = current.ImplementationStaticOnly && item.ImplementationStaticOnly;
 
                     foreach (IMethodSymbol method in item.Constructors)
                     {
