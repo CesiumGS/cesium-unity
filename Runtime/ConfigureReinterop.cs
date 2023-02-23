@@ -140,12 +140,13 @@ namespace CesiumForUnity
             MeshRenderer meshRenderer = new MeshRenderer();
             GameObject meshGameObject = meshRenderer.gameObject;
             meshRenderer.material = UnityEngine.Object.Instantiate(meshRenderer.material);
-            meshRenderer.material.SetTexture("name", texture2D);
-            meshRenderer.material.SetFloat("name", 1.0f); 
-            meshRenderer.material.SetVector("name", new Vector4());
+            int id = Shader.PropertyToID("name");
+            meshRenderer.material.SetTexture(id, texture2D);
+            meshRenderer.material.SetFloat(id, 1.0f); 
+            meshRenderer.material.SetVector(id, new Vector4());
             meshRenderer.material.DisableKeyword("keywordName");
             meshRenderer.material.EnableKeyword("keywordName");
-            meshRenderer.material.GetTexture("name");
+            meshRenderer.material.GetTexture(id);
             var ids = new List<int>();
             meshRenderer.material.GetTexturePropertyNameIDs(ids);
             for (int i = 0; i < ids.Count; ++i)
