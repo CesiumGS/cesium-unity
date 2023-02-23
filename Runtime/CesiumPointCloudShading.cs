@@ -104,7 +104,6 @@ namespace CesiumForUnity
         {
             this._unlitMaterial = UnityEngine.Object.Instantiate(
                         Resources.Load<Material>("CesiumUnlitPointCloudMaterial"));
-            this._unlitMaterial.enableInstancing = true;
             this.Update();
 
         }

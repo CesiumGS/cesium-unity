@@ -2,7 +2,6 @@
 #define CESIUM_POINT_CLOUD_SHADING
 
 #include "UnityCG.cginc"
-#include "UnityInstancing.cginc"
 
 struct VertexInput
 {
@@ -22,23 +21,23 @@ struct VertexOutput
 	uint packedColor : COLOR_0; // Packed vertex colors
 };
 
-VertexOutput Vertex(uint vertexID : SV_VertexID, uint instanceID : SV_InstanceID) {
+VertexOutput Vertex(uint vertexID : SV_VertexID) {
 	VertexOutput output;
-	uint pointIndex = vertexID / 6;
-	uint vertexIndex = vertexID - (pointIndex * 6); // Modulo
+	uint pointIndex = vertexID / 4;
+	uint vertexIndex = vertexID - (pointIndex * 4); // Modulo
 	VertexInput input = _inVertices[pointIndex];
 	float3 position = input.position;
 
 	// Using the vertex ID saves us from creating extra attribute buffers 
 	// for the corners. We can hardcode the corners of the quad as follows. 
 	// (Unity uses clockwise vertex winding.)
-	// 1 ---- 2/4
+	// 1 ----- 2
 	// |    /  |
 	// |   /   |
-	// 0/3 --- 5
+	// 0 / --- 3
 	float2 offset;
 
-	if (vertexIndex == 0 || vertexIndex == 3)
+	if (vertexIndex == 0)
 	{
 		offset = float2(-0.5, -0.5);
 	}
@@ -46,7 +45,7 @@ VertexOutput Vertex(uint vertexID : SV_VertexID, uint instanceID : SV_InstanceID
 	{
 		offset = float2(-0.5, 0.5);
 	}
-	else if (vertexIndex == 2 || vertexIndex == 4)
+	else if (vertexIndex == 2)
 	{
 		offset = float2(0.5, 0.5);
 	}
@@ -79,8 +78,7 @@ VertexOutput Vertex(uint vertexID : SV_VertexID, uint instanceID : SV_InstanceID
 	return output;
 }
 
-float4 Fragment(VertexOutput input) : SV_TARGET{
-
+float4 Fragment(VertexOutput input) : SV_TARGET {
 	// The shadow caster pass renders to a shadow map, so we can ignore
 	// the color logic here.
 	#ifndef SHADOW_CASTER_PASS
