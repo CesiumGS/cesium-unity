@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Cesium3DTilesSelection/IPrepareRendererResources.h>
+#include <CesiumShaderProperties.h>
 
 #include <DotNet/UnityEngine/GameObject.h>
 
@@ -98,6 +99,7 @@ public:
 
 private:
   ::DotNet::UnityEngine::GameObject _tileset;
+  CesiumShaderProperties _shaderProperty;
 };
 
 } // namespace CesiumForUnityNative
