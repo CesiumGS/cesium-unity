@@ -94,25 +94,32 @@ namespace Reinterop
             CppType setInteropType = setType.AsInteropType();
             CppType getInteropType = getType.AsInteropType();
 
-            string interopGetParameters = "";
-            string interopGetParametersCall = "";
             string interopSetParameters = $"{setInteropType.GetFullyQualifiedName()} value";
             string interopSetParametersCall = $"{setType.GetConversionToInteropType(context, "value")}";
             if (!field.IsStatic)
             {
-                interopGetParameters = $"void* thiz";
-                interopGetParametersCall = $"{definition.Type.AsParameterType().GetConversionToInteropType(context, "thiz")}";
                 interopSetParameters = $"void* thiz, " + interopSetParameters;
-                interopSetParametersCall = $"{definition.Type.AsParameterType().GetConversionToInteropType(context, "thiz")}, {interopSetParametersCall}";
+                interopSetParametersCall = $"{definition.Type.AsParameterType().GetConversionToInteropType(context, "(*this)")}, {interopSetParametersCall}";
             }
+
+            IEnumerable<(string ParameterName, string CallSiteName, CppType Type, CppType InteropType)> getParameters = new List<(string ParameterName, string CallSiteName, CppType Type, CppType InteropType)>();
+            if (!field.IsStatic)
+            {
+                getParameters = new[] { (ParameterName: "thiz", CallSiteName: "(*this)", Type: result.CppDefinition.Type.AsParameterType(), InteropType: result.CppDefinition.Type.AsInteropType()) }.Concat(getParameters);
+            }
+
+            bool hasStructRewrite = Interop.RewriteStructReturn(ref getParameters, ref getType, ref getInteropType);
+
+            var interopGetParameters = getParameters.Select(parameter => $"{parameter.InteropType.GetFullyQualifiedName()} {parameter.ParameterName}");
+            var interopGetParametersCall = getParameters.Select(parameter => parameter.Type.GetConversionToInteropType(context, parameter.CallSiteName));
 
             // Add the static fields for the get/set functions
             declaration.Elements.Add(new(
-                Content: $"static {getInteropType.GetFullyQualifiedName()} (*Field_get_{field.Name})({interopGetParameters});",
+                Content: $"static {getInteropType.GetFullyQualifiedName()} (*Field_get_{field.Name})({string.Join(", ", interopGetParameters)});",
                 IsPrivate: true,
                 TypeDeclarationsReferenced: new[] { getInteropType }));
             definition.Elements.Add(new(
-                Content: $"{getInteropType.GetFullyQualifiedName()} (*{definition.Type.GetFullyQualifiedName(false)}::Field_get_{field.Name})({interopGetParameters}) = nullptr;",
+                Content: $"{getInteropType.GetFullyQualifiedName()} (*{definition.Type.GetFullyQualifiedName(false)}::Field_get_{field.Name})({string.Join(", ", interopGetParameters)}) = nullptr;",
                 TypeDeclarationsReferenced: new[] { getInteropType }
             ));
 
@@ -129,7 +136,7 @@ namespace Reinterop
             var (csName, csContent) = Interop.CreateCSharpDelegateInit(context, item.Type, field, isGet: true);
             init.Functions.Add(new(
                 CppName: $"{definition.Type.GetFullyQualifiedName()}::Field_get_{field.Name}",
-                CppTypeSignature: $"{getInteropType.GetFullyQualifiedName()} (*)({interopGetParameters})",
+                CppTypeSignature: $"{getInteropType.GetFullyQualifiedName()} (*)({string.Join(", ", interopGetParameters)})",
                 CppTypeDefinitionsReferenced: new[] { definition.Type },
                 CppTypeDeclarationsReferenced: new[] { getInteropType },
                 CSharpName: csName,
@@ -156,12 +163,38 @@ namespace Reinterop
                 TypeDeclarationsReferenced: new[] { setType }
             ));
 
+            string[] invocation = new[]
+            {
+                $"auto result = Field_get_{field.Name}({string.Join(", ", interopGetParametersCall)});",
+                $"return {getType.GetConversionFromInteropType(context, "result")};"
+            };
+            if (hasStructRewrite)
+            {
+                if (fieldType.Kind == InteropTypeKind.Nullable)
+                {
+                    invocation = new[]
+                    {
+                        $"{getType.GenericArguments.FirstOrDefault().GetFullyQualifiedName()} result;",
+                        $"std::uint8_t resultIsValid = Field_get_{field.Name}({string.Join(", ", interopGetParametersCall)});",
+                        $"return resultIsValid ? std::make_optional(std::move({getType.GetConversionFromInteropType(context, "result")})) : std::nullopt;"
+                    };
+                }
+                else
+                {
+                    invocation = new[]
+                    {
+                        $"{getType.GetFullyQualifiedName()} result;",
+                        $"Field_get_{field.Name}({string.Join(", ", interopGetParametersCall)});",
+                        $"return {getType.GetConversionFromInteropType(context, "result")};"
+                    };
+                }
+            }
+
             definition.Elements.Add(new(
                 Content:
                     $$"""
                     {{getType.GetFullyQualifiedName()}} {{definition.Type.Name}}::{{field.Name}}(){{(field.IsStatic ? "" : " const")}} {
-                        auto result = Field_get_{{field.Name}}({{interopGetParametersCall}});
-                        return {{getType.GetConversionFromInteropType(context, "result")}};
+                        {{GenerationUtility.JoinAndIndent(invocation, "    ")}}
                     }
                     """,
                 TypeDefinitionsReferenced: new[]
