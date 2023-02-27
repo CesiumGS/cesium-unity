@@ -108,41 +108,6 @@ namespace Reinterop
 
             ulong validationHash = ComputeValidationHash();
 
-            var functionPointerInitLines = GetFunctionPointerInitLines();
-
-            // Chunk the function pointer initialization up into sets of no more than 50.
-            // This is to avoid a problem in Unity 2022.2+'s Burst Compiler that causes it
-            // to crash if the initializer function is too long.
-            // See https://github.com/CesiumGS/cesium-unity/issues/227
-            List<List<string>> initGroups = new List<List<string>>();
-            initGroups.Add(new List<string>());
-
-            List<string> functionCallLines = new List<string>();
-            functionCallLines.Add("Init0(memory);");
-
-            foreach (string line in functionPointerInitLines)
-            {
-                if (initGroups.Last().Count > 500000)
-                {
-                    functionCallLines.Add("Init" + initGroups.Count + "(memory);");
-                    initGroups.Add(new List<string>());
-                }
-                initGroups.Last().Add(line);
-            }
-
-            var functionImplementations = initGroups.Select((l, i) => {
-                return
-                    $$"""
-                    private static void Init{{i}}(IntPtr memory)
-                    {
-                        unsafe
-                        {
-                            {{l.JoinAndIndent("        ")}}
-                        }
-                    }
-                    """;
-            });
-
             return
                 $$"""
                 using System;
@@ -158,14 +123,22 @@ namespace Reinterop
                             // called exactly once.
                         }
 
-                        {{functionImplementations.JoinAndIndent("        ")}}
+                        // These function must be separate and occur before the static constructor.
+                        // See https://github.com/CesiumGS/cesium-unity/issues/227
+                        private static void AddFunctionPointers(IntPtr memory)
+                        {
+                            unsafe
+                            {
+                                {{GetFunctionPointerInitLines().JoinAndIndent("                ")}}
+                            }
+                        }
 
                         static ReinteropInitializer()
                         {
                             unsafe
                             {
                                 IntPtr memory = Marshal.AllocHGlobal(sizeof(IntPtr) * {{Functions.Count}});
-                                {{functionCallLines.JoinAndIndent("                ")}}
+                                AddFunctionPointers(memory);
                                 byte success = initializeReinterop({{validationHash}}UL, memory, {{Functions.Count}});
                                 if (success == 0)
                                     throw new NotImplementedException("The native library is out of sync with the managed one.");
