@@ -123,7 +123,7 @@ namespace Reinterop
                             // called exactly once.
                         }
 
-                        // These function must be separate and occur before the static constructor.
+                        // This function must be separate and occur before the static constructor.
                         // See https://github.com/CesiumGS/cesium-unity/issues/227
                         private static void AddFunctionPointers(IntPtr memory)
                         {
