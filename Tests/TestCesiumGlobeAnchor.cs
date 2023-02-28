@@ -5,7 +5,6 @@ using CesiumForUnity;
 using NUnit.Framework;
 using UnityEngine.TestTools.Utils;
 using Unity.Mathematics;
-using System.Runtime.CompilerServices;
 using System.Collections.Generic;
 
 public class TestCesiumGlobeAnchor
