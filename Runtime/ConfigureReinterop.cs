@@ -193,6 +193,8 @@ namespace CesiumForUnity
             string productName = Application.productName;
             string osVersion = System.Environment.OSVersion.VersionString;
 
+            int frames = Time.frameCount;
+
             Marshal.FreeCoTaskMem(Marshal.StringToCoTaskMemUTF8("hi"));
 
             UnityWebRequest request = UnityWebRequest.Get("url");
@@ -337,7 +339,7 @@ namespace CesiumForUnity
             georeference.originAuthority = georeference.originAuthority;
 
             CesiumGeoreference inParent = go.GetComponentInParent<CesiumGeoreference>();
-            inParent.UpdateOrigin();
+            inParent.MoveOrigin();
             inParent.changed += () => { };
 
             float time = Time.deltaTime;
@@ -429,21 +431,26 @@ namespace CesiumForUnity
             double3 cv3 = new double3();
             cv3.x = cv3.y = cv3.z;
             double3 cv4 = new double3(1.0, 2.0, 3.0);
+            double3x3 matrix3x3 = double3x3.identity;
 
+            go.GetComponent<CesiumGlobeAnchor>();
             CesiumGlobeAnchor[] globeAnchors = go.GetComponentsInChildren<CesiumGlobeAnchor>();
             globeAnchors = go.GetComponentsInChildren<CesiumGlobeAnchor>(true);
             CesiumGlobeAnchor globeAnchor = globeAnchors[globeAnchors.Length - 1];
-            globeAnchor.ecefX = globeAnchor.ecefX;
-            globeAnchor.ecefY = globeAnchor.ecefY;
-            globeAnchor.ecefZ = globeAnchor.ecefZ;
-            globeAnchor.SetPositionEarthCenteredEarthFixed(globeAnchor.ecefX, globeAnchor.ecefY, globeAnchor.ecefZ);
+            globeAnchor.positionGlobeFixed = globeAnchor.positionGlobeFixed;
 
             globeAnchor = go.AddComponent<CesiumGlobeAnchor>();
             globeAnchor.detectTransformChanges = globeAnchor.detectTransformChanges;
             globeAnchor.adjustOrientationForGlobeWhenMoving = globeAnchor.adjustOrientationForGlobeWhenMoving;
-            globeAnchor.SetPositionUnity(0.0, 0.0, 0.0);
-            globeAnchor.SetPositionLongitudeLatitudeHeight(0.0, 0.0, 0.0);
-            globeAnchor.positionAuthority = globeAnchor.positionAuthority;
+            globeAnchor.longitudeLatitudeHeight = globeAnchor.longitudeLatitudeHeight;
+            globeAnchor.localToGlobeFixedMatrix = globeAnchor.localToGlobeFixedMatrix;
+
+            // Private properties for use by the C++ class.
+            globeAnchor._georeference = null;
+            globeAnchor._localToGlobeFixedMatrix = new double4x4();
+            globeAnchor._localToGlobeFixedMatrixIsValid = true;
+            globeAnchor._lastLocalToWorld = new Matrix4x4();
+            globeAnchor.UpdateGeoreferenceIfNecessary();
 
             Cesium3DTileInfo info;
             info.usesAdditiveRefinement = true;

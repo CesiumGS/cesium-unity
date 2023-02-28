@@ -7,8 +7,8 @@
 #include <Cesium3DTilesSelection/GltfUtilities.h>
 #include <Cesium3DTilesSelection/Tile.h>
 #include <Cesium3DTilesSelection/Tileset.h>
+#include <CesiumGeometry/Transforms.h>
 #include <CesiumGeospatial/Ellipsoid.h>
-#include <CesiumGeospatial/Transforms.h>
 #include <CesiumGltf/AccessorView.h>
 #include <CesiumGltf/ExtensionKhrMaterialsUnlit.h>
 #include <CesiumGltf/ExtensionMeshPrimitiveExtFeatureMetadata.h>
@@ -749,7 +749,8 @@ void* UnityPrepareRendererResources::prepareInMainThread(
   const LocalHorizontalCoordinateSystem* pCoordinateSystem = nullptr;
   if (georeferenceComponent != nullptr) {
     pCoordinateSystem =
-        &georeferenceComponent.NativeImplementation().getCoordinateSystem();
+        &georeferenceComponent.NativeImplementation().getCoordinateSystem(
+            georeferenceComponent);
   }
 
   const bool createPhysicsMeshes = tilesetComponent.createPhysicsMeshes();
@@ -824,45 +825,15 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
         primitiveGameObject.transform().parent(pModelGameObject->transform());
 
-        // The Georeference defines the mapping of ECEF coordinates to the game
-        // object's coordinates. And then the game object's transform maps the
-        // coordinates to the Unity world. This way a transform on a tileset or
-        // georeference can position/rotate/scale some or all of the globe
-        // within the Unity world. But usually tilesets and georeferences should
-        // have identity transforms.
-
-        glm::dmat4 ecefToGameObject =
-            pCoordinateSystem
-                ? pCoordinateSystem->getEcefToLocalTransformation()
-                : glm::dmat4(1.0);
-
         glm::dmat4 modelToEcef = tileTransform * transform;
-
-        glm::dmat4 modelToGameObject = ecefToGameObject * modelToEcef;
-        glm::dmat4 gameObjectToUnityWorld = UnityTransforms::fromUnity(
-            pModelGameObject->transform().localToWorldMatrix());
-
-        glm::dvec3 translation = glm::dvec3(modelToGameObject[3]);
-
-        RotationAndScale rotationAndScale =
-            UnityTransforms::matrixToRotationAndScale(
-                glm::dmat3(modelToGameObject));
-
-        primitiveGameObject.transform().localPosition(UnityEngine::Vector3{
-            float(translation.x),
-            float(translation.y),
-            float(translation.z)});
-        primitiveGameObject.transform().localRotation(
-            UnityTransforms::toUnity(rotationAndScale.rotation));
-        primitiveGameObject.transform().localScale(
-            UnityTransforms::toUnity(rotationAndScale.scale));
 
         CesiumForUnity::CesiumGlobeAnchor anchor =
             primitiveGameObject
                 .AddComponent<CesiumForUnity::CesiumGlobeAnchor>();
         anchor.detectTransformChanges(false);
         anchor.adjustOrientationForGlobeWhenMoving(false);
-        anchor.SetPositionUnity(translation.x, translation.y, translation.z);
+        anchor.localToGlobeFixedMatrix(
+            UnityTransforms::toUnityMathematics(modelToEcef));
 
         UnityEngine::MeshFilter meshFilter =
             primitiveGameObject.AddComponent<UnityEngine::MeshFilter>();

@@ -2,16 +2,29 @@
 
 ### v0.3.0
 
+##### Breaking Changes :mega:
+
+- Removed the `positionAuthority`, `unityX`, `unityY`, and `unityZ` properties from `CesiumGlobeAnchor`. Also removed the `SetPositionUnity` method.
+- Removed the `CesiumGlobeAnchorPositionAuthority` enum. The authoritative position is now always found in the `positionGlobeFixed` property. The object's Unity world position can be obtained from its `Transform`.
+- Marked the `longitude`, `latitude`, and `height` properties on `CesiumGlobeAnchor` as obsolete. Use the `longitudeLatitudeHeight` property instead.
+- Marked the `ecefX`, `ecefY`, and `ecefZ` properties on `CesiumGlobeAnchor` as obsolete. Use the `positionGlobeFixed` property instead.
+- Marked `SetPositionLongitudeLatitudeHeight` and `SetPositionEarthCenteredEarthFixed` methods on `CesiumGlobeAnchor` as obsolete. Set the `longitudeLatitudeHeight` or `positionGlobeFixed` property instead.
+- Replaced `MetadataProperty` with `CesiumFeature`. Metadata features are now separated based on feature tables where properties are accessed by name.
+- Replaced `CesiumMetadata.GetProperties` with `CesiumMetadata.GetFeatures`, which returns an array of `CesiumFeature`s.
+
 ##### Additions :tada:
 
 - Added support for rendering point clouds (`pnts`).
-- Metadata features are now separated based on feature tables. Properties can now be accessed by name.
-- Copy all response headers from UnityWebRequest to enable caching.
+- `CesiumGlobeAnchor` now stores a precise, globe-relative orientation and scale in addition to position.
+- Added `localToGlobeFixedMatrix`, `longitudeLatitudeHeight`, `positionGlobeFixed`, `rotationGlobeFixed`, `rotationEastUpNorth`, `scaleGlobeFixed`, and `scaleEastUpNorth` properties to `CesiumGlobeAnchor`.
+- Added the `Restart` method to `CesiumGlobeAnchor`, which can be use to reinitialize the component from its serialized values.
+- Enabled caching of UnityWebRequests by copying all response headers.
 
 ##### Fixes :wrench:
 
 - Recategorized the Cesium tileset shaders from the `Shader Graphs` shader category to the new `Cesium` shader category. 
 - Fixed a bug that could cause the Cesium ion Token Troubleshooting panel to crash the Unity Editor.
+- Added a workaround for a crash in the Burst Compiler (bcl.exe) in Unity 2022.2 when using il2cpp.
 
 ### v0.2.0
 

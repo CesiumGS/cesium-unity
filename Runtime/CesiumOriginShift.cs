@@ -33,18 +33,14 @@ namespace CesiumForUnity
 
             CesiumGlobeAnchor anchor = this.GetComponent<CesiumGlobeAnchor>();
 
-            // The RequireComponent attribute should ensure this assertion passes.
-            Debug.Assert(anchor != null);
+            // The RequireComponent attribute should ensure the globe anchor exists, but it may not be active.
+            if (anchor == null || !anchor.isActiveAndEnabled)
+            {
+                Debug.LogWarning("CesiumOriginShift is doing nothing because its CesiumGlobeAnchor component is missing or disabled.");
+                return;
+            }
 
-            // The anchor's ECEF properties must be valid.
-            if (anchor.positionAuthority == CesiumGlobeAnchorPositionAuthority.None)
-                anchor.Sync();
-
-            this.UpdateFromEcef(georeference, new double3(
-                anchor.ecefX,
-                anchor.ecefY,
-                anchor.ecefZ
-            ));
+            this.UpdateFromEcef(georeference, anchor.positionGlobeFixed);
         }
 
         private List<CesiumSubScene> _sublevelsScratch = new List<CesiumSubScene>();

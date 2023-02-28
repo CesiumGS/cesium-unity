@@ -1,4 +1,5 @@
 using System;
+using System.Text.RegularExpressions;
 using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
@@ -8,56 +9,6 @@ namespace CesiumForUnity
     [InitializeOnLoad]
     public static class CesiumEditorUtility
     {
-        public static class InspectorGUI
-        {
-            public static void ClampedIntField(
-                SerializedProperty property, int min, int max, GUIContent label)
-            {
-                if (property.propertyType == SerializedPropertyType.Integer)
-                {
-                    int value = EditorGUILayout.IntField(label, property.intValue);
-                    property.intValue = Math.Clamp(value, min, max);
-                }
-                else
-                {
-                    EditorGUILayout.LabelField(
-                        label.text, "Use ClampedIntField for int only.");
-                }
-            }
-
-            public static void ClampedFloatField(
-                SerializedProperty property, float min, float max, GUIContent label)
-            {
-                if (property.propertyType == SerializedPropertyType.Float)
-                {
-                    float value = EditorGUILayout.FloatField(label, property.floatValue);
-                    property.floatValue = Math.Clamp(value, min, max);
-                }
-                else
-                {
-                    EditorGUILayout.LabelField(
-                        label.text, "Use ClampedFloatField for float only.");
-                }
-            }
-
-            public static void ClampedDoubleField(
-                SerializedProperty property, double min, double max, GUIContent label)
-            {
-                // SerializedPropertyType.Float is used for both float and double;
-                // SerializedPropertyType.Double does not exist.
-                if (property.propertyType == SerializedPropertyType.Float)
-                {
-                    double value = EditorGUILayout.DoubleField(label, property.doubleValue);
-                    property.doubleValue = Math.Clamp(value, min, max);
-                }
-                else
-                {
-                    EditorGUILayout.LabelField(
-                        label.text, "Use ClampedDoubleField for double only.");
-                }
-            }
-        }
-
         static CesiumEditorUtility()
         {
             EditorApplication.update += CheckProjectFilesForTextMeshPro;
@@ -402,6 +353,35 @@ namespace CesiumForUnity
             Undo.RegisterCreatedObjectUndo(dynamicCameraObject, "Create DynamicCamera");
 
             return dynamicCameraObject.GetComponent<CesiumCameraController>();
+        }
+
+        private static Regex _findLineBreakSets = new Regex("(\r?\n)+[ \t]*");
+
+        /// <summary>
+        /// Apply some very basic formatting to the tooltip:
+        /// - Trim whitespace from the beginning of the string and from the beginning of each new line
+        /// - Remove single newlines, replace them with a space.
+        /// - Leave double newlines, these start a new paragraph.
+        /// </summary>
+        /// <param name="tooltip">The original tooltip.</param>
+        /// <returns>The formatted tooltip.</returns>
+        public static string FormatTooltip(string tooltip)
+        {
+            return _findLineBreakSets.Replace(tooltip.Trim(), (match) =>
+            {
+                int newlineCount = 0;
+                string matchString = match.Value;
+                for (int i = 0; i < matchString.Length; ++i)
+                {
+                    if (matchString[i] == '\n')
+                        ++newlineCount;
+                }
+
+                if (newlineCount == 1)
+                    return " ";
+                else // two or more newlines
+                    return Environment.NewLine + Environment.NewLine;
+            });
         }
     }
 }

@@ -540,12 +540,7 @@ namespace CesiumForUnity
 
             if (this._georeference != null)
             {
-                double3 positionECEF = new double3()
-                {
-                    x = this._globeAnchor.ecefX,
-                    y = this._globeAnchor.ecefY,
-                    z = this._globeAnchor.ecefZ,
-                };
+                double3 positionECEF = this._globeAnchor.positionGlobeFixed;
                 double3 upECEF = CesiumWgs84Ellipsoid.GeodeticSurfaceNormal(positionECEF);
                 double3 upUnity =
                     this._georeference.TransformEarthCenteredEarthFixedDirectionToUnity(upECEF);
