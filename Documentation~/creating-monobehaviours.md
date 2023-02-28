@@ -12,7 +12,7 @@ If you don't need C++-specific state, static methods are _much_ more efficient. 
 
 * Implement `ICesiumRestartable` and its `Restart` method. This method is called by the UI when Unity has updated the serialized fields in unspecified ways, and so the state of the object should be recreated from the serialized fields.
 
-* In most cases, the implemenation of `OnEnable` should simply call `Restart`.
+* In most cases, the implementation of `OnEnable` should simply call `Restart`.
 
 * Implement `Reset`, usually by simply calling `Restart`. This method is called when Unity has directly written to the serialized fields to reset them, and so the `Restart` method is the right way to synchronize the object's state.
 
