@@ -12,6 +12,7 @@
 
 - Recategorized the Cesium tileset shaders from the `Shader Graphs` shader category to the new `Cesium` shader category. 
 - Fixed a bug that could cause the Cesium ion Token Troubleshooting panel to crash the Unity Editor.
+- Added a workaround for a crash in the Burst Compiler (bcl.exe) in Unity 2022.2 when using il2cpp.
 
 ### v0.2.0
 

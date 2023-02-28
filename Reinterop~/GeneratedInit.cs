@@ -123,12 +123,22 @@ namespace Reinterop
                             // called exactly once.
                         }
 
+                        // This function must be separate and occur before the static constructor.
+                        // See https://github.com/CesiumGS/cesium-unity/issues/227
+                        private static void AddFunctionPointers(IntPtr memory)
+                        {
+                            unsafe
+                            {
+                                {{GetFunctionPointerInitLines().JoinAndIndent("                ")}}
+                            }
+                        }
+
                         static ReinteropInitializer()
                         {
                             unsafe
                             {
                                 IntPtr memory = Marshal.AllocHGlobal(sizeof(IntPtr) * {{Functions.Count}});
-                                {{GetFunctionPointerInitLines().JoinAndIndent("                ")}}
+                                AddFunctionPointers(memory);
                                 byte success = initializeReinterop({{validationHash}}UL, memory, {{Functions.Count}});
                                 if (success == 0)
                                     throw new NotImplementedException("The native library is out of sync with the managed one.");
