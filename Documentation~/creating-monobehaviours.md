@@ -77,7 +77,7 @@ public enum CesiumGlobeAnchorPositionAuthorityBackwardCompatibility0dot2dot0
 }
 ```
 
-Next, declare an `Editor` class, nested inside `CesiumGlobeAnchorPositionAuthorityBackwardCompatibility0dot2dot0`, that merely provides an Upgrade button, and an `OnEnable` that automatically upgrades. Put both inside an ifdef for `UNITY_EDITOR`:
+Next, declare an `Editor` class, nested inside `CesiumGlobeAnchorBackwardCompatibility0dot2dot0`, that merely provides an Upgrade button, and an `OnEnable` that automatically upgrades. Put both inside an ifdef for `UNITY_EDITOR`:
 
 ```cs
 #if UNITY_EDITOR
