@@ -1,3 +1,5 @@
+using System;
+using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
 
@@ -7,56 +9,21 @@ namespace CesiumForUnity
     public class CesiumGlobeAnchorEditor : Editor
     {
         private CesiumGlobeAnchor _globeAnchor;
-
-        private SerializedProperty _adjustOrientationForGlobeWhenMoving;
-        private SerializedProperty _detectTransformChanges;
-        private SerializedProperty _positionAuthority;
-
-        // Converts the SerializedProperty's value to the CesiumGeoreferenceOriginAuthority
-        // enum it corresponds to, for convenience.
-        internal CesiumGlobeAnchorPositionAuthority positionAuthority
-        {   
-            get
-            {
-                return (CesiumGlobeAnchorPositionAuthority)
-                    this._positionAuthority.enumValueIndex;
-            }
-        }
-
-        private SerializedProperty _latitude;
-        private SerializedProperty _longitude;
-        private SerializedProperty _height;
-
-        private SerializedProperty _ecefX;
-        private SerializedProperty _ecefY;
-        private SerializedProperty _ecefZ;
-
-        private SerializedProperty _unityX;
-        private SerializedProperty _unityY;
-        private SerializedProperty _unityZ;
+        private CesiumInspectorGUI _gui;
 
         private void OnEnable()
         {
             this._globeAnchor = (CesiumGlobeAnchor)this.target;
+            this._gui = new CesiumInspectorGUI(this._globeAnchor);
+        }
 
-            this._adjustOrientationForGlobeWhenMoving =
-                this.serializedObject.FindProperty("_adjustOrientationForGlobeWhenMoving");
-            this._detectTransformChanges =
-                this.serializedObject.FindProperty("_detectTransformChanges");
-            this._positionAuthority =
-                this.serializedObject.FindProperty("_positionAuthority");
-
-            this._latitude = this.serializedObject.FindProperty("_latitude");
-            this._longitude = this.serializedObject.FindProperty("_longitude");
-            this._height = this.serializedObject.FindProperty("_height");
-
-            this._ecefX = this.serializedObject.FindProperty("_ecefX");
-            this._ecefY = this.serializedObject.FindProperty("_ecefY");
-            this._ecefZ = this.serializedObject.FindProperty("_ecefZ");
-
-            this._unityX = this.serializedObject.FindProperty("_unityX");
-            this._unityY = this.serializedObject.FindProperty("_unityY");
-            this._unityZ = this.serializedObject.FindProperty("_unityZ");
+        private void OnDisable()
+        {
+            if (this._gui != null)
+            {
+                this._gui.Dispose();
+                this._gui = null;
+            }
         }
 
         public override void OnInspectorGUI()
@@ -64,173 +31,172 @@ namespace CesiumForUnity
             this.serializedObject.Update();
 
             DrawGlobeAnchorProperties();
-            DrawPositionAuthorityProperty();
             EditorGUILayout.Space(5);
             DrawLongitudeLatitudeHeightProperties();
             EditorGUILayout.Space(5);
             DrawEarthCenteredEarthFixedProperties();
             EditorGUILayout.Space(5);
-            DrawUnityPositionProperties();
+            DrawEastUpNorthRotationProperties();
+            EditorGUILayout.Space(5);
+            DrawScaleProperties();
 
             this.serializedObject.ApplyModifiedProperties();
         }
 
+        private static readonly string adjustOrientationForGlobeWhenMovingTooltip = CesiumEditorUtility.FormatTooltip(@"
+            Whether to adjust the game object's orientation based on globe curvature
+            as the game object moves.
+
+            The Earth is not flat, so as we move across its surface, the direction of
+            ""up"" changes. If we ignore this fact and leave an object's orientation
+            unchanged as it moves over the globe surface, the object will become
+            increasingly tilted and eventually be completely upside-down when we arrive
+            at the opposite side of the globe.
+
+            When this setting is enabled, this component will automatically apply a
+            rotation to the Transform to account for globe curvature any time the game
+            object's position on the globe changes.
+
+            This property should usually be enabled, but it may be useful to disable it
+            when your application already accounts for globe curvature itself when it
+            updates a game object's transform, because in that case game object would
+            be over-rotated.");
+
+        private static readonly string detectTransformChangesTooltip = CesiumEditorUtility.FormatTooltip(@"
+            Whether this component should detect changes to the Transform component,
+            such as from physics, and update the precise coordinates accordingly.
+            Disabling this option improves performance for game objects that will not
+            move. Transform changes are always detected in Edit mode, no matter the
+            state of this flag.");
+
         private void DrawGlobeAnchorProperties()
         {
-            // The labels for this component are particularly long, so use a custom value
-            // instead of the editor style's default.
-            int labelWidth = 265;
-            GUILayout.BeginHorizontal();
-            GUIContent adjustOrientationContent = new GUIContent(
+            this._gui.Toggle(
                 "Adjust Orientation For Globe When Moving",
-                "Whether to adjust the game object's orientation based on globe curvature " +
-                "as the game object moves." +
-                "\n\n" +
-                "The Earth is not flat, so as we move across its surface, the direction of " +
-                "\"up\" changes. If we ignore this fact and leave an object's orientation " +
-                "unchanged as it moves over the globe surface, the object will become " +
-                "increasingly tilted and eventually be completely upside-down when we arrive " +
-                "at the opposite side of the globe." +
-                "\n\n" +
-                "When this setting is enabled, this component will automatically apply a " +
-                "rotation to the Transform to account for globe curvature any time the game " +
-                "object's position on the globe changes." +
-                "\n\n" +
-                "This property should usually be enabled, but it may be useful to disable it " +
-                "when your application already accounts for globe curvature itself when it " +
-                "updates a game object's transform, because in that case game object would " +
-                "be over-rotated.");
-            GUILayout.Label(adjustOrientationContent, GUILayout.Width(labelWidth));
-            EditorGUILayout.PropertyField(
-                this._adjustOrientationForGlobeWhenMoving,
-                GUIContent.none);
-            GUILayout.EndHorizontal();
+                this._globeAnchor.adjustOrientationForGlobeWhenMoving,
+                (value) => this._globeAnchor.adjustOrientationForGlobeWhenMoving = value,
+                adjustOrientationForGlobeWhenMovingTooltip);
 
-            GUILayout.BeginHorizontal();
-            GUIContent detectTransformChangesContent = new GUIContent(
+            this._gui.Toggle(
                 "Detect Transform Changes",
-                "Whether this component should detect changes to the Transform component, " +
-                "such as from physics, and update the precise coordinates accordingly. " +
-                "Disabling this option improves performance for game objects that will not " +
-                "move. Transform changes are always detected in Edit mode, no matter the " +
-                "state of this flag.");
-            GUILayout.Label(detectTransformChangesContent, GUILayout.Width(labelWidth));
-            EditorGUILayout.PropertyField(this._detectTransformChanges, GUIContent.none);
-            GUILayout.EndHorizontal();
+                this._globeAnchor.detectTransformChanges,
+                (value) => this._globeAnchor.detectTransformChanges = value,
+                detectTransformChangesTooltip);
         }
 
-        private void DrawPositionAuthorityProperty()
-        {
-            GUIContent positionAuthorityContent = new GUIContent(
-                "Position Authority",
-                "The set of coordinates that authoritatively define the position of this game object."
-            );
-            EditorGUILayout.PropertyField(this._positionAuthority);
-        }
+        private static readonly string longitudeLatitudeHeightTooltip = CesiumEditorUtility.FormatTooltip(@"
+            The Latitude, Longitude, and Height of this game object.
+
+            The Latitude (Lat) is expressed in degrees, in the range [-90, 90].
+
+            The Longitude (Lon) is expressed in degrees, in the range [-180, 180].
+
+            The Height (H) is expressed in meters above the ellipsoid (usually WGS84). Do not
+            confuse this with a geoid height or height above mean sea level, which
+            can be tens of meters higher or lower depending on where in the world the
+            object is located.");
+
+        private static readonly GUIContent latitudeContent = new GUIContent("Lat");
+        private static readonly GUIContent longitudeContent = new GUIContent("Lon");
+        private static readonly GUIContent heightContent = new GUIContent("H");
 
         private void DrawLongitudeLatitudeHeightProperties()
         {
-            EditorGUI.BeginDisabledGroup(
-                this.positionAuthority != CesiumGlobeAnchorPositionAuthority.LongitudeLatitudeHeight);
+            double3 longitudeLatitudeHeight = this._globeAnchor.longitudeLatitudeHeight;
+            longitudeLatitudeHeight.x = Math.Round(longitudeLatitudeHeight.x, 8);
+            longitudeLatitudeHeight.y = Math.Round(longitudeLatitudeHeight.y, 8);
+            longitudeLatitudeHeight.z = Math.Round(longitudeLatitudeHeight.z, 4);
 
-            GUILayout.Label("Position (Longitude Latitude Height)", EditorStyles.boldLabel);
+            // Swap X and Y so that latitude is first, to match most users' intuitions.
+            longitudeLatitudeHeight = longitudeLatitudeHeight.yxz;
 
-            GUIContent latitudeContent = new GUIContent(
-               "Latitude",
-               "The latitude of this game object in degrees, in the range [-90, 90].");
-            CesiumEditorUtility.InspectorGUI.ClampedDoubleField(
-                this._latitude,
-                -90.0,
-                90.0,
-                latitudeContent);
-
-            GUIContent longitudeContent = new GUIContent(
-                "Longitude",
-                "The longitude of this game object in degrees, in the range [-180, 180].");
-            CesiumEditorUtility.InspectorGUI.ClampedDoubleField(
-                 this._longitude,
-                 -180.0,
-                 180.0,
-                 longitudeContent);
-
-            GUIContent heightContent = new GUIContent(
-                "Height",
-                "The height of this game object in meters above the ellipsoid (usually WGS84)." +
-                "\n\n" +
-                "Do not confuse this with a geoid height or height above mean sea level, which " +
-                "can be tens of meters higher or lower depending on where in the world the " +
-                "object is located.");
-            EditorGUILayout.PropertyField(this._height, heightContent);
-
-            EditorGUI.EndDisabledGroup();
+            this._gui.Double3(
+                "Position (Latitude, Longitude, Height)",
+                longitudeLatitudeHeight,
+                (value) =>
+                {
+                    this._globeAnchor.longitudeLatitudeHeight = value.yxz;
+                },
+                longitudeLatitudeHeightTooltip,
+                latitudeContent,
+                longitudeContent,
+                heightContent);
         }
+
+        private static readonly string ecefTooltip = CesiumEditorUtility.FormatTooltip(@"
+            The Earth-Centered, Earth-Fixed (ECEF) coordinates of the origin of this
+            game object, in meters.
+
+            ECEF is a right-handed coordinate system with its origin at the
+            center of the Earth, the positive X axis pointing toward where the Prime
+            Meridian crosses the Equator, the positive Y axis pointing toward the
+            Equator at 90 degrees longitude, and the positive Z axis pointing toward
+            the North pole.");
 
         private void DrawEarthCenteredEarthFixedProperties()
         {
-            EditorGUI.BeginDisabledGroup(
-                this.positionAuthority != CesiumGlobeAnchorPositionAuthority.EarthCenteredEarthFixed);
+            double3 ecefPosition = this._globeAnchor.positionGlobeFixed;
+            ecefPosition.x = Math.Round(ecefPosition.x, 4);
+            ecefPosition.y = Math.Round(ecefPosition.y, 4);
+            ecefPosition.z = Math.Round(ecefPosition.z, 4);
 
-            GUILayout.Label("Position (Earth-Centered, Earth-Fixed)", EditorStyles.boldLabel);
-
-            GUIContent ecefXContent = new GUIContent(
-                "ECEF X",
-                "The Earth-Centered, Earth-Fixed X-coordinate of the origin of this " +
-                "game object in meters." +
-                "\n\n" +
-                 "In the ECEF coordinate system, the origin is at the center of the Earth " +
-                 "and the positive X axis points toward where the Prime Meridian crosses " +
-                 "the Equator.");
-            EditorGUILayout.PropertyField(this._ecefX, ecefXContent);
-
-            GUIContent ecefYContent = new GUIContent(
-                "ECEF Y",
-                "The Earth-Centered, Earth-Fixed Y-coordinate of the origin of this " +
-                "game object in meters." +
-                "\n\n" +
-                "In the ECEF coordinate system, the origin is at the center of the Earth " +
-                "and the positive Y axis points toward the Equator at 90 degrees longitude.");
-            EditorGUILayout.PropertyField(this._ecefY, ecefYContent);
-
-            GUIContent ecefZContent = new GUIContent(
-                "ECEF Z",
-                "The Earth-Centered, Earth-Fixed Z-coordinate of the origin of this " +
-                "game object in meters." +
-                "\n\n" +
-                "In the ECEF coordinate system, the origin is at the center of the Earth " +
-                "and the positive Z axis points toward the North pole.");
-            EditorGUILayout.PropertyField(this._ecefZ, ecefZContent);
-
-            EditorGUI.EndDisabledGroup();
+            this._gui.Double3(
+                "Position (Earth-Centered, Earth-Fixed)",
+                ecefPosition,
+                (value) =>
+                {
+                    this._globeAnchor.positionGlobeFixed = value;
+                },
+                ecefTooltip);
         }
 
-        private void DrawUnityPositionProperties()
+        private static readonly string rotationTooltip = CesiumEditorUtility.FormatTooltip(@"
+            The rotation of the object relative to the local East-Up-North
+            (EUN) frame centered at the object's position. In the EUN frame +X points East, +Y
+            points Up, and +Z points North.
+
+            These Euler angles are expressed in degrees and use Unity's normal ZXY convention.");
+
+        private void DrawEastUpNorthRotationProperties()
         {
-            EditorGUI.BeginDisabledGroup(
-                this.positionAuthority != CesiumGlobeAnchorPositionAuthority.UnityCoordinates);
+            Quaternion rotation = this._globeAnchor.rotationEastUpNorth;
+            double3 eulerAngles = (float3)rotation.eulerAngles;
 
-            GUILayout.Label("Position (Unity Local Coordinates)", EditorStyles.boldLabel);
+            eulerAngles.x = Math.Round(Math.Clamp(Helpers.Negative180To180(eulerAngles.x), -180.0f, 180.0f), 4);
+            eulerAngles.y = Math.Round(Math.Clamp(Helpers.Negative180To180(eulerAngles.y), -180.0f, 180.0f), 4);
+            eulerAngles.z = Math.Round(Math.Clamp(Helpers.Negative180To180(eulerAngles.z), -180.0f, 180.0f), 4);
 
-            EditorGUI.BeginChangeCheck();
+            this._gui.Double3(
+                "Rotation (East-Up-North)",
+                eulerAngles,
+                (value) =>
+                {
+                    rotation.eulerAngles = (float3)value;
+                    this._globeAnchor.rotationEastUpNorth = rotation;
+                },
+                rotationTooltip);
+        }
 
-            GUIContent unityXContent = new GUIContent(
-                "Unity X",
-                "The Unity X coordinate of this game object. This is the same as the Transform's " +
-                "X coordinate but expressed in 64-bit (double) precision.");
-            EditorGUILayout.PropertyField(this._unityX, unityXContent);
+        private static readonly string scaleTooltip = CesiumEditorUtility.FormatTooltip(@"The local scaling of the object.");
 
-            GUIContent unityYContent = new GUIContent(
-                "Unity Y",
-                "The Unity Y coordinate of this game object. This is the same as the Transform's " +
-                "Y coordinate but expressed in 64-bit (double) precision.");
-            EditorGUILayout.PropertyField(this._unityY, unityYContent);
+        private void DrawScaleProperties()
+        {
+            double3 scale = this._globeAnchor.scaleEastUpNorth;
+            scale.x = Math.Round(scale.x, 4);
+            scale.y = Math.Round(scale.y, 4);
+            scale.z = Math.Round(scale.z, 4);
 
-            GUIContent unityZContent = new GUIContent(
-                "Unity Z",
-                "The Unity Z coordinate of this game object. This is the same as the Transform's " +
-                "Z coordinate but expressed in 64-bit (double) precision.");
-            EditorGUILayout.PropertyField(this._unityZ, unityZContent);
-
-            EditorGUI.EndDisabledGroup();
+            this._gui.Double3(
+                "Scale",
+                scale,
+                (value) =>
+                {
+                    // Don't try to set a scale that is too close to zero.
+                    if (math.cmin(math.abs(value)) < 1.0e-15)
+                        return;
+                    this._globeAnchor.scaleEastUpNorth = value;
+                },
+                scaleTooltip);
         }
     }
 }

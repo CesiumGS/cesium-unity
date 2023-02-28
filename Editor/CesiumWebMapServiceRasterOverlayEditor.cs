@@ -72,7 +72,7 @@ namespace CesiumForUnity
             GUIContent tileWidthContent = new GUIContent(
                 "Tile Width",
                 "Image width.");
-            CesiumEditorUtility.InspectorGUI.ClampedIntField(
+            CesiumInspectorGUI.ClampedIntField(
                 this._tileWidth,
                 64,
                 2048,
@@ -81,7 +81,7 @@ namespace CesiumForUnity
             GUIContent tileHeightContent = new GUIContent(
                 "Tile Height",
                 "Image height.");
-            CesiumEditorUtility.InspectorGUI.ClampedIntField(
+            CesiumInspectorGUI.ClampedIntField(
                 this._tileHeight,
                 64,
                 2048,

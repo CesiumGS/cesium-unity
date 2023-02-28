@@ -1,9 +1,10 @@
 #include "CameraManager.h"
 
+#include "CesiumGeoreferenceImpl.h"
 #include "UnityTransforms.h"
 
 #include <CesiumGeospatial/Ellipsoid.h>
-#include <CesiumGeospatial/Transforms.h>
+#include <CesiumGeospatial/GlobeTransforms.h>
 #include <CesiumUtility/Math.h>
 
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
@@ -92,7 +93,8 @@ std::vector<ViewState> CameraManager::getAllCameras(const GameObject& context) {
   if (georeferenceComponent != nullptr) {
     CesiumGeoreferenceImpl& georeference =
         georeferenceComponent.NativeImplementation();
-    pCoordinateSystem = &georeference.getCoordinateSystem();
+    pCoordinateSystem =
+        &georeference.getCoordinateSystem(georeferenceComponent);
   }
 
   std::vector<ViewState> result;

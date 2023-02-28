@@ -62,8 +62,42 @@ namespace CesiumForUnity
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumGeoreferenceImpl", "CesiumGeoreferenceImpl.h")]
     public partial class CesiumGeoreference : MonoBehaviour
     {
+        #region Fields
+
         [SerializeField]
         private CesiumGeoreferenceOriginAuthority _originAuthority = CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight;
+
+        [SerializeField]
+        private double _latitude = 39.736401;
+
+        [SerializeField]
+        private double _longitude = -105.25737;
+
+        [SerializeField]
+        private double _height = 2250.0;
+
+        [SerializeField]
+        private double _ecefX = 6378137.0;
+
+        [SerializeField]
+        private double _ecefY = 0.0;
+
+        [SerializeField]
+        private double _ecefZ = 0.0;
+
+        [NonSerialized]
+        private double4x4 _localToEcef = double4x4.identity;
+
+        [NonSerialized]
+        private double4x4 _ecefToLocal = double4x4.identity;
+
+        [NonSerialized]
+        private bool _isInitialized = false;
+
+        [NonSerialized]
+        private HashSet<CesiumGlobeAnchor> _globeAnchors = new HashSet<CesiumGlobeAnchor>();
+
+        #endregion
 
         /// <summary>
         /// Identifies which set of coordinates authoritatively defines the origin
@@ -75,12 +109,9 @@ namespace CesiumForUnity
             set
             {
                 this._originAuthority = value;
-                this.UpdateOrigin();
+                this.MoveOrigin();
             }
         }
-
-        [SerializeField]
-        private double _latitude = 39.736401;
 
         /// <summary>
         /// The latitude of the origin of the coordinate system, in degrees, in the range -90 to 90.
@@ -97,9 +128,6 @@ namespace CesiumForUnity
                 this.originAuthority = CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight;
             }
         }
-        
-        [SerializeField]
-        private double _longitude = -105.25737;
 
         /// <summary>
         /// The longitude of the origin of the coordinate system, in degrees, in the range -180 to 180.
@@ -116,9 +144,6 @@ namespace CesiumForUnity
                 this.originAuthority = CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight;
             }
         }
-
-        [SerializeField]
-        private double _height = 2250.0;
 
         /// <summary>
         /// The height in the origin of the coordinate system, in meters above the ellipsoid. Do not
@@ -138,9 +163,6 @@ namespace CesiumForUnity
             }
         }
 
-        [SerializeField]
-        private double _ecefX = 6378137.0;
-
         /// <summary>
         /// The Earth-Centered, Earth-Fixed X coordinate of the origin of the coordinate system, in meters.
         /// This property is ignored unless <see cref="originAuthority"/> is
@@ -156,9 +178,6 @@ namespace CesiumForUnity
                 this.originAuthority = CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed;
             }
         }
-
-        [SerializeField]
-        private double _ecefY = 0.0;
 
         /// <summary>
         /// The Earth-Centered, Earth-Fixed Y coordinate of the origin of the coordinate system, in meters.
@@ -176,9 +195,6 @@ namespace CesiumForUnity
             }
         }
 
-        [SerializeField]
-        private double _ecefZ = 0.0;
-
         /// <summary>
         /// The Earth-Centered, Earth-Fixed Z coordinate of the origin of the coordinate system, in meters.
         /// This property is ignored unless <see cref="originAuthority"/> is
@@ -192,6 +208,24 @@ namespace CesiumForUnity
             {
                 this._ecefZ = value;
                 this.originAuthority = CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed;
+            }
+        }
+
+        public double4x4 localToEcefMatrix
+        {
+            get
+            {
+                this.Initialize();
+                return this._localToEcef;
+            }
+        }
+
+        public double4x4 ecefToLocalMatrix
+        {
+            get
+            {
+                this.Initialize();
+                return this._ecefToLocal;
             }
         }
 
@@ -242,67 +276,118 @@ namespace CesiumForUnity
         }
 
         /// <summary>
+        /// Register a globe anchor with this georeference. When the georeference origin changes,
+        /// the registered anchor will be updated accordingly.
+        /// </summary>
+        /// <remarks>
+        /// This is called automatically by <see cref="CesiumGlobeAnchor.OnEnable"/> and usually
+        /// does not need to be called directly.
+        /// </remarks>
+        /// <param name="globeAnchor">The globe anchor.</param>
+        public void AddGlobeAnchor(CesiumGlobeAnchor globeAnchor)
+        {
+            this._globeAnchors.Add(globeAnchor);
+        }
+
+        /// <summary>
+        /// Deregisters a globe anchor with this georeference, so the globe anchor will no longer
+        /// be updated when the georeference origin changes.
+        /// </summary>
+        /// <remarks>
+        /// This is called automatically by <see cref="CesiumGlobeAnchor.OnDisable"/> and usually
+        /// does not need to be called directly.
+        /// </remarks>
+        /// <param name="globeAnchor">The globe anchor.</param>
+        public void RemoveGlobeAnchor(CesiumGlobeAnchor globeAnchor)
+        {
+            this._globeAnchors.Remove(globeAnchor);
+        }
+
+        /// <summary>
+        /// Initializes this georeference so that other objects may use it to locate the globe in the world.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// It is not usually necessary to call this directly because it is called automatically in
+        /// <see cref="OnEnable"/>. However, when other objects in the same scene need to use this
+        /// georeference from their own <code>OnEnable</code>, it is possible that the other object's
+        /// OnEnable will be called before the georeference's, leading to incorrect georeferencing.
+        /// Calling this method explicitly will avoid this problem.
+        /// </para>
+        /// <para>
+        /// However, this method should _not_ be called prior to the scene's <code>OnEnable</code> phase.
+        /// </para>
+        /// <para>
+        /// If this component has already been initialized, this method does nothing.
+        /// </para>
+        /// </remarks>
+        public void Initialize()
+        {
+            if (!this._isInitialized)
+            {
+                this._isInitialized = true;
+                this.UpdateOtherCoordinates();
+                this.UpdateTransformations();
+            }
+        }
+
+        private void UpdateTransformations()
+        {
+            this._localToEcef = this.ComputeLocalToEarthCenteredEarthFixedTransformation();
+            this._ecefToLocal = math.inverse(this._localToEcef);
+        }
+
+        /// <summary>
         /// Recomputes the coordinate system based on an updated origin. It is usually not
         /// necessary to call this directly as it is called automatically when needed.
         /// </summary>
-        public void UpdateOrigin()
+        public void MoveOrigin()
         {
-            // Only update the origin when it has been initialized first.
-            // This check is here because the georeference may be modified by other scripts
-            // before it is enabled (e.g. CesiumSubScene.OnEnable). Without this check,
-            // objects may have incorrect orientations when the scene loads, both in Editor
-            // and in play mode. 
-            if (this._initialized)
-            {
-                this.RecalculateOrigin();
-            }
+            if (!this._isInitialized)
+                throw new InvalidOperationException("The origin of a CesiumGeoreference must not be set before its Initialize method is called, either explicitly or via OnEnable.");
 
             this.UpdateOtherCoordinates();
+
+            double4x4 oldLocalToEcef = this._localToEcef;
+
+            this.UpdateTransformations();
+
+            if (oldLocalToEcef.Equals(this._localToEcef))
+            {
+                // Origin didn't change meaningfully.
+                return;
+            }
+
+            foreach (CesiumGlobeAnchor anchor in this._globeAnchors)
+            {
+                if (anchor == null)
+                    continue;
+
+                anchor.Sync();
+            }
+
             if (this.changed != null)
             {
                 this.changed();
             }
         }
 
-        /// <summary>
-        ///  Whether InitializeOrigin() has been called yet.
-        /// </summary>
-        private bool _initialized = false;
-
-        /// <summary>
-        /// Initializes the C++ side of the georeference transformation, without regard for the
-        /// previous state (if any).
-        /// </summary>
-        private partial void InitializeOrigin();
-
-        /// <summary>
-        /// Updates to a new origin, shifting and rotating objects with CesiumGlobeAnchor
-        /// behaviors accordingly.
-        /// </summary>
-        private partial void RecalculateOrigin();
-
         private void OnValidate()
         {
-            if (this._initialized)
+            if (this._isInitialized)
             {
-                this.UpdateOrigin();
+                this.MoveOrigin();
             }
         }
 
         private void OnEnable()
         {
-            // We must initialize the origin in OnEnable because Unity does
-            // not always call Awake at the appropriate time for `ExecuteInEditMode`
-            // components like this one.
-            this.InitializeOrigin();
-            this._initialized = true;
-
-            this.UpdateOtherCoordinates();
+            this.Initialize();
         }
 
         private void OnDisable()
         {
-            this._initialized = false;
+            this._isInitialized = false;
         }
 
         private void UpdateOtherCoordinates()
@@ -335,8 +420,12 @@ namespace CesiumForUnity
         /// </summary>
         /// <param name="unityPosition">The Unity position to convert.</param>
         /// <returns>The ECEF coordinates in meters.</returns>
-        public partial double3
-            TransformUnityPositionToEarthCenteredEarthFixed(double3 unityPosition);
+        public double3
+            TransformUnityPositionToEarthCenteredEarthFixed(double3 unityPosition)
+        {
+            this.Initialize();
+            return math.mul(this._localToEcef, new double4(unityPosition, 1.0)).xyz;
+        }
 
         /// <summary>
         /// Transform an Earth-Centered, Earth-Fixed position to Unity coordinates. The resulting position should generally
@@ -346,8 +435,12 @@ namespace CesiumForUnity
         /// </summary>
         /// <param name="earthCenteredEarthFixed">The ECEF coordinates in meters.</param>
         /// <returns>The corresponding Unity coordinates.</returns>
-        public partial double3
-            TransformEarthCenteredEarthFixedPositionToUnity(double3 earthCenteredEarthFixed);
+        public double3
+            TransformEarthCenteredEarthFixedPositionToUnity(double3 earthCenteredEarthFixed)
+        {
+            this.Initialize();
+            return math.mul(this._ecefToLocal, new double4(earthCenteredEarthFixed, 1.0)).xyz;
+        }
 
         /// <summary>
         /// Transform a Unity direction to a direction in Earth-Centered, Earth-Fixed (ECEF) coordinates. The
@@ -357,8 +450,12 @@ namespace CesiumForUnity
         /// </summary>
         /// <param name="unityDirection">The Unity direction to convert.</param>
         /// <returns>The ECEF direction.</returns>
-        public partial double3
-            TransformUnityDirectionToEarthCenteredEarthFixed(double3 unityDirection);
+        public double3
+            TransformUnityDirectionToEarthCenteredEarthFixed(double3 unityDirection)
+        {
+            this.Initialize();
+            return math.mul(this._localToEcef, new double4(unityDirection, 0.0)).xyz;
+        }
 
         /// <summary>
         /// Transform an Earth-Centered, Earth-Fixed direction to Unity coordinates. The resulting direction
@@ -368,7 +465,13 @@ namespace CesiumForUnity
         /// </summary>
         /// <param name="earthCenteredEarthFixedDirection">The direction in ECEF coordinates.</param>
         /// <returns>The corresponding Unity direction.</returns>
-        public partial double3
-            TransformEarthCenteredEarthFixedDirectionToUnity(double3 earthCenteredEarthFixedDirection);
+        public double3
+            TransformEarthCenteredEarthFixedDirectionToUnity(double3 earthCenteredEarthFixedDirection)
+        {
+            this.Initialize();
+            return math.mul(this._ecefToLocal, new double4(earthCenteredEarthFixedDirection, 0.0)).xyz;
+        }
+
+        private partial double4x4 ComputeLocalToEarthCenteredEarthFixedTransformation();
     }
 }

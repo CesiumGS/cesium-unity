@@ -1,5 +1,3 @@
-#pragma once
-
 #include "CesiumEditorWindowImpl.h"
 
 #include "CesiumIonSessionImpl.h"

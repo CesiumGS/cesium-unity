@@ -229,6 +229,7 @@ namespace CesiumForUnity
             CesiumGeoreference georeference = this.GetComponentInParent<CesiumGeoreference>();
             if (georeference != null)
             {
+                georeference.Initialize();
                 this.UpdateOrigin();
             }
         }
