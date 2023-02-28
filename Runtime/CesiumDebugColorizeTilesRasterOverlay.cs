@@ -10,8 +10,10 @@ namespace CesiumForUnity
         "CesiumForUnityNative::CesiumDebugColorizeTilesRasterOverlayImpl",
         "CesiumDebugColorizeTilesRasterOverlayImpl.h")]
     public partial class CesiumDebugColorizeTilesRasterOverlay : CesiumRasterOverlay
-    {
+    {   
+        /// <inheritdoc/>
         protected override partial void AddToTileset(Cesium3DTileset tileset);
+        /// <inheritdoc/>
         protected override partial void RemoveFromTileset(Cesium3DTileset tileset);
     }
 }
