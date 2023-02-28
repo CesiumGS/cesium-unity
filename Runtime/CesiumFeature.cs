@@ -25,6 +25,9 @@ namespace CesiumForUnity
         Array
     }
 
+    /// <summary>
+    /// Allows access to a particular feature of <see cref="CesiumMetadata"/>.
+    /// </summary>
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumFeatureImpl", "CesiumFeatureImpl.h")]
     public partial class CesiumFeature
     {
