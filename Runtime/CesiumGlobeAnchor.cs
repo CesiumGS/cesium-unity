@@ -539,7 +539,7 @@ namespace CesiumForUnity
         {
             // Detect changes in the Transform component.
             // We don't use Transform.hasChanged because we can't control when it is reset to false.
-            WaitUntil waitForChanges = new WaitUntil(() => this._lastLocalToWorld != null && !this.transform.localToWorldMatrix.Equals(this._lastLocalToWorld));
+            WaitUntil waitForChanges = new WaitUntil(() => this._lastLocalToWorld.HasValue && !this.transform.localToWorldMatrix.Equals(this._lastLocalToWorld.Value));
 
             while (true)
             {
