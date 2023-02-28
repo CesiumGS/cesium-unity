@@ -162,8 +162,7 @@ namespace CesiumForUnity
 
         /// <summary>
         /// Gets the value of the specified property from an array as a signed 16-bit integer.
-        /// Returns the default value if
-        /// the property value cannot be converted to that type.
+        /// Returns the default value if the property value cannot be converted to that type.
         /// </summary>
         /// <param name="property">The name of the property.</param>
         /// <param name="index">The index of the component.</param>
@@ -244,8 +243,8 @@ namespace CesiumForUnity
         public partial Boolean GetComponentBoolean(string property, int index, Boolean defaultValue);
 
         /// <summary>
-        /// Gets the value of the specified property from an array as a string. Returns the default value if
-        /// the property value cannot be converted to that type.
+        /// Gets the value of the specified property from an array as a string. Returns 
+        /// the default value if the property value cannot be converted to that type.
         /// </summary>
         /// <param name="property">The name of the property.</param>
         /// <param name="index">The index of the component.</param>

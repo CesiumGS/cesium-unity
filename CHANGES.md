@@ -9,7 +9,7 @@
 - Marked the `longitude`, `latitude`, and `height` properties on `CesiumGlobeAnchor` as obsolete. Use the `longitudeLatitudeHeight` property instead.
 - Marked the `ecefX`, `ecefY`, and `ecefZ` properties on `CesiumGlobeAnchor` as obsolete. Use the `positionGlobeFixed` property instead.
 - Marked `SetPositionLongitudeLatitudeHeight` and `SetPositionEarthCenteredEarthFixed` methods on `CesiumGlobeAnchor` as obsolete. Set the `longitudeLatitudeHeight` or `positionGlobeFixed` property instead.
-- Replaced `MetadataProperty` with `CesiumFeature`. Metadata features are now separated based on feature tables where properties can be accessed by name.
+- Replaced `MetadataProperty` with `CesiumFeature`. Metadata features are now separated based on feature tables where properties are accessed by name.
 - Replaced `CesiumMetadata.GetProperties` with `CesiumMetadata.GetFeatures`, which returns an array of `CesiumFeature`s.
 
 ##### Additions :tada:
