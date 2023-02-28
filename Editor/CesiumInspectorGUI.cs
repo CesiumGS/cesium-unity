@@ -60,10 +60,17 @@ namespace CesiumForUnity
 
             float originalLabelWidth = EditorGUIUtility.labelWidth;
 
+            GUIContent mainLabel = new GUIContent(label, tooltip);
+            bool mainLabelTooLong = EditorStyles.label.CalcSize(mainLabel).x + 4.0f > originalLabelWidth;
+            if (mainLabelTooLong)
+                GUILayout.Label(mainLabel);
+
             using (new EditorGUILayout.HorizontalScope())
             using (var changeScope = new EditorGUI.ChangeCheckScope())
             {
-                EditorGUILayout.PrefixLabel(new GUIContent(label, tooltip));
+                if (!mainLabelTooLong)
+                    EditorGUILayout.PrefixLabel(mainLabel);
+
                 EditorGUIUtility.labelWidth = EditorStyles.label.CalcSize(xContent).x + 4.0f;
                 value.x = EditorGUILayout.DoubleField(xContent, value.x);
                 EditorGUIUtility.labelWidth = EditorStyles.label.CalcSize(yContent).x + 4.0f;
