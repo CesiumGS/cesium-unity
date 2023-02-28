@@ -64,8 +64,7 @@ public CesiumGlobeAnchorPositionAuthorityBackwardCompatibility0dot1dot2 _positio
 public double _latitude0dot2dot0 = 0.0;
 ```
 
-If a field is an enum that has been eliminated entirely, or if its enum values were different in the old version, declare the enum type nested inside the backward compatibility class.
-
+If a field is an enum that has been eliminated entirely, or if its enum values were changed from the old version, declare the old enum type nested inside the backward compatibility class. Since `CesiumGlobeAnchorPositionAuthority` was removed from `CesiumGlobeAnchor`, a backwards-compatible enum is defined in `CesiumGlobeAnchorBackwardCompatibility0dot1dot2`:
 Next, declare an `Editor` class, nested inside `CesiumGlobeAnchorPositionAuthorityBackwardCompatibility0dot1dot2`, that merely provides an Upgrade button, and an `OnEnable` that automatically upgrades. Put both inside an ifdef for `UNITY_EDITOR`:
 
 ```cs
