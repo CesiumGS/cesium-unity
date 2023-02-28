@@ -12,7 +12,7 @@ If you don't need C++-specific state, static methods are _much_ more efficient. 
 
 * Implement `ICesiumRestartable` and its `Restart` method. This method is called by the UI when Unity has updated the serialized fields in unspecified ways, and so the state of the object should be recreated from the serialized fields.
 
-* In most cases, the implemenation of `OnEnable` should simply call `Restart`.
+* In most cases, the implementation of `OnEnable` should simply call `Restart`.
 
 * Implement `Reset`, usually by simply calling `Restart`. This method is called when Unity has directly written to the serialized fields to reset them, and so the `Restart` method is the right way to synchronize the object's state.
 
@@ -58,15 +58,26 @@ Define all of the properties that existed in the old version of the `CesiumGlobe
 public bool _adjustOrientationForGlobeWhenMoving0dot2dot0 = false;
 
 [FormerlySerializedAs("_positionAuthority")]
-public CesiumGlobeAnchorPositionAuthorityBackwardCompatibility0dot1dot2 _positionAuthority0dot2dot0 = CesiumGlobeAnchorPositionAuthorityBackwardCompatibility0dot1dot2.None;
+public CesiumGlobeAnchorPositionAuthorityBackwardCompatibility0dot2dot0 _positionAuthority0dot2dot0 = CesiumGlobeAnchorPositionAuthorityBackwardCompatibility0dot2dot0.None;
 
 [FormerlySerializedAs("_latitude")]
 public double _latitude0dot2dot0 = 0.0;
 ```
 
-If a field is an enum that has been eliminated entirely, or if its enum values were different in the old version, declare the enum type nested inside the backward compatibility class.
+If a field is an enum that has been eliminated entirely, or if its enum values were changed from the old version, declare the old enum type nested inside the backward compatibility class. Since `CesiumGlobeAnchorPositionAuthority` was removed from `CesiumGlobeAnchor`, a backwards-compatible enum is defined in `CesiumGlobeAnchorBackwardCompatibility0dot2dot0`:
 
-Next, declare an `Editor` class, nested inside `CesiumGlobeAnchorPositionAuthorityBackwardCompatibility0dot1dot2`, that merely provides an Upgrade button, and an `OnEnable` that automatically upgrades. Put both inside an ifdef for `UNITY_EDITOR`:
+
+```cs
+public enum CesiumGlobeAnchorPositionAuthorityBackwardCompatibility0dot2dot0
+{
+    None,
+    LongitudeLatitudeHeight,
+    EarthCenteredEarthFixed,
+    UnityCoordinates
+}
+```
+
+Next, declare an `Editor` class, nested inside `CesiumGlobeAnchorBackwardCompatibility0dot2dot0`, that merely provides an Upgrade button, and an `OnEnable` that automatically upgrades. Put both inside an ifdef for `UNITY_EDITOR`:
 
 ```cs
 #if UNITY_EDITOR
@@ -104,16 +115,16 @@ public void Upgrade(GameObject gameObject, CesiumGlobeAnchor upgraded)
     
     switch (this._positionAuthority0dot2dot0)
     {
-        case CesiumGlobeAnchorPositionAuthorityBackwardCompatibility0dot1dot2.None:
+        case CesiumGlobeAnchorPositionAuthorityBackwardCompatibility0dot2dot0.None:
             // This shouldn't happen, but if it does, just leave the position at the default.
             break;
-        case CesiumGlobeAnchorPositionAuthorityBackwardCompatibility0dot1dot2.LongitudeLatitudeHeight:
+        case CesiumGlobeAnchorPositionAuthorityBackwardCompatibility0dot2dot0.LongitudeLatitudeHeight:
             upgraded.longitudeLatitudeHeight = new double3(this._longitude0dot2dot0, this._latitude0dot2dot0, this._height0dot2dot0);
             break;
-        case CesiumGlobeAnchorPositionAuthorityBackwardCompatibility0dot1dot2.EarthCenteredEarthFixed:
+        case CesiumGlobeAnchorPositionAuthorityBackwardCompatibility0dot2dot0.EarthCenteredEarthFixed:
             upgraded.positionGlobeFixed = new double3(this._ecefX0dot2dot0, this._ecefY0dot2dot0, this._ecefZ0dot2dot0);
             break;
-        case CesiumGlobeAnchorPositionAuthorityBackwardCompatibility0dot1dot2.UnityCoordinates:
+        case CesiumGlobeAnchorPositionAuthorityBackwardCompatibility0dot2dot0.UnityCoordinates:
             // Any backward compatibility for CesiumGeoreference must have a more negative
             // DefaultExecutionOrder so that the real CesiumGeoreference is created first.
             // If this component is not nested inside a CesiumGeoreference, converting Unity coordinates

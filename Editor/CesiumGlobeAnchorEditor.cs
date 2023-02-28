@@ -152,7 +152,7 @@ namespace CesiumForUnity
 
         private static readonly string rotationTooltip = CesiumEditorUtility.FormatTooltip(@"
             The rotation of the object relative to the local East-Up-North
-            (EUP) frame centered at the object's position. In the EUP frame +X points East, +Y
+            (EUN) frame centered at the object's position. In the EUN frame +X points East, +Y
             points Up, and +Z points North.
 
             These Euler angles are expressed in degrees and use Unity's normal ZXY convention.");

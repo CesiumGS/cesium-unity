@@ -264,7 +264,7 @@ namespace CesiumForUnity
 
             // Interpolate rotation in the EUN frame. The local EUN rotation will
             // be transformed to the appropriate world rotation as we fly.
-            this.transform.rotation = Quaternion.Slerp(
+            this._globeAnchor.rotationEastUpNorth = Quaternion.Slerp(
                 this._flyToSourceRotation,
                 this._flyToDestinationRotation,
                 (float)flyPercentage);
@@ -274,8 +274,8 @@ namespace CesiumForUnity
         {
             double3 finalPoint = this._keypoints[this._keypoints.Count - 1];
             this._globeAnchor.positionGlobeFixed = finalPoint;
-
-            this.transform.rotation = this._flyToDestinationRotation;
+            
+            this._globeAnchor.rotationEastUpNorth = this._flyToDestinationRotation;
 
             this._flyingToLocation = false;
             this._currentFlyToTime = 0.0;

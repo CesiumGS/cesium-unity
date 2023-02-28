@@ -166,8 +166,8 @@ namespace CesiumForUnity
         /// </summary>
         /// <remarks>
         /// When the position is set via this property, it is internally converted to and stored in Earth-Centered,
-        /// Earth-Fixed Coordinates. As a result, getting this property will not necessarily return exactly
-        /// the value that was set.
+        /// Earth-Fixed Coordinates. As a result, getting this property will not necessarily return
+        /// the exact value that was set.
         /// </remarks>
         public double3 longitudeLatitudeHeight
         {
@@ -206,7 +206,7 @@ namespace CesiumForUnity
         /// <para>
         /// When the rotation is set via this property, it is internally converted to and stored in the
         /// <see cref="localToGlobeFixedMatrix"/> property. As a result, getting this property will not
-        /// necessarily return exactly the value that was set.
+        /// necessarily return the exact value that was set.
         /// </para>
         /// </remarks>
         public quaternion rotationGlobeFixed
@@ -240,7 +240,7 @@ namespace CesiumForUnity
         /// <remarks>
         /// When the rotation is set via this property, it is internally converted to and stored in the
         /// <see cref="localToGlobeFixedMatrix"/> property. As a result, getting this property will not
-        /// necessarily return exactly the value that was set.
+        /// necessarily return the exact value that was set.
         /// </remarks>
         public quaternion rotationEastUpNorth
         {
@@ -295,7 +295,7 @@ namespace CesiumForUnity
         /// <remarks>
         /// When the rotation is set via this property, it is internally converted to and stored in the
         /// <see cref="localToGlobeFixedMatrix"/> property. As a result, getting this property will not
-        /// necessarily return exactly the value that was set.
+        /// necessarily return the exact value that was set.
         /// </remarks>
         public double3 scaleEastUpNorth
         {
@@ -419,8 +419,8 @@ namespace CesiumForUnity
         /// from the game object's current `Transform`.
         /// </item>
         /// <item>
-        /// If the game object's `Transform` has changed since the last time `OnEnable`, this method,
-        /// or a position setter was called, it updates all of this instance's position
+        /// If the game object's `Transform` has changed since the last time `OnEnable`,
+        /// or if a position setter was called, this method updates all of this instance's position
         /// properties from the current transform. This works even if <see cref="detectTransformChanges"/> is
         /// disabled. It will also update the object's orientation if
         /// <see cref="adjustOrientationForGlobeWhenMoving"/> is enabled.
@@ -539,7 +539,7 @@ namespace CesiumForUnity
         {
             // Detect changes in the Transform component.
             // We don't use Transform.hasChanged because we can't control when it is reset to false.
-            WaitUntil waitForChanges = new WaitUntil(() => this._lastLocalToWorld != null && !this.transform.localToWorldMatrix.Equals(this._lastLocalToWorld));
+            WaitUntil waitForChanges = new WaitUntil(() => this._lastLocalToWorld.HasValue && !this.transform.localToWorldMatrix.Equals(this._lastLocalToWorld.Value));
 
             while (true)
             {
