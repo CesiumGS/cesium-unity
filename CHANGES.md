@@ -26,6 +26,7 @@
 - Fixed a bug that prevented caching of 3D Tiles and overlay requests.
 - Fixed a bug that could cause the Cesium ion Token Troubleshooting panel to crash the Unity Editor.
 - Added a workaround for a crash in the Burst Compiler (bcl.exe) in Unity 2022.2 when using il2cpp.
+- Fixed a bug that could cause incorrect metadata to be associated with a feature, especially in Draco-encoded tiles.
 
 ### v0.2.0
 
