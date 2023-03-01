@@ -413,6 +413,10 @@ namespace Reinterop
                         throw new NotImplementedException("The native implementation is missing so {{method.Name}} cannot be invoked. This may be caused by a missing call to CreateImplementation in one of your constructors, or it may be that the entire native implementation shared library is missing or out of date.");
                     """;
             }
+            else
+            {
+                implementationCheck = "Reinterop.ReinteropInitializer.Initialize();";
+            }
 
             if (method.IsOverride)
                 modifiers += " override";

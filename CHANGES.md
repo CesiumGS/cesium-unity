@@ -18,12 +18,12 @@
 - `CesiumGlobeAnchor` now stores a precise, globe-relative orientation and scale in addition to position.
 - Added `localToGlobeFixedMatrix`, `longitudeLatitudeHeight`, `positionGlobeFixed`, `rotationGlobeFixed`, `rotationEastUpNorth`, `scaleGlobeFixed`, and `scaleEastUpNorth` properties to `CesiumGlobeAnchor`.
 - Added the `Restart` method to `CesiumGlobeAnchor`, which can be use to reinitialize the component from its serialized values.
-- Enabled caching of UnityWebRequests by copying all response headers.
+- Moved the Cesium tileset shaders from the `Shader Graphs` shader category to the new `Cesium` shader category.
 - Added `CesiumDebugColorizeTilesRasterOverlay` to visualize how a tileset is divided into tiles.
 
 ##### Fixes :wrench:
 
-- Recategorized the Cesium tileset shaders from the `Shader Graphs` shader category to the new `Cesium` shader category. 
+- Fixed a bug that prevented caching of 3D Tiles and overlay requests.
 - Fixed a bug that could cause the Cesium ion Token Troubleshooting panel to crash the Unity Editor.
 - Added a workaround for a crash in the Burst Compiler (bcl.exe) in Unity 2022.2 when using il2cpp.
 
