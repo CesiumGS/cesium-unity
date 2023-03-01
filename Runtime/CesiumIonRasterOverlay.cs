@@ -41,7 +41,9 @@ namespace CesiumForUnity
             }
         }
 
+        /// <inheritdoc/>
         protected override partial void AddToTileset(Cesium3DTileset tileset);
+        /// <inheritdoc/>
         protected override partial void RemoveFromTileset(Cesium3DTileset tileset);
     }
 }
