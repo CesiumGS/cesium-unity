@@ -65,6 +65,7 @@ jobs:
           cd d:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
           dotnet publish Reinterop~ -o .
       - name: Build Package
+        uses: ilammy/setup-nasm@v1
         run: |
           cd d:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
           mkdir -p d:\cesium\temp
@@ -161,6 +162,7 @@ jobs:
           cd ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
           dotnet publish Reinterop~ -o .
       - name: Build Package
+        uses: ilammy/setup-nasm@v1
         run: |
           cd ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
           dotnet run --project Build~
