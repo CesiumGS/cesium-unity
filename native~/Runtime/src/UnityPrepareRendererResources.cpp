@@ -22,7 +22,6 @@
 #include <DotNet/CesiumForUnity/CesiumGlobeAnchor.h>
 #include <DotNet/CesiumForUnity/CesiumMetadata.h>
 #include <DotNet/CesiumForUnity/CesiumPointCloudRenderer.h>
-#include <DotNet/CesiumForUnity/CesiumPointCloudShading.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/Collections/Generic/List1.h>
 #include <DotNet/System/Object.h>
@@ -31,7 +30,6 @@
 #include <DotNet/Unity/Collections/NativeArray1.h>
 #include <DotNet/Unity/Collections/NativeArrayOptions.h>
 #include <DotNet/UnityEngine/Application.h>
-#include <DotNet/UnityEngine/Color.h>
 #include <DotNet/UnityEngine/Debug.h>
 #include <DotNet/UnityEngine/FilterMode.h>
 #include <DotNet/UnityEngine/HideFlags.h>
@@ -875,30 +873,6 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           tileInfo.dimensions =
               UnityEngine::Vector3{dimensions.x, dimensions.y, dimensions.z};
           pointCloudRenderer.tileInfo(tileInfo);
-        }
-
-        if (primitiveInfo.containsPoints) {
-          if (opaqueMaterial != nullptr) {
-            tilesetComponent.pointCloudShading().constantColor(
-                opaqueMaterial.color());
-          } else if (pMaterial) {
-            const std::vector<double>& baseColorFactor =
-                pMaterial->pbrMetallicRoughness->baseColorFactor;
-            float red = baseColorFactor.size() > 0
-                            ? static_cast<float>(baseColorFactor[0])
-                            : 1.0f;
-            float green = baseColorFactor.size() > 1
-                              ? static_cast<float>(baseColorFactor[1])
-                              : 1.0f;
-            float blue = baseColorFactor.size() > 2
-                             ? static_cast<float>(baseColorFactor[2])
-                             : 1.0f;
-            float alpha = baseColorFactor.size() > 3
-                              ? static_cast<float>(baseColorFactor[3])
-                              : 1.0f;
-            tilesetComponent.pointCloudShading().constantColor(
-                UnityEngine::Color({red, green, blue, alpha}));
-          }
         }
 
         if (opaqueMaterial == nullptr) {

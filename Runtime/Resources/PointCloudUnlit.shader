@@ -23,6 +23,8 @@ Shader "Hidden/Cesium/PointCloudUnlit"
 
 			#pragma target 5.0
 
+			#pragma multi_compile __ HAS_POINT_COLORS
+			
 			#pragma multi_compile _ _MAIN_LIGHT_SHADOWS
 			#pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
 			#pragma multi_compile _ _ADDITIONAL_LIGHTS
@@ -45,7 +47,10 @@ Shader "Hidden/Cesium/PointCloudUnlit"
 
 			HLSLPROGRAM
 
-			// This sets up various keywords for different light types and shadow settings
+			// This is needed here to ensure the point data struct is the correct size.
+			#pragma multi_compile __ HAS_POINT_COLORS
+
+			// This sets up various keywords for different light types and shadow settings.
 			#pragma multi_compile_shadowcaster
 
 			#pragma vertex Vertex

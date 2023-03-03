@@ -13,7 +13,6 @@
 #include <DotNet/CesiumForUnity/Cesium3DTilesetLoadType.h>
 #include <DotNet/CesiumForUnity/CesiumDataSource.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
-#include <DotNet/CesiumForUnity/CesiumPointCloudShading.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
 #include <DotNet/CesiumForUnity/CesiumRuntimeSettings.h>
 #include <DotNet/System/Action.h>
@@ -361,8 +360,6 @@ void Cesium3DTilesetImpl::DestroyTileset(
     CesiumForUnity::CesiumRasterOverlay overlay = overlays[i];
     overlay.RemoveFromTileset();
   }
-
-  tileset.pointCloudShading().DestroyMaterials();
 
   this->_pTileset.reset();
 }

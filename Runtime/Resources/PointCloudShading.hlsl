@@ -6,19 +6,33 @@
 struct VertexInput
 {
 	float3 position;
+#ifdef HAS_POINT_COLORS
 	uint packedColor;
+#endif
+#ifdef HAS_POINT_NORMALS
+	float3 normal;
+#endif
 };
 
 StructuredBuffer<VertexInput> _inVertices;
 
 float4x4 _worldTransform;
-float4 _constantColor;
 float4 _attenuationParameters;
+
+#ifndef HAS_POINT_COLORS
+float4 _constantColor;
+#endif
 
 struct VertexOutput
 {
 	float4 positionClip : SV_POSITION; // Position in clip space
+#ifdef HAS_POINT_COLORS
 	uint packedColor : COLOR_0; // Packed vertex colors
+#endif
+#ifdef HAS_POINT_NORMALS
+	float3 normal : TEXCOORD0; // Normals in view space. 
+							   // There's no 'NORMAL' semantic in fragment shader.
+#endif
 };
 
 VertexOutput Vertex(uint vertexID : SV_VertexID) {
@@ -73,31 +87,42 @@ VertexOutput Vertex(uint vertexID : SV_VertexID) {
 	// Perspective divide with w is done between the vertex and fragment shaders.
 	positionClip.xy += screenOffset * positionClip.w;
 	output.positionClip = positionClip;
+
+#ifdef HAS_POINT_COLORS
 	output.packedColor = input.packedColor;
+#endif
+
+#ifdef HAS_POINT_NORMALS
+	float4 normalWC = mul(_worldTransform, vec4(input.normal, 0));
+	output.normal = mul(unity_MatrixV, normalWC).xyz;
+#endif
 
 	return output;
 }
 
-float4 Fragment(VertexOutput input) : SV_TARGET {
+float4 Fragment(VertexOutput input) : SV_TARGET{
 	// The shadow caster pass renders to a shadow map, so we can ignore
 	// the color logic here.
-	#ifndef SHADOW_CASTER_PASS
-	bool useConstantColor = _attenuationParameters.w > 0.0;
-	if (useConstantColor)
-	{
-		return _constantColor;
-	}
-	else
-	{
-		uint packedColor = input.packedColor;
-		uint r = packedColor & 255;
-		uint g = (packedColor >> 8) & 255;
-		uint b = (packedColor >> 16) & 255;
-		uint a = packedColor >> 24;
-		return float4(r, g, b, a) / 255;
-	}
-	#else
+	#ifdef SHADOW_CASTER_PASS
 	return float4(1, 1, 1, 1);
+	#else
+	float4 result;
+	#ifdef HAS_POINT_COLORS
+	uint packedColor = input.packedColor;
+	uint r = packedColor & 255;
+	uint g = (packedColor >> 8) & 255;
+	uint b = (packedColor >> 16) & 255;
+	uint a = packedColor >> 24;
+	result = float4(r, g, b, a) / 255;
+	#else
+	result = _constantColor;
+	#endif
+
+	#ifdef HAS_POINT_NORMALS
+	// TODO: shade with normals
+	#endif
+
+	return result;
 	#endif
 }
 

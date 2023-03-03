@@ -20,23 +20,22 @@ namespace CesiumForUnity
         private Cesium3DTileset _tileset;
 
         private Mesh _mesh;
-        private Material _material;
-
         private MeshFilter _meshFilter;
         private MeshRenderer _meshRenderer;
         private GraphicsBuffer _meshVertexBuffer;
+
         private int _pointCount = 0;
+        private Material _pointMaterial;
 
         private Bounds _bounds;
 
         private Vector4 _attenuationParameters;
-        private bool _useConstantColor;
+        private Vector4 _constantColor;
 
         private Cesium3DTileInfo _tileInfo;
 
         public Cesium3DTileInfo tileInfo
         {
-            get => this._tileInfo;
             set => this._tileInfo = value;
         }
 
@@ -52,10 +51,29 @@ namespace CesiumForUnity
 
             this._pointCount = this._mesh.vertexCount;
 
-            this._material = UnityEngine.Object.Instantiate(
+            this._pointMaterial = UnityEngine.Object.Instantiate(
                         Resources.Load<Material>("CesiumUnlitPointCloudMaterial"));
 
-            this._useConstantColor = !this._mesh.HasVertexAttribute(VertexAttribute.Color);
+            if (this._mesh.HasVertexAttribute(VertexAttribute.Color))
+            {
+                this._pointMaterial.EnableKeyword("HAS_POINT_COLORS");
+            }
+            else
+            {
+                Material material = this._meshRenderer.sharedMaterial;
+                if (material.HasColor("_Color"))
+                {
+                    this._constantColor = material.color;
+                }
+                else if (material.HasVector("_baseColorFactor"))
+                {
+                    this._constantColor = material.GetVector("_baseColorFactor");
+                }
+                else
+                {
+                    this._constantColor = Color.white;
+                }
+            }
         }
 
         private float GetGeometricError(CesiumPointCloudShading pointCloudShading)
@@ -106,11 +124,8 @@ namespace CesiumForUnity
             float sseDenominator = 2.0f * Mathf.Tan(0.5f * Mathf.Deg2Rad * camera.fieldOfView);
             float depthMultplier = camera.scaledPixelHeight / sseDenominator;
 
-            // Whether or not to use constant color
-            float useConstantColor = 0.0f;
-
             this._attenuationParameters =
-                new Vector4(maximumPointSize, geometricError, depthMultplier, useConstantColor);
+                new Vector4(maximumPointSize, geometricError, depthMultplier, 0);
         }
 
         private Vector3[] positionsScratch = new Vector3[3];
@@ -135,15 +150,15 @@ namespace CesiumForUnity
                 this._meshVertexBuffer = null;
             }
 
-            if(this._material != null)
+            if (this._pointMaterial != null)
             {
 #if UNITY_EDITOR
             if (!EditorApplication.isPlaying) {
-                DestroyImmediate(this._material);
+                DestroyImmediate(this._pointMaterial);
                 return;
             }
 #endif
-                Destroy(this._material);
+                Destroy(this._pointMaterial);
             }
         }
 
@@ -152,12 +167,13 @@ namespace CesiumForUnity
             this.UpdateBounds();
             this.UpdateAttenuationParameters();
 
-            this._material.SetBuffer("_inVertices", this._meshVertexBuffer);
-            this._material.SetMatrix("_worldTransform", this.gameObject.transform.localToWorldMatrix);
-            this._material.SetVector("_attenuationParameters", this._attenuationParameters);
+            this._pointMaterial.SetBuffer("_inVertices", this._meshVertexBuffer);
+            this._pointMaterial.SetMatrix("_worldTransform", this.gameObject.transform.localToWorldMatrix);
+            this._pointMaterial.SetVector("_attenuationParameters", this._attenuationParameters);
+            this._pointMaterial.SetVector("_constantColor", this._constantColor);
 
             Graphics.DrawProcedural(
-                this._material,
+                this._pointMaterial,
                 this._bounds,
                 MeshTopology.Triangles,
                 this._pointCount * 6,

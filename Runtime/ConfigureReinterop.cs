@@ -460,11 +460,6 @@ namespace CesiumForUnity
             CesiumPointCloudRenderer renderer = go.AddComponent<CesiumPointCloudRenderer>();
             renderer.tileInfo = info;
 
-            CesiumPointCloudShading pointCloudShading = tileset.pointCloudShading;
-            Material unlitMaterial = pointCloudShading.unlitMaterial;
-            pointCloudShading.constantColor = unlitMaterial.color;
-            pointCloudShading.DestroyMaterials();
-
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;
             sv.pivot = sv.pivot;
