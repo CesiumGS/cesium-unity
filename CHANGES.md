@@ -1,5 +1,11 @@
 # Change Log
 
+### v0.4.0
+
+##### Fixes :wrench:
+
+- Fixed a bug which caused local tilesets to not load.
+
 ### v0.3.0
 
 ##### Breaking Changes :mega:
