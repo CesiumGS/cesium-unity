@@ -51,6 +51,34 @@ int64_t getVertexIndexFromTriangleIndex(
       indicesView);
 }
 
+namespace {
+
+struct FeatureIDFromAccessor {
+  int64_t operator()(std::monostate) { return -1; }
+
+  int64_t operator()(
+      const CesiumGltf::AccessorView<AccessorTypes::SCALAR<float>>& value) {
+    if (vertexIdx >= 0 && vertexIdx < value.size()) {
+      return static_cast<int64_t>(glm::round(value[vertexIdx].value[0]));
+    } else {
+      return static_cast<int64_t>(-1);
+    }
+  }
+
+  template <typename T>
+  int64_t operator()(const CesiumGltf::AccessorView<T>& value) {
+    if (vertexIdx >= 0 && vertexIdx < value.size()) {
+      return static_cast<int64_t>(value[vertexIdx].value[0]);
+    } else {
+      return static_cast<int64_t>(-1);
+    }
+  }
+
+  int64_t vertexIdx;
+};
+
+} // namespace
+
 int64_t getFeatureIdFromVertexIndex(
     const CesiumGltf::Model* pModel,
     const CesiumGltf::MeshPrimitive* pPrimitive,
@@ -106,15 +134,8 @@ int64_t getFeatureIdFromVertexIndex(
     default:
       return 0;
     }
-    return std::visit(
-        [vertexIndex](auto&& value) {
-          if (vertexIndex >= 0 && vertexIndex < value.size()) {
-            return static_cast<int64_t>(value[vertexIndex].value[0]);
-          } else {
-            return static_cast<int64_t>(-1);
-          }
-        },
-        featureIDAccessor);
+
+    return std::visit(FeatureIDFromAccessor{vertexIndex}, featureIDAccessor);
   }
   return -1;
 }
