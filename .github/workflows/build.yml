@@ -22,6 +22,8 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: recursive
+      - name: Install nasm
+        uses: ilammy/setup-nasm@v1.4.0
       - name: Create SSH tunnel to Unity License Server
         env:
           UNITY_LICENSE_SERVER_SSH_KEY: ${{ secrets.UNITY_LICENSE_SERVER_SSH_KEY }}
@@ -65,7 +67,6 @@ jobs:
           cd d:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
           dotnet publish Reinterop~ -o .
       - name: Build Package
-        uses: ilammy/setup-nasm@v1
         run: |
           cd d:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
           mkdir -p d:\cesium\temp
@@ -100,6 +101,8 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: recursive
+      - name: Install nasm
+        uses: ilammy/setup-nasm@v1.4.0
       - name: Install jq
         run: brew install jq
       - name: Install Unity Hub
@@ -162,7 +165,6 @@ jobs:
           cd ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
           dotnet publish Reinterop~ -o .
       - name: Build Package
-        uses: ilammy/setup-nasm@v1
         run: |
           cd ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
           dotnet run --project Build~
