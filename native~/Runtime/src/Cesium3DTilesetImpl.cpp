@@ -308,6 +308,11 @@ Cesium3DTilesetImpl::getCreditSystem() const {
   return this->_creditSystem;
 }
 
+const Cesium3DTilesSelection::ViewUpdateResult&
+Cesium3DTilesetImpl::getLastUpdateResult() const {
+  return _lastUpdateResult;
+}
+
 void Cesium3DTilesetImpl::setCreditSystem(
     const DotNet::CesiumForUnity::CesiumCreditSystem& creditSystem) {
   this->_creditSystem = creditSystem;
@@ -316,36 +321,37 @@ void Cesium3DTilesetImpl::setCreditSystem(
 void Cesium3DTilesetImpl::updateLastViewUpdateResultState(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset,
     const Cesium3DTilesSelection::ViewUpdateResult& currentResult) {
-  if (!tileset.logSelectionStats())
-    return;
 
-  const ViewUpdateResult& previousResult = this->_lastUpdateResult;
-  if (currentResult.tilesToRenderThisFrame.size() !=
-          previousResult.tilesToRenderThisFrame.size() ||
-      currentResult.tilesLoadingLowPriority !=
-          previousResult.tilesLoadingLowPriority ||
-      currentResult.tilesLoadingMediumPriority !=
-          previousResult.tilesLoadingMediumPriority ||
-      currentResult.tilesLoadingHighPriority !=
-          previousResult.tilesLoadingHighPriority ||
-      currentResult.tilesVisited != previousResult.tilesVisited ||
-      currentResult.culledTilesVisited != previousResult.culledTilesVisited ||
-      currentResult.tilesCulled != previousResult.tilesCulled ||
-      currentResult.maxDepthVisited != previousResult.maxDepthVisited) {
-    SPDLOG_LOGGER_INFO(
-        this->_pTileset->getExternals().pLogger,
-        "{0}: Visited {1}, Culled Visited {2}, Rendered {3}, Culled {4}, Max "
-        "Depth Visited {5}, Loading-Low {6}, Loading-Medium {7}, Loading-High "
-        "{8}",
-        tileset.gameObject().name().ToStlString(),
-        currentResult.tilesVisited,
-        currentResult.culledTilesVisited,
-        currentResult.tilesToRenderThisFrame.size(),
-        currentResult.tilesCulled,
-        currentResult.maxDepthVisited,
-        currentResult.tilesLoadingLowPriority,
-        currentResult.tilesLoadingMediumPriority,
-        currentResult.tilesLoadingHighPriority);
+  if (!tileset.logSelectionStats()) {
+    const ViewUpdateResult& previousResult = this->_lastUpdateResult;
+    if (currentResult.tilesToRenderThisFrame.size() !=
+            previousResult.tilesToRenderThisFrame.size() ||
+        currentResult.tilesLoadingLowPriority !=
+            previousResult.tilesLoadingLowPriority ||
+        currentResult.tilesLoadingMediumPriority !=
+            previousResult.tilesLoadingMediumPriority ||
+        currentResult.tilesLoadingHighPriority !=
+            previousResult.tilesLoadingHighPriority ||
+        currentResult.tilesVisited != previousResult.tilesVisited ||
+        currentResult.culledTilesVisited != previousResult.culledTilesVisited ||
+        currentResult.tilesCulled != previousResult.tilesCulled ||
+        currentResult.maxDepthVisited != previousResult.maxDepthVisited) {
+      SPDLOG_LOGGER_INFO(
+          this->_pTileset->getExternals().pLogger,
+          "{0}: Visited {1}, Culled Visited {2}, Rendered {3}, Culled {4}, Max "
+          "Depth Visited {5}, Loading-Low {6}, Loading-Medium {7}, "
+          "Loading-High "
+          "{8}",
+          tileset.gameObject().name().ToStlString(),
+          currentResult.tilesVisited,
+          currentResult.culledTilesVisited,
+          currentResult.tilesToRenderThisFrame.size(),
+          currentResult.tilesCulled,
+          currentResult.maxDepthVisited,
+          currentResult.tilesLoadingLowPriority,
+          currentResult.tilesLoadingMediumPriority,
+          currentResult.tilesLoadingHighPriority);
+    }
   }
 
   this->_lastUpdateResult = currentResult;

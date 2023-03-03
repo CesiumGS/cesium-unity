@@ -43,6 +43,7 @@ public:
   const DotNet::CesiumForUnity::CesiumCreditSystem& getCreditSystem() const;
   void setCreditSystem(
       const DotNet::CesiumForUnity::CesiumCreditSystem& creditSystem);
+  const Cesium3DTilesSelection::ViewUpdateResult& getLastUpdateResult() const;
 
 private:
   void DestroyTileset(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
