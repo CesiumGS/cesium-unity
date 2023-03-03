@@ -23,8 +23,8 @@ struct VertexOutput
 
 VertexOutput Vertex(uint vertexID : SV_VertexID) {
 	VertexOutput output;
-	uint pointIndex = vertexID / 4;
-	uint vertexIndex = vertexID - (pointIndex * 4); // Modulo
+	uint pointIndex = vertexID / 6;
+	uint vertexIndex = vertexID - (pointIndex * 6); // Modulo
 	VertexInput input = _inVertices[pointIndex];
 	float3 position = input.position;
 
@@ -69,8 +69,8 @@ VertexOutput Vertex(uint vertexID : SV_VertexID) {
 	// is the same across different platforms.
 	float2 screenOffset =
 		pixelOffset / float2(_ScreenParams.x, _ScreenParams.y * _ProjectionParams.x);
-	// The clip space position xy in Unity is in [-w, w]
-	// (perspective divide with the w-coordinate is done between the shaders)
+	// The clip space position xy in Unity is in [-w, w] where w is the w-coordinate.
+	// Perspective divide with w is done between the vertex and fragment shaders.
 	positionClip.xy += screenOffset * positionClip.w;
 	output.positionClip = positionClip;
 	output.packedColor = input.packedColor;

@@ -21,8 +21,6 @@ Shader "Hidden/Cesium/PointCloudUnlit"
 
 			HLSLPROGRAM
 
-			#pragma prefer_hlslcc gles
-			#pragma exclude_renderers d3d11_9x
 			#pragma target 5.0
 
 			#pragma multi_compile _ _MAIN_LIGHT_SHADOWS

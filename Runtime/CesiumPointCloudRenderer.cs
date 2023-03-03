@@ -1,6 +1,9 @@
 using UnityEngine;
 using UnityEngine.Rendering;
-using System.Collections.Generic;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace CesiumForUnity
 {
@@ -18,7 +21,6 @@ namespace CesiumForUnity
 
         private Mesh _mesh;
         private Material _material;
-        private Material _unlitMaterial;
 
         private MeshFilter _meshFilter;
         private MeshRenderer _meshRenderer;
@@ -27,12 +29,8 @@ namespace CesiumForUnity
 
         private Bounds _bounds;
 
-        private MaterialPropertyBlock _oldProperties;
-        private MaterialPropertyBlock _materialProperties;
         private Vector4 _attenuationParameters;
         private bool _useConstantColor;
-
-        private Mesh _pointMesh;
 
         private Cesium3DTileInfo _tileInfo;
 
@@ -49,43 +47,13 @@ namespace CesiumForUnity
             this._meshFilter = this.gameObject.GetComponent<MeshFilter>();
             this._mesh = this._meshFilter.sharedMesh;
             this._meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
-            this._material = this._meshRenderer.sharedMaterial;
-            this._oldProperties = new MaterialPropertyBlock();
-            this._meshRenderer.GetPropertyBlock(this._oldProperties);
             this._mesh.vertexBufferTarget |= GraphicsBuffer.Target.Structured;
             this._meshVertexBuffer = this._mesh.GetVertexBuffer(0);
 
             this._pointCount = this._mesh.vertexCount;
-            this._pointMesh = new Mesh();
 
-            Vector3[] vertices = this._mesh.vertices;
-            int expandedPointCount = this._pointCount * 4;
-
-            Vector3[] points = new Vector3[expandedPointCount];
-            int[] triangles = new int[this._pointCount * 6];
-            for (int i = 0, j = 0, k = 0; k < this._pointCount; k++, i += 4, j += 6)
-            {
-                points[i] = vertices[k];
-                points[i + 1] = new Vector3(points[i].x, points[i].y + 1, points[i].z);
-                points[i + 2] = new Vector3(points[i].x + 1, points[i].y + 1, points[i].z);
-                points[i + 3] = new Vector3(points[i].x + 1, points[i].y, points[i].z);
-                triangles[j] = i;
-                triangles[j + 1] = i + 1;
-                triangles[j + 2] = i + 2;
-                triangles[j + 3] = i;
-                triangles[j + 4] = i + 2;
-                triangles[j + 5] = i + 3;
-            }
-
-            this._pointMesh.vertices = points;
-            this._pointMesh.indexFormat = IndexFormat.UInt32;
-            this._pointMesh.triangles = triangles;
-
-            this._unlitMaterial = UnityEngine.Object.Instantiate(
+            this._material = UnityEngine.Object.Instantiate(
                         Resources.Load<Material>("CesiumUnlitPointCloudMaterial"));
-
-            this._materialProperties = new MaterialPropertyBlock();
-            this._materialProperties.SetBuffer("_inVertices", this._meshVertexBuffer);
 
             this._useConstantColor = !this._mesh.HasVertexAttribute(VertexAttribute.Color);
         }
@@ -145,17 +113,18 @@ namespace CesiumForUnity
                 new Vector4(maximumPointSize, geometricError, depthMultplier, useConstantColor);
         }
 
-        private void UpdateTransformAndBounds()
+        private Vector3[] positionsScratch = new Vector3[3];
+
+        private void UpdateBounds()
         {
             Matrix4x4 transformMatrix = this.gameObject.transform.localToWorldMatrix;
-            this._materialProperties.SetMatrix("_worldTransform", transformMatrix);
 
-            //Bounds localBounds = this._mesh.bounds;
-            //positionsScratch[0] = localBounds.center;
-            //positionsScratch[1] = localBounds.min;
-            //positionsScratch[2] = localBounds.max;
+            Bounds localBounds = this._mesh.bounds;
+            positionsScratch[0] = localBounds.center;
+            positionsScratch[1] = localBounds.min;
+            positionsScratch[2] = localBounds.max;
 
-            //this._bounds = GeometryUtility.CalculateBounds(positionsScratch, transformMatrix);
+            this._bounds = GeometryUtility.CalculateBounds(positionsScratch, transformMatrix);
         }
 
         private void DestroyResources()
@@ -166,48 +135,46 @@ namespace CesiumForUnity
                 this._meshVertexBuffer = null;
             }
 
-            if(this._unlitMaterial != null)
+            if(this._material != null)
             {
-                DestroyImmediate(this._unlitMaterial);
+#if UNITY_EDITOR
+            if (!EditorApplication.isPlaying) {
+                DestroyImmediate(this._material);
+                return;
             }
-
-            if(this._pointMesh != null)
-            {
-                DestroyImmediate(this._pointMesh);
+#endif
+                Destroy(this._material);
             }
         }
 
         private void DrawPointsWithAttenuation()
         {
+            this.UpdateBounds();
             this.UpdateAttenuationParameters();
-            this._materialProperties.SetVector("_attenuationParameters", this._attenuationParameters);
-            Graphics.DrawMesh(
-                this._pointMesh,
-                this.gameObject.transform.localToWorldMatrix,
-                this._tileset.pointCloudShading.unlitMaterial,
-                this.gameObject.layer,
-                null,
-                0,
-                this._materialProperties);
+
+            this._material.SetBuffer("_inVertices", this._meshVertexBuffer);
+            this._material.SetMatrix("_worldTransform", this.gameObject.transform.localToWorldMatrix);
+            this._material.SetVector("_attenuationParameters", this._attenuationParameters);
+
+            Graphics.DrawProcedural(
+                this._material,
+                this._bounds,
+                MeshTopology.Triangles,
+                this._pointCount * 6,
+                1);
         }
 
         // Update is called once per frame
         void Update()
         {
-            this.UpdateTransformAndBounds();
-
             if (this._tileset.pointCloudShading.attenuation)
             {
                 this.DrawPointsWithAttenuation();
                 this._meshRenderer.enabled = false;
-                //this._meshFilter.sharedMesh = this._pointMesh;
-                //this._meshRenderer.sharedMaterial = this._unlitMaterial;
             }
             else
             {
                 this._meshRenderer.enabled = true;
-                //this._meshFilter.sharedMesh = this._mesh;
-                //this._meshRenderer.sharedMaterial = this._material;
             }
         }
 

@@ -73,6 +73,7 @@ namespace CesiumForUnity
             set => this._baseResolution = Mathf.Max(value, 0.0f);
         }
 
+        // TODO: Remove
         private Material _unlitMaterial;
 
         internal Material unlitMaterial
