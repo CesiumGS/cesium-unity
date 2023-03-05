@@ -42,16 +42,20 @@ public:
       : _statusCode(uint16_t(request.responseCode())),
         _contentType(),
         _data(std::move(handler.NativeImplementation().getData())) {
-    System::Collections::Generic::Enumerator0 enumerator =
-        request.GetResponseHeaders().GetEnumerator();
-    while (enumerator.MoveNext()) {
-      this->_headers.emplace(
-          enumerator.Current().Key().ToStlString(),
-          enumerator.Current().Value().ToStlString());
-    }
-    auto find = this->_headers.find("content-type");
-    if (find != this->_headers.end()) {
-      this->_contentType = find->second;
+    System::Collections::Generic::Dictionary2<System::String, System::String>
+        responseHeaders = request.GetResponseHeaders();
+    if (responseHeaders != nullptr) {
+      System::Collections::Generic::Enumerator0 enumerator =
+          responseHeaders.GetEnumerator();
+      while (enumerator.MoveNext()) {
+        this->_headers.emplace(
+            enumerator.Current().Key().ToStlString(),
+            enumerator.Current().Value().ToStlString());
+      }
+      auto find = this->_headers.find("content-type");
+      if (find != this->_headers.end()) {
+        this->_contentType = find->second;
+      }
     }
   }
 
