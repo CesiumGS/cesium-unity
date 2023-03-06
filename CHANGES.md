@@ -1,5 +1,13 @@
 # Change Log
 
+### v0.3.1
+
+##### Fixes :wrench:
+
+- Fixed a bug introduced in v0.3.0 that caused an exception when attempting load Cesium3DTilesets from a local file.
+
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.22.0 to v0.22.1. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
+
 ### v0.3.0
 
 ##### Breaking Changes :mega:
@@ -27,6 +35,8 @@
 - Fixed a bug that could cause the Cesium ion Token Troubleshooting panel to crash the Unity Editor.
 - Added a workaround for a crash in the Burst Compiler (bcl.exe) in Unity 2022.2 when using il2cpp.
 - Fixed a bug that could cause incorrect metadata to be associated with a feature, especially in Draco-encoded tiles.
+
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.21.3 to v0.22.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
 
 ### v0.2.0
 
