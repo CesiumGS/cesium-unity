@@ -34,7 +34,7 @@ Shader "Hidden/Cesium/PointCloudUnlit"
 			#pragma vertex Vertex
 			#pragma fragment Fragment
 
-			#include "PointCloudShading.hlsl"
+			#include "CesiumPointCloudShading.hlsl"
 
 			ENDHLSL
 		}
@@ -58,7 +58,7 @@ Shader "Hidden/Cesium/PointCloudUnlit"
 
 			#define SHADOW_CASTER_PASS
 
-			#include "PointCloudShading.hlsl"
+			#include "CesiumPointCloudShading.hlsl"
 
 			ENDHLSL
 		}

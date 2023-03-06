@@ -50,7 +50,6 @@ namespace CesiumForUnity
             this._meshVertexBuffer = this._mesh.GetVertexBuffer(0);
 
             this._pointCount = this._mesh.vertexCount;
-
             this._pointMaterial = UnityEngine.Object.Instantiate(
                         Resources.Load<Material>("CesiumUnlitPointCloudMaterial"));
 

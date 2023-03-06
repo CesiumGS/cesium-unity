@@ -69,8 +69,8 @@ VertexOutput Vertex(uint vertexID : SV_VertexID) {
 	}
 
 	float4 positionWC = mul(_worldTransform, float4(position, 1.0));
-	float4 positionClip = mul(unity_MatrixVP, positionWC);
 	float4 positionEC = mul(unity_MatrixV, positionWC);
+	float4 positionClip = mul(unity_MatrixVP, positionWC);
 	float maximumPointSize = _attenuationParameters.x;
 	float geometricError = _attenuationParameters.y;
 	float depthMultiplier = _attenuationParameters.z;
