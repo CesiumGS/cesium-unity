@@ -2,15 +2,16 @@
 #define CESIUM_POINT_CLOUD_SHADING
 
 #include "UnityCG.cginc"
+#include "UnityLightingCommon.cginc"
 
 struct VertexInput
 {
 	float3 position;
-#ifdef HAS_POINT_COLORS
-	uint packedColor;
-#endif
 #ifdef HAS_POINT_NORMALS
 	float3 normal;
+#endif
+#ifdef HAS_POINT_COLORS
+	uint packedColor;
 #endif
 };
 
@@ -27,11 +28,10 @@ struct VertexOutput
 {
 	float4 positionClip : SV_POSITION; // Position in clip space
 #ifdef HAS_POINT_COLORS
-	uint packedColor : COLOR_0; // Packed vertex colors
+	uint packedColor : COLOR_0; // Packed vertex color
 #endif
 #ifdef HAS_POINT_NORMALS
-	float3 normal : TEXCOORD0; // Normals in view space. 
-							   // There's no 'NORMAL' semantic in fragment shader.
+	float3 normalWC : TEXCOORD0; // Normal in world space. We use TEXCOORD0 because there's no 'NORMAL' semantic in fragment shader.
 #endif
 };
 
@@ -45,13 +45,14 @@ VertexOutput Vertex(uint vertexID : SV_VertexID) {
 	// Using the vertex ID saves us from creating extra attribute buffers 
 	// for the corners. We can hardcode the corners of the quad as follows. 
 	// (Unity uses clockwise vertex winding.)
-	// 1 ----- 2
-	// |    /  |
-	// |   /   |
-	// 0 / --- 3
+	// 1 ----- 2,4
+	// |    /   |
+	// |   /    |
+	// |  /     |
+	// 0,3 ---- 5
 	float2 offset;
 
-	if (vertexIndex == 0)
+	if (vertexIndex == 0 || vertexIndex == 3)
 	{
 		offset = float2(-0.5, -0.5);
 	}
@@ -59,7 +60,7 @@ VertexOutput Vertex(uint vertexID : SV_VertexID) {
 	{
 		offset = float2(-0.5, 0.5);
 	}
-	else if (vertexIndex == 2)
+	else if (vertexIndex == 2 || vertexIndex == 4)
 	{
 		offset = float2(0.5, 0.5);
 	}
@@ -93,8 +94,8 @@ VertexOutput Vertex(uint vertexID : SV_VertexID) {
 #endif
 
 #ifdef HAS_POINT_NORMALS
-	float4 normalWC = mul(_worldTransform, vec4(input.normal, 0));
-	output.normal = mul(unity_MatrixV, normalWC).xyz;
+	float4 normalWC = mul(_worldTransform, float4(input.normal, 0));
+	output.normalWC = normalWC;
 #endif
 
 	return output;
@@ -119,7 +120,13 @@ float4 Fragment(VertexOutput input) : SV_TARGET{
 	#endif
 
 	#ifdef HAS_POINT_NORMALS
-	// TODO: shade with normals
+	float3 lightWC = _WorldSpaceLightPos0.xyz;
+	float3 lightColor = _LightColor0.rgb;
+
+	float3 normalWC = input.normalWC;
+	float NdotL = clamp(dot(normalWC, lightWC), 0.01, 1);
+
+	result.xyz *= lightColor * NdotL;
 	#endif
 
 	return result;

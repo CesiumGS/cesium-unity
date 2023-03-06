@@ -51,7 +51,7 @@ namespace CesiumForUnity
 
             this._pointCount = this._mesh.vertexCount;
             this._pointMaterial = UnityEngine.Object.Instantiate(
-                        Resources.Load<Material>("CesiumUnlitPointCloudMaterial"));
+                        Resources.Load<Material>("CesiumPointCloudShadingMaterial"));
 
             if (this._mesh.HasVertexAttribute(VertexAttribute.Color))
             {
@@ -70,8 +70,13 @@ namespace CesiumForUnity
                 }
                 else
                 {
-                    this._constantColor = Color.white;
+                    this._constantColor = Color.gray;
                 }
+            }
+
+            if (this._mesh.HasVertexAttribute(VertexAttribute.Normal))
+            {
+                this._pointMaterial.EnableKeyword("HAS_POINT_NORMALS");
             }
         }
 
