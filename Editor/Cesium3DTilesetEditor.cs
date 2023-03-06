@@ -420,9 +420,10 @@ namespace CesiumForUnity
 
         private void DrawPointCloudShadingProperties()
         {
-            // Using EditorGUILayout.PropertyField will trigger OnValidate() for the tileset,
-            // even if the properties being changed belong to CesiumPointCloudShading.
-            // Use the CesiumPointCloudShading setters to modify its values instead.
+            // EditorGUILayout.PropertyField will trigger OnValidate() for the tileset,
+            // even though the properties belong to CesiumPointCloudShading.
+            // To avoid refreshing the tileset every time a parameter is changed,
+            // the values are modified using the CesiumPointCloudShading setters instead.
             GUILayout.Label("Point Cloud Shading", EditorStyles.boldLabel);
 
             EditorGUI.BeginChangeCheck();

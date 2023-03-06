@@ -27,11 +27,11 @@ float4 _constantColor;
 struct VertexOutput
 {
 	float4 positionClip : SV_POSITION; // Position in clip space
+#ifdef HAS_POINT_NORMALS
+	float3 normalWC : TEXCOORD0; // Normal in world space. Using TEXCOORD0 because there's no 'NORMAL' semantic.
+#endif
 #ifdef HAS_POINT_COLORS
 	uint packedColor : COLOR_0; // Packed vertex color
-#endif
-#ifdef HAS_POINT_NORMALS
-	float3 normalWC : TEXCOORD0; // Normal in world space. We use TEXCOORD0 because there's no 'NORMAL' semantic in fragment shader.
 #endif
 };
 
