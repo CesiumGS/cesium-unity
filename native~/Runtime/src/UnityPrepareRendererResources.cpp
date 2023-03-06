@@ -324,6 +324,12 @@ void populateMeshDataArray(
           descriptor[numberOfAttributes].dimension = 4;
           descriptor[numberOfAttributes].stream = streamIndex;
           ++numberOfAttributes;
+
+          const int8_t numComponents = gltf.accessors[colorAccessorIt->second]
+                                           .computeNumberOfComponents();
+          if (numComponents == 4) {
+            primitiveInfo.isTranslucent = true;
+          }
         }
 
         // Max number of texture coordinates supported by Unity, see
@@ -846,35 +852,6 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         UnityEngine::Material opaqueMaterial =
             tilesetComponent.opaqueMaterial();
 
-        if (primitiveInfo.containsPoints) {
-          CesiumForUnity::CesiumPointCloudRenderer pointCloudRenderer =
-              primitiveGameObject
-                  .AddComponent<CesiumForUnity::CesiumPointCloudRenderer>();
-
-          CesiumForUnity::Cesium3DTileInfo tileInfo;
-          tileInfo.usesAdditiveRefinement =
-              tile.getRefine() == Cesium3DTilesSelection::TileRefine::Add;
-          tileInfo.geometricError =
-              static_cast<float>(tile.getGeometricError());
-
-          // TODO: can we make AccessorView retrieve the min/max for us?
-          const Accessor* pPositionAccessor =
-              Model::getSafe(&gltf.accessors, positionAccessorID);
-          glm::vec3 min(
-              pPositionAccessor->min[0],
-              pPositionAccessor->min[1],
-              pPositionAccessor->min[2]);
-          glm::vec3 max(
-              pPositionAccessor->max[0],
-              pPositionAccessor->max[1],
-              pPositionAccessor->max[2]);
-          glm::vec3 dimensions(transform * glm::dvec4(max - min, 0));
-
-          tileInfo.dimensions =
-              UnityEngine::Vector3{dimensions.x, dimensions.y, dimensions.z};
-          pointCloudRenderer.tileInfo(tileInfo);
-        }
-
         if (opaqueMaterial == nullptr) {
           if (pMaterial &&
               pMaterial->hasExtension<ExtensionKhrMaterialsUnlit>()) {
@@ -893,6 +870,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         material.hideFlags(UnityEngine::HideFlags::HideAndDontSave);
         meshRenderer.material(material);
 
+        bool isTranslucent = primitiveInfo.isTranslucent;
         if (pMaterial) {
           if (pMaterial->pbrMetallicRoughness) {
             // Add base color factor and metallic-roughness factor regardless
@@ -1047,6 +1025,36 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           material.SetFloat(
               shaderProperty.getOverlayTextureCoordinateIndexID(i),
               0);
+        }
+
+        if (primitiveInfo.containsPoints) {
+          CesiumForUnity::CesiumPointCloudRenderer pointCloudRenderer =
+              primitiveGameObject
+                  .AddComponent<CesiumForUnity::CesiumPointCloudRenderer>();
+
+          CesiumForUnity::Cesium3DTileInfo tileInfo;
+          tileInfo.usesAdditiveRefinement =
+              tile.getRefine() == Cesium3DTilesSelection::TileRefine::Add;
+          tileInfo.geometricError =
+              static_cast<float>(tile.getGeometricError());
+
+          // TODO: can we make AccessorView retrieve the min/max for us?
+          const Accessor* pPositionAccessor =
+              Model::getSafe(&gltf.accessors, positionAccessorID);
+          glm::vec3 min(
+              pPositionAccessor->min[0],
+              pPositionAccessor->min[1],
+              pPositionAccessor->min[2]);
+          glm::vec3 max(
+              pPositionAccessor->max[0],
+              pPositionAccessor->max[1],
+              pPositionAccessor->max[2]);
+          glm::vec3 dimensions(transform * glm::dvec4(max - min, 0));
+
+          tileInfo.dimensions =
+              UnityEngine::Vector3{dimensions.x, dimensions.y, dimensions.z};
+          tileInfo.isTranslucent = primitiveInfo.isTranslucent;
+          pointCloudRenderer.tileInfo(tileInfo);
         }
 
         if (createPhysicsMeshes && !primitiveInfo.containsPoints) {

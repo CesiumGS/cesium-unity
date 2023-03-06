@@ -456,6 +456,7 @@ namespace CesiumForUnity
             info.usesAdditiveRefinement = true;
             info.geometricError = 1.0f;
             info.dimensions = Vector3.zero;
+            info.isTranslucent = true;
 
             CesiumPointCloudRenderer renderer = go.AddComponent<CesiumPointCloudRenderer>();
             renderer.tileInfo = info;

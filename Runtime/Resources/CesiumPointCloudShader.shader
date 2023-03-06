@@ -7,9 +7,12 @@ Shader "Hidden/Cesium/PointCloudShading"
 	SubShader
 	{
 		Tags { 
+			"Queue" = "Geometry"
 			"RenderType" = "Opaque"
 			"RenderPipeline" = "UniversalPipeline"
 		}
+
+		Blend [_SrcBlend] [_DstBlend]
 
 		Pass
 		{

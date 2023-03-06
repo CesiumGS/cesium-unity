@@ -12,6 +12,7 @@ namespace CesiumForUnity
         public bool usesAdditiveRefinement;
         public float geometricError;
         public Vector3 dimensions;
+        public bool isTranslucent;
     }
 
     [ExecuteInEditMode]
@@ -78,6 +79,7 @@ namespace CesiumForUnity
             {
                 this._pointMaterial.EnableKeyword("HAS_POINT_NORMALS");
             }
+
         }
 
         private float GetGeometricError(CesiumPointCloudShading pointCloudShading)
@@ -166,15 +168,32 @@ namespace CesiumForUnity
             }
         }
 
-        private void DrawPointsWithAttenuation()
+        private void UpdateMaterial()
         {
-            this.UpdateBounds();
-            this.UpdateAttenuationParameters();
-
             this._pointMaterial.SetBuffer("_inVertices", this._meshVertexBuffer);
             this._pointMaterial.SetMatrix("_worldTransform", this.gameObject.transform.localToWorldMatrix);
             this._pointMaterial.SetVector("_attenuationParameters", this._attenuationParameters);
             this._pointMaterial.SetVector("_constantColor", this._constantColor);
+
+            if (this._tileInfo.isTranslucent || this._constantColor.w < 1.0f)
+            {
+                this._pointMaterial.SetOverrideTag("RenderType", "Transparent");
+                this._pointMaterial.renderQueue = (int)RenderQueue.Transparent;
+                this._pointMaterial.SetInt("_SrcBlend", (int)BlendMode.SrcAlpha);
+                this._pointMaterial.SetInt("_DstBlend", (int)BlendMode.OneMinusSrcAlpha);
+            }
+            else
+            {
+                this._pointMaterial.SetInt("_SrcBlend", (int)BlendMode.One);
+                this._pointMaterial.SetInt("_DstBlend", (int)BlendMode.Zero);
+            }
+        }
+
+        private void DrawPointsWithAttenuation()
+        {
+            this.UpdateBounds();
+            this.UpdateAttenuationParameters();
+            this.UpdateMaterial();
 
             Graphics.DrawProcedural(
                 this._pointMaterial,
@@ -184,7 +203,6 @@ namespace CesiumForUnity
                 1);
         }
 
-        // Update is called once per frame
         void Update()
         {
             if (this._tileset.pointCloudShading.attenuation)
