@@ -19,10 +19,7 @@ StructuredBuffer<VertexInput> _inVertices;
 
 float4x4 _worldTransform;
 float4 _attenuationParameters;
-
-#ifndef HAS_POINT_COLORS
 float4 _constantColor;
-#endif
 
 struct VertexOutput
 {
@@ -107,16 +104,17 @@ float4 Fragment(VertexOutput input) : SV_TARGET{
 	#ifdef SHADOW_CASTER_PASS
 	return float4(1, 1, 1, 1);
 	#else
-	float4 result;
+	float4 color;
+
 	#ifdef HAS_POINT_COLORS
 	uint packedColor = input.packedColor;
 	uint r = packedColor & 255;
 	uint g = (packedColor >> 8) & 255;
 	uint b = (packedColor >> 16) & 255;
 	uint a = packedColor >> 24;
-	result = float4(r, g, b, a) / 255;
+	color = float4(r, g, b, a) / 255;
 	#else
-	result = _constantColor;
+	color = _constantColor;
 	#endif
 
 	#ifdef HAS_POINT_NORMALS
@@ -126,10 +124,10 @@ float4 Fragment(VertexOutput input) : SV_TARGET{
 	float3 normalWC = input.normalWC;
 	float NdotL = clamp(dot(normalWC, lightWC), 0.01, 1);
 
-	result.xyz *= lightColor * NdotL;
+	color.xyz *= lightColor * NdotL;
 	#endif
 
-	return result;
+	return color;
 	#endif
 }
 

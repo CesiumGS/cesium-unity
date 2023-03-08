@@ -1,4 +1,4 @@
-Shader "Hidden/Cesium/PointCloudShading"
+Shader "Hidden/Cesium/CesiumPointCloudShading"
 {
 	Properties
 	{
@@ -21,7 +21,7 @@ Shader "Hidden/Cesium/PointCloudShading"
 
 			HLSLPROGRAM
 
-			#pragma target 5.0
+			#pragma target 4.5
 
 			#pragma multi_compile __ HAS_POINT_COLORS
 			#pragma multi_compile __ HAS_POINT_NORMALS
@@ -48,7 +48,8 @@ Shader "Hidden/Cesium/PointCloudShading"
 
 			HLSLPROGRAM
 
-			// This is needed here to ensure the point data struct is the correct size.
+			#pragma target 4.5
+
 			#pragma multi_compile __ HAS_POINT_COLORS
 			#pragma multi_compile __ HAS_POINT_NORMALS
 

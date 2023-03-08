@@ -1,5 +1,11 @@
 # Change Log
 
+### v0.4.0
+
+##### Additions :tada:
+
+- Added `CesiumPointCloudShading`, which allows point cloud tilesets to be rendered with attenuation based on geometric error. Attenuation is currently only supported in URP.
+
 ### v0.3.1
 
 ##### Fixes :wrench:
