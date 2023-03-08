@@ -124,7 +124,7 @@ float4 Fragment(VertexOutput input) : SV_TARGET{
 	float3 lightColor = _LightColor0.rgb;
 
 	float3 normalWC = input.normalWC;
-	float NdotL = clamp(dot(normalWC, lightWC), 0.01, 1);
+	float NdotL = saturate(dot(normalWC, lightWC)); // saturate() clamps between 0 and 1
 
 	result.xyz *= lightColor * NdotL;
 	#endif

@@ -172,6 +172,7 @@ namespace CesiumForUnity
         {
             this._pointMaterial.SetBuffer("_inVertices", this._meshVertexBuffer);
             this._pointMaterial.SetMatrix("_worldTransform", this.gameObject.transform.localToWorldMatrix);
+            this._pointMaterial.SetMatrix("_invWorldTransform", this.gameObject.transform.worldToLocalMatrix);
             this._pointMaterial.SetVector("_attenuationParameters", this._attenuationParameters);
             this._pointMaterial.SetVector("_constantColor", this._constantColor);
 
