@@ -40,14 +40,9 @@ namespace CesiumForUnity
 
         public T Rent()
         {
-            T item;
-            if (objects.TryTake(out item))
-            {
-                onRent?.Invoke(item);
-                return item;
-            };
+            if (!objects.TryTake(out T item))
+                item = objectConstructor.Invoke();
 
-            item = objectConstructor.Invoke();
             onRent?.Invoke(item);
             return item;
         }
