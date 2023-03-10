@@ -20,12 +20,17 @@ namespace CesiumForUnity
         { }
     }
 
+    /// <summary>
+    /// The CesiumObjectPool is a singleton that has member ObjectPools of different types.
+    /// This class offers an easy way to Rent and Return common resources.
+    /// </summary>
     public class CesiumObjectPool : MonoBehaviour
     {
+        public static CesiumObjectPool Instance = null;
+
+        [Tooltip("The amount of meshes you wish to pre-allocate and pool")]
         [SerializeField]
         private int meshPoolCount = 200;
-
-        public static CesiumObjectPool Instance = null;
 
         private MeshPool meshPool = null;
         public MeshPool MeshPool => meshPool;
