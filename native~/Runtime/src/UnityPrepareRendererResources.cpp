@@ -20,6 +20,8 @@
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/CesiumForUnity/CesiumGlobeAnchor.h>
 #include <DotNet/CesiumForUnity/CesiumMetadata.h>
+#include <DotNet/CesiumForUnity/CesiumObjectPool.h>
+#include <DotNet/CesiumForUnity/MeshPool.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/Collections/Generic/List1.h>
 #include <DotNet/System/Object.h>
@@ -613,7 +615,12 @@ UnityPrepareRendererResources::prepareInLoadThread(
             // thread, too.
             System::Array1<UnityEngine::Mesh> meshes(meshDataArray.Length());
             for (int32_t i = 0, len = meshes.Length(); i < len; ++i) {
-              UnityEngine::Mesh unityMesh{};
+              UnityEngine::Mesh unityMesh =
+                  CesiumForUnity::CesiumObjectPool::Instance() != nullptr
+                      ? CesiumForUnity::CesiumObjectPool::Instance()
+                            .MeshPool()
+                            .Rent()
+                      : UnityEngine::Mesh{};
 
               // Don't let Unity unload this mesh during the time in between
               // when we create it and when we attach it to a GameObject.
@@ -1070,7 +1077,11 @@ void freePrimitiveGameObject(
   UnityEngine::MeshFilter meshFilter =
       primitiveGameObject.GetComponent<UnityEngine::MeshFilter>();
   if (meshFilter != nullptr) {
-    UnityLifetime::Destroy(meshFilter.sharedMesh());
+    if (CesiumForUnity::CesiumObjectPool::Instance() != nullptr)
+      CesiumForUnity::CesiumObjectPool::Instance().MeshPool().Release(
+          meshFilter.sharedMesh());
+    else
+      UnityLifetime::Destroy(meshFilter.sharedMesh());
   }
 
   // The MeshCollider shares a mesh with the MeshFilter, so no need to
@@ -1087,7 +1098,11 @@ void UnityPrepareRendererResources::free(
     LoadThreadResult* pTyped =
         static_cast<LoadThreadResult*>(pLoadThreadResult);
     for (int32_t i = 0, len = pTyped->meshes.Length(); i < len; ++i) {
-      UnityLifetime::Destroy(pTyped->meshes[i]);
+      if (CesiumForUnity::CesiumObjectPool::Instance() != nullptr)
+        CesiumForUnity::CesiumObjectPool::Instance().MeshPool().Release(
+            pTyped->meshes[i]);
+      else
+        UnityLifetime::Destroy(pTyped->meshes[i]);
     }
     delete pTyped;
   }

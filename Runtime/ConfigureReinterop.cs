@@ -452,6 +452,12 @@ namespace CesiumForUnity
             globeAnchor._lastLocalToWorld = new Matrix4x4();
             globeAnchor.UpdateGeoreferenceIfNecessary();
 
+            CesiumObjectPool objectPool = new CesiumObjectPool();
+            objectPool = CesiumObjectPool.Instance;
+            MeshPool meshPool = objectPool.MeshPool;
+            Mesh pooledMesh = meshPool.Rent();
+            meshPool.Release(pooledMesh);
+            
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;
             sv.pivot = sv.pivot;
