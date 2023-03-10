@@ -322,12 +322,10 @@ void Cesium3DTilesetImpl::updateLastViewUpdateResultState(
   const ViewUpdateResult& previousResult = this->_lastUpdateResult;
   if (currentResult.tilesToRenderThisFrame.size() !=
           previousResult.tilesToRenderThisFrame.size() ||
-      currentResult.tilesLoadingLowPriority !=
-          previousResult.tilesLoadingLowPriority ||
-      currentResult.tilesLoadingMediumPriority !=
-          previousResult.tilesLoadingMediumPriority ||
-      currentResult.tilesLoadingHighPriority !=
-          previousResult.tilesLoadingHighPriority ||
+      currentResult.workerThreadTileLoadQueueLength !=
+          previousResult.workerThreadTileLoadQueueLength ||
+      currentResult.mainThreadTileLoadQueueLength !=
+          previousResult.mainThreadTileLoadQueueLength ||
       currentResult.tilesVisited != previousResult.tilesVisited ||
       currentResult.culledTilesVisited != previousResult.culledTilesVisited ||
       currentResult.tilesCulled != previousResult.tilesCulled ||
@@ -335,17 +333,15 @@ void Cesium3DTilesetImpl::updateLastViewUpdateResultState(
     SPDLOG_LOGGER_INFO(
         this->_pTileset->getExternals().pLogger,
         "{0}: Visited {1}, Culled Visited {2}, Rendered {3}, Culled {4}, Max "
-        "Depth Visited {5}, Loading-Low {6}, Loading-Medium {7}, Loading-High "
-        "{8}",
+        "Depth Visited {5}, Loading-Worker {6}, Loading-Main {7}",
         tileset.gameObject().name().ToStlString(),
         currentResult.tilesVisited,
         currentResult.culledTilesVisited,
         currentResult.tilesToRenderThisFrame.size(),
         currentResult.tilesCulled,
         currentResult.maxDepthVisited,
-        currentResult.tilesLoadingLowPriority,
-        currentResult.tilesLoadingMediumPriority,
-        currentResult.tilesLoadingHighPriority);
+        currentResult.workerThreadTileLoadQueueLength,
+        currentResult.mainThreadTileLoadQueueLength);
   }
 
   this->_lastUpdateResult = currentResult;
