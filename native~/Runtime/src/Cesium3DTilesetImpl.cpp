@@ -324,8 +324,8 @@ void Cesium3DTilesetImpl::updateLastViewUpdateResultState(
           previousResult.tilesToRenderThisFrame.size() ||
       currentResult.workerThreadTileLoadQueueLength !=
           previousResult.workerThreadTileLoadQueueLength ||
-      currentResult.mainThreadTileLoadQueueLength !=
-          previousResult.mainThreadTileLoadQueueLength ||
+      // currentResult.mainThreadTileLoadQueueLength !=
+      //     previousResult.mainThreadTileLoadQueueLength ||
       currentResult.tilesVisited != previousResult.tilesVisited ||
       currentResult.culledTilesVisited != previousResult.culledTilesVisited ||
       currentResult.tilesCulled != previousResult.tilesCulled ||
@@ -333,7 +333,8 @@ void Cesium3DTilesetImpl::updateLastViewUpdateResultState(
     SPDLOG_LOGGER_INFO(
         this->_pTileset->getExternals().pLogger,
         "{0}: Visited {1}, Culled Visited {2}, Rendered {3}, Culled {4}, Max "
-        "Depth Visited {5}, Loading-Worker {6}, Loading-Main {7}",
+        "Depth Visited {5}, Loading-Worker {6}, Loading-Main {7} "
+        "Total Tiles Resident {8}, Time Since Creation {9} Frame {10}",
         tileset.gameObject().name().ToStlString(),
         currentResult.tilesVisited,
         currentResult.culledTilesVisited,
@@ -341,7 +342,12 @@ void Cesium3DTilesetImpl::updateLastViewUpdateResultState(
         currentResult.tilesCulled,
         currentResult.maxDepthVisited,
         currentResult.workerThreadTileLoadQueueLength,
-        currentResult.mainThreadTileLoadQueueLength);
+        currentResult.mainThreadTileLoadQueueLength,
+        this->_pTileset->getNumberOfTilesLoaded(),
+        std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::high_resolution_clock::now() - this->_startTime)
+            .count(),
+        currentResult.frameNumber);
   }
 
   this->_lastUpdateResult = currentResult;
@@ -430,6 +436,8 @@ void Cesium3DTilesetImpl::LoadTileset(
     CesiumForUnity::CesiumRasterOverlay overlay = overlays[i];
     overlay.AddToTileset();
   }
+
+  this->_startTime = std::chrono::high_resolution_clock::now();
 }
 
 } // namespace CesiumForUnityNative
