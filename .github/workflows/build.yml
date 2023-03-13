@@ -167,7 +167,8 @@ jobs:
       - name: Build Package
         run: |
           cd ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
-          dotnet run --project Build~
+          dotnet run --project Build~&
+          tail -f /Users/runner/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity/native~/build-iOS/build.log
           ls -l ~/cesium/CesiumForUnityBuildProject
       - name: Publish package artifact
         if: ${{ success() }}
