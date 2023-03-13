@@ -39,7 +39,7 @@ namespace CesiumForUnity
         {
             for (int i = 0; i < defaultCapacity; i++)
             {
-                Release(Get());
+                Release(createFunc());
             }
         }
     }
