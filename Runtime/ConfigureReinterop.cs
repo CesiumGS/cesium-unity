@@ -452,10 +452,8 @@ namespace CesiumForUnity
             globeAnchor._lastLocalToWorld = new Matrix4x4();
             globeAnchor.UpdateGeoreferenceIfNecessary();
 
-            CesiumObjectPool objectPool = new CesiumObjectPool();
-            objectPool = CesiumObjectPool.Instance;
-            MeshPool meshPool = objectPool.MeshPool;
-            Mesh pooledMesh = meshPool.Rent();
+            MeshPool meshPool = CesiumObjectPool.MeshPool;
+            Mesh pooledMesh = meshPool.Get();
             meshPool.Release(pooledMesh);
             
 #if UNITY_EDITOR

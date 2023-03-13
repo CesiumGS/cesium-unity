@@ -616,12 +616,7 @@ UnityPrepareRendererResources::prepareInLoadThread(
             System::Array1<UnityEngine::Mesh> meshes(meshDataArray.Length());
             for (int32_t i = 0, len = meshes.Length(); i < len; ++i) {
               UnityEngine::Mesh unityMesh =
-                  CesiumForUnity::CesiumObjectPool::Instance() != nullptr
-                      ? CesiumForUnity::CesiumObjectPool::Instance()
-                            .MeshPool()
-                            .Rent()
-                      : UnityEngine::Mesh{};
-
+                  CesiumForUnity::CesiumObjectPool::MeshPool().Get();
               // Don't let Unity unload this mesh during the time in between
               // when we create it and when we attach it to a GameObject.
               if (shouldShowTilesInHierarchy) {
@@ -1077,11 +1072,8 @@ void freePrimitiveGameObject(
   UnityEngine::MeshFilter meshFilter =
       primitiveGameObject.GetComponent<UnityEngine::MeshFilter>();
   if (meshFilter != nullptr) {
-    if (CesiumForUnity::CesiumObjectPool::Instance() != nullptr)
-      CesiumForUnity::CesiumObjectPool::Instance().MeshPool().Release(
-          meshFilter.sharedMesh());
-    else
-      UnityLifetime::Destroy(meshFilter.sharedMesh());
+    CesiumForUnity::CesiumObjectPool::MeshPool().Release(
+        meshFilter.sharedMesh());
   }
 
   // The MeshCollider shares a mesh with the MeshFilter, so no need to
@@ -1098,11 +1090,7 @@ void UnityPrepareRendererResources::free(
     LoadThreadResult* pTyped =
         static_cast<LoadThreadResult*>(pLoadThreadResult);
     for (int32_t i = 0, len = pTyped->meshes.Length(); i < len; ++i) {
-      if (CesiumForUnity::CesiumObjectPool::Instance() != nullptr)
-        CesiumForUnity::CesiumObjectPool::Instance().MeshPool().Release(
-            pTyped->meshes[i]);
-      else
-        UnityLifetime::Destroy(pTyped->meshes[i]);
+      CesiumForUnity::CesiumObjectPool::MeshPool().Release(pTyped->meshes[i]);
     }
     delete pTyped;
   }
