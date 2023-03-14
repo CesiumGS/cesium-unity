@@ -167,10 +167,7 @@ jobs:
       - name: Build Package
         run: |
           cd ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
-          mkdir -p /Users/runner/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity/native~/build-iOS
-          touch /Users/runner/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity/native~/build-iOS/build.log
-          dotnet run --project Build~&
-          tail -f /Users/runner/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity/native~/build-iOS/build.log
+          dotnet run --project Build~
           ls -l ~/cesium/CesiumForUnityBuildProject
       - name: Publish package artifact
         if: ${{ success() }}
