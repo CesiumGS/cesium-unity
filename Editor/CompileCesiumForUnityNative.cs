@@ -315,6 +315,7 @@ namespace CesiumForUnity
             {
                 library.Toolchain = "extern/ios-toolchain.cmake";
                 library.ExtraConfigureArgs.Add("-GXcode");
+                library.ExtraConfigureArgs.Add("-DCMAKE_SYSTEM_PROCESSOR=aarch64");
             }
 
             if (platform.platform == BuildTarget.StandaloneOSX)
