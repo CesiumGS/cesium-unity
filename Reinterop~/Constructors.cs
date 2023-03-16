@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using System.Collections.Immutable;
 using System.Xml.Linq;
 
 namespace Reinterop
@@ -7,17 +8,6 @@ namespace Reinterop
     {
         public static void Generate(CppGenerationContext context, TypeToGenerate item, GeneratedResult result)
         {
-            // TODO: We're not currently generating constructors for blittable value types. They'll need to be slightly different (no handle).
-            // We only need handle management for non-static classes.
-
-            GeneratedCppDeclaration declaration = result.CppDeclaration;
-            if (declaration.Type.Kind != InteropTypeKind.ClassWrapper &&
-                declaration.Type.Kind != InteropTypeKind.NonBlittableStructWrapper &&
-                declaration.Type.Kind != InteropTypeKind.Delegate)
-            {
-                return;
-            }
-
             if (item.Type.IsStatic)
                 GenerateStatic(context, item, result);
             else
@@ -50,8 +40,12 @@ namespace Reinterop
             GeneratedInit init = result.Init;
 
             var parameters = constructor.Parameters.Select(parameter => (Name: parameter.Name, Type: CppType.FromCSharp(context, parameter.Type).AsParameterType()));
-            var interopReturnType = declaration.Type.AsInteropType();
+            var returnType = declaration.Type;
+            var interopReturnType = returnType.AsInteropType();
             var interopParameters = parameters.Select(parameter => (ParameterName: parameter.Name, CallSiteName: parameter.Name, Type: parameter.Type, InteropType: parameter.Type.AsInteropType()));
+
+            bool hasStructRewrite = Interop.RewriteStructReturn(ref interopParameters, ref returnType, ref interopReturnType);
+
             var interopParameterStrings = interopParameters.Select(parameter => $"{parameter.InteropType.GetFullyQualifiedName()} {parameter.ParameterName}");
 
             string interopFunctionName = $"Construct_{Interop.HashParameters(constructor.Parameters)}";
@@ -83,30 +77,65 @@ namespace Reinterop
                 CSharpContent: csContent
             ));
 
-            // Constructor declaration
-            var parameterStrings = parameters.Select(parameter => $"{parameter.Type.GetFullyQualifiedName()} {parameter.Name}");
-            declaration.Elements.Add(new(
-                Content: $"{declaration.Type.Name}({string.Join(", ", parameterStrings)});",
-                TypeDeclarationsReferenced: parameters.Select(parameter => parameter.Type)
-            ));
+            // For blittable structs, add static "Construct" functions rather than C++ constructors.
+            // This way we can use default construction and member initialization and avoid a call into C# to
+            // construct simple blittable types, but can still call explicit C# constructors when necessary.
+            if (declaration.Type.Kind == InteropTypeKind.BlittableStruct)
+            {
+                // Constructor declaration
+                var parameterStrings = parameters.Select(parameter => $"{parameter.Type.GetFullyQualifiedName()} {parameter.Name}");
+                declaration.Elements.Add(new(
+                    Content: $"static {declaration.Type.Name} Construct({string.Join(", ", parameterStrings)});",
+                    TypeDeclarationsReferenced: parameters.Select(parameter => parameter.Type)
+                ));
 
-            // Constructor definition
-            var parameterPassStrings = interopParameters.Select(parameter => parameter.Type.GetConversionToInteropType(context, parameter.CallSiteName));
-            definition.Elements.Add(new(
-                Content:
-                    $$"""
-                    {{definition.Type.Name}}{{templateSpecialization}}::{{definition.Type.Name}}({{string.Join(", ", parameterStrings)}})
-                        : _handle({{interopFunctionName}}({{string.Join(", ", parameterPassStrings)}}))
+                // Constructor definition
+                var parameterPassStrings = interopParameters.Select(parameter => parameter.Type.GetConversionToInteropType(context, parameter.CallSiteName));
+                definition.Elements.Add(new(
+                    Content:
+                        $$"""
+                        {{definition.Type.Name}} {{definition.Type.Name}}{{templateSpecialization}}::Construct({{string.Join(", ", parameterStrings)}})
+                        {
+                            {{definition.Type.Name}} result;
+                            {{interopFunctionName}}({{string.Join(", ", parameterPassStrings)}});
+                            return result;
+                        }
+                        """,
+                    TypeDefinitionsReferenced: new[]
                     {
-                    }
-                    """,
-                TypeDefinitionsReferenced: new[]
-                {
-                    definition.Type,
-                    interopReturnType,
-                    CppObjectHandle.GetCppType(context)
-                }.Concat(parameters.Select(parameter => parameter.Type))
-            ));
+                        definition.Type,
+                        interopReturnType,
+                        CppObjectHandle.GetCppType(context)
+                    }.Concat(parameters.Select(parameter => parameter.Type))
+                ));
+            }
+            else
+            {
+                // Constructor declaration
+                var parameterStrings = parameters.Select(parameter => $"{parameter.Type.GetFullyQualifiedName()} {parameter.Name}");
+                declaration.Elements.Add(new(
+                    Content: $"{declaration.Type.Name}({string.Join(", ", parameterStrings)});",
+                    TypeDeclarationsReferenced: parameters.Select(parameter => parameter.Type)
+                ));
+
+                // Constructor definition
+                var parameterPassStrings = interopParameters.Select(parameter => parameter.Type.GetConversionToInteropType(context, parameter.CallSiteName));
+                definition.Elements.Add(new(
+                    Content:
+                        $$"""
+                        {{definition.Type.Name}}{{templateSpecialization}}::{{definition.Type.Name}}({{string.Join(", ", parameterStrings)}})
+                            : _handle({{interopFunctionName}}({{string.Join(", ", parameterPassStrings)}}))
+                        {
+                        }
+                        """,
+                    TypeDefinitionsReferenced: new[]
+                    {
+                        definition.Type,
+                        interopReturnType,
+                        CppObjectHandle.GetCppType(context)
+                    }.Concat(parameters.Select(parameter => parameter.Type))
+                ));
+            }
         }
     }
 }

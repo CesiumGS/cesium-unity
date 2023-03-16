@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
+using System.Text.RegularExpressions;
 
 namespace Reinterop
 {
@@ -62,6 +63,44 @@ namespace Reinterop
 
                 current = current.BaseType;
             }
+        }
+
+        public static IPropertySymbol? GetAutoPropertyForField(IFieldSymbol field)
+        {
+            string fieldName = field.Name;
+
+            IPropertySymbol? autoProperty = field.AssociatedSymbol as IPropertySymbol;
+
+            // Unfortunately, the above will only work if the C# compiler is looking at the source code for the property.
+            // So for backing fields in referenced assemblies, we need to do this more manually.
+            if (autoProperty == null && fieldName.EndsWith("__BackingField"))
+            {
+                Match match = new Regex("<(.+)>k__BackingField").Match(fieldName);
+                if (match.Success && match.Groups.Count > 1)
+                {
+                    autoProperty = CSharpTypeUtility.FindMember(field.ContainingType, match.Groups[1].Value) as IPropertySymbol;
+                }
+            }
+
+            return autoProperty;
+        }
+
+        public static string GetFieldName(IFieldSymbol field)
+        {
+            IPropertySymbol? autoProperty = GetAutoPropertyForField(field);
+            if (autoProperty != null)
+                return autoProperty.Name;
+            else
+                return field.Name;
+        }
+
+        public static bool GetFieldIsPrivate(IFieldSymbol field)
+        {
+            IPropertySymbol? autoProperty = GetAutoPropertyForField(field);
+            if (autoProperty != null)
+                return autoProperty.DeclaredAccessibility != Accessibility.Public;
+            else
+                return field.DeclaredAccessibility != Accessibility.Public;
         }
     }
 }

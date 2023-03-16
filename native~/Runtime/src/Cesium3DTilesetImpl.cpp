@@ -2,6 +2,7 @@
 
 #include "CameraManager.h"
 #include "UnityPrepareRendererResources.h"
+#include "UnityTileExcluderAdaptor.h"
 #include "UnityTilesetExternals.h"
 
 #include <Cesium3DTilesSelection/IonRasterOverlay.h>
@@ -15,6 +16,7 @@
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
 #include <DotNet/CesiumForUnity/CesiumRuntimeSettings.h>
+#include <DotNet/CesiumForUnity/CesiumTileExcluder.h>
 #include <DotNet/System/Action.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/Object.h>
@@ -398,6 +400,21 @@ void Cesium3DTilesetImpl::LoadTileset(
   // Generous per-frame time limits for loading / unloading on main thread.
   options.mainThreadLoadingTimeLimit = 5.0;
   options.tileCacheUnloadTimeLimit = 5.0;
+
+  CesiumForUnity::CesiumGeoreference georeference =
+      tileset.gameObject()
+          .GetComponentInParent<CesiumForUnity::CesiumGeoreference>();
+
+  if (georeference != nullptr) {
+    System::Array1<CesiumForUnity::CesiumTileExcluder> excluders =
+        tileset.gameObject()
+            .GetComponentsInParent<CesiumForUnity::CesiumTileExcluder>();
+    for (int32_t i = 0, len = excluders.Length(); i < len; ++i) {
+      CesiumForUnity::CesiumTileExcluder excluder = excluders[i];
+      options.excluders.push_back(
+          std::make_shared<UnityTileExcluderAdaptor>(excluder, georeference));
+    }
+  }
 
   TilesetContentOptions contentOptions{};
   contentOptions.generateMissingNormalsSmooth = true;

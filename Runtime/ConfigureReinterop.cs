@@ -452,6 +452,13 @@ namespace CesiumForUnity
             globeAnchor._lastLocalToWorld = new Matrix4x4();
             globeAnchor.UpdateGeoreferenceIfNecessary();
 
+            CesiumTileExcluder[] excluders = go.GetComponentsInParent<CesiumTileExcluder>();
+            CesiumTileExcluder excluder = excluders[0];
+            excluder.ShouldExclude(null);
+            excluder._tile._georeference = null;
+            excluder._tile._pTile = IntPtr.Zero;
+            excluder._tile = null;
+
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;
             sv.pivot = sv.pivot;
