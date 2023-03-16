@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace CesiumForUnity
 {
-    [ReinteropNativeImplementation("CesiumForUnityNative::Cesium3DTileImpl", "Cesium3DTileImpl.h")]
+    [ReinteropNativeImplementation("CesiumForUnityNative::Cesium3DTileImpl", "Cesium3DTileImpl.h", staticOnly: true)]
     public partial class Cesium3DTile
     {
         internal CesiumGeoreference _georeference;

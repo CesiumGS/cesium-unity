@@ -1,5 +1,11 @@
 # Change Log
 
+### ? - ?
+
+##### Additions :tada:
+
+- Added `CesiumTileExcluder` abstract class. By deriving from this class and adding an instance of your derived class to your game object, you can implement custom rules for excluding certain tiles in a Cesium3DTileset from loading and rendering.
+
 ### v0.3.1
 
 ##### Fixes :wrench:
