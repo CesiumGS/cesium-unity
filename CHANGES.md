@@ -1,5 +1,11 @@
 # Change Log
 
+### v0.4.0
+
+##### Fixes :wrench:
+
+- Fixed a bug where `CesiumCameraController` tried to access non-existent inputs in the legacy input system.
+
 ### v0.3.1
 
 ##### Fixes :wrench:
