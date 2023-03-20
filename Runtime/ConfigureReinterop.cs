@@ -157,7 +157,7 @@ namespace CesiumForUnity
             meshRenderer.sharedMaterial = meshRenderer.sharedMaterial;
             meshRenderer.material.shader = meshRenderer.material.shader;
             UnityEngine.Object.Destroy(meshGameObject);
-            UnityEngine.Object.DestroyImmediate(meshGameObject);
+            UnityEngine.Object.DestroyImmediate(meshGameObject, true);
 
             MeshFilter meshFilter = new MeshFilter();
             meshFilter.mesh = mesh;

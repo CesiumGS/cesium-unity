@@ -411,8 +411,10 @@ void Cesium3DTilesetImpl::LoadTileset(
             .GetComponentsInParent<CesiumForUnity::CesiumTileExcluder>();
     for (int32_t i = 0, len = excluders.Length(); i < len; ++i) {
       CesiumForUnity::CesiumTileExcluder excluder = excluders[i];
-      options.excluders.push_back(
-          std::make_shared<UnityTileExcluderAdaptor>(excluder, georeference));
+      auto pAdaptor = std::make_shared<UnityTileExcluderAdaptor>(excluder, georeference);
+      if (pAdaptor->isValid()) {
+        options.excluders.push_back(std::move(pAdaptor));
+      }
     }
   }
 

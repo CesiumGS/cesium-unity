@@ -164,7 +164,7 @@ namespace CesiumForUnity
 
             CesiumRasterOverlay[] rasterOverlays = tileset.gameObject.GetComponents<CesiumRasterOverlay>();
             CesiumRasterOverlay overlay = rasterOverlays[0];
-            UnityEngine.Object.DestroyImmediate(overlay);
+            UnityEngine.Object.DestroyImmediate(overlay, true);
 
             CesiumIonRasterOverlay[] ionRasterOverlays =
                 tileset.gameObject.GetComponents<CesiumIonRasterOverlay>();
