@@ -32,7 +32,7 @@ Shader "Hidden/Cesium/CesiumPointCloudShading"
 			#pragma multi_compile _ _ADDITIONAL_LIGHTS_SHADOWS
 			#pragma multi_compile _ _SHADOWS_SOFT
 
-			#pragma multi_compile_instancing // Needed for VR.
+			#pragma multi_compile_instancing // Needed for single-pass instanced VR.
 
 			#pragma vertex Vertex
 			#pragma fragment Fragment
@@ -58,7 +58,7 @@ Shader "Hidden/Cesium/CesiumPointCloudShading"
 			// This sets up various keywords for different light types and shadow settings.
 			#pragma multi_compile_shadowcaster
 
-			#pragma multi_compile_instancing // Needed for VR.
+			#pragma multi_compile_instancing // Needed for single-pass instanced VR.
 
 			#pragma vertex Vertex
 			#pragma fragment Fragment

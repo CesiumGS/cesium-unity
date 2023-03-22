@@ -25,7 +25,7 @@ float4 _constantColor;
 struct VertexInput
 {
 	uint vertexID : SV_VertexID;
-	UNITY_VERTEX_INPUT_INSTANCE_ID // Needed for VR.
+	UNITY_VERTEX_INPUT_INSTANCE_ID // Needed for single-pass instanced VR.
 	UNITY_VERTEX_OUTPUT_STEREO     // Needed for VR.
 };
 
@@ -38,7 +38,7 @@ struct VertexOutput
 #ifdef HAS_POINT_COLORS
 	uint packedColor : COLOR_0; // Packed vertex color
 #endif
-	UNITY_VERTEX_INPUT_INSTANCE_ID // Needed for VR.
+	UNITY_VERTEX_INPUT_INSTANCE_ID // Needed for single-pass instanced VR.
 	UNITY_VERTEX_OUTPUT_STEREO     // Needed for VR.
 };
 
@@ -48,9 +48,10 @@ VertexOutput Vertex(VertexInput input) {
 #ifdef INSTANCING_ON
 	UNITY_SETUP_INSTANCE_ID(input);
 	UNITY_TRANSFER_INSTANCE_ID(input, output);
+#endif
+
 	UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(input);
 	UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(input, output);
-#endif
 
 	uint vertexID = input.vertexID;
 

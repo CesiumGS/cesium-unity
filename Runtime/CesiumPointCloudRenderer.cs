@@ -80,6 +80,10 @@ namespace CesiumForUnity
                 this._pointMaterial.EnableKeyword("HAS_POINT_NORMALS");
             }
 
+            if (PlayerSettings.stereoRenderingPath == StereoRenderingPath.Instancing)
+            {
+                this._pointMaterial.EnableKeyword("INSTANCING_ON");
+            }
         }
 
         private float GetGeometricError(CesiumPointCloudShading pointCloudShading)
