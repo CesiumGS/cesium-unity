@@ -170,7 +170,7 @@ namespace CesiumForUnity
 
         private void UpdateMaterial()
         {
-            this._pointMaterial.SetBuffer("_inVertices", this._meshVertexBuffer);
+            this._pointMaterial.SetBuffer("_inPoints", this._meshVertexBuffer);
             this._pointMaterial.SetMatrix("_worldTransform", this.gameObject.transform.localToWorldMatrix);
             this._pointMaterial.SetVector("_attenuationParameters", this._attenuationParameters);
             this._pointMaterial.SetVector("_constantColor", this._constantColor);

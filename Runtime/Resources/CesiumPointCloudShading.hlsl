@@ -2,9 +2,10 @@
 #define CESIUM_POINT_CLOUD_SHADING
 
 #include "UnityCG.cginc"
+#include "UnityInstancing.cginc"
 #include "UnityLightingCommon.cginc"
 
-struct VertexInput
+struct Point
 {
 	float3 position;
 #ifdef HAS_POINT_NORMALS
@@ -15,11 +16,18 @@ struct VertexInput
 #endif
 };
 
-StructuredBuffer<VertexInput> _inVertices;
+StructuredBuffer<Point> _inPoints;
 
 float4x4 _worldTransform;
 float4 _attenuationParameters;
 float4 _constantColor;
+
+struct VertexInput
+{
+	uint vertexID : SV_VertexID;
+	UNITY_VERTEX_INPUT_INSTANCE_ID // Needed for VR.
+	UNITY_VERTEX_OUTPUT_STEREO     // Needed for VR.
+};
 
 struct VertexOutput
 {
@@ -30,14 +38,26 @@ struct VertexOutput
 #ifdef HAS_POINT_COLORS
 	uint packedColor : COLOR_0; // Packed vertex color
 #endif
+	UNITY_VERTEX_INPUT_INSTANCE_ID // Needed for VR.
+	UNITY_VERTEX_OUTPUT_STEREO     // Needed for VR.
 };
 
-VertexOutput Vertex(uint vertexID : SV_VertexID) {
+VertexOutput Vertex(VertexInput input) {
 	VertexOutput output;
+
+#ifdef INSTANCING_ON
+	UNITY_SETUP_INSTANCE_ID(input);
+	UNITY_TRANSFER_INSTANCE_ID(input, output);
+	UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(input);
+	UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(input, output);
+#endif
+
+	uint vertexID = input.vertexID;
+
 	uint pointIndex = vertexID / 6;
 	uint vertexIndex = vertexID - (pointIndex * 6); // Modulo
-	VertexInput input = _inVertices[pointIndex];
-	float3 position = input.position;
+	Point inPoint = _inPoints[pointIndex];
+	float3 position = inPoint.position;
 
 	// Using the vertex ID saves us from creating extra attribute buffers 
 	// for the corners. We can hardcode the corners of the quad as follows. 
@@ -87,7 +107,7 @@ VertexOutput Vertex(uint vertexID : SV_VertexID) {
 	output.positionClip = positionClip;
 
 #ifdef HAS_POINT_COLORS
-	output.packedColor = input.packedColor;
+	output.packedColor = inPoint.packedColor;
 #endif
 
 #ifdef HAS_POINT_NORMALS
