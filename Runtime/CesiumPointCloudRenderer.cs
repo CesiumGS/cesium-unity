@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.XR;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -80,7 +81,8 @@ namespace CesiumForUnity
                 this._pointMaterial.EnableKeyword("HAS_POINT_NORMALS");
             }
 
-            if (PlayerSettings.stereoRenderingPath == StereoRenderingPath.Instancing)
+            if (XRSettings.stereoRenderingMode == XRSettings.StereoRenderingMode.SinglePassInstanced ||
+                XRSettings.stereoRenderingMode == XRSettings.StereoRenderingMode.SinglePassMultiview)
             {
                 this._pointMaterial.EnableKeyword("INSTANCING_ON");
             }
