@@ -112,7 +112,7 @@ VertexOutput Vertex(VertexInput input) {
 #endif
 
 #ifdef HAS_POINT_NORMALS
-	float4 normalWC = mul(_worldTransform, float4(input.normal, 0));
+	float4 normalWC = mul(_worldTransform, float4(inPoint.normal, 0));
 	output.normalWC = normalWC;
 #endif
 

@@ -62,6 +62,7 @@ namespace CesiumForUnity
             else
             {
                 Material material = this._meshRenderer.sharedMaterial;
+
                 if (material.HasColor("_Color"))
                 {
                     this._constantColor = material.color;
@@ -125,8 +126,7 @@ namespace CesiumForUnity
                 maximumPointSize *= Screen.dpi / 150;
             }
 
-            CesiumPointCloudShading pointCloudShading =
-                this._tileset.pointCloudShading;
+            CesiumPointCloudShading pointCloudShading = this._tileset.pointCloudShading;
 
             float geometricError = this.GetGeometricError(pointCloudShading);
             geometricError *= pointCloudShading.geometricErrorScale;
