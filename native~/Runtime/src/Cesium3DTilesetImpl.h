@@ -6,7 +6,6 @@
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/System/Action.h>
 
-#include <chrono>
 #include <memory>
 
 #if UNITY_EDITOR
@@ -59,7 +58,6 @@ private:
 #endif
   DotNet::CesiumForUnity::CesiumCreditSystem _creditSystem;
   bool _destroyTilesetOnNextUpdate;
-  std::chrono::time_point<std::chrono::high_resolution_clock> _startTime;
 };
 
 } // namespace CesiumForUnityNative

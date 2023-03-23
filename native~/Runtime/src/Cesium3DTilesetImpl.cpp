@@ -334,7 +334,7 @@ void Cesium3DTilesetImpl::updateLastViewUpdateResultState(
         this->_pTileset->getExternals().pLogger,
         "{0}: Visited {1}, Culled Visited {2}, Rendered {3}, Culled {4}, Max "
         "Depth Visited {5}, Loading-Worker {6}, Loading-Main {7} "
-        "Total Tiles Resident {8}, Time Since Creation {9} Frame {10}",
+        "Total Tiles Resident {8}, Frame {9}",
         tileset.gameObject().name().ToStlString(),
         currentResult.tilesVisited,
         currentResult.culledTilesVisited,
@@ -344,9 +344,6 @@ void Cesium3DTilesetImpl::updateLastViewUpdateResultState(
         currentResult.workerThreadTileLoadQueueLength,
         currentResult.mainThreadTileLoadQueueLength,
         this->_pTileset->getNumberOfTilesLoaded(),
-        std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::high_resolution_clock::now() - this->_startTime)
-            .count(),
         currentResult.frameNumber);
   }
 
@@ -436,8 +433,6 @@ void Cesium3DTilesetImpl::LoadTileset(
     CesiumForUnity::CesiumRasterOverlay overlay = overlays[i];
     overlay.AddToTileset();
   }
-
-  this->_startTime = std::chrono::high_resolution_clock::now();
 }
 
 } // namespace CesiumForUnityNative
