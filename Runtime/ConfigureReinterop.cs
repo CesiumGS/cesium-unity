@@ -337,6 +337,7 @@ namespace CesiumForUnity
             georeference.ecefY = georeference.ecefY;
             georeference.ecefZ = georeference.ecefZ;
             georeference.originAuthority = georeference.originAuthority;
+            double4x4 ecefToLocal = georeference.ecefToLocalMatrix;
 
             CesiumGeoreference inParent = go.GetComponentInParent<CesiumGeoreference>();
             inParent.MoveOrigin();
@@ -454,10 +455,10 @@ namespace CesiumForUnity
 
             CesiumTileExcluder[] excluders = go.GetComponentsInParent<CesiumTileExcluder>();
             CesiumTileExcluder excluder = excluders[0];
-            excluder.ShouldExclude(null);
-            excluder._tile._georeference = null;
-            excluder._tile._pTile = IntPtr.Zero;
-            excluder._tile = null;
+            excluder.ShouldExclude(new Cesium3DTile());
+            Cesium3DTile tile = new Cesium3DTile();
+            tile._transform = new double4x4();
+            tile._pTile = IntPtr.Zero;
 
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;

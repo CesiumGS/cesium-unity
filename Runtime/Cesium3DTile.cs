@@ -9,8 +9,12 @@ namespace CesiumForUnity
     [ReinteropNativeImplementation("CesiumForUnityNative::Cesium3DTileImpl", "Cesium3DTileImpl.h", staticOnly: true)]
     public partial class Cesium3DTile
     {
-        internal CesiumGeoreference _georeference;
+        internal double4x4 _transform;
         internal IntPtr _pTile;
+
+        internal Cesium3DTile()
+        {
+        }
 
         /// <summary>
         /// Gets the axis-aligned bounding box of this tile. If this tile came from a <see cref="CesiumTileExcluder"/>,
@@ -18,7 +22,10 @@ namespace CesiumForUnity
         /// </summary>
         public Bounds bounds
         {
-            get => Cesium3DTile.getBounds(this._pTile, this._georeference.ecefToLocalMatrix);
+            get
+            {
+                return Cesium3DTile.getBounds(this._pTile, this._transform);
+            }
         }
 
         private static partial Bounds getBounds(IntPtr pTile, double4x4 ecefToLocalMatrix);

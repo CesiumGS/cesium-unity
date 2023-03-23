@@ -3,10 +3,12 @@
 #include <Cesium3DTilesSelection/ITileExcluder.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTile.h>
+#include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/CesiumForUnity/CesiumTileExcluder.h>
+#include <DotNet/UnityEngine/Transform.h>
 
 namespace DotNet::CesiumForUnity {
-class CesiumGeoreference;
+class Cesium3DTileset;
 } // namespace DotNet::CesiumForUnity
 
 namespace CesiumForUnityNative {
@@ -15,17 +17,19 @@ class UnityTileExcluderAdaptor : public Cesium3DTilesSelection::ITileExcluder {
 public:
   UnityTileExcluderAdaptor(
       const DotNet::CesiumForUnity::CesiumTileExcluder& excluder,
+      const DotNet::CesiumForUnity::Cesium3DTileset& tileset,
       const DotNet::CesiumForUnity::CesiumGeoreference& georeference);
 
-  bool isValid() const noexcept;
-
+  virtual void startNewFrame() noexcept override;
   virtual bool shouldExclude(
       const Cesium3DTilesSelection::Tile& tile) const noexcept override;
 
 private:
-  DotNet::CesiumForUnity::CesiumTileExcluder _excluder;
   DotNet::CesiumForUnity::Cesium3DTile _tile;
-  bool _isValid;
+  DotNet::CesiumForUnity::CesiumGeoreference _georeference;
+  DotNet::CesiumForUnity::CesiumTileExcluder _excluder;
+  DotNet::UnityEngine::Transform _excluderTransform;
+  DotNet::UnityEngine::Transform _tilesetTransform;
 };
 
 } // namespace CesiumForUnityNative
