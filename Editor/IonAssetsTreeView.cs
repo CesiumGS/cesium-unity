@@ -97,7 +97,7 @@ namespace CesiumForUnity
     [ReinteropNativeImplementation("CesiumForUnityNative::IonAssetsTreeViewImpl", "IonAssetsTreeViewImpl.h")]
     public partial class IonAssetsTreeView : TreeView
     {
-        MultiColumnHeaderState _headerState;
+        private MultiColumnHeaderState _headerState;
 
         public IonAssetsTreeView(TreeViewState assetsTreeState)
             : base(assetsTreeState)
@@ -170,7 +170,8 @@ namespace CesiumForUnity
         private partial string GetAssetDescription(int index);
         private partial string GetAssetAttribution(int index);
 
-        public IonAssetDetails GetAssetDetails(int treeId) {
+        public IonAssetDetails GetAssetDetails(int treeId)
+        {
             int index = treeId - 1;
             string name = GetAssetName(index);
             string type = GetAssetType(index);
@@ -196,7 +197,13 @@ namespace CesiumForUnity
 
         protected override void SearchChanged(string newSearch)
         {
-            Refresh();
+            this.Refresh();
+            this.SetSelection(new List<int>());
+        }
+
+        protected override bool CanMultiSelect(TreeViewItem item)
+        {
+            return false;
         }
 
         public partial void AddAssetToLevel(int index);
