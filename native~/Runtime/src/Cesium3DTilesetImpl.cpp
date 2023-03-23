@@ -324,8 +324,8 @@ void Cesium3DTilesetImpl::updateLastViewUpdateResultState(
           previousResult.tilesToRenderThisFrame.size() ||
       currentResult.workerThreadTileLoadQueueLength !=
           previousResult.workerThreadTileLoadQueueLength ||
-      // currentResult.mainThreadTileLoadQueueLength !=
-      //     previousResult.mainThreadTileLoadQueueLength ||
+      currentResult.mainThreadTileLoadQueueLength !=
+          previousResult.mainThreadTileLoadQueueLength ||
       currentResult.tilesVisited != previousResult.tilesVisited ||
       currentResult.culledTilesVisited != previousResult.culledTilesVisited ||
       currentResult.tilesCulled != previousResult.tilesCulled ||
