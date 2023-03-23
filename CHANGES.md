@@ -1,10 +1,14 @@
 # Change Log
 
-### v0.4.0
+### ? - ?
 
 ##### Additions :tada:
 
 - Added `CesiumPointCloudShading`, which allows point cloud tilesets to be rendered with attenuation based on geometric error. Attenuation is currently only supported in URP.
+
+##### Fixes :wrench:
+
+- Fixed a bug that prevented the use of pre-existing mipmaps, such as those loaded from KTX2.
 
 ### v0.3.1
 

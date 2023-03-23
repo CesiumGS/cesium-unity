@@ -34,11 +34,30 @@ TextureLoader::loadTexture(const CesiumGltf::ImageCesium& image) {
       Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
           GetUnsafeBufferPointerWithoutChecks(textureData));
 
-  assert(textureData.Length() >= image.pixelData.size());
+  size_t textureLength = textureData.Length();
+  assert(textureLength >= image.pixelData.size());
 
-  std::memcpy(pixels, image.pixelData.data(), image.pixelData.size());
+  if (image.mipPositions.empty()) {
+    // No mipmaps, copy the whole thing and then let Unity generate mipmaps.
+    std::memcpy(pixels, image.pixelData.data(), image.pixelData.size());
+    result.Apply(true, true);
+  } else {
+    // Copy the mipmaps explicitly.
+    std::uint8_t* pWritePosition = pixels;
+    const std::byte* pReadBuffer = image.pixelData.data();
 
-  result.Apply(true, true);
+    for (const ImageCesiumMipPosition& mip : image.mipPositions) {
+      size_t start = mip.byteOffset;
+      size_t end = mip.byteOffset + mip.byteSize;
+      if (start >= textureLength || end > textureLength)
+        continue; // invalid mip spec, ignore it
+
+      std::memcpy(pWritePosition, pReadBuffer + start, mip.byteSize);
+      pWritePosition += mip.byteSize;
+    }
+
+    result.Apply(false, true);
+  }
 
   return result;
 }
