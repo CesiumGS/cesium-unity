@@ -10,6 +10,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.Rendering;
 using Unity.Mathematics;
+using UnityEngine.Pool;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -452,6 +453,10 @@ namespace CesiumForUnity
             globeAnchor._lastLocalToWorld = new Matrix4x4();
             globeAnchor.UpdateGeoreferenceIfNecessary();
 
+            ObjectPool<Mesh> meshPool = CesiumObjectPool.MeshPool;
+            Mesh pooledMesh = meshPool.Get();
+            meshPool.Release(pooledMesh);
+            
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;
             sv.pivot = sv.pivot;
