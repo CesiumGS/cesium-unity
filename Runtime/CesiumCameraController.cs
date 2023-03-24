@@ -168,7 +168,7 @@ namespace CesiumForUnity
 
         #region Input configuration
 
-        #if ENABLE_INPUT_SYSTEM
+#if ENABLE_INPUT_SYSTEM
         InputAction lookAction;
         InputAction moveAction;
         InputAction moveUpAction;
@@ -225,7 +225,7 @@ namespace CesiumForUnity
             speedResetAction.Enable();
             toggleDynamicSpeedAction.Enable();
         }
-        #endif
+#endif
 
         #endregion
 
@@ -309,9 +309,9 @@ namespace CesiumForUnity
             this.InitializeController();
             this.CreateMaxSpeedCurve();
 
-            #if ENABLE_INPUT_SYSTEM
+#if ENABLE_INPUT_SYSTEM
             this.ConfigureInputs();
-            #endif
+#endif
         }
 
         #endregion
@@ -371,7 +371,7 @@ namespace CesiumForUnity
 
         private void HandlePlayerInputs()
         {
-            #if ENABLE_INPUT_SYSTEM
+#if ENABLE_INPUT_SYSTEM
             Vector2 lookDelta;
             Vector2 moveDelta;
             lookDelta = lookAction.ReadValue<Vector2>();
@@ -414,12 +414,9 @@ namespace CesiumForUnity
             bool inputSpeedReset = speedResetAction.ReadValue<float>() > 0.5f;
 
             bool toggleDynamicSpeed = toggleDynamicSpeedAction.ReadValue<float>() > 0.5f;
-            #else
+#else
             float inputRotateHorizontal = Input.GetAxis("Mouse X");
-            inputRotateHorizontal += Input.GetAxis("Controller Right Stick X");
-
             float inputRotateVertical = Input.GetAxis("Mouse Y");
-            inputRotateVertical += Input.GetAxis("Controller Right Stick Y");
 
             float inputForward = Input.GetAxis("Vertical");
             float inputRight = Input.GetAxis("Horizontal");
@@ -431,7 +428,7 @@ namespace CesiumForUnity
 
             bool toggleDynamicSpeed =
                 Input.GetKeyDown("g") || Input.GetKeyDown("joystick button 1");
-            #endif
+#endif
 
             Vector3 movementInput = new Vector3(inputRight, inputUp, inputForward);
 
@@ -640,7 +637,7 @@ namespace CesiumForUnity
             }
 
             // Raycast along the camera's view (forward) vector.
-            float raycastDistance = 
+            float raycastDistance =
                 Mathf.Clamp(this._maxSpeed * 3.0f, 0.0f, this._maxRaycastDistance);
 
             // If the raycast does not hit, then only override speed if the height

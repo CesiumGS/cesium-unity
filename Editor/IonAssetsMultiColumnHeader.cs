@@ -4,7 +4,8 @@ namespace CesiumForUnity
 {
     public class IonAssetsMultiColumnHeader : MultiColumnHeader
     {
-        IonAssetsTreeView _treeView;
+        private IonAssetsTreeView _treeView;
+        private int _lastSortedColumnIndex;
 
         public IonAssetsMultiColumnHeader(
             MultiColumnHeaderState state,
@@ -19,7 +20,7 @@ namespace CesiumForUnity
             MultiColumnHeaderState.Column column,
             int columnIndex)
         {
-            if (sortedColumnIndex == columnIndex)
+            if (this.sortedColumnIndex == columnIndex)
             {
                 if (column.sortedAscending)
                 {
@@ -27,9 +28,6 @@ namespace CesiumForUnity
                 }
                 else
                 {
-                    // Reset the sorting method.
-                    column.sortedAscending = true;
-
                     // Remove the sorting entirely.
                     sortedColumnIndex = -1;
                 }
@@ -37,12 +35,9 @@ namespace CesiumForUnity
             else
             {
                 sortedColumnIndex = columnIndex;
+                column.sortedAscending = true;
             }
-        }
 
-        protected override void OnSortingChanged()
-        {
-            base.OnSortingChanged();
             this._treeView.Refresh();
         }
     }

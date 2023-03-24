@@ -4,7 +4,15 @@
 
 ##### Additions :tada:
 
+- Added support for Unity's built-in render pipeline.
 - Added `CesiumTileExcluder` abstract class. By deriving from this class and adding an instance of your derived class to your game object, you can implement custom rules for excluding certain tiles in a Cesium3DTileset from loading and rendering.
+
+##### Fixes :wrench:
+
+- Fixed a bug that prevented the use of pre-existing mipmaps, such as those loaded from KTX2.
+- Fixed a bug where `CesiumCameraController` tried to access non-existent inputs in the legacy input system.
+- Fixed a bug that could cause a crash when using the search box with a dataset already selected in the Cesium ion Assets window.
+- Fixed a bug that prevented sorting the contents of the Cesium ion Assets window in descending order.
 
 ### v0.3.1
 
