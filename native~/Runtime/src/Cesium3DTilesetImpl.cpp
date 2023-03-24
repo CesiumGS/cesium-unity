@@ -23,6 +23,7 @@
 #include <DotNet/System/String.h>
 #include <DotNet/UnityEngine/Application.h>
 #include <DotNet/UnityEngine/Camera.h>
+#include <DotNet/UnityEngine/Debug.h>
 #include <DotNet/UnityEngine/GameObject.h>
 #include <DotNet/UnityEngine/Quaternion.h>
 #include <DotNet/UnityEngine/Time.h>
@@ -410,13 +411,28 @@ void Cesium3DTilesetImpl::LoadTileset(
             .GetComponentsInParent<CesiumForUnity::CesiumTileExcluder>();
     for (int32_t i = 0, len = excluders.Length(); i < len; ++i) {
       CesiumForUnity::CesiumTileExcluder excluder = excluders[i];
-      if (excluder.enabled()) {
-        auto pAdaptor = std::make_shared<UnityTileExcluderAdaptor>(
-            excluder,
-            tileset,
-            georeference);
-        options.excluders.push_back(std::move(pAdaptor));
+      if (!excluder.enabled()) {
+        continue;
       }
+
+      CesiumForUnity::CesiumGeoreference excluderGeoreference =
+          excluder.gameObject()
+              .GetComponentInParent<CesiumForUnity::CesiumGeoreference>();
+
+      if (excluderGeoreference != georeference) {
+        UnityEngine::Debug::Log(DotNet::System::String(
+            "Cesium3DTileset on " + tileset.name().ToStlString() +
+            " and CesiumTileExcluder on " + excluder.name().ToStlString() +
+            " have different CesiumGeoreferences. The excluder will not be "
+            "used."));
+        continue;
+      }
+
+      auto pAdaptor = std::make_shared<UnityTileExcluderAdaptor>(
+          excluder,
+          tileset,
+          georeference);
+      options.excluders.push_back(std::move(pAdaptor));
     }
   }
 
