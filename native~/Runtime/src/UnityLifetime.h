@@ -16,7 +16,7 @@ public:
     // In the Editor, we must use DestroyImmediate because Destroy won't
     // actually destroy the object.
     if (!DotNet::UnityEditor::EditorApplication::isPlaying()) {
-      DotNet::UnityEngine::Object::DestroyImmediate(o, true);
+      DotNet::UnityEngine::Object::DestroyImmediate(o);
       return;
     }
 #endif
