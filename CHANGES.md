@@ -5,7 +5,7 @@
 ##### Additions :tada:
 
 - Added support for Unity's built-in render pipeline.
-- Added `CesiumTileExcluder` abstract class. By deriving from this class and adding an instance of your derived class to your game object, you can implement custom rules for excluding certain tiles in a Cesium3DTileset from loading and rendering.
+- Added the `CesiumTileExcluder` abstract class. By creating a class derived from `CesiumTileExcluder`, then adding it to a `Cesium3DTileset`'s game object, you can implement custom rules for excluding tiles in the `Cesium3DTileset` from loading and rendering.
 
 ##### Fixes :wrench:
 
