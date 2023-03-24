@@ -2,6 +2,10 @@
 
 ### ? - ?
 
+##### Additions :tada:
+
+- Added support for Unity's built-in render pipeline.
+
 ##### Fixes :wrench:
 
 - Fixed a bug that prevented the use of pre-existing mipmaps, such as those loaded from KTX2.
