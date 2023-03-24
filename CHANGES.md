@@ -1,5 +1,12 @@
 # Change Log
 
+### ? - ?
+
+##### Fixes :wrench:
+
+- Fixed a bug that prevented the use of pre-existing mipmaps, such as those loaded from KTX2.
+- Fixed a bug where `CesiumCameraController` tried to access non-existent inputs in the legacy input system.
+
 ### v0.3.1
 
 ##### Fixes :wrench:
