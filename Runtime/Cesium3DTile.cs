@@ -6,6 +6,10 @@ using UnityEngine;
 
 namespace CesiumForUnity
 {
+    /// <summary>
+    /// Represents a tile in a <see cref="Cesium3DTileset"/> and allows information
+    /// about the tile to be queried from the underlying C++ tile representation.
+    /// </summary>
     [ReinteropNativeImplementation("CesiumForUnityNative::Cesium3DTileImpl", "Cesium3DTileImpl.h", staticOnly: true)]
     public partial class Cesium3DTile
     {
