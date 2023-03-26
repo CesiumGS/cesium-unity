@@ -190,6 +190,7 @@ namespace CesiumForUnity
             string temporaryCachePath = Application.temporaryCachePath;
             bool isEditor = Application.isEditor;
             string applicationVersion = Application.version;
+            string unityVersion = Application.unityVersion;
             string applicationPlatform = Helpers.ToString(Application.platform);
             string productName = Application.productName;
             string osVersion = System.Environment.OSVersion.VersionString;

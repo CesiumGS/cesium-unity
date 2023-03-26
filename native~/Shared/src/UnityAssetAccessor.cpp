@@ -117,32 +117,37 @@ std::string replaceInvalidChars(const std::string& input) {
 
 namespace CesiumForUnityNative {
 
-UnityAssetAccessor::UnityAssetAccessor()
-    : _cesiumPlatformHeader(
-          CesiumForUnity::Helpers::ToString(
-              UnityEngine::Application::platform())
-              .ToStlString() +
-          " " + System::Environment::OSVersion().VersionString().ToStlString() +
-          " " +
-          replaceInvalidChars(
-              UnityEngine::Application::productName().ToStlString())),
-      _cesiumVersionHeader(
-          CesiumForUnityNative::Cesium::version + " " +
-          CesiumForUnityNative::Cesium::commit) {}
+UnityAssetAccessor::UnityAssetAccessor() {
+  std::string version = CesiumForUnityNative::Cesium::version + " " +
+                        CesiumForUnityNative::Cesium::commit;
+  std::string projectName = replaceInvalidChars(
+      UnityEngine::Application::productName().ToStlString());
+  std::string engine =
+      UnityEngine::Application::unityVersion().ToStlString() + " " +
+      CesiumForUnity::Helpers::ToString(UnityEngine::Application::platform())
+          .ToStlString();
+  std::string OsVersion =
+      System::Environment::OSVersion().VersionString().ToStlString();
+
+  this->_cesiumRequestHeaders.insert({"X-Cesium-Client", "Cesium For Unity"});
+  this->_cesiumRequestHeaders.insert({"X-Cesium-Client-Version", version});
+  this->_cesiumRequestHeaders.insert({"X-Cesium-Client-Project", projectName});
+  this->_cesiumRequestHeaders.insert({"X-Cesium-Client-Engine", engine});
+  this->_cesiumRequestHeaders.insert({"X-Cesium-Client-OS", OsVersion});
+}
 
 CesiumAsync::Future<std::shared_ptr<CesiumAsync::IAssetRequest>>
 UnityAssetAccessor::get(
     const CesiumAsync::AsyncSystem& asyncSystem,
     const std::string& url,
     const std::vector<THeader>& headers) {
+
   // Sadly, Unity requires us to call this from the main thread.
   return asyncSystem.runInMainThread([asyncSystem,
                                       url,
                                       headers,
-                                      cesiumPlatformHeader =
-                                          this->_cesiumPlatformHeader,
-                                      cesiumVersionHeader =
-                                          this->_cesiumVersionHeader]() {
+                                      &cesiumRequestHeaders =
+                                          this->_cesiumRequestHeaders]() {
     UnityEngine::Networking::UnityWebRequest request =
         UnityEngine::Networking::UnityWebRequest::Get(System::String(url));
 
@@ -155,12 +160,11 @@ UnityAssetAccessor::get(
           System::String(header.second));
     }
 
-    request.SetRequestHeader(
-        System::String("X-Cesium-Platform"),
-        cesiumPlatformHeader);
-    request.SetRequestHeader(
-        System::String("X-Cesium-Version"),
-        cesiumVersionHeader);
+    for (const auto& header : cesiumRequestHeaders) {
+      request.SetRequestHeader(
+          System::String(header.first),
+          System::String(header.second));
+    }
 
     auto promise =
         asyncSystem
@@ -220,10 +224,8 @@ UnityAssetAccessor::request(
                                       verb,
                                       headers,
                                       payloadBytes,
-                                      cesiumPlatformHeader =
-                                          this->_cesiumPlatformHeader,
-                                      cesiumVersionHeader =
-                                          this->_cesiumVersionHeader]() {
+                                      &cesiumRequestHeaders =
+                                          this->_cesiumRequestHeaders]() {
     DotNet::CesiumForUnity::NativeDownloadHandler downloadHandler{};
     UnityEngine::Networking::UploadHandlerRaw uploadHandler(payloadBytes, true);
     UnityEngine::Networking::UnityWebRequest request(
@@ -238,12 +240,11 @@ UnityAssetAccessor::request(
           System::String(header.second));
     }
 
-    request.SetRequestHeader(
-        System::String("X-Cesium-Platform"),
-        cesiumPlatformHeader);
-    request.SetRequestHeader(
-        System::String("X-Cesium-Version"),
-        cesiumVersionHeader);
+    for (const auto& header : cesiumRequestHeaders) {
+      request.SetRequestHeader(
+          System::String(header.first),
+          System::String(header.second));
+    }
 
     auto promise =
         asyncSystem
