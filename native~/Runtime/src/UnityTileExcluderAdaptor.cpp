@@ -22,9 +22,21 @@ UnityTileExcluderAdaptor::UnityTileExcluderAdaptor(
       _georeference(georeference),
       _excluder(excluder),
       _excluderTransform(excluder.transform()),
-      _tilesetTransform(tileset.transform()) {}
+      _tilesetTransform(tileset.transform()),
+      _isValid(true) {}
 
 void UnityTileExcluderAdaptor::startNewFrame() noexcept {
+  // If any of the Unity objects we need have been destroyed, disable this
+  // excluder.
+  if (this->_tile == nullptr || this->_georeference == nullptr ||
+      this->_excluder == nullptr || this->_excluderTransform == nullptr ||
+      this->_tilesetTransform == nullptr) {
+    this->_isValid = false;
+    return;
+  }
+
+  this->_isValid = true;
+
   glm::dmat4 matrix =
       UnityTransforms::fromUnity(this->_georeference.ecefToLocalMatrix());
 
@@ -48,6 +60,10 @@ void UnityTileExcluderAdaptor::startNewFrame() noexcept {
 
 bool UnityTileExcluderAdaptor::shouldExclude(
     const Cesium3DTilesSelection::Tile& tile) const noexcept {
+  if (!this->_isValid) {
+    return false;
+  }
+
   this->_tile._pTile(const_cast<Cesium3DTilesSelection::Tile*>(&tile));
   return this->_excluder.ShouldExclude(this->_tile);
 }

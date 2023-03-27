@@ -30,6 +30,7 @@ private:
   DotNet::CesiumForUnity::CesiumTileExcluder _excluder;
   DotNet::UnityEngine::Transform _excluderTransform;
   DotNet::UnityEngine::Transform _tilesetTransform;
+  bool _isValid;
 };
 
 } // namespace CesiumForUnityNative
