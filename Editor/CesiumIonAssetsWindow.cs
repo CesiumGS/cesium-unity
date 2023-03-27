@@ -65,8 +65,8 @@ namespace CesiumForUnity
         void OnGUI()
         {
             GUILayout.BeginHorizontal();
-            DrawAssetListPanel();
-            DrawAssetDescriptionPanel();
+            this.DrawAssetListPanel();
+            this.DrawAssetDescriptionPanel();
             GUILayout.EndHorizontal();
 
             // Force the window to repaint if the cursor is hovered over it.
@@ -158,7 +158,7 @@ namespace CesiumForUnity
             }
 
             int selectedId = this._assetsTreeState.lastClickedID;
-            if (selectedId <= 0)
+            if (selectedId <= 0 || selectedId > this._assetsTreeView.GetAssetsCount())
             {
                 return;
             }

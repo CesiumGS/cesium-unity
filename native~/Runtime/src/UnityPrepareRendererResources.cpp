@@ -21,6 +21,7 @@
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/CesiumForUnity/CesiumGlobeAnchor.h>
 #include <DotNet/CesiumForUnity/CesiumMetadata.h>
+#include <DotNet/CesiumForUnity/CesiumObjectPool.h>
 #include <DotNet/CesiumForUnity/CesiumPointCloudRenderer.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/Collections/Generic/List1.h>
@@ -44,6 +45,7 @@
 #include <DotNet/UnityEngine/MeshTopology.h>
 #include <DotNet/UnityEngine/Object.h>
 #include <DotNet/UnityEngine/Physics.h>
+#include <DotNet/UnityEngine/Pool/ObjectPool1.h>
 #include <DotNet/UnityEngine/Quaternion.h>
 #include <DotNet/UnityEngine/Rendering/IndexFormat.h>
 #include <DotNet/UnityEngine/Rendering/MeshUpdateFlags.h>
@@ -622,8 +624,8 @@ UnityPrepareRendererResources::prepareInLoadThread(
             // thread, too.
             System::Array1<UnityEngine::Mesh> meshes(meshDataArray.Length());
             for (int32_t i = 0, len = meshes.Length(); i < len; ++i) {
-              UnityEngine::Mesh unityMesh{};
-
+              UnityEngine::Mesh unityMesh =
+                  CesiumForUnity::CesiumObjectPool::MeshPool().Get();
               // Don't let Unity unload this mesh during the time in between
               // when we create it and when we attach it to a GameObject.
               if (shouldShowTilesInHierarchy) {
@@ -1112,7 +1114,8 @@ void freePrimitiveGameObject(
   UnityEngine::MeshFilter meshFilter =
       primitiveGameObject.GetComponent<UnityEngine::MeshFilter>();
   if (meshFilter != nullptr) {
-    UnityLifetime::Destroy(meshFilter.sharedMesh());
+    CesiumForUnity::CesiumObjectPool::MeshPool().Release(
+        meshFilter.sharedMesh());
   }
 
   // The MeshCollider shares a mesh with the MeshFilter, so no need to
@@ -1129,7 +1132,7 @@ void UnityPrepareRendererResources::free(
     LoadThreadResult* pTyped =
         static_cast<LoadThreadResult*>(pLoadThreadResult);
     for (int32_t i = 0, len = pTyped->meshes.Length(); i < len; ++i) {
-      UnityLifetime::Destroy(pTyped->meshes[i]);
+      CesiumForUnity::CesiumObjectPool::MeshPool().Release(pTyped->meshes[i]);
     }
     delete pTyped;
   }
