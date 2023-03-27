@@ -10,17 +10,23 @@
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
 #include <DotNet/System/Array1.h>
+#include <DotNet/System/Collections/Generic/List1.h>
 #include <DotNet/System/Collections/IEnumerator.h>
 #include <DotNet/System/Object.h>
 #include <DotNet/System/String.h>
-#include <DotNet/UnityEngine/Application.h>
 #include <DotNet/UnityEngine/Coroutine.h>
+#include <DotNet/UnityEngine/Debug.h>
 #include <DotNet/UnityEngine/GameObject.h>
+#include <DotNet/UnityEngine/HideFlags.h>
 #include <DotNet/UnityEngine/Object.h>
 #include <DotNet/UnityEngine/Resources.h>
 #include <DotNet/UnityEngine/Texture2D.h>
 #include <DotNet/UnityEngine/Transform.h>
 #include <tidybuffio.h>
+
+#if UNITY_EDITOR
+#include <DotNet/UnityEditor/EditorApplication.h>
+#endif
 
 using namespace Cesium3DTilesSelection;
 using namespace DotNet;
@@ -89,9 +95,8 @@ void CesiumCreditSystemImpl::Update(
         onScreenCredits,
         System::String("<link=\"popup\"><u>Data Attribution</u></link>"));
 
-    creditSystem.SetCreditsText(
-        System::String(popupCredits),
-        System::String(onScreenCredits));
+    creditSystem.popupCredits(System::String(popupCredits));
+    creditSystem.onScreenCredits(System::String(onScreenCredits));
 
     _lastCreditsCount = creditsCount;
   }
@@ -137,7 +142,7 @@ void htmlToRtf(
         auto srcValue = tidyAttrValue(srcAttr);
         if (srcValue) {
           // Get the number of images that existed before LoadImage is called.
-          const int numImages = creditSystem.numberOfImages();
+          const int numImages = creditSystem.images().Count();
 
           const std::string srcString =
               std::string(reinterpret_cast<const char*>(srcValue));
@@ -204,37 +209,37 @@ CesiumCreditSystemImpl::getExternalCreditSystem() const {
   return _pCreditSystem;
 }
 
-CesiumForUnity::CesiumCreditSystem
-CesiumCreditSystemImpl::getDefaultCreditSystem() {
-  UnityEngine::GameObject defaultCreditSystemObject = nullptr;
+/*static*/ CesiumForUnity::CesiumCreditSystem
+CesiumCreditSystemImpl::CreateDefaultCreditSystem() {
+  UnityEngine::Debug::Log(System::String("I'm creating again"));
   System::String defaultName = System::String("CesiumCreditSystemDefault");
+  UnityEngine::GameObject defaultCreditSystemObject =
+      UnityEngine::GameObject(defaultName);
+  defaultCreditSystemObject.hideFlags(
+      UnityEngine::HideFlags::HideAndDontSave |
+      UnityEngine::HideFlags::HideInHierarchy);
 
-  // Look for an existing default credit system first.
-  System::Array1<CesiumForUnity::CesiumCreditSystem> creditSystems =
-      UnityEngine::Object::FindObjectsOfType<
-          CesiumForUnity::CesiumCreditSystem>();
+  CesiumForUnity::CesiumCreditSystem defaultCreditSystem =
+      defaultCreditSystemObject
+          .AddComponent<CesiumForUnity::CesiumCreditSystem>();
 
-  for (int32_t i = 0, len = creditSystems.Length(); i < len; i++) {
-    CesiumForUnity::CesiumCreditSystem creditSystem = creditSystems[i];
-    if (creditSystem.name().StartsWith(defaultName)) {
-      defaultCreditSystemObject = creditSystem.gameObject();
-      break;
-    }
+#if UNITY_EDITOR
+  if (!UnityEditor::EditorApplication::isPlaying()) {
+    return defaultCreditSystem;
   }
+#endif
 
-  // If no default credit system was found, instantiate one.
-  if (defaultCreditSystemObject == nullptr) {
-    UnityEngine::GameObject creditSystemPrefab =
-        UnityEngine::Resources::Load<UnityEngine::GameObject>(
-            System::String("CesiumCreditSystem"));
+  // Instantiate a UI prefab for the credit system.
+  System::String prefabName("CesiumCreditSystemUI");
+  UnityEngine::GameObject creditSystemUIPrefab =
+      UnityEngine::Resources::Load<UnityEngine::GameObject>(prefabName);
 
-    defaultCreditSystemObject =
-        UnityEngine::Object::Instantiate(creditSystemPrefab);
-    defaultCreditSystemObject.name(defaultName);
-  }
+  UnityEngine::GameObject creditSystemUI =
+      UnityEngine::Object::Instantiate(creditSystemUIPrefab);
+  creditSystemUI.name(prefabName);
+  creditSystemUI.hideFlags(UnityEngine::HideFlags::NotEditable);
 
-  return defaultCreditSystemObject
-      .GetComponent<CesiumForUnity::CesiumCreditSystem>();
+  return defaultCreditSystem;
 }
 
 } // namespace CesiumForUnityNative

@@ -12,20 +12,33 @@ using UnityEngine.TextCore;
 using UnityEngine.InputSystem.UI;
 #endif
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 namespace CesiumForUnity
 {
     /// <summary>
     /// Manages credits / attribution for <see cref="Cesium3DTileset"/> and <see cref="CesiumRasterOverlay"/>.
     /// </summary>
+    [ExecuteInEditMode]
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumCreditSystemImpl", "CesiumCreditSystemImpl.h")]
-    public partial class CesiumCreditSystem : MonoBehaviour, IPointerClickHandler
+    public partial class CesiumCreditSystem : MonoBehaviour
     {
-        private GameObject _popupGameObject = null!;
-        private TextMeshProUGUI _popupTextComponent = null!;
-        private TextMeshProUGUI _onScreenTextComponent = null!;
+        private string _onScreenCredits;
+        private string _popupCredits;
 
-        private string _popupText = "";
-        private string _onScreenText = "";
+        public string onScreenCredits
+        {
+            get => this._onScreenCredits;
+            internal set => this._onScreenCredits = value;
+        }
+
+        public string popupCredits
+        {
+            get => this._popupCredits;
+            internal set => this._popupCredits = value;
+        }
 
         // The delimiter refers to the string used to separate credit entries
         // when they are presented on-screen.
@@ -38,101 +51,34 @@ namespace CesiumForUnity
 
         private Shader _defaultSpriteShader = null!;
 
-        private int _numImages = 0;
-        internal int numberOfImages
+        private List<Texture2D> _images = new List<Texture2D>();
+
+        internal List<Texture2D> images
         {
-            get => this._numImages;
+            get => this._images;
         }
 
         private int _numLoadingImages = 0;
 
-        private void Awake()
+        private static CesiumCreditSystem _defaultCreditSystem;
+
+        public static CesiumCreditSystem GetDefaultCreditSystem()
         {
-            GameObject canvasGameObject = gameObject.transform.GetChild(0).gameObject;
-
-            _popupGameObject = canvasGameObject.transform.Find("Popup").gameObject;
-            _popupGameObject.SetActive(false);
-            GameObject popupTextGameObject = _popupGameObject.transform.GetChild(0).gameObject;
-            _popupTextComponent = popupTextGameObject.GetComponent<TextMeshProUGUI>();
-
-            GameObject onScreenGameObject = canvasGameObject.transform.Find("OnScreen").gameObject;
-            GameObject onScreenTextGameObject = onScreenGameObject.transform.GetChild(0).gameObject;
-            _onScreenTextComponent = onScreenTextGameObject.GetComponent<TextMeshProUGUI>();
-
-            _popupText = "";
-            _onScreenText = "";
-
-            // If no EventSystem exists, create one to handle clicking on credit links.
-            if (EventSystem.current == null)
+            if (_defaultCreditSystem == null)
             {
-                GameObject eventSystemGameObject = new GameObject("EventSystem");
-                eventSystemGameObject.AddComponent<EventSystem>();
-
-                #if ENABLE_INPUT_SYSTEM
-                eventSystemGameObject.AddComponent<InputSystemUIInputModule>();
-                #elif ENABLE_LEGACY_INPUT_MANAGER
-                eventSystemGameObject.AddComponent<StandaloneInputModule>();
-                #endif
+                _defaultCreditSystem = CreateDefaultCreditSystem();
             }
 
-            _defaultSpriteShader = Shader.Find("TextMeshPro/Sprite");
-            _numImages = 0;
-            _numLoadingImages = 0;
+            return _defaultCreditSystem;
         }
 
-        private partial void Update();
+        internal static partial CesiumCreditSystem CreateDefaultCreditSystem();
 
-        void IPointerClickHandler.OnPointerClick(PointerEventData eventData)
+        internal partial void Update();
+
+        public bool HasLoadingImages()
         {
-            int linkIndex;
-            if (_popupGameObject.activeSelf)
-            {
-                linkIndex = TMP_TextUtilities.FindIntersectingLink(
-                                _popupTextComponent,
-                                eventData.position,
-                                null);
-                if (linkIndex != -1)
-                {
-                    TMP_LinkInfo linkInfo = _popupTextComponent.textInfo.linkInfo[linkIndex];
-                    Application.OpenURL(linkInfo.GetLinkID());
-                    return;
-                }
-            }
-
-            linkIndex = TMP_TextUtilities.FindIntersectingLink(
-                            _onScreenTextComponent,
-                            eventData.position,
-                            null);
-            if (linkIndex != -1)
-            {
-                TMP_LinkInfo linkInfo = _onScreenTextComponent.textInfo.linkInfo[linkIndex];
-                string linkId = linkInfo.GetLinkID();
-                if (linkId == "popup")
-                {
-                    _popupGameObject.SetActive(!_popupGameObject.activeSelf);
-                }
-                else
-                {
-                    Application.OpenURL(linkId);
-                }
-            }
-        }
-
-        private void RefreshCreditsText()
-        {
-            if (_numLoadingImages == 0)
-            {
-                _popupTextComponent.text = _popupText;
-                _onScreenTextComponent.text = _onScreenText;
-            }
-        }
-
-        internal void SetCreditsText(string popupCredits, string onScreenCredits)
-        {
-            _popupText = popupCredits;
-            _onScreenText = onScreenCredits;
-
-            RefreshCreditsText();
+            return this._numLoadingImages > 0;
         }
 
         const string base64Prefix = "data:image/png;base64,";
@@ -140,8 +86,7 @@ namespace CesiumForUnity
         internal IEnumerator LoadImage(string url)
         {
             // Each image is identified by its index.
-            int imageId = _numImages;
-            _numImages++;
+            int imageId = this._images.Count;
 
             // Initialize a texture of arbitrary size.
             Texture2D texture = new Texture2D(1, 1);
@@ -161,7 +106,7 @@ namespace CesiumForUnity
             {
                 // Load an image from a URL.
                 UnityWebRequest request = UnityWebRequestTexture.GetTexture(url);
-                _numLoadingImages++;
+                this._numLoadingImages++;
                 yield return request.SendWebRequest();
 
                 if (request.result == UnityWebRequest.Result.ConnectionError ||
@@ -174,17 +119,22 @@ namespace CesiumForUnity
                     texture = ((DownloadHandlerTexture)request.downloadHandler).texture;
                 }
 
-                _numLoadingImages--;
+                this._numLoadingImages--;
             }
 
+            this._images.Add(texture);
+
+#if UNITY_EDITOR
+            if (!EditorApplication.isPlaying) {
+                yield break;
+            }
+#endif
             // Create a TMP_SpriteAsset out of the texture and add it as a fallback
             // for the default sprite asset. The sprite will be accessed when the text
             // searches for its name.
-            string name = "credit-image-" + imageId;
-            TMP_SpriteAsset spriteAsset = CreateSpriteAssetFromTexture(texture, name);
-            TMP_Settings.defaultSpriteAsset.fallbackSpriteAssets.Add(spriteAsset);
-
-            RefreshCreditsText();
+            //string name = "credit-image-" + imageId;
+            //TMP_SpriteAsset spriteAsset = CreateSpriteAssetFromTexture(texture, name);
+            //TMP_Settings.defaultSpriteAsset.fallbackSpriteAssets.Add(spriteAsset);
         }
 
         private TMP_SpriteAsset CreateSpriteAssetFromTexture(Texture2D texture, string name)
@@ -235,10 +185,16 @@ namespace CesiumForUnity
 
         private void OnDestroy()
         {
-            List<TMP_SpriteAsset> fallbackSpriteAssets = 
+#if UNITY_EDITOR
+            if (!EditorApplication.isPlaying)
+            {
+                return;
+            }
+#endif
+            List<TMP_SpriteAsset> fallbackSpriteAssets =
                 TMP_Settings.defaultSpriteAsset.fallbackSpriteAssets;
             int count = fallbackSpriteAssets.Count;
-            fallbackSpriteAssets.RemoveRange(count - _numImages, _numImages);
+            fallbackSpriteAssets.RemoveRange(count - this._images.Count, this._images.Count);
         }
     }
 }

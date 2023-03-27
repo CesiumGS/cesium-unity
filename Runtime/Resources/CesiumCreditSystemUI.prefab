@@ -458,9 +458,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6773500804347934951}
-  - component: {fileID: 8884682509449786530}
+  - component: {fileID: -1243744473593318126}
   m_Layer: 0
-  m_Name: CesiumCreditSystem
+  m_Name: CesiumCreditSystemUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -482,7 +482,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8884682509449786530
+--- !u!114 &-1243744473593318126
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -491,7 +491,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 6773500804347934950}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6ad7d034075e67d4d8e4442eee83f1bd, type: 3}
+  m_Script: {fileID: 11500000, guid: e53599f84ab62d94092435eae4a9ec6c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &6795203443051611550

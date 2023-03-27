@@ -33,7 +33,7 @@ public:
   const std::shared_ptr<Cesium3DTilesSelection::CreditSystem>&
   getExternalCreditSystem() const;
 
-  static DotNet::CesiumForUnity::CesiumCreditSystem getDefaultCreditSystem();
+  static DotNet::CesiumForUnity::CesiumCreditSystem CreateDefaultCreditSystem();
 
 private:
   // The underlying cesium-native credit system.
