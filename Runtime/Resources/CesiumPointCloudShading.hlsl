@@ -16,7 +16,22 @@ struct Point
 #endif
 };
 
+#ifdef SHADER_API_D3D11
+
+#if defined(HAS_POINT_NORMALS) && defined(HAS_POINT_COLORS)
+#define NUM_FLOATS_IN_POINT 7
+#elif defined(HAS_POINT_NORMALS)
+#define NUM_FLOATS_IN_POINT 6
+#elif defined(HAS_POINT_COLORS)
+#define NUM_FLOATS_IN_POINT 4
+#else
+#define NUM_FLOATS_IN_POINT 3
+#endif
+
+Buffer<float> _inPoints;
+#else
 StructuredBuffer<Point> _inPoints;
+#endif
 
 float4x4 _worldTransform;
 float4 _attenuationParameters;
@@ -54,10 +69,29 @@ VertexOutput Vertex(VertexInput input) {
 	UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(input, output);
 
 	uint vertexID = input.vertexID;
-
 	uint pointIndex = vertexID / 6;
 	uint vertexIndex = vertexID - (pointIndex * 6); // Modulo
+
+#ifdef SHADER_API_D3D11
+	Point inPoint;
+	uint bufferOffset = pointIndex * NUM_FLOATS_IN_POINT;
+	inPoint.position.x = _inPoints[bufferOffset];
+	inPoint.position.y = _inPoints[bufferOffset + 1];
+	inPoint.position.z = _inPoints[bufferOffset + 2];
+	bufferOffset += 3;
+
+#ifdef HAS_POINT_NORMALS
+	inPoint.normal = _inPoints[bufferOffset];
+	bufferOffset += 3;
+#endif
+
+#ifdef HAS_POINT_COLORS
+	inPoint.packedColor = asuint(_inPoints[bufferOffset]);
+#endif
+#else
 	Point inPoint = _inPoints[pointIndex];
+#endif
+
 	float3 position = inPoint.position;
 
 	// Using the vertex ID saves us from creating extra attribute buffers 
