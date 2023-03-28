@@ -5,6 +5,8 @@
 ##### Additions :tada:
 
 - Added support for Unity's built-in render pipeline.
+- Added setting in CesiumRuntimeSettings to configure the maximum number of items to keep in the Sqlite cache.
+- Added setting in CesiumRuntimeSettings to configure the number of requests to the cache database before pruning.
 
 ##### Fixes :wrench:
 

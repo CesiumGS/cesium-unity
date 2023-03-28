@@ -416,6 +416,8 @@ namespace CesiumForUnity
             string.IsNullOrEmpty("value");
 
             string token = CesiumRuntimeSettings.defaultIonAccessToken;
+            int requestsPerCachePrune = CesiumRuntimeSettings.requestsPerCachePrune;
+            ulong maxItems = CesiumRuntimeSettings.maxItems;
 
             Cesium3DTilesetLoadFailureDetails tilesetDetails
                 = new Cesium3DTilesetLoadFailureDetails(tileset, Cesium3DTilesetLoadType.Unknown, 0, "");

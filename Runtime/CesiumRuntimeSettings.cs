@@ -157,5 +157,26 @@ namespace CesiumForUnity
             }
             #endif
         }
+
+        [SerializeField]
+        private int _requestsPerCachePrune = 10000;
+
+        /// <summary>
+        ///  The number of requests to handle before each prune of old cached results from the database.
+        /// </summary>
+        public static int requestsPerCachePrune
+        {
+            get => instance._requestsPerCachePrune;
+        }
+
+        [SerializeField]
+        private ulong  _maxItems = 4096;
+        /// <summary>
+        /// the maximum number of items should be kept in the Sqlite database after pruning.
+        /// </summary>
+        public static ulong maxItems
+        {
+            get => instance._maxItems;
+        }
     }
 }
