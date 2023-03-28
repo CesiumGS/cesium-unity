@@ -8,6 +8,7 @@
 #include <DotNet/CesiumForUnity/Helpers.h>
 #include <DotNet/CesiumForUnity/NativeDownloadHandler.h>
 #include <DotNet/System/Action1.h>
+#include <DotNet/System/AppDomain.h>
 #include <DotNet/System/Collections/Generic/Dictionary2.h>
 #include <DotNet/System/Collections/Generic/Enumerator0.h>
 #include <DotNet/System/Collections/Generic/KeyValuePair2.h>
@@ -117,37 +118,18 @@ std::string replaceInvalidChars(const std::string& input) {
 
 namespace CesiumForUnityNative {
 
-UnityAssetAccessor::UnityAssetAccessor() {
-  std::string version = CesiumForUnityNative::Cesium::version + " " +
-                        CesiumForUnityNative::Cesium::commit;
-  std::string projectName = replaceInvalidChars(
-      UnityEngine::Application::productName().ToStlString());
-  std::string engine =
-      UnityEngine::Application::unityVersion().ToStlString() + " " +
-      CesiumForUnity::Helpers::ToString(UnityEngine::Application::platform())
-          .ToStlString();
-  std::string OsVersion =
-      System::Environment::OSVersion().VersionString().ToStlString();
-
-  this->_cesiumRequestHeaders.insert({"X-Cesium-Client", "Cesium For Unity"});
-  this->_cesiumRequestHeaders.insert({"X-Cesium-Client-Version", version});
-  this->_cesiumRequestHeaders.insert({"X-Cesium-Client-Project", projectName});
-  this->_cesiumRequestHeaders.insert({"X-Cesium-Client-Engine", engine});
-  this->_cesiumRequestHeaders.insert({"X-Cesium-Client-OS", OsVersion});
-}
+UnityAssetAccessor::UnityAssetAccessor()
+    : _domainUnloadHandler(nullptr), _cesiumRequestHeaders() {}
 
 CesiumAsync::Future<std::shared_ptr<CesiumAsync::IAssetRequest>>
 UnityAssetAccessor::get(
     const CesiumAsync::AsyncSystem& asyncSystem,
     const std::string& url,
     const std::vector<THeader>& headers) {
-
   // Sadly, Unity requires us to call this from the main thread.
-  return asyncSystem.runInMainThread([asyncSystem,
-                                      url,
-                                      headers,
-                                      &cesiumRequestHeaders =
-                                          this->_cesiumRequestHeaders]() {
+  return asyncSystem.runInMainThread([asyncSystem, url, headers, this]() {
+    this->init();
+
     UnityEngine::Networking::UnityWebRequest request =
         UnityEngine::Networking::UnityWebRequest::Get(System::String(url));
 
@@ -160,10 +142,8 @@ UnityAssetAccessor::get(
           System::String(header.second));
     }
 
-    for (const auto& header : cesiumRequestHeaders) {
-      request.SetRequestHeader(
-          System::String(header.first),
-          System::String(header.second));
+    for (const auto& header : this->_cesiumRequestHeaders) {
+      request.SetRequestHeader(header.first, header.second);
     }
 
     auto promise =
@@ -219,62 +199,104 @@ UnityAssetAccessor::request(
   std::memcpy(pDest, contentPayload.data(), contentPayload.size());
 
   // Sadly, Unity requires us to call this from the main thread.
-  return asyncSystem.runInMainThread([asyncSystem,
-                                      url,
-                                      verb,
-                                      headers,
-                                      payloadBytes,
-                                      &cesiumRequestHeaders =
-                                          this->_cesiumRequestHeaders]() {
-    DotNet::CesiumForUnity::NativeDownloadHandler downloadHandler{};
-    UnityEngine::Networking::UploadHandlerRaw uploadHandler(payloadBytes, true);
-    UnityEngine::Networking::UnityWebRequest request(
-        System::String(url),
-        System::String(verb),
-        downloadHandler,
-        uploadHandler);
+  return asyncSystem.runInMainThread(
+      [asyncSystem, url, verb, headers, payloadBytes, this]() {
+        this->init();
 
-    for (const auto& header : headers) {
-      request.SetRequestHeader(
-          System::String(header.first),
-          System::String(header.second));
-    }
+        DotNet::CesiumForUnity::NativeDownloadHandler downloadHandler{};
+        UnityEngine::Networking::UploadHandlerRaw uploadHandler(
+            payloadBytes,
+            true);
+        UnityEngine::Networking::UnityWebRequest request(
+            System::String(url),
+            System::String(verb),
+            downloadHandler,
+            uploadHandler);
 
-    for (const auto& header : cesiumRequestHeaders) {
-      request.SetRequestHeader(
-          System::String(header.first),
-          System::String(header.second));
-    }
+        for (const auto& header : headers) {
+          request.SetRequestHeader(
+              System::String(header.first),
+              System::String(header.second));
+        }
 
-    auto promise =
-        asyncSystem
-            .createPromise<std::shared_ptr<CesiumAsync::IAssetRequest>>();
+        for (const auto& header : this->_cesiumRequestHeaders) {
+          request.SetRequestHeader(
+              System::String(header.first),
+              System::String(header.second));
+        }
 
-    auto future = promise.getFuture();
+        auto promise =
+            asyncSystem
+                .createPromise<std::shared_ptr<CesiumAsync::IAssetRequest>>();
 
-    UnityEngine::Networking::UnityWebRequestAsyncOperation op =
-        request.SendWebRequest();
-    op.add_completed(System::Action1<UnityEngine::AsyncOperation>(
-        [request,
-         promise = std::move(promise),
-         handler = std::move(downloadHandler)](
-            const UnityEngine::AsyncOperation& operation) mutable {
-          ScopeGuard disposeHandler{[&handler]() { handler.Dispose(); }};
-          if (request.isDone() &&
-              request.result() !=
-                  UnityEngine::Networking::Result::ConnectionError) {
-            promise.resolve(
-                std::make_shared<UnityAssetRequest>(request, handler));
-          } else {
-            promise.reject(std::runtime_error(
-                "Request failed: " + request.error().ToStlString()));
-          }
-        }));
+        auto future = promise.getFuture();
 
-    return future;
-  });
+        UnityEngine::Networking::UnityWebRequestAsyncOperation op =
+            request.SendWebRequest();
+        op.add_completed(System::Action1<UnityEngine::AsyncOperation>(
+            [request,
+             promise = std::move(promise),
+             handler = std::move(downloadHandler)](
+                const UnityEngine::AsyncOperation& operation) mutable {
+              ScopeGuard disposeHandler{[&handler]() { handler.Dispose(); }};
+              if (request.isDone() &&
+                  request.result() !=
+                      UnityEngine::Networking::Result::ConnectionError) {
+                promise.resolve(
+                    std::make_shared<UnityAssetRequest>(request, handler));
+              } else {
+                promise.reject(std::runtime_error(
+                    "Request failed: " + request.error().ToStlString()));
+              }
+            }));
+
+        return future;
+      });
 }
 
 void UnityAssetAccessor::tick() noexcept {}
+
+void UnityAssetAccessor::init() noexcept {
+  if (!this->_cesiumRequestHeaders.empty())
+    return;
+
+  this->_domainUnloadHandler = DotNet::System::EventHandler(
+      [this](
+          const DotNet::System::Object& sender,
+          const DotNet::System::EventArgs& e) { this->onDomainUnload(); });
+  DotNet::System::AppDomain::CurrentDomain().add_DomainUnload(
+      this->_domainUnloadHandler);
+
+  std::string version = CesiumForUnityNative::Cesium::version + " " +
+                        CesiumForUnityNative::Cesium::commit;
+  std::string projectName = replaceInvalidChars(
+      UnityEngine::Application::productName().ToStlString());
+  std::string engine =
+      UnityEngine::Application::unityVersion().ToStlString() + " " +
+      CesiumForUnity::Helpers::ToString(UnityEngine::Application::platform())
+          .ToStlString();
+  std::string osVersion =
+      System::Environment::OSVersion().VersionString().ToStlString();
+
+  this->_cesiumRequestHeaders.push_back(
+      {System::String("X-Cesium-Client"), System::String("Cesium For Unity")});
+  this->_cesiumRequestHeaders.push_back(
+      {System::String("X-Cesium-Client-Version"), System::String(version)});
+  this->_cesiumRequestHeaders.push_back(
+      {System::String("X-Cesium-Client-Project"), System::String(projectName)});
+  this->_cesiumRequestHeaders.push_back(
+      {System::String("X-Cesium-Client-Engine"), System::String(engine)});
+  this->_cesiumRequestHeaders.push_back(
+      {System::String("X-Cesium-Client-OS"), System::String(osVersion)});
+}
+
+void UnityAssetAccessor::onDomainUnload() noexcept {
+  if (this->_domainUnloadHandler != nullptr) {
+    this->_cesiumRequestHeaders.clear();
+    DotNet::System::AppDomain::CurrentDomain().remove_DomainUnload(
+        this->_domainUnloadHandler);
+    this->_domainUnloadHandler = nullptr;
+  }
+}
 
 } // namespace CesiumForUnityNative

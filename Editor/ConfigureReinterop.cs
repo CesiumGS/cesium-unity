@@ -210,6 +210,7 @@ namespace CesiumForUnity
             assetDetails.loaded = true;
 
             EditorApplication.ExecuteMenuItem("Window/General/Hierarchy");
+            AppDomain.CurrentDomain.DomainUnload += (object sender, EventArgs e) => { };
         }
     }
 }
