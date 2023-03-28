@@ -468,7 +468,6 @@ namespace CesiumForUnity
             bool isPlaying = EditorApplication.isPlaying;
             EditorApplication.update += () => {};
 #endif
-            AppDomain.CurrentDomain.DomainUnload += (object sender, EventArgs e) => { };
         }
     }
 }
