@@ -118,8 +118,29 @@ std::string replaceInvalidChars(const std::string& input) {
 
 namespace CesiumForUnityNative {
 
-UnityAssetAccessor::UnityAssetAccessor()
-    : _domainUnloadHandler(nullptr), _cesiumRequestHeaders() {}
+UnityAssetAccessor::UnityAssetAccessor() : _cesiumRequestHeaders() {
+  std::string version = CesiumForUnityNative::Cesium::version + " " +
+                        CesiumForUnityNative::Cesium::commit;
+  std::string projectName = replaceInvalidChars(
+      UnityEngine::Application::productName().ToStlString());
+  std::string engine =
+      UnityEngine::Application::unityVersion().ToStlString() + " " +
+      CesiumForUnity::Helpers::ToString(UnityEngine::Application::platform())
+          .ToStlString();
+  std::string osVersion =
+      System::Environment::OSVersion().VersionString().ToStlString();
+
+  this->_cesiumRequestHeaders.push_back(
+      {System::String("X-Cesium-Client"), System::String("Cesium For Unity")});
+  this->_cesiumRequestHeaders.push_back(
+      {System::String("X-Cesium-Client-Version"), System::String(version)});
+  this->_cesiumRequestHeaders.push_back(
+      {System::String("X-Cesium-Client-Project"), System::String(projectName)});
+  this->_cesiumRequestHeaders.push_back(
+      {System::String("X-Cesium-Client-Engine"), System::String(engine)});
+  this->_cesiumRequestHeaders.push_back(
+      {System::String("X-Cesium-Client-OS"), System::String(osVersion)});
+}
 
 CesiumAsync::Future<std::shared_ptr<CesiumAsync::IAssetRequest>>
 UnityAssetAccessor::get(
@@ -128,8 +149,6 @@ UnityAssetAccessor::get(
     const std::vector<THeader>& headers) {
   // Sadly, Unity requires us to call this from the main thread.
   return asyncSystem.runInMainThread([asyncSystem, url, headers, this]() {
-    this->init();
-
     UnityEngine::Networking::UnityWebRequest request =
         UnityEngine::Networking::UnityWebRequest::Get(System::String(url));
 
@@ -201,8 +220,6 @@ UnityAssetAccessor::request(
   // Sadly, Unity requires us to call this from the main thread.
   return asyncSystem.runInMainThread(
       [asyncSystem, url, verb, headers, payloadBytes, this]() {
-        this->init();
-
         DotNet::CesiumForUnity::NativeDownloadHandler downloadHandler{};
         UnityEngine::Networking::UploadHandlerRaw uploadHandler(
             payloadBytes,
@@ -255,48 +272,5 @@ UnityAssetAccessor::request(
 }
 
 void UnityAssetAccessor::tick() noexcept {}
-
-void UnityAssetAccessor::init() noexcept {
-  if (!this->_cesiumRequestHeaders.empty())
-    return;
-
-  this->_domainUnloadHandler = DotNet::System::EventHandler(
-      [this](
-          const DotNet::System::Object& sender,
-          const DotNet::System::EventArgs& e) { this->onDomainUnload(); });
-  DotNet::System::AppDomain::CurrentDomain().add_DomainUnload(
-      this->_domainUnloadHandler);
-
-  std::string version = CesiumForUnityNative::Cesium::version + " " +
-                        CesiumForUnityNative::Cesium::commit;
-  std::string projectName = replaceInvalidChars(
-      UnityEngine::Application::productName().ToStlString());
-  std::string engine =
-      UnityEngine::Application::unityVersion().ToStlString() + " " +
-      CesiumForUnity::Helpers::ToString(UnityEngine::Application::platform())
-          .ToStlString();
-  std::string osVersion =
-      System::Environment::OSVersion().VersionString().ToStlString();
-
-  this->_cesiumRequestHeaders.push_back(
-      {System::String("X-Cesium-Client"), System::String("Cesium For Unity")});
-  this->_cesiumRequestHeaders.push_back(
-      {System::String("X-Cesium-Client-Version"), System::String(version)});
-  this->_cesiumRequestHeaders.push_back(
-      {System::String("X-Cesium-Client-Project"), System::String(projectName)});
-  this->_cesiumRequestHeaders.push_back(
-      {System::String("X-Cesium-Client-Engine"), System::String(engine)});
-  this->_cesiumRequestHeaders.push_back(
-      {System::String("X-Cesium-Client-OS"), System::String(osVersion)});
-}
-
-void UnityAssetAccessor::onDomainUnload() noexcept {
-  if (this->_domainUnloadHandler != nullptr) {
-    this->_cesiumRequestHeaders.clear();
-    DotNet::System::AppDomain::CurrentDomain().remove_DomainUnload(
-        this->_domainUnloadHandler);
-    this->_domainUnloadHandler = nullptr;
-  }
-}
 
 } // namespace CesiumForUnityNative
