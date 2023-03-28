@@ -117,7 +117,7 @@ std::string replaceInvalidChars(const std::string& input) {
 
 namespace CesiumForUnityNative {
 
-UnityAssetAccessor::UnityAssetAccessor() {
+UnityAssetAccessor::UnityAssetAccessor() : _cesiumRequestHeaders() {
   std::string version = CesiumForUnityNative::Cesium::version + " " +
                         CesiumForUnityNative::Cesium::commit;
   std::string projectName = replaceInvalidChars(
@@ -126,14 +126,14 @@ UnityAssetAccessor::UnityAssetAccessor() {
       UnityEngine::Application::unityVersion().ToStlString() + " " +
       CesiumForUnity::Helpers::ToString(UnityEngine::Application::platform())
           .ToStlString();
-  std::string OsVersion =
+  std::string osVersion =
       System::Environment::OSVersion().VersionString().ToStlString();
 
   this->_cesiumRequestHeaders.insert({"X-Cesium-Client", "Cesium For Unity"});
   this->_cesiumRequestHeaders.insert({"X-Cesium-Client-Version", version});
   this->_cesiumRequestHeaders.insert({"X-Cesium-Client-Project", projectName});
   this->_cesiumRequestHeaders.insert({"X-Cesium-Client-Engine", engine});
-  this->_cesiumRequestHeaders.insert({"X-Cesium-Client-OS", OsVersion});
+  this->_cesiumRequestHeaders.insert({"X-Cesium-Client-OS", osVersion});
 }
 
 CesiumAsync::Future<std::shared_ptr<CesiumAsync::IAssetRequest>>
