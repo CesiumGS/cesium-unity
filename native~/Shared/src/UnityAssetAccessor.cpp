@@ -8,7 +8,6 @@
 #include <DotNet/CesiumForUnity/Helpers.h>
 #include <DotNet/CesiumForUnity/NativeDownloadHandler.h>
 #include <DotNet/System/Action1.h>
-#include <DotNet/System/AppDomain.h>
 #include <DotNet/System/Collections/Generic/Dictionary2.h>
 #include <DotNet/System/Collections/Generic/Enumerator0.h>
 #include <DotNet/System/Collections/Generic/KeyValuePair2.h>
