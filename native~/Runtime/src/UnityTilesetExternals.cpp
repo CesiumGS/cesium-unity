@@ -9,8 +9,6 @@
 #include <CesiumAsync/SqliteCache.h>
 
 #include <DotNet/CesiumForUnity/CesiumCreditSystem.h>
-#include <DotNet/System/AppDomain.h>
-#include <DotNet/System/EventHandler.h>
 #include <DotNet/System/String.h>
 #include <DotNet/UnityEngine/Application.h>
 
@@ -28,7 +26,6 @@ namespace CesiumForUnityNative {
 
 namespace {
 
-DotNet::System::EventHandler domainUnloadHandler = nullptr;
 std::shared_ptr<CachingAssetAccessor> pAccessor = nullptr;
 std::shared_ptr<UnityTaskProcessor> pTaskProcessor = nullptr;
 std::shared_ptr<CreditSystem> pCreditSystem = nullptr;
@@ -39,31 +36,8 @@ std::shared_ptr<CreditSystem> pCreditSystem = nullptr;
 std::shared_ptr<CreditSystem> pEditorCreditSystem = nullptr;
 #endif
 
-void onDomainUnload(
-    const DotNet::System::Object& o,
-    const DotNet::System::EventArgs& e) {
-  DotNet::System::AppDomain::CurrentDomain().remove_DomainUnload(
-      domainUnloadHandler);
-  domainUnloadHandler = nullptr;
-  pAccessor = nullptr;
-  pTaskProcessor = nullptr;
-  pCreditSystem = nullptr;
-#if UNITY_EDITOR
-  pEditorCreditSystem = nullptr;
-#endif
-}
-
-void installDomainUnloadHandler() {
-  if (domainUnloadHandler == nullptr) {
-    domainUnloadHandler = DotNet::System::EventHandler(onDomainUnload);
-    DotNet::System::AppDomain::CurrentDomain().add_DomainUnload(
-        domainUnloadHandler);
-  }
-}
-
 const std::shared_ptr<CachingAssetAccessor>& getAssetAccessor() {
   if (!pAccessor) {
-    installDomainUnloadHandler();
     std::string tempPath =
         UnityEngine::Application::temporaryCachePath().ToStlString();
     std::string cacheDBPath = tempPath + "/cesium-request-cache.sqlite";
@@ -78,7 +52,6 @@ const std::shared_ptr<CachingAssetAccessor>& getAssetAccessor() {
 
 const std::shared_ptr<UnityTaskProcessor>& getTaskProcessor() {
   if (!pTaskProcessor) {
-    installDomainUnloadHandler();
     pTaskProcessor = std::make_shared<UnityTaskProcessor>();
   }
   return pTaskProcessor;
@@ -90,7 +63,6 @@ getCreditSystem(const CesiumForUnity::Cesium3DTileset& tileset) {
   if (UnityEngine::Application::isEditor() &&
       !UnityEditor::EditorApplication::isPlaying()) {
     if (!pEditorCreditSystem) {
-      installDomainUnloadHandler();
       pEditorCreditSystem = std::make_shared<CreditSystem>();
     }
     return pEditorCreditSystem;
@@ -105,7 +77,6 @@ getCreditSystem(const CesiumForUnity::Cesium3DTileset& tileset) {
   // If the tileset does not already reference a credit system,
   // get the default one.
   if (creditSystem == nullptr) {
-    installDomainUnloadHandler();
     creditSystem = CesiumCreditSystemImpl::getDefaultCreditSystem();
     tilesetImpl.setCreditSystem(creditSystem);
   }
