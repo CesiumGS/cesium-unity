@@ -122,7 +122,7 @@ UnityAssetAccessor::UnityAssetAccessor() : _cesiumRequestHeaders() {
                         CesiumForUnityNative::Cesium::commit;
   std::string projectName = replaceInvalidChars(
       UnityEngine::Application::productName().ToStlString());
-  std::string engine =
+  std::string engine = "Unity " +
       UnityEngine::Application::unityVersion().ToStlString() + " " +
       CesiumForUnity::Helpers::ToString(UnityEngine::Application::platform())
           .ToStlString();
