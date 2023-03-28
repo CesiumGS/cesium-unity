@@ -53,10 +53,22 @@ namespace CesiumForUnity
             this._pointMaterial = UnityEngine.Object.Instantiate(
                         Resources.Load<Material>("CesiumPointCloudShadingMaterial"));
 
-            bool usingDirect11 = SystemInfo.graphicsDeviceType == GraphicsDeviceType.Direct3D11;
-            this._mesh.vertexBufferTarget |= usingDirect11 ? GraphicsBuffer.Target.Raw : GraphicsBuffer.Target.Structured;
+            GraphicsBuffer sourceBuffer = this._mesh.GetVertexBuffer(0);
 
-            this._meshVertexBuffer = this._mesh.GetVertexBuffer(0);
+            bool usingDirect11 = SystemInfo.graphicsDeviceType == GraphicsDeviceType.Direct3D11;
+            if (usingDirect11)
+            {
+                this._meshVertexBuffer = new GraphicsBuffer(
+                    GraphicsBuffer.Target.Structured | GraphicsBuffer.Target.CopyDestination, 
+                    sourceBuffer.count, 
+                    sourceBuffer.stride);
+                Graphics.CopyBuffer(sourceBuffer, this._meshVertexBuffer);
+                sourceBuffer.Release();
+            } else
+            {
+                this._mesh.vertexBufferTarget |= GraphicsBuffer.Target.Structured;
+                this._meshVertexBuffer = sourceBuffer;
+            }
 
             if (this._mesh.HasVertexAttribute(VertexAttribute.Color))
             {
