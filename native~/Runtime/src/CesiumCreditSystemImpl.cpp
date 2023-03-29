@@ -6,6 +6,8 @@
 #include <Cesium3DTilesSelection/Tileset.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
+#include <DotNet/CesiumForUnity/CesiumCredit.h>
+#include <DotNet/CesiumForUnity/CesiumCreditComponent.h>
 #include <DotNet/CesiumForUnity/CesiumCreditSystem.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
@@ -30,16 +32,24 @@
 
 using namespace Cesium3DTilesSelection;
 using namespace DotNet;
+using namespace System::Collections::Generic;
 
 namespace CesiumForUnityNative {
 
 CesiumCreditSystemImpl::CesiumCreditSystemImpl(
     const CesiumForUnity::CesiumCreditSystem& creditSystem)
     : _pCreditSystem(std::make_shared<CreditSystem>()),
-      _htmlToRtf(),
-      _popupCreditsList(),
-      _onScreenCreditsList(),
-      _lastCreditsCount(0) {}
+      _htmlToUnityCredit(),
+      _dataAttributionCredit(),
+      _lastCreditsCount(0),
+      _creditsUpdated(false) {
+
+  CesiumForUnity::CesiumCreditComponent dataAttribution(
+      System::String("<u>Data Attribution</u>"),
+      System::String("popup"),
+      -1);
+  _dataAttributionCredit.components().Add(dataAttribution);
+}
 
 CesiumCreditSystemImpl::~CesiumCreditSystemImpl() {}
 
@@ -49,55 +59,55 @@ void CesiumCreditSystemImpl::Update(
     return;
   }
 
+  // If the credits were updated in a previous frame, the update will not get
+  // broadcasted until all of the images are fully loaded. Broadcast the
+  // previous update first before handling the next one.
+  if (_creditsUpdated && !creditSystem.HasLoadingImages()) {
+    creditSystem.BroadcastCreditsUpdate();
+    _creditsUpdated = false;
+  }
+
   const std::vector<Cesium3DTilesSelection::Credit>& creditsToShowThisFrame =
       _pCreditSystem->getCreditsToShowThisFrame();
 
   // If the credit list has changed, reformat the credits.
-  bool creditsUpdated =
+  _creditsUpdated =
       creditsToShowThisFrame.size() != _lastCreditsCount ||
       _pCreditSystem->getCreditsToNoLongerShowThisFrame().size() > 0;
 
-  if (creditsUpdated) {
-    _onScreenCreditsList.Clear();
-    _popupCreditsList.Clear();
+  if (_creditsUpdated) {
+    List1<CesiumForUnity::CesiumCredit> popupCredits =
+        creditSystem.popupCredits();
+    List1<CesiumForUnity::CesiumCredit> onScreenCredits =
+        creditSystem.onScreenCredits();
+
+    popupCredits.Clear();
+    onScreenCredits.Clear();
 
     size_t creditsCount = creditsToShowThisFrame.size();
 
     for (int i = 0; i < creditsCount; i++) {
       const Cesium3DTilesSelection::Credit& credit = creditsToShowThisFrame[i];
 
-      System::String rtf = System::String("");
+      DotNet::CesiumForUnity::CesiumCredit unityCredit;
       const std::string& html = _pCreditSystem->getHtml(credit);
 
-      auto htmlFind = _htmlToRtf.find(html);
-      if (htmlFind != _htmlToRtf.end()) {
-        rtf = htmlFind->second;
+      auto htmlFind = _htmlToUnityCredit.find(html);
+      if (htmlFind != _htmlToUnityCredit.end()) {
+        unityCredit = htmlFind->second;
       } else {
-        std::string rtfString = convertHtmlToRtf(html, creditSystem);
-        rtf = System::String(rtfString);
-        _htmlToRtf.insert({html, rtf});
+        unityCredit = convertHtmlToUnityCredit(html, creditSystem);
+        _htmlToUnityCredit.insert({html, unityCredit});
       }
-      _popupCreditsList.Add(rtf);
 
       if (_pCreditSystem->shouldBeShownOnScreen(credit)) {
-        _onScreenCreditsList.Add(rtf);
+        onScreenCredits.Add(unityCredit);
+      } else {
+        popupCredits.Add(unityCredit);
       }
     }
 
-    System::String popupCredits =
-        System::String::Join(System::String("\n"), _popupCreditsList.ToArray());
-
-    System::String onScreenCredits = System::String::Join(
-        creditSystem.defaultDelimiter(),
-        _onScreenCreditsList.ToArray());
-
-    onScreenCredits = System::String::Concat(
-        onScreenCredits,
-        System::String("<link=\"popup\"><u>Data Attribution</u></link>"));
-
-    creditSystem.popupCredits(System::String(popupCredits));
-    creditSystem.onScreenCredits(System::String(onScreenCredits));
-
+    onScreenCredits.Add(_dataAttributionCredit);
     _lastCreditsCount = creditsCount;
   }
 
@@ -105,17 +115,21 @@ void CesiumCreditSystemImpl::Update(
 }
 
 namespace {
-void htmlToRtf(
-    std::string& output,
-    std::string& parentUrl,
+void htmlToCreditComponents(
     TidyDoc tdoc,
     TidyNode tnod,
+    std::string& parentUrl,
+    List1<CesiumForUnity::CesiumCreditComponent>& componentList,
     const CesiumForUnity::CesiumCreditSystem& creditSystem) {
   TidyNode child;
   TidyBuffer buf;
   tidyBufInit(&buf);
 
   for (child = tidyGetChild(tnod); child; child = tidyGetNext(child)) {
+    System::String componentText("");
+    System::String componentLink("");
+    int componentImageId = -1;
+
     if (tidyNodeIsText(child)) {
       tidyNodeGetText(tdoc, child, &buf);
 
@@ -128,12 +142,7 @@ void htmlToRtf(
           text.pop_back();
         }
 
-        if (!parentUrl.empty()) {
-          // Output is <link="url">text</link>
-          output += "<link=\"" + parentUrl + "\">" + text + "</link>";
-        } else {
-          output += text;
-        }
+        componentText = System::String(text);
       }
     } else if (tidyNodeGetId(child) == TidyTagId::TidyTag_IMG) {
       auto srcAttr = tidyAttrGetById(child, TidyAttrId::TidyAttr_SRC);
@@ -142,26 +151,27 @@ void htmlToRtf(
         auto srcValue = tidyAttrValue(srcAttr);
         if (srcValue) {
           // Get the number of images that existed before LoadImage is called.
-          const int numImages = creditSystem.images().Count();
+          componentImageId = creditSystem.images().Count();
 
           const std::string srcString =
               std::string(reinterpret_cast<const char*>(srcValue));
           creditSystem.StartCoroutine(
               creditSystem.LoadImage(System::String(srcString)));
-
-          // Output is <link="url"><size=150%><sprite
-          // name="credit-image-ID"></size></link> The ID of the image is just
-          // the number of images before it was added.
-          if (!parentUrl.empty()) {
-            output += "<link=\"" + parentUrl + "\">";
-          }
-          output += "<size=150%><sprite name=\"credit-image-" +
-                    std::to_string(numImages) + "\"></size>";
-          if (!parentUrl.empty()) {
-            output += "</link>";
-          }
         }
       }
+    }
+
+    if (!System::String::IsNullOrEmpty(componentText) ||
+        componentImageId >= 0) {
+      if (!parentUrl.empty()) {
+        componentLink = System::String(parentUrl);
+      }
+
+      CesiumForUnity::CesiumCreditComponent component(
+          componentText,
+          componentLink,
+          componentImageId);
+      componentList.Add(component);
     }
 
     auto hrefAttr = tidyAttrGetById(child, TidyAttrId::TidyAttr_HREF);
@@ -169,16 +179,20 @@ void htmlToRtf(
       auto hrefValue = tidyAttrValue(hrefAttr);
       parentUrl = std::string(reinterpret_cast<const char*>(hrefValue));
     }
-    htmlToRtf(output, parentUrl, tdoc, child, creditSystem);
+
+    htmlToCreditComponents(tdoc, child, parentUrl, componentList, creditSystem);
   }
 
   tidyBufFree(&buf);
 }
 } // namespace
 
-const std::string CesiumCreditSystemImpl::convertHtmlToRtf(
+const CesiumForUnity::CesiumCredit
+CesiumCreditSystemImpl::convertHtmlToUnityCredit(
     const std::string& html,
     const CesiumForUnity::CesiumCreditSystem& creditSystem) {
+  CesiumForUnity::CesiumCredit credit = CesiumForUnity::CesiumCredit();
+
   TidyDoc tdoc;
   TidyBuffer tidy_errbuf = {0};
   int err;
@@ -193,53 +207,25 @@ const std::string CesiumCreditSystemImpl::convertHtmlToRtf(
   std::string modifiedHtml =
       "<!DOCTYPE html><html><body>" + html + "</body></html>";
 
-  std::string output, url;
+  std::string url;
   err = tidyParseString(tdoc, modifiedHtml.c_str());
   if (err < 2) {
-    htmlToRtf(output, url, tdoc, tidyGetRoot(tdoc), creditSystem);
+    htmlToCreditComponents(
+        tdoc,
+        tidyGetRoot(tdoc),
+        url,
+        credit.components(),
+        creditSystem);
   }
   tidyBufFree(&tidy_errbuf);
   tidyRelease(tdoc);
 
-  return output.c_str();
+  return credit;
 }
 
 const std::shared_ptr<Cesium3DTilesSelection::CreditSystem>&
 CesiumCreditSystemImpl::getExternalCreditSystem() const {
   return _pCreditSystem;
-}
-
-/*static*/ CesiumForUnity::CesiumCreditSystem
-CesiumCreditSystemImpl::CreateDefaultCreditSystem() {
-  UnityEngine::Debug::Log(System::String("I'm creating again"));
-  System::String defaultName = System::String("CesiumCreditSystemDefault");
-  UnityEngine::GameObject defaultCreditSystemObject =
-      UnityEngine::GameObject(defaultName);
-  defaultCreditSystemObject.hideFlags(
-      UnityEngine::HideFlags::HideAndDontSave |
-      UnityEngine::HideFlags::HideInHierarchy);
-
-  CesiumForUnity::CesiumCreditSystem defaultCreditSystem =
-      defaultCreditSystemObject
-          .AddComponent<CesiumForUnity::CesiumCreditSystem>();
-
-#if UNITY_EDITOR
-  if (!UnityEditor::EditorApplication::isPlaying()) {
-    return defaultCreditSystem;
-  }
-#endif
-
-  // Instantiate a UI prefab for the credit system.
-  System::String prefabName("CesiumCreditSystemUI");
-  UnityEngine::GameObject creditSystemUIPrefab =
-      UnityEngine::Resources::Load<UnityEngine::GameObject>(prefabName);
-
-  UnityEngine::GameObject creditSystemUI =
-      UnityEngine::Object::Instantiate(creditSystemUIPrefab);
-  creditSystemUI.name(prefabName);
-  creditSystemUI.hideFlags(UnityEngine::HideFlags::NotEditable);
-
-  return defaultCreditSystem;
 }
 
 } // namespace CesiumForUnityNative

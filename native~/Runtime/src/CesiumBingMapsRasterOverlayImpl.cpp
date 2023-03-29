@@ -12,6 +12,8 @@
 #include <DotNet/CesiumForUnity/CesiumBingMapsRasterOverlay.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
 
+#include <DotNet/System/String.h>
+
 using namespace Cesium3DTilesSelection;
 using namespace DotNet;
 

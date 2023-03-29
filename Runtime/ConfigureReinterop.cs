@@ -391,25 +391,30 @@ namespace CesiumForUnity
 
             Physics.BakeMesh(mesh.GetInstanceID(), false);
 
-            CesiumCreditSystem creditSystem = go.AddComponent<CesiumCreditSystem>();
+            CesiumCreditComponent creditComponent = new CesiumCreditComponent("text", "link", -1);
+            List<CesiumCreditComponent> creditComponents = new List<CesiumCreditComponent>();
+            creditComponents.Add(creditComponent);
 
-            CesiumCreditSystem[] creditSystems = UnityEngine.Object.FindObjectsOfType<CesiumCreditSystem>();
-            for (int i = 0; i < creditSystems.Length; ++i)
+            CesiumCredit credit = new CesiumCredit();
+            credit = new CesiumCredit(creditComponents);
+            creditComponents = credit.components;
+
+            CesiumCreditSystem creditSystem = go.AddComponent<CesiumCreditSystem>();
+            creditSystem = CesiumCreditSystem.GetDefaultCreditSystem();
+            creditSystem.StartCoroutine(creditSystem.LoadImage("string"));
+
+            List<CesiumCredit> credits = creditSystem.onScreenCredits;
+            credits = creditSystem.popupCredits;
+            credits.Add(credit);
+            credits.Clear();
+
+            if (!creditSystem.HasLoadingImages())
             {
-                creditSystem = creditSystems[i];
-                creditSystem.gameObject.name.StartsWith("name");
+                creditSystem.BroadcastCreditsUpdate();
             }
 
-            creditSystem = CesiumCreditSystem.GetDefaultCreditSystem();
-
-            //creditSystem.SetCreditsText("Popup", "OnScreen");
-            creditSystem.StartCoroutine(creditSystem.LoadImage("string"));
-            creditSystem.onScreenCredits = "";
-            creditSystem.popupCredits = "";
             List<Texture2D> images = creditSystem.images;
             int count = images.Count;
-
-            string delimiter = creditSystem.defaultDelimiter;
 
             List<string> stringList = new List<string>();
             stringList.Add("item");

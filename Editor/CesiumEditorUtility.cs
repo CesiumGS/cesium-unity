@@ -24,7 +24,6 @@ namespace CesiumForUnity
             Texture2D icon = (Texture2D)Resources.Load("Cesium-64x64");
             icon.wrapMode = TextureWrapMode.Clamp;
             _content = new GUIContent("Cesium", icon);
-            SceneView.duringSceneGui += DrawCreditSystem;
         }
 
         static void CheckProjectFilesForTextMeshPro()
@@ -109,19 +108,6 @@ namespace CesiumForUnity
             {
                 Debug.Log(details.message);
             }
-        }
-
-        static void DrawCreditSystem(SceneView sceneView)
-        {
-            CesiumCreditSystem creditSystem = CesiumCreditSystem.GetDefaultCreditSystem();
-            Handles.BeginGUI();
-            GUILayout.FlexibleSpace();
-            GUIContent testContent = new GUIContent("I'm drawing text here!");
-            GUILayout.Label(creditSystem.onScreenCredits);
-            if (GUILayout.Button("Press Me"))
-                Debug.Log("Got it to work.");
-
-            Handles.EndGUI();
         }
 
         public static Cesium3DTileset FindFirstTileset()

@@ -2,15 +2,15 @@
 
 #include <Cesium3DTilesSelection/CreditSystem.h>
 
+#include <DotNet/CesiumForUnity/CesiumCredit.h>
 #include <DotNet/CesiumForUnity/CesiumCreditSystem.h>
-#include <DotNet/System/Collections/Generic/List1.h>
-#include <DotNet/System/String.h>
-#include <DotNet/UnityEngine/GameObject.h>
 
 #include <memory>
 #include <unordered_map>
 
 namespace DotNet::CesiumForUnity {
+class CesiumCredit;
+class CesiumCreditComponent;
 class CesiumCreditSystem;
 class GameObject;
 } // namespace DotNet::CesiumForUnity
@@ -33,22 +33,20 @@ public:
   const std::shared_ptr<Cesium3DTilesSelection::CreditSystem>&
   getExternalCreditSystem() const;
 
-  static DotNet::CesiumForUnity::CesiumCreditSystem CreateDefaultCreditSystem();
-
 private:
   // The underlying cesium-native credit system.
   std::shared_ptr<Cesium3DTilesSelection::CreditSystem> _pCreditSystem;
 
-  const std::string convertHtmlToRtf(
+  const DotNet::CesiumForUnity::CesiumCredit convertHtmlToUnityCredit(
       const std::string& html,
       const DotNet::CesiumForUnity::CesiumCreditSystem& creditSystem);
 
-  std::unordered_map<std::string, DotNet::System::String> _htmlToRtf;
-  DotNet::System::Collections::Generic::List1<DotNet::System::String>
-      _popupCreditsList;
-  DotNet::System::Collections::Generic::List1<DotNet::System::String>
-      _onScreenCreditsList;
+  std::unordered_map<std::string, DotNet::CesiumForUnity::CesiumCredit>
+      _htmlToUnityCredit;
+  DotNet::CesiumForUnity::CesiumCredit _dataAttributionCredit;
+
   size_t _lastCreditsCount;
+  bool _creditsUpdated;
 };
 
 } // namespace CesiumForUnityNative

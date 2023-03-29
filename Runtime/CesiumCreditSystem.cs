@@ -2,11 +2,8 @@ using Reinterop;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.Networking;
-using UnityEngine.TextCore;
 
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem.UI;
@@ -18,6 +15,53 @@ using UnityEditor;
 
 namespace CesiumForUnity
 {
+    public class CesiumCreditComponent
+    {
+        private string _text;
+        private string _link;
+        private int _imageId = -1;
+
+        public string text
+        {
+            get => this._text;
+        }
+
+        public string link
+        {
+            get => this._link;
+        }
+
+        public int imageId
+        {
+            get => this._imageId;
+        }
+
+        public CesiumCreditComponent(string text, string link, int imageId)
+        {
+            this._text = text;
+            this._link = link;
+            this._imageId = imageId;
+        }
+    }
+
+    public class CesiumCredit
+    {
+        private List<CesiumCreditComponent> _components;
+
+        public List<CesiumCreditComponent> components
+        {
+            get => this._components;
+        }
+
+        public CesiumCredit() : this(new List<CesiumCreditComponent>())
+        { }
+
+        public CesiumCredit(List<CesiumCreditComponent> components)
+        {
+            this._components = components;
+        }
+    }
+
     /// <summary>
     /// Manages credits / attribution for <see cref="Cesium3DTileset"/> and <see cref="CesiumRasterOverlay"/>.
     /// </summary>
@@ -25,31 +69,78 @@ namespace CesiumForUnity
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumCreditSystemImpl", "CesiumCreditSystemImpl.h")]
     public partial class CesiumCreditSystem : MonoBehaviour
     {
-        private string _onScreenCredits;
-        private string _popupCredits;
+        private List<CesiumCredit> _onScreenCredits;
+        private List<CesiumCredit> _popupCredits;
 
-        public string onScreenCredits
+        /// <summary>
+        /// The current on-screen credits.
+        /// </summary>
+        public List<CesiumCredit> onScreenCredits
         {
             get => this._onScreenCredits;
-            internal set => this._onScreenCredits = value;
         }
 
-        public string popupCredits
+        /// <summary>
+        /// The credits to be displayed in the "Data Attribution" panel.
+        /// </summary>
+        public List<CesiumCredit> popupCredits
         {
             get => this._popupCredits;
-            internal set => this._popupCredits = value;
         }
 
-        // The delimiter refers to the string used to separate credit entries
-        // when they are presented on-screen.
-        private string _defaultDelimiter = " \u2022 ";
+        public delegate void CreditsUpdateDelegate(List<CesiumCredit> onScreenCredits, List<CesiumCredit> onPopupCredits);
 
-        internal string defaultDelimiter
+        public event CreditsUpdateDelegate OnCreditsUpdate;
+
+        private void OnEnable()
         {
-            get => this._defaultDelimiter;
+            this._onScreenCredits = new List<CesiumCredit>();
+            this._popupCredits = new List<CesiumCredit>();
         }
 
-        private Shader _defaultSpriteShader = null!;
+        private partial void Update();
+
+        internal void BroadcastCreditsUpdate()
+        {
+            if (this.OnCreditsUpdate != null)
+            {
+                this.OnCreditsUpdate(this._onScreenCredits, this._popupCredits);
+            }
+        }
+
+        const string defaultName = "CesiumCreditSystemDefault";
+        const string creditSystemPrefabName = "CesiumCreditSystem";
+
+        private static CesiumCreditSystem _defaultCreditSystem;
+
+        private static CesiumCreditSystem CreateDefaultCreditSystem()
+        {
+            GameObject creditSystemPrefab = Resources.Load<GameObject>(creditSystemPrefabName);
+            GameObject creditSystemGameObject = UnityEngine.Object.Instantiate(creditSystemPrefab);
+            creditSystemGameObject.name = defaultName;
+            //creditSystemGameObject.hideFlags = HideFlags.HideAndDontSave;
+
+            return creditSystemGameObject.GetComponent<CesiumCreditSystem>();
+        }
+
+        public static CesiumCreditSystem GetDefaultCreditSystem()
+        {
+            if (_defaultCreditSystem == null)
+            {
+                CesiumCreditSystem[] creditSystems = Resources.FindObjectsOfTypeAll<CesiumCreditSystem>();
+                for (int i = 0; i < creditSystems.Length; i++)
+                {
+                    if (creditSystems[i].gameObject.name == defaultName)
+                    {
+                        UnityLifetime.Destroy(creditSystems[i].gameObject);
+                    }
+                }
+
+                _defaultCreditSystem = CreateDefaultCreditSystem();
+            }
+
+            return _defaultCreditSystem;
+        }
 
         private List<Texture2D> _images = new List<Texture2D>();
 
@@ -60,22 +151,6 @@ namespace CesiumForUnity
 
         private int _numLoadingImages = 0;
 
-        private static CesiumCreditSystem _defaultCreditSystem;
-
-        public static CesiumCreditSystem GetDefaultCreditSystem()
-        {
-            if (_defaultCreditSystem == null)
-            {
-                _defaultCreditSystem = CreateDefaultCreditSystem();
-            }
-
-            return _defaultCreditSystem;
-        }
-
-        internal static partial CesiumCreditSystem CreateDefaultCreditSystem();
-
-        internal partial void Update();
-
         public bool HasLoadingImages()
         {
             return this._numLoadingImages > 0;
@@ -85,11 +160,14 @@ namespace CesiumForUnity
 
         internal IEnumerator LoadImage(string url)
         {
-            // Each image is identified by its index.
-            int imageId = this._images.Count;
+            int index = this._images.Count;
 
             // Initialize a texture of arbitrary size.
             Texture2D texture = new Texture2D(1, 1);
+
+            // Add it early so that when other images are loaded,
+            // their ID aligns properly with the current list of images.
+            this._images.Add(texture);
 
             if (url.LastIndexOf(base64Prefix, base64Prefix.Length) == 0)
             {
@@ -117,84 +195,31 @@ namespace CesiumForUnity
                 else
                 {
                     texture = ((DownloadHandlerTexture)request.downloadHandler).texture;
+
+                    Texture2D placeholderTexture = this._images[index];
+                    this._images[index] = texture;
+                    UnityLifetime.Destroy(placeholderTexture);
                 }
 
                 this._numLoadingImages--;
             }
 
-            this._images.Add(texture);
-
-#if UNITY_EDITOR
-            if (!EditorApplication.isPlaying) {
-                yield break;
-            }
-#endif
-            // Create a TMP_SpriteAsset out of the texture and add it as a fallback
-            // for the default sprite asset. The sprite will be accessed when the text
-            // searches for its name.
-            //string name = "credit-image-" + imageId;
-            //TMP_SpriteAsset spriteAsset = CreateSpriteAssetFromTexture(texture, name);
-            //TMP_Settings.defaultSpriteAsset.fallbackSpriteAssets.Add(spriteAsset);
-        }
-
-        private TMP_SpriteAsset CreateSpriteAssetFromTexture(Texture2D texture, string name)
-        {
             texture.wrapMode = TextureWrapMode.Clamp;
-
-            // Convert the image to a sprite asset for TextMeshPro.
-            TMP_SpriteAsset spriteAsset = ScriptableObject.CreateInstance<TMP_SpriteAsset>();
-            spriteAsset.name = name;
-            spriteAsset.spriteSheet = texture;
-            spriteAsset.hashCode = TMP_TextUtilities.GetSimpleHashCode(spriteAsset.name);
-
-            // Make a single sprite with the sprite sheet.
-            Sprite sprite = Sprite.Create(
-                texture,
-                new Rect(0, 0, texture.width, texture.height),
-                new Vector2(0.5f, 0.5f),
-                100.0f);
-
-            // Create a sprite glyph that treats the entire sprite as one glyph.
-            TMP_SpriteGlyph spriteGlyph = new TMP_SpriteGlyph();
-            spriteGlyph.sprite = sprite;
-            spriteGlyph.index = 0;
-            spriteGlyph.metrics = new GlyphMetrics(
-                texture.width,
-                texture.height,
-                -0.5f,
-                texture.height - 0.5f,
-                texture.width);
-            spriteGlyph.glyphRect = new GlyphRect(sprite.rect);
-            spriteGlyph.scale = 1.0f;
-            spriteAsset.spriteGlyphTable.Add(spriteGlyph);
-
-            // Create a sprite character, which represents the sprite as a basic element of text.
-            TMP_SpriteCharacter spriteCharacter = new TMP_SpriteCharacter(0xFFFE, spriteGlyph);
-            spriteCharacter.name = name;
-
-            spriteAsset.spriteCharacterTable.Add(spriteCharacter);
-            spriteAsset.UpdateLookupTables();
-
-            // Create a new default material for this asset.
-            Material material = new Material(_defaultSpriteShader);
-            material.SetTexture(ShaderUtilities.ID_MainTex, spriteAsset.spriteSheet);
-            spriteAsset.material = material;
-
-            return spriteAsset;
         }
 
         private void OnDestroy()
         {
-#if UNITY_EDITOR
-            if (!EditorApplication.isPlaying)
+            for (int i = 0, count = this._images.Count; i < count; i++)
             {
-                return;
+                UnityLifetime.Destroy(this._images[i]);
             }
-#endif
-            List<TMP_SpriteAsset> fallbackSpriteAssets =
-                TMP_Settings.defaultSpriteAsset.fallbackSpriteAssets;
-            int count = fallbackSpriteAssets.Count;
-            fallbackSpriteAssets.RemoveRange(count - this._images.Count, this._images.Count);
+
+            this._images.Clear();
+
+            if (_defaultCreditSystem == this)
+            {
+                _defaultCreditSystem = null;
+            }
         }
     }
 }
