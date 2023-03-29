@@ -77,6 +77,8 @@ namespace CesiumForUnity
             go.name = go.name;
             go = new GameObject("name");
             go.SetActive(go.activeSelf);
+            int layer = go.layer;
+            go.layer = layer;
             Transform transform = go.transform;
             transform.parent = transform.parent;
             transform.SetParent(transform.parent, false);

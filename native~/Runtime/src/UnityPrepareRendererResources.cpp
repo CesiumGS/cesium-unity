@@ -731,6 +731,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
   }
 
   pModelGameObject->transform().SetParent(this->_tileset.transform(), false);
+  pModelGameObject->layer(this->_tileset.layer());
   pModelGameObject->SetActive(false);
 
   glm::dmat4 tileTransform = tile.getTransform();
@@ -777,7 +778,8 @@ void* UnityPrepareRendererResources::prepareInMainThread(
        showTilesInHierarchy,
        currentOverlayCount,
        &pMetadataComponent,
-       &shaderProperty = _shaderProperty](
+       &shaderProperty = _shaderProperty,
+       tilesetLayer = this->tileset.layer()](
           const Model& gltf,
           const Node& node,
           const Mesh& mesh,
@@ -818,7 +820,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         }
 
         primitiveGameObject.transform().parent(pModelGameObject->transform());
-
+        primitiveGameObject.layer(tilesetLayer);
         glm::dmat4 modelToEcef = tileTransform * transform;
 
         CesiumForUnity::CesiumGlobeAnchor anchor =
