@@ -322,7 +322,7 @@ void Cesium3DTilesetImpl::updateLastViewUpdateResultState(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset,
     const Cesium3DTilesSelection::ViewUpdateResult& currentResult) {
 
-  if (!tileset.logSelectionStats()) {
+  if (tileset.logSelectionStats()) {
     const ViewUpdateResult& previousResult = this->_lastUpdateResult;
     if (currentResult.tilesToRenderThisFrame.size() !=
             previousResult.tilesToRenderThisFrame.size() ||
