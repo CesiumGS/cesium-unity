@@ -74,16 +74,11 @@ getCreditSystem(const CesiumForUnity::Cesium3DTileset& tileset) {
   CesiumForUnity::CesiumCreditSystem creditSystem =
       tilesetImpl.getCreditSystem();
 
-  // If the tileset does not already reference a credit system,
-  // get the default one.
-  if (creditSystem == nullptr) {
-    creditSystem = CesiumCreditSystemImpl::getDefaultCreditSystem();
-    tilesetImpl.setCreditSystem(creditSystem);
+  if (creditSystem != nullptr) {
+    CesiumCreditSystemImpl& creditSystemImpl =
+        creditSystem.NativeImplementation();
+    pCreditSystem = creditSystemImpl.getExternalCreditSystem();
   }
-
-  CesiumCreditSystemImpl& creditSystemImpl =
-      creditSystem.NativeImplementation();
-  pCreditSystem = creditSystemImpl.getExternalCreditSystem();
 
   return pCreditSystem;
 }
