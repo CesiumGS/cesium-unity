@@ -40,15 +40,8 @@ CesiumCreditSystemImpl::CesiumCreditSystemImpl(
     const CesiumForUnity::CesiumCreditSystem& creditSystem)
     : _pCreditSystem(std::make_shared<CreditSystem>()),
       _htmlToUnityCredit(),
-      _dataAttributionCredit(),
       _lastCreditsCount(0),
       _creditsUpdated(false) {
-
-  CesiumForUnity::CesiumCreditComponent dataAttribution(
-      System::String("<u>Data Attribution</u>"),
-      System::String("popup"),
-      -1);
-  _dataAttributionCredit.components().Add(dataAttribution);
 }
 
 CesiumCreditSystemImpl::~CesiumCreditSystemImpl() {}
@@ -107,7 +100,6 @@ void CesiumCreditSystemImpl::Update(
       }
     }
 
-    onScreenCredits.Add(_dataAttributionCredit);
     _lastCreditsCount = creditsCount;
   }
 

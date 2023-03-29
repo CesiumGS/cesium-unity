@@ -2,7 +2,7 @@
 
 #include <Cesium3DTilesSelection/CreditSystem.h>
 
-#include <DotNet/CesiumForUnity/CesiumCredit.h>
+#include <DotNet/CesiumForUnity/CesiumCreditSystem.h>
 #include <DotNet/CesiumForUnity/CesiumCreditSystem.h>
 
 #include <memory>
@@ -43,7 +43,6 @@ private:
 
   std::unordered_map<std::string, DotNet::CesiumForUnity::CesiumCredit>
       _htmlToUnityCredit;
-  DotNet::CesiumForUnity::CesiumCredit _dataAttributionCredit;
 
   size_t _lastCreditsCount;
   bool _creditsUpdated;

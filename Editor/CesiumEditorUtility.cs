@@ -12,7 +12,6 @@ namespace CesiumForUnity
         private static GUIContent _content;
         static CesiumEditorUtility()
         {
-            EditorApplication.update += CheckProjectFilesForTextMeshPro;
             EditorApplication.update += UpdateIonSession;
 
             Cesium3DTileset.OnCesium3DTilesetLoadFailure +=
@@ -24,19 +23,6 @@ namespace CesiumForUnity
             Texture2D icon = (Texture2D)Resources.Load("Cesium-64x64");
             icon.wrapMode = TextureWrapMode.Clamp;
             _content = new GUIContent("Cesium", icon);
-        }
-
-        static void CheckProjectFilesForTextMeshPro()
-        {
-            UnityEngine.Object tmpSettings = Resources.Load("TMP Settings");
-            if (tmpSettings != null)
-            {
-                return;
-            }
-
-            TextMeshProPromptWindow.ShowWindow();
-
-            EditorApplication.update -= CheckProjectFilesForTextMeshPro;
         }
 
         static void UpdateIonSession()

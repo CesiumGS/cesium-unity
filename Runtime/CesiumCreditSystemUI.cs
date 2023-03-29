@@ -1,10 +1,10 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Networking;
-using UnityEngine.TextCore;
 using UnityEngine.UIElements;
 
 #if ENABLE_INPUT_SYSTEM
@@ -34,12 +34,7 @@ namespace CesiumForUnity
 
         // The delimiter refers to the string used to separate credit entries
         // when they are presented on-screen.
-        private string _defaultDelimiter = "\u2022";
-
-        internal string defaultDelimiter
-        {
-            get => this._defaultDelimiter;
-        }
+        private string _delimiter = "\u2022";
 
         private void OnEnable()
         {
@@ -50,6 +45,13 @@ namespace CesiumForUnity
             this._onScreenCredits = this._uiDocument.rootVisualElement.Q("OnScreenCredits");
             this._popupCredits = this._uiDocument.rootVisualElement.Q("PopupCredits");
 
+#if UNITY_EDITOR
+            if (!EditorApplication.isPlaying)
+            {
+                return;
+            }
+#endif
+
             // If no EventSystem exists, create one to handle clicking on credit links.
             if (EventSystem.current == null)
             {
@@ -57,29 +59,80 @@ namespace CesiumForUnity
                 eventSystemGameObject.AddComponent<EventSystem>();
 
 #if ENABLE_INPUT_SYSTEM
-                eventSystemGameObject.AddComponent<InputSystemUIInputModule>();
+                 eventSystemGameObject.AddComponent<InputSystemUIInputModule>();
 #elif ENABLE_LEGACY_INPUT_MANAGER
-                eventSystemGameObject.AddComponent<StandaloneInputModule>();
+                 eventSystemGameObject.AddComponent<StandaloneInputModule>();
 #endif
             }
-
-#if UNITY_EDITOR
-            // TODO: can / should you handle multiple scene views?
-            this.AttachCreditsToSceneView(SceneView.lastActiveSceneView);
-#endif
         }
 
-        private void AttachCreditsToSceneView(SceneView sceneView)
-        {
+
 #if UNITY_EDITOR
-            /*if (sceneView.rootVisualElement != null && sceneView.rootVisualElement.Q("CesiumCreditsOverlay") == null)
+        private void AddCreditsToSceneView(SceneView sceneView)
+        {
+            if (sceneView.rootVisualElement == null)
+            {
+                return;
+            }
+
+            if (sceneView.rootVisualElement.Q("CesiumCreditsOverlay") == null)
             {
                 VisualTreeAsset visualTreeAsset = this._uiDocument.visualTreeAsset;
                 TemplateContainer tree = visualTreeAsset.Instantiate();
                 tree.name = "CesiumCreditsOverlay";
                 tree.style.height = new StyleLength(Length.Percent(100));
                 sceneView.rootVisualElement.Add(tree);
-            }*/
+
+                this.UpdateCreditsInSceneView(
+                    sceneView,
+                    this._creditSystem.onScreenCredits,
+                    this._creditSystem.popupCredits);
+            }
+        }
+
+        private void UpdateCreditsInSceneView(SceneView sceneView, List<CesiumCredit> onScreenCredits, List<CesiumCredit> popupCredits)
+        {
+            if (sceneView.rootVisualElement == null)
+            {
+                return;
+            }
+
+            VisualElement creditOverlay = sceneView.rootVisualElement.Q("CesiumCreditsOverlay");
+            if (creditOverlay != null)
+            {
+                VisualElement onScreenElement = creditOverlay.Q("OnScreenCredits");
+                VisualElement popupElement = creditOverlay.Q("PopupCredits");
+                this.SetCreditsOnVisualElements(
+                    onScreenElement,
+                    onScreenCredits,
+                    popupElement,
+                    popupCredits);
+            }
+        }
+
+        private void RemoveCreditsFromSceneView(SceneView sceneView)
+        {
+            if (sceneView.rootVisualElement != null)
+            {
+                VisualElement creditOverlay = sceneView.rootVisualElement.Q("CesiumCreditsOverlay");
+                if (creditOverlay != null)
+                {
+                    VisualElement parent = creditOverlay.parent;
+                    parent.Remove(creditOverlay);
+                }
+            }
+        }
+
+#endif
+
+        private void Update()
+        {
+#if UNITY_EDITOR
+            ArrayList sceneViews = SceneView.sceneViews;
+            for(int i = 0; i < sceneViews.Count; i++)
+            {
+                this.AddCreditsToSceneView((SceneView)sceneViews[i]);
+            }
 #endif
         }
 
@@ -92,17 +145,6 @@ namespace CesiumForUnity
             label.style.paddingRight = new StyleLength(0.0f);
 
             return label;
-        }
-
-        private void HandleClickedLink(string link)
-        {
-            if(link == "popup")
-            {
-                this._popupCredits.SetEnabled(!this._popupCredits.enabledSelf);
-            } else
-            {
-                Application.OpenURL(link);
-            }
         }
 
         private List<VisualElement> ConvertCreditToVisualElements(CesiumCredit credit)
@@ -129,7 +171,7 @@ namespace CesiumForUnity
 
                 if (!string.IsNullOrEmpty(creditComponent.link))
                 {
-                    element.AddManipulator(new Clickable(evt => HandleClickedLink(creditComponent.link)));
+                    element.AddManipulator(new Clickable(evt => Application.OpenURL(creditComponent.link)));
                 }
 
                 visualElements.Add(element);
@@ -138,25 +180,79 @@ namespace CesiumForUnity
             return visualElements;
         }
 
+        private VisualElement CreateDataAttributionElement(VisualElement popupElement)
+        {
+            Label label = new Label();
+            label.text = "<u>Data Attribution</u>";
+            label.AddManipulator(new Clickable(evt =>
+            {
+                if (popupElement.style.display == DisplayStyle.Flex)
+                {
+                    popupElement.style.display = DisplayStyle.None;
+                }
+                else
+                {
+                    popupElement.style.display = DisplayStyle.Flex;
+                }
+            }));
+
+            return label;
+        }
+
         private void SetCredits(List<CesiumCredit> onScreenCredits, List<CesiumCredit> popupCredits)
         {
-            this._onScreenCredits.Clear();
-            this._popupCredits.Clear();
+            this.SetCreditsOnVisualElements(this._onScreenCredits, onScreenCredits, this._popupCredits, popupCredits);
+
+#if UNITY_EDITOR
+            ArrayList sceneViews = SceneView.sceneViews;
+            for (int i = 0; i < sceneViews.Count; i++)
+            {
+                this.UpdateCreditsInSceneView((SceneView)sceneViews[i], onScreenCredits, popupCredits);
+            }
+#endif
+        }
+
+        private void SetCreditsOnVisualElements(
+            VisualElement onScreenElement,
+            List<CesiumCredit> onScreenCredits,
+            VisualElement popupElement,
+            List<CesiumCredit> popupCredits)
+        {
+            onScreenElement.Clear();
+            popupElement.Clear();
 
             for (int i = 0, creditCount = onScreenCredits.Count; i < creditCount; i++)
             {
                 if (i > 0)
                 {
-                    this._onScreenCredits.Add(this.CreateLabelFromText(this._defaultDelimiter));
+                    onScreenElement.Add(this.CreateLabelFromText(this._delimiter));
                 }
 
                 CesiumCredit credit = onScreenCredits[i];
                 List<VisualElement> visualElements = this.ConvertCreditToVisualElements(credit);
                 for (int j = 0, elementCount = visualElements.Count; j < elementCount; j++)
                 {
-                    this._onScreenCredits.Add(visualElements[j]);
+                    onScreenElement.Add(visualElements[j]);
                 }
             }
+
+            for (int i = 0, creditCount = popupCredits.Count; i < creditCount; i++)
+            {
+                
+            }
+
+            onScreenElement.Add(this.CreateDataAttributionElement(popupElement));
+        }
+
+        private void OnDisable()
+        {
+#if UNITY_EDITOR
+            ArrayList sceneViews = SceneView.sceneViews;
+            for(int i = 0; i < sceneViews.Count; i++)
+            {
+                this.RemoveCreditsFromSceneView((SceneView)sceneViews[i]);
+            }
+#endif
         }
     }
 }
