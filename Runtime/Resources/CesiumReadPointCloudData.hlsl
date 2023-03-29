@@ -77,8 +77,6 @@ void CesiumReadPointCloudData_float(float vertexIndex, out float3 position, out 
 
 	// Transform the clip space position back to object space.
 	// It's unfortunate we need to do this, but shader graph exclusively outputs object space positions.
-	//positionEC = mul(UNITY_MATRIX_I_P, positionClip);
-	//position = mul(UNITY_MATRIX_T_MV, positionEC);
 	positionWC = mul(UNITY_MATRIX_I_VP, positionClip);
 	position = mul(UNITY_MATRIX_I_M, positionWC);
 

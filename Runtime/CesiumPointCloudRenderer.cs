@@ -218,14 +218,14 @@ namespace CesiumForUnity
             this._pointMaterial.SetVector("_attenuationParameters", this._attenuationParameters);
             this._pointMaterial.SetVector("_constantColor", this._constantColor);
 
-            if (this._tileInfo.isTranslucent || this._constantColor.w < 1.0f)
-            {
-                this._pointMaterial.SetOverrideTag("RenderType", "Transparent");
-                this._pointMaterial.renderQueue = (int)RenderQueue.Transparent;
-                this._pointMaterial.SetInt("_SrcBlend", (int)BlendMode.SrcAlpha);
-                this._pointMaterial.SetInt("_DstBlend", (int)BlendMode.OneMinusSrcAlpha);
-            }
-            else
+            //if (this._tileInfo.isTranslucent || this._constantColor.w < 1.0f)
+            //{
+            //    this._pointMaterial.SetOverrideTag("RenderType", "Transparent");
+            //    this._pointMaterial.renderQueue = (int)RenderQueue.Transparent;
+            //    this._pointMaterial.SetInt("_SrcBlend", (int)BlendMode.SrcAlpha);
+            //    this._pointMaterial.SetInt("_DstBlend", (int)BlendMode.OneMinusSrcAlpha);
+            //}
+            //else
             {
                 this._pointMaterial.SetInt("_SrcBlend", (int)BlendMode.One);
                 this._pointMaterial.SetInt("_DstBlend", (int)BlendMode.Zero);
