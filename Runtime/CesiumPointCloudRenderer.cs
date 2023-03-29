@@ -36,6 +36,8 @@ namespace CesiumForUnity
 
         private Cesium3DTileInfo _tileInfo;
 
+        private Mesh _emptyMesh;
+
         public Cesium3DTileInfo tileInfo
         {
             set => this._tileInfo = value;
@@ -51,7 +53,7 @@ namespace CesiumForUnity
 
             this._pointCount = this._mesh.vertexCount;
             this._pointMaterial = UnityEngine.Object.Instantiate(
-                        Resources.Load<Material>("CesiumPointCloudShadingMaterial"));
+                        Resources.Load<Material>("CesiumPointCloudTilesetMaterial"));
 
             GraphicsBuffer sourceBuffer = this._mesh.GetVertexBuffer(0);
 
@@ -72,7 +74,7 @@ namespace CesiumForUnity
 
             if (this._mesh.HasVertexAttribute(VertexAttribute.Color))
             {
-                this._pointMaterial.EnableKeyword("HAS_POINT_COLORS");
+                this._pointMaterial.EnableKeyword("_HAS_POINT_COLORS");
             }
             else
             {
@@ -94,7 +96,7 @@ namespace CesiumForUnity
 
             if (this._mesh.HasVertexAttribute(VertexAttribute.Normal))
             {
-                this._pointMaterial.EnableKeyword("HAS_POINT_NORMALS");
+                this._pointMaterial.EnableKeyword("_HAS_POINT_NORMALS");
             }
 
             if (XRSettings.stereoRenderingMode == XRSettings.StereoRenderingMode.SinglePassInstanced ||
@@ -102,6 +104,19 @@ namespace CesiumForUnity
             {
                 this._pointMaterial.EnableKeyword("INSTANCING_ON");
             }
+
+            var layout = new VertexAttributeDescriptor[0];
+            this._emptyMesh = CesiumObjectPool.MeshPool.Get();
+
+            int[] indices = new int[this._pointCount * 6];
+            for (int i = 0; i < indices.Length; ++i)
+            {
+                indices[i] = i;
+            }
+
+            this._emptyMesh.SetVertexBufferParams(this._pointCount * 6, layout);
+            this._emptyMesh.indexFormat = IndexFormat.UInt32;
+            this._emptyMesh.SetIndices(indices, MeshTopology.Triangles, 0, false);
         }
 
         private float GetGeometricError(CesiumPointCloudShading pointCloudShading)
@@ -167,10 +182,17 @@ namespace CesiumForUnity
             positionsScratch[2] = localBounds.max;
 
             this._bounds = GeometryUtility.CalculateBounds(positionsScratch, transformMatrix);
+            this._emptyMesh.bounds = this._mesh.bounds;
         }
 
         private void DestroyResources()
         {
+            if (this._emptyMesh != null)
+            {
+                CesiumObjectPool.MeshPool.Release(this._emptyMesh);
+                this._emptyMesh = null;
+            }
+
             if (this._meshVertexBuffer != null)
             {
                 this._meshVertexBuffer.Release();
@@ -216,12 +238,13 @@ namespace CesiumForUnity
             this.UpdateAttenuationParameters();
             this.UpdateMaterial();
 
-            Graphics.DrawProcedural(
-                this._pointMaterial,
-                this._bounds,
-                MeshTopology.Triangles,
-                this._pointCount * 6,
-                1);
+            Graphics.DrawMesh(this._emptyMesh, this.gameObject.transform.localToWorldMatrix, this._pointMaterial, 0);
+            //Graphics.DrawProcedural(
+            //    this._pointMaterial,
+            //    this._bounds,
+            //    MeshTopology.Triangles,
+            //    this._pointCount * 6,
+            //    1);
         }
 
         void Update()
