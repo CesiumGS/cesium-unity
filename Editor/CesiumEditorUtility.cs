@@ -9,7 +9,6 @@ namespace CesiumForUnity
     [InitializeOnLoad]
     public static class CesiumEditorUtility
     {
-        private static GUIContent _content;
         static CesiumEditorUtility()
         {
             EditorApplication.update += UpdateIonSession;
@@ -18,11 +17,6 @@ namespace CesiumForUnity
                 HandleCesium3DTilesetLoadFailure;
             CesiumRasterOverlay.OnCesiumRasterOverlayLoadFailure +=
                 HandleCesiumRasterOverlayLoadFailure;
-
-            // Load the icon separately from the other resources.
-            Texture2D icon = (Texture2D)Resources.Load("Cesium-64x64");
-            icon.wrapMode = TextureWrapMode.Clamp;
-            _content = new GUIContent("Cesium", icon);
         }
 
         static void UpdateIonSession()
