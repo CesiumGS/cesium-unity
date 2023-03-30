@@ -2,6 +2,8 @@
 
 #include <Cesium3DTilesSelection/CreditSystem.h>
 
+#include <DotNet/System/Collections/Generic/List1.h>
+
 #include <memory>
 #include <unordered_map>
 
@@ -41,7 +43,9 @@ private:
   std::unordered_map<std::string, DotNet::CesiumForUnity::CesiumCredit>
       _htmlToUnityCredit;
 
-  size_t _lastCreditsCount;
+  std::vector<Cesium3DTilesSelection::Credit> _onScreenCredits;
+  std::vector<Cesium3DTilesSelection::Credit> _popupCredits;
+
   bool _creditsUpdated;
 };
 
