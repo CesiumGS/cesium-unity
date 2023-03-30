@@ -4,6 +4,7 @@
 
 ##### Additions :tada:
 
+- Added `CesiumPointCloudShading`, which allows point cloud tilesets to be rendered with attenuation based on geometric error. Attenuation is currently only supported in URP.
 - Added support for Unity's built-in render pipeline.
 
 ##### Fixes :wrench:
