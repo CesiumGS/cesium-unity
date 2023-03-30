@@ -3,7 +3,6 @@
 #include <Cesium3DTilesSelection/CreditSystem.h>
 
 #include <DotNet/CesiumForUnity/CesiumCreditSystem.h>
-#include <DotNet/CesiumForUnity/CesiumCreditSystem.h>
 
 #include <memory>
 #include <unordered_map>
