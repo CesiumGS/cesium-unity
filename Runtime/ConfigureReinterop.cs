@@ -394,6 +394,7 @@ namespace CesiumForUnity
             CesiumCreditComponent creditComponent = new CesiumCreditComponent("text", "link", -1);
             List<CesiumCreditComponent> creditComponents = new List<CesiumCreditComponent>();
             creditComponents.Add(creditComponent);
+            int creditCount = creditComponents.Count;
 
             CesiumCredit credit = new CesiumCredit();
             credit = new CesiumCredit(creditComponents);
@@ -424,6 +425,7 @@ namespace CesiumForUnity
             string[] stringArray = stringList.ToArray();
             test = string.Join(" ", stringArray);
             string.IsNullOrEmpty("value");
+            string.IsNullOrWhiteSpace("value");
 
             string token = CesiumRuntimeSettings.defaultIonAccessToken;
 

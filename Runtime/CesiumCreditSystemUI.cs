@@ -198,6 +198,7 @@ namespace CesiumForUnity
                 else
                 {
                     string text = creditComponent.text;
+
                     if (hasLink)
                     {
                         text = string.Format("<u>{0}</u>", text);

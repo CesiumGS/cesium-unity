@@ -1,5 +1,6 @@
+#include "CesiumCreditSystemImpl.h"
+
 #include "CameraManager.h"
-#include "Cesium3DTilesetImpl.h"
 #include "UnityTilesetExternals.h"
 
 #include <Cesium3DTilesSelection/IonRasterOverlay.h>
@@ -17,7 +18,6 @@
 #include <DotNet/System/Object.h>
 #include <DotNet/System/String.h>
 #include <DotNet/UnityEngine/Coroutine.h>
-#include <DotNet/UnityEngine/Debug.h>
 #include <DotNet/UnityEngine/GameObject.h>
 #include <DotNet/UnityEngine/HideFlags.h>
 #include <DotNet/UnityEngine/Object.h>
@@ -92,6 +92,10 @@ void CesiumCreditSystemImpl::Update(
         _htmlToUnityCredit.insert({html, unityCredit});
       }
 
+      if (unityCredit.components().Count() == 0) {
+        continue;
+      }
+
       if (_pCreditSystem->shouldBeShownOnScreen(credit)) {
         onScreenCredits.Add(unityCredit);
       } else {
@@ -133,7 +137,9 @@ void htmlToCreditComponents(
           text.pop_back();
         }
 
-        componentText = System::String(text);
+        if (!text.empty()) {
+          componentText = System::String(text);
+        }
       }
     } else if (tidyNodeGetId(child) == TidyTagId::TidyTag_IMG) {
       auto srcAttr = tidyAttrGetById(child, TidyAttrId::TidyAttr_SRC);
@@ -152,7 +158,7 @@ void htmlToCreditComponents(
       }
     }
 
-    if (!System::String::IsNullOrEmpty(componentText) ||
+    if (!System::String::IsNullOrWhiteSpace(componentText) ||
         componentImageId >= 0) {
       if (!parentUrl.empty()) {
         componentLink = System::String(parentUrl);
