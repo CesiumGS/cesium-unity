@@ -14,7 +14,6 @@
   "documentationUrl": "https://cesium.com/learn/unity/",
   "licensesUrl": "https://github.com/CesiumGS/cesium-unity/blob/main/LICENSE",
   "dependencies": {
-    "com.unity.textmeshpro": "3.0.0",
     "com.unity.mathematics": "1.2.0",
     "com.unity.test-framework": "1.1.31"
   }
