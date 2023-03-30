@@ -121,7 +121,7 @@ void htmlToCreditComponents(
     TidyDoc tdoc,
     TidyNode tnod,
     std::string& parentUrl,
-    List1<CesiumForUnity::CesiumCreditComponent> componentList,
+    const List1<CesiumForUnity::CesiumCreditComponent>& componentList,
     const CesiumForUnity::CesiumCreditSystem& creditSystem) {
   TidyNode child;
   TidyBuffer buf;
