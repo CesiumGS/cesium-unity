@@ -4,7 +4,9 @@
 
 ##### Additions :tada:
 
+- Added `CesiumPointCloudShading`, which allows point cloud tilesets to be rendered with attenuation based on geometric error. Attenuation is currently only supported in URP.
 - Added support for Unity's built-in render pipeline.
+- `GameObject` instances created for the tiles in a `Cesium3DTileset` now inherit the `layer` of the parent tileset.
 - Added setting in CesiumRuntimeSettings to configure the maximum number of items to keep in the Sqlite cache.
 - Added setting in CesiumRuntimeSettings to configure the number of requests to the cache database before pruning.
 

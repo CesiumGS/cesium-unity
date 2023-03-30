@@ -19,6 +19,12 @@ struct CesiumPrimitiveInfo {
   bool containsPoints = false;
 
   /**
+   * @brief Whether or not the primitive contains translucent vertex
+   * colors. This can affect material tags used to render the model.
+   */
+  bool isTranslucent = false;
+
+  /**
    * @brief Maps a texture coordinate index i (TEXCOORD_<i>) to the
    * corresponding Unity texture coordinate index.
    */
@@ -36,7 +42,7 @@ struct CesiumPrimitiveInfo {
  */
 struct CesiumGltfGameObject {
   /**
-   * @brief The fully loaded Unity game objet for this glTF.
+   * @brief The fully loaded Unity game object for this glTF.
    */
   std::unique_ptr<::DotNet::UnityEngine::GameObject> pGameObject{};
 
