@@ -41,8 +41,7 @@ CesiumCreditSystemImpl::CesiumCreditSystemImpl(
     : _pCreditSystem(std::make_shared<CreditSystem>()),
       _htmlToUnityCredit(),
       _lastCreditsCount(0),
-      _creditsUpdated(false) {
-}
+      _creditsUpdated(false) {}
 
 CesiumCreditSystemImpl::~CesiumCreditSystemImpl() {}
 

@@ -21,7 +21,6 @@ namespace CesiumForUnity
     /// Displays the credits / attributions managed by a <see cref="CesiumCreditSystem"/>.
     /// </summary>
     [ExecuteInEditMode]
-    [RequireComponent(typeof(CesiumCreditSystem))]
     [RequireComponent(typeof(UIDocument))]
     internal class CesiumCreditSystemUI : MonoBehaviour
     {
@@ -39,6 +38,11 @@ namespace CesiumForUnity
         private void OnEnable()
         {
             this._creditSystem = this.GetComponent<CesiumCreditSystem>();
+            if (this._creditSystem == null)
+            {
+                this._creditSystem = CesiumCreditSystem.GetDefaultCreditSystem();
+            }
+
             this._creditSystem.OnCreditsUpdate += this.SetCredits;
 
             this._uiDocument = this.GetComponent<UIDocument>();
@@ -75,13 +79,18 @@ namespace CesiumForUnity
                 return;
             }
 
-            if (sceneView.rootVisualElement.Q("CesiumCreditsOverlay") == null)
+            if (sceneView.rootVisualElement.Q("OnScreenCredits") == null)
             {
                 VisualTreeAsset visualTreeAsset = this._uiDocument.visualTreeAsset;
                 TemplateContainer tree = visualTreeAsset.Instantiate();
-                tree.name = "CesiumCreditsOverlay";
-                tree.style.height = new StyleLength(Length.Percent(100));
-                sceneView.rootVisualElement.Add(tree);
+
+                // If we add the tree directly and scale the height to fit the whole screen,
+                // it will block any non-UI mouse inputs, preventing the user from looking
+                // around the scene or selecting objects. Add the individual elements instead.
+                VisualElement onScreenCredits = tree.Q("OnScreenCredits");
+                VisualElement popupCredits = tree.Q("PopupCredits");
+                sceneView.rootVisualElement.Add(onScreenCredits);
+                sceneView.rootVisualElement.Add(popupCredits);
 
                 this.UpdateCreditsInSceneView(
                     sceneView,
@@ -97,16 +106,17 @@ namespace CesiumForUnity
                 return;
             }
 
-            VisualElement creditOverlay = sceneView.rootVisualElement.Q("CesiumCreditsOverlay");
-            if (creditOverlay != null)
+            VisualElement onScreenElement = sceneView.rootVisualElement.Q("OnScreenCredits");
+            VisualElement popupElement = sceneView.rootVisualElement.Q("PopupCredits");
+
+            if (onScreenElement != null && popupElement != null)
             {
-                VisualElement onScreenElement = creditOverlay.Q("OnScreenCredits");
-                VisualElement popupElement = creditOverlay.Q("PopupCredits");
                 this.SetCreditsOnVisualElements(
                     onScreenElement,
                     onScreenCredits,
                     popupElement,
-                    popupCredits);
+                    popupCredits,
+                    false);
             }
         }
 
@@ -114,11 +124,18 @@ namespace CesiumForUnity
         {
             if (sceneView.rootVisualElement != null)
             {
-                VisualElement creditOverlay = sceneView.rootVisualElement.Q("CesiumCreditsOverlay");
-                if (creditOverlay != null)
+                VisualElement onScreenElement = sceneView.rootVisualElement.Q("OnScreenCredits");
+                if (onScreenElement != null)
                 {
-                    VisualElement parent = creditOverlay.parent;
-                    parent.Remove(creditOverlay);
+                    VisualElement parent = onScreenElement.parent;
+                    parent.Remove(onScreenElement);
+                }
+
+                VisualElement popupElement = sceneView.rootVisualElement.Q("PopupCredits");
+                if (popupElement != null)
+                {
+                    VisualElement parent = popupElement.parent;
+                    parent.Remove(popupElement);
                 }
             }
         }
@@ -127,27 +144,35 @@ namespace CesiumForUnity
 
         private void Update()
         {
-#if UNITY_EDITOR
-            ArrayList sceneViews = SceneView.sceneViews;
-            for(int i = 0; i < sceneViews.Count; i++)
+            if (this._creditSystem != null)
             {
-                this.AddCreditsToSceneView((SceneView)sceneViews[i]);
-            }
+#if UNITY_EDITOR
+                ArrayList sceneViews = SceneView.sceneViews;
+                for(int i = 0; i < sceneViews.Count; i++)
+                {
+                    this.AddCreditsToSceneView((SceneView)sceneViews[i]);
+                }
 #endif
+            }
         }
 
-        private Label CreateLabelFromText(string text)
+        private Label CreateLabelFromText(string text, bool removeExtraSpace)
         {
             Label label = new Label();
             label.text = text;
-            label.style.marginLeft = new StyleLength(0.0f);
-            label.style.paddingLeft = new StyleLength(0.0f);
-            label.style.paddingRight = new StyleLength(0.0f);
+            label.style.whiteSpace = WhiteSpace.Normal;
+
+            if (removeExtraSpace)
+            {
+                label.style.marginLeft = new StyleLength(0.0f);
+                label.style.paddingLeft = new StyleLength(0.0f);
+                label.style.paddingRight = new StyleLength(0.0f);
+            }
 
             return label;
         }
 
-        private List<VisualElement> ConvertCreditToVisualElements(CesiumCredit credit)
+        private List<VisualElement> ConvertCreditToVisualElements(CesiumCredit credit, bool removeExtraSpace)
         {
             List<VisualElement> visualElements = new List<VisualElement>();
 
@@ -156,9 +181,16 @@ namespace CesiumForUnity
                 CesiumCreditComponent creditComponent = credit.components[i];
                 VisualElement element;
 
+                bool hasLink = !string.IsNullOrEmpty(creditComponent.link);
+
                 if (creditComponent.imageId >= 0)
                 {
                     Texture2D image = this._creditSystem.images[creditComponent.imageId];
+                    if (image == null)
+                    {
+                        continue;
+                    }
+
                     element = new VisualElement();
                     element.style.width = new StyleLength(image.width);
                     element.style.height = new StyleLength(image.height);
@@ -166,10 +198,16 @@ namespace CesiumForUnity
                 }
                 else
                 {
-                    element = this.CreateLabelFromText(creditComponent.text);
+                    string text = creditComponent.text;
+                    if (hasLink)
+                    {
+                        text = string.Format("<u>{0}</u>", text);
+                    }
+
+                    element = this.CreateLabelFromText(text, removeExtraSpace);
                 }
 
-                if (!string.IsNullOrEmpty(creditComponent.link))
+                if (hasLink)
                 {
                     element.AddManipulator(new Clickable(evt => Application.OpenURL(creditComponent.link)));
                 }
@@ -199,9 +237,36 @@ namespace CesiumForUnity
             return label;
         }
 
+        private VisualElement CreatePopupCreditElement(bool removeExtraSpace)
+        {
+            VisualElement popupCreditElement = new VisualElement();
+            popupCreditElement.style.flexDirection = FlexDirection.Row;
+            popupCreditElement.style.flexWrap = Wrap.Wrap;
+            popupCreditElement.style.alignItems = Align.Center;
+
+            if (!removeExtraSpace)
+            {
+                popupCreditElement.style.marginTop = new StyleLength(2.5f);
+            }
+            else
+            {
+                popupCreditElement.style.marginTop = new StyleLength(0.0f);
+                popupCreditElement.style.marginBottom = new StyleLength(0.0f);
+                popupCreditElement.style.paddingTop = new StyleLength(0.0f);
+                popupCreditElement.style.paddingBottom = new StyleLength(0.0f);
+            }
+
+            return popupCreditElement;
+        }
+
         private void SetCredits(List<CesiumCredit> onScreenCredits, List<CesiumCredit> popupCredits)
         {
-            this.SetCreditsOnVisualElements(this._onScreenCredits, onScreenCredits, this._popupCredits, popupCredits);
+            this.SetCreditsOnVisualElements(
+                this._onScreenCredits,
+                onScreenCredits,
+                this._popupCredits,
+                popupCredits,
+                true);
 
 #if UNITY_EDITOR
             ArrayList sceneViews = SceneView.sceneViews;
@@ -216,7 +281,8 @@ namespace CesiumForUnity
             VisualElement onScreenElement,
             List<CesiumCredit> onScreenCredits,
             VisualElement popupElement,
-            List<CesiumCredit> popupCredits)
+            List<CesiumCredit> popupCredits,
+            bool removeExtraSpace)
         {
             onScreenElement.Clear();
             popupElement.Clear();
@@ -225,11 +291,11 @@ namespace CesiumForUnity
             {
                 if (i > 0)
                 {
-                    onScreenElement.Add(this.CreateLabelFromText(this._delimiter));
+                    onScreenElement.Add(this.CreateLabelFromText(this._delimiter, false));
                 }
 
                 CesiumCredit credit = onScreenCredits[i];
-                List<VisualElement> visualElements = this.ConvertCreditToVisualElements(credit);
+                List<VisualElement> visualElements = this.ConvertCreditToVisualElements(credit, removeExtraSpace);
                 for (int j = 0, elementCount = visualElements.Count; j < elementCount; j++)
                 {
                     onScreenElement.Add(visualElements[j]);
@@ -238,7 +304,18 @@ namespace CesiumForUnity
 
             for (int i = 0, creditCount = popupCredits.Count; i < creditCount; i++)
             {
-                
+                CesiumCredit credit = popupCredits[i];
+                List<VisualElement> visualElements = this.ConvertCreditToVisualElements(credit, removeExtraSpace);
+
+                // Put the inline credit components in one container so they can be vertically stacked by the popup.
+                VisualElement popupCreditElement = CreatePopupCreditElement(removeExtraSpace);
+
+                for (int j = 0, elementCount = visualElements.Count; j < elementCount; j++)
+                {
+                    popupCreditElement.Add(visualElements[j]);
+                }
+
+                popupElement.Add(popupCreditElement);
             }
 
             onScreenElement.Add(this.CreateDataAttributionElement(popupElement));

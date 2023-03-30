@@ -118,7 +118,7 @@ namespace CesiumForUnity
             GameObject creditSystemPrefab = Resources.Load<GameObject>(creditSystemPrefabName);
             GameObject creditSystemGameObject = UnityEngine.Object.Instantiate(creditSystemPrefab);
             creditSystemGameObject.name = defaultName;
-            //creditSystemGameObject.hideFlags = HideFlags.HideAndDontSave;
+            creditSystemGameObject.hideFlags = HideFlags.HideInHierarchy;
 
             return creditSystemGameObject.GetComponent<CesiumCreditSystem>();
         }
