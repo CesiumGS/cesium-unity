@@ -1,5 +1,30 @@
 # Change Log
 
+### ? - ?
+
+##### Additions :tada:
+
+- Added `CesiumPointCloudShading`, which allows point cloud tilesets to be rendered with attenuation based on geometric error. Attenuation is currently only supported in URP.
+- Added support for Unity's built-in render pipeline.
+- `GameObject` instances created for the tiles in a `Cesium3DTileset` now inherit the `layer` of the parent tileset.
+- Added setting in CesiumRuntimeSettings to configure the maximum number of items to keep in the Sqlite cache.
+- Added setting in CesiumRuntimeSettings to configure the number of requests to the cache database before pruning.
+
+##### Fixes :wrench:
+
+- Fixed a bug that prevented the use of pre-existing mipmaps, such as those loaded from KTX2.
+- Fixed a bug where `CesiumCameraController` tried to access non-existent inputs in the legacy input system.
+- Fixed a bug that could cause a crash when using the search box with a dataset already selected in the Cesium ion Assets window.
+- Fixed a bug that prevented sorting the contents of the Cesium ion Assets window in descending order.
+
+### v0.3.1
+
+##### Fixes :wrench:
+
+- Fixed a bug introduced in v0.3.0 that caused an exception when attempting load Cesium3DTilesets from a local file.
+
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.22.0 to v0.22.1. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
+
 ### v0.3.0
 
 ##### Breaking Changes :mega:
@@ -27,6 +52,8 @@
 - Fixed a bug that could cause the Cesium ion Token Troubleshooting panel to crash the Unity Editor.
 - Added a workaround for a crash in the Burst Compiler (bcl.exe) in Unity 2022.2 when using il2cpp.
 - Fixed a bug that could cause incorrect metadata to be associated with a feature, especially in Draco-encoded tiles.
+
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.21.3 to v0.22.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
 
 ### v0.2.0
 

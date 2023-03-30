@@ -10,6 +10,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.Rendering;
 using Unity.Mathematics;
+using UnityEngine.Pool;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -77,6 +78,8 @@ namespace CesiumForUnity
             go.name = go.name;
             go = new GameObject("name");
             go.SetActive(go.activeSelf);
+            int layer = go.layer;
+            go.layer = layer;
             Transform transform = go.transform;
             transform.parent = transform.parent;
             transform.SetParent(transform.parent, false);
@@ -189,6 +192,7 @@ namespace CesiumForUnity
             string temporaryCachePath = Application.temporaryCachePath;
             bool isEditor = Application.isEditor;
             string applicationVersion = Application.version;
+            string unityVersion = Application.unityVersion;
             string applicationPlatform = Helpers.ToString(Application.platform);
             string productName = Application.productName;
             string osVersion = System.Environment.OSVersion.VersionString;
@@ -415,6 +419,8 @@ namespace CesiumForUnity
             string.IsNullOrEmpty("value");
 
             string token = CesiumRuntimeSettings.defaultIonAccessToken;
+            int requestsPerCachePrune = CesiumRuntimeSettings.requestsPerCachePrune;
+            ulong maxItems = CesiumRuntimeSettings.maxItems;
 
             Cesium3DTilesetLoadFailureDetails tilesetDetails
                 = new Cesium3DTilesetLoadFailureDetails(tileset, Cesium3DTilesetLoadType.Unknown, 0, "");
@@ -452,6 +458,19 @@ namespace CesiumForUnity
             globeAnchor._lastLocalToWorld = new Matrix4x4();
             globeAnchor.UpdateGeoreferenceIfNecessary();
 
+            Cesium3DTileInfo info;
+            info.usesAdditiveRefinement = true;
+            info.geometricError = 1.0f;
+            info.dimensions = Vector3.zero;
+            info.isTranslucent = true;
+
+            CesiumPointCloudRenderer renderer = go.AddComponent<CesiumPointCloudRenderer>();
+            renderer.tileInfo = info;
+
+            ObjectPool<Mesh> meshPool = CesiumObjectPool.MeshPool;
+            Mesh pooledMesh = meshPool.Get();
+            meshPool.Release(pooledMesh);
+            
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;
             sv.pivot = sv.pivot;

@@ -87,6 +87,7 @@ namespace CesiumForUnity
 
             Application.OpenURL("URL");
             string applicationVersion = Application.version;
+            string unityVersion = Application.unityVersion;
             string applicationPlatform = Helpers.ToString(Application.platform);
             string productName = Application.productName;
             string osVersion = System.Environment.OSVersion.VersionString;
