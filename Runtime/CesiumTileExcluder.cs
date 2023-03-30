@@ -41,7 +41,7 @@ namespace CesiumForUnity
             }
         }
 
-        public partial void AddToTileset(Cesium3DTileset tileset);
-        public partial void RemoveFromTileset(Cesium3DTileset tileset);
+        internal partial void AddToTileset(Cesium3DTileset tileset);
+        internal partial void RemoveFromTileset(Cesium3DTileset tileset);
     }
 }
