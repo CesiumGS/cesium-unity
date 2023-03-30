@@ -70,7 +70,7 @@ namespace CesiumForUnity
 
         [SerializeField]
         private bool _showCreditsOnScreen = false;
-        
+
         /// <summary>
         /// Whether or not to force this tileset's credits to be shown on the main screen. If false, the
         /// credits are usually only shown on a "Data Attribution" popup.
@@ -619,7 +619,7 @@ namespace CesiumForUnity
 
         private partial void OnEnable();
         private partial void OnDisable();
-        
+
         /// <summary>
         /// Destroy and recreate the tilset. All tiles are unloaded, and then the tileset is reloaded
         /// based on the current view.

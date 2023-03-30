@@ -184,16 +184,21 @@ namespace CesiumForUnity
 
                 if (creditComponent.imageId >= 0)
                 {
-                    Texture2D image = this._creditSystem.images[creditComponent.imageId];
+                    Texture2D image = null;
+                    if (creditComponent.imageId < this._creditSystem.images.Count)
+                    {
+                        image = this._creditSystem.images[creditComponent.imageId];
+                    }
+
                     if (image == null)
                     {
                         continue;
                     }
 
                     element = new VisualElement();
+                    element.style.backgroundImage = new StyleBackground(image);
                     element.style.width = new StyleLength(image.width);
                     element.style.height = new StyleLength(image.height);
-                    element.style.backgroundImage = new StyleBackground(image);
                 }
                 else
                 {
