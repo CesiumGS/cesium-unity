@@ -791,7 +791,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
        &pMetadataComponent,
        &tile,
        &shaderProperty = _shaderProperty,
-       tilesetLayer = this->tileset.layer()](
+       tilesetLayer = this->_tileset.layer()](
           const Model& gltf,
           const Node& node,
           const Mesh& mesh,
