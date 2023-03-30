@@ -9,6 +9,7 @@
 #include <CesiumAsync/SqliteCache.h>
 
 #include <DotNet/CesiumForUnity/CesiumCreditSystem.h>
+#include <DotNet/CesiumForUnity/CesiumRuntimeSettings.h>
 #include <DotNet/System/String.h>
 #include <DotNet/UnityEngine/Application.h>
 
@@ -42,10 +43,18 @@ const std::shared_ptr<CachingAssetAccessor>& getAssetAccessor() {
         UnityEngine::Application::temporaryCachePath().ToStlString();
     std::string cacheDBPath = tempPath + "/cesium-request-cache.sqlite";
 
+    int32_t requestsPerCachePrune =
+        CesiumForUnity::CesiumRuntimeSettings::requestsPerCachePrune();
+    uint64_t maxItems = CesiumForUnity::CesiumRuntimeSettings::maxItems();
+
     pAccessor = std::make_shared<CachingAssetAccessor>(
         spdlog::default_logger(),
         std::make_shared<UnityAssetAccessor>(),
-        std::make_shared<SqliteCache>(spdlog::default_logger(), cacheDBPath));
+        std::make_shared<SqliteCache>(
+            spdlog::default_logger(),
+            cacheDBPath,
+            maxItems),
+        requestsPerCachePrune);
   }
   return pAccessor;
 }
