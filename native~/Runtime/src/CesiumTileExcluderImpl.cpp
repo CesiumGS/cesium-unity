@@ -45,6 +45,8 @@ void CesiumTileExcluderImpl::AddToTileset(
     const DotNet::CesiumForUnity::CesiumTileExcluder& excluder,
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
   Tileset* pTileset = getNativeTileset(tileset);
+  if (pTileset == nullptr)
+    return;
 
   std::vector<std::shared_ptr<ITileExcluder>>& excluders =
       pTileset->getOptions().excluders;
