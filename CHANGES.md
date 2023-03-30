@@ -9,6 +9,7 @@
 - `GameObject` instances created for the tiles in a `Cesium3DTileset` now inherit the `layer` of the parent tileset.
 - Added setting in CesiumRuntimeSettings to configure the maximum number of items to keep in the Sqlite cache.
 - Added setting in CesiumRuntimeSettings to configure the number of requests to the cache database before pruning.
+- Exposed `Cesium3DTileset` last update result through the new member method getLastUpdateResult() 
 
 ##### Fixes :wrench:
 
