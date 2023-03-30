@@ -36,6 +36,8 @@ namespace CesiumForUnity
         //private SerializedProperty _lodTransitionLength;
         // private SerializedProperty _generateSmoothNormals;
 
+        private SerializedProperty _pointCloudShading;
+
         private SerializedProperty _showTilesInHierarchy;
         private SerializedProperty _suspendUpdate;
         private SerializedProperty _updateInEditor;
@@ -82,6 +84,8 @@ namespace CesiumForUnity
             // this._generateSmoothNormals =
             //     this.serializedObject.FindProperty("_generateSmoothNormals");
 
+            this._pointCloudShading = this.serializedObject.FindProperty("_pointCloudShading");
+
             this._showTilesInHierarchy =
                 this.serializedObject.FindProperty("_showTilesInHierarchy");
             this._suspendUpdate = this.serializedObject.FindProperty("_suspendUpdate");
@@ -97,45 +101,47 @@ namespace CesiumForUnity
             this.serializedObject.Update();
 
             EditorGUIUtility.labelWidth = CesiumEditorStyle.inspectorLabelWidth;
-            DrawInspectorButtons();
+            this.DrawInspectorButtons();
             EditorGUILayout.Space(5);
-            DrawShowCreditsOnScreenToggle();
+            this.DrawShowCreditsOnScreenToggle();
             EditorGUILayout.Space(5);
-            DrawSourceProperties();
+            this.DrawSourceProperties();
             EditorGUILayout.Space(5);
-            DrawLevelOfDetailProperties();
+            this.DrawLevelOfDetailProperties();
             EditorGUILayout.Space(5);
-            DrawTileLoadingProperties();
+            this.DrawTileLoadingProperties();
             EditorGUILayout.Space(5);
-            DrawTileCullingProperties();
+            this.DrawTileCullingProperties();
             EditorGUILayout.Space(5);
-            DrawRenderProperties();
+            this.DrawRenderProperties();
             EditorGUILayout.Space(5);
-            DrawDebugProperties();
+            this.DrawPointCloudShadingProperties();
             EditorGUILayout.Space(5);
-            DrawPhysicsProperties();
+            this.DrawDebugProperties();
+            EditorGUILayout.Space(5);
+            this.DrawPhysicsProperties();
 
             this.serializedObject.ApplyModifiedProperties();
         }
 
         public bool HasFrameBounds()
         {
-          return true;
+            return true;
         }
 
         public Bounds OnGetFrameBounds()
         {
-          // HACK: This function only gets called by Unity's editor when it is trying to focus the tileset.
-          // Return dummy bounds with infinite extent so Unity's built in focusing fails. This allows us to
-          // focus the editor view as we want, without it getting overwritten.
+            // HACK: This function only gets called by Unity's editor when it is trying to focus the tileset.
+            // Return dummy bounds with infinite extent so Unity's built in focusing fails. This allows us to
+            // focus the editor view as we want, without it getting overwritten.
 
-          // TODO: Maybe we can use reflection or something to only do this hack when the SceneView is 
-          // invoking this method. It is not ideal for this method to have a side-effect when it is invoked
-          // from anywhere else. 
-          this._tileset.FocusTileset();
-          return new Bounds(
-              new Vector3(0, 0, 0), 
-              new Vector3(float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity));
+            // TODO: Maybe we can use reflection or something to only do this hack when the SceneView is 
+            // invoking this method. It is not ideal for this method to have a side-effect when it is invoked
+            // from anywhere else. 
+            this._tileset.FocusTileset();
+            return new Bounds(
+                new Vector3(0, 0, 0),
+                new Vector3(float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity));
         }
 
         private void DrawInspectorButtons()
@@ -410,6 +416,76 @@ namespace CesiumForUnity
             //     "normals requires duplicating vertices. This option allows the glTFs to be " +
             //     "rendered with smooth normals instead when the original glTF is missing normals.");
             // EditorGUILayout.PropertyField(this._generateSmoothNormals, generateSmoothNormalsContent);
+        }
+
+        private void DrawPointCloudShadingProperties()
+        {
+            // EditorGUILayout.PropertyField will trigger OnValidate() for the tileset,
+            // even though the properties belong to CesiumPointCloudShading.
+            // To avoid refreshing the tileset every time a parameter is changed,
+            // the values are modified using the CesiumPointCloudShading setters instead.
+            GUILayout.Label("Point Cloud Shading", EditorStyles.boldLabel);
+
+            EditorGUI.BeginChangeCheck();
+
+            SerializedProperty attenuationProperty =
+                this._pointCloudShading.FindPropertyRelative("_attenuation");
+            GUIContent attenuationContent = new GUIContent(
+               "Attenuation",
+               "Whether or not to perform point attenuation. Attenuation controls the size of " +
+               "the points rendered based on the geometric error of their tile.");
+            bool attenuationValue =
+                EditorGUILayout.Toggle(attenuationContent, attenuationProperty.boolValue);
+
+            SerializedProperty geometricErrorScaleProperty =
+                this._pointCloudShading.FindPropertyRelative("_geometricErrorScale");
+            GUIContent geometricErrorScaleContent = new GUIContent(
+                "Geometric Error Scale",
+                "The scale to be applied to the tile's geometric error before it is used " +
+                "to compute attenuation. Larger values will result in larger points.");
+            float geometricErrorScaleValue = EditorGUILayout.FloatField(
+                geometricErrorScaleContent,
+                geometricErrorScaleProperty.floatValue);
+
+            SerializedProperty maximumAttenuationProperty =
+                this._pointCloudShading.FindPropertyRelative("_maximumAttenuation");
+            GUIContent maximumAttenuationContent = new GUIContent(
+                "Maximum Attenuation",
+                "The maximum point attenuation in pixels. If this is zero, the " +
+                "Cesium3DTileset's maximumScreenSpaceError will be used as the " +
+                "maximum point attenuation.");
+            float maximumAttenuationValue = EditorGUILayout.FloatField(
+                maximumAttenuationContent,
+                maximumAttenuationProperty.floatValue);
+
+            SerializedProperty baseResolutionProperty =
+                this._pointCloudShading.FindPropertyRelative("_baseResolution");
+            GUIContent baseResolutionContent = new GUIContent(
+                "Base Resolution",
+                "The average base resolution for the dataset in meters. " +
+                "For example, a base resolution of 0.05 assumes an original " +
+                "capture resolution of 5 centimeters between neighboring points." +
+                "\n\n" +
+                "This is used in place of geometric error when the tile's " +
+                "geometric error is 0. If this value is zero, each tile with " +
+                "a geometric error of 0 will have its geometric error " +
+                "approximated instead.");
+            float baseResolutionValue = EditorGUILayout.FloatField(
+                baseResolutionContent,
+                baseResolutionProperty.floatValue);
+
+            if (EditorGUI.EndChangeCheck())
+            {
+                Undo.RecordObject(
+                    this._tileset,
+                    "Modified Point Cloud Shading in " + this._tileset.gameObject.name);
+                this._tileset.pointCloudShading.attenuation = attenuationValue;
+                this._tileset.pointCloudShading.geometricErrorScale = geometricErrorScaleValue;
+                this._tileset.pointCloudShading.maximumAttenuation = maximumAttenuationValue;
+                this._tileset.pointCloudShading.baseResolution = baseResolutionValue;
+                // Force the scene view to repaint so that the changes are immediately reflected.
+                SceneView.RepaintAll();
+            }
         }
 
         private void DrawDebugProperties()

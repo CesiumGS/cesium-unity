@@ -78,6 +78,8 @@ namespace CesiumForUnity
             go.name = go.name;
             go = new GameObject("name");
             go.SetActive(go.activeSelf);
+            int layer = go.layer;
+            go.layer = layer;
             Transform transform = go.transform;
             transform.parent = transform.parent;
             transform.SetParent(transform.parent, false);
@@ -461,6 +463,15 @@ namespace CesiumForUnity
             Cesium3DTile tile = new Cesium3DTile();
             tile._transform = new double4x4();
             tile._pTile = IntPtr.Zero;
+
+            Cesium3DTileInfo info;
+            info.usesAdditiveRefinement = true;
+            info.geometricError = 1.0f;
+            info.dimensions = Vector3.zero;
+            info.isTranslucent = true;
+
+            CesiumPointCloudRenderer renderer = go.AddComponent<CesiumPointCloudRenderer>();
+            renderer.tileInfo = info;
 
             ObjectPool<Mesh> meshPool = CesiumObjectPool.MeshPool;
             Mesh pooledMesh = meshPool.Get();
