@@ -453,6 +453,15 @@ namespace CesiumForUnity
             globeAnchor._lastLocalToWorld = new Matrix4x4();
             globeAnchor.UpdateGeoreferenceIfNecessary();
 
+            Cesium3DTileInfo info;
+            info.usesAdditiveRefinement = true;
+            info.geometricError = 1.0f;
+            info.dimensions = Vector3.zero;
+            info.isTranslucent = true;
+
+            CesiumPointCloudRenderer renderer = go.AddComponent<CesiumPointCloudRenderer>();
+            renderer.tileInfo = info;
+
             ObjectPool<Mesh> meshPool = CesiumObjectPool.MeshPool;
             Mesh pooledMesh = meshPool.Get();
             meshPool.Release(pooledMesh);
