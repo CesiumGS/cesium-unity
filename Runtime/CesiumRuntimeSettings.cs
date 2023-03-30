@@ -159,6 +159,7 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
+        [Tooltip("The number of requests to handle before each prune of old cached results from the database. Must restart Unity to apply changes.")]
         private int _requestsPerCachePrune = 10000;
 
         /// <summary>
@@ -170,9 +171,10 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
+        [Tooltip("The maximum number of items should be kept in the Sqlite database after pruning. Must restart Unity to apply changes.")]
         private ulong  _maxItems = 4096;
         /// <summary>
-        /// the maximum number of items should be kept in the Sqlite database after pruning.
+        /// The maximum number of items should be kept in the Sqlite database after pruning.
         /// </summary>
         public static ulong maxItems
         {
