@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Reinterop;
+using UnityEngine;
 
 namespace CesiumForUnity
 {
@@ -9,6 +10,7 @@ namespace CesiumForUnity
     /// and rendering.
     /// </summary>
     [ExecuteInEditMode]
+    [ReinteropNativeImplementation("CesiumForUnityNative::CesiumTileExcluderImpl", "CesiumTileExcluderImpl.h", staticOnly: true)]
     public abstract partial class CesiumTileExcluder : MonoBehaviour
     {
         /// <summary>
@@ -20,5 +22,26 @@ namespace CesiumForUnity
         /// it and using it later will result in undefined behavior, including crashes.</param>
         /// <returns>True if the tile should be excluded, false if the tile should be loaded and rendered.</returns>
         public abstract bool ShouldExclude(Cesium3DTile tile);
+
+        protected virtual void OnEnable()
+        {
+            Cesium3DTileset[] tilesets = this.GetComponentsInChildren<Cesium3DTileset>();
+            foreach (Cesium3DTileset tileset in tilesets)
+            {
+                this.AddToTileset(tileset);
+            }
+        }
+
+        protected virtual void OnDisable()
+        {
+            Cesium3DTileset[] tilesets = this.GetComponentsInChildren<Cesium3DTileset>();
+            foreach (Cesium3DTileset tileset in tilesets)
+            {
+                this.RemoveFromTileset(tileset);
+            }
+        }
+
+        public partial void AddToTileset(Cesium3DTileset tileset);
+        public partial void RemoveFromTileset(Cesium3DTileset tileset);
     }
 }

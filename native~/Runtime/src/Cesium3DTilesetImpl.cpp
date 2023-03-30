@@ -401,41 +401,6 @@ void Cesium3DTilesetImpl::LoadTileset(
   options.mainThreadLoadingTimeLimit = 5.0;
   options.tileCacheUnloadTimeLimit = 5.0;
 
-  CesiumForUnity::CesiumGeoreference georeference =
-      tileset.gameObject()
-          .GetComponentInParent<CesiumForUnity::CesiumGeoreference>();
-
-  if (georeference != nullptr) {
-    System::Array1<CesiumForUnity::CesiumTileExcluder> excluders =
-        tileset.gameObject()
-            .GetComponentsInParent<CesiumForUnity::CesiumTileExcluder>();
-    for (int32_t i = 0, len = excluders.Length(); i < len; ++i) {
-      CesiumForUnity::CesiumTileExcluder excluder = excluders[i];
-      if (!excluder.enabled()) {
-        continue;
-      }
-
-      CesiumForUnity::CesiumGeoreference excluderGeoreference =
-          excluder.gameObject()
-              .GetComponentInParent<CesiumForUnity::CesiumGeoreference>();
-
-      if (excluderGeoreference != georeference) {
-        UnityEngine::Debug::Log(DotNet::System::String(
-            "Cesium3DTileset on " + tileset.name().ToStlString() +
-            " and CesiumTileExcluder on " + excluder.name().ToStlString() +
-            " have different CesiumGeoreferences. The excluder will not be "
-            "used."));
-        continue;
-      }
-
-      auto pAdaptor = std::make_shared<UnityTileExcluderAdaptor>(
-          excluder,
-          tileset,
-          georeference);
-      options.excluders.push_back(std::move(pAdaptor));
-    }
-  }
-
   TilesetContentOptions contentOptions{};
   contentOptions.generateMissingNormalsSmooth = true;
   // .. = tileset.generateSmoothNormals();
@@ -470,6 +435,19 @@ void Cesium3DTilesetImpl::LoadTileset(
   for (int32_t i = 0, len = overlays.Length(); i < len; ++i) {
     CesiumForUnity::CesiumRasterOverlay overlay = overlays[i];
     overlay.AddToTileset();
+  }
+
+  // Add any tile excluder components
+  System::Array1<CesiumForUnity::CesiumTileExcluder> excluders =
+      tileset.gameObject()
+          .GetComponentsInParent<CesiumForUnity::CesiumTileExcluder>();
+  for (int32_t i = 0, len = excluders.Length(); i < len; ++i) {
+    CesiumForUnity::CesiumTileExcluder excluder = excluders[i];
+    if (!excluder.enabled()) {
+      continue;
+    }
+
+    excluder.AddToTileset(tileset);
   }
 }
 

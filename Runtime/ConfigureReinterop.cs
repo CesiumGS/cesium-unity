@@ -459,6 +459,8 @@ namespace CesiumForUnity
 
             CesiumTileExcluder[] excluders = go.GetComponentsInParent<CesiumTileExcluder>();
             CesiumTileExcluder excluder = excluders[0];
+            excluder.AddToTileset(null);
+            excluder.RemoveFromTileset(null);
             excluder.ShouldExclude(new Cesium3DTile());
             Cesium3DTile tile = new Cesium3DTile();
             tile._transform = new double4x4();

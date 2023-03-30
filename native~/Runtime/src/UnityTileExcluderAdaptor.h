@@ -24,6 +24,10 @@ public:
   virtual bool shouldExclude(
       const Cesium3DTilesSelection::Tile& tile) const noexcept override;
 
+  const DotNet::CesiumForUnity::CesiumTileExcluder& getExcluder() noexcept {
+    return this->_excluder;
+  }
+
 private:
   DotNet::CesiumForUnity::Cesium3DTile _tile;
   DotNet::CesiumForUnity::CesiumGeoreference _georeference;
