@@ -6,10 +6,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Networking;
 
-#if ENABLE_INPUT_SYSTEM
-using UnityEngine.InputSystem.UI;
-#endif
-
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -17,22 +13,41 @@ using UnityEditor.SceneManagement;
 
 namespace CesiumForUnity
 {
+    /// <summary>
+    /// Represents an HTML element, either text or an image, that may also be hyperlinked.
+    /// This abstraction allows HTML parts of a credit to be converted to the desired UI elements
+    /// by a UI implementation.
+    /// </summary>
     internal class CesiumCreditComponent
     {
         private string _text;
         private string _link;
         private int _imageId = -1;
 
+        /// <summary>
+        /// The text of this credit component. May be empty.
+        /// </summary>
         public string text
         {
             get => this._text;
         }
 
+        /// <summary>
+        /// The link used by this credit component. May be empty. 
+        /// If the UI representation of this component is clicked, it should open this link.
+        /// </summary>
         public string link
         {
             get => this._link;
         }
 
+        /// <summary>
+        /// The ID of the image represented by this credit component.
+        /// </summary>
+        /// <remarks>
+        /// This ID corresponds to the index of the image in <see cref="CesiumCreditSystem.images"/>.
+        /// If it is -1, this component does not contain an image.
+        /// </remarks>
         public int imageId
         {
             get => this._imageId;
@@ -46,10 +61,17 @@ namespace CesiumForUnity
         }
     }
 
+    /// <summary>
+    /// Represents an HTML credit from a tileset or raster overlay. This abstracts an HTML string
+    /// into multiple <see cref="CesiumCreditComponent"/>s for UI rendering.
+    /// </summary>
     internal class CesiumCredit
     {
         private List<CesiumCreditComponent> _components;
 
+        /// <summary>
+        /// The <see cref="CesiumCreditComponent"/>s that make up this credit.
+        /// </summary>
         public List<CesiumCreditComponent> components
         {
             get => this._components;
@@ -75,7 +97,7 @@ namespace CesiumForUnity
         private List<CesiumCredit> _popupCredits;
 
         /// <summary>
-        /// The current on-screen credits.
+        /// The current on-screen credits, represented as <see cref="CesiumCredit"/>s.
         /// </summary>
         internal List<CesiumCredit> onScreenCredits
         {
@@ -83,7 +105,8 @@ namespace CesiumForUnity
         }
 
         /// <summary>
-        /// The credits to be displayed in the "Data Attribution" panel.
+        /// The credits to be displayed in the "Data Attribution" panel,
+        /// represented as <see cref="CesiumCredit"/>s.
         /// </summary>
         internal List<CesiumCredit> popupCredits
         {
@@ -91,13 +114,31 @@ namespace CesiumForUnity
         }
 
         private List<Texture2D> _images;
+
+        /// <summary>
+        /// The images loaded by this credit system.
+        /// </summary>
         internal List<Texture2D> images
         {
             get => this._images;
         }
 
+        /// <summary>
+        /// Encapsulates a method that receives the on-screen and popup credits in <see cref="CesiumCredit"/>
+        /// form. This can be used to create UI components for the credits after they have been updated.
+        /// </summary>
+        /// <param name="onScreenCredits">The on-screen credits.</param>
+        /// <param name="onPopupCredits">The popup credits.</param>
         internal delegate void CreditsUpdateDelegate(List<CesiumCredit> onScreenCredits, List<CesiumCredit> onPopupCredits);
 
+        /// <summary>
+        /// An event that is raised when credits have been updated by the credit system. This is
+        /// only raised when the credits in view have actually changed.
+        /// </summary>
+        /// <remarks>
+        /// If the credit system is loading any images for its credits, the update will not be broadcasted
+        /// until all image loads are complete.
+        /// </remarks>
         internal event CreditsUpdateDelegate OnCreditsUpdate;
 
         private void OnEnable()
@@ -118,11 +159,20 @@ namespace CesiumForUnity
             this.UpdateCredits(false);
         }
 
+        /// <summary>
+        /// Forces the credits to update, bypassing any performance optimizations in play.
+        /// This ensures the credit system accounts for changes to the credits, e.g. if 
+        /// <see cref="Cesium3DTileset.showCreditsOnScreen"/> is changed on a tileset.</param>
+        /// </summary>
         private void ForceUpdateCredits()
         {
             this.UpdateCredits(true);
         }
 
+        /// <summary>
+        /// Updates the underlying native credit system.
+        /// </summary>
+        /// <param name="forceUpdate">Whether to force the credit system to update.</param>
         private partial void UpdateCredits(bool forceUpdate);
 
         internal void BroadcastCreditsUpdate()
@@ -138,6 +188,15 @@ namespace CesiumForUnity
 
         private static CesiumCreditSystem _defaultCreditSystem;
 
+        /// <summary>
+        /// Creates an instance of the default credit system prefab.
+        /// </summary>
+        /// <remarks>
+        /// This prefab comes with a <see cref="CesiumCreditSystemUI"/> component so that 
+        /// the credits UI is automatically added to the editor and scene. However, 
+        /// the CesiumCreditSystem class is uncoupled from any UI implementation itself.
+        /// </remarks>
+        /// <returns>The new CesiumCreditSystem instance.</returns>
         private static CesiumCreditSystem CreateDefaultCreditSystem()
         {
             GameObject creditSystemPrefab = Resources.Load<GameObject>(creditSystemPrefabName);
@@ -148,7 +207,11 @@ namespace CesiumForUnity
             return creditSystemGameObject.GetComponent<CesiumCreditSystem>();
         }
 
-        public static CesiumCreditSystem GetDefaultCreditSystem()
+        /// <summary>
+        /// Gets the default credit system, or creates a new default credit system instance if none exist.
+        /// </summary>
+        /// <returns>The default CesiumCreditSystem instance.</returns>
+        internal static CesiumCreditSystem GetDefaultCreditSystem()
         {
             if (_defaultCreditSystem == null)
             {
@@ -173,7 +236,7 @@ namespace CesiumForUnity
 
         private int _numLoadingImages = 0;
 
-        public bool HasLoadingImages()
+        internal bool HasLoadingImages()
         {
             return this._numLoadingImages > 0;
         }

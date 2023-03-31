@@ -37,6 +37,7 @@ namespace CesiumForUnity
         private void OnEnable()
         {
             this._creditSystem = this.GetComponent<CesiumCreditSystem>();
+
             if (this._creditSystem == null)
             {
                 this._creditSystem = CesiumCreditSystem.GetDefaultCreditSystem();
@@ -98,7 +99,10 @@ namespace CesiumForUnity
             }
         }
 
-        private void UpdateCreditsInSceneView(SceneView sceneView, List<CesiumCredit> onScreenCredits, List<CesiumCredit> popupCredits)
+        private void UpdateCreditsInSceneView(
+            SceneView sceneView,
+            List<CesiumCredit> onScreenCredits,
+            List<CesiumCredit> popupCredits)
         {
             if (sceneView.rootVisualElement == null)
             {
@@ -143,18 +147,27 @@ namespace CesiumForUnity
 
         private void Update()
         {
-            if (this._creditSystem != null)
+            if (this._creditSystem == null)
             {
-#if UNITY_EDITOR
-                ArrayList sceneViews = SceneView.sceneViews;
-                for(int i = 0; i < sceneViews.Count; i++)
-                {
-                    this.AddCreditsToSceneView((SceneView)sceneViews[i]);
-                }
-#endif
+                return;
             }
+
+#if UNITY_EDITOR
+            ArrayList sceneViews = SceneView.sceneViews;
+            for (int i = 0; i < sceneViews.Count; i++)
+            {
+                this.AddCreditsToSceneView((SceneView)sceneViews[i]);
+            }          
+#endif
         }
 
+        /// <summary>
+        /// Creates a UIElements Label with the given text.
+        /// </summary>
+        /// <param name="text">The desired text.</param>
+        /// <param name="removeExtraSpace">Whether to strip the label of extra space. This is used to 
+        /// reduce space between inline labels, so that they appear as normally spaced text.</param>
+        /// <returns></returns>
         private Label CreateLabelFromText(string text, bool removeExtraSpace)
         {
             Label label = new Label();
@@ -171,6 +184,13 @@ namespace CesiumForUnity
             return label;
         }
 
+        /// <summary>
+        /// Converts a Cesium credit representation into VisualElements for rendering with UI Toolkit.
+        /// </summary>
+        /// <param name="credit">The credit to convert to VisualElements.</param>
+        /// <param name="removeExtraSpace">Whether to strip the credit's label elements of extra space.
+        /// This is used to reduce space between inline labels, so that they appear as normally spaced text.</param>
+        /// <returns></returns>
         private List<VisualElement> ConvertCreditToVisualElements(CesiumCredit credit, bool removeExtraSpace)
         {
             List<VisualElement> visualElements = new List<VisualElement>();
@@ -223,6 +243,12 @@ namespace CesiumForUnity
             return visualElements;
         }
 
+        /// <summary>
+        /// Creates a "Data Attribution" VisualElement that, when clicked, toggles the visibility
+        /// of the given attribution panel.
+        /// </summary>
+        /// <param name="popupElement">The VisualElement that represents the "Data Attribution" panel.</param>
+        /// <returns>The clickable "Data Attribution" VisualElement.</returns>
         private VisualElement CreateDataAttributionElement(VisualElement popupElement)
         {
             Label label = new Label();
@@ -242,6 +268,15 @@ namespace CesiumForUnity
             return label;
         }
 
+        /// <summary>
+        /// Creates a wrapper for a credit to be displayed in the "Data Attribution" panel.
+        /// This encapsulates the VisualElements of a credit so that it can be vertically
+        /// stacked with other credits in the panel, while keeping its components inline.
+        /// </summary>
+        /// <param name="removeExtraSpace">Whether or not to remove extra space between
+        /// entries in the popup panel. This is mainly used to account for visual discrepancies
+        /// between the SceneView and GameView windows.</param>
+        /// <returns>The wrapper VisualElement.</returns>
         private VisualElement CreatePopupCreditElement(bool removeExtraSpace)
         {
             VisualElement popupCreditElement = new VisualElement();
@@ -282,6 +317,17 @@ namespace CesiumForUnity
 #endif
         }
 
+        /// <summary>
+        /// Takes the given <see cref="CesiumCredit"/> lists and converts them to UI components. These
+        /// elements are then added to the given VisualElements, which each represent the on-screen and popup
+        /// portions of the credit display.
+        /// </summary>
+        /// <param name="onScreenElement">The VisualElement used to display on-screen credits.</param>
+        /// <param name="onScreenCredits">The list of CesiumCredits to be shown on-screen.</param>
+        /// <param name="popupElement">The VisualElement used to display credits in the attribution panel.</param>
+        /// <param name="popupCredits">The list of CesiumCredits to be shown in the data attribution panel.</param>
+        /// <param name="removeExtraSpace">Whether or not to remove extra space between entries.
+        /// This is mainly used to account for visual discrepancies between the SceneView and GameView windows.</param>
         private void SetCreditsOnVisualElements(
             VisualElement onScreenElement,
             List<CesiumCredit> onScreenCredits,
