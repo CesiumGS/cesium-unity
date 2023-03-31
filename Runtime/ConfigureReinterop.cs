@@ -78,6 +78,8 @@ namespace CesiumForUnity
             go.name = go.name;
             go = new GameObject("name");
             go.SetActive(go.activeSelf);
+            int layer = go.layer;
+            go.layer = layer;
             Transform transform = go.transform;
             transform.parent = transform.parent;
             transform.SetParent(transform.parent, false);
@@ -158,6 +160,7 @@ namespace CesiumForUnity
             meshRenderer.sharedMaterial = meshRenderer.sharedMaterial;
             meshRenderer.material.shader = meshRenderer.material.shader;
             UnityEngine.Object.Destroy(meshGameObject);
+            UnityEngine.Object.DestroyImmediate(meshGameObject, true);
             UnityEngine.Object.DestroyImmediate(meshGameObject);
 
             MeshFilter meshFilter = new MeshFilter();
@@ -190,6 +193,7 @@ namespace CesiumForUnity
             string temporaryCachePath = Application.temporaryCachePath;
             bool isEditor = Application.isEditor;
             string applicationVersion = Application.version;
+            string unityVersion = Application.unityVersion;
             string applicationPlatform = Helpers.ToString(Application.platform);
             string productName = Application.productName;
             string osVersion = System.Environment.OSVersion.VersionString;
@@ -338,6 +342,7 @@ namespace CesiumForUnity
             georeference.ecefY = georeference.ecefY;
             georeference.ecefZ = georeference.ecefZ;
             georeference.originAuthority = georeference.originAuthority;
+            double4x4 ecefToLocal = georeference.ecefToLocalMatrix;
 
             CesiumGeoreference inParent = go.GetComponentInParent<CesiumGeoreference>();
             inParent.MoveOrigin();
@@ -428,6 +433,8 @@ namespace CesiumForUnity
             string.IsNullOrWhiteSpace("value");
 
             string token = CesiumRuntimeSettings.defaultIonAccessToken;
+            int requestsPerCachePrune = CesiumRuntimeSettings.requestsPerCachePrune;
+            ulong maxItems = CesiumRuntimeSettings.maxItems;
 
             Cesium3DTilesetLoadFailureDetails tilesetDetails
                 = new Cesium3DTilesetLoadFailureDetails(tileset, Cesium3DTilesetLoadType.Unknown, 0, "");
@@ -464,6 +471,24 @@ namespace CesiumForUnity
             globeAnchor._localToGlobeFixedMatrixIsValid = true;
             globeAnchor._lastLocalToWorld = new Matrix4x4();
             globeAnchor.UpdateGeoreferenceIfNecessary();
+
+            CesiumTileExcluder[] excluders = go.GetComponentsInParent<CesiumTileExcluder>();
+            CesiumTileExcluder excluder = excluders[0];
+            excluder.AddToTileset(null);
+            excluder.RemoveFromTileset(null);
+            excluder.ShouldExclude(new Cesium3DTile());
+            Cesium3DTile tile = new Cesium3DTile();
+            tile._transform = new double4x4();
+            tile._pTile = IntPtr.Zero;
+
+            Cesium3DTileInfo info;
+            info.usesAdditiveRefinement = true;
+            info.geometricError = 1.0f;
+            info.dimensions = Vector3.zero;
+            info.isTranslucent = true;
+
+            CesiumPointCloudRenderer renderer = go.AddComponent<CesiumPointCloudRenderer>();
+            renderer.tileInfo = info;
 
             ObjectPool<Mesh> meshPool = CesiumObjectPool.MeshPool;
             Mesh pooledMesh = meshPool.Get();

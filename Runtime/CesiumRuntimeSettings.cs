@@ -157,5 +157,28 @@ namespace CesiumForUnity
             }
             #endif
         }
+
+        [SerializeField]
+        [Tooltip("The number of requests to handle before each prune of old cached results from the database. Must restart Unity to apply changes.")]
+        private int _requestsPerCachePrune = 10000;
+
+        /// <summary>
+        ///  The number of requests to handle before each prune of old cached results from the database.
+        /// </summary>
+        public static int requestsPerCachePrune
+        {
+            get => instance._requestsPerCachePrune;
+        }
+
+        [SerializeField]
+        [Tooltip("The maximum number of items should be kept in the Sqlite database after pruning. Must restart Unity to apply changes.")]
+        private ulong  _maxItems = 4096;
+        /// <summary>
+        /// The maximum number of items should be kept in the Sqlite database after pruning.
+        /// </summary>
+        public static ulong maxItems
+        {
+            get => instance._maxItems;
+        }
     }
 }

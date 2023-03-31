@@ -87,6 +87,7 @@ namespace CesiumForUnity
 
             Application.OpenURL("URL");
             string applicationVersion = Application.version;
+            string unityVersion = Application.unityVersion;
             string applicationPlatform = Helpers.ToString(Application.platform);
             string productName = Application.productName;
             string osVersion = System.Environment.OSVersion.VersionString;
@@ -164,6 +165,7 @@ namespace CesiumForUnity
 
             CesiumRasterOverlay[] rasterOverlays = tileset.gameObject.GetComponents<CesiumRasterOverlay>();
             CesiumRasterOverlay overlay = rasterOverlays[0];
+            UnityEngine.Object.DestroyImmediate(overlay, true);
             UnityEngine.Object.DestroyImmediate(overlay);
 
             CesiumIonRasterOverlay[] ionRasterOverlays =

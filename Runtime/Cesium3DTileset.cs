@@ -517,6 +517,19 @@ namespace CesiumForUnity
         // }
 
         [SerializeField]
+        private CesiumPointCloudShading _pointCloudShading;
+
+        /// <summary>
+        /// The CesiumPointCloudShading attached to this tileset. If the tileset
+        /// contains points, their appearance can be configured with the point
+        /// cloud shading parameters.
+        /// </summary>
+        public CesiumPointCloudShading pointCloudShading
+        {
+            get => this._pointCloudShading;
+        }
+
+        [SerializeField]
         private bool _suspendUpdate = false;
 
         /// <summary>
