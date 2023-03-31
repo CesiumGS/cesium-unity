@@ -12,18 +12,14 @@
 #include <DotNet/CesiumForUnity/CesiumCreditSystem.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
-#include <DotNet/System/Array1.h>
 #include <DotNet/System/Collections/Generic/List1.h>
 #include <DotNet/System/Collections/IEnumerator.h>
 #include <DotNet/System/Object.h>
 #include <DotNet/System/String.h>
 #include <DotNet/UnityEngine/Coroutine.h>
 #include <DotNet/UnityEngine/GameObject.h>
-#include <DotNet/UnityEngine/HideFlags.h>
 #include <DotNet/UnityEngine/Object.h>
-#include <DotNet/UnityEngine/Resources.h>
 #include <DotNet/UnityEngine/Texture2D.h>
-#include <DotNet/UnityEngine/Transform.h>
 #include <tidybuffio.h>
 
 using namespace Cesium3DTilesSelection;
@@ -36,14 +32,14 @@ CesiumCreditSystemImpl::CesiumCreditSystemImpl(
     const CesiumForUnity::CesiumCreditSystem& creditSystem)
     : _pCreditSystem(std::make_shared<CreditSystem>()),
       _htmlToUnityCredit(),
-      _onScreenCredits(),
-      _popupCredits(),
+      _lastCreditsCount(0),
       _creditsUpdated(false) {}
 
 CesiumCreditSystemImpl::~CesiumCreditSystemImpl() {}
 
-void CesiumCreditSystemImpl::Update(
-    const CesiumForUnity::CesiumCreditSystem& creditSystem) {
+void CesiumCreditSystemImpl::UpdateCredits(
+    const CesiumForUnity::CesiumCreditSystem& creditSystem,
+    bool forceUpdate) {
   if (!_pCreditSystem) {
     return;
   }
@@ -56,27 +52,14 @@ void CesiumCreditSystemImpl::Update(
     _creditsUpdated = false;
   }
 
-  size_t lastOnScreenCreditsCount = _onScreenCredits.size();
-  size_t lastPopupCreditsCount = _popupCredits.size();
-
-  _onScreenCredits.clear();
-  _popupCredits.clear();
-
   const std::vector<Cesium3DTilesSelection::Credit>& creditsToShowThisFrame =
       _pCreditSystem->getCreditsToShowThisFrame();
   size_t creditsCount = creditsToShowThisFrame.size();
+  _creditsUpdated =
+      forceUpdate || creditsCount != _lastCreditsCount ||
+      _pCreditSystem->getCreditsToNoLongerShowThisFrame().size() > 0;
 
-  for (int i = 0; i < creditsCount; i++) {
-    const Cesium3DTilesSelection::Credit& credit = creditsToShowThisFrame[i];
-    if (_pCreditSystem->shouldBeShownOnScreen(credit)) {
-      _onScreenCredits.push_back(credit);
-    } else {
-      _popupCredits.push_back(credit);
-    }
-  }
-
-  if (_onScreenCredits.size() != lastOnScreenCreditsCount ||
-      _popupCredits.size() != lastPopupCreditsCount) {
+  if (_creditsUpdated) {
     List1<CesiumForUnity::CesiumCredit> popupCredits =
         creditSystem.popupCredits();
     List1<CesiumForUnity::CesiumCredit> onScreenCredits =
@@ -111,6 +94,7 @@ void CesiumCreditSystemImpl::Update(
     }
 
     _creditsUpdated = true;
+    _lastCreditsCount = creditsCount;
   }
 
   _pCreditSystem->startNextFrame();

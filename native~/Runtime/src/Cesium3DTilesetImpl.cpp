@@ -56,6 +56,14 @@ Cesium3DTilesetImpl::Cesium3DTilesetImpl(
 
 Cesium3DTilesetImpl::~Cesium3DTilesetImpl() {}
 
+void Cesium3DTilesetImpl::SetShowCreditsOnScreen(
+    const DotNet::CesiumForUnity::Cesium3DTileset& tileset,
+    bool value) {
+  if (this->_pTileset) {
+    this->_pTileset->setShowCreditsOnScreen(value);
+  }
+}
+
 void Cesium3DTilesetImpl::Start(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {}
 

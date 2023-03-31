@@ -120,7 +120,7 @@ namespace CesiumForUnity
             texture.wrapModeU = texture.wrapModeU;
             texture.wrapModeV = texture.wrapModeV;
             texture.wrapModeW = texture.wrapModeW;
-            
+
 
             Mesh mesh = new Mesh();
             Mesh[] meshes = new[] { mesh };
@@ -145,7 +145,7 @@ namespace CesiumForUnity
             meshRenderer.material = UnityEngine.Object.Instantiate(meshRenderer.material);
             int id = Shader.PropertyToID("name");
             meshRenderer.material.SetTexture(id, texture2D);
-            meshRenderer.material.SetFloat(id, 1.0f); 
+            meshRenderer.material.SetFloat(id, 1.0f);
             meshRenderer.material.SetVector(id, new Vector4());
             meshRenderer.material.DisableKeyword("keywordName");
             meshRenderer.material.EnableKeyword("keywordName");
@@ -218,12 +218,12 @@ namespace CesiumForUnity
             string e = request.error;
             string method = request.method;
             string url = request.url;
-            if(request.result == UnityWebRequest.Result.Success){};
+            if (request.result == UnityWebRequest.Result.Success) { };
             request.downloadHandler = new NativeDownloadHandler();
             request.SetRequestHeader("name", "value");
             request.GetResponseHeader("name");
-            Dictionary<string,string>.Enumerator enumerator = request.GetResponseHeaders().GetEnumerator();
-            while(enumerator.MoveNext())
+            Dictionary<string, string>.Enumerator enumerator = request.GetResponseHeaders().GetEnumerator();
+            while (enumerator.MoveNext())
             {
                 string key = enumerator.Current.Key;
                 string value = enumerator.Current.Value;
@@ -291,7 +291,7 @@ namespace CesiumForUnity
             bingMapsRasterOverlay.bingMapsKey = bingMapsRasterOverlay.bingMapsKey;
             bingMapsRasterOverlay.mapStyle = bingMapsRasterOverlay.mapStyle;
             baseOverlay = bingMapsRasterOverlay;
-            
+
             CesiumTileMapServiceRasterOverlay tileMapServiceRasterOverlay =
                 go.GetComponent<CesiumTileMapServiceRasterOverlay>();
             tileMapServiceRasterOverlay.url = tileMapServiceRasterOverlay.url;
@@ -322,7 +322,8 @@ namespace CesiumForUnity
             metadata = go.GetComponent<CesiumMetadata>();
             CesiumMetadata metadataParent = go.GetComponentInParent<CesiumMetadata>();
             MetadataType type = MetadataType.String;
-            if(type == MetadataType.None){
+            if (type == MetadataType.None)
+            {
                 type = MetadataType.Int16;
             }
             metadata.GetFeatures(transform, 3);
@@ -493,7 +494,7 @@ namespace CesiumForUnity
             ObjectPool<Mesh> meshPool = CesiumObjectPool.MeshPool;
             Mesh pooledMesh = meshPool.Get();
             meshPool.Release(pooledMesh);
-            
+
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;
             sv.pivot = sv.pivot;

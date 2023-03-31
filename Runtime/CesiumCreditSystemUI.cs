@@ -320,7 +320,10 @@ namespace CesiumForUnity
                 popupElement.Add(popupCreditElement);
             }
 
-            onScreenElement.Add(this.CreateDataAttributionElement(popupElement));
+            if (popupCredits.Count > 0)
+            {
+                onScreenElement.Add(this.CreateDataAttributionElement(popupElement));
+            }
         }
 
         private void OnDisable()

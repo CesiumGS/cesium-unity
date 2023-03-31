@@ -27,7 +27,9 @@ public:
       const DotNet::CesiumForUnity::CesiumCreditSystem& creditSystem);
   ~CesiumCreditSystemImpl();
 
-  void Update(const DotNet::CesiumForUnity::CesiumCreditSystem& creditSystem);
+  void UpdateCredits(
+      const DotNet::CesiumForUnity::CesiumCreditSystem& creditSystem,
+      bool forceUpdate);
 
   const std::shared_ptr<Cesium3DTilesSelection::CreditSystem>&
   getExternalCreditSystem() const;
@@ -43,9 +45,7 @@ private:
   std::unordered_map<std::string, DotNet::CesiumForUnity::CesiumCredit>
       _htmlToUnityCredit;
 
-  std::vector<Cesium3DTilesSelection::Credit> _onScreenCredits;
-  std::vector<Cesium3DTilesSelection::Credit> _popupCredits;
-
+  size_t _lastCreditsCount;
   bool _creditsUpdated;
 };
 
