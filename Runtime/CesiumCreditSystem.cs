@@ -131,10 +131,14 @@ namespace CesiumForUnity
                 {
                     if (creditSystems[i].gameObject.name == defaultName)
                     {
-                        UnityLifetime.Destroy(creditSystems[i].gameObject);
+                        _defaultCreditSystem = creditSystems[i];
+                        break;
                     }
                 }
+            }
 
+            if(_defaultCreditSystem == null)
+            {
                 _defaultCreditSystem = CreateDefaultCreditSystem();
             }
 
