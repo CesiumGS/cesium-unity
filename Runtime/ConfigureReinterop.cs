@@ -160,6 +160,7 @@ namespace CesiumForUnity
             meshRenderer.sharedMaterial = meshRenderer.sharedMaterial;
             meshRenderer.material.shader = meshRenderer.material.shader;
             UnityEngine.Object.Destroy(meshGameObject);
+            UnityEngine.Object.DestroyImmediate(meshGameObject, true);
             UnityEngine.Object.DestroyImmediate(meshGameObject);
 
             MeshFilter meshFilter = new MeshFilter();
@@ -341,6 +342,7 @@ namespace CesiumForUnity
             georeference.ecefY = georeference.ecefY;
             georeference.ecefZ = georeference.ecefZ;
             georeference.originAuthority = georeference.originAuthority;
+            double4x4 ecefToLocal = georeference.ecefToLocalMatrix;
 
             CesiumGeoreference inParent = go.GetComponentInParent<CesiumGeoreference>();
             inParent.MoveOrigin();
@@ -457,6 +459,15 @@ namespace CesiumForUnity
             globeAnchor._localToGlobeFixedMatrixIsValid = true;
             globeAnchor._lastLocalToWorld = new Matrix4x4();
             globeAnchor.UpdateGeoreferenceIfNecessary();
+
+            CesiumTileExcluder[] excluders = go.GetComponentsInParent<CesiumTileExcluder>();
+            CesiumTileExcluder excluder = excluders[0];
+            excluder.AddToTileset(null);
+            excluder.RemoveFromTileset(null);
+            excluder.ShouldExclude(new Cesium3DTile());
+            Cesium3DTile tile = new Cesium3DTile();
+            tile._transform = new double4x4();
+            tile._pTile = IntPtr.Zero;
 
             Cesium3DTileInfo info;
             info.usesAdditiveRefinement = true;
