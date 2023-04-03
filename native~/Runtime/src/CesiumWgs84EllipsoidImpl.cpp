@@ -1,5 +1,3 @@
-#pragma once
-
 #include "CesiumWgs84EllipsoidImpl.h"
 
 #include <CesiumGeospatial/Ellipsoid.h>

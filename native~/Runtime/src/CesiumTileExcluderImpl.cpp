@@ -7,7 +7,9 @@
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/CesiumForUnity/CesiumTileExcluder.h>
 #include <DotNet/System/Object.h>
+#include <DotNet/System/String.h>
 #include <DotNet/UnityEngine/Debug.h>
+#include <DotNet/UnityEngine/GameObject.h>
 
 using namespace Cesium3DTilesSelection;
 

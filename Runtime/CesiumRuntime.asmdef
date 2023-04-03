@@ -2,7 +2,6 @@
     "name": "CesiumRuntime",
     "rootNamespace": "",
     "references": [
-        "Unity.TextMeshPro",
         "Unity.InputSystem",
         "Unity.Mathematics"
     ],

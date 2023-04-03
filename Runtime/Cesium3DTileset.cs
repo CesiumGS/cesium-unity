@@ -68,6 +68,8 @@ namespace CesiumForUnity
             }
         }
 
+        internal static event Action OnSetShowCreditsOnScreen;
+
         [SerializeField]
         private bool _showCreditsOnScreen = false;
 
@@ -81,7 +83,11 @@ namespace CesiumForUnity
             set
             {
                 this._showCreditsOnScreen = value;
-                this.RecreateTileset();
+                this.SetShowCreditsOnScreen(this._showCreditsOnScreen);
+                if (Cesium3DTileset.OnSetShowCreditsOnScreen != null)
+                {
+                    Cesium3DTileset.OnSetShowCreditsOnScreen();
+                }
             }
         }
 
@@ -625,6 +631,8 @@ namespace CesiumForUnity
                 this.RecreateTileset();
             }
         }
+
+        private partial void SetShowCreditsOnScreen(bool value);
 
         private partial void Start();
         private partial void Update();

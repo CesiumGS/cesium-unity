@@ -11,26 +11,12 @@ namespace CesiumForUnity
     {
         static CesiumEditorUtility()
         {
-            EditorApplication.update += CheckProjectFilesForTextMeshPro;
             EditorApplication.update += UpdateIonSession;
 
             Cesium3DTileset.OnCesium3DTilesetLoadFailure +=
                 HandleCesium3DTilesetLoadFailure;
             CesiumRasterOverlay.OnCesiumRasterOverlayLoadFailure +=
                 HandleCesiumRasterOverlayLoadFailure;
-        }
-
-        static void CheckProjectFilesForTextMeshPro()
-        {
-            UnityEngine.Object tmpSettings = Resources.Load("TMP Settings");
-            if (tmpSettings != null)
-            {
-                return;
-            }
-
-            TextMeshProPromptWindow.ShowWindow();
-
-            EditorApplication.update -= CheckProjectFilesForTextMeshPro;
         }
 
         static void UpdateIonSession()

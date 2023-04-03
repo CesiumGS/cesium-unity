@@ -173,7 +173,14 @@ namespace CesiumForUnity
             GUIContent showCreditsOnScreenContent = new GUIContent(
               "Show Credits On Screen",
               "Whether or not to show this tileset's credits on screen.");
+
+            EditorGUI.BeginChangeCheck();
             EditorGUILayout.PropertyField(this._showCreditsOnScreen, showCreditsOnScreenContent);
+            if (EditorGUI.EndChangeCheck())
+            {
+                // Trigger the OnSetShowCreditsOnScreen event in Cesium3DTileset.
+                this._tileset.showCreditsOnScreen = this._showCreditsOnScreen.boolValue;
+            }
         }
 
         private void DrawSourceProperties()
