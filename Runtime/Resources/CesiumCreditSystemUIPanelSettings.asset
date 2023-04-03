@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 19101, guid: 0000000000000000e000000000000000, type: 0}
   m_Name: CesiumCreditSystemUIPanelSettings
   m_EditorClassIdentifier: 
-  themeUss: {fileID: -4733365628477956816, guid: 177d3669758d50a47ba815879ddb2842,
+  themeUss: {fileID: -4733365628477956816, guid: 1c8cee1d39d4cb245ab32e13e5e38663,
     type: 3}
   m_TargetTexture: {fileID: 0}
   m_ScaleMode: 1
