@@ -43,28 +43,8 @@ namespace Reinterop
             if (field.IsStatic)
                 return;
 
-            string fieldName = field.Name;
-            bool isPrivate = field.DeclaredAccessibility != Accessibility.Public;
-
-            // If this is a backing field for an automatic property, use the property name instead.
-            IPropertySymbol? autoProperty = field.AssociatedSymbol as IPropertySymbol;
-            
-            // Unfortunately, the above will only work if the C# compiler is looking at the source code for the property.
-            // So for backing fields in referenced assemblies, we need to do this more manually.
-            if (autoProperty == null && fieldName.EndsWith("__BackingField"))
-            {
-                Match match = new Regex("<(.+)>k__BackingField").Match(fieldName);
-                if (match.Success && match.Groups.Count > 1)
-                {
-                    autoProperty = CSharpTypeUtility.FindMember(field.ContainingType, match.Groups[1].Value) as IPropertySymbol;
-                }
-            }
-
-            if (autoProperty != null)
-            {
-                fieldName = autoProperty.Name;
-                isPrivate = autoProperty.DeclaredAccessibility != Accessibility.Public;
-            }
+            string fieldName = CSharpTypeUtility.GetFieldName(field);
+            bool isPrivate = CSharpTypeUtility.GetFieldIsPrivate(field);
 
             CppType fieldType = CppType.FromCSharp(context, field.Type);
 

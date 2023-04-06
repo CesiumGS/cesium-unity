@@ -1,5 +1,25 @@
 # Change Log
 
+### v1.0.0 - 2023-04-03
+
+##### Additions :tada:
+
+- Added support for Unity's built-in render pipeline.
+- Added `CesiumPointCloudShading`, which allows point cloud tilesets to be rendered with attenuation based on geometric error. Attenuation is currently only supported in the Universal Render Pipeline (URP).
+- `GameObject` instances created for the tiles in a `Cesium3DTileset` now inherit the `layer` of the parent tileset.
+- Added the `CesiumTileExcluder` abstract class. By creating a class derived from `CesiumTileExcluder`, then adding it to a `Cesium3DTileset`'s game object, you can implement custom rules for excluding tiles in the `Cesium3DTileset` from loading and rendering.
+- Added setting in `CesiumRuntimeSettings` to configure the maximum number of responses to keep in the request cache.
+- Added setting in `CesiumRuntimeSettings` to configure the number of reads from the cache database before each prune.
+
+##### Fixes :wrench:
+
+- Fixed a bug that prevented the use of pre-existing mipmaps, such as those loaded from KTX2.
+- Fixed a bug where `CesiumCameraController` tried to access non-existent inputs in the legacy input system.
+- Fixed a bug that could cause a crash when using the search box with a dataset already selected in the Cesium ion Assets window.
+- Fixed a bug that prevented sorting the contents of the Cesium ion Assets window in descending order.
+
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.22.1 to v0.23.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
+
 ### v0.3.1
 
 ##### Fixes :wrench:

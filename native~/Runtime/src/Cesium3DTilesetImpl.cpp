@@ -2,6 +2,7 @@
 
 #include "CameraManager.h"
 #include "UnityPrepareRendererResources.h"
+#include "UnityTileExcluderAdaptor.h"
 #include "UnityTilesetExternals.h"
 
 #include <Cesium3DTilesSelection/IonRasterOverlay.h>
@@ -15,12 +16,14 @@
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
 #include <DotNet/CesiumForUnity/CesiumRuntimeSettings.h>
+#include <DotNet/CesiumForUnity/CesiumTileExcluder.h>
 #include <DotNet/System/Action.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/Object.h>
 #include <DotNet/System/String.h>
 #include <DotNet/UnityEngine/Application.h>
 #include <DotNet/UnityEngine/Camera.h>
+#include <DotNet/UnityEngine/Debug.h>
 #include <DotNet/UnityEngine/GameObject.h>
 #include <DotNet/UnityEngine/Quaternion.h>
 #include <DotNet/UnityEngine/Time.h>
@@ -52,6 +55,14 @@ Cesium3DTilesetImpl::Cesium3DTilesetImpl(
 }
 
 Cesium3DTilesetImpl::~Cesium3DTilesetImpl() {}
+
+void Cesium3DTilesetImpl::SetShowCreditsOnScreen(
+    const DotNet::CesiumForUnity::Cesium3DTileset& tileset,
+    bool value) {
+  if (this->_pTileset) {
+    this->_pTileset->setShowCreditsOnScreen(value);
+  }
+}
 
 void Cesium3DTilesetImpl::Start(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {}
@@ -322,12 +333,10 @@ void Cesium3DTilesetImpl::updateLastViewUpdateResultState(
   const ViewUpdateResult& previousResult = this->_lastUpdateResult;
   if (currentResult.tilesToRenderThisFrame.size() !=
           previousResult.tilesToRenderThisFrame.size() ||
-      currentResult.tilesLoadingLowPriority !=
-          previousResult.tilesLoadingLowPriority ||
-      currentResult.tilesLoadingMediumPriority !=
-          previousResult.tilesLoadingMediumPriority ||
-      currentResult.tilesLoadingHighPriority !=
-          previousResult.tilesLoadingHighPriority ||
+      currentResult.workerThreadTileLoadQueueLength !=
+          previousResult.workerThreadTileLoadQueueLength ||
+      currentResult.mainThreadTileLoadQueueLength !=
+          previousResult.mainThreadTileLoadQueueLength ||
       currentResult.tilesVisited != previousResult.tilesVisited ||
       currentResult.culledTilesVisited != previousResult.culledTilesVisited ||
       currentResult.tilesCulled != previousResult.tilesCulled ||
@@ -335,17 +344,18 @@ void Cesium3DTilesetImpl::updateLastViewUpdateResultState(
     SPDLOG_LOGGER_INFO(
         this->_pTileset->getExternals().pLogger,
         "{0}: Visited {1}, Culled Visited {2}, Rendered {3}, Culled {4}, Max "
-        "Depth Visited {5}, Loading-Low {6}, Loading-Medium {7}, Loading-High "
-        "{8}",
+        "Depth Visited {5}, Loading-Worker {6}, Loading-Main {7} "
+        "Total Tiles Resident {8}, Frame {9}",
         tileset.gameObject().name().ToStlString(),
         currentResult.tilesVisited,
         currentResult.culledTilesVisited,
         currentResult.tilesToRenderThisFrame.size(),
         currentResult.tilesCulled,
         currentResult.maxDepthVisited,
-        currentResult.tilesLoadingLowPriority,
-        currentResult.tilesLoadingMediumPriority,
-        currentResult.tilesLoadingHighPriority);
+        currentResult.workerThreadTileLoadQueueLength,
+        currentResult.mainThreadTileLoadQueueLength,
+        this->_pTileset->getNumberOfTilesLoaded(),
+        currentResult.frameNumber);
   }
 
   this->_lastUpdateResult = currentResult;
@@ -433,6 +443,19 @@ void Cesium3DTilesetImpl::LoadTileset(
   for (int32_t i = 0, len = overlays.Length(); i < len; ++i) {
     CesiumForUnity::CesiumRasterOverlay overlay = overlays[i];
     overlay.AddToTileset();
+  }
+
+  // Add any tile excluder components
+  System::Array1<CesiumForUnity::CesiumTileExcluder> excluders =
+      tileset.gameObject()
+          .GetComponentsInParent<CesiumForUnity::CesiumTileExcluder>();
+  for (int32_t i = 0, len = excluders.Length(); i < len; ++i) {
+    CesiumForUnity::CesiumTileExcluder excluder = excluders[i];
+    if (!excluder.enabled()) {
+      continue;
+    }
+
+    excluder.AddToTileset(tileset);
   }
 }
 

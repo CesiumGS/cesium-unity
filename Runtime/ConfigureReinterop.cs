@@ -10,6 +10,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.Rendering;
 using Unity.Mathematics;
+using UnityEngine.Pool;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -77,6 +78,8 @@ namespace CesiumForUnity
             go.name = go.name;
             go = new GameObject("name");
             go.SetActive(go.activeSelf);
+            int layer = go.layer;
+            go.layer = layer;
             Transform transform = go.transform;
             transform.parent = transform.parent;
             transform.SetParent(transform.parent, false);
@@ -117,7 +120,7 @@ namespace CesiumForUnity
             texture.wrapModeU = texture.wrapModeU;
             texture.wrapModeV = texture.wrapModeV;
             texture.wrapModeW = texture.wrapModeW;
-            
+
 
             Mesh mesh = new Mesh();
             Mesh[] meshes = new[] { mesh };
@@ -142,7 +145,7 @@ namespace CesiumForUnity
             meshRenderer.material = UnityEngine.Object.Instantiate(meshRenderer.material);
             int id = Shader.PropertyToID("name");
             meshRenderer.material.SetTexture(id, texture2D);
-            meshRenderer.material.SetFloat(id, 1.0f); 
+            meshRenderer.material.SetFloat(id, 1.0f);
             meshRenderer.material.SetVector(id, new Vector4());
             meshRenderer.material.DisableKeyword("keywordName");
             meshRenderer.material.EnableKeyword("keywordName");
@@ -157,6 +160,7 @@ namespace CesiumForUnity
             meshRenderer.sharedMaterial = meshRenderer.sharedMaterial;
             meshRenderer.material.shader = meshRenderer.material.shader;
             UnityEngine.Object.Destroy(meshGameObject);
+            UnityEngine.Object.DestroyImmediate(meshGameObject, true);
             UnityEngine.Object.DestroyImmediate(meshGameObject);
 
             MeshFilter meshFilter = new MeshFilter();
@@ -189,6 +193,7 @@ namespace CesiumForUnity
             string temporaryCachePath = Application.temporaryCachePath;
             bool isEditor = Application.isEditor;
             string applicationVersion = Application.version;
+            string unityVersion = Application.unityVersion;
             string applicationPlatform = Helpers.ToString(Application.platform);
             string productName = Application.productName;
             string osVersion = System.Environment.OSVersion.VersionString;
@@ -213,12 +218,12 @@ namespace CesiumForUnity
             string e = request.error;
             string method = request.method;
             string url = request.url;
-            if(request.result == UnityWebRequest.Result.Success){};
+            if (request.result == UnityWebRequest.Result.Success) { };
             request.downloadHandler = new NativeDownloadHandler();
             request.SetRequestHeader("name", "value");
             request.GetResponseHeader("name");
-            Dictionary<string,string>.Enumerator enumerator = request.GetResponseHeaders().GetEnumerator();
-            while(enumerator.MoveNext())
+            Dictionary<string, string>.Enumerator enumerator = request.GetResponseHeaders().GetEnumerator();
+            while (enumerator.MoveNext())
             {
                 string key = enumerator.Current.Key;
                 string value = enumerator.Current.Value;
@@ -286,7 +291,7 @@ namespace CesiumForUnity
             bingMapsRasterOverlay.bingMapsKey = bingMapsRasterOverlay.bingMapsKey;
             bingMapsRasterOverlay.mapStyle = bingMapsRasterOverlay.mapStyle;
             baseOverlay = bingMapsRasterOverlay;
-            
+
             CesiumTileMapServiceRasterOverlay tileMapServiceRasterOverlay =
                 go.GetComponent<CesiumTileMapServiceRasterOverlay>();
             tileMapServiceRasterOverlay.url = tileMapServiceRasterOverlay.url;
@@ -317,7 +322,8 @@ namespace CesiumForUnity
             metadata = go.GetComponent<CesiumMetadata>();
             CesiumMetadata metadataParent = go.GetComponentInParent<CesiumMetadata>();
             MetadataType type = MetadataType.String;
-            if(type == MetadataType.None){
+            if (type == MetadataType.None)
+            {
                 type = MetadataType.Int16;
             }
             metadata.GetFeatures(transform, 3);
@@ -337,6 +343,7 @@ namespace CesiumForUnity
             georeference.ecefY = georeference.ecefY;
             georeference.ecefZ = georeference.ecefZ;
             georeference.originAuthority = georeference.originAuthority;
+            double4x4 ecefToLocal = georeference.ecefToLocalMatrix;
 
             CesiumGeoreference inParent = go.GetComponentInParent<CesiumGeoreference>();
             inParent.MoveOrigin();
@@ -353,9 +360,6 @@ namespace CesiumForUnity
 
             go = Resources.Load<GameObject>("name");
             go = UnityEngine.Object.Instantiate(go);
-
-            CesiumCreditSystem creditSystem = go.AddComponent<CesiumCreditSystem>();
-            creditSystem = go.GetComponent<CesiumCreditSystem>();
 
             Mesh.MeshDataArray meshDataArray = Mesh.AllocateWritableMeshData(1);
             Mesh.MeshData meshData = meshDataArray[meshDataArray.Length - 1];
@@ -393,17 +397,31 @@ namespace CesiumForUnity
 
             Physics.BakeMesh(mesh.GetInstanceID(), false);
 
-            CesiumCreditSystem[] creditSystems = UnityEngine.Object.FindObjectsOfType<CesiumCreditSystem>();
-            for (int i = 0; i < creditSystems.Length; ++i)
+            CesiumCreditComponent creditComponent = new CesiumCreditComponent("text", "link", -1);
+            List<CesiumCreditComponent> creditComponents = new List<CesiumCreditComponent>();
+            creditComponents.Add(creditComponent);
+            int creditCount = creditComponents.Count;
+
+            CesiumCredit credit = new CesiumCredit();
+            credit = new CesiumCredit(creditComponents);
+            creditComponents = credit.components;
+
+            CesiumCreditSystem creditSystem = go.AddComponent<CesiumCreditSystem>();
+            creditSystem = CesiumCreditSystem.GetDefaultCreditSystem();
+            creditSystem.StartCoroutine(creditSystem.LoadImage("string"));
+
+            List<CesiumCredit> credits = creditSystem.onScreenCredits;
+            credits = creditSystem.popupCredits;
+            credits.Add(credit);
+            credits.Clear();
+
+            if (!creditSystem.HasLoadingImages())
             {
-                creditSystem = creditSystems[i];
-                creditSystem.gameObject.name.StartsWith("name");
+                creditSystem.BroadcastCreditsUpdate();
             }
 
-            int numImages = creditSystem.numberOfImages;
-            creditSystem.SetCreditsText("Popup", "OnScreen");
-            creditSystem.StartCoroutine(creditSystem.LoadImage("string"));
-            string delimiter = creditSystem.defaultDelimiter;
+            List<Texture2D> images = creditSystem.images;
+            int count = images.Count;
 
             List<string> stringList = new List<string>();
             stringList.Add("item");
@@ -413,8 +431,11 @@ namespace CesiumForUnity
             string[] stringArray = stringList.ToArray();
             test = string.Join(" ", stringArray);
             string.IsNullOrEmpty("value");
+            string.IsNullOrWhiteSpace("value");
 
             string token = CesiumRuntimeSettings.defaultIonAccessToken;
+            int requestsPerCachePrune = CesiumRuntimeSettings.requestsPerCachePrune;
+            ulong maxItems = CesiumRuntimeSettings.maxItems;
 
             Cesium3DTilesetLoadFailureDetails tilesetDetails
                 = new Cesium3DTilesetLoadFailureDetails(tileset, Cesium3DTilesetLoadType.Unknown, 0, "");
@@ -451,6 +472,28 @@ namespace CesiumForUnity
             globeAnchor._localToGlobeFixedMatrixIsValid = true;
             globeAnchor._lastLocalToWorld = new Matrix4x4();
             globeAnchor.UpdateGeoreferenceIfNecessary();
+
+            CesiumTileExcluder[] excluders = go.GetComponentsInParent<CesiumTileExcluder>();
+            CesiumTileExcluder excluder = excluders[0];
+            excluder.AddToTileset(null);
+            excluder.RemoveFromTileset(null);
+            excluder.ShouldExclude(new Cesium3DTile());
+            Cesium3DTile tile = new Cesium3DTile();
+            tile._transform = new double4x4();
+            tile._pTile = IntPtr.Zero;
+
+            Cesium3DTileInfo info;
+            info.usesAdditiveRefinement = true;
+            info.geometricError = 1.0f;
+            info.dimensions = Vector3.zero;
+            info.isTranslucent = true;
+
+            CesiumPointCloudRenderer renderer = go.AddComponent<CesiumPointCloudRenderer>();
+            renderer.tileInfo = info;
+
+            ObjectPool<Mesh> meshPool = CesiumObjectPool.MeshPool;
+            Mesh pooledMesh = meshPool.Get();
+            meshPool.Release(pooledMesh);
 
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;

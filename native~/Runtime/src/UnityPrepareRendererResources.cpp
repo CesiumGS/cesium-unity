@@ -16,10 +16,13 @@
 #include <CesiumShaderProperties.h>
 #include <CesiumUtility/ScopeGuard.h>
 
+#include <DotNet/CesiumForUnity/Cesium3DTileInfo.h>
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/CesiumForUnity/CesiumGlobeAnchor.h>
 #include <DotNet/CesiumForUnity/CesiumMetadata.h>
+#include <DotNet/CesiumForUnity/CesiumObjectPool.h>
+#include <DotNet/CesiumForUnity/CesiumPointCloudRenderer.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/Collections/Generic/List1.h>
 #include <DotNet/System/Object.h>
@@ -42,6 +45,7 @@
 #include <DotNet/UnityEngine/MeshTopology.h>
 #include <DotNet/UnityEngine/Object.h>
 #include <DotNet/UnityEngine/Physics.h>
+#include <DotNet/UnityEngine/Pool/ObjectPool1.h>
 #include <DotNet/UnityEngine/Quaternion.h>
 #include <DotNet/UnityEngine/Rendering/IndexFormat.h>
 #include <DotNet/UnityEngine/Rendering/MeshUpdateFlags.h>
@@ -322,6 +326,12 @@ void populateMeshDataArray(
           descriptor[numberOfAttributes].dimension = 4;
           descriptor[numberOfAttributes].stream = streamIndex;
           ++numberOfAttributes;
+
+          const int8_t numComponents = gltf.accessors[colorAccessorIt->second]
+                                           .computeNumberOfComponents();
+          if (numComponents == 4) {
+            primitiveInfo.isTranslucent = true;
+          }
         }
 
         // Max number of texture coordinates supported by Unity, see
@@ -540,6 +550,7 @@ struct LoadThreadResult {
   System::Array1<UnityEngine::Mesh> meshes;
   std::vector<CesiumPrimitiveInfo> primitiveInfos{};
 };
+
 } // namespace
 
 UnityPrepareRendererResources::UnityPrepareRendererResources(
@@ -613,8 +624,8 @@ UnityPrepareRendererResources::prepareInLoadThread(
             // thread, too.
             System::Array1<UnityEngine::Mesh> meshes(meshDataArray.Length());
             for (int32_t i = 0, len = meshes.Length(); i < len; ++i) {
-              UnityEngine::Mesh unityMesh{};
-
+              UnityEngine::Mesh unityMesh =
+                  CesiumForUnity::CesiumObjectPool::MeshPool().Get();
               // Don't let Unity unload this mesh during the time in between
               // when we create it and when we attach it to a GameObject.
               if (shouldShowTilesInHierarchy) {
@@ -731,6 +742,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
   }
 
   pModelGameObject->transform().SetParent(this->_tileset.transform(), false);
+  pModelGameObject->layer(this->_tileset.layer());
   pModelGameObject->SetActive(false);
 
   glm::dmat4 tileTransform = tile.getTransform();
@@ -777,7 +789,9 @@ void* UnityPrepareRendererResources::prepareInMainThread(
        showTilesInHierarchy,
        currentOverlayCount,
        &pMetadataComponent,
-       &shaderProperty = _shaderProperty](
+       &tile,
+       &shaderProperty = _shaderProperty,
+       tilesetLayer = this->_tileset.layer()](
           const Model& gltf,
           const Node& node,
           const Mesh& mesh,
@@ -818,7 +832,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         }
 
         primitiveGameObject.transform().parent(pModelGameObject->transform());
-
+        primitiveGameObject.layer(tilesetLayer);
         glm::dmat4 modelToEcef = tileTransform * transform;
 
         CesiumForUnity::CesiumGlobeAnchor anchor =
@@ -831,6 +845,8 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
         UnityEngine::MeshFilter meshFilter =
             primitiveGameObject.AddComponent<UnityEngine::MeshFilter>();
+        meshFilter.sharedMesh(unityMesh);
+
         UnityEngine::MeshRenderer meshRenderer =
             primitiveGameObject.AddComponent<UnityEngine::MeshRenderer>();
 
@@ -839,6 +855,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
         UnityEngine::Material opaqueMaterial =
             tilesetComponent.opaqueMaterial();
+
         if (opaqueMaterial == nullptr) {
           if (pMaterial &&
               pMaterial->hasExtension<ExtensionKhrMaterialsUnlit>()) {
@@ -857,10 +874,11 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         material.hideFlags(UnityEngine::HideFlags::HideAndDontSave);
         meshRenderer.material(material);
 
+        bool isTranslucent = primitiveInfo.isTranslucent;
         if (pMaterial) {
           if (pMaterial->pbrMetallicRoughness) {
-            // Add base color factor and metallic-roughness factor regardless of
-            // if the textures are present.
+            // Add base color factor and metallic-roughness factor regardless
+            // of if the textures are present.
             const std::vector<double>& baseColorFactorSrc =
                 pMaterial->pbrMetallicRoughness->baseColorFactor;
             UnityEngine::Vector4 baseColorFactor;
@@ -1013,16 +1031,44 @@ void* UnityPrepareRendererResources::prepareInMainThread(
               0);
         }
 
-        meshFilter.sharedMesh(unityMesh);
+        if (primitiveInfo.containsPoints) {
+          CesiumForUnity::CesiumPointCloudRenderer pointCloudRenderer =
+              primitiveGameObject
+                  .AddComponent<CesiumForUnity::CesiumPointCloudRenderer>();
 
-        if (createPhysicsMeshes &&
-            primitive.mode != MeshPrimitive::Mode::POINTS) {
-          // This should not trigger mesh baking for physics, because the meshes
-          // were already baked in the worker thread.
+          CesiumForUnity::Cesium3DTileInfo tileInfo;
+          tileInfo.usesAdditiveRefinement =
+              tile.getRefine() == Cesium3DTilesSelection::TileRefine::Add;
+          tileInfo.geometricError =
+              static_cast<float>(tile.getGeometricError());
+
+          // TODO: can we make AccessorView retrieve the min/max for us?
+          const Accessor* pPositionAccessor =
+              Model::getSafe(&gltf.accessors, positionAccessorID);
+          glm::vec3 min(
+              pPositionAccessor->min[0],
+              pPositionAccessor->min[1],
+              pPositionAccessor->min[2]);
+          glm::vec3 max(
+              pPositionAccessor->max[0],
+              pPositionAccessor->max[1],
+              pPositionAccessor->max[2]);
+          glm::vec3 dimensions(transform * glm::dvec4(max - min, 0));
+
+          tileInfo.dimensions =
+              UnityEngine::Vector3{dimensions.x, dimensions.y, dimensions.z};
+          tileInfo.isTranslucent = primitiveInfo.isTranslucent;
+          pointCloudRenderer.tileInfo(tileInfo);
+        }
+
+        if (createPhysicsMeshes && !primitiveInfo.containsPoints) {
+          // This should not trigger mesh baking for physics, because the
+          // meshes were already baked in the worker thread.
           UnityEngine::MeshCollider meshCollider =
               primitiveGameObject.AddComponent<UnityEngine::MeshCollider>();
           meshCollider.sharedMesh(unityMesh);
         }
+
         const ExtensionMeshPrimitiveExtFeatureMetadata* pMetadata =
             primitive.getExtension<ExtensionMeshPrimitiveExtFeatureMetadata>();
         if (pMetadata) {
@@ -1070,7 +1116,8 @@ void freePrimitiveGameObject(
   UnityEngine::MeshFilter meshFilter =
       primitiveGameObject.GetComponent<UnityEngine::MeshFilter>();
   if (meshFilter != nullptr) {
-    UnityLifetime::Destroy(meshFilter.sharedMesh());
+    CesiumForUnity::CesiumObjectPool::MeshPool().Release(
+        meshFilter.sharedMesh());
   }
 
   // The MeshCollider shares a mesh with the MeshFilter, so no need to
@@ -1087,7 +1134,7 @@ void UnityPrepareRendererResources::free(
     LoadThreadResult* pTyped =
         static_cast<LoadThreadResult*>(pLoadThreadResult);
     for (int32_t i = 0, len = pTyped->meshes.Length(); i < len; ++i) {
-      UnityLifetime::Destroy(pTyped->meshes[i]);
+      CesiumForUnity::CesiumObjectPool::MeshPool().Release(pTyped->meshes[i]);
     }
     delete pTyped;
   }
