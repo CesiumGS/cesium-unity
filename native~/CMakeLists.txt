@@ -13,8 +13,13 @@ if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/../Editor" CACHE PATH "Installed to the Editor directory." FORCE)
 endif()
 
+option(CESIUM_TRACING_ENABLED "Whether to enable the Cesium performance tracing framework (CESIUM_TRACE_* macros)." OFF)
 option(EDITOR "Whether to build with Editor support." ON)
 set(REINTEROP_GENERATED_DIRECTORY "generated-Editor" CACHE STRING "The subdirectory of each native library in which the Reinterop-generated code is found.")
+
+if (CESIUM_TRACING_ENABLED)
+    add_compile_definitions(CESIUM_TRACING_ENABLED=1)
+endif()
 
 # Static libraries are eventually built into shared libraries, so we need
 # position independent code.
