@@ -1,5 +1,11 @@
 # Change Log
 
+### ? - ?
+
+##### Fixes :wrench:
+
+- Added dependencies on the ShaderGraph and InputSystem packages to resolve material / script compilation errors.
+
 ### v1.0.0 - 2023-04-03
 
 ##### Additions :tada:
