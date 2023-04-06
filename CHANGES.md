@@ -1,5 +1,11 @@
 # Change Log
 
+### ? - ?
+
+##### Additions :tada:
+
+- Move generating mipmaps from the main thread to a worker thread.
+
 ### v1.0.0 - 2023-04-03
 
 ##### Additions :tada:

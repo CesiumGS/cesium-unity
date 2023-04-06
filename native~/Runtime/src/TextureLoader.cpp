@@ -38,9 +38,8 @@ TextureLoader::loadTexture(const CesiumGltf::ImageCesium& image) {
   assert(textureLength >= image.pixelData.size());
 
   if (image.mipPositions.empty()) {
-    // No mipmaps, copy the whole thing and then let Unity generate mipmaps.
     std::memcpy(pixels, image.pixelData.data(), image.pixelData.size());
-    result.Apply(true, true);
+    result.Apply(false, true);
   } else {
     // Copy the mipmaps explicitly.
     std::uint8_t* pWritePosition = pixels;
