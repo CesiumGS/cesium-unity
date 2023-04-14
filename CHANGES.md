@@ -2,6 +2,10 @@
 
 ### ? - ?
 
+##### Additions :tada:
+
+- Added support for primitives with the TRIANGLE\_STRIP topology type.
+
 ##### Fixes :wrench:
 
 - Fixed another bug where `CesiumCameraController` tried to access a non-existent input in the legacy input system.
