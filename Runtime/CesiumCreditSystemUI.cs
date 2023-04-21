@@ -372,7 +372,11 @@ namespace CesiumForUnity
 
             if (popupCredits.Count > 0)
             {
-                onScreenElement.Add(this.CreateLabelFromText(this._delimiter, false)); 
+                if (onScreenCredits.Count > 0)
+                {
+                    onScreenElement.Add(this.CreateLabelFromText(this._delimiter, false));
+                }
+
                 onScreenElement.Add(this.CreateDataAttributionElement(popupElement));
             }
         }
