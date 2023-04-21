@@ -131,6 +131,7 @@ namespace CesiumForUnity
             mesh.SetUVs(0, new NativeArray<Vector2>());
             mesh.SetIndices(new NativeArray<int>(), MeshTopology.Triangles, 0, true, 0);
             mesh.RecalculateBounds();
+            int vertexCount = mesh.vertexCount;
             int instanceID = mesh.GetInstanceID();
 
             Bounds bounds = new Bounds(new Vector3(0, 0, 0), new Vector3(1, 2, 1));
