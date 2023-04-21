@@ -75,15 +75,45 @@ using namespace DotNet;
 
 namespace {
 
-template <typename T> std::vector<T> generateIndices(const int32_t count) {
-  std::vector<T> syntheticIndexBuffer(count);
+template <typename TIndex>
+std::vector<TIndex> generateIndices(const int32_t count) {
+  std::vector<TIndex> syntheticIndexBuffer(count);
   for (int64_t i = 0; i < count; ++i) {
-    syntheticIndexBuffer[i] = static_cast<T>(i);
+    syntheticIndexBuffer[i] = static_cast<TIndex>(i);
   }
   return syntheticIndexBuffer;
 }
 
-template <typename TDest, class TIndexAccessor>
+template <typename TIndex>
+void computeFlatNormals(
+    uint8_t* pWritePos,
+    size_t stride,
+    TIndex* indices,
+    int32_t indexCount,
+    const AccessorView<UnityEngine::Vector3>& positionView) {
+
+  for (int i = 0; i < indexCount; i += 3) {
+
+    TIndex i0 = indices[i];
+    TIndex i1 = indices[i + 1];
+    TIndex i2 = indices[i + 2];
+
+    const glm::vec3& v0 =
+        *reinterpret_cast<const glm::vec3*>(&positionView[i0]);
+    const glm::vec3& v1 =
+        *reinterpret_cast<const glm::vec3*>(&positionView[i1]);
+    const glm::vec3& v2 =
+        *reinterpret_cast<const glm::vec3*>(&positionView[i2]);
+
+    glm::vec3 normal = glm::cross(v1 - v0, v2 - v0);
+    for (int j = 0; j < 3; j++) {
+      *reinterpret_cast<glm::vec3*>(pWritePos) = normal;
+      pWritePos += stride;
+    }
+  }
+}
+
+template <typename TIndex, class TIndexAccessor>
 void loadPrimitive(
     UnityEngine::MeshData meshData,
     CesiumPrimitiveInfo& primitiveInfo,
@@ -92,9 +122,9 @@ void loadPrimitive(
     const Mesh& mesh,
     const MeshPrimitive& primitive,
     const glm::dmat4& transform,
-    const AccessorView<UnityEngine::Vector3>& positionView,
     const TIndexAccessor& indicesView,
-    UnityEngine::Rendering::IndexFormat indexFormat) {
+    UnityEngine::Rendering::IndexFormat indexFormat,
+    const AccessorView<UnityEngine::Vector3>& positionView) {
 
   using namespace DotNet::UnityEngine;
   using namespace DotNet::UnityEngine::Rendering;
@@ -102,20 +132,24 @@ void loadPrimitive(
   using namespace DotNet::Unity::Collections::LowLevel::Unsafe;
 
   int32_t indexCount = 0;
-  if (primitive.mode == MeshPrimitive::Mode::TRIANGLES ||
-      primitive.mode == MeshPrimitive::Mode::POINTS) {
+  switch (primitive.mode) {
+  case MeshPrimitive::Mode::TRIANGLES:
+  case MeshPrimitive::Mode::POINTS:
     indexCount = indicesView.size();
-  } else if (primitive.mode == MeshPrimitive::Mode::TRIANGLE_STRIP) {
+    break;
+  case MeshPrimitive::Mode::TRIANGLE_STRIP:
+  case MeshPrimitive::Mode::TRIANGLE_FAN:
     indexCount = 3 * (indicesView.size() - 2);
-  } else {
+    break;
+  default:
     // TODO: add support for other primitive types.
     return;
   }
 
   meshData.SetIndexBufferParams(indexCount, indexFormat);
-  const Unity::Collections::NativeArray1<TDest>& dest =
-      meshData.GetIndexData<TDest>();
-  TDest* indices = static_cast<TDest*>(
+  const Unity::Collections::NativeArray1<TIndex>& dest =
+      meshData.GetIndexData<TIndex>();
+  TIndex* indices = static_cast<TIndex*>(
       Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
           GetUnsafeBufferPointerWithoutChecks(dest));
 
@@ -124,17 +158,24 @@ void loadPrimitive(
     for (int64_t i = 0; i < indicesView.size(); ++i) {
       indices[i] = indicesView[i];
     }
-  } else {
+  } else if (primitive.mode == MeshPrimitive::Mode::TRIANGLE_STRIP) {
     for (int64_t i = 0; i < indicesView.size() - 2; ++i) {
       if (i % 2) {
-        indices[3 * i] = static_cast<TDest>(indicesView[i]);
-        indices[3 * i + 1] = static_cast<TDest>(indicesView[i + 2]);
-        indices[3 * i + 2] = static_cast<TDest>(indicesView[i + 1]);
-      } else if (primitive.mode == MeshPrimitive::Mode::TRIANGLE_STRIP) {
-        indices[3 * i] = static_cast<TDest>(indicesView[i]);
-        indices[3 * i + 1] = static_cast<TDest>(indicesView[i + 1]);
-        indices[3 * i + 2] = static_cast<TDest>(indicesView[i + 2]);
+        indices[3 * i] = indicesView[i];
+        indices[3 * i + 1] = indicesView[i + 2];
+        indices[3 * i + 2] = indicesView[i + 1];
+      } else {
+        indices[3 * i] = indicesView[i];
+        indices[3 * i + 1] = indicesView[i + 1];
+        indices[3 * i + 2] = indicesView[i + 2];
       }
+    }
+  } else { // MeshPrimitive::Mode::TRIANGLE_STRIP
+    TIndex i0 = indicesView[0];
+    for (int64_t i = 2; i < indicesView.size(); ++i) {
+      indices[3 * i] = i0;
+      indices[3 * i + 1] = indicesView[i - 1];
+      indices[3 * i + 2] = indicesView[i];
     }
   }
 
@@ -153,18 +194,27 @@ void loadPrimitive(
   descriptor[numberOfAttributes].stream = streamIndex;
   ++numberOfAttributes;
 
-  // Add the NORMAL attribute, if it exists.
-  auto normalAccessorIt = primitive.attributes.find("NORMAL");
-  bool duplicateVertices = false;
-  AccessorView<UnityEngine::Vector3> normalView =
-      normalAccessorIt != primitive.attributes.end()
-          ? AccessorView<UnityEngine::Vector3>(gltf, normalAccessorIt->second)
-          : (duplicateVertices =
-                 true && primitive.mode != MeshPrimitive::Mode::POINTS,
-             AccessorView<UnityEngine::Vector3>());
+  const CesiumGltf::Material* pMaterial =
+      Model::getSafe(&gltf.materials, primitive.material);
 
-  assert(numberOfAttributes < MAX_ATTRIBUTES);
-  if (normalView.status() == AccessorViewStatus::Valid || duplicateVertices) {
+  primitiveInfo.isUnlit =
+      pMaterial && pMaterial->hasExtension<ExtensionKhrMaterialsUnlit>();
+
+  // Add the NORMAL attribute, if it exists.
+  bool hasNormals = false;
+  bool computeFlatNormals = false;
+  auto normalAccessorIt = primitive.attributes.find("NORMAL");
+  AccessorView<UnityEngine::Vector3> normalView;
+  if (normalAccessorIt != primitive.attributes.end()) {
+    normalView =
+        AccessorView<UnityEngine::Vector3>(gltf, normalAccessorIt->second);
+    hasNormals = normalView.status() == AccessorViewStatus::Valid;
+  } else if (
+      !primitiveInfo.isUnlit && primitive.mode != MeshPrimitive::Mode::POINTS) {
+    computeFlatNormals = hasNormals = true;
+  }
+  if (hasNormals) {
+    assert(numberOfAttributes < MAX_ATTRIBUTES);
     descriptor[numberOfAttributes].attribute = VertexAttribute::Normal;
     descriptor[numberOfAttributes].format = VertexAttributeFormat::Float32;
     descriptor[numberOfAttributes].dimension = 3;
@@ -276,7 +326,9 @@ void loadPrimitive(
     attributes.Item(i, descriptor[i]);
   }
 
-  int vertexCount = duplicateVertices ? indexCount : positionView.size();
+  int32_t vertexCount = computeFlatNormals
+                            ? indexCount
+                            : static_cast<int32_t>(positionView.size());
   meshData.SetVertexBufferParams(vertexCount, attributes);
 
   NativeArray1<uint8_t> nativeVertexBuffer =
@@ -294,50 +346,48 @@ void loadPrimitive(
   // 3. vertex colors (skip if N/A)
   // 4. texcoords (first all TEXCOORD_i, then all _CESIUMOVERLAY_i)
 
-  if (duplicateVertices) {
-    Vector3 normal;
-    for (int64_t i = 0; i < indexCount; ++i) {
-      uint32_t vertexIndex = indices[i];
+  size_t stride = sizeof(Vector3);
+  size_t normalByteOffset, colorByteOffset;
+  if (hasNormals) {
+    normalByteOffset = stride;
+    stride = sizeof(Vector3);
+  }
+  if (hasVertexColors) {
+    colorByteOffset = stride;
+    stride += sizeof(uint32_t);
+  }
+  stride += numTexCoords * sizeof(Vector2);
+
+  if (computeFlatNormals) {
+    ::computeFlatNormals(
+        pWritePos + normalByteOffset,
+        stride,
+        indices,
+        indexCount,
+        positionView);
+    for (int64_t i = 0; i < vertexCount; ++i) {
+      TIndex vertexIndex = indices[i];
       *reinterpret_cast<Vector3*>(pWritePos) = positionView[vertexIndex];
-      pWritePos += sizeof(Vector3);
-
-      if (i % 3) {
-        uint32_t i0 = vertexIndex;
-        uint32_t i1 = indices[i + 1];
-        uint32_t i2 = indices[i + 2];
-
-        const glm::vec3& v0 =
-            *reinterpret_cast<const glm::vec3*>(&positionView[vertexIndex]);
-        const glm::vec3& v1 =
-            *reinterpret_cast<const glm::vec3*>(&positionView[i + 1]);
-        const glm::vec3& v2 =
-            *reinterpret_cast<const glm::vec3*>(&positionView[i + 2]);
-
-        normal = *reinterpret_cast<Vector3*>(&glm::cross(v1 - v0, v2 - v0));
-      }
-
-      *reinterpret_cast<Vector3*>(pWritePos) = normal;
-      pWritePos += sizeof(Vector3);
-
+      // skip position and normal
+      pWritePos += 2 * sizeof(Vector3);
       // Skip the slot allocated for vertex colors, we will fill them in
       // bulk later.
       if (hasVertexColors) {
         pWritePos += sizeof(uint32_t);
       }
-
       for (uint32_t texCoordIndex = 0; texCoordIndex < numTexCoords;
            ++texCoordIndex) {
         *reinterpret_cast<Vector2*>(pWritePos) =
-            texCoordViews[texCoordIndex][i];
+            texCoordViews[texCoordIndex][vertexIndex];
         pWritePos += sizeof(Vector2);
       }
     }
   } else {
-    for (int64_t i = 0; i < positionView.size(); ++i) {
+    for (int64_t i = 0; i < vertexCount; ++i) {
       *reinterpret_cast<Vector3*>(pWritePos) = positionView[i];
       pWritePos += sizeof(Vector3);
 
-      if (normalView.status() == AccessorViewStatus::Valid) {
+      if (hasNormals) {
         *reinterpret_cast<Vector3*>(pWritePos) = normalView[i];
         pWritePos += sizeof(Vector3);
       }
@@ -360,26 +410,14 @@ void loadPrimitive(
   // Fill in vertex colors separately, if they exist.
   if (hasVertexColors) {
     // Color comes after position and normal.
-    size_t colorByteOffset = sizeof(Vector3);
-    if (normalView.status() == AccessorViewStatus::Valid || duplicateVertices) {
-      colorByteOffset += sizeof(Vector3);
-    }
-
-    // Stride includes position, normal, ...
-    size_t stride = colorByteOffset;
-    // color, ...
-    stride += sizeof(uint32_t);
-    // and tex coords.
-    stride += numTexCoords * sizeof(Vector2);
-
     createAccessorView(
         gltf,
         colorAccessorIt->second,
-        CopyVertexColors<TDest>{
+        CopyVertexColors<TIndex>{
             pBufferStart + colorByteOffset,
             stride,
             static_cast<size_t>(vertexCount),
-            duplicateVertices,
+            computeFlatNormals,
             indices});
   }
 
@@ -429,12 +467,12 @@ struct MeshDataResult {
   std::vector<CesiumPrimitiveInfo> primitiveInfos;
 };
 
-template <typename T> struct CopyVertexColors {
+template <typename TIndex> struct CopyVertexColors {
   uint8_t* pWritePos;
   size_t stride;
   size_t vertexCount;
   bool duplicateVertices;
-  T* indices;
+  TIndex* indices;
 
   struct Color32 {
     uint8_t r;
@@ -451,15 +489,28 @@ template <typename T> struct CopyVertexColors {
     }
 
     bool success = true;
-    for (size_t i = 0; success && i < vertexCount; ++i) {
-      if (i >= colorView.size()) {
-        success = false;
-      } else {
-        Color32& packedColor = *reinterpret_cast<Color32*>(pWritePos);
-        int vertexIndex = duplicateVertices ? indices[i] : i;
-        success =
-            CopyVertexColors::convertColor(colorView[vertexIndex], packedColor);
-        pWritePos += stride;
+    if (duplicateVertices) {
+      for (size_t i = 0; success && i < vertexCount; ++i) {
+        if (i >= colorView.size()) {
+          success = false;
+        } else {
+          Color32& packedColor = *reinterpret_cast<Color32*>(pWritePos);
+          TIndex vertexIndex = indices[i];
+          success = CopyVertexColors::convertColor(
+              colorView[vertexIndex],
+              packedColor);
+          pWritePos += stride;
+        }
+      }
+    } else {
+      for (size_t i = 0; success && i < vertexCount; ++i) {
+        if (i >= colorView.size()) {
+          success = false;
+        } else {
+          Color32& packedColor = *reinterpret_cast<Color32*>(pWritePos);
+          success = CopyVertexColors::convertColor(colorView[i], packedColor);
+          pWritePos += stride;
+        }
       }
     }
 
@@ -588,9 +639,9 @@ void populateMeshDataArray(
                 mesh,
                 primitive,
                 transform,
-                positionView,
                 generateIndices<std::uint32_t>(indexCount),
-                UnityEngine::Rendering::IndexFormat::UInt32);
+                UnityEngine::Rendering::IndexFormat::UInt32,
+                positionView);
           } else {
             loadPrimitive<std::uint16_t>(
                 meshData,
@@ -600,9 +651,9 @@ void populateMeshDataArray(
                 mesh,
                 primitive,
                 transform,
-                positionView,
                 generateIndices<std::uint16_t>(indexCount),
-                UnityEngine::Rendering::IndexFormat::UInt16);
+                UnityEngine::Rendering::IndexFormat::UInt16,
+                positionView);
           }
         } else {
           const Accessor& indexAccessorGltf = gltf.accessors[primitive.indices];
@@ -617,9 +668,9 @@ void populateMeshDataArray(
                 mesh,
                 primitive,
                 transform,
-                positionView,
                 indexAccessor,
-                UnityEngine::Rendering::IndexFormat::UInt16);
+                UnityEngine::Rendering::IndexFormat::UInt16,
+                positionView);
             break;
           }
           case Accessor::ComponentType::UNSIGNED_BYTE: {
@@ -632,9 +683,9 @@ void populateMeshDataArray(
                 mesh,
                 primitive,
                 transform,
-                positionView,
                 indexAccessor,
-                UnityEngine::Rendering::IndexFormat::UInt16);
+                UnityEngine::Rendering::IndexFormat::UInt16,
+                positionView);
             break;
           }
           case Accessor::ComponentType::SHORT: {
@@ -647,9 +698,9 @@ void populateMeshDataArray(
                 mesh,
                 primitive,
                 transform,
-                positionView,
                 indexAccessor,
-                UnityEngine::Rendering::IndexFormat::UInt16);
+                UnityEngine::Rendering::IndexFormat::UInt16,
+                positionView);
             break;
           }
           case Accessor::ComponentType::UNSIGNED_SHORT: {
@@ -662,9 +713,9 @@ void populateMeshDataArray(
                 mesh,
                 primitive,
                 transform,
-                positionView,
                 indexAccessor,
-                UnityEngine::Rendering::IndexFormat::UInt16);
+                UnityEngine::Rendering::IndexFormat::UInt16,
+                positionView);
             break;
           }
           case Accessor::ComponentType::UNSIGNED_INT: {
@@ -677,9 +728,9 @@ void populateMeshDataArray(
                 mesh,
                 primitive,
                 transform,
-                positionView,
                 indexAccessor,
-                UnityEngine::Rendering::IndexFormat::UInt32);
+                UnityEngine::Rendering::IndexFormat::UInt32,
+                positionView);
             break;
           }
           default:
@@ -965,8 +1016,9 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         }
 
         int64_t primitiveIndex = &mesh.primitives[0] - &primitive;
-        UnityEngine::GameObject primitiveGameObject(
-            System::String("Primitive " + std::to_string(primitiveIndex)));
+        UnityEngine::GameObject primitiveGameObject(System::String(
+            "Mesh " + std::to_string(meshIndex) + " Primitive " +
+            std::to_string(primitiveIndex)));
         if (showTilesInHierarchy) {
           primitiveGameObject.hideFlags(UnityEngine::HideFlags::DontSave);
         } else {
@@ -1001,8 +1053,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             tilesetComponent.opaqueMaterial();
 
         if (opaqueMaterial == nullptr) {
-          if (pMaterial &&
-              pMaterial->hasExtension<ExtensionKhrMaterialsUnlit>()) {
+          if (primitiveInfo.isUnlit) {
             opaqueMaterial =
                 UnityEngine::Resources::Load<UnityEngine::Material>(
                     System::String("CesiumUnlitTilesetMaterial"));

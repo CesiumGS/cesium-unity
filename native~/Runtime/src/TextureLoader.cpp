@@ -2,6 +2,7 @@
 
 #include <CesiumGltf/Model.h>
 #include <CesiumGltf/Sampler.h>
+#include <CesiumUtility/Tracing.h>
 
 #include <DotNet/Unity/Collections/LowLevel/Unsafe/NativeArrayUnsafeUtility.h>
 #include <DotNet/Unity/Collections/NativeArray1.h>
@@ -20,6 +21,7 @@ namespace CesiumForUnityNative {
 
 UnityEngine::Texture
 TextureLoader::loadTexture(const CesiumGltf::ImageCesium& image) {
+  CESIUM_TRACE("TextureLoader::loadTexture");
   UnityEngine::Texture2D result(
       image.width,
       image.height,
