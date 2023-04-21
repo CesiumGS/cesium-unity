@@ -1064,7 +1064,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         }
 
         if (createPhysicsMeshes) {
-          if (!primitiveInfo.containsPoints && unityMesh.vertexCount() > 3) {
+          if (!primitiveInfo.containsPoints && unityMesh.vertexCount() >= 3) {
             // This should not trigger mesh baking for physics, because the
             // meshes were already baked in the worker thread.
             UnityEngine::MeshCollider meshCollider =
