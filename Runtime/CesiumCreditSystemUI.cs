@@ -342,12 +342,16 @@ namespace CesiumForUnity
             {
                 CesiumCredit credit = onScreenCredits[i];
                 List<VisualElement> visualElements = this.ConvertCreditToVisualElements(credit, removeExtraSpace);
+
+                if (i > 0)
+                {
+                    onScreenElement.Add(this.CreateLabelFromText(this._delimiter, false));
+                }
+
                 for (int j = 0, elementCount = visualElements.Count; j < elementCount; j++)
                 {
                     onScreenElement.Add(visualElements[j]);
                 }
-
-                onScreenElement.Add(this.CreateLabelFromText(this._delimiter, false));
             }
 
             for (int i = 0, creditCount = popupCredits.Count; i < creditCount; i++)
@@ -368,6 +372,11 @@ namespace CesiumForUnity
 
             if (popupCredits.Count > 0)
             {
+                if (onScreenCredits.Count > 0)
+                {
+                    onScreenElement.Add(this.CreateLabelFromText(this._delimiter, false));
+                }
+
                 onScreenElement.Add(this.CreateDataAttributionElement(popupElement));
             }
         }

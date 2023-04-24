@@ -76,19 +76,46 @@ using namespace DotNet;
 
 namespace {
 
-template <typename TDest, typename TSource>
-void setIndices(
-    const Unity::Collections::NativeArray1<TDest>& dest,
-    const AccessorView<TSource>& source) {
-  assert(dest.Length() == source.size());
-
-  TDest* indices = static_cast<TDest*>(
-      Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
-          GetUnsafeBufferPointerWithoutChecks(dest));
-
-  for (int64_t i = 0; i < source.size(); ++i) {
-    indices[i] = source[i];
+template <typename TDest, class TIndexAccessor>
+int32_t setIndices(
+    UnityEngine::MeshData meshData,
+    const TIndexAccessor& indicesView,
+    int32_t primitiveMode,
+    UnityEngine::Rendering::IndexFormat indexFormat) {
+  int32_t indexCount = 0;
+  if (primitiveMode == MeshPrimitive::Mode::TRIANGLES ||
+      primitiveMode == MeshPrimitive::Mode::POINTS) {
+    indexCount = indicesView.size();
+    meshData.SetIndexBufferParams(indexCount, indexFormat);
+    const Unity::Collections::NativeArray1<TDest>& dest =
+        meshData.GetIndexData<TDest>();
+    TDest* indices = static_cast<TDest*>(
+        Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
+            GetUnsafeBufferPointerWithoutChecks(dest));
+    for (int64_t i = 0; i < indicesView.size(); ++i) {
+      indices[i] = indicesView[i];
+    }
+  } else if (primitiveMode == MeshPrimitive::Mode::TRIANGLE_STRIP) {
+    indexCount = 3 * (indicesView.size() - 2);
+    meshData.SetIndexBufferParams(indexCount, indexFormat);
+    const Unity::Collections::NativeArray1<TDest>& dest =
+        meshData.GetIndexData<TDest>();
+    TDest* indices = static_cast<TDest*>(
+        Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
+            GetUnsafeBufferPointerWithoutChecks(dest));
+    for (int64_t i = 0; i < indicesView.size() - 2; ++i) {
+      if (i % 2) {
+        indices[3 * i] = static_cast<TDest>(indicesView[i]);
+        indices[3 * i + 1] = static_cast<TDest>(indicesView[i + 2]);
+        indices[3 * i + 2] = static_cast<TDest>(indicesView[i + 1]);
+      } else {
+        indices[3 * i] = static_cast<TDest>(indicesView[i]);
+        indices[3 * i + 1] = static_cast<TDest>(indicesView[i + 1]);
+        indices[3 * i + 2] = static_cast<TDest>(indicesView[i + 2]);
+      }
+    }
   }
+  return indexCount;
 }
 
 template <typename T>
@@ -294,6 +321,13 @@ void populateMeshDataArray(
         using namespace DotNet::UnityEngine::Rendering;
         using namespace DotNet::Unity::Collections;
         using namespace DotNet::Unity::Collections::LowLevel::Unsafe;
+
+        if (primitive.mode != MeshPrimitive::Mode::TRIANGLES &&
+            primitive.mode != MeshPrimitive::Mode::TRIANGLE_STRIP &&
+            primitive.mode != MeshPrimitive::Mode::POINTS) {
+          // TODO: add support for other primitive types.
+          return;
+        }
 
         // Max attribute count supported by Unity, see VertexAttribute.
         const int MAX_ATTRIBUTES = 14;
@@ -520,25 +554,43 @@ void populateMeshDataArray(
         int32_t indexCount = 0;
 
         if (primitive.indices >= 0) {
-          AccessorView<uint8_t> indices8(gltf, primitive.indices);
-          if (indices8.status() == AccessorViewStatus::Valid) {
-            indexCount = indices8.size();
-            meshData.SetIndexBufferParams(indexCount, IndexFormat::UInt16);
-            setIndices(meshData.GetIndexData<std::uint16_t>(), indices8);
-          }
-
-          AccessorView<uint16_t> indices16(gltf, primitive.indices);
-          if (indices16.status() == AccessorViewStatus::Valid) {
-            indexCount = indices16.size();
-            meshData.SetIndexBufferParams(indexCount, IndexFormat::UInt16);
-            setIndices(meshData.GetIndexData<std::uint16_t>(), indices16);
-          }
-
-          AccessorView<uint32_t> indices32(gltf, primitive.indices);
-          if (indices32.status() == AccessorViewStatus::Valid) {
-            indexCount = indices32.size();
-            meshData.SetIndexBufferParams(indexCount, IndexFormat::UInt32);
-            setIndices(meshData.GetIndexData<std::uint32_t>(), indices32);
+          const Accessor& indexAccessorGltf = gltf.accessors[primitive.indices];
+          switch (indexAccessorGltf.componentType) {
+          case Accessor::ComponentType::BYTE:
+            indexCount = setIndices<std::uint16_t>(
+                meshData,
+                AccessorView<int8_t>(gltf, primitive.indices),
+                primitive.mode,
+                IndexFormat::UInt16);
+            break;
+          case Accessor::ComponentType::UNSIGNED_BYTE:
+            indexCount = setIndices<std::uint16_t>(
+                meshData,
+                AccessorView<uint8_t>(gltf, primitive.indices),
+                primitive.mode,
+                IndexFormat::UInt16);
+            break;
+          case Accessor::ComponentType::SHORT:
+            indexCount = setIndices<std::uint16_t>(
+                meshData,
+                AccessorView<int16_t>(gltf, primitive.indices),
+                primitive.mode,
+                IndexFormat::UInt16);
+            break;
+          case Accessor::ComponentType::UNSIGNED_SHORT:
+            indexCount = setIndices<std::uint16_t>(
+                meshData,
+                AccessorView<uint16_t>(gltf, primitive.indices),
+                primitive.mode,
+                IndexFormat::UInt16);
+            break;
+          case Accessor::ComponentType::UNSIGNED_INT:
+            indexCount = setIndices<std::uint32_t>(
+                meshData,
+                AccessorView<uint32_t>(gltf, primitive.indices),
+                primitive.mode,
+                IndexFormat::UInt32);
+            break;
           }
         } else {
           // Generate indices for primitives without them.
