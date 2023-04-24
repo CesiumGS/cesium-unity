@@ -105,7 +105,7 @@ void computeFlatNormals(
     const glm::vec3& v2 =
         *reinterpret_cast<const glm::vec3*>(&positionView[i2]);
 
-    glm::vec3 normal = glm::cross(v1 - v0, v2 - v0);
+    glm::vec3 normal = glm::normalize(glm::cross(v1 - v0, v2 - v0));
     for (int j = 0; j < 3; j++) {
       *reinterpret_cast<glm::vec3*>(pWritePos) = normal;
       pWritePos += stride;
@@ -125,12 +125,12 @@ void loadPrimitive(
     const TIndexAccessor& indicesView,
     UnityEngine::Rendering::IndexFormat indexFormat,
     const AccessorView<UnityEngine::Vector3>& positionView) {
-
   using namespace DotNet::UnityEngine;
   using namespace DotNet::UnityEngine::Rendering;
   using namespace DotNet::Unity::Collections;
   using namespace DotNet::Unity::Collections::LowLevel::Unsafe;
 
+  CESIUM_TRACE("Cesium::loadPrimitive<T>");
   int32_t indexCount = 0;
   switch (primitive.mode) {
   case MeshPrimitive::Mode::TRIANGLES:
@@ -143,6 +143,10 @@ void loadPrimitive(
     break;
   default:
     // TODO: add support for other primitive types.
+    return;
+  }
+
+  if (indexCount < 3 && primitive.mode != MeshPrimitive::Mode::POINTS) {
     return;
   }
 
@@ -350,7 +354,7 @@ void loadPrimitive(
   size_t normalByteOffset, colorByteOffset;
   if (hasNormals) {
     normalByteOffset = stride;
-    stride = sizeof(Vector3);
+    stride += sizeof(Vector3);
   }
   if (hasVertexColors) {
     colorByteOffset = stride;
@@ -419,6 +423,13 @@ void loadPrimitive(
             static_cast<size_t>(vertexCount),
             computeFlatNormals,
             indices});
+  }
+
+  if (computeFlatNormals) {
+    // rewrite indices
+    for (TIndex i = 0; i < indexCount; i++) {
+      indices[i] = i;
+    }
   }
 
   meshData.subMeshCount(1);
@@ -908,6 +919,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
     return nullptr;
   }
 
+  CESIUM_TRACE("Cesium::LoadModel");
   const Model& model = pRenderContent->getModel();
 
   std::string name = "glTF";
@@ -1017,7 +1029,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
         int64_t primitiveIndex = &mesh.primitives[0] - &primitive;
         UnityEngine::GameObject primitiveGameObject(System::String(
-            "Mesh " + std::to_string(meshIndex) + " Primitive " +
+            "Mesh " + std::to_string(meshIndex - 1) + " Primitive " +
             std::to_string(primitiveIndex)));
         if (showTilesInHierarchy) {
           primitiveGameObject.hideFlags(UnityEngine::HideFlags::DontSave);
@@ -1071,6 +1083,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
         bool isTranslucent = primitiveInfo.isTranslucent;
         if (pMaterial) {
+          CESIUM_TRACE("Cesium::CreateMaterials");
           if (pMaterial->pbrMetallicRoughness) {
             // Add base color factor and metallic-roughness factor regardless
             // of if the textures are present.
