@@ -80,13 +80,12 @@ class UnityAssetRequest : public IAssetRequest {
 public:
   UnityAssetRequest(
       const DotNet::UnityEngine::Networking::UnityWebRequest& request,
+      const HttpHeaders& headers,
       const DotNet::CesiumForUnity::NativeDownloadHandler& handler)
       : _method(request.method().ToStlString()),
         _url(request.url().ToStlString()),
-        _headers(),
-        _response(request, handler) {
-    // TODO: get request headers
-  }
+        _headers(headers),
+        _response(request, handler) {}
 
   virtual const std::string& method() const override { return _method; }
 
@@ -154,13 +153,11 @@ UnityAssetAccessor::get(
     DotNet::CesiumForUnity::NativeDownloadHandler handler{};
     request.downloadHandler(handler);
 
+    HttpHeaders requestHeaders = cesiumRequestHeaders;
     for (const auto& header : headers) {
-      request.SetRequestHeader(
-          System::String(header.first),
-          System::String(header.second));
+      requestHeaders.insert(header);
     }
-
-    for (const auto& header : cesiumRequestHeaders) {
+    for (const auto& header : requestHeaders) {
       request.SetRequestHeader(
           System::String(header.first),
           System::String(header.second));
@@ -175,14 +172,17 @@ UnityAssetAccessor::get(
     UnityEngine::Networking::UnityWebRequestAsyncOperation op =
         request.SendWebRequest();
     op.add_completed(System::Action1<UnityEngine::AsyncOperation>(
-        [request, promise = std::move(promise), handler = std::move(handler)](
+        [request,
+         headers = std::move(requestHeaders),
+         promise = std::move(promise),
+         handler = std::move(handler)](
             const UnityEngine::AsyncOperation& operation) mutable {
           ScopeGuard disposeHandler{[&handler]() { handler.Dispose(); }};
           if (request.isDone() &&
               request.result() !=
                   UnityEngine::Networking::Result::ConnectionError) {
             promise.resolve(
-                std::make_shared<UnityAssetRequest>(request, handler));
+                std::make_shared<UnityAssetRequest>(request, headers, handler));
           } else {
             promise.reject(std::runtime_error(
                 "Request failed: " + request.error().ToStlString()));
@@ -234,13 +234,12 @@ UnityAssetAccessor::request(
         downloadHandler,
         uploadHandler);
 
+    HttpHeaders requestHeaders = cesiumRequestHeaders;
     for (const auto& header : headers) {
-      request.SetRequestHeader(
-          System::String(header.first),
-          System::String(header.second));
+      requestHeaders.insert(header);
     }
 
-    for (const auto& header : cesiumRequestHeaders) {
+    for (const auto& header : requestHeaders) {
       request.SetRequestHeader(
           System::String(header.first),
           System::String(header.second));
@@ -256,6 +255,7 @@ UnityAssetAccessor::request(
         request.SendWebRequest();
     op.add_completed(System::Action1<UnityEngine::AsyncOperation>(
         [request,
+         headers = std::move(requestHeaders),
          promise = std::move(promise),
          handler = std::move(downloadHandler)](
             const UnityEngine::AsyncOperation& operation) mutable {
@@ -264,7 +264,7 @@ UnityAssetAccessor::request(
               request.result() !=
                   UnityEngine::Networking::Result::ConnectionError) {
             promise.resolve(
-                std::make_shared<UnityAssetRequest>(request, handler));
+                std::make_shared<UnityAssetRequest>(request, headers, handler));
           } else {
             promise.reject(std::runtime_error(
                 "Request failed: " + request.error().ToStlString()));

@@ -2,6 +2,10 @@
 
 ### ? - ?
 
+##### Additions :tada:
+
+- Added support for primitives with the TRIANGLE\_STRIP topology type.
+
 ##### Fixes :wrench:
 
 - Added dependencies on the ShaderGraph and InputSystem packages to resolve material / script compilation errors.
