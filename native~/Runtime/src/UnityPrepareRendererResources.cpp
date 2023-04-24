@@ -282,10 +282,10 @@ void generateMipMapsForPrimitive(
       generateMipMaps(
           pModel,
           pMaterial->pbrMetallicRoughness->baseColorTexture);
+      generateMipMaps(
+          pModel,
+          pMaterial->pbrMetallicRoughness->metallicRoughnessTexture);
     }
-    generateMipMaps(
-        pModel,
-        pMaterial->pbrMetallicRoughness->metallicRoughnessTexture);
     generateMipMaps(pModel, pMaterial->normalTexture);
     generateMipMaps(pModel, pMaterial->occlusionTexture);
     generateMipMaps(pModel, pMaterial->emissiveTexture);

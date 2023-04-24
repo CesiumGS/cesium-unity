@@ -38,6 +38,8 @@ TextureLoader::loadTexture(const CesiumGltf::ImageCesium& image) {
   assert(textureLength >= image.pixelData.size());
 
   if (image.mipPositions.empty()) {
+    // No mipmaps, copy the whole thing and then let Unity generate mipmaps on a
+    // worker thread.
     std::memcpy(pixels, image.pixelData.data(), image.pixelData.size());
     result.Apply(false, true);
   } else {
