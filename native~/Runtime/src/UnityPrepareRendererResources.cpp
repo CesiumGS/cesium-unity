@@ -634,8 +634,6 @@ int32_t countPrimitives(const CesiumGltf::Model& model) {
   return numberOfPrimitives;
 }
 
-
-
 void populateMeshDataArray(
     MeshDataResult& meshDataResult,
     TileLoadResult& tileLoadResult) {
