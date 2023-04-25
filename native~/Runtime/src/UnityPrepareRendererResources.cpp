@@ -13,6 +13,7 @@
 #include <CesiumGltf/ExtensionKhrMaterialsUnlit.h>
 #include <CesiumGltf/ExtensionMeshPrimitiveExtFeatureMetadata.h>
 #include <CesiumGltf/ExtensionModelExtFeatureMetadata.h>
+#include <CesiumGltfReader/GltfReader.h>
 #include <CesiumShaderProperties.h>
 #include <CesiumUtility/ScopeGuard.h>
 
@@ -257,10 +258,44 @@ bool validateVertexColors(
   return true;
 }
 
+void generateMipMaps(
+    Model* pModel,
+    const std::optional<TextureInfo>& textureInfo) {
+  if (textureInfo) {
+    Texture* pTexture = Model::getSafe(&pModel->textures, textureInfo->index);
+    if (pTexture) {
+      Image* pImage = Model::getSafe(&pModel->images, pTexture->source);
+      if (pImage) {
+        CesiumGltfReader::GltfReader::generateMipMaps(pImage->cesium);
+      }
+    }
+  }
+}
+
+void generateMipMapsForPrimitive(
+    Model* pModel,
+    const MeshPrimitive& primitive) {
+  const Material* pMaterial =
+      Model::getSafe(&pModel->materials, primitive.material);
+  if (pMaterial) {
+    if (pMaterial->pbrMetallicRoughness) {
+      generateMipMaps(
+          pModel,
+          pMaterial->pbrMetallicRoughness->baseColorTexture);
+      generateMipMaps(
+          pModel,
+          pMaterial->pbrMetallicRoughness->metallicRoughnessTexture);
+    }
+    generateMipMaps(pModel, pMaterial->normalTexture);
+    generateMipMaps(pModel, pMaterial->occlusionTexture);
+    generateMipMaps(pModel, pMaterial->emissiveTexture);
+  }
+}
+
 void populateMeshDataArray(
     MeshDataResult& meshDataResult,
-    const TileLoadResult& tileLoadResult) {
-  const CesiumGltf::Model* pModel =
+    TileLoadResult& tileLoadResult) {
+  CesiumGltf::Model* pModel =
       std::get_if<CesiumGltf::Model>(&tileLoadResult.contentKind);
   if (!pModel)
     return;
@@ -271,7 +306,7 @@ void populateMeshDataArray(
 
   pModel->forEachPrimitiveInScene(
       -1,
-      [&meshDataResult, &meshDataInstance](
+      [&meshDataResult, &meshDataInstance, pModel](
           const Model& gltf,
           const Node& node,
           const Mesh& mesh,
@@ -569,6 +604,8 @@ void populateMeshDataArray(
             generateIndices(meshData.GetIndexData<std::uint16_t>(), indexCount);
           }
         }
+
+        generateMipMapsForPrimitive(pModel, primitive);
 
         meshData.subMeshCount(1);
 
@@ -1218,6 +1255,7 @@ void UnityPrepareRendererResources::free(
 void* UnityPrepareRendererResources::prepareRasterInLoadThread(
     CesiumGltf::ImageCesium& image,
     const std::any& rendererOptions) {
+  CesiumGltfReader::GltfReader::generateMipMaps(image);
   return nullptr;
 }
 

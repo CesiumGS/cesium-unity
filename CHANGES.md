@@ -4,7 +4,8 @@
 
 ##### Additions :tada:
 
-- Added support for primitives with the TRIANGLE\_STRIP topology type.
+- Moved mipmap generation from the main thread to a worker thread.
+- Added support for primitives with the `TRIANGLE_STRIP` topology type.
 
 ##### Fixes :wrench:
 
