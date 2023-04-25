@@ -113,6 +113,135 @@ void computeFlatNormals(
   }
 }
 
+/**
+ * @brief The result after populating Unity mesh data with loaded glTF content.
+ */
+struct MeshDataResult {
+  UnityEngine::MeshDataArray meshDataArray;
+  std::vector<CesiumPrimitiveInfo> primitiveInfos;
+};
+
+template <typename TIndex> struct CopyVertexColors {
+  uint8_t* pWritePos;
+  size_t stride;
+  size_t vertexCount;
+  bool duplicateVertices;
+  TIndex* indices;
+
+  struct Color32 {
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+    uint8_t a;
+  };
+
+  bool operator()(AccessorView<nullptr_t>&& invalidView) { return false; }
+
+  template <typename TColorView> bool operator()(TColorView&& colorView) {
+    if (colorView.status() != AccessorViewStatus::Valid) {
+      return false;
+    }
+
+    bool success = true;
+    if (duplicateVertices) {
+      for (size_t i = 0; success && i < vertexCount; ++i) {
+        if (i >= colorView.size()) {
+          success = false;
+        } else {
+          Color32& packedColor = *reinterpret_cast<Color32*>(pWritePos);
+          TIndex vertexIndex = indices[i];
+          success = CopyVertexColors::convertColor(
+              colorView[vertexIndex],
+              packedColor);
+          pWritePos += stride;
+        }
+      }
+    } else {
+      for (size_t i = 0; success && i < vertexCount; ++i) {
+        if (i >= colorView.size()) {
+          success = false;
+        } else {
+          Color32& packedColor = *reinterpret_cast<Color32*>(pWritePos);
+          success = CopyVertexColors::convertColor(colorView[i], packedColor);
+          pWritePos += stride;
+        }
+      }
+    }
+
+    return success;
+  }
+
+  bool packColorChannel(uint8_t c, uint8_t& result) {
+    result = c;
+    return true;
+  }
+
+  bool packColorChannel(uint16_t c, uint8_t& result) {
+    result = static_cast<uint8_t>(c >> 8);
+    return true;
+  }
+
+  bool packColorChannel(float c, uint8_t& result) {
+    result = static_cast<uint8_t>(static_cast<uint32_t>(255.0f * c) & 255);
+    return true;
+  }
+
+  template <typename T> bool packColorChannel(T c, uint8_t& result) {
+    // Invalid accessor type.
+    return false;
+  }
+
+  template <typename TChannel>
+  bool
+  convertColor(const AccessorTypes::VEC3<TChannel>& color, Color32& result) {
+    result.a = 255;
+    return packColorChannel(color.value[0], result.r) &&
+           packColorChannel(color.value[1], result.g) &&
+           packColorChannel(color.value[2], result.b);
+  }
+
+  template <typename TChannel>
+  bool
+  convertColor(const AccessorTypes::VEC4<TChannel>& color, Color32& result) {
+    return packColorChannel(color.value[0], result.r) &&
+           packColorChannel(color.value[1], result.g) &&
+           packColorChannel(color.value[2], result.b) &&
+           packColorChannel(color.value[3], result.a);
+  }
+
+  template <typename T> bool convertColor(T color, Color32& result) {
+    // Not an accessor.
+    return false;
+  }
+};
+
+bool validateVertexColors(
+    const Model& model,
+    uint32_t accessorId,
+    size_t vertexCount) {
+  if (accessorId >= model.accessors.size()) {
+    return false;
+  }
+
+  const Accessor& colorAccessor = model.accessors[accessorId];
+  if (colorAccessor.type != Accessor::Type::VEC3 &&
+      colorAccessor.type != Accessor::Type::VEC4) {
+    return false;
+  }
+
+  if (colorAccessor.componentType != Accessor::ComponentType::UNSIGNED_BYTE &&
+      colorAccessor.componentType != Accessor::ComponentType::UNSIGNED_SHORT &&
+      colorAccessor.componentType != Accessor::ComponentType::FLOAT) {
+    return false;
+  }
+
+  if (colorAccessor.count < vertexCount) {
+    return false;
+  }
+
+  return true;
+}
+
 template <typename TIndex, class TIndexAccessor>
 void loadPrimitive(
     UnityEngine::MeshData meshData,
@@ -135,11 +264,11 @@ void loadPrimitive(
   switch (primitive.mode) {
   case MeshPrimitive::Mode::TRIANGLES:
   case MeshPrimitive::Mode::POINTS:
-    indexCount = indicesView.size();
+    indexCount = static_cast<int32_t>(indicesView.size());
     break;
   case MeshPrimitive::Mode::TRIANGLE_STRIP:
   case MeshPrimitive::Mode::TRIANGLE_FAN:
-    indexCount = 3 * (indicesView.size() - 2);
+    indexCount = static_cast<int32_t>(3 * (indicesView.size() - 2));
     break;
   default:
     // TODO: add support for other primitive types.
@@ -470,135 +599,6 @@ int32_t countPrimitives(const CesiumGltf::Model& model) {
   return numberOfPrimitives;
 }
 
-/**
- * @brief The result after populating Unity mesh data with loaded glTF content.
- */
-struct MeshDataResult {
-  UnityEngine::MeshDataArray meshDataArray;
-  std::vector<CesiumPrimitiveInfo> primitiveInfos;
-};
-
-template <typename TIndex> struct CopyVertexColors {
-  uint8_t* pWritePos;
-  size_t stride;
-  size_t vertexCount;
-  bool duplicateVertices;
-  TIndex* indices;
-
-  struct Color32 {
-    uint8_t r;
-    uint8_t g;
-    uint8_t b;
-    uint8_t a;
-  };
-
-  bool operator()(AccessorView<nullptr_t>&& invalidView) { return false; }
-
-  template <typename TColorView> bool operator()(TColorView&& colorView) {
-    if (colorView.status() != AccessorViewStatus::Valid) {
-      return false;
-    }
-
-    bool success = true;
-    if (duplicateVertices) {
-      for (size_t i = 0; success && i < vertexCount; ++i) {
-        if (i >= colorView.size()) {
-          success = false;
-        } else {
-          Color32& packedColor = *reinterpret_cast<Color32*>(pWritePos);
-          TIndex vertexIndex = indices[i];
-          success = CopyVertexColors::convertColor(
-              colorView[vertexIndex],
-              packedColor);
-          pWritePos += stride;
-        }
-      }
-    } else {
-      for (size_t i = 0; success && i < vertexCount; ++i) {
-        if (i >= colorView.size()) {
-          success = false;
-        } else {
-          Color32& packedColor = *reinterpret_cast<Color32*>(pWritePos);
-          success = CopyVertexColors::convertColor(colorView[i], packedColor);
-          pWritePos += stride;
-        }
-      }
-    }
-
-    return success;
-  }
-
-  bool packColorChannel(uint8_t c, uint8_t& result) {
-    result = c;
-    return true;
-  }
-
-  bool packColorChannel(uint16_t c, uint8_t& result) {
-    result = static_cast<uint8_t>(c >> 8);
-    return true;
-  }
-
-  bool packColorChannel(float c, uint8_t& result) {
-    result = static_cast<uint8_t>(static_cast<uint32_t>(255.0f * c) & 255);
-    return true;
-  }
-
-  template <typename T> bool packColorChannel(T c, uint8_t& result) {
-    // Invalid accessor type.
-    return false;
-  }
-
-  template <typename TChannel>
-  bool
-  convertColor(const AccessorTypes::VEC3<TChannel>& color, Color32& result) {
-    result.a = 255;
-    return packColorChannel(color.value[0], result.r) &&
-           packColorChannel(color.value[1], result.g) &&
-           packColorChannel(color.value[2], result.b);
-  }
-
-  template <typename TChannel>
-  bool
-  convertColor(const AccessorTypes::VEC4<TChannel>& color, Color32& result) {
-    return packColorChannel(color.value[0], result.r) &&
-           packColorChannel(color.value[1], result.g) &&
-           packColorChannel(color.value[2], result.b) &&
-           packColorChannel(color.value[3], result.a);
-  }
-
-  template <typename T> bool convertColor(T color, Color32& result) {
-    // Not an accessor.
-    return false;
-  }
-};
-
-bool validateVertexColors(
-    const Model& model,
-    uint32_t accessorId,
-    size_t vertexCount) {
-  if (accessorId >= model.accessors.size()) {
-    return false;
-  }
-
-  const Accessor& colorAccessor = model.accessors[accessorId];
-  if (colorAccessor.type != Accessor::Type::VEC3 &&
-      colorAccessor.type != Accessor::Type::VEC4) {
-    return false;
-  }
-
-  if (colorAccessor.componentType != Accessor::ComponentType::UNSIGNED_BYTE &&
-      colorAccessor.componentType != Accessor::ComponentType::UNSIGNED_SHORT &&
-      colorAccessor.componentType != Accessor::ComponentType::FLOAT) {
-    return false;
-  }
-
-  if (colorAccessor.count < vertexCount) {
-    return false;
-  }
-
-  return true;
-}
-
 void populateMeshDataArray(
     MeshDataResult& meshDataResult,
     const TileLoadResult& tileLoadResult) {
@@ -607,7 +607,7 @@ void populateMeshDataArray(
   if (!pModel)
     return;
 
-  size_t meshDataInstance = 0;
+  int32_t meshDataInstance = 0;
 
   meshDataResult.primitiveInfos.reserve(countPrimitives(*pModel));
 
@@ -640,7 +640,7 @@ void populateMeshDataArray(
         }
         if (primitive.indices < 0 ||
             primitive.indices >= gltf.accessors.size()) {
-          int32_t indexCount = positionView.size();
+          int32_t indexCount = static_cast<int32_t>(positionView.size());
           if (indexCount > std::numeric_limits<std::uint16_t>::max()) {
             loadPrimitive<std::uint32_t>(
                 meshData,
@@ -970,7 +970,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
   const bool createPhysicsMeshes = tilesetComponent.createPhysicsMeshes();
   const bool showTilesInHierarchy = tilesetComponent.showTilesInHierarchy();
 
-  size_t meshIndex = 0;
+  int32_t meshIndex = 0;
 
   DotNet::CesiumForUnity::CesiumMetadata pMetadataComponent = nullptr;
   if (model.getExtension<ExtensionModelExtFeatureMetadata>()) {
