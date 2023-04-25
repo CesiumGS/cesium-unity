@@ -4,7 +4,8 @@
 
 ##### Additions :tada:
 
-- Added support for primitives with the TRIANGLE\_STRIP topology type.
+- Added support for primitives with the `TRIANGLE_STRIP` and `TRIANGLE_FAN` topology types.
+- Missing normals are now generated as "flat" normals by default, as required by the glTF specification. An option on `Cesium3DTileset` allows the user to request smooth normals instead, which will improve performance for most meshes by reducing geometry duplication.
 
 ##### Fixes :wrench:
 
