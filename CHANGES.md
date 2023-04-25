@@ -6,6 +6,7 @@
 
 - Added support for primitives with the `TRIANGLE_STRIP` and `TRIANGLE_FAN` topology types.
 - Missing normals are now generated as "flat" normals by default, as required by the glTF specification. An option on `Cesium3DTileset` allows the user to request smooth normals instead, which will improve performance for most meshes by reducing geometry duplication.
+- Moved mipmap generation from the main thread to a worker thread.
 
 ##### Fixes :wrench:
 
