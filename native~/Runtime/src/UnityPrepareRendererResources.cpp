@@ -303,7 +303,7 @@ void loadPrimitive(
         indices[3 * i + 2] = indicesView[i + 2];
       }
     }
-  } else { // MeshPrimitive::Mode::TRIANGLE_STRIP
+  } else { // MeshPrimitive::Mode::TRIANGLE_FAN
     TIndex i0 = indicesView[0];
     for (int64_t i = 2; i < indicesView.size(); ++i) {
       indices[3 * i] = i0;
