@@ -40,8 +40,21 @@ int64_t getVertexIndexFromTriangleIndex(
     break;
   }
 
+  int64_t index;
+  switch (pPrimitive->mode) {
+  case CesiumGltf::MeshPrimitive::Mode::TRIANGLE_STRIP:
+    index = triangleIndex;
+    break;
+  case CesiumGltf::MeshPrimitive::Mode::TRIANGLE_FAN:
+    index = triangleIndex + 1;
+    break;
+  case CesiumGltf::MeshPrimitive::Mode::TRIANGLES:
+  default:
+    index = triangleIndex * 3;
+  }
+
   return std::visit(
-      [index = triangleIndex * 3](auto&& value) {
+      [index](auto&& value) {
         if (index >= 0 && index < value.size()) {
           return static_cast<int64_t>(value[index].value[0]);
         } else {

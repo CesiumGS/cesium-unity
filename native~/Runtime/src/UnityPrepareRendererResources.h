@@ -25,6 +25,12 @@ struct CesiumPrimitiveInfo {
   bool isTranslucent = false;
 
   /**
+   * @brief Whether or not the primitive material has the KHR_materials_unlit
+   * extension.
+   */
+  bool isUnlit = false;
+
+  /**
    * @brief Maps a texture coordinate index i (TEXCOORD_<i>) to the
    * corresponding Unity texture coordinate index.
    */

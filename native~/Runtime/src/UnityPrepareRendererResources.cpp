@@ -76,74 +76,42 @@ using namespace DotNet;
 
 namespace {
 
-template <typename TDest, class TIndexAccessor>
-int32_t setIndices(
-    UnityEngine::MeshData meshData,
-    const TIndexAccessor& indicesView,
-    int32_t primitiveMode,
-    UnityEngine::Rendering::IndexFormat indexFormat) {
-  int32_t indexCount = 0;
-  if (primitiveMode == MeshPrimitive::Mode::TRIANGLES ||
-      primitiveMode == MeshPrimitive::Mode::POINTS) {
-    indexCount = indicesView.size();
-    meshData.SetIndexBufferParams(indexCount, indexFormat);
-    const Unity::Collections::NativeArray1<TDest>& dest =
-        meshData.GetIndexData<TDest>();
-    TDest* indices = static_cast<TDest*>(
-        Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
-            GetUnsafeBufferPointerWithoutChecks(dest));
-    for (int64_t i = 0; i < indicesView.size(); ++i) {
-      indices[i] = indicesView[i];
-    }
-  } else if (primitiveMode == MeshPrimitive::Mode::TRIANGLE_STRIP) {
-    indexCount = 3 * (indicesView.size() - 2);
-    meshData.SetIndexBufferParams(indexCount, indexFormat);
-    const Unity::Collections::NativeArray1<TDest>& dest =
-        meshData.GetIndexData<TDest>();
-    TDest* indices = static_cast<TDest*>(
-        Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
-            GetUnsafeBufferPointerWithoutChecks(dest));
-    for (int64_t i = 0; i < indicesView.size() - 2; ++i) {
-      if (i % 2) {
-        indices[3 * i] = static_cast<TDest>(indicesView[i]);
-        indices[3 * i + 1] = static_cast<TDest>(indicesView[i + 2]);
-        indices[3 * i + 2] = static_cast<TDest>(indicesView[i + 1]);
-      } else {
-        indices[3 * i] = static_cast<TDest>(indicesView[i]);
-        indices[3 * i + 1] = static_cast<TDest>(indicesView[i + 1]);
-        indices[3 * i + 2] = static_cast<TDest>(indicesView[i + 2]);
-      }
-    }
-  }
-  return indexCount;
-}
-
-template <typename T>
-void generateIndices(
-    const Unity::Collections::NativeArray1<T>& dest,
-    const int32_t count) {
-  assert(dest.Length() == count);
-
-  T* indices = static_cast<T*>(
-      Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
-          GetUnsafeBufferPointerWithoutChecks(dest));
-
+template <typename TIndex>
+std::vector<TIndex> generateIndices(const int32_t count) {
+  std::vector<TIndex> syntheticIndexBuffer(count);
   for (int64_t i = 0; i < count; ++i) {
-    indices[i] = static_cast<T>(i);
+    syntheticIndexBuffer[i] = static_cast<TIndex>(i);
   }
+  return syntheticIndexBuffer;
 }
 
-int32_t countPrimitives(const CesiumGltf::Model& model) {
-  int32_t numberOfPrimitives = 0;
-  model.forEachPrimitiveInScene(
-      -1,
-      [&numberOfPrimitives](
-          const Model& gltf,
-          const Node& node,
-          const Mesh& mesh,
-          const MeshPrimitive& primitive,
-          const glm::dmat4& transform) { ++numberOfPrimitives; });
-  return numberOfPrimitives;
+template <typename TIndex>
+void computeFlatNormals(
+    uint8_t* pWritePos,
+    size_t stride,
+    TIndex* indices,
+    int32_t indexCount,
+    const AccessorView<UnityEngine::Vector3>& positionView) {
+
+  for (int i = 0; i < indexCount; i += 3) {
+
+    TIndex i0 = indices[i];
+    TIndex i1 = indices[i + 1];
+    TIndex i2 = indices[i + 2];
+
+    const glm::vec3& v0 =
+        *reinterpret_cast<const glm::vec3*>(&positionView[i0]);
+    const glm::vec3& v1 =
+        *reinterpret_cast<const glm::vec3*>(&positionView[i1]);
+    const glm::vec3& v2 =
+        *reinterpret_cast<const glm::vec3*>(&positionView[i2]);
+
+    glm::vec3 normal = glm::normalize(glm::cross(v1 - v0, v2 - v0));
+    for (int j = 0; j < 3; j++) {
+      *reinterpret_cast<glm::vec3*>(pWritePos) = normal;
+      pWritePos += stride;
+    }
+  }
 }
 
 /**
@@ -154,10 +122,12 @@ struct MeshDataResult {
   std::vector<CesiumPrimitiveInfo> primitiveInfos;
 };
 
-struct CopyVertexColors {
+template <typename TIndex> struct CopyVertexColors {
   uint8_t* pWritePos;
   size_t stride;
   size_t vertexCount;
+  bool duplicateVertices;
+  TIndex* indices;
 
   struct Color32 {
     uint8_t r;
@@ -174,13 +144,28 @@ struct CopyVertexColors {
     }
 
     bool success = true;
-    for (size_t i = 0; success && i < vertexCount; ++i) {
-      if (i >= colorView.size()) {
-        success = false;
-      } else {
-        Color32& packedColor = *reinterpret_cast<Color32*>(pWritePos);
-        success = CopyVertexColors::convertColor(colorView[i], packedColor);
-        pWritePos += stride;
+    if (duplicateVertices) {
+      for (size_t i = 0; success && i < vertexCount; ++i) {
+        if (i >= colorView.size()) {
+          success = false;
+        } else {
+          Color32& packedColor = *reinterpret_cast<Color32*>(pWritePos);
+          TIndex vertexIndex = indices[i];
+          success = CopyVertexColors::convertColor(
+              colorView[vertexIndex],
+              packedColor);
+          pWritePos += stride;
+        }
+      }
+    } else {
+      for (size_t i = 0; success && i < vertexCount; ++i) {
+        if (i >= colorView.size()) {
+          success = false;
+        } else {
+          Color32& packedColor = *reinterpret_cast<Color32*>(pWritePos);
+          success = CopyVertexColors::convertColor(colorView[i], packedColor);
+          pWritePos += stride;
+        }
       }
     }
 
@@ -292,6 +277,363 @@ void generateMipMapsForPrimitive(
   }
 }
 
+template <typename TIndex, class TIndexAccessor>
+void loadPrimitive(
+    UnityEngine::MeshData meshData,
+    CesiumPrimitiveInfo& primitiveInfo,
+    const Model& gltf,
+    const Node& node,
+    const Mesh& mesh,
+    const MeshPrimitive& primitive,
+    const glm::dmat4& transform,
+    const TIndexAccessor& indicesView,
+    UnityEngine::Rendering::IndexFormat indexFormat,
+    const AccessorView<UnityEngine::Vector3>& positionView) {
+  using namespace DotNet::UnityEngine;
+  using namespace DotNet::UnityEngine::Rendering;
+  using namespace DotNet::Unity::Collections;
+  using namespace DotNet::Unity::Collections::LowLevel::Unsafe;
+
+  CESIUM_TRACE("Cesium::loadPrimitive<T>");
+  int32_t indexCount = 0;
+  switch (primitive.mode) {
+  case MeshPrimitive::Mode::TRIANGLES:
+  case MeshPrimitive::Mode::POINTS:
+    indexCount = static_cast<int32_t>(indicesView.size());
+    break;
+  case MeshPrimitive::Mode::TRIANGLE_STRIP:
+  case MeshPrimitive::Mode::TRIANGLE_FAN:
+    indexCount = static_cast<int32_t>(3 * (indicesView.size() - 2));
+    break;
+  default:
+    // TODO: add support for other primitive types.
+    return;
+  }
+
+  if (indexCount < 3 && primitive.mode != MeshPrimitive::Mode::POINTS) {
+    return;
+  }
+
+  meshData.SetIndexBufferParams(indexCount, indexFormat);
+  const Unity::Collections::NativeArray1<TIndex>& dest =
+      meshData.GetIndexData<TIndex>();
+  TIndex* indices = static_cast<TIndex*>(
+      Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
+          GetUnsafeBufferPointerWithoutChecks(dest));
+
+  if (primitive.mode == MeshPrimitive::Mode::TRIANGLES ||
+      primitive.mode == MeshPrimitive::Mode::POINTS) {
+    for (int64_t i = 0; i < indicesView.size(); ++i) {
+      indices[i] = indicesView[i];
+    }
+  } else if (primitive.mode == MeshPrimitive::Mode::TRIANGLE_STRIP) {
+    for (int64_t i = 0; i < indicesView.size() - 2; ++i) {
+      if (i % 2) {
+        indices[3 * i] = indicesView[i];
+        indices[3 * i + 1] = indicesView[i + 2];
+        indices[3 * i + 2] = indicesView[i + 1];
+      } else {
+        indices[3 * i] = indicesView[i];
+        indices[3 * i + 1] = indicesView[i + 1];
+        indices[3 * i + 2] = indicesView[i + 2];
+      }
+    }
+  } else { // MeshPrimitive::Mode::TRIANGLE_FAN
+    TIndex i0 = indicesView[0];
+    for (int64_t i = 2; i < indicesView.size(); ++i) {
+      indices[3 * i] = i0;
+      indices[3 * i + 1] = indicesView[i - 1];
+      indices[3 * i + 2] = indicesView[i];
+    }
+  }
+
+  // Max attribute count supported by Unity, see VertexAttribute.
+  const int MAX_ATTRIBUTES = 14;
+  VertexAttributeDescriptor descriptor[MAX_ATTRIBUTES];
+
+  // Interleave all attributes into single stream.
+  std::int32_t numberOfAttributes = 0;
+  std::int32_t streamIndex = 0;
+
+  assert(numberOfAttributes < MAX_ATTRIBUTES);
+  descriptor[numberOfAttributes].attribute = VertexAttribute::Position;
+  descriptor[numberOfAttributes].format = VertexAttributeFormat::Float32;
+  descriptor[numberOfAttributes].dimension = 3;
+  descriptor[numberOfAttributes].stream = streamIndex;
+  ++numberOfAttributes;
+
+  const CesiumGltf::Material* pMaterial =
+      Model::getSafe(&gltf.materials, primitive.material);
+
+  primitiveInfo.isUnlit =
+      pMaterial && pMaterial->hasExtension<ExtensionKhrMaterialsUnlit>();
+
+  // Add the NORMAL attribute, if it exists.
+  bool hasNormals = false;
+  bool computeFlatNormals = false;
+  auto normalAccessorIt = primitive.attributes.find("NORMAL");
+  AccessorView<UnityEngine::Vector3> normalView;
+  if (normalAccessorIt != primitive.attributes.end()) {
+    normalView =
+        AccessorView<UnityEngine::Vector3>(gltf, normalAccessorIt->second);
+    hasNormals = normalView.status() == AccessorViewStatus::Valid;
+  } else if (
+      !primitiveInfo.isUnlit && primitive.mode != MeshPrimitive::Mode::POINTS) {
+    computeFlatNormals = hasNormals = true;
+  }
+  if (hasNormals) {
+    assert(numberOfAttributes < MAX_ATTRIBUTES);
+    descriptor[numberOfAttributes].attribute = VertexAttribute::Normal;
+    descriptor[numberOfAttributes].format = VertexAttributeFormat::Float32;
+    descriptor[numberOfAttributes].dimension = 3;
+    descriptor[numberOfAttributes].stream = streamIndex;
+    ++numberOfAttributes;
+  }
+
+  // Add the COLOR_0 attribute, if it exists.
+  auto colorAccessorIt = primitive.attributes.find("COLOR_0");
+  bool hasVertexColors =
+      colorAccessorIt != primitive.attributes.end() &&
+      validateVertexColors(gltf, colorAccessorIt->second, positionView.size());
+  if (hasVertexColors) {
+    assert(numberOfAttributes < MAX_ATTRIBUTES);
+
+    // Unity expects the vertex colors to come as 4 normalized uint8s.
+    descriptor[numberOfAttributes].attribute = VertexAttribute::Color;
+    descriptor[numberOfAttributes].format = VertexAttributeFormat::UNorm8;
+    descriptor[numberOfAttributes].dimension = 4;
+    descriptor[numberOfAttributes].stream = streamIndex;
+    ++numberOfAttributes;
+
+    const int8_t numComponents =
+        gltf.accessors[colorAccessorIt->second].computeNumberOfComponents();
+    if (numComponents == 4) {
+      primitiveInfo.isTranslucent = true;
+    }
+  }
+
+  // Max number of texture coordinates supported by Unity, see
+  // VertexAttribute.
+  constexpr int MAX_TEX_COORDS = 8;
+  int numTexCoords = 0;
+  AccessorView<UnityEngine::Vector2> texCoordViews[MAX_TEX_COORDS];
+
+  // Add all texture coordinate sets TEXCOORD_i
+  for (int i = 0; i < 8 && numTexCoords < MAX_TEX_COORDS; ++i) {
+    // TODO: Only add texture coordinates that are needed.
+    // E.g., might not need UV coords for metadata.
+
+    // Build accessor view for glTF attribute.
+    auto texCoordAccessorIt =
+        primitive.attributes.find("TEXCOORD_" + std::to_string(i));
+    if (texCoordAccessorIt == primitive.attributes.end()) {
+      continue;
+    }
+
+    AccessorView<UnityEngine::Vector2> texCoordView(
+        gltf,
+        texCoordAccessorIt->second);
+    if (texCoordView.status() != AccessorViewStatus::Valid &&
+        texCoordView.size() >= positionView.size()) {
+      // TODO: report invalid accessor?
+      continue;
+    }
+
+    texCoordViews[numTexCoords] = texCoordView;
+    primitiveInfo.uvIndexMap[i] = numTexCoords;
+
+    // Build Unity descriptor for this attribute.
+    assert(numberOfAttributes < MAX_ATTRIBUTES);
+
+    descriptor[numberOfAttributes].attribute =
+        (VertexAttribute)((int)VertexAttribute::TexCoord0 + numTexCoords);
+    descriptor[numberOfAttributes].format = VertexAttributeFormat::Float32;
+    descriptor[numberOfAttributes].dimension = 2;
+    descriptor[numberOfAttributes].stream = streamIndex;
+
+    ++numTexCoords;
+    ++numberOfAttributes;
+  }
+
+  // Add all texture coordinate sets _CESIUMOVERLAY_i
+  for (int i = 0; i < 8 && numTexCoords < MAX_TEX_COORDS; ++i) {
+    // Build accessor view for glTF attribute.
+    auto overlayAccessorIt =
+        primitive.attributes.find("_CESIUMOVERLAY_" + std::to_string(i));
+    if (overlayAccessorIt == primitive.attributes.end()) {
+      continue;
+    }
+
+    AccessorView<UnityEngine::Vector2> overlayTexCoordView(
+        gltf,
+        overlayAccessorIt->second);
+    if (overlayTexCoordView.status() != AccessorViewStatus::Valid &&
+        overlayTexCoordView.size() >= positionView.size()) {
+      // TODO: report invalid accessor?
+      continue;
+    }
+
+    texCoordViews[numTexCoords] = overlayTexCoordView;
+    primitiveInfo.rasterOverlayUvIndexMap[i] = numTexCoords;
+
+    // Build Unity descriptor for this attribute.
+    assert(numberOfAttributes < MAX_ATTRIBUTES);
+
+    descriptor[numberOfAttributes].attribute =
+        (VertexAttribute)((int)VertexAttribute::TexCoord0 + numTexCoords);
+    descriptor[numberOfAttributes].format = VertexAttributeFormat::Float32;
+    descriptor[numberOfAttributes].dimension = 2;
+    descriptor[numberOfAttributes].stream = streamIndex;
+
+    ++numTexCoords;
+    ++numberOfAttributes;
+  }
+
+  System::Array1<VertexAttributeDescriptor> attributes(numberOfAttributes);
+  for (int32_t i = 0; i < numberOfAttributes; ++i) {
+    attributes.Item(i, descriptor[i]);
+  }
+
+  int32_t vertexCount = computeFlatNormals
+                            ? indexCount
+                            : static_cast<int32_t>(positionView.size());
+  meshData.SetVertexBufferParams(vertexCount, attributes);
+
+  NativeArray1<uint8_t> nativeVertexBuffer =
+      meshData.GetVertexData<uint8_t>(streamIndex);
+  uint8_t* pBufferStart = static_cast<uint8_t*>(
+      NativeArrayUnsafeUtility::GetUnsafeBufferPointerWithoutChecks(
+          nativeVertexBuffer));
+  uint8_t* pWritePos = pBufferStart;
+
+  // Since the vertex buffer is dynamically interleaved, we don't have a
+  // convenient struct to represent the vertex data.
+  // The vertex layout will be as follows:
+  // 1. position
+  // 2. normals (skip if N/A)
+  // 3. vertex colors (skip if N/A)
+  // 4. texcoords (first all TEXCOORD_i, then all _CESIUMOVERLAY_i)
+
+  size_t stride = sizeof(Vector3);
+  size_t normalByteOffset, colorByteOffset;
+  if (hasNormals) {
+    normalByteOffset = stride;
+    stride += sizeof(Vector3);
+  }
+  if (hasVertexColors) {
+    colorByteOffset = stride;
+    stride += sizeof(uint32_t);
+  }
+  stride += numTexCoords * sizeof(Vector2);
+
+  if (computeFlatNormals) {
+    ::computeFlatNormals(
+        pWritePos + normalByteOffset,
+        stride,
+        indices,
+        indexCount,
+        positionView);
+    for (int64_t i = 0; i < vertexCount; ++i) {
+      TIndex vertexIndex = indices[i];
+      *reinterpret_cast<Vector3*>(pWritePos) = positionView[vertexIndex];
+      // skip position and normal
+      pWritePos += 2 * sizeof(Vector3);
+      // Skip the slot allocated for vertex colors, we will fill them in
+      // bulk later.
+      if (hasVertexColors) {
+        pWritePos += sizeof(uint32_t);
+      }
+      for (uint32_t texCoordIndex = 0; texCoordIndex < numTexCoords;
+           ++texCoordIndex) {
+        *reinterpret_cast<Vector2*>(pWritePos) =
+            texCoordViews[texCoordIndex][vertexIndex];
+        pWritePos += sizeof(Vector2);
+      }
+    }
+  } else {
+    for (int64_t i = 0; i < vertexCount; ++i) {
+      *reinterpret_cast<Vector3*>(pWritePos) = positionView[i];
+      pWritePos += sizeof(Vector3);
+
+      if (hasNormals) {
+        *reinterpret_cast<Vector3*>(pWritePos) = normalView[i];
+        pWritePos += sizeof(Vector3);
+      }
+
+      // Skip the slot allocated for vertex colors, we will fill them in
+      // bulk later.
+      if (hasVertexColors) {
+        pWritePos += sizeof(uint32_t);
+      }
+
+      for (uint32_t texCoordIndex = 0; texCoordIndex < numTexCoords;
+           ++texCoordIndex) {
+        *reinterpret_cast<Vector2*>(pWritePos) =
+            texCoordViews[texCoordIndex][i];
+        pWritePos += sizeof(Vector2);
+      }
+    }
+  }
+
+  // Fill in vertex colors separately, if they exist.
+  if (hasVertexColors) {
+    // Color comes after position and normal.
+    createAccessorView(
+        gltf,
+        colorAccessorIt->second,
+        CopyVertexColors<TIndex>{
+            pBufferStart + colorByteOffset,
+            stride,
+            static_cast<size_t>(vertexCount),
+            computeFlatNormals,
+            indices});
+  }
+
+  if (computeFlatNormals) {
+    // rewrite indices
+    for (TIndex i = 0; i < indexCount; i++) {
+      indices[i] = i;
+    }
+  }
+
+  meshData.subMeshCount(1);
+
+  // TODO: use sub-meshes for glTF primitives, instead of a separate mesh
+  // for each.
+  SubMeshDescriptor subMeshDescriptor{};
+
+  if (primitive.mode == MeshPrimitive::Mode::POINTS) {
+    subMeshDescriptor.topology = MeshTopology::Points;
+    primitiveInfo.containsPoints = true;
+  } else {
+    subMeshDescriptor.topology = MeshTopology::Triangles;
+  }
+
+  subMeshDescriptor.indexStart = 0;
+  subMeshDescriptor.indexCount = indexCount;
+  subMeshDescriptor.baseVertex = 0;
+
+  // These are calculated automatically by SetSubMesh
+  subMeshDescriptor.firstVertex = 0;
+  subMeshDescriptor.vertexCount = 0;
+
+  meshData.SetSubMesh(0, subMeshDescriptor, MeshUpdateFlags::Default);
+}
+} // namespace
+
+int32_t countPrimitives(const CesiumGltf::Model& model) {
+  int32_t numberOfPrimitives = 0;
+  model.forEachPrimitiveInScene(
+      -1,
+      [&numberOfPrimitives](
+          const Model& gltf,
+          const Node& node,
+          const Mesh& mesh,
+          const MeshPrimitive& primitive,
+          const glm::dmat4& transform) { ++numberOfPrimitives; });
+  return numberOfPrimitives;
+}
+
 void populateMeshDataArray(
     MeshDataResult& meshDataResult,
     TileLoadResult& tileLoadResult) {
@@ -300,7 +642,7 @@ void populateMeshDataArray(
   if (!pModel)
     return;
 
-  size_t meshDataInstance = 0;
+  int32_t meshDataInstance = 0;
 
   meshDataResult.primitiveInfos.reserve(countPrimitives(*pModel));
 
@@ -317,26 +659,6 @@ void populateMeshDataArray(
         CesiumPrimitiveInfo& primitiveInfo =
             meshDataResult.primitiveInfos.emplace_back();
 
-        using namespace DotNet::UnityEngine;
-        using namespace DotNet::UnityEngine::Rendering;
-        using namespace DotNet::Unity::Collections;
-        using namespace DotNet::Unity::Collections::LowLevel::Unsafe;
-
-        if (primitive.mode != MeshPrimitive::Mode::TRIANGLES &&
-            primitive.mode != MeshPrimitive::Mode::TRIANGLE_STRIP &&
-            primitive.mode != MeshPrimitive::Mode::POINTS) {
-          // TODO: add support for other primitive types.
-          return;
-        }
-
-        // Max attribute count supported by Unity, see VertexAttribute.
-        const int MAX_ATTRIBUTES = 14;
-        VertexAttributeDescriptor descriptor[MAX_ATTRIBUTES];
-
-        // Interleave all attributes into single stream.
-        std::int32_t numberOfAttributes = 0;
-        std::int32_t streamIndex = 0;
-
         auto positionAccessorIt = primitive.attributes.find("POSITION");
         if (positionAccessorIt == primitive.attributes.end()) {
           // This primitive doesn't have a POSITION semantic, ignore it.
@@ -352,283 +674,118 @@ void populateMeshDataArray(
           return;
         }
 
-        assert(numberOfAttributes < MAX_ATTRIBUTES);
-        descriptor[numberOfAttributes].attribute = VertexAttribute::Position;
-        descriptor[numberOfAttributes].format = VertexAttributeFormat::Float32;
-        descriptor[numberOfAttributes].dimension = 3;
-        descriptor[numberOfAttributes].stream = streamIndex;
-        ++numberOfAttributes;
-
-        // Add the NORMAL attribute, if it exists.
-        auto normalAccessorIt = primitive.attributes.find("NORMAL");
-        AccessorView<UnityEngine::Vector3> normalView =
-            normalAccessorIt != primitive.attributes.end()
-                ? AccessorView<UnityEngine::Vector3>(
-                      gltf,
-                      normalAccessorIt->second)
-                : AccessorView<UnityEngine::Vector3>();
-
-        if (normalView.status() == AccessorViewStatus::Valid &&
-            normalView.size() >= positionView.size()) {
-          assert(numberOfAttributes < MAX_ATTRIBUTES);
-          descriptor[numberOfAttributes].attribute = VertexAttribute::Normal;
-          descriptor[numberOfAttributes].format =
-              VertexAttributeFormat::Float32;
-          descriptor[numberOfAttributes].dimension = 3;
-          descriptor[numberOfAttributes].stream = streamIndex;
-          ++numberOfAttributes;
-        }
-
-        // Add the COLOR_0 attribute, if it exists.
-        auto colorAccessorIt = primitive.attributes.find("COLOR_0");
-        bool hasVertexColors = colorAccessorIt != primitive.attributes.end() &&
-                               validateVertexColors(
-                                   gltf,
-                                   colorAccessorIt->second,
-                                   positionView.size());
-        if (hasVertexColors) {
-          assert(numberOfAttributes < MAX_ATTRIBUTES);
-
-          // Unity expects the vertex colors to come as 4 normalized uint8s.
-          descriptor[numberOfAttributes].attribute = VertexAttribute::Color;
-          descriptor[numberOfAttributes].format = VertexAttributeFormat::UNorm8;
-          descriptor[numberOfAttributes].dimension = 4;
-          descriptor[numberOfAttributes].stream = streamIndex;
-          ++numberOfAttributes;
-
-          const int8_t numComponents = gltf.accessors[colorAccessorIt->second]
-                                           .computeNumberOfComponents();
-          if (numComponents == 4) {
-            primitiveInfo.isTranslucent = true;
-          }
-        }
-
-        // Max number of texture coordinates supported by Unity, see
-        // VertexAttribute.
-        constexpr int MAX_TEX_COORDS = 8;
-        int numTexCoords = 0;
-        AccessorView<UnityEngine::Vector2> texCoordViews[MAX_TEX_COORDS];
-
-        // Add all texture coordinate sets TEXCOORD_i
-        for (int i = 0; i < 8 && numTexCoords < MAX_TEX_COORDS; ++i) {
-          // TODO: Only add texture coordinates that are needed.
-          // E.g., might not need UV coords for metadata.
-
-          // Build accessor view for glTF attribute.
-          auto texCoordAccessorIt =
-              primitive.attributes.find("TEXCOORD_" + std::to_string(i));
-          if (texCoordAccessorIt == primitive.attributes.end()) {
-            continue;
-          }
-
-          AccessorView<UnityEngine::Vector2> texCoordView(
-              gltf,
-              texCoordAccessorIt->second);
-          if (texCoordView.status() != AccessorViewStatus::Valid &&
-              texCoordView.size() >= positionView.size()) {
-            // TODO: report invalid accessor?
-            continue;
-          }
-
-          texCoordViews[numTexCoords] = texCoordView;
-          primitiveInfo.uvIndexMap[i] = numTexCoords;
-
-          // Build Unity descriptor for this attribute.
-          assert(numberOfAttributes < MAX_ATTRIBUTES);
-
-          descriptor[numberOfAttributes].attribute =
-              (VertexAttribute)((int)VertexAttribute::TexCoord0 + numTexCoords);
-          descriptor[numberOfAttributes].format =
-              VertexAttributeFormat::Float32;
-          descriptor[numberOfAttributes].dimension = 2;
-          descriptor[numberOfAttributes].stream = streamIndex;
-
-          ++numTexCoords;
-          ++numberOfAttributes;
-        }
-
-        // Add all texture coordinate sets _CESIUMOVERLAY_i
-        for (int i = 0; i < 8 && numTexCoords < MAX_TEX_COORDS; ++i) {
-          // Build accessor view for glTF attribute.
-          auto overlayAccessorIt =
-              primitive.attributes.find("_CESIUMOVERLAY_" + std::to_string(i));
-          if (overlayAccessorIt == primitive.attributes.end()) {
-            continue;
-          }
-
-          AccessorView<UnityEngine::Vector2> overlayTexCoordView(
-              gltf,
-              overlayAccessorIt->second);
-          if (overlayTexCoordView.status() != AccessorViewStatus::Valid &&
-              overlayTexCoordView.size() >= positionView.size()) {
-            // TODO: report invalid accessor?
-            continue;
-          }
-
-          texCoordViews[numTexCoords] = overlayTexCoordView;
-          primitiveInfo.rasterOverlayUvIndexMap[i] = numTexCoords;
-
-          // Build Unity descriptor for this attribute.
-          assert(numberOfAttributes < MAX_ATTRIBUTES);
-
-          descriptor[numberOfAttributes].attribute =
-              (VertexAttribute)((int)VertexAttribute::TexCoord0 + numTexCoords);
-          descriptor[numberOfAttributes].format =
-              VertexAttributeFormat::Float32;
-          descriptor[numberOfAttributes].dimension = 2;
-          descriptor[numberOfAttributes].stream = streamIndex;
-
-          ++numTexCoords;
-          ++numberOfAttributes;
-        }
-
-        System::Array1<VertexAttributeDescriptor> attributes(
-            numberOfAttributes);
-        for (int32_t i = 0; i < numberOfAttributes; ++i) {
-          attributes.Item(i, descriptor[i]);
-        }
-
-        meshData.SetVertexBufferParams(positionView.size(), attributes);
-
-        NativeArray1<uint8_t> nativeVertexBuffer =
-            meshData.GetVertexData<uint8_t>(streamIndex);
-        uint8_t* pBufferStart = static_cast<uint8_t*>(
-            NativeArrayUnsafeUtility::GetUnsafeBufferPointerWithoutChecks(
-                nativeVertexBuffer));
-        uint8_t* pWritePos = pBufferStart;
-
-        // Since the vertex buffer is dynamically interleaved, we don't have a
-        // convenient struct to represent the vertex data.
-        // The vertex layout will be as follows:
-        // 1. position
-        // 2. normals (skip if N/A)
-        // 3. vertex colors (skip if N/A)
-        // 4. texcoords (first all TEXCOORD_i, then all _CESIUMOVERLAY_i)
-        for (int64_t i = 0; i < positionView.size(); ++i) {
-          *reinterpret_cast<Vector3*>(pWritePos) = positionView[i];
-          pWritePos += sizeof(Vector3);
-
-          if (normalView.status() == AccessorViewStatus::Valid) {
-            *reinterpret_cast<Vector3*>(pWritePos) = normalView[i];
-            pWritePos += sizeof(Vector3);
-          }
-
-          // Skip the slot allocated for vertex colors, we will fill them in
-          // bulk later.
-          if (hasVertexColors) {
-            pWritePos += sizeof(uint32_t);
-          }
-
-          for (uint32_t texCoordIndex = 0; texCoordIndex < numTexCoords;
-               ++texCoordIndex) {
-            *reinterpret_cast<Vector2*>(pWritePos) =
-                texCoordViews[texCoordIndex][i];
-            pWritePos += sizeof(Vector2);
-          }
-        }
-
-        // Fill in vertex colors separately, if they exist.
-        if (hasVertexColors) {
-          // Color comes after position and normal.
-          size_t colorByteOffset = sizeof(Vector3);
-          if (normalView.status() == AccessorViewStatus::Valid) {
-            colorByteOffset += sizeof(Vector3);
-          }
-
-          // Stride includes position, normal, ...
-          size_t stride = colorByteOffset;
-          // color, ...
-          stride += sizeof(uint32_t);
-          // and tex coords.
-          stride += numTexCoords * sizeof(Vector2);
-
-          createAccessorView(
-              gltf,
-              colorAccessorIt->second,
-              CopyVertexColors{
-                  pBufferStart + colorByteOffset,
-                  stride,
-                  static_cast<size_t>(positionView.size())});
-        }
-
-        int32_t indexCount = 0;
-
-        if (primitive.indices >= 0) {
-          const Accessor& indexAccessorGltf = gltf.accessors[primitive.indices];
-          switch (indexAccessorGltf.componentType) {
-          case Accessor::ComponentType::BYTE:
-            indexCount = setIndices<std::uint16_t>(
-                meshData,
-                AccessorView<int8_t>(gltf, primitive.indices),
-                primitive.mode,
-                IndexFormat::UInt16);
-            break;
-          case Accessor::ComponentType::UNSIGNED_BYTE:
-            indexCount = setIndices<std::uint16_t>(
-                meshData,
-                AccessorView<uint8_t>(gltf, primitive.indices),
-                primitive.mode,
-                IndexFormat::UInt16);
-            break;
-          case Accessor::ComponentType::SHORT:
-            indexCount = setIndices<std::uint16_t>(
-                meshData,
-                AccessorView<int16_t>(gltf, primitive.indices),
-                primitive.mode,
-                IndexFormat::UInt16);
-            break;
-          case Accessor::ComponentType::UNSIGNED_SHORT:
-            indexCount = setIndices<std::uint16_t>(
-                meshData,
-                AccessorView<uint16_t>(gltf, primitive.indices),
-                primitive.mode,
-                IndexFormat::UInt16);
-            break;
-          case Accessor::ComponentType::UNSIGNED_INT:
-            indexCount = setIndices<std::uint32_t>(
-                meshData,
-                AccessorView<uint32_t>(gltf, primitive.indices),
-                primitive.mode,
-                IndexFormat::UInt32);
-            break;
-          }
-        } else {
-          // Generate indices for primitives without them.
-          indexCount = positionView.size();
-
-          if (indexCount > std::numeric_limits<uint16_t>::max()) {
-            meshData.SetIndexBufferParams(indexCount, IndexFormat::UInt32);
-            generateIndices(meshData.GetIndexData<std::uint32_t>(), indexCount);
-          } else {
-            meshData.SetIndexBufferParams(indexCount, IndexFormat::UInt16);
-            generateIndices(meshData.GetIndexData<std::uint16_t>(), indexCount);
-          }
-        }
-
         generateMipMapsForPrimitive(pModel, primitive);
 
-        meshData.subMeshCount(1);
-
-        // TODO: use sub-meshes for glTF primitives, instead of a separate mesh
-        // for each.
-        SubMeshDescriptor subMeshDescriptor{};
-
-        if (primitive.mode == MeshPrimitive::Mode::POINTS) {
-          subMeshDescriptor.topology = MeshTopology::Points;
-          primitiveInfo.containsPoints = true;
+        if (primitive.indices < 0 ||
+            primitive.indices >= gltf.accessors.size()) {
+          int32_t indexCount = static_cast<int32_t>(positionView.size());
+          if (indexCount > std::numeric_limits<std::uint16_t>::max()) {
+            loadPrimitive<std::uint32_t>(
+                meshData,
+                primitiveInfo,
+                gltf,
+                node,
+                mesh,
+                primitive,
+                transform,
+                generateIndices<std::uint32_t>(indexCount),
+                UnityEngine::Rendering::IndexFormat::UInt32,
+                positionView);
+          } else {
+            loadPrimitive<std::uint16_t>(
+                meshData,
+                primitiveInfo,
+                gltf,
+                node,
+                mesh,
+                primitive,
+                transform,
+                generateIndices<std::uint16_t>(indexCount),
+                UnityEngine::Rendering::IndexFormat::UInt16,
+                positionView);
+          }
         } else {
-          subMeshDescriptor.topology = MeshTopology::Triangles;
+          const Accessor& indexAccessorGltf = gltf.accessors[primitive.indices];
+          switch (indexAccessorGltf.componentType) {
+          case Accessor::ComponentType::BYTE: {
+            AccessorView<int8_t> indexAccessor(gltf, primitive.indices);
+            loadPrimitive<std::uint16_t>(
+                meshData,
+                primitiveInfo,
+                gltf,
+                node,
+                mesh,
+                primitive,
+                transform,
+                indexAccessor,
+                UnityEngine::Rendering::IndexFormat::UInt16,
+                positionView);
+            break;
+          }
+          case Accessor::ComponentType::UNSIGNED_BYTE: {
+            AccessorView<uint8_t> indexAccessor(gltf, primitive.indices);
+            loadPrimitive<std::uint16_t>(
+                meshData,
+                primitiveInfo,
+                gltf,
+                node,
+                mesh,
+                primitive,
+                transform,
+                indexAccessor,
+                UnityEngine::Rendering::IndexFormat::UInt16,
+                positionView);
+            break;
+          }
+          case Accessor::ComponentType::SHORT: {
+            AccessorView<int16_t> indexAccessor(gltf, primitive.indices);
+            loadPrimitive<std::uint16_t>(
+                meshData,
+                primitiveInfo,
+                gltf,
+                node,
+                mesh,
+                primitive,
+                transform,
+                indexAccessor,
+                UnityEngine::Rendering::IndexFormat::UInt16,
+                positionView);
+            break;
+          }
+          case Accessor::ComponentType::UNSIGNED_SHORT: {
+            AccessorView<uint16_t> indexAccessor(gltf, primitive.indices);
+            loadPrimitive<std::uint16_t>(
+                meshData,
+                primitiveInfo,
+                gltf,
+                node,
+                mesh,
+                primitive,
+                transform,
+                indexAccessor,
+                UnityEngine::Rendering::IndexFormat::UInt16,
+                positionView);
+            break;
+          }
+          case Accessor::ComponentType::UNSIGNED_INT: {
+            AccessorView<uint32_t> indexAccessor(gltf, primitive.indices);
+            loadPrimitive<std::uint32_t>(
+                meshData,
+                primitiveInfo,
+                gltf,
+                node,
+                mesh,
+                primitive,
+                transform,
+                indexAccessor,
+                UnityEngine::Rendering::IndexFormat::UInt32,
+                positionView);
+            break;
+          }
+          default:
+            return;
+          }
         }
-
-        subMeshDescriptor.indexStart = 0;
-        subMeshDescriptor.indexCount = indexCount;
-        subMeshDescriptor.baseVertex = 0;
-
-        // These are calculated automatically by SetSubMesh
-        subMeshDescriptor.firstVertex = 0;
-        subMeshDescriptor.vertexCount = 0;
-
-        meshData.SetSubMesh(0, subMeshDescriptor, MeshUpdateFlags::Default);
       });
 }
 
@@ -639,8 +796,6 @@ struct LoadThreadResult {
   System::Array1<UnityEngine::Mesh> meshes;
   std::vector<CesiumPrimitiveInfo> primitiveInfos{};
 };
-
-} // namespace
 
 UnityPrepareRendererResources::UnityPrepareRendererResources(
     const UnityEngine::GameObject& tileset)
@@ -802,6 +957,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
     return nullptr;
   }
 
+  CESIUM_TRACE("Cesium::LoadModel");
   const Model& model = pRenderContent->getModel();
 
   std::string name = "glTF";
@@ -852,7 +1008,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
   const bool createPhysicsMeshes = tilesetComponent.createPhysicsMeshes();
   const bool showTilesInHierarchy = tilesetComponent.showTilesInHierarchy();
 
-  size_t meshIndex = 0;
+  int32_t meshIndex = 0;
 
   DotNet::CesiumForUnity::CesiumMetadata pMetadataComponent = nullptr;
   if (model.getExtension<ExtensionModelExtFeatureMetadata>()) {
@@ -910,8 +1066,9 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         }
 
         int64_t primitiveIndex = &mesh.primitives[0] - &primitive;
-        UnityEngine::GameObject primitiveGameObject(
-            System::String("Primitive " + std::to_string(primitiveIndex)));
+        UnityEngine::GameObject primitiveGameObject(System::String(
+            "Mesh " + std::to_string(meshIndex - 1) + " Primitive " +
+            std::to_string(primitiveIndex)));
         if (showTilesInHierarchy) {
           primitiveGameObject.hideFlags(UnityEngine::HideFlags::DontSave);
         } else {
@@ -946,8 +1103,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             tilesetComponent.opaqueMaterial();
 
         if (opaqueMaterial == nullptr) {
-          if (pMaterial &&
-              pMaterial->hasExtension<ExtensionKhrMaterialsUnlit>()) {
+          if (primitiveInfo.isUnlit) {
             opaqueMaterial =
                 UnityEngine::Resources::Load<UnityEngine::Material>(
                     System::String("CesiumUnlitTilesetMaterial"));
@@ -965,6 +1121,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
         bool isTranslucent = primitiveInfo.isTranslucent;
         if (pMaterial) {
+          CESIUM_TRACE("Cesium::CreateMaterials");
           if (pMaterial->pbrMetallicRoughness) {
             // Add base color factor and metallic-roughness factor regardless
             // of if the textures are present.
