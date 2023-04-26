@@ -903,8 +903,10 @@ UnityPrepareRendererResources::prepareInLoadThread(
               const std::int32_t len = meshes.Length();
               std::vector<std::int32_t> instanceIDs;
               for (int32_t i = 0; i < len; ++i) {
-                // Don't attempt to bake a physics mesh from a point cloud.
-                if (primitiveInfos[i].containsPoints) {
+                // Don't attempt to bake a physics mesh from a point cloud or
+                // from an invalid triangle mesh.
+                if (primitiveInfos[i].containsPoints ||
+                    meshes[i].vertexCount() < 3) {
                   continue;
                 }
                 instanceIDs.push_back(meshes[i].GetInstanceID());
@@ -1307,12 +1309,14 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           pointCloudRenderer.tileInfo(tileInfo);
         }
 
-        if (createPhysicsMeshes && !primitiveInfo.containsPoints) {
-          // This should not trigger mesh baking for physics, because the
-          // meshes were already baked in the worker thread.
-          UnityEngine::MeshCollider meshCollider =
-              primitiveGameObject.AddComponent<UnityEngine::MeshCollider>();
-          meshCollider.sharedMesh(unityMesh);
+        if (createPhysicsMeshes) {
+          if (!primitiveInfo.containsPoints && unityMesh.vertexCount() >= 3) {
+            // This should not trigger mesh baking for physics, because the
+            // meshes were already baked in the worker thread.
+            UnityEngine::MeshCollider meshCollider =
+                primitiveGameObject.AddComponent<UnityEngine::MeshCollider>();
+            meshCollider.sharedMesh(unityMesh);
+          }
         }
 
         const ExtensionMeshPrimitiveExtFeatureMetadata* pMetadata =
