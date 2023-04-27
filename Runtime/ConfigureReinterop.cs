@@ -134,6 +134,9 @@ namespace CesiumForUnity
             int vertexCount = mesh.vertexCount;
             int instanceID = mesh.GetInstanceID();
 
+            Vector3[] vertices = mesh.vertices;
+            Vector3 vertex = vertices[0];
+
             Bounds bounds = new Bounds(new Vector3(0, 0, 0), new Vector3(1, 2, 1));
 
             MeshCollider meshCollider = go.AddComponent<MeshCollider>();

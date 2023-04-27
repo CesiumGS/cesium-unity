@@ -789,6 +789,24 @@ void populateMeshDataArray(
       });
 }
 
+bool isDegenerateTriangleMesh(const UnityEngine::Mesh& mesh) {
+  int32_t vertexCount = mesh.vertexCount();
+  if (vertexCount < 3) {
+    return true;
+  }
+
+  if (vertexCount == 3) {
+    System::Array1<UnityEngine::Vector3> vertices = mesh.vertices();
+    glm::vec3 Vertex0(vertices[0].x, vertices[0].y, vertices[0].z);
+    glm::vec3 Vertex1(vertices[1].x, vertices[1].y, vertices[1].z);
+    glm::vec3 Vertex2(vertices[2].x, vertices[2].y, vertices[2].z);
+
+    return Vertex0 == Vertex1 || Vertex1 == Vertex2 || Vertex2 == Vertex0;
+  }
+
+  return false;
+}
+
 /**
  * @brief The result of the async part of mesh loading.
  */
@@ -906,9 +924,10 @@ UnityPrepareRendererResources::prepareInLoadThread(
                 // Don't attempt to bake a physics mesh from a point cloud or
                 // from an invalid triangle mesh.
                 if (primitiveInfos[i].containsPoints ||
-                    meshes[i].vertexCount() < 3) {
+                    isDegenerateTriangleMesh(meshes[i])) {
                   continue;
                 }
+
                 instanceIDs.push_back(meshes[i].GetInstanceID());
               }
 
@@ -1310,7 +1329,8 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         }
 
         if (createPhysicsMeshes) {
-          if (!primitiveInfo.containsPoints && unityMesh.vertexCount() >= 3) {
+          if (!primitiveInfo.containsPoints &&
+              !isDegenerateTriangleMesh(unityMesh)) {
             // This should not trigger mesh baking for physics, because the
             // meshes were already baked in the worker thread.
             UnityEngine::MeshCollider meshCollider =
