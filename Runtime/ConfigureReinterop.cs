@@ -492,7 +492,7 @@ namespace CesiumForUnity
             CesiumPointCloudRenderer renderer = go.AddComponent<CesiumPointCloudRenderer>();
             renderer.tileInfo = info;
 
-            ObjectPool<Mesh> meshPool = CesiumObjectPool.MeshPool;
+            CesiumObjectPool<Mesh> meshPool = CesiumObjectPools.MeshPool;
             Mesh pooledMesh = meshPool.Get();
             meshPool.Release(pooledMesh);
 
