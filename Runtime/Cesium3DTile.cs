@@ -17,8 +17,7 @@ namespace CesiumForUnity
         internal IntPtr _pTile;
 
         internal Cesium3DTile()
-        {
-        }
+        {}
 
         /// <summary>
         /// Gets the axis-aligned bounding box of this tile. If this tile came from a <see cref="CesiumTileExcluder"/>,
