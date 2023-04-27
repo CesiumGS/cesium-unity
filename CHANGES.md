@@ -13,6 +13,7 @@
 - Added dependencies on the ShaderGraph and InputSystem packages to resolve material / script compilation errors.
 - Fixed another bug where `CesiumCameraController` tried to access a non-existent input in the legacy input system.
 - Removed an extra "delimiter" added to the end of on-screen credits in some cases.
+- Fixed a memory leak of `Mesh` objects when entering and exiting Play mode in the Unity Editor.
 
 ### v1.0.0 - 2023-04-03
 

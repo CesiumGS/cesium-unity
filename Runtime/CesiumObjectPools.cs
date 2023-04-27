@@ -1,5 +1,8 @@
-using UnityEditor;
 using UnityEngine;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace CesiumForUnity
 {
@@ -21,12 +24,16 @@ namespace CesiumForUnity
                 (mesh) => mesh.Clear(),
                 (mesh) => UnityLifetime.Destroy(mesh));
 
+#if UNITY_EDITOR
             EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+#endif
         }
 
+#if UNITY_EDITOR
         private static void OnPlayModeStateChanged(PlayModeStateChange obj)
         {
             Dispose();
         }
+#endif
     }
 }
