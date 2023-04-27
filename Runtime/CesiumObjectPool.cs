@@ -11,13 +11,13 @@ namespace CesiumForUnity
         private Action<T> _releaseCallback;
         private Action<T> _destroyCallback;
 
-        public CesiumObjectPool(Func<T> createCallback, Action<T> releaseCallback, Action<T> destroyCalback, int maximumSize = 1000)
+        public CesiumObjectPool(Func<T> createCallback, Action<T> releaseCallback, Action<T> destroyCallback, int maximumSize = 1000)
         {
             this._pool = new List<T>(maximumSize);
             this._maximumSize = maximumSize;
             this._createCallback = createCallback;
             this._releaseCallback = releaseCallback;
-            this._destroyCallback = destroyCalback;
+            this._destroyCallback = destroyCallback;
         }
 
         public void Dispose()
