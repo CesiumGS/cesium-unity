@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace CesiumForUnity
 {
-    public class CesiumObjectPool<T> : IDisposable where T : class
+    internal class CesiumObjectPool<T> : IDisposable where T : class
     {
         private List<T> _pool;
         private int _maximumSize;

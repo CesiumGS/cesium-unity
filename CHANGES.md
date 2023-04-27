@@ -2,6 +2,10 @@
 
 ### ? - ?
 
+##### Breaking Changes :mega:
+
+- `CesiumObjectPool` is no longer accessible from outside the CesiumRuntime assembly.
+
 ##### Additions :tada:
 
 - Added support for primitives with the `TRIANGLE_STRIP` and `TRIANGLE_FAN` topology types.

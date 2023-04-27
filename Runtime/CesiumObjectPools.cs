@@ -6,7 +6,7 @@ using UnityEditor;
 
 namespace CesiumForUnity
 {
-    public class CesiumObjectPools
+    internal class CesiumObjectPools
     {
         public static CesiumObjectPool<Mesh> MeshPool => _meshPool;
 
