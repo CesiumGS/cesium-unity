@@ -474,7 +474,10 @@ namespace CesiumForUnity
             globeAnchor._georeference = null;
             globeAnchor._localToGlobeFixedMatrix = new double4x4();
             globeAnchor._localToGlobeFixedMatrixIsValid = true;
-            globeAnchor._lastLocalToWorld = new Matrix4x4();
+            globeAnchor._lastStateIsValid = false;
+            globeAnchor._lastLocalPosition = new Vector3();
+            globeAnchor._lastLocalRotation = new Quaternion();
+            globeAnchor._lastLocalScale = new Vector3();
             globeAnchor.UpdateGeoreferenceIfNecessary();
 
             CesiumTileExcluder[] excluders = go.GetComponentsInParent<CesiumTileExcluder>();
