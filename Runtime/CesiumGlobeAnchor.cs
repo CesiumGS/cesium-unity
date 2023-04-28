@@ -64,9 +64,15 @@ namespace CesiumForUnity
         internal bool _localToGlobeFixedMatrixIsValid = false;
 
         // The last known Transform, used to detect changes in the Transform so that
-        // the precise globe coordinates can be recomputed from it. This is null before OnEnable.
+        // the precise globe coordinates can be recomputed from it. The bool flag is false before OnEnable.
         [NonSerialized]
-        internal Matrix4x4? _lastLocalToWorld = null;
+        internal bool _lastStateIsValid = false;
+        [NonSerialized]
+        internal Vector3 _lastLocalPosition;
+        [NonSerialized]
+        internal Quaternion _lastLocalRotation;
+        [NonSerialized]
+        internal Vector3 _lastLocalScale;
 
         // The resolved georeference containing this globe anchor. This is just a cache
         // of `GetComponentInParent<CesiumGeoreference>()`.
@@ -433,7 +439,10 @@ namespace CesiumForUnity
         /// </remarks>
         public void Sync()
         {
-            if (!this._localToGlobeFixedMatrixIsValid || (this._lastLocalToWorld != null && this._lastLocalToWorld != this.transform.localToWorldMatrix))
+            if (!this._localToGlobeFixedMatrixIsValid || (this._lastStateIsValid &&
+                (this._lastLocalPosition != this.transform.localPosition ||
+                 this._lastLocalRotation != this.transform.localRotation ||
+                 this._lastLocalScale != this.transform.localScale)))
             {
                 this.UpdateEcefFromTransform();
                 return;
@@ -539,7 +548,10 @@ namespace CesiumForUnity
         {
             // Detect changes in the Transform component.
             // We don't use Transform.hasChanged because we can't control when it is reset to false.
-            WaitUntil waitForChanges = new WaitUntil(() => this._lastLocalToWorld.HasValue && !this.transform.localToWorldMatrix.Equals(this._lastLocalToWorld.Value));
+            WaitUntil waitForChanges = new WaitUntil(() =>
+                this._lastStateIsValid && (!this.transform.localPosition.Equals(this._lastLocalPosition) ||
+                                           !this.transform.localRotation.Equals(this._lastLocalRotation) ||
+                                           !this.transform.localScale.Equals(this._lastLocalScale)));
 
             while (true)
             {

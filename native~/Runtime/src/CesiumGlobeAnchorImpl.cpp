@@ -94,7 +94,10 @@ void updateAnchorFromCpp(
     transform.localRotation(UnityTransforms::toUnity(rotation));
     transform.localScale(UnityTransforms::toUnity(scale));
 
-    anchor._lastLocalToWorld(transform.localToWorldMatrix());
+    anchor._lastStateIsValid(true);
+    anchor._lastLocalPosition(transform.localPosition());
+    anchor._lastLocalRotation(transform.localRotation());
+    anchor._lastLocalScale(transform.localScale());
   }
 }
 
