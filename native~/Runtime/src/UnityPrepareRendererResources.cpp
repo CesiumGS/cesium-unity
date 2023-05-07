@@ -1086,7 +1086,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           return;
         }
 
-        int64_t primitiveIndex = &mesh.primitives[0] - &primitive;
+        int64_t primitiveIndex = &primitive - &mesh.primitives[0];
         UnityEngine::GameObject primitiveGameObject(System::String(
             "Mesh " + std::to_string(meshIndex - 1) + " Primitive " +
             std::to_string(primitiveIndex)));
