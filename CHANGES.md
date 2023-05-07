@@ -1,6 +1,10 @@
 # Change Log
 
-### ? - ?
+### v1.1.0 - 2023-05-01
+
+##### Breaking Changes :mega:
+
+- `CesiumObjectPool` is no longer accessible from outside the CesiumRuntime assembly.
 
 ##### Additions :tada:
 
@@ -13,7 +17,10 @@
 - Added dependencies on the ShaderGraph and InputSystem packages to resolve material / script compilation errors.
 - Fixed another bug where `CesiumCameraController` tried to access a non-existent input in the legacy input system.
 - Removed an extra "delimiter" added to the end of on-screen credits in some cases.
+- Fixed a memory leak of `Mesh` objects when entering and exiting Play mode in the Unity Editor.
 - Fixed a crash that happened when attempting to create physics meshes for degenerate triangle meshes.
+
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.23.0 to v0.24.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
 
 ### v1.0.0 - 2023-04-03
 
