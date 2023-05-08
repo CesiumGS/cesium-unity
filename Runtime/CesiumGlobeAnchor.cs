@@ -64,7 +64,7 @@ namespace CesiumForUnity
         internal bool _localToGlobeFixedMatrixIsValid = false;
 
         // The last known local Transform, used to detect changes in the Transform so that
-        // the precise globe coordinates can be recomputed from it. These are invali before OnEnable.
+        // the precise globe coordinates can be recomputed from it. These are invalid before OnEnable.
         [NonSerialized]
         internal bool _lastLocalsAreValid = false;
 
