@@ -347,6 +347,7 @@ namespace CesiumForUnity
             georeference.ecefY = georeference.ecefY;
             georeference.ecefZ = georeference.ecefZ;
             georeference.originAuthority = georeference.originAuthority;
+            georeference.scale = georeference.scale;
             double4x4 ecefToLocal = georeference.ecefToLocalMatrix;
 
             CesiumGeoreference inParent = go.GetComponentInParent<CesiumGeoreference>();

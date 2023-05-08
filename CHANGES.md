@@ -2,9 +2,14 @@
 
 ### ? - ?
 
+##### Additions :tada:
+
+- Added a `scale` property to `CesiumGeoreference`. This allows the entire globe to be scaled up or down with better precision than the scale property on the georeference's `Transform`.
+
 ##### Fixes :wrench:
 
 - Fixed a bug that caused primitive numbers to be negative in the names of tile game objects when the tile mesh had multiple primitives.
+- Fixed a bug that caused tiles to be displaced when changing the transform of a `CesiumGeoreference` at runtime.
 
 ### v1.1.0 - 2023-05-01
 

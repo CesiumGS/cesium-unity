@@ -73,8 +73,8 @@ ViewState unityCameraToViewState(
 
   return ViewState::create(
       cameraPosition,
-      cameraDirection,
-      cameraUp,
+      glm::normalize(cameraDirection),
+      glm::normalize(cameraUp),
       glm::dvec2(camera.pixelWidth(), camera.pixelHeight()),
       horizontalFOV,
       verticalFOV);

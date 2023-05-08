@@ -33,7 +33,8 @@ LocalHorizontalCoordinateSystem createCoordinateSystem(
             georeference.height()),
         LocalDirection::East,
         LocalDirection::Up,
-        LocalDirection::North);
+        LocalDirection::North,
+        1.0 / georeference.scale());
   } else {
     return LocalHorizontalCoordinateSystem(
         glm::dvec3(
@@ -42,7 +43,8 @@ LocalHorizontalCoordinateSystem createCoordinateSystem(
             georeference.ecefZ()),
         LocalDirection::East,
         LocalDirection::Up,
-        LocalDirection::North);
+        LocalDirection::North,
+        1.0 / georeference.scale());
   }
 }
 
