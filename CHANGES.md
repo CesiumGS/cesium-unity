@@ -4,7 +4,7 @@
 
 ##### Additions :tada:
 
-- Added a `scale` property to `CesiumGeoreference`, allowing the entire globe to be scaled up or down while preserving precision better than adjusting the scale on the `Transform`.
+- Added a `scale` property to `CesiumGeoreference`. This allows the entire globe to be scaled up or down with better precision than the scale property on the georeference's `Transform`.
 
 ##### Fixes :wrench:
 
