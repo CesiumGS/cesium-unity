@@ -29,6 +29,8 @@ namespace CesiumForUnity
         private SerializedProperty _ecefY;
         private SerializedProperty _ecefZ;
 
+        private SerializedProperty _scale;
+
         private void OnEnable()
         {
             this._georeference = (CesiumGeoreference)this.target;
@@ -43,6 +45,8 @@ namespace CesiumForUnity
             this._ecefX = this.serializedObject.FindProperty("_ecefX");
             this._ecefY = this.serializedObject.FindProperty("_ecefY");
             this._ecefZ = this.serializedObject.FindProperty("_ecefZ");
+
+            this._scale = this.serializedObject.FindProperty("_scale");
         }
 
         public override void OnInspectorGUI()
@@ -52,6 +56,8 @@ namespace CesiumForUnity
             DrawInspectorButtons();
             EditorGUILayout.Space(5);
 
+            this.DrawScaleProperty();
+            EditorGUILayout.Space(5);
             this.DrawOriginAuthorityProperty();
             EditorGUILayout.Space(5);
             this.DrawLongitudeLatitudeHeightProperties();
@@ -96,6 +102,17 @@ namespace CesiumForUnity
             GUILayout.EndHorizontal();
 
             EditorGUI.EndDisabledGroup();
+        }
+
+        private void DrawScaleProperty()
+        {
+            GUIContent scaleContent = new GUIContent(
+                "Scale",
+                "The scale of the globe in the Unity world. If this value is 0.5, for " +
+                "example, one meter on the globe occupies half a meter in the Unity world. " +
+                "The globe can also be scaled by modifying the georeference's Transform, " +
+                "but setting this property instead will do a better job of preserving precision.");
+            EditorGUILayout.PropertyField(this._scale, scaleContent);
         }
 
         private void DrawOriginAuthorityProperty()
