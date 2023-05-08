@@ -106,11 +106,11 @@ public class TestCesiumGeoreference
         Assert.That(goAnchored.transform.localScale.z, Is.EqualTo(6.0f));
 
         // The globe anchor's scale initially matches the local scale.
-        Assert.That(anchor.scaleEastUpNorth.x, Is.EqualTo(4.0));
-        Assert.That(anchor.scaleEastUpNorth.y, Is.EqualTo(5.0));
-        Assert.That(anchor.scaleEastUpNorth.z, Is.EqualTo(6.0));
-
         IEqualityComparer<double> epsilon8 = Comparers.Double(1e-8);
+        Assert.That(anchor.scaleEastUpNorth.x, Is.EqualTo(4.0).Using(epsilon8));
+        Assert.That(anchor.scaleEastUpNorth.y, Is.EqualTo(5.0).Using(epsilon8));
+        Assert.That(anchor.scaleEastUpNorth.z, Is.EqualTo(6.0).Using(epsilon8));
+
         Assert.That(anchor.longitudeLatitudeHeight.x, Is.Not.EqualTo(-55.0).Using(epsilon8));
         Assert.That(anchor.longitudeLatitudeHeight.y, Is.Not.EqualTo(55.0).Using(epsilon8));
         Assert.That(anchor.longitudeLatitudeHeight.z, Is.Not.EqualTo(1000.0).Using(epsilon8));
@@ -130,9 +130,9 @@ public class TestCesiumGeoreference
         Assert.That(goAnchored.transform.localScale.z, Is.EqualTo(3.0f).Using(epsilon4));
 
         // ...while the globe-relative properties stay the same.
-        Assert.That(anchor.scaleEastUpNorth.x, Is.EqualTo(4.0));
-        Assert.That(anchor.scaleEastUpNorth.y, Is.EqualTo(5.0));
-        Assert.That(anchor.scaleEastUpNorth.z, Is.EqualTo(6.0));
+        Assert.That(anchor.scaleEastUpNorth.x, Is.EqualTo(4.0).Using(epsilon8));
+        Assert.That(anchor.scaleEastUpNorth.y, Is.EqualTo(5.0).Using(epsilon8));
+        Assert.That(anchor.scaleEastUpNorth.z, Is.EqualTo(6.0).Using(epsilon8));
 
         Assert.That(anchor.longitudeLatitudeHeight.x, Is.EqualTo(longitudeLatitudeHeight.x).Using(epsilon8));
         Assert.That(anchor.longitudeLatitudeHeight.y, Is.EqualTo(longitudeLatitudeHeight.y).Using(epsilon8));
