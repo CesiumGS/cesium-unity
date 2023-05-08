@@ -56,7 +56,7 @@ While doing the steps below, make sure no new changes are going into either cesi
 
 # Update the Package Registry
 
-Follow the instructions in the internal Cesium guide for updating Cesium for Unity in the Package Registry. Then, remove the tarball from the samples project. Restore the scoped registry and confirm that the package works.
+Follow the instructions in the internal Cesium guide for updating Cesium for Unity in the Package Registry. Then, remove the tarball from the samples project. Restore the scoped registry and confirm that the package works with the new version.
 
 # Update Cesium for Unity Samples
 
