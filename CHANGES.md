@@ -9,6 +9,7 @@
 ##### Fixes :wrench:
 
 - Fixed a bug that caused primitive numbers to be negative in the names of tile game objects when the tile mesh had multiple primitives.
+- Fixed a bug that caused tiles to be displaced when changing the transform of a `CesiumGeoreference` at runtime.
 
 ### v1.1.0 - 2023-05-01
 
