@@ -63,10 +63,19 @@ namespace CesiumForUnity
         [SerializeField]
         internal bool _localToGlobeFixedMatrixIsValid = false;
 
-        // The last known Transform, used to detect changes in the Transform so that
-        // the precise globe coordinates can be recomputed from it. This is null before OnEnable.
+        // The last known local Transform, used to detect changes in the Transform so that
+        // the precise globe coordinates can be recomputed from it. These are invalid before OnEnable.
         [NonSerialized]
-        internal Matrix4x4? _lastLocalToWorld = null;
+        internal bool _lastLocalsAreValid = false;
+
+        [NonSerialized]
+        internal Vector3 _lastLocalPosition;
+
+        [NonSerialized]
+        internal Quaternion _lastLocalRotation;
+
+        [NonSerialized]
+        internal Vector3 _lastLocalScale;
 
         // The resolved georeference containing this globe anchor. This is just a cache
         // of `GetComponentInParent<CesiumGeoreference>()`.
@@ -433,13 +442,22 @@ namespace CesiumForUnity
         /// </remarks>
         public void Sync()
         {
-            if (!this._localToGlobeFixedMatrixIsValid || (this._lastLocalToWorld != null && this._lastLocalToWorld != this.transform.localToWorldMatrix))
+            // If we don't have a local -> globe fixed matrix yet, we must update from the Transform
+            bool updateFromTransform = !this._localToGlobeFixedMatrixIsValid;
+            if (!updateFromTransform && this._lastLocalsAreValid)
             {
-                this.UpdateEcefFromTransform();
-                return;
+                // We may also need to update from the Transform if it has changed
+                // since the last time we computed the local -> globe fixed matrix.
+                updateFromTransform =
+                    this._lastLocalPosition != this.transform.localPosition ||
+                    this._lastLocalRotation != this.transform.localRotation ||
+                    this._lastLocalScale != this.transform.localScale;
             }
 
-            this.UpdateEcef(this._localToGlobeFixedMatrix);
+            if (updateFromTransform)
+                this.UpdateEcefFromTransform();
+            else
+                this.UpdateEcef(this._localToGlobeFixedMatrix);
         }
 
         /// <summary>
@@ -539,7 +557,10 @@ namespace CesiumForUnity
         {
             // Detect changes in the Transform component.
             // We don't use Transform.hasChanged because we can't control when it is reset to false.
-            WaitUntil waitForChanges = new WaitUntil(() => this._lastLocalToWorld.HasValue && !this.transform.localToWorldMatrix.Equals(this._lastLocalToWorld.Value));
+            WaitUntil waitForChanges = new WaitUntil(() => this._lastLocalsAreValid && (
+                this.transform.localPosition != this._lastLocalPosition ||
+                this.transform.localRotation != this._lastLocalRotation ||
+                this.transform.localScale != this._lastLocalScale));
 
             while (true)
             {
