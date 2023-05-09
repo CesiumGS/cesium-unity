@@ -65,6 +65,7 @@ Assuming you tested the release candidate as described above, you should have [c
 ## Update ion Access Tokens and Project
 
 1. Create a new branch of cesium-unity-samples. 
+2. Change the `bundleVersion` property in `ProjectSettings/ProjectSettings.asset` to reflect the new version of the Samples project.
 2. Delete the Cesium for Unity Samples token for the release before last, which should expire close to the present date.
 3. Create a new access token using the CesiumJS ion account. 
    * The name of the token should match "Cesium for Unity Samples x.x.x - Delete on September 1st, 2021". The expiry date should be two months later than present. 
