@@ -66,17 +66,17 @@ Assuming you tested the release candidate as described above, you should have [c
 
 1. Create a new branch of cesium-unity-samples. 
 2. Change the `bundleVersion` property in `ProjectSettings/ProjectSettings.asset` to reflect the new version of the Samples project.
-2. Delete the Cesium for Unity Samples token for the release before last, which should expire close to the present date.
-3. Create a new access token using the CesiumJS ion account. 
+3. Delete the Cesium for Unity Samples token for the release before last, which should expire close to the present date.
+4. Create a new access token using the CesiumJS ion account. 
    * The name of the token should match "Cesium for Unity Samples x.x.x - Delete on September 1st, 2021". The expiry date should be two months later than present. 
    * The scope of the token should be "assets:read" for all assets.
-4. Copy the access token you just created.
-5. Paste the new token into the `_defaultIonAccessToken` property in [Assets/CesiumSettings/Resources/CesiumRuntimeSettings.asset](https://github.com/CesiumGS/cesium-unity-samples/blob/main/Assets/CesiumSettings/Resources/CesiumRuntimeSettings.asset).
-6. Open cesium-unity-samples in Unity.
-7. If the package update has replaced any Cesium scripts or prefabs that already exist in one of the scenes, e.g., DynamicCamera, replace the old version of the prefab with the new version, and test the scene with the play button to make sure everything is working. If you're unsure whether the package update has resulted in anything that needs to be changed in the Samples, ask the team. 
-8. Visit every scene again to make sure that the view is correct and that nothing appears to be broken or missing. 
-9. For every scene involving multiple locations or sub-scenes, e.g., 04_CesiumSubScenes or 06_CesiumPointClouds, make sure that flying to each location works.
-10. Commit and push your changes. Create a PR to merge to `main` and tag a reviewer.
+5. Copy the access token you just created.
+6. Paste the new token into the `_defaultIonAccessToken` property in [Assets/CesiumSettings/Resources/CesiumRuntimeSettings.asset](https://github.com/CesiumGS/cesium-unity-samples/blob/main/Assets/CesiumSettings/Resources/CesiumRuntimeSettings.asset).
+7. Open cesium-unity-samples in Unity.
+8. If the package update has replaced any Cesium scripts or prefabs that already exist in one of the scenes, e.g., DynamicCamera, replace the old version of the prefab with the new version, and test the scene with the play button to make sure everything is working. If you're unsure whether the package update has resulted in anything that needs to be changed in the Samples, ask the team. 
+9. Visit every scene again to make sure that the view is correct and that nothing appears to be broken or missing. 
+10. For every scene involving multiple locations or sub-scenes, e.g., 04_CesiumSubScenes or 06_CesiumPointClouds, make sure that flying to each location works.
+11. Commit and push your changes. Create a PR to merge to `main` and tag a reviewer.
 
 ## Publish the Cesium for Unity Samples release on GitHub
 
@@ -86,4 +86,6 @@ After the update has been merged to `main`, do the following:
   * `git push origin v1.10.0`
 2. Switch to the tag in the GitHub UI by visiting the repo, https://github.com/CesiumGS/cesium-unity-samples, clicking the combo box where it says "main", switching to the Tags tab, and selecting the new tag that you created above.
 3. Create a new release on GitHub: https://github.com/CesiumGS/cesium-unity-samples/releases/new. Select the tag you created above. Add a changelog in the body to describe recent updates. Follow the format used in previous release.
-4. Publish the release.
+4. Publish the release as a _draft_, and then go the [releases](https://github.com/CesiumGS/cesium-unity-samples/releases). Download the "Source Code (zip)" asset. Rename it to `CesiumForUnitySamples-v1.2.0.zip`, replacing `v1.2.0` with the correct version number for this release.
+5. Edit the draft release and attach the renamed ZIP file to it.
+6. Publish the release.
