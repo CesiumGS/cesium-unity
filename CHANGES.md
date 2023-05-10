@@ -2,7 +2,7 @@
 
 ### ? - ?
 
-### Fixes :wrench:
+##### Fixes :wrench:
 
 - Fixed a bug where `Cesium3DTileset` would not reflect changes made to the properties of its opaque material in the Editor.
 
