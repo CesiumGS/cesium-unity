@@ -1,5 +1,11 @@
 # Change Log
 
+### ? - ?
+
+### Fixes :wrench:
+
+- Fixed a bug where `Cesium3DTileset` would not reflect changes made to the properties of its opaque material in the Editor.
+
 ### v1.2.0 - 2023-05-09
 
 ##### Additions :tada:
