@@ -1,5 +1,11 @@
 # Change Log
 
+### ? - ?
+
+##### Fixes :wrench:
+
+- Fixed a bug that could cause missing textures when using two raster overlays with the same projection on a single tileset.
+
 ### v1.2.0 - 2023-05-09
 
 ##### Additions :tada:

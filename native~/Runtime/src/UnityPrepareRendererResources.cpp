@@ -1477,7 +1477,6 @@ std::optional<uint32_t> findOverlayIndex(
   bool overlayFound = false;
   for (const CesiumUtility::IntrusivePointer<RasterOverlay>& pOverlay :
        pTileset->getOverlays()) {
-    // TODO: Is it safe to compare pointers like this?
     if (&overlay == pOverlay.get()) {
       return overlayIndex;
     }
