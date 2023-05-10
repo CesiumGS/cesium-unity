@@ -1462,6 +1462,34 @@ void UnityPrepareRendererResources::freeRaster(
   }
 }
 
+namespace {
+
+std::optional<uint32_t> findOverlayIndex(
+    const UnityEngine::GameObject& tileset,
+    const Cesium3DTilesSelection::RasterOverlay& overlay) {
+  DotNet::CesiumForUnity::Cesium3DTileset tilesetComponent =
+      tileset.GetComponent<DotNet::CesiumForUnity::Cesium3DTileset>();
+  Tileset* pTileset = tilesetComponent.NativeImplementation().getTileset();
+  if (!pTileset)
+    return std::nullopt;
+
+  uint32_t overlayIndex = 0;
+  bool overlayFound = false;
+  for (const CesiumUtility::IntrusivePointer<RasterOverlay>& pOverlay :
+       pTileset->getOverlays()) {
+    // TODO: Is it safe to compare pointers like this?
+    if (&overlay == pOverlay.get()) {
+      return overlayIndex;
+    }
+
+    ++overlayIndex;
+  }
+
+  return std::nullopt;
+}
+
+} // namespace
+
 void UnityPrepareRendererResources::attachRasterInMainThread(
     const Cesium3DTilesSelection::Tile& tile,
     int32_t overlayTextureCoordinateID,
@@ -1483,30 +1511,16 @@ void UnityPrepareRendererResources::attachRasterInMainThread(
   if (!pCesiumGameObject || !pCesiumGameObject->pGameObject || !pTexture)
     return;
 
-  DotNet::CesiumForUnity::Cesium3DTileset tilesetComponent =
-      this->_tileset.GetComponent<DotNet::CesiumForUnity::Cesium3DTileset>();
-  Tileset* pTileset = tilesetComponent.NativeImplementation().getTileset();
-  if (!pTileset)
+  std::optional<uint32_t> maybeOverlayIndex =
+      findOverlayIndex(this->_tileset, rasterTile.getOverlay());
+  if (!maybeOverlayIndex)
     return;
 
-  uint32_t overlayIndex = 0;
-  bool overlayFound = false;
-  for (const CesiumUtility::IntrusivePointer<RasterOverlay>& pOverlay :
-       pTileset->getOverlays()) {
-    // TODO: Is it safe to compare pointers like this?
-    if (&rasterTile.getOverlay() == pOverlay.get()) {
-      overlayFound = true;
-      break;
-    }
+  uint32_t overlayIndex = *maybeOverlayIndex;
 
-    ++overlayIndex;
-  }
-
-  if (!overlayFound)
-    return;
-
-  // TODO: Can we count on the order of primitives in the transform chain
-  // to match the order of primitives using gltf->forEachPrimitive??
+  // We're assuming here that the order of primitives in the transform chain
+  // is the same as the order in the `primitiveInfos`, which should
+  // always be true.
   uint32_t primitiveIndex = 0;
 
   UnityEngine::Transform transform =
@@ -1587,6 +1601,13 @@ void UnityPrepareRendererResources::detachRasterInMainThread(
   if (!pCesiumGameObject || !pCesiumGameObject->pGameObject || !pTexture)
     return;
 
+  std::optional<uint32_t> maybeOverlayIndex =
+      findOverlayIndex(this->_tileset, rasterTile.getOverlay());
+  if (!maybeOverlayIndex)
+    return;
+
+  uint32_t overlayIndex = *maybeOverlayIndex;
+
   UnityEngine::Transform transform =
       pCesiumGameObject->pGameObject->transform();
   for (int32_t i = 0, len = transform.childCount(); i < len; ++i) {
@@ -1608,7 +1629,7 @@ void UnityPrepareRendererResources::detachRasterInMainThread(
       continue;
 
     material.SetTexture(
-        _shaderProperty.getOverlayTextureID(overlayTextureCoordinateID),
+        _shaderProperty.getOverlayTextureID(overlayIndex),
         UnityEngine::Texture(nullptr));
   }
 }
