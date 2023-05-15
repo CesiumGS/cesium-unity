@@ -470,6 +470,13 @@ void Cesium3DTilesetImpl::LoadTileset(
 
     excluder.AddToTileset(tileset);
   }
+
+  // If the tileset has an opaque material, set its hash here to avoid
+  // destroying it on the first tick after creation.
+  if (tileset.opaqueMaterial() != nullptr) {
+    int32_t opaqueMaterialHash = tileset.opaqueMaterial().ComputeCRC();
+    _lastOpaqueMaterialHash = opaqueMaterialHash;
+  }
 }
 
 } // namespace CesiumForUnityNative
