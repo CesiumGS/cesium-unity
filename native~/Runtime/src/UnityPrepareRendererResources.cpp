@@ -1474,7 +1474,6 @@ std::optional<uint32_t> findOverlayIndex(
     return std::nullopt;
 
   uint32_t overlayIndex = 0;
-  bool overlayFound = false;
   for (const CesiumUtility::IntrusivePointer<RasterOverlay>& pOverlay :
        pTileset->getOverlays()) {
     if (&overlay == pOverlay.get()) {
