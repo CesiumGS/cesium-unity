@@ -5,6 +5,7 @@
 ##### Fixes :wrench:
 
 - Fixed a bug where `Cesium3DTileset` would not reflect changes made to the properties of its opaque material in the Editor.
+- Fixed a bug that could cause missing textures when using two raster overlays with the same projection on a single tileset.
 
 ### v1.2.0 - 2023-05-09
 
