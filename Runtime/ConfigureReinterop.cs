@@ -347,6 +347,7 @@ namespace CesiumForUnity
             georeference.ecefY = georeference.ecefY;
             georeference.ecefZ = georeference.ecefZ;
             georeference.originAuthority = georeference.originAuthority;
+            georeference.scale = georeference.scale;
             double4x4 ecefToLocal = georeference.ecefToLocalMatrix;
 
             CesiumGeoreference inParent = go.GetComponentInParent<CesiumGeoreference>();
@@ -474,7 +475,7 @@ namespace CesiumForUnity
             globeAnchor._georeference = null;
             globeAnchor._localToGlobeFixedMatrix = new double4x4();
             globeAnchor._localToGlobeFixedMatrixIsValid = true;
-            globeAnchor._lastStateIsValid = false;
+            globeAnchor._lastLocalsAreValid = true;
             globeAnchor._lastLocalPosition = new Vector3();
             globeAnchor._lastLocalRotation = new Quaternion();
             globeAnchor._lastLocalScale = new Vector3();

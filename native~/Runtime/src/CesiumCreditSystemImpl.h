@@ -2,13 +2,13 @@
 
 #include <Cesium3DTilesSelection/CreditSystem.h>
 
+#include <DotNet/CesiumForUnity/CesiumCredit.h>
 #include <DotNet/System/Collections/Generic/List1.h>
 
 #include <memory>
 #include <unordered_map>
 
 namespace DotNet::CesiumForUnity {
-class CesiumCredit;
 class CesiumCreditComponent;
 class CesiumCreditSystem;
 class GameObject;

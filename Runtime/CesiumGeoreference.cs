@@ -85,6 +85,9 @@ namespace CesiumForUnity
         [SerializeField]
         private double _ecefZ = 0.0;
 
+        [SerializeField]
+        private double _scale = 1.0;
+
         [NonSerialized]
         private double4x4 _localToEcef = double4x4.identity;
 
@@ -208,6 +211,22 @@ namespace CesiumForUnity
             {
                 this._ecefZ = value;
                 this.originAuthority = CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed;
+            }
+        }
+
+        /// <summary>
+        /// The scale of the globe in the Unity world. If this value is 0.5, for example, one
+        /// meter on the globe occupies half a meter in the Unity world. The globe can also
+        /// be scaled by modifying the georeference's Transform, but setting this property instead
+        /// will do a better job of preserving precision.
+        /// </summary>
+        public double scale
+        {
+            get => this._scale;
+            set
+            {
+                this._scale = value;
+                this.MoveOrigin();
             }
         }
 
@@ -345,6 +364,10 @@ namespace CesiumForUnity
         {
             if (!this._isInitialized)
                 throw new InvalidOperationException("The origin of a CesiumGeoreference must not be set before its Initialize method is called, either explicitly or via OnEnable.");
+
+            // Scale must be greater than 0
+            if (this._scale < 1e-8)
+                this._scale = 1e-8;
 
             this.UpdateOtherCoordinates();
 

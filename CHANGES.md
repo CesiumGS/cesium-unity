@@ -2,6 +2,23 @@
 
 ### ? - ?
 
+##### Fixes :wrench:
+
+- Fixed a bug that could cause missing textures when using two raster overlays with the same projection on a single tileset.
+
+### v1.2.0 - 2023-05-09
+
+##### Additions :tada:
+
+- Added a `scale` property to `CesiumGeoreference`. This allows the entire globe to be scaled up or down with better precision than the scale property on the georeference's `Transform`.
+
+##### Fixes :wrench:
+
+- Fixed a bug that caused tiles to be displaced when changing the transform of a `CesiumGeoreference` at runtime.
+- Fixed a bug that caused primitive numbers to be negative in the names of tile game objects when the tile mesh had multiple primitives.
+
+### v1.1.0 - 2023-05-01
+
 ##### Breaking Changes :mega:
 
 - `CesiumObjectPool` is no longer accessible from outside the CesiumRuntime assembly.
@@ -19,6 +36,8 @@
 - Removed an extra "delimiter" added to the end of on-screen credits in some cases.
 - Fixed a memory leak of `Mesh` objects when entering and exiting Play mode in the Unity Editor.
 - Fixed a crash that happened when attempting to create physics meshes for degenerate triangle meshes.
+
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.23.0 to v0.24.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
 
 ### v1.0.0 - 2023-04-03
 

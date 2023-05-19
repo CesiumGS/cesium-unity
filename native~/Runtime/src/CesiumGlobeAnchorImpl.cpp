@@ -90,14 +90,18 @@ void updateAnchorFromCpp(
 
     UnityEngine::Transform transform = anchor.transform();
 
-    transform.localPosition(UnityTransforms::toUnity(translation));
-    transform.localRotation(UnityTransforms::toUnity(rotation));
-    transform.localScale(UnityTransforms::toUnity(scale));
+    UnityEngine::Vector3 localPosition = UnityTransforms::toUnity(translation);
+    UnityEngine::Quaternion localRotation = UnityTransforms::toUnity(rotation);
+    UnityEngine::Vector3 localScale = UnityTransforms::toUnity(scale);
 
-    anchor._lastStateIsValid(true);
+    transform.localPosition(localPosition);
+    transform.localRotation(localRotation);
+    transform.localScale(localScale);
+
     anchor._lastLocalPosition(transform.localPosition());
     anchor._lastLocalRotation(transform.localRotation());
     anchor._lastLocalScale(transform.localScale());
+    anchor._lastLocalsAreValid(true);
   }
 }
 
