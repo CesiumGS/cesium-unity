@@ -21,6 +21,7 @@ namespace CesiumForUnity
     /// </summary>
     [ExecuteInEditMode]
     [RequireComponent(typeof(UIDocument))]
+    [AddComponentMenu("Cesium/Cesium Credit System UI")]
     internal class CesiumCreditSystemUI : MonoBehaviour
     {
         private CesiumCreditSystem _creditSystem;

@@ -9,6 +9,7 @@ namespace CesiumForUnity
     [ReinteropNativeImplementation(
         "CesiumForUnityNative::CesiumDebugColorizeTilesRasterOverlayImpl",
         "CesiumDebugColorizeTilesRasterOverlayImpl.h")]
+    [AddComponentMenu("Cesium/Cesium Debug Colorize Tiles Raster Overlay")]
     public partial class CesiumDebugColorizeTilesRasterOverlay : CesiumRasterOverlay
     {   
         /// <inheritdoc/>

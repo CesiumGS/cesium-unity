@@ -27,6 +27,7 @@ namespace CesiumForUnity
     [ReinteropNativeImplementation(
         "CesiumForUnityNative::CesiumBingMapsRasterOverlayImpl",
         "CesiumBingMapsRasterOverlayImpl.h")]
+    [AddComponentMenu("Cesium/Cesium Bing Maps Raster Overlay")]
     public partial class CesiumBingMapsRasterOverlay : CesiumRasterOverlay
     {
         [SerializeField]
