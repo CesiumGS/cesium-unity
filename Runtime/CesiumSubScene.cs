@@ -17,6 +17,7 @@ namespace CesiumForUnity
     /// </para>
     /// </remarks>
     [ExecuteInEditMode]
+    [AddComponentMenu("Cesium/Cesium Sub Scene")]
     public class CesiumSubScene : MonoBehaviour
     {
         [SerializeField]

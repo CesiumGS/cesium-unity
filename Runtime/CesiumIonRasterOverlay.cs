@@ -7,6 +7,7 @@ namespace CesiumForUnity
     /// A <see cref="CesiumRasterOverlay"/> that uses an IMAGERY asset from Cesium ion.
     /// </summary>
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumIonRasterOverlayImpl", "CesiumIonRasterOverlayImpl.h")]
+    [AddComponentMenu("Cesium/Cesium Ion Raster Overlay")]
     public partial class CesiumIonRasterOverlay : CesiumRasterOverlay
     {
         [SerializeField]

@@ -10,6 +10,7 @@ namespace CesiumForUnity
     [ReinteropNativeImplementation(
         "CesiumForUnityNative::CesiumWebMapServiceRasterOverlayImpl",
         "CesiumWebMapServiceRasterOverlayImpl.h")]
+    [AddComponentMenu("Cesium/Cesium Web Map Service Raster Overlay")]
     public partial class CesiumWebMapServiceRasterOverlay : CesiumRasterOverlay
     {
         [SerializeField]

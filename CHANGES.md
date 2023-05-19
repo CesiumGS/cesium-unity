@@ -2,6 +2,10 @@
 
 ### ? - ?
 
+##### Additions :tada:
+
+- Cesium components now appear under the "Cesium" category in the Component menu. Previously were under "Scripts > Cesium for Unity"
+
 ##### Fixes :wrench:
 
 - Fixed a bug where `Cesium3DTileset` would not reflect changes made to the properties of its opaque material in the Editor.

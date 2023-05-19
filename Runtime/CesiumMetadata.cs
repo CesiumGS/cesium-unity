@@ -7,6 +7,7 @@ namespace CesiumForUnity
     /// Provides access to the metadata attached to features in a <see cref="Cesium3DTileset"/>.
     /// </summary>
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumMetadataImpl", "CesiumMetadataImpl.h")]
+    [AddComponentMenu("Cesium/Cesium Metadata")]
     public partial class CesiumMetadata : MonoBehaviour
     {
         /// <summary>

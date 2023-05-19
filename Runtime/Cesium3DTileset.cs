@@ -39,6 +39,7 @@ namespace CesiumForUnity
     /// </remarks>
     [ExecuteInEditMode]
     [ReinteropNativeImplementation("CesiumForUnityNative::Cesium3DTilesetImpl", "Cesium3DTilesetImpl.h")]
+    [AddComponentMenu("Cesium/Cesium 3D Tileset")]
     public partial class Cesium3DTileset : MonoBehaviour, IDisposable
     {
         public void Dispose()
