@@ -11,7 +11,7 @@ namespace CesiumForUnity
         "CesiumForUnityNative::CesiumWebMapServiceRasterOverlayImpl",
         "CesiumWebMapServiceRasterOverlayImpl.h")]
     [AddComponentMenu("Cesium/Cesium Web Map Service Raster Overlay")]
-    [IconAttribute("Packages/com.cesium.unity/Editor/Resources/Cesium-64x64.png")]
+    [IconAttribute("Packages/com.cesium.unity/Editor/Resources/Cesium-24x24.png")]
     public partial class CesiumWebMapServiceRasterOverlay : CesiumRasterOverlay
     {
         [SerializeField]

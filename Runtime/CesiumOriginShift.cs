@@ -26,7 +26,7 @@ namespace CesiumForUnity
     [RequireComponent(typeof(CesiumGlobeAnchor))]
     [DisallowMultipleComponent]
     [AddComponentMenu("Cesium/Cesium Origin Shift")]
-    [IconAttribute("Packages/com.cesium.unity/Editor/Resources/Cesium-64x64.png")]
+    [IconAttribute("Packages/com.cesium.unity/Editor/Resources/Cesium-24x24.png")]
     public class CesiumOriginShift : MonoBehaviour
     {
         void LateUpdate()
