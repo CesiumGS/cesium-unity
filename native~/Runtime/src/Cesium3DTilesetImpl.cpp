@@ -25,6 +25,7 @@
 #include <DotNet/UnityEngine/Camera.h>
 #include <DotNet/UnityEngine/Debug.h>
 #include <DotNet/UnityEngine/GameObject.h>
+#include <DotNet/UnityEngine/Material.h>
 #include <DotNet/UnityEngine/Quaternion.h>
 #include <DotNet/UnityEngine/Time.h>
 #include <DotNet/UnityEngine/Transform.h>
@@ -51,7 +52,8 @@ Cesium3DTilesetImpl::Cesium3DTilesetImpl(
       _updateInEditorCallback(nullptr),
 #endif
       _creditSystem(nullptr),
-      _destroyTilesetOnNextUpdate(false) {
+      _destroyTilesetOnNextUpdate(false),
+      _lastOpaqueMaterialHash(0) {
 }
 
 Cesium3DTilesetImpl::~Cesium3DTilesetImpl() {}
@@ -82,12 +84,24 @@ void Cesium3DTilesetImpl::Update(
   }
 
 #if UNITY_EDITOR
-  // If "Update In Editor" is false, return early.
   if (UnityEngine::Application::isEditor() &&
-      !UnityEditor::EditorApplication::isPlaying() &&
-      !tileset.updateInEditor()) {
-    return;
+      !UnityEditor::EditorApplication::isPlaying()) {
+    // If "Update In Editor" is false, return early.
+    if (!tileset.updateInEditor()) {
+      return;
+    }
+
+    // If the opaque material or any of its properties have changed, recreate
+    // the tileset to reflect those changes.
+    if (tileset.opaqueMaterial() != nullptr) {
+      int32_t opaqueMaterialHash = tileset.opaqueMaterial().ComputeCRC();
+      if (_lastOpaqueMaterialHash != opaqueMaterialHash) {
+        this->DestroyTileset(tileset);
+        _lastOpaqueMaterialHash = opaqueMaterialHash;
+      }
+    }
   }
+
 #endif
 
   if (!this->_pTileset) {
@@ -455,6 +469,13 @@ void Cesium3DTilesetImpl::LoadTileset(
     }
 
     excluder.AddToTileset(tileset);
+  }
+
+  // If the tileset has an opaque material, set its hash here to avoid
+  // destroying it on the first tick after creation.
+  if (tileset.opaqueMaterial() != nullptr) {
+    int32_t opaqueMaterialHash = tileset.opaqueMaterial().ComputeCRC();
+    _lastOpaqueMaterialHash = opaqueMaterialHash;
   }
 }
 

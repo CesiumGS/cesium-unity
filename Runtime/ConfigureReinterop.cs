@@ -147,7 +147,9 @@ namespace CesiumForUnity
             MeshRenderer meshRenderer = new MeshRenderer();
             GameObject meshGameObject = meshRenderer.gameObject;
             meshRenderer.material = UnityEngine.Object.Instantiate(meshRenderer.material);
+
             int id = Shader.PropertyToID("name");
+            int crc = meshRenderer.material.ComputeCRC();
             meshRenderer.material.SetTexture(id, texture2D);
             meshRenderer.material.SetFloat(id, 1.0f);
             meshRenderer.material.SetVector(id, new Vector4());
