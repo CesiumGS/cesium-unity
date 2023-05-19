@@ -11,6 +11,7 @@ namespace CesiumForUnity
         "CesiumForUnityNative::CesiumTileMapServiceRasterOverlayImpl",
         "CesiumTileMapServiceRasterOverlayImpl.h")]
     [AddComponentMenu("Cesium/Cesium Tile Map Service Raster Overlay")]
+    [IconAttribute("Packages/com.cesium.unity/Editor/Resources/Cesium-64x64.png")]
     public partial class CesiumTileMapServiceRasterOverlay : CesiumRasterOverlay
     {
         [SerializeField]

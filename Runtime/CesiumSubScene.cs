@@ -18,6 +18,7 @@ namespace CesiumForUnity
     /// </remarks>
     [ExecuteInEditMode]
     [AddComponentMenu("Cesium/Cesium Sub Scene")]
+    [IconAttribute("Packages/com.cesium.unity/Editor/Resources/Cesium-64x64.png")]
     public class CesiumSubScene : MonoBehaviour
     {
         [SerializeField]
