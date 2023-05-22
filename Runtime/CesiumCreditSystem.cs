@@ -92,6 +92,7 @@ namespace CesiumForUnity
     [ExecuteInEditMode]
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumCreditSystemImpl", "CesiumCreditSystemImpl.h")]
     [AddComponentMenu("Cesium/Cesium Credit System")]
+    [IconAttribute("Packages/com.cesium.unity/Editor/Resources/Cesium-24x24.png")]
     public partial class CesiumCreditSystem : MonoBehaviour
     {
         private List<CesiumCredit> _onScreenCredits;

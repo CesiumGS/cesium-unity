@@ -22,6 +22,7 @@ namespace CesiumForUnity
     [ExecuteInEditMode]
     [RequireComponent(typeof(UIDocument))]
     [AddComponentMenu("Cesium/Cesium Credit System UI")]
+    [IconAttribute("Packages/com.cesium.unity/Editor/Resources/Cesium-24x24.png")]
     internal class CesiumCreditSystemUI : MonoBehaviour
     {
         private CesiumCreditSystem _creditSystem;

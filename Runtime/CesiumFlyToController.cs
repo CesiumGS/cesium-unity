@@ -17,6 +17,7 @@ namespace CesiumForUnity
     [RequireComponent(typeof(CesiumOriginShift))]
     [DisallowMultipleComponent]
     [AddComponentMenu("Cesium/Cesium Fly To Controller")]
+    [IconAttribute("Packages/com.cesium.unity/Editor/Resources/Cesium-24x24.png")]
     public class CesiumFlyToController : MonoBehaviour
     {
         [SerializeField]

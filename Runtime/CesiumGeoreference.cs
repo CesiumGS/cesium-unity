@@ -61,6 +61,7 @@ namespace CesiumForUnity
     [ExecuteInEditMode]
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumGeoreferenceImpl", "CesiumGeoreferenceImpl.h")]
     [AddComponentMenu("Cesium/Cesium Georeference")]
+    [IconAttribute("Packages/com.cesium.unity/Editor/Resources/Cesium-24x24.png")]
     public partial class CesiumGeoreference : MonoBehaviour
     {
         #region Fields

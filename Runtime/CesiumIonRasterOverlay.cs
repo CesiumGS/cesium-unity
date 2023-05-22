@@ -8,6 +8,7 @@ namespace CesiumForUnity
     /// </summary>
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumIonRasterOverlayImpl", "CesiumIonRasterOverlayImpl.h")]
     [AddComponentMenu("Cesium/Cesium Ion Raster Overlay")]
+    [IconAttribute("Packages/com.cesium.unity/Editor/Resources/Cesium-24x24.png")]
     public partial class CesiumIonRasterOverlay : CesiumRasterOverlay
     {
         [SerializeField]
