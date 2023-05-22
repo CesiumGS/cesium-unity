@@ -5,6 +5,7 @@
 ##### Additions :tada:
 
 - Cesium components now appear under the "Cesium" category in the Component menu. Previously were under "Scripts > Cesium for Unity"
+- Cesium components now display the Cesium logo as their icon, rather than the default Unity script icon.
 
 ##### Fixes :wrench:
 
