@@ -148,7 +148,6 @@ public class TestCesiumGeoreference
 
         GameObject goSubscene = new GameObject("SubScene");
         goSubscene.transform.parent = goGeoreference.transform;
-        georeference.SetOriginLongitudeLatitudeHeight(-55.0, 55.0, 1000.0);
 
         CesiumSubScene subscene = goSubscene.AddComponent<CesiumSubScene>();
 
@@ -230,6 +229,81 @@ public class TestCesiumGeoreference
             yield return null;
 
             Assert.That(subscene.ecefZ, Is.EqualTo(5050.0).Using(epsilon8));
+            yield return null;
+        }
+    }
+
+    [UnityTest]
+    public IEnumerator ChangingOriginAtRuntimeUpdatesActiveSubScene()
+    {
+        GameObject goGeoreference = new GameObject("Georeference");
+        CesiumGeoreference georeference = goGeoreference.AddComponent<CesiumGeoreference>();
+        georeference.SetOriginLongitudeLatitudeHeight(-55.0, 55.0, 1000.0);
+
+        List<GameObject> goSubscenes = new List<GameObject>();
+        List<CesiumSubScene> subscenes = new List<CesiumSubScene>();
+
+        for (int i = 0; i < 3; ++i)
+        {
+            GameObject newGo = new GameObject("SubScene:" + i);
+            newGo.transform.parent = goGeoreference.transform;
+
+            CesiumSubScene newSubscene = newGo.AddComponent<CesiumSubScene>();
+            newSubscene.longitude = -1.0;
+
+            goSubscenes.Add(newGo);
+            subscenes.Add(newSubscene);
+        }
+
+        IEqualityComparer<double> epsilon8 = Comparers.Double(1e-8);
+
+        yield return null;
+
+        // Set the first subscene active, and make a change
+        {
+            goSubscenes[0].SetActive(true);
+            georeference.longitude = 42.0;
+            yield return null;
+
+            Assert.That(subscenes[0].isActiveAndEnabled, Is.EqualTo(true));
+            Assert.That(subscenes[1].isActiveAndEnabled, Is.EqualTo(false));
+            Assert.That(subscenes[2].isActiveAndEnabled, Is.EqualTo(false));
+
+            Assert.That(subscenes[0].longitude, Is.EqualTo(42.0).Using(epsilon8));
+            Assert.That(subscenes[1].longitude, Is.EqualTo(-1.0).Using(epsilon8));
+            Assert.That(subscenes[2].longitude, Is.EqualTo(-1.0).Using(epsilon8));
+            yield return null;
+        }
+
+        // Now the second
+        {
+            goSubscenes[1].SetActive(true);
+            georeference.longitude = 52.0;
+            yield return null;
+
+            Assert.That(subscenes[0].isActiveAndEnabled, Is.EqualTo(false));
+            Assert.That(subscenes[1].isActiveAndEnabled, Is.EqualTo(true));
+            Assert.That(subscenes[2].isActiveAndEnabled, Is.EqualTo(false));
+
+            Assert.That(subscenes[0].longitude, Is.EqualTo(42.0).Using(epsilon8));
+            Assert.That(subscenes[1].longitude, Is.EqualTo(52.0).Using(epsilon8));
+            Assert.That(subscenes[2].longitude, Is.EqualTo(-1.0).Using(epsilon8));
+            yield return null;
+        }
+
+        // And finally the third
+        {
+            goSubscenes[2].SetActive(true);
+            georeference.longitude = 62.0;
+            yield return null;
+
+            Assert.That(subscenes[0].isActiveAndEnabled, Is.EqualTo(false));
+            Assert.That(subscenes[1].isActiveAndEnabled, Is.EqualTo(false));
+            Assert.That(subscenes[2].isActiveAndEnabled, Is.EqualTo(true));
+
+            Assert.That(subscenes[0].longitude, Is.EqualTo(42.0).Using(epsilon8));
+            Assert.That(subscenes[1].longitude, Is.EqualTo(52.0).Using(epsilon8));
+            Assert.That(subscenes[2].longitude, Is.EqualTo(62.0).Using(epsilon8));
             yield return null;
         }
     }
