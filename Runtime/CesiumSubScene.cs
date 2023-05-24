@@ -293,12 +293,6 @@ namespace CesiumForUnity
                 if (georeference == null)
                     throw new InvalidOperationException("CesiumSubScene is not nested inside a game object with a CesiumGeoreference.");
 
-                double3 ecefPosition = new double3(
-                    this._ecefX,
-                    this._ecefY,
-                    this._ecefZ
-                );
-
                 if (this.originAuthority == CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed)
                     georeference.SetOriginEarthCenteredEarthFixed(
                         this._ecefX,
