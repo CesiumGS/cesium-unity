@@ -255,11 +255,7 @@ namespace CesiumForUnity
             this.UpdateOrigin();
         }
 
-        /// <summary>
-        /// Recomputes the coordinate system based on an updated origin. It is usually not
-        /// necessary to call this directly as it is called automatically when needed.
-        /// </summary>
-        public void UpdateOrigin()
+        private void UpdateOtherCoordinates()
         {
             if (this._originAuthority == CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight)
             {
@@ -286,6 +282,15 @@ namespace CesiumForUnity
                 this._latitude = llh.y;
                 this._height = llh.z;
             }
+        }
+
+        /// <summary>
+        /// Recomputes the coordinate system based on an updated origin. It is usually not
+        /// necessary to call this directly as it is called automatically when needed.
+        /// </summary>
+        public void UpdateOrigin()
+        {
+            UpdateOtherCoordinates();
 
             if (this.isActiveAndEnabled)
             {
