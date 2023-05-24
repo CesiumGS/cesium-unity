@@ -303,25 +303,20 @@ namespace CesiumForUnity
 
             // If not under a georef, nothing to do
             if (this._georeference == null)
+            {
                 throw new InvalidOperationException(
                     "CesiumSubScene should have been nested inside a game object with a CesiumGeoreference.");
-
-            // Update our origin to our parent georef, and maintain our origin authority
-            if (this._originAuthority == CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight)
-            {
-                this._longitude = this._georeference.longitude;
-                this._latitude = this._georeference.latitude;
-                this._height = this._georeference.height;
-            }
-            else if (this._originAuthority == CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed)
-            {
-                this._ecefX = this._georeference.ecefX;
-                this._ecefY = this._georeference.ecefY;
-                this._ecefZ = this._georeference.ecefZ;
             }
 
-            // Update other values without updating parent
-            this.UpdateOtherCoordinates();
+            // Update our origin to our parent georef, maintain our origin authority,
+            // and copy both sets of reference coordinates. No need to calculate any of this again
+            this._longitude = this._georeference.longitude;
+            this._latitude = this._georeference.latitude;
+            this._height = this._georeference.height;
+
+            this._ecefX = this._georeference.ecefX;
+            this._ecefY = this._georeference.ecefY;
+            this._ecefZ = this._georeference.ecefZ;
         }
 
         private void OnDisable()

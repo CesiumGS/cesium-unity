@@ -138,4 +138,99 @@ public class TestCesiumGeoreference
         Assert.That(anchor.longitudeLatitudeHeight.y, Is.EqualTo(longitudeLatitudeHeight.y).Using(epsilon8));
         Assert.That(anchor.longitudeLatitudeHeight.z, Is.EqualTo(longitudeLatitudeHeight.z).Using(epsilon8));
     }
+
+    [UnityTest]
+    public IEnumerator ChangingOriginAtRuntimeUpdatesSubScene()
+    {
+        GameObject goGeoreference = new GameObject("Georeference");
+        CesiumGeoreference georeference = goGeoreference.AddComponent<CesiumGeoreference>();
+        georeference.SetOriginLongitudeLatitudeHeight(-55.0, 55.0, 1000.0);
+
+        GameObject goSubscene = new GameObject("SubScene");
+        goSubscene.transform.parent = goGeoreference.transform;
+        georeference.SetOriginLongitudeLatitudeHeight(-55.0, 55.0, 1000.0);
+
+        CesiumSubScene subscene = goSubscene.AddComponent<CesiumSubScene>();
+
+        IEqualityComparer<double> epsilon8 = Comparers.Double(1e-8);
+
+        yield return null;
+
+        // Change the origin with 3 components
+        {
+            georeference.SetOriginLongitudeLatitudeHeight(-10.0, 10.0, 100.0);
+            yield return null;
+
+            // The subscene should sync up
+            Assert.That(subscene.longitude, Is.EqualTo(-10.0).Using(epsilon8));
+            Assert.That(subscene.latitude, Is.EqualTo(10.0).Using(epsilon8));
+            Assert.That(subscene.height, Is.EqualTo(100.0).Using(epsilon8));
+            yield return null;
+        }
+
+        // Change with just longitude
+        {
+            georeference.longitude = 40.0;
+            yield return null;
+
+            Assert.That(subscene.longitude, Is.EqualTo(40.0).Using(epsilon8));
+            yield return null;
+        }
+
+        // Change with just latitude
+        {
+            georeference.latitude = 50.0;
+            yield return null;
+
+            Assert.That(subscene.latitude, Is.EqualTo(50.0).Using(epsilon8));
+            yield return null;
+        }
+
+        // Change with just height
+        {
+            georeference.height = 60.0;
+            yield return null;
+
+            Assert.That(subscene.height, Is.EqualTo(60.0).Using(epsilon8));
+            yield return null;
+        }
+
+        // Now a 3 component change, but ECEF
+        {
+            georeference.SetOriginEarthCenteredEarthFixed(-3000.0, 4000.0, 5000.0);
+            yield return null;
+
+            Assert.That(subscene.ecefX, Is.EqualTo(-3000.0).Using(epsilon8));
+            Assert.That(subscene.ecefY, Is.EqualTo(4000.0).Using(epsilon8));
+            Assert.That(subscene.ecefZ, Is.EqualTo(5000.0).Using(epsilon8));
+            yield return null;
+        }
+
+        // Change with just X
+        {
+            georeference.ecefX = -3050.0;
+            yield return null;
+
+            Assert.That(subscene.ecefX, Is.EqualTo(-3050.0).Using(epsilon8));
+            yield return null;
+        }
+
+        // Change with just Y
+        {
+            georeference.ecefX = 4050.0;
+            yield return null;
+
+            Assert.That(subscene.ecefX, Is.EqualTo(4050.0).Using(epsilon8));
+            yield return null;
+        }
+
+        // Change with just Z
+        {
+            georeference.ecefZ = 5050.0;
+            yield return null;
+
+            Assert.That(subscene.ecefZ, Is.EqualTo(5050.0).Using(epsilon8));
+            yield return null;
+        }
+    }
 }
