@@ -5,6 +5,7 @@
 ##### Fixes :wrench:
 
 - Fixed a bug that could cause missing textures when using two raster overlays with the same projection on a single tileset.
+- Lessen the amount of extreme camera rotation in the CesiumCameraController after a frame hitch by using Time.smoothDeltaTime.
 
 ### v1.2.0 - 2023-05-09
 
