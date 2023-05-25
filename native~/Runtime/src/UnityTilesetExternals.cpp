@@ -6,6 +6,7 @@
 
 #include <Cesium3DTilesSelection/CreditSystem.h>
 #include <CesiumAsync/CachingAssetAccessor.h>
+#include <CesiumAsync/GunzipAssetAccessor.h>
 #include <CesiumAsync/SqliteCache.h>
 
 #include <DotNet/CesiumForUnity/CesiumCreditSystem.h>
@@ -23,11 +24,11 @@ namespace CesiumForUnityNative {
 
 namespace {
 
-std::shared_ptr<CachingAssetAccessor> pAccessor = nullptr;
+std::shared_ptr<GunzipAssetAccessor> pAccessor = nullptr;
 std::shared_ptr<UnityTaskProcessor> pTaskProcessor = nullptr;
 std::shared_ptr<CreditSystem> pCreditSystem = nullptr;
 
-const std::shared_ptr<CachingAssetAccessor>& getAssetAccessor() {
+const std::shared_ptr<GunzipAssetAccessor>& getAssetAccessor() {
   if (!pAccessor) {
     std::string tempPath =
         UnityEngine::Application::temporaryCachePath().ToStlString();
@@ -37,14 +38,15 @@ const std::shared_ptr<CachingAssetAccessor>& getAssetAccessor() {
         CesiumForUnity::CesiumRuntimeSettings::requestsPerCachePrune();
     uint64_t maxItems = CesiumForUnity::CesiumRuntimeSettings::maxItems();
 
-    pAccessor = std::make_shared<CachingAssetAccessor>(
-        spdlog::default_logger(),
-        std::make_shared<UnityAssetAccessor>(),
-        std::make_shared<SqliteCache>(
+    pAccessor = std::make_shared<GunzipAssetAccessor>(
+        std::make_shared<CachingAssetAccessor>(
             spdlog::default_logger(),
-            cacheDBPath,
-            maxItems),
-        requestsPerCachePrune);
+            std::make_shared<UnityAssetAccessor>(),
+            std::make_shared<SqliteCache>(
+                spdlog::default_logger(),
+                cacheDBPath,
+                maxItems),
+            requestsPerCachePrune));
   }
   return pAccessor;
 }
