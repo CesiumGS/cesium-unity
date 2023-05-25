@@ -189,7 +189,7 @@ namespace CesiumForUnity
         // The resolved georeference containing this globe anchor. This is just a cache
         // of `GetComponentInParent<CesiumGeoreference>()`.
         [NonSerialized]
-        internal CesiumGeoreference _georeference;
+        internal CesiumGeoreference _parentGeoreference;
 
         /// <summary>
         /// Sets the origin of the coordinate system to particular <see cref="ecefX"/>, <see cref="ecefY"/>,
@@ -231,25 +231,25 @@ namespace CesiumForUnity
             this.originAuthority = CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight;
         }
 
-        private void DetachFromGeorefIfNeeded()
+        private void DetachFromParentIfNeeded()
         {
-            if (this._georeference != null)
+            if (this._parentGeoreference != null)
             {
-                this._georeference.changed -= this.OnParentGeorefChanged;
-                this._georeference = null;
+                this._parentGeoreference.changed -= this.OnParentChanged;
+                this._parentGeoreference = null;
             }
         }
 
-        private void UpdateGeoreference()
+        private void UpdateParentReference()
         {
-            DetachFromGeorefIfNeeded();
+            DetachFromParentIfNeeded();
 
-            this._georeference = this.GetComponentInParent<CesiumGeoreference>();
+            this._parentGeoreference = this.GetComponentInParent<CesiumGeoreference>();
 
-            if (this._georeference != null)
+            if (this._parentGeoreference != null)
             {
-                this._georeference.Initialize();
-                this._georeference.changed += this.OnParentGeorefChanged;
+                this._parentGeoreference.Initialize();
+                this._parentGeoreference.changed += this.OnParentChanged;
             }
         }
 
@@ -270,20 +270,20 @@ namespace CesiumForUnity
         /// </summary>
         private void Reset()
         {
-            this.UpdateGeoreference();
+            this.UpdateParentReference();
         }
 
         private void OnEnable()
         {
-            this.UpdateGeoreference();
+            this.UpdateParentReference();
 
             // If not under a georef, nothing to do
-            if (this._georeference == null)
+            if (this._parentGeoreference == null)
                 throw new InvalidOperationException(
                     "CesiumSubScene is not nested inside a game object with a CesiumGeoreference.");
 
             // When this sub-scene is enabled, all others are disabled.
-            CesiumSubScene[] subscenes = this._georeference.GetComponentsInChildren<CesiumSubScene>();
+            CesiumSubScene[] subscenes = this._parentGeoreference.GetComponentsInChildren<CesiumSubScene>();
             foreach (CesiumSubScene scene in subscenes)
             {
                 if (scene == this)
@@ -294,15 +294,15 @@ namespace CesiumForUnity
             this.UpdateOrigin();
         }
 
-        private void OnParentGeorefChanged()
+        private void OnParentChanged()
         {
             if (!this.isActiveAndEnabled)
                 return;
 
-            this.UpdateGeoreference();
+            this.UpdateParentReference();
 
             // If not under a georef, nothing to do
-            if (this._georeference == null)
+            if (this._parentGeoreference == null)
             {
                 throw new InvalidOperationException(
                     "CesiumSubScene should have been nested inside a game object with a CesiumGeoreference.");
@@ -310,23 +310,23 @@ namespace CesiumForUnity
 
             // Update our origin to our parent georef, maintain our origin authority,
             // and copy both sets of reference coordinates. No need to calculate any of this again
-            this._longitude = this._georeference.longitude;
-            this._latitude = this._georeference.latitude;
-            this._height = this._georeference.height;
+            this._longitude = this._parentGeoreference.longitude;
+            this._latitude = this._parentGeoreference.latitude;
+            this._height = this._parentGeoreference.height;
 
-            this._ecefX = this._georeference.ecefX;
-            this._ecefY = this._georeference.ecefY;
-            this._ecefZ = this._georeference.ecefZ;
+            this._ecefX = this._parentGeoreference.ecefX;
+            this._ecefY = this._parentGeoreference.ecefY;
+            this._ecefZ = this._parentGeoreference.ecefZ;
         }
 
         private void OnDisable()
         {
-            DetachFromGeorefIfNeeded();
+            DetachFromParentIfNeeded();
         }
 
         private void OnDestroy()
         {
-            DetachFromGeorefIfNeeded();
+            DetachFromParentIfNeeded();
         }
 
         private void UpdateOtherCoordinates()
@@ -368,18 +368,18 @@ namespace CesiumForUnity
 
             if (this.isActiveAndEnabled)
             {
-                UpdateGeoreference();
+                this.UpdateParentReference();
 
-                if (this._georeference == null)
+                if (this._parentGeoreference == null)
                     throw new InvalidOperationException("CesiumSubScene is not nested inside a game object with a CesiumGeoreference.");
 
                 if (this.originAuthority == CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed)
-                    this._georeference.SetOriginEarthCenteredEarthFixed(
+                    this._parentGeoreference.SetOriginEarthCenteredEarthFixed(
                         this._ecefX,
                         this._ecefY,
                         this._ecefZ);
                 else
-                    this._georeference.SetOriginLongitudeLatitudeHeight(
+                    this._parentGeoreference.SetOriginLongitudeLatitudeHeight(
                         this._longitude,
                         this._latitude,
                         this._height);
