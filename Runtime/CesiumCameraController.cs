@@ -513,8 +513,8 @@ namespace CesiumForUnity
                 return;
             }
 
-            float valueX = verticalRotation * this._lookSpeed * Time.deltaTime;
-            float valueY = horizontalRotation * this._lookSpeed * Time.deltaTime;
+            float valueX = verticalRotation * this._lookSpeed * Time.smoothDeltaTime;
+            float valueY = horizontalRotation * this._lookSpeed * Time.smoothDeltaTime;
 
             // Rotation around the X-axis occurs counter-clockwise, so the look range
             // maps to [270, 360] degrees for the upper quarter-sphere of motion, and
