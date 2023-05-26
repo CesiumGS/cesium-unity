@@ -98,9 +98,9 @@ void updateAnchorFromCpp(
     transform.localRotation(localRotation);
     transform.localScale(localScale);
 
-    anchor._lastLocalPosition(localPosition);
-    anchor._lastLocalRotation(localRotation);
-    anchor._lastLocalScale(localScale);
+    anchor._lastLocalPosition(transform.localPosition());
+    anchor._lastLocalRotation(transform.localRotation());
+    anchor._lastLocalScale(transform.localScale());
     anchor._lastLocalsAreValid(true);
   }
 }

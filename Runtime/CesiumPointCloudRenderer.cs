@@ -17,6 +17,7 @@ namespace CesiumForUnity
     }
 
     [ExecuteInEditMode]
+    [AddComponentMenu("")]
     internal class CesiumPointCloudRenderer : MonoBehaviour
     {
         private Cesium3DTileset _tileset;

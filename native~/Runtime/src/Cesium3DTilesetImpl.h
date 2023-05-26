@@ -61,6 +61,7 @@ private:
 #endif
   DotNet::CesiumForUnity::CesiumCreditSystem _creditSystem;
   bool _destroyTilesetOnNextUpdate;
+  int32_t _lastOpaqueMaterialHash;
 };
 
 } // namespace CesiumForUnityNative

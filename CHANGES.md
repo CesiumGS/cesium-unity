@@ -2,9 +2,16 @@
 
 ### ? - ?
 
+##### Additions :tada:
+
+- Cesium components now appear under the "Cesium" category in the Component menu. Previously were under "Scripts > Cesium for Unity"
+- Cesium components now display the Cesium logo as their icon, rather than the default Unity script icon.
+
 ##### Fixes :wrench:
 
+- Fixed a bug where `Cesium3DTileset` would not reflect changes made to the properties of its opaque material in the Editor.
 - Fixed a bug that could cause missing textures when using two raster overlays with the same projection on a single tileset.
+- Fixed a bug where changing the origin on a `CesiumGeoreference` would not propogate these changes to the active `CesiumSubScene`, if one exists.
 - Lessen the amount of extreme camera rotation in the CesiumCameraController after a frame hitch by using Time.smoothDeltaTime.
 
 ### v1.2.0 - 2023-05-09

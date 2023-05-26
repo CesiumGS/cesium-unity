@@ -21,6 +21,8 @@ namespace CesiumForUnity
     [RequireComponent(typeof(CesiumOriginShift))]
     [RequireComponent(typeof(Camera))]
     [DisallowMultipleComponent]
+    [AddComponentMenu("Cesium/Cesium Camera Controller")]
+    [IconAttribute("Packages/com.cesium.unity/Editor/Resources/Cesium-24x24.png")]
     public class CesiumCameraController : MonoBehaviour
     {
         #region User-editable properties
