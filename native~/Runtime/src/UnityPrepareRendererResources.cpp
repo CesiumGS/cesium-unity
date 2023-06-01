@@ -250,8 +250,17 @@ void generateMipMaps(
     Texture* pTexture = Model::getSafe(&pModel->textures, textureInfo->index);
     if (pTexture) {
       Image* pImage = Model::getSafe(&pModel->images, pTexture->source);
-      if (pImage) {
-        CesiumGltfReader::GltfReader::generateMipMaps(pImage->cesium);
+      const Sampler* pSampler =
+          Model::getSafe(&pModel->samplers, pTexture->sampler);
+      if (pImage && pSampler) {
+        switch (pSampler->minFilter.value_or(
+            CesiumGltf::Sampler::MinFilter::LINEAR_MIPMAP_LINEAR)) {
+        case CesiumGltf::Sampler::MinFilter::LINEAR_MIPMAP_LINEAR:
+        case CesiumGltf::Sampler::MinFilter::LINEAR_MIPMAP_NEAREST:
+        case CesiumGltf::Sampler::MinFilter::NEAREST_MIPMAP_LINEAR:
+        case CesiumGltf::Sampler::MinFilter::NEAREST_MIPMAP_NEAREST:
+          CesiumGltfReader::GltfReader::generateMipMaps(pImage->cesium);
+        }
       }
     }
   }
