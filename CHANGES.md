@@ -1,6 +1,6 @@
 # Change Log
 
-### ? - ?
+### v1.3.0 - 2023-06-01
 
 ##### Additions :tada:
 
@@ -12,8 +12,10 @@
 - Fixed a bug where `Cesium3DTileset` would not reflect changes made to the properties of its opaque material in the Editor.
 - Fixed a bug that could cause missing textures when using two raster overlays with the same projection on a single tileset.
 - Fixed a bug where changing the origin on a `CesiumGeoreference` would not propogate these changes to the active `CesiumSubScene`, if one exists.
-- Lessen the amount of extreme camera rotation in the CesiumCameraController after a frame hitch by using Time.smoothDeltaTime.
-- Resolved a tile rendering issue, which caused cracks to appear between tiles, caused by improper use of mipmaps.
+- Reduced the amount of extraneous camera rotation in the `CesiumCameraController` after a frame hitch by using `Time.smoothDeltaTime`.
+- Fixed a bug that caused mipmaps to be generated for textures that shouldn't be mipmapped, sometimes leading to cracks between tiles and other problems.
+
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.24.0 to v0.25.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
 
 ### v1.2.0 - 2023-05-09
 
