@@ -56,10 +56,6 @@ namespace CesiumForUnity
             {
                 IonTokenTroubleshootingWindow.ShowWindow(details.tileset, true);
             }
-            else
-            {
-                Debug.Log(details.message);
-            }
         }
 
         static void
