@@ -13,6 +13,7 @@
 - Fixed a bug that could cause missing textures when using two raster overlays with the same projection on a single tileset.
 - Fixed a bug where changing the origin on a `CesiumGeoreference` would not propogate these changes to the active `CesiumSubScene`, if one exists.
 - Lessen the amount of extreme camera rotation in the CesiumCameraController after a frame hitch by using Time.smoothDeltaTime.
+- Resolved a tile rendering issue, which caused cracks to appear between tiles, caused by improper use of mipmaps.
 
 ### v1.2.0 - 2023-05-09
 
