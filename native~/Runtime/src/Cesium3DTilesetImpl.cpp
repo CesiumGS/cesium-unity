@@ -235,7 +235,7 @@ struct CalculateECEFCameraPosition {
             ellipsoid));
     const glm::dmat3& halfAxes = orientedBoundingBox.getHalfAxes();
     glm::dvec3 offset =
-        glm::length(halfAxes[0] + halfAxes[1] + halfAxes[2]) *
+        glm::length(halfAxes[2]) *
         glm::normalize(
             glm::dvec3(enuToEcef[0]) + glm::dvec3(enuToEcef[1]) +
             glm::dvec3(enuToEcef[2]));
