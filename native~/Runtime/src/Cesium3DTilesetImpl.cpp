@@ -53,6 +53,7 @@ Cesium3DTilesetImpl::Cesium3DTilesetImpl(
 #endif
       _creditSystem(nullptr),
       _destroyTilesetOnNextUpdate(false),
+      _ctu(DotNet::CesiumForUnity::CesiumTextureUtility::Instance()),
       _lastOpaqueMaterialHash(0) {
 }
 
@@ -198,6 +199,7 @@ void Cesium3DTilesetImpl::OnDisable(
 #endif
 
   this->_creditSystem = nullptr;
+  this->_ctu = nullptr;
 
   this->DestroyTileset(tileset);
 }
@@ -425,6 +427,24 @@ void Cesium3DTilesetImpl::LoadTileset(
 
   TilesetContentOptions contentOptions{};
   contentOptions.generateMissingNormalsSmooth = tileset.generateSmoothNormals();
+
+  _ctu.CheckSupportedGpuCompressedPixelFormats();
+
+  CesiumGltf::SupportedGpuCompressedPixelFormats supportedFormats;
+  supportedFormats.ETC1_RGB = _ctu.ETC1_RGB();
+  supportedFormats.ETC2_RGBA = _ctu.ETC2_RGBA();
+  supportedFormats.BC1_RGB = _ctu.BC1_RGB();
+  supportedFormats.BC3_RGBA = _ctu.BC3_RGBA();
+  supportedFormats.BC4_R = _ctu.BC4_R();
+  supportedFormats.BC5_RG = _ctu.BC5_RG();
+  supportedFormats.BC7_RGBA = _ctu.BC7_RGBA();
+  supportedFormats.ASTC_4x4_RGBA = _ctu.ASTC_4x4_RGBA();
+  supportedFormats.PVRTC2_4_RGBA = _ctu.PVRTC2_4_RGBA();
+  supportedFormats.ETC2_EAC_R11 = _ctu.ETC2_EAC_R11();
+  supportedFormats.ETC2_EAC_RG11 = _ctu.ETC2_EAC_RG11();
+
+  contentOptions.ktx2TranscodeTargets =
+      CesiumGltf::Ktx2TranscodeTargets(supportedFormats, false);
 
   options.contentOptions = contentOptions;
 

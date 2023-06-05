@@ -4,6 +4,7 @@
 
 #include <DotNet/CesiumForUnity/CesiumCreditSystem.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
+#include <DotNet/CesiumForUnity/CesiumTextureUtility.h>
 #include <DotNet/System/Action.h>
 
 #include <memory>
@@ -60,6 +61,7 @@ private:
   DotNet::UnityEditor::CallbackFunction _updateInEditorCallback;
 #endif
   DotNet::CesiumForUnity::CesiumCreditSystem _creditSystem;
+  DotNet::CesiumForUnity::CesiumTextureUtility _ctu;
   bool _destroyTilesetOnNextUpdate;
   int32_t _lastOpaqueMaterialHash;
 };
