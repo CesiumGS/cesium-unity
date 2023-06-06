@@ -90,6 +90,7 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
         webpdspdecode
         webputils
         webputilsdecode
+        zlibstatic
     )
     install(TARGETS tidy-static)
     install(TARGETS ${ALL_TARGETS} PUBLIC_HEADER EXCLUDE_FROM_ALL)
