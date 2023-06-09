@@ -85,7 +85,7 @@ TextureLoader::loadTexture(const CesiumGltf::ImageCesium& image) {
           GetUnsafeBufferPointerWithoutChecks(textureData));
 
   size_t textureLength = textureData.Length();
-  //assert(textureLength >= image.pixelData.size());
+  assert(textureLength >= image.pixelData.size());
 
   if (!useMipMaps) {
     // No mipmaps, copy the whole thing and then let Unity generate mipmaps on a
