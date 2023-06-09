@@ -17,6 +17,7 @@
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
 #include <DotNet/CesiumForUnity/CesiumRuntimeSettings.h>
 #include <DotNet/CesiumForUnity/CesiumTileExcluder.h>
+#include <DotNet/CesiumForUnity/CesiumTextureUtility.h>
 #include <DotNet/System/Action.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/Object.h>
@@ -53,7 +54,6 @@ Cesium3DTilesetImpl::Cesium3DTilesetImpl(
 #endif
       _creditSystem(nullptr),
       _destroyTilesetOnNextUpdate(false),
-      _ctu(DotNet::CesiumForUnity::CesiumTextureUtility::Instance()),
       _lastOpaqueMaterialHash(0) {
 }
 
@@ -199,7 +199,6 @@ void Cesium3DTilesetImpl::OnDisable(
 #endif
 
   this->_creditSystem = nullptr;
-  this->_ctu = nullptr;
 
   this->DestroyTileset(tileset);
 }
@@ -428,20 +427,21 @@ void Cesium3DTilesetImpl::LoadTileset(
   TilesetContentOptions contentOptions{};
   contentOptions.generateMissingNormalsSmooth = tileset.generateSmoothNormals();
 
-  _ctu.CheckSupportedGpuCompressedPixelFormats();
+  DotNet::CesiumForUnity::CesiumTextureUtility ctu = DotNet::CesiumForUnity::CesiumTextureUtility::Instance();
+  ctu.CheckSupportedGpuCompressedPixelFormats();
 
   CesiumGltf::SupportedGpuCompressedPixelFormats supportedFormats;
-  supportedFormats.ETC1_RGB = _ctu.ETC1_RGB();
-  supportedFormats.ETC2_RGBA = _ctu.ETC2_RGBA();
-  supportedFormats.BC1_RGB = _ctu.BC1_RGB();
-  supportedFormats.BC3_RGBA = _ctu.BC3_RGBA();
-  supportedFormats.BC4_R = _ctu.BC4_R();
-  supportedFormats.BC5_RG = _ctu.BC5_RG();
-  supportedFormats.BC7_RGBA = _ctu.BC7_RGBA();
-  supportedFormats.ASTC_4x4_RGBA = _ctu.ASTC_4x4_RGBA();
-  supportedFormats.PVRTC2_4_RGBA = _ctu.PVRTC2_4_RGBA();
-  supportedFormats.ETC2_EAC_R11 = _ctu.ETC2_EAC_R11();
-  supportedFormats.ETC2_EAC_RG11 = _ctu.ETC2_EAC_RG11();
+  supportedFormats.ETC1_RGB = ctu.ETC1_RGB();
+  supportedFormats.ETC2_RGBA = ctu.ETC2_RGBA();
+  supportedFormats.BC1_RGB = ctu.BC1_RGB();
+  supportedFormats.BC3_RGBA = ctu.BC3_RGBA();
+  supportedFormats.BC4_R = ctu.BC4_R();
+  supportedFormats.BC5_RG = ctu.BC5_RG();
+  supportedFormats.BC7_RGBA = ctu.BC7_RGBA();
+  supportedFormats.ASTC_4x4_RGBA = ctu.ASTC_4x4_RGBA();
+  supportedFormats.PVRTC2_4_RGBA = ctu.PVRTC2_4_RGBA();
+  supportedFormats.ETC2_EAC_R11 = ctu.ETC2_EAC_R11();
+  supportedFormats.ETC2_EAC_RG11 = ctu.ETC2_EAC_RG11();
 
   contentOptions.ktx2TranscodeTargets =
       CesiumGltf::Ktx2TranscodeTargets(supportedFormats, false);
