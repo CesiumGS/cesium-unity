@@ -65,14 +65,15 @@ namespace CesiumForUnity
             ASTC_4x4_RGBA = SystemInfo.IsFormatSupported(GraphicsFormat.RGBA_ASTC4X4_SRGB, FormatUsage.Sample);
 
             //not ready in TextureLoader::loadTexture() (path: native~/Runtime/src/TextureLoader.cpp)
-            //PVRTC1_4_RGB = SystemInfo.IsFormatSupported(GraphicsFormat.RGB_PVRTC_4Bpp_SRGB, FormatUsage.Sample);
-            //PVRTC1_4_RGBA = SystemInfo.IsFormatSupported(GraphicsFormat.RGBA_PVRTC_4Bpp_SRGB, FormatUsage.Sample);
+            PVRTC1_4_RGB = SystemInfo.IsFormatSupported(GraphicsFormat.RGB_PVRTC_4Bpp_SRGB, FormatUsage.Sample);
+            PVRTC1_4_RGBA = SystemInfo.IsFormatSupported(GraphicsFormat.RGBA_PVRTC_4Bpp_SRGB, FormatUsage.Sample);
 
             //these formats don't exist in UnityEngine.Experimental.Rendering.GraphicsFormat enum
             //PVRTC2_4_RGB = false;
             //PVRTC2_4_RGBA = false;
-            //ETC2_EAC_R11 = false;
-            //ETC2_EAC_RG11 = false;
+
+            ETC2_EAC_R11 = SystemInfo.IsFormatSupported(GraphicsFormat.R_EAC_UNorm, FormatUsage.Sample);
+            ETC2_EAC_RG11 = SystemInfo.IsFormatSupported(GraphicsFormat.RG_EAC_UNorm, FormatUsage.Sample);
 
             _initialized = true;
         }

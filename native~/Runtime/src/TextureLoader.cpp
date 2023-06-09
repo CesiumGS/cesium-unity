@@ -52,11 +52,19 @@ TextureLoader::loadTexture(const CesiumGltf::ImageCesium& image) {
     textureFormat = UnityEngine::TextureFormat::ASTC_4x4;
     break;
   case GpuCompressedPixelFormat::PVRTC1_4_RGB:
+    textureFormat = UnityEngine::TextureFormat::PVRTC_RGB4;
+    break;
   case GpuCompressedPixelFormat::PVRTC1_4_RGBA:
+    textureFormat = UnityEngine::TextureFormat::PVRTC_RGBA4;
+    break;
+  case GpuCompressedPixelFormat::ETC2_EAC_R11:
+    textureFormat = UnityEngine::TextureFormat::EAC_R;
+    break;
+  case GpuCompressedPixelFormat::ETC2_EAC_RG11:
+    textureFormat = UnityEngine::TextureFormat::EAC_RG;
+    break;
   case GpuCompressedPixelFormat::PVRTC2_4_RGB:
   case GpuCompressedPixelFormat::PVRTC2_4_RGBA:
-  case GpuCompressedPixelFormat::ETC2_EAC_R11:
-  case GpuCompressedPixelFormat::ETC2_EAC_RG11:
   default:
     textureFormat = UnityEngine::TextureFormat::RGBA32;
     break;
