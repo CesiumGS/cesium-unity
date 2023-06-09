@@ -274,22 +274,20 @@ namespace CesiumForUnity
             tileset.updateInEditor = tileset.updateInEditor;
             tileset.showCreditsOnScreen = tileset.showCreditsOnScreen;
 
-            CesiumTextureUtility ctu = CesiumTextureUtility.Instance;
-            ctu.ETC1_RGB = ctu.ETC1_RGB;
-            ctu.ETC2_RGBA = ctu.ETC2_RGBA;
-            ctu.BC1_RGB = ctu.BC1_RGB;
-            ctu.BC3_RGBA = ctu.BC3_RGBA;
-            ctu.BC4_R = ctu.BC4_R;
-            ctu.BC5_RG = ctu.BC5_RG;
-            ctu.BC7_RGBA = ctu.BC7_RGBA;
-            ctu.PVRTC1_4_RGB = ctu.PVRTC1_4_RGB;
-            ctu.PVRTC1_4_RGBA = ctu.PVRTC1_4_RGBA;
-            ctu.ASTC_4x4_RGBA = ctu.ASTC_4x4_RGBA;
-            ctu.PVRTC2_4_RGB = ctu.PVRTC2_4_RGB;
-            ctu.PVRTC2_4_RGBA = ctu.PVRTC2_4_RGBA;
-            ctu.ETC2_EAC_R11 = ctu.ETC2_EAC_R11;
-            ctu.ETC2_EAC_RG11 = ctu.ETC2_EAC_RG11;
-            ctu.CheckSupportedGpuCompressedPixelFormats();
+            tileset.ETC1_RGB = tileset.ETC1_RGB;
+            tileset.ETC2_RGBA = tileset.ETC2_RGBA;
+            tileset.BC1_RGB = tileset.BC1_RGB;
+            tileset.BC3_RGBA = tileset.BC3_RGBA;
+            tileset.BC4_R = tileset.BC4_R;
+            tileset.BC5_RG = tileset.BC5_RG;
+            tileset.BC7_RGBA = tileset.BC7_RGBA;
+            tileset.PVRTC1_4_RGB = tileset.PVRTC1_4_RGB;
+            tileset.PVRTC1_4_RGBA = tileset.PVRTC1_4_RGBA;
+            tileset.ASTC_4x4_RGBA = tileset.ASTC_4x4_RGBA;
+            tileset.PVRTC2_4_RGB = tileset.PVRTC2_4_RGB;
+            tileset.PVRTC2_4_RGBA = tileset.PVRTC2_4_RGBA;
+            tileset.ETC2_EAC_R11 = tileset.ETC2_EAC_R11;
+            tileset.ETC2_EAC_RG11 = tileset.ETC2_EAC_RG11;
 
             Cesium3DTileset tilesetFromGameObject = go.GetComponent<Cesium3DTileset>();
             MeshRenderer meshRendererFromGameObject = go.GetComponent<MeshRenderer>();

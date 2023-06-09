@@ -17,7 +17,6 @@
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
 #include <DotNet/CesiumForUnity/CesiumRuntimeSettings.h>
 #include <DotNet/CesiumForUnity/CesiumTileExcluder.h>
-#include <DotNet/CesiumForUnity/CesiumTextureUtility.h>
 #include <DotNet/System/Action.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/Object.h>
@@ -427,21 +426,18 @@ void Cesium3DTilesetImpl::LoadTileset(
   TilesetContentOptions contentOptions{};
   contentOptions.generateMissingNormalsSmooth = tileset.generateSmoothNormals();
 
-  DotNet::CesiumForUnity::CesiumTextureUtility ctu = DotNet::CesiumForUnity::CesiumTextureUtility::Instance();
-  ctu.CheckSupportedGpuCompressedPixelFormats();
-
   CesiumGltf::SupportedGpuCompressedPixelFormats supportedFormats;
-  supportedFormats.ETC1_RGB = ctu.ETC1_RGB();
-  supportedFormats.ETC2_RGBA = ctu.ETC2_RGBA();
-  supportedFormats.BC1_RGB = ctu.BC1_RGB();
-  supportedFormats.BC3_RGBA = ctu.BC3_RGBA();
-  supportedFormats.BC4_R = ctu.BC4_R();
-  supportedFormats.BC5_RG = ctu.BC5_RG();
-  supportedFormats.BC7_RGBA = ctu.BC7_RGBA();
-  supportedFormats.ASTC_4x4_RGBA = ctu.ASTC_4x4_RGBA();
-  supportedFormats.PVRTC2_4_RGBA = ctu.PVRTC2_4_RGBA();
-  supportedFormats.ETC2_EAC_R11 = ctu.ETC2_EAC_R11();
-  supportedFormats.ETC2_EAC_RG11 = ctu.ETC2_EAC_RG11();
+  supportedFormats.ETC1_RGB = tileset.ETC1_RGB();
+  supportedFormats.ETC2_RGBA = tileset.ETC2_RGBA();
+  supportedFormats.BC1_RGB = tileset.BC1_RGB();
+  supportedFormats.BC3_RGBA = tileset.BC3_RGBA();
+  supportedFormats.BC4_R = tileset.BC4_R();
+  supportedFormats.BC5_RG = tileset.BC5_RG();
+  supportedFormats.BC7_RGBA = tileset.BC7_RGBA();
+  supportedFormats.ASTC_4x4_RGBA = tileset.ASTC_4x4_RGBA();
+  supportedFormats.PVRTC2_4_RGBA = tileset.PVRTC2_4_RGBA();
+  supportedFormats.ETC2_EAC_R11 = tileset.ETC2_EAC_R11();
+  supportedFormats.ETC2_EAC_RG11 = tileset.ETC2_EAC_RG11();
 
   contentOptions.ktx2TranscodeTargets =
       CesiumGltf::Ktx2TranscodeTargets(supportedFormats, false);
