@@ -70,6 +70,16 @@ namespace CesiumForUnity
             }
         }
 
+        public event Action<GameObject> OnNewGameObjectCreated;
+
+        internal void BroadcastNewGameObjectCreated(GameObject go)
+        {
+            if(OnNewGameObjectCreated != null)
+            {
+                OnNewGameObjectCreated(go);
+            }
+        }
+
         internal static event Action OnSetShowCreditsOnScreen;
 
         [SerializeField]

@@ -1,5 +1,11 @@
 # Change Log
 
+### ? - ?
+
+##### Additions :tada:
+
+- Added an event to notify when a new GameObject is created.
+
 ### v1.3.1 - 2023-06-06
 
 ##### Fixes :wrench:
