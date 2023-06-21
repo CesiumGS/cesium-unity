@@ -1,5 +1,11 @@
 # Change Log
 
+### v1.3.1 - 2023-06-06
+
+##### Fixes :wrench:
+
+- Fixed a bug that prevented building on iOS.
+
 ### v1.3.0 - 2023-06-01
 
 ##### Additions :tada:
