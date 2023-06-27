@@ -592,6 +592,9 @@ namespace CesiumForUnity
             this.UpdateGeoreferenceIfNecessary();
             if (this._georeference != null)
                 this.SetNewLocalToGlobeFixedMatrixFromTransform();
+#if UNITY_EDITOR
+            PrefabUtility.RecordPrefabInstancePropertyModifications(this);
+#endif
         }
 
         /// <summary>

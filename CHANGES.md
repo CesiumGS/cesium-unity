@@ -1,5 +1,11 @@
 # Change Log
 
+### ? - ?
+
+##### Fixes :wrench:
+
+- Fixed a bug that caused a prefab with a `CesiumGlobeAnchor` to lose its position after save/reload.
+
 ### v1.3.1 - 2023-06-06
 
 ##### Fixes :wrench:
