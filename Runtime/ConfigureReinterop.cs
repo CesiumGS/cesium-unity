@@ -9,6 +9,7 @@ using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.Rendering;
+using UnityEngine.Experimental.Rendering;
 using Unity.Mathematics;
 using UnityEngine.Pool;
 
@@ -274,20 +275,9 @@ namespace CesiumForUnity
             tileset.updateInEditor = tileset.updateInEditor;
             tileset.showCreditsOnScreen = tileset.showCreditsOnScreen;
 
-            tileset.ETC1_RGB = tileset.ETC1_RGB;
-            tileset.ETC2_RGBA = tileset.ETC2_RGBA;
-            tileset.BC1_RGB = tileset.BC1_RGB;
-            tileset.BC3_RGBA = tileset.BC3_RGBA;
-            tileset.BC4_R = tileset.BC4_R;
-            tileset.BC5_RG = tileset.BC5_RG;
-            tileset.BC7_RGBA = tileset.BC7_RGBA;
-            tileset.PVRTC1_4_RGB = tileset.PVRTC1_4_RGB;
-            tileset.PVRTC1_4_RGBA = tileset.PVRTC1_4_RGBA;
-            tileset.ASTC_4x4_RGBA = tileset.ASTC_4x4_RGBA;
-            tileset.PVRTC2_4_RGB = tileset.PVRTC2_4_RGB;
-            tileset.PVRTC2_4_RGBA = tileset.PVRTC2_4_RGBA;
-            tileset.ETC2_EAC_R11 = tileset.ETC2_EAC_R11;
-            tileset.ETC2_EAC_RG11 = tileset.ETC2_EAC_RG11;
+            GraphicsFormat gfxFmt = GraphicsFormat.RGB_ETC_UNorm;
+            FormatUsage fmtUsage = FormatUsage.Sample;
+            SystemInfo.IsFormatSupported(gfxFmt, fmtUsage);
 
             Cesium3DTileset tilesetFromGameObject = go.GetComponent<Cesium3DTileset>();
             MeshRenderer meshRendererFromGameObject = go.GetComponent<MeshRenderer>();

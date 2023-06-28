@@ -30,6 +30,9 @@
 #include <DotNet/UnityEngine/Time.h>
 #include <DotNet/UnityEngine/Transform.h>
 #include <DotNet/UnityEngine/Vector3.h>
+#include <DotNet/UnityEngine/SystemInfo.h>
+#include <DotNet/UnityEngine/Experimental/Rendering/FormatUsage.h>
+#include <DotNet/UnityEngine/Experimental/Rendering/GraphicsFormat.h>
 
 #include <variant>
 
@@ -427,17 +430,39 @@ void Cesium3DTilesetImpl::LoadTileset(
   contentOptions.generateMissingNormalsSmooth = tileset.generateSmoothNormals();
 
   CesiumGltf::SupportedGpuCompressedPixelFormats supportedFormats;
-  supportedFormats.ETC1_RGB = tileset.ETC1_RGB();
-  supportedFormats.ETC2_RGBA = tileset.ETC2_RGBA();
-  supportedFormats.BC1_RGB = tileset.BC1_RGB();
-  supportedFormats.BC3_RGBA = tileset.BC3_RGBA();
-  supportedFormats.BC4_R = tileset.BC4_R();
-  supportedFormats.BC5_RG = tileset.BC5_RG();
-  supportedFormats.BC7_RGBA = tileset.BC7_RGBA();
-  supportedFormats.ASTC_4x4_RGBA = tileset.ASTC_4x4_RGBA();
-  supportedFormats.PVRTC2_4_RGBA = tileset.PVRTC2_4_RGBA();
-  supportedFormats.ETC2_EAC_R11 = tileset.ETC2_EAC_R11();
-  supportedFormats.ETC2_EAC_RG11 = tileset.ETC2_EAC_RG11();
+  supportedFormats.ETC2_RGBA = UnityEngine::SystemInfo::IsFormatSupported(
+      DotNet::UnityEngine::Experimental::Rendering::GraphicsFormat::RGBA_ETC2_SRGB,
+      DotNet::UnityEngine::Experimental::Rendering::FormatUsage::Sample);
+  supportedFormats.BC1_RGB = DotNet::UnityEngine::SystemInfo::IsFormatSupported(
+      DotNet::UnityEngine::Experimental::Rendering::GraphicsFormat::RGBA_DXT1_SRGB,
+      DotNet::UnityEngine::Experimental::Rendering::FormatUsage::Sample);
+  supportedFormats.BC3_RGBA = DotNet::UnityEngine::SystemInfo::IsFormatSupported(
+      DotNet::UnityEngine::Experimental::Rendering::GraphicsFormat::RGBA_DXT5_SRGB,
+      DotNet::UnityEngine::Experimental::Rendering::FormatUsage::Sample);
+  supportedFormats.BC4_R = DotNet::UnityEngine::SystemInfo::IsFormatSupported(
+      DotNet::UnityEngine::Experimental::Rendering::GraphicsFormat::R_BC4_SNorm,
+      DotNet::UnityEngine::Experimental::Rendering::FormatUsage::Sample);
+  supportedFormats.BC5_RG = DotNet::UnityEngine::SystemInfo::IsFormatSupported(
+      DotNet::UnityEngine::Experimental::Rendering::GraphicsFormat::RG_BC5_SNorm,
+      DotNet::UnityEngine::Experimental::Rendering::FormatUsage::Sample);
+  supportedFormats.BC7_RGBA = DotNet::UnityEngine::SystemInfo::IsFormatSupported(
+      DotNet::UnityEngine::Experimental::Rendering::GraphicsFormat::RGBA_BC7_SRGB,
+      DotNet::UnityEngine::Experimental::Rendering::FormatUsage::Sample);
+  supportedFormats.ASTC_4x4_RGBA = DotNet::UnityEngine::SystemInfo::IsFormatSupported(
+      DotNet::UnityEngine::Experimental::Rendering::GraphicsFormat::RGBA_ASTC4X4_SRGB,
+      DotNet::UnityEngine::Experimental::Rendering::FormatUsage::Sample);
+  supportedFormats.PVRTC1_4_RGB = DotNet::UnityEngine::SystemInfo::IsFormatSupported(
+      DotNet::UnityEngine::Experimental::Rendering::GraphicsFormat::RGB_PVRTC_4Bpp_SRGB,
+      DotNet::UnityEngine::Experimental::Rendering::FormatUsage::Sample);
+  supportedFormats.PVRTC1_4_RGBA = DotNet::UnityEngine::SystemInfo::IsFormatSupported(
+      DotNet::UnityEngine::Experimental::Rendering::GraphicsFormat::RGBA_PVRTC_4Bpp_SRGB,
+      DotNet::UnityEngine::Experimental::Rendering::FormatUsage::Sample);
+  supportedFormats.ETC2_EAC_R11 = DotNet::UnityEngine::SystemInfo::IsFormatSupported(
+      DotNet::UnityEngine::Experimental::Rendering::GraphicsFormat::R_EAC_UNorm,
+      DotNet::UnityEngine::Experimental::Rendering::FormatUsage::Sample);
+  supportedFormats.ETC2_EAC_RG11 = DotNet::UnityEngine::SystemInfo::IsFormatSupported(
+      DotNet::UnityEngine::Experimental::Rendering::GraphicsFormat::RG_EAC_UNorm,
+      DotNet::UnityEngine::Experimental::Rendering::FormatUsage::Sample);
 
   contentOptions.ktx2TranscodeTargets =
       CesiumGltf::Ktx2TranscodeTargets(supportedFormats, false);
