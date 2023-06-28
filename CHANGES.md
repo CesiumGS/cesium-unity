@@ -4,7 +4,7 @@
 
 ##### Additions :tada:
 
-- Added an event to notify when a new GameObject is created.
+- Added `OnTileGameObjectCreated` event to `Cesium3DTileset` class, which allows customizing the Tile GameObjects as they are loaded.
 
 ### v1.3.1 - 2023-06-06
 
