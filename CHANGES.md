@@ -6,6 +6,10 @@
 
 - Added `OnTileGameObjectCreated` event to `Cesium3DTileset` class, which allows customizing the Tile GameObjects as they are loaded.
 
+##### Fixes :wrench:
+
+- Fixed how the occlusion strength is used in the default tileset shader which was causing shadows to be too dark.
+
 ### v1.3.1 - 2023-06-06
 
 ##### Fixes :wrench:
