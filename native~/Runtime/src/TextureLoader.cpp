@@ -70,12 +70,8 @@ TextureLoader::loadTexture(const CesiumGltf::ImageCesium& image) {
     break;
   }
 
-  UnityEngine::Texture2D result(
-      image.width,
-      image.height,
-      textureFormat,
-      useMipMaps,
-      false);
+  UnityEngine::Texture2D
+      result(image.width, image.height, textureFormat, useMipMaps, false);
   result.hideFlags(UnityEngine::HideFlags::HideAndDontSave);
 
   Unity::Collections::NativeArray1<std::uint8_t> textureData =
