@@ -2,6 +2,10 @@
 
 ### ? - ?
 
+##### Additions :tada:
+
+- KTX2 compressed textures now remain compressed all the way to the GPU, reducing GPU memory usage.
+
 ##### Fixes :wrench:
 
 - Fixed how the occlusion strength is used in the default tileset shader which was causing shadows to be too dark.
