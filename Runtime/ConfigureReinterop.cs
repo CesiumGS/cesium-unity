@@ -9,6 +9,7 @@ using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.Rendering;
+using UnityEngine.Experimental.Rendering;
 using Unity.Mathematics;
 using UnityEngine.Pool;
 
@@ -273,6 +274,10 @@ namespace CesiumForUnity
             tileset.showTilesInHierarchy = tileset.showTilesInHierarchy;
             tileset.updateInEditor = tileset.updateInEditor;
             tileset.showCreditsOnScreen = tileset.showCreditsOnScreen;
+
+            GraphicsFormat gfxFmt = GraphicsFormat.RGB_ETC_UNorm;
+            FormatUsage fmtUsage = FormatUsage.Sample;
+            SystemInfo.IsFormatSupported(gfxFmt, fmtUsage);
 
             Cesium3DTileset tilesetFromGameObject = go.GetComponent<Cesium3DTileset>();
             MeshRenderer meshRendererFromGameObject = go.GetComponent<MeshRenderer>();
