@@ -23,12 +23,55 @@ UnityEngine::Texture
 TextureLoader::loadTexture(const CesiumGltf::ImageCesium& image) {
   CESIUM_TRACE("TextureLoader::loadTexture");
   bool useMipMaps = !image.mipPositions.empty();
-  UnityEngine::Texture2D result(
-      image.width,
-      image.height,
-      UnityEngine::TextureFormat::RGBA32,
-      useMipMaps,
-      false);
+
+  UnityEngine::TextureFormat textureFormat;
+
+  switch (image.compressedPixelFormat) {
+  case GpuCompressedPixelFormat::ETC1_RGB:
+    textureFormat = UnityEngine::TextureFormat::ETC_RGB4;
+    break;
+  case GpuCompressedPixelFormat::ETC2_RGBA:
+    textureFormat = UnityEngine::TextureFormat::ETC2_RGBA8;
+    break;
+  case GpuCompressedPixelFormat::BC1_RGB:
+    textureFormat = UnityEngine::TextureFormat::DXT1;
+    break;
+  case GpuCompressedPixelFormat::BC3_RGBA:
+    textureFormat = UnityEngine::TextureFormat::DXT5;
+    break;
+  case GpuCompressedPixelFormat::BC4_R:
+    textureFormat = UnityEngine::TextureFormat::BC4;
+    break;
+  case GpuCompressedPixelFormat::BC5_RG:
+    textureFormat = UnityEngine::TextureFormat::BC5;
+    break;
+  case GpuCompressedPixelFormat::BC7_RGBA:
+    textureFormat = UnityEngine::TextureFormat::BC7;
+    break;
+  case GpuCompressedPixelFormat::ASTC_4x4_RGBA:
+    textureFormat = UnityEngine::TextureFormat::ASTC_4x4;
+    break;
+  case GpuCompressedPixelFormat::PVRTC1_4_RGB:
+    textureFormat = UnityEngine::TextureFormat::PVRTC_RGB4;
+    break;
+  case GpuCompressedPixelFormat::PVRTC1_4_RGBA:
+    textureFormat = UnityEngine::TextureFormat::PVRTC_RGBA4;
+    break;
+  case GpuCompressedPixelFormat::ETC2_EAC_R11:
+    textureFormat = UnityEngine::TextureFormat::EAC_R;
+    break;
+  case GpuCompressedPixelFormat::ETC2_EAC_RG11:
+    textureFormat = UnityEngine::TextureFormat::EAC_RG;
+    break;
+  case GpuCompressedPixelFormat::PVRTC2_4_RGB:
+  case GpuCompressedPixelFormat::PVRTC2_4_RGBA:
+  default:
+    textureFormat = UnityEngine::TextureFormat::RGBA32;
+    break;
+  }
+
+  UnityEngine::Texture2D
+      result(image.width, image.height, textureFormat, useMipMaps, false);
   result.hideFlags(UnityEngine::HideFlags::HideAndDontSave);
 
   Unity::Collections::NativeArray1<std::uint8_t> textureData =

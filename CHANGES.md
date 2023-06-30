@@ -5,10 +5,12 @@
 ##### Additions :tada:
 
 - Added `OnTileGameObjectCreated` event to `Cesium3DTileset` class, which allows customizing the Tile GameObjects as they are loaded.
+- KTX2 compressed textures now remain compressed all the way to the GPU, reducing GPU memory usage.
 
 ##### Fixes :wrench:
 
 - Fixed how the occlusion strength is used in the default tileset shader which was causing shadows to be too dark.
+- Fixed a bug that caused a prefab with a `CesiumGlobeAnchor` to lose its position after save/reload.
 
 ### v1.3.1 - 2023-06-06
 
