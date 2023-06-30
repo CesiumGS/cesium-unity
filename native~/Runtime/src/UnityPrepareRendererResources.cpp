@@ -1358,6 +1358,8 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         }
       });
 
+  tilesetComponent.BroadcastNewGameObjectCreated(*pModelGameObject);
+
   CesiumGltfGameObject* pCesiumGameObject = new CesiumGltfGameObject{
       std::move(pModelGameObject),
       std::move(pLoadThreadResult->primitiveInfos)};

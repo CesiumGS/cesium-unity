@@ -69,6 +69,22 @@ namespace CesiumForUnity
                 OnCesium3DTilesetLoadFailure(details);
             }
         }
+        /// <summary>
+        /// Occurs when a new GameObject is instantiated for a Tile in the tileset.
+        /// </summary>
+        /// <remarks>
+        /// This event can be used to customize the Tile GameObjects as they are loaded,
+        /// such as adding components, changing materials, or applying transformations.
+        /// </remarks>
+        public event Action<GameObject> OnTileGameObjectCreated;
+
+        internal void BroadcastNewGameObjectCreated(GameObject go)
+        {
+            if(OnTileGameObjectCreated != null)
+            {
+                OnTileGameObjectCreated(go);
+            }
+        }
 
         internal static event Action OnSetShowCreditsOnScreen;
 

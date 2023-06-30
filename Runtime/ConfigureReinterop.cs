@@ -461,6 +461,8 @@ namespace CesiumForUnity
                                                 "");
             CesiumRasterOverlay.BroadcastCesiumRasterOverlayLoadFailure(overlayDetails);
 
+            tileset.BroadcastNewGameObjectCreated(new GameObject());
+
             double3 cv3 = new double3();
             cv3.x = cv3.y = cv3.z;
             double3 cv4 = new double3(1.0, 2.0, 3.0);

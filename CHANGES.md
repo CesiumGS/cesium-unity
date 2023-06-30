@@ -4,6 +4,7 @@
 
 ##### Additions :tada:
 
+- Added `OnTileGameObjectCreated` event to `Cesium3DTileset` class, which allows customizing the Tile GameObjects as they are loaded.
 - KTX2 compressed textures now remain compressed all the way to the GPU, reducing GPU memory usage.
 
 ##### Fixes :wrench:
