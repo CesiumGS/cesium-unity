@@ -329,7 +329,8 @@ namespace CesiumForUnity
         private void OnSceneUnloaded(Scene scene)
         {
             SceneManager.sceneUnloaded -= this.OnSceneUnloaded;
-            UnityLifetime.Destroy(this.gameObject);
+            //if (this != null && this.gameObject != null)
+                UnityLifetime.Destroy(this.gameObject);
         }
 
 #if UNITY_EDITOR

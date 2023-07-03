@@ -48,8 +48,12 @@ namespace CesiumForUnity
             this._creditSystem.OnCreditsUpdate += this.SetCredits;
 
             this._uiDocument = this.GetComponent<UIDocument>();
-            this._onScreenCredits = this._uiDocument.rootVisualElement.Q("OnScreenCredits");
-            this._popupCredits = this._uiDocument.rootVisualElement.Q("PopupCredits");
+
+            //if (this._uiDocument.rootVisualElement != null)
+            {
+                this._onScreenCredits = this._uiDocument.rootVisualElement.Q("OnScreenCredits");
+                this._popupCredits = this._uiDocument.rootVisualElement.Q("PopupCredits");
+            }
 
 #if UNITY_EDITOR
             if (!EditorApplication.isPlaying)
@@ -65,7 +69,7 @@ namespace CesiumForUnity
                 eventSystemGameObject.AddComponent<EventSystem>();
 
 #if ENABLE_INPUT_SYSTEM
-                 eventSystemGameObject.AddComponent<InputSystemUIInputModule>();
+                eventSystemGameObject.AddComponent<InputSystemUIInputModule>();
 #elif ENABLE_LEGACY_INPUT_MANAGER
                  eventSystemGameObject.AddComponent<StandaloneInputModule>();
 #endif
@@ -159,7 +163,7 @@ namespace CesiumForUnity
             for (int i = 0; i < sceneViews.Count; i++)
             {
                 this.AddCreditsToSceneView((SceneView)sceneViews[i]);
-            }          
+            }
 #endif
         }
 
@@ -387,7 +391,7 @@ namespace CesiumForUnity
         {
 #if UNITY_EDITOR
             ArrayList sceneViews = SceneView.sceneViews;
-            for(int i = 0; i < sceneViews.Count; i++)
+            for (int i = 0; i < sceneViews.Count; i++)
             {
                 this.RemoveCreditsFromSceneView((SceneView)sceneViews[i]);
             }
