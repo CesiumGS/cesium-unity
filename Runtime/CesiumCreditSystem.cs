@@ -329,7 +329,7 @@ namespace CesiumForUnity
         private void OnSceneUnloaded(Scene scene)
         {
             SceneManager.sceneUnloaded -= this.OnSceneUnloaded;
-            //if (this != null && this.gameObject != null)
+            if (this != null && this.gameObject != null)
                 UnityLifetime.Destroy(this.gameObject);
         }
 

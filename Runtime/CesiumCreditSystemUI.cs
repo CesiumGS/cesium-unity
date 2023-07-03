@@ -49,7 +49,7 @@ namespace CesiumForUnity
 
             this._uiDocument = this.GetComponent<UIDocument>();
 
-            //if (this._uiDocument.rootVisualElement != null)
+            if (this._uiDocument.rootVisualElement != null)
             {
                 this._onScreenCredits = this._uiDocument.rootVisualElement.Q("OnScreenCredits");
                 this._popupCredits = this._uiDocument.rootVisualElement.Q("PopupCredits");
