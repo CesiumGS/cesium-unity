@@ -1,6 +1,6 @@
 # Change Log
 
-### ? - ?
+### v1.4.0 - 2023-07-03
 
 ##### Additions :tada:
 
@@ -11,6 +11,8 @@
 
 - Fixed how the occlusion strength is used in the default tileset shader which was causing shadows to be too dark.
 - Fixed a bug that caused a prefab with a `CesiumGlobeAnchor` to lose its position after save/reload.
+
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.25.0 to v0.25.1. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
 
 ### v1.3.1 - 2023-06-06
 
