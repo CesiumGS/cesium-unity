@@ -1424,23 +1424,28 @@ void UnityPrepareRendererResources::free(
     std::unique_ptr<CesiumGltfGameObject> pCesiumGameObject(
         static_cast<CesiumGltfGameObject*>(pMainThreadResult));
 
-    auto metadataComponent =
-        pCesiumGameObject->pGameObject
-            ->GetComponentInParent<DotNet::CesiumForUnity::CesiumMetadata>();
+    // It's possible that the game object has already been destroyed. In which
+    // case Unity will throw a MissingReferenceException if we try to use it. So
+    // don't do that.
+    if (*pCesiumGameObject->pGameObject != nullptr) {
+      auto metadataComponent =
+          pCesiumGameObject->pGameObject
+              ->GetComponentInParent<DotNet::CesiumForUnity::CesiumMetadata>();
 
-    UnityEngine::Transform parentTransform =
-        pCesiumGameObject->pGameObject->transform();
+      UnityEngine::Transform parentTransform =
+          pCesiumGameObject->pGameObject->transform();
 
-    // Destroying primitives will remove them from the child list, so
-    // work backwards.
-    for (int32_t i = parentTransform.childCount() - 1; i >= 0; --i) {
-      UnityEngine::GameObject primitiveGameObject =
-          parentTransform.GetChild(i).gameObject();
-      freePrimitiveGameObject(primitiveGameObject, metadataComponent);
-      UnityLifetime::Destroy(primitiveGameObject);
+      // Destroying primitives will remove them from the child list, so
+      // work backwards.
+      for (int32_t i = parentTransform.childCount() - 1; i >= 0; --i) {
+        UnityEngine::GameObject primitiveGameObject =
+            parentTransform.GetChild(i).gameObject();
+        freePrimitiveGameObject(primitiveGameObject, metadataComponent);
+        UnityLifetime::Destroy(primitiveGameObject);
+      }
+
+      UnityLifetime::Destroy(*pCesiumGameObject->pGameObject);
     }
-
-    UnityLifetime::Destroy(*pCesiumGameObject->pGameObject);
   }
 }
 
@@ -1469,7 +1474,9 @@ void UnityPrepareRendererResources::freeRaster(
   if (pMainThreadResult) {
     std::unique_ptr<UnityEngine::Texture> pTexture(
         static_cast<UnityEngine::Texture*>(pMainThreadResult));
-    UnityLifetime::Destroy(*pTexture);
+    if (*pTexture != nullptr) {
+      UnityLifetime::Destroy(*pTexture);
+    }
   }
 }
 
@@ -1607,7 +1614,10 @@ void UnityPrepareRendererResources::detachRasterInMainThread(
       static_cast<CesiumGltfGameObject*>(pRenderContent->getRenderResources());
   UnityEngine::Texture* pTexture =
       static_cast<UnityEngine::Texture*>(pMainThreadRendererResources);
-  if (!pCesiumGameObject || !pCesiumGameObject->pGameObject || !pTexture)
+  if (pCesiumGameObject == nullptr ||
+      pCesiumGameObject->pGameObject == nullptr ||
+      *pCesiumGameObject->pGameObject == nullptr || pTexture == nullptr ||
+      *pTexture == nullptr)
     return;
 
   std::optional<uint32_t> maybeOverlayIndex =
