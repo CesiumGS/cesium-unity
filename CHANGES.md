@@ -11,6 +11,7 @@
 
 - Fixed how the occlusion strength is used in the default tileset shader which was causing shadows to be too dark.
 - Fixed a bug that caused a prefab with a `CesiumGlobeAnchor` to lose its position after save/reload.
+- Fixed a `MissingReferenceException` when entering Play mode with "Domain Reload" disabled. This would also prevent tilesets with raster overlays from appearing at all in Play mode.
 
 In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.25.0 to v0.25.1. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
 
