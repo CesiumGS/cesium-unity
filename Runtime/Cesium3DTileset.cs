@@ -650,6 +650,17 @@ namespace CesiumForUnity
             }
         }
 
+        /// <summary>
+        /// Gets the axis-aligned bounding box of the root tile of this tileset.
+        /// </summary>
+        public Bounds bounds
+        {
+            get
+            {
+                return getBounds();
+            }
+        }
+
         private partial void SetShowCreditsOnScreen(bool value);
 
         private partial void Start();
@@ -669,5 +680,7 @@ namespace CesiumForUnity
         /// Zoom the Editor camera to this tileset. This method does nothing outside of the Editor.
         /// </summary>
         public partial void FocusTileset();
+
+        private partial Bounds getBounds();
     }
 }

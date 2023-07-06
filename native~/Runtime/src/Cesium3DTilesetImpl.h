@@ -5,6 +5,7 @@
 #include <DotNet/CesiumForUnity/CesiumCreditSystem.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/System/Action.h>
+#include <DotNet/UnityEngine/Bounds.h>
 
 #include <memory>
 
@@ -39,6 +40,9 @@ public:
 
   void RecreateTileset(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
   void FocusTileset(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
+
+  DotNet::UnityEngine::Bounds getBounds(
+      const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
 
   Cesium3DTilesSelection::Tileset* getTileset();
   const Cesium3DTilesSelection::Tileset* getTileset() const;

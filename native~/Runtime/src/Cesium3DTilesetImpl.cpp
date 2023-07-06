@@ -4,6 +4,7 @@
 #include "UnityPrepareRendererResources.h"
 #include "UnityTileExcluderAdaptor.h"
 #include "UnityTilesetExternals.h"
+#include "UnityTransforms.h"
 
 #include <Cesium3DTilesSelection/IonRasterOverlay.h>
 #include <Cesium3DTilesSelection/Tileset.h>
@@ -324,6 +325,36 @@ void Cesium3DTilesetImpl::FocusTileset(
       unityCameraFrontf,
       UnityEngine::Vector3::up()));
 #endif
+}
+
+DotNet::UnityEngine::Bounds Cesium3DTilesetImpl::getBounds(
+  const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
+
+  // Tileset may not be loaded yet
+  if (this->_pTileset.get() == nullptr) {
+    return DotNet::UnityEngine::Bounds::Construct(
+        DotNet::UnityEngine::Vector3{0, 0, 0},
+        DotNet::UnityEngine::Vector3{0, 0, 0});
+  }
+
+  // root tile may not be loaded yet
+  Tile* rootTile = this->_pTileset->getRootTile();
+  if (rootTile == nullptr) {
+    return DotNet::UnityEngine::Bounds::Construct(
+      DotNet::UnityEngine::Vector3{ 0, 0, 0 },
+      DotNet::UnityEngine::Vector3{ 0, 0, 0 });
+  }
+
+  const BoundingVolume& bv = rootTile->getBoundingVolume();
+  CesiumGeometry::OrientedBoundingBox obb =
+      getOrientedBoundingBoxFromBoundingVolume(bv);
+  CesiumGeometry::AxisAlignedBox aabb = obb.toAxisAligned();
+  return DotNet::UnityEngine::Bounds::Construct(
+      UnityTransforms::toUnity(aabb.center),
+      DotNet::UnityEngine::Vector3{
+          float(aabb.lengthX),
+          float(aabb.lengthY),
+          float(aabb.lengthZ)});
 }
 
 Tileset* Cesium3DTilesetImpl::getTileset() { return this->_pTileset.get(); }
