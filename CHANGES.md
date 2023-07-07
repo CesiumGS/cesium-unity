@@ -1,5 +1,11 @@
 # Change Log
 
+### ? - ?
+
+##### Fixes :wrench:
+
+- Fixed a bug that could lead to incorrect textures when a KTX2 image did not include a complete mip chain.
+
 ### v1.4.0 - 2023-07-03
 
 ##### Additions :tada:
