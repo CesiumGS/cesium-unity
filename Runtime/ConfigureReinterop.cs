@@ -104,6 +104,7 @@ namespace CesiumForUnity
             go.hideFlags = HideFlags.DontSave;
 
             Texture2D texture2D = new Texture2D(256, 256, TextureFormat.RGBA32, false, false);
+            texture2D = new Texture2D(256, 256, TextureFormat.RGBA32, 1, false);
             texture2D.LoadRawTextureData(IntPtr.Zero, 0);
             NativeArray<byte> textureBytes = texture2D.GetRawTextureData<byte>();
 

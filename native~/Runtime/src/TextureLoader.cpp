@@ -22,7 +22,8 @@ namespace CesiumForUnityNative {
 UnityEngine::Texture
 TextureLoader::loadTexture(const CesiumGltf::ImageCesium& image) {
   CESIUM_TRACE("TextureLoader::loadTexture");
-  bool useMipMaps = !image.mipPositions.empty();
+  std::int32_t mipCount =
+      image.mipPositions.empty() ? 1 : std::int32_t(image.mipPositions.size());
 
   UnityEngine::TextureFormat textureFormat;
 
@@ -71,7 +72,7 @@ TextureLoader::loadTexture(const CesiumGltf::ImageCesium& image) {
   }
 
   UnityEngine::Texture2D
-      result(image.width, image.height, textureFormat, useMipMaps, false);
+      result(image.width, image.height, textureFormat, mipCount, false);
   result.hideFlags(UnityEngine::HideFlags::HideAndDontSave);
 
   Unity::Collections::NativeArray1<std::uint8_t> textureData =
@@ -83,7 +84,7 @@ TextureLoader::loadTexture(const CesiumGltf::ImageCesium& image) {
   size_t textureLength = textureData.Length();
   assert(textureLength >= image.pixelData.size());
 
-  if (!useMipMaps) {
+  if (image.mipPositions.empty()) {
     // No mipmaps, copy the whole thing and then let Unity generate mipmaps on a
     // worker thread.
     std::memcpy(pixels, image.pixelData.data(), image.pixelData.size());
