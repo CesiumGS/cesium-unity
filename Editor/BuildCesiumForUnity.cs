@@ -121,7 +121,8 @@ namespace CesiumForUnity
                 locationPathName = Path.Combine(outputPath, "game"),
                 targetGroup = targetGroup,
                 target = target,
-                scenes = new[] { "Assets/Scenes/Empty.unity" }
+                scenes = new[] { "Assets/Scenes/Empty.unity" },
+                options = BuildOptions.BuildScriptsOnly
             });
 
             if (report.summary.totalErrors > 0)
