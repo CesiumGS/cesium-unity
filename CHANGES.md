@@ -1,10 +1,12 @@
 # Change Log
 
-### ? - ?
+### v1.5.0 - 2023-08-01
 
 ##### Fixes :wrench:
 
 - Fixed a bug that could lead to incorrect textures when a KTX2 image did not include a complete mip chain.
+
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.25.1 to v0.26.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
 
 ### v1.4.0 - 2023-07-03
 
