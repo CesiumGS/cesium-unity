@@ -144,6 +144,23 @@ namespace Build
 
                 if (OperatingSystem.IsWindows())
                 {
+                    // TODO: we're currently only building for UWP on Windows. This should be an option, or a separate build command.
+                    Console.WriteLine("**** Compiling for Universal Windows Platform Player");
+                    unity.Run(new[]
+                    {
+                        "-batchmode",
+                        "-nographics",
+                        "-projectPath",
+                        Utility.ProjectRoot,
+                        "-buildTarget",
+                        "WindowsStoreApps",
+                        "-executeMethod",
+                        "CesiumForUnity.BuildCesiumForUnity.CompileForUWPAndExit"
+                    });
+
+                    Console.WriteLine("**** Adding generated files (for the UWP Player) to the package");
+                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_WSA", generatedRuntimePath, Path.Combine(outputPackagePath, "Runtime", "generated"));
+
                     Console.WriteLine("**** Compiling for Windows Player");
                     unity.Run(new[]
                     {
