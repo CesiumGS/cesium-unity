@@ -22,6 +22,8 @@ namespace CesiumForUnity
         public const string CppOutputPath = "../native~/Editor/generated-Android";
 #elif UNITY_IOS
         public const string CppOutputPath = "../native~/Editor/generated-iOS";
+#elif UNITY_WSA
+        public const string CppOutputPath = "../native~/Runtime/generated-WSA";
 #elif UNITY_64
         public const string CppOutputPath = "../native~/Editor/generated-Standalone";
 #else

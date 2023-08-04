@@ -22,6 +22,12 @@ namespace CesiumForUnity
         public bool isCleanBuild;
     }
 
+    internal enum LibraryCpuArchitecture
+    {
+        x86_64,
+        ARM64
+    }
+
     /// <summary>
     /// When the user builds a Player (built game) in the Unity Editor, this class manages
     /// automatically compiling a suitable version of the native C++ CesiumForUnityNative
@@ -36,7 +42,7 @@ namespace CesiumForUnity
         {
             public BuildTarget Platform = BuildTarget.StandaloneWindows64;
             public BuildTargetGroup PlatformGroup = BuildTargetGroup.Standalone;
-            public string Cpu = null;
+            public LibraryCpuArchitecture? Cpu = null;
             public string SourceDirectory = "";
             public string BuildDirectory = "build";
             public string GeneratedDirectoryName = "generated-Unknown";
@@ -110,6 +116,7 @@ namespace CesiumForUnity
             {
                 case BuildTarget.StandaloneWindows:
                 case BuildTarget.StandaloneWindows64:
+                case BuildTarget.WSAPlayer:
                     return $"{baseName}.dll";
                 case BuildTarget.iOS:
                     return $"lib{baseName}.a";
@@ -144,14 +151,21 @@ namespace CesiumForUnity
             importer.SetCompatibleWithEditor(false);
             importer.SetCompatibleWithPlatform(library.Platform, true);
 
-            if (library.Platform == BuildTarget.Android)
+            if (library.Platform == BuildTarget.Android ||
+                library.Platform == BuildTarget.StandaloneOSX)
             {
-                importer.SetPlatformData(BuildTarget.Android, "CPU", library.Cpu == "arm64" ? "ARM64" : library.Cpu);
+                importer.SetPlatformData(library.Platform, "CPU", library.Cpu == LibraryCpuArchitecture.ARM64 ? "ARM64" : null);
             }
-            else if (library.Platform == BuildTarget.StandaloneOSX)
+            else if (library.Platform == BuildTarget.WSAPlayer)
             {
-                if (library.Cpu != null)
-                    importer.SetPlatformData(BuildTarget.StandaloneOSX, "CPU", library.Cpu == "arm64" ? "ARM64" : library.Cpu);
+                string wsaPlatform = null;
+                if (library.Cpu == LibraryCpuArchitecture.ARM64)
+                    wsaPlatform = "ARM64";
+                else if (library.Cpu == LibraryCpuArchitecture.x86_64)
+                    wsaPlatform = "X64";
+                else
+                    UnityEngine.Debug.LogAssertion("Unsupported processor: " + library.Cpu);
+                importer.SetPlatformData(library.Platform, "CPU", wsaPlatform);
             }
         }
 
@@ -241,8 +255,8 @@ namespace CesiumForUnity
                 }
                 else
                 {
-                    result.Add(GetLibraryToBuild(summary, "x86_64"));
-                    result.Add(GetLibraryToBuild(summary, "arm64"));
+                    result.Add(GetLibraryToBuild(summary, LibraryCpuArchitecture.x86_64));
+                    result.Add(GetLibraryToBuild(summary, LibraryCpuArchitecture.ARM64));
                 }
             }
             else if (summary.platform == BuildTarget.Android)
@@ -253,9 +267,14 @@ namespace CesiumForUnity
                     UnityEngine.Debug.LogWarning("Cesium for Unity only supports the ARM64 and x86_64 CPU architectures on Android. Other architectures will not work.");
 
                 if (PlayerSettings.Android.targetArchitectures.HasFlag(AndroidArchitecture.ARM64))
-                    result.Add(GetLibraryToBuild(summary, "arm64"));
+                    result.Add(GetLibraryToBuild(summary, LibraryCpuArchitecture.ARM64));
                 if (PlayerSettings.Android.targetArchitectures.HasFlag(AndroidArchitecture.X86_64))
-                    result.Add(GetLibraryToBuild(summary, "x86_64"));
+                    result.Add(GetLibraryToBuild(summary, LibraryCpuArchitecture.x86_64));
+            }
+            else if (summary.platform == BuildTarget.WSAPlayer)
+            {
+                result.Add(GetLibraryToBuild(summary, LibraryCpuArchitecture.x86_64));
+                result.Add(GetLibraryToBuild(summary, LibraryCpuArchitecture.ARM64));
             }
             else
             {
@@ -265,7 +284,7 @@ namespace CesiumForUnity
             return result.ToArray();
         }
 
-        public static LibraryToBuild GetLibraryToBuild(BuildSummary summary, string cpu = null)
+        public static LibraryToBuild GetLibraryToBuild(BuildSummary summary, LibraryCpuArchitecture? cpu = null)
         {
             return GetLibraryToBuild(new PlatformToBuild()
             {
@@ -276,7 +295,7 @@ namespace CesiumForUnity
             }, cpu);
         }
 
-        public static LibraryToBuild GetLibraryToBuild(PlatformToBuild platform, string cpu = null)
+        public static LibraryToBuild GetLibraryToBuild(PlatformToBuild platform, LibraryCpuArchitecture? cpu = null)
         {
             string sourceFilename = GetSourceFilePathName();
             string packagePath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(sourceFilename), $".."));
@@ -304,8 +323,8 @@ namespace CesiumForUnity
             {
                 library.Toolchain = $"extern/android-toolchain.cmake";
                 if (cpu == null)
-                    cpu = "arm64";
-                if (cpu == "x86_64")
+                    cpu = LibraryCpuArchitecture.ARM64;
+                if (cpu == LibraryCpuArchitecture.x86_64)
                     library.ExtraConfigureArgs.Add("-DCMAKE_ANDROID_ARCH_ABI=x86_64");
                 else
                     library.ExtraConfigureArgs.Add("-DCMAKE_ANDROID_ARCH_ABI=arm64-v8a");
@@ -323,13 +342,30 @@ namespace CesiumForUnity
             if (platform.platform == BuildTarget.StandaloneOSX)
             {
                 if (cpu != null)
-                    library.ExtraConfigureArgs.Add("-DCMAKE_OSX_ARCHITECTURES=" + cpu);
+                    library.ExtraConfigureArgs.Add("-DCMAKE_OSX_ARCHITECTURES=" + cpu.ToString().ToLowerInvariant());
+            }
+
+            if (platform.platform == BuildTarget.WSAPlayer)
+            {
+                library.ExtraConfigureArgs.Add("-DCMAKE_SYSTEM_NAME=WindowsStore");
+                library.ExtraConfigureArgs.Add("-DCMAKE_SYSTEM_VERSION=10.0");
+                switch (cpu)
+                {
+                    case LibraryCpuArchitecture.x86_64:
+                        library.ExtraConfigureArgs.Add("-DCMAKE_SYSTEM_PROCESSOR=AMD64");
+                        library.ExtraConfigureArgs.Add("-DCMAKE_GENERATOR_PLATFORM=x64");
+                        break;
+                    case LibraryCpuArchitecture.ARM64:
+                        library.ExtraConfigureArgs.Add("-DCMAKE_SYSTEM_PROCESSOR=ARM64");
+                        library.ExtraConfigureArgs.Add("-DCMAKE_GENERATOR_PLATFORM=ARM64");
+                        break;
+                }
             }
 
             if (cpu != null)
             {
-                library.InstallDirectory = Path.Combine(library.InstallDirectory, cpu);
-                library.BuildDirectory += "-" + cpu;
+                library.InstallDirectory = Path.Combine(library.InstallDirectory, cpu.ToString().ToLowerInvariant());
+                library.BuildDirectory += "-" + cpu.ToString().ToLowerInvariant();
             }
 
             return library;
@@ -345,7 +381,8 @@ namespace CesiumForUnity
             return platformGroup == BuildTargetGroup.Unknown && platform == BuildTarget.NoTarget;
         }
 
-        private static bool IsIOS(BuildTargetGroup platformGroup, BuildTarget platform){
+        private static bool IsIOS(BuildTargetGroup platformGroup, BuildTarget platform)
+        {
             return platformGroup == BuildTargetGroup.iOS && platform == BuildTarget.iOS;
         }
 
@@ -388,10 +425,12 @@ namespace CesiumForUnity
                 {
                     ProcessStartInfo startInfo = new ProcessStartInfo();
                     startInfo.UseShellExecute = false;
-                    if (library.Platform == BuildTarget.StandaloneOSX || library.Platform == BuildTarget.iOS){
+                    if (library.Platform == BuildTarget.StandaloneOSX || library.Platform == BuildTarget.iOS)
+                    {
                         startInfo.FileName = File.Exists("/Applications/CMake.app/Contents/bin/cmake") ? "/Applications/CMake.app/Contents/bin/cmake" : "cmake";
                     }
-                    else {
+                    else
+                    {
                         startInfo.FileName = "cmake";
                     }
                     startInfo.CreateNoWindow = true;
@@ -412,7 +451,7 @@ namespace CesiumForUnity
                         $"-DREINTEROP_GENERATED_DIRECTORY={library.GeneratedDirectoryName}",
                     };
                     args.AddRange(library.ExtraConfigureArgs);
-                    
+
                     if (library.Toolchain != null)
                         args.Add($"-DCMAKE_TOOLCHAIN_FILE=\"{library.Toolchain}\"");
 
@@ -434,8 +473,8 @@ namespace CesiumForUnity
                     args.AddRange(library.ExtraBuildArgs);
                     startInfo.Arguments = string.Join(' ', args);
                     RunAndLog(startInfo, log, logFilename);
-                 
-                    if(library.Platform == BuildTarget.iOS)
+
+                    if (library.Platform == BuildTarget.iOS)
                         AssetDatabase.Refresh();
                 }
             }
