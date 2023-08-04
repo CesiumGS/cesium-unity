@@ -1,5 +1,11 @@
 # Change Log
 
+### ? - ?
+
+##### Additions :tada:
+
+- Added support for Universal Windows Platform (UWP), which is required to build applications for the Holo Lens 2.
+
 ### v1.5.0 - 2023-08-01
 
 ##### Fixes :wrench:
