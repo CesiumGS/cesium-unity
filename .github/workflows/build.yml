@@ -24,6 +24,9 @@ jobs:
           submodules: recursive
       - name: Install nasm
         uses: ilammy/setup-nasm@v1.4.0
+      - name: Install Visual Studio UWP support
+        run: |
+          choco install -y visualstudio2022-workload-universal
       - name: Install Unity UWP support
         run: |
           start -FilePath "C:\Program Files\Unity Hub\Unity Hub.exe" -ArgumentList "-- --headless install-modules --version 2021.3.13f1 --changeset 9e7d58001ecf --module universal-windows-platform uwp-il2cpp" -Wait
