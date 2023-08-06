@@ -79,6 +79,7 @@ jobs:
           # Store temp files on the D drive, which is much faster than the EBS-backed C drive.
           $ENV:TEMP="d:\cesium\temp"
           dotnet run --project Build~
+          cat D:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity\native~\build-WSA-x86_64\build.log
           dir d:\cesium\CesiumForUnityBuildProject
       - name: Publish package artifact
         if: ${{ success() }}
