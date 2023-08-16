@@ -1,5 +1,11 @@
 # Change Log
 
+### ? - ?
+
+##### Additions :tada:
+
+- Added `ComputeLoadProgress` function to estimate the percentage of the 3D tileset that has been loaded for the current view.
+
 ### v1.5.0 - 2023-08-01
 
 ##### Fixes :wrench:
