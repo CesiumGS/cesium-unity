@@ -328,10 +328,10 @@ void Cesium3DTilesetImpl::FocusTileset(
 
 float Cesium3DTilesetImpl::ComputeLoadProgress(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
-      if(getTileset() == nullptr){
-        return 0;
-      }
-      return getTileset()->computeLoadProgress();
+  if (getTileset() == nullptr) {
+    return 0;
+  }
+  return getTileset()->computeLoadProgress();
 }
 
 Tileset* Cesium3DTilesetImpl::getTileset() { return this->_pTileset.get(); }

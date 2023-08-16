@@ -40,7 +40,8 @@ public:
   void RecreateTileset(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
   void FocusTileset(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
 
-  float ComputeLoadProgress(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
+  float
+  ComputeLoadProgress(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
 
   Cesium3DTilesSelection::Tileset* getTileset();
   const Cesium3DTilesSelection::Tileset* getTileset() const;
