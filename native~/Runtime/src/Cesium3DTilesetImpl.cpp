@@ -434,6 +434,10 @@ void Cesium3DTilesetImpl::LoadTileset(
       DotNet::UnityEngine::Experimental::Rendering::GraphicsFormat::
           RGBA_ETC2_SRGB,
       DotNet::UnityEngine::Experimental::Rendering::FormatUsage::Sample);
+  supportedFormats.ETC1_RGB = UnityEngine::SystemInfo::IsFormatSupported(
+      DotNet::UnityEngine::Experimental::Rendering::GraphicsFormat::
+          RGB_ETC_UNorm,
+      DotNet::UnityEngine::Experimental::Rendering::FormatUsage::Sample);
   supportedFormats.BC1_RGB = DotNet::UnityEngine::SystemInfo::IsFormatSupported(
       DotNet::UnityEngine::Experimental::Rendering::GraphicsFormat::
           RGBA_DXT1_SRGB,

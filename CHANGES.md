@@ -5,6 +5,7 @@
 ##### Fixes :wrench:
 
 - Fixed a bug that prevented building on iOS.
+- Fixed a bug where KTX tilesets did not display properly on iOS devices due to a missing check for ETC1 texture format.
 
 ### v1.5.0 - 2023-08-01
 
