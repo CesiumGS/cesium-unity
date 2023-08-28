@@ -91,6 +91,7 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
         GSL
         httplib
         ktx_read
+        meshoptimizer
         modp_b64
         spdlog
         sqlite3
@@ -105,6 +106,7 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
         webputilsdecode
         zlibstatic
     )
+    set(MESHOPT_BUILD_SHARED_LIBS OFF BOOL FORCE)
     install(TARGETS tidy-static)
     install(TARGETS ${ALL_TARGETS} PUBLIC_HEADER EXCLUDE_FROM_ALL)
     set_target_properties(cesium-native-tests PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)

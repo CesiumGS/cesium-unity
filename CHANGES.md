@@ -5,6 +5,11 @@
 ##### Additions :tada:
 
 - Added support for Universal Windows Platform (UWP), which is required to build applications for the Holo Lens 2.
+- Added `ComputeLoadProgress` function to estimate the percentage of the 3D tileset that has been loaded for the current view.
+
+##### Fixes :wrench:
+
+- Fixed a bug that prevented building on iOS.
 
 ### v1.5.0 - 2023-08-01
 
