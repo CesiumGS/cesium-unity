@@ -2,6 +2,10 @@
 
 ### ? - ?
 
+##### Additions :tada:
+
+- Added `ComputeLoadProgress` function to estimate the percentage of the 3D tileset that has been loaded for the current view.
+
 ##### Fixes :wrench:
 
 - Fixed a bug that prevented building on iOS.
