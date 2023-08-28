@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.18)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 project(CesiumForUnityNative
@@ -28,6 +28,19 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(BUILD_SHARED_LIB OFF)
 set( SUPPORT_CONSOLE_APP OFF)
 add_subdirectory(extern/tidy-html5 EXCLUDE_FROM_ALL)
+
+# Patch tidy-html5's sprtf.c to work on UWP. UWP doesn't have lstrlen, but
+# it's totally unnecessary because simply passing -1 as the length will do the same thing.
+# So just swap in the -1.
+if (${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")
+  get_target_property(tidySources tidy-static "SOURCES")
+  list(REMOVE_ITEM tidySources "src/sprtf.c")
+  file(READ "extern/tidy-html5/src/sprtf.c" sprtSource)
+  string(REPLACE "int len = (int)lstrlen(ps);" "int len = -1;" sprtSource "${sprtSource}")
+  file(CONFIGURE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/extern/tidy-html5/sprtf.c" CONTENT "${sprtSource}")
+  list(APPEND tidySources "${CMAKE_CURRENT_BINARY_DIR}/extern/tidy-html5/sprtf.c")
+  set_target_properties(tidy-static PROPERTIES "SOURCES" "${tidySources}")
+endif()
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Android")
   set(HTTPLIB_USE_OPENSSL_IF_AVAILABLE OFF)

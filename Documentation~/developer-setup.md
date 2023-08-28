@@ -6,7 +6,7 @@ This is a summary of the setup and workflows for developers who want to modify t
 
 ### Prerequisites
 
-* CMake v3.15 or later (the latest version is recommended)
+* CMake v3.18 or later (the latest version is recommended)
 * [.NET SDK v6.0 or later](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
 * If you're using Visual Studio, you need Visual Studio 2022.
 * Unity 2021.3+ (the latest version of the Unity 2021.3 LTS release is recommended)

@@ -44,6 +44,22 @@ namespace CesiumForUnity
             EditorApplication.Exit(0);
         }
 
+        public static void CompileForUWPAndExit()
+        {
+            string buildPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(buildPath);
+            try
+            {
+                PlayerSettings.SetScriptingBackend(BuildTargetGroup.WSA, ScriptingImplementation.IL2CPP);
+                BuildPlayer(BuildTargetGroup.WSA, BuildTarget.WSAPlayer, Path.Combine(buildPath, "UWP"));
+            }
+            finally
+            {
+                Directory.Delete(buildPath, true);
+            }
+            EditorApplication.Exit(0);
+        }
+
         public static void CompileForIOSAndExit()
         {
             string buildPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
