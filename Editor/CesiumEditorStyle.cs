@@ -45,7 +45,7 @@ namespace CesiumForUnity
 
         private static Texture2D LoadImage(string resourcePath)
         {
-            Texture2D icon = (Texture2D)Resources.Load(resourcePath);
+            Texture2D icon = Resources.Load<Texture2D>(resourcePath);
             icon.wrapMode = TextureWrapMode.Clamp;
 
             return icon;

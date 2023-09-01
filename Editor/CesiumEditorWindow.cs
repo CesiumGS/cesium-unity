@@ -29,7 +29,7 @@ namespace CesiumForUnity
         void OnEnable()
         {
             // Load the icon separately from the other resources.
-            Texture2D icon = (Texture2D)Resources.Load("Cesium-64x64");
+            Texture2D icon = Resources.Load<Texture2D>("Cesium-64x64");
             icon.wrapMode = TextureWrapMode.Clamp;
             this.titleContent = new GUIContent("Cesium", icon);
 
