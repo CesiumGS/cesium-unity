@@ -1,5 +1,11 @@
 # Change Log
 
+### ? - ?
+
+##### Fixes :wrench:
+
+- Fixed a bug that prevented editor windows from functioning when `com.unity.vectorgraphics` package was installed.
+
 ### v1.6.0
 
 ##### Additions :tada:
