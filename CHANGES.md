@@ -1,6 +1,6 @@
 # Change Log
 
-### ? - ?
+### v1.6.0
 
 ##### Additions :tada:
 
@@ -11,6 +11,8 @@
 
 - Fixed a bug that prevented building on iOS.
 - Fixed a bug where KTX tilesets did not display properly on iOS devices due to a missing check for ETC1 texture format.
+
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.26.0 to v0.27.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
 
 ### v1.5.0 - 2023-08-01
 
