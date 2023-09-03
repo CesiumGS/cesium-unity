@@ -1,10 +1,12 @@
 # Change Log
 
-### ? - ?
+### v1.6.1 - 2023-09-03
 
 ##### Fixes :wrench:
 
 - Fixed a bug that prevented editor windows from functioning when `com.unity.vectorgraphics` package was installed.
+
+This release also fixes an important bug by updating [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.27.0 to v0.27.1. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
 
 ### v1.6.0
 
