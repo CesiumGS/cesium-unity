@@ -67,7 +67,7 @@ namespace CesiumForUnity
             try
             {
                 BuildPlayer(BuildTargetGroup.iOS, BuildTarget.iOS, Path.Combine(buildPath, "iOS"), false);
-                // Check that XCode project is able to build
+                // Check that the XCode project is able to build
                 System.Diagnostics.Process p = System.Diagnostics.Process.Start("xcodebuild",
                   $"-project {Path.Combine(buildPath, "iOS/game/Unity-iPhone.xcodeproj")} CODE_SIGNING_ALLOWED=NO");
                 p.WaitForExit();
