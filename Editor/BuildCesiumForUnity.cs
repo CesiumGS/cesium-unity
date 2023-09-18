@@ -66,10 +66,18 @@ namespace CesiumForUnity
             Directory.CreateDirectory(buildPath);
             try
             {
-                BuildPlayer(BuildTargetGroup.iOS, BuildTarget.iOS, Path.Combine(buildPath, "iOS"));
+                BuildPlayer(BuildTargetGroup.iOS, BuildTarget.iOS, Path.Combine(buildPath, "iOS"), false);
+                // Check that the XCode project is able to build
+                System.Diagnostics.Process p = System.Diagnostics.Process.Start("xcodebuild",
+                  $"-project {Path.Combine(buildPath, "iOS/game/Unity-iPhone.xcodeproj")} CODE_SIGNING_ALLOWED=NO");
+                p.WaitForExit();
+                if (p.ExitCode != 0)
+                    throw new Exception("xcodebuild failed");
             }
             finally
             {
+                if (Directory.Exists(Path.Combine(buildPath, "iOS")))
+                    Directory.Delete(Path.Combine(buildPath, "iOS"), true);
                 Directory.Delete(buildPath, true);
             }
             EditorApplication.Exit(0);
@@ -130,7 +138,7 @@ namespace CesiumForUnity
             };
         }
 
-        private static void BuildPlayer(BuildTargetGroup targetGroup, BuildTarget target, string outputPath)
+        private static void BuildPlayer(BuildTargetGroup targetGroup, BuildTarget target, string outputPath, bool deleteProject = true)
         {
             BuildReport report = BuildPipeline.BuildPlayer(new BuildPlayerOptions()
             {
@@ -161,7 +169,7 @@ namespace CesiumForUnity
             }
 
             // We don't actually need the built project; delete it.
-            if (Directory.Exists(outputPath))
+            if (deleteProject && Directory.Exists(outputPath))
                 Directory.Delete(outputPath, true);
         }
     }

@@ -1,5 +1,11 @@
 # Change Log
 
+### ? - ?
+
+##### Fixes :wrench:
+
+- Build the XCode project and verify it for errors during the iOS building proces. This ensures the iOS plugin from CI has all the required libraries.
+
 ### v1.6.1 - 2023-09-03
 
 ##### Fixes :wrench:
