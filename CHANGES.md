@@ -1,10 +1,13 @@
 # Change Log
 
-### ? - ?
+### v1.6.2 - 2023-09-20
 
 ##### Fixes :wrench:
 
-- Build the XCode project and verify it for errors during the iOS building proces. This ensures the iOS plugin from CI has all the required libraries.
+- Fixed a bug that caused compilation errors in packaged game builds for iOS.
+- Fixed a bug that caused Apple Silicon binaries to be missing from packaged games for macOS.
+
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.27.1 to v0.27.2. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
 
 ### v1.6.1 - 2023-09-03
 
