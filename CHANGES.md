@@ -1,5 +1,11 @@
 # Change Log
 
+### ? - ?
+
+##### Fixes :wrench:
+
+- Made the project compatible with OSX 10.13 and greater by setting the `CMAKE_OSX_DEPLOYMENT_TARGET` variable to `10.13`.
+
 ### v1.6.2 - 2023-09-20
 
 ##### Fixes :wrench:
