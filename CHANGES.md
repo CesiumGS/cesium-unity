@@ -1,10 +1,12 @@
 # Change Log
 
-### ? - ?
+### v1.6.3 - 2023-10-02
 
 ##### Fixes :wrench:
 
-- Made the project compatible with OSX 10.13 and greater by setting the `CMAKE_OSX_DEPLOYMENT_TARGET` variable to `10.13`.
+- Made the project compatible with macOS versions as old as 10.13 by setting the `CMAKE_OSX_DEPLOYMENT_TARGET` variable to `10.13`.
+
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.27.2 to v0.27.3. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
 
 ### v1.6.2 - 2023-09-20
 
