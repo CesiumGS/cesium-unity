@@ -1,5 +1,11 @@
 # Change Log
 
+### v1.6.4 - 2023-10-26
+
+##### Additions :tada:
+
+- Added "Google Photorealistic 3D Tiles" to the Quick Add panel.
+
 ### v1.6.3 - 2023-10-02
 
 ##### Fixes :wrench:

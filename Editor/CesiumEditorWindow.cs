@@ -225,6 +225,14 @@ namespace CesiumForUnity
         {
             new QuickAddItem(
                 QuickAddItemType.IonTileset,
+                "Google Photorealistic 3D Tiles",
+                "Photorealistic 3D Tiles from Google Maps Platform.",
+                "Google Photorealistic 3D Tiles",
+                2275207,
+                "",
+                -1),
+            new QuickAddItem(
+                QuickAddItemType.IonTileset,
                 "Cesium World Terrain + Bing Maps Aerial imagery",
                 "High-resolution global terrain tileset curated from several data sources, " +
                 "textured with Bing Maps satellite imagery.",
