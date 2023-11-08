@@ -11,14 +11,4 @@ Plugins.meta
 CesiumForUnityNativeBindings/native/
 .vs/
 *.user
-Reinterop.dll
-Reinterop.deps.json
-Reinterop.deps.json.meta
-Reinterop.pdb
-Reinterop.pdb.meta
-CesiumForUnityNative-*.dll
-CesiumForUnityNative-*.dll.meta
-libCesiumForUnityNative-*.so
-libCesiumForUnityNative-*.so.meta
-libCesiumForUnityNative-*.dylib
-libCesiumForUnityNative-*.dylib.meta
+
