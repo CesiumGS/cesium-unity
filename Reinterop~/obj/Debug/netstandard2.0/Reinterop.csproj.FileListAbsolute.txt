@@ -1,0 +1,10 @@
+C:\projects\cesium-mindtrust\cesium-unity-samples\Packages\com.cesium.unity\Reinterop~\bin\Debug\netstandard2.0\Reinterop.deps.json
+C:\projects\cesium-mindtrust\cesium-unity-samples\Packages\com.cesium.unity\Reinterop~\bin\Debug\netstandard2.0\Reinterop.dll
+C:\projects\cesium-mindtrust\cesium-unity-samples\Packages\com.cesium.unity\Reinterop~\bin\Debug\netstandard2.0\Reinterop.pdb
+C:\projects\cesium-mindtrust\cesium-unity-samples\Packages\com.cesium.unity\Reinterop~\obj\Debug\netstandard2.0\Reinterop.csproj.AssemblyReference.cache
+C:\projects\cesium-mindtrust\cesium-unity-samples\Packages\com.cesium.unity\Reinterop~\obj\Debug\netstandard2.0\Reinterop.GeneratedMSBuildEditorConfig.editorconfig
+C:\projects\cesium-mindtrust\cesium-unity-samples\Packages\com.cesium.unity\Reinterop~\obj\Debug\netstandard2.0\Reinterop.AssemblyInfoInputs.cache
+C:\projects\cesium-mindtrust\cesium-unity-samples\Packages\com.cesium.unity\Reinterop~\obj\Debug\netstandard2.0\Reinterop.AssemblyInfo.cs
+C:\projects\cesium-mindtrust\cesium-unity-samples\Packages\com.cesium.unity\Reinterop~\obj\Debug\netstandard2.0\Reinterop.csproj.CoreCompileInputs.cache
+C:\projects\cesium-mindtrust\cesium-unity-samples\Packages\com.cesium.unity\Reinterop~\obj\Debug\netstandard2.0\Reinterop.dll
+C:\projects\cesium-mindtrust\cesium-unity-samples\Packages\com.cesium.unity\Reinterop~\obj\Debug\netstandard2.0\Reinterop.pdb
