@@ -4,8 +4,7 @@ build/
 build-*/
 build.bat
 build.bat.meta
-publishReinterop.bat
-publishReinterop.bat.meta
+ 
 Plugins/
 Plugins.meta
 CesiumForUnityNativeBindings/native/
