@@ -13,37 +13,37 @@ using namespace CesiumForUnityNative;
 
 namespace {
 
-::DotNet::CesiumForUnity::MetadataType
-GetMetadataType(CesiumGltf::PropertyType type) {
-  switch (type) {
-  case CesiumGltf::PropertyType::Int8:
-    return DotNet::CesiumForUnity::MetadataType::Int8;
-  case CesiumGltf::PropertyType::Uint8:
-    return DotNet::CesiumForUnity::MetadataType::UInt8;
-  case CesiumGltf::PropertyType::Int16:
-    return DotNet::CesiumForUnity::MetadataType::Int16;
-  case CesiumGltf::PropertyType::Uint16:
-    return DotNet::CesiumForUnity::MetadataType::UInt16;
-  case CesiumGltf::PropertyType::Int32:
-    return DotNet::CesiumForUnity::MetadataType::Int32;
-  case CesiumGltf::PropertyType::Uint32:
-    return DotNet::CesiumForUnity::MetadataType::UInt32;
-  case CesiumGltf::PropertyType::Int64:
-    return DotNet::CesiumForUnity::MetadataType::Int64;
-  case CesiumGltf::PropertyType::Uint64:
-    return DotNet::CesiumForUnity::MetadataType::UInt64;
-  case CesiumGltf::PropertyType::Float32:
-    return DotNet::CesiumForUnity::MetadataType::Float;
-  case CesiumGltf::PropertyType::Float64:
-    return DotNet::CesiumForUnity::MetadataType::Double;
-  case CesiumGltf::PropertyType::Boolean:
-    return DotNet::CesiumForUnity::MetadataType::Boolean;
-  case CesiumGltf::PropertyType::String:
-    return DotNet::CesiumForUnity::MetadataType::String;
-  default:
-    return DotNet::CesiumForUnity::MetadataType::None;
-  }
-}
+//::DotNet::CesiumForUnity::MetadataType
+// GetMetadataType(CesiumGltf::PropertyType type) {
+//  switch (type) {
+//  case CesiumGltf::PropertyType::Int8:
+//    return DotNet::CesiumForUnity::MetadataType::Int8;
+//  case CesiumGltf::PropertyType::Uint8:
+//    return DotNet::CesiumForUnity::MetadataType::UInt8;
+//  case CesiumGltf::PropertyType::Int16:
+//    return DotNet::CesiumForUnity::MetadataType::Int16;
+//  case CesiumGltf::PropertyType::Uint16:
+//    return DotNet::CesiumForUnity::MetadataType::UInt16;
+//  case CesiumGltf::PropertyType::Int32:
+//    return DotNet::CesiumForUnity::MetadataType::Int32;
+//  case CesiumGltf::PropertyType::Uint32:
+//    return DotNet::CesiumForUnity::MetadataType::UInt32;
+//  case CesiumGltf::PropertyType::Int64:
+//    return DotNet::CesiumForUnity::MetadataType::Int64;
+//  case CesiumGltf::PropertyType::Uint64:
+//    return DotNet::CesiumForUnity::MetadataType::UInt64;
+//  case CesiumGltf::PropertyType::Float32:
+//    return DotNet::CesiumForUnity::MetadataType::Float;
+//  case CesiumGltf::PropertyType::Float64:
+//    return DotNet::CesiumForUnity::MetadataType::Double;
+//  case CesiumGltf::PropertyType::Boolean:
+//    return DotNet::CesiumForUnity::MetadataType::Boolean;
+//  case CesiumGltf::PropertyType::String:
+//    return DotNet::CesiumForUnity::MetadataType::String;
+//  default:
+//    return DotNet::CesiumForUnity::MetadataType::None;
+//  }
+//}
 
 template <typename TTo, typename TFrom>
 static TTo convertToFloat(TFrom from, TTo defaultValue) {
@@ -489,51 +489,56 @@ DotNet::System::String CesiumFeatureImpl::GetComponentString(
 int CesiumFeatureImpl::GetComponentCount(
     const DotNet::CesiumForUnity::CesiumFeature& feature,
     const DotNet::System::String& property) {
-  return std::visit(
-      [](auto&& arg) { return arg.getComponentCount(); },
-      GetPropertyType(property));
+  return 0;
+  // return std::visit(
+  //    [](auto&& arg) { return arg.getComponentCount(); },
+  //    GetPropertyType(property));
 }
 
 DotNet::CesiumForUnity::MetadataType CesiumFeatureImpl::GetComponentType(
     const DotNet::CesiumForUnity::CesiumFeature& feature,
     const DotNet::System::String& property) {
-  return std::visit(
-      [](auto&& arg) {
-        using T = std::decay_t<decltype(arg)>;
-        if constexpr (CesiumGltf::IsMetadataArray<T>::value) {
-          if (arg.size() > 0) {
-            CesiumGltf::PropertyType type = std::visit(
-                [](auto&& arg2) {
-                  using T = std::decay_t<decltype(arg2)>;
-                  return CesiumGltf::TypeToPropertyType<T>::value;
-                },
-                static_cast<ValueType>(arg[0]));
-            return ::GetMetadataType(type);
-          }
-        }
-        return DotNet::CesiumForUnity::MetadataType::None;
-      },
-      GetValueType(property));
+
+  return DotNet::CesiumForUnity::MetadataType::None;
+  //return std::visit(
+  //    [](auto&& arg) {
+  //      using T = std::decay_t<decltype(arg)>;
+  //      if constexpr (CesiumGltf::IsMetadataArray<T>::value) {
+  //        if (arg.size() > 0) {
+  //          CesiumGltf::PropertyType type = std::visit(
+  //              [](auto&& arg2) {
+  //                using T = std::decay_t<decltype(arg2)>;
+  //                return CesiumGltf::TypeToPropertyType<T>::value;
+  //              },
+  //              static_cast<ValueType>(arg[0]));
+  //          return DotNet::CesiumForUnity::MetadataType::None;
+  //          // ::GetMetadataType(type);
+  //        }
+  //      }
+  //      return DotNet::CesiumForUnity::MetadataType::None;
+  //    },
+  //    GetValueType(property));
 }
 
 bool CesiumFeatureImpl::IsNormalized(
     const DotNet::CesiumForUnity::CesiumFeature& feature,
     const DotNet::System::String& property) {
   return std::visit(
-      [](auto&& arg) { return arg.isNormalized(); },
+      [](auto&& arg) { return arg.normalized(); },
       GetPropertyType(property));
 }
 
 DotNet::CesiumForUnity::MetadataType CesiumFeatureImpl::GetMetadataType(
     const DotNet::CesiumForUnity::CesiumFeature& feature,
     const DotNet::System::String& property) {
-  CesiumGltf::PropertyType type = std::visit(
-      [](auto&& arg) {
-        using T = std::decay_t<decltype(arg)>;
-        return CesiumGltf::TypeToPropertyType<T>::value;
-      },
-      GetValueType(property));
-  return ::GetMetadataType(type);
+  return DotNet::CesiumForUnity::MetadataType::None;
+  // CesiumGltf::PropertyType type = std::visit(
+  //    [](auto&& arg) {
+  //      using T = std::decay_t<decltype(arg)>;
+  //      return CesiumGltf::TypeToPropertyType<T>::value;
+  //    },
+  //    GetValueType(property));
+  // return ::GetMetadataType(type);
 }
 
 PropertyType CesiumForUnityNative::CesiumFeatureImpl::GetPropertyType(

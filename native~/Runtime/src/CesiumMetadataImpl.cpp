@@ -3,8 +3,8 @@
 #include <CesiumGltf/AccessorView.h>
 #include <CesiumGltf/ExtensionMeshPrimitiveExtFeatureMetadata.h>
 #include <CesiumGltf/ExtensionModelExtFeatureMetadata.h>
-#include <CesiumGltf/MetadataFeatureTableView.h>
-#include <CesiumGltf/MetadataPropertyView.h>
+#include <CesiumGltf/PropertyTableView.h>
+#include <CesiumGltf/PropertyTablePropertyView.h>
 
 #include <DotNet/System/Array1.h>
 #include <DotNet/UnityEngine/GameObject.h>
@@ -174,7 +174,7 @@ CesiumForUnityNative::CesiumMetadataImpl::GetFeatures(
     const DotNet::CesiumForUnity::CesiumMetadata& metadata,
     const DotNet::UnityEngine::Transform& transform,
     int triangleIndex) {
-  auto find = this->_pModels.find(transform.GetInstanceID());
+  auto find = this->_pModels.find(transform.GetInstanceID());/*
   if (find != this->_pModels.end()) {
 
     const Model* pModel = find->second.first;
@@ -246,6 +246,6 @@ CesiumForUnityNative::CesiumMetadataImpl::GetFeatures(
       }
     }
     return features;
-  }
+  }*/
   return DotNet::System::Array1<DotNet::CesiumForUnity::CesiumFeature>(0);
 }

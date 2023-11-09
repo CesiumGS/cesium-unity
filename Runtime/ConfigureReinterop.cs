@@ -515,6 +515,33 @@ namespace CesiumForUnity
             Mesh pooledMesh = meshPool.Get();
             meshPool.Release(pooledMesh);
 
+            CesiumModelMetadata modelMetadata = go.AddComponent<CesiumModelMetadata>();
+            CesiumPropertyTable[] propertyTables = modelMetadata.propertyTables;
+            CesiumPropertyTable propertyTable = new CesiumPropertyTable();
+
+            CesiumPropertyTableProperty property = new CesiumPropertyTableProperty();
+            int test1 = property.GetAs<int>(0);
+            uint test2 = property.GetAs<uint>(0);
+            bool test3 = property.GetAs<bool>(true);
+            String test4 = property.GetAs<String>("");
+            double3 test5 = property.GetAs<double3>(new double3());
+            float2 test6 = property.GetAs<float2>(new float2());
+            int4x4 test7 = property.GetAs<int4x4>(new int4x4());
+            uint2x2 test8 = property.GetAs<uint2x2>(new uint2x2());
+            int3 test9 = property.GetAs<int3>(new int3());
+            byte test10 = property.GetAs<byte>(0);
+
+            CesiumMetadataValue<int> value1 = new CesiumMetadataValue<int>(0);
+            CesiumMetadataValue<uint> value2 = new CesiumMetadataValue<uint>(0);
+            CesiumMetadataValue<bool> value3 = new CesiumMetadataValue<bool>(false);
+            CesiumMetadataValue<String> value4 = new CesiumMetadataValue<String>("");
+            CesiumMetadataValue<double3> value5 = new CesiumMetadataValue<double3>(new double3());
+            CesiumMetadataValue<float2> value6 = new CesiumMetadataValue<float2>(new float2());
+            CesiumMetadataValue<int4x4> test7 = new CesiumMetadataValue<int4x4>(new int4x4());
+            CesiumMetadataValue<uint2x2> test8 = new CesiumMetadataValue<uint2x2>(new uint2x2());
+            CesiumMetadataValue<int3> test9 = new CesiumMetadataValue<int3>(new int3());
+            CesiumMetadataValue<byte> test10 = new CesiumMetadataValue<byte>(0);
+
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;
             sv.pivot = sv.pivot;
