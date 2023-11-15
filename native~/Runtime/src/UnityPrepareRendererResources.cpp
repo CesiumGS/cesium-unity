@@ -1,17 +1,18 @@
 #include "UnityPrepareRendererResources.h"
 
+#include "CesiumFeaturesMetadataUtility.h"
 #include "TextureLoader.h"
 #include "UnityLifetime.h"
 #include "UnityTransforms.h"
 
-#include <Cesium3DTilesSelection/GltfUtilities.h>
+#include <Cesium3DTilesContent/GltfUtilities.h>
 #include <Cesium3DTilesSelection/Tile.h>
 #include <Cesium3DTilesSelection/Tileset.h>
 #include <CesiumGeometry/Transforms.h>
 #include <CesiumGeospatial/Ellipsoid.h>
 #include <CesiumGltf/AccessorView.h>
+#include <CesiumGltf/ExtensionExtMeshFeatures.h>
 #include <CesiumGltf/ExtensionKhrMaterialsUnlit.h>
-#include <CesiumGltf/ExtensionMeshPrimitiveExtFeatureMetadata.h>
 #include <CesiumGltf/ExtensionModelExtFeatureMetadata.h>
 #include <CesiumGltfReader/GltfReader.h>
 #include <CesiumShaderProperties.h>
@@ -19,12 +20,15 @@
 
 #include <DotNet/CesiumForUnity/Cesium3DTileInfo.h>
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
+#include <DotNet/CesiumForUnity/CesiumFeatureIdAttribute.h>
+#include <DotNet/CesiumForUnity/CesiumFeatureIdSet.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/CesiumForUnity/CesiumGlobeAnchor.h>
 #include <DotNet/CesiumForUnity/CesiumMetadata.h>
 #include <DotNet/CesiumForUnity/CesiumObjectPool1.h>
 #include <DotNet/CesiumForUnity/CesiumObjectPools.h>
 #include <DotNet/CesiumForUnity/CesiumPointCloudRenderer.h>
+#include <DotNet/CesiumForUnity/CesiumPrimitiveFeatures.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/Collections/Generic/List1.h>
 #include <DotNet/System/Object.h>
@@ -66,6 +70,7 @@
 #include <unordered_map>
 #include <variant>
 
+using namespace Cesium3DTilesContent;
 using namespace Cesium3DTilesSelection;
 using namespace CesiumForUnityNative;
 using namespace CesiumGeometry;
@@ -1348,13 +1353,18 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           }
         }
 
-        const ExtensionMeshPrimitiveExtFeatureMetadata* pMetadata =
-            primitive.getExtension<ExtensionMeshPrimitiveExtFeatureMetadata>();
-        if (pMetadata) {
-          pMetadataComponent.NativeImplementation().addMetadata(
-              primitiveGameObject.transform().GetInstanceID(),
-              &gltf,
-              &primitive);
+        const ExtensionExtMeshFeatures* pFeatures =
+            primitive.getExtension<ExtensionExtMeshFeatures>();
+        if (pFeatures) {
+          CesiumFeaturesMetadataUtility::AddPrimitiveFeatures(
+              primitiveGameObject,
+              gltf,
+              primitive,
+              *pFeatures);
+          // pMetadataComponent.NativeImplementation().addMetadata(
+          //    primitiveGameObject.transform().GetInstanceID(),
+          //    &gltf,
+          //    &primitive);
         }
       });
 

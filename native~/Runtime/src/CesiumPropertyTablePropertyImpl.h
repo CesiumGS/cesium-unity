@@ -27,29 +27,31 @@ public:
   void initializeProperty(
       const CesiumGltf::PropertyTablePropertyView<T, Normalized>& property);
 
-  template <typename T>
-  T GetAs(
-      const DotNet::CesiumForUnity::CesiumPropertyTableProperty&,
-      const T& value) {
-    return value;
-  }
+  bool GetBoolean(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      bool defaultValue);
 
-  // std::int8_t GetInt8(
-  //    const DotNet::CesiumForUnity::CesiumPropertyTableProperty& feature,
-  //    const DotNet::System::String& property,
-  //    std::int8_t defaultValue);
-  // std::uint8_t GetUInt8(
-  //    const DotNet::CesiumForUnity::CesiumFeature& feature,
-  //    const DotNet::System::String& property,
-  //    std::uint8_t defaultValue);
-  // std::int16_t GetInt16(
-  //    const DotNet::CesiumForUnity::CesiumFeature& feature,
-  //    const DotNet::System::String& property,
-  //    std::int16_t defaultValue);
-  // std::uint16_t GetUInt16(
-  //    const DotNet::CesiumForUnity::CesiumFeature& feature,
-  //    const DotNet::System::String& property,
-  //    std::uint16_t defaultValue);
+  std::int8_t GetSByte(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      std::int8_t defaultValue);
+
+  std::uint8_t GetByte(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      std::uint8_t defaultValue);
+
+  std::int16_t GetInt16(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      std::int16_t defaultValue);
+
+  std::uint16_t GetUInt16(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      std::uint16_t defaultValue);
+
   // std::int32_t GetInt32(
   //    const DotNet::CesiumForUnity::CesiumFeature& feature,
   //    const DotNet::System::String& property,
@@ -74,10 +76,6 @@ public:
   //    const DotNet::CesiumForUnity::CesiumFeature& feature,
   //    const DotNet::System::String& property,
   //    double defaultValue);
-  // bool GetBoolean(
-  //    const DotNet::CesiumForUnity::CesiumFeature& feature,
-  //    const DotNet::System::String& property,
-  //    bool defaultValue);
   // DotNet::System::String GetString(
   //    const DotNet::CesiumForUnity::CesiumFeature& feature,
   //    const DotNet::System::String& property,

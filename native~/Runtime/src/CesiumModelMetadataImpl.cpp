@@ -18,7 +18,7 @@ using namespace CesiumGltf;
 void CesiumModelMetadataImpl::initializeMetadata(
     const CesiumGltf::Model* pModel,
     const CesiumGltf::ExtensionModelExtStructuralMetadata* pExtension) {
-  DotNet::System::Array1<DotNet::CesiumForUnity::PropertyTable> features =
+  /*DotNet::System::Array1<DotNet::CesiumForUnity::PropertyTable> features =
       DotNet::System::Array1<DotNet::CesiumForUnity::CesiumFeature>(
-          pMetadata->featureIdAttributes.size());
+          pMetadata->featureIdAttributes.size());*/
 }

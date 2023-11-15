@@ -247,5 +247,6 @@ CesiumForUnityNative::CesiumMetadataImpl::GetFeatures(
     }
     return features;
   }*/
+
   return DotNet::System::Array1<DotNet::CesiumForUnity::CesiumFeature>(0);
 }
