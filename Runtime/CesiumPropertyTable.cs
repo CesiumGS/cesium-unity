@@ -1,4 +1,3 @@
-using Reinterop;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -30,42 +29,59 @@ namespace CesiumForUnity
     /// <summary>
     /// Represents a glTF property table in the EXT_structural_metadata extension.
     /// A property table is a collection of properties for the features in a mesh.
-    /// It knows how to look up the metadata values associated with a given 
-    /// feature ID.
+    /// It knows how to look up the metadata values associated with a given feature ID.
     /// </summary>
-    [ReinteropNativeImplementation("CesiumForUnityNative::CesiumPropertyTableImpl", "CesiumPropertyTableImpl.h")]
-    public partial class CesiumPropertyTable
+    public class CesiumPropertyTable
     {
-        private CesiumPropertyTableStatus _status =
-            CesiumPropertyTableStatus.ErrorInvalidPropertyTable;
-
         /// <summary>
         /// The status of the property table. If an error occurred while parsing 
         /// the property table from the glTF extension, this briefly conveys why.
         /// </summary>
         public CesiumPropertyTableStatus status
         {
-            get => this._status;
-            internal set => this._status = value;
+            get; internal set;
         }
 
         /// <summary>
         /// The name of the property table. If no name was specified in the glTF
         /// extension, this is an empty string.
         /// </summary>
-        public string name { get; internal set; }
+        public string name
+        {
+            get; internal set;
+        }
 
         /// <summary>
         /// The number of values each property in the table is expected to have.
         /// If an error occurred while parsing the property table, this returns zero.
         /// </summary>
-        public Int64 count { get; internal set; }
+        public Int64 count
+        {
+            get; internal set;
+        }
 
         /// <summary>
-        /// The properties of the property table, mapped by property name.
+        /// The properties of the property table, mapped by property id.
         /// </summary>
-        public Dictionary<string, CesiumPropertyTableProperty> properties { get; internal set; }
+        public Dictionary<String, CesiumPropertyTableProperty> properties
+        {
+            get; internal set;
+        }
 
-        // public Dictionary<string, ____> GetMetadataValuesForFeature() { }
+        internal CesiumPropertyTable()
+        {
+            this.status = CesiumPropertyTableStatus.ErrorInvalidPropertyTable;
+            this.count = 0;
+        }
+
+        public Dictionary<String, String> GetMetadataValuesForFeatureAsStrings(Int64 featureId)
+        {
+            Dictionary<String, String> result = new Dictionary<String, String>();
+            foreach (KeyValuePair<String, CesiumPropertyTableProperty> property in this.properties)
+            {
+                result.Add(property.Key, property.Value.GetString(featureId));
+            }
+            return result;
+        }
     }
 }

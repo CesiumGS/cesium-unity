@@ -21,12 +21,12 @@ public:
   void JustBeforeDelete(const DotNet::CesiumForUnity::CesiumFeatureIdAttribute&
                             featureIdAttribute){};
 
-  static DotNet::CesiumForUnity::CesiumFeatureIdAttribute Create(
+  static DotNet::CesiumForUnity::CesiumFeatureIdAttribute CreateAttribute(
       const CesiumGltf::Model& model,
       const CesiumGltf::MeshPrimitive& primitive,
       const int32_t attributeSetIndex);
 
-  std::int64_t GetFeatureIDForVertex(
+  std::int64_t GetFeatureIdForVertex(
       const DotNet::CesiumForUnity::CesiumFeatureIdAttribute&
           featureIdAttribute,
       const int64_t vertexIndex);

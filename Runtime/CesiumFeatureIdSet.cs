@@ -1,4 +1,3 @@
-using Reinterop;
 using System;
 using UnityEngine;
 
@@ -88,24 +87,80 @@ namespace CesiumForUnity
 
         /// <summary>
         /// Gets the feature ID associated with a given vertex. The feature ID can be
-        /// used with a CesiumPropertyTable to retrieve the corresponding metadata.
+        /// used with a <see cref="CesiumPropertyTable"/> to retrieve the corresponding
+        /// metadata.
         /// </summary>
         /// <remarks>
         /// This returns -1 if the given vertex is out-of-bounds, or if the feature ID
         /// set is invalid.
         /// </remarks>
         /// <param name="vertexIndex">The index of the target vertex.</param>
-        /// <returns>The feature ID associated with the given vertex, or -1 for an invalid
-        /// feature ID set or invalid input.</returns>
-        public virtual Int64 GetFeatureIDForVertex(Int64 vertexIndex)
+        /// <returns>The feature ID associated with the given vertex, or -1 for an
+        /// invalid feature ID set or invalid input.</returns>
+        public virtual Int64 GetFeatureIdForVertex(Int64 vertexIndex)
         {
-            if (this.type == CesiumFeatureIdSetType.Implicit)
+            if (this.type != CesiumFeatureIdSetType.Implicit)
             {
-                return vertexIndex;
+                // Other methods should be handled by CesiumFeatureIdAttribute and CesiumFeatureIdTexture respectively.
+                return -1;
             }
 
-            // Other methods should be handled by CesiumFeatureIdAttribute and CesiumFeatureIdTexture respectively.
-            return -1;
+            if (vertexIndex < 0 || vertexIndex >= this.featureCount)
+            {
+                return -1;
+            }
+
+            return vertexIndex;
+        }
+
+        /// <summary>
+        /// Gets the feature ID from the feature ID set using the given raycast hit.
+        /// This returns a more accurate value for feature ID textures, since they 
+        /// define feature IDs per-texel instead of per-vertex. The feature ID can
+        /// be used with a <see cref="CesiumPropertyTable"/> to retrieve the 
+        /// corresponding metadata.
+        /// </summary>
+        /// <remarks>
+        /// This can still retrieve the feature IDs for non-texture feature ID sets.
+        /// For attribute or implicit feature IDs, the first feature ID associated
+        /// with the first vertex of the intersected face is returned.
+        /// 
+        /// This returns -1 if the feature ID set is invalid.
+        /// </remarks>
+        /// 
+        /// <param name="hitInfo">The raycast hit info.</param>
+        /// <returns></returns>
+        public virtual Int64 GetFeatureIdFromRaycastHit(RaycastHit hitInfo)
+        {
+            if (this.type != CesiumFeatureIdSetType.Implicit)
+            {
+                // Other methods should be handled by CesiumFeatureIdAttribute and
+                // CesiumFeatureIdTexture respectively.
+                return -1;
+            }
+
+            return GetFirstVertexFromHitTriangle(hitInfo);
+        }
+
+
+        /// <summary>
+        /// Given a successful raycast hit, finds the index of the first vertex from 
+        /// the triangle hit. Returns -1 if the triangleIndex is invalid.
+        /// </summary>
+        /// <param name="hitInfo">The raycast hit info.</param>
+        /// <returns>The index of the first vertex on the triangle.</returns>
+        protected int GetFirstVertexFromHitTriangle(RaycastHit hitInfo)
+        {
+            MeshFilter meshFilter = hitInfo.transform.GetComponent<MeshFilter>();
+            if (meshFilter == null || meshFilter.mesh == null)
+            {
+                return -1;
+            }
+
+            Mesh mesh = meshFilter.mesh;
+            int[] indices = mesh.GetTriangles(0);
+            int targetVertex = hitInfo.triangleIndex * 3;
+            return targetVertex < indices.Length ? indices[targetVertex] : -1;
         }
     }
 }

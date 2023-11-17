@@ -38,8 +38,20 @@ namespace CesiumForUnity
         /// <param name="hitInfo">The raycast hit info.</param>
         /// <param name="featureIdSetIndex">The index of the target feature ID set.</param>
         /// <returns>The feature ID, or -1 if the specified feature ID set is invalid.</returns>
-        //public partial Int64 GetFeatureIDFromRaycastHit(
-        //    RaycastHit hitInfo,
-        //    Int64 featureIdSetIndex = 0);
+        public static Int64 GetFeatureIdFromRaycastHit(
+            RaycastHit hitInfo,
+            Int64 featureIdSetIndex = 0)
+        {
+            CesiumPrimitiveFeatures primitiveFeatures = hitInfo.transform.GetComponent<CesiumPrimitiveFeatures>();
+            if (primitiveFeatures == null || 
+                featureIdSetIndex < 0 || featureIdSetIndex >= primitiveFeatures.featureIdSets.Length)
+            {
+                return -1;
+            }
+
+            CesiumFeatureIdSet featureIdSet = primitiveFeatures.featureIdSets[featureIdSetIndex];
+
+            return featureIdSet.GetFeatureIdFromRaycastHit(hitInfo);
+        }
     }
 }

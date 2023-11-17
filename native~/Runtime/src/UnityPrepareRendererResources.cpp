@@ -14,6 +14,7 @@
 #include <CesiumGltf/ExtensionExtMeshFeatures.h>
 #include <CesiumGltf/ExtensionKhrMaterialsUnlit.h>
 #include <CesiumGltf/ExtensionModelExtFeatureMetadata.h>
+#include <CesiumGltf/ExtensionModelExtStructuralMetadata.h>
 #include <CesiumGltfReader/GltfReader.h>
 #include <CesiumShaderProperties.h>
 #include <CesiumUtility/ScopeGuard.h>
@@ -25,6 +26,7 @@
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/CesiumForUnity/CesiumGlobeAnchor.h>
 #include <DotNet/CesiumForUnity/CesiumMetadata.h>
+#include <DotNet/CesiumForUnity/CesiumModelMetadata.h>
 #include <DotNet/CesiumForUnity/CesiumObjectPool1.h>
 #include <DotNet/CesiumForUnity/CesiumObjectPools.h>
 #include <DotNet/CesiumForUnity/CesiumPointCloudRenderer.h>
@@ -1046,14 +1048,23 @@ void* UnityPrepareRendererResources::prepareInMainThread(
   int32_t meshIndex = 0;
 
   DotNet::CesiumForUnity::CesiumMetadata pMetadataComponent = nullptr;
-  if (model.getExtension<ExtensionModelExtFeatureMetadata>()) {
-    pMetadataComponent =
-        pModelGameObject
-            ->GetComponentInParent<DotNet::CesiumForUnity::CesiumMetadata>();
-    if (pMetadataComponent == nullptr) {
-      pMetadataComponent =
-          this->_tileset.AddComponent<DotNet::CesiumForUnity::CesiumMetadata>();
-    }
+  // if (model.getExtension<ExtensionModelExtFeatureMetadata>()) {
+  //  pMetadataComponent =
+  //      pModelGameObject
+  //          ->GetComponentInParent<DotNet::CesiumForUnity::CesiumMetadata>();
+  //  if (pMetadataComponent == nullptr) {
+  //    pMetadataComponent =
+  //        this->_tileset.AddComponent<DotNet::CesiumForUnity::CesiumMetadata>();
+  //  }
+  //}
+
+  auto pModelMetadata =
+      model.getExtension<ExtensionModelExtStructuralMetadata>();
+  if (pModelMetadata) {
+    CesiumFeaturesMetadataUtility::AddModelMetadata(
+        *pModelGameObject,
+        model,
+        *pModelMetadata);
   }
 
   model.forEachPrimitiveInScene(

@@ -9,7 +9,7 @@ using namespace DotNet::CesiumForUnity;
 
 namespace CesiumForUnityNative {
 /*static*/ DotNet::CesiumForUnity::CesiumFeatureIdAttribute
-CesiumFeatureIdAttributeImpl::Create(
+CesiumFeatureIdAttributeImpl::CreateAttribute(
     const CesiumGltf::Model& model,
     const CesiumGltf::MeshPrimitive& primitive,
     const int32_t attributeSetIndex) {
@@ -27,7 +27,7 @@ CesiumFeatureIdAttributeImpl::Create(
   return attribute;
 }
 
-std::int64_t CesiumFeatureIdAttributeImpl::GetFeatureIDForVertex(
+std::int64_t CesiumFeatureIdAttributeImpl::GetFeatureIdForVertex(
     const CesiumFeatureIdAttribute& featureIdAttribute,
     const int64_t vertexIndex) {
   return std::visit(CesiumGltf::FeatureIdFromAccessor{vertexIndex}, _accessor);

@@ -515,14 +515,22 @@ namespace CesiumForUnity
             Mesh pooledMesh = meshPool.Get();
             meshPool.Release(pooledMesh);
 
-            CesiumMetadataValueType valueType;
+            CesiumMetadataValueType valueType = new CesiumMetadataValueType(CesiumMetadataType.Invalid, CesiumMetadataComponentType.None, false);
             valueType.type = CesiumMetadataType.Invalid;
             valueType.componentType = CesiumMetadataComponentType.None;
             valueType.isArray = false;
 
             CesiumModelMetadata modelMetadata = go.AddComponent<CesiumModelMetadata>();
-            CesiumPropertyTable[] propertyTables = modelMetadata.propertyTables;
+            modelMetadata.propertyTables = modelMetadata.propertyTables;
+            modelMetadata.propertyTables[0] = new CesiumPropertyTable();
+
             CesiumPropertyTable propertyTable = new CesiumPropertyTable();
+            propertyTable.status = CesiumPropertyTableStatus.Valid;
+            propertyTable.name = "";
+            propertyTable.count = 0;
+            propertyTable.properties = propertyTable.properties;
+            propertyTable.properties = new Dictionary<String, CesiumPropertyTableProperty>(10);
+            propertyTable.properties.Add("Test", new CesiumPropertyTableProperty());
 
             CesiumPropertyTableProperty property = new CesiumPropertyTableProperty();
             property.status = property.status;

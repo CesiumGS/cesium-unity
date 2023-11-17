@@ -60,6 +60,12 @@ namespace CesiumForUnity
         /// <param name="vertexIndex">The index of the target vertex.</param>
         /// <returns>The feature ID associated with the given vertex, or -1 
         /// if the feature ID set is invalid or if the vertex is out of bounds.</returns>
-        public override partial Int64 GetFeatureIDForVertex(Int64 vertexIndex);
+        public override partial Int64 GetFeatureIdForVertex(Int64 vertexIndex);
+
+        public override Int64 GetFeatureIdFromRaycastHit(RaycastHit hitInfo)
+        {
+            int vertex = GetFirstVertexFromHitTriangle(hitInfo);
+            return this.GetFeatureIdForVertex(vertex);
+        }
     }
 }

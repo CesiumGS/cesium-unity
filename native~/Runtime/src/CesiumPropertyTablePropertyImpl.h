@@ -1,15 +1,21 @@
 #pragma once
 
+namespace CesiumForUnityNative {
+class CesiumPropertyTablePropertyImpl;
+}
+
+//#include "CesiumFeaturesMetadataUtility.h"
+
 #include <CesiumGltf/PropertyTablePropertyView.h>
 
-#include <DotNet/CesiumForUnity/MetadataType.h>
+#include <DotNet/CesiumForUnity/CesiumPropertyTableProperty.h>
 
 #include <any>
 #include <unordered_map>
 
 namespace DotNet::CesiumForUnity {
 class CesiumPropertyTableProperty;
-} // namespace DotNet::CesiumForUnity
+}
 
 namespace DotNet::System {
 class String;
@@ -21,11 +27,13 @@ class CesiumPropertyTablePropertyImpl {
 public:
   ~CesiumPropertyTablePropertyImpl(){};
   CesiumPropertyTablePropertyImpl(
-      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& Property){};
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property){};
+  void JustBeforeDelete(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property){};
 
   template <typename T, bool Normalized>
-  void initializeProperty(
-      const CesiumGltf::PropertyTablePropertyView<T, Normalized>& property);
+  static DotNet::CesiumForUnity::CesiumPropertyTableProperty CreateProperty(
+      const CesiumGltf::PropertyTablePropertyView<T, Normalized>& propertyView);
 
   bool GetBoolean(
       const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
@@ -52,34 +60,40 @@ public:
       std::int64_t featureID,
       std::uint16_t defaultValue);
 
-  // std::int32_t GetInt32(
-  //    const DotNet::CesiumForUnity::CesiumFeature& feature,
-  //    const DotNet::System::String& property,
-  //    std::int32_t defaultValue);
-  // std::uint32_t GetUInt32(
-  //    const DotNet::CesiumForUnity::CesiumFeature& feature,
-  //    const DotNet::System::String& property,
-  //    std::uint32_t defaultValue);
-  // std::int64_t GetInt64(
-  //    const DotNet::CesiumForUnity::CesiumFeature& feature,
-  //    const DotNet::System::String& property,
-  //    std::int64_t defaultValue);
-  // std::uint64_t GetUInt64(
-  //    const DotNet::CesiumForUnity::CesiumFeature& feature,
-  //    const DotNet::System::String& property,
-  //    std::uint64_t defaultValue);
-  // float GetFloat32(
-  //    const DotNet::CesiumForUnity::CesiumFeature& feature,
-  //    const DotNet::System::String& property,
-  //    float defaultValue);
-  // double GetFloat64(
-  //    const DotNet::CesiumForUnity::CesiumFeature& feature,
-  //    const DotNet::System::String& property,
-  //    double defaultValue);
-  // DotNet::System::String GetString(
-  //    const DotNet::CesiumForUnity::CesiumFeature& feature,
-  //    const DotNet::System::String& property,
-  //    const DotNet::System::String& defaultValue);
+  std::int32_t GetInt32(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      std::int32_t defaultValue);
+
+  std::uint32_t GetUInt32(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      std::uint32_t defaultValue);
+
+  std::int64_t GetInt64(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      std::int64_t defaultValue);
+
+  std::uint64_t GetUInt64(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      std::uint64_t defaultValue);
+
+  float GetFloat(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      float defaultValue);
+
+  double GetDouble(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      double defaultValue);
+
+  DotNet::System::String GetString(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      const DotNet::System::String& defaultValue);
 
   // std::int8_t GetComponentInt8(
   //    const DotNet::CesiumForUnity::CesiumFeature& feature,
@@ -154,23 +168,26 @@ public:
   //    const DotNet::CesiumForUnity::CesiumFeature& feature,
   //    const DotNet::System::String& property);
 
-  // bool IsNormalized(
-  //    const DotNet::CesiumForUnity::CesiumFeature& feature,
-  //    const DotNet::System::String& property);
-
 private:
   std::any _property;
-  bool _normalized;
 };
 
 template <typename T, bool Normalized>
-void CesiumPropertyTablePropertyImpl::initializeProperty(
-    const CesiumGltf::PropertyTablePropertyView<T, Normalized>& property) {
-  _property = property;
-  _normalized = Normalized;
+/*static*/ DotNet::CesiumForUnity::CesiumPropertyTableProperty
+CesiumPropertyTablePropertyImpl::CreateProperty(
+    const CesiumGltf::PropertyTablePropertyView<T, Normalized>& propertyView) {
+  DotNet::CesiumForUnity::CesiumPropertyTableProperty property =
+      DotNet::CesiumForUnity::CesiumPropertyTableProperty();
+  property.size(propertyView.size());
+  property.arraySize(propertyView.arrayCount());
+  property.valueType(
+      CesiumFeaturesMetadataUtility::TypeToMetadataValueType<T>());
+  property.isNormalized(Normalized);
 
-  switch (property.status()) {}
+  CesiumPropertyTablePropertyImpl& propertyImpl =
+      property.NativeImplementation();
+  propertyImpl._property = propertyView;
 
-  // set value type
+  return property;
 }
 } // namespace CesiumForUnityNative

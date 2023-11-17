@@ -15,9 +15,9 @@ namespace CesiumForUnity
         Mat2,
         Mat3,
         Mat4,
+        String,
         Boolean,
-        Enum,
-        String
+        Enum
     }
 
     /// <summary>
