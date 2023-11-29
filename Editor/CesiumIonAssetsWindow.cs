@@ -91,12 +91,12 @@ namespace CesiumForUnity
 
         void DrawRefreshButtonAndSearchBar()
         {
-            GUILayout.BeginHorizontal();
+            EditorGUILayout.BeginHorizontal();
 
-            GUILayout.BeginVertical(GUILayout.Width(300.0f));
-            GUILayout.Space(15.0f);
+            EditorGUILayout.BeginVertical();
+            EditorGUILayout.Space(15.0f);
             CesiumIonServerUI.Selector();
-            GUILayout.EndVertical();
+            EditorGUILayout.EndVertical();
 
             if (GUILayout.Button(
                 new GUIContent(CesiumEditorStyle.refreshIcon, "Refresh the asset list"),
@@ -105,15 +105,12 @@ namespace CesiumForUnity
                 CesiumIonSession.Ion().RefreshAssets();
             }
 
-            GUILayout.FlexibleSpace();
-
-            GUILayout.BeginVertical();
-            GUILayout.Space(15);
+            EditorGUILayout.BeginVertical();
+            EditorGUILayout.Space(15);
 
             string searchString = this._searchField.OnToolbarGUI(
                 this._assetsSearchString,
-                GUILayout.Height(EditorGUIUtility.singleLineHeight),
-                GUILayout.Width(150.0f)
+                GUILayout.Height(EditorGUIUtility.singleLineHeight)
             );
 
             if (searchString != null)
@@ -131,8 +128,8 @@ namespace CesiumForUnity
                 this._assetsTreeView.searchString = this._assetsSearchString;
             }
 
-            GUILayout.EndVertical();
-            GUILayout.EndHorizontal();
+            EditorGUILayout.EndVertical();
+            EditorGUILayout.EndHorizontal();
         }
 
         void DrawAssetTreeView()
