@@ -40,7 +40,7 @@ namespace CesiumForUnity
     [ExecuteInEditMode]
     [ReinteropNativeImplementation("CesiumForUnityNative::Cesium3DTilesetImpl", "Cesium3DTilesetImpl.h")]
     [AddComponentMenu("Cesium/Cesium 3D Tileset")]
-    [IconAttribute("Packages/com.cesium.unity/Editor/Resources/Cesium-24x24.png")]  
+    [IconAttribute("Packages/com.cesium.unity/Editor/Resources/Cesium-24x24.png")]
     public partial class Cesium3DTileset : MonoBehaviour, IDisposable
     {
         public void Dispose()
@@ -80,7 +80,7 @@ namespace CesiumForUnity
 
         internal void BroadcastNewGameObjectCreated(GameObject go)
         {
-            if(OnTileGameObjectCreated != null)
+            if (OnTileGameObjectCreated != null)
             {
                 OnTileGameObjectCreated(go);
             }
@@ -172,6 +172,20 @@ namespace CesiumForUnity
             set
             {
                 this._ionAccessToken = value;
+                this.RecreateTileset();
+            }
+        }
+
+        [SerializeField]
+        private CesiumIonServer _ionServer = null;
+
+        public CesiumIonServer ionServer
+        {
+            get => this._ionServer;
+            set
+            {
+                if (value == null) value = CesiumIonServer.defaultServer;
+                this._ionServer = value;
                 this.RecreateTileset();
             }
         }

@@ -277,6 +277,7 @@ namespace CesiumForUnity
             tileset.showTilesInHierarchy = tileset.showTilesInHierarchy;
             tileset.updateInEditor = tileset.updateInEditor;
             tileset.showCreditsOnScreen = tileset.showCreditsOnScreen;
+            tileset.ionServer = tileset.ionServer;
 
             GraphicsFormat gfxFmt = GraphicsFormat.RGB_ETC_UNorm;
             FormatUsage fmtUsage = FormatUsage.Sample;
@@ -514,6 +515,13 @@ namespace CesiumForUnity
             CesiumObjectPool<Mesh> meshPool = CesiumObjectPools.MeshPool;
             Mesh pooledMesh = meshPool.Get();
             meshPool.Release(pooledMesh);
+
+            CesiumIonServer server = CesiumIonServer.defaultServer;
+            server.serverUrl = "";
+            server.apiUrl = "";
+            server.oauth2ApplicationID = 1;
+            server.defaultIonAccessToken = "";
+            server.defaultIonAccessTokenId = "";
 
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;

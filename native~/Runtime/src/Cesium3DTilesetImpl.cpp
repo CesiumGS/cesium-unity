@@ -14,6 +14,7 @@
 #include <DotNet/CesiumForUnity/Cesium3DTilesetLoadType.h>
 #include <DotNet/CesiumForUnity/CesiumDataSource.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
+#include <DotNet/CesiumForUnity/CesiumIonServer.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
 #include <DotNet/CesiumForUnity/CesiumRuntimeSettings.h>
 #include <DotNet/CesiumForUnity/CesiumTileExcluder.h>
@@ -401,6 +402,11 @@ void Cesium3DTilesetImpl::DestroyTileset(
 
 void Cesium3DTilesetImpl::LoadTileset(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
+  // Assign the default server if necessary.
+  if (tileset.ionServer() == nullptr) {
+    tileset.ionServer(CesiumForUnity::CesiumIonServer::defaultServer());
+  }
+
   TilesetOptions options{};
   options.maximumScreenSpaceError = tileset.maximumScreenSpaceError();
   options.preloadAncestors = tileset.preloadAncestors();
