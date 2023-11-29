@@ -36,6 +36,10 @@ namespace CesiumForUnity
                 }
                 return this._currentCesiumIonServer;
             }
+            set
+            {
+                this._currentCesiumIonServer = value;
+            }
         }
 
         public CesiumIonSession CurrentSession

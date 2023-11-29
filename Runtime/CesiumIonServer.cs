@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using UnityEditor;
 using UnityEngine;
 
@@ -8,6 +9,7 @@ namespace CesiumForUnity
     /// ion.cesium.com, or it may be a self-hosted instance.
     /// </summary>
     [CreateAssetMenu(fileName = "CesiumIonServer", menuName = "Cesium/Cesium ion Server")]
+    [AddComponentMenu("Cesium/Cesium ion Server")]
     public class CesiumIonServer : ScriptableObject
     {
         /// <summary>
