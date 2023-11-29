@@ -92,6 +92,12 @@ namespace CesiumForUnity
         void DrawRefreshButtonAndSearchBar()
         {
             GUILayout.BeginHorizontal();
+
+            GUILayout.BeginVertical(GUILayout.Width(300.0f));
+            GUILayout.Space(15.0f);
+            CesiumIonServerUI.Selector();
+            GUILayout.EndVertical();
+
             if (GUILayout.Button(
                 new GUIContent(CesiumEditorStyle.refreshIcon, "Refresh the asset list"),
                 CesiumEditorStyle.refreshButtonStyle))
@@ -106,7 +112,8 @@ namespace CesiumForUnity
 
             string searchString = this._searchField.OnToolbarGUI(
                 this._assetsSearchString,
-                GUILayout.Height(EditorGUIUtility.singleLineHeight)
+                GUILayout.Height(EditorGUIUtility.singleLineHeight),
+                GUILayout.Width(150.0f)
             );
 
             if (searchString != null)
