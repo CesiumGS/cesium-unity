@@ -57,13 +57,13 @@ namespace CesiumForUnity
             return session;
         }
 
-        private string GetUserAccessToken(CesiumIonServer server)
+        internal string GetUserAccessToken(CesiumIonServer server)
         {
             int index = this._userAccessTokenMap.FindIndex(record => record.server == server);
             return index >= 0 ? this._userAccessTokenMap[index].token : null;
         }
 
-        private void SetUserAccessToken(CesiumIonServer server, string token)
+        internal void SetUserAccessToken(CesiumIonServer server, string token)
         {
             int index = this._userAccessTokenMap.FindIndex(record => record.server == server);
             if (index >= 0)

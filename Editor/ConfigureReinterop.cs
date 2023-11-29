@@ -81,6 +81,11 @@ namespace CesiumForUnity
 
             CesiumIonSession session = CesiumIonSession.Ion();
             session.IsConnected();
+            CesiumIonServer server = session.server;
+            session.server = server;
+
+            CesiumIonServerManager.instance.GetUserAccessToken(null);
+            CesiumIonServerManager.instance.SetUserAccessToken(null, null);
 
             EditorPrefs.HasKey("Key");
             EditorPrefs.GetString("Key");

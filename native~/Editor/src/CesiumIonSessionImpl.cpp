@@ -3,17 +3,15 @@
 #include "UnityAssetAccessor.h"
 #include "UnityTaskProcessor.h"
 
+#include <DotNet/CesiumForUnity/CesiumIonServer.h>
+#include <DotNet/CesiumForUnity/CesiumIonServerManager.h>
 #include <DotNet/CesiumForUnity/CesiumIonSession.h>
 #include <DotNet/CesiumForUnity/CesiumRuntimeSettings.h>
-#include <DotNet/UnityEditor/EditorPrefs.h>
 #include <DotNet/UnityEngine/Application.h>
 
 using namespace DotNet;
 
 namespace CesiumForUnityNative {
-
-const std::string CesiumIonSessionImpl::_userAccessTokenEditorKey =
-    "CesiumUserAccessToken";
 
 CesiumIonSessionImpl& CesiumIonSessionImpl::ion() {
   return CesiumForUnity::CesiumIonSession::Ion().NativeImplementation();
@@ -121,12 +119,14 @@ void CesiumIonSessionImpl::Connect(
         this->_authorizeUrl = url;
         UnityEngine::Application::OpenURL(url);
       })
-      .thenInMainThread([this](CesiumIonClient::Connection&& connection) {
+      .thenInMainThread([this,
+                         session](CesiumIonClient::Connection&& connection) {
         this->_isConnecting = false;
         this->_connection = std::move(connection);
 
-        UnityEditor::EditorPrefs::SetString(
-            CesiumIonSessionImpl::_userAccessTokenEditorKey,
+        CesiumForUnity::CesiumIonServer server = session.server();
+        CesiumForUnity::CesiumIonServerManager::instance().SetUserAccessToken(
+            server,
             this->_connection.value().getAccessToken());
         this->broadcastConnectionUpdate();
       })
@@ -144,8 +144,10 @@ void CesiumIonSessionImpl::Resume(
     return;
   }
 
-  System::String userAccessToken = UnityEditor::EditorPrefs::GetString(
-      CesiumIonSessionImpl::_userAccessTokenEditorKey);
+  CesiumForUnity::CesiumIonServer server = session.server();
+  System::String userAccessToken =
+      CesiumForUnity::CesiumIonServerManager::instance().GetUserAccessToken(
+          server);
 
   if (System::String::Equals(userAccessToken, System::String(""))) {
     // No user access token was stored, so there's no existing session to
@@ -185,8 +187,10 @@ void CesiumIonSessionImpl::Disconnect(
   this->_assets.reset();
   this->_tokens.reset();
 
-  UnityEditor::EditorPrefs::DeleteKey(
-      CesiumIonSessionImpl::_userAccessTokenEditorKey);
+  CesiumForUnity::CesiumIonServer server = session.server();
+  CesiumForUnity::CesiumIonServerManager::instance().SetUserAccessToken(
+      server,
+      nullptr);
 
   this->broadcastConnectionUpdate();
   this->broadcastAssetsUpdate();
