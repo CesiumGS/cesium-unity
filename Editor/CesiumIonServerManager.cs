@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using System;
 using UnityEditor;
 using UnityEngine;
+using UnityEditor.Scripting;
+using System.Diagnostics;
 
 namespace CesiumForUnity
 {
@@ -20,8 +22,10 @@ namespace CesiumForUnity
                     // and move it to the user access token map.
                     if (string.IsNullOrEmpty(this.GetUserAccessToken(this._currentCesiumIonServer)))
                     {
+                        UnityEngine.Debug.Log("Checking for backward compatible access token.");
                         const string editorPrefKey = "CesiumUserAccessToken";
                         string userAccessToken = EditorPrefs.GetString(editorPrefKey);
+                        UnityEngine.Debug.Log("Old token: " + userAccessToken);
                         if (!string.IsNullOrEmpty(userAccessToken))
                         {
                             this.SetUserAccessToken(this._currentCesiumIonServer, userAccessToken);
