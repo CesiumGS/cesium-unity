@@ -5,8 +5,6 @@ namespace CesiumForUnity
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumIonSessionImpl", "CesiumIonSessionImpl.h")]
     public partial class CesiumIonSession
     {
-        private static CesiumIonSession currentSession = null!;
-
         public delegate void GUIUpdateDelegate();
 
         public static event GUIUpdateDelegate OnConnectionUpdated;
@@ -16,12 +14,15 @@ namespace CesiumForUnity
 
         public static CesiumIonSession Ion()
         {
-            if (currentSession == null)
-            {
-                currentSession = new CesiumIonSession();
-            }
+            return CesiumIonServerManager.instance.CurrentSession;
+        }
 
-            return currentSession;
+        internal CesiumIonServer server;
+
+        public CesiumIonSession(CesiumIonServer server)
+        {
+            this.server = server;
+            this.CreateImplementation();
         }
 
         public partial bool IsConnected();

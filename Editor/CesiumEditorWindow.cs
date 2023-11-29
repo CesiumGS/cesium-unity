@@ -11,7 +11,7 @@ namespace CesiumForUnity
     {
         public static CesiumEditorWindow currentWindow = null;
 
-        [MenuItem("Cesium/Cesium")]
+        [MenuItem("Tools/Cesium/Cesium")]
         public static void ShowWindow()
         {
             // If no existing window, make a new one docked next to the Hierarchy window.
@@ -60,6 +60,7 @@ namespace CesiumForUnity
                 this._isIonLoadingProfile = ion.IsLoadingProfile();
             }
 
+            CesiumIonServerUI.Selector();
             this.DrawCesiumToolbar();
 
             this._scrollPosition = EditorGUILayout.BeginScrollView(this._scrollPosition);
