@@ -1,5 +1,11 @@
 # Change Log
 
+### ? - ?
+
+##### Additions :tada:
+
+- Added support for multiple Cesium ion servers by creating `CesiumIonServer` assets.
+
 ### v1.6.4 - 2023-10-26
 
 ##### Additions :tada:
