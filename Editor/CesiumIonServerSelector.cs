@@ -28,23 +28,15 @@ namespace CesiumForUnity
 
         public void OnGUI()
         {
-            CesiumIonServer server = CesiumIonServerManager.instance.Current;
+            CesiumIonServer server = CesiumIonServerManager.instance.current;
             GUIContent content = new GUIContent(GetLabelFromCesiumIonServer(server), "The current Cesium ion server");
             Rect rect = EditorGUILayout.BeginHorizontal();
             if (EditorGUILayout.DropdownButton(content, FocusType.Keyboard))
             {
-                var serverDropDown = new ServerDropDown(/*this._dropDownState*/ new AdvancedDropdownState(), rect);
+                var serverDropDown = new ServerDropDown(this._dropDownState, rect);
                 serverDropDown.Show(rect);
             }
             EditorGUILayout.EndHorizontal();
-
-
-            //CesiumIonServer newServer = (CesiumIonServer)EditorGUILayout.ObjectField(server, typeof(CesiumIonServer), false);
-            //if (newServer != CesiumIonServerManager.instance.Current)
-            //{
-            //    Debug.Log("Changing server");
-            //    CesiumIonServerManager.instance.Current = newServer;
-            //}
         }
 
         public static string GetLabelFromCesiumIonServer(CesiumIonServer server)
@@ -87,7 +79,7 @@ namespace CesiumForUnity
             public ServerDropDown(AdvancedDropdownState state, Rect rect)
                 : base(state)
             {
-                int itemCount = Math.Min(10, CesiumIonServerManager.instance.Servers.Count);
+                int itemCount = Math.Min(10, CesiumIonServerManager.instance.servers.Count);
                 this.minimumSize = new Vector2(50.0f, (itemCount + 3) * EditorGUIUtility.singleLineHeight);
             }
 
@@ -95,7 +87,7 @@ namespace CesiumForUnity
             {
                 AdvancedDropdownItem root = new AdvancedDropdownItem("Cesium ion Servers");
 
-                foreach (CesiumIonServer server in CesiumIonServerManager.instance.Servers)
+                foreach (CesiumIonServer server in CesiumIonServerManager.instance.servers)
                 {
                     root.AddChild(new ServerDropDownItem(server));
                 }
@@ -105,7 +97,7 @@ namespace CesiumForUnity
 
             protected override void ItemSelected(AdvancedDropdownItem item)
             {
-                CesiumIonServerManager.instance.Current = ((ServerDropDownItem)item).server;
+                CesiumIonServerManager.instance.current = ((ServerDropDownItem)item).server;
             }
         }
     }

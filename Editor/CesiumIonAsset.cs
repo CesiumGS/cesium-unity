@@ -19,7 +19,7 @@ namespace CesiumForUnity
 
         private AssetType _type = AssetType.Null;
         private Cesium3DTileset _tileset;
-        private CesiumRasterOverlay _overlay;
+        private CesiumIonRasterOverlay _overlay;
 
         public CesiumIonAsset()
         {
@@ -32,7 +32,7 @@ namespace CesiumForUnity
             this._tileset = tileset;
         }
 
-        public CesiumIonAsset(CesiumRasterOverlay overlay)
+        public CesiumIonAsset(CesiumIonRasterOverlay overlay)
         {
             this._type = AssetType.Overlay;
             this._overlay = overlay;
@@ -43,7 +43,7 @@ namespace CesiumForUnity
             get => this._type == AssetType.Tileset ? this._tileset : null;
         }
 
-        public CesiumRasterOverlay overlay
+        public CesiumIonRasterOverlay overlay
         {
             get => this._type == AssetType.Overlay ? this._overlay : null;
         }

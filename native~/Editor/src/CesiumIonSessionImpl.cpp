@@ -14,10 +14,6 @@ using namespace DotNet;
 
 namespace CesiumForUnityNative {
 
-CesiumIonSessionImpl& CesiumIonSessionImpl::ion() {
-  return CesiumForUnity::CesiumIonSession::Ion().NativeImplementation();
-}
-
 CesiumIonSessionImpl::CesiumIonSessionImpl(
     const DotNet::CesiumForUnity::CesiumIonSession& session)
     : _asyncSystem(CesiumForUnityNative::getAsyncSystem()),
@@ -398,7 +394,8 @@ getDefaultTokenFuture(const CesiumIonSessionImpl& session) {
 } // namespace
 
 CesiumAsync::SharedFuture<CesiumIonClient::Token>
-CesiumIonSessionImpl::getProjectDefaultTokenDetails() {
+CesiumIonSessionImpl::getProjectDefaultTokenDetails(
+    const CesiumForUnity::CesiumIonSession& session) {
   if (this->_projectDefaultTokenDetailsFuture) {
     // If the future is resolved but its token doesn't match the designated
     // default token, do the request again because the user probably specified a
@@ -414,7 +411,7 @@ CesiumIonSessionImpl::getProjectDefaultTokenDetails() {
     }
   }
 
-  if (!CesiumForUnity::CesiumIonSession::Ion().IsConnected()) {
+  if (!session.IsConnected()) {
     return this->getAsyncSystem()
         .createResolvedFuture(defaultTokenFromSettings())
         .share();

@@ -7,6 +7,8 @@
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/CesiumForUnity/CesiumEditorUtility.h>
 #include <DotNet/CesiumForUnity/CesiumIonRasterOverlay.h>
+#include <DotNet/CesiumForUnity/CesiumIonServer.h>
+#include <DotNet/CesiumForUnity/CesiumIonServerManager.h>
 #include <DotNet/CesiumForUnity/CesiumIonSession.h>
 #include <DotNet/CesiumForUnity/IonAssetDetails.h>
 #include <DotNet/CesiumForUnity/IonAssetsTreeView.h>
@@ -23,6 +25,22 @@
 
 using namespace DotNet;
 using namespace DotNet::UnityEditor::IMGUI::Controls;
+
+namespace {
+
+CesiumForUnity::CesiumIonServer getServer() {
+  return CesiumForUnity::CesiumIonServerManager::instance().current();
+}
+
+CesiumForUnity::CesiumIonSession getSession() {
+  return CesiumForUnity::CesiumIonServerManager::instance().currentSession();
+}
+
+CesiumForUnityNative::CesiumIonSessionImpl& getNativeSession() {
+  return getSession().NativeImplementation();
+}
+
+} // namespace
 
 namespace CesiumForUnityNative {
 
@@ -98,7 +116,7 @@ void IonAssetsTreeViewImpl::CellGUI(
 
 void IonAssetsTreeViewImpl::Refresh(
     const DotNet::CesiumForUnity::IonAssetsTreeView& treeView) {
-  CesiumIonSessionImpl& session = CesiumIonSessionImpl::ion();
+  CesiumIonSessionImpl& session = getNativeSession();
   const CesiumIonClient::Assets& assets = session.getAssets();
 
   this->_assets.resize(assets.items.size());
@@ -200,7 +218,7 @@ void IonAssetsTreeViewImpl::AddAssetToLevel(
     const DotNet::CesiumForUnity::IonAssetsTreeView& treeView,
     int index) {
   std::shared_ptr<CesiumIonClient::Asset> pAsset = this->_assets[index];
-  SelectIonTokenWindowImpl::SelectAndAuthorizeToken({pAsset->id})
+  SelectIonTokenWindowImpl::SelectAndAuthorizeToken(getServer(), {pAsset->id})
       .thenInMainThread(
           [pAsset](
               const std::optional<CesiumIonClient::Token>& /*maybeToken*/) {
@@ -225,7 +243,7 @@ void IonAssetsTreeViewImpl::AddOverlayToTerrain(
     int index) {
   // This behavior needs to change when we support multiple overlays.
   std::shared_ptr<CesiumIonClient::Asset> pAsset = this->_assets[index];
-  SelectIonTokenWindowImpl::SelectAndAuthorizeToken({pAsset->id})
+  SelectIonTokenWindowImpl::SelectAndAuthorizeToken(getServer(), {pAsset->id})
       .thenInMainThread([pAsset](const std::optional<
                                  CesiumIonClient::Token>& /*maybeToken*/) {
         UnityEngine::GameObject selected =

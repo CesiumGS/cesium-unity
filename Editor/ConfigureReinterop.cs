@@ -79,9 +79,11 @@ namespace CesiumForUnity
 
             Task.Run(() => { });
 
-            CesiumIonSession session = CesiumIonSession.Ion();
+            CesiumIonSession session = CesiumIonServerManager.instance.GetSession(null);
+            CesiumIonServer server = CesiumIonServerManager.instance.current;
+            session = CesiumIonServerManager.instance.currentSession;
             session.IsConnected();
-            CesiumIonServer server = session.server;
+            server = session.server;
             session.server = server;
 
             CesiumIonServerManager.instance.GetUserAccessToken(null);
@@ -131,8 +133,9 @@ namespace CesiumForUnity
             IonAssetDetails.FormatDate("date");
 
             SelectIonTokenWindow.GetDefaultNewTokenName();
-            SelectIonTokenWindow.ShowWindow();
+            SelectIonTokenWindow.ShowWindow(null);
             SelectIonTokenWindow tokenWindow = SelectIonTokenWindow.currentWindow;
+            tokenWindow.server = null;
             tokenWindow.tokenSource = IonTokenSource.Create;
             string name = tokenWindow.createdTokenName;
             int tokenIndex = tokenWindow.selectedExistingTokenIndex;
@@ -216,6 +219,10 @@ namespace CesiumForUnity
             string accessToken = asset.ionAccessToken;
             long assetId = asset.ionAssetID;
             bool isNull = asset.IsNull();
+            tileset = asset.tileset;
+            server = tileset.ionServer;
+            ionOverlay = asset.overlay;
+            server = ionOverlay.ionServer;
 
             AssetTroubleshootingDetails assetDetails = troubleshootingWindow.assetDetails;
             assetDetails.assetExistsInUserAccount = true;

@@ -3,6 +3,7 @@ using System;
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace CesiumForUnity
 {
@@ -60,7 +61,7 @@ namespace CesiumForUnity
             // OnGUI is invoked in the Layout event.
             if (Event.current.type == EventType.Layout)
             {
-                CesiumIonSession ion = CesiumIonServerManager.instance.CurrentSession;
+                CesiumIonSession ion = CesiumIonServerManager.instance.currentSession;
                 this._isIonConnected = ion.IsConnected();
                 this._isIonConnecting = ion.IsConnecting();
                 this._isIonProfileLoaded = ion.IsProfileLoaded();
@@ -83,10 +84,10 @@ namespace CesiumForUnity
                 this.DrawIonLoginPanel();
             }
 
-            GUILayout.Space(10);
-            this.DrawConnectionStatusPanel();
-
+            //GUILayout.Space(10);
+            this.DrawVersion();
             EditorGUILayout.EndScrollView();
+
 
             // Force the window to repaint if the cursor is hovered over it.
             // By default, it only repaints sporadically, so the hover and
@@ -396,71 +397,28 @@ namespace CesiumForUnity
             GUILayout.FlexibleSpace();
             if (GUILayout.Button("Connect to Cesium ion", CesiumEditorStyle.cesiumButtonStyle))
             {
-                CesiumIonSession.Ion().Connect();
+                CesiumIonSession session = CesiumIonServerManager.instance.currentSession;
+                session.Connect();
             }
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
         }
 
-        void DrawConnectionStatusPanel()
+        void DrawVersion()
         {
-            if (this._isIonConnecting)
-            {
-                EditorGUILayout.LabelField(
-                    "Waiting for you to sign into Cesium ion with your web browser...",
-                    EditorStyles.wordWrappedLabel);
+            UnityEditor.PackageManager.PackageInfo package = UnityEditor.PackageManager.PackageInfo.GetAllRegisteredPackages().FirstOrDefault(package => package.name == "com.cesium.unity");
 
-                string authorizeUrl = CesiumIonSession.Ion().GetAuthorizeUrl();
-                if (EditorGUILayout.LinkButton("Open web browser again"))
-                {
-                    Application.OpenURL(authorizeUrl);
-                }
-                GUILayout.Space(5);
-                EditorGUILayout.LabelField(
-                    "Or copy the URL below into your web browser",
-                    EditorStyles.wordWrappedLabel);
-
-                GUILayout.BeginHorizontal();
-                EditorGUILayout.SelectableLabel(
-                    authorizeUrl,
-                    EditorStyles.textField,
-                    GUILayout.Height(EditorGUIUtility.singleLineHeight));
-
-                if (GUILayout.Button("Copy To Clipboard"))
-                {
-                    CopyLinkToClipboard(authorizeUrl);
-                }
-                GUILayout.EndHorizontal();
-            }
-            else if (this._isIonProfileLoaded)
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            GUIContent version = new GUIContent("v" + package.version, "Open the Cesium for Unity changelog in your browser");
+            if (EditorGUILayout.LinkButton(version))
             {
-                GUILayout.FlexibleSpace();
-                GUILayout.BeginHorizontal();
-                GUILayout.FlexibleSpace();
-                string username = CesiumIonSession.Ion().GetProfileUsername();
-                if (EditorGUILayout.LinkButton(
-                    new GUIContent(
-                        "Connected to Cesium ion as " + username,
-                        "Open your Cesium ion account in your browser")))
-                {
-                    this.VisitIon();
-                }
-                GUILayout.EndHorizontal();
+                Application.OpenURL("https://github.com/CesiumGS/cesium-unity/blob/main/CHANGES.md");
             }
-            else if (this._isIonLoadingProfile)
-            {
-                GUILayout.FlexibleSpace();
-                GUILayout.BeginHorizontal();
-                GUILayout.FlexibleSpace();
-                GUILayout.Label("Loading user information...");
-                GUILayout.EndHorizontal();
-            }
-            else if (this._isIonConnected)
-            {
-                CesiumIonSession.Ion().RefreshProfile();
-            }
+            EditorGUILayout.EndHorizontal();
 
-            GUILayout.Space(5);
+            EditorGUILayout.Space(5);
         }
 
         void AddFromIon()
@@ -475,7 +433,7 @@ namespace CesiumForUnity
 
         void SetToken()
         {
-            SelectIonTokenWindow.ShowWindow();
+            SelectIonTokenWindow.ShowWindow(CesiumIonServerManager.instance.current);
         }
 
         void OpenDocumentation()
@@ -490,7 +448,8 @@ namespace CesiumForUnity
 
         void SignOutOfIon()
         {
-            CesiumIonSession.Ion().Disconnect();
+            CesiumIonSession session = CesiumIonServerManager.instance.currentSession;
+            session.Disconnect();
         }
 
         void CopyLinkToClipboard(string link)

@@ -178,7 +178,7 @@ namespace CesiumForUnity
             ShowWindow(new CesiumIonAsset(tileset), triggeredByError);
         }
 
-        public static void ShowWindow(CesiumRasterOverlay overlay, bool triggeredByError)
+        public static void ShowWindow(CesiumIonRasterOverlay overlay, bool triggeredByError)
         {
             ShowWindow(new CesiumIonAsset(overlay), triggeredByError);
         }
@@ -260,6 +260,19 @@ namespace CesiumForUnity
             this._assetDetails = new AssetTroubleshootingDetails();
         }
 
+        private CesiumIonServer server
+        {
+            get
+            {
+                if (this.ionAsset.tileset != null)
+                    return this.ionAsset.tileset.ionServer;
+                else if (this.ionAsset.overlay != null)
+                    return this.ionAsset.overlay.ionServer;
+                else
+                    return null;
+            }
+        }
+
         private partial void GetTroubleshootingDetails();
 
         private void OnEnable()
@@ -291,7 +304,7 @@ namespace CesiumForUnity
         {
             if (Event.current.type == EventType.Layout)
             {
-                CesiumIonSession ion = CesiumIonSession.Ion();
+                CesiumIonSession ion = CesiumIonServerManager.instance.GetSession(this.server);
                 this._isConnectedToIon = ion.IsConnected();
             }
 
@@ -596,7 +609,8 @@ namespace CesiumForUnity
                         CesiumEditorStyle.cesiumButtonStyle))
             {
                 CesiumEditorWindow.ShowWindow();
-                CesiumIonSession.Ion().Connect();
+                CesiumIonSession ion = CesiumIonServerManager.instance.GetSession(this.server);
+                ion.Connect();
                 this.Close();
             }
         }

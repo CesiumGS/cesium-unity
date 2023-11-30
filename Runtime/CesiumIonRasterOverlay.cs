@@ -43,6 +43,27 @@ namespace CesiumForUnity
             }
         }
 
+        [SerializeField]
+        private CesiumIonServer _ionServer = null;
+
+        /// <summary>
+        /// The Cesium ion server from which this raster overlay is loaded.
+        /// </summary>
+        public CesiumIonServer ionServer
+        {
+            get
+            {
+                if (this._ionServer == null) this._ionServer = CesiumIonServer.defaultServer;
+                return this._ionServer;
+            }
+            set
+            {
+                if (value == null) value = CesiumIonServer.defaultServer;
+                this._ionServer = value;
+                this.Refresh();
+            }
+        }
+
         /// <inheritdoc/>
         protected override partial void AddToTileset(Cesium3DTileset tileset);
         /// <inheritdoc/>

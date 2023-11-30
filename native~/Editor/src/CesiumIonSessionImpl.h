@@ -33,8 +33,6 @@ class Token;
 namespace CesiumForUnityNative {
 class CesiumIonSessionImpl {
 public:
-  static CesiumIonSessionImpl& ion();
-
   CesiumIonSessionImpl(const DotNet::CesiumForUnity::CesiumIonSession& session);
   ~CesiumIonSessionImpl();
 
@@ -83,7 +81,8 @@ public:
   findToken(const std::string& token) const;
 
   CesiumAsync::SharedFuture<CesiumIonClient::Token>
-  getProjectDefaultTokenDetails();
+  getProjectDefaultTokenDetails(
+      const DotNet::CesiumForUnity::CesiumIonSession& session);
 
   void invalidateProjectDefaultTokenDetails();
 

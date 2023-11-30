@@ -11,7 +11,7 @@ namespace CesiumForUnity
         public event Action<CesiumIonServerManager> CurrentChanged;
         public event Action<CesiumIonServerManager> ServerListChanged;
 
-        public CesiumIonServer Current
+        public CesiumIonServer current
         {
             get
             {
@@ -43,11 +43,11 @@ namespace CesiumForUnity
             }
         }
 
-        public CesiumIonSession CurrentSession
+        public CesiumIonSession currentSession
         { 
             get
             {
-                return this.GetSession(this.Current);
+                return this.GetSession(this.current);
             }
         }
 
@@ -75,7 +75,7 @@ namespace CesiumForUnity
             }
         }
 
-        public IReadOnlyList<CesiumIonServer> Servers
+        public IReadOnlyList<CesiumIonServer> servers
         {
             get
             {

@@ -17,16 +17,20 @@ namespace CesiumForUnity
     {
         public static SelectIonTokenWindow currentWindow = null;
 
-        public static void ShowWindow()
+        public static void ShowWindow(CesiumIonServer server)
         {
             if (currentWindow == null)
             {
                 currentWindow = GetWindow<SelectIonTokenWindow>("Select Cesium ion Token");
             }
 
+            currentWindow.server = server;
+
             currentWindow.Show();
             currentWindow.Focus();
         }
+
+        public CesiumIonServer server;
 
         private IonTokenSource _source;
         private string _createdTokenName = "";
@@ -42,16 +46,17 @@ namespace CesiumForUnity
 
         private void OnEnable()
         {
-            CesiumIonSession.Ion().Resume();
+            CesiumIonSession session = CesiumIonServerManager.instance.GetSession(this.server);
+            session.Resume();
             CesiumIonSession.OnTokensUpdated += this.RefreshTokens;
 
             this._createdTokenName = GetDefaultNewTokenName();
             this._specifiedToken = CesiumRuntimeSettings.defaultIonAccessToken;
-            this._source = CesiumIonSession.Ion().IsConnected()
+            this._source = session.IsConnected()
                 ? IonTokenSource.Create
                 : IonTokenSource.Specify;
 
-            CesiumIonSession.Ion().RefreshTokens();
+            session.RefreshTokens();
         }
 
         private void OnDisable()
@@ -105,7 +110,8 @@ namespace CesiumForUnity
                 EditorStyles.wordWrappedLabel
             );
 
-            if (CesiumIonSession.Ion().IsConnected())
+            CesiumIonSession session = CesiumIonServerManager.instance.GetSession(this.server);
+            if (session.IsConnected())
             {
                 GUILayout.Space(20);
                 this.DrawCreateTokenOption();

@@ -12,11 +12,6 @@ namespace CesiumForUnity
         public static event GUIUpdateDelegate OnProfileUpdated;
         public static event GUIUpdateDelegate OnTokensUpdated;
 
-        public static CesiumIonSession Ion()
-        {
-            return CesiumIonServerManager.instance.CurrentSession;
-        }
-
         internal CesiumIonServer server;
 
         public CesiumIonSession(CesiumIonServer server)
