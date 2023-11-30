@@ -44,7 +44,7 @@ void CesiumIonRasterOverlayImpl::AddToTileset(
 
   System::String ionAccessToken = overlay.ionAccessToken();
   if (System::String::IsNullOrEmpty(ionAccessToken)) {
-    ionAccessToken = tileset.ionServer().defaultIonAccessToken();
+    ionAccessToken = overlay.ionServer().defaultIonAccessToken();
   }
 
   CesiumForUnity::CesiumRasterOverlay genericOverlay = overlay;
