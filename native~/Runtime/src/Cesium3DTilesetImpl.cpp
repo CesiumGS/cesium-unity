@@ -506,7 +506,8 @@ void Cesium3DTilesetImpl::LoadTileset(
       ionAccessToken = tileset.ionServer().defaultIonAccessToken();
     }
 
-    std::string ionAssetEndpointUrl = tileset.ionServer().apiUrl().ToStlString();
+    std::string ionAssetEndpointUrl =
+        tileset.ionServer().apiUrl().ToStlString();
 
     // Make sure the URL ends with a slash
     if (!ionAssetEndpointUrl.empty() && *ionAssetEndpointUrl.rbegin() != '/')
