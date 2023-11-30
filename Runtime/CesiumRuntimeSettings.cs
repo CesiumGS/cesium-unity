@@ -116,6 +116,7 @@ namespace CesiumForUnity
                     #endif
                 }
 
+#if UNITY_EDITOR
 #pragma warning disable 618
                 bool needsSave = false;
                 if (!string.IsNullOrEmpty(defaultIonAccessTokenID))
@@ -144,6 +145,8 @@ namespace CesiumForUnity
                     AssetDatabase.Refresh();
                 }
 #pragma warning restore 618
+#endif
+
                 return _instance;
             }
         }
