@@ -28,18 +28,25 @@ namespace CesiumForUnity
 
         void OnEnable()
         {
+            this._serverSelector = new CesiumIonServerSelector(this);
+
             // Load the icon separately from the other resources.
             Texture2D icon = Resources.Load<Texture2D>("Cesium-64x64");
             icon.wrapMode = TextureWrapMode.Clamp;
             this.titleContent = new GUIContent("Cesium", icon);
+        }
 
-            CesiumIonSession.Ion().Resume();
+        private void OnDisable()
+        {
+            this._serverSelector.Dispose();
+            this._serverSelector = null;
         }
 
         private bool _isIonConnected = false;
         private bool _isIonConnecting = false;
         private bool _isIonProfileLoaded = false;
         private bool _isIonLoadingProfile = false;
+        private CesiumIonServerSelector _serverSelector;
 
         private Vector2 _scrollPosition = Vector2.zero;
 
@@ -53,14 +60,14 @@ namespace CesiumForUnity
             // OnGUI is invoked in the Layout event.
             if (Event.current.type == EventType.Layout)
             {
-                CesiumIonSession ion = CesiumIonSession.Ion();
+                CesiumIonSession ion = CesiumIonServerManager.instance.CurrentSession;
                 this._isIonConnected = ion.IsConnected();
                 this._isIonConnecting = ion.IsConnecting();
                 this._isIonProfileLoaded = ion.IsProfileLoaded();
                 this._isIonLoadingProfile = ion.IsLoadingProfile();
             }
 
-            CesiumIonServerUI.Selector();
+            this._serverSelector.OnGUI();
             this.DrawCesiumToolbar();
 
             this._scrollPosition = EditorGUILayout.BeginScrollView(this._scrollPosition);

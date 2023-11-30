@@ -1,6 +1,7 @@
 #include "CesiumIonSessionImpl.h"
 
 #include "UnityAssetAccessor.h"
+#include "UnityExternals.h"
 #include "UnityTaskProcessor.h"
 
 #include <DotNet/CesiumForUnity/CesiumIonServer.h>
@@ -19,9 +20,8 @@ CesiumIonSessionImpl& CesiumIonSessionImpl::ion() {
 
 CesiumIonSessionImpl::CesiumIonSessionImpl(
     const DotNet::CesiumForUnity::CesiumIonSession& session)
-    : _asyncSystem(
-          CesiumAsync::AsyncSystem(std::make_shared<UnityTaskProcessor>())),
-      _pAssetAccessor(std::make_shared<UnityAssetAccessor>()),
+    : _asyncSystem(CesiumForUnityNative::getAsyncSystem()),
+      _pAssetAccessor(CesiumForUnityNative::getAssetAccessor()),
       _connection(std::nullopt),
       _profile(std::nullopt),
       _assets(std::nullopt),

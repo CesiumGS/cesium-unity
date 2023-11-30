@@ -93,6 +93,7 @@ namespace CesiumForUnity
             EditorPrefs.DeleteKey("Key");
 
             Application.OpenURL("URL");
+            string temporaryCachePath = Application.temporaryCachePath;
             string applicationVersion = Application.version;
             string unityVersion = Application.unityVersion;
             string applicationPlatform = Helpers.ToString(Application.platform);
@@ -148,6 +149,9 @@ namespace CesiumForUnity
 
             string tokenID = CesiumRuntimeSettings.defaultIonAccessTokenID;
             CesiumRuntimeSettings.defaultIonAccessTokenID = "tokenID";
+
+            int requestsPerCachePrune = CesiumRuntimeSettings.requestsPerCachePrune;
+            ulong maxItems = CesiumRuntimeSettings.maxItems;
 
             Cesium3DTileset[] tilesets = UnityEngine.Object.FindObjectsOfType<Cesium3DTileset>();
             Cesium3DTileset tileset = tilesets[0];

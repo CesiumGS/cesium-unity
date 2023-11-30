@@ -31,9 +31,12 @@ namespace CesiumForUnity
         private TreeViewState _assetsTreeState;
         private IonAssetsTreeView _assetsTreeView;
         private SearchField _searchField;
+        private CesiumIonServerSelector _serverSelector;
 
         private void OnEnable()
-        { 
+        {
+            this._serverSelector = new CesiumIonServerSelector(this);
+
             // Load the icon separately from the other resources.
             Texture2D icon = Resources.Load<Texture2D>("Cesium-64x64");
             icon.wrapMode = TextureWrapMode.Clamp;
@@ -53,6 +56,9 @@ namespace CesiumForUnity
         {
             CesiumIonSession.OnConnectionUpdated -= this._assetsTreeView.Refresh;
             CesiumIonSession.OnAssetsUpdated -= this._assetsTreeView.Refresh;
+
+            this._serverSelector.Dispose();
+            this._serverSelector = null;
         }
 
         void BuildTreeView()
@@ -95,7 +101,7 @@ namespace CesiumForUnity
 
             EditorGUILayout.BeginVertical();
             EditorGUILayout.Space(15.0f);
-            CesiumIonServerUI.Selector();
+            this._serverSelector.OnGUI();
             EditorGUILayout.EndVertical();
 
             if (GUILayout.Button(

@@ -2,14 +2,15 @@ using System.Collections.Generic;
 using System;
 using UnityEditor;
 using UnityEngine;
-using UnityEditor.Scripting;
-using System.Diagnostics;
 
 namespace CesiumForUnity
 {
     [FilePath("UserSettings/CesiumIonServerManager.asset", FilePathAttribute.Location.ProjectFolder)]
     public class CesiumIonServerManager : ScriptableSingleton<CesiumIonServerManager>
     {
+        public event Action<CesiumIonServerManager> CurrentChanged;
+        public event Action<CesiumIonServerManager> ServerListChanged;
+
         public CesiumIonServer Current
         {
             get
@@ -22,10 +23,8 @@ namespace CesiumForUnity
                     // and move it to the user access token map.
                     if (string.IsNullOrEmpty(this.GetUserAccessToken(this._currentCesiumIonServer)))
                     {
-                        UnityEngine.Debug.Log("Checking for backward compatible access token.");
                         const string editorPrefKey = "CesiumUserAccessToken";
                         string userAccessToken = EditorPrefs.GetString(editorPrefKey);
-                        UnityEngine.Debug.Log("Old token: " + userAccessToken);
                         if (!string.IsNullOrEmpty(userAccessToken))
                         {
                             this.SetUserAccessToken(this._currentCesiumIonServer, userAccessToken);
@@ -39,6 +38,8 @@ namespace CesiumForUnity
             set
             {
                 this._currentCesiumIonServer = value;
+                // TODO: set "current for new objects" in Runtime library
+                CurrentChanged?.Invoke(this);
             }
         }
 
@@ -61,6 +62,41 @@ namespace CesiumForUnity
             return session;
         }
 
+        public void ResumeAll()
+        {
+            foreach (CesiumIonServer server in this._servers)
+            {
+                CesiumIonSession session = this.GetSession(server);
+                if (session != null)
+                {
+                    session.Resume();
+                    session.GetProfileUsername();
+                }
+            }
+        }
+
+        public IReadOnlyList<CesiumIonServer> Servers
+        {
+            get
+            {
+                this.RefreshServerList();
+                return this._servers;
+            }
+        }
+
+        public void RefreshServerList()
+        {
+            this._servers = new List<CesiumIonServer>();
+
+            string[] guids = AssetDatabase.FindAssets("t:" + typeof(CesiumIonServer).FullName);
+            foreach (string guid in guids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                this._servers.Add(AssetDatabase.LoadAssetAtPath<CesiumIonServer>(path));
+            }
+            ServerListChanged?.Invoke(this);
+        }
+
         internal string GetUserAccessToken(CesiumIonServer server)
         {
             int index = this._userAccessTokenMap.FindIndex(record => record.server == server);
@@ -81,8 +117,16 @@ namespace CesiumForUnity
                 record.token = token;
                 this._userAccessTokenMap.Add(record);
             }
-
+            //
             this.Save(true);
+        }
+
+        class RefreshServers : AssetPostprocessor
+        {
+            static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths, bool didDomainReload)
+            {
+                CesiumIonServerManager.instance.ResumeAll();
+            }
         }
 
         [Serializable]
@@ -99,5 +143,6 @@ namespace CesiumForUnity
         private CesiumIonServer _currentCesiumIonServer;
 
         private Dictionary<CesiumIonServer, CesiumIonSession> _sessions = new Dictionary<CesiumIonServer, CesiumIonSession>();
+        private List<CesiumIonServer> _servers = new List<CesiumIonServer>();
     }
 }
