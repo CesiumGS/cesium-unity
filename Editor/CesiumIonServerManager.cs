@@ -38,8 +38,9 @@ namespace CesiumForUnity
             set
             {
                 this._currentCesiumIonServer = value;
-                // TODO: set "current for new objects" in Runtime library
+                CesiumIonServer.currentForNewObjects = value;
                 CurrentChanged?.Invoke(this);
+                this.Save(true);
             }
         }
 
@@ -126,6 +127,10 @@ namespace CesiumForUnity
             static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths, bool didDomainReload)
             {
                 CesiumIonServerManager.instance.ResumeAll();
+
+                // Ensure the `currentForNewObjects` matches the current server. This is
+                // essential when the manager is first loaded, and harmless otherwise.
+                CesiumIonServer.currentForNewObjects = CesiumIonServerManager.instance.current;
             }
         }
 

@@ -7,6 +7,42 @@ namespace CesiumForUnity
 {
     public class CesiumIonServerSelector : IDisposable
     {
+        public static void DisplaySelected(CesiumIonServer server)
+        {
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.Space(10, false);
+            bool enabled = GUI.enabled;
+            GUI.enabled = false;
+            EditorGUILayout.TextField("Cesium ion Server:", GetLabelFromCesiumIonServer(server), GUILayout.Width(500));
+            GUI.enabled = enabled;
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.EndHorizontal();
+        }
+
+        public static string GetLabelFromCesiumIonServer(CesiumIonServer server)
+        {
+            if (server == null)
+                return "Error: No Cesium ion server configured.";
+
+            CesiumIonSession session = CesiumIonServerManager.instance.GetSession(server);
+
+            string profileName = session.GetProfileUsername();
+
+            string prefix = "";
+            string suffix = "";
+
+            if (session.IsConnecting() || session.IsResuming())
+                suffix = " (connecting...)";
+            else if (session.IsLoadingProfile())
+                suffix = " (loading profile...)";
+            else if (session.IsConnected() && session.IsProfileLoaded())
+                prefix = profileName + " @ ";
+            else
+                suffix = " (not connected)";
+
+            return prefix + server.name + suffix;
+        }
+
         private EditorWindow _parent;
         private AdvancedDropdownState _dropDownState = new AdvancedDropdownState();
 
@@ -37,30 +73,6 @@ namespace CesiumForUnity
                 serverDropDown.Show(rect);
             }
             EditorGUILayout.EndHorizontal();
-        }
-
-        public static string GetLabelFromCesiumIonServer(CesiumIonServer server)
-        {
-            if (server == null)
-                return "Error: No Cesium ion server configured.";
-
-            CesiumIonSession session = CesiumIonServerManager.instance.GetSession(server);
-
-            string profileName = session.GetProfileUsername();
-
-            string prefix = "";
-            string suffix = "";
-
-            if (session.IsConnecting() || session.IsResuming())
-                suffix = " (connecting...)";
-            else if (session.IsLoadingProfile())
-                suffix = " (loading profile...)";
-            else if (session.IsConnected() && session.IsProfileLoaded())
-                prefix = profileName + " @ ";
-            else
-                suffix = " (not connected)";
-
-            return prefix + server.name + suffix;
         }
 
         private class ServerDropDownItem : AdvancedDropdownItem

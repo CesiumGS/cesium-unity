@@ -10,7 +10,6 @@
 #include <DotNet/CesiumForUnity/CesiumIonServer.h>
 #include <DotNet/CesiumForUnity/CesiumIonServerManager.h>
 #include <DotNet/CesiumForUnity/CesiumIonSession.h>
-#include <DotNet/CesiumForUnity/CesiumRuntimeSettings.h>
 #include <DotNet/CesiumForUnity/IonTokenTroubleshootingWindow.h>
 #include <DotNet/CesiumForUnity/TokenTroubleshootingDetails.h>
 #include <DotNet/System/Object.h>
@@ -45,13 +44,15 @@ CesiumForUnity::CesiumIonSession getSession(
 
 void getTokenTroubleShootingDetails(
     const DotNet::CesiumForUnity::IonTokenTroubleshootingWindow& window,
-    std::string token,
+    const std::string& token,
     CesiumForUnity::TokenTroubleshootingDetails details) {
   CesiumIonSessionImpl ionSession = getSession(window);
+
   auto pConnection = std::make_shared<CesiumIonClient::Connection>(
       ionSession.getAsyncSystem(),
       ionSession.getAssetAccessor(),
-      token);
+      token,
+      getServer(window).apiUrl().ToStlString());
 
   CesiumForUnity::CesiumIonAsset ionAsset = window.ionAsset();
 
@@ -149,8 +150,8 @@ void IonTokenTroubleshootingWindowImpl::GetTroubleshootingDetails(
         window.assetTokenDetails());
   }
 
-  System::String defaultToken =
-      CesiumForUnity::CesiumRuntimeSettings::defaultIonAccessToken();
+  CesiumForUnity::CesiumIonServer server = getServer(window);
+  System::String defaultToken = server.defaultIonAccessToken();
   getTokenTroubleShootingDetails(
       window,
       defaultToken.ToStlString(),
@@ -264,16 +265,17 @@ void IonTokenTroubleshootingWindowImpl::SelectNewDefaultToken(
     return;
   }
 
-  SelectIonTokenWindowImpl::SelectNewToken(getServer(window)).thenInMainThread(
-      [ionAsset = window.ionAsset()](
-          const std::optional<CesiumIonClient::Token>& newToken) {
-        if (!newToken) {
-          return;
-        }
+  SelectIonTokenWindowImpl::SelectNewToken(getServer(window))
+      .thenInMainThread(
+          [ionAsset = window.ionAsset()](
+              const std::optional<CesiumIonClient::Token>& newToken) {
+            if (!newToken) {
+              return;
+            }
 
-        CesiumForUnity::IonTokenTroubleshootingWindow::UseDefaultToken(
-            ionAsset);
-      });
+            CesiumForUnity::IonTokenTroubleshootingWindow::UseDefaultToken(
+                ionAsset);
+          });
 }
 
 } // namespace CesiumForUnityNative

@@ -16,7 +16,6 @@
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/CesiumForUnity/CesiumIonServer.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
-#include <DotNet/CesiumForUnity/CesiumRuntimeSettings.h>
 #include <DotNet/CesiumForUnity/CesiumTileExcluder.h>
 #include <DotNet/System/Action.h>
 #include <DotNet/System/Array1.h>
@@ -402,11 +401,6 @@ void Cesium3DTilesetImpl::DestroyTileset(
 
 void Cesium3DTilesetImpl::LoadTileset(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
-  // Assign the default server if necessary.
-  if (tileset.ionServer() == nullptr) {
-    tileset.ionServer(CesiumForUnity::CesiumIonServer::defaultServer());
-  }
-
   TilesetOptions options{};
   options.maximumScreenSpaceError = tileset.maximumScreenSpaceError();
   options.preloadAncestors = tileset.preloadAncestors();
@@ -509,15 +503,21 @@ void Cesium3DTilesetImpl::LoadTileset(
       CesiumForUnity::CesiumDataSource::FromCesiumIon) {
     System::String ionAccessToken = tileset.ionAccessToken();
     if (System::String::IsNullOrEmpty(ionAccessToken)) {
-      ionAccessToken =
-          CesiumForUnity::CesiumRuntimeSettings::defaultIonAccessToken();
+      ionAccessToken = tileset.ionServer().defaultIonAccessToken();
     }
+
+    std::string ionAssetEndpointUrl = tileset.ionServer().apiUrl().ToStlString();
+
+    // Make sure the URL ends with a slash
+    if (!ionAssetEndpointUrl.empty() && *ionAssetEndpointUrl.rbegin() != '/')
+      ionAssetEndpointUrl += '/';
 
     this->_pTileset = std::make_unique<Tileset>(
         createTilesetExternals(tileset),
         tileset.ionAssetID(),
         ionAccessToken.ToStlString(),
-        options);
+        options,
+        ionAssetEndpointUrl);
   } else {
     this->_pTileset = std::make_unique<Tileset>(
         createTilesetExternals(tileset),

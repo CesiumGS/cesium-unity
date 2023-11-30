@@ -11,7 +11,6 @@
 #include <DotNet/CesiumForUnity/CesiumIonServer.h>
 #include <DotNet/CesiumForUnity/CesiumIonServerManager.h>
 #include <DotNet/CesiumForUnity/CesiumIonSession.h>
-#include <DotNet/CesiumForUnity/CesiumRuntimeSettings.h>
 #include <DotNet/CesiumForUnity/SelectIonTokenWindow.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/Collections/Generic/List1.h>
@@ -198,12 +197,13 @@ void SelectIonTokenWindowImpl::RefreshTokens(
   System::Collections::Generic::List1<System::String> tokenNames =
       window.GetExistingTokenList();
 
+  CesiumForUnity::CesiumIonServer server = getServer(window);
+
   const std::string& createName =
       CesiumForUnity::SelectIonTokenWindow::GetDefaultNewTokenName()
           .ToStlString();
   const std::string& defaultTokenId =
-      CesiumForUnity::CesiumRuntimeSettings::defaultIonAccessTokenID()
-          .ToStlString();
+      server.defaultIonAccessTokenId().ToStlString();
   const std::string& specifiedToken = window.specifiedToken().ToStlString();
 
   for (size_t i = 0; i < tokens.size(); ++i) {
@@ -242,15 +242,15 @@ void SelectIonTokenWindowImpl::RefreshTokens(
 
 namespace {
 void updateDefaultToken(
-    const CesiumForUnity::CesiumIonSession& session,
+    const CesiumForUnity::CesiumIonServer& server,
     CesiumIonClient::Response<CesiumIonClient::Token> response) {
   if (response.value) {
+    CesiumForUnity::CesiumIonSession session =
+        CesiumForUnity::CesiumIonServerManager::instance().GetSession(server);
     session.NativeImplementation().invalidateProjectDefaultTokenDetails();
 
-    CesiumForUnity::CesiumRuntimeSettings::defaultIonAccessToken(
-        System::String(response.value->token));
-    CesiumForUnity::CesiumRuntimeSettings::defaultIonAccessTokenID(
-        System::String(response.value->id));
+    server.defaultIonAccessToken(System::String(response.value->token));
+    server.defaultIonAccessTokenId(System::String(response.value->id));
 
     // TODO: source control
 
@@ -309,9 +309,9 @@ void SelectIonTokenWindowImpl::CreateToken(
   };
 
   getToken().thenInMainThread(
-      [window, promise = std::move(promise), session = getSession(window)](
+      [window, promise = std::move(promise), server = getServer(window)](
           CesiumIonClient::Response<CesiumIonClient::Token>&& response) {
-        updateDefaultToken(session, response);
+        updateDefaultToken(server, response);
         promise.resolve(std::move(response.value));
         window.Close();
       });
@@ -339,9 +339,9 @@ void SelectIonTokenWindowImpl::UseExistingToken(
   };
 
   getToken().thenInMainThread(
-      [window, promise = std::move(promise), session = getSession(window)](
+      [window, promise = std::move(promise), server = getServer(window)](
           CesiumIonClient::Response<CesiumIonClient::Token>&& response) {
-        updateDefaultToken(session, response);
+        updateDefaultToken(server, response);
         promise.resolve(std::move(response.value));
         window.Close();
       });
@@ -374,9 +374,9 @@ void SelectIonTokenWindowImpl::SpecifyToken(
   };
 
   getToken().thenInMainThread(
-      [window, promise = std::move(promise), session = getSession(window)](
+      [window, promise = std::move(promise), server = getServer(window)](
           CesiumIonClient::Response<CesiumIonClient::Token>&& response) {
-        updateDefaultToken(session, response);
+        updateDefaultToken(server, response);
         promise.resolve(std::move(response.value));
         window.Close();
       });

@@ -85,6 +85,12 @@ namespace CesiumForUnity
             session.IsConnected();
             server = session.server;
             session.server = server;
+            
+            server.defaultIonAccessToken = "";
+            server.defaultIonAccessTokenId = "";
+            server.apiUrl = "";
+            server.serverUrl = "";
+            server.oauth2ApplicationID = 1;
 
             CesiumIonServerManager.instance.GetUserAccessToken(null);
             CesiumIonServerManager.instance.SetUserAccessToken(null, null);
@@ -146,12 +152,6 @@ namespace CesiumForUnity
             tokens.Add(token);
             tokenWindow.RefreshExistingTokenList();
             tokenWindow.Close();
-
-            token = CesiumRuntimeSettings.defaultIonAccessToken;
-            CesiumRuntimeSettings.defaultIonAccessToken = "token";
-
-            string tokenID = CesiumRuntimeSettings.defaultIonAccessTokenID;
-            CesiumRuntimeSettings.defaultIonAccessTokenID = "tokenID";
 
             int requestsPerCachePrune = CesiumRuntimeSettings.requestsPerCachePrune;
             ulong maxItems = CesiumRuntimeSettings.maxItems;

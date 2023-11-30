@@ -79,5 +79,25 @@ namespace CesiumForUnity
                 return result;
             }
         }
+
+        /// <summary>
+        /// Gets the current Cesium ion server that should be assigned to newly-created objects.
+        /// </summary>
+        public static CesiumIonServer currentForNewObjects
+        {
+            get
+            {
+                if (_currentForNewObjects == null)
+                    return defaultServer;
+                else
+                    return _currentForNewObjects;
+            }
+            set
+            {
+                _currentForNewObjects = value;
+            }
+        }
+
+        private static CesiumIonServer _currentForNewObjects;
     }
 }

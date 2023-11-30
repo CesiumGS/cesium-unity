@@ -289,6 +289,7 @@ namespace CesiumForUnity
             CesiumIonRasterOverlay ionOverlay = go.GetComponent<CesiumIonRasterOverlay>();
             ionOverlay.ionAssetID = ionOverlay.ionAssetID;
             ionOverlay.ionAccessToken = ionOverlay.ionAccessToken;
+            ionOverlay.ionServer = ionOverlay.ionServer;
 
             CesiumRasterOverlay overlay = go.GetComponent<CesiumRasterOverlay>();
             overlay.showCreditsOnScreen = overlay.showCreditsOnScreen;
@@ -449,7 +450,6 @@ namespace CesiumForUnity
             string.IsNullOrEmpty("value");
             string.IsNullOrWhiteSpace("value");
 
-            string token = CesiumRuntimeSettings.defaultIonAccessToken;
             int requestsPerCachePrune = CesiumRuntimeSettings.requestsPerCachePrune;
             ulong maxItems = CesiumRuntimeSettings.maxItems;
 

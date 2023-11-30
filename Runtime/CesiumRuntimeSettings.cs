@@ -1,4 +1,6 @@
 using UnityEngine;
+using System;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -114,6 +116,34 @@ namespace CesiumForUnity
                     #endif
                 }
 
+#pragma warning disable 618
+                bool needsSave = false;
+                if (!string.IsNullOrEmpty(defaultIonAccessTokenID))
+                {
+                    if (string.IsNullOrEmpty(CesiumIonServer.defaultServer.defaultIonAccessTokenId))
+                    {
+                        CesiumIonServer.defaultServer.defaultIonAccessTokenId = defaultIonAccessTokenID;
+                        needsSave = true;
+                    }
+                    defaultIonAccessTokenID = "";
+                }
+                if (!string.IsNullOrEmpty(defaultIonAccessToken))
+                {
+                    if (string.IsNullOrEmpty(CesiumIonServer.defaultServer.defaultIonAccessToken))
+                    {
+                        CesiumIonServer.defaultServer.defaultIonAccessToken = defaultIonAccessToken;
+                        needsSave = true;
+                    }
+                    defaultIonAccessToken = "";
+                }
+
+                if (needsSave)
+                {
+                    EditorUtility.SetDirty(CesiumIonServer.defaultServer);
+                    AssetDatabase.SaveAssetIfDirty(CesiumIonServer.defaultServer);
+                    AssetDatabase.Refresh();
+                }
+#pragma warning restore 618
                 return _instance;
             }
         }
@@ -124,6 +154,7 @@ namespace CesiumForUnity
         /// <summary>
         /// The ID of the default Cesium ion access token to use within the project.
         /// </summary>
+        [Obsolete("Define a CesiumIonServer instead.")]
         public static string defaultIonAccessTokenID
         {
             get => instance._defaultIonAccessTokenID;
@@ -144,6 +175,7 @@ namespace CesiumForUnity
         /// <summary>
         /// The default Cesium ion access token value to use within the project.
         /// </summary>
+        [Obsolete("Define a CesiumIonServer instead.")]
         public static string defaultIonAccessToken
         {
             get => instance._defaultIonAccessToken;

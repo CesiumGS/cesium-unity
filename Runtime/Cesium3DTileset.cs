@@ -186,12 +186,12 @@ namespace CesiumForUnity
         {
             get
             {
-                if (this._ionServer == null) this._ionServer = CesiumIonServer.defaultServer;
+                if (this._ionServer == null) this._ionServer = CesiumIonServer.currentForNewObjects;
                 return this._ionServer;
             }
             set
             {
-                if (value == null) value = CesiumIonServer.defaultServer;
+                if (value == null) value = CesiumIonServer.currentForNewObjects;
                 this._ionServer = value;
                 this.RecreateTileset();
             }

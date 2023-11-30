@@ -132,6 +132,7 @@ namespace CesiumForUnity
                 this._ionAsset = value;
                 this._assetTokenDetails.token = value.ionAccessToken;
                 this._assetDetails.assetID = value.ionAssetID;
+                this._defaultTokenDetails.token = this.server.defaultIonAccessToken;
                 this.GetTroubleshootingDetails();
             }
         }
@@ -275,13 +276,6 @@ namespace CesiumForUnity
 
         private partial void GetTroubleshootingDetails();
 
-        private void OnEnable()
-        {
-            // This has to be deferred so that CesiumRuntimeSettings
-            // calls AssetDatabase.LoadAssetAtPath during a game loop.
-            this._defaultTokenDetails.token = CesiumRuntimeSettings.defaultIonAccessToken;
-        }
-
         private void Update()
         {
             // If the asset has been deleted at some point, close the window.
@@ -328,6 +322,9 @@ namespace CesiumForUnity
                     "help you fix it!", EditorStyles.wordWrappedLabel);
                 GUILayout.Space(5);
             }
+
+            CesiumIonServerSelector.DisplaySelected(this.server);
+            GUILayout.Space(5);
 
             bool hasAssetToken = !string.IsNullOrEmpty(this._ionAsset.ionAccessToken);
             if (hasAssetToken)
@@ -552,7 +549,7 @@ namespace CesiumForUnity
                 "Authorize the project's default token to access this asset",
                 CesiumEditorStyle.cesiumButtonStyle))
             {
-                this.AuthorizeToken(CesiumRuntimeSettings.defaultIonAccessToken, true);
+                this.AuthorizeToken(this.server.defaultIonAccessToken, true);
                 this.Close();
             }
         }

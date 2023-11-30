@@ -9,8 +9,8 @@
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/CesiumForUnity/CesiumIonRasterOverlay.h>
+#include <DotNet/CesiumForUnity/CesiumIonServer.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
-#include <DotNet/CesiumForUnity/CesiumRuntimeSettings.h>
 #include <DotNet/System/String.h>
 
 using namespace Cesium3DTilesSelection;
@@ -44,19 +44,23 @@ void CesiumIonRasterOverlayImpl::AddToTileset(
 
   System::String ionAccessToken = overlay.ionAccessToken();
   if (System::String::IsNullOrEmpty(ionAccessToken)) {
-    ionAccessToken =
-        CesiumForUnity::CesiumRuntimeSettings::defaultIonAccessToken();
+    ionAccessToken = tileset.ionServer().defaultIonAccessToken();
   }
 
   CesiumForUnity::CesiumRasterOverlay genericOverlay = overlay;
   RasterOverlayOptions options =
       CesiumRasterOverlayUtility::GetOverlayOptions(genericOverlay);
 
+  std::string apiUrl = overlay.ionServer().apiUrl().ToStlString();
+  if (!apiUrl.empty() && *apiUrl.rbegin() != '/')
+    apiUrl += '/';
+
   this->_pOverlay = new IonRasterOverlay(
       overlay.name().ToStlString(),
       overlay.ionAssetID(),
       ionAccessToken.ToStlString(),
-      options);
+      options,
+      apiUrl);
 
   pTileset->getOverlays().add(this->_pOverlay);
 }

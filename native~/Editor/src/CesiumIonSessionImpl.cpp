@@ -7,7 +7,6 @@
 #include <DotNet/CesiumForUnity/CesiumIonServer.h>
 #include <DotNet/CesiumForUnity/CesiumIonServerManager.h>
 #include <DotNet/CesiumForUnity/CesiumIonSession.h>
-#include <DotNet/CesiumForUnity/CesiumRuntimeSettings.h>
 #include <DotNet/UnityEngine/Application.h>
 
 using namespace DotNet;
@@ -349,46 +348,44 @@ CesiumIonSessionImpl::findToken(const std::string& token) const {
 
 namespace {
 
-CesiumIonClient::Token defaultTokenFromSettings() {
+CesiumIonClient::Token createDefaultToken(const std::string& token) {
   CesiumIonClient::Token result;
-
-  const System::String& defaultToken =
-      CesiumForUnity::CesiumRuntimeSettings::defaultIonAccessToken();
-  result.token = defaultToken.ToStlString();
-
+  result.token = token;
   return result;
 }
 
 CesiumAsync::Future<CesiumIonClient::Token>
-getDefaultTokenFuture(const CesiumIonSessionImpl& session) {
-  System::String defaultTokenID =
-      CesiumForUnity::CesiumRuntimeSettings::defaultIonAccessTokenID();
-  System::String defaultToken =
-      CesiumForUnity::CesiumRuntimeSettings::defaultIonAccessToken();
+getDefaultTokenFuture(const CesiumForUnity::CesiumIonSession& session) {
+  System::String defaultTokenID = session.server().defaultIonAccessTokenId();
+  System::String defaultToken = session.server().defaultIonAccessToken();
   if (!System::String::IsNullOrEmpty(defaultTokenID)) {
-    return session.getConnection()
+    return session.NativeImplementation()
+        .getConnection()
         ->token(defaultTokenID.ToStlString())
-        .thenImmediately([](CesiumIonClient::Response<CesiumIonClient::Token>&&
-                                tokenResponse) {
+        .thenImmediately([defaultToken = defaultToken.ToStlString()](
+                             CesiumIonClient::Response<CesiumIonClient::Token>&&
+                                 tokenResponse) {
           if (tokenResponse.value) {
             return *tokenResponse.value;
           } else {
-            return defaultTokenFromSettings();
+            return createDefaultToken(defaultToken);
           }
         });
   } else if (!System::String::IsNullOrEmpty(defaultToken)) {
-    return session.findToken(defaultToken.ToStlString())
+    return session.NativeImplementation()
+        .findToken(defaultToken.ToStlString())
         .thenImmediately(
-            [](CesiumIonClient::Response<CesiumIonClient::Token>&& response) {
+            [defaultToken = defaultToken.ToStlString()](
+                CesiumIonClient::Response<CesiumIonClient::Token>&& response) {
               if (response.value) {
                 return *response.value;
               } else {
-                return defaultTokenFromSettings();
+                return createDefaultToken(defaultToken);
               }
             });
   } else {
-    return session.getAsyncSystem().createResolvedFuture(
-        defaultTokenFromSettings());
+    return getAsyncSystem().createResolvedFuture(
+        createDefaultToken(defaultToken.ToStlString()));
   }
 }
 } // namespace
@@ -401,7 +398,7 @@ CesiumIonSessionImpl::getProjectDefaultTokenDetails(
     // default token, do the request again because the user probably specified a
     // new token.
     const System::String& defaultToken =
-        CesiumForUnity::CesiumRuntimeSettings::defaultIonAccessToken();
+        session.server().defaultIonAccessToken();
     if (this->_projectDefaultTokenDetailsFuture->isReady() &&
         this->_projectDefaultTokenDetailsFuture->wait().token !=
             defaultToken.ToStlString()) {
@@ -413,12 +410,13 @@ CesiumIonSessionImpl::getProjectDefaultTokenDetails(
 
   if (!session.IsConnected()) {
     return this->getAsyncSystem()
-        .createResolvedFuture(defaultTokenFromSettings())
+        .createResolvedFuture(createDefaultToken(
+            session.server().defaultIonAccessToken().ToStlString()))
         .share();
   }
 
   this->_projectDefaultTokenDetailsFuture =
-      getDefaultTokenFuture(*this).share();
+      getDefaultTokenFuture(session).share();
   return *this->_projectDefaultTokenDetailsFuture;
 }
 

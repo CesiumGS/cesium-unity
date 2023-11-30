@@ -105,7 +105,7 @@ namespace CesiumForUnity
                 CesiumIonSession.OnTokensUpdated += this.RefreshTokens;
 
                 this._createdTokenName = GetDefaultNewTokenName();
-                this._specifiedToken = CesiumRuntimeSettings.defaultIonAccessToken;
+                this._specifiedToken = this.server.defaultIonAccessToken;
                 this._source = session.IsConnected()
                     ? IonTokenSource.Create
                     : IonTokenSource.Specify;
@@ -122,6 +122,8 @@ namespace CesiumForUnity
                 "Select the Cesium ion token to use.",
                 EditorStyles.wordWrappedLabel
             );
+
+            CesiumIonServerSelector.DisplaySelected(this.server);
 
             if (session.IsConnected())
             {
