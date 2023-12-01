@@ -4,7 +4,7 @@ namespace CesiumForUnityNative {
 class CesiumPropertyTablePropertyImpl;
 }
 
-//#include "CesiumFeaturesMetadataUtility.h"
+#include "CesiumFeaturesMetadataUtility.h"
 
 #include <CesiumGltf/PropertyTablePropertyView.h>
 
@@ -20,6 +20,13 @@ class CesiumPropertyTableProperty;
 namespace DotNet::System {
 class String;
 }
+
+namespace DotNet::Unity::Mathematics {
+class int2;
+class uint2;
+class float2;
+class double2;
+} // namespace DotNet::Unity::Mathematics
 
 namespace CesiumForUnityNative {
 
@@ -90,83 +97,30 @@ public:
       std::int64_t featureID,
       double defaultValue);
 
+  DotNet::Unity::Mathematics::int2 GetInt2(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      DotNet::Unity::Mathematics::int2 defaultValue);
+
+  DotNet::Unity::Mathematics::uint2 GetUInt2(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      DotNet::Unity::Mathematics::uint2 defaultValue);
+
+  DotNet::Unity::Mathematics::float2 GetFloat2(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      DotNet::Unity::Mathematics::float2 defaultValue);
+
+  DotNet::Unity::Mathematics::double2 GetDouble2(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      DotNet::Unity::Mathematics::double2 defaultValue);
+
   DotNet::System::String GetString(
       const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
       std::int64_t featureID,
       const DotNet::System::String& defaultValue);
-
-  // std::int8_t GetComponentInt8(
-  //    const DotNet::CesiumForUnity::CesiumFeature& feature,
-  //    const DotNet::System::String& property,
-  //    int index,
-  //    std::int8_t defaultValue);
-  // std::uint8_t GetComponentUInt8(
-  //    const DotNet::CesiumForUnity::CesiumFeature& feature,
-  //    const DotNet::System::String& property,
-  //    int index,
-  //    std::uint8_t defaultValue);
-  // std::int16_t GetComponentInt16(
-  //    const DotNet::CesiumForUnity::CesiumFeature& feature,
-  //    const DotNet::System::String& property,
-  //    int index,
-  //    std::int16_t defaultValue);
-  // std::uint16_t GetComponentUInt16(
-  //    const DotNet::CesiumForUnity::CesiumFeature& feature,
-  //    const DotNet::System::String& property,
-  //    int index,
-  //    std::uint16_t defaultValue);
-  // std::int32_t GetComponentInt32(
-  //    const DotNet::CesiumForUnity::CesiumFeature& feature,
-  //    const DotNet::System::String& property,
-  //    int index,
-  //    std::int32_t defaultValue);
-  // std::uint32_t GetComponentUInt32(
-  //    const DotNet::CesiumForUnity::CesiumFeature& feature,
-  //    const DotNet::System::String& property,
-  //    int index,
-  //    std::uint32_t defaultValue);
-  // std::int64_t GetComponentInt64(
-  //    const DotNet::CesiumForUnity::CesiumFeature& feature,
-  //    const DotNet::System::String& property,
-  //    int index,
-  //    std::int64_t defaultValue);
-  // std::uint64_t GetComponentUInt64(
-  //    const DotNet::CesiumForUnity::CesiumFeature& feature,
-  //    const DotNet::System::String& property,
-  //    int index,
-  //    std::uint64_t defaultValue);
-  // float GetComponentFloat32(
-  //    const DotNet::CesiumForUnity::CesiumFeature& feature,
-  //    const DotNet::System::String& property,
-  //    int index,
-  //    float defaultValue);
-  // double GetComponentFloat64(
-  //    const DotNet::CesiumForUnity::CesiumFeature& feature,
-  //    const DotNet::System::String& property,
-  //    int index,
-  //    double defaultValue);
-  // bool GetComponentBoolean(
-  //    const DotNet::CesiumForUnity::CesiumFeature& feature,
-  //    const DotNet::System::String& property,
-  //    int index,
-  //    bool defaultValue);
-  // DotNet::System::String GetComponentString(
-  //    const DotNet::CesiumForUnity::CesiumFeature& feature,
-  //    const DotNet::System::String& property,
-  //    int index,
-  //    const DotNet::System::String& defaultValue);
-
-  // int GetComponentCount(
-  //    const DotNet::CesiumForUnity::CesiumFeature& feature,
-  //    const DotNet::System::String& property);
-
-  // DotNet::CesiumForUnity::MetadataType GetComponentType(
-  //    const DotNet::CesiumForUnity::CesiumFeature& feature,
-  //    const DotNet::System::String& property);
-
-  // DotNet::CesiumForUnity::MetadataType GetMetadataType(
-  //    const DotNet::CesiumForUnity::CesiumFeature& feature,
-  //    const DotNet::System::String& property);
 
 private:
   std::any _property;

@@ -3,8 +3,8 @@
 #include <CesiumGltf/AccessorView.h>
 #include <CesiumGltf/ExtensionMeshPrimitiveExtFeatureMetadata.h>
 #include <CesiumGltf/ExtensionModelExtFeatureMetadata.h>
-#include <CesiumGltf/PropertyTableView.h>
 #include <CesiumGltf/PropertyTablePropertyView.h>
+#include <CesiumGltf/PropertyTableView.h>
 
 #include <DotNet/System/Array1.h>
 #include <DotNet/UnityEngine/GameObject.h>
@@ -174,79 +174,80 @@ CesiumForUnityNative::CesiumMetadataImpl::GetFeatures(
     const DotNet::CesiumForUnity::CesiumMetadata& metadata,
     const DotNet::UnityEngine::Transform& transform,
     int triangleIndex) {
-  auto find = this->_pModels.find(transform.GetInstanceID());/*
-  if (find != this->_pModels.end()) {
+  auto find =
+      this->_pModels.find(transform.GetInstanceID()); /*
+if (find != this->_pModels.end()) {
 
-    const Model* pModel = find->second.first;
-    const MeshPrimitive* pPrimitive = find->second.second;
+const Model* pModel = find->second.first;
+const MeshPrimitive* pPrimitive = find->second.second;
 
-    int64_t vertexIndex =
-        getVertexIndexFromTriangleIndex(pModel, pPrimitive, triangleIndex);
-    const ExtensionModelExtFeatureMetadata* pModelMetadata =
-        pModel->getExtension<ExtensionModelExtFeatureMetadata>();
-    const ExtensionMeshPrimitiveExtFeatureMetadata* pMetadata =
-        pPrimitive->getExtension<ExtensionMeshPrimitiveExtFeatureMetadata>();
-    DotNet::System::Array1<DotNet::CesiumForUnity::CesiumFeature> features =
-        DotNet::System::Array1<DotNet::CesiumForUnity::CesiumFeature>(
-            pMetadata->featureIdAttributes.size());
-    for (int i = 0; i < pMetadata->featureIdAttributes.size(); i++) {
-      const CesiumGltf::FeatureIDAttribute& featIDAttr =
-          pMetadata->featureIdAttributes[i];
-      auto find = pModelMetadata->featureTables.find(featIDAttr.featureTable);
-      if (find != pModelMetadata->featureTables.end()) {
-        DotNet::CesiumForUnity::CesiumFeature feature =
-            DotNet::CesiumForUnity::CesiumFeature();
-        features.Item(i, feature);
-        const std::string& featureTableName = find->first;
-        feature.featureTableName(featureTableName);
-        int numProperties = find->second.properties.size();
-        int64_t featureID = getFeatureIdFromVertexIndex(
-            pModel,
-            pPrimitive,
-            featIDAttr.featureIds.attribute,
-            vertexIndex);
-        if (find->second.classProperty && pModelMetadata->schema.has_value()) {
-          auto classIt =
-              pModelMetadata->schema->classes.find(*find->second.classProperty);
-          if (classIt != pModelMetadata->schema->classes.end() &&
-              classIt->second.name.has_value()) {
-            feature.className(*classIt->second.name);
-          }
-        }
-        auto find = pModelMetadata->featureTables.find(featureTableName);
-        if (find != pModelMetadata->featureTables.end()) {
-          const CesiumGltf::FeatureTable& featureTable = find->second;
-          CesiumGltf::MetadataFeatureTableView featureTableView{
-              pModel,
-              &featureTable};
-          feature.properties(DotNet::System::Array1<DotNet::System::String>(
-              featureTable.properties.size()));
-          auto size = feature.properties().Length();
-          auto& nativeProperties = feature.NativeImplementation().properties;
-          int index = 0;
-          featureTableView.forEachProperty(
-              [featureID, &index, feature, &nativeProperties](
-                  const std::string& propertyName,
-                  auto propertyType) {
-                ValueType propertyValue = std::visit(
-                    [featureID](auto&& value) {
-                      if (featureID >= 0 && featureID < value.size()) {
-                        return static_cast<ValueType>(value.get(featureID));
-                      } else {
-                        return static_cast<ValueType>(0);
-                      }
-                    },
-                    static_cast<CesiumForUnityNative::PropertyType>(
-                        propertyType));
-                feature.properties().Item(index++, propertyName);
-                nativeProperties.insert(
-                    {propertyName, {propertyType, propertyValue}});
-              });
-        }
-      }
-    }
-    return features;
-  }*/
+int64_t vertexIndex =
+ getVertexIndexFromTriangleIndex(pModel, pPrimitive, triangleIndex);
+const ExtensionModelExtFeatureMetadata* pModelMetadata =
+ pModel->getExtension<ExtensionModelExtFeatureMetadata>();
+const ExtensionMeshPrimitiveExtFeatureMetadata* pMetadata =
+ pPrimitive->getExtension<ExtensionMeshPrimitiveExtFeatureMetadata>();
+DotNet::System::Array1<DotNet::CesiumForUnity::CesiumFeature> features =
+ DotNet::System::Array1<DotNet::CesiumForUnity::CesiumFeature>(
+     pMetadata->featureIdAttributes.size());
+for (int i = 0; i < pMetadata->featureIdAttributes.size(); i++) {
+const CesiumGltf::FeatureIDAttribute& featIDAttr =
+   pMetadata->featureIdAttributes[i];
+auto find = pModelMetadata->featureTables.find(featIDAttr.featureTable);
+if (find != pModelMetadata->featureTables.end()) {
+ DotNet::CesiumForUnity::CesiumFeature feature =
+     DotNet::CesiumForUnity::CesiumFeature();
+ features.Item(i, feature);
+ const std::string& featureTableName = find->first;
+ feature.featureTableName(featureTableName);
+ int numProperties = find->second.properties.size();
+ int64_t featureID = getFeatureIdFromVertexIndex(
+     pModel,
+     pPrimitive,
+     featIDAttr.featureIds.attribute,
+     vertexIndex);
+ if (find->second.classProperty && pModelMetadata->schema.has_value()) {
+   auto classIt =
+       pModelMetadata->schema->classes.find(*find->second.classProperty);
+   if (classIt != pModelMetadata->schema->classes.end() &&
+       classIt->second.name.has_value()) {
+     feature.className(*classIt->second.name);
+   }
+ }
+ auto find = pModelMetadata->featureTables.find(featureTableName);
+ if (find != pModelMetadata->featureTables.end()) {
+   const CesiumGltf::FeatureTable& featureTable = find->second;
+   CesiumGltf::MetadataFeatureTableView featureTableView{
+       pModel,
+       &featureTable};
+   feature.properties(DotNet::System::Array1<DotNet::System::String>(
+       featureTable.properties.size()));
+   auto size = feature.properties().Length();
+   auto& nativeProperties = feature.NativeImplementation().properties;
+   int index = 0;
+   featureTableView.forEachProperty(
+       [featureID, &index, feature, &nativeProperties](
+           const std::string& propertyName,
+           auto propertyType) {
+         ValueType propertyValue = std::visit(
+             [featureID](auto&& value) {
+               if (featureID >= 0 && featureID < value.size()) {
+                 return static_cast<ValueType>(value.get(featureID));
+               } else {
+                 return static_cast<ValueType>(0);
+               }
+             },
+             static_cast<CesiumForUnityNative::PropertyType>(
+                 propertyType));
+         feature.properties().Item(index++, propertyName);
+         nativeProperties.insert(
+             {propertyName, {propertyType, propertyValue}});
+       });
+ }
+}
+}
+return features;
+}*/
 
   return DotNet::System::Array1<DotNet::CesiumForUnity::CesiumFeature>(0);
 }

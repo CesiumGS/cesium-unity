@@ -56,16 +56,25 @@ using PropertyType = std::variant<
     CesiumGltf::PropertyTablePropertyView<double>,
     CesiumGltf::PropertyTablePropertyView<bool>,
     CesiumGltf::PropertyTablePropertyView<std::string_view>,
-    CesiumGltf::PropertyTablePropertyView<CesiumGltf::PropertyArrayView<int8_t>>,
-    CesiumGltf::PropertyTablePropertyView<CesiumGltf::PropertyArrayView<uint8_t>>,
-    CesiumGltf::PropertyTablePropertyView<CesiumGltf::PropertyArrayView<int16_t>>,
-    CesiumGltf::PropertyTablePropertyView<CesiumGltf::PropertyArrayView<uint16_t>>,
-    CesiumGltf::PropertyTablePropertyView<CesiumGltf::PropertyArrayView<int32_t>>,
-    CesiumGltf::PropertyTablePropertyView<CesiumGltf::PropertyArrayView<uint32_t>>,
-    CesiumGltf::PropertyTablePropertyView<CesiumGltf::PropertyArrayView<int64_t>>,
-    CesiumGltf::PropertyTablePropertyView<CesiumGltf::PropertyArrayView<uint64_t>>,
+    CesiumGltf::PropertyTablePropertyView<
+        CesiumGltf::PropertyArrayView<int8_t>>,
+    CesiumGltf::PropertyTablePropertyView<
+        CesiumGltf::PropertyArrayView<uint8_t>>,
+    CesiumGltf::PropertyTablePropertyView<
+        CesiumGltf::PropertyArrayView<int16_t>>,
+    CesiumGltf::PropertyTablePropertyView<
+        CesiumGltf::PropertyArrayView<uint16_t>>,
+    CesiumGltf::PropertyTablePropertyView<
+        CesiumGltf::PropertyArrayView<int32_t>>,
+    CesiumGltf::PropertyTablePropertyView<
+        CesiumGltf::PropertyArrayView<uint32_t>>,
+    CesiumGltf::PropertyTablePropertyView<
+        CesiumGltf::PropertyArrayView<int64_t>>,
+    CesiumGltf::PropertyTablePropertyView<
+        CesiumGltf::PropertyArrayView<uint64_t>>,
     CesiumGltf::PropertyTablePropertyView<CesiumGltf::PropertyArrayView<float>>,
-    CesiumGltf::PropertyTablePropertyView<CesiumGltf::PropertyArrayView<double>>,
+    CesiumGltf::PropertyTablePropertyView<
+        CesiumGltf::PropertyArrayView<double>>,
     CesiumGltf::PropertyTablePropertyView<CesiumGltf::PropertyArrayView<bool>>,
     CesiumGltf::PropertyTablePropertyView<
         CesiumGltf::PropertyArrayView<std::string_view>>>;

@@ -7,9 +7,15 @@
 #include <DotNet/CesiumForUnity/CesiumMetadataValueType.h>
 #include <DotNet/CesiumForUnity/CesiumPropertyTableProperty.h>
 #include <DotNet/System/String.h>
+#include <DotNet/Unity/Mathematics/double2.h>
+#include <DotNet/Unity/Mathematics/float2.h>
+#include <DotNet/Unity/Mathematics/int2.h>
+#include <DotNet/Unity/Mathematics/uint2.h>
 
-using namespace DotNet;
 using namespace CesiumGltf;
+using namespace DotNet;
+using namespace DotNet::UnityEngine;
+using namespace DotNet::Unity::Mathematics;
 
 namespace CesiumForUnityNative {
 
@@ -1117,6 +1123,118 @@ double CesiumPropertyTablePropertyImpl::GetDouble(
         return MetadataConversions<double, decltype(value)>::convert(value)
             .value_or(defaultValue);
       });
+}
+
+DotNet::Unity::Mathematics::int2 CesiumPropertyTablePropertyImpl::GetInt2(
+    const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+    std::int64_t featureID,
+    DotNet::Unity::Mathematics::int2 defaultValue) {
+  std::optional<glm::ivec2> maybeVec2 =
+      propertyTablePropertyCallback<std::optional<glm::ivec2>>(
+          this->_property,
+          property.valueType(),
+          property.isNormalized(),
+          [featureID](const auto& v) -> std::optional<glm::ivec2> {
+            // size() returns zero if the view is invalid.
+            if (featureID < 0 || featureID >= v.size()) {
+              return std::nullopt;
+            }
+
+            auto maybeValue = v.get(featureID);
+            if (!maybeValue) {
+              return std::nullopt;
+            }
+
+            auto value = *maybeValue;
+            return MetadataConversions<glm::ivec2, decltype(value)>::convert(
+                value);
+          });
+
+  return maybeVec2 ? int2{(*maybeVec2)[0], (*maybeVec2)[1]} : defaultValue;
+}
+
+DotNet::Unity::Mathematics::uint2 CesiumPropertyTablePropertyImpl::GetUInt2(
+    const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+    std::int64_t featureID,
+    DotNet::Unity::Mathematics::uint2 defaultValue) {
+  std::optional<glm::uvec2> maybeVec2 =
+      propertyTablePropertyCallback<std::optional<glm::uvec2>>(
+          this->_property,
+          property.valueType(),
+          property.isNormalized(),
+          [featureID](const auto& v) -> std::optional<glm::uvec2> {
+            // size() returns zero if the view is invalid.
+            if (featureID < 0 || featureID >= v.size()) {
+              return std::nullopt;
+            }
+
+            auto maybeValue = v.get(featureID);
+            if (!maybeValue) {
+              return std::nullopt;
+            }
+
+            auto value = *maybeValue;
+            return MetadataConversions<glm::uvec2, decltype(value)>::convert(
+                value);
+          });
+
+  return maybeVec2 ? uint2{(*maybeVec2)[0], (*maybeVec2)[1]} : defaultValue;
+}
+
+DotNet::Unity::Mathematics::float2 CesiumPropertyTablePropertyImpl::GetFloat2(
+    const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+    std::int64_t featureID,
+    DotNet::Unity::Mathematics::float2 defaultValue) {
+  std::optional<glm::vec2> maybeVec2 =
+      propertyTablePropertyCallback<std::optional<glm::vec2>>(
+          this->_property,
+          property.valueType(),
+          property.isNormalized(),
+          [featureID](const auto& v) -> std::optional<glm::vec2> {
+            // size() returns zero if the view is invalid.
+            if (featureID < 0 || featureID >= v.size()) {
+              return std::nullopt;
+            }
+
+            auto maybeValue = v.get(featureID);
+            if (!maybeValue) {
+              return std::nullopt;
+            }
+
+            auto value = *maybeValue;
+            return MetadataConversions<glm::vec2, decltype(value)>::convert(
+                value);
+          });
+
+  return maybeVec2 ? float2{(*maybeVec2)[0], (*maybeVec2)[1]} : defaultValue;
+}
+
+DotNet::Unity::Mathematics::double2 CesiumPropertyTablePropertyImpl::GetDouble2(
+    const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+    std::int64_t featureID,
+    DotNet::Unity::Mathematics::double2 defaultValue) {
+  std::optional<glm::dvec2> maybeVec2 =
+      propertyTablePropertyCallback<std::optional<glm::dvec2>>(
+          this->_property,
+          property.valueType(),
+          property.isNormalized(),
+          [featureID](const auto& v) -> std::optional<glm::dvec2> {
+            // size() returns zero if the view is invalid.
+            if (featureID < 0 || featureID >= v.size()) {
+              return std::nullopt;
+            }
+
+            auto maybeValue = v.get(featureID);
+            if (!maybeValue) {
+              return std::nullopt;
+            }
+
+            auto value = *maybeValue;
+            return MetadataConversions<glm::dvec2, decltype(value)>::convert(
+                value);
+          });
+
+  return maybeVec2 ? double2{(*maybeVec2)[0], (*maybeVec2)[1]} : defaultValue;
 }
 
 System::String CesiumPropertyTablePropertyImpl::GetString(

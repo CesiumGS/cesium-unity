@@ -40,7 +40,7 @@ namespace Reinterop
             // If this is an instance method, pass the current object as the first parameter.
             if (!method.IsStatic)
             {
-                interopParameters = new[] { (ParameterName: "thiz", CallSiteName: "(*this)", Type: result.CppDefinition.Type.AsParameterType(), InteropType: result.CppDefinition.Type.AsInteropType()) }.Concat(interopParameters);
+                interopParameters = new[] { (ParameterName: "thiz", CallSiteName: "(*this)", Type: result.CppDefinition.Type.AsParameterType(), InteropType: result.CppDefinition.Type.AsParameterType().AsInteropType()) }.Concat(interopParameters);
             }
 
             bool hasStructRewrite = Interop.RewriteStructReturn(ref interopParameters, ref returnType, ref interopReturnType);

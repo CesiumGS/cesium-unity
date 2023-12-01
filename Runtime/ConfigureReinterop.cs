@@ -515,7 +515,10 @@ namespace CesiumForUnity
             Mesh pooledMesh = meshPool.Get();
             meshPool.Release(pooledMesh);
 
-            CesiumMetadataValueType valueType = new CesiumMetadataValueType(CesiumMetadataType.Invalid, CesiumMetadataComponentType.None, false);
+            CesiumMetadataValueType valueType = new CesiumMetadataValueType(
+                CesiumMetadataType.Invalid,
+                CesiumMetadataComponentType.None,
+                false);
             valueType.type = CesiumMetadataType.Invalid;
             valueType.componentType = CesiumMetadataComponentType.None;
             valueType.isArray = false;
@@ -539,6 +542,17 @@ namespace CesiumForUnity
             property.isNormalized = property.isNormalized;
             property.valueType = property.valueType;
 
+            CesiumPropertyArray array = new CesiumPropertyArray();
+            array.valueType = new CesiumMetadataValueType();
+            array.values = new CesiumMetadataValue[10];
+            array.values[0] = new CesiumMetadataValue();
+
+            CesiumMetadataValue myValue = new CesiumMetadataValue(0);
+            int2 myInt2 = new int2(1, 2);
+            uint2 myUint2 = new uint2(1, 2);
+            float2 myFloat2 = new float2(1, 2);
+            double2 myDouble2 = new double2(1, 2);
+
             CesiumPrimitiveFeatures primitiveFeatures = go.AddComponent<CesiumPrimitiveFeatures>();
             CesiumFeatureIdSet[] sets = primitiveFeatures.featureIdSets;
             sets = new CesiumFeatureIdSet[10];
@@ -556,7 +570,19 @@ namespace CesiumForUnity
             attribute.label = "label";
             attribute.nullFeatureId = 0;
             attribute.propertyTableIndex = 0;
+
+            CesiumFeatureIdTexture featureIdTexture = new CesiumFeatureIdTexture();
+            featureIdTexture.status = featureIdTexture.status;
+            featureIdTexture.featureCount = 1;
+            featureIdTexture.label = "label";
+            featureIdTexture.nullFeatureId = 0;
+            featureIdTexture.propertyTableIndex = 0;
+
             primitiveFeatures.featureIdSets[0] = attribute;
+            primitiveFeatures.featureIdSets[1] = featureIdTexture;
+
+            RaycastHit hitInfo = new RaycastHit();
+            Vector3 coordinate = hitInfo.barycentricCoordinate;
 
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;

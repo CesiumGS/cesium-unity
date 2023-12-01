@@ -48,20 +48,10 @@ namespace CesiumForUnity
             this.CreateImplementation();
         }
 
-        /// <summary>
-        /// Gets the feature ID associated with a given vertex. The feature 
-        /// ID can be used with a <see cref="CesiumPropertyTable"/> to retrieve
-        /// the corresponding metadata.
-        /// </summary>
-        /// <remarks>
-        /// This returns -1 if the given vertex is out-of-bounds, or if the 
-        /// feature ID attribute is invalid.
-        /// </remarks>
-        /// <param name="vertexIndex">The index of the target vertex.</param>
-        /// <returns>The feature ID associated with the given vertex, or -1 
-        /// if the feature ID set is invalid or if the vertex is out of bounds.</returns>
+        /// <inheritdoc />
         public override partial Int64 GetFeatureIdForVertex(Int64 vertexIndex);
 
+        /// <inheritdoc />
         public override Int64 GetFeatureIdFromRaycastHit(RaycastHit hitInfo)
         {
             int vertex = GetFirstVertexFromHitTriangle(hitInfo);

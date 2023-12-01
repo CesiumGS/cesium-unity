@@ -500,24 +500,24 @@ DotNet::CesiumForUnity::MetadataType CesiumFeatureImpl::GetComponentType(
     const DotNet::System::String& property) {
 
   return DotNet::CesiumForUnity::MetadataType::None;
-  //return std::visit(
-  //    [](auto&& arg) {
-  //      using T = std::decay_t<decltype(arg)>;
-  //      if constexpr (CesiumGltf::IsMetadataArray<T>::value) {
-  //        if (arg.size() > 0) {
-  //          CesiumGltf::PropertyType type = std::visit(
-  //              [](auto&& arg2) {
-  //                using T = std::decay_t<decltype(arg2)>;
-  //                return CesiumGltf::TypeToPropertyType<T>::value;
-  //              },
-  //              static_cast<ValueType>(arg[0]));
-  //          return DotNet::CesiumForUnity::MetadataType::None;
-  //          // ::GetMetadataType(type);
-  //        }
-  //      }
-  //      return DotNet::CesiumForUnity::MetadataType::None;
-  //    },
-  //    GetValueType(property));
+  // return std::visit(
+  //     [](auto&& arg) {
+  //       using T = std::decay_t<decltype(arg)>;
+  //       if constexpr (CesiumGltf::IsMetadataArray<T>::value) {
+  //         if (arg.size() > 0) {
+  //           CesiumGltf::PropertyType type = std::visit(
+  //               [](auto&& arg2) {
+  //                 using T = std::decay_t<decltype(arg2)>;
+  //                 return CesiumGltf::TypeToPropertyType<T>::value;
+  //               },
+  //               static_cast<ValueType>(arg[0]));
+  //           return DotNet::CesiumForUnity::MetadataType::None;
+  //           // ::GetMetadataType(type);
+  //         }
+  //       }
+  //       return DotNet::CesiumForUnity::MetadataType::None;
+  //     },
+  //     GetValueType(property));
 }
 
 bool CesiumFeatureImpl::IsNormalized(

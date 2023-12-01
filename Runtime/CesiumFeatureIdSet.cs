@@ -101,7 +101,8 @@ namespace CesiumForUnity
         {
             if (this.type != CesiumFeatureIdSetType.Implicit)
             {
-                // Other methods should be handled by CesiumFeatureIdAttribute and CesiumFeatureIdTexture respectively.
+                // Other methods should be handled by CesiumFeatureIdAttribute and
+                // CesiumFeatureIdTexture respectively.
                 return -1;
             }
 
@@ -123,13 +124,13 @@ namespace CesiumForUnity
         /// <remarks>
         /// This can still retrieve the feature IDs for non-texture feature ID sets.
         /// For attribute or implicit feature IDs, the first feature ID associated
-        /// with the first vertex of the intersected face is returned.
+        /// with the first vertex of the intersected face is returned.<br/><br/>
         /// 
         /// This returns -1 if the feature ID set is invalid.
         /// </remarks>
-        /// 
         /// <param name="hitInfo">The raycast hit info.</param>
-        /// <returns></returns>
+        /// <returns>The feature ID associated with the given vertex, or -1 for an
+        /// invalid feature ID set.</returns>
         public virtual Int64 GetFeatureIdFromRaycastHit(RaycastHit hitInfo)
         {
             if (this.type != CesiumFeatureIdSetType.Implicit)
