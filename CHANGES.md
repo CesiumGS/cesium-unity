@@ -1,5 +1,11 @@
 # Change Log
 
+### ? - ?
+
+##### Additions :tada:
+
+- Improved `KHR_texture_transform` extension by moving it from native to Unity. This makes the texture transformations more efficient and reliable. The shader now handles the scale and offset values.
+
 ### v1.6.4 - 2023-10-26
 
 ##### Additions :tada:

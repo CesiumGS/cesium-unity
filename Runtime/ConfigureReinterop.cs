@@ -160,6 +160,8 @@ namespace CesiumForUnity
             meshRenderer.material.DisableKeyword("keywordName");
             meshRenderer.material.EnableKeyword("keywordName");
             meshRenderer.material.GetTexture(id);
+            meshRenderer.material.SetTextureOffset(id, new Vector2());
+            meshRenderer.material.SetTextureScale(id, new Vector2());
             var ids = new List<int>();
             meshRenderer.material.GetTexturePropertyNameIDs(ids);
             for (int i = 0; i < ids.Count; ++i)

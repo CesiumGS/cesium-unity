@@ -11,6 +11,7 @@
 #include <CesiumGeospatial/Ellipsoid.h>
 #include <CesiumGltf/AccessorView.h>
 #include <CesiumGltf/ExtensionKhrMaterialsUnlit.h>
+#include <CesiumGltf/ExtensionKhrTextureTransform.h>
 #include <CesiumGltf/ExtensionMeshPrimitiveExtFeatureMetadata.h>
 #include <CesiumGltf/ExtensionModelExtFeatureMetadata.h>
 #include <CesiumGltfReader/GltfReader.h>
@@ -1198,6 +1199,23 @@ void* UnityPrepareRendererResources::prepareInMainThread(
                   material.SetFloat(
                       shaderProperty.getBaseColorTextureCoordinateIndexID(),
                       static_cast<float>(texCoordIndexIt->second));
+                  const ExtensionKhrTextureTransform* pTextureTransform =
+                      baseColorTexture
+                          ->getExtension<ExtensionKhrTextureTransform>();
+                  if (pTextureTransform) {
+                    UnityEngine::Vector2 offset;
+                    offset.x = (float)pTextureTransform->offset[0];
+                    offset.y = (float)pTextureTransform->offset[1];
+                    UnityEngine::Vector2 scale;
+                    scale.x = (float)pTextureTransform->scale[0];
+                    scale.y = (float)pTextureTransform->scale[1];
+                    material.SetTextureOffset(
+                        shaderProperty.getBaseColorTextureID(),
+                        offset);
+                    material.SetTextureScale(
+                        shaderProperty.getBaseColorTextureID(),
+                        scale);
+                  }
                 }
               }
             }
