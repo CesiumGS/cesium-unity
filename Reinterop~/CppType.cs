@@ -51,7 +51,7 @@ namespace Reinterop
             if (named != null && named.Name == "Nullable" && named.TypeArguments.Length == 1)
             {
                 CppType nullabledType = CppType.FromCSharp(context, named.TypeArguments[0]);
-                if (nullabledType.Kind == InteropTypeKind.BlittableStruct)
+                if (nullabledType.Kind == InteropTypeKind.BlittableStruct || nullabledType.Kind == InteropTypeKind.Primitive)
                     return new CppType(InteropTypeKind.Nullable, new[] {"std"}, "optional", new[] { nullabledType }, 0, "<optional>");
             }
 
@@ -463,6 +463,7 @@ namespace Reinterop
                     return $"::std::uint32_t({variableName})";
                 case InteropTypeKind.EnumFlags:
                     return $"{variableName}.underlying_value()";
+                case InteropTypeKind.Primitive:
                 case InteropTypeKind.BlittableStruct:
                     if (this.Flags.HasFlag(CppTypeFlags.Reference))
                         return $"&{variableName}";
@@ -473,7 +474,6 @@ namespace Reinterop
                         return $"{variableName}.has_value() ? &{variableName}.value() : nullptr";
                     else
                         return variableName;
-                case InteropTypeKind.Primitive:
                 case InteropTypeKind.Unknown:
                 default:
                     return variableName;
