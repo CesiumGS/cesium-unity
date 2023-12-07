@@ -547,7 +547,31 @@ namespace CesiumForUnity
             array.values = new CesiumMetadataValue[10];
             array.values[0] = new CesiumMetadataValue();
 
-            CesiumMetadataValue myValue = new CesiumMetadataValue(0);
+            CesiumMetadataValue myValue = new CesiumMetadataValue();
+            myValue = new CesiumMetadataValue(0);
+            valueType = myValue.valueType;
+
+            System.Object myObject = myValue.valueImpl;
+            
+            CesiumMetadataValue.GetObjectAsBoolean(myObject);
+            CesiumMetadataValue.GetObjectAsSByte(myObject);
+            CesiumMetadataValue.GetObjectAsByte(myObject);
+            CesiumMetadataValue.GetObjectAsInt16(myObject);
+            CesiumMetadataValue.GetObjectAsUInt16(myObject);
+            CesiumMetadataValue.GetObjectAsInt32(myObject);
+            CesiumMetadataValue.GetObjectAsUInt32(myObject);
+            CesiumMetadataValue.GetObjectAsInt64(myObject);
+            CesiumMetadataValue.GetObjectAsUInt64(myObject);
+            CesiumMetadataValue.GetObjectAsFloat(myObject);
+            CesiumMetadataValue.GetObjectAsDouble(myObject);
+            CesiumMetadataValue.GetObjectAsFloat2(myObject);
+            CesiumMetadataValue.GetObjectAsFloat3(myObject);
+            CesiumMetadataValue.GetObjectAsFloat4(myObject);
+            CesiumMetadataValue.GetObjectAsDouble2(myObject);
+            CesiumMetadataValue.GetObjectAsDouble3(myObject);
+            CesiumMetadataValue.GetObjectAsDouble4(myObject);
+            CesiumMetadataValue.GetObjectAsString(myObject);
+
             int2 myInt2 = new int2(1, 2);
             uint2 myUint2 = new uint2(1, 2);
             float2 myFloat2 = new float2(1, 2);
@@ -564,12 +588,12 @@ namespace CesiumForUnity
             sets[0].propertyTableIndex = 0;
 
             CesiumFeatureIdSetType setType = CesiumFeatureIdSetType.None;
-            CesiumFeatureIdAttribute attribute = new CesiumFeatureIdAttribute();
-            attribute.status = attribute.status;
-            attribute.featureCount = 1;
-            attribute.label = "label";
-            attribute.nullFeatureId = 0;
-            attribute.propertyTableIndex = 0;
+            CesiumFeatureIdAttribute featureIdAttribute = new CesiumFeatureIdAttribute();
+            featureIdAttribute.status = featureIdAttribute.status;
+            featureIdAttribute.featureCount = 1;
+            featureIdAttribute.label = "label";
+            featureIdAttribute.nullFeatureId = 0;
+            featureIdAttribute.propertyTableIndex = 0;
 
             CesiumFeatureIdTexture featureIdTexture = new CesiumFeatureIdTexture();
             featureIdTexture.status = featureIdTexture.status;
@@ -578,7 +602,7 @@ namespace CesiumForUnity
             featureIdTexture.nullFeatureId = 0;
             featureIdTexture.propertyTableIndex = 0;
 
-            primitiveFeatures.featureIdSets[0] = attribute;
+            primitiveFeatures.featureIdSets[0] = featureIdAttribute;
             primitiveFeatures.featureIdSets[1] = featureIdTexture;
 
             RaycastHit hitInfo = new RaycastHit();

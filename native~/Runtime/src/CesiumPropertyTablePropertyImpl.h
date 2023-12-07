@@ -15,7 +15,8 @@ class CesiumPropertyTablePropertyImpl;
 
 namespace DotNet::CesiumForUnity {
 class CesiumPropertyTableProperty;
-}
+class CesiumMetadataValue;
+} // namespace DotNet::CesiumForUnity
 
 namespace DotNet::System {
 class String;
@@ -26,6 +27,14 @@ class int2;
 class uint2;
 class float2;
 class double2;
+class int3;
+class uint3;
+class float3;
+class double3;
+class int4;
+class uint4;
+class float4;
+class double4;
 } // namespace DotNet::Unity::Mathematics
 
 namespace CesiumForUnityNative {
@@ -121,6 +130,10 @@ public:
       const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
       std::int64_t featureID,
       const DotNet::System::String& defaultValue);
+
+  //DotNet::CesiumForUnity::CesiumMetadataValue GetValue(
+  //    const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+  //    std::int64_t featureID);
 
 private:
   std::any _property;

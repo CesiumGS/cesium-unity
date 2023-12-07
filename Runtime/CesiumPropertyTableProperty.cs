@@ -794,7 +794,7 @@ namespace CesiumForUnity
         // int4, uint4, Vector4, double4,
         // int2x2, uint2x2, float2x2, double2x2
         // int3x3, uint3x3, float3x3, double3x3,
-        // int4x4, uint4x4, Matrix4x4, double4x4
+        // int4x4, uint4x4, float4x4, double4x4
 
         /// <summary>
         /// Attempts to retrieve the value for the given feature as a String.
@@ -823,6 +823,40 @@ namespace CesiumForUnity
         /// <param name="defaultValue">The default value to fall back on.</param>
         /// <returns>The property value as a String.</returns>
         public partial String GetString(Int64 featureID, String defaultValue = "");
+
+        /// <summary>
+        /// Retrieves the value of the property for the given feature as a 
+        /// <see cref="CesiumMetadataValue"/>. This allows the value to be acted on more
+        /// generically; its true value can be retrieved later as a specific Blueprints type.
+        /// </summary>
+        /// <remarks> 
+        /// For numeric properties, the raw value for a given feature will be
+        /// transformed by the property's normalization, scale, and offset before it is
+        /// returned. If the raw value is equal to the property's "no data" value, an
+        /// empty value will be returned. However, if the property itself specifies a
+        /// default value, then the property-defined default value will be returned.
+        /// </remarks>
+        /// <param name="featureID">The ID of the feature.</param>
+        /// <returns>The property value.</returns>
+        //public partial CesiumMetadataValue GetValue(Int64 featureID);
+
+        /// <summary>
+        /// Retrieves the raw value of the property for the given feature. This is the
+        /// value of the property without normalization, offset, or scale applied.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// If this property specifies a "no data" value, and the raw value is equal to
+        /// this "no data" value, the value is returned as-is.
+        /// </para>
+        /// <para>
+        /// If this property is an empty property with a specified default value, it 
+        /// will not have any raw data to retrieve. The returned value will be empty.
+        /// </para>
+        /// </remarks>
+        /// <param name="featureID">The ID of the feature.</param>
+        /// <returns>The property value.</returns>
+        //public partial CesiumMetadataValue GetRawValue(Int64 featureID);
         #endregion
     }
 }
