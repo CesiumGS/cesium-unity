@@ -65,7 +65,7 @@ namespace CesiumForUnity
 
         public void ResumeAll()
         {
-            foreach (CesiumIonServer server in this._servers)
+            foreach (CesiumIonServer server in this.servers)
             {
                 CesiumIonSession session = this.GetSession(server);
                 if (session != null)
@@ -118,7 +118,7 @@ namespace CesiumForUnity
                 record.token = token;
                 this._userAccessTokenMap.Add(record);
             }
-            //
+
             this.Save(true);
         }
 

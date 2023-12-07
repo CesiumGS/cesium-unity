@@ -132,6 +132,7 @@ namespace CesiumForUnity
             session.BroadcastAssetsUpdate();
             session.BroadcastProfileUpdate();
             session.BroadcastTokensUpdate();
+            session.BroadcastDefaultsUpdate();
 
             CesiumEditorWindow editorWindow = CesiumEditorWindow.currentWindow;
 

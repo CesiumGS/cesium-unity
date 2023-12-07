@@ -30,7 +30,7 @@ namespace CesiumForUnity
         /// OAuth2 application must be configured on the server with the exact URL
         /// `http://127.0.0.1/cesium-for-unreal/oauth2/callback`.
         /// </summary>
-        public long oauth2ApplicationID = 190;
+        public long oauth2ApplicationID = 381;
 
         /// <summary>
         /// The ID of the default access token to use to access Cesium ion assets at
