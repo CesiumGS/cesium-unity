@@ -100,6 +100,42 @@ public:
       const DotNet::CesiumForUnity::CesiumMetadataValue& value,
       bool defaultValue);
 
+  static int8_t ConvertToSByte(
+      const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+      int8_t defaultValue);
+
+  static uint8_t ConvertToByte(
+      const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+      uint8_t defaultValue);
+
+  static int16_t ConvertToInt16(
+      const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+      int16_t defaultValue);
+
+  static uint16_t ConvertToUInt16(
+      const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+      uint16_t defaultValue);
+
+  static int32_t ConvertToInt32(
+      const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+      int32_t defaultValue);
+
+  static uint32_t ConvertToUInt32(
+      const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+      uint32_t defaultValue);
+
+  static int64_t ConvertToInt64(
+      const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+      int64_t defaultValue);
+
+  static uint64_t ConvertToUInt64(
+      const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+      uint64_t defaultValue);
+
+  static DotNet::System::String ConvertToString(
+      const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+      DotNet::System::String defaultValue);
+
 private:
   /**
    * Retrieves the value from the System.Object in the C#

@@ -762,6 +762,10 @@ namespace CesiumForUnity
                     return new CesiumMetadataValueType(CesiumMetadataType.Scalar, CesiumMetadataComponentType.Int64, false);
                 case UInt64:
                     return new CesiumMetadataValueType(CesiumMetadataType.Scalar, CesiumMetadataComponentType.Uint64, false);
+                case float:
+                    return new CesiumMetadataValueType(CesiumMetadataType.Scalar, CesiumMetadataComponentType.Float32, false);
+                case double:
+                    return new CesiumMetadataValueType(CesiumMetadataType.Scalar, CesiumMetadataComponentType.Float64, false);
                 case int2:
                     return new CesiumMetadataValueType(CesiumMetadataType.Vec2, CesiumMetadataComponentType.Int32, false);
                 case int3:

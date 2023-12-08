@@ -552,7 +552,7 @@ namespace CesiumForUnity
             valueType = myValue.valueType;
 
             System.Object myObject = myValue.valueImpl;
-            
+
             CesiumMetadataValue.GetObjectAsBoolean(myObject);
             CesiumMetadataValue.GetObjectAsSByte(myObject);
             CesiumMetadataValue.GetObjectAsByte(myObject);

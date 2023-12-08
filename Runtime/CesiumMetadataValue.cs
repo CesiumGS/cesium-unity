@@ -121,57 +121,12 @@ namespace CesiumForUnity
         /// <returns>The property value as a SByte.</returns>
         public SByte GetSByte(SByte defaultValue = 0)
         {
-            if (this.isEmpty)
+            if (this.isEmpty || this.valueType.isArray)
             {
                 return defaultValue;
             }
 
-            CesiumMetadataValueType valueType = this.valueType;
-            if (valueType.isArray)
-            {
-                return defaultValue;
-            }
-
-            switch (valueType.type)
-            {
-                case CesiumMetadataType.Boolean:
-                case CesiumMetadataType.String:
-                    try
-                    {
-                        return Convert.ToSByte(this.valueImpl);
-                    }
-                    catch
-                    {
-                        // The above may throw if trying to convert an invalid string.
-                        return defaultValue;
-                    }
-                case CesiumMetadataType.Scalar:
-                    // We need to explicitly truncate floating-point values. Otherwise,
-                    // Convert will round to the nearest number.
-                    System.Object value = this.valueImpl;
-                    switch (valueType.componentType)
-                    {
-                        case CesiumMetadataComponentType.Float32:
-                            value = Math.Truncate((value as float?).Value);
-                            break;
-                        case CesiumMetadataComponentType.Float64:
-                            value = Math.Truncate((value as double?).Value);
-                            break;
-                        default:
-                            break;
-                    }
-                    try
-                    {
-                        return Convert.ToSByte(value);
-                    }
-                    catch
-                    {
-                        // The above may throw if trying to convert an out-of-range-number.
-                        return defaultValue;
-                    }
-                default:
-                    return defaultValue;
-            }
+            return ConvertToSByte(this, defaultValue);
         }
 
         /// <summary>
@@ -200,57 +155,12 @@ namespace CesiumForUnity
         /// <returns>The property value as a Byte.</returns>
         public Byte GetByte(Byte defaultValue = 0)
         {
-            if (this.isEmpty)
+            if (this.isEmpty || this.valueType.isArray)
             {
                 return defaultValue;
             }
 
-            CesiumMetadataValueType valueType = this.valueType;
-            if (valueType.isArray)
-            {
-                return defaultValue;
-            }
-
-            switch (valueType.type)
-            {
-                case CesiumMetadataType.Boolean:
-                case CesiumMetadataType.String:
-                    try
-                    {
-                        return Convert.ToByte(this.valueImpl);
-                    }
-                    catch
-                    {
-                        // The above may throw if trying to convert an invalid string.
-                        return defaultValue;
-                    }
-                case CesiumMetadataType.Scalar:
-                    // We need to explicitly truncate floating-point values. Otherwise,
-                    // Convert will round to the nearest number.
-                    System.Object value = this.valueImpl;
-                    switch (valueType.componentType)
-                    {
-                        case CesiumMetadataComponentType.Float32:
-                            value = Math.Truncate((value as float?).Value);
-                            break;
-                        case CesiumMetadataComponentType.Float64:
-                            value = Math.Truncate((value as double?).Value);
-                            break;
-                        default:
-                            break;
-                    }
-                    try
-                    {
-                        return Convert.ToByte(value);
-                    }
-                    catch
-                    {
-                        // The above may throw if trying to convert an out-of-range-number.
-                        return defaultValue;
-                    }
-                default:
-                    return defaultValue;
-            }
+            return ConvertToByte(this, defaultValue);
         }
 
         /// <summary>
@@ -279,57 +189,12 @@ namespace CesiumForUnity
         /// <returns>The property value as a Int16.</returns>
         public Int16 GetInt16(Int16 defaultValue = 0)
         {
-            if (this.isEmpty)
+            if (this.isEmpty || this.valueType.isArray)
             {
                 return defaultValue;
             }
 
-            CesiumMetadataValueType valueType = this.valueType;
-            if (valueType.isArray)
-            {
-                return defaultValue;
-            }
-
-            switch (valueType.type)
-            {
-                case CesiumMetadataType.Boolean:
-                case CesiumMetadataType.String:
-                    try
-                    {
-                        return Convert.ToInt16(this.valueImpl);
-                    }
-                    catch
-                    {
-                        // The above may throw if trying to convert an invalid string.
-                        return defaultValue;
-                    }
-                case CesiumMetadataType.Scalar:
-                    // We need to explicitly truncate floating-point values. Otherwise,
-                    // Convert will round to the nearest number.
-                    System.Object value = this.valueImpl;
-                    switch (valueType.componentType)
-                    {
-                        case CesiumMetadataComponentType.Float32:
-                            value = Math.Truncate((value as float?).Value);
-                            break;
-                        case CesiumMetadataComponentType.Float64:
-                            value = Math.Truncate((value as double?).Value);
-                            break;
-                        default:
-                            break;
-                    }
-                    try
-                    {
-                        return Convert.ToInt16(value);
-                    }
-                    catch
-                    {
-                        // The above may throw if trying to convert an out-of-range-number.
-                        return defaultValue;
-                    }
-                default:
-                    return defaultValue;
-            }
+            return ConvertToInt16(this, defaultValue);
         }
 
         /// <summary>
@@ -359,57 +224,12 @@ namespace CesiumForUnity
         /// <returns>The property value as a UInt16.</returns>
         public UInt16 GetUInt16(UInt16 defaultValue = 0)
         {
-            if (this.isEmpty)
+            if (this.isEmpty || this.valueType.isArray)
             {
                 return defaultValue;
             }
 
-            CesiumMetadataValueType valueType = this.valueType;
-            if (valueType.isArray)
-            {
-                return defaultValue;
-            }
-
-            switch (valueType.type)
-            {
-                case CesiumMetadataType.Boolean:
-                case CesiumMetadataType.String:
-                    try
-                    {
-                        return Convert.ToUInt16(this.valueImpl);
-                    }
-                    catch
-                    {
-                        // The above may throw if trying to convert an invalid string.
-                        return defaultValue;
-                    }
-                case CesiumMetadataType.Scalar:
-                    // We need to explicitly truncate floating-point values. Otherwise,
-                    // Convert will round to the nearest number.
-                    System.Object value = this.valueImpl;
-                    switch (valueType.componentType)
-                    {
-                        case CesiumMetadataComponentType.Float32:
-                            value = Math.Truncate((value as float?).Value);
-                            break;
-                        case CesiumMetadataComponentType.Float64:
-                            value = Math.Truncate((value as double?).Value);
-                            break;
-                        default:
-                            break;
-                    }
-                    try
-                    {
-                        return Convert.ToUInt16(value);
-                    }
-                    catch
-                    {
-                        // The above may throw if trying to convert an out-of-range-number.
-                        return defaultValue;
-                    }
-                default:
-                    return defaultValue;
-            }
+            return ConvertToUInt16(this, defaultValue);
         }
 
         /// <summary>
@@ -440,57 +260,12 @@ namespace CesiumForUnity
         /// <returns>The property value as a Int32.</returns>
         public Int32 GetInt32(Int32 defaultValue = 0)
         {
-            if (this.isEmpty)
+            if (this.isEmpty || this.valueType.isArray)
             {
                 return defaultValue;
             }
 
-            CesiumMetadataValueType valueType = this.valueType;
-            if (valueType.isArray)
-            {
-                return defaultValue;
-            }
-
-            switch (valueType.type)
-            {
-                case CesiumMetadataType.Boolean:
-                case CesiumMetadataType.String:
-                    try
-                    {
-                        return Convert.ToInt32(this.valueImpl);
-                    }
-                    catch
-                    {
-                        // The above may throw if trying to convert an invalid string.
-                        return defaultValue;
-                    }
-                case CesiumMetadataType.Scalar:
-                    // We need to explicitly truncate floating-point values. Otherwise,
-                    // Convert will round to the nearest number.
-                    System.Object value = this.valueImpl;
-                    switch (valueType.componentType)
-                    {
-                        case CesiumMetadataComponentType.Float32:
-                            value = Math.Truncate((value as float?).Value);
-                            break;
-                        case CesiumMetadataComponentType.Float64:
-                            value = Math.Truncate((value as double?).Value);
-                            break;
-                        default:
-                            break;
-                    }
-                    try
-                    {
-                        return Convert.ToInt32(value);
-                    }
-                    catch
-                    {
-                        // The above may throw if trying to convert an out-of-range-number.
-                        return defaultValue;
-                    }
-                default:
-                    return defaultValue;
-            }
+            return ConvertToInt32(this, defaultValue);
         }
 
         /// <summary>
@@ -519,57 +294,12 @@ namespace CesiumForUnity
         /// <returns>The property value as a UInt32.</returns>
         public UInt32 GetUInt32(UInt32 defaultValue = 0)
         {
-            if (this.isEmpty)
+            if (this.isEmpty || this.valueType.isArray)
             {
                 return defaultValue;
             }
 
-            CesiumMetadataValueType valueType = this.valueType;
-            if (valueType.isArray)
-            {
-                return defaultValue;
-            }
-
-            switch (valueType.type)
-            {
-                case CesiumMetadataType.Boolean:
-                case CesiumMetadataType.String:
-                    try
-                    {
-                        return Convert.ToUInt32(this.valueImpl);
-                    }
-                    catch
-                    {
-                        // The above may throw if trying to convert an invalid string.
-                        return defaultValue;
-                    }
-                case CesiumMetadataType.Scalar:
-                    // We need to explicitly truncate floating-point values. Otherwise,
-                    // Convert will round to the nearest number.
-                    System.Object value = this.valueImpl;
-                    switch (valueType.componentType)
-                    {
-                        case CesiumMetadataComponentType.Float32:
-                            value = Math.Truncate((value as float?).Value);
-                            break;
-                        case CesiumMetadataComponentType.Float64:
-                            value = Math.Truncate((value as double?).Value);
-                            break;
-                        default:
-                            break;
-                    }
-                    try
-                    {
-                        return Convert.ToUInt32(value);
-                    }
-                    catch
-                    {
-                        // The above may throw if trying to convert an out-of-range-number.
-                        return defaultValue;
-                    }
-                default:
-                    return defaultValue;
-            }
+            return ConvertToUInt32(this, defaultValue);
         }
 
         /// <summary>
@@ -1194,6 +924,16 @@ namespace CesiumForUnity
 
         #region Internal static partial methods
         internal static partial bool ConvertToBoolean(CesiumMetadataValue value, bool defaultValue);
+        internal static partial SByte ConvertToSByte(CesiumMetadataValue value, SByte defaultValue);
+        internal static partial Byte ConvertToByte(CesiumMetadataValue value, Byte defaultValue);
+        internal static partial Int16 ConvertToInt16(CesiumMetadataValue value, Int16 defaultValue);
+        internal static partial UInt16 ConvertToUInt16(CesiumMetadataValue value, UInt16 defaultValue);
+        internal static partial Int32 ConvertToInt32(CesiumMetadataValue value, Int32 defaultValue);
+        internal static partial UInt32 ConvertToUInt32(CesiumMetadataValue value, UInt32 defaultValue);
+        internal static partial Int64 ConvertToInt64(CesiumMetadataValue value, Int64 defaultValue);
+        internal static partial UInt64 ConvertToUInt64(CesiumMetadataValue value, UInt64 defaultValue);
+        internal static partial String ConvertToString(CesiumMetadataValue value, String defaultValue);
+
         #endregion
     }
 }

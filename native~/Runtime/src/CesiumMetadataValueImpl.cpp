@@ -136,4 +136,157 @@ CesiumMetadataValueImpl::getNativeValue(
       },
       nativeValue);
 }
+
+/*static*/ int8_t CesiumMetadataValueImpl::ConvertToSByte(
+    const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+    int8_t defaultValue) {
+  ValueType nativeValue = getNativeValue(value);
+  return std::visit(
+      [&defaultValue](auto trueValue) -> int8_t {
+        if constexpr (std::is_same_v<decltype(trueValue), std::monostate>) {
+          return defaultValue;
+        } else {
+          return MetadataConversions<int8_t, decltype(trueValue)>::convert(
+                     trueValue)
+              .value_or(defaultValue);
+        }
+      },
+      nativeValue);
+}
+
+/*static*/ uint8_t CesiumMetadataValueImpl::ConvertToByte(
+    const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+    uint8_t defaultValue) {
+  ValueType nativeValue = getNativeValue(value);
+  return std::visit(
+      [&defaultValue](auto trueValue) -> uint8_t {
+        if constexpr (std::is_same_v<decltype(trueValue), std::monostate>) {
+          return defaultValue;
+        } else {
+          return MetadataConversions<uint8_t, decltype(trueValue)>::convert(
+                     trueValue)
+              .value_or(defaultValue);
+        }
+      },
+      nativeValue);
+}
+
+/*static*/ int16_t CesiumMetadataValueImpl::ConvertToInt16(
+    const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+    int16_t defaultValue) {
+  ValueType nativeValue = getNativeValue(value);
+  return std::visit(
+      [&defaultValue](auto trueValue) -> int16_t {
+        if constexpr (std::is_same_v<decltype(trueValue), std::monostate>) {
+          return defaultValue;
+        } else {
+          return MetadataConversions<int16_t, decltype(trueValue)>::convert(
+                     trueValue)
+              .value_or(defaultValue);
+        }
+      },
+      nativeValue);
+}
+
+/*static*/ uint16_t CesiumMetadataValueImpl::ConvertToUInt16(
+    const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+    uint16_t defaultValue) {
+  ValueType nativeValue = getNativeValue(value);
+  return std::visit(
+      [&defaultValue](auto trueValue) -> uint16_t {
+        if constexpr (std::is_same_v<decltype(trueValue), std::monostate>) {
+          return defaultValue;
+        } else {
+          return MetadataConversions<uint16_t, decltype(trueValue)>::convert(
+                     trueValue)
+              .value_or(defaultValue);
+        }
+      },
+      nativeValue);
+}
+
+/*static*/ int32_t CesiumMetadataValueImpl::ConvertToInt32(
+    const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+    int32_t defaultValue) {
+  ValueType nativeValue = getNativeValue(value);
+  return std::visit(
+      [&defaultValue](auto trueValue) -> int32_t {
+        if constexpr (std::is_same_v<decltype(trueValue), std::monostate>) {
+          return defaultValue;
+        } else {
+          return MetadataConversions<int32_t, decltype(trueValue)>::convert(
+                     trueValue)
+              .value_or(defaultValue);
+        }
+      },
+      nativeValue);
+}
+
+/*static*/ uint32_t CesiumMetadataValueImpl::ConvertToUInt32(
+    const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+    uint32_t defaultValue) {
+  ValueType nativeValue = getNativeValue(value);
+  return std::visit(
+      [&defaultValue](auto trueValue) -> uint32_t {
+        if constexpr (std::is_same_v<decltype(trueValue), std::monostate>) {
+          return defaultValue;
+        } else {
+          return MetadataConversions<uint32_t, decltype(trueValue)>::convert(
+                     trueValue)
+              .value_or(defaultValue);
+        }
+      },
+      nativeValue);
+}
+/*static*/ int64_t CesiumMetadataValueImpl::ConvertToInt64(
+    const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+    int64_t defaultValue) {
+  ValueType nativeValue = getNativeValue(value);
+  return std::visit(
+      [&defaultValue](auto trueValue) -> int64_t {
+        if constexpr (std::is_same_v<decltype(trueValue), std::monostate>) {
+          return defaultValue;
+        } else {
+          return MetadataConversions<int64_t, decltype(trueValue)>::convert(
+                     trueValue)
+              .value_or(defaultValue);
+        }
+      },
+      nativeValue);
+}
+
+/*static*/ uint64_t CesiumMetadataValueImpl::ConvertToUInt64(
+    const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+    uint64_t defaultValue) {
+  ValueType nativeValue = getNativeValue(value);
+  return std::visit(
+      [&defaultValue](auto trueValue) -> uint64_t {
+        if constexpr (std::is_same_v<decltype(trueValue), std::monostate>) {
+          return defaultValue;
+        } else {
+          return MetadataConversions<uint64_t, decltype(trueValue)>::convert(
+                     trueValue)
+              .value_or(defaultValue);
+        }
+      },
+      nativeValue);
+}
+
+/*static*/ DotNet::System::String CesiumMetadataValueImpl::ConvertToString(
+    const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+    DotNet::System::String defaultValue) {
+  ValueType nativeValue = getNativeValue(value);
+  return std::visit(
+      [&defaultValue](auto trueValue) -> System::String {
+        if constexpr (std::is_same_v<decltype(trueValue), std::monostate>) {
+          return defaultValue;
+        } else {
+          auto maybeString =
+              MetadataConversions<std::string, decltype(trueValue)>::convert(
+                  trueValue);
+          return maybeString ? System::String(*maybeString) : defaultValue;
+        }
+      },
+      nativeValue);
+}
 } // namespace CesiumForUnityNative
