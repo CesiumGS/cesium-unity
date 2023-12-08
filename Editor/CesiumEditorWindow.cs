@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.Networking;
 
 namespace CesiumForUnity
 {
@@ -279,8 +280,8 @@ namespace CesiumForUnity
 
         void DrawIonLoginPanel()
         {
-            Texture2D logo = EditorGUIUtility.isProSkin ? 
-                CesiumEditorStyle.cesiumForUnityLogoLight : 
+            Texture2D logo = EditorGUIUtility.isProSkin ?
+                CesiumEditorStyle.cesiumForUnityLogoLight :
                 CesiumEditorStyle.cesiumForUnityLogoDark;
             GUIContent logoContent = new GUIContent(logo);
 
@@ -303,13 +304,53 @@ namespace CesiumForUnity
 
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            if (GUILayout.Button("Connect to Cesium ion", CesiumEditorStyle.cesiumButtonStyle))
+
+            string label = this._isIonConnecting ? "Cancel Connecting" : "Connect to Cesium ion";
+            if (GUILayout.Button(label, CesiumEditorStyle.cesiumButtonStyle))
             {
                 CesiumIonSession session = CesiumIonServerManager.instance.currentSession;
-                session.Connect();
+                if (session.IsConnecting())
+                {
+                    // Cancel the existing request by visiting the redirect URL.
+                    UnityWebRequest.Get(session.GetRedirectUrl()).SendWebRequest();
+                }
+                else
+                {
+                    // Initiate a new connection
+                    session.Connect();
+                }
             }
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
+
+            if (this._isIonConnecting)
+            {
+                EditorGUILayout.LabelField(
+                    "Waiting for you to sign into Cesium ion with your web browser...",
+                    EditorStyles.wordWrappedLabel);
+
+                string authorizeUrl = CesiumIonServerManager.instance.currentSession.GetAuthorizeUrl();
+                if (EditorGUILayout.LinkButton("Open web browser again"))
+                {
+                    Application.OpenURL(authorizeUrl);
+                }
+                GUILayout.Space(5);
+                EditorGUILayout.LabelField(
+                    "Or copy the URL below into your web browser",
+                    EditorStyles.wordWrappedLabel);
+
+                GUILayout.BeginHorizontal();
+                EditorGUILayout.SelectableLabel(
+                    authorizeUrl,
+                    EditorStyles.textField,
+                    GUILayout.Height(EditorGUIUtility.singleLineHeight));
+
+                if (GUILayout.Button("Copy To Clipboard", GUILayout.ExpandWidth(false)))
+                {
+                    CopyLinkToClipboard(authorizeUrl);
+                }
+                GUILayout.EndHorizontal();
+            }
         }
 
         void DrawVersion()
