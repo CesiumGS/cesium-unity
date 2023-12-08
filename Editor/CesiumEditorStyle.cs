@@ -31,6 +31,7 @@ namespace CesiumForUnity
         public static Texture2D refreshIcon;
         public static Texture2D checkIcon;
         public static Texture2D xIcon;
+        public static Texture2D folderIcon;
 
         private static readonly Color buttonColor = new Color(0.2945f, 0.6317f, 0.7930f);
         private static readonly Color buttonColorLighter = new Color(0.4475f, 0.7544f, 0.8904f);
@@ -181,6 +182,7 @@ namespace CesiumForUnity
 
             checkIcon = LoadImage("FontAwesome/check-solid");
             xIcon = LoadImage("FontAwesome/times-solid");
+            folderIcon = LoadImage("FontAwesome/folder");
         }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
+using UnityEditor.SearchService;
 using UnityEngine;
 
 namespace CesiumForUnity
@@ -71,6 +72,17 @@ namespace CesiumForUnity
             {
                 var serverDropDown = new ServerDropDown(this._dropDownState, rect);
                 serverDropDown.Show(rect);
+            }
+
+            GUIContent browseButtonContent = new GUIContent(
+                CesiumEditorStyle.folderIcon,
+                "Show this server in the Project view.");
+            if (GUILayout.Button(browseButtonContent, GUILayout.Height(EditorGUIUtility.singleLineHeight), GUILayout.ExpandWidth(false)))
+            {
+                //Selection.activeObject = CesiumIonServerManager.instance.current;
+                EditorUtility.FocusProjectWindow();
+                EditorGUIUtility.PingObject(CesiumIonServerManager.instance.current);
+
             }
             EditorGUILayout.EndHorizontal();
         }
