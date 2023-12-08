@@ -147,6 +147,8 @@ private:
   std::string _authorizeUrl;
   std::string _redirectUrl;
 
+  DotNet::System::Collections::Generic::List1<DotNet::CesiumForUnity::QuickAddItem> _quickAddItems;
+
   const static std::string _userAccessTokenEditorKey;
 };
 } // namespace CesiumForUnityNative

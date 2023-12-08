@@ -76,7 +76,8 @@ CesiumIonSessionImpl::CesiumIonSessionImpl(
           session)),
       broadcastDefaultsUpdate(std::bind(
           &DotNet::CesiumForUnity::CesiumIonSession::BroadcastDefaultsUpdate,
-          session)) {}
+          session)),
+      _quickAddItems() {}
 
 CesiumIonSessionImpl::~CesiumIonSessionImpl() {}
 
@@ -216,11 +217,13 @@ void CesiumIonSessionImpl::Connect(
                       .SetUserAccessToken(
                           server,
                           this->_connection.value().getAccessToken());
+                  this->_quickAddItems = nullptr;
                   this->broadcastConnectionUpdate();
                 })
             .catchInMainThread([this](std::exception&& e) {
               this->_isConnecting = false;
               this->_connection = std::nullopt;
+              this->_quickAddItems = nullptr;
               this->broadcastConnectionUpdate();
             });
       });
@@ -263,6 +266,7 @@ void CesiumIonSessionImpl::Resume(
               this->_connection = std::move(*pConnection);
             }
             this->_isResuming = false;
+            this->_quickAddItems = nullptr;
             this->broadcastConnectionUpdate();
 
             this->startQueuedLoads();
@@ -285,6 +289,8 @@ void CesiumIonSessionImpl::Disconnect(
   CesiumForUnity::CesiumIonServerManager::instance().SetUserAccessToken(
       server,
       nullptr);
+
+  this->_quickAddItems = nullptr;
 
   this->broadcastConnectionUpdate();
   this->broadcastAssetsUpdate();
@@ -317,6 +323,10 @@ DotNet::System::Collections::Generic::List1<
     DotNet::CesiumForUnity::QuickAddItem>
 CesiumIonSessionImpl::GetQuickAddItems(
     const DotNet::CesiumForUnity::CesiumIonSession& session) {
+  if (this->_quickAddItems != nullptr) {
+    return this->_quickAddItems;
+  }
+
   DotNet::System::Collections::Generic::List1<
       DotNet::CesiumForUnity::QuickAddItem>
       result{};
@@ -338,6 +348,8 @@ CesiumIonSessionImpl::GetQuickAddItems(
       result.Add(item);
     }
   }
+
+  this->_quickAddItems = result;
 
   return result;
 }
@@ -464,6 +476,7 @@ void CesiumIonSessionImpl::refreshDefaults() {
             logResponseErrors(defaults);
             this->_isLoadingDefaults = false;
             this->_defaults = std::move(defaults.value);
+            this->_quickAddItems = nullptr;
             this->broadcastDefaultsUpdate();
             if (this->_loadDefaultsQueued)
               this->refreshDefaults();
@@ -472,6 +485,7 @@ void CesiumIonSessionImpl::refreshDefaults() {
         logResponseErrors(e);
         this->_isLoadingDefaults = false;
         this->_defaults = std::nullopt;
+        this->_quickAddItems = nullptr;
         this->broadcastDefaultsUpdate();
         if (this->_loadDefaultsQueued)
           this->refreshDefaults();
