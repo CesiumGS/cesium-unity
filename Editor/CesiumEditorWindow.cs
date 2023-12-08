@@ -261,6 +261,17 @@ namespace CesiumForUnity
                 CesiumEditorStyle.quickAddIcon,
                 "Add this item to the level");
 
+            if (CesiumIonServerManager.instance.currentSession.IsLoadingDefaults())
+            {
+                GUILayout.BeginHorizontal(CesiumEditorStyle.quickAddItemStyle);
+                GUILayout.Box(new GUIContent(
+                    "Loading...",
+                    "The list of Quick Add assets is being retrieved from the server."),
+                    EditorStyles.wordWrappedLabel);
+                GUILayout.FlexibleSpace();
+                GUILayout.EndHorizontal();
+            }
+
             List<QuickAddItem> assets = CesiumIonServerManager.instance.currentSession.GetQuickAddItems();
             for (int i = 0; i < assets.Count; i++)
             {
