@@ -172,42 +172,6 @@ namespace CesiumForUnity
             GUILayout.EndHorizontal();
         }
 
-        private enum QuickAddItemType
-        {
-            BlankTileset,
-            DynamicCamera,
-            IonTileset
-        }
-
-        private class QuickAddItem
-        {
-            public QuickAddItemType type;
-            public string name;
-            public string tooltip;
-            public string tilesetName;
-            public long tilesetId;
-            public string overlayName;
-            public long overlayId;
-
-            public QuickAddItem(
-                QuickAddItemType type,
-                string name,
-                string tooltip,
-                string tilesetName,
-                long tilesetId,
-                string overlayName,
-                long overlayId)
-            {
-                this.type = type;
-                this.name = name;
-                this.tooltip = tooltip;
-                this.tilesetName = tilesetName;
-                this.tilesetId = tilesetId;
-                this.overlayName = overlayName;
-                this.overlayId = overlayId;
-            }
-        }
-
         private readonly QuickAddItem[] _basicAssets = new[]
         {
             new QuickAddItem(
@@ -226,62 +190,6 @@ namespace CesiumForUnity
                 "geospatial environment.",
                 "",
                 -1,
-                "",
-                -1)
-        };
-
-        private readonly QuickAddItem[] _ionAssets = new[]
-        {
-            new QuickAddItem(
-                QuickAddItemType.IonTileset,
-                "Google Photorealistic 3D Tiles",
-                "Photorealistic 3D Tiles from Google Maps Platform.",
-                "Google Photorealistic 3D Tiles",
-                2275207,
-                "",
-                -1),
-            new QuickAddItem(
-                QuickAddItemType.IonTileset,
-                "Cesium World Terrain + Bing Maps Aerial imagery",
-                "High-resolution global terrain tileset curated from several data sources, " +
-                "textured with Bing Maps satellite imagery.",
-                "Cesium World Terrain",
-                1,
-                "Bing Maps Aerial imagery",
-                2),
-            new QuickAddItem(
-                QuickAddItemType.IonTileset,
-                "Cesium World Terrain + Bing Maps Aerial with Labels imagery",
-                "High-resolution global terrain tileset curated from several data sources, " +
-                "textured with labeled Bing Maps satellite imagery.",
-                "Cesium World Terrain",
-                1,
-                "Bing Maps Aerial with Labels imagery",
-                3),
-            new QuickAddItem(
-                QuickAddItemType.IonTileset,
-                "Cesium World Terrain + Bing Maps Road imagery",
-                "High-resolution global terrain tileset curated from several data sources, " +
-                "textured with labeled Bing Maps imagery.",
-                "Cesium World Terrain",
-                1,
-                "Bing Maps Road imagery",
-                4),
-            new QuickAddItem(
-                QuickAddItemType.IonTileset,
-                "Cesium World Terrain + Sentinel-2 imagery",
-                "High-resolution global terrain tileset curated from several data sources, " +
-                "textured with high-resolution satellite imagery from the Sentinel-2 project.",
-                "Cesium World Terrain",
-                1,
-                "Sentinel-2 imagery",
-                3954),
-            new QuickAddItem(
-                QuickAddItemType.IonTileset,
-                "Cesium OSM Buildings",
-                "A 3D buildings layer derived from OpenStreetMap covering the entire world.",
-                "Cesium OSM Buildings",
-                96188,
                 "",
                 -1)
         };
@@ -352,22 +260,22 @@ namespace CesiumForUnity
                 CesiumEditorStyle.quickAddIcon,
                 "Add this item to the level");
 
-            for (int i = 0; i < this._ionAssets.Length; i++)
+            List<QuickAddItem> assets = CesiumIonServerManager.instance.currentSession.GetQuickAddItems();
+            for (int i = 0; i < assets.Count; i++)
             {
                 GUILayout.BeginHorizontal(CesiumEditorStyle.quickAddItemStyle);
                 GUILayout.Box(new GUIContent(
-                    this._ionAssets[i].name,
-                    this._ionAssets[i].tooltip),
+                    assets[i].name,
+                    assets[i].tooltip),
                     EditorStyles.wordWrappedLabel);
                 GUILayout.FlexibleSpace();
                 if (GUILayout.Button(addButtonContent, CesiumEditorStyle.quickAddButtonStyle))
                 {
-                    this.QuickAddAsset(this._ionAssets[i]);
+                    this.QuickAddAsset(assets[i]);
                 }
                 GUILayout.EndHorizontal();
             }
         }
-
 
         void DrawIonLoginPanel()
         {

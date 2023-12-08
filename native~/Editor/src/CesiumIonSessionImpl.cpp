@@ -9,6 +9,8 @@
 #include <DotNet/CesiumForUnity/CesiumIonServer.h>
 #include <DotNet/CesiumForUnity/CesiumIonServerManager.h>
 #include <DotNet/CesiumForUnity/CesiumIonSession.h>
+#include <DotNet/CesiumForUnity/QuickAddItem.h>
+#include <DotNet/CesiumForUnity/QuickAddItemType.h>
 #include <DotNet/System/Object.h>
 #include <DotNet/UnityEngine/Application.h>
 #include <DotNet/UnityEngine/Debug.h>
@@ -309,6 +311,35 @@ System::String CesiumIonSessionImpl::GetAuthorizeUrl(
 System::String CesiumIonSessionImpl::GetRedirectUrl(
     const DotNet::CesiumForUnity::CesiumIonSession& session) {
   return System::String(this->_redirectUrl);
+}
+
+DotNet::System::Collections::Generic::List1<
+    DotNet::CesiumForUnity::QuickAddItem>
+CesiumIonSessionImpl::GetQuickAddItems(
+    const DotNet::CesiumForUnity::CesiumIonSession& session) {
+  DotNet::System::Collections::Generic::List1<
+      DotNet::CesiumForUnity::QuickAddItem>
+      result{};
+
+  const CesiumIonClient::Defaults& defaults = this->getDefaults();
+  for (const CesiumIonClient::QuickAddAsset& asset : defaults.quickAddAssets) {
+    if (asset.type == "3DTILES" ||
+        (asset.type == "TERRAIN" && !asset.rasterOverlays.empty())) {
+      CesiumForUnity::QuickAddItem item(
+          CesiumForUnity::QuickAddItemType::IonTileset,
+          System::String(asset.name),
+          System::String(asset.description),
+          System::String(asset.objectName),
+          asset.assetId,
+          asset.rasterOverlays.empty()
+              ? nullptr
+              : System::String(asset.rasterOverlays[0].name),
+          asset.rasterOverlays.empty() ? -1 : asset.rasterOverlays[0].assetId);
+      result.Add(item);
+    }
+  }
+
+  return result;
 }
 
 void CesiumIonSessionImpl::RefreshProfile(

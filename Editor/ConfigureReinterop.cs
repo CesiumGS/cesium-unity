@@ -85,6 +85,21 @@ namespace CesiumForUnity
             session.IsConnected();
             server = session.server;
             session.server = server;
+
+            List<QuickAddItem> items = new List<QuickAddItem>();
+            items = session.GetQuickAddItems();
+
+            QuickAddItem item = new QuickAddItem();
+            item.type = QuickAddItemType.BlankTileset;
+            item.name = "name";
+            item.tooltip = "tooltip";
+            item.tilesetName = "tilesetName";
+            item.tilesetId = 1;
+            item.overlayName = "overlayName";
+            item.overlayId = 2;
+
+            item = new QuickAddItem(QuickAddItemType.IonTileset, "name", "tooltip", "tilesetName", 1, "overlayName", 2);
+            items.Add(item);
             
             server.defaultIonAccessToken = "";
             server.defaultIonAccessTokenId = "";

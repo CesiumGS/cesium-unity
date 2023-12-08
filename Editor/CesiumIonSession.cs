@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Reinterop;
 
 namespace CesiumForUnity
@@ -48,6 +49,7 @@ namespace CesiumForUnity
         public partial string GetProfileUsername();
         public partial string GetAuthorizeUrl();
         public partial string GetRedirectUrl();
+        public partial List<QuickAddItem> GetQuickAddItems();
 
         public partial void Tick();
 

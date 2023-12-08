@@ -9,6 +9,7 @@
 #include <CesiumIonClient/Profile.h>
 #include <CesiumIonClient/Token.h>
 
+#include <DotNet/System/Collections/Generic/List1.h>
 #include <DotNet/System/String.h>
 
 #include <functional>
@@ -72,6 +73,9 @@ public:
   GetAuthorizeUrl(const DotNet::CesiumForUnity::CesiumIonSession& session);
   DotNet::System::String
   GetRedirectUrl(const DotNet::CesiumForUnity::CesiumIonSession& session);
+  DotNet::System::Collections::Generic::List1<
+      DotNet::CesiumForUnity::QuickAddItem>
+  GetQuickAddItems(const DotNet::CesiumForUnity::CesiumIonSession& session);
 
   void RefreshProfile(const DotNet::CesiumForUnity::CesiumIonSession& session);
   void RefreshAssets(const DotNet::CesiumForUnity::CesiumIonSession& session);
