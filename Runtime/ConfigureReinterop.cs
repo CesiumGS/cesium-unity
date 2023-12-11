@@ -552,7 +552,6 @@ namespace CesiumForUnity
             valueType = myValue.valueType;
 
             System.Object myObject = myValue.valueImpl;
-
             CesiumMetadataValue.GetObjectAsBoolean(myObject);
             CesiumMetadataValue.GetObjectAsSByte(myObject);
             CesiumMetadataValue.GetObjectAsByte(myObject);
@@ -564,6 +563,12 @@ namespace CesiumForUnity
             CesiumMetadataValue.GetObjectAsUInt64(myObject);
             CesiumMetadataValue.GetObjectAsFloat(myObject);
             CesiumMetadataValue.GetObjectAsDouble(myObject);
+            CesiumMetadataValue.GetObjectAsCesiumIntVec2(myObject);
+            CesiumMetadataValue.GetObjectAsCesiumIntVec3(myObject);
+            CesiumMetadataValue.GetObjectAsCesiumIntVec4(myObject);
+            CesiumMetadataValue.GetObjectAsCesiumUIntVec2(myObject);
+            CesiumMetadataValue.GetObjectAsCesiumUIntVec3(myObject);
+            CesiumMetadataValue.GetObjectAsCesiumUIntVec4(myObject);
             CesiumMetadataValue.GetObjectAsFloat2(myObject);
             CesiumMetadataValue.GetObjectAsFloat3(myObject);
             CesiumMetadataValue.GetObjectAsFloat4(myObject);
@@ -572,10 +577,36 @@ namespace CesiumForUnity
             CesiumMetadataValue.GetObjectAsDouble4(myObject);
             CesiumMetadataValue.GetObjectAsString(myObject);
 
+            CesiumIntVec2 myIntVec2 = new CesiumIntVec2(1, 2);
+            myObject = myIntVec2[0];
+            CesiumIntVec3 myIntVec3 = new CesiumIntVec3(1, 2, 3);
+            myObject = myIntVec3[0];
+            CesiumIntVec4 myIntVec4 = new CesiumIntVec4(1, 2, 3, 4);
+            myObject = myIntVec4[0];
+            CesiumUIntVec2 myUintVec2 = new CesiumUIntVec2(1, 2);
+            myObject = myUintVec2[0];
+            CesiumUIntVec3 myUintVec3 = new CesiumUIntVec3(1, 2, 3);
+            myObject = myUintVec3[0];
+            CesiumUIntVec4 myUintVec4 = new CesiumUIntVec4(1, 2, 3, 4);
+            myObject = myUintVec4[0];
             int2 myInt2 = new int2(1, 2);
+            int3 myInt3 = new int3(1, 2, 3);
+            int4 myInt4 = new int4(1, 2, 3, 4);
             uint2 myUint2 = new uint2(1, 2);
+            uint3 myUint3 = new uint3(1, 2, 3);
+            uint4 myUint4 = new uint4(1, 2, 3, 4);
             float2 myFloat2 = new float2(1, 2);
+            myObject = myFloat2[0];
+            float3 myFloat3 = new float3(1, 2, 3);
+            myObject = myFloat3[0];
+            float4 myFloat4 = new float4(1, 2, 3, 4);
+            myObject = myFloat4[0];
             double2 myDouble2 = new double2(1, 2);
+            myObject = myDouble2[0];
+            double3 myDouble3 = new double3(1, 2, 3);
+            myObject = myDouble3[0];
+            double4 myDouble4 = new double4(1, 2, 3, 4);
+            myObject = myDouble4[0];
 
             CesiumPrimitiveFeatures primitiveFeatures = go.AddComponent<CesiumPrimitiveFeatures>();
             CesiumFeatureIdSet[] sets = primitiveFeatures.featureIdSets;

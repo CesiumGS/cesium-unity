@@ -14,6 +14,17 @@ class String;
 class Object;
 } // namespace DotNet::System
 
+namespace DotNet::Unity::Mathematics {
+struct int2;
+struct uint2;
+struct float2;
+struct double2;
+struct int3;
+struct uint3;
+struct float3;
+struct double3;
+} // namespace DotNet::Unity::Mathematics
+
 namespace CesiumForUnityNative {
 
 class CesiumMetadataValueImpl {
@@ -131,6 +142,46 @@ public:
   static uint64_t ConvertToUInt64(
       const DotNet::CesiumForUnity::CesiumMetadataValue& value,
       uint64_t defaultValue);
+
+  static float ConvertToFloat(
+      const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+      float defaultValue);
+
+  static double ConvertToDouble(
+      const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+      double defaultValue);
+
+  static DotNet::Unity::Mathematics::int2 ConvertToInt2(
+      const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+      DotNet::Unity::Mathematics::int2 defaultValue);
+
+  static DotNet::Unity::Mathematics::uint2 ConvertToUInt2(
+      const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+      DotNet::Unity::Mathematics::uint2 defaultValue);
+
+  static DotNet::Unity::Mathematics::float2 ConvertToFloat2(
+      const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+      DotNet::Unity::Mathematics::float2 defaultValue);
+
+  static DotNet::Unity::Mathematics::double2 ConvertToDouble2(
+      const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+      DotNet::Unity::Mathematics::double2 defaultValue);
+
+  static DotNet::Unity::Mathematics::int3 ConvertToInt3(
+      const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+      DotNet::Unity::Mathematics::int3 defaultValue);
+
+  static DotNet::Unity::Mathematics::uint3 ConvertToUInt3(
+      const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+      DotNet::Unity::Mathematics::uint3 defaultValue);
+
+  static DotNet::Unity::Mathematics::float3 ConvertToFloat3(
+      const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+      DotNet::Unity::Mathematics::float3 defaultValue);
+
+  static DotNet::Unity::Mathematics::double3 ConvertToDouble3(
+      const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+      DotNet::Unity::Mathematics::double3 defaultValue);
 
   static DotNet::System::String ConvertToString(
       const DotNet::CesiumForUnity::CesiumMetadataValue& value,
