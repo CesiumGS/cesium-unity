@@ -89,7 +89,8 @@ namespace CesiumForUnity
         void ISerializationCallbackReceiver.OnAfterDeserialize()
         {
 #if UNITY_EDITOR
-            // For backward compatibility, tilesets loaded without a server should adopt the default one.
+            // For backward compatibility, overlays loaded without a server should adopt
+            // the default one rather than the current one.
             if (this._ionServer == null)
                 this._useDefaultServer = true;
 #endif
