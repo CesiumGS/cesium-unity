@@ -14,7 +14,7 @@ namespace CesiumForUnity
             EditorGUILayout.Space(10, false);
             bool enabled = GUI.enabled;
             GUI.enabled = false;
-            EditorGUILayout.TextField("Cesium ion Server:", GetLabelFromCesiumIonServer(server), GUILayout.Width(500));
+            EditorGUILayout.TextField("Cesium ion Server:", server.name, GUILayout.Width(500));
             GUI.enabled = enabled;
             GUILayout.FlexibleSpace();
             EditorGUILayout.EndHorizontal();
