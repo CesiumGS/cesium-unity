@@ -41,7 +41,7 @@ namespace CesiumForUnity
     [ReinteropNativeImplementation("CesiumForUnityNative::Cesium3DTilesetImpl", "Cesium3DTilesetImpl.h")]
     [AddComponentMenu("Cesium/Cesium 3D Tileset")]
     [IconAttribute("Packages/com.cesium.unity/Editor/Resources/Cesium-24x24.png")]
-    public partial class Cesium3DTileset : MonoBehaviour, IDisposable
+    public partial class Cesium3DTileset : MonoBehaviour, IDisposable, ISerializationCallbackReceiver
     {
         public void Dispose()
         {
@@ -186,7 +186,20 @@ namespace CesiumForUnity
         {
             get
             {
-                if (this._ionServer == null) this._ionServer = CesiumIonServer.currentForNewObjects;
+                if (this._ionServer == null)
+                {
+#if UNITY_EDITOR
+                    // See OnAfterDeserialize.
+                    if (this._useDefaultServer)
+                        this._ionServer = CesiumIonServer.defaultServer;
+                    else
+                        this._ionServer = CesiumIonServer.currentForNewObjects;
+
+                    this._useDefaultServer = false;
+#else
+                    this._ionServer = CesiumIonServer.currentForNewObjects;
+#endif
+                }
                 return this._ionServer;
             }
             set
@@ -698,5 +711,22 @@ namespace CesiumForUnity
         /// Zoom the Editor camera to this tileset. This method does nothing outside of the Editor.
         /// </summary>
         public partial void FocusTileset();
+
+        void ISerializationCallbackReceiver.OnBeforeSerialize()
+        {
+        }
+
+        void ISerializationCallbackReceiver.OnAfterDeserialize()
+        {
+#if UNITY_EDITOR
+            // For backward compatibility, tilesets loaded without a server should adopt the default one.
+            if (this._ionServer == null)
+                this._useDefaultServer = true;
+#endif
+        }
+
+#if UNITY_EDITOR
+        private bool _useDefaultServer = false;
+#endif
     }
 }
