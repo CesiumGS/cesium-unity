@@ -116,37 +116,6 @@ namespace CesiumForUnity
                     #endif
                 }
 
-#if UNITY_EDITOR
-#pragma warning disable 618
-                bool needsSave = false;
-                if (!string.IsNullOrEmpty(defaultIonAccessTokenID))
-                {
-                    if (string.IsNullOrEmpty(CesiumIonServer.defaultServer.defaultIonAccessTokenId))
-                    {
-                        CesiumIonServer.defaultServer.defaultIonAccessTokenId = defaultIonAccessTokenID;
-                        needsSave = true;
-                    }
-                    defaultIonAccessTokenID = "";
-                }
-                if (!string.IsNullOrEmpty(defaultIonAccessToken))
-                {
-                    if (string.IsNullOrEmpty(CesiumIonServer.defaultServer.defaultIonAccessToken))
-                    {
-                        CesiumIonServer.defaultServer.defaultIonAccessToken = defaultIonAccessToken;
-                        needsSave = true;
-                    }
-                    defaultIonAccessToken = "";
-                }
-
-                if (needsSave)
-                {
-                    EditorUtility.SetDirty(CesiumIonServer.defaultServer);
-                    AssetDatabase.SaveAssetIfDirty(CesiumIonServer.defaultServer);
-                    AssetDatabase.Refresh();
-                }
-#pragma warning restore 618
-#endif
-
                 return _instance;
             }
         }

@@ -71,6 +71,28 @@ namespace CesiumForUnity
                     if (!AssetDatabase.IsValidFolder("Assets/CesiumSettings/Resources/CesiumIonServers"))
                         AssetDatabase.CreateFolder("Assets/CesiumSettings/Resources", "CesiumIonServers");
                     result = ScriptableObject.CreateInstance<CesiumIonServer>();
+
+#pragma warning disable 618
+                    if (!string.IsNullOrEmpty(CesiumRuntimeSettings.defaultIonAccessTokenID))
+                    {
+                        if (string.IsNullOrEmpty(result.defaultIonAccessTokenId))
+                        {
+                            result.defaultIonAccessTokenId = CesiumRuntimeSettings.defaultIonAccessTokenID;
+                        }
+                        CesiumRuntimeSettings.defaultIonAccessTokenID = "";
+                    }
+
+                    if (!string.IsNullOrEmpty(CesiumRuntimeSettings.defaultIonAccessToken))
+                    {
+                        if (string.IsNullOrEmpty(result.defaultIonAccessToken))
+                        {
+                            result.defaultIonAccessToken = CesiumRuntimeSettings.defaultIonAccessToken;
+                        }
+                        CesiumRuntimeSettings.defaultIonAccessToken = "";
+                    }
+
+#pragma warning restore 618
+
                     AssetDatabase.CreateAsset(result, "Assets/CesiumSettings/Resources/CesiumIonServers/ion.cesium.com.asset");
                     AssetDatabase.Refresh();
                 }
