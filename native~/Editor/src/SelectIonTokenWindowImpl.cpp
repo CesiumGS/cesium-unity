@@ -57,7 +57,7 @@ SelectIonTokenWindowImpl::SelectNewToken(
 /*static*/ CesiumAsync::Future<std::optional<CesiumIonClient::Token>>
 SelectIonTokenWindowImpl::SelectTokenIfNecessary(
     const DotNet::CesiumForUnity::CesiumIonServer& server) {
-  CesiumForUnity::CesiumIonSession& session =
+  CesiumForUnity::CesiumIonSession session =
       CesiumForUnity::CesiumIonServerManager::instance().GetSession(server);
   return session.NativeImplementation()
       .getProjectDefaultTokenDetails(session)
