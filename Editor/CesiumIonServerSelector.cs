@@ -79,7 +79,6 @@ namespace CesiumForUnity
                 "Show this server in the Project view.");
             if (GUILayout.Button(browseButtonContent, GUILayout.Height(EditorGUIUtility.singleLineHeight), GUILayout.ExpandWidth(false)))
             {
-                //Selection.activeObject = CesiumIonServerManager.instance.current;
                 EditorUtility.FocusProjectWindow();
                 EditorGUIUtility.PingObject(CesiumIonServerManager.instance.current);
 

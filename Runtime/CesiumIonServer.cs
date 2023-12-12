@@ -105,7 +105,7 @@ namespace CesiumForUnity
         /// <summary>
         /// Gets the current Cesium ion server that should be assigned to newly-created objects.
         /// </summary>
-        public static CesiumIonServer currentForNewObjects
+        public static CesiumIonServer serverForNewObjects
         {
             get
             {

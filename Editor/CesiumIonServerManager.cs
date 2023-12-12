@@ -38,7 +38,7 @@ namespace CesiumForUnity
             set
             {
                 this._currentCesiumIonServer = value;
-                CesiumIonServer.currentForNewObjects = value;
+                CesiumIonServer.serverForNewObjects = value;
                 CurrentChanged?.Invoke(this);
                 this.Save(true);
             }
@@ -130,7 +130,7 @@ namespace CesiumForUnity
 
                 // Ensure the `currentForNewObjects` matches the current server. This is
                 // essential when the manager is first loaded, and harmless otherwise.
-                CesiumIonServer.currentForNewObjects = CesiumIonServerManager.instance.current;
+                CesiumIonServer.serverForNewObjects = CesiumIonServerManager.instance.current;
             }
         }
 

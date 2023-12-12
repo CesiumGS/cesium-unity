@@ -60,7 +60,7 @@ namespace CesiumForUnity
                     if (this._useDefaultServer)
                         this._ionServer = CesiumIonServer.defaultServer;
                     else
-                        this._ionServer = CesiumIonServer.currentForNewObjects;
+                        this._ionServer = CesiumIonServer.serverForNewObjects;
 
                     this._useDefaultServer = false;
 #else
@@ -71,7 +71,7 @@ namespace CesiumForUnity
             }
             set
             {
-                if (value == null) value = CesiumIonServer.currentForNewObjects;
+                if (value == null) value = CesiumIonServer.serverForNewObjects;
                 this._ionServer = value;
                 this.Refresh();
             }

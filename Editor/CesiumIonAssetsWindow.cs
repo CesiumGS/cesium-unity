@@ -10,7 +10,7 @@ namespace CesiumForUnity
     {
         public static CesiumIonAssetsWindow currentWindow = null;
 
-        [MenuItem("Tools/Cesium/Cesium ion Assets")]
+        [MenuItem("Cesium/Cesium ion Assets")]
         public static void ShowWindow()
         {
             if (currentWindow == null)

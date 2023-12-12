@@ -32,7 +32,7 @@ namespace CesiumForUnity
 
         public CesiumIonServer server;
 
-        private bool _initialize = false;
+        private bool _shouldInitialize = false;
         private IonTokenSource _source;
         private string _createdTokenName = "";
         private List<string> _existingTokenList = new List<string>();
@@ -47,15 +47,15 @@ namespace CesiumForUnity
 
         private void OnEnable()
         {
-            // This gets called before we can possible set any properties on the new window,
+            // This gets called before we can possibly set any properties on the new window,
             // such as the `server` property. So instead of doing our initialization here,
             // set a flag so we know to do it in OnGUI.
-            this._initialize = true;
+            this._shouldInitialize = true;
         }
 
         private void OnDisable()
         {
-            this._initialize = false;
+            this._shouldInitialize = false;
             CesiumIonSession.OnTokensUpdated -= this.RefreshTokens;
         }
 
@@ -99,7 +99,7 @@ namespace CesiumForUnity
         {
             CesiumIonSession session = CesiumIonServerManager.instance.GetSession(this.server);
 
-            if (this._initialize)
+            if (this._shouldInitialize)
             {
                 session.Resume();
                 CesiumIonSession.OnTokensUpdated += this.RefreshTokens;
@@ -112,7 +112,7 @@ namespace CesiumForUnity
 
                 session.RefreshTokens();
 
-                this._initialize = false;
+                this._shouldInitialize = false;
             }
 
             GUILayout.Space(10);
