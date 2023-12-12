@@ -1,4 +1,4 @@
-//clang-format off
+// clang-format off
 //#include "CesiumPropertyArrayImpl.h"
 //
 //#include <DotNet/CesiumForUnity/CesiumMetadataValue.h>

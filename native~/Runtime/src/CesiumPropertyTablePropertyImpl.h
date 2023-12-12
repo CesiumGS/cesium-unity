@@ -146,7 +146,7 @@ public:
       std::int64_t featureID,
       DotNet::Unity::Mathematics::double3 defaultValue);
 
-    DotNet::Unity::Mathematics::int4 GetInt4(
+  DotNet::Unity::Mathematics::int4 GetInt4(
       const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
       std::int64_t featureID,
       DotNet::Unity::Mathematics::int4 defaultValue);
