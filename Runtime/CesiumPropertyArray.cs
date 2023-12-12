@@ -8,10 +8,17 @@ namespace CesiumForUnity
     /// Represents the value type of a metadata value or property, akin to the 
     /// property types in EXT_structural_metadata.
     /// </summary>
-    [ReinteropNativeImplementation("CesiumForUnityNative::CesiumPropertyArrayImpl", "CesiumPropertyArrayImpl.h")]
+    //[ReinteropNativeImplementation("CesiumForUnityNative::CesiumPropertyArrayImpl", "CesiumPropertyArrayImpl.h")]
     public partial class CesiumPropertyArray
     {
         internal CesiumMetadataValue[] values { get; set; }
+
+        internal CesiumPropertyArray() { }
+
+        internal CesiumPropertyArray(CesiumMetadataValue[] values)
+        {
+            this.values = values;
+        }
 
         /// <summary>
         /// The value type of the elements in the array. Some of these types are
