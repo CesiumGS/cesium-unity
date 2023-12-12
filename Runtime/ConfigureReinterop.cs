@@ -278,6 +278,7 @@ namespace CesiumForUnity
             tileset.updateInEditor = tileset.updateInEditor;
             tileset.showCreditsOnScreen = tileset.showCreditsOnScreen;
             tileset.ionServer = tileset.ionServer;
+            tileset.RecreateTileset();
 
             GraphicsFormat gfxFmt = GraphicsFormat.RGB_ETC_UNorm;
             FormatUsage fmtUsage = FormatUsage.Sample;
@@ -290,6 +291,7 @@ namespace CesiumForUnity
             ionOverlay.ionAssetID = ionOverlay.ionAssetID;
             ionOverlay.ionAccessToken = ionOverlay.ionAccessToken;
             ionOverlay.ionServer = ionOverlay.ionServer;
+            ionOverlay.AddToTilesetLater(null);
 
             CesiumRasterOverlay overlay = go.GetComponent<CesiumRasterOverlay>();
             overlay.showCreditsOnScreen = overlay.showCreditsOnScreen;
@@ -522,6 +524,7 @@ namespace CesiumForUnity
             server.oauth2ApplicationID = 1;
             server.defaultIonAccessToken = "";
             server.defaultIonAccessTokenId = "";
+            server.serverUrlThatIsLoadingApiUrl = "";
 
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;
@@ -532,6 +535,8 @@ namespace CesiumForUnity
 
             bool isPlaying = EditorApplication.isPlaying;
             EditorApplication.update += () => {};
+
+            EditorUtility.SetDirty(null);
 #endif
         }
     }

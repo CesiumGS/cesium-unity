@@ -24,39 +24,10 @@ namespace CesiumForUnityNative {
 
 namespace {
 
-std::shared_ptr<GunzipAssetAccessor> pAccessor = nullptr;
-std::shared_ptr<UnityTaskProcessor> pTaskProcessor = nullptr;
+std::shared_ptr<IAssetAccessor> pAccessor = nullptr;
+std::shared_ptr<ITaskProcessor> pTaskProcessor = nullptr;
 std::shared_ptr<CreditSystem> pCreditSystem = nullptr;
-
-const std::shared_ptr<GunzipAssetAccessor>& getAssetAccessor() {
-  if (!pAccessor) {
-    std::string tempPath =
-        UnityEngine::Application::temporaryCachePath().ToStlString();
-    std::string cacheDBPath = tempPath + "/cesium-request-cache.sqlite";
-
-    int32_t requestsPerCachePrune =
-        CesiumForUnity::CesiumRuntimeSettings::requestsPerCachePrune();
-    uint64_t maxItems = CesiumForUnity::CesiumRuntimeSettings::maxItems();
-
-    pAccessor = std::make_shared<GunzipAssetAccessor>(
-        std::make_shared<CachingAssetAccessor>(
-            spdlog::default_logger(),
-            std::make_shared<UnityAssetAccessor>(),
-            std::make_shared<SqliteCache>(
-                spdlog::default_logger(),
-                cacheDBPath,
-                maxItems),
-            requestsPerCachePrune));
-  }
-  return pAccessor;
-}
-
-const std::shared_ptr<UnityTaskProcessor>& getTaskProcessor() {
-  if (!pTaskProcessor) {
-    pTaskProcessor = std::make_shared<UnityTaskProcessor>();
-  }
-  return pTaskProcessor;
-}
+std::optional<AsyncSystem> asyncSystem;
 
 const std::shared_ptr<CreditSystem>&
 getCreditSystem(const CesiumForUnity::Cesium3DTileset& tileset) {
@@ -80,6 +51,43 @@ getCreditSystem(const CesiumForUnity::Cesium3DTileset& tileset) {
 }
 
 } // namespace
+
+const std::shared_ptr<IAssetAccessor>& getAssetAccessor() {
+  if (!pAccessor) {
+    std::string tempPath =
+        UnityEngine::Application::temporaryCachePath().ToStlString();
+    std::string cacheDBPath = tempPath + "/cesium-request-cache.sqlite";
+
+    int32_t requestsPerCachePrune =
+        CesiumForUnity::CesiumRuntimeSettings::requestsPerCachePrune();
+    uint64_t maxItems = CesiumForUnity::CesiumRuntimeSettings::maxItems();
+
+    pAccessor = std::make_shared<GunzipAssetAccessor>(
+        std::make_shared<CachingAssetAccessor>(
+            spdlog::default_logger(),
+            std::make_shared<UnityAssetAccessor>(),
+            std::make_shared<SqliteCache>(
+                spdlog::default_logger(),
+                cacheDBPath,
+                maxItems),
+            requestsPerCachePrune));
+  }
+  return pAccessor;
+}
+
+const std::shared_ptr<ITaskProcessor>& getTaskProcessor() {
+  if (!pTaskProcessor) {
+    pTaskProcessor = std::make_shared<UnityTaskProcessor>();
+  }
+  return pTaskProcessor;
+}
+
+AsyncSystem getAsyncSystem() {
+  if (!asyncSystem) {
+    asyncSystem.emplace(getTaskProcessor());
+  }
+  return *asyncSystem;
+}
 
 Cesium3DTilesSelection::TilesetExternals
 createTilesetExternals(const CesiumForUnity::Cesium3DTileset& tileset) {

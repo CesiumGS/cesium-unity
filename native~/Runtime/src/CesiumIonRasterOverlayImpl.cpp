@@ -1,6 +1,7 @@
 #include "CesiumIonRasterOverlayImpl.h"
 
 #include "Cesium3DTilesetImpl.h"
+#include "CesiumIonServerHelper.h"
 #include "CesiumRasterOverlayUtility.h"
 
 #include <Cesium3DTilesSelection/IonRasterOverlay.h>
@@ -11,7 +12,9 @@
 #include <DotNet/CesiumForUnity/CesiumIonRasterOverlay.h>
 #include <DotNet/CesiumForUnity/CesiumIonServer.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
+#include <DotNet/System/Collections/IEnumerator.h>
 #include <DotNet/System/String.h>
+#include <DotNet/UnityEngine/Coroutine.h>
 
 using namespace Cesium3DTilesSelection;
 using namespace DotNet;
@@ -55,14 +58,20 @@ void CesiumIonRasterOverlayImpl::AddToTileset(
   if (!apiUrl.empty() && *apiUrl.rbegin() != '/')
     apiUrl += '/';
 
-  this->_pOverlay = new IonRasterOverlay(
-      overlay.name().ToStlString(),
-      overlay.ionAssetID(),
-      ionAccessToken.ToStlString(),
-      options,
-      apiUrl);
+  if (!apiUrl.empty()) {
+    this->_pOverlay = new IonRasterOverlay(
+        overlay.name().ToStlString(),
+        overlay.ionAssetID(),
+        ionAccessToken.ToStlString(),
+        options,
+        apiUrl);
 
-  pTileset->getOverlays().add(this->_pOverlay);
+    pTileset->getOverlays().add(this->_pOverlay);
+  } else {
+    // Resolve the API URL if it's not already in progress.
+    resolveCesiumIonApiUrl(overlay.ionServer());
+    overlay.StartCoroutine(overlay.AddToTilesetLater(tileset));
+  }
 }
 
 void CesiumIonRasterOverlayImpl::RemoveFromTileset(

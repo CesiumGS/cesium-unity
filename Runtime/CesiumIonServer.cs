@@ -46,6 +46,12 @@ namespace CesiumForUnity
         /// </summary>
         public string defaultIonAccessToken;
 
+        // The server URL for which we are currently attempting to deduce an API URL. When this property
+        // is null, we're not currently loading a config.json in order to deduce an API URL for the server.
+        // When this property is different from `serverUrl`, a config.json load is in progress, but it's
+        // obsolete.
+        internal string serverUrlThatIsLoadingApiUrl = null;
+
         /// <summary>
         /// Gets the default Cesium ion Server (ion.cesium.com).
         /// </summary>

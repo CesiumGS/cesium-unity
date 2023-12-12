@@ -1,4 +1,5 @@
 ﻿using Reinterop;
+using System.Collections;
 using UnityEngine;
 
 namespace CesiumForUnity
@@ -81,6 +82,12 @@ namespace CesiumForUnity
         protected override partial void AddToTileset(Cesium3DTileset tileset);
         /// <inheritdoc/>
         protected override partial void RemoveFromTileset(Cesium3DTileset tileset);
+
+        internal IEnumerator AddToTilesetLater(Cesium3DTileset tileset)
+        {
+            yield return new WaitForSecondsRealtime(0.1f);
+            this.AddToTileset(tileset);
+        }
 
         void ISerializationCallbackReceiver.OnBeforeSerialize()
         {
