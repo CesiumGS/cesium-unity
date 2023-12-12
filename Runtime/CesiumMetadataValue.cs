@@ -740,6 +740,144 @@ namespace CesiumForUnity
         }
 
         /// <summary>
+        /// Attempts to retrieve the value for the given feature as an int4.
+        /// </summary>
+        /// <remarks>
+        /// If the value is a 4-dimensional vector, its components will be converted 
+        /// to 32-bit signed integers if possible.<br/>
+        /// 
+        /// If the value is a 3-dimensional vector, it will become the XYZ-components of
+        /// the int4. The W-component will be set to zero.<br/>
+        /// 
+        /// If the value is a 2-dimensional vector, it will become the XY-components of
+        /// the int4. The Z- and W-components will be set to zero.<br/>
+        /// 
+        /// If the value is a scalar that can be converted to a 32-bit signed integer,
+        /// the resulting int4 will have this value in both of its components.<br/>
+        /// 
+        /// If the value is a boolean, (1, 1, 1, 1) is returned for true, while 
+        /// (0, 0, 0, 0) is returned for false.<br/>
+        /// 
+        /// In all other cases, the user-defined default value is returned. 
+        /// </para>
+        /// </remarks>
+        /// <param name="defaultValue">The default value to use if the value 
+        /// cannot be converted to a int4.</param>
+        /// <returns>The property value as a int4.</returns>
+        public int4 GetInt4(int4 defaultValue)
+        {
+            if (this.isEmpty || this.valueType.isArray)
+            {
+                return defaultValue;
+            }
+
+            return ConvertToInt4(this, defaultValue);
+        }
+
+        /// <summary>
+        /// Attempts to retrieve the value for the given feature as a uint4.
+        /// </summary>
+        /// <remarks>
+        /// If the value is a 4-dimensional vector, its components will be converted 
+        /// to 32-bit unsigned integers if possible.<br/>
+        /// 
+        /// If the value is a 3-dimensional vector, it will become the XYZ-components of
+        /// the uint4. The W-component will be set to zero.<br/>
+        /// 
+        /// If the value is a 2-dimensional vector, it will become the XY-components of
+        /// the uint4. The Z- and W-components will be set to zero.<br/>
+        /// 
+        /// If the value is a scalar that can be converted to a 32-bit unsigned integer,
+        /// the resulting uint4 will have this value in both of its components.<br/>
+        /// 
+        /// If the value is a boolean, (1, 1, 1, 1) is returned for true, while 
+        /// (0, 0, 0, 0) is returned for false.<br/>
+        /// 
+        /// In all other cases, the user-defined default value is returned. 
+        /// </para>
+        /// </remarks>
+        /// <param name="defaultValue">The default value to use if the value 
+        /// cannot be converted to a uint4.</param>
+        /// <returns>The property value as a uint4.</returns>
+        public uint4 GetUInt4(uint4 defaultValue)
+        {
+            if (this.isEmpty || this.valueType.isArray)
+            {
+                return defaultValue;
+            }
+
+            return ConvertToUInt4(this, defaultValue);
+        }
+
+        /// <summary>
+        /// Attempts to retrieve the value for the given feature as a float4.
+        /// </summary>
+        /// <remarks>
+        /// If the value is a 4-dimensional vector, its components will be converted 
+        /// the closest representable single-precision floats, if possible.<br/>
+        /// 
+        /// If the value is a 3-dimensional vector, it will become the XYZ-components of
+        /// the float4. The W-component will be set to zero.<br/>
+        /// 
+        /// If the value is a 2-dimensional vector, it will become the XY-components of
+        /// the float4. The Z- and W-components will be set to zero.<br/>
+        /// 
+        /// If the value is a scalar, the resulting float4 will have this value in
+        /// both of its components.<br/>
+        /// 
+        /// If the value is a boolean, (1.0f, 1.0f, 1.0f, 1.0f) is returned for true, while 
+        /// (0.0f, 0.0f, 0.0f, 0.0f) is returned for false.<br/>
+        /// In all other cases, the user-defined default value is returned.
+        /// </para>
+        /// </remarks>
+        /// <param name="defaultValue">The default value to use if the value 
+        /// cannot be converted to a float4.</param>
+        /// <returns>The property value as a float4.</returns>
+        public float4 GetFloat4(float4 defaultValue)
+        {
+            if (this.isEmpty || this.valueType.isArray)
+            {
+                return defaultValue;
+            }
+
+            return ConvertToFloat4(this, defaultValue);
+        }
+
+        /// <summary>
+        /// Attempts to retrieve the value for the given feature as a double4.
+        /// </summary>
+        /// <remarks>
+        /// If the value is a 4-dimensional vector, its components will be converted 
+        /// to double-precision floating-point numbers.<br/>
+        /// 
+        /// If the value is a 3-dimensional vector, it will become the XYZ-components of
+        /// the double4. The W-component will be set to zero.<br/>
+        /// 
+        /// If the value is a 2-dimensional vector, it will become the XY-components of
+        /// the double4. The Z- and W-components will be set to zero.<br/>
+        /// 
+        /// If the value is a scalar, the resulting double4 will have this value in
+        /// both of its components.<br/>
+        /// 
+        /// If the value is a boolean, (1.0, 1.0, 1.0, 1.0) is returned for true, while 
+        /// (0.0, 0.0, 0.0, 0.0) is returned for false.<br/>
+        /// In all other cases, the user-defined default value is returned.
+        /// </para>
+        /// </remarks>
+        /// <param name="defaultValue">The default value to use if the value 
+        /// cannot be converted to a double4.</param>
+        /// <returns>The property value as a double4.</returns>
+        public double4 GetDouble4(double4 defaultValue)
+        {
+            if (this.isEmpty || this.valueType.isArray)
+            {
+                return defaultValue;
+            }
+
+            return ConvertToDouble4(this, defaultValue);
+        }
+
+        /// <summary>
         /// Attempts to retrieve the value as a String.
         /// </summary>
         /// <remarks>
@@ -1025,6 +1163,10 @@ namespace CesiumForUnity
         internal static partial uint3 ConvertToUInt3(CesiumMetadataValue value, uint3 defaultValue);
         internal static partial float3 ConvertToFloat3(CesiumMetadataValue value, float3 defaultValue);
         internal static partial double3 ConvertToDouble3(CesiumMetadataValue value, double3 defaultValue);
+        internal static partial int4 ConvertToInt4(CesiumMetadataValue value, int4 defaultValue);
+        internal static partial uint4 ConvertToUInt4(CesiumMetadataValue value, uint4 defaultValue);
+        internal static partial float4 ConvertToFloat4(CesiumMetadataValue value, float4 defaultValue);
+        internal static partial double4 ConvertToDouble4(CesiumMetadataValue value, double4 defaultValue);
         internal static partial String ConvertToString(CesiumMetadataValue value, String defaultValue);
 
         #endregion

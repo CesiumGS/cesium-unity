@@ -620,6 +620,86 @@ CesiumMetadataValueImpl::getNativeValue(
       nativeValue);
 }
 
+/*static*/ int4 CesiumMetadataValueImpl::ConvertToInt4(
+    const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+    int4 defaultValue) {
+  ValueType nativeValue = getNativeValue(value);
+  return std::visit(
+      [&defaultValue](auto trueValue) -> int4 {
+        if constexpr (std::is_same_v<decltype(trueValue), std::monostate>) {
+          return defaultValue;
+        } else {
+          std::optional<glm::ivec4> maybeVec4 =
+              MetadataConversions<glm::ivec4, decltype(trueValue)>::convert(
+                  trueValue);
+          return maybeVec4
+                     ? int4{(*maybeVec4)[0], (*maybeVec4)[1], (*maybeVec4)[2], (*maybeVec4)[3]}
+                     : defaultValue;
+        }
+      },
+      nativeValue);
+}
+
+/*static*/ uint4 CesiumMetadataValueImpl::ConvertToUInt4(
+    const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+    uint4 defaultValue) {
+  ValueType nativeValue = getNativeValue(value);
+  return std::visit(
+      [&defaultValue](auto trueValue) -> uint4 {
+        if constexpr (std::is_same_v<decltype(trueValue), std::monostate>) {
+          return defaultValue;
+        } else {
+          std::optional<glm::uvec4> maybeVec4 =
+              MetadataConversions<glm::uvec4, decltype(trueValue)>::convert(
+                  trueValue);
+          return maybeVec4
+                     ? uint4{(*maybeVec4)[0], (*maybeVec4)[1], (*maybeVec4)[2], (*maybeVec4)[3]}
+                     : defaultValue;
+        }
+      },
+      nativeValue);
+}
+
+/*static*/ float4 CesiumMetadataValueImpl::ConvertToFloat4(
+    const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+    float4 defaultValue) {
+  ValueType nativeValue = getNativeValue(value);
+  return std::visit(
+      [&defaultValue](auto trueValue) -> float4 {
+        if constexpr (std::is_same_v<decltype(trueValue), std::monostate>) {
+          return defaultValue;
+        } else {
+          std::optional<glm::vec4> maybeVec4 =
+              MetadataConversions<glm::vec4, decltype(trueValue)>::convert(
+                  trueValue);
+          return maybeVec4
+                     ? float4{(*maybeVec4)[0], (*maybeVec4)[1], (*maybeVec4)[2], (*maybeVec4)[3]}
+                     : defaultValue;
+        }
+      },
+      nativeValue);
+}
+
+/*static*/ double4 CesiumMetadataValueImpl::ConvertToDouble4(
+    const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+    double4 defaultValue) {
+  ValueType nativeValue = getNativeValue(value);
+  return std::visit(
+      [&defaultValue](auto trueValue) -> double4 {
+        if constexpr (std::is_same_v<decltype(trueValue), std::monostate>) {
+          return defaultValue;
+        } else {
+          std::optional<glm::dvec4> maybeVec4 =
+              MetadataConversions<glm::dvec4, decltype(trueValue)>::convert(
+                  trueValue);
+          return maybeVec4
+                     ? double4{(*maybeVec4)[0], (*maybeVec4)[1], (*maybeVec4)[2], (*maybeVec4)[3]}
+                     : defaultValue;
+        }
+      },
+      nativeValue);
+}
+
 /*static*/ DotNet::System::String CesiumMetadataValueImpl::ConvertToString(
     const DotNet::CesiumForUnity::CesiumMetadataValue& value,
     DotNet::System::String defaultValue) {

@@ -16,13 +16,17 @@ class Object;
 
 namespace DotNet::Unity::Mathematics {
 struct int2;
-struct uint2;
-struct float2;
-struct double2;
 struct int3;
+struct int4;
+struct uint2;
 struct uint3;
+struct uint4;
+struct float2;
 struct float3;
+struct float4;
+struct double2;
 struct double3;
+struct double4;
 } // namespace DotNet::Unity::Mathematics
 
 namespace CesiumForUnityNative {
@@ -182,6 +186,22 @@ public:
   static DotNet::Unity::Mathematics::double3 ConvertToDouble3(
       const DotNet::CesiumForUnity::CesiumMetadataValue& value,
       DotNet::Unity::Mathematics::double3 defaultValue);
+
+  static DotNet::Unity::Mathematics::int4 ConvertToInt4(
+      const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+      DotNet::Unity::Mathematics::int4 defaultValue);
+
+  static DotNet::Unity::Mathematics::uint4 ConvertToUInt4(
+      const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+      DotNet::Unity::Mathematics::uint4 defaultValue);
+
+  static DotNet::Unity::Mathematics::float4 ConvertToFloat4(
+      const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+      DotNet::Unity::Mathematics::float4 defaultValue);
+
+  static DotNet::Unity::Mathematics::double4 ConvertToDouble4(
+      const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+      DotNet::Unity::Mathematics::double4 defaultValue);
 
   static DotNet::System::String ConvertToString(
       const DotNet::CesiumForUnity::CesiumMetadataValue& value,

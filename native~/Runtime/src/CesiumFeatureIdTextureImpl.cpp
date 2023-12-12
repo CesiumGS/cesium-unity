@@ -64,10 +64,13 @@ std::int64_t CesiumFeatureIdTextureImpl::GetFeatureIdForVertex(
 
 std::int64_t CesiumFeatureIdTextureImpl::GetFeatureIdFromRaycastHit(
     const CesiumFeatureIdTexture& featureIdTexture,
-    const DotNet::UnityEngine::RaycastHit& hitInfo) {/*
+    const DotNet::UnityEngine::RaycastHit& hitInfo) {
+  // clang-format off
+  /*
   DotNet::UnityEngine::Vector3 barycentricCoords =
       hitInfo.barycentricCoordinate();*/
   // TODO
+  // clang-format on
   return -1;
 }
 
