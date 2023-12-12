@@ -2,10 +2,6 @@
 using NUnit.Framework;
 using System;
 using Unity.Mathematics;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.TestTools;
-using UnityEngine.TestTools.Utils;
 
 public class TestCesiumMetadataValue
 {
@@ -1948,7 +1944,6 @@ public class TestCesiumMetadataValue
         Assert.That(value.GetDouble4(defaultValue), Is.EqualTo(new double4(0.0)));
     }
 
-
     [Test]
     public void GetDouble4ReturnsDefaultValueForUnsupportedTypes()
     {
@@ -1962,7 +1957,6 @@ public class TestCesiumMetadataValue
         Assert.That(value.GetDouble4(double4.zero), Is.EqualTo(double4.zero));
     }
     #endregion
-
 
     #region GetString
     [Test]

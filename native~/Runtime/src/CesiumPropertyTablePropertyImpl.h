@@ -126,14 +126,56 @@ public:
       std::int64_t featureID,
       DotNet::Unity::Mathematics::double2 defaultValue);
 
+  DotNet::Unity::Mathematics::int3 GetInt3(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      DotNet::Unity::Mathematics::int3 defaultValue);
+
+  DotNet::Unity::Mathematics::uint3 GetUInt3(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      DotNet::Unity::Mathematics::uint3 defaultValue);
+
+  DotNet::Unity::Mathematics::float3 GetFloat3(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      DotNet::Unity::Mathematics::float3 defaultValue);
+
+  DotNet::Unity::Mathematics::double3 GetDouble3(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      DotNet::Unity::Mathematics::double3 defaultValue);
+
+    DotNet::Unity::Mathematics::int4 GetInt4(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      DotNet::Unity::Mathematics::int4 defaultValue);
+
+  DotNet::Unity::Mathematics::uint4 GetUInt4(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      DotNet::Unity::Mathematics::uint4 defaultValue);
+
+  DotNet::Unity::Mathematics::float4 GetFloat4(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      DotNet::Unity::Mathematics::float4 defaultValue);
+
+  DotNet::Unity::Mathematics::double4 GetDouble4(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      DotNet::Unity::Mathematics::double4 defaultValue);
+
   DotNet::System::String GetString(
       const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
       std::int64_t featureID,
       const DotNet::System::String& defaultValue);
 
-  //DotNet::CesiumForUnity::CesiumMetadataValue GetValue(
-  //    const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
-  //    std::int64_t featureID);
+  // clang-format off
+  // DotNet::CesiumForUnity::CesiumMetadataValue GetValue(
+  //   const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+  //   std::int64_t featureID);
+  // clang-format on
 
 private:
   std::any _property;

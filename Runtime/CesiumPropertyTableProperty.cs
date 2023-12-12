@@ -631,17 +631,14 @@ namespace CesiumForUnity
         /// to 32-bit signed integers if possible.<br/>
         /// 
         /// - If the value is a 3- or 4-dimensional vector, it will use the first two
-        /// components to construct the Vector2Int.<br/>
+        /// components to construct the int2.<br/>
         /// 
         /// - If the value is a scalar that can be converted to a 32-bit signed
-        /// integer, the resulting Vector2Int will have this value in both of its
+        /// integer, the resulting int2 will have this value in both of its
         /// components.<br/>
         /// 
         /// - If the value is a boolean, (1, 1) is returned for true, while (0, 0) is 
         /// returned for false.<br/>
-        /// 
-        /// - If the value is a string that can be parsed as an int2, the parsed 
-        /// value is returned. The string must be formatted as "(X, Y)" or "int2(X, Y)".
         /// <br/><br/>
         /// </para>
         /// <para>
@@ -684,9 +681,6 @@ namespace CesiumForUnity
         /// 
         /// - If the value is a boolean, (1, 1) is returned for true, while (0, 0) is 
         /// returned for false.<br/>
-        /// 
-        /// - If the value is a string that can be parsed as a uint2, the parsed 
-        /// value is returned. The string must be formatted as "(X, Y)" or "uint(X, Y)".
         /// <br/><br/>
         /// </para>
         /// <para>
@@ -728,9 +722,6 @@ namespace CesiumForUnity
         /// 
         /// - If the value is a boolean, (1.0f, 1.0f) is returned for true, while 
         /// (0.0f, 0.0f) is returned for false.<br/>
-        /// 
-        /// - If the value is a string that can be parsed as a float2, the parsed 
-        /// value is returned. The string must be formatted as "(X, Y)" or "float2(X, Y)".
         /// <br/><br/>
         /// </para>
         /// <para>
@@ -767,15 +758,11 @@ namespace CesiumForUnity
         /// - If the value is a 3- or 4-dimensional vector, it will use the first two
         /// components to construct the double2.<br/>
         /// 
-        /// - If the value is a scalar, the resulting float2 will have this value in
+        /// - If the value is a scalar, the resulting double2 will have this value in
         /// both of its components.<br/>
         /// 
         /// - If the value is a boolean, (1.0, 1.0) is returned for true, while 
         /// (0.0, 0.0) is returned for false.<br/>
-        /// 
-        /// - If the value is a string that can be parsed as a double2, the parsed 
-        /// value is returned. The string must be formatted as "(X, Y)" or 
-        /// "double2(X, Y)".
         /// <br/><br/>
         /// </para>
         /// <para>
@@ -789,9 +776,358 @@ namespace CesiumForUnity
         /// <returns>The property value as a double2.</returns>
         public partial double2 GetDouble2(Int64 featureID, double2 defaultValue);
 
-        // TODO
-        // int3, uint3, Vector3, double3,
-        // int4, uint4, Vector4, double4,
+        /// <summary>
+        /// Attempts to retrieve the value for the given feature as a int3.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// For numeric properties, the raw value for a given feature will be
+        /// transformed by the property's normalization, scale, and offset before it is
+        /// further converted. If the raw value is equal to the property's "no data"
+        /// value, then the property's default value will be converted if possible. If
+        /// the property-defined default value cannot be converted, or does not exist,
+        /// then the user-defined default value is returned.
+        /// </para>
+        /// <para>
+        /// Property values are converted as follows:<br/>
+        /// 
+        /// - If the value is a 3-dimensional vector, its components will be converted 
+        /// to 32-bit signed integers if possible.<br/>
+        /// 
+        /// - If the value is a 4-dimensional vector, it will use the first three
+        /// components to construct the int3.<br/>
+        /// 
+        /// - If the value is a 2-dimensional vector, it will become the XY-components 
+        /// of the int3. The Z component will be set to zero.<br/>
+        /// 
+        /// - If the value is a scalar that can be converted to a 32-bit signed
+        /// integer, the resulting int3 will have this value in both of its
+        /// components.<br/>
+        /// 
+        /// - If the value is a boolean, (1, 1, 1) is returned for true, while (0, 0, 0) is 
+        /// returned for false.<br/>
+        /// <br/><br/>
+        /// </para>
+        /// <para>
+        /// In all other cases, the user-defined default value is returned. In all vector 
+        /// cases, if any of the relevant components cannot be represented as a 32-bit signed
+        /// integer, the default value is returned.<br/><br/>
+        /// If the feature ID is out-of-range, or if the property table property is somehow
+        /// invalid, the user-defined default value is returned.
+        /// </para>
+        /// </remarks>
+        /// <param name="featureID">The ID of the feature.</param>
+        /// <param name="defaultValue">The default value to fall back on.</param>
+        /// <returns>The property value as a int3.</returns>
+        public partial int3 GetInt3(Int64 featureID, int3 defaultValue);
+
+        /// <summary>
+        /// Attempts to retrieve the value for the given feature as a uint3.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// For numeric properties, the raw value for a given feature will be
+        /// transformed by the property's normalization, scale, and offset before it is
+        /// further converted. If the raw value is equal to the property's "no data"
+        /// value, then the property's default value will be converted if possible. If
+        /// the property-defined default value cannot be converted, or does not exist,
+        /// then the user-defined default value is returned.
+        /// </para>
+        /// <para>
+        /// Property values are converted as follows:<br/>
+        /// 
+        /// - If the value is a 3-dimensional vector, its components will be converted 
+        /// to 32-bit unsigned integers if possible.<br/>
+        /// 
+        /// - If the value is a 4-dimensional vector, it will use the first three
+        /// components to construct the uint3.<br/>
+        /// 
+        /// - If the value is a 2-dimensional vector, it will become the XY-components 
+        /// of the uint3. The Z component will be set to zero.<br/>
+        /// 
+        /// - If the value is a scalar that can be converted to a 32-bit unsigned
+        /// integer, the resulting uint3 will have this value in all of its
+        /// components.<br/>
+        /// 
+        /// - If the value is a boolean, (1, 1, 1) is returned for true, while (0, 0, 0) is 
+        /// returned for false.<br/>
+        /// <br/><br/>
+        /// </para>
+        /// <para>
+        /// In all other cases, the user-defined default value is returned. In all vector 
+        /// cases, if any of the relevant components cannot be represented as a 32-bit unsigned
+        /// integer, the default value is returned.<br/><br/>
+        /// If the feature ID is out-of-range, or if the property table property is somehow
+        /// invalid, the user-defined default value is returned.
+        /// </para>
+        /// </remarks>
+        /// <param name="featureID">The ID of the feature.</param>
+        /// <param name="defaultValue">The default value to fall back on.</param>
+        /// <returns>The property value as a uint3.</returns>
+        public partial uint3 GetUInt3(Int64 featureID, uint3 defaultValue);
+
+        /// <summary>
+        /// Attempts to retrieve the value for the given feature as a float3.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// For numeric properties, the raw value for a given feature will be
+        /// transformed by the property's normalization, scale, and offset before it is
+        /// further converted. If the raw value is equal to the property's "no data"
+        /// value, then the property's default value will be converted if possible. If
+        /// the property-defined default value cannot be converted, or does not exist,
+        /// then the user-defined default value is returned.
+        /// </para>
+        /// <para>
+        /// Property values are converted as follows:<br/>
+        /// 
+        /// - If the value is a 3-dimensional vector, its components will be converted 
+        /// to the closest representable single-precision floats, if possible.<br/>
+        /// 
+        /// - If the value is a 4-dimensional vector, it will use the first three
+        /// components to construct the float3.<br/>
+        /// 
+        /// - If the value is a 2-dimensional vector, it will become the XY-components 
+        /// of the float3. The Z component will be set to zero.<br/>
+        /// 
+        /// - If the value is a scalar that can be converted to a single-precision float,
+        /// the resulting float3 will have this value in all of its components.<br/>
+        /// 
+        /// - If the value is a boolean, (1.0f, 1.0f, 1.0f) is returned for true, while 
+        /// (0.0f, 0.0f, 0.0f) is returned for false.<br/>
+        /// <br/><br/>
+        /// </para>
+        /// <para>
+        /// In all other cases, the user-defined default value is returned. In all vector 
+        /// cases, if any of the relevant components cannot be represented as a 
+        /// single-precision floating point number, the default value is returned.<br/><br/>
+        /// If the feature ID is out-of-range, or if the property table property is somehow
+        /// invalid, the user-defined default value is returned.
+        /// </para>
+        /// </remarks>
+        /// <param name="featureID">The ID of the feature.</param>
+        /// <param name="defaultValue">The default value to fall back on.</param>
+        /// <returns>The property value as a float3.</returns>
+        public partial float3 GetFloat3(Int64 featureID, float3 defaultValue);
+
+        /// <summary>
+        /// Attempts to retrieve the value for the given feature as a double3.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// For numeric properties, the raw value for a given feature will be
+        /// transformed by the property's normalization, scale, and offset before it is
+        /// further converted. If the raw value is equal to the property's "no data"
+        /// value, then the property's default value will be converted if possible. If
+        /// the property-defined default value cannot be converted, or does not exist,
+        /// then the user-defined default value is returned.
+        /// </para>
+        /// <para>
+        /// Property values are converted as follows:<br/>
+        /// 
+        /// - If the value is a 3-dimensional vector, its components will be converted 
+        /// to double-precision floating-point numbers.<br/>
+        /// 
+        /// - If the value is a 4-dimensional vector, it will use the first three
+        /// components to construct the double3.<br/>
+        /// 
+        /// - If the value is a 2-dimensional vector, it will become the XY-components 
+        /// of the double3. The Z component will be set to zero.<br/>
+        /// 
+        /// - If the value is a scalar, the resulting double3 will have this value in
+        /// all of its components.<br/>
+        /// 
+        /// - If the value is a boolean, (1.0, 1.0, 1.0) is returned for true, while 
+        /// (0.0, 0.0, 0.0) is returned for false.<br/>
+        /// <br/><br/>
+        /// </para>
+        /// <para>
+        /// In all other cases, the user-defined default value is returned. If the 
+        /// feature ID is out-of-range, or if the property table property is somehow
+        /// invalid, the user-defined default value is returned.
+        /// </para>
+        /// </remarks>
+        /// <param name="featureID">The ID of the feature.</param>
+        /// <param name="defaultValue">The default value to fall back on.</param>
+        /// <returns>The property value as a double3.</returns>
+        public partial double3 GetDouble3(Int64 featureID, double3 defaultValue);
+
+        /// <summary>
+        /// Attempts to retrieve the value for the given feature as a int4.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// For numeric properties, the raw value for a given feature will be
+        /// transformed by the property's normalization, scale, and offset before it is
+        /// further converted. If the raw value is equal to the property's "no data"
+        /// value, then the property's default value will be converted if possible. If
+        /// the property-defined default value cannot be converted, or does not exist,
+        /// then the user-defined default value is returned.
+        /// </para>
+        /// <para>
+        /// Property values are converted as follows:<br/>
+        /// 
+        /// - If the value is a 4-dimensional vector, its components will be converted 
+        /// to 32-bit signed integers if possible.<br/>
+        /// 
+        /// - If the value is a 3-dimensional vector, it will become the XYZ-components 
+        /// of the int4. The W-component will be set to zero.<br/>
+        /// 
+        /// - If the value is a 2-dimensional vector, it will become the XY-components 
+        /// of the int4. The Z- and W-component will be set to zero.<br/>
+        /// 
+        /// - If the value is a scalar that can be converted to a 32-bit signed
+        /// integer, the resulting int4 will have this value in both of its
+        /// components.<br/>
+        /// 
+        /// - If the value is a boolean, (1, 1, 1, 1) is returned for true, while (0, 0, 0, 0) 
+        /// is returned for false.<br/>
+        /// <br/><br/>
+        /// </para>
+        /// <para>
+        /// In all other cases, the user-defined default value is returned. In all vector 
+        /// cases, if any of the relevant components cannot be represented as a 32-bit signed
+        /// integer, the default value is returned.<br/><br/>
+        /// If the feature ID is out-of-range, or if the property table property is somehow
+        /// invalid, the user-defined default value is returned.
+        /// </para>
+        /// </remarks>
+        /// <param name="featureID">The ID of the feature.</param>
+        /// <param name="defaultValue">The default value to fall back on.</param>
+        /// <returns>The property value as a int4.</returns>
+        public partial int4 GetInt4(Int64 featureID, int4 defaultValue);
+
+        /// <summary>
+        /// Attempts to retrieve the value for the given feature as a uint4.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// For numeric properties, the raw value for a given feature will be
+        /// transformed by the property's normalization, scale, and offset before it is
+        /// further converted. If the raw value is equal to the property's "no data"
+        /// value, then the property's default value will be converted if possible. If
+        /// the property-defined default value cannot be converted, or does not exist,
+        /// then the user-defined default value is returned.
+        /// </para>
+        /// <para>
+        /// Property values are converted as follows:<br/>
+        /// 
+        /// - If the value is a 4-dimensional vector, its components will be converted 
+        /// to 32-bit unsigned integers if possible.<br/>
+        /// 
+        /// - If the value is a 3-dimensional vector, it will become the XYZ-components 
+        /// of the uint4. The W-component will be set to zero.<br/>
+        /// 
+        /// - If the value is a 2-dimensional vector, it will become the XY-components 
+        /// of the uint4. The Z- and W-component will be set to zero.<br/>
+        /// 
+        /// - If the value is a scalar that can be converted to a 32-bit unsigned
+        /// integer, the resulting uint4 will have this value in both of its
+        /// components.<br/>
+        /// 
+        /// - If the value is a boolean, (1, 1, 1, 1) is returned for true, while (0, 0, 0, 0) 
+        /// is returned for false.<br/>
+        /// <br/><br/>
+        /// </para>
+        /// <para>
+        /// In all other cases, the user-defined default value is returned. In all vector 
+        /// cases, if any of the relevant components cannot be represented as a 32-bit unsigned
+        /// integer, the default value is returned.<br/><br/>
+        /// If the feature ID is out-of-range, or if the property table property is somehow
+        /// invalid, the user-defined default value is returned.
+        /// </para>
+        /// </remarks>
+        /// <param name="featureID">The ID of the feature.</param>
+        /// <param name="defaultValue">The default value to fall back on.</param>
+        /// <returns>The property value as a uint4.</returns>
+        public partial uint4 GetUInt4(Int64 featureID, uint4 defaultValue);
+
+        /// <summary>
+        /// Attempts to retrieve the value for the given feature as a float4.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// For numeric properties, the raw value for a given feature will be
+        /// transformed by the property's normalization, scale, and offset before it is
+        /// further converted. If the raw value is equal to the property's "no data"
+        /// value, then the property's default value will be converted if possible. If
+        /// the property-defined default value cannot be converted, or does not exist,
+        /// then the user-defined default value is returned.
+        /// </para>
+        /// <para>
+        /// Property values are converted as follows:<br/>
+        /// 
+        /// - If the value is a 4-dimensional vector, its components will be converted 
+        /// to the closest representable single-precision floats, if possible.<br/>
+        /// 
+        /// - If the value is a 3-dimensional vector, it will become the XYZ-components 
+        /// of the float4. The W-component will be set to zero.<br/>
+        /// 
+        /// - If the value is a 2-dimensional vector, it will become the XY-components 
+        /// of the float4. The Z- and W-component will be set to zero.<br/>
+        /// 
+        /// - If the value is a scalar that can be converted to a single-precision float,
+        /// the resulting float4 will have this value in all of its components.<br/>
+        /// 
+        /// - If the value is a boolean, (1.0f, 1.0f, 1.0f, 1.0f) is returned for true, while 
+        /// (0.0f, 0.0f, 0.0f, 0.0f) is returned for false.<br/>
+        /// <br/><br/>
+        /// </para>
+        /// <para>
+        /// In all other cases, the user-defined default value is returned. In all vector 
+        /// cases, if any of the relevant components cannot be represented as a 
+        /// single-precision floating point number, the default value is returned.<br/><br/>
+        /// If the feature ID is out-of-range, or if the property table property is somehow
+        /// invalid, the user-defined default value is returned.
+        /// </para>
+        /// </remarks>
+        /// <param name="featureID">The ID of the feature.</param>
+        /// <param name="defaultValue">The default value to fall back on.</param>
+        /// <returns>The property value as a float4.</returns>
+        public partial float4 GetFloat4(Int64 featureID, float4 defaultValue);
+
+        /// <summary>
+        /// Attempts to retrieve the value for the given feature as a double4.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// For numeric properties, the raw value for a given feature will be
+        /// transformed by the property's normalization, scale, and offset before it is
+        /// further converted. If the raw value is equal to the property's "no data"
+        /// value, then the property's default value will be converted if possible. If
+        /// the property-defined default value cannot be converted, or does not exist,
+        /// then the user-defined default value is returned.
+        /// </para>
+        /// <para>
+        /// Property values are converted as follows:<br/>
+        /// 
+        /// - If the value is a 4-dimensional vector, its components will be converted 
+        /// to double-precision floating-point numbers.<br/>
+        /// 
+        /// - If the value is a 3-dimensional vector, it will become the XYZ-components 
+        /// of the double4. The W-component will be set to zero.<br/>
+        /// 
+        /// - If the value is a 2-dimensional vector, it will become the XY-components 
+        /// of the double4. The Z- and W-component will be set to zero.<br/>
+        /// 
+        /// - If the value is a scalar, the resulting double4 will have this value in
+        /// all of its components.<br/>
+        /// 
+        /// - If the value is a boolean, (1.0, 1.0, 1.0, 1.0) is returned for true, while 
+        /// (0.0, 0.0, 0.0, 0.0) is returned for false.<br/>
+        /// <br/><br/>
+        /// </para>
+        /// <para>
+        /// In all other cases, the user-defined default value is returned. If the 
+        /// feature ID is out-of-range, or if the property table property is somehow
+        /// invalid, the user-defined default value is returned.
+        /// </para>
+        /// </remarks>
+        /// <param name="featureID">The ID of the feature.</param>
+        /// <param name="defaultValue">The default value to fall back on.</param>
+        /// <returns>The property value as a double4.</returns>
+        public partial double4 GetDouble4(Int64 featureID, double4 defaultValue);
+
         // int2x2, uint2x2, float2x2, double2x2
         // int3x3, uint3x3, float3x3, double3x3,
         // int4x4, uint4x4, float4x4, double4x4
