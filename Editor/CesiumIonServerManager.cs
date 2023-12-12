@@ -128,7 +128,7 @@ namespace CesiumForUnity
             {
                 CesiumIonServerManager.instance.ResumeAll();
 
-                // Ensure the `currentForNewObjects` matches the current server. This is
+                // Ensure the `serverForNewObjects` matches the current server. This is
                 // essential when the manager is first loaded, and harmless otherwise.
                 CesiumIonServer.serverForNewObjects = CesiumIonServerManager.instance.current;
             }

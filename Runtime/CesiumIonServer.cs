@@ -115,17 +115,17 @@ namespace CesiumForUnity
         {
             get
             {
-                if (_currentForNewObjects == null)
+                if (_serverForNewObjects == null)
                     return defaultServer;
                 else
-                    return _currentForNewObjects;
+                    return _serverForNewObjects;
             }
             set
             {
-                _currentForNewObjects = value;
+                _serverForNewObjects = value;
             }
         }
 
-        private static CesiumIonServer _currentForNewObjects;
+        private static CesiumIonServer _serverForNewObjects;
     }
 }

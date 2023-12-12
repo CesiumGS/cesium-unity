@@ -197,7 +197,7 @@ namespace CesiumForUnity
 
                     this._useDefaultServer = false;
 #else
-                    this._ionServer = CesiumIonServer.currentForNewObjects;
+                    this._ionServer = CesiumIonServer.serverForNewObjects;
 #endif
                 }
                 return this._ionServer;
