@@ -6,8 +6,11 @@
 
 #include <DotNet/CesiumForUnity/CesiumIonServer.h>
 #include <DotNet/System/String.h>
-#include <DotNet/UnityEditor/EditorUtility.h>
 #include <DotNet/UnityEngine/Object.h>
+
+#if UNITY_EDITOR
+#include <DotNet/UnityEditor/EditorUtility.h>
+#endif
 
 using namespace DotNet;
 
