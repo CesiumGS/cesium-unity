@@ -5,9 +5,11 @@
 #include <CesiumAsync/SharedFuture.h>
 #include <CesiumIonClient/Assets.h>
 #include <CesiumIonClient/Connection.h>
+#include <CesiumIonClient/Defaults.h>
 #include <CesiumIonClient/Profile.h>
 #include <CesiumIonClient/Token.h>
 
+#include <DotNet/System/Collections/Generic/List1.h>
 #include <DotNet/System/String.h>
 
 #include <functional>
@@ -33,8 +35,6 @@ class Token;
 namespace CesiumForUnityNative {
 class CesiumIonSessionImpl {
 public:
-  static CesiumIonSessionImpl& ion();
-
   CesiumIonSessionImpl(const DotNet::CesiumForUnity::CesiumIonSession& session);
   ~CesiumIonSessionImpl();
 
@@ -56,6 +56,11 @@ public:
   bool
   IsLoadingTokenList(const DotNet::CesiumForUnity::CesiumIonSession& session);
 
+  bool
+  IsDefaultsLoaded(const DotNet::CesiumForUnity::CesiumIonSession& session);
+  bool
+  IsLoadingDefaults(const DotNet::CesiumForUnity::CesiumIonSession& session);
+
   void Connect(const DotNet::CesiumForUnity::CesiumIonSession& session);
   void Resume(const DotNet::CesiumForUnity::CesiumIonSession& session);
   void Disconnect(const DotNet::CesiumForUnity::CesiumIonSession& session);
@@ -66,24 +71,33 @@ public:
   GetProfileUsername(const DotNet::CesiumForUnity::CesiumIonSession& session);
   DotNet::System::String
   GetAuthorizeUrl(const DotNet::CesiumForUnity::CesiumIonSession& session);
+  DotNet::System::String
+  GetRedirectUrl(const DotNet::CesiumForUnity::CesiumIonSession& session);
+  DotNet::System::Collections::Generic::List1<
+      DotNet::CesiumForUnity::QuickAddItem>
+  GetQuickAddItems(const DotNet::CesiumForUnity::CesiumIonSession& session);
 
   void RefreshProfile(const DotNet::CesiumForUnity::CesiumIonSession& session);
   void RefreshAssets(const DotNet::CesiumForUnity::CesiumIonSession& session);
   void RefreshTokens(const DotNet::CesiumForUnity::CesiumIonSession& session);
+  void RefreshDefaults(const DotNet::CesiumForUnity::CesiumIonSession& session);
 
   void refreshProfile();
   void refreshAssets();
   void refreshTokens();
+  void refreshDefaults();
 
   bool refreshProfileIfNeeded();
   bool refreshAssetsIfNeeded();
   bool refreshTokensIfNeeded();
+  bool refreshDefaultsIfNeeded();
 
   CesiumAsync::Future<CesiumIonClient::Response<CesiumIonClient::Token>>
   findToken(const std::string& token) const;
 
   CesiumAsync::SharedFuture<CesiumIonClient::Token>
-  getProjectDefaultTokenDetails();
+  getProjectDefaultTokenDetails(
+      const DotNet::CesiumForUnity::CesiumIonSession& session);
 
   void invalidateProjectDefaultTokenDetails();
 
@@ -91,12 +105,15 @@ public:
   const CesiumIonClient::Profile& getProfile();
   const CesiumIonClient::Assets& getAssets();
   const std::vector<CesiumIonClient::Token>& getTokens();
+  const CesiumIonClient::Defaults& getDefaults();
 
   const std::shared_ptr<CesiumAsync::IAssetAccessor>& getAssetAccessor() const;
   const CesiumAsync::AsyncSystem& getAsyncSystem() const;
   CesiumAsync::AsyncSystem& getAsyncSystem();
 
 private:
+  void startQueuedLoads();
+
   CesiumAsync::AsyncSystem _asyncSystem;
   std::shared_ptr<CesiumAsync::IAssetAccessor> _pAssetAccessor;
 
@@ -104,6 +121,7 @@ private:
   std::optional<CesiumIonClient::Profile> _profile;
   std::optional<CesiumIonClient::Assets> _assets;
   std::optional<std::vector<CesiumIonClient::Token>> _tokens;
+  std::optional<CesiumIonClient::Defaults> _defaults;
 
   std::optional<CesiumAsync::SharedFuture<CesiumIonClient::Token>>
       _projectDefaultTokenDetailsFuture;
@@ -113,17 +131,25 @@ private:
   bool _isLoadingProfile;
   bool _isLoadingAssets;
   bool _isLoadingTokens;
+  bool _isLoadingDefaults;
 
   bool _loadProfileQueued;
   bool _loadAssetsQueued;
   bool _loadTokensQueued;
+  bool _loadDefaultsQueued;
 
   std::function<void()> broadcastConnectionUpdate;
   std::function<void()> broadcastAssetsUpdate;
   std::function<void()> broadcastProfileUpdate;
   std::function<void()> broadcastTokensUpdate;
+  std::function<void()> broadcastDefaultsUpdate;
 
   std::string _authorizeUrl;
+  std::string _redirectUrl;
+
+  DotNet::System::Collections::Generic::List1<
+      DotNet::CesiumForUnity::QuickAddItem>
+      _quickAddItems;
 
   const static std::string _userAccessTokenEditorKey;
 };

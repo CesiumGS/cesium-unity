@@ -12,7 +12,8 @@
 
 namespace DotNet::CesiumForUnity {
 class SelectIonTokenWindow;
-}
+class CesiumIonServer;
+} // namespace DotNet::CesiumForUnity
 
 namespace CesiumForUnityNative {
 
@@ -20,13 +21,15 @@ class SelectIonTokenWindowImpl {
 
 public:
   static CesiumAsync::SharedFuture<std::optional<CesiumIonClient::Token>>
-  SelectNewToken();
+  SelectNewToken(const DotNet::CesiumForUnity::CesiumIonServer& server);
 
   static CesiumAsync::Future<std::optional<CesiumIonClient::Token>>
-  SelectTokenIfNecessary();
+  SelectTokenIfNecessary(const DotNet::CesiumForUnity::CesiumIonServer& server);
 
   static CesiumAsync::Future<std::optional<CesiumIonClient::Token>>
-  SelectAndAuthorizeToken(const std::vector<int64_t>& assetIDs);
+  SelectAndAuthorizeToken(
+      const DotNet::CesiumForUnity::CesiumIonServer& server,
+      const std::vector<int64_t>& assetIDs);
 
   SelectIonTokenWindowImpl(
       const DotNet::CesiumForUnity::SelectIonTokenWindow& window);

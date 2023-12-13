@@ -17,17 +17,22 @@ namespace CesiumForUnity
     {
         public static SelectIonTokenWindow currentWindow = null;
 
-        public static void ShowWindow()
+        public static void ShowWindow(CesiumIonServer server)
         {
             if (currentWindow == null)
             {
                 currentWindow = GetWindow<SelectIonTokenWindow>("Select Cesium ion Token");
             }
 
+            currentWindow.server = server;
+
             currentWindow.Show();
             currentWindow.Focus();
         }
 
+        public CesiumIonServer server;
+
+        private bool _shouldInitialize = false;
         private IonTokenSource _source;
         private string _createdTokenName = "";
         private List<string> _existingTokenList = new List<string>();
@@ -42,20 +47,15 @@ namespace CesiumForUnity
 
         private void OnEnable()
         {
-            CesiumIonSession.Ion().Resume();
-            CesiumIonSession.OnTokensUpdated += this.RefreshTokens;
-
-            this._createdTokenName = GetDefaultNewTokenName();
-            this._specifiedToken = CesiumRuntimeSettings.defaultIonAccessToken;
-            this._source = CesiumIonSession.Ion().IsConnected()
-                ? IonTokenSource.Create
-                : IonTokenSource.Specify;
-
-            CesiumIonSession.Ion().RefreshTokens();
+            // This gets called before we can possibly set any properties on the new window,
+            // such as the `server` property. So instead of doing our initialization here,
+            // set a flag so we know to do it in OnGUI.
+            this._shouldInitialize = true;
         }
 
         private void OnDisable()
         {
+            this._shouldInitialize = false;
             CesiumIonSession.OnTokensUpdated -= this.RefreshTokens;
         }
 
@@ -97,6 +97,24 @@ namespace CesiumForUnity
 
         private void OnGUI()
         {
+            CesiumIonSession session = CesiumIonServerManager.instance.GetSession(this.server);
+
+            if (this._shouldInitialize)
+            {
+                session.Resume();
+                CesiumIonSession.OnTokensUpdated += this.RefreshTokens;
+
+                this._createdTokenName = GetDefaultNewTokenName();
+                this._specifiedToken = this.server.defaultIonAccessToken;
+                this._source = session.IsConnected()
+                    ? IonTokenSource.Create
+                    : IonTokenSource.Specify;
+
+                session.RefreshTokens();
+
+                this._shouldInitialize = false;
+            }
+
             GUILayout.Space(10);
             EditorGUILayout.LabelField(
                 "Cesium for Unity embeds a Cesium ion token in your project in " +
@@ -105,7 +123,9 @@ namespace CesiumForUnity
                 EditorStyles.wordWrappedLabel
             );
 
-            if (CesiumIonSession.Ion().IsConnected())
+            CesiumIonServerSelector.DisplaySelected(this.server);
+
+            if (session.IsConnected())
             {
                 GUILayout.Space(20);
                 this.DrawCreateTokenOption();

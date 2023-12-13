@@ -1,56 +1,31 @@
-#include "UnityTilesetExternals.h"
+#include "UnityExternals.h"
 
 #include "UnityAssetAccessor.h"
-#include "UnityPrepareRendererResources.h"
 #include "UnityTaskProcessor.h"
 
-#include <Cesium3DTilesSelection/CreditSystem.h>
 #include <CesiumAsync/CachingAssetAccessor.h>
 #include <CesiumAsync/GunzipAssetAccessor.h>
 #include <CesiumAsync/SqliteCache.h>
 
-#include <DotNet/CesiumForUnity/CesiumCreditSystem.h>
 #include <DotNet/CesiumForUnity/CesiumRuntimeSettings.h>
 #include <DotNet/System/String.h>
 #include <DotNet/UnityEngine/Application.h>
 
 #include <memory>
 
-using namespace Cesium3DTilesSelection;
 using namespace CesiumAsync;
+using namespace CesiumForUnityNative;
 using namespace DotNet;
-
-namespace CesiumForUnityNative {
 
 namespace {
 
 std::shared_ptr<IAssetAccessor> pAccessor = nullptr;
 std::shared_ptr<ITaskProcessor> pTaskProcessor = nullptr;
-std::shared_ptr<CreditSystem> pCreditSystem = nullptr;
 std::optional<AsyncSystem> asyncSystem;
 
-const std::shared_ptr<CreditSystem>&
-getCreditSystem(const CesiumForUnity::Cesium3DTileset& tileset) {
-  // Get the credit system associated with the tileset.
-  Cesium3DTilesetImpl& tilesetImpl = tileset.NativeImplementation();
-  CesiumForUnity::CesiumCreditSystem creditSystem =
-      tilesetImpl.getCreditSystem();
-
-  // If the tileset does not already reference a credit system,
-  // get the default one.
-  if (creditSystem == nullptr) {
-    creditSystem = CesiumForUnity::CesiumCreditSystem::GetDefaultCreditSystem();
-    tilesetImpl.setCreditSystem(creditSystem);
-  }
-
-  CesiumCreditSystemImpl& creditSystemImpl =
-      creditSystem.NativeImplementation();
-  pCreditSystem = creditSystemImpl.getExternalCreditSystem();
-
-  return pCreditSystem;
-}
-
 } // namespace
+
+namespace CesiumForUnityNative {
 
 const std::shared_ptr<IAssetAccessor>& getAssetAccessor() {
   if (!pAccessor) {
@@ -87,16 +62,6 @@ AsyncSystem getAsyncSystem() {
     asyncSystem.emplace(getTaskProcessor());
   }
   return *asyncSystem;
-}
-
-Cesium3DTilesSelection::TilesetExternals
-createTilesetExternals(const CesiumForUnity::Cesium3DTileset& tileset) {
-  return TilesetExternals{
-      getAssetAccessor(),
-      std::make_shared<UnityPrepareRendererResources>(tileset.gameObject()),
-      AsyncSystem(getTaskProcessor()),
-      getCreditSystem(tileset),
-      spdlog::default_logger()};
 }
 
 } // namespace CesiumForUnityNative
