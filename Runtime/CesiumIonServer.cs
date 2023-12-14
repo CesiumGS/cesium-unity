@@ -65,7 +65,13 @@ namespace CesiumForUnity
         {
             get
             {
+#if UNITY_EDITOR
+                CesiumIonServer result = AssetDatabase.LoadAssetAtPath(
+                    "Assets/CesiumSettings/Resources/CesiumIonServers/ion.cesium.com.asset",
+                    typeof(CesiumIonServer)) as CesiumIonServer;
+#else
                 CesiumIonServer result = Resources.Load<CesiumIonServer>("CesiumIonServers/ion.cesium.com");
+#endif
 
 #if UNITY_EDITOR
                 if (result == null)
