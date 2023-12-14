@@ -1,5 +1,11 @@
 # Change Log
 
+### v1.7.1 - 2023-12-14
+
+##### Fixes :wrench:
+
+- Fixed a bug that prevented the default `CesiumIonServer` asset from remembering its token in a clean project.
+
 ### v1.7.0 - 2023-12-14
 
 ##### Additions :tada:
