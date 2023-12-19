@@ -199,7 +199,7 @@ public:
       const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
       std::int64_t featureID);
 
-    DotNet::CesiumForUnity::CesiumMetadataValue GetRawValue(
+  DotNet::CesiumForUnity::CesiumMetadataValue GetRawValue(
       const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
       std::int64_t featureID);
 

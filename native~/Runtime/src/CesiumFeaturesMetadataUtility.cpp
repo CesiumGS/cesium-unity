@@ -11,9 +11,9 @@
 #include <CesiumGltf/PropertyTableView.h>
 
 #include <DotNet/CesiumForUnity/CesiumFeatureIdAttribute.h>
-#include <DotNet/CesiumForUnity/CesiumFeatureIdTexture.h>
 #include <DotNet/CesiumForUnity/CesiumFeatureIdSet.h>
 #include <DotNet/CesiumForUnity/CesiumFeatureIdSetType.h>
+#include <DotNet/CesiumForUnity/CesiumFeatureIdTexture.h>
 #include <DotNet/CesiumForUnity/CesiumModelMetadata.h>
 #include <DotNet/CesiumForUnity/CesiumPrimitiveFeatures.h>
 #include <DotNet/CesiumForUnity/CesiumPropertyTable.h>
