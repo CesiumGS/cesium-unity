@@ -126,7 +126,7 @@
 //  DotNet::CesiumForUnity::CesiumPropertyArray array =
 //      DotNet::CesiumForUnity::CesiumPropertyArray();
 //  array.length(arrayView.size());
-//  array.valueType(CesiumFeaturesMetadataUtility::TypeToMetadataValueType<T>());
+//  array.valueType(CesiumFeaturesMetadataUtility::typeToMetadataValueType<T>());
 //
 //  CesiumPropertyArrayImpl& arrayImpl = array.NativeImplementation();
 //  arrayImpl._value = arrayView;

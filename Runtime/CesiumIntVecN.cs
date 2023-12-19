@@ -1,4 +1,5 @@
 using System;
+using Unity.Mathematics;
 
 namespace CesiumForUnity
 {
@@ -13,10 +14,19 @@ namespace CesiumForUnity
     /// </remarks>
     internal struct CesiumIntVec2
     {
-        public CesiumMetadataComponentType componentType { get; }
+        public CesiumMetadataComponentType componentType
+        {
+            get; private set;
+        }
 
-        public Int64 x { get; }
-        public Int64 y { get; }
+        public Int64 x
+        {
+            get; private set;
+        }
+        public Int64 y
+        {
+            get; private set;
+        }
 
         public CesiumIntVec2(SByte x, SByte y)
         {
@@ -46,6 +56,13 @@ namespace CesiumForUnity
             this.y = y;
         }
 
+        public CesiumIntVec2(int2 unityInt2)
+        {
+            this.componentType = CesiumMetadataComponentType.Int32;
+            this.x = unityInt2.x;
+            this.y = unityInt2.y;
+        }
+
         public Int64 this[int index]
         {
             get
@@ -73,11 +90,23 @@ namespace CesiumForUnity
     /// </remarks>
     internal struct CesiumIntVec3
     {
-        public CesiumMetadataComponentType componentType { get; }
+        public CesiumMetadataComponentType componentType
+        {
+            get; private set;
+        }
 
-        public Int64 x { get; }
-        public Int64 y { get; }
-        public Int64 z { get; }
+        public Int64 x
+        {
+            get; private set;
+        }
+        public Int64 y
+        {
+            get; private set;
+        }
+        public Int64 z
+        {
+            get; private set;
+        }
 
         public CesiumIntVec3(SByte x, SByte y, SByte z)
         {
@@ -111,6 +140,14 @@ namespace CesiumForUnity
             this.z = z;
         }
 
+        public CesiumIntVec3(int3 unityInt3)
+        {
+            this.componentType = CesiumMetadataComponentType.Int32;
+            this.x = unityInt3.x;
+            this.y = unityInt3.y;
+            this.z = unityInt3.z;
+        }
+
         public Int64 this[int index]
         {
             get
@@ -140,12 +177,27 @@ namespace CesiumForUnity
     /// </remarks>
     internal struct CesiumIntVec4
     {
-        public CesiumMetadataComponentType componentType { get; }
+        public CesiumMetadataComponentType componentType
+        {
+            get; private set;
+        }
 
-        public Int64 x { get; }
-        public Int64 y { get; }
-        public Int64 z { get; }
-        public Int64 w { get; }
+        public Int64 x
+        {
+            get; private set;
+        }
+        public Int64 y
+        {
+            get; private set;
+        }
+        public Int64 z
+        {
+            get; private set;
+        }
+        public Int64 w
+        {
+            get; private set;
+        }
 
         public CesiumIntVec4(SByte x, SByte y, SByte z, SByte w)
         {
@@ -181,6 +233,15 @@ namespace CesiumForUnity
             this.w = w;
         }
 
+        public CesiumIntVec4(int4 unityInt4)
+        {
+            this.componentType = CesiumMetadataComponentType.Int32;
+            this.x = unityInt4.x;
+            this.y = unityInt4.y;
+            this.z = unityInt4.z;
+            this.w = unityInt4.w;
+        }
+
         public Int64 this[int index]
         {
             get
@@ -210,39 +271,54 @@ namespace CesiumForUnity
     /// Internally, this is used to store all unsigned integer vec2 types, including u8vec2,
     /// u16vec2, u32vec2, and u64vec2. The intended type is conveyed through CesiumMetadataComponentType.
     /// </remarks>
-    internal struct CesiumUIntVec2
+    internal struct CesiumUintVec2
     {
-        public CesiumMetadataComponentType componentType { get; }
+        public CesiumMetadataComponentType componentType
+        {
+            get; private set;
+        }
 
-        public UInt64 x { get; }
-        public UInt64 y { get; }
+        public UInt64 x
+        {
+            get; private set;
+        }
+        public UInt64 y
+        {
+            get; private set;
+        }
 
-        public CesiumUIntVec2(Byte x, Byte y)
+        public CesiumUintVec2(Byte x, Byte y)
         {
             this.componentType = CesiumMetadataComponentType.Uint8;
             this.x = x;
             this.y = y;
         }
 
-        public CesiumUIntVec2(UInt16 x, UInt16 y)
+        public CesiumUintVec2(UInt16 x, UInt16 y)
         {
             this.componentType = CesiumMetadataComponentType.Uint16;
             this.x = x;
             this.y = y;
         }
 
-        public CesiumUIntVec2(UInt32 x, UInt32 y)
+        public CesiumUintVec2(UInt32 x, UInt32 y)
         {
             this.componentType = CesiumMetadataComponentType.Uint32;
             this.x = x;
             this.y = y;
         }
 
-        public CesiumUIntVec2(UInt64 x, UInt64 y)
+        public CesiumUintVec2(UInt64 x, UInt64 y)
         {
             this.componentType = CesiumMetadataComponentType.Uint64;
             this.x = x;
             this.y = y;
+        }
+        public CesiumUintVec2(uint2 unityUint2)
+        {
+            this.componentType = CesiumMetadataComponentType.Uint32;
+            this.x = unityUint2.x;
+            this.y = unityUint2.y;
         }
 
         public UInt64 this[int index]
@@ -270,14 +346,26 @@ namespace CesiumForUnity
     /// Internally, this is used to store all unsigned integer vec3 types, including u8vec3,
     /// u16vec3, u32vec3, and u64vec3. The intended type is conveyed through CesiumMetadataComponentType.
     /// </remarks>
-    internal struct CesiumUIntVec3
+    internal struct CesiumUintVec3
     {
-        public CesiumMetadataComponentType componentType { get; }
-        public UInt64 x { get; }
-        public UInt64 y { get; }
-        public UInt64 z { get; }
+        public CesiumMetadataComponentType componentType
+        {
+            get; private set;
+        }
+        public UInt64 x
+        {
+            get; private set;
+        }
+        public UInt64 y
+        {
+            get; private set;
+        }
+        public UInt64 z
+        {
+            get; private set;
+        }
 
-        public CesiumUIntVec3(Byte x, Byte y, Byte z)
+        public CesiumUintVec3(Byte x, Byte y, Byte z)
         {
             this.componentType = CesiumMetadataComponentType.Uint8;
             this.x = x;
@@ -285,7 +373,7 @@ namespace CesiumForUnity
             this.z = z;
         }
 
-        public CesiumUIntVec3(UInt16 x, UInt16 y, UInt16 z)
+        public CesiumUintVec3(UInt16 x, UInt16 y, UInt16 z)
         {
             this.componentType = CesiumMetadataComponentType.Uint16;
             this.x = x;
@@ -293,7 +381,7 @@ namespace CesiumForUnity
             this.z = z;
         }
 
-        public CesiumUIntVec3(UInt32 x, UInt32 y, UInt32 z)
+        public CesiumUintVec3(UInt32 x, UInt32 y, UInt32 z)
         {
             this.componentType = CesiumMetadataComponentType.Uint32;
             this.x = x;
@@ -301,7 +389,7 @@ namespace CesiumForUnity
             this.z = z;
         }
 
-        public CesiumUIntVec3(UInt64 x, UInt64 y, UInt64 z)
+        public CesiumUintVec3(UInt64 x, UInt64 y, UInt64 z)
         {
             this.componentType = CesiumMetadataComponentType.Uint64;
             this.x = x;
@@ -309,6 +397,13 @@ namespace CesiumForUnity
             this.z = z;
         }
 
+        public CesiumUintVec3(uint3 unityUint3)
+        {
+            this.componentType = CesiumMetadataComponentType.Uint32;
+            this.x = unityUint3.x;
+            this.y = unityUint3.y;
+            this.z = unityUint3.z;
+        }
         public UInt64 this[int index]
         {
             get
@@ -336,16 +431,31 @@ namespace CesiumForUnity
     /// Internally, this is used to store all unsigned integer vec4 types, including u8vec4,
     /// u16vec4, u32vec4, and u64vec4. The intended type is conveyed through CesiumMetadataComponentType.
     /// </remarks>
-    internal struct CesiumUIntVec4
+    internal struct CesiumUintVec4
     {
-        public CesiumMetadataComponentType componentType { get; }
+        public CesiumMetadataComponentType componentType
+        {
+            get; private set;
+        }
 
-        public UInt64 x { get; }
-        public UInt64 y { get; }
-        public UInt64 z { get; }
-        public UInt64 w { get; }
+        public UInt64 x
+        {
+            get; private set;
+        }
+        public UInt64 y
+        {
+            get; private set;
+        }
+        public UInt64 z
+        {
+            get; private set;
+        }
+        public UInt64 w
+        {
+            get; private set;
+        }
 
-        public CesiumUIntVec4(Byte x, Byte y, Byte z, Byte w)
+        public CesiumUintVec4(Byte x, Byte y, Byte z, Byte w)
         {
             this.componentType = CesiumMetadataComponentType.Uint8;
             this.x = x;
@@ -354,7 +464,7 @@ namespace CesiumForUnity
             this.w = w;
         }
 
-        public CesiumUIntVec4(UInt16 x, UInt16 y, UInt16 z, UInt16 w)
+        public CesiumUintVec4(UInt16 x, UInt16 y, UInt16 z, UInt16 w)
         {
             this.componentType = CesiumMetadataComponentType.Uint16;
             this.x = x;
@@ -363,7 +473,7 @@ namespace CesiumForUnity
             this.w = w;
         }
 
-        public CesiumUIntVec4(UInt32 x, UInt32 y, UInt32 z, UInt32 w)
+        public CesiumUintVec4(UInt32 x, UInt32 y, UInt32 z, UInt32 w)
         {
             this.componentType = CesiumMetadataComponentType.Uint32;
             this.x = x;
@@ -372,13 +482,21 @@ namespace CesiumForUnity
             this.w = w;
         }
 
-        public CesiumUIntVec4(UInt64 x, UInt64 y, UInt64 z, UInt64 w)
+        public CesiumUintVec4(UInt64 x, UInt64 y, UInt64 z, UInt64 w)
         {
             this.componentType = CesiumMetadataComponentType.Uint64;
             this.x = x;
             this.y = y;
             this.z = z;
             this.w = w;
+        }
+        public CesiumUintVec4(uint4 unityUint4)
+        {
+            this.componentType = CesiumMetadataComponentType.Uint32;
+            this.x = unityUint4.x;
+            this.y = unityUint4.y;
+            this.z = unityUint4.z;
+            this.w = unityUint4.w;
         }
 
         public UInt64 this[int index]

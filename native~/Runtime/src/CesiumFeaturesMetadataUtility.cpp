@@ -1,6 +1,7 @@
 #include "CesiumFeaturesMetadataUtility.h"
 
 #include "CesiumFeatureIdAttributeImpl.h"
+#include "CesiumFeatureIdTextureImpl.h"
 #include "CesiumPropertyTablePropertyImpl.h"
 
 #include <CesiumGltf/ExtensionExtMeshFeatures.h>
@@ -10,6 +11,7 @@
 #include <CesiumGltf/PropertyTableView.h>
 
 #include <DotNet/CesiumForUnity/CesiumFeatureIdAttribute.h>
+#include <DotNet/CesiumForUnity/CesiumFeatureIdTexture.h>
 #include <DotNet/CesiumForUnity/CesiumFeatureIdSet.h>
 #include <DotNet/CesiumForUnity/CesiumFeatureIdSetType.h>
 #include <DotNet/CesiumForUnity/CesiumModelMetadata.h>
@@ -28,11 +30,11 @@ using namespace DotNet::System::Collections::Generic;
 namespace CesiumForUnityNative {
 
 DotNet::CesiumForUnity::CesiumPrimitiveFeatures
-CesiumFeaturesMetadataUtility::AddPrimitiveFeatures(
+CesiumFeaturesMetadataUtility::addPrimitiveFeatures(
     const DotNet::UnityEngine::GameObject& primitiveGameObject,
     const CesiumGltf::Model& model,
     const CesiumGltf::MeshPrimitive& primitive,
-    const CesiumGltf::ExtensionExtMeshFeatures& extension) {
+    const CesiumGltf::ExtensionExtMeshFeatures& extension) noexcept {
   CesiumForUnity::CesiumPrimitiveFeatures& primitiveFeatures =
       primitiveGameObject
           .AddComponent<CesiumForUnity::CesiumPrimitiveFeatures>();
@@ -54,7 +56,12 @@ CesiumFeaturesMetadataUtility::AddPrimitiveFeatures(
               primitive,
               *gltfFeatureId.attribute));
     } else if (gltfFeatureId.texture) {
-      // TODO
+      featureIdSets.Item(
+          i,
+          CesiumFeatureIdTextureImpl::CreateTexture(
+              model,
+              primitive,
+              *gltfFeatureId.texture));
     } else {
       // Create implicit feature ID set (or an invalid one if featureCount = 0).
       featureIdSets.Item(
@@ -72,10 +79,10 @@ CesiumFeaturesMetadataUtility::AddPrimitiveFeatures(
 }
 
 DotNet::CesiumForUnity::CesiumModelMetadata
-CesiumFeaturesMetadataUtility::AddModelMetadata(
+CesiumFeaturesMetadataUtility::addModelMetadata(
     const DotNet::UnityEngine::GameObject& modelGameObject,
     const CesiumGltf::Model& model,
-    const CesiumGltf::ExtensionModelExtStructuralMetadata& extension) {
+    const CesiumGltf::ExtensionModelExtStructuralMetadata& extension) noexcept {
   CesiumForUnity::CesiumModelMetadata& modelMetadata =
       modelGameObject.AddComponent<CesiumForUnity::CesiumModelMetadata>();
 

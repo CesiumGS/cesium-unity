@@ -52,17 +52,36 @@ public class TestCesiumMetadataValue
         Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Vec2));
         Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Int32));
         Assert.That(valueType.isArray, Is.False);
+
+        value = new CesiumMetadataValue(new CesiumUintVec4((Byte)1, (Byte)1, (Byte)2, (Byte)3));
+        Assert.That(value.isEmpty, Is.False);
+
+        valueType = value.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Vec4));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Uint8));
+        Assert.That(valueType.isArray, Is.False);
     }
 
     [Test]
     public void ConstructsMatNValue()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(new uint2x2(1, 2, 3, 1));
+        CesiumMetadataValue value = new CesiumMetadataValue(new float2x2(1, 2, 3, 1));
         Assert.That(value.isEmpty, Is.False);
 
         CesiumMetadataValueType valueType = value.valueType;
         Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat2));
-        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Uint32));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
+
+        value = new CesiumMetadataValue(new CesiumIntMat3x3(
+            new int3(1, 0, 0),
+            new int3(0, 1, 0),
+            new int3(0, 0, 1)));
+        Assert.That(value.isEmpty, Is.False);
+
+        valueType = value.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat3));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Int32));
         Assert.That(valueType.isArray, Is.False);
     }
 
@@ -790,10 +809,10 @@ public class TestCesiumMetadataValue
     [Test]
     public void GetInt2ReturnsVec2Values()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumIntVec2(-1, -2));
+        CesiumMetadataValue value = new CesiumMetadataValue(new int2(-1, -2));
         Assert.That(value.GetInt2(int2.zero), Is.EqualTo(new int2(-1, -2)));
 
-        value = new CesiumMetadataValue(new CesiumUIntVec2(1, 2));
+        value = new CesiumMetadataValue(new uint2(1, 2));
         Assert.That(value.GetInt2(int2.zero), Is.EqualTo(new int2(1, 2)));
 
         value = new CesiumMetadataValue(new float2(0.5f, 1.2f));
@@ -806,10 +825,10 @@ public class TestCesiumMetadataValue
     [Test]
     public void GetInt2ConvertsVec3Values()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumIntVec3(-1, -2, -3));
+        CesiumMetadataValue value = new CesiumMetadataValue(new int3(-1, -2, -3));
         Assert.That(value.GetInt2(int2.zero), Is.EqualTo(new int2(-1, -2)));
 
-        value = new CesiumMetadataValue(new CesiumUIntVec3(1, 2, 3));
+        value = new CesiumMetadataValue(new uint3(1, 2, 3));
         Assert.That(value.GetInt2(int2.zero), Is.EqualTo(new int2(1, 2)));
 
         value = new CesiumMetadataValue(new float3(0.5f, 1.2f, -1.0f));
@@ -822,16 +841,38 @@ public class TestCesiumMetadataValue
     [Test]
     public void GetInt2ConvertsVec4Values()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumIntVec4(-1, -2, -3, 1));
+        CesiumMetadataValue value = new CesiumMetadataValue(new int4(-1, -2, -3, 1));
         Assert.That(value.GetInt2(int2.zero), Is.EqualTo(new int2(-1, -2)));
 
-        value = new CesiumMetadataValue(new CesiumUIntVec4(1, 2, 3, 1));
+        value = new CesiumMetadataValue(new uint4(1, 2, 3, 1));
         Assert.That(value.GetInt2(int2.zero), Is.EqualTo(new int2(1, 2)));
 
         value = new CesiumMetadataValue(new float4(0.5f, 1.2f, -1.0f, 1.0f));
         Assert.That(value.GetInt2(int2.zero), Is.EqualTo(new int2(0, 1)));
 
         value = new CesiumMetadataValue(new double4(1.2, 2.3, 3.4, 1.0));
+        Assert.That(value.GetInt2(int2.zero), Is.EqualTo(new int2(1, 2)));
+    }
+
+    [Test]
+    public void GetInt2ConvertsCesiumVecNValues()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumIntVec2(-1, -2));
+        Assert.That(value.GetInt2(int2.zero), Is.EqualTo(new int2(-1, -2)));
+
+        value = new CesiumMetadataValue(new CesiumUintVec2(1, 2));
+        Assert.That(value.GetInt2(int2.zero), Is.EqualTo(new int2(1, 2)));
+
+        value = new CesiumMetadataValue(new CesiumIntVec3(-1, -2, -3));
+        Assert.That(value.GetInt2(int2.zero), Is.EqualTo(new int2(-1, -2)));
+
+        value = new CesiumMetadataValue(new CesiumUintVec3(1, 2, 3));
+        Assert.That(value.GetInt2(int2.zero), Is.EqualTo(new int2(1, 2)));
+
+        value = new CesiumMetadataValue(new CesiumIntVec4(-1, -2, -3, 1));
+        Assert.That(value.GetInt2(int2.zero), Is.EqualTo(new int2(-1, -2)));
+
+        value = new CesiumMetadataValue(new CesiumUintVec4(1, 2, 3, 1));
         Assert.That(value.GetInt2(int2.zero), Is.EqualTo(new int2(1, 2)));
     }
 
@@ -886,10 +927,10 @@ public class TestCesiumMetadataValue
     [Test]
     public void GetUInt2ReturnsVec2Values()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumUIntVec2(1, 2));
+        CesiumMetadataValue value = new CesiumMetadataValue(new uint2(1, 2));
         Assert.That(value.GetUInt2(uint2.zero), Is.EqualTo(new uint2(1, 2)));
 
-        value = new CesiumMetadataValue(new CesiumIntVec2(10, 20));
+        value = new CesiumMetadataValue(new int2(10, 20));
         Assert.That(value.GetUInt2(uint2.zero), Is.EqualTo(new uint2(10, 20)));
 
         value = new CesiumMetadataValue(new float2(0.5f, 1.2f));
@@ -902,10 +943,10 @@ public class TestCesiumMetadataValue
     [Test]
     public void GetUInt2ConvertsVec3Values()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumUIntVec3(1, 2, 3));
+        CesiumMetadataValue value = new CesiumMetadataValue(new uint3(1, 2, 3));
         Assert.That(value.GetUInt2(uint2.zero), Is.EqualTo(new uint2(1, 2)));
 
-        value = new CesiumMetadataValue(new CesiumIntVec3(10, 20, 30));
+        value = new CesiumMetadataValue(new int3(10, 20, 30));
         Assert.That(value.GetUInt2(uint2.zero), Is.EqualTo(new uint2(10, 20)));
 
         value = new CesiumMetadataValue(new float3(0.5f, 1.2f, -1.0f));
@@ -918,10 +959,10 @@ public class TestCesiumMetadataValue
     [Test]
     public void GetUInt2ConvertsVec4Values()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumUIntVec4(1, 2, 3, 1));
+        CesiumMetadataValue value = new CesiumMetadataValue(new uint4(1, 2, 3, 1));
         Assert.That(value.GetUInt2(uint2.zero), Is.EqualTo(new uint2(1, 2)));
 
-        value = new CesiumMetadataValue(new CesiumIntVec4(10, 20, 30, 40));
+        value = new CesiumMetadataValue(new int4(10, 20, 30, 40));
         Assert.That(value.GetUInt2(uint2.zero), Is.EqualTo(new uint2(10, 20)));
 
         value = new CesiumMetadataValue(new float4(0.5f, 1.2f, -1.0f, 1.0f));
@@ -929,6 +970,28 @@ public class TestCesiumMetadataValue
 
         value = new CesiumMetadataValue(new double4(1.2, 2.3, 3.4, 1.0));
         Assert.That(value.GetUInt2(uint2.zero), Is.EqualTo(new uint2(1, 2)));
+    }
+
+    [Test]
+    public void GetUInt2ConvertsCesiumVecNValues()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumUintVec2(1, 2));
+        Assert.That(value.GetUInt2(uint2.zero), Is.EqualTo(new uint2(1, 2)));
+
+        value = new CesiumMetadataValue(new CesiumIntVec2(10, 20));
+        Assert.That(value.GetUInt2(uint2.zero), Is.EqualTo(new uint2(10, 20)));
+
+        value = new CesiumMetadataValue(new CesiumUintVec3(1, 2, 3));
+        Assert.That(value.GetUInt2(uint2.zero), Is.EqualTo(new uint2(1, 2)));
+
+        value = new CesiumMetadataValue(new CesiumIntVec3(10, 20, 30));
+        Assert.That(value.GetUInt2(uint2.zero), Is.EqualTo(new uint2(10, 20)));
+
+        value = new CesiumMetadataValue(new CesiumUintVec4(1, 2, 3, 1));
+        Assert.That(value.GetUInt2(uint2.zero), Is.EqualTo(new uint2(1, 2)));
+
+        value = new CesiumMetadataValue(new CesiumIntVec4(10, 20, 30, 40));
+        Assert.That(value.GetUInt2(uint2.zero), Is.EqualTo(new uint2(10, 20)));
     }
 
     [Test]
@@ -985,10 +1048,10 @@ public class TestCesiumMetadataValue
         CesiumMetadataValue value = new CesiumMetadataValue(float2Value);
         Assert.That(value.GetFloat2(float2.zero), Is.EqualTo(float2Value));
 
-        value = new CesiumMetadataValue(new CesiumIntVec2(-1, -2));
+        value = new CesiumMetadataValue(new int2(-1, -2));
         Assert.That(value.GetFloat2(float2.zero), Is.EqualTo(new float2(-1, -2)));
 
-        value = new CesiumMetadataValue(new CesiumUIntVec2(1, 2));
+        value = new CesiumMetadataValue(new uint2(1, 2));
         Assert.That(value.GetFloat2(float2.zero), Is.EqualTo(new float2(1, 2)));
 
         value = new CesiumMetadataValue(new double2(1.2, 2.3));
@@ -1003,10 +1066,10 @@ public class TestCesiumMetadataValue
         CesiumMetadataValue value = new CesiumMetadataValue(float3Value);
         Assert.That(value.GetFloat2(float2.zero), Is.EqualTo(float3Value.xy));
 
-        value = new CesiumMetadataValue(new CesiumIntVec3(-1, -2, -3));
+        value = new CesiumMetadataValue(new int3(-1, -2, -3));
         Assert.That(value.GetFloat2(float2.zero), Is.EqualTo(new float2(-1, -2)));
 
-        value = new CesiumMetadataValue(new CesiumUIntVec3(1, 2, 3));
+        value = new CesiumMetadataValue(new uint3(1, 2, 3));
         Assert.That(value.GetFloat2(float2.zero), Is.EqualTo(new float2(1, 2)));
 
         value = new CesiumMetadataValue(new double3(1.2, 2.3, 3.4));
@@ -1020,15 +1083,37 @@ public class TestCesiumMetadataValue
         CesiumMetadataValue value = new CesiumMetadataValue(float4Value);
         Assert.That(value.GetFloat2(float2.zero), Is.EqualTo(float4Value.xy));
 
-        value = new CesiumMetadataValue(new CesiumIntVec4(-1, -2, -3, 1));
+        value = new CesiumMetadataValue(new int4(-1, -2, -3, 1));
         Assert.That(value.GetFloat2(float2.zero), Is.EqualTo(new float2(-1, -2)));
 
-        value = new CesiumMetadataValue(new CesiumUIntVec4(1, 2, 3, 1));
+        value = new CesiumMetadataValue(new uint4(1, 2, 3, 1));
         Assert.That(value.GetFloat2(float2.zero), Is.EqualTo(new float2(1, 2)));
 
         double4 double4Value = new double4(1.2, 2.3, 3.4, 1.0);
         value = new CesiumMetadataValue(double4Value);
         Assert.That(value.GetFloat2(float2.zero), Is.EqualTo(new float2((float)double4Value.x, (float)double4Value.y)));
+    }
+
+    [Test]
+    public void GetFloat2ConvertsCesiumVecNValues()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumIntVec2(-1, -2));
+        Assert.That(value.GetFloat2(float2.zero), Is.EqualTo(new float2(-1, -2)));
+
+        value = new CesiumMetadataValue(new CesiumUintVec2(1, 2));
+        Assert.That(value.GetFloat2(float2.zero), Is.EqualTo(new float2(1, 2)));
+
+        value = new CesiumMetadataValue(new CesiumIntVec3(-1, -2, -3));
+        Assert.That(value.GetFloat2(float2.zero), Is.EqualTo(new float2(-1, -2)));
+
+        value = new CesiumMetadataValue(new CesiumUintVec3(1, 2, 3));
+        Assert.That(value.GetFloat2(float2.zero), Is.EqualTo(new float2(1, 2)));
+
+        value = new CesiumMetadataValue(new CesiumIntVec4(-1, -2, -3, 1));
+        Assert.That(value.GetFloat2(float2.zero), Is.EqualTo(new float2(-1, -2)));
+
+        value = new CesiumMetadataValue(new CesiumUintVec4(1, 2, 3, 1));
+        Assert.That(value.GetFloat2(float2.zero), Is.EqualTo(new float2(1, 2)));
     }
 
     [Test]
@@ -1088,10 +1173,10 @@ public class TestCesiumMetadataValue
         CesiumMetadataValue value = new CesiumMetadataValue(double2Value);
         Assert.That(value.GetDouble2(double2.zero), Is.EqualTo(double2Value));
 
-        value = new CesiumMetadataValue(new CesiumIntVec2(-1, -2));
+        value = new CesiumMetadataValue(new int2(-1, -2));
         Assert.That(value.GetDouble2(double2.zero), Is.EqualTo(new double2(-1, -2)));
 
-        value = new CesiumMetadataValue(new CesiumUIntVec2(1, 2));
+        value = new CesiumMetadataValue(new uint2(1, 2));
         Assert.That(value.GetDouble2(double2.zero), Is.EqualTo(new double2(1, 2)));
 
         float2 float2Value = new float2(0.5f, 1.2f);
@@ -1106,10 +1191,10 @@ public class TestCesiumMetadataValue
         CesiumMetadataValue value = new CesiumMetadataValue(double3Value);
         Assert.That(value.GetDouble2(double2.zero), Is.EqualTo(double3Value.xy));
 
-        value = new CesiumMetadataValue(new CesiumIntVec3(-1, -2, -3));
+        value = new CesiumMetadataValue(new int3(-1, -2, -3));
         Assert.That(value.GetDouble2(double2.zero), Is.EqualTo(new double2(-1, -2)));
 
-        value = new CesiumMetadataValue(new CesiumUIntVec3(1, 2, 3));
+        value = new CesiumMetadataValue(new uint3(1, 2, 3));
         Assert.That(value.GetDouble2(double2.zero), Is.EqualTo(new double2(1, 2)));
 
         value = new CesiumMetadataValue(new float3(0.5f, 1.2f, -1.0f));
@@ -1123,14 +1208,36 @@ public class TestCesiumMetadataValue
         CesiumMetadataValue value = new CesiumMetadataValue(double4Value);
         Assert.That(value.GetDouble2(double2.zero), Is.EqualTo(double4Value.xy));
 
-        value = new CesiumMetadataValue(new CesiumIntVec4(-1, -2, -3, 1));
+        value = new CesiumMetadataValue(new int4(-1, -2, -3, 1));
         Assert.That(value.GetDouble2(double2.zero), Is.EqualTo(new double2(-1, -2)));
 
-        value = new CesiumMetadataValue(new CesiumUIntVec4(1, 2, 3, 1));
+        value = new CesiumMetadataValue(new uint4(1, 2, 3, 1));
         Assert.That(value.GetDouble2(double2.zero), Is.EqualTo(new double2(1, 2)));
 
         value = new CesiumMetadataValue(new float4(0.5f, 1.2f, -1.0f, 1.0f));
         Assert.That(value.GetDouble2(double2.zero), Is.EqualTo(new double2(0.5f, 1.2f)));
+    }
+
+    [Test]
+    public void GetDouble2ConvertsCesiumVecNValues()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumIntVec2(-1, -2));
+        Assert.That(value.GetDouble2(double2.zero), Is.EqualTo(new double2(-1, -2)));
+
+        value = new CesiumMetadataValue(new CesiumUintVec2(1, 2));
+        Assert.That(value.GetDouble2(double2.zero), Is.EqualTo(new double2(1, 2)));
+
+        value = new CesiumMetadataValue(new CesiumIntVec3(-1, -2, -3));
+        Assert.That(value.GetDouble2(double2.zero), Is.EqualTo(new double2(-1, -2)));
+
+        value = new CesiumMetadataValue(new CesiumUintVec3(1, 2, 3));
+        Assert.That(value.GetDouble2(double2.zero), Is.EqualTo(new double2(1, 2)));
+
+        value = new CesiumMetadataValue(new CesiumIntVec4(-1, -2, -3, 1));
+        Assert.That(value.GetDouble2(double2.zero), Is.EqualTo(new double2(-1, -2)));
+
+        value = new CesiumMetadataValue(new CesiumUintVec4(1, 2, 3, 1));
+        Assert.That(value.GetDouble2(double2.zero), Is.EqualTo(new double2(1, 2)));
     }
 
     [Test]
@@ -1177,10 +1284,10 @@ public class TestCesiumMetadataValue
     [Test]
     public void GetInt3ReturnsVec3Values()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumIntVec3(-1, -2, -3));
+        CesiumMetadataValue value = new CesiumMetadataValue(new int3(-1, -2, -3));
         Assert.That(value.GetInt3(int3.zero), Is.EqualTo(new int3(-1, -2, -3)));
 
-        value = new CesiumMetadataValue(new CesiumUIntVec3(1, 2, 3));
+        value = new CesiumMetadataValue(new uint3(1, 2, 3));
         Assert.That(value.GetInt3(int3.zero), Is.EqualTo(new int3(1, 2, 3)));
 
         value = new CesiumMetadataValue(new float3(0.5f, 1.2f, -1.0f));
@@ -1193,10 +1300,10 @@ public class TestCesiumMetadataValue
     [Test]
     public void GetInt3ConvertsVec2Values()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumIntVec2(-1, -2));
+        CesiumMetadataValue value = new CesiumMetadataValue(new int2(-1, -2));
         Assert.That(value.GetInt3(int3.zero), Is.EqualTo(new int3(-1, -2, 0)));
 
-        value = new CesiumMetadataValue(new CesiumUIntVec2(1, 2));
+        value = new CesiumMetadataValue(new uint2(1, 2));
         Assert.That(value.GetInt3(int3.zero), Is.EqualTo(new int3(1, 2, 0)));
 
         value = new CesiumMetadataValue(new float2(0.5f, 1.2f));
@@ -1209,16 +1316,38 @@ public class TestCesiumMetadataValue
     [Test]
     public void GetInt3ConvertsVec4Values()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumIntVec4(-1, -2, -3, 1));
+        CesiumMetadataValue value = new CesiumMetadataValue(new int4(-1, -2, -3, 1));
         Assert.That(value.GetInt3(int3.zero), Is.EqualTo(new int3(-1, -2, -3)));
 
-        value = new CesiumMetadataValue(new CesiumUIntVec4(1, 2, 3, 1));
+        value = new CesiumMetadataValue(new uint4(1, 2, 3, 1));
         Assert.That(value.GetInt3(int3.zero), Is.EqualTo(new int3(1, 2, 3)));
 
         value = new CesiumMetadataValue(new float4(0.5f, 1.2f, -1.0f, 1.0f));
         Assert.That(value.GetInt3(int3.zero), Is.EqualTo(new int3(0, 1, -1)));
 
         value = new CesiumMetadataValue(new double4(1.2, 2.3, 3.4, 1.0));
+        Assert.That(value.GetInt3(int3.zero), Is.EqualTo(new int3(1, 2, 3)));
+    }
+
+    [Test]
+    public void GetInt3ConvertsCesiumVecNValues()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumIntVec3(-1, -2, -3));
+        Assert.That(value.GetInt3(int3.zero), Is.EqualTo(new int3(-1, -2, -3)));
+
+        value = new CesiumMetadataValue(new CesiumUintVec3(1, 2, 3));
+        Assert.That(value.GetInt3(int3.zero), Is.EqualTo(new int3(1, 2, 3)));
+
+        value = new CesiumMetadataValue(new CesiumIntVec2(-1, -2));
+        Assert.That(value.GetInt3(int3.zero), Is.EqualTo(new int3(-1, -2, 0)));
+
+        value = new CesiumMetadataValue(new CesiumUintVec2(1, 2));
+        Assert.That(value.GetInt3(int3.zero), Is.EqualTo(new int3(1, 2, 0)));
+
+        value = new CesiumMetadataValue(new CesiumIntVec4(-1, -2, -3, 1));
+        Assert.That(value.GetInt3(int3.zero), Is.EqualTo(new int3(-1, -2, -3)));
+
+        value = new CesiumMetadataValue(new CesiumUintVec4(1, 2, 3, 1));
         Assert.That(value.GetInt3(int3.zero), Is.EqualTo(new int3(1, 2, 3)));
     }
 
@@ -1273,10 +1402,10 @@ public class TestCesiumMetadataValue
     [Test]
     public void GetUInt3ReturnsVec3Values()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumUIntVec3(1, 2, 3));
+        CesiumMetadataValue value = new CesiumMetadataValue(new uint3(1, 2, 3));
         Assert.That(value.GetUInt3(uint3.zero), Is.EqualTo(new uint3(1, 2, 3)));
 
-        value = new CesiumMetadataValue(new CesiumIntVec3(10, 20, 30));
+        value = new CesiumMetadataValue(new int3(10, 20, 30));
         Assert.That(value.GetUInt3(uint3.zero), Is.EqualTo(new uint3(10, 20, 30)));
 
         value = new CesiumMetadataValue(new float3(0.5f, 1.2f, 11.0f));
@@ -1289,10 +1418,10 @@ public class TestCesiumMetadataValue
     [Test]
     public void GetUInt3ConvertsVec2Values()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumUIntVec2(1, 2));
+        CesiumMetadataValue value = new CesiumMetadataValue(new uint2(1, 2));
         Assert.That(value.GetUInt3(uint3.zero), Is.EqualTo(new uint3(1, 2, 0)));
 
-        value = new CesiumMetadataValue(new CesiumIntVec2(10, 20));
+        value = new CesiumMetadataValue(new int2(10, 20));
         Assert.That(value.GetUInt3(uint3.zero), Is.EqualTo(new uint3(10, 20, 0)));
 
         value = new CesiumMetadataValue(new float2(0.5f, 1.2f));
@@ -1305,10 +1434,10 @@ public class TestCesiumMetadataValue
     [Test]
     public void GetUInt3ConvertsVec4Values()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumUIntVec4(1, 2, 3, 1));
+        CesiumMetadataValue value = new CesiumMetadataValue(new uint4(1, 2, 3, 1));
         Assert.That(value.GetUInt3(uint3.zero), Is.EqualTo(new uint3(1, 2, 3)));
 
-        value = new CesiumMetadataValue(new CesiumIntVec4(10, 20, 30, 1));
+        value = new CesiumMetadataValue(new int4(10, 20, 30, 1));
         Assert.That(value.GetUInt3(uint3.zero), Is.EqualTo(new uint3(10, 20, 30)));
 
         value = new CesiumMetadataValue(new float4(0.5f, 1.2f, 21.0f, 1.0f));
@@ -1316,6 +1445,28 @@ public class TestCesiumMetadataValue
 
         value = new CesiumMetadataValue(new double4(1.2, 2.3, 3.4, 1.0));
         Assert.That(value.GetUInt3(uint3.zero), Is.EqualTo(new uint3(1, 2, 3)));
+    }
+
+    [Test]
+    public void GetUInt3ConvertsCesiumVecNValues()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumUintVec3(1, 2, 3));
+        Assert.That(value.GetUInt3(uint3.zero), Is.EqualTo(new uint3(1, 2, 3)));
+
+        value = new CesiumMetadataValue(new CesiumIntVec3(10, 20, 30));
+        Assert.That(value.GetUInt3(uint3.zero), Is.EqualTo(new uint3(10, 20, 30)));
+
+        value = new CesiumMetadataValue(new CesiumUintVec2(1, 2));
+        Assert.That(value.GetUInt3(uint3.zero), Is.EqualTo(new uint3(1, 2, 0)));
+
+        value = new CesiumMetadataValue(new CesiumIntVec2(10, 20));
+        Assert.That(value.GetUInt3(uint3.zero), Is.EqualTo(new uint3(10, 20, 0)));
+
+        value = new CesiumMetadataValue(new CesiumUintVec4(1, 2, 3, 1));
+        Assert.That(value.GetUInt3(uint3.zero), Is.EqualTo(new uint3(1, 2, 3)));
+
+        value = new CesiumMetadataValue(new CesiumIntVec4(10, 20, 30, 1));
+        Assert.That(value.GetUInt3(uint3.zero), Is.EqualTo(new uint3(10, 20, 30)));
     }
 
     [Test]
@@ -1372,11 +1523,10 @@ public class TestCesiumMetadataValue
         CesiumMetadataValue value = new CesiumMetadataValue(float3Value);
         Assert.That(value.GetFloat3(float3.zero), Is.EqualTo(float3Value));
 
-        value = new CesiumMetadataValue(new CesiumIntVec3(-1, -2, -3));
+        value = new CesiumMetadataValue(new int3(-1, -2, -3));
         Assert.That(value.GetFloat3(float3.zero), Is.EqualTo(new float3(-1, -2, -3)));
 
-        CesiumUIntVec3 uintVec3Value = new CesiumUIntVec3(1, 2, 3);
-        value = new CesiumMetadataValue(uintVec3Value);
+        value = new CesiumMetadataValue(new uint3(1, 2, 3));
         Assert.That(value.GetFloat3(float3.zero), Is.EqualTo(new float3(1, 2, 3)));
 
         value = new CesiumMetadataValue(new double3(1.2, 2.3, 3.4));
@@ -1392,10 +1542,10 @@ public class TestCesiumMetadataValue
         CesiumMetadataValue value = new CesiumMetadataValue(float2Value);
         Assert.That(value.GetFloat3(float3.zero), Is.EqualTo(new float3(float2Value, 0)));
 
-        value = new CesiumMetadataValue(new CesiumIntVec2(-1, -2));
+        value = new CesiumMetadataValue(new int2(-1, -2));
         Assert.That(value.GetFloat3(float3.zero), Is.EqualTo(new float3(-1, -2, 0)));
 
-        value = new CesiumMetadataValue(new CesiumUIntVec2(1, 2));
+        value = new CesiumMetadataValue(new uint2(1, 2));
         Assert.That(value.GetFloat3(float3.zero), Is.EqualTo(new float3(1, 2, 0)));
 
         double2 double2Value = new double2(1.2, 2.3);
@@ -1412,12 +1562,10 @@ public class TestCesiumMetadataValue
         CesiumMetadataValue value = new CesiumMetadataValue(float4Value);
         Assert.That(value.GetFloat3(float3.zero), Is.EqualTo(float4Value.xyz));
 
-        CesiumIntVec4 intVec4Value = new CesiumIntVec4(-1, -2, -3, 1);
-        value = new CesiumMetadataValue(intVec4Value);
+        value = new CesiumMetadataValue(new CesiumIntVec4(-1, -2, -3, 1));
         Assert.That(value.GetFloat3(float3.zero), Is.EqualTo(new float3(-1, -2, -3)));
 
-        CesiumUIntVec4 uintVec4Value = new CesiumUIntVec4(1, 2, 3, 1);
-        value = new CesiumMetadataValue(uintVec4Value);
+        value = new CesiumMetadataValue(new CesiumUintVec4(1, 2, 3, 1));
         Assert.That(value.GetFloat3(float3.zero), Is.EqualTo(new float3(1, 2, 3)));
 
         double4 double4Value = new double4(1.2, 2.3, 3.4, 1.0);
@@ -1425,6 +1573,28 @@ public class TestCesiumMetadataValue
         Assert.That(
             value.GetFloat3(float3.zero),
             Is.EqualTo(new float3((float)double4Value.x, (float)double4Value.y, (float)double4Value.z)));
+    }
+
+    [Test]
+    public void GetFloat3ConvertsCesiumVecNValues()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumIntVec3(-1, -2, -3));
+        Assert.That(value.GetFloat3(float3.zero), Is.EqualTo(new float3(-1, -2, -3)));
+
+        value = new CesiumMetadataValue(new CesiumUintVec3(1, 2, 3));
+        Assert.That(value.GetFloat3(float3.zero), Is.EqualTo(new float3(1, 2, 3)));
+
+        value = new CesiumMetadataValue(new CesiumIntVec2(-1, -2));
+        Assert.That(value.GetFloat3(float3.zero), Is.EqualTo(new float3(-1, -2, 0)));
+
+        value = new CesiumMetadataValue(new CesiumUintVec2(1, 2));
+        Assert.That(value.GetFloat3(float3.zero), Is.EqualTo(new float3(1, 2, 0)));
+
+        value = new CesiumMetadataValue(new CesiumIntVec4(-1, -2, -3, 1));
+        Assert.That(value.GetFloat3(float3.zero), Is.EqualTo(new float3(-1, -2, -3)));
+
+        value = new CesiumMetadataValue(new CesiumUintVec4(1, 2, 3, 1));
+        Assert.That(value.GetFloat3(float3.zero), Is.EqualTo(new float3(1, 2, 3)));
     }
 
     [Test]
@@ -1484,10 +1654,10 @@ public class TestCesiumMetadataValue
         CesiumMetadataValue value = new CesiumMetadataValue(double3Value);
         Assert.That(value.GetDouble3(double3.zero), Is.EqualTo(double3Value));
 
-        value = new CesiumMetadataValue(new CesiumIntVec3(-1, -2, -3));
+        value = new CesiumMetadataValue(new int3(-1, -2, -3));
         Assert.That(value.GetDouble3(double3.zero), Is.EqualTo(new double3(-1, -2, -3)));
 
-        value = new CesiumMetadataValue(new CesiumUIntVec3(1, 2, 3));
+        value = new CesiumMetadataValue(new uint3(1, 2, 3));
         Assert.That(value.GetDouble3(double3.zero), Is.EqualTo(new double3(1, 2, 3)));
 
         value = new CesiumMetadataValue(new float3(0.5f, 1.2f, -1.0f));
@@ -1502,14 +1672,13 @@ public class TestCesiumMetadataValue
         CesiumMetadataValue value = new CesiumMetadataValue(double2Value);
         Assert.That(value.GetDouble3(double3.zero), Is.EqualTo(new double3(double2Value, 0)));
 
-        value = new CesiumMetadataValue(new CesiumIntVec2(-1, -2));
+        value = new CesiumMetadataValue(new int2(-1, -2));
         Assert.That(value.GetDouble3(double3.zero), Is.EqualTo(new double3(-1, -2, 0)));
 
-        value = new CesiumMetadataValue(new CesiumUIntVec2(1, 2));
+        value = new CesiumMetadataValue(new uint2(1, 2));
         Assert.That(value.GetDouble3(double3.zero), Is.EqualTo(new double3(1, 2, 0)));
 
-        float2 float2Value = new float2(0.5f, 1.2f);
-        value = new CesiumMetadataValue(float2Value);
+        value = new CesiumMetadataValue(new float2(0.5f, 1.2f));
         Assert.That(value.GetDouble3(double3.zero), Is.EqualTo(new double3(0.5f, 1.2f, 0.0f)));
     }
 
@@ -1520,14 +1689,36 @@ public class TestCesiumMetadataValue
         CesiumMetadataValue value = new CesiumMetadataValue(double4Value);
         Assert.That(value.GetDouble3(double3.zero), Is.EqualTo(double4Value.xyz));
 
-        value = new CesiumMetadataValue(new CesiumIntVec4(-1, -2, -3, 1));
+        value = new CesiumMetadataValue(new int4(-1, -2, -3, 1));
         Assert.That(value.GetDouble3(double3.zero), Is.EqualTo(new double3(-1, -2, -3)));
 
-        value = new CesiumMetadataValue(new CesiumUIntVec4(1, 2, 3, 1));
+        value = new CesiumMetadataValue(new uint4(1, 2, 3, 1));
         Assert.That(value.GetDouble3(double3.zero), Is.EqualTo(new double3(1, 2, 3)));
 
         value = new CesiumMetadataValue(new float4(0.5f, 1.2f, -1.0f, 1.0f));
         Assert.That(value.GetDouble3(double3.zero), Is.EqualTo(new double3(0.5f, 1.2f, -1.0f)));
+    }
+
+    [Test]
+    public void GetDouble3ConvertsCesiumVecNValues()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumIntVec3(-1, -2, -3));
+        Assert.That(value.GetDouble3(double3.zero), Is.EqualTo(new double3(-1, -2, -3)));
+
+        value = new CesiumMetadataValue(new CesiumUintVec3(1, 2, 3));
+        Assert.That(value.GetDouble3(double3.zero), Is.EqualTo(new double3(1, 2, 3)));
+
+        value = new CesiumMetadataValue(new CesiumIntVec2(-1, -2));
+        Assert.That(value.GetDouble3(double3.zero), Is.EqualTo(new double3(-1, -2, 0)));
+
+        value = new CesiumMetadataValue(new CesiumUintVec2(1, 2));
+        Assert.That(value.GetDouble3(double3.zero), Is.EqualTo(new double3(1, 2, 0)));
+
+        value = new CesiumMetadataValue(new CesiumIntVec4(-1, -2, -3, 1));
+        Assert.That(value.GetDouble3(double3.zero), Is.EqualTo(new double3(-1, -2, -3)));
+
+        value = new CesiumMetadataValue(new CesiumUintVec4(1, 2, 3, 1));
+        Assert.That(value.GetDouble3(double3.zero), Is.EqualTo(new double3(1, 2, 3)));
     }
 
     [Test]
@@ -1574,10 +1765,10 @@ public class TestCesiumMetadataValue
     [Test]
     public void GetInt4ReturnsVec4Values()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumIntVec4(-1, -2, -3, 1));
+        CesiumMetadataValue value = new CesiumMetadataValue(new int4(-1, -2, -3, 1));
         Assert.That(value.GetInt4(int4.zero), Is.EqualTo(new int4(-1, -2, -3, 1)));
 
-        value = new CesiumMetadataValue(new CesiumUIntVec4(1, 2, 3, 1));
+        value = new CesiumMetadataValue(new uint4(1, 2, 3, 1));
         Assert.That(value.GetInt4(int4.zero), Is.EqualTo(new int4(1, 2, 3, 1)));
 
         value = new CesiumMetadataValue(new float4(0.5f, 1.2f, -1.0f, 1.0f));
@@ -1587,14 +1778,13 @@ public class TestCesiumMetadataValue
         Assert.That(value.GetInt4(int4.zero), Is.EqualTo(new int4(1, 2, 3, 1)));
     }
 
-
     [Test]
     public void GetInt4ConvertsVec2Values()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumIntVec2(-1, -2));
+        CesiumMetadataValue value = new CesiumMetadataValue(new int2(-1, -2));
         Assert.That(value.GetInt4(int4.zero), Is.EqualTo(new int4(-1, -2, 0, 0)));
 
-        value = new CesiumMetadataValue(new CesiumUIntVec2(1, 2));
+        value = new CesiumMetadataValue(new uint2(1, 2));
         Assert.That(value.GetInt4(int4.zero), Is.EqualTo(new int4(1, 2, 0, 0)));
 
         value = new CesiumMetadataValue(new float2(0.5f, 1.2f));
@@ -1607,16 +1797,38 @@ public class TestCesiumMetadataValue
     [Test]
     public void GetInt4ConvertsVec3Values()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumIntVec3(-1, -2, -3));
+        CesiumMetadataValue value = new CesiumMetadataValue(new int3(-1, -2, -3));
         Assert.That(value.GetInt4(int4.zero), Is.EqualTo(new int4(-1, -2, -3, 0)));
 
-        value = new CesiumMetadataValue(new CesiumUIntVec3(1, 2, 3));
+        value = new CesiumMetadataValue(new uint3(1, 2, 3));
         Assert.That(value.GetInt4(int4.zero), Is.EqualTo(new int4(1, 2, 3, 0)));
 
         value = new CesiumMetadataValue(new float3(0.5f, 1.2f, -1.0f));
         Assert.That(value.GetInt4(int4.zero), Is.EqualTo(new int4(0, 1, -1, 0)));
 
         value = new CesiumMetadataValue(new double3(1.2, 2.3, 3.4));
+        Assert.That(value.GetInt4(int4.zero), Is.EqualTo(new int4(1, 2, 3, 0)));
+    }
+
+    [Test]
+    public void GetInt4ConvertsCesiumVecNValues()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumIntVec4(-1, -2, -3, 1));
+        Assert.That(value.GetInt4(int4.zero), Is.EqualTo(new int4(-1, -2, -3, 1)));
+
+        value = new CesiumMetadataValue(new CesiumUintVec4(1, 2, 3, 1));
+        Assert.That(value.GetInt4(int4.zero), Is.EqualTo(new int4(1, 2, 3, 1)));
+
+        value = new CesiumMetadataValue(new CesiumIntVec2(-1, -2));
+        Assert.That(value.GetInt4(int4.zero), Is.EqualTo(new int4(-1, -2, 0, 0)));
+
+        value = new CesiumMetadataValue(new CesiumUintVec2(1, 2));
+        Assert.That(value.GetInt4(int4.zero), Is.EqualTo(new int4(1, 2, 0, 0)));
+
+        value = new CesiumMetadataValue(new CesiumIntVec3(-1, -2, -3));
+        Assert.That(value.GetInt4(int4.zero), Is.EqualTo(new int4(-1, -2, -3, 0)));
+
+        value = new CesiumMetadataValue(new CesiumUintVec3(1, 2, 3));
         Assert.That(value.GetInt4(int4.zero), Is.EqualTo(new int4(1, 2, 3, 0)));
     }
 
@@ -1670,10 +1882,10 @@ public class TestCesiumMetadataValue
     [Test]
     public void GetUInt4ReturnsVec4Values()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumUIntVec4(1, 2, 3, 1));
+        CesiumMetadataValue value = new CesiumMetadataValue(new uint4(1, 2, 3, 1));
         Assert.That(value.GetUInt4(uint4.zero), Is.EqualTo(new uint4(1, 2, 3, 1)));
 
-        value = new CesiumMetadataValue(new CesiumIntVec4(10, 20, 30, 1));
+        value = new CesiumMetadataValue(new int4(10, 20, 30, 1));
         Assert.That(value.GetUInt4(uint4.zero), Is.EqualTo(new uint4(10, 20, 30, 1)));
 
         value = new CesiumMetadataValue(new float4(0.5f, 1.2f, 21.0f, 1.0f));
@@ -1686,10 +1898,10 @@ public class TestCesiumMetadataValue
     [Test]
     public void GetUInt4ConvertsVec2Values()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumUIntVec2(1, 2));
+        CesiumMetadataValue value = new CesiumMetadataValue(new uint2(1, 2));
         Assert.That(value.GetUInt4(uint4.zero), Is.EqualTo(new uint4(1, 2, 0, 0)));
 
-        value = new CesiumMetadataValue(new CesiumIntVec2(10, 20));
+        value = new CesiumMetadataValue(new int2(10, 20));
         Assert.That(value.GetUInt4(uint4.zero), Is.EqualTo(new uint4(10, 20, 0, 0)));
 
         value = new CesiumMetadataValue(new float2(0.5f, 1.2f));
@@ -1702,10 +1914,10 @@ public class TestCesiumMetadataValue
     [Test]
     public void GetUInt4ConvertsVec3Values()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumUIntVec3(1, 2, 3));
+        CesiumMetadataValue value = new CesiumMetadataValue(new uint3(1, 2, 3));
         Assert.That(value.GetUInt4(uint4.zero), Is.EqualTo(new uint4(1, 2, 3, 0)));
 
-        value = new CesiumMetadataValue(new CesiumIntVec3(10, 20, 30));
+        value = new CesiumMetadataValue(new int3(10, 20, 30));
         Assert.That(value.GetUInt4(uint4.zero), Is.EqualTo(new uint4(10, 20, 30, 0)));
 
         value = new CesiumMetadataValue(new float3(0.5f, 1.2f, 11.0f));
@@ -1713,6 +1925,28 @@ public class TestCesiumMetadataValue
 
         value = new CesiumMetadataValue(new double3(1.2, 2.3, 3.4));
         Assert.That(value.GetUInt4(uint4.zero), Is.EqualTo(new uint4(1, 2, 3, 0)));
+    }
+
+    [Test]
+    public void GetUInt4ConvertsCesiumVecNValues()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumUintVec4(1, 2, 3, 1));
+        Assert.That(value.GetUInt4(uint4.zero), Is.EqualTo(new uint4(1, 2, 3, 1)));
+
+        value = new CesiumMetadataValue(new CesiumIntVec4(10, 20, 30, 1));
+        Assert.That(value.GetUInt4(uint4.zero), Is.EqualTo(new uint4(10, 20, 30, 1)));
+
+        value = new CesiumMetadataValue(new CesiumUintVec2(1, 2));
+        Assert.That(value.GetUInt4(uint4.zero), Is.EqualTo(new uint4(1, 2, 0, 0)));
+
+        value = new CesiumMetadataValue(new CesiumIntVec2(10, 20));
+        Assert.That(value.GetUInt4(uint4.zero), Is.EqualTo(new uint4(10, 20, 0, 0)));
+
+        value = new CesiumMetadataValue(new CesiumUintVec3(1, 2, 3));
+        Assert.That(value.GetUInt4(uint4.zero), Is.EqualTo(new uint4(1, 2, 3, 0)));
+
+        value = new CesiumMetadataValue(new CesiumIntVec3(10, 20, 30));
+        Assert.That(value.GetUInt4(uint4.zero), Is.EqualTo(new uint4(10, 20, 30, 0)));
     }
 
     [Test]
@@ -1769,10 +2003,10 @@ public class TestCesiumMetadataValue
         CesiumMetadataValue value = new CesiumMetadataValue(float4Value);
         Assert.That(value.GetFloat4(float4.zero), Is.EqualTo(float4Value));
 
-        value = new CesiumMetadataValue(new CesiumIntVec4(-1, -2, -3, 1));
+        value = new CesiumMetadataValue(new int4(-1, -2, -3, 1));
         Assert.That(value.GetFloat4(float4.zero), Is.EqualTo(new float4(-1, -2, -3, 1)));
 
-        value = new CesiumMetadataValue(new CesiumUIntVec4(1, 2, 3, 1));
+        value = new CesiumMetadataValue(new uint4(1, 2, 3, 1));
         Assert.That(value.GetFloat4(float4.zero), Is.EqualTo(new float4(1, 2, 3, 1)));
 
         value = new CesiumMetadataValue(new double4(1.2, 2.3, 3.4, 1.0));
@@ -1788,10 +2022,10 @@ public class TestCesiumMetadataValue
         CesiumMetadataValue value = new CesiumMetadataValue(float2Value);
         Assert.That(value.GetFloat4(float4.zero), Is.EqualTo(new float4(float2Value, 0, 0)));
 
-        value = new CesiumMetadataValue(new CesiumIntVec2(-1, -2));
+        value = new CesiumMetadataValue(new int2(-1, -2));
         Assert.That(value.GetFloat4(float4.zero), Is.EqualTo(new float4(-1, -2, 0, 0)));
 
-        value = new CesiumMetadataValue(new CesiumUIntVec2(1, 2));
+        value = new CesiumMetadataValue(new uint2(1, 2));
         Assert.That(value.GetFloat4(float4.zero), Is.EqualTo(new float4(1, 2, 0, 0)));
 
         value = new CesiumMetadataValue(new double2(1.2, 2.3));
@@ -1806,15 +2040,37 @@ public class TestCesiumMetadataValue
         CesiumMetadataValue value = new CesiumMetadataValue(float3Value);
         Assert.That(value.GetFloat4(float4.zero), Is.EqualTo(new float4(float3Value, 0)));
 
-        value = new CesiumMetadataValue(new CesiumIntVec3(-1, -2, -3));
+        value = new CesiumMetadataValue(new int3(-1, -2, -3));
         Assert.That(value.GetFloat4(float4.zero), Is.EqualTo(new float4(-1, -2, -3, 0)));
 
-        value = new CesiumMetadataValue(new CesiumUIntVec3(1, 2, 3));
+        value = new CesiumMetadataValue(new uint3(1, 2, 3));
         Assert.That(value.GetFloat4(float4.zero), Is.EqualTo(new float4(1, 2, 3, 0)));
 
         value = new CesiumMetadataValue(new double3(1.2, 2.3, 3.4));
         Assert.That(
             value.GetFloat4(float4.zero), Is.EqualTo(new float4((float)1.2, (float)2.3, (float)3.4, 0)));
+    }
+
+    [Test]
+    public void GetFloat4ConvertsCesiumVecNValues()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumIntVec4(-1, -2, -3, 1));
+        Assert.That(value.GetFloat4(float4.zero), Is.EqualTo(new float4(-1, -2, -3, 1)));
+
+        value = new CesiumMetadataValue(new CesiumUintVec4(1, 2, 3, 1));
+        Assert.That(value.GetFloat4(float4.zero), Is.EqualTo(new float4(1, 2, 3, 1)));
+
+        value = new CesiumMetadataValue(new CesiumIntVec2(-1, -2));
+        Assert.That(value.GetFloat4(float4.zero), Is.EqualTo(new float4(-1, -2, 0, 0)));
+
+        value = new CesiumMetadataValue(new CesiumUintVec2(1, 2));
+        Assert.That(value.GetFloat4(float4.zero), Is.EqualTo(new float4(1, 2, 0, 0)));
+
+        value = new CesiumMetadataValue(new CesiumIntVec3(-1, -2, -3));
+        Assert.That(value.GetFloat4(float4.zero), Is.EqualTo(new float4(-1, -2, -3, 0)));
+
+        value = new CesiumMetadataValue(new CesiumUintVec3(1, 2, 3));
+        Assert.That(value.GetFloat4(float4.zero), Is.EqualTo(new float4(1, 2, 3, 0)));
     }
 
     [Test]
@@ -1874,10 +2130,10 @@ public class TestCesiumMetadataValue
         CesiumMetadataValue value = new CesiumMetadataValue(double4Value);
         Assert.That(value.GetDouble4(double4.zero), Is.EqualTo(double4Value));
 
-        value = new CesiumMetadataValue(new CesiumIntVec4(-1, -2, -3, 1));
+        value = new CesiumMetadataValue(new int4(-1, -2, -3, 1));
         Assert.That(value.GetDouble4(double4.zero), Is.EqualTo(new double4(-1, -2, -3, 1)));
 
-        value = new CesiumMetadataValue(new CesiumUIntVec4(1, 2, 3, 1));
+        value = new CesiumMetadataValue(new uint4(1, 2, 3, 1));
         Assert.That(value.GetDouble4(double4.zero), Is.EqualTo(new double4(1, 2, 3, 1)));
 
         value = new CesiumMetadataValue(new float4(0.5f, 1.2f, -1.0f, 1.0f));
@@ -1891,14 +2147,13 @@ public class TestCesiumMetadataValue
         CesiumMetadataValue value = new CesiumMetadataValue(double2Value);
         Assert.That(value.GetDouble4(double4.zero), Is.EqualTo(new double4(double2Value, 0, 0)));
 
-        value = new CesiumMetadataValue(new CesiumIntVec2(-1, -2));
+        value = new CesiumMetadataValue(new int2(-1, -2));
         Assert.That(value.GetDouble4(double4.zero), Is.EqualTo(new double4(-1, -2, 0, 0)));
 
-        value = new CesiumMetadataValue(new CesiumUIntVec2(1, 2));
+        value = new CesiumMetadataValue(new uint2(1, 2));
         Assert.That(value.GetDouble4(double4.zero), Is.EqualTo(new double4(1, 2, 0, 0)));
 
-        float2 float2Value = new float2(0.5f, 1.2f);
-        value = new CesiumMetadataValue(float2Value);
+        value = new CesiumMetadataValue(new float2(0.5f, 1.2f));
         Assert.That(value.GetDouble4(double4.zero), Is.EqualTo(new double4(0.5f, 1.2f, 0.0f, 0.0f)));
     }
 
@@ -1909,15 +2164,37 @@ public class TestCesiumMetadataValue
         CesiumMetadataValue value = new CesiumMetadataValue(double3Value);
         Assert.That(value.GetDouble4(double4.zero), Is.EqualTo(new double4(double3Value, 0)));
 
-        value = new CesiumMetadataValue(new CesiumIntVec3(-1, -2, -3));
+        value = new CesiumMetadataValue(new int3(-1, -2, -3));
         Assert.That(value.GetDouble4(double4.zero), Is.EqualTo(new double4(-1, -2, -3, 0)));
 
-        value = new CesiumMetadataValue(new CesiumUIntVec3(1, 2, 3));
+        value = new CesiumMetadataValue(new uint3(1, 2, 3));
         Assert.That(value.GetDouble4(double4.zero), Is.EqualTo(new double4(1, 2, 3, 0)));
 
         value = new CesiumMetadataValue(new float3(0.5f, 1.2f, -1.0f));
         Assert.That(
             value.GetDouble4(double4.zero), Is.EqualTo(new double4(0.5f, 1.2f, -1.0f, 0)));
+    }
+
+    [Test]
+    public void GetDouble4ConvertsCesiumVecNValues()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumIntVec4(-1, -2, -3, 1));
+        Assert.That(value.GetDouble4(double4.zero), Is.EqualTo(new double4(-1, -2, -3, 1)));
+
+        value = new CesiumMetadataValue(new CesiumUintVec4(1, 2, 3, 1));
+        Assert.That(value.GetDouble4(double4.zero), Is.EqualTo(new double4(1, 2, 3, 1)));
+
+        value = new CesiumMetadataValue(new CesiumIntVec2(-1, -2));
+        Assert.That(value.GetDouble4(double4.zero), Is.EqualTo(new double4(-1, -2, 0, 0)));
+
+        value = new CesiumMetadataValue(new CesiumUintVec2(1, 2));
+        Assert.That(value.GetDouble4(double4.zero), Is.EqualTo(new double4(1, 2, 0, 0)));
+
+        value = new CesiumMetadataValue(new CesiumIntVec3(-1, -2, -3));
+        Assert.That(value.GetDouble4(double4.zero), Is.EqualTo(new double4(-1, -2, -3, 0)));
+
+        value = new CesiumMetadataValue(new CesiumUintVec3(1, 2, 3));
+        Assert.That(value.GetDouble4(double4.zero), Is.EqualTo(new double4(1, 2, 3, 0)));
     }
 
     [Test]
@@ -1955,6 +2232,897 @@ public class TestCesiumMetadataValue
 
         value = new CesiumMetadataValue(new CesiumPropertyArray());
         Assert.That(value.GetDouble4(double4.zero), Is.EqualTo(double4.zero));
+    }
+    #endregion
+
+    #region GetInt2x2
+
+    [Test]
+    public void GetInt2x2ReturnsMat2Values()
+    {
+        int2x2 int2x2Value = new int2x2(-1, -2, -3, -4);
+        CesiumMetadataValue value = new CesiumMetadataValue(int2x2Value);
+        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(int2x2Value));
+
+        uint2x2 uint2x2Value = new uint2x2(1, 2, 3, 4);
+        value = new CesiumMetadataValue(uint2x2Value);
+        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(new int2x2(uint2x2Value)));
+
+        float2x2 float2x2Value = new float2x2(0.5f, 1.2f, -1.9f, 0.0f);
+        value = new CesiumMetadataValue(float2x2Value);
+        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(new int2x2(float2x2Value)));
+
+        double2x2 double2x2Value = new double2x2(1.2, 2.3, -1.9, 0.2);
+        value = new CesiumMetadataValue(double2x2Value);
+        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(new int2x2(double2x2Value)));
+    }
+
+    [Test]
+    public void GetInt2x2ConvertsMat3Values()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue(new int3x3(
+            -1, -2, -3,
+             0, -1, 0,
+             0, 0, 1));
+        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(new int2x2(-1, -2, 0, -1)));
+
+        value = new CesiumMetadataValue(new uint3x3(
+            1, 2, 3,
+            4, 5, 6,
+            7, 8, 9));
+        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(new int2x2(1, 2, 4, 5)));
+
+        value = new CesiumMetadataValue(new float3x3(
+             0.5f, 1.2f, -1.0f,
+            -2.2f, 4.54f, 0.0f,
+             0.0f, 0.0f, -1.0f));
+        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(new int2x2(0, 1, -2, 4)));
+
+        value = new CesiumMetadataValue(new double3x3(
+             1.2, 2.3, 3.4,
+            -1.0, -2.0, -0.5,
+             0.1, 20.2, -44.3));
+        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(new int2x2(1, 2, -1, -2)));
+    }
+
+    [Test]
+    public void GetInt2x2ConvertsMat4Values()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue(new int4x4(
+            -1, -2, -3, 0,
+             0, -1, 0, 0,
+             0, 0, 1, 0,
+             1, -1, 0, 1));
+        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(new int2x2(-1, -2, 0, -1)));
+
+        value = new CesiumMetadataValue(new uint4x4(
+            1, 2, 3, 0,
+            4, 5, 6, 0,
+            7, 8, 9, 0,
+            0, 0, 0, 1));
+        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(new int2x2(1, 2, 4, 5)));
+
+        value = new CesiumMetadataValue(new float4x4(
+             0.5f, 1.2f, -1.0f, 1.0f,
+            -2.2f, 4.54f, 0.0f, 2.0f,
+             0.0f, 0.0f, -1.0f, 3.0f,
+             0.0f, 0.0f, 0.0f, 1.0f));
+        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(new int2x2(0, 1, -2, 4)));
+
+        value = new CesiumMetadataValue(new double4x4(
+             1.2, 2.3, 3.4, 0.0,
+            -1.0, -2.0, -0.5, 0.0,
+             0.1, 20.2, -44.3, 0.0,
+             0.0, 0.0, 0.0, 1.0));
+        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(new int2x2(1, 2, -1, -2)));
+    }
+
+    [Test]
+    public void GetInt2x2ConvertsCesiumMatNValues()
+    {
+        int2x2 int2x2Value = new int2x2(-1, -2, -3, -4);
+        CesiumMetadataValue value = new CesiumMetadataValue(
+            new CesiumIntMat2x2(int2x2Value[0], int2x2Value[1]));
+        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(int2x2Value));
+
+        value = new CesiumMetadataValue(new CesiumUintMat2x2(
+            new uint2(1, 2),
+            new uint2(3, 4)));
+        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(new int2x2(1, 3, 2, 4)));
+
+        value = new CesiumMetadataValue(new CesiumIntMat3x3(
+            new int3(-1, -2, -3),
+            new int3(0, -1, 0),
+            new int3(0, 0, -1)));
+        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(new int2x2(-1, 0, -2, -1)));
+
+        value = new CesiumMetadataValue(new CesiumUintMat3x3(
+            new uint3(1, 2, 3),
+            new uint3(4, 5, 6),
+            new uint3(7, 8, 9)));
+        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(new int2x2(1, 4, 2, 5)));
+
+        value = new CesiumMetadataValue(new CesiumIntMat4x4(
+           new int4(-1, -2, -3, 0),
+           new int4(0, -1, 0, 0),
+           new int4(0, 0, 1, 0),
+           new int4(1, -1, 0, 1)));
+        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(new int2x2(-1, 0, -2, -1)));
+
+        value = new CesiumMetadataValue(new CesiumUintMat4x4(
+            new uint4(1, 2, 3, 0),
+            new uint4(4, 5, 6, 0),
+            new uint4(7, 8, 9, 0),
+            new uint4(0, 0, 0, 1)));
+        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(new int2x2(1, 4, 2, 5)));
+    }
+
+    [Test]
+    public void GetInt2x2ConvertsScalarValues()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue(1.2345f);
+        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(int2x2.identity));
+
+        value = new CesiumMetadataValue(-12345);
+        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(new int2x2(-12345, 0, 0, -12345)));
+    }
+
+    [Test]
+    public void GetInt2x2ConvertsBooleanValue()
+    {
+        int2x2 defaultValue = new int2x2(-1);
+        CesiumMetadataValue value = new CesiumMetadataValue(true);
+        Assert.That(value.GetInt2x2(defaultValue), Is.EqualTo(int2x2.identity));
+
+        value = new CesiumMetadataValue(false);
+        Assert.That(value.GetInt2x2(defaultValue), Is.EqualTo(int2x2.zero));
+    }
+
+    [Test]
+    public void GetInt2x2ReturnsDefaultValueForOutOfRangeValues()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue(UInt32.MaxValue);
+        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(int2x2.zero));
+
+        value = new CesiumMetadataValue(new double2x2(Double.MinValue));
+        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(int2x2.zero));
+    }
+
+    [Test]
+    public void GetInt2x2ReturnsDefaultValueForUnsupportedTypes()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue();
+        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(int2x2.zero));
+
+        value = new CesiumMetadataValue(new int2(1));
+        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(int2x2.zero));
+
+        value = new CesiumMetadataValue(new CesiumPropertyArray());
+        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(int2x2.zero));
+
+    }
+    #endregion
+
+    #region GetUInt2x2
+
+    [Test]
+    public void GetUInt2x2ReturnsMat2Values()
+    {
+        uint2x2 uint2x2Value = new uint2x2(1, 2, 3, 4);
+        CesiumMetadataValue value = new CesiumMetadataValue(uint2x2Value);
+        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(uint2x2Value));
+
+        int2x2 int2x2Value = new int2x2(2, 4, 6, 8);
+        value = new CesiumMetadataValue(int2x2Value);
+        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(new uint2x2(int2x2Value)));
+
+        float2x2 float2x2Value = new float2x2(0.5f, 1.2f, 1.9f, 0.0f);
+        value = new CesiumMetadataValue(float2x2Value);
+        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(new uint2x2(float2x2Value)));
+
+        double2x2 double2x2Value = new double2x2(1.2, 2.3, 1.9, 0.2);
+        value = new CesiumMetadataValue(double2x2Value);
+        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(new uint2x2(double2x2Value)));
+    }
+
+    [Test]
+    public void GetUInt2x2ConvertsMat3Values()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue(new uint3x3(
+            1, 2, 3,
+            0, 1, 0,
+            0, 0, 1));
+        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(new uint2x2(1, 2, 0, 1)));
+
+        value = new CesiumMetadataValue(new int3x3(
+            1, 2, 3,
+            4, 5, 6,
+            7, 8, 9));
+        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(new uint2x2(1, 2, 4, 5)));
+
+        value = new CesiumMetadataValue(new float3x3(
+             0.5f, 1.2f, -1.0f,
+             2.2f, 4.54f, 0.0f,
+             0.0f, 0.0f, -1.0f));
+        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(new uint2x2(0, 1, 2, 4)));
+
+        value = new CesiumMetadataValue(new double3x3(
+             1.2, 2.3, 3.4,
+             1.0, 2.0, -0.5,
+             0.1, 20.2, -44.3));
+        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(new uint2x2(1, 2, 1, 2)));
+    }
+
+    [Test]
+    public void GetUInt2x2ConvertsMat4Values()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue(new uint4x4(
+            1, 2, 3, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            1, 1, 0, 1));
+        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(new uint2x2(1, 2, 0, 1)));
+
+        value = new CesiumMetadataValue(new int4x4(
+            1, 2, 3, 0,
+            4, 5, 6, 0,
+            7, 8, 9, 0,
+            0, 0, 0, 1));
+        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(new uint2x2(1, 2, 4, 5)));
+
+        value = new CesiumMetadataValue(new float4x4(
+             0.5f, 1.2f, -1.0f, 1.0f,
+            2.2f, 4.54f, 0.0f, 2.0f,
+             0.0f, 0.0f, -1.0f, 3.0f,
+             0.0f, 0.0f, 0.0f, 1.0f));
+        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(new uint2x2(0, 1, 2, 4)));
+
+        value = new CesiumMetadataValue(new double4x4(
+            1.2, 2.3, 3.4, 0.0,
+            1.0, 2.0, -0.5, 0.0,
+            0.1, 20.2, -44.3, 0.0,
+            0.0, 0.0, 0.0, 1.0));
+        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(new uint2x2(1, 2, 1, 2)));
+    }
+
+    [Test]
+    public void GetUInt2x2ConvertsCesiumMatNValues()
+    {
+        uint2x2 uint2x2Value = new uint2x2(1, 2, 3, 4);
+        CesiumMetadataValue value = new CesiumMetadataValue(
+            new CesiumUintMat2x2(uint2x2Value[0], uint2x2Value[1]));
+        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(uint2x2Value));
+
+        value = new CesiumMetadataValue(new CesiumIntMat2x2(
+            new int2(1, 2),
+            new int2(3, 4)));
+        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(new uint2x2(1, 3, 2, 4)));
+
+        value = new CesiumMetadataValue(new CesiumUintMat3x3(
+            new uint3(1, 2, 3),
+            new uint3(0, 1, 0),
+            new uint3(0, 0, 1)));
+        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(new uint2x2(1, 0, 2, 1)));
+
+        value = new CesiumMetadataValue(new CesiumIntMat3x3(
+            new int3(1, 2, 3),
+            new int3(4, 5, 6),
+            new int3(7, 8, 9)));
+        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(new uint2x2(1, 4, 2, 5)));
+
+        value = new CesiumMetadataValue(new CesiumUintMat4x4(
+           new uint4(1, 2, 3, 0),
+           new uint4(0, 1, 0, 0),
+           new uint4(0, 0, 1, 0),
+           new uint4(1, 1, 0, 1)));
+        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(new uint2x2(1, 0, 2, 1)));
+
+        value = new CesiumMetadataValue(new CesiumIntMat4x4(
+            new int4(1, 2, 3, 0),
+            new int4(4, 5, 6, 0),
+            new int4(7, 8, 9, 0),
+            new int4(0, 0, 0, 1)));
+        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(new uint2x2(1, 4, 2, 5)));
+    }
+
+    [Test]
+    public void GetUInt2x2ConvertsScalarValues()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue(1.2345f);
+        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(uint2x2.identity));
+
+        value = new CesiumMetadataValue(12345);
+        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(new uint2x2(12345, 0, 0, 12345)));
+    }
+
+    [Test]
+    public void GetUInt2x2ConvertsBooleanValue()
+    {
+        uint2x2 defaultValue = new uint2x2(11);
+        CesiumMetadataValue value = new CesiumMetadataValue(true);
+        Assert.That(value.GetUInt2x2(defaultValue), Is.EqualTo(uint2x2.identity));
+
+        value = new CesiumMetadataValue(false);
+        Assert.That(value.GetUInt2x2(defaultValue), Is.EqualTo(uint2x2.zero));
+    }
+
+    [Test]
+    public void GetUInt2x2ReturnsDefaultValueForOutOfRangeValues()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue(-1);
+        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(uint2x2.zero));
+
+        value = new CesiumMetadataValue(new double2x2(Double.MinValue));
+        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(uint2x2.zero));
+    }
+
+    [Test]
+    public void GetUInt2x2ReturnsDefaultValueForUnsupportedTypes()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue();
+        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(uint2x2.zero));
+
+        value = new CesiumMetadataValue(new uint2(1));
+        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(uint2x2.zero));
+
+        value = new CesiumMetadataValue(new CesiumPropertyArray());
+        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(uint2x2.zero));
+
+    }
+    #endregion
+
+    #region GetFloat2x2
+
+    [Test]
+    public void GetFloat2x2ReturnsMat2Values()
+    {
+        float2x2 float2x2Value = new float2x2(0.5f, 1.2f, -1.9f, 0.0f);
+        CesiumMetadataValue value = new CesiumMetadataValue(float2x2Value);
+        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(float2x2Value));
+
+        int2x2 int2x2Value = new int2x2(-1, -2, -3, -4);
+        value = new CesiumMetadataValue(int2x2Value);
+        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(int2x2Value)));
+
+        uint2x2 uint2x2Value = new uint2x2(1, 2, 3, 4);
+        value = new CesiumMetadataValue(uint2x2Value);
+        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(uint2x2Value)));
+
+        double2x2 double2x2Value = new double2x2(1.2, 2.3, -1.9, 0.2);
+        value = new CesiumMetadataValue(double2x2Value);
+        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(double2x2Value)));
+    }
+
+    [Test]
+    public void GetFloat2x2ConvertsMat3Values()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue(new float3x3(
+             0.5f, 1.2f, -1.0f,
+            -2.2f, 4.54f, 0.0f,
+             0.0f, 0.0f, -1.0f));
+        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(0.5f, 1.2f, -2.2f, 4.54f)));
+
+        value = new CesiumMetadataValue(new int3x3(
+            -1, -2, -3,
+             0, -1, 0,
+             0, 0, 1));
+        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(-1, -2, 0, -1)));
+
+        value = new CesiumMetadataValue(new uint3x3(
+            1, 2, 3,
+            4, 5, 6,
+            7, 8, 9));
+
+        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(1, 2, 4, 5)));
+
+        double3x3 double3x3Value = new double3x3(
+             1.2, 2.3, 3.4,
+            -1.0, -2.0, -0.5,
+             0.1, 20.2, -44.3);
+        value = new CesiumMetadataValue(double3x3Value);
+        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(
+            (float)double3x3Value[0][0], (float)double3x3Value[1][0],
+            (float)double3x3Value[0][1], (float)double3x3Value[1][1])));
+    }
+
+    [Test]
+    public void GetFloat2x2ConvertsMat4Values()
+    {
+        CesiumMetadataValue
+        value = new CesiumMetadataValue(new float4x4(
+             0.5f, 1.2f, -1.0f, 1.0f,
+            -2.2f, 4.54f, 0.0f, 2.0f,
+             0.0f, 0.0f, -1.0f, 3.0f,
+             0.0f, 0.0f, 0.0f, 1.0f));
+        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(
+            0.5f, 1.2f,
+            -2.2f, 4.54f)));
+
+        value = new CesiumMetadataValue(new int4x4(
+            -1, -2, -3, 0,
+             0, -1, 0, 0,
+             0, 0, 1, 0,
+             1, -1, 0, 1));
+        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(-1, -2, 0, -1)));
+
+        value = new CesiumMetadataValue(new uint4x4(
+            1, 2, 3, 0,
+            4, 5, 6, 0,
+            7, 8, 9, 0,
+            0, 0, 0, 1));
+        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(1, 2, 4, 5)));
+
+        double4x4 double4x4Value = new double4x4(
+             1.2, 2.3, 3.4, 0.0,
+            -1.0, -2.0, -0.5, 0.0,
+             0.1, 20.2, -44.3, 0.0,
+             0.0, 0.0, 0.0, 1.0);
+        value = new CesiumMetadataValue(double4x4Value);
+        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(
+            (float)double4x4Value[0][0], (float)double4x4Value[1][0],
+            (float)double4x4Value[0][1], (float)double4x4Value[1][1])));
+    }
+
+    [Test]
+    public void GetFloat2x2ConvertsCesiumMatNValues()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumIntMat2x2(
+            new int2(-1, -2),
+            new int2(-3, -4)));
+        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(-1, -3, -2, -4)));
+
+        value = new CesiumMetadataValue(new CesiumUintMat2x2(
+            new uint2(1, 2),
+            new uint2(3, 4)));
+        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(1, 3, 2, 4)));
+
+        value = new CesiumMetadataValue(new CesiumIntMat3x3(
+            new int3(-1, -2, -3),
+            new int3(0, -1, 0),
+            new int3(0, 0, -1)));
+        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(-1, 0, -2, -1)));
+
+        value = new CesiumMetadataValue(new CesiumUintMat3x3(
+            new uint3(1, 2, 3),
+            new uint3(4, 5, 6),
+            new uint3(7, 8, 9)));
+        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(1, 4, 2, 5)));
+
+        value = new CesiumMetadataValue(new CesiumIntMat4x4(
+           new int4(-1, -2, -3, 0),
+           new int4(0, -1, 0, 0),
+           new int4(0, 0, 1, 0),
+           new int4(1, -1, 0, 1)));
+        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(-1, 0, -2, -1)));
+
+        value = new CesiumMetadataValue(new CesiumUintMat4x4(
+            new uint4(1, 2, 3, 0),
+            new uint4(4, 5, 6, 0),
+            new uint4(7, 8, 9, 0),
+            new uint4(0, 0, 0, 1)));
+        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(1, 4, 2, 5)));
+    }
+
+    [Test]
+    public void GetFloat2x2ConvertsScalarValues()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue(1.2345f);
+        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(1.2345f, 0, 0, 1.2345f)));
+
+        value = new CesiumMetadataValue(-12345);
+        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(-12345, 0, 0, -12345)));
+    }
+
+    [Test]
+    public void GetFloat2x2ConvertsBooleanValue()
+    {
+        float2x2 defaultValue = new float2x2(-1);
+        CesiumMetadataValue value = new CesiumMetadataValue(true);
+        Assert.That(value.GetFloat2x2(defaultValue), Is.EqualTo(float2x2.identity));
+
+        value = new CesiumMetadataValue(false);
+        Assert.That(value.GetFloat2x2(defaultValue), Is.EqualTo(float2x2.zero));
+    }
+
+    [Test]
+    public void GetFloat2x2ReturnsDefaultValueForOutOfRangeValues()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue(Double.MaxValue);
+        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(float2x2.zero));
+
+        value = new CesiumMetadataValue(new double2x2(Double.MinValue));
+        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(float2x2.zero));
+    }
+
+    [Test]
+    public void GetFloat2x2ReturnsDefaultValueForUnsupportedTypes()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue();
+        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(float2x2.zero));
+
+        value = new CesiumMetadataValue(new float2(1));
+        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(float2x2.zero));
+
+        value = new CesiumMetadataValue(new CesiumPropertyArray());
+        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(float2x2.zero));
+
+    }
+    #endregion
+
+    #region GetDouble2x2
+
+    [Test]
+    public void GetDouble2x2ReturnsMat2Values()
+    {
+        double2x2 double2x2Value = new double2x2(1.2, 2.3, -1.9, 0.2);
+        CesiumMetadataValue value = new CesiumMetadataValue(double2x2Value);
+        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(double2x2Value));
+
+        int2x2 int2x2Value = new int2x2(-1, -2, -3, -4);
+        value = new CesiumMetadataValue(int2x2Value);
+        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(int2x2Value)));
+
+        uint2x2 uint2x2Value = new uint2x2(1, 2, 3, 4);
+        value = new CesiumMetadataValue(uint2x2Value);
+        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(uint2x2Value)));
+
+        float2x2 float2x2Value = new float2x2(0.5f, 1.2f, -1.9f, 0.0f);
+        value = new CesiumMetadataValue(float2x2Value);
+        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(float2x2Value)));
+    }
+
+    [Test]
+    public void GetDouble2x2ConvertsMat3Values()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue(new double3x3(
+             1.2, 2.3, 3.4,
+            -1.0, -2.0, -0.5,
+             0.1, 20.2, -44.3));
+        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(1.2, 2.3, -1.0, -2.0)));
+
+        value = new CesiumMetadataValue(new int3x3(
+            -1, -2, -3,
+             0, -1, 0,
+             0, 0, 1));
+        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(-1, -2, 0, -1)));
+
+        value = new CesiumMetadataValue(new uint3x3(
+            1, 2, 3,
+            4, 5, 6,
+            7, 8, 9));
+
+        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(1, 2, 4, 5)));
+
+        value = new CesiumMetadataValue(new float3x3(
+             0.5f, 1.2f, -1.0f,
+            -2.2f, 4.54f, 0.0f,
+             0.0f, 0.0f, -1.0f));
+        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(0.5f, 1.2f, -2.2f, 4.54f)));
+    }
+
+    [Test]
+    public void GetDouble2x2ConvertsMat4Values()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue(new double4x4(
+             1.2, 2.3, 3.4, 0.0,
+            -1.0, -2.0, -0.5, 0.0,
+             0.1, 20.2, -44.3, 0.0,
+             0.0, 0.0, 0.0, 1.0));
+        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(1.2, 2.3, -1.0, -2.0)));
+
+        value = new CesiumMetadataValue(new int4x4(
+            -1, -2, -3, 0,
+             0, -1, 0, 0,
+             0, 0, 1, 0,
+             1, -1, 0, 1));
+        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(-1, -2, 0, -1)));
+
+        value = new CesiumMetadataValue(new uint4x4(
+            1, 2, 3, 0,
+            4, 5, 6, 0,
+            7, 8, 9, 0,
+            0, 0, 0, 1));
+        Assert.That(value.GetDouble2x2(float2x2.zero), Is.EqualTo(new double2x2(1, 2, 4, 5)));
+
+        value = new CesiumMetadataValue(new float4x4(
+             0.5f, 1.2f, -1.0f, 1.0f,
+            -2.2f, 4.54f, 0.0f, 2.0f,
+             0.0f, 0.0f, -1.0f, 3.0f,
+             0.0f, 0.0f, 0.0f, 1.0f));
+        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(0.5f, 1.2f, -2.2f, 4.54f)));
+    }
+
+    [Test]
+    public void GetDouble2x2ConvertsCesiumMatNValues()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumIntMat2x2(
+            new int2(-1, -2),
+            new int2(-3, -4)));
+        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(-1, -3, -2, -4)));
+
+        value = new CesiumMetadataValue(new CesiumUintMat2x2(
+            new uint2(1, 2),
+            new uint2(3, 4)));
+        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(1, 3, 2, 4)));
+
+        value = new CesiumMetadataValue(new CesiumIntMat3x3(
+            new int3(-1, -2, -3),
+            new int3(0, -1, 0),
+            new int3(0, 0, -1)));
+        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(-1, 0, -2, -1)));
+
+        value = new CesiumMetadataValue(new CesiumUintMat3x3(
+            new uint3(1, 2, 3),
+            new uint3(4, 5, 6),
+            new uint3(7, 8, 9)));
+        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(1, 4, 2, 5)));
+
+        value = new CesiumMetadataValue(new CesiumIntMat4x4(
+           new int4(-1, -2, -3, 0),
+           new int4(0, -1, 0, 0),
+           new int4(0, 0, 1, 0),
+           new int4(1, -1, 0, 1)));
+        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(-1, 0, -2, -1)));
+
+        value = new CesiumMetadataValue(new CesiumUintMat4x4(
+            new uint4(1, 2, 3, 0),
+            new uint4(4, 5, 6, 0),
+            new uint4(7, 8, 9, 0),
+            new uint4(0, 0, 0, 1)));
+        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(1, 4, 2, 5)));
+    }
+
+    [Test]
+    public void GetDouble2x2ConvertsScalarValues()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue(1.2345f);
+        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(1.2345f, 0, 0, 1.2345f)));
+
+        value = new CesiumMetadataValue(-12345);
+        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(-12345, 0, 0, -12345)));
+    }
+
+    [Test]
+    public void GetDouble2x2ConvertsBooleanValue()
+    {
+        double2x2 defaultValue = new double2x2(-1);
+        CesiumMetadataValue value = new CesiumMetadataValue(true);
+        Assert.That(value.GetDouble2x2(defaultValue), Is.EqualTo(double2x2.identity));
+
+        value = new CesiumMetadataValue(false);
+        Assert.That(value.GetDouble2x2(defaultValue), Is.EqualTo(double2x2.zero));
+    }
+
+    [Test]
+    public void GetDouble2x2ReturnsDefaultValueForUnsupportedTypes()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue();
+        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(double2x2.zero));
+
+        value = new CesiumMetadataValue(new double2(1));
+        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(double2x2.zero));
+
+        value = new CesiumMetadataValue(new CesiumPropertyArray());
+        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(double2x2.zero));
+
+    }
+    #endregion
+
+    #region GetInt3x3
+
+    [Test]
+    public void GetInt3x3ReturnsMat3Values()
+    {
+        int3x3 int3x3Value = new int3x3(
+            -1, -2, -3,
+             0, -1, 0,
+             0, 0, 1);
+        CesiumMetadataValue value = new CesiumMetadataValue(int3x3Value);
+        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(int3x3Value));
+
+        uint3x3 uint3x3Value = new uint3x3(
+            1, 2, 3,
+            4, 5, 6,
+            7, 8, 9);
+        value = new CesiumMetadataValue(uint3x3Value);
+        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(new int3x3(uint3x3Value)));
+
+        float3x3 float3x3Value = new float3x3(
+             0.5f, 1.2f, -1.0f,
+            -2.2f, 4.54f, 0.0f,
+             0.0f, 0.0f, -1.0f);
+        value = new CesiumMetadataValue(float3x3Value);
+        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(new int3x3(float3x3Value)));
+
+        double3x3 double3x3Value = new double3x3(
+             1.2, 2.3, 3.4,
+            -1.0, -2.0, -0.5,
+             0.1, 20.2, -44.3);
+        value = new CesiumMetadataValue(double3x3Value);
+        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(new int3x3(double3x3Value)));
+    }
+
+    [Test]
+    public void GetInt3x3ConvertsMat2Values()
+    {
+        int2x2 int2x2Value = new int2x2(-1, -2, -3, -4);
+        CesiumMetadataValue value = new CesiumMetadataValue(int2x2Value);
+        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(new int3x3(
+            -1, -2, 0,
+            -3, -4, 0,
+            0, 0, 0)));
+
+        uint2x2 uint2x2Value = new uint2x2(1, 2, 3, 4);
+        value = new CesiumMetadataValue(uint2x2Value);
+        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(new int3x3(
+            1, 2, 0,
+            3, 4, 0,
+            0, 0, 0)));
+
+        float2x2 float2x2Value = new float2x2(0.5f, 1.2f, -1.9f, 0.0f);
+        value = new CesiumMetadataValue(float2x2Value);
+        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(new int3x3(
+            0, 1, 0,
+            -1, 0, 0,
+            0, 0, 0)));
+
+        double2x2 double2x2Value = new double2x2(1.2, 2.3, -1.9, 0.2);
+        value = new CesiumMetadataValue(double2x2Value);
+        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(new int3x3(
+            1, 2, 0,
+            -1, 0, 0,
+            0, 0, 0)));
+    }
+
+    [Test]
+    public void GetInt3x3ConvertsMat4Values()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue(new int4x4(
+            -1, -2, -3, 0,
+             0, -1, 0, 0,
+             0, 0, 1, 0,
+             1, -1, 0, 1));
+        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(new int3x3(
+            -1, -2, -3,
+            0, -1, 0,
+            0, 0, 1)));
+
+        value = new CesiumMetadataValue(new uint4x4(
+            1, 2, 3, 0,
+            4, 5, 6, 0,
+            7, 8, 9, 0,
+            0, 0, 0, 1));
+        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(new int3x3(
+            1, 2, 3,
+            4, 5, 6,
+            7, 8, 9)));
+
+        value = new CesiumMetadataValue(new float4x4(
+             0.5f, 1.2f, -1.0f, 1.0f,
+            -2.2f, 4.54f, 0.0f, 2.0f,
+             0.0f, 0.0f, -1.0f, 3.0f,
+             0.0f, 0.0f, 0.0f, 1.0f));
+        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(new int3x3(
+            0, 1, -1,
+            -2, 4, 0,
+            0, 0, -1)));
+
+        value = new CesiumMetadataValue(new double4x4(
+             1.2, 2.3, 3.4, 0.0,
+            -1.0, -2.0, -0.5, 0.0,
+             0.1, 20.2, -44.3, 0.0,
+             0.0, 0.0, 0.0, 1.0));
+        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(new int3x3(
+            1, 2, 3,
+            -1, -2, 0,
+            0, 20, -44)));
+    }
+
+    [Test]
+    public void GetInt3x3ConvertsCesiumMatNValues()
+    {
+        int3x3 int3x3Value = new int3x3(
+            -1, 0, 0,
+            -2, -1, 0,
+            -3, 0, -1);
+        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumIntMat3x3(
+           int3x3Value[0],
+           int3x3Value[1],
+           int3x3Value[2]));
+        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(int3x3Value));
+
+        value = new CesiumMetadataValue(new CesiumUintMat3x3(
+            new uint3(1, 2, 3),
+            new uint3(4, 5, 6),
+            new uint3(7, 8, 9)));
+        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(new int3x3(
+            1, 4, 7,
+            2, 5, 8,
+            3, 6, 9)));
+
+        value = new CesiumMetadataValue(new CesiumIntMat2x2(
+            new int2(-1, -2),
+            new int2(-3, -4)));
+        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(new int3x3(
+            -1, -3, 0,
+            -2, -4, 0,
+            0, 0, 0)));
+
+        value = new CesiumMetadataValue(new CesiumUintMat2x2(
+            new uint2(1, 2),
+            new uint2(3, 4)));
+        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(new int3x3(
+            1, 3, 0,
+            2, 4, 0,
+            0, 0, 0)));
+
+        value = new CesiumMetadataValue(new CesiumIntMat4x4(
+           new int4(-1, -2, -3, 0),
+           new int4(0, -1, 0, 0),
+           new int4(0, 0, 1, 0),
+           new int4(1, -1, 0, 1)));
+        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(new int3x3(
+            -1, 0, 0,
+            -2, -1, 0,
+            -3, 0, 1)));
+
+        value = new CesiumMetadataValue(new CesiumUintMat4x4(
+            new uint4(1, 2, 3, 0),
+            new uint4(4, 5, 6, 0),
+            new uint4(7, 8, 9, 0),
+            new uint4(0, 0, 0, 1)));
+        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(new int3x3(
+            1, 4, 7,
+            2, 5, 8,
+            3, 6, 9)));
+    }
+
+    [Test]
+    public void GetInt3x3ConvertsScalarValues()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue(1.2345f);
+        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(int3x3.identity));
+
+        value = new CesiumMetadataValue(-12345);
+        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(new int3x3(
+            -12345, 0, 0,
+            0, -12345, 0,
+            0, 0, -12345)));
+    }
+
+    [Test]
+    public void GetInt3x3ConvertsBooleanValue()
+    {
+        int3x3 defaultValue = new int3x3(-1);
+        CesiumMetadataValue value = new CesiumMetadataValue(true);
+        Assert.That(value.GetInt3x3(defaultValue), Is.EqualTo(int3x3.identity));
+
+        value = new CesiumMetadataValue(false);
+        Assert.That(value.GetInt3x3(defaultValue), Is.EqualTo(int3x3.zero));
+    }
+
+    [Test]
+    public void GetInt3x3ReturnsDefaultValueForOutOfRangeValues()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue(UInt32.MaxValue);
+        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(int3x3.zero));
+
+        value = new CesiumMetadataValue(new double2x2(Double.MinValue));
+        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(int3x3.zero));
+    }
+
+    [Test]
+    public void GetInt3x3ReturnsDefaultValueForUnsupportedTypes()
+    {
+        CesiumMetadataValue value = new CesiumMetadataValue();
+        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(int3x3.zero));
+
+        value = new CesiumMetadataValue(new int3(1));
+        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(int3x3.zero));
+
+        value = new CesiumMetadataValue(new CesiumPropertyArray());
+        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(int3x3.zero));
+
     }
     #endregion
 

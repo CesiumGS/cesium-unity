@@ -1113,8 +1113,8 @@ namespace CesiumForUnity
         /// - If the value is a scalar, the resulting double4 will have this value in
         /// all of its components.<br/>
         /// 
-        /// - If the value is a boolean, (1.0, 1.0, 1.0, 1.0) is returned for true, while 
-        /// (0.0, 0.0, 0.0, 0.0) is returned for false.<br/>
+        /// - If the value is a boolean, (1.0, 1.0, 1.0, 1.0) is returned for true,
+        /// while (0.0, 0.0, 0.0, 0.0) is returned for false.<br/>
         /// <br/><br/>
         /// </para>
         /// <para>
@@ -1128,7 +1128,166 @@ namespace CesiumForUnity
         /// <returns>The property value as a double4.</returns>
         public partial double4 GetDouble4(Int64 featureID, double4 defaultValue);
 
-        // int2x2, uint2x2, float2x2, double2x2
+        /// <summary>
+        /// Attempts to retrieve the value for the given feature as a int2x2.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// For numeric properties, the raw value for a given feature will be
+        /// transformed by the property's normalization, scale, and offset before it is
+        /// further converted. If the raw value is equal to the property's "no data"
+        /// value, then the property's default value will be converted if possible. If
+        /// the property-defined default value cannot be converted, or does not exist,
+        /// then the user-defined default value is returned.
+        /// </para>
+        /// <para>
+        /// Property values are converted as follows:<br/>
+        /// 
+        /// - If the value is a 2-by-2 matrix, its components will be converted to
+        /// 32-bit signed integers if possible.<br/>
+        /// 
+        /// - If the value is a 3-by-3 or 4-by-4 matrix, the int2x2 will be constructed
+        /// from the first 2 components of the first 2 columns.<br/>
+        /// 
+        /// - If the value is a scalar, then the resulting int2x2 will have this 
+        /// value along its diagonal. All other entries will be zero.<br/>
+        /// 
+        /// - If the value is a boolean, it is converted to 1 for true and 0 for
+        /// false. Then, the resulting int2x2 will have this value along its diagonal,
+        /// while all other entries will be zero.<br/>
+        /// <br/><br/>
+        /// </para>
+        /// <para>
+        /// In all other cases, the user-defined default value is returned. If the
+        /// feature ID is out-of-range, or if the property table property is somehow
+        /// invalid, the user-defined default value is returned.
+        /// </para>
+        /// </remarks>
+        /// <param name="featureID">The ID of the feature.</param>
+        /// <param name="defaultValue">The default value to fall back on.</param>
+        /// <returns>The property value as a int2x2.</returns>
+        public partial int2x2 GetInt2x2(Int64 featureID, int2x2 defaultValue);
+
+        /// <summary>
+        /// Attempts to retrieve the value for the given feature as a uint2x2.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// For numeric properties, the raw value for a given feature will be
+        /// transformed by the property's normalization, scale, and offset before it is
+        /// further converted. If the raw value is equal to the property's "no data"
+        /// value, then the property's default value will be converted if possible. If
+        /// the property-defined default value cannot be converted, or does not exist,
+        /// then the user-defined default value is returned.
+        /// </para>
+        /// <para>
+        /// Property values are converted as follows:<br/>
+        /// 
+        /// - If the value is a 2-by-2 matrix, its components will be converted to
+        /// 32-bit unsigned integers if possible.<br/>
+        /// 
+        /// - If the value is a 3-by-3 or 4-by-4 matrix, the uint2x2 will be constructed
+        /// from the first 2 components of the first 2 columns.<br/>
+        /// 
+        /// - If the value is a scalar, then the resulting uint2x2 will have this 
+        /// value along its diagonal. All other entries will be zero.<br/>
+        /// 
+        /// - If the value is a boolean, it is converted to 1 for true and 0 for
+        /// false. Then, the resulting uint2x2 will have this value along its diagonal,
+        /// while all other entries will be zero.<br/>
+        /// <br/><br/>
+        /// </para>
+        /// <para>
+        /// In all other cases, the user-defined default value is returned. If the
+        /// feature ID is out-of-range, or if the property table property is somehow
+        /// invalid, the user-defined default value is returned.
+        /// </para>
+        /// </remarks>
+        /// <param name="featureID">The ID of the feature.</param>
+        /// <param name="defaultValue">The default value to fall back on.</param>
+        /// <returns>The property value as a uint2x2.</returns>
+        public partial uint2x2 GetUInt2x2(Int64 featureID, uint2x2 defaultValue);
+
+        /// <summary>
+        /// Attempts to retrieve the value for the given feature as a float2x2.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// For numeric properties, the raw value for a given feature will be
+        /// transformed by the property's normalization, scale, and offset before it is
+        /// further converted. If the raw value is equal to the property's "no data"
+        /// value, then the property's default value will be converted if possible. If
+        /// the property-defined default value cannot be converted, or does not exist,
+        /// then the user-defined default value is returned.
+        /// </para>
+        /// <para>
+        /// Property values are converted as follows:<br/>
+        /// 
+        /// - If the value is a 2-by-2 matrix, its components will be converted to 
+        /// the closest representable single-precision floats, if possible.<br/>
+        /// 
+        /// - If the value is a 3-by-3 or 4-by-4 matrix, the float2x2 will be constructed
+        /// from the first 2 components of the first 2 columns.<br/>
+        /// 
+        /// - If the value is a scalar, then the resulting float2x2 will have this 
+        /// value along its diagonal. All other entries will be zero.<br/>
+        /// 
+        /// - If the value is a boolean, it is converted to 1.0f for true and 0.0f for
+        /// false. Then, the resulting float2x2 will have this value along its diagonal,
+        /// while all other entries will be zero.<br/>
+        /// <br/><br/>
+        /// </para>
+        /// <para>
+        /// In all other cases, the user-defined default value is returned. If the
+        /// feature ID is out-of-range, or if the property table property is somehow
+        /// invalid, the user-defined default value is returned.
+        /// </para>
+        /// </remarks>
+        /// <param name="featureID">The ID of the feature.</param>
+        /// <param name="defaultValue">The default value to fall back on.</param>
+        /// <returns>The property value as a float2x2.</returns>
+        public partial float2x2 GetFloat2x2(Int64 featureID, float2x2 defaultValue);
+
+        /// <summary>
+        /// Attempts to retrieve the value for the given feature as a double2x2.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// For numeric properties, the raw value for a given feature will be
+        /// transformed by the property's normalization, scale, and offset before it is
+        /// further converted. If the raw value is equal to the property's "no data"
+        /// value, then the property's default value will be converted if possible. If
+        /// the property-defined default value cannot be converted, or does not exist,
+        /// then the user-defined default value is returned.
+        /// </para>
+        /// <para>
+        /// Property values are converted as follows:<br/>
+        /// 
+        /// - If the value is a 2-by-2 matrix, its components will be converted to 
+        /// double-precision floating-point numbers.<br/>
+        /// 
+        /// - If the value is a 3-by-3 or 4-by-4 matrix, the double2x2 will be constructed
+        /// from the first 2 components of the first 2 columns.<br/>
+        /// 
+        /// - If the value is a scalar, then the resulting double2x2 will have this 
+        /// value along its diagonal. All other entries will be zero.<br/>
+        /// 
+        /// - If the value is a boolean, it is converted to 1.0 for true and 0.0 for
+        /// false. Then, the resulting double2x2 will have this value along its diagonal,
+        /// while all other entries will be zero.<br/>
+        /// <br/><br/>
+        /// </para>
+        /// <para>
+        /// In all other cases, the user-defined default value is returned. If the
+        /// feature ID is out-of-range, or if the property table property is somehow
+        /// invalid, the user-defined default value is returned.
+        /// </para>
+        /// </remarks>
+        /// <param name="featureID">The ID of the feature.</param>
+        /// <param name="defaultValue">The default value to fall back on.</param>
+        /// <returns>The property value as a double2x2.</returns>
+        public partial double2x2 GetDouble2x2(Int64 featureID, double2x2 defaultValue);
+
         // int3x3, uint3x3, float3x3, double3x3,
         // int4x4, uint4x4, float4x4, double4x4
 
@@ -1174,7 +1333,7 @@ namespace CesiumForUnity
         /// </remarks>
         /// <param name="featureID">The ID of the feature.</param>
         /// <returns>The property value.</returns>
-        //public partial CesiumMetadataValue GetValue(Int64 featureID);
+        public partial CesiumMetadataValue GetValue(Int64 featureID);
 
         /// <summary>
         /// Retrieves the raw value of the property for the given feature. This is the
@@ -1192,7 +1351,7 @@ namespace CesiumForUnity
         /// </remarks>
         /// <param name="featureID">The ID of the feature.</param>
         /// <returns>The property value.</returns>
-        //public partial CesiumMetadataValue GetRawValue(Int64 featureID);
+        public partial CesiumMetadataValue GetRawValue(Int64 featureID);
         #endregion
     }
 }

@@ -156,12 +156,12 @@ namespace CesiumForUnity
                     return new CesiumMetadataValueType(CesiumMetadataType.Vec3, (inObject as CesiumIntVec3?).Value.componentType, false);
                 case CesiumIntVec4:
                     return new CesiumMetadataValueType(CesiumMetadataType.Vec4, (inObject as CesiumIntVec4?).Value.componentType, false);
-                case CesiumUIntVec2:
-                    return new CesiumMetadataValueType(CesiumMetadataType.Vec2, (inObject as CesiumUIntVec2?).Value.componentType, false);
-                case CesiumUIntVec3:
-                    return new CesiumMetadataValueType(CesiumMetadataType.Vec3, (inObject as CesiumUIntVec3?).Value.componentType, false);
-                case CesiumUIntVec4:
-                    return new CesiumMetadataValueType(CesiumMetadataType.Vec4, (inObject as CesiumUIntVec4?).Value.componentType, false);
+                case CesiumUintVec2:
+                    return new CesiumMetadataValueType(CesiumMetadataType.Vec2, (inObject as CesiumUintVec2?).Value.componentType, false);
+                case CesiumUintVec3:
+                    return new CesiumMetadataValueType(CesiumMetadataType.Vec3, (inObject as CesiumUintVec3?).Value.componentType, false);
+                case CesiumUintVec4:
+                    return new CesiumMetadataValueType(CesiumMetadataType.Vec4, (inObject as CesiumUintVec4?).Value.componentType, false);
                 case uint2x2:
                     return new CesiumMetadataValueType(CesiumMetadataType.Mat2, CesiumMetadataComponentType.Uint32, false);
                 case uint3x3:
@@ -186,12 +186,12 @@ namespace CesiumForUnity
                     return new CesiumMetadataValueType(CesiumMetadataType.Mat3, (inObject as CesiumIntMat3x3?).Value.componentType, false);
                 case CesiumIntMat4x4:
                     return new CesiumMetadataValueType(CesiumMetadataType.Mat4, (inObject as CesiumIntMat4x4?).Value.componentType, false);
-                case CesiumUIntMat2x2:
-                    return new CesiumMetadataValueType(CesiumMetadataType.Mat2, (inObject as CesiumUIntMat2x2?).Value.componentType, false);
-                case CesiumUIntMat3x3:
-                    return new CesiumMetadataValueType(CesiumMetadataType.Mat3, (inObject as CesiumUIntMat3x3?).Value.componentType, false);
-                case CesiumUIntMat4x4:
-                    return new CesiumMetadataValueType(CesiumMetadataType.Mat4, (inObject as CesiumUIntMat4x4?).Value.componentType, false);
+                case CesiumUintMat2x2:
+                    return new CesiumMetadataValueType(CesiumMetadataType.Mat2, (inObject as CesiumUintMat2x2?).Value.componentType, false);
+                case CesiumUintMat3x3:
+                    return new CesiumMetadataValueType(CesiumMetadataType.Mat3, (inObject as CesiumUintMat3x3?).Value.componentType, false);
+                case CesiumUintMat4x4:
+                    return new CesiumMetadataValueType(CesiumMetadataType.Mat4, (inObject as CesiumUintMat4x4?).Value.componentType, false);
                 case System.String:
                     return new CesiumMetadataValueType(CesiumMetadataType.String, CesiumMetadataComponentType.None, false);
                 default:

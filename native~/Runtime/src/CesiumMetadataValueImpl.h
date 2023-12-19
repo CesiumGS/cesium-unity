@@ -16,17 +16,29 @@ class Object;
 
 namespace DotNet::Unity::Mathematics {
 struct int2;
+struct int2x2;
 struct int3;
+struct int3x3;
 struct int4;
+struct int4x4;
 struct uint2;
+struct uint2x2;
 struct uint3;
+struct uint3x3;
 struct uint4;
+struct uint4x4;
 struct float2;
+struct float2x2;
 struct float3;
+struct float3x3;
 struct float4;
+struct float4x4;
 struct double2;
+struct double2x2;
 struct double3;
+struct double3x3;
 struct double4;
+struct double4x4;
 } // namespace DotNet::Unity::Mathematics
 
 namespace CesiumForUnityNative {
@@ -111,6 +123,7 @@ public:
       glm::mat<4, 4, double>>;
 #pragma endregion
 
+#pragma region Partial function implementations
   static bool ConvertToBoolean(
       const DotNet::CesiumForUnity::CesiumMetadataValue& value,
       bool defaultValue);
@@ -203,15 +216,64 @@ public:
       const DotNet::CesiumForUnity::CesiumMetadataValue& value,
       DotNet::Unity::Mathematics::double4 defaultValue);
 
+  static DotNet::Unity::Mathematics::int2x2 ConvertToInt2x2(
+      const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+      DotNet::Unity::Mathematics::int2x2 defaultValue);
+
+  static DotNet::Unity::Mathematics::uint2x2 ConvertToUInt2x2(
+      const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+      DotNet::Unity::Mathematics::uint2x2 defaultValue);
+
+  static DotNet::Unity::Mathematics::float2x2 ConvertToFloat2x2(
+      const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+      DotNet::Unity::Mathematics::float2x2 defaultValue);
+
+  static DotNet::Unity::Mathematics::double2x2 ConvertToDouble2x2(
+      const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+      DotNet::Unity::Mathematics::double2x2 defaultValue);
+
+  static DotNet::Unity::Mathematics::int3x3 ConvertToInt3x3(
+      const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+      DotNet::Unity::Mathematics::int3x3 defaultValue);
+
+  static DotNet::Unity::Mathematics::uint3x3 ConvertToUInt3x3(
+      const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+      DotNet::Unity::Mathematics::uint3x3 defaultValue);
+
+  static DotNet::Unity::Mathematics::float3x3 ConvertToFloat3x3(
+      const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+      DotNet::Unity::Mathematics::float3x3 defaultValue);
+
+  static DotNet::Unity::Mathematics::double3x3 ConvertToDouble3x3(
+      const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+      DotNet::Unity::Mathematics::double3x3 defaultValue);
+
+  static DotNet::Unity::Mathematics::int4x4 ConvertToInt4x4(
+      const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+      DotNet::Unity::Mathematics::int4x4 defaultValue);
+
+  static DotNet::Unity::Mathematics::uint4x4 ConvertToUInt4x4(
+      const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+      DotNet::Unity::Mathematics::uint4x4 defaultValue);
+
+  static DotNet::Unity::Mathematics::float4x4 ConvertToFloat4x4(
+      const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+      DotNet::Unity::Mathematics::float4x4 defaultValue);
+
+  static DotNet::Unity::Mathematics::double4x4 ConvertToDouble4x4(
+      const DotNet::CesiumForUnity::CesiumMetadataValue& value,
+      DotNet::Unity::Mathematics::double4x4 defaultValue);
+
   static DotNet::System::String ConvertToString(
       const DotNet::CesiumForUnity::CesiumMetadataValue& value,
       DotNet::System::String defaultValue);
+#pragma endregion
 
 private:
   /**
    * Retrieves the value from the System.Object in the C#
-   * class implementation as a C++-compatible type. std::monostate is used to
-   * indicate a null value.
+   * class implementation as a C++-compatible type. std::monostate is used
+   * to indicate a null value.
    */
   static ValueType
   getNativeValue(const DotNet::CesiumForUnity::CesiumMetadataValue& value);

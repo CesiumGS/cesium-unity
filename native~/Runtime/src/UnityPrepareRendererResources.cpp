@@ -1047,21 +1047,10 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
   int32_t meshIndex = 0;
 
-  DotNet::CesiumForUnity::CesiumMetadata pMetadataComponent = nullptr;
-  // if (model.getExtension<ExtensionModelExtFeatureMetadata>()) {
-  //  pMetadataComponent =
-  //      pModelGameObject
-  //          ->GetComponentInParent<DotNet::CesiumForUnity::CesiumMetadata>();
-  //  if (pMetadataComponent == nullptr) {
-  //    pMetadataComponent =
-  //        this->_tileset.AddComponent<DotNet::CesiumForUnity::CesiumMetadata>();
-  //  }
-  //}
-
   auto pModelMetadata =
       model.getExtension<ExtensionModelExtStructuralMetadata>();
   if (pModelMetadata) {
-    CesiumFeaturesMetadataUtility::AddModelMetadata(
+    CesiumFeaturesMetadataUtility::addModelMetadata(
         *pModelGameObject,
         model,
         *pModelMetadata);
@@ -1079,7 +1068,6 @@ void* UnityPrepareRendererResources::prepareInMainThread(
        createPhysicsMeshes,
        showTilesInHierarchy,
        currentOverlayCount,
-       &pMetadataComponent,
        &tile,
        &shaderProperty = _shaderProperty,
        tilesetLayer = this->_tileset.layer()](
@@ -1367,15 +1355,11 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         const ExtensionExtMeshFeatures* pFeatures =
             primitive.getExtension<ExtensionExtMeshFeatures>();
         if (pFeatures) {
-          CesiumFeaturesMetadataUtility::AddPrimitiveFeatures(
+          CesiumFeaturesMetadataUtility::addPrimitiveFeatures(
               primitiveGameObject,
               gltf,
               primitive,
               *pFeatures);
-          // pMetadataComponent.NativeImplementation().addMetadata(
-          //    primitiveGameObject.transform().GetInstanceID(),
-          //    &gltf,
-          //    &primitive);
         }
       });
 

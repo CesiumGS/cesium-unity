@@ -24,17 +24,21 @@ class String;
 
 namespace DotNet::Unity::Mathematics {
 class int2;
-class uint2;
-class float2;
-class double2;
 class int3;
-class uint3;
-class float3;
-class double3;
 class int4;
+class uint2;
+class uint3;
 class uint4;
+class float2;
+class float3;
 class float4;
+class double2;
+class double3;
 class double4;
+class int2x2;
+class uint2x2;
+class float2x2;
+class double2x2;
 } // namespace DotNet::Unity::Mathematics
 
 namespace CesiumForUnityNative {
@@ -166,16 +170,38 @@ public:
       std::int64_t featureID,
       DotNet::Unity::Mathematics::double4 defaultValue);
 
+  DotNet::Unity::Mathematics::int2x2 GetInt2x2(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      DotNet::Unity::Mathematics::int2x2 defaultValue);
+
+  DotNet::Unity::Mathematics::uint2x2 GetUInt2x2(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      DotNet::Unity::Mathematics::uint2x2 defaultValue);
+
+  DotNet::Unity::Mathematics::float2x2 GetFloat2x2(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      DotNet::Unity::Mathematics::float2x2 defaultValue);
+
+  DotNet::Unity::Mathematics::double2x2 GetDouble2x2(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      DotNet::Unity::Mathematics::double2x2 defaultValue);
+
   DotNet::System::String GetString(
       const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
       std::int64_t featureID,
       const DotNet::System::String& defaultValue);
 
-  // clang-format off
-  // DotNet::CesiumForUnity::CesiumMetadataValue GetValue(
-  //   const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
-  //   std::int64_t featureID);
-  // clang-format on
+  DotNet::CesiumForUnity::CesiumMetadataValue GetValue(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID);
+
+    DotNet::CesiumForUnity::CesiumMetadataValue GetRawValue(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID);
 
 private:
   std::any _property;
@@ -190,7 +216,7 @@ CesiumPropertyTablePropertyImpl::CreateProperty(
   property.size(propertyView.size());
   property.arraySize(propertyView.arrayCount());
   property.valueType(
-      CesiumFeaturesMetadataUtility::TypeToMetadataValueType<T>());
+      CesiumFeaturesMetadataUtility::typeToMetadataValueType<T>());
   property.isNormalized(Normalized);
 
   CesiumPropertyTablePropertyImpl& propertyImpl =

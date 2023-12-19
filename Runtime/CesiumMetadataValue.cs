@@ -16,10 +16,10 @@ namespace CesiumForUnity
         /// </summary>
         /// <remarks>
         /// If this is intended to hold an integer vecN or matN value, use the appropriate
-        /// CesiumIntN, CesiumUIntN, CesiumIntMatN, or CesiumUIntMatN structs. Only
+        /// CesiumIntN, CesiumUintN, CesiumIntMatN, or CesiumUintMatN structs. Only
         /// use Unity.Mathematics for vecNs or matNs with floating point components.
         /// </remarks>
-        internal System.Object valueImpl { get; set; }
+        internal System.Object objectValue { get; set; }
 
         #region Getters
 
@@ -32,7 +32,7 @@ namespace CesiumForUnity
         {
             get
             {
-                return CesiumMetadataValueType.GetValueType(this.valueImpl);
+                return CesiumMetadataValueType.GetValueType(this.objectValue);
             }
         }
 
@@ -48,7 +48,7 @@ namespace CesiumForUnity
         /// <returns>Whether the value is empty.</returns>
         public bool isEmpty
         {
-            get { return this.valueImpl == null; }
+            get { return this.objectValue == null; }
         }
         #endregion
 
@@ -58,35 +58,60 @@ namespace CesiumForUnity
 
         public CesiumMetadataValue(System.Object value)
         {
-            // For consistent implementation, convert intN to CesiumIntVecN and uintN to CesiumUintVecN
+            // For consistent implementation, convert intN to CesiumIntVecN, uintN to CesiumUintVecN,
+            // intNxN to CesiumIntMatNxN, and uintNxN to CesiumUintMatNxN
             switch (value)
             {
                 case int2:
                     int2 asInt2 = (value as int2?).Value;
-                    this.valueImpl = new CesiumIntVec2(asInt2.x, asInt2.y);
+                    this.objectValue = new CesiumIntVec2(asInt2.x, asInt2.y);
                     break;
                 case int3:
                     int3 asInt3 = (value as int3?).Value;
-                    this.valueImpl = new CesiumIntVec3(asInt3.x, asInt3.y, asInt3.z);
+                    this.objectValue = new CesiumIntVec3(asInt3.x, asInt3.y, asInt3.z);
                     break;
                 case int4:
                     int4 asInt4 = (value as int4?).Value;
-                    this.valueImpl = new CesiumIntVec4(asInt4.x, asInt4.y, asInt4.z, asInt4.w);
+                    this.objectValue = new CesiumIntVec4(asInt4.x, asInt4.y, asInt4.z, asInt4.w);
                     break;
                 case uint2:
                     uint2 asUint2 = (value as uint2?).Value;
-                    this.valueImpl = new CesiumUIntVec2(asUint2.x, asUint2.y);
+                    this.objectValue = new CesiumUintVec2(asUint2.x, asUint2.y);
                     break;
                 case uint3:
                     uint3 asUint3 = (value as uint3?).Value;
-                    this.valueImpl = new CesiumUIntVec3(asUint3.x, asUint3.y, asUint3.z);
+                    this.objectValue = new CesiumUintVec3(asUint3.x, asUint3.y, asUint3.z);
                     break;
                 case uint4:
                     uint4 asUint4 = (value as uint4?).Value;
-                    this.valueImpl = new CesiumUIntVec4(asUint4.x, asUint4.y, asUint4.z, asUint4.w);
+                    this.objectValue = new CesiumUintVec4(asUint4.x, asUint4.y, asUint4.z, asUint4.w);
+                    break;
+                case int2x2:
+                    int2x2 asInt2x2 = (value as int2x2?).Value;
+                    this.objectValue = new CesiumIntMat2x2(asInt2x2.c0, asInt2x2.c1);
+                    break;
+                case int3x3:
+                    int3x3 asInt3x3 = (value as int3x3?).Value;
+                    this.objectValue = new CesiumIntMat3x3(asInt3x3.c0, asInt3x3.c1, asInt3x3.c2);
+                    break;
+                case int4x4:
+                    int4x4 asInt4x4 = (value as int4x4?).Value;
+                    this.objectValue = new CesiumIntMat4x4(asInt4x4.c0, asInt4x4.c1, asInt4x4.c2, asInt4x4.c3);
+                    break;
+                case uint2x2:
+                    uint2x2 asUint2x2 = (value as uint2x2?).Value;
+                    this.objectValue = new CesiumUintMat2x2(asUint2x2.c0, asUint2x2.c1);
+                    break;
+                case uint3x3:
+                    uint3x3 asUint3x3 = (value as uint3x3?).Value;
+                    this.objectValue = new CesiumUintMat3x3(asUint3x3.c0, asUint3x3.c1, asUint3x3.c2);
+                    break;
+                case uint4x4:
+                    uint4x4 asUint4x4 = (value as uint4x4?).Value;
+                    this.objectValue = new CesiumUintMat4x4(asUint4x4.c0, asUint4x4.c1, asUint4x4.c2, asUint4x4.c3);
                     break;
                 default:
-                    this.valueImpl = value;
+                    this.objectValue = value;
                     break;
             }
         }
@@ -472,9 +497,10 @@ namespace CesiumForUnity
         }
 
         /// <summary>
-        /// Attempts to retrieve the value for the given feature as an int2.
+        /// Attempts to retrieve the value as an int2.
         /// </summary>
         /// <remarks>
+        /// <para>
         /// If the value is a 2-dimensional vector, its components will be converted 
         /// to 32-bit signed integers if possible.<br/>
         /// 
@@ -504,9 +530,10 @@ namespace CesiumForUnity
         }
 
         /// <summary>
-        /// Attempts to retrieve the value for the given feature as a uint2.
+        /// Attempts to retrieve the value as a uint2.
         /// </summary>
         /// <remarks>
+        /// <para>
         /// If the value is a 2-dimensional vector, its components will be converted 
         /// to 32-bit unsigned integers if possible.<br/>
         /// 
@@ -536,9 +563,10 @@ namespace CesiumForUnity
         }
 
         /// <summary>
-        /// Attempts to retrieve the value for the given feature as a float2.
+        /// Attempts to retrieve the value as a float2.
         /// </summary>
         /// <remarks>
+        /// <para>
         /// If the value is a 2-dimensional vector, its components will be converted 
         /// to the closest representable single-precision floats, if possible.
         /// 
@@ -569,9 +597,10 @@ namespace CesiumForUnity
         }
 
         /// <summary>
-        /// Attempts to retrieve the value for the given feature as a double2.
+        /// Attempts to retrieve the value as a double2.
         /// </summary>
         /// <remarks>
+        /// <para>
         /// If the value is a 2-dimensional vector, its components will be converted 
         /// to double-precision floating-point numbers.<br/>
         /// 
@@ -600,9 +629,10 @@ namespace CesiumForUnity
         }
 
         /// <summary>
-        /// Attempts to retrieve the value for the given feature as an int3.
+        /// Attempts to retrieve the value as an int3.
         /// </summary>
         /// <remarks>
+        /// <para>
         /// If the value is a 3-dimensional vector, its components will be converted 
         /// to 32-bit signed integers if possible.<br/>
         /// 
@@ -635,9 +665,10 @@ namespace CesiumForUnity
         }
 
         /// <summary>
-        /// Attempts to retrieve the value for the given feature as an uint3.
+        /// Attempts to retrieve the value as an uint3.
         /// </summary>
         /// <remarks>
+        /// <para>
         /// If the value is a 3-dimensional vector, its components will be converted 
         /// to 32-bit unsigned integers if possible.<br/>
         /// 
@@ -670,9 +701,10 @@ namespace CesiumForUnity
         }
 
         /// <summary>
-        /// Attempts to retrieve the value for the given feature as a float3.
+        /// Attempts to retrieve the value as a float3.
         /// </summary>
         /// <remarks>
+        /// <para>
         /// If the value is a 3-dimensional vector, its components will be converted to
         /// the closest representable single-precision floats, if possible.<br/>
         /// 
@@ -706,9 +738,10 @@ namespace CesiumForUnity
         }
 
         /// <summary>
-        /// Attempts to retrieve the value for the given feature as a double3.
+        /// Attempts to retrieve the value as a double3.
         /// </summary>
         /// <remarks>
+        /// <para>
         /// If the value is a 3-dimensional vector, its components will be converted 
         /// to double-precision floating-point numbers.<br/>
         /// 
@@ -740,9 +773,10 @@ namespace CesiumForUnity
         }
 
         /// <summary>
-        /// Attempts to retrieve the value for the given feature as an int4.
+        /// Attempts to retrieve the value as an int4.
         /// </summary>
         /// <remarks>
+        /// <para>
         /// If the value is a 4-dimensional vector, its components will be converted 
         /// to 32-bit signed integers if possible.<br/>
         /// 
@@ -775,9 +809,10 @@ namespace CesiumForUnity
         }
 
         /// <summary>
-        /// Attempts to retrieve the value for the given feature as a uint4.
+        /// Attempts to retrieve the value as a uint4.
         /// </summary>
         /// <remarks>
+        /// <para>
         /// If the value is a 4-dimensional vector, its components will be converted 
         /// to 32-bit unsigned integers if possible.<br/>
         /// 
@@ -810,10 +845,11 @@ namespace CesiumForUnity
         }
 
         /// <summary>
-        /// Attempts to retrieve the value for the given feature as a float4.
+        /// Attempts to retrieve the value as a float4.
         /// </summary>
         /// <remarks>
-        /// If the value is a 4-dimensional vector, its components will be converted 
+        /// <para>
+        /// If the value is a 4-dimensional vector, its components will be converted to
         /// the closest representable single-precision floats, if possible.<br/>
         /// 
         /// If the value is a 3-dimensional vector, it will become the XYZ-components of
@@ -844,9 +880,10 @@ namespace CesiumForUnity
         }
 
         /// <summary>
-        /// Attempts to retrieve the value for the given feature as a double4.
+        /// Attempts to retrieve the value as a double4.
         /// </summary>
         /// <remarks>
+        /// <para>
         /// If the value is a 4-dimensional vector, its components will be converted 
         /// to double-precision floating-point numbers.<br/>
         /// 
@@ -875,6 +912,453 @@ namespace CesiumForUnity
             }
 
             return ConvertToDouble4(this, defaultValue);
+        }
+
+        /// <summary>
+        /// Attempts to retrieve the value as a int2x2.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Property values are converted as follows:<br/>
+        /// 
+        /// - If the value is a 2-by-2 matrix, its components will be converted to
+        /// 32-bit signed integers if possible.<br/>
+        /// 
+        /// - If the value is a 3-by-3 or 4-by-4 matrix, the int2x2 will be constructed
+        /// from the first 2 components of the first 2 columns.<br/>
+        /// 
+        /// - If the value is a scalar that can be converted to a 32-bit signed integer,
+        /// then the resulting int2x2 will have this value along its diagonal. All other
+        /// entries will be zero.<br/>
+        /// 
+        /// - If the value is a boolean, it is converted to 1 for true and 0 for false.
+        /// Then, the resulting int2x2 will have this value along its diagonal, while 
+        /// all other entries will be zero.<br/>
+        /// In all other cases, the user-defined default value is returned.
+        /// </para>
+        /// </remarks>
+        /// <param name="defaultValue">The default value to use if the value 
+        /// cannot be converted to a int2x2.</param>
+        /// <returns>The property value as a int2x2.</returns>
+        public int2x2 GetInt2x2(int2x2 defaultValue)
+        {
+            if (this.isEmpty || this.valueType.isArray)
+            {
+                return defaultValue;
+            }
+
+            return ConvertToInt2x2(this, defaultValue);
+        }
+
+        /// <summary>
+        /// Attempts to retrieve the value as a uint2x2.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Property values are converted as follows:<br/>
+        /// 
+        /// - If the value is a 2-by-2 matrix, its components will be converted to
+        /// 32-bit unsigned integers if possible.<br/>
+        /// 
+        /// - If the value is a 3-by-3 or 4-by-4 matrix, the uint2x2 will be constructed
+        /// from the first 2 components of the first 2 columns.<br/>
+        /// 
+        /// - If the value is a scalar that can be converted to a 32-bit unsigned integer,
+        /// then the resulting uint2x2 will have this value along its diagonal. All other
+        /// entries will be zero.<br/>
+        /// 
+        /// - If the value is a boolean, it is converted to 1 for true and 0 for false. 
+        /// Then, the resulting uint2x2 will have this value along its diagonal, while
+        /// all other entries will be zero.<br/>
+        /// In all other cases, the user-defined default value is returned.
+        /// </para>
+        /// </remarks>
+        /// <param name="defaultValue">The default value to use if the value 
+        /// cannot be converted to a uint2x2.</param>
+        /// <returns>The property value as a uint2x2.</returns>
+        public uint2x2 GetUInt2x2(uint2x2 defaultValue)
+        {
+            if (this.isEmpty || this.valueType.isArray)
+            {
+                return defaultValue;
+            }
+
+            return ConvertToUInt2x2(this, defaultValue);
+        }
+
+        /// <summary>
+        /// Attempts to retrieve the value as a float2x2.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Property values are converted as follows:<br/>
+        /// 
+        /// - If the value is a 2-by-2 matrix, its components will be converted to
+        /// the closest representable single-precision floats.<br/>
+        /// 
+        /// - If the value is a 3-by-3 or 4-by-4 matrix, the float2x2 will be constructed
+        /// from the first 2 components of the first 2 columns.<br/>
+        /// 
+        /// - If the value is a scalar that can be converted to a single-precision floating
+        /// point number, then the resulting float2x2 will have this value along its diagonal.
+        /// All other entries will be zero.<br/>
+        /// 
+        /// - If the value is a boolean, it is converted to 1.0f for true and 0.0f for false.
+        /// Then, the resulting float2x2 will have this value along its diagonal, while 
+        /// all other entries will be zero.<br/>
+        /// In all other cases, the user-defined default value is returned.
+        /// </para>
+        /// </remarks>
+        /// <param name="defaultValue">The default value to use if the value 
+        /// cannot be converted to a float2x2.</param>
+        /// <returns>The property value as a float2x2.</returns>
+        public float2x2 GetFloat2x2(float2x2 defaultValue)
+        {
+            if (this.isEmpty || this.valueType.isArray)
+            {
+                return defaultValue;
+            }
+
+            return ConvertToFloat2x2(this, defaultValue);
+        }
+
+        /// <summary>
+        /// Attempts to retrieve the value as a double2x2.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Property values are converted as follows:<br/>
+        /// 
+        /// - If the value is a 2-by-2 matrix, its components will be converted to
+        /// double-precision floating-point numbers.<br/>
+        /// 
+        /// - If the value is a 3-by-3 or 4-by-4 matrix, the double2x2 will be constructed
+        /// from the first 2 components of the first 2 columns.<br/>
+        /// 
+        /// - If the value is a scalar, then the resulting double2x2 will have this value
+        /// along its diagonal. All other entries will be zero.<br/>
+        /// 
+        /// - If the value is a boolean, it is converted to 1.0 for true and 0.0 for false.
+        /// Then, the resulting double2x2 will have this value along its diagonal, while 
+        /// all other entries will be zero.<br/>
+        /// In all other cases, the user-defined default value is returned.
+        /// </para>
+        /// </remarks>
+        /// <param name="defaultValue">The default value to use if the value 
+        /// cannot be converted to a double2x2.</param>
+        /// <returns>The property value as a double2x2.</returns>
+        public double2x2 GetDouble2x2(double2x2 defaultValue)
+        {
+            if (this.isEmpty || this.valueType.isArray)
+            {
+                return defaultValue;
+            }
+
+            return ConvertToDouble2x2(this, defaultValue);
+        }
+
+        /// <summary>
+        /// Attempts to retrieve the value as a int3x3.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Property values are converted as follows:<br/>
+        /// 
+        /// - If the value is a 3-by-3 matrix, its components will be converted to
+        /// 32-bit signed integers if possible.<br/>
+        /// 
+        /// - If the value is a 2-by-2 matrix, its components will be used to fill
+        /// the corresponding components in the int3x3. All other components will
+        /// be initialized as zero.<br/>
+        /// 
+        /// - If the value is a 4-by-4 matrix, the int3x3 will be constructed
+        /// from the first 3 components of the first 3 columns.<br/>
+        /// 
+        /// - If the value is a scalar that can be converted to a 32-bit signed integer,
+        /// then the resulting int3x3 will have this value along its diagonal. All other
+        /// entries will be zero.<br/>
+        /// 
+        /// - If the value is a boolean, it is converted to 1 for true and 0 for false.
+        /// Then, the resulting int3x3 will have this value along its diagonal, while 
+        /// all other entries will be zero.<br/>
+        /// In all other cases, the user-defined default value is returned.
+        /// </para>
+        /// </remarks>
+        /// <param name="defaultValue">The default value to use if the value 
+        /// cannot be converted to a int3x3.</param>
+        /// <returns>The property value as a int3x3.</returns>
+        public int3x3 GetInt3x3(int3x3 defaultValue)
+        {
+            if (this.isEmpty || this.valueType.isArray)
+            {
+                return defaultValue;
+            }
+
+            return ConvertToInt3x3(this, defaultValue);
+        }
+
+        /// <summary>
+        /// Attempts to retrieve the value as a uint3x3.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Property values are converted as follows:<br/>
+        /// 
+        /// - If the value is a 3-by-3 matrix, its components will be converted to
+        /// 32-bit unsigned integers if possible.<br/>
+        /// 
+        /// - If the value is a 2-by-2 matrix, its components will be used to fill
+        /// the corresponding components in the uint3x3. All other components will
+        /// be initialized as zero.<br/>
+        /// 
+        /// - If the value is a 4-by-4 matrix, the uint3x3 will be constructed
+        /// from the first 3 components of the first 3 columns.<br/>
+        /// 
+        /// - If the value is a scalar that can be converted to a 32-bit unsigned integer,
+        /// then the resulting uint3x3 will have this value along its diagonal. All other
+        /// entries will be zero.<br/>
+        /// 
+        /// - If the value is a boolean, it is converted to 1 for true and 0 for false.
+        /// Then, the resulting uint3x3 will have this value along its diagonal, while 
+        /// all other entries will be zero.<br/>
+        /// In all other cases, the user-defined default value is returned.
+        /// </para>
+        /// </remarks>
+        /// <param name="defaultValue">The default value to use if the value 
+        /// cannot be converted to a uint3x3.</param>
+        /// <returns>The property value as a uint3x3.</returns>
+        public uint3x3 GetUInt3x3(uint3x3 defaultValue)
+        {
+            if (this.isEmpty || this.valueType.isArray)
+            {
+                return defaultValue;
+            }
+
+            return ConvertToUInt3x3(this, defaultValue);
+        }
+
+        /// <summary>
+        /// Attempts to retrieve the value as a float3x3.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Property values are converted as follows:<br/>
+        /// 
+        /// - If the value is a 3-by-3 matrix, its components will be converted to the
+        /// closest representable single-precision floats if possible.<br/>
+        /// 
+        /// - If the value is a 2-by-2 matrix, its components will be used to fill
+        /// the corresponding components in the float3x3. All other components will
+        /// be initialized as zero.<br/>
+        /// 
+        /// - If the value is a 4-by-4 matrix, the float3x3 will be constructed
+        /// from the first 3 components of the first 3 columns.<br/>
+        /// 
+        /// - If the value is a scalar that can be converted to a single-precision floating
+        /// point number, then the resulting float3x3 will have this value along its diagonal.
+        /// All other entries will be zero.<br/>
+        /// 
+        /// - If the value is a boolean, it is converted to 1.0f for true and 0.0f for false.
+        /// Then, the resulting float3x3 will have this value along its diagonal, while 
+        /// all other entries will be zero.<br/>
+        /// In all other cases, the user-defined default value is returned.
+        /// </para>
+        /// </remarks>
+        /// <param name="defaultValue">The default value to use if the value 
+        /// cannot be converted to a float3x3.</param>
+        /// <returns>The property value as a float3x3.</returns>
+        public float3x3 GetFloat3x3(float3x3 defaultValue)
+        {
+            if (this.isEmpty || this.valueType.isArray)
+            {
+                return defaultValue;
+            }
+
+            return ConvertToFloat3x3(this, defaultValue);
+        }
+
+        /// <summary>
+        /// Attempts to retrieve the value as a double3x3.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Property values are converted as follows:<br/>
+        /// 
+        /// - If the value is a 3-by-3 matrix, its components will be converted to the
+        /// double-precision floating point numbers.<br/>
+        /// 
+        /// - If the value is a 2-by-2 matrix, its components will be used to fill
+        /// the corresponding components in the double3x3. All other components will
+        /// be initialized as zero.<br/>
+        /// 
+        /// - If the value is a 4-by-4 matrix, the double3x3 will be constructed
+        /// from the first 3 components of the first 3 columns.<br/>
+        ///     
+        /// - If the value is a scalar, then the resulting double3x3 will have this value
+        /// along its diagonal. All other entries will be zero.<br/>
+        /// 
+        /// - If the value is a boolean, it is converted to 1.0 for true and 0.0 for false.
+        /// Then, the resulting double3x3 will have this value along its diagonal, while 
+        /// all other entries will be zero.<br/>
+        /// In all other cases, the user-defined default value is returned.
+        /// </para>
+        /// </remarks>
+        /// <param name="defaultValue">The default value to use if the value 
+        /// cannot be converted to a double3x3.</param>
+        /// <returns>The property value as a double3x3.</returns>
+        public double3x3 GetDouble3x3(double3x3 defaultValue)
+        {
+            if (this.isEmpty || this.valueType.isArray)
+            {
+                return defaultValue;
+            }
+
+            return ConvertToDouble3x3(this, defaultValue);
+        }
+
+        /// <summary>
+        /// Attempts to retrieve the value as a int4x4.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Property values are converted as follows:<br/>
+        /// - If the value is a 4-by-4 matrix, its components will be converted to
+        /// 32-bit signed integers if possible.<br/>
+        /// 
+        /// - If the value is a 2-by-2 or 3-by-3 matrix, its components will be used
+        /// to fill the corresponding components in the int4x4. All other components
+        /// will be initialized as zero.<br/>
+        /// 
+        /// - If the value is a scalar that can be converted to a 32-bit signed integer,
+        /// then the resulting int4x4 will have this value along its diagonal. All other
+        /// entries will be zero.<br/>
+        /// 
+        /// - If the value is a boolean, it is converted to 1 for true and 0 for false.
+        /// Then, the resulting int4x4 will have this value along its diagonal, while 
+        /// all other entries will be zero.<br/>
+        /// In all other cases, the user-defined default value is returned.
+        /// </para>
+        /// </remarks>
+        /// <param name="defaultValue">The default value to use if the value 
+        /// cannot be converted to a int4x4.</param>
+        /// <returns>The property value as a int4x4.</returns>
+        public int4x4 GetInt4x4(int4x4 defaultValue)
+        {
+            if (this.isEmpty || this.valueType.isArray)
+            {
+                return defaultValue;
+            }
+
+            return ConvertToInt4x4(this, defaultValue);
+        }
+
+        /// <summary>
+        /// Attempts to retrieve the value as a uint4x4.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Property values are converted as follows:<br/>
+        /// - If the value is a 4-by-4 matrix, its components will be converted to
+        /// 32-bit unsigned integers if possible.<br/>
+        /// 
+        /// - If the value is a 2-by-2 or 3-by-3 matrix, its components will be used
+        /// to fill the corresponding components in the uint4x4. All other components
+        /// will be initialized as zero.<br/>
+        /// 
+        /// - If the value is a scalar that can be converted to a 32-bit unsigned integer,
+        /// then the resulting uint4x4 will have this value along its diagonal. All other
+        /// entries will be zero.<br/>
+        /// 
+        /// - If the value is a boolean, it is converted to 1 for true and 0 for false.
+        /// Then, the resulting uint4x4 will have this value along its diagonal, while 
+        /// all other entries will be zero.<br/>
+        /// In all other cases, the user-defined default value is returned.
+        /// </para>
+        /// </remarks>
+        /// <param name="defaultValue">The default value to use if the value 
+        /// cannot be converted to a uint4x4.</param>
+        /// <returns>The property value as a uint4x4.</returns>
+        public uint4x4 GetUInt4x4(uint4x4 defaultValue)
+        {
+            if (this.isEmpty || this.valueType.isArray)
+            {
+                return defaultValue;
+            }
+
+            return ConvertToUInt4x4(this, defaultValue);
+        }
+
+        /// <summary>
+        /// Attempts to retrieve the value as a float4x4.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Property values are converted as follows:<br/>
+        /// 
+        /// - If the value is a 4-by-4 matrix, its components will be converted to the
+        /// closest representable single-precision floats if possible.<br/>
+        /// 
+        /// - If the value is a 2-by-2 or 3-by-3 matrix, its components will be used
+        /// to fill the corresponding components in the float4x4. All other components
+        /// will be initialized as zero.<br/>
+        /// 
+        /// - If the value is a scalar that can be converted to a single-precision floating
+        /// point number, then the resulting float4x4 will have this value along its diagonal.
+        /// All other entries will be zero.<br/>
+        /// 
+        /// - If the value is a boolean, it is converted to 1.0f for true and 0.0f for false.
+        /// Then, the resulting float4x4 will have this value along its diagonal, while 
+        /// all other entries will be zero.<br/>
+        /// In all other cases, the user-defined default value is returned.
+        /// </para>
+        /// </remarks>
+        /// <param name="defaultValue">The default value to use if the value 
+        /// cannot be converted to a float4x4.</param>
+        /// <returns>The property value as a float4x4.</returns>
+        public float4x4 GetFloat4x4(float4x4 defaultValue)
+        {
+            if (this.isEmpty || this.valueType.isArray)
+            {
+                return defaultValue;
+            }
+
+            return ConvertToFloat4x4(this, defaultValue);
+        }
+
+        /// <summary>
+        /// Attempts to retrieve the value as a double4x4.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Property values are converted as follows:<br/>
+        /// 
+        /// - If the value is a 4-by-4 matrix, its components will be converted to the
+        /// double-precision floating point numbers.<br/>
+        /// 
+        /// - If the value is a 2-by-2 or 3-by-3 matrix, its components will be used
+        /// to fill the corresponding components in the double4x4. All other components
+        /// will be initialized as zero.<br/>
+        ///     
+        /// - If the value is a scalar, then the resulting double4x4 will have this value
+        /// along its diagonal. All other entries will be zero.<br/>
+        /// 
+        /// - If the value is a boolean, it is converted to 1.0 for true and 0.0 for false.
+        /// Then, the resulting double4x4 will have this value along its diagonal, while 
+        /// all other entries will be zero.<br/>
+        /// In all other cases, the user-defined default value is returned.
+        /// </para>
+        /// </remarks>
+        /// <param name="defaultValue">The default value to use if the value 
+        /// cannot be converted to a double4x4.</param>
+        /// <returns>The property value as a double4x4.</returns>
+        public double4x4 GetDouble4x4(double4x4 defaultValue)
+        {
+            if (this.isEmpty || this.valueType.isArray)
+            {
+                return defaultValue;
+            }
+
+            return ConvertToDouble4x4(this, defaultValue);
         }
 
         /// <summary>
@@ -912,7 +1396,7 @@ namespace CesiumForUnity
         {
             if (valueType.isArray)
             {
-                return this.valueImpl as CesiumPropertyArray;
+                return this.objectValue as CesiumPropertyArray;
             }
 
             return new CesiumPropertyArray();
@@ -950,8 +1434,8 @@ namespace CesiumForUnity
         //            CesiumInt2 Int2Value = (value as CesiumInt2?).Value;
         //            return new double2(
         //                Convert.ToDouble(Int2Value[0]), Convert.ToDouble(Int2Value[1]));
-        //        case CesiumUInt2:
-        //            CesiumUInt2 uInt2Value = (value as CesiumUInt2?).Value;
+        //        case CesiumUint2:
+        //            CesiumUint2 uInt2Value = (value as CesiumUint2?).Value;
         //            return new double2(
         //                Convert.ToDouble(uInt2Value[0]), Convert.ToDouble(uInt2Value[1]));
         //        case float2:
@@ -963,8 +1447,8 @@ namespace CesiumForUnity
         //            CesiumInt3 Int3Value = (value as CesiumInt3?).Value;
         //            return new double2(
         //                Convert.ToDouble(Int3Value[0]), Convert.ToDouble(Int3Value[1]));
-        //        case CesiumUInt3:
-        //            CesiumUInt3 uInt3Value = (value as CesiumUInt3?).Value;
+        //        case CesiumUint3:
+        //            CesiumUint3 uInt3Value = (value as CesiumUint3?).Value;
         //            return new double2(
         //                Convert.ToDouble(uInt3Value[0]), Convert.ToDouble(uInt3Value[1]));
         //        case float3:
@@ -976,8 +1460,8 @@ namespace CesiumForUnity
         //            CesiumInt4 Int4Value = (value as CesiumInt4?).Value;
         //            return new double2(
         //                Convert.ToDouble(Int4Value[0]), Convert.ToDouble(Int4Value[1]));
-        //        case CesiumUInt4:
-        //            CesiumUInt4 uInt4Value = (value as CesiumUInt4?).Value;
+        //        case CesiumUint4:
+        //            CesiumUint4 uInt4Value = (value as CesiumUint4?).Value;
         //            return new double2(
         //                Convert.ToDouble(uInt4Value[0]), Convert.ToDouble(uInt4Value[1]));
         //        case float4:
@@ -996,142 +1480,138 @@ namespace CesiumForUnity
         {
             return inObject as bool?;
         }
-
         internal static SByte? GetObjectAsSByte(System.Object inObject)
         {
             return inObject as SByte?;
         }
-
         internal static Byte? GetObjectAsByte(System.Object inObject)
         {
             return inObject as Byte?;
         }
-
         internal static Int16? GetObjectAsInt16(System.Object inObject)
         {
             return inObject as Int16?;
         }
-
         internal static UInt16? GetObjectAsUInt16(System.Object inObject)
         {
             return inObject as UInt16?;
         }
-
         internal static Int32? GetObjectAsInt32(System.Object inObject)
         {
             return inObject as Int32?;
         }
-
         internal static UInt32? GetObjectAsUInt32(System.Object inObject)
         {
             return inObject as UInt32?;
         }
-
         internal static Int64? GetObjectAsInt64(System.Object inObject)
         {
             return inObject as Int64?;
         }
-
         internal static UInt64? GetObjectAsUInt64(System.Object inObject)
         {
             return inObject as UInt64?;
         }
-
         internal static float? GetObjectAsFloat(System.Object inObject)
         {
             return inObject as float?;
         }
-
         internal static double? GetObjectAsDouble(System.Object inObject)
         {
             return inObject as double?;
         }
-
         internal static CesiumIntVec2? GetObjectAsCesiumIntVec2(System.Object inObject)
         {
             return inObject as CesiumIntVec2?;
         }
-
         internal static CesiumIntVec3? GetObjectAsCesiumIntVec3(System.Object inObject)
         {
             return inObject as CesiumIntVec3?;
         }
-
         internal static CesiumIntVec4? GetObjectAsCesiumIntVec4(System.Object inObject)
         {
             return inObject as CesiumIntVec4?;
         }
-
-        internal static CesiumUIntVec2? GetObjectAsCesiumUIntVec2(System.Object inObject)
+        internal static CesiumUintVec2? GetObjectAsCesiumUintVec2(System.Object inObject)
         {
-            return inObject as CesiumUIntVec2?;
+            return inObject as CesiumUintVec2?;
         }
-
-        internal static CesiumUIntVec3? GetObjectAsCesiumUIntVec3(System.Object inObject)
+        internal static CesiumUintVec3? GetObjectAsCesiumUintVec3(System.Object inObject)
         {
-            return inObject as CesiumUIntVec3?;
+            return inObject as CesiumUintVec3?;
         }
-
-        internal static CesiumUIntVec4? GetObjectAsCesiumUIntVec4(System.Object inObject)
+        internal static CesiumUintVec4? GetObjectAsCesiumUintVec4(System.Object inObject)
         {
-            return inObject as CesiumUIntVec4?;
+            return inObject as CesiumUintVec4?;
         }
-
         internal static float2? GetObjectAsFloat2(System.Object inObject)
         {
             return inObject as float2?;
         }
-
         internal static float3? GetObjectAsFloat3(System.Object inObject)
         {
             return inObject as float3?;
         }
-
         internal static float4? GetObjectAsFloat4(System.Object inObject)
         {
             return inObject as float4?;
         }
-
         internal static double2? GetObjectAsDouble2(System.Object inObject)
         {
             return inObject as double2?;
         }
-
         internal static double3? GetObjectAsDouble3(System.Object inObject)
         {
             return inObject as double3?;
         }
-
         internal static double4? GetObjectAsDouble4(System.Object inObject)
         {
             return inObject as double4?;
         }
-
+        internal static CesiumIntMat2x2? GetObjectAsCesiumIntMat2x2(System.Object inObject)
+        {
+            return inObject as CesiumIntMat2x2?;
+        }
+        internal static CesiumIntMat3x3? GetObjectAsCesiumIntMat3x3(System.Object inObject)
+        {
+            return inObject as CesiumIntMat3x3?;
+        }
+        internal static CesiumIntMat4x4? GetObjectAsCesiumIntMat4x4(System.Object inObject)
+        {
+            return inObject as CesiumIntMat4x4?;
+        }
+        internal static CesiumUintMat2x2? GetObjectAsCesiumUintMat2x2(System.Object inObject)
+        {
+            return inObject as CesiumUintMat2x2?;
+        }
+        internal static CesiumUintMat3x3? GetObjectAsCesiumUintMat3x3(System.Object inObject)
+        {
+            return inObject as CesiumUintMat3x3?;
+        }
+        internal static CesiumUintMat4x4? GetObjectAsCesiumUintMat4x4(System.Object inObject)
+        {
+            return inObject as CesiumUintMat4x4?;
+        }
         internal static float2x2? GetObjectAsFloat2x2(System.Object inObject)
         {
             return inObject as float2x2?;
         }
-
         internal static float3x3? GetObjectAsFloat3x3(System.Object inObject)
         {
             return inObject as float3x3?;
         }
-
         internal static float4x4? GetObjectAsFloat4x4(System.Object inObject)
         {
             return inObject as float4x4?;
         }
-
         internal static double2x2? GetObjectAsDouble2x2(System.Object inObject)
         {
             return inObject as double2x2?;
         }
-
         internal static double3x3? GetObjectAsDouble3x3(System.Object inObject)
         {
             return inObject as double3x3?;
         }
-
         internal static double4x4? GetObjectAsDouble4x4(System.Object inObject)
         {
             return inObject as double4x4?;
@@ -1141,6 +1621,157 @@ namespace CesiumForUnity
             return inObject as String;
         }
 
+        #endregion
+
+        #region Internal setters for Reinterop
+        internal void SetObjectValue(bool input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(SByte input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(Byte input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(Int16 input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(UInt16 input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(Int32 input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(UInt32 input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(Int64 input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(UInt64 input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(float input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(double input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(CesiumIntVec2 input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(CesiumIntVec3 input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(CesiumIntVec4 input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(CesiumUintVec2 input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(CesiumUintVec3 input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(CesiumUintVec4 input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(float2 input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(float3 input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(float4 input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(double2 input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(double3 input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(double4 input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(CesiumIntMat2x2 input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(CesiumIntMat3x3 input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(CesiumIntMat4x4 input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(CesiumUintMat2x2 input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(CesiumUintMat3x3 input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(CesiumUintMat4x4 input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(float2x2 input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(float3x3 input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(float4x4 input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(double2x2 input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(double3x3 input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(double4x4 input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(String input)
+        {
+            this.objectValue = input;
+        }
+        internal void SetObjectValue(CesiumPropertyArray input)
+        {
+            this.objectValue = input;
+        }
         #endregion
 
         #region Internal static partial methods
@@ -1167,6 +1798,18 @@ namespace CesiumForUnity
         internal static partial uint4 ConvertToUInt4(CesiumMetadataValue value, uint4 defaultValue);
         internal static partial float4 ConvertToFloat4(CesiumMetadataValue value, float4 defaultValue);
         internal static partial double4 ConvertToDouble4(CesiumMetadataValue value, double4 defaultValue);
+        internal static partial int2x2 ConvertToInt2x2(CesiumMetadataValue value, int2x2 defaultValue);
+        internal static partial uint2x2 ConvertToUInt2x2(CesiumMetadataValue value, uint2x2 defaultValue);
+        internal static partial float2x2 ConvertToFloat2x2(CesiumMetadataValue value, float2x2 defaultValue);
+        internal static partial double2x2 ConvertToDouble2x2(CesiumMetadataValue value, double2x2 defaultValue);
+        internal static partial int3x3 ConvertToInt3x3(CesiumMetadataValue value, int3x3 defaultValue);
+        internal static partial uint3x3 ConvertToUInt3x3(CesiumMetadataValue value, uint3x3 defaultValue);
+        internal static partial float3x3 ConvertToFloat3x3(CesiumMetadataValue value, float3x3 defaultValue);
+        internal static partial double3x3 ConvertToDouble3x3(CesiumMetadataValue value, double3x3 defaultValue);
+        internal static partial int4x4 ConvertToInt4x4(CesiumMetadataValue value, int4x4 defaultValue);
+        internal static partial uint4x4 ConvertToUInt4x4(CesiumMetadataValue value, uint4x4 defaultValue);
+        internal static partial float4x4 ConvertToFloat4x4(CesiumMetadataValue value, float4x4 defaultValue);
+        internal static partial double4x4 ConvertToDouble4x4(CesiumMetadataValue value, double4x4 defaultValue);
         internal static partial String ConvertToString(CesiumMetadataValue value, String defaultValue);
 
         #endregion

@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using System;
+using Unity.Mathematics;
 
 namespace CesiumForUnity
 {
@@ -12,15 +14,33 @@ namespace CesiumForUnity
     /// </remarks>
     internal struct CesiumIntMat2x2
     {
-        public CesiumMetadataComponentType componentType { get; }
+        public CesiumMetadataComponentType componentType
+        {
+            get; private set;
+        }
 
-        private CesiumIntVec2[] value { get; }
+        // Column-major order
+        public CesiumIntVec2 c0
+        {
+            get; private set;
+        }
+        public CesiumIntVec2 c1
+        {
+            get; private set;
+        }
 
         public CesiumIntMat2x2(CesiumIntVec2 v0, CesiumIntVec2 v1)
         {
             Debug.Assert(v0.componentType == v1.componentType);
             this.componentType = v0.componentType;
-            this.value = new CesiumIntVec2[] { v0, v1 };
+            this.c0 = v0;
+            this.c1 = v1;
+        }
+        public CesiumIntMat2x2(int2 v0, int2 v1)
+        {
+            this.componentType = CesiumMetadataComponentType.Int32;
+            this.c0 = new CesiumIntVec2(v0);
+            this.c1 = new CesiumIntVec2(v1);
         }
 
         public CesiumIntVec2 this[int index]
@@ -30,9 +50,9 @@ namespace CesiumForUnity
                 switch (index)
                 {
                     case 0:
-                        return this.value[0];
+                        return this.c0;
                     case 1:
-                        return this.value[1];
+                        return this.c1;
                     default:
                         throw new System.IndexOutOfRangeException();
                 }
@@ -50,15 +70,40 @@ namespace CesiumForUnity
     /// </remarks>
     internal struct CesiumIntMat3x3
     {
-        public CesiumMetadataComponentType componentType { get; }
+        public CesiumMetadataComponentType componentType
+        {
+            get; private set;
+        }
 
-        private CesiumIntVec3[] value { get; }
+        // Column-major order
+        public CesiumIntVec3 c0
+        {
+            get; private set;
+        }
+        public CesiumIntVec3 c1
+        {
+            get; private set;
+        }
+        public CesiumIntVec3 c2
+        {
+            get; private set;
+        }
 
         public CesiumIntMat3x3(CesiumIntVec3 v0, CesiumIntVec3 v1, CesiumIntVec3 v2)
         {
             Debug.Assert(v0.componentType == v1.componentType && v1.componentType == v2.componentType);
             this.componentType = v0.componentType;
-            this.value = new CesiumIntVec3[] { v0, v1, v2 };
+            this.c0 = v0;
+            this.c1 = v1;
+            this.c2 = v2;
+        }
+
+        public CesiumIntMat3x3(int3 v0, int3 v1, int3 v2)
+        {
+            this.componentType = CesiumMetadataComponentType.Int32;
+            this.c0 = new CesiumIntVec3(v0);
+            this.c1 = new CesiumIntVec3(v1);
+            this.c2 = new CesiumIntVec3(v2);
         }
 
         public CesiumIntVec3 this[int index]
@@ -68,11 +113,11 @@ namespace CesiumForUnity
                 switch (index)
                 {
                     case 0:
-                        return this.value[0];
+                        return this.c0;
                     case 1:
-                        return this.value[1];
+                        return this.c1;
                     case 2:
-                        return this.value[2];
+                        return this.c2;
                     default:
                         throw new System.IndexOutOfRangeException();
                 }
@@ -90,15 +135,46 @@ namespace CesiumForUnity
     /// </remarks>
     internal struct CesiumIntMat4x4
     {
-        public CesiumMetadataComponentType componentType { get; }
+        public CesiumMetadataComponentType componentType
+        {
+            get; private set;
+        }
 
-        private CesiumIntVec4[] value { get; }
+        // Column-major order
+        public CesiumIntVec4 c0
+        {
+            get; private set;
+        }
+        public CesiumIntVec4 c1
+        {
+            get; private set;
+        }
+        public CesiumIntVec4 c2
+        {
+            get; private set;
+        }
+        public CesiumIntVec4 c3
+        {
+            get; private set;
+        }
 
         public CesiumIntMat4x4(CesiumIntVec4 v0, CesiumIntVec4 v1, CesiumIntVec4 v2, CesiumIntVec4 v3)
         {
             Debug.Assert(v0.componentType == v1.componentType && v1.componentType == v2.componentType && v2.componentType == v3.componentType);
             this.componentType = v0.componentType;
-            this.value = new CesiumIntVec4[] { v0, v1, v2, v3 };
+            this.c0 = v0;
+            this.c1 = v1;
+            this.c2 = v2;
+            this.c3 = v3;
+        }
+
+        public CesiumIntMat4x4(int4 v0, int4 v1, int4 v2, int4 v3)
+        {
+            this.componentType = CesiumMetadataComponentType.Int32;
+            this.c0 = new CesiumIntVec4(v0);
+            this.c1 = new CesiumIntVec4(v1);
+            this.c2 = new CesiumIntVec4(v2);
+            this.c3 = new CesiumIntVec4(v3);
         }
 
         public CesiumIntVec4 this[int index]
@@ -108,13 +184,13 @@ namespace CesiumForUnity
                 switch (index)
                 {
                     case 0:
-                        return this.value[0];
+                        return this.c0;
                     case 1:
-                        return this.value[1];
+                        return this.c1;
                     case 2:
-                        return this.value[2];
+                        return this.c2;
                     case 3:
-                        return this.value[3];
+                        return this.c3;
                     default:
                         throw new System.IndexOutOfRangeException();
                 }
@@ -130,29 +206,48 @@ namespace CesiumForUnity
     /// Internally, this is used to store all unsigned integer mat types, including u8mat2x2,
     /// u16mat2x2, u32mat2x2, and u64mat2x2. The intended type is conveyed through CesiumMetadataComponentType.
     /// </remarks>
-    internal struct CesiumUIntMat2x2
+    internal struct CesiumUintMat2x2
     {
-        public CesiumMetadataComponentType componentType { get; }
+        public CesiumMetadataComponentType componentType
+        {
+            get; private set;
+        }
 
-        private CesiumUIntVec2[] value { get; }
+        // Column-major order
+        public CesiumUintVec2 c0
+        {
+            get; private set;
+        }
+        public CesiumUintVec2 c1
+        {
+            get; private set;
+        }
 
-        public CesiumUIntMat2x2(CesiumUIntVec2 v0, CesiumUIntVec2 v1)
+        public CesiumUintMat2x2(CesiumUintVec2 v0, CesiumUintVec2 v1)
         {
             Debug.Assert(v0.componentType == v1.componentType);
             this.componentType = v0.componentType;
-            this.value = new CesiumUIntVec2[] { v0, v1 };
+            this.c0 = v0;
+            this.c1 = v1;
         }
 
-        public CesiumUIntVec2 this[int index]
+        public CesiumUintMat2x2(uint2 v0, uint2 v1)
+        {
+            this.componentType = CesiumMetadataComponentType.Uint32;
+            this.c0 = new CesiumUintVec2(v0);
+            this.c1 = new CesiumUintVec2(v1);
+        }
+
+        public CesiumUintVec2 this[int index]
         {
             get
             {
                 switch (index)
                 {
                     case 0:
-                        return this.value[0];
+                        return c0;
                     case 1:
-                        return this.value[1];
+                        return c1;
                     default:
                         throw new System.IndexOutOfRangeException();
                 }
@@ -168,31 +263,56 @@ namespace CesiumForUnity
     /// Internally, this is used to store all unsigned integer mat types, including u8mat3x3,
     /// u16mat3x3, u32mat3x3, and u64mat3x3. The intended type is conveyed through CesiumMetadataComponentType.
     /// </remarks>
-    internal struct CesiumUIntMat3x3
+    internal struct CesiumUintMat3x3
     {
-        public CesiumMetadataComponentType componentType { get; }
+        public CesiumMetadataComponentType componentType
+        {
+            get; private set;
+        }
 
-        private CesiumUIntVec3[] value { get; }
+        // Column-major order
+        public CesiumUintVec3 c0
+        {
+            get; private set;
+        }
+        public CesiumUintVec3 c1
+        {
+            get; private set;
+        }
+        public CesiumUintVec3 c2
+        {
+            get; private set;
+        }
 
-        public CesiumUIntMat3x3(CesiumUIntVec3 v0, CesiumUIntVec3 v1, CesiumUIntVec3 v2)
+        public CesiumUintMat3x3(CesiumUintVec3 v0, CesiumUintVec3 v1, CesiumUintVec3 v2)
         {
             Debug.Assert(v0.componentType == v1.componentType && v1.componentType == v2.componentType);
             this.componentType = v0.componentType;
-            this.value = new CesiumUIntVec3[] { v0, v1, v2 };
+            this.c0 = v0;
+            this.c1 = v1;
+            this.c2 = v2;
         }
 
-        public CesiumUIntVec3 this[int index]
+        public CesiumUintMat3x3(uint3 v0, uint3 v1, uint3 v2)
+        {
+            this.componentType = CesiumMetadataComponentType.Uint32;
+            this.c0 = new CesiumUintVec3(v0);
+            this.c1 = new CesiumUintVec3(v1);
+            this.c2 = new CesiumUintVec3(v2);
+        }
+
+        public CesiumUintVec3 this[int index]
         {
             get
             {
                 switch (index)
                 {
                     case 0:
-                        return this.value[0];
+                        return this.c0;
                     case 1:
-                        return this.value[1];
+                        return this.c1;
                     case 2:
-                        return this.value[2];
+                        return this.c2;
                     default:
                         throw new System.IndexOutOfRangeException();
                 }
@@ -208,33 +328,64 @@ namespace CesiumForUnity
     /// Internally, this is used to store all unsigned integer mat types, including u8mat4x4,
     /// u16mat4x4, u32mat4x4, and u64mat4x4. The intended type is conveyed through CesiumMetadataComponentType.
     /// </remarks>
-    internal struct CesiumUIntMat4x4
+    internal struct CesiumUintMat4x4
     {
-        public CesiumMetadataComponentType componentType { get; }
+        public CesiumMetadataComponentType componentType
+        {
+            get; private set;
+        }
 
-        private CesiumUIntVec4[] value { get; }
+        // Column-major order
+        public CesiumUintVec4 c0
+        {
+            get; private set;
+        }
+        public CesiumUintVec4 c1
+        {
+            get; private set;
+        }
+        public CesiumUintVec4 c2
+        {
+            get; private set;
+        }
+        public CesiumUintVec4 c3
+        {
+            get; private set;
+        }
 
-        public CesiumUIntMat4x4(CesiumUIntVec4 v0, CesiumUIntVec4 v1, CesiumUIntVec4 v2, CesiumUIntVec4 v3)
+        public CesiumUintMat4x4(CesiumUintVec4 v0, CesiumUintVec4 v1, CesiumUintVec4 v2, CesiumUintVec4 v3)
         {
             Debug.Assert(v0.componentType == v1.componentType && v1.componentType == v2.componentType && v2.componentType == v3.componentType);
             this.componentType = v0.componentType;
-            this.value = new CesiumUIntVec4[] { v0, v1, v2, v3 };
+            this.c0 = v0;
+            this.c1 = v1;
+            this.c2 = v2;
+            this.c3 = v3;
         }
 
-        public CesiumUIntVec4 this[int index]
+        public CesiumUintMat4x4(uint4 v0, uint4 v1, uint4 v2, uint4 v3)
+        {
+            this.componentType = CesiumMetadataComponentType.Uint32;
+            this.c0 = new CesiumUintVec4(v0);
+            this.c1 = new CesiumUintVec4(v1);
+            this.c2 = new CesiumUintVec4(v2);
+            this.c3 = new CesiumUintVec4(v3);
+        }
+
+        public CesiumUintVec4 this[int index]
         {
             get
             {
                 switch (index)
                 {
                     case 0:
-                        return this.value[0];
+                        return this.c0;
                     case 1:
-                        return this.value[1];
+                        return this.c1;
                     case 2:
-                        return this.value[2];
+                        return this.c2;
                     case 3:
-                        return this.value[3];
+                        return this.c3;
                     default:
                         throw new System.IndexOutOfRangeException();
                 }
