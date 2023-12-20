@@ -285,6 +285,7 @@ namespace CesiumForUnity
             SystemInfo.IsFormatSupported(gfxFmt, fmtUsage);
 
             Cesium3DTileset tilesetFromGameObject = go.GetComponent<Cesium3DTileset>();
+            tilesetFromGameObject = go.GetComponentInParent<Cesium3DTileset>();
             MeshRenderer meshRendererFromGameObject = go.GetComponent<MeshRenderer>();
             MeshFilter meshFilterFromGameObject = go.GetComponent<MeshFilter>();
             CesiumIonRasterOverlay ionOverlay = go.GetComponent<CesiumIonRasterOverlay>();
@@ -526,6 +527,15 @@ namespace CesiumForUnity
             server.defaultIonAccessTokenId = "";
             server.serverUrlThatIsLoadingApiUrl = "";
 
+            CesiumDebugTileBoundingVolume bv = new CesiumDebugTileBoundingVolume();
+
+            Gizmos.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+            Gizmos.matrix = Matrix4x4.identity;
+            Gizmos.DrawCube(new Vector3(0.0f, 0.0f, 0.0f), new Vector3(1.0f, 1.0f, 1.0f));
+            Gizmos.DrawSphere(new Vector3(0.0f, 0.0f, 0.0f), 1.0f);
+            Gizmos.DrawWireCube(new Vector3(0.0f, 0.0f, 0.0f), new Vector3(1.0f, 1.0f, 1.0f));
+            Gizmos.DrawWireSphere(new Vector3(0.0f, 0.0f, 0.0f), 1.0f);
+
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;
             sv.pivot = sv.pivot;
@@ -534,7 +544,7 @@ namespace CesiumForUnity
             svc.transform.SetPositionAndRotation(p, q);
 
             bool isPlaying = EditorApplication.isPlaying;
-            EditorApplication.update += () => {};
+            EditorApplication.update += () => { };
 
             EditorUtility.SetDirty(null);
 #endif
