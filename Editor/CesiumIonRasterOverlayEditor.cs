@@ -11,6 +11,7 @@ namespace CesiumForUnity
 
         private SerializedProperty _ionAssetID;
         private SerializedProperty _ionAccessToken;
+        private SerializedProperty _ionServer;
 
         private void OnEnable()
         {
@@ -22,6 +23,7 @@ namespace CesiumForUnity
 
             this._ionAssetID = this.serializedObject.FindProperty("_ionAssetID");
             this._ionAccessToken = this.serializedObject.FindProperty("_ionAccessToken");
+            this._ionServer = this.serializedObject.FindProperty("_ionServer");
         }
 
         private void OnDisable()
@@ -69,6 +71,9 @@ namespace CesiumForUnity
                 "ion Access Token",
                 "The access token to use to access the Cesium ion resource.");
             EditorGUILayout.DelayedTextField(this._ionAccessToken, ionAccessTokenContent);
+
+            GUIContent ionServerContent = new GUIContent("ion Server", "The Cesium ion server to use.");
+            EditorGUILayout.PropertyField(this._ionServer, ionServerContent);
         }
 
         private void DrawRasterOverlayProperties()

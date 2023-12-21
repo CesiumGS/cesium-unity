@@ -132,6 +132,7 @@ namespace CesiumForUnity
                 this._ionAsset = value;
                 this._assetTokenDetails.token = value.ionAccessToken;
                 this._assetDetails.assetID = value.ionAssetID;
+                this._defaultTokenDetails.token = this.server.defaultIonAccessToken;
                 this.GetTroubleshootingDetails();
             }
         }
@@ -178,7 +179,7 @@ namespace CesiumForUnity
             ShowWindow(new CesiumIonAsset(tileset), triggeredByError);
         }
 
-        public static void ShowWindow(CesiumRasterOverlay overlay, bool triggeredByError)
+        public static void ShowWindow(CesiumIonRasterOverlay overlay, bool triggeredByError)
         {
             ShowWindow(new CesiumIonAsset(overlay), triggeredByError);
         }
@@ -260,14 +261,20 @@ namespace CesiumForUnity
             this._assetDetails = new AssetTroubleshootingDetails();
         }
 
-        private partial void GetTroubleshootingDetails();
-
-        private void OnEnable()
+        private CesiumIonServer server
         {
-            // This has to be deferred so that CesiumRuntimeSettings
-            // calls AssetDatabase.LoadAssetAtPath during a game loop.
-            this._defaultTokenDetails.token = CesiumRuntimeSettings.defaultIonAccessToken;
+            get
+            {
+                if (this.ionAsset.tileset != null)
+                    return this.ionAsset.tileset.ionServer;
+                else if (this.ionAsset.overlay != null)
+                    return this.ionAsset.overlay.ionServer;
+                else
+                    return null;
+            }
         }
+
+        private partial void GetTroubleshootingDetails();
 
         private void Update()
         {
@@ -291,7 +298,7 @@ namespace CesiumForUnity
         {
             if (Event.current.type == EventType.Layout)
             {
-                CesiumIonSession ion = CesiumIonSession.Ion();
+                CesiumIonSession ion = CesiumIonServerManager.instance.GetSession(this.server);
                 this._isConnectedToIon = ion.IsConnected();
             }
 
@@ -315,6 +322,9 @@ namespace CesiumForUnity
                     "help you fix it!", EditorStyles.wordWrappedLabel);
                 GUILayout.Space(5);
             }
+
+            CesiumIonServerSelector.DisplaySelected(this.server);
+            GUILayout.Space(5);
 
             bool hasAssetToken = !string.IsNullOrEmpty(this._ionAsset.ionAccessToken);
             if (hasAssetToken)
@@ -539,7 +549,7 @@ namespace CesiumForUnity
                 "Authorize the project's default token to access this asset",
                 CesiumEditorStyle.cesiumButtonStyle))
             {
-                this.AuthorizeToken(CesiumRuntimeSettings.defaultIonAccessToken, true);
+                this.AuthorizeToken(this.server.defaultIonAccessToken, true);
                 this.Close();
             }
         }
@@ -596,7 +606,8 @@ namespace CesiumForUnity
                         CesiumEditorStyle.cesiumButtonStyle))
             {
                 CesiumEditorWindow.ShowWindow();
-                CesiumIonSession.Ion().Connect();
+                CesiumIonSession ion = CesiumIonServerManager.instance.GetSession(this.server);
+                ion.Connect();
                 this.Close();
             }
         }

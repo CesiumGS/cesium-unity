@@ -16,6 +16,7 @@ namespace CesiumForUnity
         private SerializedProperty _url;
         private SerializedProperty _ionAssetID;
         private SerializedProperty _ionAccessToken;
+        private SerializedProperty _ionServer;
 
         private SerializedProperty _maximumScreenSpaceError;
 
@@ -56,6 +57,7 @@ namespace CesiumForUnity
             this._url = this.serializedObject.FindProperty("_url");
             this._ionAssetID = this.serializedObject.FindProperty("_ionAssetID");
             this._ionAccessToken = this.serializedObject.FindProperty("_ionAccessToken");
+            this._ionServer = this.serializedObject.FindProperty("_ionServer");
 
             this._maximumScreenSpaceError =
                 this.serializedObject.FindProperty("_maximumScreenSpaceError");
@@ -210,6 +212,8 @@ namespace CesiumForUnity
                 "ion Access Token",
                 "The access token to use to access the Cesium ion resource.");
             EditorGUILayout.DelayedTextField(this._ionAccessToken, ionAccessTokenContent);
+            GUIContent ionServerContent = new GUIContent("ion Server", "The Cesium ion server to use.");
+            EditorGUILayout.PropertyField(this._ionServer, ionServerContent);
             EditorGUI.EndDisabledGroup();
         }
 

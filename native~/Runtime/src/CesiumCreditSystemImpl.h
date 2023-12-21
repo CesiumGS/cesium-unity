@@ -16,7 +16,7 @@ class GameObject;
 
 namespace Cesium3DTilesSelection {
 class CreditSystem;
-class Credit;
+struct Credit;
 } // namespace Cesium3DTilesSelection
 
 namespace CesiumForUnityNative {

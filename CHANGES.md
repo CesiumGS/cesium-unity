@@ -6,6 +6,21 @@
 
 - Improved `KHR_texture_transform` extension by moving it from native to Unity. This makes the texture transformations more efficient and reliable. The shader now handles the scale and offset values.
 
+### v1.7.1 - 2023-12-14
+
+##### Fixes :wrench:
+
+- Fixed a bug that prevented the default `CesiumIonServer` asset from remembering its token in a clean project.
+
+### v1.7.0 - 2023-12-14
+
+##### Additions :tada:
+
+- Added support for multiple Cesium ion servers by creating `CesiumIonServer` assets.
+
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.27.3 to v0.27.4. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
+>>>>>>> main
+
 ### v1.6.4 - 2023-10-26
 
 ##### Additions :tada:

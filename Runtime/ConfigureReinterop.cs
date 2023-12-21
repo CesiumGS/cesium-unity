@@ -279,6 +279,8 @@ namespace CesiumForUnity
             tileset.showTilesInHierarchy = tileset.showTilesInHierarchy;
             tileset.updateInEditor = tileset.updateInEditor;
             tileset.showCreditsOnScreen = tileset.showCreditsOnScreen;
+            tileset.ionServer = tileset.ionServer;
+            tileset.RecreateTileset();
 
             GraphicsFormat gfxFmt = GraphicsFormat.RGB_ETC_UNorm;
             FormatUsage fmtUsage = FormatUsage.Sample;
@@ -290,6 +292,8 @@ namespace CesiumForUnity
             CesiumIonRasterOverlay ionOverlay = go.GetComponent<CesiumIonRasterOverlay>();
             ionOverlay.ionAssetID = ionOverlay.ionAssetID;
             ionOverlay.ionAccessToken = ionOverlay.ionAccessToken;
+            ionOverlay.ionServer = ionOverlay.ionServer;
+            ionOverlay.AddToTilesetLater(null);
 
             CesiumRasterOverlay overlay = go.GetComponent<CesiumRasterOverlay>();
             overlay.showCreditsOnScreen = overlay.showCreditsOnScreen;
@@ -450,7 +454,6 @@ namespace CesiumForUnity
             string.IsNullOrEmpty("value");
             string.IsNullOrWhiteSpace("value");
 
-            string token = CesiumRuntimeSettings.defaultIonAccessToken;
             int requestsPerCachePrune = CesiumRuntimeSettings.requestsPerCachePrune;
             ulong maxItems = CesiumRuntimeSettings.maxItems;
 
@@ -517,6 +520,14 @@ namespace CesiumForUnity
             Mesh pooledMesh = meshPool.Get();
             meshPool.Release(pooledMesh);
 
+            CesiumIonServer server = CesiumIonServer.defaultServer;
+            server.serverUrl = "";
+            server.apiUrl = "";
+            server.oauth2ApplicationID = 1;
+            server.defaultIonAccessToken = "";
+            server.defaultIonAccessTokenId = "";
+            server.serverUrlThatIsLoadingApiUrl = "";
+
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;
             sv.pivot = sv.pivot;
@@ -526,6 +537,8 @@ namespace CesiumForUnity
 
             bool isPlaying = EditorApplication.isPlaying;
             EditorApplication.update += () => {};
+
+            EditorUtility.SetDirty(null);
 #endif
         }
     }

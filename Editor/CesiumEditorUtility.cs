@@ -23,7 +23,7 @@ namespace CesiumForUnity
         {
             try
             {
-                CesiumIonSession.Ion().Tick();
+                CesiumIonServerManager.instance.currentSession.Tick();
             }
             // Don't let a missing / out-of-sync native DLL crash everything.
             catch (DllNotFoundException)
@@ -76,9 +76,10 @@ namespace CesiumForUnity
             // (or perhaps the asset ID is). Also check for a 404, because ion returns 404
             // when the token is valid but not authorized for the asset.
             if (details.type == CesiumRasterOverlayLoadType.CesiumIon
-                && (details.httpStatusCode == 401 || details.httpStatusCode == 404))
+                && (details.httpStatusCode == 401 || details.httpStatusCode == 404)
+                && details.overlay is CesiumIonRasterOverlay ionOverlay)
             {
-                IonTokenTroubleshootingWindow.ShowWindow(details.overlay, true);
+                IonTokenTroubleshootingWindow.ShowWindow(ionOverlay, true);
             }
             else
             {

@@ -184,8 +184,10 @@ UnityAssetAccessor::get(
             promise.resolve(
                 std::make_shared<UnityAssetRequest>(request, headers, handler));
           } else {
-            promise.reject(std::runtime_error(
-                "Request failed: " + request.error().ToStlString()));
+            promise.reject(std::runtime_error(fmt::format(
+                "Request for `{}` failed: {}",
+                request.url().ToStlString(),
+                request.error().ToStlString())));
           }
         }));
 
@@ -266,8 +268,10 @@ UnityAssetAccessor::request(
             promise.resolve(
                 std::make_shared<UnityAssetRequest>(request, headers, handler));
           } else {
-            promise.reject(std::runtime_error(
-                "Request failed: " + request.error().ToStlString()));
+            promise.reject(std::runtime_error(fmt::format(
+                "Request for `{}` failed: {}",
+                request.url().ToStlString(),
+                request.error().ToStlString())));
           }
         }));
 
