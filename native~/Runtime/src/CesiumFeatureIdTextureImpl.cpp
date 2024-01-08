@@ -2,6 +2,8 @@
 
 #include "CesiumFeatureIdTextureImpl.h"
 
+#include <CesiumGltf/AccessorUtility.h>
+
 #include <DotNet/CesiumForUnity/CesiumFeatureIdTexture.h>
 #include <DotNet/CesiumForUnity/CesiumFeatureIdTextureStatus.h>
 #include <DotNet/UnityEngine/RaycastHit.h>
@@ -19,12 +21,12 @@ CesiumFeatureIdTextureImpl::CreateTexture(
   CesiumFeatureIdTextureImpl& textureImpl = texture.NativeImplementation();
   textureImpl._featureIdTextureView =
       CesiumGltf::FeatureIdTextureView(model, featureIdTexture);
-
-  auto& texCoordAccessor = textureImpl._texCoordAccessor;
-  texCoordAccessor = CesiumGltf::GetTexCoordAccessorView(
+  textureImpl._texCoordAccessor = CesiumGltf::GetTexCoordAccessorView(
       model,
       primitive,
       featureIdTexture.texCoord);
+  textureImpl._indexAccessor =
+      CesiumGltf::GetIndexAccessorView(model, primitive);
 
   switch (textureImpl._featureIdTextureView.status()) {
   case CesiumGltf::FeatureIdTextureViewStatus::Valid:
@@ -65,13 +67,36 @@ std::int64_t CesiumFeatureIdTextureImpl::GetFeatureIdForVertex(
 std::int64_t CesiumFeatureIdTextureImpl::GetFeatureIdFromRaycastHit(
     const CesiumFeatureIdTexture& featureIdTexture,
     const DotNet::UnityEngine::RaycastHit& hitInfo) {
-  // clang-format off
-  /*
+  int64_t vertexCount =
+      std::visit(CesiumGltf::CountFromAccessor{}, this->_texCoordAccessor);
+
+  std::array<int64_t, 3> vertexIndices = std::visit(
+      CesiumGltf::IndicesForFaceFromAccessor{
+          hitInfo.triangleIndex(),
+          vertexCount},
+      this->_indexAccessor);
+
+  std::array<glm::dvec2, 3> UVs;
+  for (size_t i = 0; i < UVs.size(); i++) {
+    auto maybeTexCoord = std::visit(
+        CesiumGltf::TexCoordFromAccessor{vertexIndices[i]},
+        this->_texCoordAccessor);
+    if (!maybeTexCoord) {
+      return -1;
+    }
+
+    const glm::dvec2& texCoord = *maybeTexCoord;
+    UVs[i] = glm::dvec2(texCoord[0], texCoord[1]);
+  }
+
   DotNet::UnityEngine::Vector3 barycentricCoords =
-      hitInfo.barycentricCoordinate();*/
-  // TODO
-  // clang-format on
-  return -1;
+      hitInfo.barycentricCoordinate();
+
+  glm::dvec2 UV = (static_cast<double>(barycentricCoords.x) * UVs[0]) +
+                  (static_cast<double>(barycentricCoords.y) * UVs[1]) +
+                  (static_cast<double>(barycentricCoords.z) * UVs[2]);
+
+  return this->_featureIdTextureView.getFeatureID(UV.x, UV.y);
 }
 
 } // namespace CesiumForUnityNative

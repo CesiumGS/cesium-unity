@@ -736,6 +736,7 @@ namespace CesiumForUnity
             property.valueType = property.valueType;
 
             RaycastHit hitInfo = new RaycastHit();
+            int triangleIndex = hitInfo.triangleIndex;
             Vector3 coordinate = hitInfo.barycentricCoordinate;
 
 #if UNITY_EDITOR
