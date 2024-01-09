@@ -21,12 +21,12 @@ CesiumFeatureIdTextureImpl::CreateTexture(
   CesiumFeatureIdTextureImpl& textureImpl = texture.NativeImplementation();
   textureImpl._featureIdTextureView =
       CesiumGltf::FeatureIdTextureView(model, featureIdTexture);
-  textureImpl._texCoordAccessor = CesiumGltf::GetTexCoordAccessorView(
+  textureImpl._texCoordAccessor = CesiumGltf::getTexCoordAccessorView(
       model,
       primitive,
       featureIdTexture.texCoord);
   textureImpl._indexAccessor =
-      CesiumGltf::GetIndexAccessorView(model, primitive);
+      CesiumGltf::getIndexAccessorView(model, primitive);
 
   switch (textureImpl._featureIdTextureView.status()) {
   case CesiumGltf::FeatureIdTextureViewStatus::Valid:

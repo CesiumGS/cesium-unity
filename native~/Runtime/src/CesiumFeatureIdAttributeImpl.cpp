@@ -16,7 +16,7 @@ CesiumFeatureIdAttributeImpl::CreateAttribute(
   CesiumFeatureIdAttribute attribute;
   auto& accessor = attribute.NativeImplementation()._accessor;
   accessor =
-      CesiumGltf::GetFeatureIdAccessorView(model, primitive, attributeSetIndex);
+      CesiumGltf::getFeatureIdAccessorView(model, primitive, attributeSetIndex);
 
   auto accessorStatus = std::visit(CesiumGltf::StatusFromAccessor{}, accessor);
   attribute.status(

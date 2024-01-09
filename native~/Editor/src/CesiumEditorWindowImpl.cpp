@@ -12,6 +12,9 @@
 #include <DotNet/CesiumForUnity/CesiumEditorUtility.h>
 #include <DotNet/CesiumForUnity/CesiumEditorWindow.h>
 #include <DotNet/CesiumForUnity/CesiumIonRasterOverlay.h>
+#include <DotNet/CesiumForUnity/CesiumIonServer.h>
+#include <DotNet/CesiumForUnity/CesiumIonServerManager.h>
+#include <DotNet/CesiumForUnity/CesiumIonSession.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
 #include <DotNet/CesiumForUnity/IonMissingAssetWindow.h>
 #include <DotNet/System/Object.h>
@@ -23,6 +26,22 @@
 #include <optional>
 
 using namespace DotNet;
+
+namespace {
+
+CesiumForUnity::CesiumIonServer getServer() {
+  return CesiumForUnity::CesiumIonServerManager::instance().current();
+}
+
+CesiumForUnity::CesiumIonSession getSession() {
+  return CesiumForUnity::CesiumIonServerManager::instance().currentSession();
+}
+
+CesiumForUnityNative::CesiumIonSessionImpl& getNativeSession() {
+  return getSession().NativeImplementation();
+}
+
+} // namespace
 
 namespace CesiumForUnityNative {
 
@@ -39,7 +58,7 @@ void CesiumEditorWindowImpl::AddAssetFromIon(
     DotNet::System::String overlayName,
     int64_t overlayID) {
   const std::optional<CesiumIonClient::Connection>& connection =
-      CesiumIonSessionImpl::ion().getConnection();
+      getNativeSession().getConnection();
   if (!connection) {
     UnityEngine::Debug::LogError(
         System::String("Cannot add an ion asset without an active connection"));
@@ -59,7 +78,7 @@ void CesiumEditorWindowImpl::AddAssetFromIon(
     assetIDs.push_back(overlayID);
   }
 
-  SelectIonTokenWindowImpl::SelectAndAuthorizeToken(assetIDs)
+  SelectIonTokenWindowImpl::SelectAndAuthorizeToken(getServer(), assetIDs)
       .thenInMainThread(
           [connection, tilesetID](
               const std::optional<CesiumIonClient::Token>& /*maybeToken*/) {
@@ -115,7 +134,7 @@ void CesiumEditorWindowImpl::AddAssetFromIon(
           }
           tileset.ionAssetID(tilesetID);
 
-          CesiumIonSessionImpl::ion().getAssets();
+          getNativeSession().getAssets();
 
           if (overlayID > 0) {
             // TODO: Need to fix this when we support multiple overlays

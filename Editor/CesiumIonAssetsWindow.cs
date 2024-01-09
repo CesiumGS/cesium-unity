@@ -31,9 +31,12 @@ namespace CesiumForUnity
         private TreeViewState _assetsTreeState;
         private IonAssetsTreeView _assetsTreeView;
         private SearchField _searchField;
+        private CesiumIonServerSelector _serverSelector;
 
         private void OnEnable()
-        { 
+        {
+            this._serverSelector = new CesiumIonServerSelector(this);
+
             // Load the icon separately from the other resources.
             Texture2D icon = Resources.Load<Texture2D>("Cesium-64x64");
             icon.wrapMode = TextureWrapMode.Clamp;
@@ -41,18 +44,31 @@ namespace CesiumForUnity
 
             this._searchField = new SearchField();
 
-            CesiumIonSession.Ion().Resume();
+            CesiumIonSession session = CesiumIonServerManager.instance.currentSession;
+            session.Resume();
             BuildTreeView();
             CesiumIonSession.OnConnectionUpdated += this._assetsTreeView.Refresh;
             CesiumIonSession.OnAssetsUpdated += this._assetsTreeView.Refresh;
+            CesiumIonServerManager.instance.CurrentChanged += this.OnCurrentServerChanged;
 
-            CesiumIonSession.Ion().RefreshAssets();
+            session.RefreshAssets();
         }
 
         private void OnDisable()
         {
+            CesiumIonServerManager.instance.CurrentChanged -= this.OnCurrentServerChanged;
             CesiumIonSession.OnConnectionUpdated -= this._assetsTreeView.Refresh;
             CesiumIonSession.OnAssetsUpdated -= this._assetsTreeView.Refresh;
+
+            this._serverSelector.Dispose();
+            this._serverSelector = null;
+        }
+
+        private void OnCurrentServerChanged(CesiumIonServerManager manager)
+        {
+            CesiumIonSession session = CesiumIonServerManager.instance.currentSession;
+            session.RefreshAssets();
+            this._assetsTreeView.Refresh();
         }
 
         void BuildTreeView()
@@ -91,18 +107,24 @@ namespace CesiumForUnity
 
         void DrawRefreshButtonAndSearchBar()
         {
-            GUILayout.BeginHorizontal();
+            EditorGUILayout.BeginHorizontal();
+
+            EditorGUILayout.BeginVertical();
+            EditorGUILayout.Space(15.0f);
+            this._serverSelector.OnGUI();
+            EditorGUILayout.EndVertical();
+
             if (GUILayout.Button(
                 new GUIContent(CesiumEditorStyle.refreshIcon, "Refresh the asset list"),
                 CesiumEditorStyle.refreshButtonStyle))
             {
-                CesiumIonSession.Ion().RefreshAssets();
+                CesiumIonSession session = CesiumIonServerManager.instance.currentSession;
+                session.RefreshAssets();
+                this._assetsTreeView.Refresh();
             }
 
-            GUILayout.FlexibleSpace();
-
-            GUILayout.BeginVertical();
-            GUILayout.Space(15);
+            EditorGUILayout.BeginVertical();
+            EditorGUILayout.Space(15);
 
             string searchString = this._searchField.OnToolbarGUI(
                 this._assetsSearchString,
@@ -124,8 +146,8 @@ namespace CesiumForUnity
                 this._assetsTreeView.searchString = this._assetsSearchString;
             }
 
-            GUILayout.EndVertical();
-            GUILayout.EndHorizontal();
+            EditorGUILayout.EndVertical();
+            EditorGUILayout.EndHorizontal();
         }
 
         void DrawAssetTreeView()

@@ -1,4 +1,6 @@
 using UnityEngine;
+using System;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -124,6 +126,7 @@ namespace CesiumForUnity
         /// <summary>
         /// The ID of the default Cesium ion access token to use within the project.
         /// </summary>
+        [Obsolete("Define a CesiumIonServer instead.")]
         public static string defaultIonAccessTokenID
         {
             get => instance._defaultIonAccessTokenID;
@@ -144,6 +147,7 @@ namespace CesiumForUnity
         /// <summary>
         /// The default Cesium ion access token value to use within the project.
         /// </summary>
+        [Obsolete("Define a CesiumIonServer instead.")]
         public static string defaultIonAccessToken
         {
             get => instance._defaultIonAccessToken;

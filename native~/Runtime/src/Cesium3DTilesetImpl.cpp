@@ -1,21 +1,23 @@
 #include "Cesium3DTilesetImpl.h"
 
 #include "CameraManager.h"
+#include "CesiumIonServerHelper.h"
 #include "UnityPrepareRendererResources.h"
 #include "UnityTileExcluderAdaptor.h"
 #include "UnityTilesetExternals.h"
 
-#include <Cesium3DTilesSelection/IonRasterOverlay.h>
 #include <Cesium3DTilesSelection/Tileset.h>
 #include <CesiumGeospatial/GlobeTransforms.h>
+#include <CesiumIonClient/Connection.h>
+#include <CesiumRasterOverlays/IonRasterOverlay.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/CesiumForUnity/Cesium3DTilesetLoadFailureDetails.h>
 #include <DotNet/CesiumForUnity/Cesium3DTilesetLoadType.h>
 #include <DotNet/CesiumForUnity/CesiumDataSource.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
+#include <DotNet/CesiumForUnity/CesiumIonServer.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
-#include <DotNet/CesiumForUnity/CesiumRuntimeSettings.h>
 #include <DotNet/CesiumForUnity/CesiumTileExcluder.h>
 #include <DotNet/System/Action.h>
 #include <DotNet/System/Array1.h>
@@ -28,6 +30,7 @@
 #include <DotNet/UnityEngine/Experimental/Rendering/GraphicsFormat.h>
 #include <DotNet/UnityEngine/GameObject.h>
 #include <DotNet/UnityEngine/Material.h>
+#include <DotNet/UnityEngine/Object.h>
 #include <DotNet/UnityEngine/Quaternion.h>
 #include <DotNet/UnityEngine/SystemInfo.h>
 #include <DotNet/UnityEngine/Time.h>
@@ -39,6 +42,7 @@
 #if UNITY_EDITOR
 #include <DotNet/UnityEditor/CallbackFunction.h>
 #include <DotNet/UnityEditor/EditorApplication.h>
+#include <DotNet/UnityEditor/EditorUtility.h>
 #include <DotNet/UnityEditor/SceneView.h>
 #endif
 
@@ -503,15 +507,27 @@ void Cesium3DTilesetImpl::LoadTileset(
       CesiumForUnity::CesiumDataSource::FromCesiumIon) {
     System::String ionAccessToken = tileset.ionAccessToken();
     if (System::String::IsNullOrEmpty(ionAccessToken)) {
-      ionAccessToken =
-          CesiumForUnity::CesiumRuntimeSettings::defaultIonAccessToken();
+      ionAccessToken = tileset.ionServer().defaultIonAccessToken();
     }
 
-    this->_pTileset = std::make_unique<Tileset>(
-        createTilesetExternals(tileset),
-        tileset.ionAssetID(),
-        ionAccessToken.ToStlString(),
-        options);
+    std::string ionAssetEndpointUrl =
+        tileset.ionServer().apiUrl().ToStlString();
+
+    if (!ionAssetEndpointUrl.empty()) {
+      // Make sure the URL ends with a slash
+      if (*ionAssetEndpointUrl.rbegin() != '/')
+        ionAssetEndpointUrl += '/';
+
+      this->_pTileset = std::make_unique<Tileset>(
+          createTilesetExternals(tileset),
+          tileset.ionAssetID(),
+          ionAccessToken.ToStlString(),
+          options,
+          ionAssetEndpointUrl);
+    } else {
+      // Resolve the API URL if it's not already in progress.
+      resolveCesiumIonApiUrl(tileset.ionServer());
+    }
   } else {
     this->_pTileset = std::make_unique<Tileset>(
         createTilesetExternals(tileset),

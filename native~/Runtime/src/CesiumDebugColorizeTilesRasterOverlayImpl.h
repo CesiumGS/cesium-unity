@@ -7,7 +7,7 @@ class Cesium3DTileset;
 class CesiumDebugColorizeTilesRasterOverlay;
 } // namespace DotNet::CesiumForUnity
 
-namespace Cesium3DTilesSelection {
+namespace CesiumRasterOverlays {
 class DebugColorizeTilesRasterOverlay;
 }
 
@@ -31,7 +31,7 @@ public:
 
 private:
   CesiumUtility::IntrusivePointer<
-      Cesium3DTilesSelection::DebugColorizeTilesRasterOverlay>
+      CesiumRasterOverlays::DebugColorizeTilesRasterOverlay>
       _pOverlay;
 };
 

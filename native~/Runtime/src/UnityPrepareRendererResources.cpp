@@ -5,7 +5,6 @@
 #include "UnityLifetime.h"
 #include "UnityTransforms.h"
 
-#include <Cesium3DTilesContent/GltfUtilities.h>
 #include <Cesium3DTilesSelection/Tile.h>
 #include <Cesium3DTilesSelection/Tileset.h>
 #include <CesiumGeometry/Transforms.h>
@@ -15,6 +14,7 @@
 #include <CesiumGltf/ExtensionKhrMaterialsUnlit.h>
 #include <CesiumGltf/ExtensionModelExtFeatureMetadata.h>
 #include <CesiumGltf/ExtensionModelExtStructuralMetadata.h>
+#include <CesiumGltfContent/GltfUtilities.h>
 #include <CesiumGltfReader/GltfReader.h>
 #include <CesiumShaderProperties.h>
 #include <CesiumUtility/ScopeGuard.h>
@@ -72,7 +72,8 @@
 #include <unordered_map>
 #include <variant>
 
-using namespace Cesium3DTilesContent;
+using namespace CesiumRasterOverlays;
+using namespace CesiumGltfContent;
 using namespace Cesium3DTilesSelection;
 using namespace CesiumForUnityNative;
 using namespace CesiumGeometry;
@@ -1462,7 +1463,7 @@ void* UnityPrepareRendererResources::prepareRasterInLoadThread(
 }
 
 void* UnityPrepareRendererResources::prepareRasterInMainThread(
-    Cesium3DTilesSelection::RasterOverlayTile& rasterTile,
+    CesiumRasterOverlays::RasterOverlayTile& rasterTile,
     void* pLoadThreadResult) {
   auto pTexture = std::make_unique<UnityEngine::Texture>(
       TextureLoader::loadTexture(rasterTile.getImage()));
@@ -1473,7 +1474,7 @@ void* UnityPrepareRendererResources::prepareRasterInMainThread(
 }
 
 void UnityPrepareRendererResources::freeRaster(
-    const Cesium3DTilesSelection::RasterOverlayTile& rasterTile,
+    const CesiumRasterOverlays::RasterOverlayTile& rasterTile,
     void* pLoadThreadResult,
     void* pMainThreadResult) noexcept {
   if (pMainThreadResult) {
@@ -1489,7 +1490,7 @@ namespace {
 
 std::optional<uint32_t> findOverlayIndex(
     const UnityEngine::GameObject& tileset,
-    const Cesium3DTilesSelection::RasterOverlay& overlay) {
+    const CesiumRasterOverlays::RasterOverlay& overlay) {
   DotNet::CesiumForUnity::Cesium3DTileset tilesetComponent =
       tileset.GetComponent<DotNet::CesiumForUnity::Cesium3DTileset>();
   Tileset* pTileset = tilesetComponent.NativeImplementation().getTileset();
@@ -1514,7 +1515,7 @@ std::optional<uint32_t> findOverlayIndex(
 void UnityPrepareRendererResources::attachRasterInMainThread(
     const Cesium3DTilesSelection::Tile& tile,
     int32_t overlayTextureCoordinateID,
-    const Cesium3DTilesSelection::RasterOverlayTile& rasterTile,
+    const CesiumRasterOverlays::RasterOverlayTile& rasterTile,
     void* pMainThreadRendererResources,
     const glm::dvec2& translation,
     const glm::dvec2& scale) {
@@ -1606,7 +1607,7 @@ void UnityPrepareRendererResources::attachRasterInMainThread(
 void UnityPrepareRendererResources::detachRasterInMainThread(
     const Cesium3DTilesSelection::Tile& tile,
     int32_t overlayTextureCoordinateID,
-    const Cesium3DTilesSelection::RasterOverlayTile& rasterTile,
+    const CesiumRasterOverlays::RasterOverlayTile& rasterTile,
     void* pMainThreadRendererResources) noexcept {
   const Cesium3DTilesSelection::TileContent& content = tile.getContent();
   const Cesium3DTilesSelection::TileRenderContent* pRenderContent =

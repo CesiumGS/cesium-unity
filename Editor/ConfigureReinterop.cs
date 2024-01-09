@@ -79,8 +79,36 @@ namespace CesiumForUnity
 
             Task.Run(() => { });
 
-            CesiumIonSession session = CesiumIonSession.Ion();
+            CesiumIonSession session = CesiumIonServerManager.instance.GetSession(null);
+            CesiumIonServer server = CesiumIonServerManager.instance.current;
+            session = CesiumIonServerManager.instance.currentSession;
             session.IsConnected();
+            server = session.server;
+            session.server = server;
+
+            List<QuickAddItem> items = new List<QuickAddItem>();
+            items = session.GetQuickAddItems();
+
+            QuickAddItem item = new QuickAddItem();
+            item.type = QuickAddItemType.BlankTileset;
+            item.name = "name";
+            item.tooltip = "tooltip";
+            item.tilesetName = "tilesetName";
+            item.tilesetId = 1;
+            item.overlayName = "overlayName";
+            item.overlayId = 2;
+
+            item = new QuickAddItem(QuickAddItemType.IonTileset, "name", "tooltip", "tilesetName", 1, "overlayName", 2);
+            items.Add(item);
+            
+            server.defaultIonAccessToken = "";
+            server.defaultIonAccessTokenId = "";
+            server.apiUrl = "";
+            server.serverUrl = "";
+            server.oauth2ApplicationID = 1;
+
+            CesiumIonServerManager.instance.GetUserAccessToken(null);
+            CesiumIonServerManager.instance.SetUserAccessToken(null, null);
 
             EditorPrefs.HasKey("Key");
             EditorPrefs.GetString("Key");
@@ -88,6 +116,7 @@ namespace CesiumForUnity
             EditorPrefs.DeleteKey("Key");
 
             Application.OpenURL("URL");
+            string temporaryCachePath = Application.temporaryCachePath;
             string applicationVersion = Application.version;
             string unityVersion = Application.unityVersion;
             string applicationPlatform = Helpers.ToString(Application.platform);
@@ -118,6 +147,7 @@ namespace CesiumForUnity
             session.BroadcastAssetsUpdate();
             session.BroadcastProfileUpdate();
             session.BroadcastTokensUpdate();
+            session.BroadcastDefaultsUpdate();
 
             CesiumEditorWindow editorWindow = CesiumEditorWindow.currentWindow;
 
@@ -125,8 +155,9 @@ namespace CesiumForUnity
             IonAssetDetails.FormatDate("date");
 
             SelectIonTokenWindow.GetDefaultNewTokenName();
-            SelectIonTokenWindow.ShowWindow();
+            SelectIonTokenWindow.ShowWindow(null);
             SelectIonTokenWindow tokenWindow = SelectIonTokenWindow.currentWindow;
+            tokenWindow.server = null;
             tokenWindow.tokenSource = IonTokenSource.Create;
             string name = tokenWindow.createdTokenName;
             int tokenIndex = tokenWindow.selectedExistingTokenIndex;
@@ -138,11 +169,8 @@ namespace CesiumForUnity
             tokenWindow.RefreshExistingTokenList();
             tokenWindow.Close();
 
-            token = CesiumRuntimeSettings.defaultIonAccessToken;
-            CesiumRuntimeSettings.defaultIonAccessToken = "token";
-
-            string tokenID = CesiumRuntimeSettings.defaultIonAccessTokenID;
-            CesiumRuntimeSettings.defaultIonAccessTokenID = "tokenID";
+            int requestsPerCachePrune = CesiumRuntimeSettings.requestsPerCachePrune;
+            ulong maxItems = CesiumRuntimeSettings.maxItems;
 
             Cesium3DTileset[] tilesets = UnityEngine.Object.FindObjectsOfType<Cesium3DTileset>();
             Cesium3DTileset tileset = tilesets[0];
@@ -207,6 +235,10 @@ namespace CesiumForUnity
             string accessToken = asset.ionAccessToken;
             long assetId = asset.ionAssetID;
             bool isNull = asset.IsNull();
+            tileset = asset.tileset;
+            server = tileset.ionServer;
+            ionOverlay = asset.overlay;
+            server = ionOverlay.ionServer;
 
             AssetTroubleshootingDetails assetDetails = troubleshootingWindow.assetDetails;
             assetDetails.assetExistsInUserAccount = true;

@@ -40,6 +40,7 @@ target_link_libraries(
     PUBLIC
       Cesium3DTilesSelection
       CesiumAsync
+      CesiumIonClient
     PRIVATE
       tidy-static
       enum-flags
