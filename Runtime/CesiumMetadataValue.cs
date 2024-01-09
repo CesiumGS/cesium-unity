@@ -919,19 +919,17 @@ namespace CesiumForUnity
         /// </summary>
         /// <remarks>
         /// <para>
-        /// Property values are converted as follows:<br/>
-        /// 
-        /// - If the value is a 2-by-2 matrix, its components will be converted to
+        /// If the value is a 2-by-2 matrix, its components will be converted to
         /// 32-bit signed integers if possible.<br/>
         /// 
-        /// - If the value is a 3-by-3 or 4-by-4 matrix, the int2x2 will be constructed
+        /// If the value is a 3-by-3 or 4-by-4 matrix, the int2x2 will be constructed
         /// from the first 2 components of the first 2 columns.<br/>
         /// 
-        /// - If the value is a scalar that can be converted to a 32-bit signed integer,
+        /// If the value is a scalar that can be converted to a 32-bit signed integer,
         /// then the resulting int2x2 will have this value along its diagonal. All other
         /// entries will be zero.<br/>
         /// 
-        /// - If the value is a boolean, it is converted to 1 for true and 0 for false.
+        /// If the value is a boolean, it is converted to 1 for true and 0 for false.
         /// Then, the resulting int2x2 will have this value along its diagonal, while 
         /// all other entries will be zero.<br/>
         /// In all other cases, the user-defined default value is returned.
@@ -955,19 +953,17 @@ namespace CesiumForUnity
         /// </summary>
         /// <remarks>
         /// <para>
-        /// Property values are converted as follows:<br/>
-        /// 
-        /// - If the value is a 2-by-2 matrix, its components will be converted to
+        /// If the value is a 2-by-2 matrix, its components will be converted to
         /// 32-bit unsigned integers if possible.<br/>
         /// 
-        /// - If the value is a 3-by-3 or 4-by-4 matrix, the uint2x2 will be constructed
+        /// If the value is a 3-by-3 or 4-by-4 matrix, the uint2x2 will be constructed
         /// from the first 2 components of the first 2 columns.<br/>
         /// 
-        /// - If the value is a scalar that can be converted to a 32-bit unsigned integer,
+        /// If the value is a scalar that can be converted to a 32-bit unsigned integer,
         /// then the resulting uint2x2 will have this value along its diagonal. All other
         /// entries will be zero.<br/>
         /// 
-        /// - If the value is a boolean, it is converted to 1 for true and 0 for false. 
+        /// If the value is a boolean, it is converted to 1 for true and 0 for false. 
         /// Then, the resulting uint2x2 will have this value along its diagonal, while
         /// all other entries will be zero.<br/>
         /// In all other cases, the user-defined default value is returned.
@@ -991,19 +987,17 @@ namespace CesiumForUnity
         /// </summary>
         /// <remarks>
         /// <para>
-        /// Property values are converted as follows:<br/>
-        /// 
-        /// - If the value is a 2-by-2 matrix, its components will be converted to
+        /// If the value is a 2-by-2 matrix, its components will be converted to
         /// the closest representable single-precision floats.<br/>
         /// 
-        /// - If the value is a 3-by-3 or 4-by-4 matrix, the float2x2 will be constructed
+        /// If the value is a 3-by-3 or 4-by-4 matrix, the float2x2 will be constructed
         /// from the first 2 components of the first 2 columns.<br/>
         /// 
-        /// - If the value is a scalar that can be converted to a single-precision floating
+        /// If the value is a scalar that can be converted to a single-precision floating
         /// point number, then the resulting float2x2 will have this value along its diagonal.
         /// All other entries will be zero.<br/>
         /// 
-        /// - If the value is a boolean, it is converted to 1.0f for true and 0.0f for false.
+        /// If the value is a boolean, it is converted to 1.0f for true and 0.0f for false.
         /// Then, the resulting float2x2 will have this value along its diagonal, while 
         /// all other entries will be zero.<br/>
         /// In all other cases, the user-defined default value is returned.
@@ -1027,18 +1021,16 @@ namespace CesiumForUnity
         /// </summary>
         /// <remarks>
         /// <para>
-        /// Property values are converted as follows:<br/>
-        /// 
-        /// - If the value is a 2-by-2 matrix, its components will be converted to
+        /// If the value is a 2-by-2 matrix, its components will be converted to
         /// double-precision floating-point numbers.<br/>
         /// 
-        /// - If the value is a 3-by-3 or 4-by-4 matrix, the double2x2 will be constructed
+        /// If the value is a 3-by-3 or 4-by-4 matrix, the double2x2 will be constructed
         /// from the first 2 components of the first 2 columns.<br/>
         /// 
-        /// - If the value is a scalar, then the resulting double2x2 will have this value
+        /// If the value is a scalar, then the resulting double2x2 will have this value
         /// along its diagonal. All other entries will be zero.<br/>
         /// 
-        /// - If the value is a boolean, it is converted to 1.0 for true and 0.0 for false.
+        /// If the value is a boolean, it is converted to 1.0 for true and 0.0 for false.
         /// Then, the resulting double2x2 will have this value along its diagonal, while 
         /// all other entries will be zero.<br/>
         /// In all other cases, the user-defined default value is returned.
@@ -1062,23 +1054,21 @@ namespace CesiumForUnity
         /// </summary>
         /// <remarks>
         /// <para>
-        /// Property values are converted as follows:<br/>
-        /// 
-        /// - If the value is a 3-by-3 matrix, its components will be converted to
+        /// If the value is a 3-by-3 matrix, its components will be converted to
         /// 32-bit signed integers if possible.<br/>
         /// 
-        /// - If the value is a 2-by-2 matrix, its components will be used to fill
+        /// If the value is a 2-by-2 matrix, its components will be used to fill
         /// the corresponding components in the int3x3. All other components will
         /// be initialized as zero.<br/>
         /// 
-        /// - If the value is a 4-by-4 matrix, the int3x3 will be constructed
+        /// If the value is a 4-by-4 matrix, the int3x3 will be constructed
         /// from the first 3 components of the first 3 columns.<br/>
         /// 
-        /// - If the value is a scalar that can be converted to a 32-bit signed integer,
+        /// If the value is a scalar that can be converted to a 32-bit signed integer,
         /// then the resulting int3x3 will have this value along its diagonal. All other
         /// entries will be zero.<br/>
         /// 
-        /// - If the value is a boolean, it is converted to 1 for true and 0 for false.
+        /// If the value is a boolean, it is converted to 1 for true and 0 for false.
         /// Then, the resulting int3x3 will have this value along its diagonal, while 
         /// all other entries will be zero.<br/>
         /// In all other cases, the user-defined default value is returned.
@@ -1102,23 +1092,21 @@ namespace CesiumForUnity
         /// </summary>
         /// <remarks>
         /// <para>
-        /// Property values are converted as follows:<br/>
-        /// 
-        /// - If the value is a 3-by-3 matrix, its components will be converted to
+        /// If the value is a 3-by-3 matrix, its components will be converted to
         /// 32-bit unsigned integers if possible.<br/>
         /// 
-        /// - If the value is a 2-by-2 matrix, its components will be used to fill
+        /// If the value is a 2-by-2 matrix, its components will be used to fill
         /// the corresponding components in the uint3x3. All other components will
         /// be initialized as zero.<br/>
         /// 
-        /// - If the value is a 4-by-4 matrix, the uint3x3 will be constructed
+        /// If the value is a 4-by-4 matrix, the uint3x3 will be constructed
         /// from the first 3 components of the first 3 columns.<br/>
         /// 
-        /// - If the value is a scalar that can be converted to a 32-bit unsigned integer,
+        /// If the value is a scalar that can be converted to a 32-bit unsigned integer,
         /// then the resulting uint3x3 will have this value along its diagonal. All other
         /// entries will be zero.<br/>
         /// 
-        /// - If the value is a boolean, it is converted to 1 for true and 0 for false.
+        /// If the value is a boolean, it is converted to 1 for true and 0 for false.
         /// Then, the resulting uint3x3 will have this value along its diagonal, while 
         /// all other entries will be zero.<br/>
         /// In all other cases, the user-defined default value is returned.
@@ -1142,23 +1130,21 @@ namespace CesiumForUnity
         /// </summary>
         /// <remarks>
         /// <para>
-        /// Property values are converted as follows:<br/>
-        /// 
-        /// - If the value is a 3-by-3 matrix, its components will be converted to the
+        /// If the value is a 3-by-3 matrix, its components will be converted to the
         /// closest representable single-precision floats if possible.<br/>
         /// 
-        /// - If the value is a 2-by-2 matrix, its components will be used to fill
+        /// If the value is a 2-by-2 matrix, its components will be used to fill
         /// the corresponding components in the float3x3. All other components will
         /// be initialized as zero.<br/>
         /// 
-        /// - If the value is a 4-by-4 matrix, the float3x3 will be constructed
+        /// If the value is a 4-by-4 matrix, the float3x3 will be constructed
         /// from the first 3 components of the first 3 columns.<br/>
         /// 
-        /// - If the value is a scalar that can be converted to a single-precision floating
+        /// If the value is a scalar that can be converted to a single-precision floating
         /// point number, then the resulting float3x3 will have this value along its diagonal.
         /// All other entries will be zero.<br/>
         /// 
-        /// - If the value is a boolean, it is converted to 1.0f for true and 0.0f for false.
+        /// If the value is a boolean, it is converted to 1.0f for true and 0.0f for false.
         /// Then, the resulting float3x3 will have this value along its diagonal, while 
         /// all other entries will be zero.<br/>
         /// In all other cases, the user-defined default value is returned.
@@ -1369,8 +1355,6 @@ namespace CesiumForUnity
         /// String values are returned as-is.<br/>
         /// Scalar values are converted to a string with `ToString()`.<br/>
         /// Boolean values are converted to "true" or "false".<br/>
-        /// Vector values are returned as strings in the format (X, Y, Z, W)
-        /// depending on how many components they have.<br/>
         /// Array values return the default value.<br/>
         /// </para>
         /// </remarks>

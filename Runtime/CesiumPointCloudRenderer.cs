@@ -17,7 +17,6 @@ namespace CesiumForUnity
     }
 
     [ExecuteInEditMode]
-    [IconAttribute("Packages/com.cesium.unity/Editor/Resources/Cesium-24x24.png")]
     [AddComponentMenu("")]
     internal class CesiumPointCloudRenderer : MonoBehaviour
     {

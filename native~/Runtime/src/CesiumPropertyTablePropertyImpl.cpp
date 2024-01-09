@@ -12,19 +12,27 @@
 #include <DotNet/Unity/Mathematics/double2.h>
 #include <DotNet/Unity/Mathematics/double2x2.h>
 #include <DotNet/Unity/Mathematics/double3.h>
+#include <DotNet/Unity/Mathematics/double3x3.h>
 #include <DotNet/Unity/Mathematics/double4.h>
+#include <DotNet/Unity/Mathematics/double4x4.h>
 #include <DotNet/Unity/Mathematics/float2.h>
 #include <DotNet/Unity/Mathematics/float2x2.h>
 #include <DotNet/Unity/Mathematics/float3.h>
+#include <DotNet/Unity/Mathematics/float3x3.h>
 #include <DotNet/Unity/Mathematics/float4.h>
+#include <DotNet/Unity/Mathematics/float4x4.h>
 #include <DotNet/Unity/Mathematics/int2.h>
 #include <DotNet/Unity/Mathematics/int2x2.h>
 #include <DotNet/Unity/Mathematics/int3.h>
+#include <DotNet/Unity/Mathematics/int3x3.h>
 #include <DotNet/Unity/Mathematics/int4.h>
+#include <DotNet/Unity/Mathematics/int4x4.h>
 #include <DotNet/Unity/Mathematics/uint2.h>
 #include <DotNet/Unity/Mathematics/uint2x2.h>
 #include <DotNet/Unity/Mathematics/uint3.h>
+#include <DotNet/Unity/Mathematics/uint3x3.h>
 #include <DotNet/Unity/Mathematics/uint4.h>
+#include <DotNet/Unity/Mathematics/uint4x4.h>
 
 using namespace CesiumGltf;
 using namespace DotNet;
@@ -1601,6 +1609,242 @@ CesiumPropertyTablePropertyImpl::GetDouble2x2(
           });
 
   return maybeMat2 ? UnityMetadataConversions::toDouble2x2(*maybeMat2)
+                   : defaultValue;
+}
+
+DotNet::Unity::Mathematics::int3x3 CesiumPropertyTablePropertyImpl::GetInt3x3(
+    const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+    std::int64_t featureID,
+    DotNet::Unity::Mathematics::int3x3 defaultValue) {
+  std::optional<glm::imat3x3> maybeMat3 =
+      propertyTablePropertyCallback<std::optional<glm::imat3x3>>(
+          this->_property,
+          property.valueType(),
+          property.isNormalized(),
+          [featureID](const auto& v) -> std::optional<glm::imat3x3> {
+            // size() returns zero if the view is invalid.
+            if (featureID < 0 || featureID >= v.size()) {
+              return std::nullopt;
+            }
+
+            auto maybeValue = v.get(featureID);
+            if (!maybeValue) {
+              return std::nullopt;
+            }
+
+            auto value = *maybeValue;
+            return MetadataConversions<glm::imat3x3, decltype(value)>::convert(
+                value);
+          });
+
+  return maybeMat3 ? UnityMetadataConversions::toInt3x3(*maybeMat3)
+                   : defaultValue;
+}
+
+DotNet::Unity::Mathematics::uint3x3 CesiumPropertyTablePropertyImpl::GetUInt3x3(
+    const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+    std::int64_t featureID,
+    DotNet::Unity::Mathematics::uint3x3 defaultValue) {
+  std::optional<glm::umat3x3> maybeMat3 =
+      propertyTablePropertyCallback<std::optional<glm::umat3x3>>(
+          this->_property,
+          property.valueType(),
+          property.isNormalized(),
+          [featureID](const auto& v) -> std::optional<glm::umat3x3> {
+            // size() returns zero if the view is invalid.
+            if (featureID < 0 || featureID >= v.size()) {
+              return std::nullopt;
+            }
+
+            auto maybeValue = v.get(featureID);
+            if (!maybeValue) {
+              return std::nullopt;
+            }
+
+            auto value = *maybeValue;
+            return MetadataConversions<glm::umat3x3, decltype(value)>::convert(
+                value);
+          });
+
+  return maybeMat3 ? UnityMetadataConversions::toUint3x3(*maybeMat3)
+                   : defaultValue;
+}
+
+DotNet::Unity::Mathematics::float3x3
+CesiumPropertyTablePropertyImpl::GetFloat3x3(
+    const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+    std::int64_t featureID,
+    DotNet::Unity::Mathematics::float3x3 defaultValue) {
+  std::optional<glm::mat3> maybeMat3 =
+      propertyTablePropertyCallback<std::optional<glm::mat3>>(
+          this->_property,
+          property.valueType(),
+          property.isNormalized(),
+          [featureID](const auto& v) -> std::optional<glm::mat3> {
+            // size() returns zero if the view is invalid.
+            if (featureID < 0 || featureID >= v.size()) {
+              return std::nullopt;
+            }
+
+            auto maybeValue = v.get(featureID);
+            if (!maybeValue) {
+              return std::nullopt;
+            }
+
+            auto value = *maybeValue;
+            return MetadataConversions<glm::mat3, decltype(value)>::convert(
+                value);
+          });
+
+  return maybeMat3 ? UnityMetadataConversions::toFloat3x3(*maybeMat3)
+                   : defaultValue;
+}
+
+DotNet::Unity::Mathematics::double3x3
+CesiumPropertyTablePropertyImpl::GetDouble3x3(
+    const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+    std::int64_t featureID,
+    DotNet::Unity::Mathematics::double3x3 defaultValue) {
+  std::optional<glm::dmat3> maybeMat3 =
+      propertyTablePropertyCallback<std::optional<glm::dmat3>>(
+          this->_property,
+          property.valueType(),
+          property.isNormalized(),
+          [featureID](const auto& v) -> std::optional<glm::dmat3> {
+            // size() returns zero if the view is invalid.
+            if (featureID < 0 || featureID >= v.size()) {
+              return std::nullopt;
+            }
+
+            auto maybeValue = v.get(featureID);
+            if (!maybeValue) {
+              return std::nullopt;
+            }
+
+            auto value = *maybeValue;
+            return MetadataConversions<glm::dmat3, decltype(value)>::convert(
+                value);
+          });
+
+  return maybeMat3 ? UnityMetadataConversions::toDouble3x3(*maybeMat3)
+                   : defaultValue;
+}
+
+DotNet::Unity::Mathematics::int4x4 CesiumPropertyTablePropertyImpl::GetInt4x4(
+    const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+    std::int64_t featureID,
+    DotNet::Unity::Mathematics::int4x4 defaultValue) {
+  std::optional<glm::imat4x4> maybeMat4 =
+      propertyTablePropertyCallback<std::optional<glm::imat4x4>>(
+          this->_property,
+          property.valueType(),
+          property.isNormalized(),
+          [featureID](const auto& v) -> std::optional<glm::imat4x4> {
+            // size() returns zero if the view is invalid.
+            if (featureID < 0 || featureID >= v.size()) {
+              return std::nullopt;
+            }
+
+            auto maybeValue = v.get(featureID);
+            if (!maybeValue) {
+              return std::nullopt;
+            }
+
+            auto value = *maybeValue;
+            return MetadataConversions<glm::imat4x4, decltype(value)>::convert(
+                value);
+          });
+
+  return maybeMat4 ? UnityMetadataConversions::toInt4x4(*maybeMat4)
+                   : defaultValue;
+}
+
+DotNet::Unity::Mathematics::uint4x4 CesiumPropertyTablePropertyImpl::GetUInt4x4(
+    const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+    std::int64_t featureID,
+    DotNet::Unity::Mathematics::uint4x4 defaultValue) {
+  std::optional<glm::umat4x4> maybeMat4 =
+      propertyTablePropertyCallback<std::optional<glm::umat4x4>>(
+          this->_property,
+          property.valueType(),
+          property.isNormalized(),
+          [featureID](const auto& v) -> std::optional<glm::umat4x4> {
+            // size() returns zero if the view is invalid.
+            if (featureID < 0 || featureID >= v.size()) {
+              return std::nullopt;
+            }
+
+            auto maybeValue = v.get(featureID);
+            if (!maybeValue) {
+              return std::nullopt;
+            }
+
+            auto value = *maybeValue;
+            return MetadataConversions<glm::umat4x4, decltype(value)>::convert(
+                value);
+          });
+
+  return maybeMat4 ? UnityMetadataConversions::toUint4x4(*maybeMat4)
+                   : defaultValue;
+}
+
+DotNet::Unity::Mathematics::float4x4
+CesiumPropertyTablePropertyImpl::GetFloat4x4(
+    const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+    std::int64_t featureID,
+    DotNet::Unity::Mathematics::float4x4 defaultValue) {
+  std::optional<glm::mat4> maybeMat4 =
+      propertyTablePropertyCallback<std::optional<glm::mat4>>(
+          this->_property,
+          property.valueType(),
+          property.isNormalized(),
+          [featureID](const auto& v) -> std::optional<glm::mat4> {
+            // size() returns zero if the view is invalid.
+            if (featureID < 0 || featureID >= v.size()) {
+              return std::nullopt;
+            }
+
+            auto maybeValue = v.get(featureID);
+            if (!maybeValue) {
+              return std::nullopt;
+            }
+
+            auto value = *maybeValue;
+            return MetadataConversions<glm::mat4, decltype(value)>::convert(
+                value);
+          });
+
+  return maybeMat4 ? UnityMetadataConversions::toFloat4x4(*maybeMat4)
+                   : defaultValue;
+}
+
+DotNet::Unity::Mathematics::double4x4
+CesiumPropertyTablePropertyImpl::GetDouble4x4(
+    const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+    std::int64_t featureID,
+    DotNet::Unity::Mathematics::double4x4 defaultValue) {
+  std::optional<glm::dmat4> maybeMat4 =
+      propertyTablePropertyCallback<std::optional<glm::dmat4>>(
+          this->_property,
+          property.valueType(),
+          property.isNormalized(),
+          [featureID](const auto& v) -> std::optional<glm::dmat4> {
+            // size() returns zero if the view is invalid.
+            if (featureID < 0 || featureID >= v.size()) {
+              return std::nullopt;
+            }
+
+            auto maybeValue = v.get(featureID);
+            if (!maybeValue) {
+              return std::nullopt;
+            }
+
+            auto value = *maybeValue;
+            return MetadataConversions<glm::dmat4, decltype(value)>::convert(
+                value);
+          });
+
+  return maybeMat4 ? UnityMetadataConversions::toDouble4x4(*maybeMat4)
                    : defaultValue;
 }
 

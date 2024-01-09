@@ -1057,6 +1057,11 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         *pModelMetadata);
   }
 
+  // For backwards compatibility.
+  CesiumForUnity::CesiumMetadata metadataComponent =
+      pModelGameObject
+          ->GetComponentInParent<DotNet::CesiumForUnity::CesiumMetadata>();
+
   model.forEachPrimitiveInScene(
       -1,
       [&meshes,
@@ -1069,6 +1074,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
        createPhysicsMeshes,
        showTilesInHierarchy,
        currentOverlayCount,
+       &metadataComponent,
        &tile,
        &shaderProperty = _shaderProperty,
        tilesetLayer = this->_tileset.layer()](
@@ -1362,6 +1368,14 @@ void* UnityPrepareRendererResources::prepareInMainThread(
               primitive,
               *pFeatures);
         }
+
+        // For backwards compatibility.
+        if (metadataComponent != nullptr) {
+          metadataComponent.NativeImplementation().addMetadata(
+              primitiveGameObject.transform().GetInstanceID(),
+              &gltf,
+              &primitive);
+        }
       });
 
   tilesetComponent.BroadcastNewGameObjectCreated(*pModelGameObject);
@@ -1378,6 +1392,7 @@ namespace {
 void freePrimitiveGameObject(
     const DotNet::UnityEngine::GameObject& primitiveGameObject,
     const DotNet::CesiumForUnity::CesiumMetadata& maybeMetadata) {
+  // Kept for backwards compatibility.
   if (maybeMetadata != nullptr) {
     maybeMetadata.NativeImplementation().removeMetadata(
         primitiveGameObject.transform().GetInstanceID());

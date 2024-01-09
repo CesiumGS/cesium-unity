@@ -29,6 +29,7 @@ namespace CesiumForUnity
     /// Allows access to a particular feature of <see cref="CesiumMetadata"/>.
     /// </summary>
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumFeatureImpl", "CesiumFeatureImpl.h")]
+    [Obsolete("Retrieve feature IDs using the CesiumPrimitiveFeatures component attached to a mesh primitive instead.")]
     public partial class CesiumFeature
     {
         /// <summary>

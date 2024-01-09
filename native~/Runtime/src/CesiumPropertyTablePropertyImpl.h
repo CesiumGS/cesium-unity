@@ -39,6 +39,14 @@ class int2x2;
 class uint2x2;
 class float2x2;
 class double2x2;
+class int3x3;
+class uint3x3;
+class float3x3;
+class double3x3;
+class int4x4;
+class uint4x4;
+class float4x4;
+class double4x4;
 } // namespace DotNet::Unity::Mathematics
 
 namespace CesiumForUnityNative {
@@ -189,6 +197,46 @@ public:
       const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
       std::int64_t featureID,
       DotNet::Unity::Mathematics::double2x2 defaultValue);
+
+  DotNet::Unity::Mathematics::int3x3 GetInt3x3(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      DotNet::Unity::Mathematics::int3x3 defaultValue);
+
+  DotNet::Unity::Mathematics::uint3x3 GetUInt3x3(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      DotNet::Unity::Mathematics::uint3x3 defaultValue);
+
+  DotNet::Unity::Mathematics::float3x3 GetFloat3x3(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      DotNet::Unity::Mathematics::float3x3 defaultValue);
+
+  DotNet::Unity::Mathematics::double3x3 GetDouble3x3(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      DotNet::Unity::Mathematics::double3x3 defaultValue);
+
+  DotNet::Unity::Mathematics::int4x4 GetInt4x4(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      DotNet::Unity::Mathematics::int4x4 defaultValue);
+
+  DotNet::Unity::Mathematics::uint4x4 GetUInt4x4(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      DotNet::Unity::Mathematics::uint4x4 defaultValue);
+
+  DotNet::Unity::Mathematics::float4x4 GetFloat4x4(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      DotNet::Unity::Mathematics::float4x4 defaultValue);
+
+  DotNet::Unity::Mathematics::double4x4 GetDouble4x4(
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+      std::int64_t featureID,
+      DotNet::Unity::Mathematics::double4x4 defaultValue);
 
   DotNet::System::String GetString(
       const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,

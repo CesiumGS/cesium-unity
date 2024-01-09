@@ -57,7 +57,7 @@ set_target_properties(
 target_compile_options(
   CesiumForUnityNative-Runtime
   PRIVATE
-    /bigobj
+    -bigobj
 )
 
 target_compile_definitions(

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <CesiumGltf/AccessorView.h>
+#include <CesiumGltf/AccessorUtility.h>
 #include <CesiumGltf/Model.h>
 
 #include <DotNet/CesiumForUnity/CesiumFeature.h>
@@ -20,14 +20,6 @@ class Transform;
 } // namespace DotNet::UnityEngine
 
 namespace CesiumForUnityNative {
-
-using AccessorType = std::variant<
-    CesiumGltf::AccessorView<CesiumGltf::AccessorTypes::SCALAR<int8_t>>,
-    CesiumGltf::AccessorView<CesiumGltf::AccessorTypes::SCALAR<uint8_t>>,
-    CesiumGltf::AccessorView<CesiumGltf::AccessorTypes::SCALAR<int16_t>>,
-    CesiumGltf::AccessorView<CesiumGltf::AccessorTypes::SCALAR<uint16_t>>,
-    CesiumGltf::AccessorView<CesiumGltf::AccessorTypes::SCALAR<uint32_t>>,
-    CesiumGltf::AccessorView<CesiumGltf::AccessorTypes::SCALAR<float>>>;
 
 class CesiumMetadataImpl {
 public:
@@ -53,9 +45,5 @@ private:
       int32_t,
       std::pair<const CesiumGltf::Model*, const CesiumGltf::MeshPrimitive*>>
       _pModels;
-
-  using FeatureTable = std::unordered_map<std::string, PropertyType>;
-
-  using FeatureIDAttribute = std::pair<std::string, AccessorType>;
 };
 } // namespace CesiumForUnityNative

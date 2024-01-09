@@ -49,7 +49,7 @@ set_target_properties(
 target_compile_options(
   CesiumForUnityNative-Editor
   PRIVATE
-    /bigobj
+    -bigobj
 )
 
 # If we're building for the Unity Editor, set a #define accordingly.

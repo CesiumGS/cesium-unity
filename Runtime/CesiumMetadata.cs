@@ -1,4 +1,5 @@
 using Reinterop;
+using System;
 using UnityEngine;
 
 namespace CesiumForUnity
@@ -9,6 +10,7 @@ namespace CesiumForUnity
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumMetadataImpl", "CesiumMetadataImpl.h")]
     [AddComponentMenu("Cesium/Cesium Metadata")]
     [IconAttribute("Packages/com.cesium.unity/Editor/Resources/Cesium-24x24.png")]
+    [Obsolete("Retrieve metadata using the CesiumModelMetadata component attached to a tile instead.")]
     public partial class CesiumMetadata : MonoBehaviour
     {
         /// <summary>

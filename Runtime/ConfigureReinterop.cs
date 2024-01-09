@@ -12,6 +12,7 @@ using UnityEngine.Rendering;
 using UnityEngine.Experimental.Rendering;
 using Unity.Mathematics;
 using UnityEngine.Pool;
+using UnityEngine.UIElements;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -612,6 +613,7 @@ namespace CesiumForUnity
             array.valueType = new CesiumMetadataValueType();
             array.values = new CesiumMetadataValue[10];
             array.values[0] = new CesiumMetadataValue();
+            int length = array.values.Length;
 
             CesiumMetadataValue myValue = new CesiumMetadataValue();
             myValue.SetObjectValue(false);
@@ -691,6 +693,20 @@ namespace CesiumForUnity
             CesiumMetadataValue.GetObjectAsDouble4x4(myObject);
             CesiumMetadataValue.GetObjectAsString(myObject);
 
+            myValue.GetBoolean();
+            myValue.GetSByte();
+            myValue.GetByte();
+            myValue.GetInt16();
+            myValue.GetUInt16();
+            myValue.GetInt32();
+            myValue.GetUInt32();
+            myValue.GetInt64();
+            myValue.GetUInt64();
+            myValue.GetFloat();
+            myValue.GetDouble();
+            myValue.GetString();
+            myValue.GetArray();
+
             CesiumPrimitiveFeatures primitiveFeatures = go.AddComponent<CesiumPrimitiveFeatures>();
             CesiumFeatureIdSet[] sets = primitiveFeatures.featureIdSets;
             sets = new CesiumFeatureIdSet[10];
@@ -758,7 +774,7 @@ namespace CesiumForUnity
             svc.transform.SetPositionAndRotation(p, q);
 
             bool isPlaying = EditorApplication.isPlaying;
-            EditorApplication.update += () => {};
+            EditorApplication.update += () => { };
 
             EditorUtility.SetDirty(null);
 #endif

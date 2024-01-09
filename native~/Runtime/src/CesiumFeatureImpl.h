@@ -2,6 +2,7 @@
 
 #include <CesiumGltf/PropertyTablePropertyView.h>
 
+#include <DotNet/CesiumForUnity/CesiumMetadataValue.h>
 #include <DotNet/CesiumForUnity/MetadataType.h>
 
 #include <unordered_map>
@@ -42,42 +43,6 @@ using ValueType = std::variant<
     CesiumGltf::PropertyArrayView<double>,
     CesiumGltf::PropertyArrayView<bool>,
     CesiumGltf::PropertyArrayView<std::string_view>>;
-
-using PropertyType = std::variant<
-    CesiumGltf::PropertyTablePropertyView<int8_t>,
-    CesiumGltf::PropertyTablePropertyView<uint8_t>,
-    CesiumGltf::PropertyTablePropertyView<int16_t>,
-    CesiumGltf::PropertyTablePropertyView<uint16_t>,
-    CesiumGltf::PropertyTablePropertyView<int32_t>,
-    CesiumGltf::PropertyTablePropertyView<uint32_t>,
-    CesiumGltf::PropertyTablePropertyView<int64_t>,
-    CesiumGltf::PropertyTablePropertyView<uint64_t>,
-    CesiumGltf::PropertyTablePropertyView<float>,
-    CesiumGltf::PropertyTablePropertyView<double>,
-    CesiumGltf::PropertyTablePropertyView<bool>,
-    CesiumGltf::PropertyTablePropertyView<std::string_view>,
-    CesiumGltf::PropertyTablePropertyView<
-        CesiumGltf::PropertyArrayView<int8_t>>,
-    CesiumGltf::PropertyTablePropertyView<
-        CesiumGltf::PropertyArrayView<uint8_t>>,
-    CesiumGltf::PropertyTablePropertyView<
-        CesiumGltf::PropertyArrayView<int16_t>>,
-    CesiumGltf::PropertyTablePropertyView<
-        CesiumGltf::PropertyArrayView<uint16_t>>,
-    CesiumGltf::PropertyTablePropertyView<
-        CesiumGltf::PropertyArrayView<int32_t>>,
-    CesiumGltf::PropertyTablePropertyView<
-        CesiumGltf::PropertyArrayView<uint32_t>>,
-    CesiumGltf::PropertyTablePropertyView<
-        CesiumGltf::PropertyArrayView<int64_t>>,
-    CesiumGltf::PropertyTablePropertyView<
-        CesiumGltf::PropertyArrayView<uint64_t>>,
-    CesiumGltf::PropertyTablePropertyView<CesiumGltf::PropertyArrayView<float>>,
-    CesiumGltf::PropertyTablePropertyView<
-        CesiumGltf::PropertyArrayView<double>>,
-    CesiumGltf::PropertyTablePropertyView<CesiumGltf::PropertyArrayView<bool>>,
-    CesiumGltf::PropertyTablePropertyView<
-        CesiumGltf::PropertyArrayView<std::string_view>>>;
 
 class CesiumFeatureImpl {
 public:
@@ -209,11 +174,19 @@ public:
       const DotNet::CesiumForUnity::CesiumFeature& feature,
       const DotNet::System::String& property);
 
-  std::unordered_map<std::string, std::pair<PropertyType, ValueType>>
-      properties;
+  struct PropertyInfo {
+    int64_t count;
+    bool isNormalized;
+  };
+
+  std::unordered_map<
+      std::string,
+      std::pair<PropertyInfo, DotNet::CesiumForUnity::CesiumMetadataValue>>
+      values;
 
 private:
-  PropertyType GetPropertyType(const DotNet::System::String& property);
-  ValueType GetValueType(const DotNet::System::String& property);
+  PropertyInfo getPropertyInfo(const DotNet::System::String& property);
+  DotNet::CesiumForUnity::CesiumMetadataValue
+  getValue(const DotNet::System::String& property);
 };
 } // namespace CesiumForUnityNative
