@@ -1473,6 +1473,50 @@ namespace CesiumForUnity
         /// <returns>The property value as a double3x3.</returns>
         public partial double3x3 GetDouble3x3(Int64 featureID, double3x3 defaultValue);
 
+        /// <summary>
+        /// Attempts to retrieve the value for the given feature as a int4x4.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// For numeric properties, the raw value for a given feature will be
+        /// transformed by the property's normalization, scale, and offset before it is
+        /// further converted. If the raw value is equal to the property's "no data"
+        /// value, then the property's default value will be converted if possible. If
+        /// the property-defined default value cannot be converted, or does not exist,
+        /// then the user-defined default value is returned.
+        /// </para>
+        /// <para>
+        /// Property values are converted as follows:<br/>
+        /// 
+        /// - If the value is a 4-by-4 matrix, its components will be converted to
+        /// 32-bit signed integers if possible.<br/>
+        /// 
+        /// - If the value is a 2-by-2 or 3-by-3 matrix, its components will be used
+        /// to fill the corresponding components in the int4x4. All other components
+        /// will be initialized as zero.<br/>
+        /// 
+        /// - If the value is a scalar that can be converted to a 32-bit signed integer,
+        /// then the resulting int4x4 will have this value along its diagonal. All other
+        /// entries will be zero.<br/>
+        /// 
+        /// - If the value is a boolean, it is converted to 1 for true and 0 for false.
+        /// Then, the resulting int4x4 will have this value along its diagonal, while 
+        /// all other entries will be zero.<br/>
+        /// </para>
+        /// <para>
+        /// In all other cases, the user-defined default value is returned. In all matrix
+        /// cases, if any of the relevant components cannot be represented as a 32-bit 
+        /// signed integer, the default value is returned.
+        /// <br/><br/>
+        /// If the feature ID is out-of-range, or if the property table property is somehow
+        /// invalid, the user-defined default value is returned.
+        /// </para>
+        /// </remarks>
+        /// <param name="featureID">The ID of the feature.</param>
+        /// <param name="defaultValue">The default value to fall back on.</param>
+        /// <returns>The property value as a int4x4.</returns>
+        public partial int4x4 GetInt4x4(Int64 featureID, int4x4 defaultValue);
+
         // int4x4, uint4x4, float4x4, double4x4
 
         /// <summary>

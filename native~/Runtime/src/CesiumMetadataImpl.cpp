@@ -1,5 +1,7 @@
 #include "CesiumMetadataImpl.h"
 
+#include "CesiumFeaturesMetadataUtility.h"
+
 #include <CesiumGltf/AccessorUtility.h>
 #include <CesiumGltf/AccessorView.h>
 #include <CesiumGltf/ExtensionExtMeshFeatures.h>
@@ -38,15 +40,10 @@ int64_t getFirstVertexFromTriangle(
 int64_t getFeatureIdFromVertex(
     const CesiumGltf::Model& model,
     const CesiumGltf::MeshPrimitive& primitive,
-    const std::string& attribute,
-    int64_t vertexIndex) {
-  auto featureIdAttribute = primitive.attributes.find(attribute);
-  if (featureIdAttribute == primitive.attributes.end()) {
-    return -1;
-  }
-
+    const int64_t featureIdAttributeIndex,
+    const int64_t vertexIndex) {
   CesiumGltf::FeatureIdAccessorType featureIDAccessor =
-      getFeatureIdAccessorView(model, primitive, featureIdAttribute->second);
+      getFeatureIdAccessorView(model, primitive, featureIdAttributeIndex);
 
   return std::visit(
       CesiumGltf::FeatureIdFromAccessor{vertexIndex},
@@ -123,6 +120,9 @@ CesiumForUnityNative::CesiumMetadataImpl::GetFeatures(
           attributesCount);
 
   for (int32_t i = 0; i < attributesCount; i++) {
+    DotNet::CesiumForUnity::CesiumFeature feature;
+    features.Item(i, feature);
+
     const CesiumGltf::FeatureId& featureIdSet = *featureIdAttributes[i];
     if (!featureIdSet.propertyTable || *featureIdSet.propertyTable < 0 ||
         *featureIdSet.propertyTable >=
@@ -131,8 +131,6 @@ CesiumForUnityNative::CesiumMetadataImpl::GetFeatures(
     }
 
     const auto propertyTable = pModelMetadata->propertyTables[i];
-    DotNet::CesiumForUnity::CesiumFeature feature;
-    features.Item(i, feature);
 
     int64_t vertexIndex = getFirstVertexFromTriangle(
         *pModel,
@@ -140,56 +138,66 @@ CesiumForUnityNative::CesiumMetadataImpl::GetFeatures(
         vertexCount,
         triangleIndex);
 
-    const std::string featureIdAttributeName =
-        "_FEATURE_ID_" + *featureIdSet.attribute;
-    int64_t featureID = getFeatureIdFromVertex(
-        *pModel,
-        *pPrimitive,
-        featureIdAttributeName,
-        vertexIndex);
-
-    const std::string& featureTableName = propertyTable.name.value_or("");
-    feature.featureTableName(featureTableName);
+    if (propertyTable.name) {
+      feature.featureTableName(*propertyTable.name);
+    }
 
     auto classIt =
         pModelMetadata->schema->classes.find(propertyTable.classProperty);
     if (classIt != pModelMetadata->schema->classes.end() &&
-        classIt->second.name.has_value()) {
+        classIt->second.name) {
       feature.className(*classIt->second.name);
+    }
+
+    int64_t featureID = getFeatureIdFromVertex(
+        *pModel,
+        *pPrimitive,
+        *featureIdSet.attribute,
+        vertexIndex);
+    if (featureID < 0) {
+      feature.properties(DotNet::System::Array1<DotNet::System::String>(0));
+      continue;
     }
 
     CesiumGltf::PropertyTableView propertyTableView(*pModel, propertyTable);
     feature.properties(DotNet::System::Array1<DotNet::System::String>(
         propertyTable.properties.size()));
-    auto size = feature.properties().Length();
+    int propertyIndex = 0;
     auto& values = feature.NativeImplementation().values;
-    int index = 0;
-    propertyTableView.forEachProperty([featureID, &index, feature, &values](
-                                          const std::string& propertyName,
-                                          auto property) {
-      // The 3D Tiles Next implementation of this class did not account for
-      // noData values, so using getRaw() most accurately preserves
-      // backwards compatibility.
-      auto rawValue = property.getRaw(featureID);
-      CesiumMetadataValue value = CesiumMetadataValue();
-      using ValueType = decltype(rawValue);
+    propertyTableView.forEachProperty(
+        [featureID, &propertyIndex, feature, &values](
+            const std::string& propertyName,
+            auto property) {
+          // The 3D Tiles Next implementation of this class did not account for
+          // noData values, so using getRaw() most accurately preserves
+          // backwards compatibility.
+          auto rawValue = property.getRaw(featureID);
+          CesiumMetadataValue value = CesiumMetadataValue();
+          using ValueType = decltype(rawValue);
 
-      if constexpr (
-          IsMetadataBoolean<ValueType>::value ||
-          IsMetadataScalar<ValueType>::value) {
-        value.SetObjectValue(rawValue);
-      }
+          if constexpr (
+              IsMetadataBoolean<ValueType>::value ||
+              IsMetadataScalar<ValueType>::value) {
+            value.SetObjectValue(rawValue);
+          }
 
-      if constexpr (IsMetadataString<ValueType>::value) {
-        value.SetObjectValue(System::String(std::string(rawValue)));
-      }
+          if constexpr (IsMetadataString<ValueType>::value) {
+            std::string stringValue = std::string(rawValue);
+            value.SetObjectValue(System::String(stringValue));
+          }
 
-      feature.properties().Item(index++, propertyName);
-      CesiumFeatureImpl::PropertyInfo propertyInfo{
-          property.arrayCount(),
-          property.normalized()};
-      values.insert({propertyName, {propertyInfo, value}});
-    });
+          if constexpr (IsMetadataArray<ValueType>::value) {
+            CesiumPropertyArray array =
+                CesiumFeaturesMetadataUtility::makePropertyArray(rawValue);
+            value.SetObjectValue(array);
+          }
+
+          feature.properties().Item(propertyIndex++, propertyName);
+          CesiumFeatureImpl::PropertyInfo propertyInfo{
+              property.arrayCount(),
+              property.normalized()};
+          values.insert({propertyName, {propertyInfo, value}});
+        });
   }
   return features;
 }

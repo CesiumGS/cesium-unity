@@ -513,7 +513,9 @@ namespace CesiumForUnity
         /// If the value is a boolean, (1, 1) is returned for true, while 
         /// (0, 0) is returned for false.<br/>
         /// 
-        /// In all other cases, the user-defined default value is returned. 
+        /// In all other cases, the user-defined default value is returned. In all vector
+        /// cases, if any of the relevant components cannot be represented as a 32-bit 
+        /// signed integer, the default value is returned.
         /// </para>
         /// </remarks>
         /// <param name="defaultValue">The default value to use if the value 
@@ -546,7 +548,9 @@ namespace CesiumForUnity
         /// If the value is a boolean, (1, 1) is returned for true, while 
         /// (0, 0) is returned for false.<br/>
         /// 
-        /// In all other cases, the user-defined default value is returned. 
+        /// In all other cases, the user-defined default value is returned. In all vector
+        /// cases, if any of the relevant components cannot be represented as a 32-bit 
+        /// unsigned integer, the default value is returned.
         /// </para>
         /// </remarks>
         /// <param name="defaultValue">The default value to use if the value 
@@ -580,7 +584,9 @@ namespace CesiumForUnity
         /// If the value is a boolean, (1.0f, 1.0f) is returned for true, while 
         /// (0.0f, 0.0f) is returned for false.<br/>
         /// 
-        /// In all other cases, the user-defined default value is returned. 
+        /// In all other cases, the user-defined default value is returned. In all vector
+        /// cases, if any of the relevant components cannot be represented as a
+        /// single-precision floating-point number, the default value is returned.
         /// </para>
         /// </remarks>
         /// <param name="defaultValue">The default value to use if the value 
@@ -648,7 +654,9 @@ namespace CesiumForUnity
         /// If the value is a boolean, (1, 1, 1) is returned for true, while 
         /// (0, 0, 0) is returned for false.<br/>
         /// 
-        /// In all other cases, the user-defined default value is returned. 
+        /// In all other cases, the user-defined default value is returned. In all vector
+        /// cases, if any of the relevant components cannot be represented as a 32-bit 
+        /// signed integer, the default value is returned.
         /// </para>
         /// </remarks>
         /// <param name="defaultValue">The default value to use if the value 
@@ -684,7 +692,9 @@ namespace CesiumForUnity
         /// If the value is a boolean, (1, 1, 1) is returned for true, while 
         /// (0, 0, 0) is returned for false.<br/>
         /// 
-        /// In all other cases, the user-defined default value is returned. 
+        /// In all other cases, the user-defined default value is returned. In all vector
+        /// cases, if any of the relevant components cannot be represented as a 32-bit 
+        /// unsigned integer, the default value is returned.
         /// </para>
         /// </remarks>
         /// <param name="defaultValue">The default value to use if the value 
@@ -721,7 +731,9 @@ namespace CesiumForUnity
         /// If the value is a boolean, (1.0f, 1.0f, 1.0f) is returned for true, while 
         /// (0.0f, 0.0f, 0.0f) is returned for false.<br/>
         /// 
-        /// In all other cases, the user-defined default value is returned. 
+        /// In all other cases, the user-defined default value is returned. In all vector
+        /// cases, if any of the relevant components cannot be represented as a 
+        /// single-precision floating-point number, the default value is returned.
         /// </para>
         /// </remarks>
         /// <param name="defaultValue">The default value to use if the value 
@@ -792,7 +804,9 @@ namespace CesiumForUnity
         /// If the value is a boolean, (1, 1, 1, 1) is returned for true, while 
         /// (0, 0, 0, 0) is returned for false.<br/>
         /// 
-        /// In all other cases, the user-defined default value is returned. 
+        /// In all other cases, the user-defined default value is returned. In all vector
+        /// cases, if any of the relevant components cannot be represented as a 32-bit 
+        /// signed integer, the default value is returned.
         /// </para>
         /// </remarks>
         /// <param name="defaultValue">The default value to use if the value 
@@ -828,7 +842,9 @@ namespace CesiumForUnity
         /// If the value is a boolean, (1, 1, 1, 1) is returned for true, while 
         /// (0, 0, 0, 0) is returned for false.<br/>
         /// 
-        /// In all other cases, the user-defined default value is returned. 
+        /// In all other cases, the user-defined default value is returned. In all vector
+        /// cases, if any of the relevant components cannot be represented as a 32-bit 
+        /// unsigned integer, the default value is returned.
         /// </para>
         /// </remarks>
         /// <param name="defaultValue">The default value to use if the value 
@@ -863,7 +879,9 @@ namespace CesiumForUnity
         /// 
         /// If the value is a boolean, (1.0f, 1.0f, 1.0f, 1.0f) is returned for true, while 
         /// (0.0f, 0.0f, 0.0f, 0.0f) is returned for false.<br/>
-        /// In all other cases, the user-defined default value is returned.
+        /// In all other cases, the user-defined default value is returned. In all vector
+        /// cases, if any of the relevant components cannot be represented as a
+        /// single-precision floating-point number, the default value is returned.
         /// </para>
         /// </remarks>
         /// <param name="defaultValue">The default value to use if the value 
@@ -932,7 +950,9 @@ namespace CesiumForUnity
         /// If the value is a boolean, it is converted to 1 for true and 0 for false.
         /// Then, the resulting int2x2 will have this value along its diagonal, while 
         /// all other entries will be zero.<br/>
-        /// In all other cases, the user-defined default value is returned.
+        /// In all other cases, the user-defined default value is returned. In all matrix
+        /// cases, if any of the relevant components cannot be represented as a 32-bit 
+        /// signed integer, the default value is returned.
         /// </para>
         /// </remarks>
         /// <param name="defaultValue">The default value to use if the value 
@@ -966,7 +986,9 @@ namespace CesiumForUnity
         /// If the value is a boolean, it is converted to 1 for true and 0 for false. 
         /// Then, the resulting uint2x2 will have this value along its diagonal, while
         /// all other entries will be zero.<br/>
-        /// In all other cases, the user-defined default value is returned.
+        /// In all other cases, the user-defined default value is returned. In all matrix
+        /// cases, if any of the relevant components cannot be represented as a 32-bit 
+        /// unsigned integer, the default value is returned.
         /// </para>
         /// </remarks>
         /// <param name="defaultValue">The default value to use if the value 
@@ -1000,7 +1022,9 @@ namespace CesiumForUnity
         /// If the value is a boolean, it is converted to 1.0f for true and 0.0f for false.
         /// Then, the resulting float2x2 will have this value along its diagonal, while 
         /// all other entries will be zero.<br/>
-        /// In all other cases, the user-defined default value is returned.
+        /// In all other cases, the user-defined default value is returned. In all matrix
+        /// cases, if any of the relevant components cannot be represented as a
+        /// single-precision floating-point number, the default value is returned.
         /// </para>
         /// </remarks>
         /// <param name="defaultValue">The default value to use if the value 
@@ -1071,7 +1095,9 @@ namespace CesiumForUnity
         /// If the value is a boolean, it is converted to 1 for true and 0 for false.
         /// Then, the resulting int3x3 will have this value along its diagonal, while 
         /// all other entries will be zero.<br/>
-        /// In all other cases, the user-defined default value is returned.
+        /// In all other cases, the user-defined default value is returned. In all matrix
+        /// cases, if any of the relevant components cannot be represented as a 32-bit 
+        /// signed integer, the default value is returned.
         /// </para>
         /// </remarks>
         /// <param name="defaultValue">The default value to use if the value 
@@ -1109,7 +1135,9 @@ namespace CesiumForUnity
         /// If the value is a boolean, it is converted to 1 for true and 0 for false.
         /// Then, the resulting uint3x3 will have this value along its diagonal, while 
         /// all other entries will be zero.<br/>
-        /// In all other cases, the user-defined default value is returned.
+        /// In all other cases, the user-defined default value is returned. In all matrix
+        /// cases, if any of the relevant components cannot be represented as a 32-bit 
+        /// unsigned integer, the default value is returned.
         /// </para>
         /// </remarks>
         /// <param name="defaultValue">The default value to use if the value 
@@ -1147,7 +1175,9 @@ namespace CesiumForUnity
         /// If the value is a boolean, it is converted to 1.0f for true and 0.0f for false.
         /// Then, the resulting float3x3 will have this value along its diagonal, while 
         /// all other entries will be zero.<br/>
-        /// In all other cases, the user-defined default value is returned.
+        /// In all other cases, the user-defined default value is returned. In all matrix
+        /// cases, if any of the relevant components cannot be represented as a
+        /// single-precision floating-point number, the default value is returned.
         /// </para>
         /// </remarks>
         /// <param name="defaultValue">The default value to use if the value 
@@ -1168,22 +1198,20 @@ namespace CesiumForUnity
         /// </summary>
         /// <remarks>
         /// <para>
-        /// Property values are converted as follows:<br/>
-        /// 
-        /// - If the value is a 3-by-3 matrix, its components will be converted to the
+        /// If the value is a 3-by-3 matrix, its components will be converted to the
         /// double-precision floating point numbers.<br/>
         /// 
-        /// - If the value is a 2-by-2 matrix, its components will be used to fill
+        /// If the value is a 2-by-2 matrix, its components will be used to fill
         /// the corresponding components in the double3x3. All other components will
         /// be initialized as zero.<br/>
         /// 
-        /// - If the value is a 4-by-4 matrix, the double3x3 will be constructed
+        /// If the value is a 4-by-4 matrix, the double3x3 will be constructed
         /// from the first 3 components of the first 3 columns.<br/>
         ///     
-        /// - If the value is a scalar, then the resulting double3x3 will have this value
+        /// If the value is a scalar, then the resulting double3x3 will have this value
         /// along its diagonal. All other entries will be zero.<br/>
         /// 
-        /// - If the value is a boolean, it is converted to 1.0 for true and 0.0 for false.
+        /// If the value is a boolean, it is converted to 1.0 for true and 0.0 for false.
         /// Then, the resulting double3x3 will have this value along its diagonal, while 
         /// all other entries will be zero.<br/>
         /// In all other cases, the user-defined default value is returned.
@@ -1222,7 +1250,9 @@ namespace CesiumForUnity
         /// - If the value is a boolean, it is converted to 1 for true and 0 for false.
         /// Then, the resulting int4x4 will have this value along its diagonal, while 
         /// all other entries will be zero.<br/>
-        /// In all other cases, the user-defined default value is returned.
+        /// In all other cases, the user-defined default value is returned.In all matrix
+        /// cases, if any of the relevant components cannot be represented as a 32-bit 
+        /// signed integer, the default value is returned.
         /// </para>
         /// </remarks>
         /// <param name="defaultValue">The default value to use if the value 
