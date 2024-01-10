@@ -74,12 +74,21 @@ namespace CesiumForUnity
             this.count = 0;
         }
 
-        public Dictionary<String, String> GetMetadataValuesForFeatureAsStrings(Int64 featureId)
+        /// <summary>
+        /// Gets all of the property values for a given feature, mapped by property
+        /// name. This will only include values from valid property table properties.
+        /// </summary>
+        /// <remarks>
+        /// If the feature ID is out-of-bounds, the returned dictionary will be empty.
+        /// </remarks>
+        /// <param name="featureId">The ID of the feature.</param>
+        /// <returns>A dictionary of the property values mapped by property name.</returns>
+        public Dictionary<String, CesiumMetadataValue> GetMetadataValuesForFeature(Int64 featureId)
         {
-            Dictionary<String, String> result = new Dictionary<String, String>();
+            Dictionary<String, CesiumMetadataValue> result = new Dictionary<String, CesiumMetadataValue>();
             foreach (KeyValuePair<String, CesiumPropertyTableProperty> property in this.properties)
             {
-                result.Add(property.Key, property.Value.GetString(featureId));
+                result.Add(property.Key, property.Value.GetValue(featureId));
             }
             return result;
         }

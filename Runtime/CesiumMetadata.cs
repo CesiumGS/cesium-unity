@@ -13,6 +13,11 @@ namespace CesiumForUnity
     [Obsolete("Retrieve metadata using the CesiumModelMetadata component attached to a tile instead.")]
     public partial class CesiumMetadata : MonoBehaviour
     {
+        private void OnEnable()
+        {
+            Debug.LogWarning("CesiumMetadata component is deprecated. Retrieving metadata using the CesiumModelMetadata component of a tile object.");
+        }
+
         /// <summary>
         /// Gets the features corresponding to a particular triangle in a tile.
         /// </summary>
@@ -24,5 +29,5 @@ namespace CesiumForUnity
         /// function.
         /// </remarks>
         public partial CesiumFeature[] GetFeatures(Transform transform, int triangleIndex);
-   }
+    }
 }

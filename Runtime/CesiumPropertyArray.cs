@@ -1,6 +1,4 @@
-using UnityEngine;
 using System;
-using Reinterop;
 
 namespace CesiumForUnity
 {
@@ -8,7 +6,6 @@ namespace CesiumForUnity
     /// Represents the value type of a metadata value or property, akin to the 
     /// property types in EXT_structural_metadata.
     /// </summary>
-    //[ReinteropNativeImplementation("CesiumForUnityNative::CesiumPropertyArrayImpl", "CesiumPropertyArrayImpl.h")]
     public partial class CesiumPropertyArray
     {
         internal CesiumMetadataValue[] values { get; set; }

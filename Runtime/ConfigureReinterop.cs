@@ -337,6 +337,8 @@ namespace CesiumForUnity
             MonoBehaviour mb = tileset;
             mb.StartCoroutine(new NativeCoroutine(endIteration => endIteration).GetEnumerator());
 
+
+#pragma warning disable 0618
             CesiumMetadata metadata = go.AddComponent<CesiumMetadata>();
             metadata = go.GetComponent<CesiumMetadata>();
             CesiumMetadata metadataParent = go.GetComponentInParent<CesiumMetadata>();
@@ -352,6 +354,7 @@ namespace CesiumForUnity
             feature.featureTableName = "";
             feature.properties = new string[4];
             feature.properties[2] = "";
+#pragma warning restore 0618
 
             CesiumGeoreference georeference = go.AddComponent<CesiumGeoreference>();
             georeference = go.GetComponent<CesiumGeoreference>();
