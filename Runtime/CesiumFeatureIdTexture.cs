@@ -55,5 +55,10 @@ namespace CesiumForUnity
 
         /// <inheritdoc />
         public override partial Int64 GetFeatureIdFromRaycastHit(RaycastHit hitInfo);
+
+        internal override void CallDispose()
+        {
+            this.Dispose();
+        }
     }
 }

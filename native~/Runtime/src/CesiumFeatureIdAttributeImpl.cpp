@@ -1,5 +1,3 @@
-#pragma once
-
 #include "CesiumFeatureIdAttributeImpl.h"
 
 #include <DotNet/CesiumForUnity/CesiumFeatureIdAttribute.h>

@@ -31,6 +31,7 @@
 #include <DotNet/CesiumForUnity/CesiumObjectPools.h>
 #include <DotNet/CesiumForUnity/CesiumPointCloudRenderer.h>
 #include <DotNet/CesiumForUnity/CesiumPrimitiveFeatures.h>
+#include <DotNet/CesiumForUnity/CesiumPropertyTable.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/Collections/Generic/List1.h>
 #include <DotNet/System/Object.h>
@@ -1048,19 +1049,23 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
   int32_t meshIndex = 0;
 
-  auto pModelMetadata =
-      model.getExtension<ExtensionModelExtStructuralMetadata>();
-  if (pModelMetadata) {
-    CesiumFeaturesMetadataUtility::addModelMetadata(
-        *pModelGameObject,
-        model,
-        *pModelMetadata);
-  }
-
   // For backwards compatibility.
   CesiumForUnity::CesiumMetadata metadataComponent =
       pModelGameObject
           ->GetComponentInParent<DotNet::CesiumForUnity::CesiumMetadata>();
+
+  if (metadataComponent == nullptr) {
+    // Only add the model metadata component here if the older component isn't
+    // attached.
+    auto pModelMetadata =
+        model.getExtension<ExtensionModelExtStructuralMetadata>();
+    if (pModelMetadata) {
+      CesiumFeaturesMetadataUtility::addModelMetadata(
+          *pModelGameObject,
+          model,
+          *pModelMetadata);
+    }
+  }
 
   model.forEachPrimitiveInScene(
       -1,
@@ -1359,22 +1364,22 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           }
         }
 
-        const ExtensionExtMeshFeatures* pFeatures =
-            primitive.getExtension<ExtensionExtMeshFeatures>();
-        if (pFeatures) {
-          CesiumFeaturesMetadataUtility::addPrimitiveFeatures(
-              primitiveGameObject,
-              gltf,
-              primitive,
-              *pFeatures);
-        }
-
         // For backwards compatibility.
         if (metadataComponent != nullptr) {
           metadataComponent.NativeImplementation().addMetadata(
               primitiveGameObject.transform().GetInstanceID(),
               &gltf,
               &primitive);
+        } else {
+          const ExtensionExtMeshFeatures* pFeatures =
+              primitive.getExtension<ExtensionExtMeshFeatures>();
+          if (pFeatures) {
+            CesiumFeaturesMetadataUtility::addPrimitiveFeatures(
+                primitiveGameObject,
+                gltf,
+                primitive,
+                *pFeatures);
+          }
         }
       });
 
@@ -1389,13 +1394,34 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
 namespace {
 
+void freePrimitiveFeatures(
+    const DotNet::UnityEngine::GameObject& primitiveGameObject) {
+  DotNet::CesiumForUnity::CesiumPrimitiveFeatures features =
+      primitiveGameObject
+          .GetComponent<DotNet::CesiumForUnity::CesiumPrimitiveFeatures>();
+  if (features == nullptr) {
+    return;
+  }
+
+  auto featureIdSets = features.featureIdSets();
+  if (featureIdSets.Length() == 0) {
+    return;
+  }
+
+  for (int32_t i = 0; i < featureIdSets.Length(); i++) {
+    featureIdSets[i].CallDispose();
+  }
+}
+
 void freePrimitiveGameObject(
     const DotNet::UnityEngine::GameObject& primitiveGameObject,
-    const DotNet::CesiumForUnity::CesiumMetadata& maybeMetadata) {
+    const DotNet::CesiumForUnity::CesiumMetadata& metadataComponent) {
   // Kept for backwards compatibility.
-  if (maybeMetadata != nullptr) {
-    maybeMetadata.NativeImplementation().removeMetadata(
+  if (metadataComponent != nullptr) {
+    metadataComponent.NativeImplementation().removeMetadata(
         primitiveGameObject.transform().GetInstanceID());
+  } else {
+    freePrimitiveFeatures(primitiveGameObject);
   }
 
   UnityEngine::MeshRenderer meshRenderer =
@@ -1424,6 +1450,24 @@ void freePrimitiveGameObject(
 
   // The MeshCollider shares a mesh with the MeshFilter, so no need to
   // destroy it explicitly.
+}
+
+void freeModelMetadata(const DotNet::UnityEngine::GameObject& modelGameObject) {
+  auto modelMetadata =
+      modelGameObject
+          .GetComponent<DotNet::CesiumForUnity::CesiumModelMetadata>();
+  if (modelMetadata == nullptr) {
+    return;
+  }
+
+  auto propertyTables = modelMetadata.propertyTables();
+  if (propertyTables.Length() == 0) {
+    return;
+  }
+
+  for (int32_t i = 0; i < propertyTables.Length(); i++) {
+    propertyTables[i].DisposeProperties();
+  }
 }
 
 } // namespace
@@ -1463,6 +1507,10 @@ void UnityPrepareRendererResources::free(
             parentTransform.GetChild(i).gameObject();
         freePrimitiveGameObject(primitiveGameObject, metadataComponent);
         UnityLifetime::Destroy(primitiveGameObject);
+      }
+
+      if (metadataComponent == nullptr) {
+        freeModelMetadata(*pCesiumGameObject->pGameObject);
       }
 
       UnityLifetime::Destroy(*pCesiumGameObject->pGameObject);

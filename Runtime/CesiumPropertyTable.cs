@@ -92,5 +92,13 @@ namespace CesiumForUnity
             }
             return result;
         }
+
+        internal void DisposeProperties()
+        {
+            foreach (KeyValuePair<String, CesiumPropertyTableProperty> property in this.properties)
+            {
+                property.Value.Dispose();
+            }
+        }
     }
 }

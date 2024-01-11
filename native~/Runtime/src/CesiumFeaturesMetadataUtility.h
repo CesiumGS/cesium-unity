@@ -2,6 +2,7 @@
 
 #include "UnityMetadataConversions.h"
 
+#include <CesiumGltf/PropertyTablePropertyView.h>
 #include <CesiumGltf/PropertyTypeTraits.h>
 
 #include <DotNet/CesiumForUnity/CesiumIntVec2.h>
@@ -10,7 +11,9 @@
 #include <DotNet/CesiumForUnity/CesiumMetadataValue.h>
 #include <DotNet/CesiumForUnity/CesiumMetadataValueType.h>
 #include <DotNet/CesiumForUnity/CesiumPropertyArray.h>
+#include <DotNet/CesiumForUnity/CesiumPropertyTableProperty.h>
 #include <DotNet/System/Array1.h>
+#include <DotNet/System/String.h>
 
 namespace DotNet::CesiumForUnity {
 class CesiumPrimitiveFeatures;
@@ -54,6 +57,11 @@ public:
   template <typename T>
   static DotNet::CesiumForUnity::CesiumPropertyArray
   makePropertyArray(const CesiumGltf::PropertyArrayView<T>& arrayView);
+
+  template <typename T, bool Normalized>
+  static DotNet::CesiumForUnity::CesiumPropertyTableProperty
+  makePropertyTableProperty(
+      const CesiumGltf::PropertyTablePropertyView<T, Normalized>& propertyView);
 };
 
 template <typename T>
@@ -85,7 +93,7 @@ CesiumFeaturesMetadataUtility::typeToMetadataValueType() noexcept {
 }
 
 template <typename T>
-static DotNet::CesiumForUnity::CesiumMetadataValue
+DotNet::CesiumForUnity::CesiumMetadataValue
 CesiumFeaturesMetadataUtility::makeMetadataValue(
     const T& nativeValue) noexcept {
   DotNet::CesiumForUnity::CesiumMetadataValue value;
@@ -276,8 +284,8 @@ CesiumFeaturesMetadataUtility::makeMetadataValue(
   }
 
   if constexpr (CesiumGltf::IsMetadataString<T>::value) {
-    value.SetObjectValue(
-        System::String(std::string(nativeValue.data(), nativeValue.size())));
+    value.SetObjectValue(DotNet::System::String(
+        std::string(nativeValue.data(), nativeValue.size())));
   }
 
   if constexpr (
@@ -290,7 +298,7 @@ CesiumFeaturesMetadataUtility::makeMetadataValue(
 }
 
 template <typename T>
-static DotNet::CesiumForUnity::CesiumPropertyArray
+DotNet::CesiumForUnity::CesiumPropertyArray
 CesiumFeaturesMetadataUtility::makePropertyArray(
     const CesiumGltf::PropertyArrayView<T>& arrayView) {
   DotNet::CesiumForUnity::CesiumPropertyArray array =
@@ -307,6 +315,66 @@ CesiumFeaturesMetadataUtility::makePropertyArray(
 
   array.values(values);
   return array;
+}
+
+template <typename T, bool Normalized>
+DotNet::CesiumForUnity::CesiumPropertyTableProperty
+CesiumFeaturesMetadataUtility::makePropertyTableProperty(
+    const CesiumGltf::PropertyTablePropertyView<T, Normalized>& propertyView) {
+  DotNet::CesiumForUnity::CesiumPropertyTableProperty property =
+      DotNet::CesiumForUnity::CesiumPropertyTableProperty();
+  property.size(propertyView.size());
+  property.arraySize(propertyView.arrayCount());
+  property.valueType(
+      CesiumFeaturesMetadataUtility::typeToMetadataValueType<T>());
+  property.isNormalized(Normalized);
+  if (propertyView.offset()) {
+    property.offset(CesiumFeaturesMetadataUtility::makeMetadataValue(
+        *propertyView.offset()));
+  } else {
+    property.offset(DotNet::CesiumForUnity::CesiumMetadataValue());
+  }
+
+  if (propertyView.scale()) {
+    property.scale(CesiumFeaturesMetadataUtility::makeMetadataValue(
+        *propertyView.scale()));
+  } else {
+    property.scale(DotNet::CesiumForUnity::CesiumMetadataValue());
+  }
+
+  if (propertyView.min()) {
+    property.min(
+        CesiumFeaturesMetadataUtility::makeMetadataValue(*propertyView.min()));
+  } else {
+    property.min(DotNet::CesiumForUnity::CesiumMetadataValue());
+  }
+
+  if (propertyView.max()) {
+    property.max(
+        CesiumFeaturesMetadataUtility::makeMetadataValue(*propertyView.max()));
+  } else {
+    property.max(DotNet::CesiumForUnity::CesiumMetadataValue());
+  }
+
+  if (propertyView.noData()) {
+    property.noData(CesiumFeaturesMetadataUtility::makeMetadataValue(
+        *propertyView.noData()));
+  } else {
+    property.noData(DotNet::CesiumForUnity::CesiumMetadataValue());
+  }
+
+  if (propertyView.defaultValue()) {
+    property.defaultValue(CesiumFeaturesMetadataUtility::makeMetadataValue(
+        *propertyView.defaultValue()));
+  } else {
+    property.defaultValue(DotNet::CesiumForUnity::CesiumMetadataValue());
+  }
+
+  CesiumPropertyTablePropertyImpl& propertyImpl =
+      property.NativeImplementation();
+  propertyImpl._property = propertyView;
+
+  return property;
 }
 
 } // namespace CesiumForUnityNative

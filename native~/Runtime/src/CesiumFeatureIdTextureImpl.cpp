@@ -1,5 +1,3 @@
-#pragma once
-
 #include "CesiumFeatureIdTextureImpl.h"
 
 #include <CesiumGltf/AccessorUtility.h>

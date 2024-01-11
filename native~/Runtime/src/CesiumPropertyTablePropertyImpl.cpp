@@ -2,6 +2,7 @@
 
 #include "CesiumPropertyTablePropertyImpl.h"
 
+#include "CesiumFeaturesMetadataUtility.h"
 #include "UnityMetadataConversions.h"
 
 #include <CesiumGltf/MetadataConversions.h>

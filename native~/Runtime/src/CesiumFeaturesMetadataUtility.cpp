@@ -35,7 +35,7 @@ CesiumFeaturesMetadataUtility::addPrimitiveFeatures(
     const CesiumGltf::Model& model,
     const CesiumGltf::MeshPrimitive& primitive,
     const CesiumGltf::ExtensionExtMeshFeatures& extension) noexcept {
-  CesiumForUnity::CesiumPrimitiveFeatures& primitiveFeatures =
+  CesiumForUnity::CesiumPrimitiveFeatures primitiveFeatures =
       primitiveGameObject
           .AddComponent<CesiumForUnity::CesiumPrimitiveFeatures>();
 
@@ -44,7 +44,7 @@ CesiumFeaturesMetadataUtility::addPrimitiveFeatures(
       System::Array1<CesiumForUnity::CesiumFeatureIdSet>(
           gltfFeatureIds.size()));
 
-  auto& featureIdSets = primitiveFeatures.featureIdSets();
+  auto featureIdSets = primitiveFeatures.featureIdSets();
 
   for (size_t i = 0; i < gltfFeatureIds.size(); i++) {
     const CesiumGltf::FeatureId& gltfFeatureId = gltfFeatureIds[i];
@@ -83,7 +83,7 @@ CesiumFeaturesMetadataUtility::addModelMetadata(
     const DotNet::UnityEngine::GameObject& modelGameObject,
     const CesiumGltf::Model& model,
     const CesiumGltf::ExtensionModelExtStructuralMetadata& extension) noexcept {
-  CesiumForUnity::CesiumModelMetadata& modelMetadata =
+  CesiumForUnity::CesiumModelMetadata modelMetadata =
       modelGameObject.AddComponent<CesiumForUnity::CesiumModelMetadata>();
 
   const auto& gltfPropertyTables = extension.propertyTables;
@@ -91,7 +91,7 @@ CesiumFeaturesMetadataUtility::addModelMetadata(
       System::Array1<CesiumForUnity::CesiumPropertyTable>(
           gltfPropertyTables.size()));
 
-  auto& propertyTables = modelMetadata.propertyTables();
+  auto propertyTables = modelMetadata.propertyTables();
 
   for (size_t i = 0; i < gltfPropertyTables.size(); i++) {
     const CesiumGltf::PropertyTable& gltfPropertyTable = gltfPropertyTables[i];
@@ -109,12 +109,13 @@ CesiumFeaturesMetadataUtility::addModelMetadata(
                                CesiumForUnity::CesiumPropertyTableProperty>(
           gltfPropertyTable.properties.size()));
 
-      view.forEachProperty([&properties = propertyTable.properties()](
+      view.forEachProperty([properties = propertyTable.properties()](
                                const std::string& propertyId,
                                auto propertyValue) mutable {
         properties.Add(
             System::String(propertyId),
-            CesiumPropertyTablePropertyImpl::CreateProperty(propertyValue));
+            CesiumFeaturesMetadataUtility::makePropertyTableProperty(
+                propertyValue));
       });
     } else {
       propertyTable.status(CesiumForUnity::CesiumPropertyTableStatus::

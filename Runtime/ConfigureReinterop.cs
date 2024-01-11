@@ -711,6 +711,7 @@ namespace CesiumForUnity
             myValue.GetArray();
 
             CesiumPrimitiveFeatures primitiveFeatures = go.AddComponent<CesiumPrimitiveFeatures>();
+            primitiveFeatures = go.GetComponent<CesiumPrimitiveFeatures>();
             CesiumFeatureIdSet[] sets = primitiveFeatures.featureIdSets;
             sets = new CesiumFeatureIdSet[10];
             sets[0] = new CesiumFeatureIdSet();
@@ -719,6 +720,7 @@ namespace CesiumForUnity
             sets[0].label = "label";
             sets[0].nullFeatureId = 0;
             sets[0].propertyTableIndex = 0;
+            sets[0].CallDispose();
 
             CesiumFeatureIdSetType setType = CesiumFeatureIdSetType.None;
             CesiumFeatureIdAttribute featureIdAttribute = new CesiumFeatureIdAttribute();
@@ -739,8 +741,10 @@ namespace CesiumForUnity
             primitiveFeatures.featureIdSets[1] = featureIdTexture;
 
             CesiumModelMetadata modelMetadata = go.AddComponent<CesiumModelMetadata>();
+            modelMetadata = go.GetComponent<CesiumModelMetadata>();
             modelMetadata.propertyTables = modelMetadata.propertyTables;
-            modelMetadata.propertyTables[0] = new CesiumPropertyTable();
+            modelMetadata.propertyTables[0] = modelMetadata.propertyTables[0];
+            length = modelMetadata.propertyTables.Length;
 
             CesiumPropertyTable propertyTable = new CesiumPropertyTable();
             propertyTable.status = CesiumPropertyTableStatus.Valid;
@@ -749,6 +753,7 @@ namespace CesiumForUnity
             propertyTable.properties = propertyTable.properties;
             propertyTable.properties = new Dictionary<String, CesiumPropertyTableProperty>(10);
             propertyTable.properties.Add("Test", new CesiumPropertyTableProperty());
+            propertyTable.DisposeProperties();
 
             CesiumPropertyTableProperty property = new CesiumPropertyTableProperty();
             property.status = property.status;

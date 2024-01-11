@@ -22,6 +22,8 @@ namespace CesiumForUnity
     /// </summary>
     public class CesiumFeatureIdSet
     {
+        #region Fields
+
         /// <summary>
         /// The type of this feature ID set.
         /// </summary>
@@ -73,6 +75,10 @@ namespace CesiumForUnity
             get; internal set;
         }
 
+        #endregion
+
+        #region Constructors
+
         internal CesiumFeatureIdSet() : this(0)
         { }
 
@@ -85,6 +91,9 @@ namespace CesiumForUnity
             this.propertyTableIndex = -1;
         }
 
+        #endregion
+
+        #region Public methods
         /// <summary>
         /// Gets the feature ID associated with a given vertex. The feature ID can be
         /// used with a <see cref="CesiumPropertyTable"/> to retrieve the corresponding
@@ -143,6 +152,7 @@ namespace CesiumForUnity
             return GetFirstVertexFromHitTriangle(hitInfo);
         }
 
+        #endregion
 
         /// <summary>
         /// Given a successful raycast hit, finds the index of the first vertex from 
@@ -163,5 +173,7 @@ namespace CesiumForUnity
             int targetVertex = hitInfo.triangleIndex * 3;
             return targetVertex < indices.Length ? indices[targetVertex] : -1;
         }
+
+        internal virtual void CallDispose() { }
     }
 }
