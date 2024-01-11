@@ -755,6 +755,12 @@ namespace CesiumForUnity
             property.size = property.size;
             property.arraySize = property.arraySize;
             property.isNormalized = property.isNormalized;
+            property.offset = myValue;
+            property.scale = myValue;
+            property.min = myValue;
+            property.max = myValue;
+            property.noData = myValue;
+            property.defaultValue = myValue;
             property.valueType = property.valueType;
 
             RaycastHit hitInfo = new RaycastHit();

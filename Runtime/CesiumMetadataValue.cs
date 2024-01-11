@@ -5,8 +5,8 @@ using System.Collections.Generic;
 namespace CesiumForUnity
 {
     /// <summary>
-    /// Represents the value type of a metadata value or property, akin to the 
-    /// property types in EXT_structural_metadata.
+    /// Represents a value from a property in glTF metadata. The value belong to one of the
+    /// supported property types in EXT_structural_metadata.
     /// </summary>
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumMetadataValueImpl", "CesiumMetadataValueImpl.h", staticOnly: true)]
     public partial class CesiumMetadataValue
@@ -1235,22 +1235,21 @@ namespace CesiumForUnity
         /// </summary>
         /// <remarks>
         /// <para>
-        /// Property values are converted as follows:<br/>
-        /// - If the value is a 4-by-4 matrix, its components will be converted to
+        /// If the value is a 4-by-4 matrix, its components will be converted to
         /// 32-bit signed integers if possible.<br/>
         /// 
-        /// - If the value is a 2-by-2 or 3-by-3 matrix, its components will be used
+        /// If the value is a 2-by-2 or 3-by-3 matrix, its components will be used
         /// to fill the corresponding components in the int4x4. All other components
         /// will be initialized as zero.<br/>
         /// 
-        /// - If the value is a scalar that can be converted to a 32-bit signed integer,
+        /// If the value is a scalar that can be converted to a 32-bit signed integer,
         /// then the resulting int4x4 will have this value along its diagonal. All other
         /// entries will be zero.<br/>
         /// 
-        /// - If the value is a boolean, it is converted to 1 for true and 0 for false.
+        /// If the value is a boolean, it is converted to 1 for true and 0 for false.
         /// Then, the resulting int4x4 will have this value along its diagonal, while 
         /// all other entries will be zero.<br/>
-        /// In all other cases, the user-defined default value is returned.In all matrix
+        /// In all other cases, the user-defined default value is returned. In all matrix
         /// cases, if any of the relevant components cannot be represented as a 32-bit 
         /// signed integer, the default value is returned.
         /// </para>
@@ -1273,19 +1272,18 @@ namespace CesiumForUnity
         /// </summary>
         /// <remarks>
         /// <para>
-        /// Property values are converted as follows:<br/>
-        /// - If the value is a 4-by-4 matrix, its components will be converted to
+        /// If the value is a 4-by-4 matrix, its components will be converted to
         /// 32-bit unsigned integers if possible.<br/>
         /// 
-        /// - If the value is a 2-by-2 or 3-by-3 matrix, its components will be used
+        /// If the value is a 2-by-2 or 3-by-3 matrix, its components will be used
         /// to fill the corresponding components in the uint4x4. All other components
         /// will be initialized as zero.<br/>
         /// 
-        /// - If the value is a scalar that can be converted to a 32-bit unsigned integer,
+        /// If the value is a scalar that can be converted to a 32-bit unsigned integer,
         /// then the resulting uint4x4 will have this value along its diagonal. All other
         /// entries will be zero.<br/>
         /// 
-        /// - If the value is a boolean, it is converted to 1 for true and 0 for false.
+        /// If the value is a boolean, it is converted to 1 for true and 0 for false.
         /// Then, the resulting uint4x4 will have this value along its diagonal, while 
         /// all other entries will be zero.<br/>
         /// In all other cases, the user-defined default value is returned.
@@ -1293,7 +1291,7 @@ namespace CesiumForUnity
         /// </remarks>
         /// <param name="defaultValue">The default value to use if the value 
         /// cannot be converted to a uint4x4.</param>
-        /// <returns>The property value as a uint4x4.</returns>
+        /// <returns>The value as a uint4x4.</returns>
         public uint4x4 GetUInt4x4(uint4x4 defaultValue)
         {
             if (this.isEmpty || this.valueType.isArray)
@@ -1309,20 +1307,18 @@ namespace CesiumForUnity
         /// </summary>
         /// <remarks>
         /// <para>
-        /// Property values are converted as follows:<br/>
-        /// 
-        /// - If the value is a 4-by-4 matrix, its components will be converted to the
+        /// If the value is a 4-by-4 matrix, its components will be converted to the
         /// closest representable single-precision floats if possible.<br/>
         /// 
-        /// - If the value is a 2-by-2 or 3-by-3 matrix, its components will be used
+        /// If the value is a 2-by-2 or 3-by-3 matrix, its components will be used
         /// to fill the corresponding components in the float4x4. All other components
         /// will be initialized as zero.<br/>
         /// 
-        /// - If the value is a scalar that can be converted to a single-precision floating
+        /// If the value is a scalar that can be converted to a single-precision floating
         /// point number, then the resulting float4x4 will have this value along its diagonal.
         /// All other entries will be zero.<br/>
         /// 
-        /// - If the value is a boolean, it is converted to 1.0f for true and 0.0f for false.
+        /// If the value is a boolean, it is converted to 1.0f for true and 0.0f for false.
         /// Then, the resulting float4x4 will have this value along its diagonal, while 
         /// all other entries will be zero.<br/>
         /// In all other cases, the user-defined default value is returned.
@@ -1330,7 +1326,7 @@ namespace CesiumForUnity
         /// </remarks>
         /// <param name="defaultValue">The default value to use if the value 
         /// cannot be converted to a float4x4.</param>
-        /// <returns>The property value as a float4x4.</returns>
+        /// <returns>The value as a float4x4.</returns>
         public float4x4 GetFloat4x4(float4x4 defaultValue)
         {
             if (this.isEmpty || this.valueType.isArray)
@@ -1346,19 +1342,17 @@ namespace CesiumForUnity
         /// </summary>
         /// <remarks>
         /// <para>
-        /// Property values are converted as follows:<br/>
-        /// 
-        /// - If the value is a 4-by-4 matrix, its components will be converted to the
+        /// If the value is a 4-by-4 matrix, its components will be converted to the
         /// double-precision floating point numbers.<br/>
         /// 
-        /// - If the value is a 2-by-2 or 3-by-3 matrix, its components will be used
+        /// If the value is a 2-by-2 or 3-by-3 matrix, its components will be used
         /// to fill the corresponding components in the double4x4. All other components
         /// will be initialized as zero.<br/>
         ///     
-        /// - If the value is a scalar, then the resulting double4x4 will have this value
+        /// If the value is a scalar, then the resulting double4x4 will have this value
         /// along its diagonal. All other entries will be zero.<br/>
         /// 
-        /// - If the value is a boolean, it is converted to 1.0 for true and 0.0 for false.
+        /// If the value is a boolean, it is converted to 1.0 for true and 0.0 for false.
         /// Then, the resulting double4x4 will have this value along its diagonal, while 
         /// all other entries will be zero.<br/>
         /// In all other cases, the user-defined default value is returned.
@@ -1366,7 +1360,7 @@ namespace CesiumForUnity
         /// </remarks>
         /// <param name="defaultValue">The default value to use if the value 
         /// cannot be converted to a double4x4.</param>
-        /// <returns>The property value as a double4x4.</returns>
+        /// <returns>The value as a double4x4.</returns>
         public double4x4 GetDouble4x4(double4x4 defaultValue)
         {
             if (this.isEmpty || this.valueType.isArray)

@@ -3,14 +3,16 @@ using System;
 namespace CesiumForUnity
 {
     /// <summary>
-    /// Represents the value type of a metadata value or property, akin to the 
-    /// property types in EXT_structural_metadata.
+    /// Represents an array value from a property in glTF metadata. The values belong
+    /// to one of the supported property types in EXT_structural_metadata.
     /// </summary>
-    public partial class CesiumPropertyArray
+    public class CesiumPropertyArray
     {
         internal CesiumMetadataValue[] values { get; set; }
 
-        internal CesiumPropertyArray() { }
+        internal CesiumPropertyArray() {
+            this.values = new CesiumMetadataValue[0];
+        }
 
         internal CesiumPropertyArray(CesiumMetadataValue[] values)
         {

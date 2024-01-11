@@ -213,7 +213,7 @@ namespace CesiumForUnity
         /// - If the value is a string, "0", "false", and "no" (case-insensitive)
         /// are converted to false, while "1", "true", and "yes" are converted to
         /// true. All other strings, including strings that can be converted to 
-        /// numbers, will return the user-defined default value.<br/><br/>
+        /// numbers, will return the user-defined default value.
         /// </para>
         /// <para>
         /// All other types return the user-defined default value. If the feature ID is
@@ -225,6 +225,8 @@ namespace CesiumForUnity
         /// <param name="defaultValue">The default value to fall back on.</param>
         /// <returns>The property value as a Boolean.</returns>
         public partial Boolean GetBoolean(Int64 featureID, Boolean defaultValue = false);
+
+        #region Scalar Getters
 
         /// <summary>
         /// Attempts to retrieve the value for the given feature as a signed
@@ -251,7 +253,7 @@ namespace CesiumForUnity
         /// - If the value is a string and the entire string can be parsed as an
         /// integer between -128 and 127, the parsed value is returned. The string is
         /// parsed in a locale-independent way and does not support the use of commas
-        /// or other delimiters to group digits together.<br/><br/>
+        /// or other delimiters to group digits together.
         /// </para>
         /// <para>
         /// In all other cases, the user-defined default value is returned. If the
@@ -289,7 +291,7 @@ namespace CesiumForUnity
         /// - If the value is a string and the entire string can be parsed as an
         /// integer between 0 and 255, the parsed value is returned. The string is
         /// parsed in a locale-independent way and does not support the use of commas
-        /// or other delimiters to group digits together.<br/><br/>
+        /// or other delimiters to group digits together.
         /// </para>
         /// <para>
         /// In all other cases, the user-defined default value is returned. If the
@@ -327,7 +329,7 @@ namespace CesiumForUnity
         /// - If the value is a string and the entire string can be parsed as an
         /// integer between -32768 and 32767, the parsed value is returned. The string 
         /// is parsed in a locale-independent way and does not support the use of commas
-        /// or other delimiters to group digits together.<br/><br/>
+        /// or other delimiters to group digits together.
         /// </para>
         /// <para>
         /// In all other cases, the user-defined default value is returned. If the
@@ -365,7 +367,7 @@ namespace CesiumForUnity
         /// - If the value is a string and the entire string can be parsed as an
         /// integer between 0 and 65535, the parsed value is returned. The string is
         /// parsed in a locale-independent way and does not support the use of commas
-        /// or other delimiters to group digits together.<br/><br/>
+        /// or other delimiters to group digits together.
         /// </para>
         /// <para>
         /// In all other cases, the user-defined default value is returned. If the
@@ -404,7 +406,7 @@ namespace CesiumForUnity
         /// - If the value is a string and the entire string can be parsed as an
         /// integer between -2,147,483,648 and 2,147,483,647, the parsed value is 
         /// returned. The string is parsed in a locale-independent way and does not
-        /// support the use of commas or other delimiters to group digits together.<br/><br/>
+        /// support the use of commas or other delimiters to group digits together.
         /// </para>
         /// <para>
         /// In all other cases, the user-defined default value is returned. If the
@@ -442,7 +444,7 @@ namespace CesiumForUnity
         /// - If the value is a string and the entire string can be parsed as an
         /// integer between 0 and 4,294,967,295, the parsed value is returned. The 
         /// string is parsed in a locale-independent way and does not support the use 
-        /// of commas or other delimiters to group digits together.<br/><br/>
+        /// of commas or other delimiters to group digits together.
         /// </para>
         /// <para>
         /// In all other cases, the user-defined default value is returned. If the
@@ -480,7 +482,7 @@ namespace CesiumForUnity
         /// - If the value is a string and the entire string can be parsed as an
         /// integer between -2^63 and (2^63 - 1), the parsed value is returned. The string
         /// is parsed in a locale-independent way and does not support the use of commas 
-        /// or other delimiters to group digits together.<br/><br/>
+        /// or other delimiters to group digits together.
         /// </para>
         /// <para>
         /// In all other cases, the user-defined default value is returned. If the
@@ -518,7 +520,7 @@ namespace CesiumForUnity
         /// - If the value is a string and the entire string can be parsed as an
         /// integer between 0 and (2^64-1), the parsed value is returned. The 
         /// string is parsed in a locale-independent way and does not support the use 
-        /// of commas or other delimiters to group digits together.<br/><br/>
+        /// of commas or other delimiters to group digits together.
         /// </para>
         /// <para>
         /// In all other cases, the user-defined default value is returned. If the
@@ -559,7 +561,7 @@ namespace CesiumForUnity
         /// - If the value is a string and the entire string can be parsed as a number, 
         /// the parsed value is returned. The string is parsed in a
         /// locale-independent way and does not support the use of a comma or other
-        /// delimiter to group digits together.<br/><br/>
+        /// delimiter to group digits together.
         /// </para>
         /// <para>
         /// In all other cases, the user-defined default value is returned. If the
@@ -599,7 +601,7 @@ namespace CesiumForUnity
         /// - If the value is a string and the entire string can be parsed as a number, 
         /// the parsed value is returned. The string is parsed in a
         /// locale-independent way and does not support the use of a comma or other
-        /// delimiter to group digits together.<br/><br/>
+        /// delimiter to group digits together.
         /// </para>
         /// <para>
         /// In all other cases, the user-defined default value is returned. If the
@@ -611,6 +613,10 @@ namespace CesiumForUnity
         /// <param name="defaultValue">The default value to fall back on.</param>
         /// <returns>The property value as a Double.</returns>
         public partial double GetDouble(Int64 featureID, double defaultValue = 0.0);
+
+        #endregion
+
+        #region Vector Getters
 
         /// <summary>
         /// Attempts to retrieve the value for the given feature as a int2.
@@ -638,8 +644,7 @@ namespace CesiumForUnity
         /// components.<br/>
         /// 
         /// - If the value is a boolean, (1, 1) is returned for true, while (0, 0) is 
-        /// returned for false.<br/>
-        /// <br/><br/>
+        /// returned for false.
         /// </para>
         /// <para>
         /// In all other cases, the user-defined default value is returned. In all vector 
@@ -680,7 +685,7 @@ namespace CesiumForUnity
         /// components.<br/>
         /// 
         /// - If the value is a boolean, (1, 1) is returned for true, while (0, 0) is 
-        /// returned for false.<br/>
+        /// returned for false.
         /// </para>
         /// <para>
         /// In all other cases, the user-defined default value is returned. In all vector 
@@ -720,7 +725,7 @@ namespace CesiumForUnity
         /// the resulting float2 will have this value in both of its components.<br/>
         /// 
         /// - If the value is a boolean, (1.0f, 1.0f) is returned for true, while 
-        /// (0.0f, 0.0f) is returned for false.<br/>
+        /// (0.0f, 0.0f) is returned for false.
         /// </para>
         /// <para>
         /// In all other cases, the user-defined default value is returned. In all vector 
@@ -760,7 +765,7 @@ namespace CesiumForUnity
         /// both of its components.<br/>
         /// 
         /// - If the value is a boolean, (1.0, 1.0) is returned for true, while 
-        /// (0.0, 0.0) is returned for false.<br/>
+        /// (0.0, 0.0) is returned for false.
         /// </para>
         /// <para>
         /// In all other cases, the user-defined default value is returned. If the 
@@ -802,7 +807,7 @@ namespace CesiumForUnity
         /// components.<br/>
         /// 
         /// - If the value is a boolean, (1, 1, 1) is returned for true, while (0, 0, 0) is 
-        /// returned for false.<br/>
+        /// returned for false.
         /// </para>
         /// <para>
         /// In all other cases, the user-defined default value is returned. In all vector 
@@ -846,8 +851,7 @@ namespace CesiumForUnity
         /// components.<br/>
         /// 
         /// - If the value is a boolean, (1, 1, 1) is returned for true, while (0, 0, 0) is 
-        /// returned for false.<br/>
-        /// <br/><br/>
+        /// returned for false.
         /// </para>
         /// <para>
         /// In all other cases, the user-defined default value is returned. In all vector 
@@ -890,8 +894,7 @@ namespace CesiumForUnity
         /// the resulting float3 will have this value in all of its components.<br/>
         /// 
         /// - If the value is a boolean, (1.0f, 1.0f, 1.0f) is returned for true, while 
-        /// (0.0f, 0.0f, 0.0f) is returned for false.<br/>
-        /// <br/><br/>
+        /// (0.0f, 0.0f, 0.0f) is returned for false.
         /// </para>
         /// <para>
         /// In all other cases, the user-defined default value is returned. In all vector 
@@ -934,8 +937,7 @@ namespace CesiumForUnity
         /// all of its components.<br/>
         /// 
         /// - If the value is a boolean, (1.0, 1.0, 1.0) is returned for true, while 
-        /// (0.0, 0.0, 0.0) is returned for false.<br/>
-        /// <br/><br/>
+        /// (0.0, 0.0, 0.0) is returned for false.
         /// </para>
         /// <para>
         /// In all other cases, the user-defined default value is returned. If the 
@@ -977,8 +979,7 @@ namespace CesiumForUnity
         /// components.<br/>
         /// 
         /// - If the value is a boolean, (1, 1, 1, 1) is returned for true, while (0, 0, 0, 0) 
-        /// is returned for false.<br/>
-        /// <br/><br/>
+        /// is returned for false.
         /// </para>
         /// <para>
         /// In all other cases, the user-defined default value is returned. In all vector 
@@ -1022,8 +1023,7 @@ namespace CesiumForUnity
         /// components.<br/>
         /// 
         /// - If the value is a boolean, (1, 1, 1, 1) is returned for true, while (0, 0, 0, 0) 
-        /// is returned for false.<br/>
-        /// <br/><br/>
+        /// is returned for false.
         /// </para>
         /// <para>
         /// In all other cases, the user-defined default value is returned. In all vector 
@@ -1066,8 +1066,7 @@ namespace CesiumForUnity
         /// the resulting float4 will have this value in all of its components.<br/>
         /// 
         /// - If the value is a boolean, (1.0f, 1.0f, 1.0f, 1.0f) is returned for true, while 
-        /// (0.0f, 0.0f, 0.0f, 0.0f) is returned for false.<br/>
-        /// <br/><br/>
+        /// (0.0f, 0.0f, 0.0f, 0.0f) is returned for false.
         /// </para>
         /// <para>
         /// In all other cases, the user-defined default value is returned. In all vector 
@@ -1110,8 +1109,7 @@ namespace CesiumForUnity
         /// all of its components.<br/>
         /// 
         /// - If the value is a boolean, (1.0, 1.0, 1.0, 1.0) is returned for true,
-        /// while (0.0, 0.0, 0.0, 0.0) is returned for false.<br/>
-        /// <br/><br/>
+        /// while (0.0, 0.0, 0.0, 0.0) is returned for false.
         /// </para>
         /// <para>
         /// In all other cases, the user-defined default value is returned. If the 
@@ -1123,6 +1121,10 @@ namespace CesiumForUnity
         /// <param name="defaultValue">The default value to fall back on.</param>
         /// <returns>The property value as a double4.</returns>
         public partial double4 GetDouble4(Int64 featureID, double4 defaultValue);
+
+        #endregion
+
+        #region Matrix Getters
 
         /// <summary>
         /// Attempts to retrieve the value for the given feature as a int2x2.
@@ -1150,7 +1152,7 @@ namespace CesiumForUnity
         /// 
         /// - If the value is a boolean, it is converted to 1 for true and 0 for
         /// false. Then, the resulting int2x2 will have this value along its diagonal,
-        /// while all other entries will be zero.<br/>
+        /// while all other entries will be zero.
         /// </para>
         /// <para>
         /// In all other cases, the user-defined default value is returned. In all matrix
@@ -1192,7 +1194,7 @@ namespace CesiumForUnity
         /// 
         /// - If the value is a boolean, it is converted to 1 for true and 0 for
         /// false. Then, the resulting uint2x2 will have this value along its diagonal,
-        /// while all other entries will be zero.<br/>
+        /// while all other entries will be zero.
         /// </para>
         /// <para>
         /// In all other cases, the user-defined default value is returned. In all matrix
@@ -1234,7 +1236,7 @@ namespace CesiumForUnity
         /// 
         /// - If the value is a boolean, it is converted to 1.0f for true and 0.0f for
         /// false. Then, the resulting float2x2 will have this value along its diagonal,
-        /// while all other entries will be zero.<br/>
+        /// while all other entries will be zero.
         /// </para>
         /// <para>
         /// In all other cases, the user-defined default value is returned. In all matrix
@@ -1276,7 +1278,7 @@ namespace CesiumForUnity
         /// 
         /// - If the value is a boolean, it is converted to 1.0 for true and 0.0 for
         /// false. Then, the resulting double2x2 will have this value along its diagonal,
-        /// while all other entries will be zero.<br/>
+        /// while all other entries will be zero.
         /// </para>
         /// <para>
         /// In all other cases, the user-defined default value is returned. If the
@@ -1320,7 +1322,7 @@ namespace CesiumForUnity
         /// 
         /// - If the value is a boolean, it is converted to 1 for true and 0 for false.
         /// Then, the resulting int3x3 will have this value along its diagonal, while 
-        /// all other entries will be zero.<br/>
+        /// all other entries will be zero.
         /// </para>
         /// <para>
         /// In all other cases, the user-defined default value is returned. In all matrix
@@ -1367,7 +1369,7 @@ namespace CesiumForUnity
         /// 
         /// - If the value is a boolean, it is converted to 1 for true and 0 for false.
         /// Then, the resulting uint3x3 will have this value along its diagonal, while 
-        /// all other entries will be zero.<br/>
+        /// all other entries will be zero.
         /// </para>
         /// <para>
         /// In all other cases, the user-defined default value is returned. In all matrix
@@ -1414,7 +1416,7 @@ namespace CesiumForUnity
         /// 
         /// - If the value is a boolean, it is converted to 1.0f for true and 0.0f for false.
         /// Then, the resulting float3x3 will have this value along its diagonal, while 
-        /// all other entries will be zero.<br/>
+        /// all other entries will be zero.
         /// </para>
         /// <para>
         /// In all other cases, the user-defined default value is returned. In all matrix
@@ -1460,7 +1462,7 @@ namespace CesiumForUnity
         /// 
         /// - If the value is a boolean, it is converted to 1.0 for true and 0.0 for false.
         /// Then, the resulting double3x3 will have this value along its diagonal, while 
-        /// all other entries will be zero.<br/>
+        /// all other entries will be zero.
         /// </para>
         /// <para>
         /// In all other cases, the user-defined default value is returned. If the
@@ -1501,7 +1503,7 @@ namespace CesiumForUnity
         /// 
         /// - If the value is a boolean, it is converted to 1 for true and 0 for false.
         /// Then, the resulting int4x4 will have this value along its diagonal, while 
-        /// all other entries will be zero.<br/>
+        /// all other entries will be zero.
         /// </para>
         /// <para>
         /// In all other cases, the user-defined default value is returned. In all matrix
@@ -1517,7 +1519,135 @@ namespace CesiumForUnity
         /// <returns>The property value as a int4x4.</returns>
         public partial int4x4 GetInt4x4(Int64 featureID, int4x4 defaultValue);
 
-        // int4x4, uint4x4, float4x4, double4x4
+        /// <summary>
+        /// Attempts to retrieve the value for the given feature as a uint4x4.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// For numeric properties, the raw value for a given feature will be
+        /// transformed by the property's normalization, scale, and offset before it is
+        /// further converted. If the raw value is equal to the property's "no data"
+        /// value, then the property's default value will be converted if possible. If
+        /// the property-defined default value cannot be converted, or does not exist,
+        /// then the user-defined default value is returned.
+        /// </para>
+        /// <para>
+        /// Property values are converted as follows:<br/>
+        /// 
+        /// - If the value is a 4-by-4 matrix, its components will be converted to
+        /// 32-bit unsigned integers if possible.<br/>
+        /// 
+        /// - If the value is a 2-by-2 or 3-by-3 matrix, its components will be used
+        /// to fill the corresponding components in the uint4x4. All other components
+        /// will be initialized as zero.<br/>
+        /// 
+        /// - If the value is a scalar that can be converted to a 32-bit unsigned integer,
+        /// then the resulting uint4x4 will have this value along its diagonal. All other
+        /// entries will be zero.<br/>
+        /// 
+        /// - If the value is a boolean, it is converted to 1 for true and 0 for false.
+        /// Then, the resulting uint4x4 will have this value along its diagonal, while 
+        /// all other entries will be zero.
+        /// </para>
+        /// <para>
+        /// In all other cases, the user-defined default value is returned. In all matrix
+        /// cases, if any of the relevant components cannot be represented as a 32-bit 
+        /// unsigned integer, the default value is returned.
+        /// <br/><br/>
+        /// If the feature ID is out-of-range, or if the property table property is somehow
+        /// invalid, the user-defined default value is returned.
+        /// </para>
+        /// </remarks>
+        /// <param name="featureID">The ID of the feature.</param>
+        /// <param name="defaultValue">The default value to fall back on.</param>
+        /// <returns>The property value as a uint4x4.</returns>
+        public partial uint4x4 GetUInt4x4(Int64 featureID, uint4x4 defaultValue);
+
+        /// <summary>
+        /// Attempts to retrieve the value for the given feature as a float4x4.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// For numeric properties, the raw value for a given feature will be
+        /// transformed by the property's normalization, scale, and offset before it is
+        /// further converted. If the raw value is equal to the property's "no data"
+        /// value, then the property's default value will be converted if possible. If
+        /// the property-defined default value cannot be converted, or does not exist,
+        /// then the user-defined default value is returned.
+        /// </para>
+        /// <para>        
+        /// Property values are converted as follows:<br/>
+        /// 
+        /// - If the value is a 4-by-4 matrix, its components will be converted to the
+        /// closest representable single-precision floats if possible.<br/>
+        /// 
+        /// - If the value is a 2-by-2 or 3-by-3 matrix, its components will be used
+        /// to fill the corresponding components in the float4x4. All other components
+        /// will be initialized as zero.<br/>
+        /// 
+        /// - If the value is a scalar that can be converted to a single-precision floating
+        /// point number, then the resulting float4x4 will have this value along its diagonal.
+        /// All other entries will be zero.<br/>
+        /// 
+        /// - If the value is a boolean, it is converted to 1.0f for true and 0.0f for false.
+        /// Then, the resulting float4x4 will have this value along its diagonal, while 
+        /// all other entries will be zero.
+        /// </para>
+        /// <para>
+        /// In all other cases, the user-defined default value is returned. In all matrix
+        /// cases, if any of the relevant components cannot be represented as a 
+        /// single-precision floating-point number, the default value is returned.
+        /// <br/><br/>
+        /// If the feature ID is out-of-range, or if the property table property is somehow
+        /// invalid, the user-defined default value is returned.
+        /// </para>
+        /// </remarks>
+        /// <param name="featureID">The ID of the feature.</param>
+        /// <param name="defaultValue">The default value to fall back on.</param>
+        /// <returns>The property value as a float4x4.</returns>
+        public partial float4x4 GetFloat4x4(Int64 featureID, float4x4 defaultValue);
+
+        /// <summary>
+        /// Attempts to retrieve the value for the given feature as a double4x4.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// For numeric properties, the raw value for a given feature will be
+        /// transformed by the property's normalization, scale, and offset before it is
+        /// further converted. If the raw value is equal to the property's "no data"
+        /// value, then the property's default value will be converted if possible. If
+        /// the property-defined default value cannot be converted, or does not exist,
+        /// then the user-defined default value is returned.
+        /// </para>
+        /// <para>
+        /// Property values are converted as follows:<br/>
+        /// 
+        /// - If the value is a 4-by-4 matrix, its components will be converted to the
+        /// double-precision floating point numbers.<br/>
+        /// 
+        /// - If the value is a 2-by-2 or 3-by-3 matrix, its components will be used
+        /// to fill the corresponding components in the double4x4. All other components
+        /// will be initialized as zero.<br/>
+        ///     
+        /// - If the value is a scalar, then the resulting double4x4 will have this value
+        /// along its diagonal. All other entries will be zero.<br/>
+        /// 
+        /// - If the value is a boolean, it is converted to 1.0 for true and 0.0 for false.
+        /// Then, the resulting double4x4 will have this value along its diagonal, while 
+        /// all other entries will be zero.
+        /// </para>
+        /// <para>
+        /// In all other cases, the user-defined default value is returned. If the
+        /// feature ID is out-of-range, or if the property table property is somehow
+        /// invalid, the user-defined default value is returned.
+        /// </para>
+        /// </remarks>
+        /// <param name="featureID">The ID of the feature.</param>
+        /// <param name="defaultValue">The default value to fall back on.</param>
+        /// <returns>The property value as a double4x4.</returns>
+        public partial double4x4 GetDouble4x4(Int64 featureID, double4x4 defaultValue);
+
+        #endregion
 
         /// <summary>
         /// Attempts to retrieve the value for the given feature as a String.
@@ -1545,6 +1675,23 @@ namespace CesiumForUnity
         /// <param name="defaultValue">The default value to fall back on.</param>
         /// <returns>The property value as a String.</returns>
         public partial String GetString(Int64 featureID, String defaultValue = "");
+
+        /// <summary>
+        /// Attempts to retrieve the value for the given feature as a 
+        /// <see cref="CesiumPropertyArray"/>. If the property is not an array type, this returns an
+        /// empty array.
+        /// 
+        /// For numeric array properties, the raw array value for a given feature will
+        /// be transformed by the property's normalization, scale, and offset before it
+        /// is further converted. If the raw value is equal to the property's "no data"
+        /// value, then the property's default value will be converted if possible. If
+        /// the property-defined default value cannot be converted, or does not exist,
+        /// then the user-defined default value is returned.
+        /// 
+        /// </summary>
+        /// <param name="featureID">The ID of the feature.</param>
+        /// <returns>The property value as a CesiumPropertyArray.</returns>
+        public partial CesiumPropertyArray GetArray(Int64 featureID);
 
         /// <summary>
         /// Retrieves the value of the property for the given feature as a 

@@ -5,6 +5,7 @@
 #include "UnityMetadataConversions.h"
 
 #include <CesiumGltf/MetadataConversions.h>
+#include <CesiumGltf/PropertyTypeTraits.h>
 
 #include <DotNet/CesiumForUnity/CesiumMetadataValueType.h>
 #include <DotNet/CesiumForUnity/CesiumPropertyTableProperty.h>
@@ -1848,6 +1849,63 @@ CesiumPropertyTablePropertyImpl::GetDouble4x4(
                    : defaultValue;
 }
 
+System::String CesiumPropertyTablePropertyImpl::GetString(
+    const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+    std::int64_t featureID,
+    const DotNet::System::String& defaultValue) {
+  std::optional<std::string> maybeString =
+      propertyTablePropertyCallback<std::optional<std::string>>(
+          this->_property,
+          property.valueType(),
+          property.isNormalized(),
+          [featureID](const auto& v) -> std::optional<std::string> {
+            // size() returns zero if the view is invalid.
+            if (featureID < 0 || featureID >= v.size()) {
+              return std::nullopt;
+            }
+
+            auto maybeValue = v.get(featureID);
+            if (!maybeValue) {
+              return std::nullopt;
+            }
+
+            auto value = *maybeValue;
+            return MetadataConversions<std::string, decltype(value)>::convert(
+                value);
+          });
+
+  return maybeString ? System::String(*maybeString) : defaultValue;
+}
+
+DotNet::CesiumForUnity::CesiumPropertyArray
+CesiumPropertyTablePropertyImpl::GetArray(
+    const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
+    std::int64_t featureID) {
+  return propertyTablePropertyCallback<
+      DotNet::CesiumForUnity::CesiumPropertyArray>(
+      this->_property,
+      property.valueType(),
+      property.isNormalized(),
+      [featureID](
+          const auto& v) -> DotNet::CesiumForUnity::CesiumPropertyArray {
+          // size() returns zero if the view is invalid.
+        if (featureID < 0 || featureID >= v.size()) {
+          return DotNet::CesiumForUnity::CesiumPropertyArray();
+        }
+
+        auto maybeValue = v.get(featureID);
+        if (maybeValue) {
+          auto value = *maybeValue;
+          if constexpr (CesiumGltf::IsMetadataArray<decltype(value)>::value) {
+            return CesiumFeaturesMetadataUtility::makePropertyArray (value);
+          }
+        }
+
+        return DotNet::CesiumForUnity::CesiumPropertyArray();
+
+      });
+}
+
 DotNet::CesiumForUnity::CesiumMetadataValue
 CesiumPropertyTablePropertyImpl::GetValue(
     const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
@@ -1886,34 +1944,6 @@ CesiumPropertyTablePropertyImpl::GetRawValue(
         return CesiumFeaturesMetadataUtility::makeMetadataValue(
             v.getRaw(featureID));
       });
-}
-
-System::String CesiumPropertyTablePropertyImpl::GetString(
-    const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
-    std::int64_t featureID,
-    const DotNet::System::String& defaultValue) {
-  std::optional<std::string> maybeString =
-      propertyTablePropertyCallback<std::optional<std::string>>(
-          this->_property,
-          property.valueType(),
-          property.isNormalized(),
-          [featureID](const auto& v) -> std::optional<std::string> {
-            // size() returns zero if the view is invalid.
-            if (featureID < 0 || featureID >= v.size()) {
-              return std::nullopt;
-            }
-
-            auto maybeValue = v.get(featureID);
-            if (!maybeValue) {
-              return std::nullopt;
-            }
-
-            auto value = *maybeValue;
-            return MetadataConversions<std::string, decltype(value)>::convert(
-                value);
-          });
-
-  return maybeString ? System::String(*maybeString) : defaultValue;
 }
 
 } // namespace CesiumForUnityNative
