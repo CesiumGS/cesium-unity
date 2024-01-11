@@ -1888,7 +1888,7 @@ CesiumPropertyTablePropertyImpl::GetArray(
       property.isNormalized(),
       [featureID](
           const auto& v) -> DotNet::CesiumForUnity::CesiumPropertyArray {
-          // size() returns zero if the view is invalid.
+        // size() returns zero if the view is invalid.
         if (featureID < 0 || featureID >= v.size()) {
           return DotNet::CesiumForUnity::CesiumPropertyArray();
         }
@@ -1897,12 +1897,11 @@ CesiumPropertyTablePropertyImpl::GetArray(
         if (maybeValue) {
           auto value = *maybeValue;
           if constexpr (CesiumGltf::IsMetadataArray<decltype(value)>::value) {
-            return CesiumFeaturesMetadataUtility::makePropertyArray (value);
+            return CesiumFeaturesMetadataUtility::makePropertyArray(value);
           }
         }
 
         return DotNet::CesiumForUnity::CesiumPropertyArray();
-
       });
 }
 
