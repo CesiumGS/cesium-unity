@@ -268,7 +268,7 @@ DotNet::CesiumForUnity::MetadataType CesiumFeatureImpl::GetComponentType(
   }
 
   CesiumPropertyArray propertyArray = value.GetArray();
-  return getMetadataType(propertyArray.valueType());
+  return getMetadataType(propertyArray.elementValueType());
 }
 
 bool CesiumFeatureImpl::IsNormalized(

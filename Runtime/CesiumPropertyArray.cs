@@ -10,7 +10,8 @@ namespace CesiumForUnity
     {
         internal CesiumMetadataValue[] values { get; set; }
 
-        internal CesiumPropertyArray() {
+        internal CesiumPropertyArray()
+        {
             this.values = new CesiumMetadataValue[0];
         }
 
@@ -23,7 +24,7 @@ namespace CesiumForUnity
         /// The value type of the elements in the array. Some of these types are
         /// not accessible from Unity, but can be converted to a close-fitting type.
         /// </summary>
-        public CesiumMetadataValueType valueType
+        public CesiumMetadataValueType elementValueType
         {
             get; internal set;
         }

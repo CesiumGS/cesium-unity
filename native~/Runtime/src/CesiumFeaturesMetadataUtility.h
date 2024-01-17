@@ -12,6 +12,7 @@
 #include <DotNet/CesiumForUnity/CesiumMetadataValueType.h>
 #include <DotNet/CesiumForUnity/CesiumPropertyArray.h>
 #include <DotNet/CesiumForUnity/CesiumPropertyTableProperty.h>
+#include <DotNet/CesiumForUnity/CesiumPropertyTablePropertyStatus.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/String.h>
 
@@ -303,7 +304,9 @@ CesiumFeaturesMetadataUtility::makePropertyArray(
     const CesiumGltf::PropertyArrayView<T>& arrayView) {
   DotNet::CesiumForUnity::CesiumPropertyArray array =
       DotNet::CesiumForUnity::CesiumPropertyArray();
-  array.valueType(CesiumFeaturesMetadataUtility::typeToMetadataValueType<T>());
+  DotNet::CesiumForUnity::CesiumMetadataValueType valueType =
+      CesiumFeaturesMetadataUtility::typeToMetadataValueType<T>();
+  array.elementValueType({valueType.type, valueType.componentType, false});
 
   DotNet::System::Array1<DotNet::CesiumForUnity::CesiumMetadataValue> values(
       arrayView.size());
@@ -323,6 +326,36 @@ CesiumFeaturesMetadataUtility::makePropertyTableProperty(
     const CesiumGltf::PropertyTablePropertyView<T, Normalized>& propertyView) {
   DotNet::CesiumForUnity::CesiumPropertyTableProperty property =
       DotNet::CesiumForUnity::CesiumPropertyTableProperty();
+  switch (propertyView.status()) {
+  case CesiumGltf::PropertyTablePropertyViewStatus::Valid:
+    property.status(
+        DotNet::CesiumForUnity::CesiumPropertyTablePropertyStatus::Valid);
+    break;
+  case CesiumGltf::PropertyTablePropertyViewStatus::EmptyPropertyWithDefault:
+    property.status(DotNet::CesiumForUnity::CesiumPropertyTablePropertyStatus::
+                        EmptyPropertyWithDefault);
+    break;
+  case CesiumGltf::PropertyTablePropertyViewStatus::ErrorInvalidPropertyTable:
+  case CesiumGltf::PropertyTablePropertyViewStatus::ErrorNonexistentProperty:
+  case CesiumGltf::PropertyTablePropertyViewStatus::ErrorTypeMismatch:
+  case CesiumGltf::PropertyTablePropertyViewStatus::ErrorComponentTypeMismatch:
+  case CesiumGltf::PropertyTablePropertyViewStatus::ErrorArrayTypeMismatch:
+  case CesiumGltf::PropertyTablePropertyViewStatus::ErrorInvalidNormalization:
+  case CesiumGltf::PropertyTablePropertyViewStatus::ErrorNormalizationMismatch:
+  case CesiumGltf::PropertyTablePropertyViewStatus::ErrorInvalidOffset:
+  case CesiumGltf::PropertyTablePropertyViewStatus::ErrorInvalidScale:
+  case CesiumGltf::PropertyTablePropertyViewStatus::ErrorInvalidMax:
+  case CesiumGltf::PropertyTablePropertyViewStatus::ErrorInvalidMin:
+  case CesiumGltf::PropertyTablePropertyViewStatus::ErrorInvalidNoDataValue:
+  case CesiumGltf::PropertyTablePropertyViewStatus::ErrorInvalidDefaultValue:
+    // The status was already set in the C# default constructor.
+    return property;
+  default:
+    property.status(DotNet::CesiumForUnity::CesiumPropertyTablePropertyStatus::
+                        ErrorInvalidPropertyData);
+    return property;
+  }
+
   property.size(propertyView.size());
   property.arraySize(propertyView.arrayCount());
   property.valueType(
@@ -331,43 +364,31 @@ CesiumFeaturesMetadataUtility::makePropertyTableProperty(
   if (propertyView.offset()) {
     property.offset(CesiumFeaturesMetadataUtility::makeMetadataValue(
         *propertyView.offset()));
-  } else {
-    property.offset(DotNet::CesiumForUnity::CesiumMetadataValue());
   }
 
   if (propertyView.scale()) {
     property.scale(CesiumFeaturesMetadataUtility::makeMetadataValue(
         *propertyView.scale()));
-  } else {
-    property.scale(DotNet::CesiumForUnity::CesiumMetadataValue());
   }
 
   if (propertyView.min()) {
     property.min(
         CesiumFeaturesMetadataUtility::makeMetadataValue(*propertyView.min()));
-  } else {
-    property.min(DotNet::CesiumForUnity::CesiumMetadataValue());
   }
 
   if (propertyView.max()) {
     property.max(
         CesiumFeaturesMetadataUtility::makeMetadataValue(*propertyView.max()));
-  } else {
-    property.max(DotNet::CesiumForUnity::CesiumMetadataValue());
   }
 
   if (propertyView.noData()) {
     property.noData(CesiumFeaturesMetadataUtility::makeMetadataValue(
         *propertyView.noData()));
-  } else {
-    property.noData(DotNet::CesiumForUnity::CesiumMetadataValue());
   }
 
   if (propertyView.defaultValue()) {
     property.defaultValue(CesiumFeaturesMetadataUtility::makeMetadataValue(
         *propertyView.defaultValue()));
-  } else {
-    property.defaultValue(DotNet::CesiumForUnity::CesiumMetadataValue());
   }
 
   CesiumPropertyTablePropertyImpl& propertyImpl =

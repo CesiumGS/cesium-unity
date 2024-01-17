@@ -1,11 +1,6 @@
 using Reinterop;
 using System;
-using System.Collections.Generic;
-using UnityEngine;
 using Unity.Mathematics;
-using System.ComponentModel;
-using System.Reflection;
-
 namespace CesiumForUnity
 {
     /// <summary>
@@ -44,6 +39,7 @@ namespace CesiumForUnity
     public partial class CesiumPropertyTableProperty
     {
         #region Getters
+
         /// <summary>
         /// The status of the property table property. If this property table 
         /// property is invalid in any way, this will briefly indicate why.
@@ -185,6 +181,13 @@ namespace CesiumForUnity
             this.size = 0;
             this.arraySize = 0;
             this.isNormalized = false;
+            this.offset = new CesiumMetadataValue();
+            this.scale = new CesiumMetadataValue();
+            this.min = new CesiumMetadataValue();
+            this.max = new CesiumMetadataValue();
+            this.noData = new CesiumMetadataValue();
+            this.defaultValue = new CesiumMetadataValue();
+
             this.CreateImplementation();
         }
 

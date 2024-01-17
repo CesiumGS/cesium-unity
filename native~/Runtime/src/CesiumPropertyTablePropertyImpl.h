@@ -7,7 +7,7 @@ namespace DotNet::CesiumForUnity {
 class CesiumPropertyTableProperty;
 class CesiumPropertyArray;
 class CesiumMetadataValue;
-}
+} // namespace DotNet::CesiumForUnity
 
 namespace DotNet::System {
 class String;
@@ -246,6 +246,7 @@ private:
   std::any _property;
 
   friend class CesiumFeaturesMetadataUtility;
+  friend class TestGltfModelImpl;
 };
 
 } // namespace CesiumForUnityNative

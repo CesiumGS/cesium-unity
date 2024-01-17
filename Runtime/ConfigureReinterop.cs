@@ -452,9 +452,12 @@ namespace CesiumForUnity
 
             string test = string.Concat("string", "string2");
             string[] stringArray = stringList.ToArray();
+            test = stringArray[0];
             test = string.Join(" ", stringArray);
             string.IsNullOrEmpty("value");
             string.IsNullOrWhiteSpace("value");
+
+            int length = test.Length;
 
             int requestsPerCachePrune = CesiumRuntimeSettings.requestsPerCachePrune;
             ulong maxItems = CesiumRuntimeSettings.maxItems;
@@ -613,10 +616,10 @@ namespace CesiumForUnity
             valueType.isArray = false;
 
             CesiumPropertyArray array = new CesiumPropertyArray();
-            array.valueType = new CesiumMetadataValueType();
+            array.elementValueType = new CesiumMetadataValueType();
             array.values = new CesiumMetadataValue[10];
             array.values[0] = new CesiumMetadataValue();
-            int length = array.values.Length;
+            length = array.values.Length;
 
             CesiumMetadataValue myValue = new CesiumMetadataValue();
             myValue.SetObjectValue(false);
@@ -779,6 +782,46 @@ namespace CesiumForUnity
             server.defaultIonAccessToken = "";
             server.defaultIonAccessTokenId = "";
             server.serverUrlThatIsLoadingApiUrl = "";
+
+            TestGltfModel testModel = new TestGltfModel();
+
+            bool[] boolArray = { };
+            bool boolValue = boolArray[0];
+
+            int[] intArray = { };
+            int intValue = intArray[0];
+
+            double[] doubleArray = { };
+            double doubleValue = doubleArray[0];
+
+            float2[] float2Array = { };
+            myFloat2 = float2Array[0];
+
+            float3[] float3Array = { };
+            myFloat3 = float3Array[0];
+
+            float4[] float4Array = { };
+            myFloat4 = float4Array[0];
+
+            float2x2[] float2x2Array = { };
+            myFloat2x2 = float2x2Array[0];
+
+            float3x3[] float3x3Array = { };
+            myFloat3x3 = float3x3Array[0];
+
+            float4x4[] float4x4Array = { };
+            myFloat4x4 = float4x4Array[0];
+
+            length = boolArray.Length;
+            length = intArray.Length;
+            length = doubleArray.Length;
+            length = stringArray.Length;
+            length = float2Array.Length;
+            length = float3Array.Length;
+            length = float4Array.Length;
+            length = float2x2Array.Length;
+            length = float3x3Array.Length;
+            length = float4x4Array.Length;
 
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;

@@ -93,7 +93,7 @@ namespace CesiumForUnity
             if (inObject.GetType() == typeof(CesiumPropertyArray))
             {
                 CesiumPropertyArray array = inObject as CesiumPropertyArray;
-                return new CesiumMetadataValueType(array.valueType.type, array.valueType.componentType, true);
+                return new CesiumMetadataValueType(array.elementValueType.type, array.elementValueType.componentType, true);
             }
 
             switch (inObject)

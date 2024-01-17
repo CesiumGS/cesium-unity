@@ -1,5 +1,21 @@
 # Change Log
 
+### ? - ?
+
+##### Breaking Changes :mega:
+
+- Feature IDs and metadata are now parsed through the `EXT_mesh_features` and `EXT_structural_metadata` extensions respectively. Models with `EXT_feature_metadata` will still be parsed, but their metadata will no longer be accessible.
+
+##### Additions :tada:
+
+- Added `CesiumFeatureIdSet`, which represents a feature ID set in `EXT_mesh_features`.
+- Added `CesiumFeatureIdAttribute` and `CesiumFeatureIdTexture`, which respectively represent a feature ID attribute and feature ID texture in `EXT_mesh_features`. These derive from `CesiumFeatureIdSet`
+
+##### Deprecated :hourglass_flowing_sand:
+
+- `CesiumMetadata` has been deprecated. Instead, retrieve the `CesiumModelMetadata` component attached to a tile game object in order to access its glTF metadata.
+- `CesiumFeature` has been deprecated. Instead, retrieve feature IDs from the `CesiumPrimitiveFeatures` component attached to a primitive game object in order to access its glTF features. Feature IDs can be used to retrieve metadata from the `CesiumModelMetadata` attached to its parent.
+
 ### v1.7.1 - 2023-12-14
 
 ##### Fixes :wrench:
