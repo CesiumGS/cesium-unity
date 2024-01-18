@@ -1,5 +1,11 @@
 # Change Log
 
+### ? - ?
+
+##### Fixes :wrench:
+
+- Removed Universal Additional Camera Data script from DynamicCamera prefab, as it shows up as a missing script in other render pipelines.
+
 ### v1.7.1 - 2023-12-14
 
 ##### Fixes :wrench:
