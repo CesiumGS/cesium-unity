@@ -112,7 +112,7 @@ public class TestCesiumPropertyTableProperty
         Assert.That(property.size, Is.EqualTo(testValues.Length));
 
         CesiumMetadataValueType valueType = property.valueType;
-        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat3));
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat2));
         Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
         Assert.That(valueType.isArray, Is.False);
 
@@ -133,6 +133,26 @@ public class TestCesiumPropertyTableProperty
         Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.String));
         Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.None));
         Assert.That(valueType.isArray, Is.False);
+
+        model.Dispose();
+    }
+
+    [Test]
+    public void ConstructsArrayProperty()
+    {
+        TestGltfModel model = new TestGltfModel();
+        double[] testValues = { 1, 2, 3, 4, -5, -6 };
+        const Int64 count = 2;
+
+        CesiumPropertyTableProperty property = model.AddFixedLengthArrayPropertyTableProperty(testValues, count);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length / count));
+        Assert.That(property.arraySize, Is.EqualTo(count));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Scalar));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float64));
+        Assert.That(valueType.isArray, Is.True);
 
         model.Dispose();
     }
@@ -888,8 +908,6 @@ public class TestCesiumPropertyTableProperty
     }
     #endregion
 
-    // TODO normalization test
-
     #region GetDouble
 
     [Test]
@@ -910,6 +928,31 @@ public class TestCesiumPropertyTableProperty
         for (Int64 i = 0; i < testValues.Length; i++)
         {
             Assert.That(property.GetDouble(i), Is.EqualTo(testValues[i]));
+        }
+
+        model.Dispose();
+    }
+
+    [Test]
+    public void GetDoubleReturnsNormalizedScalarValues()
+    {
+        TestGltfModel model = new TestGltfModel();
+        int[] testValues = { Int32.MaxValue, 0, Int32.MinValue + 1, Int32.MaxValue / 2 };
+        double denominator = Int32.MaxValue;
+
+        CesiumPropertyTableProperty property = model.AddIntPropertyTableProperty(testValues, true);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+        Assert.That(property.isNormalized, Is.True);
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Scalar));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Int32));
+        Assert.That(valueType.isArray, Is.False);
+
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetDouble(i), Is.EqualTo(testValues[i] / denominator));
         }
 
         model.Dispose();
@@ -2751,167 +2794,173 @@ public class TestCesiumPropertyTableProperty
     [Test]
     public void GetInt2x2ReturnsMat2Values()
     {
-        int2x2 int2x2Value = new int2x2(-1, -2, -3, -4);
-        CesiumMetadataValue value = new CesiumMetadataValue(int2x2Value);
-        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(int2x2Value));
+        TestGltfModel model = new TestGltfModel();
+        float2x2[] testValues = {
+            new float2x2(1, 2, 1, 1),
+            new float2x2(3, 4, 3, 1),
+            new float2x2(5, 6, 0, 1),
+            new float2x2(UInt32.MaxValue)};
+        int2x2[] expected =
+        {
+            new int2x2(testValues[0]),
+            new int2x2(testValues[1]),
+            new int2x2(testValues[2]),
+            int2x2.zero
+        };
 
-        uint2x2 uint2x2Value = new uint2x2(1, 2, 3, 4);
-        value = new CesiumMetadataValue(uint2x2Value);
-        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(new int2x2(uint2x2Value)));
+        CesiumPropertyTableProperty property = model.AddMat2PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
 
-        float2x2 float2x2Value = new float2x2(0.5f, 1.2f, -1.9f, 0.0f);
-        value = new CesiumMetadataValue(float2x2Value);
-        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(new int2x2(float2x2Value)));
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat2));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
 
-        double2x2 double2x2Value = new double2x2(1.2, 2.3, -1.9, 0.2);
-        value = new CesiumMetadataValue(double2x2Value);
-        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(new int2x2(double2x2Value)));
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetInt2x2(i, int2x2.zero), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
     }
 
     [Test]
     public void GetInt2x2ConvertsMat3Values()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(new int3x3(
-            -1, -2, -3,
-             0, -1, 0,
-             0, 0, 1));
-        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(new int2x2(-1, -2, 0, -1)));
+        TestGltfModel model = new TestGltfModel();
+        float3x3[] testValues = {
+            new float3x3(1, 2, 1,
+                         2, 3, -1,
+                         0, 4, 6),
+            new float3x3(3, 4, 3,
+                         2, 8, 1,
+                         7, -7, -1),
+            new float3x3(5, 6, 0,
+                         8, 2, 5,
+                         5, -2, 78),
+            new float3x3(UInt32.MaxValue)};
+        int2x2[] expected = {
+            new int2x2(1, 2, 2, 3),
+            new int2x2(3, 4, 2, 8),
+            new int2x2(5, 6, 8, 2),
+            int2x2.zero};
 
-        value = new CesiumMetadataValue(new uint3x3(
-            1, 2, 3,
-            4, 5, 6,
-            7, 8, 9));
-        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(new int2x2(1, 2, 4, 5)));
+        CesiumPropertyTableProperty property = model.AddMat3PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
 
-        value = new CesiumMetadataValue(new float3x3(
-             0.5f, 1.2f, -1.0f,
-            -2.2f, 4.54f, 0.0f,
-             0.0f, 0.0f, -1.0f));
-        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(new int2x2(0, 1, -2, 4)));
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat3));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
 
-        value = new CesiumMetadataValue(new double3x3(
-             1.2, 2.3, 3.4,
-            -1.0, -2.0, -0.5,
-             0.1, 20.2, -44.3));
-        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(new int2x2(1, 2, -1, -2)));
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetInt2x2(i, int2x2.zero), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
     }
 
     [Test]
     public void GetInt2x2ConvertsMat4Values()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(new int4x4(
-            -1, -2, -3, 0,
-             0, -1, 0, 0,
-             0, 0, 1, 0,
-             1, -1, 0, 1));
-        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(new int2x2(-1, -2, 0, -1)));
+        TestGltfModel model = new TestGltfModel();
+        float4x4[] testValues = {
+            new float4x4(1, 2, 1, 8,
+                         2, 3, -1, 9,
+                         0, 4, 6, 2,
+                         0, 0, 0, 1),
+            new float4x4(3, 4, 3, -4,
+                         2, 8, 1, 2,
+                         7, -7, -1, 0,
+                         0, 0, 0, 1),
+            new float4x4(5, 6, 0, 4,
+                         8, 2, 5, 8,
+                         5, -2, 78, -9,
+                         0, 0, 0, 1),
+            new float4x4(UInt32.MaxValue)};
+        int2x2[] expected = {
+            new int2x2(1, 2, 2, 3),
+            new int2x2(3, 4, 2, 8),
+            new int2x2(5, 6, 8, 2),
+            int2x2.zero};
 
-        value = new CesiumMetadataValue(new uint4x4(
-            1, 2, 3, 0,
-            4, 5, 6, 0,
-            7, 8, 9, 0,
-            0, 0, 0, 1));
-        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(new int2x2(1, 2, 4, 5)));
+        CesiumPropertyTableProperty property = model.AddMat4PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
 
-        value = new CesiumMetadataValue(new float4x4(
-             0.5f, 1.2f, -1.0f, 1.0f,
-            -2.2f, 4.54f, 0.0f, 2.0f,
-             0.0f, 0.0f, -1.0f, 3.0f,
-             0.0f, 0.0f, 0.0f, 1.0f));
-        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(new int2x2(0, 1, -2, 4)));
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat4));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
 
-        value = new CesiumMetadataValue(new double4x4(
-             1.2, 2.3, 3.4, 0.0,
-            -1.0, -2.0, -0.5, 0.0,
-             0.1, 20.2, -44.3, 0.0,
-             0.0, 0.0, 0.0, 1.0));
-        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(new int2x2(1, 2, -1, -2)));
-    }
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetInt2x2(i, int2x2.zero), Is.EqualTo(expected[i]));
+        }
 
-    [Test]
-    public void GetInt2x2ConvertsCesiumMatNValues()
-    {
-        int2x2 int2x2Value = new int2x2(-1, -2, -3, -4);
-        CesiumMetadataValue value = new CesiumMetadataValue(
-            new CesiumIntMat2x2(int2x2Value[0], int2x2Value[1]));
-        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(int2x2Value));
-
-        value = new CesiumMetadataValue(new CesiumUintMat2x2(
-            new uint2(1, 2),
-            new uint2(3, 4)));
-        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(new int2x2(1, 3, 2, 4)));
-
-        value = new CesiumMetadataValue(new CesiumIntMat3x3(
-            new int3(-1, -2, -3),
-            new int3(0, -1, 0),
-            new int3(0, 0, -1)));
-        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(new int2x2(-1, 0, -2, -1)));
-
-        value = new CesiumMetadataValue(new CesiumUintMat3x3(
-            new uint3(1, 2, 3),
-            new uint3(4, 5, 6),
-            new uint3(7, 8, 9)));
-        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(new int2x2(1, 4, 2, 5)));
-
-        value = new CesiumMetadataValue(new CesiumIntMat4x4(
-           new int4(-1, -2, -3, 0),
-           new int4(0, -1, 0, 0),
-           new int4(0, 0, 1, 0),
-           new int4(1, -1, 0, 1)));
-        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(new int2x2(-1, 0, -2, -1)));
-
-        value = new CesiumMetadataValue(new CesiumUintMat4x4(
-            new uint4(1, 2, 3, 0),
-            new uint4(4, 5, 6, 0),
-            new uint4(7, 8, 9, 0),
-            new uint4(0, 0, 0, 1)));
-        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(new int2x2(1, 4, 2, 5)));
+        model.Dispose();
     }
 
     [Test]
     public void GetInt2x2ConvertsScalarValues()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(1.2345f);
-        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(int2x2.identity));
+        TestGltfModel model = new TestGltfModel();
+        double[] testValues = { 2, 5.1, -8.89, UInt32.MaxValue };
+        int2x2[] expected = {
+            new int2x2(2, 0, 0, 2),
+            new int2x2(5, 0, 0, 5),
+            new int2x2(-8, 0, 0, -8),
+            int2x2.zero};
 
-        value = new CesiumMetadataValue(-12345);
-        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(new int2x2(-12345, 0, 0, -12345)));
+        CesiumPropertyTableProperty property = model.AddDoublePropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Scalar));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float64));
+        Assert.That(valueType.isArray, Is.False);
+
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetInt2x2(i, int2x2.zero), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
     }
 
     [Test]
     public void GetInt2x2ConvertsBooleanValue()
     {
+        TestGltfModel model = new TestGltfModel();
+        bool[] testValues = { true, false, false, true };
+        int2x2[] expected = {
+            int2x2.identity,
+            int2x2.zero,
+            int2x2.zero,
+            int2x2.identity};
+
+        CesiumPropertyTableProperty property = model.AddBooleanPropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Boolean));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.None));
+        Assert.That(valueType.isArray, Is.False);
+
         int2x2 defaultValue = new int2x2(-1);
-        CesiumMetadataValue value = new CesiumMetadataValue(true);
-        Assert.That(value.GetInt2x2(defaultValue), Is.EqualTo(int2x2.identity));
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetInt2x2(i, defaultValue), Is.EqualTo(expected[i]));
+        }
 
-        value = new CesiumMetadataValue(false);
-        Assert.That(value.GetInt2x2(defaultValue), Is.EqualTo(int2x2.zero));
+        model.Dispose();
     }
 
-    [Test]
-    public void GetInt2x2ReturnsDefaultValueForOutOfRangeValues()
-    {
-        CesiumMetadataValue value = new CesiumMetadataValue(UInt32.MaxValue);
-        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(int2x2.zero));
-
-        value = new CesiumMetadataValue(new double2x2(Double.MinValue));
-        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(int2x2.zero));
-    }
-
-    [Test]
-    public void GetInt2x2ReturnsDefaultValueForUnsupportedTypes()
-    {
-        CesiumMetadataValue value = new CesiumMetadataValue();
-        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(int2x2.zero));
-
-        value = new CesiumMetadataValue(new int2(1));
-        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(int2x2.zero));
-
-        value = new CesiumMetadataValue(new CesiumPropertyArray());
-        Assert.That(value.GetInt2x2(int2x2.zero), Is.EqualTo(int2x2.zero));
-
-    }
     #endregion
 
     #region GetUInt2x2
@@ -2919,167 +2968,173 @@ public class TestCesiumPropertyTableProperty
     [Test]
     public void GetUInt2x2ReturnsMat2Values()
     {
-        uint2x2 uint2x2Value = new uint2x2(1, 2, 3, 4);
-        CesiumMetadataValue value = new CesiumMetadataValue(uint2x2Value);
-        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(uint2x2Value));
+        TestGltfModel model = new TestGltfModel();
+        float2x2[] testValues = {
+            new float2x2(1, 2, 1, 1),
+            new float2x2(3, 4, 3, 1),
+            new float2x2(5, 6, 0, 1),
+            new float2x2(Int64.MaxValue)};
+        uint2x2[] expected =
+        {
+            new uint2x2(testValues[0]),
+            new uint2x2(testValues[1]),
+            new uint2x2(testValues[2]),
+            uint2x2.zero
+        };
 
-        int2x2 int2x2Value = new int2x2(2, 4, 6, 8);
-        value = new CesiumMetadataValue(int2x2Value);
-        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(new uint2x2(int2x2Value)));
+        CesiumPropertyTableProperty property = model.AddMat2PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
 
-        float2x2 float2x2Value = new float2x2(0.5f, 1.2f, 1.9f, 0.0f);
-        value = new CesiumMetadataValue(float2x2Value);
-        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(new uint2x2(float2x2Value)));
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat2));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
 
-        double2x2 double2x2Value = new double2x2(1.2, 2.3, 1.9, 0.2);
-        value = new CesiumMetadataValue(double2x2Value);
-        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(new uint2x2(double2x2Value)));
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetUInt2x2(i, uint2x2.zero), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
     }
 
     [Test]
     public void GetUInt2x2ConvertsMat3Values()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(new uint3x3(
-            1, 2, 3,
-            0, 1, 0,
-            0, 0, 1));
-        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(new uint2x2(1, 2, 0, 1)));
+        TestGltfModel model = new TestGltfModel();
+        float3x3[] testValues = {
+            new float3x3(1, 2, 1,
+                         2, 3, -1,
+                         0, 4, 6),
+            new float3x3(3, 4, 3,
+                         2, 8, 1,
+                         7, -7, -1),
+            new float3x3(5, 6, 0,
+                         8, 2, 5,
+                         5, -2, 78),
+            new float3x3(-1)};
+        uint2x2[] expected = {
+            new uint2x2(1, 2, 2, 3),
+            new uint2x2(3, 4, 2, 8),
+            new uint2x2(5, 6, 8, 2),
+            uint2x2.zero};
 
-        value = new CesiumMetadataValue(new int3x3(
-            1, 2, 3,
-            4, 5, 6,
-            7, 8, 9));
-        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(new uint2x2(1, 2, 4, 5)));
+        CesiumPropertyTableProperty property = model.AddMat3PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
 
-        value = new CesiumMetadataValue(new float3x3(
-             0.5f, 1.2f, -1.0f,
-             2.2f, 4.54f, 0.0f,
-             0.0f, 0.0f, -1.0f));
-        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(new uint2x2(0, 1, 2, 4)));
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat3));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
 
-        value = new CesiumMetadataValue(new double3x3(
-             1.2, 2.3, 3.4,
-             1.0, 2.0, -0.5,
-             0.1, 20.2, -44.3));
-        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(new uint2x2(1, 2, 1, 2)));
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetUInt2x2(i, uint2x2.zero), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
     }
 
     [Test]
     public void GetUInt2x2ConvertsMat4Values()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(new uint4x4(
-            1, 2, 3, 0,
-            0, 1, 0, 0,
-            0, 0, 1, 0,
-            1, 1, 0, 1));
-        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(new uint2x2(1, 2, 0, 1)));
+        TestGltfModel model = new TestGltfModel();
+        float4x4[] testValues = {
+            new float4x4(1, 2, 1, 8,
+                         2, 3, -1, 9,
+                         0, 4, 6, 2,
+                         0, 0, 0, 1),
+            new float4x4(3, 4, 3, -4,
+                         2, 8, 1, 2,
+                         7, -7, -1, 0,
+                         0, 0, 0, 1),
+            new float4x4(5, 6, 0, 4,
+                         8, 2, 5, 8,
+                         5, -2, 78, -9,
+                         0, 0, 0, 1),
+            new float4x4(-1)};
+        uint2x2[] expected = {
+            new uint2x2(1, 2, 2, 3),
+            new uint2x2(3, 4, 2, 8),
+            new uint2x2(5, 6, 8, 2),
+            uint2x2.zero};
 
-        value = new CesiumMetadataValue(new int4x4(
-            1, 2, 3, 0,
-            4, 5, 6, 0,
-            7, 8, 9, 0,
-            0, 0, 0, 1));
-        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(new uint2x2(1, 2, 4, 5)));
+        CesiumPropertyTableProperty property = model.AddMat4PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
 
-        value = new CesiumMetadataValue(new float4x4(
-             0.5f, 1.2f, -1.0f, 1.0f,
-            2.2f, 4.54f, 0.0f, 2.0f,
-             0.0f, 0.0f, -1.0f, 3.0f,
-             0.0f, 0.0f, 0.0f, 1.0f));
-        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(new uint2x2(0, 1, 2, 4)));
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat4));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
 
-        value = new CesiumMetadataValue(new double4x4(
-            1.2, 2.3, 3.4, 0.0,
-            1.0, 2.0, -0.5, 0.0,
-            0.1, 20.2, -44.3, 0.0,
-            0.0, 0.0, 0.0, 1.0));
-        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(new uint2x2(1, 2, 1, 2)));
-    }
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetUInt2x2(i, uint2x2.zero), Is.EqualTo(expected[i]));
+        }
 
-    [Test]
-    public void GetUInt2x2ConvertsCesiumMatNValues()
-    {
-        uint2x2 uint2x2Value = new uint2x2(1, 2, 3, 4);
-        CesiumMetadataValue value = new CesiumMetadataValue(
-            new CesiumUintMat2x2(uint2x2Value[0], uint2x2Value[1]));
-        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(uint2x2Value));
-
-        value = new CesiumMetadataValue(new CesiumIntMat2x2(
-            new int2(1, 2),
-            new int2(3, 4)));
-        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(new uint2x2(1, 3, 2, 4)));
-
-        value = new CesiumMetadataValue(new CesiumUintMat3x3(
-            new uint3(1, 2, 3),
-            new uint3(0, 1, 0),
-            new uint3(0, 0, 1)));
-        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(new uint2x2(1, 0, 2, 1)));
-
-        value = new CesiumMetadataValue(new CesiumIntMat3x3(
-            new int3(1, 2, 3),
-            new int3(4, 5, 6),
-            new int3(7, 8, 9)));
-        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(new uint2x2(1, 4, 2, 5)));
-
-        value = new CesiumMetadataValue(new CesiumUintMat4x4(
-           new uint4(1, 2, 3, 0),
-           new uint4(0, 1, 0, 0),
-           new uint4(0, 0, 1, 0),
-           new uint4(1, 1, 0, 1)));
-        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(new uint2x2(1, 0, 2, 1)));
-
-        value = new CesiumMetadataValue(new CesiumIntMat4x4(
-            new int4(1, 2, 3, 0),
-            new int4(4, 5, 6, 0),
-            new int4(7, 8, 9, 0),
-            new int4(0, 0, 0, 1)));
-        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(new uint2x2(1, 4, 2, 5)));
+        model.Dispose();
     }
 
     [Test]
     public void GetUInt2x2ConvertsScalarValues()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(1.2345f);
-        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(uint2x2.identity));
+        TestGltfModel model = new TestGltfModel();
+        double[] testValues = { 2, 5.1, 8.89, -1 };
+        uint2x2[] expected = {
+            new uint2x2(2, 0, 0, 2),
+            new uint2x2(5, 0, 0, 5),
+            new uint2x2(8, 0, 0, 8),
+            uint2x2.zero};
 
-        value = new CesiumMetadataValue(12345);
-        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(new uint2x2(12345, 0, 0, 12345)));
+        CesiumPropertyTableProperty property = model.AddDoublePropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Scalar));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float64));
+        Assert.That(valueType.isArray, Is.False);
+
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetUInt2x2(i, uint2x2.zero), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
     }
 
     [Test]
     public void GetUInt2x2ConvertsBooleanValue()
     {
+        TestGltfModel model = new TestGltfModel();
+        bool[] testValues = { true, false, false, true };
+        uint2x2[] expected = {
+            uint2x2.identity,
+            uint2x2.zero,
+            uint2x2.zero,
+            uint2x2.identity};
+
+        CesiumPropertyTableProperty property = model.AddBooleanPropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Boolean));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.None));
+        Assert.That(valueType.isArray, Is.False);
+
         uint2x2 defaultValue = new uint2x2(11);
-        CesiumMetadataValue value = new CesiumMetadataValue(true);
-        Assert.That(value.GetUInt2x2(defaultValue), Is.EqualTo(uint2x2.identity));
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetUInt2x2(i, defaultValue), Is.EqualTo(expected[i]));
+        }
 
-        value = new CesiumMetadataValue(false);
-        Assert.That(value.GetUInt2x2(defaultValue), Is.EqualTo(uint2x2.zero));
+        model.Dispose();
     }
 
-    [Test]
-    public void GetUInt2x2ReturnsDefaultValueForOutOfRangeValues()
-    {
-        CesiumMetadataValue value = new CesiumMetadataValue(-1);
-        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(uint2x2.zero));
-
-        value = new CesiumMetadataValue(new double2x2(Double.MinValue));
-        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(uint2x2.zero));
-    }
-
-    [Test]
-    public void GetUInt2x2ReturnsDefaultValueForUnsupportedTypes()
-    {
-        CesiumMetadataValue value = new CesiumMetadataValue();
-        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(uint2x2.zero));
-
-        value = new CesiumMetadataValue(new uint2(1));
-        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(uint2x2.zero));
-
-        value = new CesiumMetadataValue(new CesiumPropertyArray());
-        Assert.That(value.GetUInt2x2(uint2x2.zero), Is.EqualTo(uint2x2.zero));
-
-    }
     #endregion
 
     #region GetFloat2x2
@@ -3087,177 +3142,166 @@ public class TestCesiumPropertyTableProperty
     [Test]
     public void GetFloat2x2ReturnsMat2Values()
     {
-        float2x2 float2x2Value = new float2x2(0.5f, 1.2f, -1.9f, 0.0f);
-        CesiumMetadataValue value = new CesiumMetadataValue(float2x2Value);
-        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(float2x2Value));
+        TestGltfModel model = new TestGltfModel();
+        float2x2[] testValues = {
+            new float2x2(1, 2, 1, 1),
+            new float2x2(3, 4, 3, 1),
+            new float2x2(5, 6, 0, 1),
+            new float2x2(UInt32.MaxValue)};
 
-        int2x2 int2x2Value = new int2x2(-1, -2, -3, -4);
-        value = new CesiumMetadataValue(int2x2Value);
-        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(int2x2Value)));
+        CesiumPropertyTableProperty property = model.AddMat2PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
 
-        uint2x2 uint2x2Value = new uint2x2(1, 2, 3, 4);
-        value = new CesiumMetadataValue(uint2x2Value);
-        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(uint2x2Value)));
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat2));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
 
-        double2x2 double2x2Value = new double2x2(1.2, 2.3, -1.9, 0.2);
-        value = new CesiumMetadataValue(double2x2Value);
-        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(double2x2Value)));
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetFloat2x2(i, float2x2.zero), Is.EqualTo(testValues[i]));
+        }
+
+        model.Dispose();
     }
 
     [Test]
     public void GetFloat2x2ConvertsMat3Values()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(new float3x3(
-             0.5f, 1.2f, -1.0f,
-            -2.2f, 4.54f, 0.0f,
-             0.0f, 0.0f, -1.0f));
-        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(0.5f, 1.2f, -2.2f, 4.54f)));
+        TestGltfModel model = new TestGltfModel();
+        float3x3[] testValues = {
+            new float3x3(1, 2, 1,
+                         2, 3, -1,
+                         0, 4, 6),
+            new float3x3(3, 4, 3,
+                         2, 8, 1,
+                         7, -7, -1),
+            new float3x3(5, 6, 0,
+                         8, 2, 5,
+                         5, -2, 78),
+            new float3x3(UInt32.MaxValue)};
+        float2x2[] expected = {
+            new float2x2(1, 2, 2, 3),
+            new float2x2(3, 4, 2, 8),
+            new float2x2(5, 6, 8, 2),
+            new float2x2(UInt32.MaxValue)};
 
-        value = new CesiumMetadataValue(new int3x3(
-            -1, -2, -3,
-             0, -1, 0,
-             0, 0, 1));
-        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(-1, -2, 0, -1)));
+        CesiumPropertyTableProperty property = model.AddMat3PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
 
-        value = new CesiumMetadataValue(new uint3x3(
-            1, 2, 3,
-            4, 5, 6,
-            7, 8, 9));
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat3));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
 
-        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(1, 2, 4, 5)));
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetFloat2x2(i, float2x2.zero), Is.EqualTo(expected[i]));
+        }
 
-        double3x3 double3x3Value = new double3x3(
-             1.2, 2.3, 3.4,
-            -1.0, -2.0, -0.5,
-             0.1, 20.2, -44.3);
-        value = new CesiumMetadataValue(double3x3Value);
-        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(
-            (float)double3x3Value[0][0], (float)double3x3Value[1][0],
-            (float)double3x3Value[0][1], (float)double3x3Value[1][1])));
+        model.Dispose();
     }
 
     [Test]
     public void GetFloat2x2ConvertsMat4Values()
     {
-        CesiumMetadataValue
-        value = new CesiumMetadataValue(new float4x4(
-             0.5f, 1.2f, -1.0f, 1.0f,
-            -2.2f, 4.54f, 0.0f, 2.0f,
-             0.0f, 0.0f, -1.0f, 3.0f,
-             0.0f, 0.0f, 0.0f, 1.0f));
-        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(
-            0.5f, 1.2f,
-            -2.2f, 4.54f)));
+        TestGltfModel model = new TestGltfModel();
+        float4x4[] testValues = {
+            new float4x4(1, 2, 1, 8,
+                         2, 3, -1, 9,
+                         0, 4, 6, 2,
+                         0, 0, 0, 1),
+            new float4x4(3, 4, 3, -4,
+                         2, 8, 1, 2,
+                         7, -7, -1, 0,
+                         0, 0, 0, 1),
+            new float4x4(5, 6, 0, 4,
+                         8, 2, 5, 8,
+                         5, -2, 78, -9,
+                         0, 0, 0, 1),
+            new float4x4(UInt32.MaxValue)};
+        float2x2[] expected = {
+            new float2x2(1, 2, 2, 3),
+            new float2x2(3, 4, 2, 8),
+            new float2x2(5, 6, 8, 2),
+            new float2x2(UInt32.MaxValue)};
 
-        value = new CesiumMetadataValue(new int4x4(
-            -1, -2, -3, 0,
-             0, -1, 0, 0,
-             0, 0, 1, 0,
-             1, -1, 0, 1));
-        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(-1, -2, 0, -1)));
+        CesiumPropertyTableProperty property = model.AddMat4PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
 
-        value = new CesiumMetadataValue(new uint4x4(
-            1, 2, 3, 0,
-            4, 5, 6, 0,
-            7, 8, 9, 0,
-            0, 0, 0, 1));
-        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(1, 2, 4, 5)));
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat4));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
 
-        double4x4 double4x4Value = new double4x4(
-             1.2, 2.3, 3.4, 0.0,
-            -1.0, -2.0, -0.5, 0.0,
-             0.1, 20.2, -44.3, 0.0,
-             0.0, 0.0, 0.0, 1.0);
-        value = new CesiumMetadataValue(double4x4Value);
-        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(
-            (float)double4x4Value[0][0], (float)double4x4Value[1][0],
-            (float)double4x4Value[0][1], (float)double4x4Value[1][1])));
-    }
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetFloat2x2(i, float2x2.zero), Is.EqualTo(expected[i]));
+        }
 
-    [Test]
-    public void GetFloat2x2ConvertsCesiumMatNValues()
-    {
-        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumIntMat2x2(
-            new int2(-1, -2),
-            new int2(-3, -4)));
-        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(-1, -3, -2, -4)));
-
-        value = new CesiumMetadataValue(new CesiumUintMat2x2(
-            new uint2(1, 2),
-            new uint2(3, 4)));
-        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(1, 3, 2, 4)));
-
-        value = new CesiumMetadataValue(new CesiumIntMat3x3(
-            new int3(-1, -2, -3),
-            new int3(0, -1, 0),
-            new int3(0, 0, -1)));
-        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(-1, 0, -2, -1)));
-
-        value = new CesiumMetadataValue(new CesiumUintMat3x3(
-            new uint3(1, 2, 3),
-            new uint3(4, 5, 6),
-            new uint3(7, 8, 9)));
-        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(1, 4, 2, 5)));
-
-        value = new CesiumMetadataValue(new CesiumIntMat4x4(
-           new int4(-1, -2, -3, 0),
-           new int4(0, -1, 0, 0),
-           new int4(0, 0, 1, 0),
-           new int4(1, -1, 0, 1)));
-        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(-1, 0, -2, -1)));
-
-        value = new CesiumMetadataValue(new CesiumUintMat4x4(
-            new uint4(1, 2, 3, 0),
-            new uint4(4, 5, 6, 0),
-            new uint4(7, 8, 9, 0),
-            new uint4(0, 0, 0, 1)));
-        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(1, 4, 2, 5)));
+        model.Dispose();
     }
 
     [Test]
     public void GetFloat2x2ConvertsScalarValues()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(1.2345f);
-        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(1.2345f, 0, 0, 1.2345f)));
+        TestGltfModel model = new TestGltfModel();
+        double[] testValues = { 2, 5.1, -8.89, Double.MaxValue };
+        float2x2[] expected = {
+            2 * float2x2.identity,
+            (float)5.1 * float2x2.identity,
+            (float)-8.89 * float2x2.identity,
+            float2x2.zero};
 
-        value = new CesiumMetadataValue(-12345);
-        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(new float2x2(-12345, 0, 0, -12345)));
+        CesiumPropertyTableProperty property = model.AddDoublePropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Scalar));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float64));
+        Assert.That(valueType.isArray, Is.False);
+
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetFloat2x2(i, float2x2.zero), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
     }
 
     [Test]
     public void GetFloat2x2ConvertsBooleanValue()
     {
+        TestGltfModel model = new TestGltfModel();
+        bool[] testValues = { true, false, false, true };
+        float2x2[] expected = {
+            float2x2.identity,
+            float2x2.zero,
+            float2x2.zero,
+            float2x2.identity};
+
+        CesiumPropertyTableProperty property = model.AddBooleanPropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Boolean));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.None));
+        Assert.That(valueType.isArray, Is.False);
+
         float2x2 defaultValue = new float2x2(-1);
-        CesiumMetadataValue value = new CesiumMetadataValue(true);
-        Assert.That(value.GetFloat2x2(defaultValue), Is.EqualTo(float2x2.identity));
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetFloat2x2(i, defaultValue), Is.EqualTo(expected[i]));
+        }
 
-        value = new CesiumMetadataValue(false);
-        Assert.That(value.GetFloat2x2(defaultValue), Is.EqualTo(float2x2.zero));
+        model.Dispose();
     }
 
-    [Test]
-    public void GetFloat2x2ReturnsDefaultValueForOutOfRangeValues()
-    {
-        CesiumMetadataValue value = new CesiumMetadataValue(Double.MaxValue);
-        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(float2x2.zero));
-
-        value = new CesiumMetadataValue(new double2x2(Double.MinValue));
-        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(float2x2.zero));
-    }
-
-    [Test]
-    public void GetFloat2x2ReturnsDefaultValueForUnsupportedTypes()
-    {
-        CesiumMetadataValue value = new CesiumMetadataValue();
-        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(float2x2.zero));
-
-        value = new CesiumMetadataValue(new float2(1));
-        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(float2x2.zero));
-
-        value = new CesiumMetadataValue(new CesiumPropertyArray());
-        Assert.That(value.GetFloat2x2(float2x2.zero), Is.EqualTo(float2x2.zero));
-
-    }
     #endregion
 
     #region GetDouble2x2
@@ -3265,158 +3309,166 @@ public class TestCesiumPropertyTableProperty
     [Test]
     public void GetDouble2x2ReturnsMat2Values()
     {
-        double2x2 double2x2Value = new double2x2(1.2, 2.3, -1.9, 0.2);
-        CesiumMetadataValue value = new CesiumMetadataValue(double2x2Value);
-        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(double2x2Value));
+        TestGltfModel model = new TestGltfModel();
+        float2x2[] testValues = {
+            new float2x2(1, 2, 1, 1),
+            new float2x2(3, 4, 3, 1),
+            new float2x2(5, 6, 0, 1),
+            new float2x2(UInt32.MaxValue)};
 
-        int2x2 int2x2Value = new int2x2(-1, -2, -3, -4);
-        value = new CesiumMetadataValue(int2x2Value);
-        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(int2x2Value)));
+        CesiumPropertyTableProperty property = model.AddMat2PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
 
-        uint2x2 uint2x2Value = new uint2x2(1, 2, 3, 4);
-        value = new CesiumMetadataValue(uint2x2Value);
-        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(uint2x2Value)));
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat2));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
 
-        float2x2 float2x2Value = new float2x2(0.5f, 1.2f, -1.9f, 0.0f);
-        value = new CesiumMetadataValue(float2x2Value);
-        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(float2x2Value)));
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetDouble2x2(i, double2x2.zero), Is.EqualTo(new double2x2(testValues[i])));
+        }
+
+        model.Dispose();
     }
 
     [Test]
     public void GetDouble2x2ConvertsMat3Values()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(new double3x3(
-             1.2, 2.3, 3.4,
-            -1.0, -2.0, -0.5,
-             0.1, 20.2, -44.3));
-        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(1.2, 2.3, -1.0, -2.0)));
+        TestGltfModel model = new TestGltfModel();
+        float3x3[] testValues = {
+            new float3x3(1, 2, 1,
+                         2, 3, -1,
+                         0, 4, 6),
+            new float3x3(3, 4, 3,
+                         2, 8, 1,
+                         7, -7, -1),
+            new float3x3(5, 6, 0,
+                         8, 2, 5,
+                         5, -2, 78),
+            new float3x3(-1)};
+        double2x2[] expected = {
+            new double2x2(1, 2, 2, 3),
+            new double2x2(3, 4, 2, 8),
+            new double2x2(5, 6, 8, 2),
+            new double2x2(-1)};
 
-        value = new CesiumMetadataValue(new int3x3(
-            -1, -2, -3,
-             0, -1, 0,
-             0, 0, 1));
-        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(-1, -2, 0, -1)));
+        CesiumPropertyTableProperty property = model.AddMat3PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
 
-        value = new CesiumMetadataValue(new uint3x3(
-            1, 2, 3,
-            4, 5, 6,
-            7, 8, 9));
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat3));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
 
-        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(1, 2, 4, 5)));
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetDouble2x2(i, double2x2.zero), Is.EqualTo(expected[i]));
+        }
 
-        value = new CesiumMetadataValue(new float3x3(
-             0.5f, 1.2f, -1.0f,
-            -2.2f, 4.54f, 0.0f,
-             0.0f, 0.0f, -1.0f));
-        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(0.5f, 1.2f, -2.2f, 4.54f)));
+        model.Dispose();
     }
 
     [Test]
     public void GetDouble2x2ConvertsMat4Values()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(new double4x4(
-             1.2, 2.3, 3.4, 0.0,
-            -1.0, -2.0, -0.5, 0.0,
-             0.1, 20.2, -44.3, 0.0,
-             0.0, 0.0, 0.0, 1.0));
-        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(1.2, 2.3, -1.0, -2.0)));
+        TestGltfModel model = new TestGltfModel();
+        float4x4[] testValues = {
+            new float4x4(1, 2, 1, 8,
+                         2, 3, -1, 9,
+                         0, 4, 6, 2,
+                         0, 0, 0, 1),
+            new float4x4(3, 4, 3, -4,
+                         2, 8, 1, 2,
+                         7, -7, -1, 0,
+                         0, 0, 0, 1),
+            new float4x4(5, 6, 0, 4,
+                         8, 2, 5, 8,
+                         5, -2, 78, -9,
+                         0, 0, 0, 1),
+            new float4x4(-1)};
+        double2x2[] expected = {
+            new double2x2(1, 2, 2, 3),
+            new double2x2(3, 4, 2, 8),
+            new double2x2(5, 6, 8, 2),
+            new double2x2(-1)};
 
-        value = new CesiumMetadataValue(new int4x4(
-            -1, -2, -3, 0,
-             0, -1, 0, 0,
-             0, 0, 1, 0,
-             1, -1, 0, 1));
-        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(-1, -2, 0, -1)));
+        CesiumPropertyTableProperty property = model.AddMat4PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
 
-        value = new CesiumMetadataValue(new uint4x4(
-            1, 2, 3, 0,
-            4, 5, 6, 0,
-            7, 8, 9, 0,
-            0, 0, 0, 1));
-        Assert.That(value.GetDouble2x2(float2x2.zero), Is.EqualTo(new double2x2(1, 2, 4, 5)));
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat4));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
 
-        value = new CesiumMetadataValue(new float4x4(
-             0.5f, 1.2f, -1.0f, 1.0f,
-            -2.2f, 4.54f, 0.0f, 2.0f,
-             0.0f, 0.0f, -1.0f, 3.0f,
-             0.0f, 0.0f, 0.0f, 1.0f));
-        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(0.5f, 1.2f, -2.2f, 4.54f)));
-    }
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetDouble2x2(i, double2x2.zero), Is.EqualTo(expected[i]));
+        }
 
-    [Test]
-    public void GetDouble2x2ConvertsCesiumMatNValues()
-    {
-        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumIntMat2x2(
-            new int2(-1, -2),
-            new int2(-3, -4)));
-        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(-1, -3, -2, -4)));
-
-        value = new CesiumMetadataValue(new CesiumUintMat2x2(
-            new uint2(1, 2),
-            new uint2(3, 4)));
-        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(1, 3, 2, 4)));
-
-        value = new CesiumMetadataValue(new CesiumIntMat3x3(
-            new int3(-1, -2, -3),
-            new int3(0, -1, 0),
-            new int3(0, 0, -1)));
-        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(-1, 0, -2, -1)));
-
-        value = new CesiumMetadataValue(new CesiumUintMat3x3(
-            new uint3(1, 2, 3),
-            new uint3(4, 5, 6),
-            new uint3(7, 8, 9)));
-        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(1, 4, 2, 5)));
-
-        value = new CesiumMetadataValue(new CesiumIntMat4x4(
-           new int4(-1, -2, -3, 0),
-           new int4(0, -1, 0, 0),
-           new int4(0, 0, 1, 0),
-           new int4(1, -1, 0, 1)));
-        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(-1, 0, -2, -1)));
-
-        value = new CesiumMetadataValue(new CesiumUintMat4x4(
-            new uint4(1, 2, 3, 0),
-            new uint4(4, 5, 6, 0),
-            new uint4(7, 8, 9, 0),
-            new uint4(0, 0, 0, 1)));
-        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(1, 4, 2, 5)));
+        model.Dispose();
     }
 
     [Test]
     public void GetDouble2x2ConvertsScalarValues()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(1.2345f);
-        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(1.2345f, 0, 0, 1.2345f)));
+        TestGltfModel model = new TestGltfModel();
+        double[] testValues = { 2, 5.1, -8.89, Double.MaxValue };
+        double2x2[] expected = {
+            new double2x2(2, 0, 0, 2),
+            new double2x2(5.1, 0, 0, 5.1),
+            new double2x2(-8.89, 0, 0, -8.89),
+            new double2x2(Double.MaxValue, 0, 0, Double.MaxValue)};
 
-        value = new CesiumMetadataValue(-12345);
-        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(new double2x2(-12345, 0, 0, -12345)));
+        CesiumPropertyTableProperty property = model.AddDoublePropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Scalar));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float64));
+        Assert.That(valueType.isArray, Is.False);
+
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetDouble2x2(i, double2x2.zero), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
     }
 
     [Test]
     public void GetDouble2x2ConvertsBooleanValue()
     {
+        TestGltfModel model = new TestGltfModel();
+        bool[] testValues = { true, false, false, true };
+        double2x2[] expected = {
+            double2x2.identity,
+            double2x2.zero,
+            double2x2.zero,
+            double2x2.identity};
+
+        CesiumPropertyTableProperty property = model.AddBooleanPropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Boolean));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.None));
+        Assert.That(valueType.isArray, Is.False);
+
         double2x2 defaultValue = new double2x2(-1);
-        CesiumMetadataValue value = new CesiumMetadataValue(true);
-        Assert.That(value.GetDouble2x2(defaultValue), Is.EqualTo(double2x2.identity));
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetDouble2x2(i, defaultValue), Is.EqualTo(expected[i]));
+        }
 
-        value = new CesiumMetadataValue(false);
-        Assert.That(value.GetDouble2x2(defaultValue), Is.EqualTo(double2x2.zero));
+        model.Dispose();
     }
 
-    [Test]
-    public void GetDouble2x2ReturnsDefaultValueForUnsupportedTypes()
-    {
-        CesiumMetadataValue value = new CesiumMetadataValue();
-        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(double2x2.zero));
-
-        value = new CesiumMetadataValue(new double2(1));
-        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(double2x2.zero));
-
-        value = new CesiumMetadataValue(new CesiumPropertyArray());
-        Assert.That(value.GetDouble2x2(double2x2.zero), Is.EqualTo(double2x2.zero));
-
-    }
     #endregion
 
     #region GetInt3x3
@@ -3424,217 +3476,185 @@ public class TestCesiumPropertyTableProperty
     [Test]
     public void GetInt3x3ReturnsMat3Values()
     {
-        int3x3 int3x3Value = new int3x3(
-            -1, -2, -3,
-             0, -1, 0,
-             0, 0, 1);
-        CesiumMetadataValue value = new CesiumMetadataValue(int3x3Value);
-        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(int3x3Value));
+        TestGltfModel model = new TestGltfModel();
+        float3x3[] testValues = {
+            new float3x3(1, 2, 1,
+                         2, 3, -1,
+                         0, 4, 6),
+            new float3x3(3, 4, 3,
+                         2, 8, 1,
+                         7, -7, -1),
+            new float3x3(5, 6, 0,
+                         8, 2, 5,
+                         5, -2, 78),
+            new float3x3(UInt32.MaxValue)};
+        int3x3[] expected = {
+            new int3x3(testValues[0]),
+            new int3x3(testValues[1]),
+            new int3x3(testValues[2]),
+            int3x3.zero};
 
-        uint3x3 uint3x3Value = new uint3x3(
-            1, 2, 3,
-            4, 5, 6,
-            7, 8, 9);
-        value = new CesiumMetadataValue(uint3x3Value);
-        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(new int3x3(uint3x3Value)));
+        CesiumPropertyTableProperty property = model.AddMat3PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
 
-        float3x3 float3x3Value = new float3x3(
-             0.5f, 1.2f, -1.0f,
-            -2.2f, 4.54f, 0.0f,
-             0.0f, 0.0f, -1.0f);
-        value = new CesiumMetadataValue(float3x3Value);
-        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(new int3x3(float3x3Value)));
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat3));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
 
-        double3x3 double3x3Value = new double3x3(
-             1.2, 2.3, 3.4,
-            -1.0, -2.0, -0.5,
-             0.1, 20.2, -44.3);
-        value = new CesiumMetadataValue(double3x3Value);
-        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(new int3x3(double3x3Value)));
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetInt3x3(i, int3x3.zero), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
     }
 
     [Test]
     public void GetInt3x3ConvertsMat2Values()
     {
-        int2x2 int2x2Value = new int2x2(-1, -2, -3, -4);
-        CesiumMetadataValue value = new CesiumMetadataValue(int2x2Value);
-        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(new int3x3(
-            -1, -2, 0,
-            -3, -4, 0,
-            0, 0, 0)));
+        TestGltfModel model = new TestGltfModel();
+        float2x2[] testValues = {
+            new float2x2(1, 2, 1, 1),
+            new float2x2(3, 4, 3, 1),
+            new float2x2(5, 6, 0, 1),
+            new float2x2(UInt32.MaxValue)};
+        int3x3[] expected =
+        {
+            new int3x3(1, 2, 0,
+                       1, 1, 0,
+                       0, 0, 0),
+            new int3x3(3, 4, 0,
+                       3, 1, 0,
+                       0, 0, 0),
+            new int3x3(5, 6, 0,
+                       0, 1, 0,
+                       0, 0, 0),
+            int3x3.zero
+        };
 
-        uint2x2 uint2x2Value = new uint2x2(1, 2, 3, 4);
-        value = new CesiumMetadataValue(uint2x2Value);
-        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(new int3x3(
-            1, 2, 0,
-            3, 4, 0,
-            0, 0, 0)));
+        CesiumPropertyTableProperty property = model.AddMat2PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
 
-        float2x2 float2x2Value = new float2x2(0.5f, 1.2f, -1.9f, 0.0f);
-        value = new CesiumMetadataValue(float2x2Value);
-        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(new int3x3(
-            0, 1, 0,
-            -1, 0, 0,
-            0, 0, 0)));
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat2));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
 
-        double2x2 double2x2Value = new double2x2(1.2, 2.3, -1.9, 0.2);
-        value = new CesiumMetadataValue(double2x2Value);
-        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(new int3x3(
-            1, 2, 0,
-            -1, 0, 0,
-            0, 0, 0)));
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetInt3x3(i, int3x3.zero), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
     }
 
     [Test]
     public void GetInt3x3ConvertsMat4Values()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(new int4x4(
-            -1, -2, -3, 0,
-             0, -1, 0, 0,
-             0, 0, 1, 0,
-             1, -1, 0, 1));
-        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(new int3x3(
-            -1, -2, -3,
-            0, -1, 0,
-            0, 0, 1)));
+        TestGltfModel model = new TestGltfModel();
+        float4x4[] testValues = {
+            new float4x4(1, 2, 1, 8,
+                         2, 3, -1, 9,
+                         0, 4, 6, 2,
+                         0, 0, 0, 1),
+            new float4x4(3, 4, 3, -4,
+                         2, 8, 1, 2,
+                         7, -7, -1, 0,
+                         0, 0, 0, 1),
+            new float4x4(5, 6, 0, 4,
+                         8, 2, 5, 8,
+                         5, -2, 78, -9,
+                         0, 0, 0, 1),
+            new float4x4(UInt32.MaxValue)};
+        int3x3[] expected = {
+            new int3x3(1, 2, 1,
+                       2, 3, -1,
+                       0, 4, 6),
+            new int3x3(3, 4, 3,
+                       2, 8, 1,
+                       7, -7, -1),
+            new int3x3(5, 6, 0,
+                       8, 2, 5,
+                       5, -2, 78),
+            int3x3.zero};
 
-        value = new CesiumMetadataValue(new uint4x4(
-            1, 2, 3, 0,
-            4, 5, 6, 0,
-            7, 8, 9, 0,
-            0, 0, 0, 1));
-        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(new int3x3(
-            1, 2, 3,
-            4, 5, 6,
-            7, 8, 9)));
+        CesiumPropertyTableProperty property = model.AddMat4PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
 
-        value = new CesiumMetadataValue(new float4x4(
-             0.5f, 1.2f, -1.0f, 1.0f,
-            -2.2f, 4.54f, 0.0f, 2.0f,
-             0.0f, 0.0f, -1.0f, 3.0f,
-             0.0f, 0.0f, 0.0f, 1.0f));
-        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(new int3x3(
-            0, 1, -1,
-            -2, 4, 0,
-            0, 0, -1)));
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat4));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
 
-        value = new CesiumMetadataValue(new double4x4(
-             1.2, 2.3, 3.4, 0.0,
-            -1.0, -2.0, -0.5, 0.0,
-             0.1, 20.2, -44.3, 0.0,
-             0.0, 0.0, 0.0, 1.0));
-        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(new int3x3(
-            1, 2, 3,
-            -1, -2, 0,
-            0, 20, -44)));
-    }
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetInt3x3(i, int3x3.zero), Is.EqualTo(expected[i]));
+        }
 
-    [Test]
-    public void GetInt3x3ConvertsCesiumMatNValues()
-    {
-        int3x3 int3x3Value = new int3x3(
-            -1, 0, 0,
-            -2, -1, 0,
-            -3, 0, -1);
-        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumIntMat3x3(
-           int3x3Value[0],
-           int3x3Value[1],
-           int3x3Value[2]));
-        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(int3x3Value));
-
-        value = new CesiumMetadataValue(new CesiumUintMat3x3(
-            new uint3(1, 2, 3),
-            new uint3(4, 5, 6),
-            new uint3(7, 8, 9)));
-        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(new int3x3(
-            1, 4, 7,
-            2, 5, 8,
-            3, 6, 9)));
-
-        value = new CesiumMetadataValue(new CesiumIntMat2x2(
-            new int2(-1, -2),
-            new int2(-3, -4)));
-        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(new int3x3(
-            -1, -3, 0,
-            -2, -4, 0,
-            0, 0, 0)));
-
-        value = new CesiumMetadataValue(new CesiumUintMat2x2(
-            new uint2(1, 2),
-            new uint2(3, 4)));
-        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(new int3x3(
-            1, 3, 0,
-            2, 4, 0,
-            0, 0, 0)));
-
-        value = new CesiumMetadataValue(new CesiumIntMat4x4(
-           new int4(-1, -2, -3, 0),
-           new int4(0, -1, 0, 0),
-           new int4(0, 0, 1, 0),
-           new int4(1, -1, 0, 1)));
-        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(new int3x3(
-            -1, 0, 0,
-            -2, -1, 0,
-            -3, 0, 1)));
-
-        value = new CesiumMetadataValue(new CesiumUintMat4x4(
-            new uint4(1, 2, 3, 0),
-            new uint4(4, 5, 6, 0),
-            new uint4(7, 8, 9, 0),
-            new uint4(0, 0, 0, 1)));
-        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(new int3x3(
-            1, 4, 7,
-            2, 5, 8,
-            3, 6, 9)));
+        model.Dispose();
     }
 
     [Test]
     public void GetInt3x3ConvertsScalarValues()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(1.2345f);
-        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(int3x3.identity));
+        TestGltfModel model = new TestGltfModel();
+        double[] testValues = { 2, 5.1, -8.89, UInt32.MaxValue };
+        int3x3[] expected = {
+            2 * int3x3.identity,
+            5 * int3x3.identity,
+            -8 * int3x3.identity,
+            int3x3.zero};
 
-        value = new CesiumMetadataValue(-12345);
-        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(new int3x3(
-            -12345, 0, 0,
-            0, -12345, 0,
-            0, 0, -12345)));
+        CesiumPropertyTableProperty property = model.AddDoublePropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Scalar));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float64));
+        Assert.That(valueType.isArray, Is.False);
+
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetInt3x3(i, int3x3.zero), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
     }
 
     [Test]
     public void GetInt3x3ConvertsBooleanValue()
     {
+        TestGltfModel model = new TestGltfModel();
+        bool[] testValues = { true, false, false, true };
+        int3x3[] expected = {
+            int3x3.identity,
+            int3x3.zero,
+            int3x3.zero,
+            int3x3.identity};
+
+        CesiumPropertyTableProperty property = model.AddBooleanPropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Boolean));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.None));
+        Assert.That(valueType.isArray, Is.False);
+
         int3x3 defaultValue = new int3x3(-1);
-        CesiumMetadataValue value = new CesiumMetadataValue(true);
-        Assert.That(value.GetInt3x3(defaultValue), Is.EqualTo(int3x3.identity));
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetInt3x3(i, defaultValue), Is.EqualTo(expected[i]));
+        }
 
-        value = new CesiumMetadataValue(false);
-        Assert.That(value.GetInt3x3(defaultValue), Is.EqualTo(int3x3.zero));
+        model.Dispose();
     }
 
-    [Test]
-    public void GetInt3x3ReturnsDefaultValueForOutOfRangeValues()
-    {
-        CesiumMetadataValue value = new CesiumMetadataValue(UInt32.MaxValue);
-        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(int3x3.zero));
-
-        value = new CesiumMetadataValue(new double2x2(Double.MinValue));
-        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(int3x3.zero));
-    }
-
-    [Test]
-    public void GetInt3x3ReturnsDefaultValueForUnsupportedTypes()
-    {
-        CesiumMetadataValue value = new CesiumMetadataValue();
-        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(int3x3.zero));
-
-        value = new CesiumMetadataValue(new int3(1));
-        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(int3x3.zero));
-
-        value = new CesiumMetadataValue(new CesiumPropertyArray());
-        Assert.That(value.GetInt3x3(int3x3.zero), Is.EqualTo(int3x3.zero));
-
-    }
     #endregion
 
     #region GetUInt3x3
@@ -3642,218 +3662,185 @@ public class TestCesiumPropertyTableProperty
     [Test]
     public void GetUInt3x3ReturnsMat3Values()
     {
-        uint3x3 uint3x3Value = new uint3x3(
-            1, 2, 3,
-            4, 5, 6,
-            7, 8, 9);
-        CesiumMetadataValue value = new CesiumMetadataValue(uint3x3Value);
-        Assert.That(value.GetUInt3x3(uint3x3.zero), Is.EqualTo(uint3x3Value));
+        TestGltfModel model = new TestGltfModel();
+        float3x3[] testValues = {
+            new float3x3(1, 2, 1,
+                         2, 3, 1,
+                         0, 4, 6),
+            new float3x3(3, 4, 3,
+                         2, 8, 1,
+                         7, 7, 1),
+            new float3x3(5, 6, 0,
+                         8, 2, 5,
+                         5, 2, 78),
+            new float3x3(-1)};
+        uint3x3[] expected = {
+            new uint3x3(testValues[0]),
+            new uint3x3(testValues[1]),
+            new uint3x3(testValues[2]),
+            uint3x3.zero};
 
-        int3x3 int3x3Value = new int3x3(
-            1, 2, 3,
-            0, 1, 0,
-            0, 0, 1);
-        value = new CesiumMetadataValue(int3x3Value);
-        Assert.That(value.GetUInt3x3(uint3x3.zero), Is.EqualTo(new uint3x3(int3x3Value)));
+        CesiumPropertyTableProperty property = model.AddMat3PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
 
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat3));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
 
-        float3x3 float3x3Value = new float3x3(
-            0.5f, 1.2f, 1.0f,
-            2.2f, 4.54f, 0.0f,
-            0.0f, 0.0f, 1.0f);
-        value = new CesiumMetadataValue(float3x3Value);
-        Assert.That(value.GetUInt3x3(uint3x3.zero), Is.EqualTo(new uint3x3(float3x3Value)));
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetUInt3x3(i, uint3x3.zero), Is.EqualTo(expected[i]));
+        }
 
-        double3x3 double3x3Value = new double3x3(
-            1.2, 2.3, 3.4,
-            1.0, 2.0, 0.5,
-            0.1, 20.2, 44.3);
-        value = new CesiumMetadataValue(double3x3Value);
-        Assert.That(value.GetUInt3x3(uint3x3.zero), Is.EqualTo(new uint3x3(double3x3Value)));
+        model.Dispose();
     }
 
     [Test]
     public void GetUInt3x3ConvertsMat2Values()
     {
-        uint2x2 uint2x2Value = new uint2x2(1, 2, 3, 4);
-        CesiumMetadataValue value = new CesiumMetadataValue(uint2x2Value);
-        Assert.That(value.GetUInt3x3(uint3x3.zero), Is.EqualTo(new uint3x3(
-            1, 2, 0,
-            3, 4, 0,
-            0, 0, 0)));
+        TestGltfModel model = new TestGltfModel();
+        float2x2[] testValues = {
+            new float2x2(1, 2, 1, 1),
+            new float2x2(3, 4, 3, 1),
+            new float2x2(5, 6, 0, 1),
+            new float2x2(UInt32.MaxValue)};
+        uint3x3[] expected =
+        {
+            new uint3x3(1, 2, 0,
+                        1, 1, 0,
+                        0, 0, 0),
+            new uint3x3(3, 4, 0,
+                        3, 1, 0,
+                        0, 0, 0),
+            new uint3x3(5, 6, 0,
+                        0, 1, 0,
+                        0, 0, 0),
+            uint3x3.zero
+        };
 
-        int2x2 int2x2Value = new int2x2(1, 2, 3, 4);
-        value = new CesiumMetadataValue(int2x2Value);
-        Assert.That(value.GetUInt3x3(uint3x3.zero), Is.EqualTo(new uint3x3(
-            1, 2, 0,
-            3, 4, 0,
-            0, 0, 0)));
+        CesiumPropertyTableProperty property = model.AddMat2PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
 
-        float2x2 float2x2Value = new float2x2(0.5f, 1.2f, 1.9f, 0.0f);
-        value = new CesiumMetadataValue(float2x2Value);
-        Assert.That(value.GetUInt3x3(uint3x3.zero), Is.EqualTo(new uint3x3(
-            0, 1, 0,
-            1, 0, 0,
-            0, 0, 0)));
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat2));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
 
-        double2x2 double2x2Value = new double2x2(1.2, 2.3, 1.9, 0.2);
-        value = new CesiumMetadataValue(double2x2Value);
-        Assert.That(value.GetUInt3x3(uint3x3.zero), Is.EqualTo(new uint3x3(
-            1, 2, 0,
-            1, 0, 0,
-            0, 0, 0)));
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetUInt3x3(i, uint3x3.zero), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
     }
 
     [Test]
     public void GetUInt3x3ConvertsMat4Values()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(new uint4x4(
-            1, 2, 3, 0,
-            4, 5, 6, 0,
-            7, 8, 9, 0,
-            0, 0, 0, 1));
-        Assert.That(value.GetUInt3x3(uint3x3.zero), Is.EqualTo(new uint3x3(
-            1, 2, 3,
-            4, 5, 6,
-            7, 8, 9)));
+        TestGltfModel model = new TestGltfModel();
+        float4x4[] testValues = {
+            new float4x4(1, 2, 1, 8,
+                         2, 3, 1, 9,
+                         0, 4, 6, 2,
+                         0, 0, 0, 1),
+            new float4x4(3, 4, 3, -4,
+                         2, 8, 1, 2,
+                         7, 7, 1, 0,
+                         0, 0, 0, 1),
+            new float4x4(5, 6, 0, 4,
+                         8, 2, 5, 8,
+                         5, 2, 78, -9,
+                         0, 0, 0, 1),
+            new float4x4(UInt32.MaxValue)};
+        uint3x3[] expected = {
+            new uint3x3(1, 2, 1,
+                       2, 3, 1,
+                       0, 4, 6),
+            new uint3x3(3, 4, 3,
+                       2, 8, 1,
+                       7, 7, 1),
+            new uint3x3(5, 6, 0,
+                       8, 2, 5,
+                       5, 2, 78),
+            uint3x3.zero};
 
-        value = new CesiumMetadataValue(new int4x4(
-            1, 2, 3, 0,
-            0, 1, 0, 0,
-            0, 0, 1, 0,
-            1, 1, 0, 1));
-        Assert.That(value.GetUInt3x3(uint3x3.zero), Is.EqualTo(new uint3x3(
-            1, 2, 3,
-            0, 1, 0,
-            0, 0, 1)));
+        CesiumPropertyTableProperty property = model.AddMat4PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
 
-        value = new CesiumMetadataValue(new float4x4(
-            0.5f, 1.2f, 1.0f, 1.0f,
-            2.2f, 4.54f, 0.0f, 2.0f,
-            0.0f, 0.0f, 1.0f, 3.0f,
-            0.0f, 0.0f, 0.0f, 1.0f));
-        Assert.That(value.GetUInt3x3(uint3x3.zero), Is.EqualTo(new uint3x3(
-            0, 1, 1,
-            2, 4, 0,
-            0, 0, 1)));
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat4));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
 
-        value = new CesiumMetadataValue(new double4x4(
-            1.2, 2.3, 3.4, 0.0,
-            1.0, 2.0, 0.5, 0.0,
-            0.1, 20.2, 44.3, 0.0,
-            0.0, 0.0, 0.0, 1.0));
-        Assert.That(value.GetUInt3x3(uint3x3.zero), Is.EqualTo(new uint3x3(
-            1, 2, 3,
-            1, 2, 0,
-            0, 20, 44)));
-    }
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetUInt3x3(i, uint3x3.zero), Is.EqualTo(expected[i]));
+        }
 
-    [Test]
-    public void GetUInt3x3ConvertsCesiumMatNValues()
-    {
-        uint3x3 uint3x3Value = new uint3x3(
-            1, 2, 3,
-            4, 5, 6,
-            7, 8, 9);
-        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumUintMat3x3(
-            uint3x3Value[0],
-            uint3x3Value[1],
-            uint3x3Value[2]));
-        Assert.That(value.GetUInt3x3(uint3x3.zero), Is.EqualTo(uint3x3Value));
-
-        value = new CesiumMetadataValue(new CesiumIntMat3x3(
-           new int3(1, 0, 0),
-           new int3(2, 1, 0),
-           new int3(3, 0, 1)));
-        Assert.That(value.GetUInt3x3(uint3x3.zero), Is.EqualTo(new uint3x3(
-            1, 2, 3,
-            0, 1, 0,
-            0, 0, 1)));
-
-        value = new CesiumMetadataValue(new CesiumIntMat2x2(
-            new int2(1, 2),
-            new int2(3, 4)));
-        Assert.That(value.GetUInt3x3(uint3x3.zero), Is.EqualTo(new uint3x3(
-            1, 3, 0,
-            2, 4, 0,
-            0, 0, 0)));
-
-        value = new CesiumMetadataValue(new CesiumUintMat2x2(
-            new uint2(2, 4),
-            new uint2(6, 8)));
-        Assert.That(value.GetUInt3x3(uint3x3.zero), Is.EqualTo(new uint3x3(
-            2, 6, 0,
-            4, 8, 0,
-            0, 0, 0)));
-
-        value = new CesiumMetadataValue(new CesiumIntMat4x4(
-           new int4(1, 2, 3, 0),
-           new int4(0, 1, 0, 0),
-           new int4(0, 0, 1, 0),
-           new int4(1, -1, 0, 1)));
-        Assert.That(value.GetUInt3x3(uint3x3.zero), Is.EqualTo(new uint3x3(
-            1, 0, 0,
-            2, 1, 0,
-            3, 0, 1)));
-
-        value = new CesiumMetadataValue(new CesiumUintMat4x4(
-            new uint4(1, 2, 3, 0),
-            new uint4(4, 5, 6, 0),
-            new uint4(7, 8, 9, 0),
-            new uint4(0, 0, 0, 1)));
-        Assert.That(value.GetUInt3x3(uint3x3.zero), Is.EqualTo(new uint3x3(
-            1, 4, 7,
-            2, 5, 8,
-            3, 6, 9)));
+        model.Dispose();
     }
 
     [Test]
     public void GetUInt3x3ConvertsScalarValues()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(1.2345f);
-        Assert.That(value.GetUInt3x3(uint3x3.zero), Is.EqualTo(uint3x3.identity));
+        TestGltfModel model = new TestGltfModel();
+        double[] testValues = { 2, 5.1, 8.89, -1 };
+        uint3x3[] expected = {
+            2 * uint3x3.identity,
+            5 * uint3x3.identity,
+            8 * uint3x3.identity,
+            uint3x3.zero};
 
-        value = new CesiumMetadataValue(12345);
-        Assert.That(value.GetUInt3x3(uint3x3.zero), Is.EqualTo(new uint3x3(
-            12345, 0, 0,
-            0, 12345, 0,
-            0, 0, 12345)));
+        CesiumPropertyTableProperty property = model.AddDoublePropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Scalar));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float64));
+        Assert.That(valueType.isArray, Is.False);
+
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetUInt3x3(i, uint3x3.zero), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
     }
 
     [Test]
     public void GetUInt3x3ConvertsBooleanValue()
     {
-        uint3x3 defaultValue = new uint3x3(11);
-        CesiumMetadataValue value = new CesiumMetadataValue(true);
-        Assert.That(value.GetUInt3x3(defaultValue), Is.EqualTo(uint3x3.identity));
+        TestGltfModel model = new TestGltfModel();
+        bool[] testValues = { true, false, false, true };
+        uint3x3[] expected = {
+            uint3x3.identity,
+            uint3x3.zero,
+            uint3x3.zero,
+            uint3x3.identity};
 
-        value = new CesiumMetadataValue(false);
-        Assert.That(value.GetUInt3x3(defaultValue), Is.EqualTo(uint3x3.zero));
+        CesiumPropertyTableProperty property = model.AddBooleanPropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Boolean));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.None));
+        Assert.That(valueType.isArray, Is.False);
+
+        uint3x3 defaultValue = new uint3x3(-1);
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetUInt3x3(i, defaultValue), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
     }
 
-    [Test]
-    public void GetUInt3x3ReturnsDefaultValueForOutOfRangeValues()
-    {
-        CesiumMetadataValue value = new CesiumMetadataValue(-1);
-        Assert.That(value.GetUInt3x3(uint3x3.zero), Is.EqualTo(uint3x3.zero));
-
-        value = new CesiumMetadataValue(new double2x2(Double.MinValue));
-        Assert.That(value.GetUInt3x3(uint3x3.zero), Is.EqualTo(uint3x3.zero));
-    }
-
-    [Test]
-    public void GetUInt3x3ReturnsDefaultValueForUnsupportedTypes()
-    {
-        CesiumMetadataValue value = new CesiumMetadataValue();
-        Assert.That(value.GetUInt3x3(uint3x3.zero), Is.EqualTo(uint3x3.zero));
-
-        value = new CesiumMetadataValue(new uint3(1));
-        Assert.That(value.GetUInt3x3(uint3x3.zero), Is.EqualTo(uint3x3.zero));
-
-        value = new CesiumMetadataValue(new CesiumPropertyArray());
-        Assert.That(value.GetUInt3x3(uint3x3.zero), Is.EqualTo(uint3x3.zero));
-
-    }
     #endregion
 
     #region GetFloat3x3
@@ -3861,218 +3848,182 @@ public class TestCesiumPropertyTableProperty
     [Test]
     public void GetFloat3x3ReturnsMat3Values()
     {
-        float3x3 float3x3Value = new float3x3(
-             0.5f, 1.2f, -1.0f,
-            -2.2f, 4.54f, 0.0f,
-             0.0f, 0.0f, -1.0f);
-        CesiumMetadataValue value = new CesiumMetadataValue(float3x3Value);
-        Assert.That(value.GetFloat3x3(float3x3.zero), Is.EqualTo(float3x3Value));
+        TestGltfModel model = new TestGltfModel();
+        float3x3[] testValues = {
+            new float3x3(1, 2, 1,
+                         2, 3, -1,
+                         0, 4, 6),
+            new float3x3(3, 4, 3,
+                         2, 8, 1,
+                         7, -7, -1),
+            new float3x3(5, 6, 0,
+                         8, 2, 5,
+                         5, -2, 78),
+            new float3x3(-1)};
 
-        int3x3 int3x3Value = new int3x3(
-            -1, -2, -3,
-             0, -1, 0,
-             0, 0, 1);
-        value = new CesiumMetadataValue(int3x3Value);
-        Assert.That(value.GetFloat3x3(float3x3.zero), Is.EqualTo(new float3x3(int3x3Value)));
+        CesiumPropertyTableProperty property = model.AddMat3PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
 
-        uint3x3 uint3x3Value = new uint3x3(
-            1, 2, 3,
-            4, 5, 6,
-            7, 8, 9);
-        value = new CesiumMetadataValue(uint3x3Value);
-        Assert.That(value.GetFloat3x3(float3x3.zero), Is.EqualTo(new float3x3(uint3x3Value)));
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat3));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
 
-        double3x3 double3x3Value = new double3x3(
-             1.2, 2.3, 3.4,
-            -1.0, -2.0, -0.5,
-             0.1, 20.2, -44.3);
-        value = new CesiumMetadataValue(double3x3Value);
-        Assert.That(value.GetFloat3x3(float3x3.zero), Is.EqualTo(new float3x3(double3x3Value)));
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetFloat3x3(i, float3x3.zero), Is.EqualTo(testValues[i]));
+        }
+
+        model.Dispose();
     }
 
     [Test]
     public void GetFloat3x3ConvertsMat2Values()
     {
-        float2x2 float2x2Value = new float2x2(0.5f, 1.2f, -1.9f, 0.0f);
-        CesiumMetadataValue value = new CesiumMetadataValue(float2x2Value);
-        Assert.That(value.GetFloat3x3(float3x3.zero), Is.EqualTo(new float3x3(
-            0.5f, 1.2f, 0,
-            -1.9f, 0.0f, 0,
-            0, 0, 0)));
+        TestGltfModel model = new TestGltfModel();
+        float2x2[] testValues = {
+            new float2x2(1, 2, 1, 1),
+            new float2x2(3, 4, 3, 1),
+            new float2x2(5, 6, 0, 1),
+            new float2x2(-1)};
+        float3x3[] expected =
+        {
+            new float3x3(1, 2, 0,
+                         1, 1, 0,
+                         0, 0, 0),
+            new float3x3(3, 4, 0,
+                         3, 1, 0,
+                         0, 0, 0),
+            new float3x3(5, 6, 0,
+                         0, 1, 0,
+                         0, 0, 0),
+            new float3x3(-1, -1, 0,
+                         -1, -1, 0,
+                         0, 0, 0)
+        };
 
-        int2x2 int2x2Value = new int2x2(-1, -2, -3, -4);
-        value = new CesiumMetadataValue(int2x2Value);
-        Assert.That(value.GetFloat3x3(float3x3.zero), Is.EqualTo(new float3x3(
-            -1, -2, 0,
-            -3, -4, 0,
-            0, 0, 0)));
+        CesiumPropertyTableProperty property = model.AddMat2PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
 
-        uint2x2 uint2x2Value = new uint2x2(1, 2, 3, 4);
-        value = new CesiumMetadataValue(uint2x2Value);
-        Assert.That(value.GetFloat3x3(float3x3.zero), Is.EqualTo(new float3x3(
-            1, 2, 0,
-            3, 4, 0,
-            0, 0, 0)));
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat2));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
 
-        double2x2 double2x2Value = new double2x2(1.2, 2.3, -1.9, 0.2);
-        value = new CesiumMetadataValue(double2x2Value);
-        Assert.That(value.GetFloat3x3(float3x3.zero), Is.EqualTo(new float3x3(
-            (float)1.2, (float)2.3, 0,
-            (float)-1.9, (float)0.2, 0,
-            0, 0, 0)));
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetFloat3x3(i, float3x3.zero), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
     }
 
     [Test]
     public void GetFloat3x3ConvertsMat4Values()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(new float4x4(
-             0.5f, 1.2f, -1.0f, 1.0f,
-            -2.2f, 4.54f, 0.0f, 2.0f,
-             0.0f, 0.0f, -1.0f, 3.0f,
-             0.0f, 0.0f, 0.0f, 1.0f));
-        Assert.That(value.GetFloat3x3(float3x3.zero), Is.EqualTo(new float3x3(
-             0.5f, 1.2f, -1.0f,
-            -2.2f, 4.54f, 0.0f,
-             0.0f, 0.0f, -1.0f)));
+        TestGltfModel model = new TestGltfModel();
+        float4x4[] testValues = {
+            new float4x4(1, 2, 1, 8,
+                         2, 3, -1, 9,
+                         0, 4, 6, 2,
+                         0, 0, 0, 1),
+            new float4x4(3, 4, 3, -4,
+                         2, 8, 1, 2,
+                         7, -7, -1, 0,
+                         0, 0, 0, 1),
+            new float4x4(5, 6, 0, 4,
+                         8, 2, 5, 8,
+                         5, -2, 78, -9,
+                         0, 0, 0, 1),
+            new float4x4(-1)};
+        float3x3[] expected = {
+            new float3x3(1, 2, 1,
+                       2, 3, -1,
+                       0, 4, 6),
+            new float3x3(3, 4, 3,
+                       2, 8, 1,
+                       7, -7, -1),
+            new float3x3(5, 6, 0,
+                       8, 2, 5,
+                       5, -2, 78),
+            new float3x3(-1)};
 
-        value = new CesiumMetadataValue(new int4x4(
-            -1, -2, -3, 0,
-             0, -1, 0, 0,
-             0, 0, 1, 0,
-             1, -1, 0, 1));
-        Assert.That(value.GetFloat3x3(float3x3.zero), Is.EqualTo(new float3x3(
-            -1, -2, -3,
-            0, -1, 0,
-            0, 0, 1)));
+        CesiumPropertyTableProperty property = model.AddMat4PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
 
-        value = new CesiumMetadataValue(new uint4x4(
-            1, 2, 3, 0,
-            4, 5, 6, 0,
-            7, 8, 9, 0,
-            0, 0, 0, 1));
-        Assert.That(value.GetFloat3x3(float3x3.zero), Is.EqualTo(new float3x3(
-            1, 2, 3,
-            4, 5, 6,
-            7, 8, 9)));
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat4));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
 
-        value = new CesiumMetadataValue(new double4x4(
-             1.2, 2.3, 3.4, 0.0,
-            -1.0, -2.0, -0.5, 0.0,
-             0.1, 20.2, -44.3, 0.0,
-             0.0, 0.0, 0.0, 1.0));
-        Assert.That(value.GetFloat3x3(float3x3.zero), Is.EqualTo(new float3x3(
-            (float)1.2, (float)2.3, (float)3.4,
-            (float)-1.0, (float)-2.0, (float)-0.5,
-            (float)0.1, (float)20.2, (float)-44.3)));
-    }
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetFloat3x3(i, float3x3.zero), Is.EqualTo(expected[i]));
+        }
 
-    [Test]
-    public void GetFloat3x3ConvertsCesiumMatNValues()
-    {
-        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumIntMat3x3(
-            new int3(-1, 0, 0),
-            new int3(-2, -1, 0),
-            new int3(-3, 0, -1)));
-        Assert.That(value.GetFloat3x3(float3x3.zero), Is.EqualTo(new float3x3(
-            -1, -2, -3,
-            0, -1, 0,
-            0, 0, -1)));
-
-        value = new CesiumMetadataValue(new CesiumUintMat3x3(
-            new uint3(1, 2, 3),
-            new uint3(4, 5, 6),
-            new uint3(7, 8, 9)));
-        Assert.That(value.GetFloat3x3(float3x3.zero), Is.EqualTo(new float3x3(
-            1, 4, 7,
-            2, 5, 8,
-            3, 6, 9)));
-
-        value = new CesiumMetadataValue(new CesiumIntMat2x2(
-            new int2(-1, -2),
-            new int2(-3, -4)));
-        Assert.That(value.GetFloat3x3(float3x3.zero), Is.EqualTo(new float3x3(
-            -1, -3, 0,
-            -2, -4, 0,
-            0, 0, 0)));
-
-        value = new CesiumMetadataValue(new CesiumUintMat2x2(
-            new uint2(1, 2),
-            new uint2(3, 4)));
-        Assert.That(value.GetFloat3x3(float3x3.zero), Is.EqualTo(new float3x3(
-            1, 3, 0,
-            2, 4, 0,
-            0, 0, 0)));
-
-        value = new CesiumMetadataValue(new CesiumIntMat4x4(
-           new int4(-1, -2, -3, 0),
-           new int4(0, -1, 0, 0),
-           new int4(0, 0, 1, 0),
-           new int4(1, -1, 0, 1)));
-        Assert.That(value.GetFloat3x3(float3x3.zero), Is.EqualTo(new float3x3(
-            -1, 0, 0,
-            -2, -1, 0,
-            -3, 0, 1)));
-
-        value = new CesiumMetadataValue(new CesiumUintMat4x4(
-            new uint4(1, 2, 3, 0),
-            new uint4(4, 5, 6, 0),
-            new uint4(7, 8, 9, 0),
-            new uint4(0, 0, 0, 1)));
-        Assert.That(value.GetFloat3x3(float3x3.zero), Is.EqualTo(new float3x3(
-            1, 4, 7,
-            2, 5, 8,
-            3, 6, 9)));
+        model.Dispose();
     }
 
     [Test]
     public void GetFloat3x3ConvertsScalarValues()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(1.2345f);
-        Assert.That(value.GetFloat3x3(float3x3.zero), Is.EqualTo(new float3x3(
-            1.2345f, 0, 0,
-            0, 1.2345f, 0,
-            0, 0, 1.2345f)));
+        TestGltfModel model = new TestGltfModel();
+        double[] testValues = { 2, 5.1, -8.89, Double.MaxValue };
+        float3x3[] expected = {
+            2 * float3x3.identity,
+            (float)5.1 * float3x3.identity,
+            (float)-8.89 * float3x3.identity,
+            float3x3.zero};
 
-        value = new CesiumMetadataValue(-12345);
-        Assert.That(value.GetFloat3x3(float3x3.zero), Is.EqualTo(new float3x3(
-            -12345, 0, 0,
-            0, -12345, 0,
-            0, 0, -12345)));
+        CesiumPropertyTableProperty property = model.AddDoublePropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Scalar));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float64));
+        Assert.That(valueType.isArray, Is.False);
+
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetFloat3x3(i, float3x3.zero), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
     }
 
     [Test]
     public void GetFloat3x3ConvertsBooleanValue()
     {
+        TestGltfModel model = new TestGltfModel();
+        bool[] testValues = { true, false, false, true };
+        float3x3[] expected = {
+            float3x3.identity,
+            float3x3.zero,
+            float3x3.zero,
+            float3x3.identity};
+
+        CesiumPropertyTableProperty property = model.AddBooleanPropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Boolean));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.None));
+        Assert.That(valueType.isArray, Is.False);
+
         float3x3 defaultValue = new float3x3(-1);
-        CesiumMetadataValue value = new CesiumMetadataValue(true);
-        Assert.That(value.GetFloat3x3(defaultValue), Is.EqualTo(float3x3.identity));
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetFloat3x3(i, defaultValue), Is.EqualTo(expected[i]));
+        }
 
-        value = new CesiumMetadataValue(false);
-        Assert.That(value.GetFloat3x3(defaultValue), Is.EqualTo(float3x3.zero));
+        model.Dispose();
     }
 
-    [Test]
-    public void GetFloat3x3ReturnsDefaultValueForOutOfRangeValues()
-    {
-        CesiumMetadataValue value = new CesiumMetadataValue(Double.MaxValue);
-        Assert.That(value.GetFloat3x3(float3x3.zero), Is.EqualTo(float3x3.zero));
-
-        value = new CesiumMetadataValue(new double2x2(Double.MinValue));
-        Assert.That(value.GetFloat3x3(float3x3.zero), Is.EqualTo(float3x3.zero));
-    }
-
-    [Test]
-    public void GetFloat3x3ReturnsDefaultValueForUnsupportedTypes()
-    {
-        CesiumMetadataValue value = new CesiumMetadataValue();
-        Assert.That(value.GetFloat3x3(float3x3.zero), Is.EqualTo(float3x3.zero));
-
-        value = new CesiumMetadataValue(new float3(1));
-        Assert.That(value.GetFloat3x3(float3x3.zero), Is.EqualTo(float3x3.zero));
-
-        value = new CesiumMetadataValue(new CesiumPropertyArray());
-        Assert.That(value.GetFloat3x3(float3x3.zero), Is.EqualTo(float3x3.zero));
-    }
     #endregion
 
     #region GetDouble3x3
@@ -4080,245 +4031,1189 @@ public class TestCesiumPropertyTableProperty
     [Test]
     public void GetDouble3x3ReturnsMat3Values()
     {
-        double3x3 double3x3Value = new double3x3(
-             1.2, 2.3, 3.4,
-            -1.0, -2.0, -0.5,
-             0.1, 20.2, -44.3);
-        CesiumMetadataValue value = new CesiumMetadataValue(double3x3Value);
-        Assert.That(value.GetDouble3x3(double3x3.zero), Is.EqualTo(double3x3Value));
+        TestGltfModel model = new TestGltfModel();
+        float3x3[] testValues = {
+            new float3x3(1, 2, 1,
+                         2, 3, -1,
+                         0, 4, 6),
+            new float3x3(3, 4, 3,
+                         2, 8, 1,
+                         7, -7, -1),
+            new float3x3(5, 6, 0,
+                         8, 2, 5,
+                         5, -2, 78),
+            new float3x3(-1)};
 
-        int3x3 int3x3Value = new int3x3(
-            -1, -2, -3,
-             0, -1, 0,
-             0, 0, 1);
-        value = new CesiumMetadataValue(int3x3Value);
-        Assert.That(value.GetDouble3x3(double3x3.zero), Is.EqualTo(new double3x3(int3x3Value)));
+        CesiumPropertyTableProperty property = model.AddMat3PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
 
-        uint3x3 uint3x3Value = new uint3x3(
-            1, 2, 3,
-            4, 5, 6,
-            7, 8, 9);
-        value = new CesiumMetadataValue(uint3x3Value);
-        Assert.That(value.GetDouble3x3(double3x3.zero), Is.EqualTo(new double3x3(uint3x3Value)));
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat3));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
 
-        float3x3 float3x3Value = new float3x3(
-             0.5f, 1.2f, -1.0f,
-            -2.2f, 4.54f, 0.0f,
-             0.0f, 0.0f, -1.0f);
-        value = new CesiumMetadataValue(float3x3Value);
-        Assert.That(value.GetDouble3x3(double3x3.zero), Is.EqualTo(new double3x3(float3x3Value)));
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetDouble3x3(i, double3x3.zero), Is.EqualTo(new double3x3(testValues[i])));
+        }
+
+        model.Dispose();
     }
 
     [Test]
     public void GetDouble3x3ConvertsMat2Values()
     {
-        double2x2 double2x2Value = new double2x2(1.2, 2.3, -1.9, 0.2);
-        CesiumMetadataValue value = new CesiumMetadataValue(double2x2Value);
-        Assert.That(value.GetDouble3x3(double3x3.zero), Is.EqualTo(new double3x3(
-            1.2, 2.3, 0,
-           -1.9, 0.2, 0,
-            0, 0, 0)));
+        TestGltfModel model = new TestGltfModel();
+        float2x2[] testValues = {
+            new float2x2(1, 2, 1, 1),
+            new float2x2(3, 4, 3, 1),
+            new float2x2(5, 6, 0, 1),
+            new float2x2(-1)};
+        double3x3[] expected =
+        {
+            new double3x3(1, 2, 0,
+                         1, 1, 0,
+                         0, 0, 0),
+            new double3x3(3, 4, 0,
+                         3, 1, 0,
+                         0, 0, 0),
+            new double3x3(5, 6, 0,
+                         0, 1, 0,
+                         0, 0, 0),
+            new double3x3(-1, -1, 0,
+                          -1, -1, 0,
+                          0, 0, 0)
+        };
 
-        float2x2 float2x2Value = new float2x2(0.5f, 1.2f, -1.9f, 0.0f);
-        value = new CesiumMetadataValue(float2x2Value);
-        Assert.That(value.GetDouble3x3(double3x3.zero), Is.EqualTo(new double3x3(
-            0.5f, 1.2f, 0,
-            -1.9f, 0.0f, 0,
-            0, 0, 0)));
+        CesiumPropertyTableProperty property = model.AddMat2PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
 
-        int2x2 int2x2Value = new int2x2(-1, -2, -3, -4);
-        value = new CesiumMetadataValue(int2x2Value);
-        Assert.That(value.GetDouble3x3(double3x3.zero), Is.EqualTo(new double3x3(
-            -1, -2, 0,
-            -3, -4, 0,
-            0, 0, 0)));
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat2));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
 
-        uint2x2 uint2x2Value = new uint2x2(1, 2, 3, 4);
-        value = new CesiumMetadataValue(uint2x2Value);
-        Assert.That(value.GetDouble3x3(double3x3.zero), Is.EqualTo(new double3x3(
-            1, 2, 0,
-            3, 4, 0,
-            0, 0, 0)));
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetDouble3x3(i, double3x3.zero), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
     }
 
     [Test]
     public void GetDouble3x3ConvertsMat4Values()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(new double4x4(
-             1.2, 2.3, 3.4, 0.0,
-            -1.0, -2.0, -0.5, 0.0,
-             0.1, 20.2, -44.3, 0.0,
-             0.0, 0.0, 0.0, 1.0));
-        Assert.That(value.GetDouble3x3(double3x3.zero), Is.EqualTo(new double3x3(
-            1.2, 2.3, 3.4,
-            -1.0, -2.0, -0.5,
-            0.1, 20.2, -44.3)));
+        TestGltfModel model = new TestGltfModel();
+        float4x4[] testValues = {
+            new float4x4(1, 2, 1, 8,
+                         2, 3, -1, 9,
+                         0, 4, 6, 2,
+                         0, 0, 0, 1),
+            new float4x4(3, 4, 3, -4,
+                         2, 8, 1, 2,
+                         7, -7, -1, 0,
+                         0, 0, 0, 1),
+            new float4x4(5, 6, 0, 4,
+                         8, 2, 5, 8,
+                         5, -2, 78, -9,
+                         0, 0, 0, 1),
+            new float4x4(-1)};
+        double3x3[] expected = {
+            new double3x3(1, 2, 1,
+                          2, 3, -1,
+                          0, 4, 6),
+            new double3x3(3, 4, 3,
+                          2, 8, 1,
+                          7, -7, -1),
+            new double3x3(5, 6, 0,
+                          8, 2, 5,
+                          5, -2, 78),
+            new double3x3(-1)};
 
-        value = new CesiumMetadataValue(new int4x4(
-            -1, -2, -3, 0,
-             0, -1, 0, 0,
-             0, 0, 1, 0,
-             1, -1, 0, 1));
-        Assert.That(value.GetDouble3x3(double3x3.zero), Is.EqualTo(new double3x3(
-            -1, -2, -3,
-            0, -1, 0,
-            0, 0, 1)));
+        CesiumPropertyTableProperty property = model.AddMat4PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
 
-        value = new CesiumMetadataValue(new uint4x4(
-            1, 2, 3, 0,
-            4, 5, 6, 0,
-            7, 8, 9, 0,
-            0, 0, 0, 1));
-        Assert.That(value.GetDouble3x3(double3x3.zero), Is.EqualTo(new double3x3(
-            1, 2, 3,
-            4, 5, 6,
-            7, 8, 9)));
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat4));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
 
-        value = new CesiumMetadataValue(new float4x4(
-             0.5f, 1.2f, -1.0f, 1.0f,
-            -2.2f, 4.54f, 0.0f, 2.0f,
-             0.0f, 0.0f, -1.0f, 3.0f,
-             0.0f, 0.0f, 0.0f, 1.0f));
-        Assert.That(value.GetDouble3x3(double3x3.zero), Is.EqualTo(new double3x3(
-             0.5f, 1.2f, -1.0f,
-            -2.2f, 4.54f, 0.0f,
-             0.0f, 0.0f, -1.0f)));
-    }
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetDouble3x3(i, double3x3.zero), Is.EqualTo(expected[i]));
+        }
 
-    [Test]
-    public void GetDouble3x3ConvertsCesiumMatNValues()
-    {
-        CesiumMetadataValue value = new CesiumMetadataValue(new CesiumIntMat3x3(
-            new int3(-1, 0, 0),
-            new int3(-2, -1, 0),
-            new int3(-3, 0, -1)));
-        Assert.That(value.GetDouble3x3(double3x3.zero), Is.EqualTo(new double3x3(
-            -1, -2, -3,
-            0, -1, 0,
-            0, 0, -1)));
-
-        value = new CesiumMetadataValue(new CesiumUintMat3x3(
-            new uint3(1, 2, 3),
-            new uint3(4, 5, 6),
-            new uint3(7, 8, 9)));
-        Assert.That(value.GetDouble3x3(double3x3.zero), Is.EqualTo(new double3x3(
-            1, 4, 7,
-            2, 5, 8,
-            3, 6, 9)));
-
-        value = new CesiumMetadataValue(new CesiumIntMat2x2(
-            new int2(-1, -2),
-            new int2(-3, -4)));
-        Assert.That(value.GetDouble3x3(double3x3.zero), Is.EqualTo(new double3x3(
-            -1, -3, 0,
-            -2, -4, 0,
-            0, 0, 0)));
-
-        value = new CesiumMetadataValue(new CesiumUintMat2x2(
-            new uint2(1, 2),
-            new uint2(3, 4)));
-        Assert.That(value.GetDouble3x3(double3x3.zero), Is.EqualTo(new double3x3(
-            1, 3, 0,
-            2, 4, 0,
-            0, 0, 0)));
-
-        value = new CesiumMetadataValue(new CesiumIntMat4x4(
-           new int4(-1, -2, -3, 0),
-           new int4(0, -1, 0, 0),
-           new int4(0, 0, 1, 0),
-           new int4(1, -1, 0, 1)));
-        Assert.That(value.GetDouble3x3(double3x3.zero), Is.EqualTo(new double3x3(
-            -1, 0, 0,
-            -2, -1, 0,
-            -3, 0, 1)));
-
-        value = new CesiumMetadataValue(new CesiumUintMat4x4(
-            new uint4(1, 2, 3, 0),
-            new uint4(4, 5, 6, 0),
-            new uint4(7, 8, 9, 0),
-            new uint4(0, 0, 0, 1)));
-        Assert.That(value.GetDouble3x3(double3x3.zero), Is.EqualTo(new double3x3(
-            1, 4, 7,
-            2, 5, 8,
-            3, 6, 9)));
+        model.Dispose();
     }
 
     [Test]
     public void GetDouble3x3ConvertsScalarValues()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(1.2345f);
-        Assert.That(value.GetDouble3x3(double3x3.zero), Is.EqualTo(new double3x3(
-            1.2345f, 0, 0,
-            0, 1.2345f, 0,
-            0, 0, 1.2345f)));
+        TestGltfModel model = new TestGltfModel();
+        double[] testValues = { 2, 5.1, -8.89, -1 };
+        double3x3[] expected = {
+            2 * double3x3.identity,
+            5.1 * double3x3.identity,
+            -8.89 * double3x3.identity,
+            -1 * double3x3.identity};
 
-        value = new CesiumMetadataValue(-12345);
-        Assert.That(value.GetDouble3x3(double3x3.zero), Is.EqualTo(new double3x3(
-            -12345, 0, 0,
-            0, -12345, 0,
-            0, 0, -12345)));
+        CesiumPropertyTableProperty property = model.AddDoublePropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Scalar));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float64));
+        Assert.That(valueType.isArray, Is.False);
+
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetDouble3x3(i, double3x3.zero), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
     }
 
     [Test]
     public void GetDouble3x3ConvertsBooleanValue()
     {
-        double3x3 defaultValue = new double3x3(-1);
-        CesiumMetadataValue value = new CesiumMetadataValue(true);
-        Assert.That(value.GetDouble3x3(defaultValue), Is.EqualTo(double3x3.identity));
+        TestGltfModel model = new TestGltfModel();
+        bool[] testValues = { true, false, false, true };
+        double3x3[] expected = {
+            double3x3.identity,
+            double3x3.zero,
+            double3x3.zero,
+            double3x3.identity};
 
-        value = new CesiumMetadataValue(false);
-        Assert.That(value.GetDouble3x3(defaultValue), Is.EqualTo(double3x3.zero));
+        CesiumPropertyTableProperty property = model.AddBooleanPropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Boolean));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.None));
+        Assert.That(valueType.isArray, Is.False);
+
+        double3x3 defaultValue = new double3x3(-1);
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetDouble3x3(i, defaultValue), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
+    }
+
+    #endregion
+
+    #region GetInt4x4
+
+    [Test]
+    public void GetInt4x4ReturnsMat4Values()
+    {
+        TestGltfModel model = new TestGltfModel();
+        float4x4[] testValues = {
+            new float4x4(1, 2, 1, 8,
+                         2, 3, -1, 9,
+                         0, 4, 6, 2,
+                         0, 0, 0, 1),
+            new float4x4(3, 4, 3, -4,
+                         2, 8, 1, 2,
+                         7, -7, -1, 0,
+                         0, 0, 0, 1),
+            new float4x4(5, 6, 0, 4,
+                         8, 2, 5, 8,
+                         5, -2, 78, -9,
+                         0, 0, 0, 1),
+            new float4x4(UInt32.MaxValue)};
+
+        int4x4[] expected = {
+            new int4x4(testValues[0]),
+            new int4x4(testValues[1]),
+            new int4x4(testValues[2]),
+            int4x4.zero };
+
+        CesiumPropertyTableProperty property = model.AddMat4PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat4));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
+
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetInt4x4(i, int4x4.zero), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
     }
 
     [Test]
-    public void GetDouble3x3ReturnsDefaultValueForUnsupportedTypes()
+    public void GetInt4x4ConvertsMat2Values()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue();
-        Assert.That(value.GetDouble3x3(double3x3.zero), Is.EqualTo(double3x3.zero));
+        TestGltfModel model = new TestGltfModel();
+        float2x2[] testValues = {
+            new float2x2(1, 2, 1, 1),
+            new float2x2(3, 4, 3, 1),
+            new float2x2(5, 6, 0, 1),
+            new float2x2(UInt32.MaxValue)};
+        int4x4[] expected =
+        {
+            new int4x4(1, 2, 0, 0,
+                       1, 1, 0, 0,
+                       0, 0, 0, 0,
+                       0, 0, 0, 0),
+            new int4x4(3, 4, 0, 0,
+                       3, 1, 0, 0,
+                       0, 0, 0, 0,
+                       0, 0, 0, 0),
+            new int4x4(5, 6, 0, 0,
+                       0, 1, 0, 0,
+                       0, 0, 0, 0,
+                       0, 0, 0, 0),
+            int4x4.zero
+        };
 
-        value = new CesiumMetadataValue(new double3(1));
-        Assert.That(value.GetDouble3x3(double3x3.zero), Is.EqualTo(double3x3.zero));
+        CesiumPropertyTableProperty property = model.AddMat2PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
 
-        value = new CesiumMetadataValue(new CesiumPropertyArray());
-        Assert.That(value.GetDouble3x3(double3x3.zero), Is.EqualTo(double3x3.zero));
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat2));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
+
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetInt4x4(i, int4x4.zero), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
     }
+
+    [Test]
+    public void GetInt4x4ConvertsMat3Values()
+    {
+        TestGltfModel model = new TestGltfModel();
+        float3x3[] testValues = {
+            new float3x3(1, 2, 1,
+                         2, 3, -1,
+                         0, 4, 6),
+            new float3x3(3, 4, 3,
+                         2, 8, 1,
+                         7, -7, -1),
+            new float3x3(5, 6, 0,
+                         8, 2, 5,
+                         5, -2, 78),
+            new float3x3(UInt32.MaxValue)};
+        int4x4[] expected =
+        {
+            new int4x4(1, 2, 1, 0,
+                       2, 3, -1, 0,
+                       0, 4, 6, 0,
+                       0, 0, 0, 0),
+            new int4x4(3, 4, 3, 0,
+                       2, 8, 1, 0,
+                       7, -7, -1, 0,
+                       0, 0, 0, 0),
+            new int4x4(5, 6, 0, 0,
+                       8, 2, 5, 0,
+                       5, -2, 78, 0,
+                       0, 0, 0, 0),
+            int4x4.zero
+        };
+
+        CesiumPropertyTableProperty property = model.AddMat3PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat3));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
+
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetInt4x4(i, int4x4.zero), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
+    }
+
+    [Test]
+    public void GetInt4x4ConvertsScalarValues()
+    {
+        TestGltfModel model = new TestGltfModel();
+        double[] testValues = { 2, 5.1, -8.89, UInt32.MaxValue };
+        int4x4[] expected = {
+            2 * int4x4.identity,
+            5 * int4x4.identity,
+            -8 * int4x4.identity,
+            int4x4.zero};
+
+        CesiumPropertyTableProperty property = model.AddDoublePropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Scalar));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float64));
+        Assert.That(valueType.isArray, Is.False);
+
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetInt4x4(i, int4x4.zero), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
+    }
+
+    [Test]
+    public void GetInt4x4ConvertsBooleanValue()
+    {
+        TestGltfModel model = new TestGltfModel();
+        bool[] testValues = { true, false, false, true };
+        int4x4[] expected = {
+            int4x4.identity,
+            int4x4.zero,
+            int4x4.zero,
+            int4x4.identity};
+
+        CesiumPropertyTableProperty property = model.AddBooleanPropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Boolean));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.None));
+        Assert.That(valueType.isArray, Is.False);
+
+        int4x4 defaultValue = new int4x4(-1);
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetInt4x4(i, defaultValue), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
+    }
+
+    #endregion
+
+    #region GetUInt4x4
+
+    [Test]
+    public void GetUInt4x4ReturnsMat4Values()
+    {
+        TestGltfModel model = new TestGltfModel();
+        float4x4[] testValues = {
+            new float4x4(1, 2, 1, 8,
+                         2, 3, 1, 9,
+                         0, 4, 6, 2,
+                         0, 0, 0, 1),
+            new float4x4(3, 4, 3, 4,
+                         2, 8, 1, 2,
+                         7, 7, 1, 0,
+                         0, 0, 0, 1),
+            new float4x4(5, 6, 0, 4,
+                         8, 2, 5, 8,
+                         5, 2, 78, 9,
+                         0, 0, 0, 1),
+            new float4x4(-1)};
+
+        uint4x4[] expected = {
+            new uint4x4(testValues[0]),
+            new uint4x4(testValues[1]),
+            new uint4x4(testValues[2]),
+            uint4x4.zero };
+
+        CesiumPropertyTableProperty property = model.AddMat4PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat4));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
+
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetUInt4x4(i, uint4x4.zero), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
+    }
+
+    [Test]
+    public void GetUInt4x4ConvertsMat2Values()
+    {
+        TestGltfModel model = new TestGltfModel();
+        float2x2[] testValues = {
+            new float2x2(1, 2, 1, 1),
+            new float2x2(3, 4, 3, 1),
+            new float2x2(5, 6, 0, 1),
+            new float2x2(UInt32.MaxValue)};
+        uint4x4[] expected =
+        {
+            new uint4x4(1, 2, 0, 0,
+                       1, 1, 0, 0,
+                       0, 0, 0, 0,
+                       0, 0, 0, 0),
+            new uint4x4(3, 4, 0, 0,
+                       3, 1, 0, 0,
+                       0, 0, 0, 0,
+                       0, 0, 0, 0),
+            new uint4x4(5, 6, 0, 0,
+                       0, 1, 0, 0,
+                       0, 0, 0, 0,
+                       0, 0, 0, 0),
+            uint4x4.zero
+        };
+
+        CesiumPropertyTableProperty property = model.AddMat2PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat2));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
+
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetUInt4x4(i, uint4x4.zero), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
+    }
+
+    [Test]
+    public void GetUInt4x4ConvertsMat3Values()
+    {
+        TestGltfModel model = new TestGltfModel();
+        float3x3[] testValues = {
+            new float3x3(1, 2, 1,
+                         2, 3, 1,
+                         0, 4, 6),
+            new float3x3(3, 4, 3,
+                         2, 8, 1,
+                         7, 7, 1),
+            new float3x3(5, 6, 0,
+                         8, 2, 5,
+                         5, 2, 78),
+            new float3x3(-1)};
+        uint4x4[] expected =
+        {
+            new uint4x4(1, 2, 1, 0,
+                       2, 3, 1, 0,
+                       0, 4, 6, 0,
+                       0, 0, 0, 0),
+            new uint4x4(3, 4, 3, 0,
+                       2, 8, 1, 0,
+                       7, 7, 1, 0,
+                       0, 0, 0, 0),
+            new uint4x4(5, 6, 0, 0,
+                       8, 2, 5, 0,
+                       5, 2, 78, 0,
+                       0, 0, 0, 0),
+            uint4x4.zero
+        };
+
+        CesiumPropertyTableProperty property = model.AddMat3PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat3));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
+
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetUInt4x4(i, uint4x4.zero), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
+    }
+
+    [Test]
+    public void GetUInt4x4ConvertsScalarValues()
+    {
+        TestGltfModel model = new TestGltfModel();
+        double[] testValues = { 2, 5.1, 8.89, -1 };
+        uint4x4[] expected = {
+            2 * uint4x4.identity,
+            5 * uint4x4.identity,
+            8 * uint4x4.identity,
+            uint4x4.zero};
+
+        CesiumPropertyTableProperty property = model.AddDoublePropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Scalar));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float64));
+        Assert.That(valueType.isArray, Is.False);
+
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetUInt4x4(i, uint4x4.zero), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
+    }
+
+    [Test]
+    public void GetUInt4x4ConvertsBooleanValue()
+    {
+        TestGltfModel model = new TestGltfModel();
+        bool[] testValues = { true, false, false, true };
+        uint4x4[] expected = {
+            uint4x4.identity,
+            uint4x4.zero,
+            uint4x4.zero,
+            uint4x4.identity};
+
+        CesiumPropertyTableProperty property = model.AddBooleanPropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Boolean));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.None));
+        Assert.That(valueType.isArray, Is.False);
+
+        uint4x4 defaultValue = new uint4x4(11);
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetUInt4x4(i, defaultValue), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
+    }
+
+    #endregion
+
+    #region GetFloat4x4
+
+    [Test]
+    public void GetFloat4x4ReturnsMat4Values()
+    {
+        TestGltfModel model = new TestGltfModel();
+        float4x4[] testValues = {
+            new float4x4(1, 2, 1, 8,
+                         2, 3, -1, 9,
+                         0, 4, 6, 2,
+                         0, 0, 0, 1),
+            new float4x4(3, 4, 3, -4,
+                         2, 8, 1, 2,
+                         7, -7, -1, 0,
+                         0, 0, 0, 1),
+            new float4x4(5, 6, 0, 4,
+                         8, 2, 5, 8,
+                         5, -2, 78, -9,
+                         0, 0, 0, 1),
+            new float4x4(-1)};
+
+        CesiumPropertyTableProperty property = model.AddMat4PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat4));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
+
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetFloat4x4(i, float4x4.zero), Is.EqualTo(testValues[i]));
+        }
+
+        model.Dispose();
+    }
+
+    [Test]
+    public void GetFloat4x4ConvertsMat2Values()
+    {
+        TestGltfModel model = new TestGltfModel();
+        float2x2[] testValues = {
+            new float2x2(1, 2, 1, 1),
+            new float2x2(3, 4, 3, 1),
+            new float2x2(5, 6, 0, 1),
+            new float2x2(-1)};
+        float4x4[] expected =
+        {
+            new float4x4(1, 2, 0, 0,
+                       1, 1, 0, 0,
+                       0, 0, 0, 0,
+                       0, 0, 0, 0),
+            new float4x4(3, 4, 0, 0,
+                       3, 1, 0, 0,
+                       0, 0, 0, 0,
+                       0, 0, 0, 0),
+            new float4x4(5, 6, 0, 0,
+                       0, 1, 0, 0,
+                       0, 0, 0, 0,
+                       0, 0, 0, 0),
+            new float4x4(-1, -1, 0, 0,
+                       -1, -1, 0, 0,
+                       0, 0, 0, 0,
+                       0, 0, 0, 0)
+        };
+
+        CesiumPropertyTableProperty property = model.AddMat2PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat2));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
+
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetFloat4x4(i, float4x4.zero), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
+    }
+
+    [Test]
+    public void GetFloat4x4ConvertsMat3Values()
+    {
+        TestGltfModel model = new TestGltfModel();
+        float3x3[] testValues = {
+            new float3x3(1, 2, 1,
+                         2, 3, -1,
+                         0, 4, 6),
+            new float3x3(3, 4, 3,
+                         2, 8, 1,
+                         7, -7, -1),
+            new float3x3(5, 6, 0,
+                         8, 2, 5,
+                         5, -2, 78),
+            new float3x3(-1)};
+        float4x4[] expected =
+        {
+            new float4x4(1, 2, 1, 0,
+                       2, 3, -1, 0,
+                       0, 4, 6, 0,
+                       0, 0, 0, 0),
+            new float4x4(3, 4, 3, 0,
+                       2, 8, 1, 0,
+                       7, -7, -1, 0,
+                       0, 0, 0, 0),
+            new float4x4(5, 6, 0, 0,
+                       8, 2, 5, 0,
+                       5, -2, 78, 0,
+                       0, 0, 0, 0),
+            new float4x4(-1, -1, -1, 0,
+                       -1, -1, -1, 0,
+                       -1, -1, -1, 0,
+                       0, 0, 0, 0)
+        };
+
+        CesiumPropertyTableProperty property = model.AddMat3PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat3));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
+
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetFloat4x4(i, float4x4.zero), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
+    }
+
+    [Test]
+    public void GetFloat4x4ConvertsScalarValues()
+    {
+        TestGltfModel model = new TestGltfModel();
+        double[] testValues = { 2, 5.1, -8.89, Double.MaxValue };
+        float4x4[] expected = {
+            2 * float4x4.identity,
+            (float)5.1 * float4x4.identity,
+            (float)-8.89 * float4x4.identity,
+            float4x4.zero};
+
+        CesiumPropertyTableProperty property = model.AddDoublePropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Scalar));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float64));
+        Assert.That(valueType.isArray, Is.False);
+
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetFloat4x4(i, float4x4.zero), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
+    }
+
+    [Test]
+    public void GetFloat4x4ConvertsBooleanValue()
+    {
+        TestGltfModel model = new TestGltfModel();
+        bool[] testValues = { true, false, false, true };
+        float4x4[] expected = {
+            float4x4.identity,
+            float4x4.zero,
+            float4x4.zero,
+            float4x4.identity};
+
+        CesiumPropertyTableProperty property = model.AddBooleanPropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Boolean));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.None));
+        Assert.That(valueType.isArray, Is.False);
+
+        float4x4 defaultValue = new float4x4(-1);
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetFloat4x4(i, defaultValue), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
+    }
+
+    #endregion
+
+    #region GetDouble4x4
+
+    [Test]
+    public void GetDouble4x4ReturnsMat4Values()
+    {
+        TestGltfModel model = new TestGltfModel();
+        float4x4[] testValues = {
+            new float4x4(1, 2, 1, 8,
+                         2, 3, -1, 9,
+                         0, 4, 6, 2,
+                         0, 0, 0, 1),
+            new float4x4(3, 4, 3, -4,
+                         2, 8, 1, 2,
+                         7, -7, -1, 0,
+                         0, 0, 0, 1),
+            new float4x4(5, 6, 0, 4,
+                         8, 2, 5, 8,
+                         5, -2, 78, -9,
+                         0, 0, 0, 1),
+            new float4x4(-1)};
+
+        CesiumPropertyTableProperty property = model.AddMat4PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat4));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
+
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetDouble4x4(i, double4x4.zero), Is.EqualTo(new double4x4(testValues[i])));
+        }
+
+        model.Dispose();
+    }
+
+    [Test]
+    public void GetDouble4x4ConvertsMat2Values()
+    {
+        TestGltfModel model = new TestGltfModel();
+        float2x2[] testValues = {
+            new float2x2(1, 2, 1, 1),
+            new float2x2(3, 4, 3, 1),
+            new float2x2(5, 6, 0, 1),
+            new float2x2(-1)};
+        double4x4[] expected =
+        {
+            new double4x4(1, 2, 0, 0,
+                          1, 1, 0, 0,
+                          0, 0, 0, 0,
+                          0, 0, 0, 0),
+            new double4x4(3, 4, 0, 0,
+                          3, 1, 0, 0,
+                          0, 0, 0, 0,
+                          0, 0, 0, 0),
+            new double4x4(5, 6, 0, 0,
+                          0, 1, 0, 0,
+                          0, 0, 0, 0,
+                          0, 0, 0, 0),
+            new double4x4(-1, -1, 0, 0,
+                          -1, -1, 0, 0,
+                          0, 0, 0, 0,
+                          0, 0, 0, 0)
+        };
+
+        CesiumPropertyTableProperty property = model.AddMat2PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat2));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
+
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetDouble4x4(i, double4x4.zero), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
+    }
+
+    [Test]
+    public void GetDouble4x4ConvertsMat3Values()
+    {
+        TestGltfModel model = new TestGltfModel();
+        float3x3[] testValues = {
+            new float3x3(1, 2, 1,
+                         2, 3, -1,
+                         0, 4, 6),
+            new float3x3(3, 4, 3,
+                         2, 8, 1,
+                         7, -7, -1),
+            new float3x3(5, 6, 0,
+                         8, 2, 5,
+                         5, -2, 78),
+            new float3x3(-1)};
+        double4x4[] expected =
+        {
+            new double4x4(1, 2, 1, 0,
+                          2, 3, -1, 0,
+                          0, 4, 6, 0,
+                          0, 0, 0, 0),
+            new double4x4(3, 4, 3, 0,
+                          2, 8, 1, 0,
+                          7, -7, -1, 0,
+                          0, 0, 0, 0),
+            new double4x4(5, 6, 0, 0,
+                          8, 2, 5, 0,
+                          5, -2, 78, 0,
+                          0, 0, 0, 0),
+            new double4x4(-1, -1, -1, 0,
+                          -1, -1, -1, 0,
+                          -1, -1, -1, 0,
+                          0, 0, 0, 0)
+        };
+
+        CesiumPropertyTableProperty property = model.AddMat3PropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Mat3));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float32));
+        Assert.That(valueType.isArray, Is.False);
+
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetDouble4x4(i, double4x4.zero), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
+    }
+
+    [Test]
+    public void GetDouble4x4ConvertsScalarValues()
+    {
+        TestGltfModel model = new TestGltfModel();
+        double[] testValues = { 2, 5.1, -8.89, Double.MaxValue };
+        double4x4[] expected = {
+            2 * double4x4.identity,
+            5.1 * double4x4.identity,
+            -8.89 * double4x4.identity,
+            Double.MaxValue * double4x4.identity};
+
+        CesiumPropertyTableProperty property = model.AddDoublePropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Scalar));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float64));
+        Assert.That(valueType.isArray, Is.False);
+
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetDouble4x4(i, double4x4.zero), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
+    }
+
+    [Test]
+    public void GetDouble4x4ConvertsBooleanValue()
+    {
+        TestGltfModel model = new TestGltfModel();
+        bool[] testValues = { true, false, false, true };
+        double4x4[] expected = {
+            double4x4.identity,
+            double4x4.zero,
+            double4x4.zero,
+            double4x4.identity};
+
+        CesiumPropertyTableProperty property = model.AddBooleanPropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Boolean));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.None));
+        Assert.That(valueType.isArray, Is.False);
+
+        double4x4 defaultValue = new double4x4(-1);
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetDouble4x4(i, defaultValue), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
+    }
+
     #endregion
 
     #region GetString
+
     [Test]
     public void GetStringReturnsStringValue()
     {
-        String str = "string";
-        CesiumMetadataValue value = new CesiumMetadataValue(str);
-        Assert.That(value.GetString(), Is.EqualTo(str));
+        TestGltfModel model = new TestGltfModel();
+        string[] testValues = { "test 1", "test 2", "test 3" };
+
+        CesiumPropertyTableProperty property = model.AddStringPropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.String));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.None));
+        Assert.That(valueType.isArray, Is.False);
+
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetString(i, String.Empty), Is.EqualTo(testValues[i]));
+        }
+
+        model.Dispose();
     }
 
     [Test]
     public void GetStringConvertsBooleanValue()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(true);
-        Assert.That(value.GetString(), Is.EqualTo("true"));
+        TestGltfModel model = new TestGltfModel();
+        bool[] testValues = { true, false, false, true };
+        string[] expected = { "true", "false", "false", "true" };
 
-        value = new CesiumMetadataValue(false);
-        Assert.That(value.GetString(), Is.EqualTo("false"));
+        CesiumPropertyTableProperty property = model.AddBooleanPropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Boolean));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.None));
+        Assert.That(valueType.isArray, Is.False);
+
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetString(i, String.Empty), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
     }
 
     [Test]
     public void GetStringConvertsScalarValue()
     {
-        CesiumMetadataValue value = new CesiumMetadataValue(1234);
-        Assert.That(value.GetString(), Is.EqualTo("1234"));
+        TestGltfModel model = new TestGltfModel();
+        int[] testValues = { 2, 5, 8, -1 };
+        string[] expected = { "2", "5", "8", "-1" };
+
+        CesiumPropertyTableProperty property = model.AddIntPropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Scalar));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Int32));
+        Assert.That(valueType.isArray, Is.False);
+
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetString(i, String.Empty), Is.EqualTo(expected[i]));
+        }
+
+        model.Dispose();
+    }
+    #endregion
+
+    #region GetArray
+
+    [Test]
+    public void GetArrayReturnsFixedLengthArrayValues()
+    {
+        TestGltfModel model = new TestGltfModel();
+        double[] testValues = { 1, 2, 3, 4, -5, -6 };
+        const Int64 count = 2;
+        Int64 size = testValues.Length / count;
+
+        CesiumPropertyTableProperty property = model.AddFixedLengthArrayPropertyTableProperty(testValues, count);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(size));
+        Assert.That(property.arraySize, Is.EqualTo(count));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Scalar));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float64));
+        Assert.That(valueType.isArray, Is.True);
+
+        for (Int64 i = 0; i < size; i++)
+        {
+            CesiumPropertyArray array = property.GetArray(i);
+            Assert.That(array.length, Is.EqualTo(count));
+            Assert.That(array.elementValueType.type, Is.EqualTo(valueType.type));
+            Assert.That(array.elementValueType.componentType, Is.EqualTo(valueType.componentType));
+
+            Int64 arrayStartIndex = i * count;
+            for (int j = 0; j < count; j++)
+            {
+                Assert.That(array[j].GetDouble(), Is.EqualTo(testValues[arrayStartIndex + j]));
+            }
+        }
+
+        model.Dispose();
     }
 
     [Test]
-    public void GetStringReturnsDefaultValueForUnsupportedTypes()
+    public void GetArrayReturnsVariableLengthArrayValues()
     {
-        String defaultValue = "default";
-        CesiumMetadataValue value = new CesiumMetadataValue();
-        Assert.That(value.GetString(defaultValue), Is.EqualTo(defaultValue));
+        TestGltfModel model = new TestGltfModel();
+        double[] testValues = { 1, 2, 3, 4, -5, -6 };
+        UInt16[] offsets = { 0, 1, 4, 6 };
+        Int64 size = offsets.Length - 1;
 
-        value = new CesiumMetadataValue(new CesiumPropertyArray());
-        Assert.That(value.GetString(defaultValue), Is.EqualTo(defaultValue));
+        CesiumPropertyTableProperty property = model.AddVariableLengthArrayPropertyTableProperty(testValues, offsets);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(size));
+        Assert.That(property.arraySize, Is.EqualTo(0));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Scalar));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float64));
+        Assert.That(valueType.isArray, Is.True);
+
+        for (Int64 i = 0; i < size; i++)
+        {
+            CesiumPropertyArray array = property.GetArray(i);
+            Int64 arrayStartIndex = offsets[i];
+            Int64 arrayEndIndex = offsets[i + 1];
+
+            Int64 expectedLength = arrayEndIndex - arrayStartIndex;
+            Assert.That(array.length, Is.EqualTo(expectedLength));
+            Assert.That(array.elementValueType.type, Is.EqualTo(valueType.type));
+            Assert.That(array.elementValueType.componentType, Is.EqualTo(valueType.componentType));
+
+            for (Int64 j = arrayStartIndex; j < arrayEndIndex; j++)
+            {
+                Assert.That(array[j].GetDouble(), Is.EqualTo(testValues[arrayStartIndex + j]));
+            }
+        }
+
+        model.Dispose();
     }
+
+    [Test]
+    public void GetArrayReturnsEmptyArrayForNonArrayProperty()
+    {
+        TestGltfModel model = new TestGltfModel();
+        bool[] testValues = { true, false, false, true };
+
+        CesiumPropertyTableProperty property = model.AddBooleanPropertyTableProperty(testValues);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Boolean));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.None));
+        Assert.That(valueType.isArray, Is.False);
+
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            Assert.That(property.GetArray(i).length, Is.EqualTo(0));
+        }
+
+        model.Dispose();
+    }
+
     #endregion
+
+    [Test]
+    public void GetRawValueReturnsRawScalarValues()
+    {
+        TestGltfModel model = new TestGltfModel();
+        int[] testValues = { Int32.MaxValue, 0, Int32.MinValue + 1, Int32.MaxValue / 2 };
+
+        CesiumPropertyTableProperty property = model.AddIntPropertyTableProperty(testValues, true);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+        Assert.That(property.isNormalized, Is.True);
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Scalar));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Int32));
+        Assert.That(valueType.isArray, Is.False);
+
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            CesiumMetadataValue rawValue = property.GetRawValue(i);
+            Assert.That(rawValue.valueType, Is.EqualTo(valueType));
+            Assert.That(rawValue.GetInt32(), Is.EqualTo(testValues[i]));
+        }
+
+        model.Dispose();
+    }
+
+    [Test]
+    public void GetValueReturnsTransformedScalarValues()
+    {
+        TestGltfModel model = new TestGltfModel();
+        int[] testValues = { Int32.MaxValue, 0, Int32.MinValue + 1, Int32.MaxValue / 2 };
+        double denominator = Int32.MaxValue;
+
+        CesiumPropertyTableProperty property = model.AddIntPropertyTableProperty(testValues, true);
+        Assert.That(property.status, Is.EqualTo(CesiumPropertyTablePropertyStatus.Valid));
+        Assert.That(property.size, Is.EqualTo(testValues.Length));
+        Assert.That(property.isNormalized, Is.True);
+
+        CesiumMetadataValueType valueType = property.valueType;
+        Assert.That(valueType.type, Is.EqualTo(CesiumMetadataType.Scalar));
+        Assert.That(valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Int32));
+        Assert.That(valueType.isArray, Is.False);
+
+        for (Int64 i = 0; i < testValues.Length; i++)
+        {
+            CesiumMetadataValue rawValue = property.GetValue(i);
+            Assert.That(rawValue.valueType.type, Is.EqualTo(CesiumMetadataType.Scalar));
+            Assert.That(rawValue.valueType.componentType, Is.EqualTo(CesiumMetadataComponentType.Float64));
+            Assert.That(rawValue.GetDouble(), Is.EqualTo(testValues[i] / denominator));
+        }
+
+        model.Dispose();
+    }
 }

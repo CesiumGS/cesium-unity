@@ -47,7 +47,7 @@ namespace CesiumForUnity
         /// </summary>
         /// <param name="index">The desired index</param>
         /// <returns>The element as a CesiumMetadataValue.</returns>
-        public CesiumMetadataValue this[int index]
+        public CesiumMetadataValue this[Int64 index]
         {
             get
             {

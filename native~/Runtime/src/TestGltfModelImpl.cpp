@@ -435,4 +435,101 @@ TestGltfModelImpl::AddStringPropertyTableProperty(
   return CesiumFeaturesMetadataUtility::makePropertyTableProperty(propertyView);
 }
 
+DotNet::CesiumForUnity::CesiumPropertyTableProperty
+TestGltfModelImpl::AddFixedLengthArrayPropertyTableProperty(
+    const DotNet::CesiumForUnity::TestGltfModel& model,
+    const DotNet::System::Array1<double>& values,
+    std::int64_t count) {
+  int64_t numValues = values.Length();
+
+  CesiumGltf::Buffer& buffer = this->_nativeModel.buffers.emplace_back();
+  buffer.byteLength = numValues * sizeof(double);
+  buffer.cesium.data.resize(buffer.byteLength);
+
+  double* pValue = reinterpret_cast<double*>(buffer.cesium.data.data());
+  for (int64_t i = 0; i < numValues; i++) {
+    *pValue = values[i];
+    pValue++;
+  }
+
+  CesiumGltf::PropertyTableProperty property;
+  CesiumGltf::ClassProperty classProperty;
+  classProperty.type = CesiumGltf::ClassProperty::Type::SCALAR;
+  classProperty.componentType =
+      CesiumGltf::ClassProperty::ComponentType::FLOAT64;
+  classProperty.array = true;
+  classProperty.count = count;
+
+  CesiumGltf::PropertyTablePropertyView<CesiumGltf::PropertyArrayView<double>>
+      propertyView(
+          property,
+          classProperty,
+          numValues / count,
+          gsl::span<const std::byte>(
+              buffer.cesium.data.data(),
+              buffer.cesium.data.size()));
+
+  return CesiumFeaturesMetadataUtility::makePropertyTableProperty(propertyView);
+}
+
+DotNet::CesiumForUnity::CesiumPropertyTableProperty
+TestGltfModelImpl::AddVariableLengthArrayPropertyTableProperty(
+    const DotNet::CesiumForUnity::TestGltfModel& model,
+    const DotNet::System::Array1<double>& values,
+    const DotNet::System::Array1<std::uint16_t>& offsets) {
+  int64_t size = offsets.Length() - 1;
+
+  this->_nativeModel.buffers.emplace_back();
+  size_t bufferIndex = this->_nativeModel.buffers.size() - 1;
+
+  this->_nativeModel.buffers.emplace_back();
+  size_t offsetBufferIndex = this->_nativeModel.buffers.size() - 1;
+
+  CesiumGltf::Buffer& buffer = this->_nativeModel.buffers[bufferIndex];
+  buffer.byteLength = values.Length() * sizeof(double);
+  buffer.cesium.data.resize(buffer.byteLength);
+
+  CesiumGltf::Buffer& offsetBuffer =
+      this->_nativeModel.buffers[offsetBufferIndex];
+  offsetBuffer.byteLength = offsets.Length() * sizeof(std::uint16_t);
+  offsetBuffer.cesium.data.resize(offsetBuffer.byteLength);
+
+  double* pValue = reinterpret_cast<double*>(buffer.cesium.data.data());
+  for (int64_t i = 0; i < values.Length(); i++) {
+    *pValue = values[i];
+    pValue++;
+  }
+
+  std::uint16_t* pOffset =
+      reinterpret_cast<std::uint16_t*>(offsetBuffer.cesium.data.data());
+  for (int64_t i = 0; i < offsets.Length(); i++) {
+    *pOffset = offsets[i];
+    pOffset++;
+  }
+
+  CesiumGltf::PropertyTableProperty property;
+  CesiumGltf::ClassProperty classProperty;
+  classProperty.type = CesiumGltf::ClassProperty::Type::SCALAR;
+  classProperty.componentType =
+      CesiumGltf::ClassProperty::ComponentType::FLOAT64;
+  classProperty.array = true;
+
+  CesiumGltf::PropertyTablePropertyView<CesiumGltf::PropertyArrayView<double>>
+      propertyView(
+          property,
+          classProperty,
+          size,
+          gsl::span<const std::byte>(
+              buffer.cesium.data.data(),
+              buffer.cesium.data.size()),
+          gsl::span<const std::byte>(
+              offsetBuffer.cesium.data.data(),
+              offsetBuffer.cesium.data.size()),
+          gsl::span<const std::byte>(),
+          CesiumGltf::PropertyComponentType::Uint16,
+          CesiumGltf::PropertyComponentType::None);
+
+  return CesiumFeaturesMetadataUtility::makePropertyTableProperty(propertyView);
+}
+
 } // namespace CesiumForUnityNative

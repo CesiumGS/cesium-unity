@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace CesiumForUnity
@@ -22,7 +23,7 @@ namespace CesiumForUnity
     /// </summary>
     public class CesiumFeatureIdSet
     {
-        #region Fields
+        #region Getters
 
         /// <summary>
         /// The type of this feature ID set.
@@ -154,6 +155,10 @@ namespace CesiumForUnity
 
         #endregion
 
+        // Cache the list of indices to prevent the allocation of a new array every time
+        // GetFirstVertexFromHitTriangle is called.
+        List<int> _indices;
+
         /// <summary>
         /// Given a successful raycast hit, finds the index of the first vertex from 
         /// the triangle hit. Returns -1 if the triangleIndex is invalid.
@@ -168,10 +173,14 @@ namespace CesiumForUnity
                 return -1;
             }
 
-            Mesh mesh = meshFilter.mesh;
-            int[] indices = mesh.GetTriangles(0);
+            if (this._indices == null)
+            {
+                this._indices = new List<int>();
+            }
+
+            meshFilter.mesh.GetTriangles(this._indices, 0);
             int targetVertex = hitInfo.triangleIndex * 3;
-            return targetVertex < indices.Length ? indices[targetVertex] : -1;
+            return targetVertex < this._indices.Count ? this._indices[targetVertex] : -1;
         }
 
         internal virtual void CallDispose() { }

@@ -63,22 +63,37 @@ public:
   DotNet::CesiumForUnity::CesiumPropertyTableProperty
   AddMat2PropertyTableProperty(
       const DotNet::CesiumForUnity::TestGltfModel& model,
-      const DotNet::System::Array1<DotNet::Unity::Mathematics::float2x2>& values);
+      const DotNet::System::Array1<DotNet::Unity::Mathematics::float2x2>&
+          values);
 
   DotNet::CesiumForUnity::CesiumPropertyTableProperty
   AddMat3PropertyTableProperty(
       const DotNet::CesiumForUnity::TestGltfModel& model,
-      const DotNet::System::Array1<DotNet::Unity::Mathematics::float3x3>& values);
+      const DotNet::System::Array1<DotNet::Unity::Mathematics::float3x3>&
+          values);
 
   DotNet::CesiumForUnity::CesiumPropertyTableProperty
   AddMat4PropertyTableProperty(
       const DotNet::CesiumForUnity::TestGltfModel& model,
-      const DotNet::System::Array1<DotNet::Unity::Mathematics::float4x4>& values);
+      const DotNet::System::Array1<DotNet::Unity::Mathematics::float4x4>&
+          values);
 
   DotNet::CesiumForUnity::CesiumPropertyTableProperty
   AddStringPropertyTableProperty(
       const DotNet::CesiumForUnity::TestGltfModel& model,
       const DotNet::System::Array1<DotNet::System::String>& values);
+
+  DotNet::CesiumForUnity::CesiumPropertyTableProperty
+  AddFixedLengthArrayPropertyTableProperty(
+      const DotNet::CesiumForUnity::TestGltfModel& model,
+      const DotNet::System::Array1<double>& values,
+      std::int64_t count);
+
+  DotNet::CesiumForUnity::CesiumPropertyTableProperty
+  AddVariableLengthArrayPropertyTableProperty(
+      const DotNet::CesiumForUnity::TestGltfModel& model,
+      const DotNet::System::Array1<double>& values,
+      const DotNet::System::Array1<std::uint16_t>& offsets);
 
 private:
   CesiumGltf::Model _nativeModel;

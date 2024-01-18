@@ -2,7 +2,6 @@
 using Reinterop;
 using System;
 using Unity.Mathematics;
-using UnityEngine;
 
 namespace CesiumForUnity
 {
@@ -38,5 +37,11 @@ namespace CesiumForUnity
 
         public partial CesiumPropertyTableProperty AddStringPropertyTableProperty(
             string[] values);
+
+        public partial CesiumPropertyTableProperty AddFixedLengthArrayPropertyTableProperty(
+            double[] values, Int64 count);
+
+        public partial CesiumPropertyTableProperty AddVariableLengthArrayPropertyTableProperty(
+            double[] values, UInt16[] offsets);
     }
 }

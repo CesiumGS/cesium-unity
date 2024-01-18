@@ -786,33 +786,29 @@ namespace CesiumForUnity
             TestGltfModel testModel = new TestGltfModel();
 
             bool[] boolArray = { };
-            bool boolValue = boolArray[0];
-
+            UInt16[] uint16Array = { };
             int[] intArray = { };
-            int intValue = intArray[0];
-
             double[] doubleArray = { };
-            double doubleValue = doubleArray[0];
-
             float2[] float2Array = { };
-            myFloat2 = float2Array[0];
-
             float3[] float3Array = { };
-            myFloat3 = float3Array[0];
-
             float4[] float4Array = { };
-            myFloat4 = float4Array[0];
-
             float2x2[] float2x2Array = { };
-            myFloat2x2 = float2x2Array[0];
-
             float3x3[] float3x3Array = { };
-            myFloat3x3 = float3x3Array[0];
-
             float4x4[] float4x4Array = { };
+
+            bool boolValue = boolArray[0];
+            UInt16 uint16Value = uint16Array[0];
+            int intValue = intArray[0];
+            double doubleValue = doubleArray[0];
+            myFloat2 = float2Array[0];
+            myFloat3 = float3Array[0];
+            myFloat4 = float4Array[0];
+            myFloat2x2 = float2x2Array[0];
+            myFloat3x3 = float3x3Array[0];
             myFloat4x4 = float4x4Array[0];
 
             length = boolArray.Length;
+            length = uint16Array.Length;
             length = intArray.Length;
             length = doubleArray.Length;
             length = stringArray.Length;

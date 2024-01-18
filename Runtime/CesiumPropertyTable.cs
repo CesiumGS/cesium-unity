@@ -86,11 +86,33 @@ namespace CesiumForUnity
         public Dictionary<String, CesiumMetadataValue> GetMetadataValuesForFeature(Int64 featureId)
         {
             Dictionary<String, CesiumMetadataValue> result = new Dictionary<String, CesiumMetadataValue>();
+            GetMetadataValuesForFeature(result, featureId);
+            return result;
+        }
+
+        /// <summary>
+        /// Gets all of the property values for a given feature, mapped by property
+        /// name. This will only include values from valid property table properties.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Call the overload with a Dictionary parameter if you wish to avoid allocation
+        /// of a new Dictionary with every access.
+        /// </para>
+        /// <para>
+        /// If the feature ID is out-of-bounds, the returned dictionary will be empty.
+        /// </para>
+        /// </remarks>
+        /// <param name="featureId">The ID of the feature.</param>
+        /// <returns>A dictionary of the property values mapped by property name.</returns>
+        public void GetMetadataValuesForFeature(Dictionary<String, CesiumMetadataValue> values, Int64 featureId)
+        {
+            values.Clear();
+
             foreach (KeyValuePair<String, CesiumPropertyTableProperty> property in this.properties)
             {
-                result.Add(property.Key, property.Value.GetValue(featureId));
+                values.Add(property.Key, property.Value.GetValue(featureId));
             }
-            return result;
         }
 
         internal void DisposeProperties()
