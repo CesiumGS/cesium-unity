@@ -191,6 +191,16 @@ namespace CesiumForUnity
         [NonSerialized]
         internal CesiumGeoreference _parentGeoreference;
 
+        // The coordinates of the parent CesiumGeoreference before being changed by `UpdateOrigin`.
+        // This is because `OnEnable` runs before `Reset` does, so to be able to use the parent's
+        // coordinates as the default values without changing the OnEnable behavior of CesiumSubScene,
+        // we need to store what those values were before.
+        [NonSerialized]
+        private double3 _oldParentCoordinates = double3.zero;
+
+        [NonSerialized]
+        private CesiumGeoreferenceOriginAuthority _oldParentOriginAuthority;
+
         /// <summary>
         /// Sets the origin of the coordinate system to particular <see cref="ecefX"/>, <see cref="ecefY"/>,
         /// <see cref="ecefZ"/> coordinates in the Earth-Centered, Earth-Fixed (ECEF) frame.
@@ -229,6 +239,17 @@ namespace CesiumForUnity
             this._latitude = latitude;
             this._height = height;
             this.originAuthority = CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight;
+        }
+
+        private void CopyParentCoordinates()
+        {
+            this._longitude = this._parentGeoreference.longitude;
+            this._latitude = this._parentGeoreference.latitude;
+            this._height = this._parentGeoreference.height;
+
+            this._ecefX = this._parentGeoreference.ecefX;
+            this._ecefY = this._parentGeoreference.ecefY;
+            this._ecefZ = this._parentGeoreference.ecefZ;
         }
 
         private void DetachFromParentIfNeeded()
@@ -271,6 +292,22 @@ namespace CesiumForUnity
         private void Reset()
         {
             this.UpdateParentReference();
+
+            // The default coordinates for the CesiumSubScene component should be the coordinates of its parent, if possible.
+            // This means adding the component as the child of an existing CesiumGeoreference won't reset the parent's coordinates.
+            if (this._parentGeoreference != null)
+            {
+                if(this._oldParentOriginAuthority == CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed)
+                {
+                    this._parentGeoreference.SetOriginEarthCenteredEarthFixed(this._oldParentCoordinates.x, this._oldParentCoordinates.y, this._oldParentCoordinates.z);
+                }
+                else
+                {
+                    this._parentGeoreference.SetOriginLongitudeLatitudeHeight(this._oldParentCoordinates.x, this._oldParentCoordinates.y, this._oldParentCoordinates.z);
+                }
+
+                this.CopyParentCoordinates();
+            }
         }
 
         private void OnEnable()
@@ -310,13 +347,7 @@ namespace CesiumForUnity
 
             // Update our origin to our parent georef, maintain our origin authority,
             // and copy both sets of reference coordinates. No need to calculate any of this again
-            this._longitude = this._parentGeoreference.longitude;
-            this._latitude = this._parentGeoreference.latitude;
-            this._height = this._parentGeoreference.height;
-
-            this._ecefX = this._parentGeoreference.ecefX;
-            this._ecefY = this._parentGeoreference.ecefY;
-            this._ecefZ = this._parentGeoreference.ecefZ;
+            CopyParentCoordinates();
         }
 
         private void OnDisable()
@@ -373,6 +404,16 @@ namespace CesiumForUnity
                 if (this._parentGeoreference == null)
                     throw new InvalidOperationException("CesiumSubScene is not nested inside a game object with a CesiumGeoreference.");
 
+                this._oldParentOriginAuthority = this._parentGeoreference.originAuthority;
+                if(this._oldParentOriginAuthority == CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed)
+                {
+                    this._oldParentCoordinates = new double3(this._parentGeoreference.ecefX, this._parentGeoreference.ecefY, this._parentGeoreference.ecefZ);
+                }
+                else
+                {
+                    this._oldParentCoordinates = new double3(this._parentGeoreference.longitude, this._parentGeoreference.latitude, this._parentGeoreference.height);
+                }
+
                 if (this.originAuthority == CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed)
                     this._parentGeoreference.SetOriginEarthCenteredEarthFixed(
                         this._ecefX,
@@ -386,7 +427,7 @@ namespace CesiumForUnity
             }
         }
 
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
         private void OnDrawGizmos()
         {
             if (this._showActivationRadius)
@@ -396,6 +437,6 @@ namespace CesiumForUnity
                 Gizmos.DrawWireSphere(this.transform.position, (float)this._activationRadius);
             }
         }
-        #endif
+#endif
     }
 }
