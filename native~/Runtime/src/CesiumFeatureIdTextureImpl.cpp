@@ -5,6 +5,7 @@
 #include <DotNet/CesiumForUnity/CesiumFeatureIdTexture.h>
 #include <DotNet/CesiumForUnity/CesiumFeatureIdTextureStatus.h>
 #include <DotNet/UnityEngine/RaycastHit.h>
+#include <DotNet/UnityEngine/Vector2.h>
 #include <DotNet/UnityEngine/Vector3.h>
 
 using namespace DotNet::CesiumForUnity;
@@ -14,6 +15,7 @@ namespace CesiumForUnityNative {
 CesiumFeatureIdTextureImpl::CreateTexture(
     const CesiumGltf::Model& model,
     const CesiumGltf::MeshPrimitive& primitive,
+    const int64_t featureCount,
     const CesiumGltf::FeatureIdTexture& featureIdTexture) {
   CesiumFeatureIdTexture texture;
   CesiumFeatureIdTextureImpl& textureImpl = texture.NativeImplementation();
@@ -29,13 +31,16 @@ CesiumFeatureIdTextureImpl::CreateTexture(
   switch (textureImpl._featureIdTextureView.status()) {
   case CesiumGltf::FeatureIdTextureViewStatus::Valid:
     texture.status(CesiumFeatureIdTextureStatus::Valid);
+    texture.featureCount(featureCount);
     break;
   case CesiumGltf::FeatureIdTextureViewStatus::ErrorInvalidChannels:
     texture.status(CesiumFeatureIdTextureStatus::ErrorInvalidTextureAccess);
+    texture.featureCount(0);
     break;
   default:
     // Error with the texture or image. The status is already set by the C#
     // constructor.
+    texture.featureCount(0);
     break;
   }
 
@@ -44,22 +49,24 @@ CesiumFeatureIdTextureImpl::CreateTexture(
 
 std::int64_t CesiumFeatureIdTextureImpl::GetFeatureIdForUV(
     const CesiumFeatureIdTexture& featureIdTexture,
-    const glm::dvec2& uv) {
+    const DotNet::UnityEngine::Vector2& uv) {
   return featureIdTexture.NativeImplementation()
-      ._featureIdTextureView.getFeatureID(uv[0], uv[1]);
+      ._featureIdTextureView.getFeatureID(uv.x, uv.y);
 }
 
 std::int64_t CesiumFeatureIdTextureImpl::GetFeatureIdForVertex(
     const CesiumFeatureIdTexture& featureIdTexture,
     const int64_t vertexIndex) {
-  const std::optional<glm::dvec2> texCoords = std::visit(
+  const std::optional<glm::dvec2> maybeTexCoords = std::visit(
       CesiumGltf::TexCoordFromAccessor{vertexIndex},
       featureIdTexture.NativeImplementation()._texCoordAccessor);
-  if (!texCoords) {
+  if (!maybeTexCoords) {
     return -1;
   }
 
-  return GetFeatureIdForUV(featureIdTexture, *texCoords);
+  auto texCoords = *maybeTexCoords;
+  return featureIdTexture.NativeImplementation()
+      ._featureIdTextureView.getFeatureID(texCoords[0], texCoords[1]);
 }
 
 std::int64_t CesiumFeatureIdTextureImpl::GetFeatureIdFromRaycastHit(

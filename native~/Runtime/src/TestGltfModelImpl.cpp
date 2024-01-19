@@ -1,10 +1,14 @@
 #include "TestGltfModelImpl.h"
 
+#include "CesiumFeatureIdAttributeImpl.h"
+#include "CesiumFeatureIdTextureImpl.h"
 #include "CesiumFeaturesMetadataUtility.h"
 
-#include <CesiumGltf/Buffer.h>
+#include <CesiumGltf/FeatureIdTexture.h>
 #include <CesiumGltf/PropertyTablePropertyView.h>
 
+#include <DotNet/CesiumForUnity/CesiumFeatureIdAttribute.h>
+#include <DotNet/CesiumForUnity/CesiumFeatureIdTexture.h>
 #include <DotNet/CesiumForUnity/CesiumMetadataValue.h>
 #include <DotNet/CesiumForUnity/CesiumMetadataValueType.h>
 #include <DotNet/CesiumForUnity/CesiumPropertyArray.h>
@@ -28,6 +32,124 @@ TestGltfModelImpl::TestGltfModelImpl(
     : _nativeModel(CesiumGltf::Model()) {}
 
 TestGltfModelImpl::~TestGltfModelImpl() {}
+
+DotNet::CesiumForUnity::CesiumFeatureIdAttribute
+TestGltfModelImpl::AddFeatureIdAttribute(
+    const DotNet::CesiumForUnity::TestGltfModel& model,
+    const DotNet::System::Array1<std::uint16_t>& featureIds,
+    const int64_t featureCount) {
+  const int featureIdsLength = featureIds.Length();
+  CesiumGltf::Buffer& buffer = this->_nativeModel.buffers.emplace_back();
+  buffer.byteLength = featureIdsLength * sizeof(std::uint32_t);
+  buffer.cesium.data.resize(buffer.byteLength);
+
+  std::int32_t* pFeatureId =
+      reinterpret_cast<std::int32_t*>(buffer.cesium.data.data());
+  for (int64_t i = 0; i < featureIdsLength; i++) {
+    *pFeatureId = featureIds[i];
+    pFeatureId++;
+  }
+
+  CesiumGltf::BufferView& bufferView =
+      this->_nativeModel.bufferViews.emplace_back();
+  bufferView.buffer =
+      static_cast<int32_t>(this->_nativeModel.buffers.size() - 1);
+  bufferView.byteLength = buffer.byteLength;
+
+  CesiumGltf::Accessor& accessor = this->_nativeModel.accessors.emplace_back();
+  accessor.bufferView =
+      static_cast<int32_t>(this->_nativeModel.bufferViews.size() - 1);
+  accessor.count = featureIds.Length();
+  accessor.type = CesiumGltf::Accessor::Type::SCALAR;
+  accessor.componentType = CesiumGltf::Accessor::ComponentType::UNSIGNED_SHORT;
+
+  CesiumGltf::Mesh& mesh = this->_nativeModel.meshes.emplace_back();
+  CesiumGltf::MeshPrimitive& meshPrimitive = mesh.primitives.emplace_back();
+  meshPrimitive.attributes.emplace(
+      "_FEATURE_ID_0",
+      static_cast<std::int32_t>(this->_nativeModel.accessors.size() - 1));
+
+  return CesiumFeatureIdAttributeImpl::CreateAttribute(
+      this->_nativeModel,
+      meshPrimitive,
+      featureCount,
+      0);
+}
+
+DotNet::CesiumForUnity::CesiumFeatureIdTexture
+TestGltfModelImpl::AddFeatureIdTexture(
+    const DotNet::CesiumForUnity::TestGltfModel& model,
+    const DotNet::System::Array1<std::uint16_t>& featureIds,
+    const int64_t featureCount,
+    const DotNet::System::Array1<DotNet::Unity::Mathematics::float2>& uvs) {
+  const int featureIdsLength = featureIds.Length();
+  assert(length == 4);
+
+  // Copy feature IDs to texture.
+  CesiumGltf::Image& image = this->_nativeModel.images.emplace_back();
+  image.cesium.width = 2;
+  image.cesium.height = 2;
+  image.cesium.bytesPerChannel = 1;
+  image.cesium.channels = 2;
+  image.cesium.pixelData.resize(featureIdsLength * sizeof(std::uint16_t));
+
+  std::uint16_t* pFeatureId =
+      reinterpret_cast<std::uint16_t*>(image.cesium.pixelData.data());
+  for (int32_t i = 0; i < featureIdsLength; i++) {
+    *pFeatureId = featureIds[i];
+    pFeatureId++;
+  }
+
+  this->_nativeModel.samplers.emplace_back();
+
+  CesiumGltf::Texture& texture = this->_nativeModel.textures.emplace_back();
+  texture.sampler =
+      static_cast<int32_t>(this->_nativeModel.samplers.size() - 1);
+  texture.source = static_cast<int32_t>(this->_nativeModel.images.size() - 1);
+
+  // Copy texture coordinates to mesh.
+  const int uvsLength = uvs.Length();
+  CesiumGltf::Buffer& buffer = this->_nativeModel.buffers.emplace_back();
+  buffer.byteLength = uvsLength * sizeof(glm::vec2);
+  buffer.cesium.data.resize(buffer.byteLength);
+  glm::vec2* pTexCoord =
+      reinterpret_cast<glm::vec2*>(buffer.cesium.data.data());
+  for (int64_t i = 0; i < uvsLength; i++) {
+    DotNet::Unity::Mathematics::float2 uv = uvs[i];
+    *pTexCoord = glm::vec2(uv[0], uv[1]);
+    pTexCoord++;
+  }
+
+  CesiumGltf::BufferView& bufferView =
+      this->_nativeModel.bufferViews.emplace_back();
+  bufferView.buffer =
+      static_cast<int32_t>(this->_nativeModel.buffers.size() - 1);
+  bufferView.byteLength = buffer.byteLength;
+
+  CesiumGltf::Accessor& accessor = this->_nativeModel.accessors.emplace_back();
+  accessor.bufferView =
+      static_cast<int32_t>(this->_nativeModel.bufferViews.size() - 1);
+  accessor.count = uvs.Length();
+  accessor.type = CesiumGltf::Accessor::Type::VEC2;
+  accessor.componentType = CesiumGltf::Accessor::ComponentType::FLOAT;
+
+  CesiumGltf::Mesh& mesh = this->_nativeModel.meshes.emplace_back();
+  CesiumGltf::MeshPrimitive& meshPrimitive = mesh.primitives.emplace_back();
+  meshPrimitive.attributes.emplace(
+      "TEXCOORD_0",
+      static_cast<std::int32_t>(this->_nativeModel.accessors.size() - 1));
+
+  CesiumGltf::FeatureIdTexture featureIdTexture;
+  featureIdTexture.index = 0;
+  featureIdTexture.texCoord = 0;
+  featureIdTexture.channels = {0, 1};
+
+  return CesiumFeatureIdTextureImpl::CreateTexture(
+      this->_nativeModel,
+      meshPrimitive,
+      featureCount,
+      featureIdTexture);
+}
 
 DotNet::CesiumForUnity::CesiumPropertyTableProperty
 TestGltfModelImpl::AddBooleanPropertyTableProperty(

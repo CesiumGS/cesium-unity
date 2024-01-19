@@ -54,7 +54,7 @@ namespace CesiumForUnity
         /// <inheritdoc />
         public override Int64 GetFeatureIdFromRaycastHit(RaycastHit hitInfo)
         {
-            int vertex = base.GetFirstVertexFromHitTriangle(hitInfo);
+            int vertex = CesiumPrimitiveFeatures.GetFirstVertexFromHitTriangle(hitInfo);
             return this.GetFeatureIdForVertex(vertex);
         }
 

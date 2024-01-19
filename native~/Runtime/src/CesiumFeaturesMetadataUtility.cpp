@@ -54,6 +54,7 @@ CesiumFeaturesMetadataUtility::addPrimitiveFeatures(
           CesiumFeatureIdAttributeImpl::CreateAttribute(
               model,
               primitive,
+              gltfFeatureId.featureCount,
               *gltfFeatureId.attribute));
     } else if (gltfFeatureId.texture) {
       featureIdSets.Item(
@@ -61,6 +62,7 @@ CesiumFeaturesMetadataUtility::addPrimitiveFeatures(
           CesiumFeatureIdTextureImpl::CreateTexture(
               model,
               primitive,
+              gltfFeatureId.featureCount,
               *gltfFeatureId.texture));
     } else {
       // Create implicit feature ID set (or an invalid one if featureCount = 0).

@@ -5129,7 +5129,7 @@ public class TestCesiumPropertyTableProperty
             Assert.That(array.elementValueType.type, Is.EqualTo(valueType.type));
             Assert.That(array.elementValueType.componentType, Is.EqualTo(valueType.componentType));
 
-            for (Int64 j = arrayStartIndex; j < arrayEndIndex; j++)
+            for (Int64 j = 0; j < expectedLength; j++)
             {
                 Assert.That(array[j].GetDouble(), Is.EqualTo(testValues[arrayStartIndex + j]));
             }

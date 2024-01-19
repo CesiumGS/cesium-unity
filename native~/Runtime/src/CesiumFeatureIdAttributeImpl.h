@@ -24,6 +24,7 @@ public:
   static DotNet::CesiumForUnity::CesiumFeatureIdAttribute CreateAttribute(
       const CesiumGltf::Model& model,
       const CesiumGltf::MeshPrimitive& primitive,
+      const int64_t featureCount,
       const int32_t attributeSetIndex);
 
   std::int64_t GetFeatureIdForVertex(

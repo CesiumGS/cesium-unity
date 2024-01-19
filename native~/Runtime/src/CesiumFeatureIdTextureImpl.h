@@ -30,7 +30,12 @@ public:
   static DotNet::CesiumForUnity::CesiumFeatureIdTexture CreateTexture(
       const CesiumGltf::Model& model,
       const CesiumGltf::MeshPrimitive& primitive,
+      const int64_t featureCount,
       const CesiumGltf::FeatureIdTexture& featureIdTexture);
+
+  std::int64_t GetFeatureIdForUV(
+      const DotNet::CesiumForUnity::CesiumFeatureIdTexture& featureIdTexture,
+      const DotNet::UnityEngine::Vector2& uv);
 
   std::int64_t GetFeatureIdForVertex(
       const DotNet::CesiumForUnity::CesiumFeatureIdTexture& featureIdTexture,
@@ -41,10 +46,6 @@ public:
       const DotNet::UnityEngine::RaycastHit& hitInfo);
 
 private:
-  std::int64_t GetFeatureIdForUV(
-      const DotNet::CesiumForUnity::CesiumFeatureIdTexture& featureIdTexture,
-      const glm::dvec2& uv);
-
   CesiumGltf::FeatureIdTextureView _featureIdTextureView;
   CesiumGltf::TexCoordAccessorType _texCoordAccessor;
   CesiumGltf::IndexAccessorType _indexAccessor;

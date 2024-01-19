@@ -50,6 +50,15 @@ namespace CesiumForUnity
             this.CreateImplementation();
         }
 
+        /// <summary>
+        /// Gets the feature ID corresponding to the pixel specified by the UV texture
+        /// coordinates. The feature ID can be used with a <see cref="CesiumPropertyTable"/>
+        /// to retrieve the per-texel metadata.
+        /// </summary>
+        /// <param name="uv">The texture coordinates.</param>
+        /// <returns>The feature ID at the given texture coordinates, or -1 if the feature ID texture is invalid.</returns>
+        public partial Int64 GetFeatureIdForUV(Vector2 uv);
+
         /// <inheritdoc />
         public override partial Int64 GetFeatureIdForVertex(Int64 vertexIndex);
 

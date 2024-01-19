@@ -8,6 +8,14 @@ namespace CesiumForUnity
     [ReinteropNativeImplementation("CesiumForUnityNative::TestGltfModelImpl", "TestGltfModelImpl.h")]
     internal partial class TestGltfModel
     {
+        #region EXT_mesh_features
+
+        public partial CesiumFeatureIdAttribute AddFeatureIdAttribute(UInt16[] featureIds, Int64 featureCount);
+
+        public partial CesiumFeatureIdTexture AddFeatureIdTexture(UInt16[] featureIds, Int64 featureCount, float2[] uvs);
+        #endregion
+
+        #region EXT_structural_metadata
         public partial CesiumPropertyTableProperty AddBooleanPropertyTableProperty(
             bool[] values);
 
@@ -43,5 +51,6 @@ namespace CesiumForUnity
 
         public partial CesiumPropertyTableProperty AddVariableLengthArrayPropertyTableProperty(
             double[] values, UInt16[] offsets);
+        #endregion
     }
 }

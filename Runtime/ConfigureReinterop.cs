@@ -774,6 +774,8 @@ namespace CesiumForUnity
             RaycastHit hitInfo = new RaycastHit();
             int triangleIndex = hitInfo.triangleIndex;
             Vector3 coordinate = hitInfo.barycentricCoordinate;
+            Vector2 textureCoordinate = new Vector2();
+            textureCoordinate.x = textureCoordinate.y;
 
             CesiumIonServer server = CesiumIonServer.defaultServer;
             server.serverUrl = "";

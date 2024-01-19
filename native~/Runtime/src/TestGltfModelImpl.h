@@ -5,6 +5,8 @@
 #include <DotNet/System/Array1.h>
 
 namespace DotNet::CesiumForUnity {
+class CesiumFeatureIdAttribute;
+class CesiumFeatureIdTexture;
 class CesiumPropertyTableProperty;
 class TestGltfModel;
 } // namespace DotNet::CesiumForUnity
@@ -28,6 +30,17 @@ class TestGltfModelImpl {
 public:
   TestGltfModelImpl(const DotNet::CesiumForUnity::TestGltfModel& model);
   ~TestGltfModelImpl();
+
+  DotNet::CesiumForUnity::CesiumFeatureIdAttribute AddFeatureIdAttribute(
+      const DotNet::CesiumForUnity::TestGltfModel& model,
+      const DotNet::System::Array1<std::uint16_t>& featureIds,
+      const int64_t featureCount);
+
+  DotNet::CesiumForUnity::CesiumFeatureIdTexture AddFeatureIdTexture(
+      const DotNet::CesiumForUnity::TestGltfModel& model,
+      const DotNet::System::Array1<std::uint16_t>& featureIds,
+      const int64_t featureCount,
+      const DotNet::System::Array1<DotNet::Unity::Mathematics::float2>& uvs);
 
   DotNet::CesiumForUnity::CesiumPropertyTableProperty
   AddBooleanPropertyTableProperty(

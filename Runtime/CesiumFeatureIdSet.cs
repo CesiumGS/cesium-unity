@@ -150,7 +150,8 @@ namespace CesiumForUnity
                 return -1;
             }
 
-            return GetFirstVertexFromHitTriangle(hitInfo);
+
+            return CesiumPrimitiveFeatures.GetFirstVertexFromHitTriangle(hitInfo);
         }
 
         #endregion
@@ -158,30 +159,6 @@ namespace CesiumForUnity
         // Cache the list of indices to prevent the allocation of a new array every time
         // GetFirstVertexFromHitTriangle is called.
         List<int> _indices;
-
-        /// <summary>
-        /// Given a successful raycast hit, finds the index of the first vertex from 
-        /// the triangle hit. Returns -1 if the triangleIndex is invalid.
-        /// </summary>
-        /// <param name="hitInfo">The raycast hit info.</param>
-        /// <returns>The index of the first vertex on the triangle.</returns>
-        protected int GetFirstVertexFromHitTriangle(RaycastHit hitInfo)
-        {
-            MeshFilter meshFilter = hitInfo.transform.GetComponent<MeshFilter>();
-            if (meshFilter == null || meshFilter.mesh == null)
-            {
-                return -1;
-            }
-
-            if (this._indices == null)
-            {
-                this._indices = new List<int>();
-            }
-
-            meshFilter.mesh.GetTriangles(this._indices, 0);
-            int targetVertex = hitInfo.triangleIndex * 3;
-            return targetVertex < this._indices.Count ? this._indices[targetVertex] : -1;
-        }
 
         internal virtual void CallDispose() { }
     }
