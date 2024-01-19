@@ -5,6 +5,7 @@
 ##### Fixes :wrench:
 
 - Fixed a bug that prevented the default `CesiumIonServer` asset from remembering its token in a clean project.
+- Fixed a bug where adding a `CesiumSubScene` as the child of an existing `CesiumGeoreference` in editor would cause the parent `CesiumGeoreference` to have its coordinates reset to the default.
 
 ### v1.7.0 - 2023-12-14
 
