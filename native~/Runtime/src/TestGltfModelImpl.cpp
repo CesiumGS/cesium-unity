@@ -38,14 +38,14 @@ TestGltfModelImpl::AddFeatureIdAttribute(
     const DotNet::CesiumForUnity::TestGltfModel& model,
     const DotNet::System::Array1<std::uint16_t>& featureIds,
     const int64_t featureCount) {
-  const int featureIdsLength = featureIds.Length();
+  const int32_t featureIdsLength = featureIds.Length();
   CesiumGltf::Buffer& buffer = this->_nativeModel.buffers.emplace_back();
-  buffer.byteLength = featureIdsLength * sizeof(std::uint32_t);
+  buffer.byteLength = featureIdsLength * sizeof(std::uint16_t);
   buffer.cesium.data.resize(buffer.byteLength);
 
-  std::int32_t* pFeatureId =
-      reinterpret_cast<std::int32_t*>(buffer.cesium.data.data());
-  for (int64_t i = 0; i < featureIdsLength; i++) {
+  std::uint16_t* pFeatureId =
+      reinterpret_cast<std::uint16_t*>(buffer.cesium.data.data());
+  for (int32_t i = 0; i < featureIdsLength; i++) {
     *pFeatureId = featureIds[i];
     pFeatureId++;
   }
@@ -82,7 +82,7 @@ TestGltfModelImpl::AddFeatureIdTexture(
     const DotNet::System::Array1<std::uint16_t>& featureIds,
     const int64_t featureCount,
     const DotNet::System::Array1<DotNet::Unity::Mathematics::float2>& uvs) {
-  const int featureIdsLength = featureIds.Length();
+  const int32_t featureIdsLength = featureIds.Length();
   assert(length == 4);
 
   // Copy feature IDs to texture.

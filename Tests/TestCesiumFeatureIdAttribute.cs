@@ -1,11 +1,5 @@
-using System.Collections;
-using UnityEngine;
-using UnityEngine.TestTools;
 using CesiumForUnity;
 using NUnit.Framework;
-using UnityEngine.TestTools.Utils;
-using Unity.Mathematics;
-using System.Collections.Generic;
 using System;
 
 public class TestCesiumFeatureIdAttribute
@@ -14,6 +8,7 @@ public class TestCesiumFeatureIdAttribute
     public void ConstructsEmptyAttribute()
     {
         CesiumFeatureIdAttribute attribute = new CesiumFeatureIdAttribute();
+        Assert.That(attribute.type, Is.EqualTo(CesiumFeatureIdSetType.Attribute));
         Assert.That(attribute.status, Is.EqualTo(CesiumFeatureIdAttributeStatus.ErrorInvalidAttribute));
         Assert.That(attribute.featureCount, Is.EqualTo(0));
     }
@@ -26,6 +21,7 @@ public class TestCesiumFeatureIdAttribute
         const Int64 featureCount = 2;
 
         CesiumFeatureIdAttribute attribute = model.AddFeatureIdAttribute(featureIds, featureCount);
+        Assert.That(attribute.type, Is.EqualTo(CesiumFeatureIdSetType.Attribute));
         Assert.That(attribute.status, Is.EqualTo(CesiumFeatureIdAttributeStatus.Valid));
         Assert.That(attribute.featureCount, Is.EqualTo(featureCount));
 
@@ -36,6 +32,7 @@ public class TestCesiumFeatureIdAttribute
     public void GetFeatureIdForVertexHandlesInvalidAttribute()
     {
         CesiumFeatureIdAttribute attribute = new CesiumFeatureIdAttribute();
+        Assert.That(attribute.type, Is.EqualTo(CesiumFeatureIdSetType.Attribute));
         Assert.That(attribute.status, Is.EqualTo(CesiumFeatureIdAttributeStatus.ErrorInvalidAttribute));
         Assert.That(attribute.featureCount, Is.EqualTo(0));
 
@@ -50,6 +47,7 @@ public class TestCesiumFeatureIdAttribute
         const Int64 featureCount = 3;
 
         CesiumFeatureIdAttribute attribute = model.AddFeatureIdAttribute(featureIds, featureCount);
+        Assert.That(attribute.type, Is.EqualTo(CesiumFeatureIdSetType.Attribute));
         Assert.That(attribute.status, Is.EqualTo(CesiumFeatureIdAttributeStatus.Valid));
         Assert.That(attribute.featureCount, Is.EqualTo(featureCount));
 
@@ -67,6 +65,7 @@ public class TestCesiumFeatureIdAttribute
         const Int64 featureCount = 3;
 
         CesiumFeatureIdAttribute attribute = model.AddFeatureIdAttribute(featureIds, featureCount);
+        Assert.That(attribute.type, Is.EqualTo(CesiumFeatureIdSetType.Attribute));
         Assert.That(attribute.status, Is.EqualTo(CesiumFeatureIdAttributeStatus.Valid));
         Assert.That(attribute.featureCount, Is.EqualTo(featureCount));
 

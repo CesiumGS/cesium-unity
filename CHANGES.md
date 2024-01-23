@@ -9,7 +9,12 @@
 ##### Additions :tada:
 
 - Added `CesiumFeatureIdSet`, which represents a feature ID set in `EXT_mesh_features`.
-- Added `CesiumFeatureIdAttribute` and `CesiumFeatureIdTexture`, which respectively represent a feature ID attribute and feature ID texture in `EXT_mesh_features`. These derive from `CesiumFeatureIdSet`
+- Added `CesiumFeatureIdAttribute` and `CesiumFeatureIdTexture`, which derive from `CesiumFeatureIdSet` and respectively represent a feature ID attribute and feature ID texture in `EXT_mesh_features`.
+- Added `CesiumPrimitiveFeatures`, a component that provides access to the `EXT_mesh_features` on a glTF primitive when it is loaded by `Cesium3DTileset`.
+- Added `CesiumPropertyTableProperty`, which represents a property table property in `EXT_structural_metadata` and can be used to retrieve metadata.
+- Added `CesiumPropertyTable`, which represents a property table in `EXT_structural_metadata`.
+- Added `CesiumModelMetadata`, a component that provides access to the `EXT_structural_metadata` on a glTF model when it is loaded by `Cesium3DTileset`.
+- Added `CesiumMetadataValue`, which can hold a metadata value from `EXT_structural_metadata` while abstracting away its type.
 
 ##### Deprecated :hourglass_flowing_sand:
 

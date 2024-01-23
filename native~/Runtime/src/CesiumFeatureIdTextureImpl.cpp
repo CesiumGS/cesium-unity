@@ -51,8 +51,7 @@ CesiumFeatureIdTextureImpl::CreateTexture(
 std::int64_t CesiumFeatureIdTextureImpl::GetFeatureIdForUV(
     const CesiumFeatureIdTexture& featureIdTexture,
     const DotNet::UnityEngine::Vector2& uv) {
-  return featureIdTexture.NativeImplementation()
-      ._featureIdTextureView.getFeatureID(uv.x, uv.y);
+  return this->_featureIdTextureView.getFeatureID(uv.x, uv.y);
 }
 
 std::int64_t CesiumFeatureIdTextureImpl::GetFeatureIdForVertex(
@@ -60,14 +59,13 @@ std::int64_t CesiumFeatureIdTextureImpl::GetFeatureIdForVertex(
     const int64_t vertexIndex) {
   const std::optional<glm::dvec2> maybeTexCoords = std::visit(
       CesiumGltf::TexCoordFromAccessor{vertexIndex},
-      featureIdTexture.NativeImplementation()._texCoordAccessor);
+      this->_texCoordAccessor);
   if (!maybeTexCoords) {
     return -1;
   }
 
   auto texCoords = *maybeTexCoords;
-  return featureIdTexture.NativeImplementation()
-      ._featureIdTextureView.getFeatureID(texCoords[0], texCoords[1]);
+  return this->_featureIdTextureView.getFeatureID(texCoords[0], texCoords[1]);
 }
 
 std::int64_t CesiumFeatureIdTextureImpl::GetFeatureIdFromRaycastHit(
