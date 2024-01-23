@@ -49,5 +49,6 @@ private:
   CesiumGltf::FeatureIdTextureView _featureIdTextureView;
   CesiumGltf::TexCoordAccessorType _texCoordAccessor;
   CesiumGltf::IndexAccessorType _indexAccessor;
+  int32_t _primitiveMode;
 };
 } // namespace CesiumForUnityNative

@@ -27,6 +27,7 @@ CesiumFeatureIdTextureImpl::CreateTexture(
       featureIdTexture.texCoord);
   textureImpl._indexAccessor =
       CesiumGltf::getIndexAccessorView(model, primitive);
+  textureImpl._primitiveMode = primitive.mode;
 
   switch (textureImpl._featureIdTextureView.status()) {
   case CesiumGltf::FeatureIdTextureViewStatus::Valid:
@@ -78,7 +79,8 @@ std::int64_t CesiumFeatureIdTextureImpl::GetFeatureIdFromRaycastHit(
   std::array<int64_t, 3> vertexIndices = std::visit(
       CesiumGltf::IndicesForFaceFromAccessor{
           hitInfo.triangleIndex(),
-          vertexCount},
+          vertexCount,
+          this->_primitiveMode},
       this->_indexAccessor);
 
   std::array<glm::dvec2, 3> UVs;
