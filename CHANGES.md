@@ -1,5 +1,11 @@
 # Change Log
 
+### ? - ?
+
+##### Fixes :wrench:
+
+- Fixed jump at the end of the flight path in `CesiumFlyToController` and rewrote class to no longer use keypoints.
+
 ### v1.7.1 - 2023-12-14
 
 ##### Fixes :wrench:
