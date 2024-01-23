@@ -5,6 +5,7 @@
 ##### Fixes :wrench:
 
 - Fixed a bug that prevented the default `CesiumIonServer` asset from remembering its token in a clean project.
+- Fixed "DynamicCamera is not nested inside a game object with a CesiumGeoreference" warning when adding a new DynamicCamera in the editor.
 
 ### v1.7.0 - 2023-12-14
 
