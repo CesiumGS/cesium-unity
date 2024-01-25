@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Unity.Mathematics;
-using Unity.VisualScripting.YamlDotNet.Core.Tokens;
 using UnityEngine;
 
 namespace CesiumForUnity
@@ -128,7 +127,7 @@ namespace CesiumForUnity
                 }
 
                 double distance = math.length(new double3(georeference.ecefX, georeference.ecefY, georeference.ecefZ) - ecef);
-                
+
                 if (!this.useActivationDistance || distance >= this._activationDistance)
                 {
                     // Update the origin continuously.
@@ -136,7 +135,7 @@ namespace CesiumForUnity
                     // Make sure the physics system is informed that things have moved
                     Physics.SyncTransforms();
                 }
-                else if(deactivatedAnySublevel)
+                else if (deactivatedAnySublevel)
                 {
                     Physics.SyncTransforms();
                 }

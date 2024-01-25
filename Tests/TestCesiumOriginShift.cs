@@ -112,7 +112,7 @@ public class TestCesiumOriginShift
         GameObject goOriginShift = new GameObject("OriginShifter");
         goOriginShift.transform.parent = goGeoreference.transform;
         CesiumGlobeAnchor globeAnchor = goOriginShift.AddComponent<CesiumGlobeAnchor>();
-        
+
         CesiumOriginShift originShift = goOriginShift.AddComponent<CesiumOriginShift>();
         originShift.useActivationDistance = true;
         originShift.activationDistance = 5000;
@@ -169,7 +169,7 @@ public class TestCesiumOriginShift
         float startTime = Time.time;
         Vector3 startPos = globeAnchor.transform.position;
 
-        while((Time.time - startTime) < duration)
+        while ((Time.time - startTime) < duration)
         {
             double3 previousPositionEcef = globeAnchor.positionGlobeFixed.x;
 
