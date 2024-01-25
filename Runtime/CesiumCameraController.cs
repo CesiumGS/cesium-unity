@@ -320,7 +320,7 @@ namespace CesiumForUnity
 
         #region Update
 
-        void Update()
+        void FixedUpdate()
         {
             this.HandlePlayerInputs();
 
@@ -513,8 +513,8 @@ namespace CesiumForUnity
                 return;
             }
 
-            float valueX = verticalRotation * this._lookSpeed * Time.smoothDeltaTime;
-            float valueY = horizontalRotation * this._lookSpeed * Time.smoothDeltaTime;
+            float valueX = verticalRotation * this._lookSpeed * Time.fixedDeltaTime;
+            float valueY = horizontalRotation * this._lookSpeed * Time.fixedDeltaTime;
 
             // Rotation around the X-axis occurs counter-clockwise, so the look range
             // maps to [270, 360] degrees for the upper quarter-sphere of motion, and
@@ -565,17 +565,17 @@ namespace CesiumForUnity
                 {
                     Vector3 directionChange = inputDirection - this._velocity.normalized;
                     this._velocity +=
-                        directionChange * this._velocity.magnitude * Time.deltaTime;
+                        directionChange * this._velocity.magnitude * Time.fixedDeltaTime;
                 }
 
-                this._velocity += inputDirection * this._acceleration * Time.deltaTime;
+                this._velocity += inputDirection * this._acceleration * Time.fixedDeltaTime;
                 this._velocity = Vector3.ClampMagnitude(this._velocity, this._maxSpeed);
             }
             else
             {
                 // Decelerate
                 float speed = Mathf.Max(
-                    this._velocity.magnitude - this._deceleration * Time.deltaTime,
+                    this._velocity.magnitude - this._deceleration * Time.fixedDeltaTime,
                     0.0f);
 
                 this._velocity = Vector3.ClampMagnitude(this._velocity, speed);
@@ -583,7 +583,7 @@ namespace CesiumForUnity
 
             if (this._velocity != Vector3.zero)
             {
-                this._controller.Move(this._velocity * Time.deltaTime);
+                this._controller.Move(this._velocity * Time.fixedDeltaTime);
 
                 // Other controllers may disable detectTransformChanges to control their own
                 // movement, but the globe anchor should be synced even if detectTransformChanges

@@ -1,6 +1,7 @@
-using UnityEngine;
 using System.Collections.Generic;
 using Unity.Mathematics;
+using Unity.VisualScripting.YamlDotNet.Core.Tokens;
+using UnityEngine;
 
 namespace CesiumForUnity
 {
@@ -29,6 +30,33 @@ namespace CesiumForUnity
     [IconAttribute("Packages/com.cesium.unity/Editor/Resources/Cesium-24x24.png")]
     public class CesiumOriginShift : MonoBehaviour
     {
+        /// <summary>
+        /// When false, the origin will be shifted every frame.
+        /// When true, <see cref="activationDistance"/> will be used to specify the distance from the old
+        /// origin after which the origin will be shifted.
+        /// </summary>
+        public bool useActivationDistance
+        {
+            get => _useActivationDistance;
+            set => _useActivationDistance = value;
+        }
+
+        [SerializeField]
+        private bool _useActivationDistance = false;
+
+        /// <summary>
+        /// Specifies the minimum distance in meters from the old origin to the current origin before the 
+        /// origin of the parent <see cref="CesiumGeoreference"/> will be shifted.
+        /// </summary>
+        public double activationDistance
+        {
+            get => _activationDistance;
+            set => _activationDistance = value;
+        }
+
+        [SerializeField]
+        private double _activationDistance = 1.0;
+
         void LateUpdate()
         {
             CesiumGeoreference georeference = this.GetComponentInParent<CesiumGeoreference>();
@@ -42,13 +70,15 @@ namespace CesiumForUnity
                 return;
             }
 
-            this.UpdateFromEcef(georeference, anchor.positionGlobeFixed);
+            this.UpdateFromEcef(georeference, anchor);
         }
 
         private List<CesiumSubScene> _sublevelsScratch = new List<CesiumSubScene>();
 
-        private void UpdateFromEcef(CesiumGeoreference georeference, double3 ecef)
+        private void UpdateFromEcef(CesiumGeoreference georeference, CesiumGlobeAnchor anchor)
         {
+            double3 ecef = anchor.positionGlobeFixed;
+
             CesiumSubScene closestLevel = null;
             double distanceSquaredToClosest = double.MaxValue;
 
@@ -97,10 +127,16 @@ namespace CesiumForUnity
                     }
                 }
 
-                // Update the origin continuously.
-                georeference.SetOriginEarthCenteredEarthFixed(ecef.x, ecef.y, ecef.z);
-
-                if (deactivatedAnySublevel)
+                double distance = math.length(new double3(georeference.ecefX, georeference.ecefY, georeference.ecefZ) - ecef);
+                
+                if (!this.useActivationDistance || distance >= this._activationDistance)
+                {
+                    // Update the origin continuously.
+                    georeference.SetOriginEarthCenteredEarthFixed(ecef.x, ecef.y, ecef.z);
+                    // Make sure the physics system is informed that things have moved
+                    Physics.SyncTransforms();
+                }
+                else if(deactivatedAnySublevel)
                 {
                     Physics.SyncTransforms();
                 }
