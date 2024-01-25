@@ -1,5 +1,10 @@
 # Change Log
 
+### ? - ?
+
+##### Additions :tada:
+- `CesiumOriginShift` now allows specifying an activation distance instead of updating the origin every frame.
+
 ### v1.7.1 - 2023-12-14
 
 ##### Fixes :wrench:
