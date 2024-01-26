@@ -404,6 +404,7 @@ namespace Reinterop
             if (method.IsStatic)
             {
                 modifiers += " static";
+                implementationCheck = "Reinterop.ReinteropInitializer.Initialize();";
             }
             else if (!item.ImplementationStaticOnly)
             {

@@ -4,7 +4,7 @@
 #include "CesiumRasterOverlayUtility.h"
 
 #include <Cesium3DTilesSelection/Tileset.h>
-#include <Cesium3DTilesSelection/WebMapServiceRasterOverlay.h>
+#include <CesiumRasterOverlays/WebMapServiceRasterOverlay.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
@@ -12,6 +12,7 @@
 #include <DotNet/System/String.h>
 
 using namespace Cesium3DTilesSelection;
+using namespace CesiumRasterOverlays;
 using namespace DotNet;
 
 namespace CesiumForUnityNative {

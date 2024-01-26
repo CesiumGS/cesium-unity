@@ -3,8 +3,8 @@
 #include "Cesium3DTilesetImpl.h"
 #include "CesiumRasterOverlayUtility.h"
 
-#include <Cesium3DTilesSelection/DebugColorizeTilesRasterOverlay.h>
 #include <Cesium3DTilesSelection/Tileset.h>
+#include <CesiumRasterOverlays/DebugColorizeTilesRasterOverlay.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/CesiumForUnity/CesiumDebugColorizeTilesRasterOverlay.h>
@@ -12,6 +12,7 @@
 #include <DotNet/System/String.h>
 
 using namespace Cesium3DTilesSelection;
+using namespace CesiumRasterOverlays;
 using namespace DotNet;
 
 namespace CesiumForUnityNative {

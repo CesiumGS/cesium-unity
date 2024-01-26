@@ -87,18 +87,18 @@ public:
       const std::any& rendererOptions) override;
 
   virtual void* prepareRasterInMainThread(
-      Cesium3DTilesSelection::RasterOverlayTile& rasterTile,
+      CesiumRasterOverlays::RasterOverlayTile& rasterTile,
       void* pLoadThreadResult) override;
 
   virtual void freeRaster(
-      const Cesium3DTilesSelection::RasterOverlayTile& rasterTile,
+      const CesiumRasterOverlays::RasterOverlayTile& rasterTile,
       void* pLoadThreadResult,
       void* pMainThreadResult) noexcept override;
 
   virtual void attachRasterInMainThread(
       const Cesium3DTilesSelection::Tile& tile,
       int32_t overlayTextureCoordinateID,
-      const Cesium3DTilesSelection::RasterOverlayTile& rasterTile,
+      const CesiumRasterOverlays::RasterOverlayTile& rasterTile,
       void* pMainThreadRendererResources,
       const glm::dvec2& translation,
       const glm::dvec2& scale) override;
@@ -106,7 +106,7 @@ public:
   virtual void detachRasterInMainThread(
       const Cesium3DTilesSelection::Tile& tile,
       int32_t overlayTextureCoordinateID,
-      const Cesium3DTilesSelection::RasterOverlayTile& rasterTile,
+      const CesiumRasterOverlays::RasterOverlayTile& rasterTile,
       void* pMainThreadRendererResources) noexcept override;
 
 private:

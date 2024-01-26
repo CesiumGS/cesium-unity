@@ -7,7 +7,7 @@ class Cesium3DTileset;
 class CesiumTileMapServiceRasterOverlay;
 } // namespace DotNet::CesiumForUnity
 
-namespace Cesium3DTilesSelection {
+namespace CesiumRasterOverlays {
 class TileMapServiceRasterOverlay;
 }
 
@@ -30,7 +30,7 @@ public:
 
 private:
   CesiumUtility::IntrusivePointer<
-      Cesium3DTilesSelection::TileMapServiceRasterOverlay>
+      CesiumRasterOverlays::TileMapServiceRasterOverlay>
       _pOverlay;
 };
 

@@ -6,6 +6,25 @@
 
 - Fixed jump at the end of the flight path in `CesiumFlyToController` and rewrote class to no longer use keypoints.
 
+##### Breaking Changes :mega:
+
+- Feature IDs and metadata are now parsed through the `EXT_mesh_features` and `EXT_structural_metadata` extensions respectively. Models with `EXT_feature_metadata` will still be parsed, but their metadata will no longer be accessible.
+
+##### Additions :tada:
+
+- Added `CesiumFeatureIdSet`, which represents a feature ID set in `EXT_mesh_features`.
+- Added `CesiumFeatureIdAttribute` and `CesiumFeatureIdTexture`, which derive from `CesiumFeatureIdSet` and respectively represent a feature ID attribute and feature ID texture in `EXT_mesh_features`.
+- Added `CesiumPrimitiveFeatures`, a component that provides access to the `EXT_mesh_features` on a glTF primitive when it is loaded by `Cesium3DTileset`.
+- Added `CesiumPropertyTableProperty`, which represents a property table property in `EXT_structural_metadata` and can be used to retrieve metadata.
+- Added `CesiumPropertyTable`, which represents a property table in `EXT_structural_metadata`.
+- Added `CesiumModelMetadata`, a component that provides access to the `EXT_structural_metadata` on a glTF model when it is loaded by `Cesium3DTileset`.
+- Added `CesiumMetadataValue`, which can hold a metadata value from `EXT_structural_metadata` while abstracting away its type.
+
+##### Deprecated :hourglass_flowing_sand:
+
+- `CesiumMetadata` has been deprecated. Instead, retrieve the `CesiumModelMetadata` component attached to a tile game object in order to access its glTF metadata.
+- `CesiumFeature` has been deprecated. Instead, retrieve feature IDs from the `CesiumPrimitiveFeatures` component attached to a primitive game object in order to access its glTF features. Feature IDs can be used to retrieve metadata from the `CesiumModelMetadata` attached to its parent.
+
 ### v1.7.1 - 2023-12-14
 
 ##### Fixes :wrench:

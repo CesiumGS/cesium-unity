@@ -12,6 +12,7 @@ using UnityEngine.Rendering;
 using UnityEngine.Experimental.Rendering;
 using Unity.Mathematics;
 using UnityEngine.Pool;
+using UnityEngine.UIElements;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -336,6 +337,8 @@ namespace CesiumForUnity
             MonoBehaviour mb = tileset;
             mb.StartCoroutine(new NativeCoroutine(endIteration => endIteration).GetEnumerator());
 
+
+#pragma warning disable 0618
             CesiumMetadata metadata = go.AddComponent<CesiumMetadata>();
             metadata = go.GetComponent<CesiumMetadata>();
             CesiumMetadata metadataParent = go.GetComponentInParent<CesiumMetadata>();
@@ -351,6 +354,7 @@ namespace CesiumForUnity
             feature.featureTableName = "";
             feature.properties = new string[4];
             feature.properties[2] = "";
+#pragma warning restore 0618
 
             CesiumGeoreference georeference = go.AddComponent<CesiumGeoreference>();
             georeference = go.GetComponent<CesiumGeoreference>();
@@ -448,9 +452,12 @@ namespace CesiumForUnity
 
             string test = string.Concat("string", "string2");
             string[] stringArray = stringList.ToArray();
+            test = stringArray[0];
             test = string.Join(" ", stringArray);
             string.IsNullOrEmpty("value");
             string.IsNullOrWhiteSpace("value");
+
+            int length = test.Length;
 
             int requestsPerCachePrune = CesiumRuntimeSettings.requestsPerCachePrune;
             ulong maxItems = CesiumRuntimeSettings.maxItems;
@@ -518,6 +525,258 @@ namespace CesiumForUnity
             Mesh pooledMesh = meshPool.Get();
             meshPool.Release(pooledMesh);
 
+            System.Object myObject = null;
+
+            CesiumIntVec2 myIntVec2 = new CesiumIntVec2((SByte)1, (SByte)2);
+            myIntVec2 = new CesiumIntVec2((Int16)1, (Int16)2);
+            myIntVec2 = new CesiumIntVec2((Int32)1, (Int32)2);
+            myIntVec2 = new CesiumIntVec2((Int64)1, (Int64)2);
+            CesiumIntVec3 myIntVec3 = new CesiumIntVec3((SByte)1, (SByte)2, (SByte)3);
+            myIntVec3 = new CesiumIntVec3((Int16)1, (Int16)2, (Int16)3);
+            myIntVec3 = new CesiumIntVec3((Int32)1, (Int32)2, (Int32)3);
+            myIntVec3 = new CesiumIntVec3((Int64)1, (Int64)2, (Int64)3);
+            CesiumIntVec4 myIntVec4 = new CesiumIntVec4((SByte)1, (SByte)2, (SByte)3, (SByte)4);
+            myIntVec4 = new CesiumIntVec4((Int16)1, (Int16)2, (Int16)3, (Int16)4);
+            myIntVec4 = new CesiumIntVec4((Int32)1, (Int32)2, (Int32)3, (Int32)4);
+            myIntVec4 = new CesiumIntVec4((Int64)1, (Int64)2, (Int64)3, (Int64)4);
+            myObject = myIntVec2[0];
+            myObject = myIntVec3[0];
+            myObject = myIntVec4[0];
+            CesiumUintVec2 myUintVec2 = new CesiumUintVec2((Byte)1, (Byte)2);
+            myUintVec2 = new CesiumUintVec2((UInt16)1, (UInt16)2);
+            myUintVec2 = new CesiumUintVec2((UInt32)1, (UInt32)2);
+            myUintVec2 = new CesiumUintVec2((UInt64)1, (UInt64)2);
+            CesiumUintVec3 myUintVec3 = new CesiumUintVec3((Byte)1, (Byte)2, (Byte)3);
+            myUintVec3 = new CesiumUintVec3((UInt16)1, (UInt16)2, (UInt16)3);
+            myUintVec3 = new CesiumUintVec3((UInt32)1, (UInt32)2, (UInt32)3);
+            myUintVec3 = new CesiumUintVec3((UInt64)1, (UInt64)2, (UInt64)3);
+            CesiumUintVec4 myUintVec4 = new CesiumUintVec4((Byte)1, (Byte)2, (Byte)3, (Byte)4);
+            myUintVec4 = new CesiumUintVec4((UInt16)1, (UInt16)2, (UInt16)3, (UInt16)4);
+            myUintVec4 = new CesiumUintVec4((UInt32)1, (UInt32)2, (UInt32)3, (UInt32)4);
+            myUintVec4 = new CesiumUintVec4((UInt64)1, (UInt64)2, (UInt64)3, (UInt64)4);
+            myObject = myUintVec2[0];
+            myObject = myUintVec3[0];
+            myObject = myUintVec4[0];
+            CesiumIntMat2x2 myIntMat2 = new CesiumIntMat2x2(myIntVec2, myIntVec2);
+            CesiumIntMat3x3 myIntMat3 = new CesiumIntMat3x3(myIntVec3, myIntVec3, myIntVec3);
+            CesiumIntMat4x4 myIntMat4 = new CesiumIntMat4x4(myIntVec4, myIntVec4, myIntVec4, myIntVec4);
+            myObject = myIntMat2[0];
+            myObject = myIntMat3[0];
+            myObject = myIntMat4[0];
+            CesiumUintMat2x2 myUintMat2 = new CesiumUintMat2x2(myUintVec2, myUintVec2);
+            CesiumUintMat3x3 myUintMat3 = new CesiumUintMat3x3(myUintVec3, myUintVec3, myUintVec3);
+            CesiumUintMat4x4 myUintMat4 = new CesiumUintMat4x4(myUintVec4, myUintVec4, myUintVec4, myUintVec4);
+            myObject = myUintMat2[0];
+            myObject = myUintMat3[0];
+            myObject = myUintMat4[0];
+
+            int2 myInt2 = new int2(1, 2);
+            int3 myInt3 = new int3(1, 2, 3);
+            int4 myInt4 = new int4(1, 2, 3, 4);
+            uint2 myUint2 = new uint2(1, 2);
+            uint3 myUint3 = new uint3(1, 2, 3);
+            uint4 myUint4 = new uint4(1, 2, 3, 4);
+            float2 myFloat2 = new float2(1, 2);
+            float3 myFloat3 = new float3(1, 2, 3);
+            float4 myFloat4 = new float4(1, 2, 3, 4);
+            myObject = myFloat2[0];
+            myObject = myFloat3[0];
+            myObject = myFloat4[0];
+            double2 myDouble2 = new double2(1, 2);
+            double3 myDouble3 = new double3(1, 2, 3);
+            double4 myDouble4 = new double4(1, 2, 3, 4);
+            myObject = myDouble2[0];
+            myObject = myDouble3[0];
+            myObject = myDouble4[0];
+            int2x2 myInt2x2 = new int2x2(myInt2, myInt2);
+            int3x3 myInt3x3 = new int3x3(myInt3, myInt3, myInt3);
+            int4x4 myInt4x4 = new int4x4(myInt4, myInt4, myInt4, myInt4);
+            uint2x2 myUint2x2 = new uint2x2(myUint2, myUint2);
+            uint3x3 myUint3x3 = new uint3x3(myUint3, myUint3, myUint3);
+            uint4x4 myUint4x4 = new uint4x4(myUint4, myUint4, myUint4, myUint4);
+            float2x2 myFloat2x2 = new float2x2(myFloat2, myFloat2);
+            float3x3 myFloat3x3 = new float3x3(myFloat3, myFloat3, myFloat3);
+            float4x4 myFloat4x4 = new float4x4(myFloat4, myFloat4, myFloat4, myFloat4);
+            myObject = myFloat2x2[0];
+            myObject = myFloat3x3[0];
+            myObject = myFloat4x4[0];
+            double2x2 myDouble2x2 = new double2x2(myDouble2, myDouble2);
+            double3x3 myDouble3x3 = new double3x3(myDouble3, myDouble3, myDouble3);
+            double4x4 myDouble4x4 = new double4x4(myDouble4, myDouble4, myDouble4, myDouble4);
+            myObject = myDouble2x2[0];
+            myObject = myDouble3x3[0];
+            myObject = myDouble4x4[0];
+
+            CesiumMetadataValueType valueType = new CesiumMetadataValueType(
+                CesiumMetadataType.Invalid,
+                CesiumMetadataComponentType.None,
+                false);
+            valueType.type = CesiumMetadataType.Invalid;
+            valueType.componentType = CesiumMetadataComponentType.None;
+            valueType.isArray = false;
+
+            CesiumPropertyArray array = new CesiumPropertyArray();
+            array.elementValueType = new CesiumMetadataValueType();
+            array.values = new CesiumMetadataValue[10];
+            array.values[0] = new CesiumMetadataValue();
+            length = array.values.Length;
+
+            CesiumMetadataValue myValue = new CesiumMetadataValue();
+            myValue.SetObjectValue(false);
+            myValue.SetObjectValue((SByte)0);
+            myValue.SetObjectValue((Byte)0);
+            myValue.SetObjectValue((Int16)0);
+            myValue.SetObjectValue((UInt16)0);
+            myValue.SetObjectValue((Int32)0);
+            myValue.SetObjectValue((UInt32)0);
+            myValue.SetObjectValue((Int64)0);
+            myValue.SetObjectValue((UInt64)0);
+            myValue.SetObjectValue(0.0f);
+            myValue.SetObjectValue(0.0);
+            myValue.SetObjectValue(myIntVec2);
+            myValue.SetObjectValue(myIntVec3);
+            myValue.SetObjectValue(myIntVec4);
+            myValue.SetObjectValue(myUintVec2);
+            myValue.SetObjectValue(myUintVec3);
+            myValue.SetObjectValue(myUintVec4);
+            myValue.SetObjectValue(myFloat2);
+            myValue.SetObjectValue(myFloat3);
+            myValue.SetObjectValue(myFloat4);
+            myValue.SetObjectValue(myDouble2);
+            myValue.SetObjectValue(myDouble3);
+            myValue.SetObjectValue(myDouble4);
+            myValue.SetObjectValue(myIntMat2);
+            myValue.SetObjectValue(myIntMat3);
+            myValue.SetObjectValue(myIntMat4);
+            myValue.SetObjectValue(myUintMat2);
+            myValue.SetObjectValue(myUintMat3);
+            myValue.SetObjectValue(myUintMat4);
+            myValue.SetObjectValue(myFloat2x2);
+            myValue.SetObjectValue(myFloat3x3);
+            myValue.SetObjectValue(myFloat4x4);
+            myValue.SetObjectValue(myDouble2x2);
+            myValue.SetObjectValue(myDouble3x3);
+            myValue.SetObjectValue(myDouble4x4);
+            myValue.SetObjectValue("test");
+            myValue.SetObjectValue(array);
+            valueType = myValue.valueType;
+
+            myObject = myValue.objectValue;
+            CesiumMetadataValue.GetObjectAsBoolean(myObject);
+            CesiumMetadataValue.GetObjectAsSByte(myObject);
+            CesiumMetadataValue.GetObjectAsByte(myObject);
+            CesiumMetadataValue.GetObjectAsInt16(myObject);
+            CesiumMetadataValue.GetObjectAsUInt16(myObject);
+            CesiumMetadataValue.GetObjectAsInt32(myObject);
+            CesiumMetadataValue.GetObjectAsUInt32(myObject);
+            CesiumMetadataValue.GetObjectAsInt64(myObject);
+            CesiumMetadataValue.GetObjectAsUInt64(myObject);
+            CesiumMetadataValue.GetObjectAsFloat(myObject);
+            CesiumMetadataValue.GetObjectAsDouble(myObject);
+            CesiumMetadataValue.GetObjectAsCesiumIntVec2(myObject);
+            CesiumMetadataValue.GetObjectAsCesiumIntVec3(myObject);
+            CesiumMetadataValue.GetObjectAsCesiumIntVec4(myObject);
+            CesiumMetadataValue.GetObjectAsCesiumUintVec2(myObject);
+            CesiumMetadataValue.GetObjectAsCesiumUintVec3(myObject);
+            CesiumMetadataValue.GetObjectAsCesiumUintVec4(myObject);
+            CesiumMetadataValue.GetObjectAsFloat2(myObject);
+            CesiumMetadataValue.GetObjectAsFloat3(myObject);
+            CesiumMetadataValue.GetObjectAsFloat4(myObject);
+            CesiumMetadataValue.GetObjectAsDouble2(myObject);
+            CesiumMetadataValue.GetObjectAsDouble3(myObject);
+            CesiumMetadataValue.GetObjectAsDouble4(myObject);
+            CesiumMetadataValue.GetObjectAsCesiumIntMat2x2(myObject);
+            CesiumMetadataValue.GetObjectAsCesiumIntMat3x3(myObject);
+            CesiumMetadataValue.GetObjectAsCesiumIntMat4x4(myObject);
+            CesiumMetadataValue.GetObjectAsCesiumUintMat2x2(myObject);
+            CesiumMetadataValue.GetObjectAsCesiumUintMat3x3(myObject);
+            CesiumMetadataValue.GetObjectAsCesiumUintMat4x4(myObject);
+            CesiumMetadataValue.GetObjectAsFloat2x2(myObject);
+            CesiumMetadataValue.GetObjectAsFloat3x3(myObject);
+            CesiumMetadataValue.GetObjectAsFloat4x4(myObject);
+            CesiumMetadataValue.GetObjectAsDouble2x2(myObject);
+            CesiumMetadataValue.GetObjectAsDouble3x3(myObject);
+            CesiumMetadataValue.GetObjectAsDouble4x4(myObject);
+            CesiumMetadataValue.GetObjectAsString(myObject);
+
+            myValue.GetBoolean();
+            myValue.GetSByte();
+            myValue.GetByte();
+            myValue.GetInt16();
+            myValue.GetUInt16();
+            myValue.GetInt32();
+            myValue.GetUInt32();
+            myValue.GetInt64();
+            myValue.GetUInt64();
+            myValue.GetFloat();
+            myValue.GetDouble();
+            myValue.GetString();
+            myValue.GetArray();
+
+            CesiumPrimitiveFeatures primitiveFeatures = go.AddComponent<CesiumPrimitiveFeatures>();
+            primitiveFeatures = go.GetComponent<CesiumPrimitiveFeatures>();
+            CesiumFeatureIdSet[] sets = primitiveFeatures.featureIdSets;
+            sets = new CesiumFeatureIdSet[10];
+            sets[0] = new CesiumFeatureIdSet();
+            sets[0] = new CesiumFeatureIdSet(1);
+            sets[0].featureCount = 1;
+            sets[0].label = "label";
+            sets[0].nullFeatureId = 0;
+            sets[0].propertyTableIndex = 0;
+            sets[0].CallDispose();
+
+            CesiumFeatureIdSetType setType = CesiumFeatureIdSetType.None;
+            CesiumFeatureIdAttribute featureIdAttribute = new CesiumFeatureIdAttribute();
+            featureIdAttribute.status = featureIdAttribute.status;
+            featureIdAttribute.featureCount = 1;
+            featureIdAttribute.label = "label";
+            featureIdAttribute.nullFeatureId = 0;
+            featureIdAttribute.propertyTableIndex = 0;
+
+            CesiumFeatureIdTexture featureIdTexture = new CesiumFeatureIdTexture();
+            featureIdTexture.status = featureIdTexture.status;
+            featureIdTexture.featureCount = 1;
+            featureIdTexture.label = "label";
+            featureIdTexture.nullFeatureId = 0;
+            featureIdTexture.propertyTableIndex = 0;
+
+            primitiveFeatures.featureIdSets[0] = featureIdAttribute;
+            primitiveFeatures.featureIdSets[1] = featureIdTexture;
+
+            CesiumModelMetadata modelMetadata = go.AddComponent<CesiumModelMetadata>();
+            modelMetadata = go.GetComponent<CesiumModelMetadata>();
+            modelMetadata.propertyTables = modelMetadata.propertyTables;
+            modelMetadata.propertyTables[0] = modelMetadata.propertyTables[0];
+            length = modelMetadata.propertyTables.Length;
+
+            CesiumPropertyTable propertyTable = new CesiumPropertyTable();
+            propertyTable.status = CesiumPropertyTableStatus.Valid;
+            propertyTable.name = "";
+            propertyTable.count = 0;
+            propertyTable.properties = propertyTable.properties;
+            propertyTable.properties = new Dictionary<String, CesiumPropertyTableProperty>(10);
+            propertyTable.properties.Add("Test", new CesiumPropertyTableProperty());
+            propertyTable.DisposeProperties();
+
+            CesiumPropertyTableProperty property = new CesiumPropertyTableProperty();
+            property.status = property.status;
+            property.size = property.size;
+            property.arraySize = property.arraySize;
+            property.isNormalized = property.isNormalized;
+            property.offset = myValue;
+            property.scale = myValue;
+            property.min = myValue;
+            property.max = myValue;
+            property.noData = myValue;
+            property.defaultValue = myValue;
+            property.valueType = property.valueType;
+
+            RaycastHit hitInfo = new RaycastHit();
+            int triangleIndex = hitInfo.triangleIndex;
+            Vector3 coordinate = hitInfo.barycentricCoordinate;
+            Vector2 textureCoordinate = new Vector2();
+            textureCoordinate.x = textureCoordinate.y;
+
             CesiumIonServer server = CesiumIonServer.defaultServer;
             server.serverUrl = "";
             server.apiUrl = "";
@@ -525,6 +784,42 @@ namespace CesiumForUnity
             server.defaultIonAccessToken = "";
             server.defaultIonAccessTokenId = "";
             server.serverUrlThatIsLoadingApiUrl = "";
+
+            TestGltfModel testModel = new TestGltfModel();
+
+            bool[] boolArray = { };
+            UInt16[] uint16Array = { };
+            int[] intArray = { };
+            double[] doubleArray = { };
+            float2[] float2Array = { };
+            float3[] float3Array = { };
+            float4[] float4Array = { };
+            float2x2[] float2x2Array = { };
+            float3x3[] float3x3Array = { };
+            float4x4[] float4x4Array = { };
+
+            bool boolValue = boolArray[0];
+            UInt16 uint16Value = uint16Array[0];
+            int intValue = intArray[0];
+            double doubleValue = doubleArray[0];
+            myFloat2 = float2Array[0];
+            myFloat3 = float3Array[0];
+            myFloat4 = float4Array[0];
+            myFloat2x2 = float2x2Array[0];
+            myFloat3x3 = float3x3Array[0];
+            myFloat4x4 = float4x4Array[0];
+
+            length = boolArray.Length;
+            length = uint16Array.Length;
+            length = intArray.Length;
+            length = doubleArray.Length;
+            length = stringArray.Length;
+            length = float2Array.Length;
+            length = float3Array.Length;
+            length = float4Array.Length;
+            length = float2x2Array.Length;
+            length = float3x3Array.Length;
+            length = float4x4Array.Length;
 
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;
@@ -534,7 +829,7 @@ namespace CesiumForUnity
             svc.transform.SetPositionAndRotation(p, q);
 
             bool isPlaying = EditorApplication.isPlaying;
-            EditorApplication.update += () => {};
+            EditorApplication.update += () => { };
 
             EditorUtility.SetDirty(null);
 #endif
