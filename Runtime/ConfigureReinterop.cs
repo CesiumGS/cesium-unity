@@ -126,7 +126,6 @@ namespace CesiumForUnity
             texture.wrapModeV = texture.wrapModeV;
             texture.wrapModeW = texture.wrapModeW;
 
-
             Mesh mesh = new Mesh();
             Mesh[] meshes = new[] { mesh };
             mesh = meshes[0];
@@ -486,6 +485,8 @@ namespace CesiumForUnity
             globeAnchors = go.GetComponentsInChildren<CesiumGlobeAnchor>(true);
             CesiumGlobeAnchor globeAnchor = globeAnchors[globeAnchors.Length - 1];
             globeAnchor.positionGlobeFixed = globeAnchor.positionGlobeFixed;
+
+            CesiumGlobeFlightPath globeFlightPath = new CesiumGlobeFlightPath();
 
             globeAnchor = go.AddComponent<CesiumGlobeAnchor>();
             globeAnchor.detectTransformChanges = globeAnchor.detectTransformChanges;

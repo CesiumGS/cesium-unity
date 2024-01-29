@@ -134,22 +134,17 @@ namespace CesiumForUnity
 
         private CesiumGeoreference _georeference;
         private CesiumGlobeAnchor _globeAnchor;
+        private CesiumGlobeFlightPath _flightPath;
 
         private CesiumCameraController _cameraController;
 
-        private double _sourceHeight;
-        private Vector3 _sourceDirection;
         private Quaternion _sourceRotation;
+        private Quaternion _destinationRotation;
 
         private double3 _destinationECEF;
-        private Quaternion _destinationRotation;
-        private double _destinationHeight;
-
-        private Vector3 _rotationAxis;
-        private double _totalAngle;
-        private double _maxHeight;
-
         private double3 _previousPositionECEF;
+
+        private double _maxHeight;
 
         private double _currentFlyToTime = 0.0;
 
@@ -220,7 +215,7 @@ namespace CesiumForUnity
         /// <param name="deltaTime"> The time delta in seconds.</param>
         private void HandleFlightStep(float deltaTime)
         {
-            if (!this._flyingToLocation)
+            if (!this._flyingToLocation || this._flightPath == null)
             {
                 return;
             }
@@ -255,30 +250,14 @@ namespace CesiumForUnity
             }
 
             // If we're have it to the end of the flight, or if the flight we're taking isn't actually moving or rotating us at all, we're done.
-            if (flyPercentage == 1.0 || (this._totalAngle == 0.0 && this._sourceRotation == this._destinationRotation))
+            if (flyPercentage == 1.0 || (this._flightPath.Length == 0.0 && this._sourceRotation == this._destinationRotation))
             {
                 this.CompleteFlight();
                 return;
             }
 
-            // We're currently in flight, update position and rotation by interpolating between start and end values.
-
-            // Rotate the source direction around the axis by the given percentage of the total angle we're rotating, giving us our current position.
-            double3 rotatedDirection = (float3)(Quaternion.AngleAxis((float)(flyPercentage * this._totalAngle), this._rotationAxis) * this._sourceDirection);
-
-            // Map the result to a position on our reference ellipsoid.
-            double3? geodeticPosition = CesiumWgs84Ellipsoid.ScaleToGeodeticSurface(rotatedDirection);
-            if (geodeticPosition == null)
-            {
-                // Unable to map to geodetic position, nothing we can do.
-                return;
-            }
-
-            // Calculate the surface normal at this position.
-            double3 geodeticUp = CesiumWgs84Ellipsoid.GeodeticSurfaceNormal(geodeticPosition.Value);
-
             // Calculate the height above the surface. If we have a profile curve, use it as well.
-            double altituteOffset = math.lerp(this._sourceHeight, this._destinationHeight, flyPercentage);
+            double altituteOffset = 0.0;
             if (this._maxHeight != 0.0 && this.flyToAltitudeProfileCurve != null && this.flyToAltitudeProfileCurve.length > 0)
             {
                 double curveOffset = this._maxHeight * this.flyToAltitudeProfileCurve.Evaluate((float)flyPercentage);
@@ -286,7 +265,7 @@ namespace CesiumForUnity
             }
 
             // Update position.
-            double3 currentPosition = geodeticPosition.Value + geodeticUp * altituteOffset;
+            double3 currentPosition = this._flightPath.GetPosition(flyPercentage, altituteOffset);
             this._previousPositionECEF = currentPosition;
             this._globeAnchor.positionGlobeFixed = currentPosition;
 
@@ -353,46 +332,7 @@ namespace CesiumForUnity
             this._destinationRotation = Quaternion.Euler(pitchAtDestination, yawAtDestination, 0.0f);
             this._destinationECEF = destinationECEF;
 
-            double3? geodeticSourceEcef = CesiumWgs84Ellipsoid.ScaleToGeodeticSurface(sourceECEF);
-            double3? geodeticDestinationEcef = CesiumWgs84Ellipsoid.ScaleToGeodeticSurface(destinationECEF);
-
-            // Failed to calculate geodetic coordinates for source or destination - nothing we can really do.
-            if (geodeticSourceEcef == null || geodeticDestinationEcef == null)
-            {
-                return;
-            }
-
-            Quaternion flyQuat = Quaternion.FromToRotation(
-                (float3)math.normalize(geodeticSourceEcef.Value),
-                (float3)math.normalize(geodeticDestinationEcef.Value));
-
-            float angleFloat = 0.0f;
-            flyQuat.ToAngleAxis(out angleFloat, out this._rotationAxis);
-            this._totalAngle = angleFloat;
-
-            this._currentFlyToTime = 0.0;
-
-            // We will not create a curve projected along the ellipsoid because we want to take
-            // altitude while flying. The radius of the current point will evolve as follows:
-            //  - Project the point on the ellipsoid: will give a default radius
-            //  depending on ellipsoid location.
-            //  - Interpolate the altitudes: get the source/destination altitudes, and make a
-            //  linear interpolation between them. This will allow for flying from / to any
-            //  point smoothly.
-            //  - Add a flight profile offset /-\ defined by a curve.
-            this._sourceHeight = 0.0;
-            this._destinationHeight = 0.0;
-
-            double3 cartographicSource = CesiumWgs84Ellipsoid.EarthCenteredEarthFixedToLongitudeLatitudeHeight(sourceECEF);
-            this._sourceHeight = cartographicSource.z;
-
-            // By setting the height to 0 and calculating the ECEF coordinates of the resulting point, we can produce a geodetic surface normal.
-            cartographicSource.z = 0;
-            double3 zeroHeightSource = CesiumWgs84Ellipsoid.LongitudeLatitudeHeightToEarthCenteredEarthFixed(cartographicSource);
-            this._sourceDirection = (float3)math.normalizesafe(zeroHeightSource);
-
-            double3 cartographicDestination = CesiumWgs84Ellipsoid.EarthCenteredEarthFixedToLongitudeLatitudeHeight(destinationECEF);
-            this._destinationHeight = cartographicDestination.z;
+            _flightPath = CesiumGlobeFlightPath.FromEarthCenteredEarthFixedCoordinates(sourceECEF, destinationECEF);
 
             this._maxHeight = 0.0;
             if (this._flyToAltitudeProfileCurve != null && this._flyToMaximumAltitudeCurve.length > 0)
@@ -400,7 +340,7 @@ namespace CesiumForUnity
                 this._maxHeight = 30000.0;
                 if (this._flyToMaximumAltitudeCurve != null && this._flyToMaximumAltitudeCurve.length > 0)
                 {
-                    double flyToDistance = math.length(destinationECEF - sourceECEF);
+                    double flyToDistance = _flightPath.Length;
                     this._maxHeight = this._flyToMaximumAltitudeCurve.Evaluate((float)flyToDistance);
                 }
             }
