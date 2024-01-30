@@ -1189,8 +1189,10 @@ void* UnityPrepareRendererResources::prepareInMainThread(
               auto texCoordIndexIt =
                   primitiveInfo.uvIndexMap.find(baseColorTexture->texCoord);
               if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
-                UnityEngine::Texture texture =
-                    TextureLoader::loadTexture(gltf, baseColorTexture->index);
+                UnityEngine::Texture texture = TextureLoader::loadTexture(
+                    gltf,
+                    baseColorTexture->index,
+                    true);
                 if (texture != nullptr) {
                   material.SetTexture(
                       shaderProperty.getBaseColorTextureID(),
@@ -1208,8 +1210,10 @@ void* UnityPrepareRendererResources::prepareInMainThread(
               auto texCoordIndexIt =
                   primitiveInfo.uvIndexMap.find(metallicRoughness->texCoord);
               if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
-                UnityEngine::Texture texture =
-                    TextureLoader::loadTexture(gltf, metallicRoughness->index);
+                UnityEngine::Texture texture = TextureLoader::loadTexture(
+                    gltf,
+                    metallicRoughness->index,
+                    false);
                 if (texture != nullptr) {
                   material.SetTexture(
                       shaderProperty.getMetallicRoughnessTextureID(),
@@ -1229,7 +1233,8 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
               UnityEngine::Texture texture = TextureLoader::loadTexture(
                   gltf,
-                  pMaterial->normalTexture->index);
+                  pMaterial->normalTexture->index,
+                  false);
               if (texture != nullptr) {
                 material.SetTexture(
                     shaderProperty.getNormalMapTextureID(),
@@ -1250,7 +1255,8 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
               UnityEngine::Texture texture = TextureLoader::loadTexture(
                   gltf,
-                  pMaterial->occlusionTexture->index);
+                  pMaterial->occlusionTexture->index,
+                  false);
               if (texture != nullptr) {
                 material.SetTexture(
                     shaderProperty.getOcclusionTextureID(),
@@ -1286,7 +1292,8 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
               UnityEngine::Texture texture = TextureLoader::loadTexture(
                   gltf,
-                  pMaterial->emissiveTexture->index);
+                  pMaterial->emissiveTexture->index,
+                  true);
               if (texture != nullptr) {
                 material.SetTexture(
                     shaderProperty.getEmissiveTextureID(),
@@ -1460,7 +1467,7 @@ void* UnityPrepareRendererResources::prepareRasterInMainThread(
     Cesium3DTilesSelection::RasterOverlayTile& rasterTile,
     void* pLoadThreadResult) {
   auto pTexture = std::make_unique<UnityEngine::Texture>(
-      TextureLoader::loadTexture(rasterTile.getImage()));
+      TextureLoader::loadTexture(rasterTile.getImage(), true));
   pTexture->wrapMode(UnityEngine::TextureWrapMode::Clamp);
   pTexture->filterMode(UnityEngine::FilterMode::Trilinear);
   pTexture->anisoLevel(16);
