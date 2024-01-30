@@ -21,11 +21,16 @@
 - `CesiumMetadata` has been deprecated. Instead, retrieve the `CesiumModelMetadata` component attached to a tile game object in order to access its glTF metadata.
 - `CesiumFeature` has been deprecated. Instead, retrieve feature IDs from the `CesiumPrimitiveFeatures` component attached to a primitive game object in order to access its glTF features. Feature IDs can be used to retrieve metadata from the `CesiumModelMetadata` attached to its parent.
 
+##### Fixes :wrench:
+
+- Removed Universal Additional Camera Data script from DynamicCamera prefab, as it shows up as a missing script in other render pipelines.
+
 ### v1.7.1 - 2023-12-14
 
 ##### Fixes :wrench:
 
 - Fixed a bug that prevented the default `CesiumIonServer` asset from remembering its token in a clean project.
+- Fixed "DynamicCamera is not nested inside a game object with a CesiumGeoreference" warning when adding a new DynamicCamera in the editor.
 
 ### v1.7.0 - 2023-12-14
 
