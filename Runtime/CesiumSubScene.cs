@@ -367,7 +367,7 @@ namespace CesiumForUnity
 
             // Update our origin to our parent georef, maintain our origin authority,
             // and copy both sets of reference coordinates. No need to calculate any of this again
-            CopyParentCoordinates();
+            this.CopyParentCoordinates();
         }
 
         private void OnDisable()
