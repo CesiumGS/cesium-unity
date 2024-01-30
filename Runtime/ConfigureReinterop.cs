@@ -725,7 +725,6 @@ namespace CesiumForUnity
             sets[0].propertyTableIndex = 0;
             sets[0].CallDispose();
 
-            CesiumFeatureIdSetType setType = CesiumFeatureIdSetType.None;
             CesiumFeatureIdAttribute featureIdAttribute = new CesiumFeatureIdAttribute();
             featureIdAttribute.status = featureIdAttribute.status;
             featureIdAttribute.featureCount = 1;
