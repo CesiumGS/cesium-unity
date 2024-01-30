@@ -78,6 +78,11 @@ namespace CesiumForUnity
         private partial bool CreateFromEarthCenteredEarthFixedCoordinates(double3 sourceEcef, double3 destinationEcef);
         private partial bool CreateFromLongitudeLatitudeHeight(double3 sourceLlh, double3 destinationLlh);
         private partial double GetLength();
+
+        private CesiumGlobeFlightPath()
+        {
+            CreateImplementation();
+        }
         #endregion
     }
 }
