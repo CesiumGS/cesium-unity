@@ -5,6 +5,7 @@
 ##### Fixes :wrench:
 
 - Removed Universal Additional Camera Data script from DynamicCamera prefab, as it shows up as a missing script in other render pipelines.
+- Normal, Metallic-Roughness, and Occlusion maps will now correctly be treated as linear rather than sRGB textures.
 
 ### v1.7.1 - 2023-12-14
 
