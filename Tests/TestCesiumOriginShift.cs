@@ -1,6 +1,7 @@
 ﻿using CesiumForUnity;
 using NUnit.Framework;
 using System.Collections;
+using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -114,7 +115,6 @@ public class TestCesiumOriginShift
         CesiumGlobeAnchor globeAnchor = goOriginShift.AddComponent<CesiumGlobeAnchor>();
 
         CesiumOriginShift originShift = goOriginShift.AddComponent<CesiumOriginShift>();
-        originShift.useActivationDistance = true;
         originShift.activationDistance = 5000;
 
         yield return null;
@@ -123,19 +123,23 @@ public class TestCesiumOriginShift
 
         yield return null;
 
-        Assert.AreEqual(baseEcef.x + 4999.0, globeAnchor.positionGlobeFixed.x);
-        Assert.AreEqual(baseEcef.x + 0, georeference.ecefX);
+        IEqualityComparer<double> epsilon6 = Comparers.Double(1e-6);
+
+        // The anchor is still within the distance threshold, so the georeference should remain unchanged.
+        Assert.That(baseEcef.x + 4999.0, Is.EqualTo(globeAnchor.positionGlobeFixed.x).Using(epsilon6));
+        Assert.That(baseEcef.x, Is.EqualTo(georeference.ecefX).Using(epsilon6));
 
         globeAnchor.positionGlobeFixed = baseEcef + new double3(5010.0, 0, 0);
         yield return null;
 
-        Assert.AreEqual(baseEcef.x + 5010.0, globeAnchor.positionGlobeFixed.x);
-        Assert.AreEqual(baseEcef.x + 5010.0, georeference.ecefX);
+        // The anchor has surpassed the distance threshold, so the georeference should shift to the anchor's ECEF coordinates.
+        Assert.That(baseEcef.x + 5010.0, Is.EqualTo(globeAnchor.positionGlobeFixed.x).Using(epsilon6));
+        Assert.That(globeAnchor.positionGlobeFixed.x, Is.EqualTo(georeference.ecefX).Using(epsilon6));
     }
 
     // Testing a bug where the character controller would cause a jump ahead when the activation distance is hit.
     [UnityTest]
-    public IEnumerator ShiftingOriginWithCharacterController()
+    public IEnumerator ShiftsOriginWithCharacterController()
     {
         double3 baseEcef = new double3(-2694020, -4297355, 3854720);
 
@@ -150,7 +154,6 @@ public class TestCesiumOriginShift
         CesiumGlobeAnchor globeAnchor = goOriginShift.AddComponent<CesiumGlobeAnchor>();
 
         CesiumOriginShift originShift = goOriginShift.AddComponent<CesiumOriginShift>();
-        originShift.useActivationDistance = true;
         originShift.activationDistance = 5000;
 
         CharacterController controller = goOriginShift.AddComponent<CharacterController>();
@@ -161,7 +164,9 @@ public class TestCesiumOriginShift
 
         yield return new WaitForEndOfFrame();
 
-        Assert.AreEqual((float)baseEcef.x, (float)globeAnchor.positionGlobeFixed.x);
+        IEqualityComparer<double> epsilon6 = Comparers.Double(1e-6, 1e-6);
+
+        Assert.That(baseEcef.x, Is.EqualTo(globeAnchor.positionGlobeFixed.x).Using(epsilon6));
 
         // speed per second
         double speed = 1000.0;
@@ -182,11 +187,8 @@ public class TestCesiumOriginShift
             yield return new WaitForEndOfFrame();
 
             globeAnchor.Sync();
-            Assert.AreEqual((float)(previousPositionEcef.x + unitsEcef), (float)globeAnchor.positionGlobeFixed.x);
+            Assert.That(previousPositionEcef.x + unitsEcef, Is.EqualTo(globeAnchor.positionGlobeFixed.x).Using(epsilon6));
             Assert.Less(georeference.ecefX - globeAnchor.positionGlobeFixed.x, 5000.0);
-
-            Debug.Log($"georeference d: ({georeference.ecefX - baseEcef.x}, {georeference.ecefY - baseEcef.y}, {georeference.ecefZ - baseEcef.z})");
-            Debug.Log($"anchor d: {globeAnchor.positionGlobeFixed - baseEcef}");
         }
     }
 }

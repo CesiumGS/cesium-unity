@@ -30,20 +30,6 @@ namespace CesiumForUnity
     public class CesiumOriginShift : MonoBehaviour
     {
         /// <summary>
-        /// When false, the origin will be shifted every frame.
-        /// When true, <see cref="activationDistance"/> will be used to specify the distance from the old
-        /// origin after which the origin will be shifted.
-        /// </summary>
-        public bool useActivationDistance
-        {
-            get => _useActivationDistance;
-            set => _useActivationDistance = value;
-        }
-
-        [SerializeField]
-        private bool _useActivationDistance = false;
-
-        /// <summary>
         /// Specifies the minimum distance in meters from the old origin to the current origin before the 
         /// origin of the parent <see cref="CesiumGeoreference"/> will be shifted.
         /// </summary>
@@ -54,7 +40,7 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        private double _activationDistance = 1.0;
+        private double _activationDistance = 0.0;
 
         void LateUpdate()
         {
@@ -69,15 +55,13 @@ namespace CesiumForUnity
                 return;
             }
 
-            this.UpdateFromEcef(georeference, anchor);
+            this.UpdateFromEcef(georeference, anchor.positionGlobeFixed);
         }
 
         private List<CesiumSubScene> _sublevelsScratch = new List<CesiumSubScene>();
 
-        private void UpdateFromEcef(CesiumGeoreference georeference, CesiumGlobeAnchor anchor)
+        private void UpdateFromEcef(CesiumGeoreference georeference, double3 ecef)
         {
-            double3 ecef = anchor.positionGlobeFixed;
-
             CesiumSubScene closestLevel = null;
             double distanceSquaredToClosest = double.MaxValue;
 
@@ -128,9 +112,9 @@ namespace CesiumForUnity
 
                 double distance = math.length(new double3(georeference.ecefX, georeference.ecefY, georeference.ecefZ) - ecef);
 
-                if (!this.useActivationDistance || distance >= this._activationDistance)
+                if (distance >= this._activationDistance)
                 {
-                    // Update the origin continuously.
+                    // Update the origin if we've surpassed the distance threshold.
                     georeference.SetOriginEarthCenteredEarthFixed(ecef.x, ecef.y, ecef.z);
                     // Make sure the physics system is informed that things have moved
                     Physics.SyncTransforms();
