@@ -486,7 +486,7 @@ namespace CesiumForUnity
             CesiumGlobeAnchor globeAnchor = globeAnchors[globeAnchors.Length - 1];
             globeAnchor.positionGlobeFixed = globeAnchor.positionGlobeFixed;
 
-            CesiumGlobeFlightPath globeFlightPath = CesiumGlobeFlightPath.FromEarthCenteredEarthFixedCoordinates(new double3(0, 0, 0), new double3(0, 0, 0));
+            CesiumSimplePlanarEllipsoidCurve planarEllipsoidCurve = CesiumSimplePlanarEllipsoidCurve.FromEarthCenteredEarthFixedCoordinates(new double3(0, 0, 0), new double3(0, 0, 0));
 
             globeAnchor = go.AddComponent<CesiumGlobeAnchor>();
             globeAnchor.detectTransformChanges = globeAnchor.detectTransformChanges;

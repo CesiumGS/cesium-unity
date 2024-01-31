@@ -1,6 +1,6 @@
 #pragma once
 
-#include <CesiumGeospatial/GlobeFlightPath.h>
+#include <CesiumGeospatial/SimplePlanarEllipsoidCurve.h>
 
 #include <DotNet/Unity/Mathematics/double3.h>
 
@@ -8,7 +8,7 @@
 #include <optional>
 
 namespace DotNet::CesiumForUnity {
-class CesiumGlobeFlightPath;
+class CesiumSimplePlanarEllipsoidCurve;
 } // namespace DotNet::CesiumForUnity
 
 namespace DotNet::Unity::Mathematics {
@@ -17,32 +17,29 @@ struct double3;
 
 namespace CesiumForUnityNative {
 
-class CesiumGlobeFlightPathImpl {
+class CesiumSimplePlanarEllipsoidCurveImpl {
 public:
-  CesiumGlobeFlightPathImpl(
-      const DotNet::CesiumForUnity::CesiumGlobeFlightPath& path);
-  ~CesiumGlobeFlightPathImpl();
+  CesiumSimplePlanarEllipsoidCurveImpl(
+      const DotNet::CesiumForUnity::CesiumSimplePlanarEllipsoidCurve& path);
+  ~CesiumSimplePlanarEllipsoidCurveImpl();
 
   bool CreateFromEarthCenteredEarthFixedCoordinates(
-      const DotNet::CesiumForUnity::CesiumGlobeFlightPath& path,
+      const DotNet::CesiumForUnity::CesiumSimplePlanarEllipsoidCurve& path,
       const DotNet::Unity::Mathematics::double3 sourceEcef,
       const DotNet::Unity::Mathematics::double3 destinationEcef);
 
   bool CreateFromLongitudeLatitudeHeight(
-      const DotNet::CesiumForUnity::CesiumGlobeFlightPath& path,
+      const DotNet::CesiumForUnity::CesiumSimplePlanarEllipsoidCurve& path,
       const DotNet::Unity::Mathematics::double3 sourceLlh,
       const DotNet::Unity::Mathematics::double3 destinationLlh);
 
   DotNet::Unity::Mathematics::double3 GetPosition(
-      const DotNet::CesiumForUnity::CesiumGlobeFlightPath& path,
+      const DotNet::CesiumForUnity::CesiumSimplePlanarEllipsoidCurve& path,
       double percentage,
       double additionalHeight) const;
 
-  double
-  GetLength(const DotNet::CesiumForUnity::CesiumGlobeFlightPath& path) const;
-
 private:
-  std::unique_ptr<CesiumGeospatial::GlobeFlightPath> _flightPath;
+  std::unique_ptr<CesiumGeospatial::SimplePlanarEllipsoidCurve> _curve;
 };
 
 } // namespace CesiumForUnityNative

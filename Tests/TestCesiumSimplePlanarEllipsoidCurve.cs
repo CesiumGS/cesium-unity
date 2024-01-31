@@ -7,16 +7,21 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.TestTools.Utils;
 
-public class TestCesiumGlobeFlightPath
+public class TestCesiumSimplePlanarEllipsoidCurve
 {
     private readonly double3 _philadelphiaEcef = new double3(1253264.69280105, -4732469.91065521, 4075112.40412297);
     private readonly double3 _tokyoEcef = new double3(-3960158.65587452, 3352568.87555906, 3697235.23506459);
 
+    private double3 RelativeToAbsoluteEpsilon(double3 left, double3 right, double relativeEpsilon)
+    {
+        return new double3(relativeEpsilon) * math.max(math.abs(left), math.abs(right));
+    }
+
     [UnityTest]
     public IEnumerator StartAndEndOfPathAreIdenticalToInput()
     {
-        CesiumGlobeFlightPath flightPath = 
-            CesiumGlobeFlightPath.FromEarthCenteredEarthFixedCoordinates(_philadelphiaEcef, _tokyoEcef);
+        CesiumSimplePlanarEllipsoidCurve flightPath =
+            CesiumSimplePlanarEllipsoidCurve.FromEarthCenteredEarthFixedCoordinates(_philadelphiaEcef, _tokyoEcef);
         Assert.IsNotNull(flightPath);
 
         double3 startPosition = flightPath.GetPosition(0.0);
@@ -37,8 +42,8 @@ public class TestCesiumGlobeFlightPath
     [UnityTest]
     public IEnumerator ShouldCalculateMidpointCorrectly()
     {
-        CesiumGlobeFlightPath flightPath = 
-            CesiumGlobeFlightPath.FromEarthCenteredEarthFixedCoordinates(_philadelphiaEcef, _tokyoEcef);
+        CesiumSimplePlanarEllipsoidCurve flightPath =
+            CesiumSimplePlanarEllipsoidCurve.FromEarthCenteredEarthFixedCoordinates(_philadelphiaEcef, _tokyoEcef);
         Assert.IsNotNull(flightPath);
 
         double3 expectedResult = new double3(
@@ -46,11 +51,14 @@ public class TestCesiumGlobeFlightPath
             -1052346.4221710551,
             5923430.4378960524);
         double3 actualResult = flightPath.GetPosition(0.5);
+        double3 epsilons = RelativeToAbsoluteEpsilon(expectedResult, actualResult, 1.0e-6);
 
-        IEqualityComparer<double> doubleComparer = Comparers.Double(1.0e-4);
-        Assert.That(actualResult.x, Is.EqualTo(expectedResult.x).Using(doubleComparer));
-        Assert.That(actualResult.y, Is.EqualTo(expectedResult.y).Using(doubleComparer));
-        Assert.That(actualResult.z, Is.EqualTo(expectedResult.z).Using(doubleComparer));
+        IEqualityComparer<double> xComparer = Comparers.Double(epsilons.x);
+        IEqualityComparer<double> yComparer = Comparers.Double(epsilons.y);
+        IEqualityComparer<double> zComparer = Comparers.Double(epsilons.z);
+        Assert.That(actualResult.x, Is.EqualTo(expectedResult.x).Using(xComparer));
+        Assert.That(actualResult.y, Is.EqualTo(expectedResult.y).Using(yComparer));
+        Assert.That(actualResult.z, Is.EqualTo(expectedResult.z).Using(zComparer));
 
         yield break;
     }

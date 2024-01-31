@@ -134,7 +134,8 @@ namespace CesiumForUnity
 
         private CesiumGeoreference _georeference;
         private CesiumGlobeAnchor _globeAnchor;
-        private CesiumGlobeFlightPath _flightPath;
+        private CesiumSimplePlanarEllipsoidCurve _flightPath;
+        private double _flightPathLength;
 
         private CesiumCameraController _cameraController;
 
@@ -250,7 +251,7 @@ namespace CesiumForUnity
             }
 
             // If we're have it to the end of the flight, or if the flight we're taking isn't actually moving or rotating us at all, we're done.
-            if (flyPercentage == 1.0 || (this._flightPath.Length == 0.0 && this._sourceRotation == this._destinationRotation))
+            if (flyPercentage == 1.0 || (this._flightPathLength == 0.0 && this._sourceRotation == this._destinationRotation))
             {
                 this.CompleteFlight();
                 return;
@@ -332,7 +333,8 @@ namespace CesiumForUnity
             this._destinationRotation = Quaternion.Euler(pitchAtDestination, yawAtDestination, 0.0f);
             this._destinationECEF = destinationECEF;
 
-            _flightPath = CesiumGlobeFlightPath.FromEarthCenteredEarthFixedCoordinates(sourceECEF, destinationECEF);
+            this._flightPath = CesiumSimplePlanarEllipsoidCurve.FromEarthCenteredEarthFixedCoordinates(sourceECEF, destinationECEF);
+            this._flightPathLength = math.length(sourceECEF - destinationECEF);
 
             this._maxHeight = 0.0;
             if (this._flyToAltitudeProfileCurve != null && this._flyToMaximumAltitudeCurve.length > 0)
@@ -340,8 +342,7 @@ namespace CesiumForUnity
                 this._maxHeight = 30000.0;
                 if (this._flyToMaximumAltitudeCurve != null && this._flyToMaximumAltitudeCurve.length > 0)
                 {
-                    double flyToDistance = _flightPath.Length;
-                    this._maxHeight = this._flyToMaximumAltitudeCurve.Evaluate((float)flyToDistance);
+                    this._maxHeight = this._flyToMaximumAltitudeCurve.Evaluate((float)this._flightPathLength);
                 }
             }
 
