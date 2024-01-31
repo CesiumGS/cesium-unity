@@ -81,7 +81,7 @@ namespace Reinterop
             CSharpType csReturnType = CSharpType.FromSymbol(context, returnType);
             CSharpType csInteropReturnType = csReturnType.AsInteropTypeReturn();
 
-            // Rewrite methods that return a blittable struct to instead taking a pointer to one.
+            // Rewrite methods that return a blittable struct to instead take a pointer to one.
             // See Interop.RewriteStructReturn in this file for the C++ side of this and more
             // explanation of why it's needed.
             bool hasStructRewrite = false;
@@ -600,7 +600,9 @@ namespace Reinterop
 
                 return true;
             }
-            else if (returnType.Kind == InteropTypeKind.Nullable && interopReturnType.Kind == InteropTypeKind.BlittableStruct)
+            else if (returnType.Kind == InteropTypeKind.Nullable &&
+                     (interopReturnType.Kind == InteropTypeKind.BlittableStruct ||
+                      interopReturnType.Kind == InteropTypeKind.Primitive))
             {
                 CppType originalInteropReturnType = interopReturnType;
                 interopReturnType = CppType.UInt8;

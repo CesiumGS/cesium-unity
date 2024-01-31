@@ -2,9 +2,12 @@
 
 ### ? - ?
 
-##### Additions :tada:
+##### Fixes :wrench:
 
-- Improved `KHR_texture_transform` extension by moving it from native to Unity. This makes the texture transformations more efficient and reliable. The shader now handles the scale and offset values.
+- Removed the "Universal Additional Camera Data" script from DynamicCamera, as it shows up as a missing script in other render pipelines.
+- Fixed a bug where adding a `CesiumSubScene` as the child of an existing `CesiumGeoreference` in editor would cause the parent `CesiumGeoreference` to have its coordinates reset to the default.
+- Fixed the "DynamicCamera is not nested inside a game object with a CesiumGeoreference" warning when adding a new DynamicCamera in the editor.
+- `KHR_texture_transform` is now applied in ShaderGraph, instead of being baked directly into texture coordinates.
 
 ### v1.7.1 - 2023-12-14
 
@@ -19,7 +22,6 @@
 - Added support for multiple Cesium ion servers by creating `CesiumIonServer` assets.
 
 In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.27.3 to v0.27.4. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
->>>>>>> main
 
 ### v1.6.4 - 2023-10-26
 
