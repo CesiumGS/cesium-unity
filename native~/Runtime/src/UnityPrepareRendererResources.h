@@ -111,7 +111,7 @@ public:
 
 private:
   ::DotNet::UnityEngine::GameObject _tileset;
-  CesiumShaderProperties _shaderProperty;
+  CesiumShaderProperties _shaderProperties;
 };
 
 } // namespace CesiumForUnityNative

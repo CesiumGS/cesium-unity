@@ -10,6 +10,7 @@ namespace CesiumForUnityNative {
 class CesiumShaderProperties {
 public:
   CesiumShaderProperties();
+
   const int32_t getBaseColorFactorID() const { return baseColorFactorID; }
   const int32_t getMetallicRoughnessFactorID() const {
     return metallicRoughnessFactorID;
@@ -40,6 +41,14 @@ public:
     return emissiveTextureCoordinateIndexID;
   }
 
+  const int32_t getBaseColorMetallicRoughnessRotationID() const {
+    return baseColorMetallicRoughnessRotationID;
+  }
+  const int32_t getEmissiveNormalRotationID() const {
+    return emissiveNormalRotationID;
+  }
+  const int32_t getOcclusionRotationID() const { return occlusionRotationID; }
+
   const int32_t getOverlayTextureCoordinateIndexID(int32_t index) {
     return overlayTextureCoordinateIndexID[index];
   }
@@ -66,6 +75,10 @@ private:
   int32_t emissiveFactorID;
   int32_t emissiveTextureID;
   int32_t emissiveTextureCoordinateIndexID;
+
+  int32_t baseColorMetallicRoughnessRotationID;
+  int32_t emissiveNormalRotationID;
+  int32_t occlusionRotationID;
 
   std::vector<int32_t> overlayTextureCoordinateIndexID;
   std::vector<int32_t> overlayTextureID;

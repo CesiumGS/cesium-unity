@@ -34,6 +34,13 @@ CesiumShaderProperties::CesiumShaderProperties() {
   emissiveTextureCoordinateIndexID =
       Shader::PropertyToID(System::String("_emissiveTextureCoordinateIndex"));
 
+  baseColorMetallicRoughnessRotationID = Shader::PropertyToID(
+      System::String("_baseColorMetallicRoughnessRotation"));
+  emissiveNormalRotationID =
+      Shader::PropertyToID(System::String("_emissiveNormalRotation"));
+  occlusionRotationID = Shader::PropertyToID(
+      System::String("_occlusionRotation"));
+
   overlayTextureCoordinateIndexID = {
       Shader::PropertyToID(System::String("_overlay0TextureCoordinateIndex")),
       Shader::PropertyToID(System::String("_overlay1TextureCoordinateIndex")),
