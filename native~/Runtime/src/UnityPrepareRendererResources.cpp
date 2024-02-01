@@ -1363,6 +1363,8 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         meshRenderer.material(material);
 
         if (pMaterial) {
+          CESIUM_TRACE("Cesium::CreateMaterials");
+
           const CesiumGltf::MaterialPBRMetallicRoughness& pbr =
               pMaterial->pbrMetallicRoughness
                   ? *(pMaterial->pbrMetallicRoughness)
@@ -1370,190 +1372,188 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
           //// Add base color factor and metallic-roughness factor regardless
           //// of whether the textures are present.
-          // const std::vector<double>& baseColorFactor = pbr.baseColorFactor;
-          // material.SetVector(
-          //    shaderProperties.getBaseColorFactorID(),
-          //    gltfVectorToUnityVector(baseColorFactor, 1.0f));
+           const std::vector<double>& baseColorFactor = pbr.baseColorFactor;
+           material.SetVector(
+              shaderProperties.getBaseColorFactorID(),
+              gltfVectorToUnityVector(baseColorFactor, 1.0f));
 
-          // UnityEngine::Vector4 metallicRoughnessFactor;
-          // material.SetVector(
-          //    shaderProperties.getMetallicRoughnessFactorID(),
-          //    {(float)pbr.metallicFactor, (float)pbr.roughnessFactor, 0, 0});
+           UnityEngine::Vector4 metallicRoughnessFactor;
+           material.SetVector(
+              shaderProperties.getMetallicRoughnessFactorID(),
+              {(float)pbr.metallicFactor, (float)pbr.roughnessFactor, 0, 0});
 
-          // const std::optional<TextureInfo>& baseColorTexture =
-          //    pbr.baseColorTexture;
-          // if (baseColorTexture) {
-          //  auto texCoordIndexIt =
-          //      primitiveInfo.uvIndexMap.find(baseColorTexture->texCoord);
-          //  if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
-          //    UnityEngine::Texture texture =
-          //        TextureLoader::loadTexture(gltf, baseColorTexture->index);
-          //    if (texture != nullptr) {
-          //      material.SetTexture(
-          //          shaderProperties.getBaseColorTextureID(),
-          //          texture);
-          //      material.SetFloat(
-          //          shaderProperties.getBaseColorTextureCoordinateIndexID(),
-          //          static_cast<float>(texCoordIndexIt->second));
-          //    }
-          //  }
-          //}
+           const std::optional<TextureInfo>& baseColorTexture =
+              pbr.baseColorTexture;
+           if (baseColorTexture) {
+            auto texCoordIndexIt =
+                primitiveInfo.uvIndexMap.find(baseColorTexture->texCoord);
+            if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
+              UnityEngine::Texture texture =
+                  TextureLoader::loadTexture(gltf, baseColorTexture->index);
+              if (texture != nullptr) {
+                material.SetTexture(
+                    shaderProperties.getBaseColorTextureID(),
+                    texture);
+                material.SetFloat(
+                    shaderProperties.getBaseColorTextureCoordinateIndexID(),
+                    static_cast<float>(texCoordIndexIt->second));
+              }
+            }
+          }
 
-          // const std::optional<TextureInfo>& metallicRoughness =
-          //    pbr.metallicRoughnessTexture;
-          // if (metallicRoughness) {
-          //  auto texCoordIndexIt =
-          //      primitiveInfo.uvIndexMap.find(metallicRoughness->texCoord);
-          //  if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
-          //    UnityEngine::Texture texture =
-          //        TextureLoader::loadTexture(gltf, metallicRoughness->index);
-          //    if (texture != nullptr) {
-          //      material.SetTexture(
-          //          shaderProperties.getMetallicRoughnessTextureID(),
-          //          texture);
-          //      material.SetFloat(
-          //          shaderProperties
-          //              .getMetallicRoughnessTextureCoordinateIndexID(),
-          //          static_cast<float>(texCoordIndexIt->second));
-          //    }
-          //  }
-          //}
+           const std::optional<TextureInfo>& metallicRoughness =
+              pbr.metallicRoughnessTexture;
+           if (metallicRoughness) {
+            auto texCoordIndexIt =
+                primitiveInfo.uvIndexMap.find(metallicRoughness->texCoord);
+            if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
+              UnityEngine::Texture texture =
+                  TextureLoader::loadTexture(gltf, metallicRoughness->index);
+              if (texture != nullptr) {
+                material.SetTexture(
+                    shaderProperties.getMetallicRoughnessTextureID(),
+                    texture);
+                material.SetFloat(
+                    shaderProperties
+                        .getMetallicRoughnessTextureCoordinateIndexID(),
+                    static_cast<float>(texCoordIndexIt->second));
+              }
+            }
+          }
 
-          // if (pMaterial->normalTexture) {
-          //  auto texCoordIndexIt = primitiveInfo.uvIndexMap.find(
-          //      pMaterial->normalTexture->texCoord);
-          //  if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
-          //    UnityEngine::Texture texture = TextureLoader::loadTexture(
-          //        gltf,
-          //        pMaterial->normalTexture->index);
-          //    if (texture != nullptr) {
-          //      material.SetTexture(
-          //          shaderProperties.getNormalMapTextureID(),
-          //          texture);
-          //      material.SetFloat(
-          //          shaderProperties.getNormalMapTextureCoordinateIndexID(),
-          //          static_cast<float>(texCoordIndexIt->second));
-          //      material.SetFloat(
-          //          shaderProperties.getNormalMapScaleID(),
-          //          static_cast<float>(pMaterial->normalTexture->scale));
-          //    }
-          //  }
-          //}
+           if (pMaterial->normalTexture) {
+            auto texCoordIndexIt = primitiveInfo.uvIndexMap.find(
+                pMaterial->normalTexture->texCoord);
+            if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
+              UnityEngine::Texture texture = TextureLoader::loadTexture(
+                  gltf,
+                  pMaterial->normalTexture->index);
+              if (texture != nullptr) {
+                material.SetTexture(
+                    shaderProperties.getNormalMapTextureID(),
+                    texture);
+                material.SetFloat(
+                    shaderProperties.getNormalMapTextureCoordinateIndexID(),
+                    static_cast<float>(texCoordIndexIt->second));
+                material.SetFloat(
+                    shaderProperties.getNormalMapScaleID(),
+                    static_cast<float>(pMaterial->normalTexture->scale));
+              }
+            }
+          }
 
-          // if (pMaterial->occlusionTexture) {
-          //  auto texCoordIndexIt = primitiveInfo.uvIndexMap.find(
-          //      pMaterial->occlusionTexture->texCoord);
-          //  if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
-          //    UnityEngine::Texture texture = TextureLoader::loadTexture(
-          //        gltf,
-          //        pMaterial->occlusionTexture->index);
-          //    if (texture != nullptr) {
-          //      material.SetTexture(
-          //          shaderProperties.getOcclusionTextureID(),
-          //          texture);
-          //      material.SetFloat(
-          //          shaderProperties.getOcclusionTextureCoordinateIndexID(),
-          //          static_cast<float>(texCoordIndexIt->second));
-          //      material.SetFloat(
-          //          shaderProperties.getOcclusionStrengthID(),
-          //          static_cast<float>(pMaterial->occlusionTexture->strength));
-          //    }
-          //  }
-          //}
+           if (pMaterial->occlusionTexture) {
+            auto texCoordIndexIt = primitiveInfo.uvIndexMap.find(
+                pMaterial->occlusionTexture->texCoord);
+            if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
+              UnityEngine::Texture texture = TextureLoader::loadTexture(
+                  gltf,
+                  pMaterial->occlusionTexture->index);
+              if (texture != nullptr) {
+                material.SetTexture(
+                    shaderProperties.getOcclusionTextureID(),
+                    texture);
+                material.SetFloat(
+                    shaderProperties.getOcclusionTextureCoordinateIndexID(),
+                    static_cast<float>(texCoordIndexIt->second));
+                material.SetFloat(
+                    shaderProperties.getOcclusionStrengthID(),
+                    static_cast<float>(pMaterial->occlusionTexture->strength));
+              }
+            }
+          }
 
-          // const std::vector<double>& emissiveFactor =
-          // pMaterial->emissiveFactor; material.SetVector(
-          //    shaderProperties.getEmissiveFactorID(),
-          //    gltfVectorToUnityVector(emissiveFactor, 0.0f));
-          // if (pMaterial->emissiveTexture) {
-          //  auto texCoordIndexIt = primitiveInfo.uvIndexMap.find(
-          //      pMaterial->emissiveTexture->texCoord);
-          //  if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
-          //    UnityEngine::Texture texture = TextureLoader::loadTexture(
-          //        gltf,
-          //        pMaterial->emissiveTexture->index);
-          //    if (texture != nullptr) {
-          //      material.SetTexture(
-          //          shaderProperties.getEmissiveTextureID(),
-          //          texture);
-          //      material.SetFloat(
-          //          shaderProperties.getEmissiveTextureCoordinateIndexID(),
-          //          static_cast<float>(texCoordIndexIt->second));
-          //    }
-          //  }
-          //}
+           const std::vector<double>& emissiveFactor =
+           pMaterial->emissiveFactor; material.SetVector(
+              shaderProperties.getEmissiveFactorID(),
+              gltfVectorToUnityVector(emissiveFactor, 0.0f));
+           if (pMaterial->emissiveTexture) {
+            auto texCoordIndexIt = primitiveInfo.uvIndexMap.find(
+                pMaterial->emissiveTexture->texCoord);
+            if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
+              UnityEngine::Texture texture = TextureLoader::loadTexture(
+                  gltf,
+                  pMaterial->emissiveTexture->index);
+              if (texture != nullptr) {
+                material.SetTexture(
+                    shaderProperties.getEmissiveTextureID(),
+                    texture);
+                material.SetFloat(
+                    shaderProperties.getEmissiveTextureCoordinateIndexID(),
+                    static_cast<float>(texCoordIndexIt->second));
+              }
+            }
+          }
 
-          // const ExtensionKhrTextureTransform* pBaseColorTextureTransform =
-          //    pbr.baseColorTexture
-          //        ? pbr.baseColorTexture
-          //              ->getExtension<ExtensionKhrTextureTransform>()
-          //        : nullptr;
-          // if (pBaseColorTextureTransform) {
-          //  UnityEngine::Vector2 offset{
-          //      (float)pBaseColorTextureTransform->offset[0],
-          //      (float)pBaseColorTextureTransform->offset[1]};
-          //  UnityEngine::Vector2 scale{
-          //      (float)pBaseColorTextureTransform->scale[0],
-          //      (float)pBaseColorTextureTransform->scale[1]};
-          //  material.SetTextureOffset(
-          //      shaderProperties.getBaseColorTextureID(),
-          //      offset);
-          //  material.SetTextureScale(
-          //      shaderProperties.getBaseColorTextureID(),
-          //      scale);
-          //}
+           const ExtensionKhrTextureTransform* pBaseColorTextureTransform =
+              pbr.baseColorTexture
+                  ? pbr.baseColorTexture
+                        ->getExtension<ExtensionKhrTextureTransform>()
+                  : nullptr;
+           if (pBaseColorTextureTransform) {
+            UnityEngine::Vector2 offset{
+                (float)pBaseColorTextureTransform->offset[0],
+                (float)pBaseColorTextureTransform->offset[1]};
+            UnityEngine::Vector2 scale{
+                (float)pBaseColorTextureTransform->scale[0],
+                (float)pBaseColorTextureTransform->scale[1]};
+            material.SetTextureOffset(
+                shaderProperties.getBaseColorTextureID(),
+                offset);
+            material.SetTextureScale(
+                shaderProperties.getBaseColorTextureID(),
+                scale);
+          }
 
-          // const ExtensionKhrTextureTransform*
-          //    pMetallicRoughnessTextureTransform =
-          //        pbr.metallicRoughnessTexture
-          //            ? pbr.metallicRoughnessTexture
-          //                  ->getExtension<ExtensionKhrTextureTransform>()
-          //            : nullptr;
-          // if (pMetallicRoughnessTextureTransform) {
-          //  UnityEngine::Vector2 offset{
-          //      (float)pMetallicRoughnessTextureTransform->offset[0],
-          //      (float)pMetallicRoughnessTextureTransform->offset[1]};
-          //  UnityEngine::Vector2 scale{
-          //      (float)pMetallicRoughnessTextureTransform->scale[0],
-          //      (float)pMetallicRoughnessTextureTransform->scale[1]};
-          //  material.SetTextureOffset(
-          //      shaderProperties.getMetallicRoughnessTextureID(),
-          //      offset);
-          //  material.SetTextureScale(
-          //      shaderProperties.getMetallicRoughnessTextureID(),
-          //      scale);
-          //}
+           const ExtensionKhrTextureTransform*
+              pMetallicRoughnessTextureTransform =
+                  pbr.metallicRoughnessTexture
+                      ? pbr.metallicRoughnessTexture
+                            ->getExtension<ExtensionKhrTextureTransform>()
+                      : nullptr;
+           if (pMetallicRoughnessTextureTransform) {
+            UnityEngine::Vector2 offset{
+                (float)pMetallicRoughnessTextureTransform->offset[0],
+                (float)pMetallicRoughnessTextureTransform->offset[1]};
+            UnityEngine::Vector2 scale{
+                (float)pMetallicRoughnessTextureTransform->scale[0],
+                (float)pMetallicRoughnessTextureTransform->scale[1]};
+            material.SetTextureOffset(
+                shaderProperties.getMetallicRoughnessTextureID(),
+                offset);
+            material.SetTextureScale(
+                shaderProperties.getMetallicRoughnessTextureID(),
+                scale);
+          }
 
-          // if (pBaseColorTextureTransform ||
-          //    pMetallicRoughnessTextureTransform) {
-          //  UnityEngine::Vector4 rotationValues{0.0f, 1.0f, 0.0f, 1.0f};
-          //  if (pBaseColorTextureTransform) {
-          //    rotationValues.x =
-          //        float(glm::sin(pBaseColorTextureTransform->rotation));
-          //    rotationValues.y =
-          //        float(glm::cos(pBaseColorTextureTransform->rotation));
-          //  }
-          //  if (pMetallicRoughnessTextureTransform) {
-          //    rotationValues.z =
-          //        float(glm::sin(pMetallicRoughnessTextureTransform->rotation));
-          //    rotationValues.w =
-          //        float(glm::cos(pMetallicRoughnessTextureTransform->rotation));
-          //  }
+           if (pBaseColorTextureTransform ||
+              pMetallicRoughnessTextureTransform) {
+            UnityEngine::Vector4 rotationValues{0.0f, 1.0f, 0.0f, 1.0f};
+            if (pBaseColorTextureTransform) {
+              rotationValues.x =
+                  float(glm::sin(pBaseColorTextureTransform->rotation));
+              rotationValues.y =
+                  float(glm::cos(pBaseColorTextureTransform->rotation));
+            }
+            if (pMetallicRoughnessTextureTransform) {
+              rotationValues.z =
+                  float(glm::sin(pMetallicRoughnessTextureTransform->rotation));
+              rotationValues.w =
+                  float(glm::cos(pMetallicRoughnessTextureTransform->rotation));
+            }
 
-          //  material.SetVector(
-          //      shaderProperties.getBaseColorMetallicRoughnessRotationID(),
-          //      rotationValues);
-          //}
+            material.SetVector(
+                shaderProperties.getBaseColorMetallicRoughnessRotationID(),
+                rotationValues);
+          }
 
-          CESIUM_TRACE("Cesium::CreateMaterials");
-
-          setGltfMaterialParameterValues(
-              gltf,
-              primitiveInfo,
-              *pMaterial,
-              pbr,
-              material,
-              shaderProperties);
+          //setGltfMaterialParameterValues(
+          //    gltf,
+          //    primitiveInfo,
+          //    *pMaterial,
+          //    pbr,
+          //    material,
+          //    shaderProperties);
         }
 
         // Initialize overlay UVs to all use index 0, attachRasterTile will
