@@ -1007,9 +1007,15 @@ void setGltfMaterialParameterValues(
     const CesiumGltf::Model& model,
     const CesiumPrimitiveInfo& primitiveInfo,
     const CesiumGltf::Material& gltfMaterial,
-    const CesiumGltf::MaterialPBRMetallicRoughness& pbr,
     const UnityEngine::Material& unityMaterial,
     const CesiumShaderProperties& shaderProperties) {
+  CESIUM_TRACE("Cesium::CreateMaterials");
+
+  const CesiumGltf::MaterialPBRMetallicRoughness& pbr =
+      gltfMaterial.pbrMetallicRoughness
+          ? gltfMaterial.pbrMetallicRoughness.value()
+          : defaultPbrMetallicRoughness;
+
   // Add base color factor and metallic-roughness factor regardless
   // of whether the textures are present.
   const std::vector<double>& baseColorFactor = pbr.baseColorFactor;
@@ -1443,133 +1449,10 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         meshRenderer.material(material);
 
         if (pMaterial) {
-          CESIUM_TRACE("Cesium::CreateMaterials");
-
-          const CesiumGltf::MaterialPBRMetallicRoughness& pbr =
-              pMaterial->pbrMetallicRoughness
-                  ? pMaterial->pbrMetallicRoughness.value()
-                  : defaultPbrMetallicRoughness;
-
-          //// Add base color factor and metallic-roughness factor regardless
-          //// of whether the textures are present.
-          // const std::vector<double>& baseColorFactor = pbr.baseColorFactor;
-          // material.SetVector(
-          //    shaderProperties.getBaseColorFactorID(),
-          //    gltfVectorToUnityVector(baseColorFactor, 1.0f));
-
-          // UnityEngine::Vector4 metallicRoughnessFactor;
-          // material.SetVector(
-          //    shaderProperties.getMetallicRoughnessFactorID(),
-          //    {(float)pbr.metallicFactor, (float)pbr.roughnessFactor, 0, 0});
-
-          // const std::optional<TextureInfo>& baseColorTexture =
-          //    pbr.baseColorTexture;
-          // if (baseColorTexture) {
-          //  auto texCoordIndexIt =
-          //      primitiveInfo.uvIndexMap.find(baseColorTexture->texCoord);
-          //  if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
-          //    UnityEngine::Texture texture =
-          //        TextureLoader::loadTexture(gltf, baseColorTexture->index);
-          //    if (texture != nullptr) {
-          //      material.SetTexture(
-          //          shaderProperties.getBaseColorTextureID(),
-          //          texture);
-          //      material.SetFloat(
-          //          shaderProperties.getBaseColorTextureCoordinateIndexID(),
-          //          static_cast<float>(texCoordIndexIt->second));
-          //    }
-          //  }
-          //}
-
-          // const std::optional<TextureInfo>& metallicRoughness =
-          //    pbr.metallicRoughnessTexture;
-          // if (metallicRoughness) {
-          //  auto texCoordIndexIt =
-          //      primitiveInfo.uvIndexMap.find(metallicRoughness->texCoord);
-          //  if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
-          //    UnityEngine::Texture texture =
-          //        TextureLoader::loadTexture(gltf, metallicRoughness->index);
-          //    if (texture != nullptr) {
-          //      material.SetTexture(
-          //          shaderProperties.getMetallicRoughnessTextureID(),
-          //          texture);
-          //      material.SetFloat(
-          //          shaderProperties
-          //              .getMetallicRoughnessTextureCoordinateIndexID(),
-          //          static_cast<float>(texCoordIndexIt->second));
-          //    }
-          //  }
-          //}
-
-          // if (pMaterial->normalTexture) {
-          //  auto texCoordIndexIt = primitiveInfo.uvIndexMap.find(
-          //      pMaterial->normalTexture->texCoord);
-          //  if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
-          //    UnityEngine::Texture texture = TextureLoader::loadTexture(
-          //        gltf,
-          //        pMaterial->normalTexture->index);
-          //    if (texture != nullptr) {
-          //      material.SetTexture(
-          //          shaderProperties.getNormalMapTextureID(),
-          //          texture);
-          //      material.SetFloat(
-          //          shaderProperties.getNormalMapTextureCoordinateIndexID(),
-          //          static_cast<float>(texCoordIndexIt->second));
-          //      material.SetFloat(
-          //          shaderProperties.getNormalMapScaleID(),
-          //          static_cast<float>(pMaterial->normalTexture->scale));
-          //    }
-          //  }
-          //}
-
-          // if (pMaterial->occlusionTexture) {
-          //  auto texCoordIndexIt = primitiveInfo.uvIndexMap.find(
-          //      pMaterial->occlusionTexture->texCoord);
-          //  if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
-          //    UnityEngine::Texture texture = TextureLoader::loadTexture(
-          //        gltf,
-          //        pMaterial->occlusionTexture->index);
-          //    if (texture != nullptr) {
-          //      material.SetTexture(
-          //          shaderProperties.getOcclusionTextureID(),
-          //          texture);
-          //      material.SetFloat(
-          //          shaderProperties.getOcclusionTextureCoordinateIndexID(),
-          //          static_cast<float>(texCoordIndexIt->second));
-          //      material.SetFloat(
-          //          shaderProperties.getOcclusionStrengthID(),
-          //          static_cast<float>(pMaterial->occlusionTexture->strength));
-          //    }
-          //  }
-          //}
-
-          // const std::vector<double>& emissiveFactor =
-          // pMaterial->emissiveFactor; material.SetVector(
-          //    shaderProperties.getEmissiveFactorID(),
-          //    gltfVectorToUnityVector(emissiveFactor, 0.0f));
-          // if (pMaterial->emissiveTexture) {
-          //  auto texCoordIndexIt = primitiveInfo.uvIndexMap.find(
-          //      pMaterial->emissiveTexture->texCoord);
-          //  if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
-          //    UnityEngine::Texture texture = TextureLoader::loadTexture(
-          //        gltf,
-          //        pMaterial->emissiveTexture->index);
-          //    if (texture != nullptr) {
-          //      material.SetTexture(
-          //          shaderProperties.getEmissiveTextureID(),
-          //          texture);
-          //      material.SetFloat(
-          //          shaderProperties.getEmissiveTextureCoordinateIndexID(),
-          //          static_cast<float>(texCoordIndexIt->second));
-          //    }
-          //  }
-          //}
-
           setGltfMaterialParameterValues(
               gltf,
               primitiveInfo,
               *pMaterial,
-              pbr,
               material,
               shaderProperties);
         }
