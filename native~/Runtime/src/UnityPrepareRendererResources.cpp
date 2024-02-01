@@ -1278,8 +1278,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
        &pMetadataComponent,
        &tile,
        &shaderProperties = this->_shaderProperties,
-       tilesetLayer = this->_tileset.layer(),
-       this](
+       tilesetLayer = this->_tileset.layer()](
           const Model& gltf,
           const Node& node,
           const Mesh& mesh,
@@ -1367,24 +1366,24 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
           const CesiumGltf::MaterialPBRMetallicRoughness& pbr =
               pMaterial->pbrMetallicRoughness
-                  ? *(pMaterial->pbrMetallicRoughness)
+                  ? pMaterial->pbrMetallicRoughness.value()
                   : defaultPbrMetallicRoughness;
 
           //// Add base color factor and metallic-roughness factor regardless
           //// of whether the textures are present.
-           const std::vector<double>& baseColorFactor = pbr.baseColorFactor;
-           material.SetVector(
+          const std::vector<double>& baseColorFactor = pbr.baseColorFactor;
+          material.SetVector(
               shaderProperties.getBaseColorFactorID(),
               gltfVectorToUnityVector(baseColorFactor, 1.0f));
 
-           UnityEngine::Vector4 metallicRoughnessFactor;
-           material.SetVector(
+          UnityEngine::Vector4 metallicRoughnessFactor;
+          material.SetVector(
               shaderProperties.getMetallicRoughnessFactorID(),
               {(float)pbr.metallicFactor, (float)pbr.roughnessFactor, 0, 0});
 
-           const std::optional<TextureInfo>& baseColorTexture =
+          const std::optional<TextureInfo>& baseColorTexture =
               pbr.baseColorTexture;
-           if (baseColorTexture) {
+          if (baseColorTexture) {
             auto texCoordIndexIt =
                 primitiveInfo.uvIndexMap.find(baseColorTexture->texCoord);
             if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
@@ -1401,9 +1400,9 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             }
           }
 
-           const std::optional<TextureInfo>& metallicRoughness =
+          const std::optional<TextureInfo>& metallicRoughness =
               pbr.metallicRoughnessTexture;
-           if (metallicRoughness) {
+          if (metallicRoughness) {
             auto texCoordIndexIt =
                 primitiveInfo.uvIndexMap.find(metallicRoughness->texCoord);
             if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
@@ -1421,7 +1420,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             }
           }
 
-           if (pMaterial->normalTexture) {
+          if (pMaterial->normalTexture) {
             auto texCoordIndexIt = primitiveInfo.uvIndexMap.find(
                 pMaterial->normalTexture->texCoord);
             if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
@@ -1442,7 +1441,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             }
           }
 
-           if (pMaterial->occlusionTexture) {
+          if (pMaterial->occlusionTexture) {
             auto texCoordIndexIt = primitiveInfo.uvIndexMap.find(
                 pMaterial->occlusionTexture->texCoord);
             if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
@@ -1463,11 +1462,11 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             }
           }
 
-           const std::vector<double>& emissiveFactor =
-           pMaterial->emissiveFactor; material.SetVector(
+          const std::vector<double>& emissiveFactor = pMaterial->emissiveFactor;
+          material.SetVector(
               shaderProperties.getEmissiveFactorID(),
               gltfVectorToUnityVector(emissiveFactor, 0.0f));
-           if (pMaterial->emissiveTexture) {
+          if (pMaterial->emissiveTexture) {
             auto texCoordIndexIt = primitiveInfo.uvIndexMap.find(
                 pMaterial->emissiveTexture->texCoord);
             if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
@@ -1485,12 +1484,12 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             }
           }
 
-           const ExtensionKhrTextureTransform* pBaseColorTextureTransform =
+          const ExtensionKhrTextureTransform* pBaseColorTextureTransform =
               pbr.baseColorTexture
                   ? pbr.baseColorTexture
                         ->getExtension<ExtensionKhrTextureTransform>()
                   : nullptr;
-           if (pBaseColorTextureTransform) {
+          if (pBaseColorTextureTransform) {
             UnityEngine::Vector2 offset{
                 (float)pBaseColorTextureTransform->offset[0],
                 (float)pBaseColorTextureTransform->offset[1]};
@@ -1505,13 +1504,13 @@ void* UnityPrepareRendererResources::prepareInMainThread(
                 scale);
           }
 
-           const ExtensionKhrTextureTransform*
+          const ExtensionKhrTextureTransform*
               pMetallicRoughnessTextureTransform =
                   pbr.metallicRoughnessTexture
                       ? pbr.metallicRoughnessTexture
                             ->getExtension<ExtensionKhrTextureTransform>()
                       : nullptr;
-           if (pMetallicRoughnessTextureTransform) {
+          if (pMetallicRoughnessTextureTransform) {
             UnityEngine::Vector2 offset{
                 (float)pMetallicRoughnessTextureTransform->offset[0],
                 (float)pMetallicRoughnessTextureTransform->offset[1]};
@@ -1526,7 +1525,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
                 scale);
           }
 
-           if (pBaseColorTextureTransform ||
+          if (pBaseColorTextureTransform ||
               pMetallicRoughnessTextureTransform) {
             UnityEngine::Vector4 rotationValues{0.0f, 1.0f, 0.0f, 1.0f};
             if (pBaseColorTextureTransform) {
@@ -1547,7 +1546,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
                 rotationValues);
           }
 
-          //setGltfMaterialParameterValues(
+          // setGltfMaterialParameterValues(
           //    gltf,
           //    primitiveInfo,
           //    *pMaterial,
