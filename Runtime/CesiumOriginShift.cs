@@ -1,6 +1,6 @@
-using UnityEngine;
 using System.Collections.Generic;
 using Unity.Mathematics;
+using UnityEngine;
 
 namespace CesiumForUnity
 {
@@ -29,6 +29,30 @@ namespace CesiumForUnity
     [IconAttribute("Packages/com.cesium.unity/Editor/Resources/Cesium-24x24.png")]
     public class CesiumOriginShift : MonoBehaviour
     {
+        /// <summary>
+        /// The maximum distance between the origin of the Unity coordinate system and
+        /// the game object to which this component is attached. When this distance is
+        /// exceeded, the <see cref="CesiumGeoreference"/> origin is shifted to bring it
+        /// close to the game object.
+        /// </summary>
+        /// <remarks>
+        /// When the value of this property is 0.0, the origin is shifted continuously.
+        /// </remarks>
+        public double distance
+        {
+            get => _distance;
+            set => _distance = value;
+        }
+
+        [SerializeField]
+        [Min(0)]
+        [Tooltip("The maximum distance between the origin of the Unity coordinate system and " +
+                 "the game object to which this component is attached. When this distance is" +
+                 "exceeded, the CesiumGeoreference origin is shifted to bring it close to the " +
+                 "game object.\n\n" +
+                 "When the value of this property is 0.0, the origin is shifted continuously.")]
+        private double _distance = 0.0;
+
         void LateUpdate()
         {
             CesiumGeoreference georeference = this.GetComponentInParent<CesiumGeoreference>();
@@ -97,10 +121,16 @@ namespace CesiumForUnity
                     }
                 }
 
-                // Update the origin continuously.
-                georeference.SetOriginEarthCenteredEarthFixed(ecef.x, ecef.y, ecef.z);
+                double distance = math.length(new double3(georeference.ecefX, georeference.ecefY, georeference.ecefZ) - ecef);
 
-                if (deactivatedAnySublevel)
+                if (distance >= this._distance)
+                {
+                    // Update the origin if we've surpassed the distance threshold.
+                    georeference.SetOriginEarthCenteredEarthFixed(ecef.x, ecef.y, ecef.z);
+                    // Make sure the physics system is informed that things have moved
+                    Physics.SyncTransforms();
+                }
+                else if (deactivatedAnySublevel)
                 {
                     Physics.SyncTransforms();
                 }
