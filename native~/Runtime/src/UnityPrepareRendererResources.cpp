@@ -1191,6 +1191,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
               if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
                 UnityEngine::Texture texture =
                     TextureLoader::loadTexture(gltf, baseColorTexture->index);
+                texture.hideFlags(DotNet::UnityEngine::HideFlags::DontSave);
                 if (texture != nullptr) {
                   material.SetTexture(
                       shaderProperty.getBaseColorTextureID(),
@@ -1210,6 +1211,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
               if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
                 UnityEngine::Texture texture =
                     TextureLoader::loadTexture(gltf, metallicRoughness->index);
+                texture.hideFlags(DotNet::UnityEngine::HideFlags::DontSave);
                 if (texture != nullptr) {
                   material.SetTexture(
                       shaderProperty.getMetallicRoughnessTextureID(),
@@ -1230,6 +1232,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
               UnityEngine::Texture texture = TextureLoader::loadTexture(
                   gltf,
                   pMaterial->normalTexture->index);
+              texture.hideFlags(DotNet::UnityEngine::HideFlags::DontSave);
               if (texture != nullptr) {
                 material.SetTexture(
                     shaderProperty.getNormalMapTextureID(),
@@ -1251,6 +1254,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
               UnityEngine::Texture texture = TextureLoader::loadTexture(
                   gltf,
                   pMaterial->occlusionTexture->index);
+              texture.hideFlags(DotNet::UnityEngine::HideFlags::DontSave);
               if (texture != nullptr) {
                 material.SetTexture(
                     shaderProperty.getOcclusionTextureID(),
@@ -1287,6 +1291,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
               UnityEngine::Texture texture = TextureLoader::loadTexture(
                   gltf,
                   pMaterial->emissiveTexture->index);
+              texture.hideFlags(DotNet::UnityEngine::HideFlags::DontSave);
               if (texture != nullptr) {
                 material.SetTexture(
                     shaderProperty.getEmissiveTextureID(),
@@ -1387,10 +1392,14 @@ void freePrimitiveGameObject(
     for (int32_t i = 0, len = textureIDs.Count(); i < len; ++i) {
       int32_t textureID = textureIDs[i];
       UnityEngine::Texture texture = material.GetTexture(textureID);
-      if (texture != nullptr)
+      std::string name = texture == nullptr ? "" : texture.name().ToStlString();
+      if (texture != nullptr && (texture.hideFlags() & UnityEngine::HideFlags::DontSave)) {
         UnityLifetime::Destroy(texture);
+      }
     }
 
+    std::string materialName =
+        material == nullptr ? "" : material.name().ToStlString();
     UnityLifetime::Destroy(material);
   }
 
