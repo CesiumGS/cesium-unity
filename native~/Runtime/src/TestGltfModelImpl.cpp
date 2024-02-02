@@ -83,7 +83,7 @@ TestGltfModelImpl::AddFeatureIdTexture(
     const int64_t featureCount,
     const DotNet::System::Array1<DotNet::Unity::Mathematics::float2>& uvs) {
   const int32_t featureIdsLength = featureIds.Length();
-  assert(length == 4);
+  assert(featureIdsLength == 4);
 
   // Copy feature IDs to texture.
   CesiumGltf::Image& image = this->_nativeModel.images.emplace_back();
