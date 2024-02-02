@@ -46,11 +46,13 @@ set_target_properties(
         CXX_EXTENSIONS NO
 )
 
-target_compile_options(
-  CesiumForUnityNative-Editor
-  PRIVATE
-    -bigobj
-)
+if (MSVC)
+  target_compile_options(
+    CesiumForUnityNative-Editor
+    PRIVATE
+      /bigobj
+  )
+endif()
 
 # If we're building for the Unity Editor, set a #define accordingly.
 if (EDITOR)

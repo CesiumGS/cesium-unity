@@ -3,7 +3,7 @@ using UnityEngine;
 namespace CesiumForUnity
 {
     /// <summary>
-    /// Represents the root EXT_structural_extension of a glTF model in a 
+    /// Represents the root `EXT_structural_metadata` extension of a glTF model in a 
     /// <see cref="Cesium3DTileset"/>. It holds views of property tables
     /// available on the glTF.
     /// </summary>

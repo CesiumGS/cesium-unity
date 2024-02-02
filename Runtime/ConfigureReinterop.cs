@@ -723,7 +723,7 @@ namespace CesiumForUnity
             sets[0].label = "label";
             sets[0].nullFeatureId = 0;
             sets[0].propertyTableIndex = 0;
-            sets[0].CallDispose();
+            sets[0].Dispose();
 
             CesiumFeatureIdAttribute featureIdAttribute = new CesiumFeatureIdAttribute();
             featureIdAttribute.status = featureIdAttribute.status;

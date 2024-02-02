@@ -21,7 +21,7 @@ namespace CesiumForUnity
     /// These can be used with the corresponding <see cref="CesiumPropertyTable"/> to 
     /// access per-feature metadata.
     /// </summary>
-    public class CesiumFeatureIdSet
+    public class CesiumFeatureIdSet : IDisposable
     {
         #region Getters
 
@@ -160,6 +160,6 @@ namespace CesiumForUnity
         // GetFirstVertexFromHitTriangle is called.
         List<int> _indices;
 
-        internal virtual void CallDispose() { }
+        public virtual void Dispose() { }
     }
 }

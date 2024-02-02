@@ -15,7 +15,7 @@ namespace CesiumForUnity
     {
         private void OnEnable()
         {
-            Debug.LogWarning("CesiumMetadata component is deprecated. Retrieving metadata using the CesiumModelMetadata component of a tile object.");
+            Debug.LogWarning("CesiumMetadata component is deprecated. Retrieve metadata using the CesiumModelMetadata component of a tile object.");
         }
 
         /// <summary>

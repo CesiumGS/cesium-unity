@@ -58,56 +58,45 @@ namespace CesiumForUnity
 
         public CesiumMetadataValue(System.Object value)
         {
-            // For consistent implementation, convert intN to CesiumIntVecN, uintN to CesiumUintVecN,
-            // intNxN to CesiumIntMatNxN, and uintNxN to CesiumUintMatNxN
+            // Convert intN to CesiumIntVecN, uintN to CesiumUintVecN, intNxN to CesiumIntMatNxN,
+            // and uintNxN to CesiumUintMatNxN. This avoids having to manage conversions for
+            // multiple representations of vector values.
             switch (value)
             {
-                case int2:
-                    int2 asInt2 = (value as int2?).Value;
+                case int2 asInt2:
                     this.objectValue = new CesiumIntVec2(asInt2.x, asInt2.y);
                     break;
-                case int3:
-                    int3 asInt3 = (value as int3?).Value;
+                case int3 asInt3:
                     this.objectValue = new CesiumIntVec3(asInt3.x, asInt3.y, asInt3.z);
                     break;
-                case int4:
-                    int4 asInt4 = (value as int4?).Value;
+                case int4 asInt4:
                     this.objectValue = new CesiumIntVec4(asInt4.x, asInt4.y, asInt4.z, asInt4.w);
                     break;
-                case uint2:
-                    uint2 asUint2 = (value as uint2?).Value;
+                case uint2 asUint2:
                     this.objectValue = new CesiumUintVec2(asUint2.x, asUint2.y);
                     break;
-                case uint3:
-                    uint3 asUint3 = (value as uint3?).Value;
+                case uint3 asUint3:
                     this.objectValue = new CesiumUintVec3(asUint3.x, asUint3.y, asUint3.z);
                     break;
-                case uint4:
-                    uint4 asUint4 = (value as uint4?).Value;
+                case uint4 asUint4:
                     this.objectValue = new CesiumUintVec4(asUint4.x, asUint4.y, asUint4.z, asUint4.w);
                     break;
-                case int2x2:
-                    int2x2 asInt2x2 = (value as int2x2?).Value;
+                case int2x2 asInt2x2:
                     this.objectValue = new CesiumIntMat2x2(asInt2x2.c0, asInt2x2.c1);
                     break;
-                case int3x3:
-                    int3x3 asInt3x3 = (value as int3x3?).Value;
+                case int3x3 asInt3x3:
                     this.objectValue = new CesiumIntMat3x3(asInt3x3.c0, asInt3x3.c1, asInt3x3.c2);
                     break;
-                case int4x4:
-                    int4x4 asInt4x4 = (value as int4x4?).Value;
+                case int4x4 asInt4x4:
                     this.objectValue = new CesiumIntMat4x4(asInt4x4.c0, asInt4x4.c1, asInt4x4.c2, asInt4x4.c3);
                     break;
-                case uint2x2:
-                    uint2x2 asUint2x2 = (value as uint2x2?).Value;
+                case uint2x2 asUint2x2:
                     this.objectValue = new CesiumUintMat2x2(asUint2x2.c0, asUint2x2.c1);
                     break;
-                case uint3x3:
-                    uint3x3 asUint3x3 = (value as uint3x3?).Value;
+                case uint3x3 asUint3x3:
                     this.objectValue = new CesiumUintMat3x3(asUint3x3.c0, asUint3x3.c1, asUint3x3.c2);
                     break;
-                case uint4x4:
-                    uint4x4 asUint4x4 = (value as uint4x4?).Value;
+                case uint4x4 asUint4x4:
                     this.objectValue = new CesiumUintMat4x4(asUint4x4.c0, asUint4x4.c1, asUint4x4.c2, asUint4x4.c3);
                     break;
                 default:
@@ -1431,56 +1420,6 @@ namespace CesiumForUnity
 
             return result;
         }
-        #endregion
-
-        #region Private conversion methods
-        //private static double2 ConvertVecNObjectToDouble2(System.Object value, double2 defaultValue)
-        //{
-        //    switch (value)
-        //    {
-        //        case CesiumInt2:
-        //            CesiumInt2 Int2Value = (value as CesiumInt2?).Value;
-        //            return new double2(
-        //                Convert.ToDouble(Int2Value[0]), Convert.ToDouble(Int2Value[1]));
-        //        case CesiumUint2:
-        //            CesiumUint2 uInt2Value = (value as CesiumUint2?).Value;
-        //            return new double2(
-        //                Convert.ToDouble(uInt2Value[0]), Convert.ToDouble(uInt2Value[1]));
-        //        case float2:
-        //            float2 float2Value = (value as float2?).Value;
-        //            return new double2(float2Value);
-        //        case double2:
-        //            return (value as double2?).Value;
-        //        case CesiumInt3:
-        //            CesiumInt3 Int3Value = (value as CesiumInt3?).Value;
-        //            return new double2(
-        //                Convert.ToDouble(Int3Value[0]), Convert.ToDouble(Int3Value[1]));
-        //        case CesiumUint3:
-        //            CesiumUint3 uInt3Value = (value as CesiumUint3?).Value;
-        //            return new double2(
-        //                Convert.ToDouble(uInt3Value[0]), Convert.ToDouble(uInt3Value[1]));
-        //        case float3:
-        //            float3 float3Value = (value as float3?).Value;
-        //            return new double2(float3Value.x, float3Value.y);
-        //        case double3:
-        //            return (value as double3?).Value.xy;
-        //        case CesiumInt4:
-        //            CesiumInt4 Int4Value = (value as CesiumInt4?).Value;
-        //            return new double2(
-        //                Convert.ToDouble(Int4Value[0]), Convert.ToDouble(Int4Value[1]));
-        //        case CesiumUint4:
-        //            CesiumUint4 uInt4Value = (value as CesiumUint4?).Value;
-        //            return new double2(
-        //                Convert.ToDouble(uInt4Value[0]), Convert.ToDouble(uInt4Value[1]));
-        //        case float4:
-        //            float4 float4Value = (value as float4?).Value;
-        //            return new double2(float4Value.x, float4Value.y);
-        //        case double4:
-        //            return (value as double4?).Value.xy;
-        //        default:
-        //            return defaultValue;
-        //    }
-        //}
         #endregion
 
         #region Internal casts for Reinterop

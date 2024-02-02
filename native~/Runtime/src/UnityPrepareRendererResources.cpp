@@ -1409,7 +1409,7 @@ void freePrimitiveFeatures(
   }
 
   for (int32_t i = 0; i < featureIdSets.Length(); i++) {
-    featureIdSets[i].CallDispose();
+    featureIdSets[i].Dispose();
   }
 }
 

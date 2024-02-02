@@ -62,7 +62,6 @@ if (MSVC)
   )
 endif()
 
-
 target_compile_definitions(
   CesiumForUnityNative-Runtime
   PUBLIC
