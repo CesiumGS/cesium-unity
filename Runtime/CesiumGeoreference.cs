@@ -1,6 +1,6 @@
+using Reinterop;
 using System;
 using System.Collections.Generic;
-using Reinterop;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -76,15 +76,19 @@ namespace CesiumForUnity
         private double _longitude = -105.25737;
 
         [SerializeField]
+        [Delayed]
         private double _height = 2250.0;
 
         [SerializeField]
+        [Delayed]
         private double _ecefX = 6378137.0;
 
         [SerializeField]
+        [Delayed]
         private double _ecefY = 0.0;
 
         [SerializeField]
+        [Delayed]
         private double _ecefZ = 0.0;
 
         [SerializeField]

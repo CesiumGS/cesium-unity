@@ -140,7 +140,8 @@ namespace CesiumForUnity
                 this._latitude,
                 -90.0,
                 90.0,
-                latitudeContent);
+                latitudeContent,
+                delayed: true);
 
             GUIContent longitudeContent = new GUIContent(
                 "Longitude",
@@ -149,7 +150,8 @@ namespace CesiumForUnity
                  this._longitude,
                  -180.0,
                  180.0,
-                 longitudeContent);
+                 longitudeContent,
+                 delayed: true);
 
             GUIContent heightContent = new GUIContent(
                 "Height",
