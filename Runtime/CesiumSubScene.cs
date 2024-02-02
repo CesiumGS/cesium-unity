@@ -21,6 +21,11 @@ namespace CesiumForUnity
     [IconAttribute("Packages/com.cesium.unity/Editor/Resources/Cesium-24x24.png")]
     public class CesiumSubScene : MonoBehaviour
     {
+#if UNITY_EDITOR
+        // Caches the built-in sphere mesh across all CesiumSubScenes for use in OnDrawGizmos
+        private static Mesh _previewSphereMesh;
+#endif
+
         [SerializeField]
         private double _activationRadius = 1000;
 
@@ -442,9 +447,15 @@ namespace CesiumForUnity
         {
             if (this._showActivationRadius)
             {
-                // TODO: would be nice to draw a better wireframe sphere.
+                // Gizmos.DrawWireSphere only draws three wire circles representing the sphere's radii
+                // To do better, we need to fetch the built-in sphere mesh and use that
+                if (_previewSphereMesh == null)
+                {
+                    _previewSphereMesh = Resources.GetBuiltinResource<Mesh>("Sphere.fbx");
+                }
+
                 Gizmos.color = Color.blue;
-                Gizmos.DrawWireSphere(this.transform.position, (float)this._activationRadius);
+                Gizmos.DrawWireMesh(_previewSphereMesh, this.transform.position, Quaternion.identity, (float3)new double3(this._activationRadius, this._activationRadius, this._activationRadius));
             }
         }
 #endif
