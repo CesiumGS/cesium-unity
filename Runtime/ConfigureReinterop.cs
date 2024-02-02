@@ -12,6 +12,7 @@ using UnityEngine.Rendering;
 using UnityEngine.Experimental.Rendering;
 using Unity.Mathematics;
 using UnityEngine.Pool;
+using UnityEngine.UIElements;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -526,6 +527,11 @@ namespace CesiumForUnity
             server.defaultIonAccessTokenId = "";
             server.serverUrlThatIsLoadingApiUrl = "";
 
+
+            double2[] points = { };
+            double2 point = points[0];
+            len = points.Length;
+
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;
             sv.pivot = sv.pivot;
@@ -534,7 +540,7 @@ namespace CesiumForUnity
             svc.transform.SetPositionAndRotation(p, q);
 
             bool isPlaying = EditorApplication.isPlaying;
-            EditorApplication.update += () => {};
+            EditorApplication.update += () => { };
 
             EditorUtility.SetDirty(null);
 #endif
