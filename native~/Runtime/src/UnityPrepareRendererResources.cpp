@@ -1399,7 +1399,8 @@ void freePrimitiveGameObject(
       UnityEngine::Texture texture = material.GetTexture(textureID);
       std::string name = texture == nullptr ? "" : texture.name().ToStlString();
       if (texture != nullptr &&
-          (texture.hideFlags() & UnityEngine::HideFlags::HideAndDontSave)) {
+          (texture.hideFlags() & UnityEngine::HideFlags::HideAndDontSave) ==
+              UnityEngine::HideFlags::HideAndDontSave) {
         UnityLifetime::Destroy(texture);
       }
     }
