@@ -6,12 +6,17 @@
 
 - Added a `distance` property to `CesiumOriginShift`, which specifies the maximum allowed distance from the current origin before it is shifted.
 
+##### Fixes :wrench:
+
+- Removed the "Universal Additional Camera Data" script from DynamicCamera, as it shows up as a missing script in other render pipelines.
+- Fixed a bug where adding a `CesiumSubScene` as the child of an existing `CesiumGeoreference` in editor would cause the parent `CesiumGeoreference` to have its coordinates reset to the default.
+- Fixed the "DynamicCamera is not nested inside a game object with a CesiumGeoreference" warning when adding a new DynamicCamera in the editor.
+
 ### v1.7.1 - 2023-12-14
 
 ##### Fixes :wrench:
 
 - Fixed a bug that prevented the default `CesiumIonServer` asset from remembering its token in a clean project.
-- Fixed "DynamicCamera is not nested inside a game object with a CesiumGeoreference" warning when adding a new DynamicCamera in the editor.
 
 ### v1.7.0 - 2023-12-14
 
