@@ -30,17 +30,28 @@ namespace CesiumForUnity
     public class CesiumOriginShift : MonoBehaviour
     {
         /// <summary>
-        /// Specifies the minimum distance in meters from the old origin to the current origin before the 
-        /// origin of the parent <see cref="CesiumGeoreference"/> will be shifted.
+        /// The maximum distance between the origin of the Unity coordinate system and
+        /// the game object to which this component is attached. When this distance is
+        /// exceeded, the <see cref="CesiumGeoreference"/> origin is shifted to bring it
+        /// close to the game object.
         /// </summary>
-        public double activationDistance
+        /// <remarks>
+        /// When the value of this property is 0.0, the origin is shifted continuously.
+        /// </remarks>
+        public double distance
         {
-            get => _activationDistance;
-            set => _activationDistance = value;
+            get => _distance;
+            set => _distance = value;
         }
 
         [SerializeField]
-        private double _activationDistance = 0.0;
+        [Min(0)]
+        [Tooltip("The maximum distance between the origin of the Unity coordinate system and " +
+                 "the game object to which this component is attached. When this distance is" +
+                 "exceeded, the CesiumGeoreference origin is shifted to bring it close to the " +
+                 "game object.\n\n" +
+                 "When the value of this property is 0.0, the origin is shifted continuously.")]
+        private double _distance = 0.0;
 
         void LateUpdate()
         {
@@ -112,7 +123,7 @@ namespace CesiumForUnity
 
                 double distance = math.length(new double3(georeference.ecefX, georeference.ecefY, georeference.ecefZ) - ecef);
 
-                if (distance >= this._activationDistance)
+                if (distance >= this._distance)
                 {
                     // Update the origin if we've surpassed the distance threshold.
                     georeference.SetOriginEarthCenteredEarthFixed(ecef.x, ecef.y, ecef.z);

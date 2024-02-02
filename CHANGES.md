@@ -3,7 +3,8 @@
 ### ? - ?
 
 ##### Additions :tada:
-- `CesiumOriginShift` now allows specifying an activation distance instead of updating the origin every frame.
+
+- Added a `distance` property to `CesiumOriginShift`, which specifies the maximum allowed distance from the current origin before it is shifted.
 
 ### v1.7.1 - 2023-12-14
 

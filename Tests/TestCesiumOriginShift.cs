@@ -100,7 +100,7 @@ public class TestCesiumOriginShift
     }
 
     [UnityTest]
-    public IEnumerator UsesActivationDistanceProperty()
+    public IEnumerator UsesDistanceProperty()
     {
         double3 baseEcef = new double3(-2694019.41, -4297353.83809221, 3854717.9087824);
 
@@ -115,7 +115,7 @@ public class TestCesiumOriginShift
         CesiumGlobeAnchor globeAnchor = goOriginShift.AddComponent<CesiumGlobeAnchor>();
 
         CesiumOriginShift originShift = goOriginShift.AddComponent<CesiumOriginShift>();
-        originShift.activationDistance = 5000;
+        originShift.distance = 5000;
 
         yield return null;
 
@@ -154,7 +154,7 @@ public class TestCesiumOriginShift
         CesiumGlobeAnchor globeAnchor = goOriginShift.AddComponent<CesiumGlobeAnchor>();
 
         CesiumOriginShift originShift = goOriginShift.AddComponent<CesiumOriginShift>();
-        originShift.activationDistance = 5000;
+        originShift.distance = 5000;
 
         CharacterController controller = goOriginShift.AddComponent<CharacterController>();
         controller.radius = 1.0f;
