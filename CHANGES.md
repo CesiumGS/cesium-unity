@@ -7,6 +7,7 @@
 - Removed the "Universal Additional Camera Data" script from DynamicCamera, as it shows up as a missing script in other render pipelines.
 - Fixed a bug where adding a `CesiumSubScene` as the child of an existing `CesiumGeoreference` in editor would cause the parent `CesiumGeoreference` to have its coordinates reset to the default.
 - Fixed the "DynamicCamera is not nested inside a game object with a CesiumGeoreference" warning when adding a new DynamicCamera in the editor.
+- Fixed "Destroying assets is not permitted to avoid data loss" error when using a custom opaque material with texture assets on a `Cesium3DTileset`.
 
 ### v1.7.1 - 2023-12-14
 

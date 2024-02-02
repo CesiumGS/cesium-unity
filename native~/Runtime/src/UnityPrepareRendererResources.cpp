@@ -1397,7 +1397,6 @@ void freePrimitiveGameObject(
     for (int32_t i = 0, len = textureIDs.Count(); i < len; ++i) {
       int32_t textureID = textureIDs[i];
       UnityEngine::Texture texture = material.GetTexture(textureID);
-      std::string name = texture == nullptr ? "" : texture.name().ToStlString();
       if (texture != nullptr &&
           (texture.hideFlags() & UnityEngine::HideFlags::HideAndDontSave) ==
               UnityEngine::HideFlags::HideAndDontSave) {
@@ -1405,8 +1404,6 @@ void freePrimitiveGameObject(
       }
     }
 
-    std::string materialName =
-        material == nullptr ? "" : material.name().ToStlString();
     UnityLifetime::Destroy(material);
   }
 
