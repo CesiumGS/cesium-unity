@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Cesium3DTilesSelection/CreditSystem.h>
+#include <CesiumUtility/CreditSystem.h>
 
 #include <DotNet/CesiumForUnity/CesiumCredit.h>
 #include <DotNet/System/Collections/Generic/List1.h>
@@ -14,10 +14,10 @@ class CesiumCreditSystem;
 class GameObject;
 } // namespace DotNet::CesiumForUnity
 
-namespace Cesium3DTilesSelection {
+namespace CesiumUtility {
 class CreditSystem;
 struct Credit;
-} // namespace Cesium3DTilesSelection
+} // namespace CesiumUtility
 
 namespace CesiumForUnityNative {
 
@@ -31,12 +31,12 @@ public:
       const DotNet::CesiumForUnity::CesiumCreditSystem& creditSystem,
       bool forceUpdate);
 
-  const std::shared_ptr<Cesium3DTilesSelection::CreditSystem>&
+  const std::shared_ptr<CesiumUtility::CreditSystem>&
   getExternalCreditSystem() const;
 
 private:
   // The underlying cesium-native credit system.
-  std::shared_ptr<Cesium3DTilesSelection::CreditSystem> _pCreditSystem;
+  std::shared_ptr<CesiumUtility::CreditSystem> _pCreditSystem;
 
   const DotNet::CesiumForUnity::CesiumCredit convertHtmlToUnityCredit(
       const std::string& html,

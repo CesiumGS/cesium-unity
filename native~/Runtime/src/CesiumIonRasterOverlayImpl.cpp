@@ -4,9 +4,9 @@
 #include "CesiumIonServerHelper.h"
 #include "CesiumRasterOverlayUtility.h"
 
-#include <Cesium3DTilesSelection/IonRasterOverlay.h>
 #include <Cesium3DTilesSelection/Tileset.h>
 #include <CesiumAsync/IAssetResponse.h>
+#include <CesiumRasterOverlays/IonRasterOverlay.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/CesiumForUnity/CesiumIonRasterOverlay.h>
@@ -17,6 +17,7 @@
 #include <DotNet/UnityEngine/Coroutine.h>
 
 using namespace Cesium3DTilesSelection;
+using namespace CesiumRasterOverlays;
 using namespace DotNet;
 
 namespace CesiumForUnityNative {

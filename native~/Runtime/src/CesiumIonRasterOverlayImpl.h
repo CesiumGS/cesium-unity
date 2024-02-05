@@ -7,7 +7,7 @@ class Cesium3DTileset;
 class CesiumIonRasterOverlay;
 } // namespace DotNet::CesiumForUnity
 
-namespace Cesium3DTilesSelection {
+namespace CesiumRasterOverlays {
 class IonRasterOverlay;
 }
 
@@ -27,7 +27,7 @@ public:
       const ::DotNet::CesiumForUnity::Cesium3DTileset& tileset);
 
 private:
-  CesiumUtility::IntrusivePointer<Cesium3DTilesSelection::IonRasterOverlay>
+  CesiumUtility::IntrusivePointer<CesiumRasterOverlays::IonRasterOverlay>
       _pOverlay;
 };
 

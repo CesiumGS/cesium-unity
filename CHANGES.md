@@ -2,8 +2,19 @@
 
 ### ? - ?
 
+##### Breaking Changes :mega:
+
+- Feature IDs and metadata are now parsed through the `EXT_mesh_features` and `EXT_structural_metadata` extensions respectively. Models with `EXT_feature_metadata` will still be parsed, but their metadata will no longer be accessible.
+
 ##### Additions :tada:
 
+- Added `CesiumFeatureIdSet`, which represents a feature ID set in `EXT_mesh_features`.
+- Added `CesiumFeatureIdAttribute` and `CesiumFeatureIdTexture`, which derive from `CesiumFeatureIdSet` and respectively represent a feature ID attribute and feature ID texture in `EXT_mesh_features`.
+- Added `CesiumPrimitiveFeatures`, a component that provides access to the `EXT_mesh_features` on a glTF primitive when it is loaded by `Cesium3DTileset`.
+- Added `CesiumPropertyTableProperty`, which represents a property table property in `EXT_structural_metadata` and can be used to retrieve metadata.
+- Added `CesiumPropertyTable`, which represents a property table in `EXT_structural_metadata`.
+- Added `CesiumModelMetadata`, a component that provides access to the `EXT_structural_metadata` on a glTF model when it is loaded by `Cesium3DTileset`.
+- Added `CesiumMetadataValue`, which can hold a metadata value from `EXT_structural_metadata` while abstracting away its type.
 - Added a `distance` property to `CesiumOriginShift`, which specifies the maximum allowed distance from the current origin before it is shifted.
 
 ##### Fixes :wrench:
@@ -11,6 +22,11 @@
 - Removed the "Universal Additional Camera Data" script from DynamicCamera, as it shows up as a missing script in other render pipelines.
 - Fixed a bug where adding a `CesiumSubScene` as the child of an existing `CesiumGeoreference` in editor would cause the parent `CesiumGeoreference` to have its coordinates reset to the default.
 - Fixed the "DynamicCamera is not nested inside a game object with a CesiumGeoreference" warning when adding a new DynamicCamera in the editor.
+
+##### Deprecated :hourglass_flowing_sand:
+
+- `CesiumMetadata` has been deprecated. Instead, retrieve the `CesiumModelMetadata` component attached to a tile game object in order to access its glTF metadata.
+- `CesiumFeature` has been deprecated. Instead, retrieve feature IDs from the `CesiumPrimitiveFeatures` component attached to a primitive game object in order to access its glTF features. Feature IDs can be used to retrieve metadata from the `CesiumModelMetadata` attached to its parent.
 
 ### v1.7.1 - 2023-12-14
 
