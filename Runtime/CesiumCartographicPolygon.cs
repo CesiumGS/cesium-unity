@@ -1,4 +1,3 @@
-using Reinterop;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
@@ -12,7 +11,6 @@ namespace CesiumForUnity
     [ExecuteInEditMode]
     [RequireComponent(typeof(SplineContainer))]
     [RequireComponent(typeof(CesiumGlobeAnchor))]
-    [ReinteropNativeImplementation("CesiumForUnityNative::CesiumCartographicPolygonImpl", "CesiumCartographicPolygonImpl.h")]
     [AddComponentMenu("Cesium/Cesium Cartographic Polygon")]
     [IconAttribute("Packages/com.cesium.unity/Editor/Resources/Cesium-24x24.png")]
     public partial class CesiumCartographicPolygon : MonoBehaviour
@@ -52,39 +50,50 @@ namespace CesiumForUnity
         }
 #endif
 
-        internal void ApplySplineChanges()
+        static List<double2> emptyList = new List<double2>();
+
+        internal List<double2> GetCartographicPoints()
         {
             CesiumGeoreference georeference = this._globeAnchor.GetComponentInParent<CesiumGeoreference>();
             if (georeference == null)
             {
-                return;
+                return emptyList;
             }
 
-            // TODO: "Apply Spline Changes" button
             IReadOnlyList<Spline> splines = this._splineContainer.Splines;
             if (splines.Count == 0)
             {
-                return;
+                return emptyList;
             }
 
             Spline spline = splines[0];
+            if (!spline.Closed)
+            {
+                Debug.LogError("Spline must be closed to be used as a cartographic polygon.");
+                return emptyList;
+            }
+
             BezierKnot[] knots = spline.ToArray();
             List<double2> cartographicPoints = new List<double2>(knots.Length);
 
+            Matrix4x4 transformMatrix = Matrix4x4.TRS(this.transform.localPosition, this.transform.localRotation, this.transform.localScale);
             for (int i = 0; i < knots.Length; i++)
             {
-                BezierKnot knot = knots[i];
+                if (spline.GetTangentMode(i) != TangentMode.Linear)
+                {
+                    Debug.LogError("Cartographic polygon only supports linear splines.");
+                    return emptyList;
+                }
 
-                float3 unityPosition = this.transform.TransformPoint(knot.Position);
+                BezierKnot knot = knots[i];
+                float3 unityPosition = transformMatrix.MultiplyPoint3x4(knot.Position);
                 double3 ecefPosition = georeference.TransformUnityPositionToEarthCenteredEarthFixed(unityPosition);
                 double3 cartographicPosition = CesiumWgs84Ellipsoid.EarthCenteredEarthFixedToLongitudeLatitudeHeight(ecefPosition);
 
-                cartographicPoints[i] = cartographicPosition.xz;
+                cartographicPoints.Add(cartographicPosition.xy);
             }
 
-            this.UpdatePolygon(cartographicPoints.ToArray());
+            return cartographicPoints;
         }
-
-        private partial void UpdatePolygon(double2[] cartographicPoints);
     }
 }

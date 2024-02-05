@@ -784,14 +784,17 @@ namespace CesiumForUnity
             server.defaultIonAccessTokenId = "";
             server.serverUrlThatIsLoadingApiUrl = "";
 
-            double2[] points = { };
-            double2 point = points[0];
-            len = points.Length;
+            CesiumCartographicPolygon polygon = go.GetComponent<CesiumCartographicPolygon>();
+            List<double2> points = polygon.GetCartographicPoints();
+            len = points.Count;
+            myDouble2 = points[0];
 
             CesiumPolygonRasterOverlay polygonRasterOverlay = go.GetComponent<CesiumPolygonRasterOverlay>();
-            polygonRasterOverlay.polygons = polygonRasterOverlay.polygons;
+            List<CesiumCartographicPolygon> polygons = polygonRasterOverlay.polygons;
             polygonRasterOverlay.excludeSelectedTiles = polygonRasterOverlay.excludeSelectedTiles;
             polygonRasterOverlay.invertSelection = polygonRasterOverlay.invertSelection;
+            polygon = polygons[0];
+            len = polygons.Count;
 
             TestGltfModel testModel = new TestGltfModel();
 
