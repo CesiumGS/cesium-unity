@@ -192,6 +192,14 @@ namespace CesiumForUnity
                 "",
                 -1,
                 "",
+                -1),
+            new QuickAddItem(
+                QuickAddItemType.CartographicPolygon,
+                "Cesium Cartographic Polygon",
+                "A spline-based component that can be used to draw out regions for use with clipping or other material effects.",
+                "",
+                -1,
+                "",
                 -1)
         };
 
@@ -236,9 +244,14 @@ namespace CesiumForUnity
                     Selection.activeGameObject = blankTileset.gameObject;
                     break;
                 case QuickAddItemType.DynamicCamera:
-                    CesiumCameraController dynamicCamera
-                        = CesiumEditorUtility.CreateDynamicCamera();
+                    CesiumCameraController dynamicCamera =
+                        CesiumEditorUtility.CreateDynamicCamera();
                     Selection.activeGameObject = dynamicCamera.gameObject;
+                    break;
+                case QuickAddItemType.CartographicPolygon:
+                    CesiumCartographicPolygon cartographicPolygon =
+                        CesiumEditorUtility.CreateCartographicPolygon();
+                    Selection.activeGameObject = cartographicPolygon.gameObject;
                     break;
                 default:
                     break;
