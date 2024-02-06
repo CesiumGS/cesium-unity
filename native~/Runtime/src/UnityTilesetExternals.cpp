@@ -4,10 +4,10 @@
 #include "UnityPrepareRendererResources.h"
 #include "UnityTaskProcessor.h"
 
-#include <Cesium3DTilesSelection/CreditSystem.h>
 #include <CesiumAsync/CachingAssetAccessor.h>
 #include <CesiumAsync/GunzipAssetAccessor.h>
 #include <CesiumAsync/SqliteCache.h>
+#include <CesiumUtility/CreditSystem.h>
 
 #include <DotNet/CesiumForUnity/CesiumCreditSystem.h>
 #include <DotNet/CesiumForUnity/CesiumRuntimeSettings.h>
@@ -16,6 +16,7 @@
 
 #include <memory>
 
+using namespace CesiumUtility;
 using namespace Cesium3DTilesSelection;
 using namespace CesiumAsync;
 using namespace DotNet;

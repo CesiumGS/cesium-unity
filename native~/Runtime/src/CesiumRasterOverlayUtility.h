@@ -1,4 +1,4 @@
-namespace Cesium3DTilesSelection {
+namespace CesiumRasterOverlays {
 class RasterOverlayOptions;
 }
 
@@ -10,7 +10,7 @@ class CesiumRasterOverlayOptions;
 namespace CesiumForUnityNative {
 class CesiumRasterOverlayUtility {
 public:
-  static Cesium3DTilesSelection::RasterOverlayOptions
+  static CesiumRasterOverlays::RasterOverlayOptions
   GetOverlayOptions(const DotNet::CesiumForUnity::CesiumRasterOverlay& overlay);
 };
 } // namespace CesiumForUnityNative
