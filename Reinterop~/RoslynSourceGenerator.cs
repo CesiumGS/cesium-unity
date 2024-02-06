@@ -22,11 +22,20 @@ namespace Reinterop
 
         public void Execute(GeneratorExecutionContext context)
         {
+            // Don't let more than one copy of Reinterop run at a time, because that will lead to
+            // a race condition where we fail to clean up previously-generated (but no longer needed)
+            // .cpp and .h files.
+            Semaphore semaphore = new Semaphore(1, 1, "Reinterop");
+            semaphore.WaitOne();
+
             ReinteropSyntaxReceiver receiver = (ReinteropSyntaxReceiver)context.SyntaxReceiver!;
 
             // Don't generate any support code if there's nothing real to generate.
             if (receiver.ClassesImplementedInCpp.Count == 0 && receiver.ExposeToCppMethods.Count == 0)
+            {
+                semaphore.Release();
                 return;
+            }
 
             CSharpReinteropAttribute.Generate(context);
             CSharpReinteropNativeImplementationAttribute.Generate(context);
@@ -177,6 +186,8 @@ namespace Reinterop
             }
 
             CodeGenerator.WriteCSharpCode(context, codeGenerator.Options, generatedResults);
+
+            semaphore.Release();
         }
 
         private static readonly string[] ConfigurationPropertyNames = { "CppOutputPath", "BaseNamespace", "NativeLibraryName", "NonBlittableTypes" };
@@ -200,7 +211,7 @@ namespace Reinterop
             string? cppOutputPath;
             if (options.GlobalOptions.TryGetValue("cpp_output_path", out cppOutputPath))
                 mergedProperties["CppOutputPath"] = cppOutputPath;
-                
+
             string? baseNamespace;
             if (options.GlobalOptions.TryGetValue("base_namespace", out baseNamespace))
                 mergedProperties["BaseNamespace"] = baseNamespace;
