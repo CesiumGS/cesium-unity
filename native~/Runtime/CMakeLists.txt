@@ -54,6 +54,14 @@ set_target_properties(
         CXX_EXTENSIONS NO
 )
 
+if (MSVC)
+  target_compile_options(
+    CesiumForUnityNative-Runtime
+    PRIVATE
+      /bigobj
+  )
+endif()
+
 target_compile_definitions(
   CesiumForUnityNative-Runtime
   PUBLIC

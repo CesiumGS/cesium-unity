@@ -1,156 +1,53 @@
 #include "CesiumMetadataImpl.h"
 
+#include "CesiumFeaturesMetadataUtility.h"
+
+#include <CesiumGltf/AccessorUtility.h>
 #include <CesiumGltf/AccessorView.h>
-#include <CesiumGltf/ExtensionMeshPrimitiveExtFeatureMetadata.h>
-#include <CesiumGltf/ExtensionModelExtFeatureMetadata.h>
-#include <CesiumGltf/MetadataFeatureTableView.h>
-#include <CesiumGltf/MetadataPropertyView.h>
+#include <CesiumGltf/ExtensionExtMeshFeatures.h>
+#include <CesiumGltf/ExtensionModelExtStructuralMetadata.h>
+#include <CesiumGltf/PropertyTablePropertyView.h>
+#include <CesiumGltf/PropertyTableView.h>
 
 #include <DotNet/System/Array1.h>
 #include <DotNet/UnityEngine/GameObject.h>
 #include <DotNet/UnityEngine/Mesh.h>
 #include <DotNet/UnityEngine/Transform.h>
 
-using namespace CesiumForUnityNative;
+using namespace DotNet;
+using namespace DotNet::CesiumForUnity;
 using namespace CesiumGltf;
 
+namespace CesiumForUnityNative {
+
 namespace {
 
-int64_t getVertexIndexFromTriangleIndex(
-    const CesiumGltf::Model* pModel,
-    const CesiumGltf::MeshPrimitive* pPrimitive,
+int64_t getFirstVertexFromTriangle(
+    const CesiumGltf::Model& model,
+    const CesiumGltf::MeshPrimitive& primitive,
+    int64_t vertexCount,
     int64_t triangleIndex) {
-  const Accessor& indicesAccessor =
-      pModel->getSafe(pModel->accessors, pPrimitive->indices);
+  CesiumGltf::IndexAccessorType indexAccessor =
+      getIndexAccessorView(model, primitive);
 
-  AccessorType indicesView;
+  auto indices = std::visit(
+      IndicesForFaceFromAccessor{triangleIndex, vertexCount, primitive.mode},
+      indexAccessor);
 
-  switch (indicesAccessor.componentType) {
-  case Accessor::ComponentType::UNSIGNED_BYTE:
-    indicesView =
-        AccessorView<AccessorTypes::SCALAR<uint8_t>>(*pModel, indicesAccessor);
-    break;
-  case Accessor::ComponentType::UNSIGNED_SHORT:
-    indicesView =
-        AccessorView<AccessorTypes::SCALAR<uint16_t>>(*pModel, indicesAccessor);
-    break;
-  case Accessor::ComponentType::UNSIGNED_INT:
-    indicesView =
-        AccessorView<AccessorTypes::SCALAR<uint32_t>>(*pModel, indicesAccessor);
-    break;
-  }
-
-  int64_t index;
-  switch (pPrimitive->mode) {
-  case CesiumGltf::MeshPrimitive::Mode::TRIANGLE_STRIP:
-    index = triangleIndex;
-    break;
-  case CesiumGltf::MeshPrimitive::Mode::TRIANGLE_FAN:
-    index = triangleIndex + 1;
-    break;
-  case CesiumGltf::MeshPrimitive::Mode::TRIANGLES:
-  default:
-    index = triangleIndex * 3;
-  }
-
-  return std::visit(
-      [index](auto&& value) {
-        if (index >= 0 && index < value.size()) {
-          return static_cast<int64_t>(value[index].value[0]);
-        } else {
-          return static_cast<int64_t>(-1);
-        }
-      },
-      indicesView);
+  return indices[0];
 }
 
-namespace {
+int64_t getFeatureIdFromVertex(
+    const CesiumGltf::Model& model,
+    const CesiumGltf::MeshPrimitive& primitive,
+    const int64_t featureIdAttributeIndex,
+    const int64_t vertexIndex) {
+  CesiumGltf::FeatureIdAccessorType featureIDAccessor =
+      getFeatureIdAccessorView(model, primitive, featureIdAttributeIndex);
 
-struct FeatureIDFromAccessor {
-  int64_t operator()(std::monostate) { return -1; }
-
-  int64_t operator()(
-      const CesiumGltf::AccessorView<AccessorTypes::SCALAR<float>>& value) {
-    if (vertexIdx >= 0 && vertexIdx < value.size()) {
-      return static_cast<int64_t>(glm::round(value[vertexIdx].value[0]));
-    } else {
-      return static_cast<int64_t>(-1);
-    }
-  }
-
-  template <typename T>
-  int64_t operator()(const CesiumGltf::AccessorView<T>& value) {
-    if (vertexIdx >= 0 && vertexIdx < value.size()) {
-      return static_cast<int64_t>(value[vertexIdx].value[0]);
-    } else {
-      return static_cast<int64_t>(-1);
-    }
-  }
-
-  int64_t vertexIdx;
-};
-
-} // namespace
-
-int64_t getFeatureIdFromVertexIndex(
-    const CesiumGltf::Model* pModel,
-    const CesiumGltf::MeshPrimitive* pPrimitive,
-    const std::optional<std::string>& attribute,
-    int64_t vertexIndex) {
-  if (attribute) {
-    auto featureAttribute = pPrimitive->attributes.find(attribute.value());
-    if (featureAttribute == pPrimitive->attributes.end()) {
-      return -1;
-    }
-    const CesiumGltf::Accessor* accessor =
-        pModel->getSafe<CesiumGltf::Accessor>(
-            &pModel->accessors,
-            featureAttribute->second);
-    if (!accessor) {
-      return -1;
-    }
-    if (accessor->type != CesiumGltf::Accessor::Type::SCALAR) {
-      return -1;
-    }
-    AccessorType featureIDAccessor;
-    switch (accessor->componentType) {
-    case CesiumGltf::Accessor::ComponentType::BYTE:
-      featureIDAccessor =
-          CesiumGltf::AccessorView<CesiumGltf::AccessorTypes::SCALAR<int8_t>>(
-              *pModel,
-              *accessor);
-      break;
-    case CesiumGltf::Accessor::ComponentType::UNSIGNED_BYTE:
-      featureIDAccessor =
-          CesiumGltf::AccessorView<CesiumGltf::AccessorTypes::SCALAR<uint8_t>>(
-              *pModel,
-              *accessor);
-      break;
-    case CesiumGltf::Accessor::ComponentType::SHORT:
-      featureIDAccessor =
-          CesiumGltf::AccessorView<CesiumGltf::AccessorTypes::SCALAR<int16_t>>(
-              *pModel,
-              *accessor);
-      break;
-    case CesiumGltf::Accessor::ComponentType::UNSIGNED_SHORT:
-      featureIDAccessor =
-          CesiumGltf::AccessorView<CesiumGltf::AccessorTypes::SCALAR<uint16_t>>(
-              *pModel,
-              *accessor);
-      break;
-    case CesiumGltf::Accessor::ComponentType::FLOAT:
-      featureIDAccessor =
-          CesiumGltf::AccessorView<CesiumGltf::AccessorTypes::SCALAR<float>>(
-              *pModel,
-              *accessor);
-      break;
-    default:
-      return 0;
-    }
-
-    return std::visit(FeatureIDFromAccessor{vertexIndex}, featureIDAccessor);
-  }
-  return -1;
+  return std::visit(
+      CesiumGltf::FeatureIdFromAccessor{vertexIndex},
+      featureIDAccessor);
 }
 
 } // namespace
@@ -169,83 +66,140 @@ void CesiumMetadataImpl::removeMetadata(int32_t instanceID) {
   }
 }
 
+namespace {}
+
 DotNet::System::Array1<DotNet::CesiumForUnity::CesiumFeature>
 CesiumForUnityNative::CesiumMetadataImpl::GetFeatures(
     const DotNet::CesiumForUnity::CesiumMetadata& metadata,
     const DotNet::UnityEngine::Transform& transform,
     int triangleIndex) {
   auto find = this->_pModels.find(transform.GetInstanceID());
-  if (find != this->_pModels.end()) {
-
-    const Model* pModel = find->second.first;
-    const MeshPrimitive* pPrimitive = find->second.second;
-
-    int64_t vertexIndex =
-        getVertexIndexFromTriangleIndex(pModel, pPrimitive, triangleIndex);
-    const ExtensionModelExtFeatureMetadata* pModelMetadata =
-        pModel->getExtension<ExtensionModelExtFeatureMetadata>();
-    const ExtensionMeshPrimitiveExtFeatureMetadata* pMetadata =
-        pPrimitive->getExtension<ExtensionMeshPrimitiveExtFeatureMetadata>();
-    DotNet::System::Array1<DotNet::CesiumForUnity::CesiumFeature> features =
-        DotNet::System::Array1<DotNet::CesiumForUnity::CesiumFeature>(
-            pMetadata->featureIdAttributes.size());
-    for (int i = 0; i < pMetadata->featureIdAttributes.size(); i++) {
-      const CesiumGltf::FeatureIDAttribute& featIDAttr =
-          pMetadata->featureIdAttributes[i];
-      auto find = pModelMetadata->featureTables.find(featIDAttr.featureTable);
-      if (find != pModelMetadata->featureTables.end()) {
-        DotNet::CesiumForUnity::CesiumFeature feature =
-            DotNet::CesiumForUnity::CesiumFeature();
-        features.Item(i, feature);
-        const std::string& featureTableName = find->first;
-        feature.featureTableName(featureTableName);
-        int numProperties = find->second.properties.size();
-        int64_t featureID = getFeatureIdFromVertexIndex(
-            pModel,
-            pPrimitive,
-            featIDAttr.featureIds.attribute,
-            vertexIndex);
-        if (find->second.classProperty && pModelMetadata->schema.has_value()) {
-          auto classIt =
-              pModelMetadata->schema->classes.find(*find->second.classProperty);
-          if (classIt != pModelMetadata->schema->classes.end() &&
-              classIt->second.name.has_value()) {
-            feature.className(*classIt->second.name);
-          }
-        }
-        auto find = pModelMetadata->featureTables.find(featureTableName);
-        if (find != pModelMetadata->featureTables.end()) {
-          const CesiumGltf::FeatureTable& featureTable = find->second;
-          CesiumGltf::MetadataFeatureTableView featureTableView{
-              pModel,
-              &featureTable};
-          feature.properties(DotNet::System::Array1<DotNet::System::String>(
-              featureTable.properties.size()));
-          auto size = feature.properties().Length();
-          auto& nativeProperties = feature.NativeImplementation().properties;
-          int index = 0;
-          featureTableView.forEachProperty(
-              [featureID, &index, feature, &nativeProperties](
-                  const std::string& propertyName,
-                  auto propertyType) {
-                ValueType propertyValue = std::visit(
-                    [featureID](auto&& value) {
-                      if (featureID >= 0 && featureID < value.size()) {
-                        return static_cast<ValueType>(value.get(featureID));
-                      } else {
-                        return static_cast<ValueType>(0);
-                      }
-                    },
-                    static_cast<CesiumForUnityNative::PropertyType>(
-                        propertyType));
-                feature.properties().Item(index++, propertyName);
-                nativeProperties.insert(
-                    {propertyName, {propertyType, propertyValue}});
-              });
-        }
-      }
-    }
-    return features;
+  if (find == this->_pModels.end()) {
+    return DotNet::System::Array1<DotNet::CesiumForUnity::CesiumFeature>(0);
   }
-  return DotNet::System::Array1<DotNet::CesiumForUnity::CesiumFeature>(0);
+  const Model* pModel = find->second.first;
+  const MeshPrimitive* pPrimitive = find->second.second;
+
+  int64_t vertexCount = 0;
+  auto positionIt = pPrimitive->attributes.find("POSITION");
+  if (positionIt != pPrimitive->attributes.end()) {
+    const Accessor* pPositionAccessor =
+        Model::getSafe<Accessor>(&pModel->accessors, positionIt->second);
+    if (pPositionAccessor) {
+      vertexCount = pPositionAccessor->count;
+    }
+  }
+
+  if (vertexCount == 0) {
+    return DotNet::System::Array1<DotNet::CesiumForUnity::CesiumFeature>(0);
+  }
+
+  const ExtensionModelExtStructuralMetadata* pModelMetadata =
+      pModel->getExtension<ExtensionModelExtStructuralMetadata>();
+  if (!pModelMetadata || !pModelMetadata->schema) {
+    return DotNet::System::Array1<DotNet::CesiumForUnity::CesiumFeature>(0);
+  }
+
+  const ExtensionExtMeshFeatures* pFeatures =
+      pPrimitive->getExtension<ExtensionExtMeshFeatures>();
+  if (!pFeatures) {
+    return DotNet::System::Array1<DotNet::CesiumForUnity::CesiumFeature>(0);
+  }
+
+  std::vector<const FeatureId*> featureIdAttributes;
+  for (const FeatureId& featureIdSet : pFeatures->featureIds) {
+    if (featureIdSet.attribute) {
+      featureIdAttributes.push_back(&featureIdSet);
+    }
+  }
+
+  const int32_t attributesCount =
+      static_cast<int32_t>(featureIdAttributes.size());
+  DotNet::System::Array1<DotNet::CesiumForUnity::CesiumFeature> features =
+      DotNet::System::Array1<DotNet::CesiumForUnity::CesiumFeature>(
+          attributesCount);
+
+  for (int32_t i = 0; i < attributesCount; i++) {
+    DotNet::CesiumForUnity::CesiumFeature feature;
+    features.Item(i, feature);
+
+    const CesiumGltf::FeatureId& featureIdSet = *featureIdAttributes[i];
+    if (!featureIdSet.propertyTable || *featureIdSet.propertyTable < 0 ||
+        *featureIdSet.propertyTable >=
+            static_cast<int64_t>(pModelMetadata->propertyTables.size())) {
+      continue;
+    }
+
+    const auto propertyTable = pModelMetadata->propertyTables[i];
+
+    int64_t vertexIndex = getFirstVertexFromTriangle(
+        *pModel,
+        *pPrimitive,
+        vertexCount,
+        triangleIndex);
+
+    if (propertyTable.name) {
+      feature.featureTableName(*propertyTable.name);
+    }
+
+    auto classIt =
+        pModelMetadata->schema->classes.find(propertyTable.classProperty);
+    if (classIt != pModelMetadata->schema->classes.end() &&
+        classIt->second.name) {
+      feature.className(*classIt->second.name);
+    }
+
+    int64_t featureID = getFeatureIdFromVertex(
+        *pModel,
+        *pPrimitive,
+        *featureIdSet.attribute,
+        vertexIndex);
+    if (featureID < 0) {
+      feature.properties(DotNet::System::Array1<DotNet::System::String>(0));
+      continue;
+    }
+
+    CesiumGltf::PropertyTableView propertyTableView(*pModel, propertyTable);
+    feature.properties(DotNet::System::Array1<DotNet::System::String>(
+        propertyTable.properties.size()));
+    int propertyIndex = 0;
+    auto& values = feature.NativeImplementation().values;
+    propertyTableView.forEachProperty(
+        [featureID, &propertyIndex, feature, &values](
+            const std::string& propertyName,
+            auto property) {
+          // The 3D Tiles Next implementation of this class did not account for
+          // noData values, so using getRaw() most accurately preserves
+          // backwards compatibility.
+          auto rawValue = property.getRaw(featureID);
+          CesiumMetadataValue value = CesiumMetadataValue();
+          using ValueType = decltype(rawValue);
+
+          if constexpr (
+              IsMetadataBoolean<ValueType>::value ||
+              IsMetadataScalar<ValueType>::value) {
+            value.SetObjectValue(rawValue);
+          }
+
+          if constexpr (IsMetadataString<ValueType>::value) {
+            std::string stringValue = std::string(rawValue);
+            value.SetObjectValue(System::String(stringValue));
+          }
+
+          if constexpr (IsMetadataArray<ValueType>::value) {
+            CesiumPropertyArray array =
+                CesiumFeaturesMetadataUtility::makePropertyArray(rawValue);
+            value.SetObjectValue(array);
+          }
+
+          feature.properties().Item(propertyIndex++, propertyName);
+          CesiumFeatureImpl::PropertyInfo propertyInfo{
+              property.arrayCount(),
+              property.normalized()};
+          values.insert({propertyName, {propertyInfo, value}});
+        });
+  }
+  return features;
 }
+
+} // namespace CesiumForUnityNative

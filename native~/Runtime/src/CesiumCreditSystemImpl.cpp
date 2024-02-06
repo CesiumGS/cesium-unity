@@ -3,8 +3,8 @@
 #include "CameraManager.h"
 #include "UnityTilesetExternals.h"
 
-#include <Cesium3DTilesSelection/IonRasterOverlay.h>
 #include <Cesium3DTilesSelection/Tileset.h>
+#include <CesiumRasterOverlays/IonRasterOverlay.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/CesiumForUnity/CesiumCredit.h>
@@ -22,7 +22,6 @@
 #include <DotNet/UnityEngine/Texture2D.h>
 #include <tidybuffio.h>
 
-using namespace Cesium3DTilesSelection;
 using namespace DotNet;
 using namespace System::Collections::Generic;
 
@@ -30,7 +29,7 @@ namespace CesiumForUnityNative {
 
 CesiumCreditSystemImpl::CesiumCreditSystemImpl(
     const CesiumForUnity::CesiumCreditSystem& creditSystem)
-    : _pCreditSystem(std::make_shared<CreditSystem>()),
+    : _pCreditSystem(std::make_shared<CesiumUtility::CreditSystem>()),
       _htmlToUnityCredit(),
       _lastCreditsCount(0),
       _creditsUpdated(false) {}
@@ -52,7 +51,7 @@ void CesiumCreditSystemImpl::UpdateCredits(
     _creditsUpdated = false;
   }
 
-  const std::vector<Cesium3DTilesSelection::Credit>& creditsToShowThisFrame =
+  const std::vector<CesiumUtility::Credit>& creditsToShowThisFrame =
       _pCreditSystem->getCreditsToShowThisFrame();
   size_t creditsCount = creditsToShowThisFrame.size();
   _creditsUpdated =
@@ -69,7 +68,7 @@ void CesiumCreditSystemImpl::UpdateCredits(
     onScreenCredits.Clear();
 
     for (int i = 0; i < creditsCount; i++) {
-      const Cesium3DTilesSelection::Credit& credit = creditsToShowThisFrame[i];
+      const CesiumUtility::Credit& credit = creditsToShowThisFrame[i];
 
       DotNet::CesiumForUnity::CesiumCredit unityCredit;
       const std::string& html = _pCreditSystem->getHtml(credit);
@@ -211,7 +210,7 @@ CesiumCreditSystemImpl::convertHtmlToUnityCredit(
   return credit;
 }
 
-const std::shared_ptr<Cesium3DTilesSelection::CreditSystem>&
+const std::shared_ptr<CesiumUtility::CreditSystem>&
 CesiumCreditSystemImpl::getExternalCreditSystem() const {
   return _pCreditSystem;
 }
