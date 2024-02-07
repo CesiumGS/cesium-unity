@@ -171,8 +171,9 @@ void TilesetMaterialProperties::updateOverlayParameterIDs(
     if (uniqueKeys.find(keyStlString) != uniqueKeys.end()) {
       UnityEngine::Debug::LogWarning(
           System::String("Two or more raster overlays use the same material "
-                         "key on the same Cesium3DTileset. Only one of them "
-                         "will be passed to the tileset's material."));
+                         "key on the same Cesium3DTileset. This will cause "
+                         "unexpected behavior, as only one of them will be "
+                         "passed to the tileset's material."));
       continue;
     }
     uniqueKeys.insert(keyStlString);

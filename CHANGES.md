@@ -17,6 +17,7 @@
 - Added `CesiumMetadataValue`, which can hold a metadata value from `EXT_structural_metadata` while abstracting away its type.
 - Added a `distance` property to `CesiumOriginShift`, which specifies the maximum allowed distance from the current origin before it is shifted.
 - Added support for the `KHR_texture_transform` glTF extension - including rotation - in `baseColorTexture`, `metallicRoughnessTexture`, `emissiveTexture`, `normalTexture`, and `occlusionTexture`. The transformation is now applied on the GPU via nodes in the Material, rather than on the CPU by directly modifying texture coordinates.
+- Added `materialKey` to `CesiumRasterOverlay`, which maps the overlay to its corresponding parameters in the tileset's material. This allows for explicit ordering of raster overlays, as well as overlay-specific effects.
 
 ##### Fixes :wrench:
 
