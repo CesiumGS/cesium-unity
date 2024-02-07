@@ -537,15 +537,25 @@ void Cesium3DTilesetImpl::LoadTileset(
         options);
   }
 
-  // Add any overlay components
+  // Add any overlay components while collecting their material keys.
   System::Array1<CesiumForUnity::CesiumRasterOverlay> overlays =
       tileset.gameObject().GetComponents<CesiumForUnity::CesiumRasterOverlay>();
+  std::vector<std::string> overlayMaterialKeys(overlays.Length());
+
   for (int32_t i = 0, len = overlays.Length(); i < len; ++i) {
     CesiumForUnity::CesiumRasterOverlay overlay = overlays[i];
     overlay.AddToTileset();
+    overlayMaterialKeys[i] = overlay.materialKey().ToStlString();
   }
 
-  // Add any tile excluder components
+  // Use material keys to resolve the property IDs in TilesetMaterialProperties.
+  UnityPrepareRendererResources* pRendererResources =
+      static_cast<UnityPrepareRendererResources*>(
+          this->_pTileset->getExternals().pPrepareRendererResources.get());
+  pRendererResources->getMaterialProperties().updateOverlayParameterIDs(
+      overlayMaterialKeys);
+
+  // Add any tile excluder components.
   System::Array1<CesiumForUnity::CesiumTileExcluder> excluders =
       tileset.gameObject()
           .GetComponentsInParent<CesiumForUnity::CesiumTileExcluder>();

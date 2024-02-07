@@ -1,23 +1,37 @@
 using UnityEditor;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace CesiumForUnity
 {
     [CustomEditor(typeof(CesiumRasterOverlay))]
     public class CesiumRasterOverlayEditor : Editor
     {
+        private const string _overlayPrefix = "_overlayTexture_";
+
+        private Cesium3DTileset _tileset;
         private CesiumRasterOverlay _overlay;
 
         private SerializedProperty _showCreditsOnScreen;
+        private SerializedProperty _materialKey;
         private SerializedProperty _maximumScreenSpaceError;
         private SerializedProperty _maximumTextureSize;
         private SerializedProperty _maximumSimultaneousTileLoads;
         private SerializedProperty _subTileCacheBytes;
 
+        private int _materialCRC = 0;
+        private string[] _materialKeys;
+        private int _selectedMaterialKeyIndex;
+
+        public bool drawShowCreditsOnScreen = true;
+        public bool drawOverlayProperties = true;
+
         private void OnEnable()
         {
             this._overlay = (CesiumRasterOverlay)target;
+            this._tileset = _overlay.gameObject.GetComponent<Cesium3DTileset>();
 
+            this._materialKey = this.serializedObject.FindProperty("_materialKey");
             this._showCreditsOnScreen = this.serializedObject.FindProperty("_showCreditsOnScreen");
             this._maximumScreenSpaceError =
                 this.serializedObject.FindProperty("_maximumScreenSpaceError");
@@ -25,26 +39,124 @@ namespace CesiumForUnity
             this._maximumSimultaneousTileLoads =
                 this.serializedObject.FindProperty("_maximumSimultaneousTileLoads");
             this._subTileCacheBytes = this.serializedObject.FindProperty("_subTileCacheBytes");
+
+            this._materialKeys = new string[] { };
+
+            this.UpdateMaterialKeys();
         }
 
         public override void OnInspectorGUI()
         {
             this.serializedObject.Update();
 
+            this.DrawTilesetWarning();
+
             EditorGUIUtility.labelWidth = CesiumEditorStyle.inspectorLabelWidth;
-            DrawRasterOverlayProperties();
+
+            this.DrawMaterialKeyProperty();
+
+            if (this.drawShowCreditsOnScreen)
+            {
+                this.DrawShowCreditsOnScreenProperty();
+            }
+
+            if (this.drawOverlayProperties)
+            {
+                this.DrawRasterOverlayProperties();
+            }
 
             this.serializedObject.ApplyModifiedProperties();
         }
 
-        private void DrawRasterOverlayProperties()
+        private void DrawTilesetWarning()
+        {
+            if (this._tileset == null)
+            {
+                EditorGUILayout.HelpBox("CesiumRasterOverlay should be used in combination with a " +
+                    "Cesium3DTileset component on this GameObject.", MessageType.Warning);
+            }
+        }
+
+        private void UpdateMaterialKeys()
+        {
+            if (this._tileset != null)
+            {
+                Material material = this._tileset.opaqueMaterial;
+
+                if (material == null)
+                {
+                    material = Resources.Load<Material>("CesiumDefaultTilesetMaterial");
+                }
+
+                if (material == null)
+                {
+                    Debug.LogError("Couldn't find default tileset material in Resources.");
+                    return;
+                }
+
+                int materialCRC = material.ComputeCRC();
+                if (this._materialCRC == materialCRC)
+                {
+                    return;
+                }
+
+                string[] propertyNames = material.GetTexturePropertyNames();
+                List<string> materialKeys = new List<string>();
+
+                foreach (string name in propertyNames)
+                {
+                    if (name.StartsWith(_overlayPrefix))
+                    {
+                        string key = name.Substring(_overlayPrefix.Length);
+
+                        if (this._materialKey.stringValue == key)
+                        {
+                            this._selectedMaterialKeyIndex = materialKeys.Count;
+                        }
+
+                        materialKeys.Add(key);
+                    }
+                }
+
+                this._materialKeys = materialKeys.ToArray();
+            }
+        }
+
+
+        private void DrawMaterialKeyProperty()
+        {
+            GUIContent materialKeyContent = new GUIContent(
+                "Material Key", 
+                "The key to use to match this overlay to the corresponding parameters " +
+                "in the tileset's material." +
+                "\n\n" +
+                "In the tileset's materials, an overlay requires parameters for its texture, " +
+                "texture coordinate index, and translation and scale. Overlays must specify a " +
+                "string key to match with the correct parameters. The format of these parameters " +
+                "is as follows." +
+                "\n\n" +
+                "- <b>Overlay Texture</b>: _overlayTexture_KEY\n" +
+                "<b>Overlay Texture Coordinate Index</b>: _overlayTextureCoordinateIndex_KEY\n" +
+                "<b>Overlay Translation and Scale</b>: _overlayTranslationScale_KEY\n" +
+                "\n\n" +
+                "Material keys are useful for specifying the order of the raster overlays, or distinguishing " +
+                "them for overlay-specific effects."
+                );
+            this._selectedMaterialKeyIndex =
+                EditorGUILayout.Popup(materialKeyContent, this._selectedMaterialKeyIndex, this._materialKeys);
+        }
+
+        private void DrawShowCreditsOnScreenProperty()
         {
             GUIContent showCreditsOnScreenContent = new GUIContent(
                 "Show Credits On Screen",
                 "Whether or not to show credits of this raster overlay on screen.");
             EditorGUILayout.PropertyField(
                 this._showCreditsOnScreen, showCreditsOnScreenContent);
+        }
 
+        private void DrawRasterOverlayProperties()
+        {
             GUIContent maximumScreenSpaceErrorContent = new GUIContent(
                 "Maximum Screen Space Error",
                 "The maximum number of pixels of error when rendering this overlay. " +

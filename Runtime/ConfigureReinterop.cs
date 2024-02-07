@@ -14,6 +14,7 @@ using Unity.Mathematics;
 using UnityEngine.Pool;
 using UnityEngine.UIElements;
 
+
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -297,6 +298,7 @@ namespace CesiumForUnity
             ionOverlay.AddToTilesetLater(null);
 
             CesiumRasterOverlay overlay = go.GetComponent<CesiumRasterOverlay>();
+            overlay.materialKey = overlay.materialKey;
             overlay.showCreditsOnScreen = overlay.showCreditsOnScreen;
             overlay.maximumScreenSpaceError = overlay.maximumScreenSpaceError;
             overlay.maximumTextureSize = overlay.maximumTextureSize;

@@ -6,7 +6,6 @@ namespace CesiumForUnity
     [CustomEditor(typeof(CesiumBingMapsRasterOverlay))]
     public class CesiumBingMapsRasterOverlayEditor : Editor
     {
-        private CesiumBingMapsRasterOverlay _bingMapsOverlay;
         private CesiumRasterOverlayEditor _rasterOverlayEditor;
 
         private SerializedProperty _bingMapsKey;
@@ -14,7 +13,6 @@ namespace CesiumForUnity
 
         private void OnEnable()
         {
-            this._bingMapsOverlay = (CesiumBingMapsRasterOverlay)this.target;
             this._rasterOverlayEditor =
                 (CesiumRasterOverlayEditor)Editor.CreateEditor(
                                                      this.target,
