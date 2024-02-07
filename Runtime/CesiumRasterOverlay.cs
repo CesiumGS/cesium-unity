@@ -174,6 +174,9 @@ namespace CesiumForUnity
             if (tileset == null)
                 return;
 
+            // In case the material key changed, register the new key with the tileset.
+            tileset.UpdateOverlayMaterialKeys();
+
             this.AddToTileset(tileset);
         }
 
@@ -201,6 +204,7 @@ namespace CesiumForUnity
         public void Refresh()
         {
             this.RemoveFromTileset();
+
             if (this.enabled)
                 this.AddToTileset();
         }

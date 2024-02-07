@@ -1381,7 +1381,6 @@ void* UnityPrepareRendererResources::prepareInMainThread(
        pCoordinateSystem,
        createPhysicsMeshes,
        showTilesInHierarchy,
-       currentOverlayCount,
        &metadataComponent,
        &tile,
        &materialProperties = this->_materialProperties,
@@ -1475,14 +1474,6 @@ void* UnityPrepareRendererResources::prepareInMainThread(
               *pMaterial,
               material,
               materialProperties);
-        }
-
-        // Initialize overlay UVs to all use index 0, attachRasterTile will
-        // update the uniforms with the correct UV index.
-        for (uint32_t i = 0; i < currentOverlayCount; ++i) {
-          material.SetFloat(
-              materialProperties.getOverlayTextureCoordinateIndexID(i),
-              0);
         }
 
         if (primitiveInfo.containsPoints) {
@@ -1758,12 +1749,7 @@ void UnityPrepareRendererResources::attachRasterInMainThread(
   if (!pCesiumGameObject || !pCesiumGameObject->pGameObject || !pTexture)
     return;
 
-  std::optional<uint32_t> maybeOverlayIndex =
-      findOverlayIndex(this->_tilesetGameObject, rasterTile.getOverlay());
-  if (!maybeOverlayIndex)
-    return;
-
-  uint32_t overlayIndex = *maybeOverlayIndex;
+  std::string key = rasterTile.getOverlay().getName();
 
   // We're assuming here that the order of primitives in the transform chain
   // is the same as the order in the `primitiveInfos`, which should
@@ -1810,22 +1796,27 @@ void UnityPrepareRendererResources::attachRasterInMainThread(
     // index - multiple overlays can use the _CESIUMOVERLAY_0 attribute for
     // example. The _CESIUMOVERLAY_<i> attributes correspond to unique
     // _projections_, not unique overlays.
-    material.SetFloat(
-        _materialProperties.getOverlayTextureCoordinateIndexID(overlayIndex),
-        static_cast<float>(texCoordIndexIt->second));
+    auto maybeID =
+        this->_materialProperties.getOverlayTextureCoordinateIndexID(key);
+    if (maybeID) {
+      material.SetFloat(*maybeID, static_cast<float>(texCoordIndexIt->second));
+    }
 
-    material.SetTexture(
-        _materialProperties.getOverlayTextureID(overlayIndex),
-        *pTexture);
+    maybeID = this->_materialProperties.getOverlayTextureID(key);
+    if (maybeID) {
+      material.SetTexture(*maybeID, *pTexture);
+    }
 
     UnityEngine::Vector4 translationAndScale{
         float(translation.x),
         float(translation.y),
         float(scale.x),
         float(scale.y)};
-    material.SetVector(
-        _materialProperties.getOverlayTranslationAndScaleID(overlayIndex),
-        translationAndScale);
+
+    maybeID = this->_materialProperties.getOverlayTranslationAndScaleID(key);
+    if (maybeID) {
+      material.SetVector(*maybeID, translationAndScale);
+    }
   }
 }
 
@@ -1851,13 +1842,6 @@ void UnityPrepareRendererResources::detachRasterInMainThread(
       *pTexture == nullptr)
     return;
 
-  std::optional<uint32_t> maybeOverlayIndex =
-      findOverlayIndex(this->_tilesetGameObject, rasterTile.getOverlay());
-  if (!maybeOverlayIndex)
-    return;
-
-  uint32_t overlayIndex = *maybeOverlayIndex;
-
   UnityEngine::Transform transform =
       pCesiumGameObject->pGameObject->transform();
   for (int32_t i = 0, len = transform.childCount(); i < len; ++i) {
@@ -1878,8 +1862,10 @@ void UnityPrepareRendererResources::detachRasterInMainThread(
     if (material == nullptr)
       continue;
 
-    material.SetTexture(
-        _materialProperties.getOverlayTextureID(overlayIndex),
-        UnityEngine::Texture(nullptr));
+    auto maybeID = this->_materialProperties.getOverlayTextureID(
+        rasterTile.getOverlay().getName());
+    if (maybeID) {
+      material.SetTexture(*maybeID, UnityEngine::Texture(nullptr));
+    }
   }
 }

@@ -2,8 +2,9 @@
 
 #include <DotNet/System/String.h>
 
-#include <cassert>
 #include <cstdint>
+#include <optional>
+#include <unordered_map>
 #include <vector>
 
 namespace CesiumForUnityNative {
@@ -76,15 +77,12 @@ public:
     return this->_occlusionTextureRotationID;
   }
 
-  const int32_t getOverlayTextureCoordinateIndexID(int32_t index) {
-    return this->_overlayTextureCoordinateIndexIDs[index];
-  }
-  const int32_t getOverlayTextureID(int32_t index) {
-    return this->_overlayTextureIDs[index];
-  }
-  const int32_t getOverlayTranslationAndScaleID(int32_t index) {
-    return this->_overlayTranslationAndScaleIDs[index];
-  }
+  const std::optional<int32_t>
+  getOverlayTextureCoordinateIndexID(const std::string& key) const noexcept;
+  const std::optional<int32_t>
+  getOverlayTextureID(const std::string& key) const noexcept;
+  const std::optional<int32_t>
+  getOverlayTranslationAndScaleID(const std::string& key) const noexcept;
 
   void updateOverlayParameterIDs(
       const std::vector<std::string>& overlayMaterialKeys);
@@ -116,40 +114,39 @@ private:
   int32_t _normalMapTextureRotationID;
   int32_t _occlusionTextureRotationID;
 
-  std::vector<int32_t> _overlayTextureCoordinateIndexIDs;
-  std::vector<int32_t> _overlayTextureIDs;
-  std::vector<int32_t> _overlayTranslationAndScaleIDs;
+  std::unordered_map<std::string, int32_t> _overlayTextureCoordinateIndexIDs;
+  std::unordered_map<std::string, int32_t> _overlayTextureIDs;
+  std::unordered_map<std::string, int32_t> _overlayTranslationAndScaleIDs;
 
-  static const DotNet::System::String _baseColorFactorName;
-  static const DotNet::System::String _baseColorTextureName;
-  static const DotNet::System::String _baseColorTextureCoordinateIndexName;
+  static const std::string _baseColorFactorName;
+  static const std::string _baseColorTextureName;
+  static const std::string _baseColorTextureCoordinateIndexName;
 
-  static const DotNet::System::String _normalMapTextureName;
-  static const DotNet::System::String _normalMapTextureCoordinateIndexName;
-  static const DotNet::System::String _normalMapScaleName;
+  static const std::string _normalMapTextureName;
+  static const std::string _normalMapTextureCoordinateIndexName;
+  static const std::string _normalMapScaleName;
 
-  static const DotNet::System::String _metallicRoughnessFactorName;
-  static const DotNet::System::String _metallicRoughnessTextureName;
-  static const DotNet::System::String
-      _metallicRoughnessTextureCoordinateIndexName;
+  static const std::string _metallicRoughnessFactorName;
+  static const std::string _metallicRoughnessTextureName;
+  static const std::string _metallicRoughnessTextureCoordinateIndexName;
 
-  static const DotNet::System::String _occlusionTextureName;
-  static const DotNet::System::String _occlusionTextureCoordinateIndexName;
-  static const DotNet::System::String _occlusionStrengthName;
+  static const std::string _occlusionTextureName;
+  static const std::string _occlusionTextureCoordinateIndexName;
+  static const std::string _occlusionStrengthName;
 
-  static const DotNet::System::String _emissiveFactorName;
-  static const DotNet::System::String _emissiveTextureName;
-  static const DotNet::System::String _emissiveTextureCoordinateIndexName;
+  static const std::string _emissiveFactorName;
+  static const std::string _emissiveTextureName;
+  static const std::string _emissiveTextureCoordinateIndexName;
 
-  static const DotNet::System::String _baseColorTextureRotationName;
-  static const DotNet::System::String _metallicRoughnessTextureRotationName;
-  static const DotNet::System::String _emissiveTextureRotationName;
-  static const DotNet::System::String _normalMapTextureRotationName;
-  static const DotNet::System::String _occlusionTextureRotationName;
+  static const std::string _baseColorTextureRotationName;
+  static const std::string _metallicRoughnessTextureRotationName;
+  static const std::string _emissiveTextureRotationName;
+  static const std::string _normalMapTextureRotationName;
+  static const std::string _occlusionTextureRotationName;
 
-  static const DotNet::System::String _overlayTexturePrefix;
-  static const DotNet::System::String _overlayTextureCoordinateIndexPrefix;
-  static const DotNet::System::String _overlayTranslationAndScalePrefix;
+  static const std::string _overlayTexturePrefix;
+  static const std::string _overlayTextureCoordinateIndexPrefix;
+  static const std::string _overlayTranslationAndScalePrefix;
 };
 
 } // namespace CesiumForUnityNative

@@ -149,6 +149,7 @@ namespace CesiumForUnity
             meshCollider.sharedMesh = mesh;
 
             Debug.Log("Logging");
+            Debug.LogWarning("Warning");
 
             MeshRenderer meshRenderer = new MeshRenderer();
             GameObject meshGameObject = meshRenderer.gameObject;

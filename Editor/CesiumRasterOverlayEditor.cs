@@ -41,8 +41,6 @@ namespace CesiumForUnity
             this._subTileCacheBytes = this.serializedObject.FindProperty("_subTileCacheBytes");
 
             this._materialKeys = new string[] { };
-
-            this.UpdateMaterialKeys();
         }
 
         public override void OnInspectorGUI()
@@ -52,6 +50,8 @@ namespace CesiumForUnity
             this.DrawTilesetWarning();
 
             EditorGUIUtility.labelWidth = CesiumEditorStyle.inspectorLabelWidth;
+
+            this.UpdateMaterialKeys();
 
             this.DrawMaterialKeyProperty();
 
@@ -126,7 +126,7 @@ namespace CesiumForUnity
         private void DrawMaterialKeyProperty()
         {
             GUIContent materialKeyContent = new GUIContent(
-                "Material Key", 
+                "Material Key",
                 "The key to use to match this overlay to the corresponding parameters " +
                 "in the tileset's material." +
                 "\n\n" +
@@ -135,15 +135,23 @@ namespace CesiumForUnity
                 "string key to match with the correct parameters. The format of these parameters " +
                 "is as follows." +
                 "\n\n" +
-                "- <b>Overlay Texture</b>: _overlayTexture_KEY\n" +
-                "<b>Overlay Texture Coordinate Index</b>: _overlayTextureCoordinateIndex_KEY\n" +
-                "<b>Overlay Translation and Scale</b>: _overlayTranslationScale_KEY\n" +
+                "- Overlay Texture: _overlayTexture_KEY\n" +
+                "- Overlay Texture Coordinate Index: _overlayTextureCoordinateIndex_KEY\n" +
+                "- Overlay Translation and Scale: _overlayTranslationScale_KEY\n" +
                 "\n\n" +
                 "Material keys are useful for specifying the order of the raster overlays, or distinguishing " +
                 "them for overlay-specific effects."
                 );
-            this._selectedMaterialKeyIndex =
+            int selectedIndex =
                 EditorGUILayout.Popup(materialKeyContent, this._selectedMaterialKeyIndex, this._materialKeys);
+            if (selectedIndex == this._selectedMaterialKeyIndex ||
+                selectedIndex < 0 || selectedIndex >= this._materialKeys.Length)
+            {
+                return;
+            }
+
+            this._materialKey.stringValue = this._materialKeys[selectedIndex];
+            this._selectedMaterialKeyIndex = selectedIndex;
         }
 
         private void DrawShowCreditsOnScreenProperty()

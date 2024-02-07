@@ -3,7 +3,7 @@
 #include <Cesium3DTilesSelection/IPrepareRendererResources.h>
 
 #include <DotNet/UnityEngine/GameObject.h>
-#include <TilesetMaterialProperties.h>
+#include "TilesetMaterialProperties.h"
 
 namespace CesiumForUnityNative {
 
