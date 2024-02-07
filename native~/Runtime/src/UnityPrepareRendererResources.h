@@ -1,9 +1,10 @@
 #pragma once
 
+#include "TilesetMaterialProperties.h"
+
 #include <Cesium3DTilesSelection/IPrepareRendererResources.h>
 
 #include <DotNet/UnityEngine/GameObject.h>
-#include "TilesetMaterialProperties.h"
 
 namespace CesiumForUnityNative {
 
