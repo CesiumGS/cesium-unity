@@ -567,7 +567,6 @@ void Cesium3DTilesetImpl::LoadTileset(
   // Add any overlay components.
   System::Array1<CesiumForUnity::CesiumRasterOverlay> overlays =
       tileset.gameObject().GetComponents<CesiumForUnity::CesiumRasterOverlay>();
-
   for (int32_t i = 0, len = overlays.Length(); i < len; ++i) {
     CesiumForUnity::CesiumRasterOverlay overlay = overlays[i];
     overlay.AddToTileset();

@@ -1702,32 +1702,6 @@ void UnityPrepareRendererResources::freeRaster(
   }
 }
 
-namespace {
-
-std::optional<uint32_t> findOverlayIndex(
-    const UnityEngine::GameObject& tileset,
-    const CesiumRasterOverlays::RasterOverlay& overlay) {
-  DotNet::CesiumForUnity::Cesium3DTileset tilesetComponent =
-      tileset.GetComponent<DotNet::CesiumForUnity::Cesium3DTileset>();
-  Tileset* pTileset = tilesetComponent.NativeImplementation().getTileset();
-  if (!pTileset)
-    return std::nullopt;
-
-  uint32_t overlayIndex = 0;
-  for (const CesiumUtility::IntrusivePointer<RasterOverlay>& pOverlay :
-       pTileset->getOverlays()) {
-    if (&overlay == pOverlay.get()) {
-      return overlayIndex;
-    }
-
-    ++overlayIndex;
-  }
-
-  return std::nullopt;
-}
-
-} // namespace
-
 void UnityPrepareRendererResources::attachRasterInMainThread(
     const Cesium3DTilesSelection::Tile& tile,
     int32_t overlayTextureCoordinateID,

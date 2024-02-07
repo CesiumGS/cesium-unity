@@ -14,7 +14,6 @@ using Unity.Mathematics;
 using UnityEngine.Pool;
 using UnityEngine.UIElements;
 
-
 #if UNITY_EDITOR
 using UnityEditor;
 #endif

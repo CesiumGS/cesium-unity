@@ -22,6 +22,7 @@ namespace CesiumForUnity
         private int _materialCRC = 0;
         private string[] _materialKeys;
         private int _selectedMaterialKeyIndex;
+        private bool _showMaterialKeyWarning;
 
         public bool drawShowCreditsOnScreen = true;
         public bool drawOverlayProperties = true;
@@ -103,6 +104,7 @@ namespace CesiumForUnity
                 string[] propertyNames = material.GetTexturePropertyNames();
                 List<string> materialKeys = new List<string>();
 
+                bool foundMaterialKey = false;
                 foreach (string name in propertyNames)
                 {
                     if (name.StartsWith(_overlayPrefix))
@@ -112,10 +114,19 @@ namespace CesiumForUnity
                         if (this._materialKey.stringValue == key)
                         {
                             this._selectedMaterialKeyIndex = materialKeys.Count;
+                            foundMaterialKey = true;
+                            this._showMaterialKeyWarning = false;
                         }
 
                         materialKeys.Add(key);
                     }
+                }
+
+                if (!foundMaterialKey)
+                {
+                    this._showMaterialKeyWarning = true;
+                    this._selectedMaterialKeyIndex = materialKeys.Count;
+                    materialKeys.Add(this._materialKey.stringValue);
                 }
 
                 this._materialKeys = materialKeys.ToArray();
@@ -144,6 +155,13 @@ namespace CesiumForUnity
                 );
             int selectedIndex =
                 EditorGUILayout.Popup(materialKeyContent, this._selectedMaterialKeyIndex, this._materialKeys);
+
+            if (this._showMaterialKeyWarning)
+            {
+                EditorGUILayout.HelpBox("The specified Material Key does not exist in the " +
+                    "Cesium3DTileset's material.", MessageType.Warning);
+            }
+
             if (selectedIndex == this._selectedMaterialKeyIndex ||
                 selectedIndex < 0 || selectedIndex >= this._materialKeys.Length)
             {
@@ -152,6 +170,7 @@ namespace CesiumForUnity
 
             this._materialKey.stringValue = this._materialKeys[selectedIndex];
             this._selectedMaterialKeyIndex = selectedIndex;
+
         }
 
         private void DrawShowCreditsOnScreenProperty()
