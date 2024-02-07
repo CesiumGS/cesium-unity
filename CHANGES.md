@@ -5,6 +5,7 @@
 ##### Breaking Changes :mega:
 
 - Feature IDs and metadata are now parsed through the `EXT_mesh_features` and `EXT_structural_metadata` extensions respectively. Models with `EXT_feature_metadata` will still be parsed, but their metadata will no longer be accessible.
+- `CesiumDefaultTilesetMaterial` and `CesiumUnlitTilesetMaterial` have had their overlay-related parameters renamed. For instance, `_overlay0TextureCoordinateIndex` has now become `_overlayTextureCoordinateIndex_0`. Custom materials that relied on the previous naming scheme may break.
 
 ##### Additions :tada:
 
@@ -17,7 +18,7 @@
 - Added `CesiumMetadataValue`, which can hold a metadata value from `EXT_structural_metadata` while abstracting away its type.
 - Added a `distance` property to `CesiumOriginShift`, which specifies the maximum allowed distance from the current origin before it is shifted.
 - Added support for the `KHR_texture_transform` glTF extension - including rotation - in `baseColorTexture`, `metallicRoughnessTexture`, `emissiveTexture`, `normalTexture`, and `occlusionTexture`. The transformation is now applied on the GPU via nodes in the Material, rather than on the CPU by directly modifying texture coordinates.
-- Added `materialKey` to `CesiumRasterOverlay`, which maps the overlay to its corresponding parameters in the tileset's material. This allows for explicit ordering of raster overlays, as well as overlay-specific effects.
+- Added `materialKey` to `CesiumRasterOverlay`, which matches the overlay to its corresponding parameters in the tileset's material. This allows for explicit ordering of raster overlays and overlay-specific effects. 
 
 ##### Fixes :wrench:
 
