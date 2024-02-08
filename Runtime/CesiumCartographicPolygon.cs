@@ -1,7 +1,10 @@
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
+
+#if UNITY_2022_2_OR_NEWER
 using UnityEngine.Splines;
+#endif
 
 namespace CesiumForUnity
 {
@@ -9,12 +12,15 @@ namespace CesiumForUnity
     /// A spline-based polygon used to rasterize 2D polygons on top of <see cref="Cesium3DTileset"/>s.
     /// </summary>
     [ExecuteInEditMode]
+#if UNITY_2022_2_OR_NEWER
     [RequireComponent(typeof(SplineContainer))]
     [RequireComponent(typeof(CesiumGlobeAnchor))]
+#endif
     [AddComponentMenu("Cesium/Cesium Cartographic Polygon")]
     [IconAttribute("Packages/com.cesium.unity/Editor/Resources/Cesium-24x24.png")]
     public partial class CesiumCartographicPolygon : MonoBehaviour
     {
+#if UNITY_2022_2_OR_NEWER
         private SplineContainer _splineContainer;
         private CesiumGlobeAnchor _globeAnchor;
 
@@ -49,11 +55,13 @@ namespace CesiumForUnity
             this._splineContainer.AddSpline(defaultSpline);
         }
 #endif
+#endif
 
         static List<double2> emptyList = new List<double2>();
 
         internal List<double2> GetCartographicPoints(Matrix4x4 worldToTileset)
         {
+#if UNITY_2022_2_OR_NEWER
             CesiumGeoreference georeference = this._globeAnchor.GetComponentInParent<CesiumGeoreference>();
             if (georeference == null)
             {
@@ -102,6 +110,9 @@ namespace CesiumForUnity
             }
 
             return cartographicPoints;
+#else
+            return emptyList;
+#endif
         }
     }
 }
