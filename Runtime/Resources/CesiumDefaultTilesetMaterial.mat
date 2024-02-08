@@ -25,7 +25,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  version: 5
+  version: 7
 --- !u!21 &2100000
 Material:
   serializedVersion: 8
@@ -36,7 +36,10 @@ Material:
   m_Name: CesiumDefaultTilesetMaterial
   m_Shader: {fileID: -6465566751694194690, guid: 407c0cff68611ac46a65eec87a5203f5,
     type: 3}
-  m_ValidKeywords: []
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords:
+  - _ALPHATEST_ON
   m_InvalidKeywords:
   - _OVERLAYCOUNT_NONE
   - _OVERLAY_COUNT_NONE
@@ -44,10 +47,11 @@ Material:
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
+  m_CustomRenderQueue: 2450
   stringTagMap:
-    RenderType: Opaque
+    RenderType: TransparentCutout
   disabledShaderPasses: []
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -99,6 +103,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _overlayTexture_Clipping:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -113,10 +121,12 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _AlphaClip: 0
+    - _AlphaClip: 1
+    - _AlphaToMask: 1
     - _BUILTIN_QueueControl: -1
     - _BUILTIN_QueueOffset: 0
     - _Blend: 0
+    - _BlendModePreserveSpecular: 1
     - _CastShadows: 1
     - _Cull: 2
     - _DstBlend: 0
@@ -157,6 +167,7 @@ Material:
     - _overlayTextureCoordinateIndex_0: 0
     - _overlayTextureCoordinateIndex_1: 0
     - _overlayTextureCoordinateIndex_2: 0
+    - _overlayTextureCoordinateIndex_Clipping: 0
     m_Colors:
     - _baseColorFactor: {r: 1, g: 1, b: 1, a: 1}
     - _baseColorTextureRotation: {r: 0, g: 1, b: 0, a: 0}
@@ -172,4 +183,5 @@ Material:
     - _overlayTranslationAndScale_0: {r: 0, g: 0, b: 1, a: 1}
     - _overlayTranslationAndScale_1: {r: 0, g: 0, b: 1, a: 1}
     - _overlayTranslationAndScale_2: {r: 0, g: 0, b: 1, a: 1}
+    - _overlayTranslationAndScale_Clipping: {r: 0, g: 0, b: 1, a: 1}
   m_BuildTextureStacks: []

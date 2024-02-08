@@ -14,6 +14,9 @@
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
 #include <DotNet/System/String.h>
 #include <DotNet/Unity/Mathematics/double2.h>
+#include <DotNet/UnityEngine/GameObject.h>
+#include <DotNet/UnityEngine/Matrix4x4.h>
+#include <DotNet/UnityEngine/Transform.h>
 #include <glm/glm.hpp>
 
 using namespace DotNet;
@@ -33,7 +36,7 @@ CesiumPolygonRasterOverlayImpl::~CesiumPolygonRasterOverlayImpl() {}
 CesiumPolygonRasterOverlayImpl::CreateCartographicPolygon(
     DotNet::System::Collections::Generic::List1<
         DotNet::Unity::Mathematics::double2> cartographicPoints) {
-  int32_t pointsCount = cartographicPoints.Count();
+  const int32_t pointsCount = cartographicPoints.Count();
   if (pointsCount < 3) {
     return CesiumGeospatial::CartographicPolygon({});
   }
@@ -77,19 +80,32 @@ void CesiumPolygonRasterOverlayImpl::AddToTileset(
     return;
   }
 
+  UnityEngine::Matrix4x4 worldToTileset =
+      tileset.gameObject().transform().worldToLocalMatrix();
+
   const int32_t polygonCount = unityPolygons.Count();
   std::vector<CesiumGeospatial::CartographicPolygon> nativePolygons;
   nativePolygons.reserve(polygonCount);
 
   for (int32_t i = 0; i < polygonCount; i++) {
     CesiumForUnity::CesiumCartographicPolygon unityPolygon = unityPolygons[i];
+    if (unityPolygon == nullptr) {
+      continue;
+    }
+
+    if (!unityPolygon.enabled() ||
+        !unityPolygon.gameObject().activeInHierarchy()) {
+      continue;
+    }
+
     CesiumGeospatial::CartographicPolygon nativePolygon =
-        CreateCartographicPolygon(unityPolygon.GetCartographicPoints());
+        CreateCartographicPolygon(
+            unityPolygon.GetCartographicPoints(worldToTileset));
     nativePolygons.emplace_back(std::move(nativePolygon));
   }
 
   this->_pOverlay = new RasterizedPolygonsOverlay(
-      overlay.name().ToStlString(),
+      overlay.materialKey().ToStlString(),
       nativePolygons,
       overlay.invertSelection(),
       CesiumGeospatial::Ellipsoid::WGS84,

@@ -244,12 +244,12 @@ namespace CesiumForUnity
                     Selection.activeGameObject = blankTileset.gameObject;
                     break;
                 case QuickAddItemType.DynamicCamera:
-                    CesiumCameraController dynamicCamera =
+                    CesiumCameraController dynamicCamera = 
                         CesiumEditorUtility.CreateDynamicCamera();
                     Selection.activeGameObject = dynamicCamera.gameObject;
                     break;
                 case QuickAddItemType.CartographicPolygon:
-                    CesiumCartographicPolygon cartographicPolygon =
+                    CesiumCartographicPolygon cartographicPolygon = 
                         CesiumEditorUtility.CreateCartographicPolygon();
                     Selection.activeGameObject = cartographicPolygon.gameObject;
                     break;

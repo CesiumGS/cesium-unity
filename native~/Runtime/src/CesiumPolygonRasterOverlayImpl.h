@@ -42,6 +42,7 @@ private:
   static CesiumGeospatial::CartographicPolygon CreateCartographicPolygon(
       DotNet::System::Collections::Generic::List1<
           DotNet::Unity::Mathematics::double2> cartographicPoints);
+
   CesiumUtility::IntrusivePointer<
       CesiumRasterOverlays::RasterizedPolygonsOverlay>
       _pOverlay;

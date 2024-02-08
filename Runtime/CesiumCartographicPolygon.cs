@@ -52,7 +52,7 @@ namespace CesiumForUnity
 
         static List<double2> emptyList = new List<double2>();
 
-        internal List<double2> GetCartographicPoints()
+        internal List<double2> GetCartographicPoints(Matrix4x4 worldToTileset)
         {
             CesiumGeoreference georeference = this._globeAnchor.GetComponentInParent<CesiumGeoreference>();
             if (georeference == null)
@@ -66,6 +66,12 @@ namespace CesiumForUnity
                 return emptyList;
             }
 
+            if (splines.Count > 1)
+            {
+                Debug.LogWarning("CesiumCartographicPolygon has multiple splines in its Spline component, " +
+                    "but can only support one at a time. Only the first spline will be rasterized.");
+            }
+
             Spline spline = splines[0];
             if (!spline.Closed)
             {
@@ -76,17 +82,19 @@ namespace CesiumForUnity
             BezierKnot[] knots = spline.ToArray();
             List<double2> cartographicPoints = new List<double2>(knots.Length);
 
-            Matrix4x4 transformMatrix = Matrix4x4.TRS(this.transform.localPosition, this.transform.localRotation, this.transform.localScale);
+            float4x4 localToWorld = this.transform.localToWorldMatrix;
+
             for (int i = 0; i < knots.Length; i++)
             {
                 if (spline.GetTangentMode(i) != TangentMode.Linear)
                 {
-                    Debug.LogError("Cartographic polygon only supports linear splines.");
+                    Debug.LogError("CesiumCartographicPolygon only supports linear splines.");
                     return emptyList;
                 }
 
                 BezierKnot knot = knots[i];
-                float3 unityPosition = transformMatrix.MultiplyPoint3x4(knot.Position);
+                float3 worldPosition = knot.Transform(localToWorld).Position;
+                float3 unityPosition = worldToTileset.MultiplyPoint3x4(worldPosition);
                 double3 ecefPosition = georeference.TransformUnityPositionToEarthCenteredEarthFixed(unityPosition);
                 double3 cartographicPosition = CesiumWgs84Ellipsoid.EarthCenteredEarthFixedToLongitudeLatitudeHeight(ecefPosition);
 

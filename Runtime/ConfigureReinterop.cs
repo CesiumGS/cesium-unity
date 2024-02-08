@@ -81,7 +81,7 @@ namespace CesiumForUnity
             GameObject go = new GameObject();
             go.name = go.name;
             go = new GameObject("name");
-            go.SetActive(go.activeSelf);
+            go.SetActive(go.activeInHierarchy);
             int layer = go.layer;
             go.layer = layer;
             Transform transform = go.transform;
@@ -789,7 +789,9 @@ namespace CesiumForUnity
             server.serverUrlThatIsLoadingApiUrl = "";
 
             CesiumCartographicPolygon polygon = go.GetComponent<CesiumCartographicPolygon>();
-            List<double2> points = polygon.GetCartographicPoints();
+            polygon.enabled = polygon.enabled;
+
+            List<double2> points = polygon.GetCartographicPoints(m);
             len = points.Count;
             myDouble2 = points[0];
 

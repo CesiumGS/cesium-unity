@@ -14,9 +14,11 @@ namespace CesiumForUnity
     public partial class CesiumPolygonRasterOverlay : CesiumRasterOverlay
     {
         [SerializeField]
-        [Tooltip("The polygons to rasterize for this overlay.")]
         private List<CesiumCartographicPolygon> _polygons;
 
+        /// <summary>
+        /// The polygons to rasterize for this overlay.
+        /// </summary>
         public List<CesiumCartographicPolygon> polygons
         {
             get => this._polygons;
@@ -28,12 +30,22 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Tooltip("Whether to invert the selection specified by the polygons." +
-            "\n\n" +
-            "If this is true, only the areas outside of all the polygons will be rasterized.")]
-
         private bool _invertSelection = false;
 
+        /// <summary>
+        /// Whether to invert the selection specified by the polygons.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// When this setting is false, the areas inside the polygons are rasterized and therefore 
+        /// hidden from the rest of the tileset. In other words, they appear to cut holes in the
+        /// tileset.
+        /// </para>
+        /// <para>
+        /// When this setting is true, the areas outside of all the polygons will be rasterized instead.
+        /// This will hide everything except for the areas inside the polygons.
+        /// </para>
+        /// </remarks>
         public bool invertSelection
         {
             get => this._invertSelection;
@@ -45,15 +57,24 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Tooltip("Whether tiles that fall entirely within the rasterized selection should be " +
-            "excluded from loading and rendering. For better performance, this should be enabled " +
-            "when this overlay will be used for clipping. But when this overlay is used for other effects," +
-            " this option should be disabled to avoid missing tiles." +
-            "\n\n" +
-            "Note that if InvertSelection is true, this will cull tiles that are outside of all the polygons. " +
-            "If it is false, this will cull tiles that are completely inside at least one polygon.")]
         private bool _excludeSelectedTiles = true;
 
+        /// <summary>
+        /// Whether tiles that fall entirely within the rasterized selection should be 
+        /// excluded from loading and rendering.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// For better performance, this should be enabled when this overlay will be used for clipping.
+        /// But when this overlay is used for other effects, this option should be disabled to avoid 
+        /// missing tiles.
+        /// </para>
+        /// <para>
+        /// Note that if <see cref="invertSelection"/> is true, this will cull tiles that are outside 
+        /// of all the polygons. If it is false, this will cull tiles that are completely inside at 
+        /// least one polygon.
+        /// </para>
+        /// </remarks>
         public bool excludeSelectedTiles
         {
             get => this._excludeSelectedTiles;
@@ -63,6 +84,13 @@ namespace CesiumForUnity
                 this.Refresh();
             }
         }
+
+#if UNITY_EDITOR
+        private void Reset()
+        {
+            this.materialKey = "Clipping";
+        }
+#endif
 
         /// <inheritdoc/>
         protected override partial void AddToTileset(Cesium3DTileset tileset);

@@ -35,9 +35,9 @@ namespace CesiumForUnity
             this.serializedObject.Update();
 
             EditorGUIUtility.labelWidth = CesiumEditorStyle.inspectorLabelWidth;
-            DrawBingMapsProperties();
+            this.DrawBingMapsProperties();
             EditorGUILayout.Space(5);
-            DrawRasterOverlayProperties();
+            this.DrawRasterOverlayProperties();
 
             this.serializedObject.ApplyModifiedProperties();
         }
