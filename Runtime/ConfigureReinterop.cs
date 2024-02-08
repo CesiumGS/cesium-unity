@@ -148,6 +148,7 @@ namespace CesiumForUnity
             meshCollider.sharedMesh = mesh;
 
             Debug.Log("Logging");
+            Debug.LogWarning("Warning");
 
             MeshRenderer meshRenderer = new MeshRenderer();
             GameObject meshGameObject = meshRenderer.gameObject;
@@ -161,6 +162,8 @@ namespace CesiumForUnity
             meshRenderer.material.DisableKeyword("keywordName");
             meshRenderer.material.EnableKeyword("keywordName");
             meshRenderer.material.GetTexture(id);
+            meshRenderer.material.SetTextureOffset(id, new Vector2());
+            meshRenderer.material.SetTextureScale(id, new Vector2());
             var ids = new List<int>();
             meshRenderer.material.GetTexturePropertyNameIDs(ids);
             for (int i = 0; i < ids.Count; ++i)
@@ -295,6 +298,7 @@ namespace CesiumForUnity
             ionOverlay.AddToTilesetLater(null);
 
             CesiumRasterOverlay overlay = go.GetComponent<CesiumRasterOverlay>();
+            overlay.materialKey = overlay.materialKey;
             overlay.showCreditsOnScreen = overlay.showCreditsOnScreen;
             overlay.maximumScreenSpaceError = overlay.maximumScreenSpaceError;
             overlay.maximumTextureSize = overlay.maximumTextureSize;

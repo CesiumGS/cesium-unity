@@ -55,7 +55,7 @@ void CesiumWebMapServiceRasterOverlayImpl::AddToTileset(
       CesiumRasterOverlayUtility::GetOverlayOptions(genericOverlay);
 
   this->_pOverlay = new WebMapServiceRasterOverlay(
-      overlay.name().ToStlString(),
+      overlay.materialKey().ToStlString(),
       overlay.baseUrl().ToStlString(),
       std::vector<CesiumAsync::IAssetAccessor::THeader>(),
       wmsOptions,

@@ -61,7 +61,7 @@ void CesiumIonRasterOverlayImpl::AddToTileset(
 
   if (!apiUrl.empty()) {
     this->_pOverlay = new IonRasterOverlay(
-        overlay.name().ToStlString(),
+        overlay.materialKey().ToStlString(),
         overlay.ionAssetID(),
         ionAccessToken.ToStlString(),
         options,
