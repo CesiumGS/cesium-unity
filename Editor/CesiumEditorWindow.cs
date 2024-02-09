@@ -193,6 +193,7 @@ namespace CesiumForUnity
                 -1,
                 "",
                 -1),
+#if UNITY_2022_2_OR_NEWER
             new QuickAddItem(
                 QuickAddItemType.CartographicPolygon,
                 "Cesium Cartographic Polygon",
@@ -201,6 +202,7 @@ namespace CesiumForUnity
                 -1,
                 "",
                 -1)
+#endif
         };
 
         void DrawQuickAddBasicAssetsPanel()
@@ -244,12 +246,12 @@ namespace CesiumForUnity
                     Selection.activeGameObject = blankTileset.gameObject;
                     break;
                 case QuickAddItemType.DynamicCamera:
-                    CesiumCameraController dynamicCamera = 
+                    CesiumCameraController dynamicCamera =
                         CesiumEditorUtility.CreateDynamicCamera();
                     Selection.activeGameObject = dynamicCamera.gameObject;
                     break;
                 case QuickAddItemType.CartographicPolygon:
-                    CesiumCartographicPolygon cartographicPolygon = 
+                    CesiumCartographicPolygon cartographicPolygon =
                         CesiumEditorUtility.CreateCartographicPolygon();
                     Selection.activeGameObject = cartographicPolygon.gameObject;
                     break;

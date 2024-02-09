@@ -5,8 +5,13 @@ using UnityEngine;
 namespace CesiumForUnity
 {
     /// <summary>
-    /// A raster overlay that can be used to debug tilesets by shading each tile with a random color.
+    /// A raster overlay that rasterizes polygons and drapes them over the tileset.
+    /// This is useful for clipping out parts of a tileset or applying specific material
+    /// effects in an area.
     /// </summary>
+    /// <remarks>
+    /// Polygon raster overlays will only work in Unity 2022.2 or later.
+    /// </remarks>
     [ReinteropNativeImplementation(
         "CesiumForUnityNative::CesiumPolygonRasterOverlayImpl", "CesiumPolygonRasterOverlayImpl.h")]
     [AddComponentMenu("Cesium/Cesium Polygon Raster Overlay")]

@@ -10,13 +10,16 @@ namespace CesiumForUnity
 {
     /// <summary>
     /// A spline-based polygon used to rasterize 2D polygons on top of <see cref="Cesium3DTileset"/>s.
+    /// Cartographic polygons are only supported for Unity 2022.2 or later.
     /// </summary>
     [ExecuteInEditMode]
 #if UNITY_2022_2_OR_NEWER
     [RequireComponent(typeof(SplineContainer))]
     [RequireComponent(typeof(CesiumGlobeAnchor))]
-#endif
     [AddComponentMenu("Cesium/Cesium Cartographic Polygon")]
+#else
+    [AddComponentMenu("")]
+#endif
     [IconAttribute("Packages/com.cesium.unity/Editor/Resources/Cesium-24x24.png")]
     public partial class CesiumCartographicPolygon : MonoBehaviour
     {
