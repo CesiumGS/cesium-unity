@@ -43,12 +43,6 @@ CesiumPolygonRasterOverlayImpl::CreateCartographicPolygon(
 
   std::vector<glm::dvec2> polygonPoints(pointsCount);
 
-  // The spline points should be located in the tileset *exactly where they
-  // appear to be*. The way we do that is by getting their world position, and
-  // then transforming that world position to a Cesium3DTileset local position.
-  // That way if the tileset is transformed relative to the globe, the polygon
-  // will still affect the tileset where the user thinks it should.
-
   for (int32_t i = 0; i < pointsCount; ++i) {
     Unity::Mathematics::double2 point = cartographicPoints[i];
     polygonPoints[i] = glm::dvec2(glm::radians(point.x), glm::radians(point.y));
@@ -98,9 +92,10 @@ void CesiumPolygonRasterOverlayImpl::AddToTileset(
       continue;
     }
 
+    auto cartographicPoints =
+        unityPolygon.GetCartographicPoints(worldToTileset);
     CesiumGeospatial::CartographicPolygon nativePolygon =
-        CreateCartographicPolygon(
-            unityPolygon.GetCartographicPoints(worldToTileset));
+        CreateCartographicPolygon(cartographicPoints);
     nativePolygons.emplace_back(std::move(nativePolygon));
   }
 

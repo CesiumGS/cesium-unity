@@ -112,6 +112,13 @@ namespace CesiumForUnity
                 }
 
                 BezierKnot knot = knots[i];
+
+                // The spline points should be located in the tileset *exactly where they
+                // appear to be*. The way we do that is by getting their world position, and
+                // then transforming that world position to a Cesium3DTileset local position.
+                // That way if the tileset is transformed relative to the globe, the polygon
+                // will still affect the tileset where the user thinks it should.
+
                 float3 worldPosition = knot.Transform(localToWorld).Position;
                 float3 unityPosition = worldToTileset.MultiplyPoint3x4(worldPosition);
                 double3 ecefPosition = georeference.TransformUnityPositionToEarthCenteredEarthFixed(unityPosition);
