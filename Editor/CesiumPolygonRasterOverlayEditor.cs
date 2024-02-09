@@ -38,6 +38,17 @@ namespace CesiumForUnity
         {
             this.serializedObject.Update();
 
+#if !SUPPORTS_SPLINES
+#if UNITY_2022_2_OR_NEWER
+            EditorGUILayout.HelpBox("CesiumCartographicPolygon requires the Splines package, which is currently " +
+             "not installed in the project. CesiumPolygonRasterOverlay will not have any effect until the Splines " +
+             "package is installed through the Package Manager", MessageType.Error);
+#else
+            EditorGUILayout.HelpBox("CesiumCartographicPolygon requires the Splines package, which is not available " +
+                "in this version of Unity. This means CesiumPolygonRasterOverlay will not have any effect.", MessageType.Error);
+#endif
+#endif
+
             EditorGUIUtility.labelWidth = CesiumEditorStyle.inspectorLabelWidth;
             this.DrawPolygonRasterOverlayProperties();
             EditorGUILayout.Space(5);

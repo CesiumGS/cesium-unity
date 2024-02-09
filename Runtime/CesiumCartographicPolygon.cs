@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 
-#if UNITY_2022_2_OR_NEWER
+#if SUPPORTS_SPLINES
 using UnityEngine.Splines;
 #endif
 
@@ -13,7 +13,7 @@ namespace CesiumForUnity
     /// Cartographic polygons are only supported for Unity 2022.2 or later.
     /// </summary>
     [ExecuteInEditMode]
-#if UNITY_2022_2_OR_NEWER
+#if SUPPORTS_SPLINES
     [RequireComponent(typeof(SplineContainer))]
     [RequireComponent(typeof(CesiumGlobeAnchor))]
     [AddComponentMenu("Cesium/Cesium Cartographic Polygon")]
@@ -23,17 +23,26 @@ namespace CesiumForUnity
     [IconAttribute("Packages/com.cesium.unity/Editor/Resources/Cesium-24x24.png")]
     public partial class CesiumCartographicPolygon : MonoBehaviour
     {
-#if UNITY_2022_2_OR_NEWER
+#if SUPPORTS_SPLINES
         private SplineContainer _splineContainer;
         private CesiumGlobeAnchor _globeAnchor;
+#endif
 
         void OnEnable()
         {
+#if SUPPORTS_SPLINES
             this._splineContainer = this.GetComponent<SplineContainer>();
             this._globeAnchor = this.GetComponent<CesiumGlobeAnchor>();
+#elif UNITY_2022_2_OR_NEWER
+            Debug.LogError("CesiumCartographicPolygon requires the Splines package, which is currently not installed " +
+                "in the project. Install the Splines package using the Package Manager.");
+#else
+            Debug.LogError("CesiumCartographicPolygon requires the Splines package, which is not available " +
+                "in this version of Unity.");
+#endif
         }
 
-#if UNITY_EDITOR
+#if SUPPORTS_SPLINES && UNITY_EDITOR
         void Reset()
         {
             IReadOnlyList<Spline> splines = this._splineContainer.Splines;
@@ -58,13 +67,12 @@ namespace CesiumForUnity
             this._splineContainer.AddSpline(defaultSpline);
         }
 #endif
-#endif
 
         static List<double2> emptyList = new List<double2>();
 
         internal List<double2> GetCartographicPoints(Matrix4x4 worldToTileset)
         {
-#if UNITY_2022_2_OR_NEWER
+#if SUPPORTS_SPLINES
             CesiumGeoreference georeference = this._globeAnchor.GetComponentInParent<CesiumGeoreference>();
             if (georeference == null)
             {

@@ -14,7 +14,11 @@ namespace CesiumForUnity
     /// </remarks>
     [ReinteropNativeImplementation(
         "CesiumForUnityNative::CesiumPolygonRasterOverlayImpl", "CesiumPolygonRasterOverlayImpl.h")]
+#if UNITY_2022_2_OR_NEWER
     [AddComponentMenu("Cesium/Cesium Polygon Raster Overlay")]
+#else
+    [AddComponentMenu("")]
+#endif
     [IconAttribute("Packages/com.cesium.unity/Editor/Resources/Cesium-24x24.png")]
     public partial class CesiumPolygonRasterOverlay : CesiumRasterOverlay
     {
