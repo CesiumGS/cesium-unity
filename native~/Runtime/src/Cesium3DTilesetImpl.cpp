@@ -214,6 +214,28 @@ void Cesium3DTilesetImpl::RecreateTileset(
   this->DestroyTileset(tileset);
 }
 
+void Cesium3DTilesetImpl::UpdateTilesetOptions(
+    const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
+  if (this->_pTileset) {
+    TilesetOptions options = this->_pTileset->getOptions();
+    options.maximumScreenSpaceError = tileset.maximumScreenSpaceError();
+    options.preloadAncestors = tileset.preloadAncestors();
+    options.preloadSiblings = tileset.preloadSiblings();
+    options.forbidHoles = tileset.forbidHoles();
+    options.maximumSimultaneousTileLoads = tileset.maximumSimultaneousTileLoads();
+    options.maximumCachedBytes = tileset.maximumCachedBytes();
+    options.loadingDescendantLimit = tileset.loadingDescendantLimit();
+    options.enableFrustumCulling = tileset.enableFrustumCulling();
+    options.enableFogCulling = tileset.enableFogCulling();
+    options.enforceCulledScreenSpaceError = tileset.enforceCulledScreenSpaceError();
+    options.culledScreenSpaceError = tileset.culledScreenSpaceError();
+    // options.enableLodTransitionPeriod = tileset.useLodTransitions();
+    // options.lodTransitionLength = tileset.lodTransitionLength();
+    options.showCreditsOnScreen = tileset.showCreditsOnScreen();
+    this->_pTileset->setOptions(options);
+  }
+}
+
 namespace {
 
 struct CalculateECEFCameraPosition {

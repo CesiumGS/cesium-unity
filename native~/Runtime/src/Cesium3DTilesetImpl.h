@@ -38,6 +38,7 @@ public:
   void OnDisable(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
 
   void RecreateTileset(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
+  void UpdateTilesetOptions(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
   void FocusTileset(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
 
   float
