@@ -171,10 +171,11 @@ public class TestCesiumOriginShift
         // speed per second
         double speed = 1000.0;
         double duration = 10.0;
-        float startTime = Time.time;
-        Vector3 startPos = globeAnchor.transform.position;
+        // To make tests more repeatable, we'll run a fixed number of frames, rather than a fixed duration
+        // This means that the rest will have the same result regardless of the frame time
+        int totalNumFrames = (int)(duration / Time.fixedDeltaTime);
 
-        while ((Time.time - startTime) < duration)
+        for(int i = 0; i < totalNumFrames; i += 2)
         {
             double3 previousPositionEcef = globeAnchor.positionGlobeFixed.x;
 
