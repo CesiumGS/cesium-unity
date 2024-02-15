@@ -232,7 +232,7 @@ void Cesium3DTilesetImpl::UpdateTilesetOptions(
     // options.enableLodTransitionPeriod = tileset.useLodTransitions();
     // options.lodTransitionLength = tileset.lodTransitionLength();
     options.showCreditsOnScreen = tileset.showCreditsOnScreen();
-    this->_pTileset->setOptions(options);
+    this->_pTileset->getOptions() = options;
   }
 }
 
