@@ -160,6 +160,8 @@ namespace CesiumForUnity
             meshRenderer.material.DisableKeyword("keywordName");
             meshRenderer.material.EnableKeyword("keywordName");
             meshRenderer.material.GetTexture(id);
+            meshRenderer.material.SetTextureOffset(id, new Vector2());
+            meshRenderer.material.SetTextureScale(id, new Vector2());
             var ids = new List<int>();
             meshRenderer.material.GetTexturePropertyNameIDs(ids);
             for (int i = 0; i < ids.Count; ++i)
@@ -724,9 +726,8 @@ namespace CesiumForUnity
             sets[0].label = "label";
             sets[0].nullFeatureId = 0;
             sets[0].propertyTableIndex = 0;
-            sets[0].CallDispose();
+            sets[0].Dispose();
 
-            CesiumFeatureIdSetType setType = CesiumFeatureIdSetType.None;
             CesiumFeatureIdAttribute featureIdAttribute = new CesiumFeatureIdAttribute();
             featureIdAttribute.status = featureIdAttribute.status;
             featureIdAttribute.featureCount = 1;

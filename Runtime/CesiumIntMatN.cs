@@ -5,8 +5,9 @@ using Unity.Mathematics;
 namespace CesiumForUnity
 {
     /// <summary>
-    /// Represents a mat2x2 with signed integer components. This preserves the accuracy of the integer
-    /// values, which could otherwise lose precision if represented as doubles.
+    /// Represents a mat2x2 with signed integer components. This preserves the exact type
+    /// of the integer components so they can be properly converted (or not converted)
+    /// to other types.
     /// </summary>
     /// <remarks>
     /// Internally, this is used to store all signed integer mat types, including i8mat2x2,
@@ -61,8 +62,9 @@ namespace CesiumForUnity
     }
 
     /// <summary>
-    /// Represents a mat3x3 with signed integer components. This preserves the accuracy of the integer
-    /// values, which could otherwise lose precision if represented as doubles.
+    /// Represents a mat3x3 with signed integer components. This preserves the exact type
+    /// of the integer components so they can be properly converted (or not converted)
+    /// to other types.
     /// </summary>
     /// <remarks>
     /// Internally, this is used to store all signed integer mat types, including i8mat3x3,
@@ -126,8 +128,9 @@ namespace CesiumForUnity
     }
 
     /// <summary>
-    /// Represents a mat4x4 with signed integer components. This preserves the accuracy of the integer
-    /// values, which could otherwise lose precision if represented as doubles.
+    /// Represents a mat4x4 with signed integer components. This preserves the exact type
+    /// of the integer components so they can be properly converted (or not converted)
+    /// to other types.
     /// </summary>
     /// <remarks>
     /// Internally, this is used to store all signed integer mat types, including i8mat4x4,

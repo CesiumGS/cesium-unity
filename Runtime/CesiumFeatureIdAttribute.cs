@@ -57,10 +57,5 @@ namespace CesiumForUnity
             int vertex = CesiumPrimitiveFeatures.GetFirstVertexFromHitTriangle(hitInfo);
             return this.GetFeatureIdForVertex(vertex);
         }
-
-        internal override void CallDispose()
-        {
-            this.Dispose();
-        }
     }
 }

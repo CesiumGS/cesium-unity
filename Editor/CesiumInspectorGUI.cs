@@ -1,6 +1,5 @@
 ﻿
 using System;
-using System.Text.RegularExpressions;
 using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
@@ -139,13 +138,21 @@ namespace CesiumForUnity
         }
 
         public static void ClampedDoubleField(
-            SerializedProperty property, double min, double max, GUIContent label)
+            SerializedProperty property, double min, double max, GUIContent label, bool delayed = false)
         {
             // SerializedPropertyType.Float is used for both float and double;
             // SerializedPropertyType.Double does not exist.
             if (property.propertyType == SerializedPropertyType.Float)
             {
-                double value = EditorGUILayout.DoubleField(label, property.doubleValue);
+                double value;
+                if (delayed)
+                {
+                    value = EditorGUILayout.DelayedDoubleField(label, property.doubleValue);
+                }
+                else
+                {
+                    value = EditorGUILayout.DoubleField(label, property.doubleValue);
+                }
                 property.doubleValue = Math.Clamp(value, min, max);
             }
             else
