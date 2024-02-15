@@ -1,4 +1,5 @@
 using Reinterop;
+using System;
 using UnityEngine;
 
 namespace CesiumForUnity
@@ -7,10 +8,16 @@ namespace CesiumForUnity
     /// Provides access to the metadata attached to features in a <see cref="Cesium3DTileset"/>.
     /// </summary>
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumMetadataImpl", "CesiumMetadataImpl.h")]
-    [AddComponentMenu("Cesium/Cesium Metadata")]
+    [AddComponentMenu("")]
     [IconAttribute("Packages/com.cesium.unity/Editor/Resources/Cesium-24x24.png")]
+    [Obsolete("Retrieve metadata using the CesiumModelMetadata component attached to a tile instead.")]
     public partial class CesiumMetadata : MonoBehaviour
     {
+        private void OnEnable()
+        {
+            Debug.LogWarning("CesiumMetadata component is deprecated. Retrieve metadata using the CesiumModelMetadata component of a tile object.");
+        }
+
         /// <summary>
         /// Gets the features corresponding to a particular triangle in a tile.
         /// </summary>
@@ -22,5 +29,5 @@ namespace CesiumForUnity
         /// function.
         /// </remarks>
         public partial CesiumFeature[] GetFeatures(Transform transform, int triangleIndex);
-   }
+    }
 }

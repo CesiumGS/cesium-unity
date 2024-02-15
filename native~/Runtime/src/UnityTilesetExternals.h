@@ -6,8 +6,11 @@
 
 namespace Cesium3DTilesSelection {
 class TilesetExternals;
-class CreditSystem;
 } // namespace Cesium3DTilesSelection
+
+namespace CesiumUtility {
+class CreditSystem;
+}
 
 namespace CesiumAsync {
 class AsyncSystem;

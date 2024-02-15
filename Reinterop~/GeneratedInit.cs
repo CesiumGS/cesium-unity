@@ -113,6 +113,9 @@ namespace Reinterop
                 using System;
                 using System.Runtime.InteropServices;
 
+                // Obsolete warnings aren't useful in this generated code.
+                #pragma warning disable 612, 618
+
                 namespace Reinterop
                 {
                     internal class ReinteropInitializer

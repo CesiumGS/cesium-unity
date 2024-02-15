@@ -6,10 +6,10 @@
 #include "UnityTileExcluderAdaptor.h"
 #include "UnityTilesetExternals.h"
 
-#include <Cesium3DTilesSelection/IonRasterOverlay.h>
 #include <Cesium3DTilesSelection/Tileset.h>
 #include <CesiumGeospatial/GlobeTransforms.h>
 #include <CesiumIonClient/Connection.h>
+#include <CesiumRasterOverlays/IonRasterOverlay.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/CesiumForUnity/Cesium3DTilesetLoadFailureDetails.h>
@@ -498,6 +498,8 @@ void Cesium3DTilesetImpl::LoadTileset(
 
   contentOptions.ktx2TranscodeTargets =
       CesiumGltf::Ktx2TranscodeTargets(supportedFormats, false);
+
+  contentOptions.applyTextureTransform = false;
 
   options.contentOptions = contentOptions;
 
