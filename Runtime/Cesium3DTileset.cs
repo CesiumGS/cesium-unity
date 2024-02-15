@@ -707,6 +707,10 @@ namespace CesiumForUnity
         /// </summary>
         public partial void RecreateTileset();
         
+        /// <summary>
+        /// Update the tileset options. Tiles are not unloaded, but the Options of the tileset are updated
+        /// based on the current values of the properties.
+        /// </summary>
         public partial void UpdateTilesetOptions();
 
         /// <summary>
