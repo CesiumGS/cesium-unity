@@ -1191,9 +1191,9 @@ void* UnityPrepareRendererResources::prepareInMainThread(
               if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
                 UnityEngine::Texture texture =
                     TextureLoader::loadTexture(gltf, baseColorTexture->index);
-                texture.hideFlags(
-                    DotNet::UnityEngine::HideFlags::HideAndDontSave);
                 if (texture != nullptr) {
+                  texture.hideFlags(
+                      DotNet::UnityEngine::HideFlags::HideAndDontSave);
                   material.SetTexture(
                       shaderProperty.getBaseColorTextureID(),
                       texture);
@@ -1212,9 +1212,9 @@ void* UnityPrepareRendererResources::prepareInMainThread(
               if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
                 UnityEngine::Texture texture =
                     TextureLoader::loadTexture(gltf, metallicRoughness->index);
-                texture.hideFlags(
-                    DotNet::UnityEngine::HideFlags::HideAndDontSave);
                 if (texture != nullptr) {
+                  texture.hideFlags(
+                      DotNet::UnityEngine::HideFlags::HideAndDontSave);
                   material.SetTexture(
                       shaderProperty.getMetallicRoughnessTextureID(),
                       texture);
@@ -1234,9 +1234,9 @@ void* UnityPrepareRendererResources::prepareInMainThread(
               UnityEngine::Texture texture = TextureLoader::loadTexture(
                   gltf,
                   pMaterial->normalTexture->index);
-              texture.hideFlags(
-                  DotNet::UnityEngine::HideFlags::HideAndDontSave);
               if (texture != nullptr) {
+                texture.hideFlags(
+                    DotNet::UnityEngine::HideFlags::HideAndDontSave);
                 material.SetTexture(
                     shaderProperty.getNormalMapTextureID(),
                     texture);
@@ -1257,9 +1257,9 @@ void* UnityPrepareRendererResources::prepareInMainThread(
               UnityEngine::Texture texture = TextureLoader::loadTexture(
                   gltf,
                   pMaterial->occlusionTexture->index);
-              texture.hideFlags(
-                  DotNet::UnityEngine::HideFlags::HideAndDontSave);
               if (texture != nullptr) {
+                texture.hideFlags(
+                    DotNet::UnityEngine::HideFlags::HideAndDontSave);
                 material.SetTexture(
                     shaderProperty.getOcclusionTextureID(),
                     texture);
@@ -1295,9 +1295,9 @@ void* UnityPrepareRendererResources::prepareInMainThread(
               UnityEngine::Texture texture = TextureLoader::loadTexture(
                   gltf,
                   pMaterial->emissiveTexture->index);
-              texture.hideFlags(
-                  DotNet::UnityEngine::HideFlags::HideAndDontSave);
               if (texture != nullptr) {
+                texture.hideFlags(
+                    DotNet::UnityEngine::HideFlags::HideAndDontSave);
                 material.SetTexture(
                     shaderProperty.getEmissiveTextureID(),
                     texture);
