@@ -180,7 +180,7 @@ public class TestCesiumOriginShift
 
             yield return new WaitForFixedUpdate();
 
-            double unitsEcef = speed * Time.deltaTime;
+            double unitsEcef = speed * Time.fixedDeltaTime;
             double3 movement = georeference.TransformEarthCenteredEarthFixedDirectionToUnity(new double3(unitsEcef, 0, 0));
             controller.Move((float3)movement);
 
