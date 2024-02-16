@@ -5,8 +5,9 @@ namespace CesiumForUnity
 {
 
     /// <summary>
-    /// Represents a vec2 with signed integer components. This preserves the accuracy of the integer
-    /// values, which could otherwise lose precision if represented as doubles.
+    /// Represents a vec2 with signed integer components. This preserves the exact type
+    /// of the integer components so they can be properly converted (or not converted)
+    /// to other types.
     /// </summary>
     /// <remarks>
     /// Internally, this is used to store all signed integer vec2 types, including i8vec2,
@@ -81,8 +82,9 @@ namespace CesiumForUnity
     }
 
     /// <summary>
-    /// Represents a vec3 with signed integer components. This preserves the accuracy of the integer
-    /// values, which could otherwise lose precision if represented as doubles.
+    /// Represents a vec3 with signed integer components. This preserves the exact type
+    /// of the integer components so they can be properly converted (or not converted)
+    /// to other types.
     /// </summary>
     /// <remarks>
     /// Internally, this is used to store all signed integer vec3 types, including i8vec3,
@@ -168,8 +170,9 @@ namespace CesiumForUnity
     }
 
     /// <summary>
-    /// Represents a vec4 with signed integer components. This preserves the accuracy of the integer values,
-    /// which could otherwise lose precision if represented as doubles.
+    /// Represents a vec4 with signed integer components. This preserves the exact type
+    /// of the integer components so they can be properly converted (or not converted)
+    /// to other types.
     /// </summary>
     /// <remarks>
     /// Internally, this is used to store all signed integer vec4 types, including i8vec4,

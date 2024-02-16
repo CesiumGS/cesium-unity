@@ -499,6 +499,8 @@ void Cesium3DTilesetImpl::LoadTileset(
   contentOptions.ktx2TranscodeTargets =
       CesiumGltf::Ktx2TranscodeTargets(supportedFormats, false);
 
+  contentOptions.applyTextureTransform = false;
+
   options.contentOptions = contentOptions;
 
   this->_lastUpdateResult = ViewUpdateResult();
