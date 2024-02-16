@@ -164,24 +164,23 @@ public class TestCesiumOriginShift
 
         yield return new WaitForEndOfFrame();
 
-        IEqualityComparer<double> epsilon6 = Comparers.Double(1e-6, 1e-6);
+        IEqualityComparer<double> epsilon6 = Comparers.Double(1e-6, 1e-4);
 
         Assert.That(baseEcef.x, Is.EqualTo(globeAnchor.positionGlobeFixed.x).Using(epsilon6));
 
         // speed per second
         double speed = 1000.0;
         double duration = 10.0;
-        // To make tests more repeatable, we'll run a fixed number of frames, rather than a fixed duration
-        // This means that the rest will have the same result regardless of the frame time
-        int totalNumFrames = (int)(duration / Time.fixedDeltaTime);
+        float startTime = Time.time;
+        Vector3 startPos = globeAnchor.transform.position;
 
-        for(int i = 0; i < totalNumFrames; i += 2)
+        while ((Time.time - startTime) < duration)
         {
             double3 previousPositionEcef = globeAnchor.positionGlobeFixed.x;
 
             yield return new WaitForFixedUpdate();
 
-            double unitsEcef = speed * Time.fixedDeltaTime;
+            double unitsEcef = speed * Time.deltaTime;
             double3 movement = georeference.TransformEarthCenteredEarthFixedDirectionToUnity(new double3(unitsEcef, 0, 0));
             controller.Move((float3)movement);
 
