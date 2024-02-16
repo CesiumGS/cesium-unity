@@ -2,9 +2,6 @@ using Reinterop;
 using Unity.Mathematics;
 using UnityEngine;
 
-#if UNITY_EDITOR
-#endif
-
 namespace CesiumForUnity
 {
     /// <summary>
