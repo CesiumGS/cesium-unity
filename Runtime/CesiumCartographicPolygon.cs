@@ -33,6 +33,22 @@ namespace CesiumForUnity
 #if SUPPORTS_SPLINES
             this._splineContainer = this.GetComponent<SplineContainer>();
             this._globeAnchor = this.GetComponent<CesiumGlobeAnchor>();
+
+            // If this component is created before the Splines package is added, the
+            // "RequireComponent" attributes won't automatically apply. This extra check
+            // should ensure the required components exist.
+            if (this._splineContainer == null)
+            {
+                this._splineContainer = this.gameObject.AddComponent<SplineContainer>();
+#if UNITY_EDITOR
+                this.Reset();
+#endif
+            }
+            if (this._globeAnchor == null)
+            {
+                this._globeAnchor = this.gameObject.AddComponent<CesiumGlobeAnchor>();
+            }
+
 #elif UNITY_2022_2_OR_NEWER
             Debug.LogError("CesiumCartographicPolygon requires the Splines package, which is currently not installed " +
                 "in the project. Install the Splines package using the Package Manager.");
