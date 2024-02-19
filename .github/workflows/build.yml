@@ -26,6 +26,7 @@ jobs:
         uses: ilammy/setup-nasm@v1.4.0
       - name: Build Reinterop
         run: |
+          cd d:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
           dotnet publish Reinterop~ -o .
       - name: Create SSH tunnel to Unity License Server
         env:
