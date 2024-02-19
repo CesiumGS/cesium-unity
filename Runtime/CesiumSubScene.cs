@@ -21,6 +21,11 @@ namespace CesiumForUnity
     [IconAttribute("Packages/com.cesium.unity/Editor/Resources/Cesium-24x24.png")]
     public class CesiumSubScene : MonoBehaviour
     {
+#if UNITY_EDITOR
+        // Caches the built-in sphere mesh across all CesiumSubScenes for use in OnDrawGizmos
+        private static Mesh _previewSphereMesh;
+#endif
+
         [SerializeField]
         private double _activationRadius = 1000;
 
@@ -191,6 +196,21 @@ namespace CesiumForUnity
         [NonSerialized]
         internal CesiumGeoreference _parentGeoreference;
 
+#if UNITY_EDITOR
+        // The coordinates of the parent CesiumGeoreference before being changed by `UpdateOrigin`.
+        // This is used when adding a CesiumSubScene component to a GameObject. Since `OnEnable`
+        // runs before `Reset`, it will force the georeference to move to the default coordinates
+        // of CesiumSubScene, which is undesired. But there's no way to modify `OnEnable` to
+        // distinguish whether the subscene was just added or already existed in the scene.
+        // Instead, we need to store the georeference's previous values during `OnEnable`,
+        // so that we can move it back during `Reset`.
+        [NonSerialized]
+        private double3 _oldParentCoordinates = double3.zero;
+
+        [NonSerialized]
+        private CesiumGeoreferenceOriginAuthority _oldParentOriginAuthority;
+#endif
+
         /// <summary>
         /// Sets the origin of the coordinate system to particular <see cref="ecefX"/>, <see cref="ecefY"/>,
         /// <see cref="ecefZ"/> coordinates in the Earth-Centered, Earth-Fixed (ECEF) frame.
@@ -231,6 +251,17 @@ namespace CesiumForUnity
             this.originAuthority = CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight;
         }
 
+        private void CopyParentCoordinates()
+        {
+            this._longitude = this._parentGeoreference.longitude;
+            this._latitude = this._parentGeoreference.latitude;
+            this._height = this._parentGeoreference.height;
+
+            this._ecefX = this._parentGeoreference.ecefX;
+            this._ecefY = this._parentGeoreference.ecefY;
+            this._ecefZ = this._parentGeoreference.ecefZ;
+        }
+
         private void DetachFromParentIfNeeded()
         {
             if (this._parentGeoreference != null)
@@ -263,6 +294,7 @@ namespace CesiumForUnity
             this.UpdateOrigin();
         }
 
+#if UNITY_EDITOR
         /// <summary>
         /// Called by the Editor when the user chooses to "reset" the component.
         /// The implementation here makes sure the newly-reset values for the serialized
@@ -271,7 +303,24 @@ namespace CesiumForUnity
         private void Reset()
         {
             this.UpdateParentReference();
+
+            // The default coordinates for the CesiumSubScene component should be the coordinates of its parent, if possible.
+            // This means adding the component as the child of an existing CesiumGeoreference won't reset the parent's coordinates.
+            if (this._parentGeoreference != null)
+            {
+                if (this._oldParentOriginAuthority == CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed)
+                {
+                    this._parentGeoreference.SetOriginEarthCenteredEarthFixed(this._oldParentCoordinates.x, this._oldParentCoordinates.y, this._oldParentCoordinates.z);
+                }
+                else
+                {
+                    this._parentGeoreference.SetOriginLongitudeLatitudeHeight(this._oldParentCoordinates.x, this._oldParentCoordinates.y, this._oldParentCoordinates.z);
+                }
+
+                this.CopyParentCoordinates();
+            }
         }
+#endif
 
         private void OnEnable()
         {
@@ -290,6 +339,19 @@ namespace CesiumForUnity
                     continue;
                 scene.gameObject.SetActive(false);
             }
+
+#if UNITY_EDITOR
+            // The parent's previous coordinates are saved here in case they have to be reverted in the editor during `Reset`
+            this._oldParentOriginAuthority = this._parentGeoreference.originAuthority;
+            if (this._oldParentOriginAuthority == CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed)
+            {
+                this._oldParentCoordinates = new double3(this._parentGeoreference.ecefX, this._parentGeoreference.ecefY, this._parentGeoreference.ecefZ);
+            }
+            else
+            {
+                this._oldParentCoordinates = new double3(this._parentGeoreference.longitude, this._parentGeoreference.latitude, this._parentGeoreference.height);
+            }
+#endif
 
             this.UpdateOrigin();
         }
@@ -310,13 +372,7 @@ namespace CesiumForUnity
 
             // Update our origin to our parent georef, maintain our origin authority,
             // and copy both sets of reference coordinates. No need to calculate any of this again
-            this._longitude = this._parentGeoreference.longitude;
-            this._latitude = this._parentGeoreference.latitude;
-            this._height = this._parentGeoreference.height;
-
-            this._ecefX = this._parentGeoreference.ecefX;
-            this._ecefY = this._parentGeoreference.ecefY;
-            this._ecefZ = this._parentGeoreference.ecefZ;
+            this.CopyParentCoordinates();
         }
 
         private void OnDisable()
@@ -386,16 +442,22 @@ namespace CesiumForUnity
             }
         }
 
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
         private void OnDrawGizmos()
         {
             if (this._showActivationRadius)
             {
-                // TODO: would be nice to draw a better wireframe sphere.
+                // Gizmos.DrawWireSphere only draws three wire circles representing the sphere's radii
+                // To do better, we need to fetch the built-in sphere mesh and use that
+                if (_previewSphereMesh == null)
+                {
+                    _previewSphereMesh = Resources.GetBuiltinResource<Mesh>("Sphere.fbx");
+                }
+
                 Gizmos.color = Color.blue;
-                Gizmos.DrawWireSphere(this.transform.position, (float)this._activationRadius);
+                Gizmos.DrawWireMesh(_previewSphereMesh, this.transform.position, Quaternion.identity, (float3)new double3(this._activationRadius, this._activationRadius, this._activationRadius));
             }
         }
-        #endif
+#endif
     }
 }

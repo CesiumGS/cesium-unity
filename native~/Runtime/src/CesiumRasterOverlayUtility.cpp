@@ -1,14 +1,14 @@
 #include "CesiumRasterOverlayUtility.h"
 
-#include <Cesium3DTilesSelection/RasterOverlay.h>
 #include <CesiumAsync/IAssetResponse.h>
+#include <CesiumRasterOverlays/RasterOverlay.h>
 
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlayLoadFailureDetails.h>
 #include <DotNet/System/String.h>
 
 using namespace DotNet;
-using namespace Cesium3DTilesSelection;
+using namespace CesiumRasterOverlays;
 
 namespace CesiumForUnityNative {
 /*static*/ RasterOverlayOptions CesiumRasterOverlayUtility::GetOverlayOptions(

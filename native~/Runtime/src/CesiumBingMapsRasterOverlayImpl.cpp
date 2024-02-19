@@ -3,9 +3,9 @@
 #include "Cesium3DTilesetImpl.h"
 #include "CesiumRasterOverlayUtility.h"
 
-#include <Cesium3DTilesSelection/BingMapsRasterOverlay.h>
 #include <Cesium3DTilesSelection/Tileset.h>
 #include <CesiumGeospatial/Ellipsoid.h>
+#include <CesiumRasterOverlays/BingMapsRasterOverlay.h>
 
 #include <DotNet/CesiumForUnity/BingMapsStyle.h>
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
@@ -14,6 +14,7 @@
 #include <DotNet/System/String.h>
 
 using namespace Cesium3DTilesSelection;
+using namespace CesiumRasterOverlays;
 using namespace DotNet;
 
 namespace CesiumForUnityNative {
@@ -45,29 +46,28 @@ void CesiumBingMapsRasterOverlayImpl::AddToTileset(
   std::string mapStyle;
   switch (overlay.mapStyle()) {
   case CesiumForUnity::BingMapsStyle::Aerial:
-    mapStyle = Cesium3DTilesSelection::BingMapsStyle::AERIAL;
+    mapStyle = BingMapsStyle::AERIAL;
     break;
   case CesiumForUnity::BingMapsStyle::AerialWithLabelsOnDemand:
-    mapStyle =
-        Cesium3DTilesSelection::BingMapsStyle::AERIAL_WITH_LABELS_ON_DEMAND;
+    mapStyle = BingMapsStyle::AERIAL_WITH_LABELS_ON_DEMAND;
     break;
   case CesiumForUnity::BingMapsStyle::RoadOnDemand:
-    mapStyle = Cesium3DTilesSelection::BingMapsStyle::ROAD_ON_DEMAND;
+    mapStyle = BingMapsStyle::ROAD_ON_DEMAND;
     break;
   case CesiumForUnity::BingMapsStyle::CanvasDark:
-    mapStyle = Cesium3DTilesSelection::BingMapsStyle::CANVAS_DARK;
+    mapStyle = BingMapsStyle::CANVAS_DARK;
     break;
   case CesiumForUnity::BingMapsStyle::CanvasLight:
-    mapStyle = Cesium3DTilesSelection::BingMapsStyle::CANVAS_LIGHT;
+    mapStyle = BingMapsStyle::CANVAS_LIGHT;
     break;
   case CesiumForUnity::BingMapsStyle::CanvasGray:
-    mapStyle = Cesium3DTilesSelection::BingMapsStyle::CANVAS_GRAY;
+    mapStyle = BingMapsStyle::CANVAS_GRAY;
     break;
   case CesiumForUnity::BingMapsStyle::OrdnanceSurvey:
-    mapStyle = Cesium3DTilesSelection::BingMapsStyle::ORDNANCE_SURVEY;
+    mapStyle = BingMapsStyle::ORDNANCE_SURVEY;
     break;
   case CesiumForUnity::BingMapsStyle::CollinsBart:
-    mapStyle = Cesium3DTilesSelection::BingMapsStyle::COLLINS_BART;
+    mapStyle = BingMapsStyle::COLLINS_BART;
     break;
   }
 

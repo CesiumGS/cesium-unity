@@ -1,7 +1,7 @@
 #include "CesiumUtility/Tracing.h"
 #include "UnityLoggerSink.h"
 
-#include <Cesium3DTilesSelection/registerAllTileContentTypes.h>
+#include <Cesium3DTilesContent/registerAllTileContentTypes.h>
 
 #include <spdlog/spdlog.h>
 
@@ -9,7 +9,7 @@
 #include <chrono>
 #endif
 
-using namespace Cesium3DTilesSelection;
+using namespace Cesium3DTilesContent;
 using namespace CesiumForUnity;
 
 void start() {
