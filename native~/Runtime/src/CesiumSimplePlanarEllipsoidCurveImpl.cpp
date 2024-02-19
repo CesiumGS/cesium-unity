@@ -10,7 +10,7 @@ namespace CesiumForUnityNative {
 
 CesiumSimplePlanarEllipsoidCurveImpl::CesiumSimplePlanarEllipsoidCurveImpl(
     const DotNet::CesiumForUnity::CesiumSimplePlanarEllipsoidCurve& path)
-    : _curve(nullptr) {}
+    : _curve() {}
 
 CesiumSimplePlanarEllipsoidCurveImpl::~CesiumSimplePlanarEllipsoidCurveImpl() {}
 
@@ -25,12 +25,12 @@ bool CesiumSimplePlanarEllipsoidCurveImpl::
           glm::dvec3(sourceEcef.x, sourceEcef.y, sourceEcef.z),
           glm::dvec3(destinationEcef.x, destinationEcef.y, destinationEcef.z));
   if (!flightPath.has_value()) {
-    this->_curve = nullptr;
+    this->_curve = std::nullopt;
     return false;
   }
 
-  this->_curve = std::make_unique<SimplePlanarEllipsoidCurve>(*flightPath);
-  return this->_curve != nullptr;
+  this->_curve = *flightPath;
+  return this->_curve.has_value();
 }
 
 bool CesiumSimplePlanarEllipsoidCurveImpl::CreateFromLongitudeLatitudeHeight(
@@ -44,12 +44,12 @@ bool CesiumSimplePlanarEllipsoidCurveImpl::CreateFromLongitudeLatitudeHeight(
           Cartographic(destinationLlh.x, destinationLlh.y, destinationLlh.z));
 
   if (!flightPath.has_value()) {
-    this->_curve = nullptr;
+    this->_curve = std::nullopt;
     return false;
   }
 
-  this->_curve = std::make_unique<SimplePlanarEllipsoidCurve>(*flightPath);
-  return this->_curve != nullptr;
+  this->_curve = *flightPath;
+  return this->_curve.has_value();
 }
 
 DotNet::Unity::Mathematics::double3
@@ -57,7 +57,7 @@ CesiumSimplePlanarEllipsoidCurveImpl::GetPosition(
     const DotNet::CesiumForUnity::CesiumSimplePlanarEllipsoidCurve& path,
     double percentage,
     double additionalHeight) const {
-  assert(this->_curve != nullptr);
+  assert(this->_curve.has_value());
 
   glm::dvec3 result = this->_curve->getPosition(percentage, additionalHeight);
 

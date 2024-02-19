@@ -4,7 +4,6 @@
 
 #include <DotNet/Unity/Mathematics/double3.h>
 
-#include <memory>
 #include <optional>
 
 namespace DotNet::CesiumForUnity {
@@ -39,7 +38,7 @@ public:
       double additionalHeight) const;
 
 private:
-  std::unique_ptr<CesiumGeospatial::SimplePlanarEllipsoidCurve> _curve;
+  std::optional<CesiumGeospatial::SimplePlanarEllipsoidCurve> _curve;
 };
 
 } // namespace CesiumForUnityNative
