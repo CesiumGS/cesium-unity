@@ -24,10 +24,6 @@ jobs:
           submodules: recursive
       - name: Install nasm
         uses: ilammy/setup-nasm@v1.4.0
-      - name: Build Reinterop
-        run: |
-          cd d:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
-          dotnet publish Reinterop~ -o .
       - name: Create SSH tunnel to Unity License Server
         env:
           UNITY_LICENSE_SERVER_SSH_KEY: ${{ secrets.UNITY_LICENSE_SERVER_SSH_KEY }}
@@ -66,6 +62,10 @@ jobs:
         run: |
           mkdir -p d:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
           mv $ENV:GITHUB_WORKSPACE/* d:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
+      - name: Build Reinterop
+        run: |
+          cd d:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
+          dotnet publish Reinterop~ -o .
       - name: Build Package
         run: |
           cd d:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
