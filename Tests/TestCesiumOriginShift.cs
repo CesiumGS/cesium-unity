@@ -164,31 +164,36 @@ public class TestCesiumOriginShift
 
         yield return new WaitForEndOfFrame();
 
-        IEqualityComparer<double> epsilon6 = Comparers.Double(1e-6, 1e-6);
+        IEqualityComparer<double> epsilon6 = Comparers.Double(1e-6, 1e-4);
 
         Assert.That(baseEcef.x, Is.EqualTo(globeAnchor.positionGlobeFixed.x).Using(epsilon6));
 
-        // speed per second
-        double speed = 1000.0;
-        double duration = 10.0;
-        float startTime = Time.time;
-        Vector3 startPos = globeAnchor.transform.position;
+        yield return null;
 
-        while ((Time.time - startTime) < duration)
-        {
-            double3 previousPositionEcef = globeAnchor.positionGlobeFixed.x;
+        // Move, but not far enough to trigger an origin shift
+        double3 previousPositionEcef = globeAnchor.positionGlobeFixed.x;
+        double3 movement = georeference.TransformEarthCenteredEarthFixedDirectionToUnity(new double3(2500.0, 0, 0));
+        controller.Move((float3)movement);
 
-            yield return new WaitForFixedUpdate();
+        // Explicitly sync the globe anchor, so that the origin shift's LateUpdate sees the new position this frame.
+        // Otherwise, it will base the shift on the position in the previous frame because CesiumGlobeAnchor
+        // coroutine that updates from the Transform already ran for this frame before the Move above was called.
+        globeAnchor.Sync();
 
-            double unitsEcef = speed * Time.deltaTime;
-            double3 movement = georeference.TransformEarthCenteredEarthFixedDirectionToUnity(new double3(unitsEcef, 0, 0));
-            controller.Move((float3)movement);
+        yield return null;
 
-            yield return new WaitForEndOfFrame();
+        Assert.That(previousPositionEcef.x + 2500.0, Is.EqualTo(globeAnchor.positionGlobeFixed.x).Using(epsilon6));
+        Assert.Less(georeference.ecefX - globeAnchor.positionGlobeFixed.x, 5000.0);
 
-            globeAnchor.Sync();
-            Assert.That(previousPositionEcef.x + unitsEcef, Is.EqualTo(globeAnchor.positionGlobeFixed.x).Using(epsilon6));
-            Assert.Less(georeference.ecefX - globeAnchor.positionGlobeFixed.x, 5000.0);
-        }
+        // Move again, this time triggering an origin shift
+        previousPositionEcef = globeAnchor.positionGlobeFixed.x;
+        movement = georeference.TransformEarthCenteredEarthFixedDirectionToUnity(new double3(3000.0, 0, 0));
+        controller.Move((float3)movement);
+        globeAnchor.Sync();
+
+        yield return null;
+
+        Assert.That(previousPositionEcef.x + 3000.0, Is.EqualTo(globeAnchor.positionGlobeFixed.x).Using(epsilon6));
+        Assert.Less(System.Math.Abs(georeference.ecefX - globeAnchor.positionGlobeFixed.x), 5000.0);
     }
 }

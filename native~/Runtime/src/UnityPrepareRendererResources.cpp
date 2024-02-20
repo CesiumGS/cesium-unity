@@ -1046,6 +1046,7 @@ void setGltfMaterialParameterValues(
       UnityEngine::Texture texture =
           TextureLoader::loadTexture(model, baseColorTexture->index);
       if (texture != nullptr) {
+        texture.hideFlags(DotNet::UnityEngine::HideFlags::HideAndDontSave);
         unityMaterial.SetTexture(
             materialProperties.getBaseColorTextureID(),
             texture);
@@ -1065,6 +1066,7 @@ void setGltfMaterialParameterValues(
       UnityEngine::Texture texture =
           TextureLoader::loadTexture(model, metallicRoughness->index);
       if (texture != nullptr) {
+        texture.hideFlags(DotNet::UnityEngine::HideFlags::HideAndDontSave);
         unityMaterial.SetTexture(
             materialProperties.getMetallicRoughnessTextureID(),
             texture);
@@ -1087,6 +1089,7 @@ void setGltfMaterialParameterValues(
           model,
           gltfMaterial.emissiveTexture->index);
       if (texture != nullptr) {
+        texture.hideFlags(DotNet::UnityEngine::HideFlags::HideAndDontSave);
         unityMaterial.SetTexture(
             materialProperties.getEmissiveTextureID(),
             texture);
@@ -1104,6 +1107,7 @@ void setGltfMaterialParameterValues(
       UnityEngine::Texture texture =
           TextureLoader::loadTexture(model, gltfMaterial.normalTexture->index);
       if (texture != nullptr) {
+        texture.hideFlags(DotNet::UnityEngine::HideFlags::HideAndDontSave);
         unityMaterial.SetTexture(
             materialProperties.getNormalMapTextureID(),
             texture);
@@ -1125,6 +1129,7 @@ void setGltfMaterialParameterValues(
           model,
           gltfMaterial.occlusionTexture->index);
       if (texture != nullptr) {
+        texture.hideFlags(DotNet::UnityEngine::HideFlags::HideAndDontSave);
         unityMaterial.SetTexture(
             materialProperties.getOcclusionTextureID(),
             texture);
@@ -1587,8 +1592,11 @@ void freePrimitiveGameObject(
     for (int32_t i = 0, len = textureIDs.Count(); i < len; ++i) {
       int32_t textureID = textureIDs[i];
       UnityEngine::Texture texture = material.GetTexture(textureID);
-      if (texture != nullptr)
+      if (texture != nullptr &&
+          (texture.hideFlags() & UnityEngine::HideFlags::HideAndDontSave) ==
+              UnityEngine::HideFlags::HideAndDontSave) {
         UnityLifetime::Destroy(texture);
+      }
     }
 
     UnityLifetime::Destroy(material);
