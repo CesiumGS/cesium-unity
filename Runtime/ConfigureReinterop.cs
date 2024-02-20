@@ -148,6 +148,7 @@ namespace CesiumForUnity
             meshCollider.sharedMesh = mesh;
 
             Debug.Log("Logging");
+            Debug.LogWarning("Warning");
 
             MeshRenderer meshRenderer = new MeshRenderer();
             GameObject meshGameObject = meshRenderer.gameObject;
@@ -297,6 +298,7 @@ namespace CesiumForUnity
             ionOverlay.AddToTilesetLater(null);
 
             CesiumRasterOverlay overlay = go.GetComponent<CesiumRasterOverlay>();
+            overlay.materialKey = overlay.materialKey;
             overlay.showCreditsOnScreen = overlay.showCreditsOnScreen;
             overlay.maximumScreenSpaceError = overlay.maximumScreenSpaceError;
             overlay.maximumTextureSize = overlay.maximumTextureSize;
