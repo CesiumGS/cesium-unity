@@ -19,6 +19,58 @@ using namespace DotNet;
 
 namespace CesiumForUnityNative {
 
+namespace {
+UnityEngine::TextureFormat
+getCompressedPixelFormat(const CesiumGltf::ImageCesium& image) {
+  switch (image.compressedPixelFormat) {
+  case GpuCompressedPixelFormat::ETC1_RGB:
+    return UnityEngine::TextureFormat::ETC_RGB4;
+  case GpuCompressedPixelFormat::ETC2_RGBA:
+    return UnityEngine::TextureFormat::ETC2_RGBA8;
+  case GpuCompressedPixelFormat::BC1_RGB:
+    return UnityEngine::TextureFormat::DXT1;
+  case GpuCompressedPixelFormat::BC3_RGBA:
+    return UnityEngine::TextureFormat::DXT5;
+  case GpuCompressedPixelFormat::BC4_R:
+    return UnityEngine::TextureFormat::BC4;
+  case GpuCompressedPixelFormat::BC5_RG:
+    return UnityEngine::TextureFormat::BC5;
+  case GpuCompressedPixelFormat::BC7_RGBA:
+    return UnityEngine::TextureFormat::BC7;
+  case GpuCompressedPixelFormat::ASTC_4x4_RGBA:
+    return UnityEngine::TextureFormat::ASTC_4x4;
+  case GpuCompressedPixelFormat::PVRTC1_4_RGB:
+    return UnityEngine::TextureFormat::PVRTC_RGB4;
+  case GpuCompressedPixelFormat::PVRTC1_4_RGBA:
+    return UnityEngine::TextureFormat::PVRTC_RGBA4;
+  case GpuCompressedPixelFormat::ETC2_EAC_R11:
+    return UnityEngine::TextureFormat::EAC_R;
+  case GpuCompressedPixelFormat::ETC2_EAC_RG11:
+    return UnityEngine::TextureFormat::EAC_RG;
+  case GpuCompressedPixelFormat::PVRTC2_4_RGB:
+  case GpuCompressedPixelFormat::PVRTC2_4_RGBA:
+  default:
+    return UnityEngine::TextureFormat::RGBA32;
+  }
+}
+
+UnityEngine::TextureFormat
+getUncompressedPixelFormat(const CesiumGltf::ImageCesium& image) {
+  switch (image.channels) {
+  case 1:
+    return UnityEngine::TextureFormat::R8;
+  case 2:
+    return UnityEngine::TextureFormat::RG16;
+  case 3:
+    return UnityEngine::TextureFormat::RGB24;
+  case 4:
+  default:
+    return UnityEngine::TextureFormat::RGBA32;
+  }
+}
+
+} // namespace
+
 UnityEngine::Texture
 TextureLoader::loadTexture(const CesiumGltf::ImageCesium& image) {
   CESIUM_TRACE("TextureLoader::loadTexture");
@@ -26,49 +78,10 @@ TextureLoader::loadTexture(const CesiumGltf::ImageCesium& image) {
       image.mipPositions.empty() ? 1 : std::int32_t(image.mipPositions.size());
 
   UnityEngine::TextureFormat textureFormat;
-
-  switch (image.compressedPixelFormat) {
-  case GpuCompressedPixelFormat::ETC1_RGB:
-    textureFormat = UnityEngine::TextureFormat::ETC_RGB4;
-    break;
-  case GpuCompressedPixelFormat::ETC2_RGBA:
-    textureFormat = UnityEngine::TextureFormat::ETC2_RGBA8;
-    break;
-  case GpuCompressedPixelFormat::BC1_RGB:
-    textureFormat = UnityEngine::TextureFormat::DXT1;
-    break;
-  case GpuCompressedPixelFormat::BC3_RGBA:
-    textureFormat = UnityEngine::TextureFormat::DXT5;
-    break;
-  case GpuCompressedPixelFormat::BC4_R:
-    textureFormat = UnityEngine::TextureFormat::BC4;
-    break;
-  case GpuCompressedPixelFormat::BC5_RG:
-    textureFormat = UnityEngine::TextureFormat::BC5;
-    break;
-  case GpuCompressedPixelFormat::BC7_RGBA:
-    textureFormat = UnityEngine::TextureFormat::BC7;
-    break;
-  case GpuCompressedPixelFormat::ASTC_4x4_RGBA:
-    textureFormat = UnityEngine::TextureFormat::ASTC_4x4;
-    break;
-  case GpuCompressedPixelFormat::PVRTC1_4_RGB:
-    textureFormat = UnityEngine::TextureFormat::PVRTC_RGB4;
-    break;
-  case GpuCompressedPixelFormat::PVRTC1_4_RGBA:
-    textureFormat = UnityEngine::TextureFormat::PVRTC_RGBA4;
-    break;
-  case GpuCompressedPixelFormat::ETC2_EAC_R11:
-    textureFormat = UnityEngine::TextureFormat::EAC_R;
-    break;
-  case GpuCompressedPixelFormat::ETC2_EAC_RG11:
-    textureFormat = UnityEngine::TextureFormat::EAC_RG;
-    break;
-  case GpuCompressedPixelFormat::PVRTC2_4_RGB:
-  case GpuCompressedPixelFormat::PVRTC2_4_RGBA:
-  default:
-    textureFormat = UnityEngine::TextureFormat::RGBA32;
-    break;
+  if (image.compressedPixelFormat != GpuCompressedPixelFormat::NONE) {
+    textureFormat = getCompressedPixelFormat(image);
+  } else {
+    textureFormat = getUncompressedPixelFormat(image);
   }
 
   UnityEngine::Texture2D
