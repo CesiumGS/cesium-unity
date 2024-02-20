@@ -98,7 +98,7 @@ jobs:
           start -FilePath "C:\Program Files\Unity\Hub\Editor\2021.3.13f1\Editor\Unity.exe" -ArgumentList "-runTests -batchmode -projectPath d:\cesium\CesiumForUnityBuildProject -testResults d:\cesium\temp\TestResults.xml -testPlatform PlayMode -logFile d:\cesium\temp\test-log.txt" -Wait
           cat d:\cesium\temp\test-log.txt
       - name: Test Report
-        uses: kring/test-reporter@v1.6.1-kring
+        uses: kring/test-reporter@v1.6.2-kring
         if: success() || failure()    # run this step even if previous step failed
         with:
           name: Tests - Windows
@@ -198,7 +198,7 @@ jobs:
           cat ~/cesium/CesiumForUnityBuildProject/test-log.txt
           ls /Users/runner/cesium/CesiumForUnityBuildProject/TestResults.xml
       - name: Test Report
-        uses: kring/test-reporter@v1.6.1-kring
+        uses: kring/test-reporter@v1.6.2-kring
         if: success() || failure()    # run this step even if previous step failed
         with:
           name: Tests - macOS
