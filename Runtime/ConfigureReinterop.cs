@@ -56,7 +56,9 @@ namespace CesiumForUnity
 
         public void ExposeToCPP()
         {
-            Camera c = Camera.main;
+            Camera c = CesiumCamera.camera ?? Camera.main;
+            
+            
             Transform t = c.transform;
             Vector3 u = t.up;
             Vector3 f = t.forward;
