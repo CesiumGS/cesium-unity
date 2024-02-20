@@ -24,6 +24,9 @@ jobs:
           submodules: recursive
       - name: Install nasm
         uses: ilammy/setup-nasm@v1.5.1
+      - name: Install wget
+        run: |
+          choco install -y wget
       - name: Install Unity Hub
         run: |
           wget https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.exe
