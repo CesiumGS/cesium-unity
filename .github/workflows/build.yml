@@ -30,7 +30,7 @@ jobs:
       - name: Install Unity Hub
         run: |
           wget https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.exe
-          ./UnityHubSetup.exe /S
+          Start-Process "./UnityHubSetup.exe" -Args "/S" -Wait
           del ./UnityHubSetup.exe
       - name: Install Unity
         run: |
