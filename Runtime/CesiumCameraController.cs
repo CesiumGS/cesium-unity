@@ -16,7 +16,6 @@ namespace CesiumForUnity
     /// it automatically changes its own up direction such that the world always 
     /// looks right-side up.
     /// </summary>
-    [RequireComponent(typeof(CesiumOriginShift))]
     [RequireComponent(typeof(Camera))]
     [DisallowMultipleComponent]
     [AddComponentMenu("Cesium/Cesium Camera Controller")]
@@ -231,27 +230,27 @@ namespace CesiumForUnity
 
         #region Initialization
 
-        void InitializeCamera()
+        private void InitializeCamera()
         {
             this._camera = this.gameObject.GetComponent<Camera>();
             this._initialNearClipPlane = this._camera.nearClipPlane;
             this._initialFarClipPlane = this._camera.farClipPlane;
         }
 
-        void InitializeController()
+        private void InitializeController()
         {
-            if (this.gameObject.GetComponent<CharacterController>() != null)
+            if (this._globeAnchor.GetComponent<CharacterController>() != null)
             {
                 Debug.LogWarning(
                     "A CharacterController component was manually " +
-                    "added to the CesiumCameraController's game object. " +
+                    "added to the CesiumGlobeAnchor's game object. " +
                     "This may interfere with the CesiumCameraController's movement.");
 
-                this._controller = this.gameObject.GetComponent<CharacterController>();
+                this._controller = this._globeAnchor.GetComponent<CharacterController>();
             }
             else
             {
-                this._controller = this.gameObject.AddComponent<CharacterController>();
+                this._controller = this._globeAnchor.gameObject.AddComponent<CharacterController>();
                 this._controller.hideFlags = HideFlags.HideInInspector;
             }
 
@@ -302,8 +301,19 @@ namespace CesiumForUnity
                     "with a CesiumGeoreference.");
             }
 
-            // CesiumOriginShift will add a CesiumGlobeAnchor automatically.
-            this._globeAnchor = this.gameObject.GetComponent<CesiumGlobeAnchor>();
+            this._globeAnchor = this.gameObject.GetComponentInParent<CesiumGlobeAnchor>();
+            if (this._globeAnchor == null)
+            {
+                Debug.LogError("CesiumCameraController must have a CesiumGlobeAnchor " +
+                    "attached to itself or a parent");
+            }
+
+            CesiumOriginShift originShift = this._globeAnchor.GetComponent<CesiumOriginShift>();
+            if (originShift == null)
+            {
+                Debug.LogError("CesiumCameraController expects a CesiumOriginShift " +
+                    $"on {this._globeAnchor?.name}, none found");
+            }
 
             this.InitializeCamera();
             this.InitializeController();
@@ -313,6 +323,26 @@ namespace CesiumForUnity
             this.ConfigureInputs();
 #endif
         }
+
+#if UNITY_EDITOR
+        // Ensures required components are present in the editor.
+        private void Reset()
+        {
+            CesiumGlobeAnchor anchor = this.gameObject.GetComponentInParent<CesiumGlobeAnchor>();
+            if (anchor == null)
+            {
+                anchor = this.gameObject.AddComponent<CesiumGlobeAnchor>();
+                Debug.LogWarning("CesiumCameraController missing a CesiumGlobeAnchor - adding");
+            }
+
+            CesiumOriginShift origin = anchor.GetComponent<CesiumOriginShift>();
+            if (origin == null)
+            {
+                origin = anchor.gameObject.AddComponent<CesiumOriginShift>();
+                Debug.LogWarning("CesiumCameraController missing a CesiumOriginShift - adding");
+            }
+        }
+#endif
 
         #endregion
 

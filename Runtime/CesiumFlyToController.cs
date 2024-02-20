@@ -14,7 +14,6 @@ namespace CesiumForUnity
     /// it will disable inputs on CesiumCameraController as necessary, such as
     /// camera rotation with the mouse.
     /// </remarks>
-    [RequireComponent(typeof(CesiumOriginShift))]
     [DisallowMultipleComponent]
     [AddComponentMenu("Cesium/Cesium Fly To Controller")]
     [IconAttribute("Packages/com.cesium.unity/Editor/Resources/Cesium-24x24.png")]
@@ -156,8 +155,17 @@ namespace CesiumForUnity
                     "with a CesiumGeoreference.");
             }
 
-            // CesiumOriginShift will add a CesiumGlobeAnchor automatically.
-            this._globeAnchor = this.gameObject.GetComponent<CesiumGlobeAnchor>();
+            this._globeAnchor = this.gameObject.GetComponentInParent<CesiumGlobeAnchor>();
+            if (this._globeAnchor == null)
+            {
+                Debug.LogError("CesiumFlyToController expects a CesiumGlobeAnchor to be attached to itself or to a parent");
+            }
+
+            CesiumOriginShift originShift = this._globeAnchor.GetComponent<CesiumOriginShift>();
+            if (originShift == null)
+            {
+                Debug.LogError("CesiumFlyToController expects a CesiumOriginShift to be attached to the CesiumGlobeAnchor above it");
+            }
 
             // If a CesiumCameraController is present, CesiumFlyToController will account for
             // its inputs and modify it during flights.
@@ -171,6 +179,26 @@ namespace CesiumForUnity
                 this.HandleFlightStep(Time.deltaTime);
             }
         }
+
+#if UNITY_EDITOR
+        // Ensures required components are present in the editor.
+        private void Reset()
+        {
+            CesiumGlobeAnchor anchor = this.gameObject.GetComponentInParent<CesiumGlobeAnchor>();
+            if(anchor == null)
+            {
+                anchor = this.gameObject.AddComponent<CesiumGlobeAnchor>();
+                Debug.LogWarning("CesiumFlyToController missing a CesiumGlobeAnchor - adding");
+            }
+
+            CesiumOriginShift origin = anchor.GetComponent<CesiumOriginShift>();
+            if(origin == null)
+            {
+                origin = anchor.gameObject.AddComponent<CesiumOriginShift>();
+                Debug.LogWarning("CesiumFlyToController missing a CesiumOriginShift - adding");
+            }
+        }
+#endif
 
         /// <summary>
         /// Whether this controller detects movement from other controllers on the game object.
@@ -276,7 +304,7 @@ namespace CesiumForUnity
         {
             double3 finalPoint = this._keypoints[this._keypoints.Count - 1];
             this._globeAnchor.positionGlobeFixed = finalPoint;
-            
+
             this._globeAnchor.rotationEastUpNorth = this._flyToDestinationRotation;
 
             this._flyingToLocation = false;
