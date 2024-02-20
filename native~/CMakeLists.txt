@@ -65,14 +65,17 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
     set (ALL_TARGETS
         CesiumForUnityNative-Runtime
         Async++
+        Cesium3DTilesContent
         Cesium3DTilesReader
         Cesium3DTilesSelection
         CesiumAsync
-        CesiumGeospatial
         CesiumGeometry
+        CesiumGeospatial
         CesiumGltf
+        CesiumGltfContent
         CesiumGltfReader
         CesiumJsonReader
+        CesiumRasterOverlays
         CesiumUtility
         draco_attributes
         draco_compression_attributes_dec
