@@ -1,3 +1,7 @@
+#ifndef GLM_ENABLE_EXPERIMENTAL
+#define GLM_ENABLE_EXPERIMENTAL
+#endif
+
 #include "CesiumFeatureImpl.h"
 
 #include <CesiumGltf/MetadataConversions.h>

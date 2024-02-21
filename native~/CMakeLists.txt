@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.18)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# Make sure we use the same runtime library as cesium-native so our binaries are compatible
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
 project(CesiumForUnityNative
     VERSION 0.1.0
     LANGUAGES CXX C

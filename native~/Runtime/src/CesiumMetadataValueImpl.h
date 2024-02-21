@@ -1,6 +1,9 @@
 #pragma once
 
 #include <DotNet/System/String.h>
+#ifndef GLM_ENABLE_EXPERIMENTAL
+#define GLM_ENABLE_EXPERIMENTAL
+#endif
 #include <glm/glm.hpp>
 
 #include <variant>
