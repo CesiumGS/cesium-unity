@@ -21,8 +21,9 @@ public class TestCesiumFlyToController
         GameObject goFlyer = new GameObject("Flyer");
         goFlyer.transform.parent = goGeoreference.transform;
 
+        CesiumGlobeAnchor anchor = goFlyer.AddComponent<CesiumGlobeAnchor>();
+        goFlyer.AddComponent<CesiumOriginShift>();
         CesiumFlyToController flyToController = goFlyer.AddComponent<CesiumFlyToController>();
-        CesiumGlobeAnchor anchor = goFlyer.GetComponent<CesiumGlobeAnchor>();
 
         // Make the flight fast so the test doesn't take too long.
         flyToController.flyToDuration = 0.25;
