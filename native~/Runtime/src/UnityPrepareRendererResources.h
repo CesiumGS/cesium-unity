@@ -1,7 +1,8 @@
 #pragma once
 
+#include "TilesetMaterialProperties.h"
+
 #include <Cesium3DTilesSelection/IPrepareRendererResources.h>
-#include <CesiumShaderProperties.h>
 
 #include <DotNet/UnityEngine/GameObject.h>
 
@@ -63,7 +64,7 @@ class UnityPrepareRendererResources
     : public Cesium3DTilesSelection::IPrepareRendererResources {
 public:
   UnityPrepareRendererResources(
-      const ::DotNet::UnityEngine::GameObject& tileset);
+      const ::DotNet::UnityEngine::GameObject& tilesetGameObject);
 
   virtual CesiumAsync::Future<
       Cesium3DTilesSelection::TileLoadResultAndRenderResources>
@@ -109,9 +110,13 @@ public:
       const CesiumRasterOverlays::RasterOverlayTile& rasterTile,
       void* pMainThreadRendererResources) noexcept override;
 
+  TilesetMaterialProperties& getMaterialProperties() {
+    return this->_materialProperties;
+  }
+
 private:
-  ::DotNet::UnityEngine::GameObject _tileset;
-  CesiumShaderProperties _shaderProperties;
+  ::DotNet::UnityEngine::GameObject _tilesetGameObject;
+  TilesetMaterialProperties _materialProperties;
 };
 
 } // namespace CesiumForUnityNative
