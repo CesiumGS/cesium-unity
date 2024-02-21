@@ -13,7 +13,6 @@
 #include <DotNet/CesiumForUnity/CesiumPropertyArray.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/String.h>
-
 #include <glm/common.hpp>
 
 #include <algorithm>
