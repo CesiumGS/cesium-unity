@@ -9,6 +9,7 @@
 
 ##### Additions :tada:
 
+- Added `CesiumCartographicPolygon` and `CesiumPolygonRasterOverlay`, which together can be used to clip out polygonal areas of a `Cesium3DTileset`. These new classes are _only_ available in Unity 2022.2+ because they require Unity's Splines package.
 - Added `CesiumFeatureIdSet`, which represents a feature ID set in `EXT_mesh_features`.
 - Added `CesiumFeatureIdAttribute` and `CesiumFeatureIdTexture`, which derive from `CesiumFeatureIdSet` and respectively represent a feature ID attribute and feature ID texture in `EXT_mesh_features`.
 - Added `CesiumPrimitiveFeatures`, a component that provides access to the `EXT_mesh_features` on a glTF primitive when it is loaded by `Cesium3DTileset`.
