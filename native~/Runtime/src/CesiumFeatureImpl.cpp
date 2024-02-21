@@ -1,3 +1,7 @@
+#ifndef GLM_ENABLE_EXPERIMENTAL
+#define GLM_ENABLE_EXPERIMENTAL
+#endif
+
 #include "CesiumFeatureImpl.h"
 
 #include <CesiumGltf/MetadataConversions.h>
@@ -9,6 +13,7 @@
 #include <DotNet/CesiumForUnity/CesiumPropertyArray.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/String.h>
+
 #include <glm/common.hpp>
 
 #include <algorithm>

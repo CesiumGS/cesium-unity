@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef GLM_ENABLE_EXPERIMENTAL
+#define GLM_ENABLE_EXPERIMENTAL
+#endif
+
 #include "CesiumPropertyTablePropertyImpl.h"
 
 #include "CesiumFeaturesMetadataUtility.h"
