@@ -25,7 +25,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  version: 7
+  version: 5
 --- !u!21 &2100000
 Material:
   serializedVersion: 8
@@ -36,8 +36,6 @@ Material:
   m_Name: CesiumDefaultTilesetMaterial
   m_Shader: {fileID: -6465566751694194690, guid: 407c0cff68611ac46a65eec87a5203f5,
     type: 3}
-  m_Parent: {fileID: 0}
-  m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords:
   - _OVERLAYCOUNT_NONE
@@ -50,7 +48,6 @@ Material:
   stringTagMap:
     RenderType: Opaque
   disabledShaderPasses: []
-  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -105,11 +102,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _AlphaClip: 0
-    - _AlphaToMask: 0
-    - _BUILTIN_QueueControl: -1
-    - _BUILTIN_QueueOffset: 0
     - _Blend: 0
-    - _BlendModePreserveSpecular: 1
     - _CastShadows: 1
     - _Cull: 2
     - _DstBlend: 0
@@ -149,13 +142,8 @@ Material:
     - _overlay2TextureCoordinateIndex: 0
     m_Colors:
     - _baseColorFactor: {r: 1, g: 1, b: 1, a: 1}
-    - _baseColorTextureRotation: {r: 0, g: 1, b: 0, a: 0}
     - _emissiveFactor: {r: 0, g: 0, b: 0, a: 0}
-    - _emissiveTextureRotation: {r: 0, g: 1, b: 0, a: 0}
     - _metallicRoughnessFactor: {r: 0, g: 0, b: 0, a: 0}
-    - _metallicRoughnessTextureRotation: {r: 0, g: 1, b: 0, a: 0}
-    - _normalMapTextureRotation: {r: 0, g: 1, b: 0, a: 0}
-    - _occlusionTextureRotation: {r: 0, g: 1, b: 0, a: 0}
     - _overlay0TranslationAndScale: {r: 0, g: 0, b: 1, a: 1}
     - _overlay1TranslationAndScale: {r: 0, g: 0, b: 1, a: 1}
     - _overlay2TranslationAndScale: {r: 0, g: 0, b: 1, a: 1}
