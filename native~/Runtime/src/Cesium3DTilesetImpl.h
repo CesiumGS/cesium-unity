@@ -5,6 +5,7 @@
 #include <DotNet/CesiumForUnity/CesiumCreditSystem.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/System/Action.h>
+#include <DotNet/System/Array1.h>
 
 #include <memory>
 
@@ -15,6 +16,7 @@
 namespace DotNet::CesiumForUnity {
 class Cesium3DTileset;
 class CesiumCreditSystem;
+class CesiumRasterOverlay;
 } // namespace DotNet::CesiumForUnity
 
 namespace Cesium3DTilesSelection {
@@ -40,6 +42,8 @@ public:
   void RecreateTileset(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
   void UpdateTilesetOptions(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
   void FocusTileset(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
+  void UpdateOverlayMaterialKeys(
+      const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
 
   float
   ComputeLoadProgress(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
@@ -52,6 +56,9 @@ public:
       const DotNet::CesiumForUnity::CesiumCreditSystem& creditSystem);
 
 private:
+  void updateOverlayMaterialKeys(
+      const DotNet::System::Array1<DotNet::CesiumForUnity::CesiumRasterOverlay>&
+          overlays);
   void DestroyTileset(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
   void LoadTileset(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
   void updateLastViewUpdateResultState(

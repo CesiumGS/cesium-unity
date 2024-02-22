@@ -76,7 +76,7 @@ void CesiumBingMapsRasterOverlayImpl::AddToTileset(
       CesiumRasterOverlayUtility::GetOverlayOptions(genericOverlay);
 
   this->_pOverlay = new BingMapsRasterOverlay(
-      overlay.name().ToStlString(),
+      overlay.materialKey().ToStlString(),
       "https://dev.virtualearth.net",
       overlay.bingMapsKey().ToStlString(),
       mapStyle,

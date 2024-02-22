@@ -81,7 +81,7 @@ namespace CesiumForUnity
             GameObject go = new GameObject();
             go.name = go.name;
             go = new GameObject("name");
-            go.SetActive(go.activeSelf);
+            go.SetActive(go.activeInHierarchy);
             int layer = go.layer;
             go.layer = layer;
             Transform transform = go.transform;
@@ -148,6 +148,7 @@ namespace CesiumForUnity
             meshCollider.sharedMesh = mesh;
 
             Debug.Log("Logging");
+            Debug.LogWarning("Warning");
 
             MeshRenderer meshRenderer = new MeshRenderer();
             GameObject meshGameObject = meshRenderer.gameObject;
@@ -298,6 +299,7 @@ namespace CesiumForUnity
             ionOverlay.AddToTilesetLater(null);
 
             CesiumRasterOverlay overlay = go.GetComponent<CesiumRasterOverlay>();
+            overlay.materialKey = overlay.materialKey;
             overlay.showCreditsOnScreen = overlay.showCreditsOnScreen;
             overlay.maximumScreenSpaceError = overlay.maximumScreenSpaceError;
             overlay.maximumTextureSize = overlay.maximumTextureSize;
@@ -786,6 +788,20 @@ namespace CesiumForUnity
             server.defaultIonAccessToken = "";
             server.defaultIonAccessTokenId = "";
             server.serverUrlThatIsLoadingApiUrl = "";
+
+            CesiumCartographicPolygon polygon = go.GetComponent<CesiumCartographicPolygon>();
+            polygon.enabled = polygon.enabled;
+
+            List<double2> points = polygon.GetCartographicPoints(m);
+            len = points.Count;
+            myDouble2 = points[0];
+
+            CesiumPolygonRasterOverlay polygonRasterOverlay = go.GetComponent<CesiumPolygonRasterOverlay>();
+            List<CesiumCartographicPolygon> polygons = polygonRasterOverlay.polygons;
+            polygonRasterOverlay.excludeSelectedTiles = polygonRasterOverlay.excludeSelectedTiles;
+            polygonRasterOverlay.invertSelection = polygonRasterOverlay.invertSelection;
+            polygon = polygons[0];
+            len = polygons.Count;
 
             TestGltfModel testModel = new TestGltfModel();
 
