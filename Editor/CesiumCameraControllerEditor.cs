@@ -119,7 +119,7 @@ namespace CesiumForUnity
             GUILayout.EndHorizontal();
 
             EditorGUI.EndDisabledGroup();
-            
+
             EditorGUILayout.Space(5);
 
             GUILayout.BeginHorizontal();
@@ -141,7 +141,7 @@ namespace CesiumForUnity
             GUILayout.BeginHorizontal();
             GUIContent dynamicClippingPlanesMinHeightContent = new GUIContent(
                 "Dynamic Clipping Planes Min Height",
-                "The height to start dynamically adjust the camera's clipping " + 
+                "The height to start dynamically adjust the camera's clipping " +
                 "planes. Below this height, the clipping planes will be set to their " +
                 "initial values.");
             GUILayout.Label(dynamicClippingPlanesMinHeightContent, GUILayout.Width(labelWidth));
@@ -153,7 +153,7 @@ namespace CesiumForUnity
             EditorGUILayout.Space(5);
 
             this._lookAction.isExpanded = EditorGUILayout.BeginFoldoutHeaderGroup(this._lookAction.isExpanded, new GUIContent("Input Actions"));
-            if(this._lookAction.isExpanded)
+            if (this._lookAction.isExpanded)
             {
                 EditorGUILayout.PropertyField(this._lookAction);
                 EditorGUILayout.PropertyField(this._moveAction);

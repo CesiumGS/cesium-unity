@@ -201,14 +201,14 @@ namespace CesiumForUnity
 #endif
             InputActionMap map = new InputActionMap("Cesium Camera Controller");
 
-            if(!HasInputAction(_lookAction))
+            if (!HasInputAction(_lookAction))
             {
                 InputAction newLookAction = map.AddAction("look", binding: "<Mouse>/delta");
                 newLookAction.AddBinding("<Gamepad>/rightStick").WithProcessor("scaleVector2(x=15, y=15)");
                 _lookAction = new InputActionProperty(newLookAction);
             }
 
-            if(!HasInputAction(_moveAction))
+            if (!HasInputAction(_moveAction))
             {
                 InputAction newMoveAction = map.AddAction("move", binding: "<Gamepad>/leftStick");
                 newMoveAction.AddCompositeBinding("Dpad")
@@ -223,7 +223,7 @@ namespace CesiumForUnity
                 _moveAction = new InputActionProperty(newMoveAction);
             }
 
-            if(!HasInputAction(_moveUpAction))
+            if (!HasInputAction(_moveUpAction))
             {
                 InputAction newMoveUpAction = map.AddAction("moveUp");
                 newMoveUpAction.AddCompositeBinding("Dpad")
@@ -236,7 +236,7 @@ namespace CesiumForUnity
                 _moveUpAction = new InputActionProperty(newMoveUpAction);
             }
 
-            if(!HasInputAction(_speedChangeAction))
+            if (!HasInputAction(_speedChangeAction))
             {
                 InputAction newSpeedChangeAction = map.AddAction("speedChange", binding: "<Mouse>/scroll");
                 newSpeedChangeAction.AddCompositeBinding("Dpad")
@@ -245,14 +245,14 @@ namespace CesiumForUnity
                 _speedChangeAction = new InputActionProperty(newSpeedChangeAction);
             }
 
-            if(!HasInputAction(_speedResetAction))
+            if (!HasInputAction(_speedResetAction))
             {
                 InputAction newSpeedResetAction = map.AddAction("speedReset", binding: "<Mouse>/middleButton");
                 newSpeedResetAction.AddBinding("<Gamepad>/buttonNorth");
                 _speedResetAction = new InputActionProperty(newSpeedResetAction);
             }
 
-            if(!HasInputAction(_toggleDynamicSpeedAction))
+            if (!HasInputAction(_toggleDynamicSpeedAction))
             {
                 InputAction newToggleDynamicSpeedAction =
                     map.AddAction("toggleDynamicSpeed", binding: "<Keyboard>/g");
