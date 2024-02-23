@@ -17,12 +17,14 @@ namespace CesiumForUnity
         private SerializedProperty _enableDynamicClippingPlanes;
         private SerializedProperty _dynamicClippingPlanesMinHeight;
 
+#if ENABLE_INPUT_SYSTEM
         private SerializedProperty _lookAction;
         private SerializedProperty _moveAction;
         private SerializedProperty _moveUpAction;
         private SerializedProperty _speedChangeAction;
         private SerializedProperty _speedResetAction;
         private SerializedProperty _toggleDynamicSpeedAction;
+#endif
 
         private void OnEnable()
         {
@@ -44,12 +46,14 @@ namespace CesiumForUnity
             this._dynamicClippingPlanesMinHeight =
                 this.serializedObject.FindProperty("_dynamicClippingPlanesMinHeight");
 
+#if ENABLE_INPUT_SYSTEM
             this._lookAction = this.serializedObject.FindProperty("_lookAction");
             this._moveAction = this.serializedObject.FindProperty("_moveAction");
             this._moveUpAction = this.serializedObject.FindProperty("_moveUpAction");
             this._speedChangeAction = this.serializedObject.FindProperty("_speedChangeAction");
             this._speedResetAction = this.serializedObject.FindProperty("_speedResetAction");
             this._toggleDynamicSpeedAction = this.serializedObject.FindProperty("_toggleDynamicSpeedAction");
+#endif
         }
 
         public override void OnInspectorGUI()
@@ -150,6 +154,7 @@ namespace CesiumForUnity
 
             EditorGUI.EndDisabledGroup();
 
+#if ENABLE_INPUT_SYSTEM
             EditorGUILayout.Space(5);
 
             this._lookAction.isExpanded = EditorGUILayout.BeginFoldoutHeaderGroup(this._lookAction.isExpanded, new GUIContent("Input Actions"));
@@ -163,6 +168,7 @@ namespace CesiumForUnity
                 EditorGUILayout.PropertyField(this._toggleDynamicSpeedAction);
             }
             EditorGUILayout.EndFoldoutHeaderGroup();
+#endif
         }
     }
 }

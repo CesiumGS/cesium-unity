@@ -129,6 +129,7 @@ namespace CesiumForUnity
             set => this._dynamicClippingPlanesMinHeight = Mathf.Max(value, 0.0f);
         }
 
+#if ENABLE_INPUT_SYSTEM
         [SerializeField]
         private InputActionProperty _lookAction;
 
@@ -146,6 +147,7 @@ namespace CesiumForUnity
 
         [SerializeField]
         private InputActionProperty _toggleDynamicSpeedAction;
+#endif
 
         #endregion
 
