@@ -19,17 +19,12 @@ bool CesiumSimplePlanarEllipsoidCurveImpl::
         const DotNet::CesiumForUnity::CesiumSimplePlanarEllipsoidCurve& path,
         const DotNet::Unity::Mathematics::double3 sourceEcef,
         const DotNet::Unity::Mathematics::double3 destinationEcef) {
-  std::optional<SimplePlanarEllipsoidCurve> flightPath =
+  this->_curve =
       SimplePlanarEllipsoidCurve::fromEarthCenteredEarthFixedCoordinates(
           Ellipsoid::WGS84,
           glm::dvec3(sourceEcef.x, sourceEcef.y, sourceEcef.z),
           glm::dvec3(destinationEcef.x, destinationEcef.y, destinationEcef.z));
-  if (!flightPath.has_value()) {
-    this->_curve = std::nullopt;
-    return false;
-  }
 
-  this->_curve = *flightPath;
   return this->_curve.has_value();
 }
 
@@ -37,18 +32,11 @@ bool CesiumSimplePlanarEllipsoidCurveImpl::CreateFromLongitudeLatitudeHeight(
     const DotNet::CesiumForUnity::CesiumSimplePlanarEllipsoidCurve& path,
     const DotNet::Unity::Mathematics::double3 sourceLlh,
     const DotNet::Unity::Mathematics::double3 destinationLlh) {
-  std::optional<SimplePlanarEllipsoidCurve> flightPath =
-      SimplePlanarEllipsoidCurve::fromLongitudeLatitudeHeight(
-          Ellipsoid::WGS84,
-          Cartographic(sourceLlh.x, sourceLlh.y, sourceLlh.z),
-          Cartographic(destinationLlh.x, destinationLlh.y, destinationLlh.z));
+  this->_curve = SimplePlanarEllipsoidCurve::fromLongitudeLatitudeHeight(
+      Ellipsoid::WGS84,
+      Cartographic(sourceLlh.x, sourceLlh.y, sourceLlh.z),
+      Cartographic(destinationLlh.x, destinationLlh.y, destinationLlh.z));
 
-  if (!flightPath.has_value()) {
-    this->_curve = std::nullopt;
-    return false;
-  }
-
-  this->_curve = *flightPath;
   return this->_curve.has_value();
 }
 
