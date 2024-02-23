@@ -17,6 +17,13 @@ namespace CesiumForUnity
         private SerializedProperty _enableDynamicClippingPlanes;
         private SerializedProperty _dynamicClippingPlanesMinHeight;
 
+        private SerializedProperty _lookAction;
+        private SerializedProperty _moveAction;
+        private SerializedProperty _moveUpAction;
+        private SerializedProperty _speedChangeAction;
+        private SerializedProperty _speedResetAction;
+        private SerializedProperty _toggleDynamicSpeedAction;
+
         private void OnEnable()
         {
             this._enableMovement =
@@ -36,6 +43,13 @@ namespace CesiumForUnity
                 this.serializedObject.FindProperty("_enableDynamicClippingPlanes");
             this._dynamicClippingPlanesMinHeight =
                 this.serializedObject.FindProperty("_dynamicClippingPlanesMinHeight");
+
+            this._lookAction = this.serializedObject.FindProperty("_lookAction");
+            this._moveAction = this.serializedObject.FindProperty("_moveAction");
+            this._moveUpAction = this.serializedObject.FindProperty("_moveUpAction");
+            this._speedChangeAction = this.serializedObject.FindProperty("_speedChangeAction");
+            this._speedResetAction = this.serializedObject.FindProperty("_speedResetAction");
+            this._toggleDynamicSpeedAction = this.serializedObject.FindProperty("_toggleDynamicSpeedAction");
         }
 
         public override void OnInspectorGUI()
@@ -135,6 +149,20 @@ namespace CesiumForUnity
             GUILayout.EndHorizontal();
 
             EditorGUI.EndDisabledGroup();
+
+            EditorGUILayout.Space(5);
+
+            this._lookAction.isExpanded = EditorGUILayout.BeginFoldoutHeaderGroup(this._lookAction.isExpanded, new GUIContent("Input Actions"));
+            if(this._lookAction.isExpanded)
+            {
+                EditorGUILayout.PropertyField(this._lookAction);
+                EditorGUILayout.PropertyField(this._moveAction);
+                EditorGUILayout.PropertyField(this._moveUpAction);
+                EditorGUILayout.PropertyField(this._speedChangeAction);
+                EditorGUILayout.PropertyField(this._speedResetAction);
+                EditorGUILayout.PropertyField(this._toggleDynamicSpeedAction);
+            }
+            EditorGUILayout.EndFoldoutHeaderGroup();
         }
     }
 }
