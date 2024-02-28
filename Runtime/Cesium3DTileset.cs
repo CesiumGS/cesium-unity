@@ -49,6 +49,8 @@ namespace CesiumForUnity
             this.DisposeImplementation();
         }
 
+        #region Events and Delegates
+
         /// <summary>
         /// Encapsulates a method that receives details of a tileset load failure.
         /// </summary>
@@ -88,6 +90,9 @@ namespace CesiumForUnity
 
         internal static event Action OnSetShowCreditsOnScreen;
 
+        #endregion
+
+        #region Fields 
         [SerializeField]
         private bool _showCreditsOnScreen = false;
 
@@ -108,6 +113,7 @@ namespace CesiumForUnity
                 }
             }
         }
+
 
         [SerializeField]
         private CesiumDataSource _tilesetSource = CesiumDataSource.FromCesiumIon;
@@ -684,6 +690,10 @@ namespace CesiumForUnity
             }
         }
 
+        #endregion
+
+        #region Public Methods
+
         /// <summary>
         /// Estimate the percentage of the tiles for the current view that have been loaded. 
         /// </summary>
@@ -692,14 +702,6 @@ namespace CesiumForUnity
         /// </returns>
         public partial float ComputeLoadProgress();
 
-        private partial void SetShowCreditsOnScreen(bool value);
-
-        private partial void Start();
-        private partial void Update();
-        private partial void OnValidate();
-
-        private partial void OnEnable();
-        private partial void OnDisable();
 
         /// <summary>
         /// Destroy and recreate the tilset. All tiles are unloaded, and then the tileset is reloaded
@@ -711,6 +713,23 @@ namespace CesiumForUnity
         /// Zoom the Editor camera to this tileset. This method does nothing outside of the Editor.
         /// </summary>
         public partial void FocusTileset();
+
+        #endregion
+
+        #region Private Methods
+
+        private partial void SetShowCreditsOnScreen(bool value);
+
+        private partial void Start();
+        private partial void Update();
+        private partial void OnValidate();
+
+        private partial void OnEnable();
+        private partial void OnDisable();
+
+        internal partial void UpdateOverlayMaterialKeys();
+
+        #endregion
 
         void ISerializationCallbackReceiver.OnBeforeSerialize()
         {

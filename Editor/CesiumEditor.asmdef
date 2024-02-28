@@ -3,7 +3,8 @@
     "rootNamespace": "",
     "references": [
         "GUID:63cab5ddbd23cf34ca160a9b3d74438d",
-        "GUID:d8b63aba1907145bea998dd612889d6b"
+        "GUID:d8b63aba1907145bea998dd612889d6b",
+        "GUID:21d1eb854b91ade49bc69a263d12bee2"
     ],
     "includePlatforms": [
         "Editor"
@@ -14,6 +15,12 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.splines",
+            "expression": "1.0.0",
+            "define": "SUPPORTS_SPLINES"
+        }
+    ],
     "noEngineReferences": false
 }
