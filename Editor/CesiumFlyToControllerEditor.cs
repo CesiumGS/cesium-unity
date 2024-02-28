@@ -71,18 +71,6 @@ namespace CesiumForUnity
                 "The length in seconds that the camera flight should last.");
             EditorGUILayout.PropertyField(
                 this._flyToDuration, flyToDurationContent);
-
-            GUIContent flyToGranularityDegreesContent = new GUIContent(
-                "Granularity Degrees",
-                "The granularity in degrees with which keypoints should be generated " +
-                "for the flight interpolation. This value should be greater than 0.0, otherwise " +
-                "the controller will not take flight." +
-                "\n\n" +
-                "This represents the difference in degrees between each keypoint on the flight path. " +
-                "The lower the value, the more keypoints are generated, and the smoother the flight " +
-                "interpolation will be.");
-            EditorGUILayout.PropertyField(
-                this._flyToGranularityDegrees, flyToGranularityDegreesContent);
         }
     }
 }
