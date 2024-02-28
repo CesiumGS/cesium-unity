@@ -4,6 +4,7 @@ namespace CesiumForUnity
     {
         BlankTileset,
         DynamicCamera,
+        CartographicPolygon,
         IonTileset
     }
 

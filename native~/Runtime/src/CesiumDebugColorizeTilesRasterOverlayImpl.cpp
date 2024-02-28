@@ -45,7 +45,7 @@ void CesiumDebugColorizeTilesRasterOverlayImpl::AddToTileset(
       CesiumRasterOverlayUtility::GetOverlayOptions(genericOverlay);
 
   this->_pOverlay = new DebugColorizeTilesRasterOverlay(
-      overlay.name().ToStlString(),
+      overlay.materialKey().ToStlString(),
       options);
 
   pTileset->getOverlays().add(this->_pOverlay);

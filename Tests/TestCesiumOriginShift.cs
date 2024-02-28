@@ -162,7 +162,7 @@ public class TestCesiumOriginShift
         controller.center = Vector3.zero;
         controller.enableOverlapRecovery = false;
 
-        yield return new WaitForEndOfFrame();
+        yield return null;
 
         IEqualityComparer<double> epsilon6 = Comparers.Double(1e-6, 1e-4);
 
@@ -189,6 +189,7 @@ public class TestCesiumOriginShift
         previousPositionEcef = globeAnchor.positionGlobeFixed.x;
         movement = georeference.TransformEarthCenteredEarthFixedDirectionToUnity(new double3(3000.0, 0, 0));
         controller.Move((float3)movement);
+
         globeAnchor.Sync();
 
         yield return null;
