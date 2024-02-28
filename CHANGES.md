@@ -28,11 +28,13 @@
 - Fixed the "DynamicCamera is not nested inside a game object with a CesiumGeoreference" warning when adding a new DynamicCamera in the editor.
 - Fixed support for loading textures with less than four channels.
 - Fixed "Destroying assets is not permitted to avoid data loss" error when using a custom opaque material with texture assets on a `Cesium3DTileset`.
+- Fixed jump at the end of the flight path in `CesiumFlyToController`.
 
 ##### Deprecated :hourglass_flowing_sand:
 
 - `CesiumMetadata` has been deprecated. Instead, retrieve the `CesiumModelMetadata` component attached to a tile game object in order to access its glTF metadata.
 - `CesiumFeature` has been deprecated. Instead, retrieve feature IDs from the `CesiumPrimitiveFeatures` component attached to a primitive game object in order to access its glTF features. Feature IDs can be used to retrieve metadata from the `CesiumModelMetadata` attached to its parent.
+- `flyToGranularityDegrees` in `CesiumFlyToController` has been deprecated. `CesiumFlyToController` no longer works using keypoints, so this value is unnecessary.
 
 ### v1.7.1 - 2023-12-14
 

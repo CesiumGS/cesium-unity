@@ -1,7 +1,6 @@
 using System;
-using System.Collections.Generic;
-using UnityEngine;
 using Unity.Mathematics;
+using UnityEngine;
 
 namespace CesiumForUnity
 {
@@ -14,7 +13,6 @@ namespace CesiumForUnity
     /// it will disable inputs on CesiumCameraController as necessary, such as
     /// camera rotation with the mouse.
     /// </remarks>
-    [RequireComponent(typeof(CesiumOriginShift))]
     [DisallowMultipleComponent]
     [AddComponentMenu("Cesium/Cesium Fly To Controller")]
     [IconAttribute("Packages/com.cesium.unity/Editor/Resources/Cesium-24x24.png")]
@@ -81,7 +79,7 @@ namespace CesiumForUnity
             set => this._flyToDuration = Math.Max(value, 0.0);
         }
 
-        [SerializeField]
+        #region Deprecated Functionality
         [Min(0.0f)]
         private double _flyToGranularityDegrees = 0.01;
 
@@ -95,6 +93,7 @@ namespace CesiumForUnity
         /// The lower the value, the more keypoints are generated, and the smoother the flight
         /// interpolation will be.
         /// </remarks>
+        [Obsolete("CesiumFlyToController no longer works using keypoints. This value has no effect.")]
         public double flyToGranularityDegrees
         {
             get => this._flyToGranularityDegrees;
@@ -110,6 +109,7 @@ namespace CesiumForUnity
                 }
             }
         }
+        #endregion
 
         /// <summary>
         /// Encapsulates a method that is called whenever the controller finishes flying.
@@ -133,15 +133,20 @@ namespace CesiumForUnity
 
         private CesiumGeoreference _georeference;
         private CesiumGlobeAnchor _globeAnchor;
+        private CesiumSimplePlanarEllipsoidCurve _flightPath;
+        private double _flightPathLength;
 
         private CesiumCameraController _cameraController;
 
-        private List<double3> _keypoints = new List<double3>();
-        private double3 _lastPositionECEF = new double3(0.0, 0.0, 0.0);
+        private Quaternion _sourceRotation;
+        private Quaternion _destinationRotation;
+
+        private double3 _destinationECEF;
+        private double3 _previousPositionECEF;
+
+        private double _maxHeight;
 
         private double _currentFlyToTime = 0.0;
-        private Quaternion _flyToSourceRotation = Quaternion.identity;
-        private Quaternion _flyToDestinationRotation = Quaternion.identity;
 
         private bool _flyingToLocation = false;
         private bool _canInterruptFlight = true;
@@ -156,8 +161,17 @@ namespace CesiumForUnity
                     "with a CesiumGeoreference.");
             }
 
-            // CesiumOriginShift will add a CesiumGlobeAnchor automatically.
-            this._globeAnchor = this.gameObject.GetComponent<CesiumGlobeAnchor>();
+            this._globeAnchor = this.gameObject.GetComponentInParent<CesiumGlobeAnchor>();
+            if (this._globeAnchor == null)
+            {
+                Debug.LogError("CesiumFlyToController expects a CesiumGlobeAnchor to be attached to itself or to a parent");
+            }
+
+            CesiumOriginShift originShift = this._globeAnchor.GetComponent<CesiumOriginShift>();
+            if (originShift == null)
+            {
+                Debug.LogError("CesiumFlyToController expects a CesiumOriginShift to be attached to the CesiumGlobeAnchor above it");
+            }
 
             // If a CesiumCameraController is present, CesiumFlyToController will account for
             // its inputs and modify it during flights.
@@ -172,6 +186,26 @@ namespace CesiumForUnity
             }
         }
 
+#if UNITY_EDITOR
+        // Ensures required components are present in the editor.
+        private void Reset()
+        {
+            CesiumGlobeAnchor anchor = this.gameObject.GetComponentInParent<CesiumGlobeAnchor>();
+            if(anchor == null)
+            {
+                anchor = this.gameObject.AddComponent<CesiumGlobeAnchor>();
+                Debug.LogWarning("CesiumFlyToController missing a CesiumGlobeAnchor - adding");
+            }
+
+            CesiumOriginShift origin = anchor.GetComponent<CesiumOriginShift>();
+            if(origin == null)
+            {
+                origin = anchor.gameObject.AddComponent<CesiumOriginShift>();
+                Debug.LogWarning("CesiumFlyToController missing a CesiumOriginShift - adding");
+            }
+        }
+#endif
+
         /// <summary>
         /// Whether this controller detects movement from other controllers on the game object.
         /// </summary>
@@ -185,7 +219,7 @@ namespace CesiumForUnity
         private bool DetectMovementInput()
         {
             double3 currentPositionECEF = this._globeAnchor.positionGlobeFixed;
-            bool3 positionEquality = currentPositionECEF == this._lastPositionECEF;
+            bool3 positionEquality = currentPositionECEF == this._previousPositionECEF;
             return !positionEquality.x || !positionEquality.y || !positionEquality.z;
         }
 
@@ -210,7 +244,12 @@ namespace CesiumForUnity
         /// <param name="deltaTime"> The time delta in seconds.</param>
         private void HandleFlightStep(float deltaTime)
         {
-            if (this._georeference == null || this._keypoints.Count == 0)
+            if (!this._flyingToLocation || this._flightPath == null)
+            {
+                return;
+            }
+
+            if (this._georeference == null)
             {
                 this._flyingToLocation = false;
                 return;
@@ -222,62 +261,51 @@ namespace CesiumForUnity
                 return;
             }
 
-            this._currentFlyToTime += (double)deltaTime;
+            this._currentFlyToTime += deltaTime;
 
-            // If we reached the end, set actual destination location and orientation
+            double flyPercentage = 0.0;
             if (this._currentFlyToTime >= this._flyToDuration)
             {
-                this.CompleteFlight();
-                return;
+                flyPercentage = 1.0;
             }
-
-            // We're currently in flight. Interpolate the position and orientation:
-            double percentage = this._currentFlyToTime / this._flyToDuration;
-
-            // In order to accelerate at start and slow down at end, we use a progress
-            // profile curve
-            double flyPercentage = percentage;
-            if (this._flyToProgressCurve != null && this._flyToProgressCurve.length > 0)
+            else if (this._flyToProgressCurve != null && this._flyToProgressCurve.length > 0)
             {
-                flyPercentage = Math.Clamp(
-                    (double)this._flyToProgressCurve.Evaluate((float)percentage),
-                    0.0,
-                    1.0);
+                // Sample the progress curve if we have one
+                flyPercentage = math.clamp(this._flyToProgressCurve.Evaluate((float)(this._currentFlyToTime / this._flyToDuration)), 0.0, 1.0);
+            }
+            else
+            {
+                flyPercentage = this._currentFlyToTime / this._flyToDuration;
             }
 
-            if (Mathf.Approximately((float)flyPercentage, 1.0f))
+            // If we're have it to the end of the flight, or if the flight we're taking isn't actually moving or rotating us at all, we're done.
+            if (flyPercentage == 1.0 || (this._flightPathLength == 0.0 && this._sourceRotation == this._destinationRotation))
             {
                 this.CompleteFlight();
                 return;
             }
 
-            // Find the keypoint indexes corresponding to the current percentage
-            double keypointValue = flyPercentage * (this._keypoints.Count - 1);
-            int lastKeypointIndex = (int)Math.Floor(keypointValue);
-            double segmentPercentage = keypointValue - lastKeypointIndex;
-            int nextKeypointIndex = lastKeypointIndex + 1;
+            // Calculate the height above the surface. If we have a profile curve, use it as well.
+            double altituteOffset = 0.0;
+            if (this._maxHeight != 0.0 && this.flyToAltitudeProfileCurve != null && this.flyToAltitudeProfileCurve.length > 0)
+            {
+                double curveOffset = this._maxHeight * this.flyToAltitudeProfileCurve.Evaluate((float)flyPercentage);
+                altituteOffset += curveOffset;
+            }
 
-            // Get the current position by interpolating linearly between those two points
-            double3 lastPosition = this._keypoints[lastKeypointIndex];
-            double3 nextPosition = this._keypoints[nextKeypointIndex];
-            double3 currentPosition = math.lerp(lastPosition, nextPosition, segmentPercentage);
+            // Update position.
+            double3 currentPosition = this._flightPath.GetPosition(flyPercentage, altituteOffset);
+            this._previousPositionECEF = currentPosition;
             this._globeAnchor.positionGlobeFixed = currentPosition;
-            this._lastPositionECEF = currentPosition;
 
-            // Interpolate rotation in the EUN frame. The local EUN rotation will
-            // be transformed to the appropriate world rotation as we fly.
-            this._globeAnchor.rotationEastUpNorth = Quaternion.Slerp(
-                this._flyToSourceRotation,
-                this._flyToDestinationRotation,
-                (float)flyPercentage);
+            Quaternion currentQuat = Quaternion.Slerp(this._sourceRotation, this._destinationRotation, (float)flyPercentage);
+            this._globeAnchor.rotationEastUpNorth = currentQuat;
         }
 
         private void CompleteFlight()
         {
-            double3 finalPoint = this._keypoints[this._keypoints.Count - 1];
-            this._globeAnchor.positionGlobeFixed = finalPoint;
-            
-            this._globeAnchor.rotationEastUpNorth = this._flyToDestinationRotation;
+            this._globeAnchor.positionGlobeFixed = _destinationECEF;
+            this._globeAnchor.rotationEastUpNorth = this._destinationRotation;
 
             this._flyingToLocation = false;
             this._currentFlyToTime = 0.0;
@@ -327,112 +355,27 @@ namespace CesiumForUnity
             float yawAtDestination,
             float pitchAtDestination)
         {
-            // The source and destination rotations are expressed in East-Up-North
-            // coordinates.
-            this._flyToSourceRotation = this.transform.rotation;
-            this._flyToDestinationRotation =
-                Quaternion.Euler(pitchAtDestination, yawAtDestination, 0);
+            // The source and destination rotations are expressed in East-Up-North coordinates.
+            pitchAtDestination = Mathf.Clamp(pitchAtDestination, -89.99f, 89.99f);
+            this._sourceRotation = this.transform.rotation;
+            this._destinationRotation = Quaternion.Euler(pitchAtDestination, yawAtDestination, 0.0f);
+            this._destinationECEF = destinationECEF;
 
-            // Compute angle / axis transform and initialize key points
-            float3 normalizedSource = (float3)math.normalize(sourceECEF);
-            float3 normalizedDestination = (float3)math.normalize(destinationECEF);
-            Quaternion flyQuat =
-                Quaternion.FromToRotation(normalizedSource, normalizedDestination);
+            this._flightPath = CesiumSimplePlanarEllipsoidCurve.FromEarthCenteredEarthFixedCoordinates(sourceECEF, destinationECEF);
+            this._flightPathLength = math.length(sourceECEF - destinationECEF);
 
-            float flyTotalAngle = 0.0f;
-            Vector3 flyRotationAxis = Vector3.zero;
-            flyQuat.ToAngleAxis(out flyTotalAngle, out flyRotationAxis);
-
-            this._keypoints.Clear();
-            this._currentFlyToTime = 0.0;
-
-            if (this.flyToGranularityDegrees == 0.0)
+            this._maxHeight = 0.0;
+            if (this._flyToAltitudeProfileCurve != null && this._flyToMaximumAltitudeCurve.length > 0)
             {
-                Debug.LogError(
-                    "CesiumFlyToController cannot fly when flyToGranularityDegrees " +
-                    "is set to 0.");
-                return;
-            }
-
-            if (flyTotalAngle == 0.0f &&
-                this._flyToSourceRotation == this._flyToDestinationRotation)
-            {
-                return;
-            }
-
-            int steps = Math.Max(
-                (int)(flyTotalAngle / (Mathf.Deg2Rad * this.flyToGranularityDegrees)) - 1,
-                0);
-
-            // We will not create a curve projected along the ellipsoid because we want to take
-            // altitude while flying. The radius of the current point will evolve as follows:
-            //  - Project the point on the ellipsoid: will give a default radius
-            //  depending on ellipsoid location.
-            //  - Interpolate the altitudes: get the source/destination altitudes, and make a
-            //  linear interpolation between them. This will allow for flying from / to any
-            //  point smoothly.
-            //  - Add a flight profile offset /-\ defined by a curve.
-
-            // Compute global radius at source and destination points
-            double sourceRadius = math.length(sourceECEF);
-            double3 sourceUpVector = sourceECEF;
-
-            // Compute actual altitude at source and destination points by scaling on
-            // ellipsoid.
-            double sourceAltitude = 0.0, destinationAltitude = 0.0;
-            double3? scaled = CesiumWgs84Ellipsoid.ScaleToGeodeticSurface(sourceECEF);
-            if (scaled != null)
-            {
-                sourceAltitude = math.length(sourceECEF - (double3)scaled);
-            }
-
-            scaled = CesiumWgs84Ellipsoid.ScaleToGeodeticSurface(destinationECEF);
-            if (scaled != null)
-            {
-                destinationAltitude = math.length(destinationECEF - (double3)scaled);
-            }
-
-            // Get distance between source and destination points to compute a wanted
-            // altitude from the curve.
-            double flyToDistance = math.length(destinationECEF - sourceECEF);
-
-            this._keypoints.Add(sourceECEF);
-            this._lastPositionECEF = sourceECEF;
-
-            for (int step = 1; step <= steps; step++)
-            {
-                double stepDouble = (double)step;
-                double percentage = stepDouble / (steps + 1);
-                double altitude = math.lerp(sourceAltitude, destinationAltitude, percentage);
-                double phi = Mathf.Deg2Rad * this.flyToGranularityDegrees * stepDouble;
-
-                float3 rotated = Quaternion.AngleAxis((float)phi, flyRotationAxis) * (float3)sourceUpVector;
-                scaled = CesiumWgs84Ellipsoid.ScaleToGeodeticSurface((double3)rotated);
-                if (scaled != null)
+                this._maxHeight = 30000.0;
+                if (this._flyToMaximumAltitudeCurve != null && this._flyToMaximumAltitudeCurve.length > 0)
                 {
-                    double3 scaledValue = (double3)scaled;
-                    double3 upVector = math.normalize(scaledValue);
-
-                    // Add an altitude if we have a profile curve for it
-                    double offsetAltitude = 0;
-                    if (this._flyToAltitudeProfileCurve != null && this._flyToAltitudeProfileCurve.length > 0)
-                    {
-                        double maxAltitude = 30000;
-                        if (this._flyToMaximumAltitudeCurve != null && this._flyToMaximumAltitudeCurve.length > 0)
-                        {
-                            maxAltitude = (double)
-                                    this._flyToMaximumAltitudeCurve.Evaluate((float)flyToDistance);
-                        }
-                        offsetAltitude =
-                            (double)maxAltitude * this._flyToAltitudeProfileCurve.Evaluate((float)percentage);
-                    }
-
-                    double3 point = scaledValue + upVector * (altitude + offsetAltitude);
-                    this._keypoints.Add(point);
+                    this._maxHeight = this._flyToMaximumAltitudeCurve.Evaluate((float)this._flightPathLength);
                 }
             }
 
-            this._keypoints.Add(destinationECEF);
+            this._previousPositionECEF = sourceECEF;
+            this._flyingToLocation = true;
         }
 
         /// <summary>
