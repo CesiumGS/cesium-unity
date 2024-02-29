@@ -14,9 +14,8 @@
 #include <CesiumGltf/ExtensionExtMeshFeatures.h>
 #include <CesiumGltf/ExtensionKhrMaterialsUnlit.h>
 #include <CesiumGltf/ExtensionKhrTextureTransform.h>
-#include <CesiumGltf/ExtensionMeshPrimitiveExtFeatureMetadata.h>
-#include <CesiumGltf/ExtensionModelExtFeatureMetadata.h>
 #include <CesiumGltf/ExtensionModelExtStructuralMetadata.h>
+#include <CesiumGltf/KhrTextureTransform.h>
 #include <CesiumGltfContent/GltfUtilities.h>
 #include <CesiumGltfReader/GltfReader.h>
 #include <CesiumUtility/ScopeGuard.h>
@@ -1144,31 +1143,33 @@ void setGltfMaterialParameterValues(
   }
 
   // Handle KHR_texture_transform for each available texture.
+  KhrTextureTransform textureTransform;
 
   const ExtensionKhrTextureTransform* pBaseColorTextureTransform =
       pbr.baseColorTexture
           ? pbr.baseColorTexture->getExtension<ExtensionKhrTextureTransform>()
           : nullptr;
   if (pBaseColorTextureTransform) {
-    UnityEngine::Vector2 offset{
-        (float)pBaseColorTextureTransform->offset[0],
-        (float)pBaseColorTextureTransform->offset[1]};
-    UnityEngine::Vector2 scale{
-        (float)pBaseColorTextureTransform->scale[0],
-        (float)pBaseColorTextureTransform->scale[1]};
-    unityMaterial.SetTextureOffset(
-        materialProperties.getBaseColorTextureID(),
-        offset);
-    unityMaterial.SetTextureScale(
-        materialProperties.getBaseColorTextureID(),
-        scale);
+    textureTransform = KhrTextureTransform(*pBaseColorTextureTransform);
+    if (textureTransform.status() == KhrTextureTransformStatus::Valid) {
+      const glm::dvec2& scale = textureTransform.scale();
+      const glm::dvec2& offset = textureTransform.offset();
+      unityMaterial.SetTextureOffset(
+          materialProperties.getBaseColorTextureID(),
+          {static_cast<float>(offset[0]), static_cast<float>(offset[1])});
+      unityMaterial.SetTextureScale(
+          materialProperties.getBaseColorTextureID(),
+          {static_cast<float>(scale[0]), static_cast<float>(scale[1])});
 
-    UnityEngine::Vector4 rotationValues{0.0f, 1.0f, 0.0f, 1.0f};
-    rotationValues.x = float(glm::sin(pBaseColorTextureTransform->rotation));
-    rotationValues.y = float(glm::cos(pBaseColorTextureTransform->rotation));
-    unityMaterial.SetVector(
-        materialProperties.getBaseColorTextureRotationID(),
-        rotationValues);
+      const glm::dvec2& rotationSineCosine =
+          textureTransform.rotationSineCosine();
+      unityMaterial.SetVector(
+          materialProperties.getBaseColorTextureRotationID(),
+          {static_cast<float>(rotationSineCosine[0]),
+           static_cast<float>(rotationSineCosine[1]),
+           0.0f,
+           0.0f});
+    }
   }
 
   const ExtensionKhrTextureTransform* pMetallicRoughnessTextureTransform =
@@ -1177,27 +1178,26 @@ void setGltfMaterialParameterValues(
                 ->getExtension<ExtensionKhrTextureTransform>()
           : nullptr;
   if (pMetallicRoughnessTextureTransform) {
-    UnityEngine::Vector2 offset{
-        (float)pMetallicRoughnessTextureTransform->offset[0],
-        (float)pMetallicRoughnessTextureTransform->offset[1]};
-    UnityEngine::Vector2 scale{
-        (float)pMetallicRoughnessTextureTransform->scale[0],
-        (float)pMetallicRoughnessTextureTransform->scale[1]};
-    unityMaterial.SetTextureOffset(
-        materialProperties.getMetallicRoughnessTextureID(),
-        offset);
-    unityMaterial.SetTextureScale(
-        materialProperties.getMetallicRoughnessTextureID(),
-        scale);
+    textureTransform = KhrTextureTransform(*pMetallicRoughnessTextureTransform);
+    if (textureTransform.status() == KhrTextureTransformStatus::Valid) {
+      const glm::dvec2& scale = textureTransform.scale();
+      const glm::dvec2& offset = textureTransform.offset();
+      unityMaterial.SetTextureOffset(
+          materialProperties.getMetallicRoughnessTextureID(),
+          {static_cast<float>(offset[0]), static_cast<float>(offset[1])});
+      unityMaterial.SetTextureScale(
+          materialProperties.getMetallicRoughnessTextureID(),
+          {static_cast<float>(scale[0]), static_cast<float>(scale[1])});
 
-    UnityEngine::Vector4 rotationValues{0.0f, 1.0f, 0.0f, 1.0f};
-    rotationValues.x =
-        float(glm::sin(pMetallicRoughnessTextureTransform->rotation));
-    rotationValues.y =
-        float(glm::cos(pMetallicRoughnessTextureTransform->rotation));
-    unityMaterial.SetVector(
-        materialProperties.getMetallicRoughnessTextureRotationID(),
-        rotationValues);
+      const glm::dvec2& rotationSineCosine =
+          textureTransform.rotationSineCosine();
+      unityMaterial.SetVector(
+          materialProperties.getMetallicRoughnessTextureRotationID(),
+          {static_cast<float>(rotationSineCosine[0]),
+           static_cast<float>(rotationSineCosine[1]),
+           0.0f,
+           0.0f});
+    }
   }
 
   const ExtensionKhrTextureTransform* pNormalTextureTransform =
@@ -1206,25 +1206,27 @@ void setGltfMaterialParameterValues(
                 ->getExtension<ExtensionKhrTextureTransform>()
           : nullptr;
   if (pNormalTextureTransform) {
-    UnityEngine::Vector2 offset{
-        (float)pNormalTextureTransform->offset[0],
-        (float)pNormalTextureTransform->offset[1]};
-    UnityEngine::Vector2 scale{
-        (float)pNormalTextureTransform->scale[0],
-        (float)pNormalTextureTransform->scale[1]};
-    unityMaterial.SetTextureOffset(
-        materialProperties.getNormalMapTextureID(),
-        offset);
-    unityMaterial.SetTextureScale(
-        materialProperties.getNormalMapTextureID(),
-        scale);
+    textureTransform = KhrTextureTransform(*pNormalTextureTransform);
+    if (textureTransform.status() == KhrTextureTransformStatus::Valid) {
+      const glm::dvec2& scale = textureTransform.scale();
+      const glm::dvec2& offset = textureTransform.offset();
 
-    UnityEngine::Vector4 rotationValues{0.0f, 1.0f, 0.0f, 1.0f};
-    rotationValues.x = float(glm::sin(pNormalTextureTransform->rotation));
-    rotationValues.y = float(glm::cos(pNormalTextureTransform->rotation));
-    unityMaterial.SetVector(
-        materialProperties.getNormalMapTextureRotationID(),
-        rotationValues);
+      unityMaterial.SetTextureOffset(
+          materialProperties.getNormalMapTextureID(),
+          {static_cast<float>(offset[0]), static_cast<float>(offset[1])});
+      unityMaterial.SetTextureScale(
+          materialProperties.getNormalMapTextureID(),
+          {static_cast<float>(scale[0]), static_cast<float>(scale[1])});
+
+      const glm::dvec2& rotationSineCosine =
+          textureTransform.rotationSineCosine();
+      unityMaterial.SetVector(
+          materialProperties.getNormalMapTextureRotationID(),
+          {static_cast<float>(rotationSineCosine[0]),
+           static_cast<float>(rotationSineCosine[1]),
+           0.0f,
+           0.0f});
+    }
   }
 
   const ExtensionKhrTextureTransform* pEmissiveTextureTransform =
@@ -1233,25 +1235,27 @@ void setGltfMaterialParameterValues(
                 ->getExtension<ExtensionKhrTextureTransform>()
           : nullptr;
   if (pEmissiveTextureTransform) {
-    UnityEngine::Vector2 offset{
-        (float)pEmissiveTextureTransform->offset[0],
-        (float)pEmissiveTextureTransform->offset[1]};
-    UnityEngine::Vector2 scale{
-        (float)pEmissiveTextureTransform->scale[0],
-        (float)pEmissiveTextureTransform->scale[1]};
-    unityMaterial.SetTextureOffset(
-        materialProperties.getEmissiveTextureID(),
-        offset);
-    unityMaterial.SetTextureScale(
-        materialProperties.getEmissiveTextureID(),
-        scale);
+    textureTransform = KhrTextureTransform(*pEmissiveTextureTransform);
+    if (textureTransform.status() == KhrTextureTransformStatus::Valid) {
+      const glm::dvec2& scale = textureTransform.scale();
+      const glm::dvec2& offset = textureTransform.offset();
 
-    UnityEngine::Vector4 rotationValues{0.0f, 1.0f, 0.0f, 1.0f};
-    rotationValues.x = float(glm::sin(pEmissiveTextureTransform->rotation));
-    rotationValues.y = float(glm::cos(pEmissiveTextureTransform->rotation));
-    unityMaterial.SetVector(
-        materialProperties.getEmissiveTextureRotationID(),
-        rotationValues);
+      unityMaterial.SetTextureOffset(
+          materialProperties.getEmissiveTextureID(),
+          {static_cast<float>(offset[0]), static_cast<float>(offset[1])});
+      unityMaterial.SetTextureScale(
+          materialProperties.getEmissiveTextureID(),
+          {static_cast<float>(scale[0]), static_cast<float>(scale[1])});
+
+      const glm::dvec2& rotationSineCosine =
+          textureTransform.rotationSineCosine();
+      unityMaterial.SetVector(
+          materialProperties.getEmissiveTextureRotationID(),
+          {static_cast<float>(rotationSineCosine[0]),
+           static_cast<float>(rotationSineCosine[1]),
+           0.0f,
+           0.0f});
+    }
   }
 
   const ExtensionKhrTextureTransform* pOcclusionTextureTransform =
@@ -1260,25 +1264,27 @@ void setGltfMaterialParameterValues(
                 ->getExtension<ExtensionKhrTextureTransform>()
           : nullptr;
   if (pOcclusionTextureTransform) {
-    UnityEngine::Vector2 offset{
-        (float)pOcclusionTextureTransform->offset[0],
-        (float)pOcclusionTextureTransform->offset[1]};
-    UnityEngine::Vector2 scale{
-        (float)pOcclusionTextureTransform->scale[0],
-        (float)pOcclusionTextureTransform->scale[1]};
-    unityMaterial.SetTextureOffset(
-        materialProperties.getOcclusionTextureID(),
-        offset);
-    unityMaterial.SetTextureScale(
-        materialProperties.getOcclusionTextureID(),
-        scale);
+    textureTransform = KhrTextureTransform(*pOcclusionTextureTransform);
+    if (textureTransform.status() == KhrTextureTransformStatus::Valid) {
+      const glm::dvec2& scale = textureTransform.scale();
+      const glm::dvec2& offset = textureTransform.offset();
 
-    UnityEngine::Vector4 rotationValues{0.0f, 1.0f, 0.0f, 1.0f};
-    rotationValues.x = float(glm::sin(pOcclusionTextureTransform->rotation));
-    rotationValues.y = float(glm::cos(pOcclusionTextureTransform->rotation));
-    unityMaterial.SetVector(
-        materialProperties.getOcclusionTextureRotationID(),
-        rotationValues);
+      unityMaterial.SetTextureOffset(
+          materialProperties.getOcclusionTextureID(),
+          {static_cast<float>(offset[0]), static_cast<float>(offset[1])});
+      unityMaterial.SetTextureScale(
+          materialProperties.getOcclusionTextureID(),
+          {static_cast<float>(scale[0]), static_cast<float>(scale[1])});
+
+      const glm::dvec2& rotationSineCosine =
+          textureTransform.rotationSineCosine();
+      unityMaterial.SetVector(
+          materialProperties.getOcclusionTextureRotationID(),
+          {static_cast<float>(rotationSineCosine[0]),
+           static_cast<float>(rotationSineCosine[1]),
+           0.0f,
+           0.0f});
+    }
   }
 }
 } // namespace
