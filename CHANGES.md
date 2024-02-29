@@ -20,6 +20,7 @@
 - Added a `distance` property to `CesiumOriginShift`, which specifies the maximum allowed distance from the current origin before it is shifted.
 - Added support for the `KHR_texture_transform` glTF extension - including rotation - in `baseColorTexture`, `metallicRoughnessTexture`, `emissiveTexture`, `normalTexture`, and `occlusionTexture`. The transformation is now applied on the GPU via nodes in the Material, rather than on the CPU by directly modifying texture coordinates.
 - Added `materialKey` to `CesiumRasterOverlay`, which matches the overlay to its corresponding parameters in the tileset's material. This allows for explicit ordering of raster overlays and overlay-specific effects. 
+- `CesiumCameraController` can now accept custom input actions that override the default inputs.
 
 ##### Fixes :wrench:
 
