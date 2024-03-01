@@ -1,6 +1,6 @@
 # Change Log
 
-### ? - ?
+### v1.8.0 - 2023-03-01
 
 ##### Breaking Changes :mega:
 
@@ -20,6 +20,7 @@
 - Added a `distance` property to `CesiumOriginShift`, which specifies the maximum allowed distance from the current origin before it is shifted.
 - Added support for the `KHR_texture_transform` glTF extension - including rotation - in `baseColorTexture`, `metallicRoughnessTexture`, `emissiveTexture`, `normalTexture`, and `occlusionTexture`. The transformation is now applied on the GPU via nodes in the Material, rather than on the CPU by directly modifying texture coordinates.
 - Added `materialKey` to `CesiumRasterOverlay`, which matches the overlay to its corresponding parameters in the tileset's material. This allows for explicit ordering of raster overlays and overlay-specific effects. 
+- `CesiumCameraController` can now accept custom input actions that override the default inputs.
 
 ##### Fixes :wrench:
 
@@ -28,11 +29,15 @@
 - Fixed the "DynamicCamera is not nested inside a game object with a CesiumGeoreference" warning when adding a new DynamicCamera in the editor.
 - Fixed support for loading textures with less than four channels.
 - Fixed "Destroying assets is not permitted to avoid data loss" error when using a custom opaque material with texture assets on a `Cesium3DTileset`.
+- Fixed jump at the end of the flight path in `CesiumFlyToController`.
 
 ##### Deprecated :hourglass_flowing_sand:
 
 - `CesiumMetadata` has been deprecated. Instead, retrieve the `CesiumModelMetadata` component attached to a tile game object in order to access its glTF metadata.
 - `CesiumFeature` has been deprecated. Instead, retrieve feature IDs from the `CesiumPrimitiveFeatures` component attached to a primitive game object in order to access its glTF features. Feature IDs can be used to retrieve metadata from the `CesiumModelMetadata` attached to its parent.
+- `flyToGranularityDegrees` in `CesiumFlyToController` has been deprecated. `CesiumFlyToController` no longer works using keypoints, so this value is unnecessary.
+
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.27.4 to v0.33.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
 
 ### v1.7.1 - 2023-12-14
 

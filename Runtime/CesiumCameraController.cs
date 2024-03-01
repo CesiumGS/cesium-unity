@@ -1,5 +1,7 @@
 using UnityEngine;
 using Unity.Mathematics;
+using System.Linq;
+
 
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
@@ -16,7 +18,6 @@ namespace CesiumForUnity
     /// it automatically changes its own up direction such that the world always 
     /// looks right-side up.
     /// </summary>
-    [RequireComponent(typeof(CesiumOriginShift))]
     [RequireComponent(typeof(Camera))]
     [DisallowMultipleComponent]
     [AddComponentMenu("Cesium/Cesium Camera Controller")]
@@ -127,6 +128,26 @@ namespace CesiumForUnity
             set => this._dynamicClippingPlanesMinHeight = Mathf.Max(value, 0.0f);
         }
 
+#if ENABLE_INPUT_SYSTEM
+        [SerializeField]
+        private InputActionProperty _lookAction;
+
+        [SerializeField]
+        private InputActionProperty _moveAction;
+
+        [SerializeField]
+        private InputActionProperty _moveUpAction;
+
+        [SerializeField]
+        private InputActionProperty _speedChangeAction;
+
+        [SerializeField]
+        private InputActionProperty _speedResetAction;
+
+        [SerializeField]
+        private InputActionProperty _toggleDynamicSpeedAction;
+#endif
+
         #endregion
 
         #region Private variables
@@ -169,12 +190,10 @@ namespace CesiumForUnity
         #region Input configuration
 
 #if ENABLE_INPUT_SYSTEM
-        InputAction lookAction;
-        InputAction moveAction;
-        InputAction moveUpAction;
-        InputAction speedChangeAction;
-        InputAction speedResetAction;
-        InputAction toggleDynamicSpeedAction;
+        private bool HasInputAction(InputActionProperty property)
+        {
+            return (property.action != null && property.action.bindings.Any()) || (property.reference != null);
+        }
 
         void ConfigureInputs()
         {
@@ -183,47 +202,71 @@ namespace CesiumForUnity
 #endif
             InputActionMap map = new InputActionMap("Cesium Camera Controller");
 
-            lookAction = map.AddAction("look", binding: "<Mouse>/delta");
-            lookAction.AddBinding("<Gamepad>/rightStick").WithProcessor("scaleVector2(x=15, y=15)");
+            if (!HasInputAction(_lookAction))
+            {
+                InputAction newLookAction = map.AddAction("look", binding: "<Mouse>/delta");
+                newLookAction.AddBinding("<Gamepad>/rightStick").WithProcessor("scaleVector2(x=15, y=15)");
+                _lookAction = new InputActionProperty(newLookAction);
+            }
 
-            moveAction = map.AddAction("move", binding: "<Gamepad>/leftStick");
-            moveAction.AddCompositeBinding("Dpad")
-                .With("Up", "<Keyboard>/w")
-                .With("Down", "<Keyboard>/s")
-                .With("Left", "<Keyboard>/a")
-                .With("Right", "<Keyboard>/d")
-                .With("Up", "<Keyboard>/upArrow")
-                .With("Down", "<Keyboard>/downArrow")
-                .With("Left", "<Keyboard>/leftArrow")
-                .With("Right", "<Keyboard>/rightArrow");
+            if (!HasInputAction(_moveAction))
+            {
+                InputAction newMoveAction = map.AddAction("move", binding: "<Gamepad>/leftStick");
+                newMoveAction.AddCompositeBinding("Dpad")
+                    .With("Up", "<Keyboard>/w")
+                    .With("Down", "<Keyboard>/s")
+                    .With("Left", "<Keyboard>/a")
+                    .With("Right", "<Keyboard>/d")
+                    .With("Up", "<Keyboard>/upArrow")
+                    .With("Down", "<Keyboard>/downArrow")
+                    .With("Left", "<Keyboard>/leftArrow")
+                    .With("Right", "<Keyboard>/rightArrow");
+                _moveAction = new InputActionProperty(newMoveAction);
+            }
 
-            moveUpAction = map.AddAction("moveUp");
-            moveUpAction.AddCompositeBinding("Dpad")
-                .With("Up", "<Keyboard>/space")
-                .With("Down", "<Keyboard>/c")
-                .With("Up", "<Keyboard>/e")
-                .With("Down", "<Keyboard>/q")
-                .With("Up", "<Gamepad>/rightTrigger")
-                .With("Down", "<Gamepad>/leftTrigger");
+            if (!HasInputAction(_moveUpAction))
+            {
+                InputAction newMoveUpAction = map.AddAction("moveUp");
+                newMoveUpAction.AddCompositeBinding("Dpad")
+                    .With("Up", "<Keyboard>/space")
+                    .With("Down", "<Keyboard>/c")
+                    .With("Up", "<Keyboard>/e")
+                    .With("Down", "<Keyboard>/q")
+                    .With("Up", "<Gamepad>/rightTrigger")
+                    .With("Down", "<Gamepad>/leftTrigger");
+                _moveUpAction = new InputActionProperty(newMoveUpAction);
+            }
 
-            speedChangeAction = map.AddAction("speedChange", binding: "<Mouse>/scroll");
-            speedChangeAction.AddCompositeBinding("Dpad")
-                .With("Up", "<Gamepad>/rightShoulder")
-                .With("Down", "<Gamepad>/leftShoulder");
+            if (!HasInputAction(_speedChangeAction))
+            {
+                InputAction newSpeedChangeAction = map.AddAction("speedChange", binding: "<Mouse>/scroll");
+                newSpeedChangeAction.AddCompositeBinding("Dpad")
+                    .With("Up", "<Gamepad>/rightShoulder")
+                    .With("Down", "<Gamepad>/leftShoulder");
+                _speedChangeAction = new InputActionProperty(newSpeedChangeAction);
+            }
 
-            speedResetAction = map.AddAction("speedReset", binding: "<Mouse>/middleButton");
-            speedResetAction.AddBinding("<Gamepad>/buttonNorth");
+            if (!HasInputAction(_speedResetAction))
+            {
+                InputAction newSpeedResetAction = map.AddAction("speedReset", binding: "<Mouse>/middleButton");
+                newSpeedResetAction.AddBinding("<Gamepad>/buttonNorth");
+                _speedResetAction = new InputActionProperty(newSpeedResetAction);
+            }
 
-            toggleDynamicSpeedAction =
-                map.AddAction("toggleDynamicSpeed", binding: "<Keyboard>/g");
-            toggleDynamicSpeedAction.AddBinding("<Gamepad>/buttonEast");
+            if (!HasInputAction(_toggleDynamicSpeedAction))
+            {
+                InputAction newToggleDynamicSpeedAction =
+                    map.AddAction("toggleDynamicSpeed", binding: "<Keyboard>/g");
+                newToggleDynamicSpeedAction.AddBinding("<Gamepad>/buttonEast");
+                _toggleDynamicSpeedAction = new InputActionProperty(newToggleDynamicSpeedAction);
+            }
 
-            moveAction.Enable();
-            lookAction.Enable();
-            moveUpAction.Enable();
-            speedChangeAction.Enable();
-            speedResetAction.Enable();
-            toggleDynamicSpeedAction.Enable();
+            _moveAction.action.Enable();
+            _lookAction.action.Enable();
+            _moveUpAction.action.Enable();
+            _speedChangeAction.action.Enable();
+            _speedResetAction.action.Enable();
+            _toggleDynamicSpeedAction.action.Enable();
         }
 #endif
 
@@ -231,27 +274,27 @@ namespace CesiumForUnity
 
         #region Initialization
 
-        void InitializeCamera()
+        private void InitializeCamera()
         {
             this._camera = this.gameObject.GetComponent<Camera>();
             this._initialNearClipPlane = this._camera.nearClipPlane;
             this._initialFarClipPlane = this._camera.farClipPlane;
         }
 
-        void InitializeController()
+        private void InitializeController()
         {
-            if (this.gameObject.GetComponent<CharacterController>() != null)
+            if (this._globeAnchor.GetComponent<CharacterController>() != null)
             {
                 Debug.LogWarning(
                     "A CharacterController component was manually " +
-                    "added to the CesiumCameraController's game object. " +
+                    "added to the CesiumGlobeAnchor's game object. " +
                     "This may interfere with the CesiumCameraController's movement.");
 
-                this._controller = this.gameObject.GetComponent<CharacterController>();
+                this._controller = this._globeAnchor.GetComponent<CharacterController>();
             }
             else
             {
-                this._controller = this.gameObject.AddComponent<CharacterController>();
+                this._controller = this._globeAnchor.gameObject.AddComponent<CharacterController>();
                 this._controller.hideFlags = HideFlags.HideInInspector;
             }
 
@@ -302,8 +345,19 @@ namespace CesiumForUnity
                     "with a CesiumGeoreference.");
             }
 
-            // CesiumOriginShift will add a CesiumGlobeAnchor automatically.
-            this._globeAnchor = this.gameObject.GetComponent<CesiumGlobeAnchor>();
+            this._globeAnchor = this.gameObject.GetComponentInParent<CesiumGlobeAnchor>();
+            if (this._globeAnchor == null)
+            {
+                Debug.LogError("CesiumCameraController must have a CesiumGlobeAnchor " +
+                    "attached to itself or a parent");
+            }
+
+            CesiumOriginShift originShift = this._globeAnchor.GetComponent<CesiumOriginShift>();
+            if (originShift == null)
+            {
+                Debug.LogError("CesiumCameraController expects a CesiumOriginShift " +
+                    $"on {this._globeAnchor?.name}, none found");
+            }
 
             this.InitializeCamera();
             this.InitializeController();
@@ -313,6 +367,26 @@ namespace CesiumForUnity
             this.ConfigureInputs();
 #endif
         }
+
+#if UNITY_EDITOR
+        // Ensures required components are present in the editor.
+        private void Reset()
+        {
+            CesiumGlobeAnchor anchor = this.gameObject.GetComponentInParent<CesiumGlobeAnchor>();
+            if (anchor == null)
+            {
+                anchor = this.gameObject.AddComponent<CesiumGlobeAnchor>();
+                Debug.LogWarning("CesiumCameraController missing a CesiumGlobeAnchor - adding");
+            }
+
+            CesiumOriginShift origin = anchor.GetComponent<CesiumOriginShift>();
+            if (origin == null)
+            {
+                origin = anchor.gameObject.AddComponent<CesiumOriginShift>();
+                Debug.LogWarning("CesiumCameraController missing a CesiumOriginShift - adding");
+            }
+        }
+#endif
 
         #endregion
 
@@ -374,8 +448,8 @@ namespace CesiumForUnity
 #if ENABLE_INPUT_SYSTEM
             Vector2 lookDelta;
             Vector2 moveDelta;
-            lookDelta = lookAction.ReadValue<Vector2>();
-            moveDelta = moveAction.ReadValue<Vector2>();
+            lookDelta = _lookAction.action.ReadValue<Vector2>();
+            moveDelta = _moveAction.action.ReadValue<Vector2>();
 
 #if UNITY_IOS || UNITY_ANDROID
             bool handledMove = false;
@@ -408,12 +482,12 @@ namespace CesiumForUnity
             float inputForward = moveDelta.y;
             float inputRight = moveDelta.x;
 
-            float inputUp = moveUpAction.ReadValue<Vector2>().y;
+            float inputUp = _moveUpAction.action.ReadValue<Vector2>().y;
 
-            float inputSpeedChange = speedChangeAction.ReadValue<Vector2>().y;
-            bool inputSpeedReset = speedResetAction.ReadValue<float>() > 0.5f;
+            float inputSpeedChange = _speedChangeAction.action.ReadValue<Vector2>().y;
+            bool inputSpeedReset = _speedResetAction.action.ReadValue<float>() > 0.5f;
 
-            bool toggleDynamicSpeed = toggleDynamicSpeedAction.ReadValue<float>() > 0.5f;
+            bool toggleDynamicSpeed = _toggleDynamicSpeedAction.action.ReadValue<float>() > 0.5f;
 #else
             float inputRotateHorizontal = Input.GetAxis("Mouse X");
             float inputRotateVertical = Input.GetAxis("Mouse Y");
