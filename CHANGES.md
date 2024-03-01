@@ -37,6 +37,8 @@
 - `CesiumFeature` has been deprecated. Instead, retrieve feature IDs from the `CesiumPrimitiveFeatures` component attached to a primitive game object in order to access its glTF features. Feature IDs can be used to retrieve metadata from the `CesiumModelMetadata` attached to its parent.
 - `flyToGranularityDegrees` in `CesiumFlyToController` has been deprecated. `CesiumFlyToController` no longer works using keypoints, so this value is unnecessary.
 
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.27.4 to v0.33.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
+
 ### v1.7.1 - 2023-12-14
 
 ##### Fixes :wrench:
