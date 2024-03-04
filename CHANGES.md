@@ -1,5 +1,15 @@
 # Change Log
 
+### ? - ?
+
+##### Additions :tada:
+
+- Added support for the `KHR_texture_transform` glTF extension - including rotation - for picking with `CesiumFeatureIdTexture`.
+
+##### Fixes :wrench:
+
+- Fixed a bug where UVs were not properly interpolated in `CesiumFeatureIdTexture.GetFeatureIdFromHit`, resulting in incorrect values.
+
 ### v1.8.0 - 2023-03-01
 
 ##### Breaking Changes :mega:
