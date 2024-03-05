@@ -357,7 +357,7 @@ namespace CesiumForUnity
         {
             // The source and destination rotations are expressed in East-Up-North coordinates.
             pitchAtDestination = Mathf.Clamp(pitchAtDestination, -89.99f, 89.99f);
-            this._sourceRotation = this.transform.rotation;
+            this._sourceRotation = this._globeAnchor.transform.rotation;
             this._destinationRotation = Quaternion.Euler(pitchAtDestination, yawAtDestination, 0.0f);
             this._destinationECEF = destinationECEF;
 
