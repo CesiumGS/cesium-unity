@@ -92,6 +92,21 @@ namespace CesiumForUnity
                 this.Refresh();
             }
         }
+        
+        [SerializeField] private bool _useGeographicProjection = false;
+
+        /// <summary>
+        /// Change projection to GeographicProjection (the default is WebMercatorProjection).
+        /// </summary>
+        public bool useGeographicProjection
+        {
+            get => this._useGeographicProjection;
+            set
+            {
+                this._useGeographicProjection = value;
+                this.Refresh();
+            }
+        }
 
         [SerializeField] private int _minimumLevel = 0;
 

@@ -345,6 +345,7 @@ namespace CesiumForUnity
             webMapTileServiceRasterOverlay.style = webMapTileServiceRasterOverlay.style;
             webMapTileServiceRasterOverlay.layer = webMapTileServiceRasterOverlay.layer;
             webMapTileServiceRasterOverlay.tileMatrixSetID = webMapTileServiceRasterOverlay.tileMatrixSetID;
+            webMapTileServiceRasterOverlay.useGeographicProjection = webMapTileServiceRasterOverlay.useGeographicProjection;
             
             baseOverlay = webMapTileServiceRasterOverlay;
 

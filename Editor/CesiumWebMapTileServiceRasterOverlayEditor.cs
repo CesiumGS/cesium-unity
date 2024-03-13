@@ -18,6 +18,7 @@ namespace CesiumForUnity
         private SerializedProperty _style;
         private SerializedProperty _layer;
         private SerializedProperty _tileMatrixSetID;
+        private SerializedProperty _useGeographicProjection;
 
         private void OnEnable()
         {
@@ -37,6 +38,7 @@ namespace CesiumForUnity
             this._style = this.serializedObject.FindProperty("_style");
             this._layer = this.serializedObject.FindProperty("_layer");
             this._tileMatrixSetID = this.serializedObject.FindProperty("_tileMatrixSetID");
+            this._useGeographicProjection = this.serializedObject.FindProperty("_useGeographicProjection");
         }
 
         private void OnDisable()
@@ -121,6 +123,12 @@ namespace CesiumForUnity
                 "Tile Matrix Set ID",
                 "The tile matrix set identifier for WMTS requests.");
             EditorGUILayout.DelayedTextField(this._tileMatrixSetID, tileMatrixSetIDContent);
+            
+            GUIContent useGeographicProjectionContent = new GUIContent(
+                "Use Geographic Projection",
+                "If true, the overlay will be projected using a geographic projection. " +
+                "If false, the overlay will be projected using a web mercator projection.");
+            EditorGUILayout.PropertyField(this._useGeographicProjection, useGeographicProjectionContent);
         }
 
         private void DrawRasterOverlayProperties()

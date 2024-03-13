@@ -48,6 +48,10 @@ void CesiumWebMapTileServiceRasterOverlayImpl::AddToTileset(
   wmtsOptions.tileWidth = overlay.tileWidth();
   wmtsOptions.tileHeight = overlay.tileHeight();
 
+  if (overlay.useGeographicProjection()) {
+    wmtsOptions.projection = CesiumGeospatial::GeographicProjection();
+  }
+
   CesiumForUnity::CesiumRasterOverlay genericOverlay = overlay;
   RasterOverlayOptions options =
       CesiumRasterOverlayUtility::GetOverlayOptions(genericOverlay);
