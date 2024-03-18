@@ -26,8 +26,13 @@ CesiumWebMapTileServiceRasterOverlayImpl::~CesiumWebMapTileServiceRasterOverlayI
 void CesiumWebMapTileServiceRasterOverlayImpl::AddToTileset(
     const ::DotNet::CesiumForUnity::CesiumWebMapTileServiceRasterOverlay& overlay,
     const ::DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
-  if (this->_pOverlay) {
-    // Overlay already added to a tileset, do nothing.
+  if (this->_pOverlay != nullptr) {
+    // Overlay already added.
+    return;
+  }
+
+  if (System::String::IsNullOrEmpty(overlay.baseUrl())) {
+    // Don't create an overlay with an empty base URL.
     return;
   }
 
