@@ -54,7 +54,7 @@ void CesiumTileMapServiceRasterOverlayImpl::AddToTileset(
       CesiumRasterOverlayUtility::GetOverlayOptions(genericOverlay);
 
   this->_pOverlay = new TileMapServiceRasterOverlay(
-      overlay.name().ToStlString(),
+      overlay.materialKey().ToStlString(),
       overlay.url().ToStlString(),
       std::vector<CesiumAsync::IAssetAccessor::THeader>(),
       tmsOptions,

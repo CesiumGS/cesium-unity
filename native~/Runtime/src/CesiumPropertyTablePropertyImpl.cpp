@@ -867,6 +867,11 @@ TResult propertyTablePropertyCallback(
 
 } // namespace
 
+CesiumPropertyTablePropertyImpl::CesiumPropertyTablePropertyImpl(
+    const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property) {}
+
+CesiumPropertyTablePropertyImpl::~CesiumPropertyTablePropertyImpl() {}
+
 bool CesiumPropertyTablePropertyImpl::GetBoolean(
     const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,
     std::int64_t featureID,
