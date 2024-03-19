@@ -21,11 +21,9 @@ struct FeatureIdTexture;
 namespace CesiumForUnityNative {
 class CesiumFeatureIdTextureImpl {
 public:
-  ~CesiumFeatureIdTextureImpl(){};
   CesiumFeatureIdTextureImpl(
-      const DotNet::CesiumForUnity::CesiumFeatureIdTexture& featureIdTexture){};
-  void JustBeforeDelete(
-      const DotNet::CesiumForUnity::CesiumFeatureIdTexture& featureIdTexture){};
+      const DotNet::CesiumForUnity::CesiumFeatureIdTexture& featureIdTexture);
+  ~CesiumFeatureIdTextureImpl();
 
   static DotNet::CesiumForUnity::CesiumFeatureIdTexture CreateTexture(
       const CesiumGltf::Model& model,

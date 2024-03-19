@@ -11,6 +11,12 @@
 using namespace DotNet::CesiumForUnity;
 
 namespace CesiumForUnityNative {
+
+CesiumFeatureIdTextureImpl::CesiumFeatureIdTextureImpl(
+    const DotNet::CesiumForUnity::CesiumFeatureIdTexture& featureIdTexture) {}
+
+CesiumFeatureIdTextureImpl::~CesiumFeatureIdTextureImpl() {}
+
 /*static*/ DotNet::CesiumForUnity::CesiumFeatureIdTexture
 CesiumFeatureIdTextureImpl::CreateTexture(
     const CesiumGltf::Model& model,
