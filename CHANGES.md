@@ -1,5 +1,11 @@
 # Change Log
 
+### ? - ?
+
+##### Fixes :wrench:
+
+- Normal, metallic-roughness, and occlusion textures from glTF models will now be correctly treated as linear rather than sRGB.
+
 ### v1.8.0 - 2023-03-01
 
 ##### Breaking Changes :mega:
@@ -24,7 +30,6 @@
 
 ##### Fixes :wrench:
 
-- Normal, Metallic-Roughness, and Occlusion maps will now correctly be treated as linear rather than sRGB textures.
 - Removed the "Universal Additional Camera Data" script from DynamicCamera, as it shows up as a missing script in other render pipelines.
 - Fixed a bug where adding a `CesiumSubScene` as the child of an existing `CesiumGeoreference` in editor would cause the parent `CesiumGeoreference` to have its coordinates reset to the default.
 - Fixed the "DynamicCamera is not nested inside a game object with a CesiumGeoreference" warning when adding a new DynamicCamera in the editor.
