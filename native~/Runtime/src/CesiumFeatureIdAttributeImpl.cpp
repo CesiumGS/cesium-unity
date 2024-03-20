@@ -6,6 +6,12 @@
 using namespace DotNet::CesiumForUnity;
 
 namespace CesiumForUnityNative {
+CesiumFeatureIdAttributeImpl::CesiumFeatureIdAttributeImpl(
+    const DotNet::CesiumForUnity::CesiumFeatureIdAttribute&
+        featureIdAttribute) {}
+
+CesiumFeatureIdAttributeImpl::~CesiumFeatureIdAttributeImpl() {}
+
 /*static*/ DotNet::CesiumForUnity::CesiumFeatureIdAttribute
 CesiumFeatureIdAttributeImpl::CreateAttribute(
     const CesiumGltf::Model& model,
