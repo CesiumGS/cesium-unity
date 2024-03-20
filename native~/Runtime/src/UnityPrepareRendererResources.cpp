@@ -1043,7 +1043,7 @@ void setGltfMaterialParameterValues(
         primitiveInfo.uvIndexMap.find(baseColorTexture->texCoord);
     if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
       UnityEngine::Texture texture =
-          TextureLoader::loadTexture(model, baseColorTexture->index);
+          TextureLoader::loadTexture(model, baseColorTexture->index, true);
       if (texture != nullptr) {
         texture.hideFlags(DotNet::UnityEngine::HideFlags::HideAndDontSave);
         unityMaterial.SetTexture(
@@ -1063,7 +1063,7 @@ void setGltfMaterialParameterValues(
         primitiveInfo.uvIndexMap.find(metallicRoughness->texCoord);
     if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
       UnityEngine::Texture texture =
-          TextureLoader::loadTexture(model, metallicRoughness->index);
+          TextureLoader::loadTexture(model, metallicRoughness->index, false);
       if (texture != nullptr) {
         texture.hideFlags(DotNet::UnityEngine::HideFlags::HideAndDontSave);
         unityMaterial.SetTexture(
@@ -1086,7 +1086,8 @@ void setGltfMaterialParameterValues(
     if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
       UnityEngine::Texture texture = TextureLoader::loadTexture(
           model,
-          gltfMaterial.emissiveTexture->index);
+          gltfMaterial.emissiveTexture->index,
+          true);
       if (texture != nullptr) {
         texture.hideFlags(DotNet::UnityEngine::HideFlags::HideAndDontSave);
         unityMaterial.SetTexture(
@@ -1103,8 +1104,10 @@ void setGltfMaterialParameterValues(
     auto texCoordIndexIt =
         primitiveInfo.uvIndexMap.find(gltfMaterial.normalTexture->texCoord);
     if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
-      UnityEngine::Texture texture =
-          TextureLoader::loadTexture(model, gltfMaterial.normalTexture->index);
+      UnityEngine::Texture texture = TextureLoader::loadTexture(
+          model,
+          gltfMaterial.normalTexture->index,
+          false);
       if (texture != nullptr) {
         texture.hideFlags(DotNet::UnityEngine::HideFlags::HideAndDontSave);
         unityMaterial.SetTexture(
@@ -1126,7 +1129,8 @@ void setGltfMaterialParameterValues(
     if (texCoordIndexIt != primitiveInfo.uvIndexMap.end()) {
       UnityEngine::Texture texture = TextureLoader::loadTexture(
           model,
-          gltfMaterial.occlusionTexture->index);
+          gltfMaterial.occlusionTexture->index,
+          false);
       if (texture != nullptr) {
         texture.hideFlags(DotNet::UnityEngine::HideFlags::HideAndDontSave);
         unityMaterial.SetTexture(
@@ -1696,7 +1700,7 @@ void* UnityPrepareRendererResources::prepareRasterInMainThread(
     CesiumRasterOverlays::RasterOverlayTile& rasterTile,
     void* pLoadThreadResult) {
   auto pTexture = std::make_unique<UnityEngine::Texture>(
-      TextureLoader::loadTexture(rasterTile.getImage()));
+      TextureLoader::loadTexture(rasterTile.getImage(), true));
   pTexture->wrapMode(UnityEngine::TextureWrapMode::Clamp);
   pTexture->filterMode(UnityEngine::FilterMode::Trilinear);
   pTexture->anisoLevel(16);
