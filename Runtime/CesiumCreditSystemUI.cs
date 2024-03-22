@@ -307,12 +307,15 @@ namespace CesiumForUnity
 
         private void SetCredits(List<CesiumCredit> onScreenCredits, List<CesiumCredit> popupCredits)
         {
-            this.SetCreditsOnVisualElements(
-                this._onScreenCredits,
-                onScreenCredits,
-                this._popupCredits,
-                popupCredits,
-                true);
+            if (this._onScreenCredits != null && this._popupCredits != null)
+            {
+                this.SetCreditsOnVisualElements(
+                    this._onScreenCredits,
+                    onScreenCredits,
+                    this._popupCredits,
+                    popupCredits,
+                    true);
+            }
 
 #if UNITY_EDITOR
             ArrayList sceneViews = SceneView.sceneViews;

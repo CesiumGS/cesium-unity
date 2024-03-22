@@ -95,8 +95,16 @@ namespace CesiumForUnity
     [IconAttribute("Packages/com.cesium.unity/Editor/Resources/Cesium-24x24.png")]
     public partial class CesiumCreditSystem : MonoBehaviour
     {
+        private static CesiumCreditSystem _defaultCreditSystem;
+
         private List<CesiumCredit> _onScreenCredits;
         private List<CesiumCredit> _popupCredits;
+        private List<Texture2D> _images;
+        private int _numLoadingImages = 0;
+
+        const string base64Prefix = "data:image/png;base64,";
+        const string defaultName = "CesiumCreditSystemDefault";
+        const string creditSystemPrefabName = "CesiumCreditSystem";
 
         /// <summary>
         /// The current on-screen credits, represented as <see cref="CesiumCredit"/>s.
@@ -114,8 +122,6 @@ namespace CesiumForUnity
         {
             get => this._popupCredits;
         }
-
-        private List<Texture2D> _images;
 
         /// <summary>
         /// The images loaded by this credit system.
@@ -185,11 +191,6 @@ namespace CesiumForUnity
             }
         }
 
-        const string defaultName = "CesiumCreditSystemDefault";
-        const string creditSystemPrefabName = "CesiumCreditSystem";
-
-        private static CesiumCreditSystem _defaultCreditSystem;
-
         /// <summary>
         /// Creates an instance of the default credit system prefab.
         /// </summary>
@@ -236,14 +237,10 @@ namespace CesiumForUnity
             return _defaultCreditSystem;
         }
 
-        private int _numLoadingImages = 0;
-
         internal bool HasLoadingImages()
         {
             return this._numLoadingImages > 0;
         }
-
-        const string base64Prefix = "data:image/png;base64,";
 
         internal IEnumerator LoadImage(string url)
         {
@@ -323,13 +320,13 @@ namespace CesiumForUnity
         }
 
         /// <summary>
-        /// This handles the destruction of the credit system whenever a scene is unloaded at runtime.
+        /// This handles the destruction of the credit system whenever its scene is unloaded at runtime.
         /// </summary>
         /// <param name="scene">The scene being unloaded.</param>
         private void OnSceneUnloaded(Scene scene)
         {
             SceneManager.sceneUnloaded -= this.OnSceneUnloaded;
-            if (this != null && this.gameObject != null)
+            if (this != null && this.gameObject != null && this.gameObject.scene == scene)
                 UnityLifetime.Destroy(this.gameObject);
         }
 
@@ -343,7 +340,7 @@ namespace CesiumForUnity
         /// <param name="removingScene">Whether or not the closing scene is also being removed.</param>
         private static void HandleClosingScene(Scene scene, bool removingScene)
         {
-            if (_defaultCreditSystem != null)
+            if (_defaultCreditSystem != null && _defaultCreditSystem.gameObject.scene == scene)
             {
                 UnityLifetime.Destroy(_defaultCreditSystem.gameObject);
             }
