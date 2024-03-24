@@ -65,16 +65,42 @@ namespace CesiumForUnity
         {
             GUIContent baseUrlContent = new GUIContent(
                 "Base URL",
-                "The base URL of the Web Map Service (WMS)." +
+                "The base URL of the Web Map Tile Service (WMTS)." +
                 "\n\n" +
                 "e.g." +
                 "\n\n" +
-                "https://services.ga.gov.au/gis/services/NM_Culture_and_Infrastructure/MapServer/WMSServer");
+                "https://tile.openstreetmap.org/{TileMatrix}/{TileCol}/{TileRow}.png");
             EditorGUILayout.DelayedTextField(this._baseUrl, baseUrlContent);
+            
+            GUIContent layerContent = new GUIContent(
+                "Layer",
+                "The layer name for WMTS requests.");
+            EditorGUILayout.DelayedTextField(this._layer, layerContent);
+            
+            GUIContent styleContent = new GUIContent(
+                "Style",
+                "The style name for WMTS requests.");
+            EditorGUILayout.DelayedTextField(this._style, styleContent);
+            
+            GUIContent formatContent = new GUIContent(
+                "Format",
+                "The MIME type for images to retrieve from the server.");
+            EditorGUILayout.DelayedTextField(this._format, formatContent);
+            
+            GUIContent tileMatrixSetIDContent = new GUIContent(
+                "Tile Matrix Set ID",
+                "The tile matrix set identifier for WMTS requests.");
+            EditorGUILayout.DelayedTextField(this._tileMatrixSetID, tileMatrixSetIDContent);
+            
+            GUIContent useGeographicProjectionContent = new GUIContent(
+                "Use Geographic Projection",
+                "If true, the overlay will be projected using a geographic projection. " +
+                "If false, the overlay will be projected using a web mercator projection.");
+            EditorGUILayout.PropertyField(this._useGeographicProjection, useGeographicProjectionContent);
 
             GUIContent tileWidthContent = new GUIContent(
                 "Tile Width",
-                "Image width.");
+                "The width of the image tiles in pixels.");
             CesiumInspectorGUI.ClampedIntField(
                 this._tileWidth,
                 64,
@@ -83,7 +109,7 @@ namespace CesiumForUnity
 
             GUIContent tileHeightContent = new GUIContent(
                 "Tile Height",
-                "Image height.");
+                "The height of the image tiles in pixels.");
             CesiumInspectorGUI.ClampedIntField(
                 this._tileHeight,
                 64,
@@ -103,32 +129,6 @@ namespace CesiumForUnity
                 "Maximum Level",
                 "Maximum zoom level.");
             EditorGUILayout.PropertyField(this._maximumLevel, maximumLevelContent);
-            
-            GUIContent formatContent = new GUIContent(
-                "Format",
-                "The MIME type for images to retrieve from the server, default value is \"image/jpeg\".");
-            EditorGUILayout.DelayedTextField(this._format, formatContent);
-            
-            GUIContent styleContent = new GUIContent(
-                "Style",
-                "The style name for WMTS requests, default value is \"default\".");
-            EditorGUILayout.DelayedTextField(this._style, styleContent);
-            
-            GUIContent layerContent = new GUIContent(
-                "Layer",
-                "The layer name for WMTS requests.");
-            EditorGUILayout.DelayedTextField(this._layer, layerContent);
-            
-            GUIContent tileMatrixSetIDContent = new GUIContent(
-                "Tile Matrix Set ID",
-                "The tile matrix set identifier for WMTS requests.");
-            EditorGUILayout.DelayedTextField(this._tileMatrixSetID, tileMatrixSetIDContent);
-            
-            GUIContent useGeographicProjectionContent = new GUIContent(
-                "Use Geographic Projection",
-                "If true, the overlay will be projected using a geographic projection. " +
-                "If false, the overlay will be projected using a web mercator projection.");
-            EditorGUILayout.PropertyField(this._useGeographicProjection, useGeographicProjectionContent);
         }
 
         private void DrawRasterOverlayProperties()

@@ -21,7 +21,7 @@ namespace CesiumForUnity
         /// </summary>
         /// <remarks>
         /// This URL should not include query parameters. For example:
-        /// https://services.ga.gov.au/gis/services/NM_Culture_and_Infrastructure/MapServer/WMTSServer
+        /// https://tile.openstreetmap.org/{TileMatrix}/{TileCol}/{TileRow}.png
         /// </remarks>
         public string baseUrl
         {
@@ -48,7 +48,7 @@ namespace CesiumForUnity
             }
         }
 
-        [SerializeField] private string _style = "default";
+        [SerializeField] private string _style = "";
 
         /// <summary>
         /// The style name for WMTS requests, default value is "default".
@@ -66,7 +66,7 @@ namespace CesiumForUnity
         [SerializeField] private string _format = "image/jpeg";
 
         /// <summary>
-        /// The MIME type for images to retrieve from the server, default value is "image/jpeg".
+        /// The MIME type for images to retrieve from the server. The default value is "image/jpeg".
         /// </summary>
         public string format
         {
@@ -111,7 +111,7 @@ namespace CesiumForUnity
         [SerializeField] private int _minimumLevel = 0;
 
         /// <summary>
-        /// The minimum level-of-detail supported by the imagery provider, default value is 0.
+        /// The minimum level-of-detail supported by the imagery provider.
         /// </summary>
         public int minimumLevel
         {
@@ -126,7 +126,7 @@ namespace CesiumForUnity
         [SerializeField] private int _maximumLevel = 25;
 
         /// <summary>
-        /// The maximum level-of-detail supported by the imagery provider, default value is 25.
+        /// The maximum level-of-detail supported by the imagery provider.
         /// </summary>
         public int maximumLevel
         {
@@ -141,7 +141,7 @@ namespace CesiumForUnity
         [SerializeField] private int _tileWidth = 256;
 
         /// <summary>
-        /// Pixel width of image tiles, default value is 256.
+        /// The pixel width of the image tiles.
         /// </summary>
         public int tileWidth
         {
@@ -156,7 +156,7 @@ namespace CesiumForUnity
         [SerializeField] private int _tileHeight = 256;
 
         /// <summary>
-        /// Pixel height of image tiles, default value is 256.
+        /// The pixel height of the image tiles.
         /// </summary>
         public int tileHeight
         {
