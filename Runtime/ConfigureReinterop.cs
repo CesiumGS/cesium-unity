@@ -331,7 +331,23 @@ namespace CesiumForUnity
             webMapServiceRasterOverlay.tileHeight = webMapServiceRasterOverlay.tileHeight;
             webMapServiceRasterOverlay.minimumLevel = webMapServiceRasterOverlay.minimumLevel;
             webMapServiceRasterOverlay.maximumLevel = webMapServiceRasterOverlay.maximumLevel;
+            
             baseOverlay = webMapServiceRasterOverlay;
+            
+            CesiumWebMapTileServiceRasterOverlay webMapTileServiceRasterOverlay =
+                go.GetComponent<CesiumWebMapTileServiceRasterOverlay>();
+            webMapTileServiceRasterOverlay.baseUrl = webMapTileServiceRasterOverlay.baseUrl;
+            webMapTileServiceRasterOverlay.tileWidth = webMapTileServiceRasterOverlay.tileWidth;
+            webMapTileServiceRasterOverlay.tileHeight = webMapTileServiceRasterOverlay.tileHeight;
+            webMapTileServiceRasterOverlay.minimumLevel = webMapTileServiceRasterOverlay.minimumLevel;
+            webMapTileServiceRasterOverlay.maximumLevel = webMapTileServiceRasterOverlay.maximumLevel;
+            webMapTileServiceRasterOverlay.format = webMapTileServiceRasterOverlay.format;
+            webMapTileServiceRasterOverlay.style = webMapTileServiceRasterOverlay.style;
+            webMapTileServiceRasterOverlay.layer = webMapTileServiceRasterOverlay.layer;
+            webMapTileServiceRasterOverlay.tileMatrixSetID = webMapTileServiceRasterOverlay.tileMatrixSetID;
+            webMapTileServiceRasterOverlay.useGeographicProjection = webMapTileServiceRasterOverlay.useGeographicProjection;
+            
+            baseOverlay = webMapTileServiceRasterOverlay;
 
             CesiumRasterOverlay[] overlaysArray = go.GetComponents<CesiumRasterOverlay>();
             int len = overlaysArray.Length;
