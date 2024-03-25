@@ -16,14 +16,17 @@ namespace CesiumForUnityNative {
 class CesiumWebMapTileServiceRasterOverlayImpl {
 public:
   CesiumWebMapTileServiceRasterOverlayImpl(
-      const DotNet::CesiumForUnity::CesiumWebMapTileServiceRasterOverlay& overlay);
+      const DotNet::CesiumForUnity::CesiumWebMapTileServiceRasterOverlay&
+          overlay);
   ~CesiumWebMapTileServiceRasterOverlayImpl();
 
   void AddToTileset(
-      const ::DotNet::CesiumForUnity::CesiumWebMapTileServiceRasterOverlay& overlay,
+      const ::DotNet::CesiumForUnity::CesiumWebMapTileServiceRasterOverlay&
+          overlay,
       const ::DotNet::CesiumForUnity::Cesium3DTileset& tileset);
   void RemoveFromTileset(
-      const ::DotNet::CesiumForUnity::CesiumWebMapTileServiceRasterOverlay& overlay,
+      const ::DotNet::CesiumForUnity::CesiumWebMapTileServiceRasterOverlay&
+          overlay,
       const ::DotNet::CesiumForUnity::Cesium3DTileset& tileset);
 
 private:

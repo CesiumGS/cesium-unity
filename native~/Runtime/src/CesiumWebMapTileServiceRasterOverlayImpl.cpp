@@ -17,14 +17,18 @@ using namespace DotNet;
 
 namespace CesiumForUnityNative {
 
-CesiumWebMapTileServiceRasterOverlayImpl::CesiumWebMapTileServiceRasterOverlayImpl(
-    const DotNet::CesiumForUnity::CesiumWebMapTileServiceRasterOverlay& overlay)
+CesiumWebMapTileServiceRasterOverlayImpl::
+    CesiumWebMapTileServiceRasterOverlayImpl(
+        const DotNet::CesiumForUnity::CesiumWebMapTileServiceRasterOverlay&
+            overlay)
     : _pOverlay(nullptr) {}
 
-CesiumWebMapTileServiceRasterOverlayImpl::~CesiumWebMapTileServiceRasterOverlayImpl() {}
+CesiumWebMapTileServiceRasterOverlayImpl::
+    ~CesiumWebMapTileServiceRasterOverlayImpl() {}
 
 void CesiumWebMapTileServiceRasterOverlayImpl::AddToTileset(
-    const ::DotNet::CesiumForUnity::CesiumWebMapTileServiceRasterOverlay& overlay,
+    const ::DotNet::CesiumForUnity::CesiumWebMapTileServiceRasterOverlay&
+        overlay,
     const ::DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
   if (this->_pOverlay != nullptr) {
     // Overlay already added.
@@ -72,7 +76,8 @@ void CesiumWebMapTileServiceRasterOverlayImpl::AddToTileset(
 }
 
 void CesiumWebMapTileServiceRasterOverlayImpl::RemoveFromTileset(
-    const ::DotNet::CesiumForUnity::CesiumWebMapTileServiceRasterOverlay& overlay,
+    const ::DotNet::CesiumForUnity::CesiumWebMapTileServiceRasterOverlay&
+        overlay,
     const ::DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
   if (this->_pOverlay == nullptr)
     return;
