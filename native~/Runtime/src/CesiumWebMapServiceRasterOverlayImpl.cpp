@@ -46,6 +46,7 @@ void CesiumWebMapServiceRasterOverlayImpl::AddToTileset(
     wmsOptions.minimumLevel = overlay.minimumLevel();
     wmsOptions.maximumLevel = overlay.maximumLevel();
   }
+
   wmsOptions.layers = overlay.layers().ToStlString();
   wmsOptions.tileWidth = overlay.tileWidth();
   wmsOptions.tileHeight = overlay.tileHeight();

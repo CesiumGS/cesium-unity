@@ -133,7 +133,7 @@ namespace CesiumForUnity
             get => this._latitude;
             set
             {
-                this._latitude = value;
+                this._latitude = Math.Clamp(value, -90, 90);
                 this.originAuthority = CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight;
             }
         }
@@ -149,7 +149,7 @@ namespace CesiumForUnity
             get => this._longitude;
             set
             {
-                this._longitude = value;
+                this._longitude = Math.Clamp(value, -180, 180);
                 this.originAuthority = CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight;
             }
         }
