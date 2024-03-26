@@ -2,6 +2,10 @@
 
 ### ? - ?
 
+##### Additions :tada:
+
+- Added `CesiumWebMapTileServiceRasterOverlay`, which enables Web Map Tile Service (WMTS) imagery to be draped on a `Cesium3DTileset`.
+
 ##### Fixes :wrench:
 
 - Normal, metallic-roughness, and occlusion textures from glTF models will now be correctly treated as linear rather than sRGB.
