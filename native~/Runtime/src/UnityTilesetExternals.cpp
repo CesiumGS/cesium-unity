@@ -14,8 +14,6 @@
 #include <DotNet/System/String.h>
 #include <DotNet/UnityEngine/Application.h>
 
-#include <memory>
-
 using namespace CesiumUtility;
 using namespace Cesium3DTilesSelection;
 using namespace CesiumAsync;
@@ -29,27 +27,6 @@ std::shared_ptr<IAssetAccessor> pAccessor = nullptr;
 std::shared_ptr<ITaskProcessor> pTaskProcessor = nullptr;
 std::shared_ptr<CreditSystem> pCreditSystem = nullptr;
 std::optional<AsyncSystem> asyncSystem;
-
-const std::shared_ptr<CreditSystem>&
-getCreditSystem(const CesiumForUnity::Cesium3DTileset& tileset) {
-  // Get the credit system associated with the tileset.
-  Cesium3DTilesetImpl& tilesetImpl = tileset.NativeImplementation();
-  CesiumForUnity::CesiumCreditSystem creditSystem =
-      tilesetImpl.getCreditSystem();
-
-  // If the tileset does not already reference a credit system,
-  // get the default one.
-  if (creditSystem == nullptr) {
-    creditSystem = CesiumForUnity::CesiumCreditSystem::GetDefaultCreditSystem();
-    tilesetImpl.setCreditSystem(creditSystem);
-  }
-
-  CesiumCreditSystemImpl& creditSystemImpl =
-      creditSystem.NativeImplementation();
-  pCreditSystem = creditSystemImpl.getExternalCreditSystem();
-
-  return pCreditSystem;
-}
 
 } // namespace
 
@@ -90,13 +67,36 @@ AsyncSystem getAsyncSystem() {
   return *asyncSystem;
 }
 
+const std::shared_ptr<CreditSystem>&
+getOrCreateCreditSystem(const CesiumForUnity::Cesium3DTileset& tileset) {
+  // First, get the existing credit system associated with the tileset.
+  // (This happens when the existing tileset is recreated.)
+  Cesium3DTilesetImpl& tilesetImpl = tileset.NativeImplementation();
+  CesiumForUnity::CesiumCreditSystem creditSystem =
+      tilesetImpl.getCreditSystem();
+
+  // If the tileset does not reference a credit system, get the default one.
+  if (creditSystem == nullptr) {
+    creditSystem = CesiumForUnity::CesiumCreditSystem::GetDefaultCreditSystem();
+    // This is necessary for the tileset to track the Unity credit system's
+    // lifetime.
+    tilesetImpl.setCreditSystem(creditSystem);
+  }
+
+  CesiumCreditSystemImpl& creditSystemImpl =
+      creditSystem.NativeImplementation();
+  pCreditSystem = creditSystemImpl.getNativeCreditSystem();
+
+  return pCreditSystem;
+}
+
 Cesium3DTilesSelection::TilesetExternals
 createTilesetExternals(const CesiumForUnity::Cesium3DTileset& tileset) {
   return TilesetExternals{
       getAssetAccessor(),
       std::make_shared<UnityPrepareRendererResources>(tileset.gameObject()),
       AsyncSystem(getTaskProcessor()),
-      getCreditSystem(tileset),
+      getOrCreateCreditSystem(tileset),
       spdlog::default_logger()};
 }
 

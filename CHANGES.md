@@ -5,6 +5,7 @@
 ##### Fixes :wrench:
 
 - Normal, metallic-roughness, and occlusion textures from glTF models will now be correctly treated as linear rather than sRGB.
+- Fixed a bug where `CesiumCreditSystem` would delete itself from its scene when other additive scenes were unloaded.
 
 ### v1.8.0 - 2023-03-01
 
