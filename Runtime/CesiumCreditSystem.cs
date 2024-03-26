@@ -105,6 +105,7 @@ namespace CesiumForUnity
         const string defaultName = "CesiumCreditSystemDefault";
         const string creditSystemPrefabName = "CesiumCreditSystem";
 
+        #region Fields and Events
         /// <summary>
         /// The current on-screen credits, represented as <see cref="CesiumCredit"/>s.
         /// </summary>
@@ -147,6 +148,9 @@ namespace CesiumForUnity
         /// until all image loads are complete.
         /// </remarks>
         internal event CreditsUpdateDelegate OnCreditsUpdate;
+        #endregion
+
+        #region Unity Messages
 
         private void OnEnable()
         {
@@ -155,9 +159,8 @@ namespace CesiumForUnity
             this._images = new List<Texture2D>();
 
             Cesium3DTileset.OnSetShowCreditsOnScreen += this.ForceUpdateCredits;
-            SceneManager.sceneUnloaded += this.OnSceneUnloaded;
 #if UNITY_EDITOR
-            EditorSceneManager.sceneClosing += HandleClosingScene;
+            EditorSceneManager.sceneClosing += HandleClosingSceneView;
 #endif
         }
 
@@ -165,6 +168,36 @@ namespace CesiumForUnity
         {
             this.UpdateCredits(false);
         }
+
+        private void OnDestroy()
+        {
+            Cesium3DTileset.OnSetShowCreditsOnScreen -= this.ForceUpdateCredits;
+
+            for (int i = 0, count = this._images.Count; i < count; i++)
+            {
+                if (this._images != null)
+                {
+                    UnityLifetime.Destroy(this._images[i]);
+                }
+            }
+
+            this._images.Clear();
+
+            if (_defaultCreditSystem == this)
+            {
+                _defaultCreditSystem = null;
+            }
+        }
+
+        /// <summary>
+        /// This handles the destruction of the credit system whenever the application is quit
+        /// from a built executable or from play mode.
+        /// </summary>
+        private void OnApplicationQuit()
+        {
+            UnityLifetime.Destroy(this.gameObject);
+        }
+        #endregion
 
         /// <summary>
         /// Forces the credits to update, bypassing any performance optimizations in play.
@@ -289,45 +322,6 @@ namespace CesiumForUnity
             texture.wrapMode = TextureWrapMode.Clamp;
         }
 
-        private void OnDestroy()
-        {
-            Cesium3DTileset.OnSetShowCreditsOnScreen -= this.ForceUpdateCredits;
-
-            for (int i = 0, count = this._images.Count; i < count; i++)
-            {
-                if (this._images != null)
-                {
-                    UnityLifetime.Destroy(this._images[i]);
-                }
-            }
-
-            this._images.Clear();
-
-            if (_defaultCreditSystem == this)
-            {
-                _defaultCreditSystem = null;
-            }
-        }
-
-        /// <summary>
-        /// This handles the destruction of the credit system whenever the application is quit
-        /// from a built executable or from play mode.
-        /// </summary>
-        private void OnApplicationQuit()
-        {
-            UnityLifetime.Destroy(this.gameObject);
-        }
-
-        /// <summary>
-        /// This handles the destruction of the credit system whenever its scene is unloaded at runtime.
-        /// </summary>
-        /// <param name="scene">The scene being unloaded.</param>
-        private void OnSceneUnloaded(Scene scene)
-        {
-            SceneManager.sceneUnloaded -= this.OnSceneUnloaded;
-            if (this != null && this.gameObject != null && this.gameObject.scene == scene)
-                UnityLifetime.Destroy(this.gameObject);
-        }
 
 #if UNITY_EDITOR
         /// <summary>
@@ -337,7 +331,7 @@ namespace CesiumForUnity
         /// </summary>
         /// <param name="scene">The scene.</param>
         /// <param name="removingScene">Whether or not the closing scene is also being removed.</param>
-        private static void HandleClosingScene(Scene scene, bool removingScene)
+        private static void HandleClosingSceneView(Scene scene, bool removingScene)
         {
             if (_defaultCreditSystem != null && _defaultCreditSystem.gameObject.scene == scene)
             {

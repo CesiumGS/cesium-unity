@@ -71,32 +71,32 @@ void CesiumCreditSystemImpl::UpdateCredits(
       const CesiumUtility::Credit& credit = creditsToShowThisFrame[i];
 
       DotNet::CesiumForUnity::CesiumCredit unityCredit;
-      const std::string& html = _pCreditSystem->getHtml(credit);
+      const std::string& html = this->_pCreditSystem->getHtml(credit);
 
-      auto htmlFind = _htmlToUnityCredit.find(html);
-      if (htmlFind != _htmlToUnityCredit.end()) {
+      auto htmlFind = this->_htmlToUnityCredit.find(html);
+      if (htmlFind != this->_htmlToUnityCredit.end()) {
         unityCredit = htmlFind->second;
       } else {
         unityCredit = convertHtmlToUnityCredit(html, creditSystem);
-        _htmlToUnityCredit.insert({html, unityCredit});
+        this->_htmlToUnityCredit.insert({html, unityCredit});
       }
 
       if (unityCredit.components().Count() == 0) {
         continue;
       }
 
-      if (_pCreditSystem->shouldBeShownOnScreen(credit)) {
+      if (this->_pCreditSystem->shouldBeShownOnScreen(credit)) {
         onScreenCredits.Add(unityCredit);
       } else {
         popupCredits.Add(unityCredit);
       }
     }
 
-    _creditsUpdated = true;
-    _lastCreditsCount = creditsCount;
+    this->_creditsUpdated = true;
+    this->_lastCreditsCount = creditsCount;
   }
 
-  _pCreditSystem->startNextFrame();
+  this->_pCreditSystem->startNextFrame();
 }
 
 namespace {
@@ -211,8 +211,8 @@ CesiumCreditSystemImpl::convertHtmlToUnityCredit(
 }
 
 const std::shared_ptr<CesiumUtility::CreditSystem>&
-CesiumCreditSystemImpl::getExternalCreditSystem() const {
-  return _pCreditSystem;
+CesiumCreditSystemImpl::getNativeCreditSystem() const {
+  return this->_pCreditSystem;
 }
 
 } // namespace CesiumForUnityNative
