@@ -8,6 +8,7 @@
 
 ##### Fixes :wrench:
 
+- Normal, metallic-roughness, and occlusion textures from glTF models will now be correctly treated as linear rather than sRGB.
 - Fixed a bug where UVs were not properly interpolated in `CesiumFeatureIdTexture.GetFeatureIdFromHit`, resulting in incorrect values.
 
 ### v1.8.0 - 2023-03-01
