@@ -344,12 +344,14 @@ void loadPrimitive(
       Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
           GetUnsafeBufferPointerWithoutChecks(dest));
 
-  if (primitive.mode == MeshPrimitive::Mode::TRIANGLES ||
-      primitive.mode == MeshPrimitive::Mode::POINTS) {
+  switch (primitive.mode) {
+  case MeshPrimitive::Mode::TRIANGLES:
+  case MeshPrimitive::Mode::POINTS:
     for (int64_t i = 0; i < indicesView.size(); ++i) {
       indices[i] = indicesView[i];
     }
-  } else if (primitive.mode == MeshPrimitive::Mode::TRIANGLE_STRIP) {
+    break;
+  case MeshPrimitive::Mode::TRIANGLE_STRIP:
     for (int64_t i = 0; i < indicesView.size() - 2; ++i) {
       if (i % 2) {
         indices[3 * i] = indicesView[i];
@@ -361,13 +363,15 @@ void loadPrimitive(
         indices[3 * i + 2] = indicesView[i + 2];
       }
     }
-  } else { // MeshPrimitive::Mode::TRIANGLE_FAN
-    TIndex i0 = indicesView[0];
+    break;
+  case MeshPrimitive::Mode::TRIANGLE_FAN:
+  default:
     for (int64_t i = 2; i < indicesView.size(); ++i) {
-      indices[3 * i] = i0;
+      indices[3 * i] = indicesView[0];
       indices[3 * i + 1] = indicesView[i - 1];
       indices[3 * i + 2] = indicesView[i];
     }
+    break;
   }
 
   // Max attribute count supported by Unity, see VertexAttribute.
