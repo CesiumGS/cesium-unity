@@ -333,6 +333,31 @@ namespace CesiumForUnity
             webMapServiceRasterOverlay.maximumLevel = webMapServiceRasterOverlay.maximumLevel;
             baseOverlay = webMapServiceRasterOverlay;
 
+            CesiumWebMapTileServiceRasterOverlay webMapTileServiceRasterOverlay =
+                go.GetComponent<CesiumWebMapTileServiceRasterOverlay>();
+            webMapTileServiceRasterOverlay.baseUrl = webMapTileServiceRasterOverlay.baseUrl;
+            webMapTileServiceRasterOverlay.layer = webMapTileServiceRasterOverlay.layer;
+            webMapTileServiceRasterOverlay.style = webMapTileServiceRasterOverlay.style;
+            webMapTileServiceRasterOverlay.format = webMapTileServiceRasterOverlay.format;
+            webMapTileServiceRasterOverlay.tileMatrixSetID = webMapTileServiceRasterOverlay.tileMatrixSetID;
+            webMapTileServiceRasterOverlay.tileMatrixSetLabelPrefix = webMapTileServiceRasterOverlay.tileMatrixSetLabelPrefix;
+            webMapTileServiceRasterOverlay.specifyTileMatrixSetLabels = webMapTileServiceRasterOverlay.specifyTileMatrixSetLabels;
+            webMapTileServiceRasterOverlay.tileMatrixSetLabels = webMapTileServiceRasterOverlay.tileMatrixSetLabels;
+            webMapTileServiceRasterOverlay.projection = webMapTileServiceRasterOverlay.projection;
+            webMapTileServiceRasterOverlay.specifyTilingScheme = webMapTileServiceRasterOverlay.specifyTilingScheme;
+            webMapTileServiceRasterOverlay.rootTilesX = webMapTileServiceRasterOverlay.rootTilesX;
+            webMapTileServiceRasterOverlay.rootTilesY = webMapTileServiceRasterOverlay.rootTilesY;
+            webMapTileServiceRasterOverlay.rectangleEast = webMapTileServiceRasterOverlay.rectangleEast;
+            webMapTileServiceRasterOverlay.rectangleSouth = webMapTileServiceRasterOverlay.rectangleSouth;
+            webMapTileServiceRasterOverlay.rectangleWest = webMapTileServiceRasterOverlay.rectangleWest;
+            webMapTileServiceRasterOverlay.rectangleNorth = webMapTileServiceRasterOverlay.rectangleNorth;
+            webMapTileServiceRasterOverlay.specifyZoomLevels = webMapTileServiceRasterOverlay.specifyZoomLevels;
+            webMapTileServiceRasterOverlay.minimumLevel = webMapTileServiceRasterOverlay.minimumLevel;
+            webMapTileServiceRasterOverlay.maximumLevel = webMapTileServiceRasterOverlay.maximumLevel;
+            webMapTileServiceRasterOverlay.tileWidth = webMapTileServiceRasterOverlay.tileWidth;
+            webMapTileServiceRasterOverlay.tileHeight = webMapTileServiceRasterOverlay.tileHeight;
+            baseOverlay = webMapTileServiceRasterOverlay;
+
             CesiumRasterOverlay[] overlaysArray = go.GetComponents<CesiumRasterOverlay>();
             int len = overlaysArray.Length;
             overlay = overlaysArray[0];
@@ -452,10 +477,12 @@ namespace CesiumForUnity
             List<string> stringList = new List<string>();
             stringList.Add("item");
             stringList.Clear();
+            count = stringList.Count;
 
             string test = string.Concat("string", "string2");
             string[] stringArray = stringList.ToArray();
             test = stringArray[0];
+            test = stringList[0];
             test = string.Join(" ", stringArray);
             string.IsNullOrEmpty("value");
             string.IsNullOrWhiteSpace("value");
@@ -776,10 +803,13 @@ namespace CesiumForUnity
             property.valueType = property.valueType;
 
             RaycastHit hitInfo = new RaycastHit();
+            primitiveFeatures = hitInfo.transform.GetComponent<CesiumPrimitiveFeatures>();
             int triangleIndex = hitInfo.triangleIndex;
-            Vector3 coordinate = hitInfo.barycentricCoordinate;
+            Vector3 hitPoint = hitInfo.point;
+            
             Vector2 textureCoordinate = new Vector2();
             textureCoordinate.x = textureCoordinate.y;
+            hitPoint = m2.MultiplyPoint3x4(hitPoint);
 
             CesiumIonServer server = CesiumIonServer.defaultServer;
             server.serverUrl = "";
