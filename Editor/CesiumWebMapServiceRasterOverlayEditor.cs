@@ -6,7 +6,6 @@ namespace CesiumForUnity
     [CustomEditor(typeof(CesiumWebMapServiceRasterOverlay))]
     public class CesiumWebMapServiceRasterOverlayEditor : Editor
     {
-        private CesiumWebMapServiceRasterOverlay _webMapServiceOverlay;
         private CesiumRasterOverlayEditor _rasterOverlayEditor;
 
         private SerializedProperty _baseUrl;
@@ -18,8 +17,6 @@ namespace CesiumForUnity
 
         private void OnEnable()
         {
-            this._webMapServiceOverlay =
-                (CesiumWebMapServiceRasterOverlay)this.target;
             this._rasterOverlayEditor =
                 (CesiumRasterOverlayEditor)Editor.CreateEditor(
                                                      this.target,
