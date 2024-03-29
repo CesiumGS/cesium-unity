@@ -337,6 +337,7 @@ void CesiumIonSessionImpl::Disconnect(
   this->_assets.reset();
   this->_tokens.reset();
   this->_defaults.reset();
+  this->_appData.reset();
 
   CesiumForUnity::CesiumIonServer server = session.server();
   CesiumForUnity::CesiumIonServerManager::instance().SetUserAccessToken(
