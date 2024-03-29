@@ -4,6 +4,7 @@
 
 ##### Additions :tada:
 
+- Added `CesiumWebMapTileServiceRasterOverlay`, which enables Web Map Tile Service (WMTS) imagery to be draped on a `Cesium3DTileset`.
 - Added support for the `KHR_texture_transform` glTF extension - including rotation - for picking with `CesiumFeatureIdTexture`.
 
 ##### Fixes :wrench:
