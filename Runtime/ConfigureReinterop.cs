@@ -803,10 +803,13 @@ namespace CesiumForUnity
             property.valueType = property.valueType;
 
             RaycastHit hitInfo = new RaycastHit();
+            primitiveFeatures = hitInfo.transform.GetComponent<CesiumPrimitiveFeatures>();
             int triangleIndex = hitInfo.triangleIndex;
-            Vector3 coordinate = hitInfo.barycentricCoordinate;
+            Vector3 hitPoint = hitInfo.point;
+            
             Vector2 textureCoordinate = new Vector2();
             textureCoordinate.x = textureCoordinate.y;
+            hitPoint = m2.MultiplyPoint3x4(hitPoint);
 
             CesiumIonServer server = CesiumIonServer.defaultServer;
             server.serverUrl = "";
