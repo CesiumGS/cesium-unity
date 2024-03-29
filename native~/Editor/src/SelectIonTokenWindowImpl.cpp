@@ -61,8 +61,9 @@ SelectIonTokenWindowImpl::SelectTokenIfNecessary(
       CesiumForUnity::CesiumIonServerManager::instance().GetSession(server);
   return session.NativeImplementation()
       .getProjectDefaultTokenDetails(session)
-      .thenInMainThread([server](const CesiumIonClient::Token& token) {
-        if (token.token.empty()) {
+      .thenInMainThread([server, session](const CesiumIonClient::Token& token) {
+        if (token.token.empty() &&
+            session.NativeImplementation().IsAuthenticationRequired(session)) {
           return SelectNewToken(server).thenImmediately(
               [](const std::optional<CesiumIonClient::Token>& maybeToken) {
                 return maybeToken;

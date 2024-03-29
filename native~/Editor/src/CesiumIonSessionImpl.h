@@ -60,6 +60,8 @@ public:
   IsDefaultsLoaded(const DotNet::CesiumForUnity::CesiumIonSession& session);
   bool
   IsLoadingDefaults(const DotNet::CesiumForUnity::CesiumIonSession& session);
+  bool IsAuthenticationRequired(
+      const DotNet::CesiumForUnity::CesiumIonSession& session);
 
   void Connect(const DotNet::CesiumForUnity::CesiumIonSession& session);
   void Resume(const DotNet::CesiumForUnity::CesiumIonSession& session);
@@ -105,6 +107,7 @@ public:
   const CesiumIonClient::Profile& getProfile();
   const CesiumIonClient::Assets& getAssets();
   const std::vector<CesiumIonClient::Token>& getTokens();
+  const CesiumIonClient::ApplicationData& getAppData();
   const CesiumIonClient::Defaults& getDefaults();
 
   const std::shared_ptr<CesiumAsync::IAssetAccessor>& getAssetAccessor() const;
@@ -117,6 +120,7 @@ private:
   CesiumAsync::AsyncSystem _asyncSystem;
   std::shared_ptr<CesiumAsync::IAssetAccessor> _pAssetAccessor;
 
+  std::optional<CesiumIonClient::ApplicationData> _appData;
   std::optional<CesiumIonClient::Connection> _connection;
   std::optional<CesiumIonClient::Profile> _profile;
   std::optional<CesiumIonClient::Assets> _assets;
