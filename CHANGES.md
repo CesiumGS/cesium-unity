@@ -1,6 +1,6 @@
 # Change Log
 
-### ? - ?
+### v1.9.0 - 2024-04-01
 
 ##### Additions :tada:
 
@@ -12,7 +12,9 @@
 - Normal, metallic-roughness, and occlusion textures from glTF models will now be correctly treated as linear rather than sRGB.
 - Fixed a bug where UVs were not properly interpolated in `CesiumFeatureIdTexture.GetFeatureIdFromHit`, resulting in incorrect values.
 
-### v1.8.0 - 2023-03-01
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.33.0 to v0.34.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
+
+### v1.8.0 - 2024-03-01
 
 ##### Breaking Changes :mega:
 
