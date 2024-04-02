@@ -50,7 +50,18 @@ public:
   Cesium3DTilesSelection::Tileset* getTileset();
   const Cesium3DTilesSelection::Tileset* getTileset() const;
 
+  /**
+   * Gets the Unity credit system for this tileset to pass credits to.
+   */
   const DotNet::CesiumForUnity::CesiumCreditSystem& getCreditSystem() const;
+  /**
+   * Sets the Unity credit system for this tileset to pass credits to.
+   * This is done when a new credit system is created in Unity.
+   *
+   * This is necessary to keep track of the Unity credit system's lifetime. If
+   * the credit system in Unity is destroyed, then the native one should update
+   * accordingly.
+   */
   void setCreditSystem(
       const DotNet::CesiumForUnity::CesiumCreditSystem& creditSystem);
 

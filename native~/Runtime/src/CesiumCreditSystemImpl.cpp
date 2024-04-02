@@ -39,26 +39,26 @@ CesiumCreditSystemImpl::~CesiumCreditSystemImpl() {}
 void CesiumCreditSystemImpl::UpdateCredits(
     const CesiumForUnity::CesiumCreditSystem& creditSystem,
     bool forceUpdate) {
-  if (!_pCreditSystem) {
+  if (!this->_pCreditSystem) {
     return;
   }
 
   // If the credits were updated in a previous frame, the update will not get
   // broadcasted until all of the images are fully loaded. Broadcast the
   // previous update first before handling the next one.
-  if (_creditsUpdated && !creditSystem.HasLoadingImages()) {
+  if (this->_creditsUpdated && !creditSystem.HasLoadingImages()) {
     creditSystem.BroadcastCreditsUpdate();
-    _creditsUpdated = false;
+    this->_creditsUpdated = false;
   }
 
   const std::vector<CesiumUtility::Credit>& creditsToShowThisFrame =
-      _pCreditSystem->getCreditsToShowThisFrame();
+      this->_pCreditSystem->getCreditsToShowThisFrame();
   size_t creditsCount = creditsToShowThisFrame.size();
-  _creditsUpdated =
-      forceUpdate || creditsCount != _lastCreditsCount ||
-      _pCreditSystem->getCreditsToNoLongerShowThisFrame().size() > 0;
+  this->_creditsUpdated =
+      forceUpdate || creditsCount != this->_lastCreditsCount ||
+      this->_pCreditSystem->getCreditsToNoLongerShowThisFrame().size() > 0;
 
-  if (_creditsUpdated) {
+  if (this->_creditsUpdated) {
     List1<CesiumForUnity::CesiumCredit> popupCredits =
         creditSystem.popupCredits();
     List1<CesiumForUnity::CesiumCredit> onScreenCredits =
@@ -71,32 +71,32 @@ void CesiumCreditSystemImpl::UpdateCredits(
       const CesiumUtility::Credit& credit = creditsToShowThisFrame[i];
 
       DotNet::CesiumForUnity::CesiumCredit unityCredit;
-      const std::string& html = _pCreditSystem->getHtml(credit);
+      const std::string& html = this->_pCreditSystem->getHtml(credit);
 
-      auto htmlFind = _htmlToUnityCredit.find(html);
-      if (htmlFind != _htmlToUnityCredit.end()) {
+      auto htmlFind = this->_htmlToUnityCredit.find(html);
+      if (htmlFind != this->_htmlToUnityCredit.end()) {
         unityCredit = htmlFind->second;
       } else {
         unityCredit = convertHtmlToUnityCredit(html, creditSystem);
-        _htmlToUnityCredit.insert({html, unityCredit});
+        this->_htmlToUnityCredit.insert({html, unityCredit});
       }
 
       if (unityCredit.components().Count() == 0) {
         continue;
       }
 
-      if (_pCreditSystem->shouldBeShownOnScreen(credit)) {
+      if (this->_pCreditSystem->shouldBeShownOnScreen(credit)) {
         onScreenCredits.Add(unityCredit);
       } else {
         popupCredits.Add(unityCredit);
       }
     }
 
-    _creditsUpdated = true;
-    _lastCreditsCount = creditsCount;
+    this->_creditsUpdated = true;
+    this->_lastCreditsCount = creditsCount;
   }
 
-  _pCreditSystem->startNextFrame();
+  this->_pCreditSystem->startNextFrame();
 }
 
 namespace {
@@ -211,8 +211,8 @@ CesiumCreditSystemImpl::convertHtmlToUnityCredit(
 }
 
 const std::shared_ptr<CesiumUtility::CreditSystem>&
-CesiumCreditSystemImpl::getExternalCreditSystem() const {
-  return _pCreditSystem;
+CesiumCreditSystemImpl::getNativeCreditSystem() const {
+  return this->_pCreditSystem;
 }
 
 } // namespace CesiumForUnityNative

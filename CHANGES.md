@@ -10,6 +10,7 @@
 ##### Fixes :wrench:
 
 - Normal, metallic-roughness, and occlusion textures from glTF models will now be correctly treated as linear rather than sRGB.
+- Fixed a bug where `CesiumCreditSystem` would delete itself from its scene when other additive scenes were unloaded.
 - Fixed a bug where UVs were not properly interpolated in `CesiumFeatureIdTexture.GetFeatureIdFromHit`, resulting in incorrect values.
 
 In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.33.0 to v0.34.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
