@@ -299,6 +299,12 @@ void CesiumIonSessionImpl::Resume(
     return;
   }
 
+  if (!this->_appData.has_value()) {
+    // _appData is filled in by Connect - if we're missing it, we don't have a
+    // valid session to resume.
+    return;
+  }
+
   this->_isResuming = true;
 
   std::shared_ptr<CesiumIonClient::Connection> pConnection =
@@ -712,10 +718,8 @@ const std::vector<CesiumIonClient::Token>& CesiumIonSessionImpl::getTokens() {
 }
 
 const CesiumIonClient::ApplicationData& CesiumIonSessionImpl::getAppData() {
-  if (this->_appData) {
-    return *this->_appData;
-  }
-  return CesiumIonClient::ApplicationData();
+  static const CesiumIonClient::ApplicationData empty;
+  return this->_appData.value_or(empty);
 }
 
 const CesiumIonClient::Defaults& CesiumIonSessionImpl::getDefaults() {
