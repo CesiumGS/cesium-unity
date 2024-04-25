@@ -117,6 +117,15 @@ public:
 private:
   void startQueuedLoads();
 
+  /**
+   * If the {@link _appData} field has no value, this method will request the
+   * ion server's /appData endpoint to obtain its data.
+   * @returns A future that resolves to true if _appData is present or false if
+   * it couldn't be fetched.
+   */
+  CesiumAsync::Future<bool>
+  ensureAppDataLoaded(const DotNet::CesiumForUnity::CesiumIonSession& session);
+
   CesiumAsync::AsyncSystem _asyncSystem;
   std::shared_ptr<CesiumAsync::IAssetAccessor> _pAssetAccessor;
 
