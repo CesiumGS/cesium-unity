@@ -282,29 +282,41 @@ void CesiumIonSessionImpl::Resume(
 
   this->_isResuming = true;
 
-  std::shared_ptr<CesiumIonClient::Connection> pConnection =
-      std::make_shared<CesiumIonClient::Connection>(
-          this->_asyncSystem,
-          this->_pAssetAccessor,
-          userAccessToken.ToStlString(),
-          this->_appData.value(),
-          server.apiUrl().ToStlString());
-
   // Verify that the connection actually works.
-  pConnection->me()
-      .thenInMainThread(
-          [this, pConnection](
-              CesiumIonClient::Response<CesiumIonClient::Profile>&& response) {
-            logResponseErrors(response);
-            if (response.value.has_value()) {
-              this->_connection = std::move(*pConnection);
-            }
-            this->_isResuming = false;
-            this->_quickAddItems = nullptr;
-            this->broadcastConnectionUpdate();
+  this->ensureAppDataLoaded(session)
+      .thenInMainThread([this, userAccessToken, server](bool loadedAppData) {
+        if (!loadedAppData || !this->_appData.has_value()) {
+          CesiumAsync::Promise<void> promise =
+              this->_asyncSystem.createPromise<void>();
 
-            this->startQueuedLoads();
-          })
+          promise.reject(std::runtime_error(
+              "Failed to obtain _appData, can't resume connection"));
+          return promise.getFuture();
+        }
+
+        std::shared_ptr<CesiumIonClient::Connection> pConnection =
+            std::make_shared<CesiumIonClient::Connection>(
+                this->_asyncSystem,
+                this->_pAssetAccessor,
+                userAccessToken.ToStlString(),
+                this->_appData.value(),
+                server.apiUrl().ToStlString());
+
+        return pConnection->me().thenInMainThread(
+            [this,
+             pConnection](CesiumIonClient::Response<CesiumIonClient::Profile>&&
+                              response) {
+              logResponseErrors(response);
+              if (response.value.has_value()) {
+                this->_connection = std::move(*pConnection);
+              }
+              this->_isResuming = false;
+              this->_quickAddItems = nullptr;
+              this->broadcastConnectionUpdate();
+
+              this->startQueuedLoads();
+            });
+      })
       .catchInMainThread([this](std::exception&& e) {
         logResponseErrors(e);
         this->_isResuming = false;
@@ -693,7 +705,7 @@ const std::vector<CesiumIonClient::Token>& CesiumIonSessionImpl::getTokens() {
 }
 
 const CesiumIonClient::ApplicationData& CesiumIonSessionImpl::getAppData() {
-  static const CesiumIonClient::ApplicationData empty;
+  static const CesiumIonClient::ApplicationData empty{};
   return this->_appData.value_or(empty);
 }
 
