@@ -153,7 +153,7 @@ namespace CesiumForUnity
             this.DrawToolbarButton(
                 "Token",
                 ToolbarButton.Token,
-                this._isAuthenticationRequired ? "Select or create a token to use to access Cesium ion assets" : "Authentication tokens are disabled when connected to an ion server running in single-user mode.",
+                this._isAuthenticationRequired ? "Select or create a token to use to access Cesium ion assets" : "Tokens are disabled for Cesium ion servers running in single-user mode.",
                 false,
                 this.SetToken);
             EditorGUI.EndDisabledGroup();
