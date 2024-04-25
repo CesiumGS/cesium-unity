@@ -1,5 +1,11 @@
 # Change Log
 
+### ? - ?
+
+##### Fixes :wrench:
+
+- Fixed a bug where `CesiumCreditSystem` would delete itself from its scene when other additive scenes were unloaded.
+
 ### v1.9.0 - 2024-04-01
 
 ##### Additions :tada:

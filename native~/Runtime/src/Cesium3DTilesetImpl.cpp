@@ -108,6 +108,10 @@ void Cesium3DTilesetImpl::Update(
   }
 
 #endif
+  if (this->_creditSystem == nullptr) {
+    // Refresh the tileset so it creates and uses a new credit system.
+    this->DestroyTileset(tileset);
+  }
 
   if (!this->_pTileset) {
     this->LoadTileset(tileset);

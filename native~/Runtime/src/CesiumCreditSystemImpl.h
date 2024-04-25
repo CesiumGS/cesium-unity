@@ -32,7 +32,7 @@ public:
       bool forceUpdate);
 
   const std::shared_ptr<CesiumUtility::CreditSystem>&
-  getExternalCreditSystem() const;
+  getNativeCreditSystem() const;
 
 private:
   // The underlying cesium-native credit system.
