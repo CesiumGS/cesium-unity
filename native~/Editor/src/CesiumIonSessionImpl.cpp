@@ -274,23 +274,26 @@ void CesiumIonSessionImpl::Resume(
       CesiumForUnity::CesiumIonServerManager::instance().GetUserAccessToken(
           server);
 
-  if (System::String::IsNullOrEmpty(userAccessToken)) {
-    // No user access token was stored, so there's no existing session to
-    // resume.
-    return;
-  }
-
   this->_isResuming = true;
 
   // Verify that the connection actually works.
   this->ensureAppDataLoaded(session)
       .thenInMainThread([this, userAccessToken, server](bool loadedAppData) {
-        if (!loadedAppData || !this->_appData.has_value()) {
-          CesiumAsync::Promise<void> promise =
-              this->_asyncSystem.createPromise<void>();
+        CesiumAsync::Promise<void> promise =
+            this->_asyncSystem.createPromise<void>();
 
+        if (!loadedAppData || !this->_appData.has_value()) {
           promise.reject(std::runtime_error(
               "Failed to obtain _appData, can't resume connection"));
+          return promise.getFuture();
+        }
+
+        if (this->_appData->needsOauthAuthentication() &&
+            System::String::IsNullOrEmpty(userAccessToken)) {
+          // No user access token was stored, so there's no existing session to
+          // resume.
+          promise.resolve();
+          this->_isResuming = false;
           return promise.getFuture();
         }
 
