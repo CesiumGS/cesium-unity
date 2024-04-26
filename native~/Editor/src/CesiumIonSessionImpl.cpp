@@ -709,7 +709,10 @@ const std::vector<CesiumIonClient::Token>& CesiumIonSessionImpl::getTokens() {
 
 const CesiumIonClient::ApplicationData& CesiumIonSessionImpl::getAppData() {
   static const CesiumIonClient::ApplicationData empty{};
-  return this->_appData.value_or(empty);
+  if (this->_appData) {
+    return *this->_appData;
+  }
+  return empty;
 }
 
 const CesiumIonClient::Defaults& CesiumIonSessionImpl::getDefaults() {
