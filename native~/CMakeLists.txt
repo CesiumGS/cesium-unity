@@ -76,6 +76,7 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
         CesiumGltfReader
         CesiumJsonReader
         CesiumRasterOverlays
+        CesiumQuantizedMeshTerrain
         CesiumUtility
         draco_attributes
         draco_compression_attributes_dec
@@ -94,7 +95,7 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
         expected-lite
         GSL
         httplib
-        ktx_read
+        ktx
         meshoptimizer
         modp_b64
         spdlog
