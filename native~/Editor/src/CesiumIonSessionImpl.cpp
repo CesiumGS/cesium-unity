@@ -254,7 +254,7 @@ void CesiumIonSessionImpl::Connect(
         this->broadcastConnectionUpdate();
       })
       .catchInMainThread([this](std::exception&& e) {
-        DotNet::UnityEngine::Debug::Log(System::String::String(e.what()));
+        DotNet::UnityEngine::Debug::Log(System::String(e.what()));
         this->_isConnecting = false;
         this->_connection = std::nullopt;
         this->_quickAddItems = nullptr;
