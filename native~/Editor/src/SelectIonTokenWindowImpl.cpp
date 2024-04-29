@@ -50,7 +50,8 @@ SelectIonTokenWindowImpl::SelectNewToken(
     const DotNet::CesiumForUnity::CesiumIonServer& server) {
   CesiumForUnity::CesiumIonSession session =
       CesiumForUnity::CesiumIonServerManager::instance().GetSession(server);
-  // If we don't need tokens, don't bother opening the window
+  // If the current server doesn't require tokens, don't bother opening the
+  // window.
   if (!session.NativeImplementation().IsAuthenticationRequired(session)) {
     return session.NativeImplementation()
         .getAsyncSystem()
@@ -70,7 +71,7 @@ SelectIonTokenWindowImpl::SelectTokenIfNecessary(
     const DotNet::CesiumForUnity::CesiumIonServer& server) {
   CesiumForUnity::CesiumIonSession session =
       CesiumForUnity::CesiumIonServerManager::instance().GetSession(server);
-  // If we don't need tokens, don't bother opening the window
+  // If the current server doesn't require tokens, exit early.
   if (!session.NativeImplementation().IsAuthenticationRequired(session)) {
     return session.NativeImplementation()
         .getAsyncSystem()
@@ -120,7 +121,7 @@ SelectIonTokenWindowImpl::SelectAndAuthorizeToken(
     const std::vector<int64_t>& assetIDs) {
   CesiumForUnity::CesiumIonSession session =
       CesiumForUnity::CesiumIonServerManager::instance().GetSession(server);
-  // If we don't need tokens, don't bother trying to authorize them
+  // If the current server doesn't require tokens, don't try to authorize them.
   if (!session.NativeImplementation().IsAuthenticationRequired(session)) {
     return session.NativeImplementation()
         .getAsyncSystem()
