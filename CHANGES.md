@@ -1,6 +1,10 @@
 # Change Log
 
-### ? - ?
+### v.1.10.0 - 2024-05-01
+
+##### Additions :tada:
+
+- Added support for Cesium ion servers in single user mode. Tokens are not required to stream assets from such servers.
 
 ##### Fixes :wrench:
 
