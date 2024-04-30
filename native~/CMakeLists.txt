@@ -60,6 +60,8 @@ if (EDITOR)
   add_subdirectory(Editor)
 endif()
 
+set(LIB_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR})
+
 # Specify all targets that need to compile bitcode
 if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
     set (ALL_TARGETS
