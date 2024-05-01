@@ -46,8 +46,9 @@ using ValueType = std::variant<
 
 class CesiumFeatureImpl {
 public:
-  ~CesiumFeatureImpl(){};
-  CesiumFeatureImpl(const DotNet::CesiumForUnity::CesiumFeature& feature){};
+  CesiumFeatureImpl(const DotNet::CesiumForUnity::CesiumFeature& feature);
+  ~CesiumFeatureImpl();
+
   std::int8_t GetInt8(
       const DotNet::CesiumForUnity::CesiumFeature& feature,
       const DotNet::System::String& property,

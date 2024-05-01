@@ -48,6 +48,18 @@ SelectIonTokenWindowImpl& currentWindow() {
 /*static*/ CesiumAsync::SharedFuture<std::optional<CesiumIonClient::Token>>
 SelectIonTokenWindowImpl::SelectNewToken(
     const DotNet::CesiumForUnity::CesiumIonServer& server) {
+  CesiumForUnity::CesiumIonSession session =
+      CesiumForUnity::CesiumIonServerManager::instance().GetSession(server);
+  // If the current server doesn't require tokens, don't bother opening the
+  // window to create one.
+  if (!session.NativeImplementation().IsAuthenticationRequired(session)) {
+    return session.NativeImplementation()
+        .getAsyncSystem()
+        .createResolvedFuture<std::optional<CesiumIonClient::Token>>(
+            std::make_optional(CesiumIonClient::Token()))
+        .share();
+  }
+
   CesiumForUnity::SelectIonTokenWindow::ShowWindow(server);
   SelectIonTokenWindowImpl& window = currentWindow();
 
@@ -59,10 +71,12 @@ SelectIonTokenWindowImpl::SelectTokenIfNecessary(
     const DotNet::CesiumForUnity::CesiumIonServer& server) {
   CesiumForUnity::CesiumIonSession session =
       CesiumForUnity::CesiumIonServerManager::instance().GetSession(server);
+
   return session.NativeImplementation()
       .getProjectDefaultTokenDetails(session)
-      .thenInMainThread([server](const CesiumIonClient::Token& token) {
-        if (token.token.empty()) {
+      .thenInMainThread([server, session](const CesiumIonClient::Token& token) {
+        if (token.token.empty() &&
+            session.NativeImplementation().IsAuthenticationRequired(session)) {
           return SelectNewToken(server).thenImmediately(
               [](const std::optional<CesiumIonClient::Token>& maybeToken) {
                 return maybeToken;
@@ -100,6 +114,14 @@ SelectIonTokenWindowImpl::SelectAndAuthorizeToken(
     const std::vector<int64_t>& assetIDs) {
   CesiumForUnity::CesiumIonSession session =
       CesiumForUnity::CesiumIonServerManager::instance().GetSession(server);
+  // If the current server doesn't require tokens, don't try to create or
+  // authorize one.
+  if (!session.NativeImplementation().IsAuthenticationRequired(session)) {
+    return session.NativeImplementation()
+        .getAsyncSystem()
+        .createResolvedFuture<std::optional<CesiumIonClient::Token>>(
+            std::make_optional(CesiumIonClient::Token()));
+  }
 
   return SelectTokenIfNecessary(server).thenInMainThread(
       [assetIDs,
@@ -136,7 +158,8 @@ SelectIonTokenWindowImpl::SelectAndAuthorizeToken(
                             assetIDsString += id;
                           });
                       UnityEngine::Debug::Log(System::String(
-                          "Authorizing the project's default Cesium ion token "
+                          "Authorizing the project's default Cesium ion "
+                          "token "
                           "to access the following asset IDs: " +
                           assetIDsString));
 
@@ -219,8 +242,8 @@ void SelectIonTokenWindowImpl::RefreshTokens(
       window.tokenSource(CesiumForUnity::IonTokenSource::UseExisting);
     }
 
-    // If there's already a token with the default name we would use to create a
-    // new one, default to selecting that rather than creating a new one.
+    // If there's already a token with the default name we would use to create
+    // a new one, default to selecting that rather than creating a new one.
     if (window.tokenSource() == CesiumForUnity::IonTokenSource::Create &&
         this->_tokens[i]->name == createName) {
       window.selectedExistingTokenIndex(i);

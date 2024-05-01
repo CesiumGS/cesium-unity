@@ -52,6 +52,7 @@ void getTokenTroubleShootingDetails(
       ionSession.getAsyncSystem(),
       ionSession.getAssetAccessor(),
       token,
+      ionSession.getAppData(),
       getServer(window).apiUrl().ToStlString());
 
   CesiumForUnity::CesiumIonAsset ionAsset = window.ionAsset();

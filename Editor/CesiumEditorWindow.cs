@@ -48,6 +48,7 @@ namespace CesiumForUnity
         private bool _isIonConnecting = false;
         private bool _isIonProfileLoaded = false;
         private bool _isIonLoadingProfile = false;
+        private bool _isAuthenticationRequired = true;
         private CesiumIonServerSelector _serverSelector;
 
         private Vector2 _scrollPosition = Vector2.zero;
@@ -67,6 +68,7 @@ namespace CesiumForUnity
                 this._isIonConnecting = ion.IsConnecting();
                 this._isIonProfileLoaded = ion.IsProfileLoaded();
                 this._isIonLoadingProfile = ion.IsLoadingProfile();
+                this._isAuthenticationRequired = ion.IsAuthenticationRequired();
             }
 
             GUILayout.Space(5);
@@ -146,12 +148,16 @@ namespace CesiumForUnity
                 "Upload a tileset to Cesium ion to process it for efficient streaming to Cesium for Unity",
                 true,
                 this.UploadToIon);
+
+            EditorGUI.BeginDisabledGroup(!this._isAuthenticationRequired);
             this.DrawToolbarButton(
                 "Token",
                 ToolbarButton.Token,
-                "Select or create a token to use to access Cesium ion assets",
+                this._isAuthenticationRequired ? "Select or create a token to use to access Cesium ion assets" : "Tokens are disabled for Cesium ion servers running in single-user mode.",
                 false,
                 this.SetToken);
+            EditorGUI.EndDisabledGroup();
+
             this.DrawToolbarButton(
                 "Learn",
                 ToolbarButton.Learn,

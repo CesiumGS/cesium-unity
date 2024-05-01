@@ -60,6 +60,8 @@ if (EDITOR)
   add_subdirectory(Editor)
 endif()
 
+set(LIB_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR})
+
 # Specify all targets that need to compile bitcode
 if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
     set (ALL_TARGETS
@@ -76,6 +78,7 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
         CesiumGltfReader
         CesiumJsonReader
         CesiumRasterOverlays
+        CesiumQuantizedMeshTerrain
         CesiumUtility
         draco_attributes
         draco_compression_attributes_dec
@@ -94,7 +97,7 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
         expected-lite
         GSL
         httplib
-        ktx_read
+        ktx
         meshoptimizer
         modp_b64
         spdlog
@@ -112,10 +115,19 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
     )
     set(MESHOPT_BUILD_SHARED_LIBS OFF BOOL FORCE)
     install(TARGETS tidy-static)
-    install(TARGETS ${ALL_TARGETS} PUBLIC_HEADER EXCLUDE_FROM_ALL)
+    install(
+      TARGETS ${ALL_TARGETS}
+      PUBLIC_HEADER
+        EXCLUDE_FROM_ALL
+      FRAMEWORK
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    )
     set_target_properties(cesium-native-tests PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
     set_target_properties(tidy-static PROPERTIES EXCLUDE_FROM_ALL 0 EXCLUDE_FROM_DEFAULT_BUILD 0)
     set_target_properties(${ALL_TARGETS} PROPERTIES XCODE_ATTRIBUTE_ENABLE_BITCODE "YES")
+
+    # ktx tags itself as a FRAMEWORK on iOS, which causes linker errors. Undo that.
+    set_target_properties(ktx PROPERTIES FRAMEWORK FALSE)
 endif()
 
 

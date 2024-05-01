@@ -48,6 +48,23 @@ namespace CesiumForUnity
                 return;
             }
 
+            if(details.tileset.ionServer == null)
+            {
+                return;
+            }
+
+            CesiumIonSession session = CesiumIonServerManager.instance.GetSession(details.tileset.ionServer);
+            if(session == null)
+            {
+                return;
+            }
+
+            if(!session.IsAuthenticationRequired())
+            {
+                // The server we're connected to doesn't use tokens, so reauthorizing would be pointless
+                return;
+            }
+
             // Check for a 401 connecting to Cesium ion, which means the token is invalid
             // (or perhaps the asset ID is). Also check for a 404, because ion returns 404
             // when the token is valid but not authorized for the asset.
