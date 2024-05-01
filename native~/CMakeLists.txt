@@ -126,6 +126,9 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
     set_target_properties(cesium-native-tests PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
     set_target_properties(tidy-static PROPERTIES EXCLUDE_FROM_ALL 0 EXCLUDE_FROM_DEFAULT_BUILD 0)
     set_target_properties(${ALL_TARGETS} PROPERTIES XCODE_ATTRIBUTE_ENABLE_BITCODE "YES")
+
+    # ktx tags itself as a FRAMEWORK on iOS, which causes linker errors. Undo that.
+    set_target_properties(ktx PROPERTIES FRAMEWORK FALSE)
 endif()
 
 
