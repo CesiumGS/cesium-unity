@@ -10,6 +10,8 @@
 
 - Fixed a bug where `CesiumCreditSystem` would delete itself from its scene when other additive scenes were unloaded.
 
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.34.0 to v0.35.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
+
 ### v1.9.0 - 2024-04-01
 
 ##### Additions :tada:
