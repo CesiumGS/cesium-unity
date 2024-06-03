@@ -1,6 +1,6 @@
 [submodule "native~/extern/cesium-native"]
 	path = native~/extern/cesium-native
-	url = https://github.com/CesiumGS/cesium-native.git
+	url = ../cesium-native.git
 [submodule "native~/extern/tidy-html5"]
 	path = native~/extern/tidy-html5
 	url = https://github.com/htacg/tidy-html5.git
