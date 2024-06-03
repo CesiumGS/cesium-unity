@@ -73,7 +73,7 @@ CesiumFeaturesMetadataUtility::addPrimitiveFeatures(
     CesiumForUnity::CesiumFeatureIdSet featureIdSet = featureIdSets[i];
     featureIdSet.label(System::String(gltfFeatureId.label.value_or("")));
     featureIdSet.nullFeatureId(gltfFeatureId.nullFeatureId.value_or(-1));
-    featureIdSet.propertyTableIndex(gltfFeatureId.propertyTable.value_or(-1));
+    featureIdSet.propertyTableIndex(gltfFeatureId.propertyTable);
   }
 
   return primitiveFeatures;
