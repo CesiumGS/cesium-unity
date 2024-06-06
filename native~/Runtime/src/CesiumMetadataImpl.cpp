@@ -129,8 +129,8 @@ CesiumForUnityNative::CesiumMetadataImpl::GetFeatures(
     features.Item(i, feature);
 
     const CesiumGltf::FeatureId& featureIdSet = *featureIdAttributes[i];
-    if (!featureIdSet.propertyTable || *featureIdSet.propertyTable < 0 ||
-        *featureIdSet.propertyTable >=
+    if (!featureIdSet.propertyTable || featureIdSet.propertyTable < 0 ||
+        featureIdSet.propertyTable >=
             static_cast<int64_t>(pModelMetadata->propertyTables.size())) {
       continue;
     }

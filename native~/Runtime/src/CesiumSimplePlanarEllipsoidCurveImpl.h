@@ -3,6 +3,7 @@
 #include <CesiumGeospatial/SimplePlanarEllipsoidCurve.h>
 
 #include <DotNet/Unity/Mathematics/double3.h>
+#include <DotNet/CesiumForUnity/CesiumEllipsoid.h>
 
 #include <optional>
 
@@ -24,11 +25,13 @@ public:
 
   bool CreateFromEarthCenteredEarthFixedCoordinates(
       const DotNet::CesiumForUnity::CesiumSimplePlanarEllipsoidCurve& path,
+      const DotNet::CesiumForUnity::CesiumEllipsoid& ellipsoid,
       const DotNet::Unity::Mathematics::double3 sourceEcef,
       const DotNet::Unity::Mathematics::double3 destinationEcef);
 
   bool CreateFromLongitudeLatitudeHeight(
       const DotNet::CesiumForUnity::CesiumSimplePlanarEllipsoidCurve& path,
+      const DotNet::CesiumForUnity::CesiumEllipsoid& ellipsoid,
       const DotNet::Unity::Mathematics::double3 sourceLlh,
       const DotNet::Unity::Mathematics::double3 destinationLlh);
 

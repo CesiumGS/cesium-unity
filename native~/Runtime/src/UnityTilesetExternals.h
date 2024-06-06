@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Cesium3DTilesSelection/TilesetExternals.h>
+#include <CesiumGeospatial/Ellipsoid.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 
@@ -36,6 +37,6 @@ const std::shared_ptr<CesiumUtility::CreditSystem>&
 getOrCreateCreditSystem(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
 
 Cesium3DTilesSelection::TilesetExternals
-createTilesetExternals(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
+createTilesetExternals(const DotNet::CesiumForUnity::Cesium3DTileset& tileset, const CesiumGeospatial::Ellipsoid& ellipsoid);
 
 } // namespace CesiumForUnityNative

@@ -22,10 +22,10 @@ namespace CesiumForUnity
         /// A <see cref="CesiumSimplePlanarEllipsoidCurve"/> if a curve can successfully be 
         /// created between the two points, or null otherwise.
         /// </returns>
-        public static CesiumSimplePlanarEllipsoidCurve FromEarthCenteredEarthFixedCoordinates(double3 sourceEcef, double3 destinationEcef)
+        public static CesiumSimplePlanarEllipsoidCurve FromEarthCenteredEarthFixedCoordinates(CesiumEllipsoid ellipsoid, double3 sourceEcef, double3 destinationEcef)
         {
             CesiumSimplePlanarEllipsoidCurve curve = new CesiumSimplePlanarEllipsoidCurve();
-            if (!curve.CreateFromEarthCenteredEarthFixedCoordinates(sourceEcef, destinationEcef))
+            if (!curve.CreateFromEarthCenteredEarthFixedCoordinates(ellipsoid, sourceEcef, destinationEcef))
             {
                 return null;
             }
@@ -43,10 +43,10 @@ namespace CesiumForUnity
         /// A <see cref="CesiumSimplePlanarEllipsoidCurve"/> if a curve can successfully be 
         /// created between the two points, or null otherwise.
         /// </returns>
-        public static CesiumSimplePlanarEllipsoidCurve FromLongituteLatitudeHeight(double3 sourceLlh, double3 destinationLlh)
+        public static CesiumSimplePlanarEllipsoidCurve FromLongituteLatitudeHeight(CesiumEllipsoid ellipsoid, double3 sourceLlh, double3 destinationLlh)
         {
             CesiumSimplePlanarEllipsoidCurve curve = new CesiumSimplePlanarEllipsoidCurve();
-            if (!curve.CreateFromLongitudeLatitudeHeight(sourceLlh, destinationLlh))
+            if (!curve.CreateFromLongitudeLatitudeHeight(ellipsoid, sourceLlh, destinationLlh))
             {
                 return null;
             }
@@ -70,8 +70,8 @@ namespace CesiumForUnity
         /// <returns>The position of the given point on this curve in Earth-Centered, Earth-Fixed coordinates.</returns>
         public partial double3 GetPosition(double percentage, double additionalHeight = 0.0);
 
-        private partial bool CreateFromEarthCenteredEarthFixedCoordinates(double3 sourceEcef, double3 destinationEcef);
-        private partial bool CreateFromLongitudeLatitudeHeight(double3 sourceLlh, double3 destinationLlh);
+        private partial bool CreateFromEarthCenteredEarthFixedCoordinates(CesiumEllipsoid ellipsoid, double3 sourceEcef, double3 destinationEcef);
+        private partial bool CreateFromLongitudeLatitudeHeight(CesiumEllipsoid ellipsoid, double3 sourceLlh, double3 destinationLlh);
 
         private CesiumSimplePlanarEllipsoidCurve()
         {

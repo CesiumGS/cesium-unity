@@ -65,6 +65,8 @@ namespace CesiumForUnity
     public partial class CesiumGeoreference : MonoBehaviour
     {
         #region Fields
+        [SerializeField]
+        private CesiumEllipsoid _ellipsoidOverride = null;
 
         [SerializeField]
         private CesiumGeoreferenceOriginAuthority _originAuthority = CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight;
@@ -105,6 +107,9 @@ namespace CesiumForUnity
 
         [NonSerialized]
         private HashSet<CesiumGlobeAnchor> _globeAnchors = new HashSet<CesiumGlobeAnchor>();
+
+        [NonSerialized]
+        private CesiumEllipsoid _ellipsoid = null;
 
         #endregion
 
@@ -251,6 +256,23 @@ namespace CesiumForUnity
             {
                 this.Initialize();
                 return this._ecefToLocal;
+            }
+        }
+
+        public CesiumEllipsoid ellipsoid
+        {
+            get
+            {
+                if (this._ellipsoid == null)
+                {
+                    this._ellipsoid = this._ellipsoidOverride ?? CesiumEllipsoid.WGS84;
+                }
+
+                return this._ellipsoid;
+            }
+            set
+            {
+                this._ellipsoid = value;
             }
         }
 

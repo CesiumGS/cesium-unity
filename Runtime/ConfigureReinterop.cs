@@ -517,7 +517,13 @@ namespace CesiumForUnity
             CesiumGlobeAnchor globeAnchor = globeAnchors[globeAnchors.Length - 1];
             globeAnchor.positionGlobeFixed = globeAnchor.positionGlobeFixed;
 
-            CesiumSimplePlanarEllipsoidCurve planarEllipsoidCurve = CesiumSimplePlanarEllipsoidCurve.FromEarthCenteredEarthFixedCoordinates(new double3(0, 0, 0), new double3(0, 0, 0));
+            CesiumSimplePlanarEllipsoidCurve planarEllipsoidCurve = CesiumSimplePlanarEllipsoidCurve.FromEarthCenteredEarthFixedCoordinates(
+                CesiumEllipsoid.WGS84,
+                new double3(0, 0, 0), 
+                new double3(0, 0, 0));
+            CesiumEllipsoid ellipsoid = CesiumEllipsoid.WGS84;
+            ellipsoid.radii = new double3(0.0, 0.0, 0.0);
+            georeference.ellipsoid = ellipsoid;
 
             globeAnchor = go.AddComponent<CesiumGlobeAnchor>();
             globeAnchor.detectTransformChanges = globeAnchor.detectTransformChanges;
@@ -806,7 +812,7 @@ namespace CesiumForUnity
             primitiveFeatures = hitInfo.transform.GetComponent<CesiumPrimitiveFeatures>();
             int triangleIndex = hitInfo.triangleIndex;
             Vector3 hitPoint = hitInfo.point;
-            
+
             Vector2 textureCoordinate = new Vector2();
             textureCoordinate.x = textureCoordinate.y;
             hitPoint = m2.MultiplyPoint3x4(hitPoint);

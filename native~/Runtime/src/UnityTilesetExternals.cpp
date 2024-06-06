@@ -4,6 +4,7 @@
 #include "UnityPrepareRendererResources.h"
 #include "UnityTaskProcessor.h"
 
+#include <Cesium3DTilesSelection/Tileset.h>
 #include <CesiumAsync/CachingAssetAccessor.h>
 #include <CesiumAsync/GunzipAssetAccessor.h>
 #include <CesiumAsync/SqliteCache.h>
@@ -90,14 +91,17 @@ getOrCreateCreditSystem(const CesiumForUnity::Cesium3DTileset& tileset) {
   return pCreditSystem;
 }
 
-Cesium3DTilesSelection::TilesetExternals
-createTilesetExternals(const CesiumForUnity::Cesium3DTileset& tileset) {
-  return TilesetExternals{
+Cesium3DTilesSelection::TilesetExternals createTilesetExternals(
+    const CesiumForUnity::Cesium3DTileset& tileset,
+    const CesiumGeospatial::Ellipsoid& ellipsoid) {
+  TilesetExternals externals = TilesetExternals{
       getAssetAccessor(),
       std::make_shared<UnityPrepareRendererResources>(tileset.gameObject()),
       AsyncSystem(getTaskProcessor()),
       getOrCreateCreditSystem(tileset),
       spdlog::default_logger()};
+  externals.pEllipsoid = std::make_shared<CesiumGeospatial::Ellipsoid>(ellipsoid);
+  return externals;
 }
 
 } // namespace CesiumForUnityNative

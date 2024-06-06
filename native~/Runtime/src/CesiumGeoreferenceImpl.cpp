@@ -8,6 +8,7 @@
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreferenceOriginAuthority.h>
 #include <DotNet/CesiumForUnity/CesiumGlobeAnchor.h>
+#include <DotNet/CesiumForUnity/CesiumEllipsoid.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/UnityEngine/GameObject.h>
 #include <DotNet/UnityEngine/Matrix4x4.h>
@@ -34,7 +35,8 @@ LocalHorizontalCoordinateSystem createCoordinateSystem(
         LocalDirection::East,
         LocalDirection::Up,
         LocalDirection::North,
-        1.0 / georeference.scale());
+        1.0 / georeference.scale(),
+        georeference.ellipsoid().NativeImplementation().GetEllipsoid());
   } else {
     return LocalHorizontalCoordinateSystem(
         glm::dvec3(
@@ -44,7 +46,8 @@ LocalHorizontalCoordinateSystem createCoordinateSystem(
         LocalDirection::East,
         LocalDirection::Up,
         LocalDirection::North,
-        1.0 / georeference.scale());
+        1.0 / georeference.scale(),
+        georeference.ellipsoid().NativeImplementation().GetEllipsoid());
   }
 }
 

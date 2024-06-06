@@ -1,6 +1,7 @@
 #include "Cesium3DTilesetImpl.h"
 
 #include "CameraManager.h"
+#include "CesiumEllipsoidImpl.h"
 #include "CesiumIonServerHelper.h"
 #include "UnityPrepareRendererResources.h"
 #include "UnityTileExcluderAdaptor.h"
@@ -11,6 +12,7 @@
 #include <CesiumIonClient/Connection.h>
 #include <CesiumRasterOverlays/IonRasterOverlay.h>
 
+#include <DotNet/CesiumForUnity/CesiumEllipsoid.h>
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/CesiumForUnity/Cesium3DTilesetLoadFailureDetails.h>
 #include <DotNet/CesiumForUnity/Cesium3DTilesetLoadType.h>
@@ -325,11 +327,13 @@ void Cesium3DTilesetImpl::FocusTileset(
   const glm::dmat4& ecefToUnityWorld =
       georeferenceCrs.getEcefToLocalTransformation();
 
+  const CesiumGeospatial::Ellipsoid& ellipsoid =
+      georeferenceComponent.ellipsoid().NativeImplementation().GetEllipsoid();
+
   const BoundingVolume& boundingVolume =
       this->_pTileset->getRootTile()->getBoundingVolume();
-  glm::dvec3 ecefCameraPosition = std::visit(
-      CalculateECEFCameraPosition{CesiumGeospatial::Ellipsoid::WGS84},
-      boundingVolume);
+  glm::dvec3 ecefCameraPosition =
+      std::visit(CalculateECEFCameraPosition{ellipsoid}, boundingVolume);
   glm::dvec3 unityCameraPosition =
       glm::dvec3(ecefToUnityWorld * glm::dvec4(ecefCameraPosition, 1.0));
 
@@ -469,6 +473,13 @@ void Cesium3DTilesetImpl::LoadTileset(
   options.mainThreadLoadingTimeLimit = 5.0;
   options.tileCacheUnloadTimeLimit = 5.0;
 
+  DotNet::CesiumForUnity::CesiumGeoreference georeferenceComponent =
+      tileset.gameObject()
+          .GetComponentInParent<DotNet::CesiumForUnity::CesiumGeoreference>();
+
+  options.ellipsoid =
+      georeferenceComponent.ellipsoid().NativeImplementation().GetEllipsoid();
+
   TilesetContentOptions contentOptions{};
   contentOptions.generateMissingNormalsSmooth = tileset.generateSmoothNormals();
 
@@ -552,7 +563,7 @@ void Cesium3DTilesetImpl::LoadTileset(
         ionAssetEndpointUrl += '/';
 
       this->_pTileset = std::make_unique<Tileset>(
-          createTilesetExternals(tileset),
+          createTilesetExternals(tileset, options.ellipsoid.value_or(CesiumGeospatial::Ellipsoid::WGS84)),
           tileset.ionAssetID(),
           ionAccessToken.ToStlString(),
           options,
@@ -563,7 +574,7 @@ void Cesium3DTilesetImpl::LoadTileset(
     }
   } else {
     this->_pTileset = std::make_unique<Tileset>(
-        createTilesetExternals(tileset),
+        createTilesetExternals(tileset, options.ellipsoid.value_or(CesiumGeospatial::Ellipsoid::WGS84)),
         tileset.url().ToStlString(),
         options);
   }
