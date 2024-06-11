@@ -33,7 +33,8 @@ void CesiumForUnityNative::CesiumEllipsoidImpl::SetRadii(
 std::optional<DotNet::Unity::Mathematics::double3>
 CesiumForUnityNative::CesiumEllipsoidImpl::ScaleToGeodeticSurface(
     const DotNet::CesiumForUnity::CesiumEllipsoid& unityEllipsoid,
-    const DotNet::Unity::Mathematics::double3& ellipsoidCenteredEllipsoidFixed) {
+    const DotNet::Unity::Mathematics::double3&
+        ellipsoidCenteredEllipsoidFixed) {
   return CesiumEllipsoidFunctions::ScaleToGeodeticSurface(
       this->_ellipsoid,
       ellipsoidCenteredEllipsoidFixed);
@@ -42,7 +43,8 @@ CesiumForUnityNative::CesiumEllipsoidImpl::ScaleToGeodeticSurface(
 DotNet::Unity::Mathematics::double3
 CesiumForUnityNative::CesiumEllipsoidImpl::GeodeticSurfaceNormal(
     const DotNet::CesiumForUnity::CesiumEllipsoid& unityEllipsoid,
-    const DotNet::Unity::Mathematics::double3& ellipsoidCenteredEllipsoidFixed) {
+    const DotNet::Unity::Mathematics::double3&
+        ellipsoidCenteredEllipsoidFixed) {
   return CesiumEllipsoidFunctions::GeodeticSurfaceNormal(
       this->_ellipsoid,
       ellipsoidCenteredEllipsoidFixed);
@@ -61,7 +63,8 @@ DotNet::Unity::Mathematics::double3 CesiumForUnityNative::CesiumEllipsoidImpl::
 DotNet::Unity::Mathematics::double3 CesiumForUnityNative::CesiumEllipsoidImpl::
     EllipsoidCenteredEllipsoidFixedToLongitudeLatitudeHeight(
         const DotNet::CesiumForUnity::CesiumEllipsoid& unityEllipsoid,
-        const DotNet::Unity::Mathematics::double3& ellipsoidCenteredEllipsoidFixed) {
+        const DotNet::Unity::Mathematics::double3&
+            ellipsoidCenteredEllipsoidFixed) {
   return CesiumEllipsoidFunctions::
       EllipsoidCenteredEllipsoidFixedToLongitudeLatitudeHeight(
           this->_ellipsoid,

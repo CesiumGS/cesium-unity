@@ -12,11 +12,11 @@
 #include <CesiumIonClient/Connection.h>
 #include <CesiumRasterOverlays/IonRasterOverlay.h>
 
-#include <DotNet/CesiumForUnity/CesiumEllipsoid.h>
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/CesiumForUnity/Cesium3DTilesetLoadFailureDetails.h>
 #include <DotNet/CesiumForUnity/Cesium3DTilesetLoadType.h>
 #include <DotNet/CesiumForUnity/CesiumDataSource.h>
+#include <DotNet/CesiumForUnity/CesiumEllipsoid.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/CesiumForUnity/CesiumIonServer.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>

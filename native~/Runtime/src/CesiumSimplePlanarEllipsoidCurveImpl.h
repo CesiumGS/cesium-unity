@@ -2,8 +2,8 @@
 
 #include <CesiumGeospatial/SimplePlanarEllipsoidCurve.h>
 
-#include <DotNet/Unity/Mathematics/double3.h>
 #include <DotNet/CesiumForUnity/CesiumEllipsoid.h>
+#include <DotNet/Unity/Mathematics/double3.h>
 
 #include <optional>
 

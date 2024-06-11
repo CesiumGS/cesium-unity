@@ -1354,8 +1354,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
   glm::dmat4 tileTransform = tile.getTransform();
   tileTransform = GltfUtilities::applyRtcCenter(model, tileTransform);
-  tileTransform =
-      GltfUtilities::applyGltfUpAxisTransform(model, tileTransform);
+  tileTransform = GltfUtilities::applyGltfUpAxisTransform(model, tileTransform);
 
   DotNet::CesiumForUnity::CesiumGeoreference georeferenceComponent =
       this->_tilesetGameObject
