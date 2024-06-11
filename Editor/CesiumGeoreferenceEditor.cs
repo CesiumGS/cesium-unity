@@ -115,7 +115,12 @@ namespace CesiumForUnity
                 "The ellipsoid definition to use for this tileset. If this is left blank, " +
                 "the ellipsoid specified by the tileset is used, or WGS84 if the tileset " +
                 "doesn't list an ellipsoid to use.");
+            EditorGUI.BeginChangeCheck();
             EditorGUILayout.PropertyField(this._ellipsoidOverride, ellipsoidOverrideContent);
+            if(EditorGUI.EndChangeCheck())
+            {
+                this._georeference.ReloadEllipsoid();
+            }
         }
 
         private void DrawScaleProperty()

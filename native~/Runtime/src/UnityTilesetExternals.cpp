@@ -100,7 +100,6 @@ Cesium3DTilesSelection::TilesetExternals createTilesetExternals(
       AsyncSystem(getTaskProcessor()),
       getOrCreateCreditSystem(tileset),
       spdlog::default_logger()};
-  externals.pEllipsoid = std::make_shared<CesiumGeospatial::Ellipsoid>(ellipsoid);
   return externals;
 }
 

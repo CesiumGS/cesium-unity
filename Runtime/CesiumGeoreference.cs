@@ -378,6 +378,19 @@ namespace CesiumForUnity
             }
         }
 
+        /// <summary>
+        /// Called when the ellipsoid override property has changed.
+        /// </summary>
+        public void ReloadEllipsoid()
+        {
+            this._ellipsoid = this._ellipsoidOverride ?? CesiumEllipsoid.WGS84;
+            Cesium3DTileset[] tilesets = GetComponentsInChildren<Cesium3DTileset>();
+            foreach(var tileset in tilesets)
+            {
+                tileset.RecreateTileset();
+            }
+        }
+
         private void UpdateTransformations()
         {
             this._localToEcef = this.ComputeLocalToEarthCenteredEarthFixedTransformation();
