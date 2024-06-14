@@ -106,9 +106,14 @@ namespace CesiumForUnity
 
                 this._createdTokenName = GetDefaultNewTokenName();
                 this._specifiedToken = this.server.defaultIonAccessToken;
-                this._source = session.IsConnected()
-                    ? IonTokenSource.Create
-                    : IonTokenSource.Specify;
+                
+                // The source will be set to "UseExisting" later by RefreshTokens
+                // if the _specifiedToken is from the currently signed-in ion account.
+                this._source = IonTokenSource.Specify;
+                if (this._specifiedToken.Length == 0 && session.IsConnected())
+                {
+                    this._source = IonTokenSource.Create;
+                }
 
                 session.RefreshTokens();
 

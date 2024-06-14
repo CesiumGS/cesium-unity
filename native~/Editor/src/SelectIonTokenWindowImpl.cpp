@@ -15,6 +15,7 @@
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/Collections/Generic/List1.h>
 #include <DotNet/System/Object.h>
+#include <DotNet/UnityEditor/EditorUtility.h>
 #include <DotNet/UnityEngine/Debug.h>
 #include <DotNet/UnityEngine/GameObject.h>
 #include <DotNet/UnityEngine/Object.h>
@@ -222,42 +223,70 @@ void SelectIonTokenWindowImpl::RefreshTokens(
 
   CesiumForUnity::CesiumIonServer server = getServer(window);
 
-  const std::string& createName =
+  const std::string createName =
       CesiumForUnity::SelectIonTokenWindow::GetDefaultNewTokenName()
           .ToStlString();
-  const std::string& defaultTokenId =
+  const std::string defaultTokenId =
       server.defaultIonAccessTokenId().ToStlString();
-  const std::string& specifiedToken = window.specifiedToken().ToStlString();
+  const std::string specifiedToken = window.specifiedToken().ToStlString();
+
+  std::optional<size_t> selectedTokenById;
+  std::optional<size_t> selectedTokenByValue;
+  std::optional<size_t> selectedTokenByCreateName;
 
   for (size_t i = 0; i < tokens.size(); ++i) {
     if (this->_tokens[i]) {
-      *this->_tokens[i] = std::move(tokens[i]);
+      *this->_tokens[i] = tokens[i];
     } else {
-      this->_tokens[i] =
-          std::make_shared<CesiumIonClient::Token>(std::move(tokens[i]));
+      this->_tokens[i] = std::make_shared<CesiumIonClient::Token>(tokens[i]);
     }
 
     if (this->_tokens[i]->id == defaultTokenId) {
-      window.selectedExistingTokenIndex(i);
-      window.tokenSource(CesiumForUnity::IonTokenSource::UseExisting);
+      selectedTokenById = i;
     }
 
-    // If there's already a token with the default name we would use to create
-    // a new one, default to selecting that rather than creating a new one.
-    if (window.tokenSource() == CesiumForUnity::IonTokenSource::Create &&
-        this->_tokens[i]->name == createName) {
-      window.selectedExistingTokenIndex(i);
-      window.tokenSource(CesiumForUnity::IonTokenSource::UseExisting);
+    if (this->_tokens[i]->token == specifiedToken) {
+      selectedTokenByValue = i;
     }
 
-    // If this happens to be the specified token, select it.
-    if (window.tokenSource() == CesiumForUnity::IonTokenSource::Specify &&
-        this->_tokens[i]->token == specifiedToken) {
-      window.selectedExistingTokenIndex(i);
-      window.tokenSource(CesiumForUnity::IonTokenSource::UseExisting);
+    if (this->_tokens[i]->name == createName) {
+      selectedTokenByCreateName = i;
     }
 
     tokenNames.Add(System::String(this->_tokens[i]->name));
+  }
+
+  // If there is already a token selected, the panel should reflect that
+  // accurately. But if there is no token selected, the panel should reflect a
+  // _recommendation_: either create a new one or select the existing one with
+  // the name we would create.
+  if (!specifiedToken.empty()) {
+    if (selectedTokenByValue) {
+      window.selectedExistingTokenIndex(*selectedTokenByValue);
+      window.tokenSource(CesiumForUnity::IonTokenSource::UseExisting);
+    } else if (selectedTokenById) {
+      window.selectedExistingTokenIndex(*selectedTokenById);
+      window.tokenSource(CesiumForUnity::IonTokenSource::UseExisting);
+    } else {
+      // The specified token does not exist in the user's account.
+      window.tokenSource(CesiumForUnity::IonTokenSource::Specify);
+
+      // If the user's account does have a token that matches the default name
+      // we would use if we created one for this project, then select that token
+      // in the "Use Existing" dropdown, for convenience.
+      if (selectedTokenByCreateName) {
+        window.selectedExistingTokenIndex(*selectedTokenByCreateName);
+      }
+    }
+  } else {
+    if (selectedTokenByCreateName) {
+      // A token already exists that has the name we recommend for a new token.
+      // So recommend selecting that existing one.
+      window.selectedExistingTokenIndex(*selectedTokenByCreateName);
+      window.tokenSource(CesiumForUnity::IonTokenSource::UseExisting);
+    } else {
+      window.tokenSource(CesiumForUnity::IonTokenSource::Create);
+    }
   }
 
   window.RefreshExistingTokenList();
@@ -274,6 +303,7 @@ void updateDefaultToken(
 
     server.defaultIonAccessToken(System::String(response.value->token));
     server.defaultIonAccessTokenId(System::String(response.value->id));
+    UnityEditor::EditorUtility::SetDirty(server);
 
     // TODO: source control
 

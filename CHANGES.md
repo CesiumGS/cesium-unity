@@ -1,5 +1,12 @@
 # Change Log
 
+### ? - ?
+
+##### Fixes :wrench:
+
+- Fixed a bug that caused Cesium ion tokens selected on the Tokens panel to fail to save.
+- Fixed a bug that caused the "Select Cesium ion Token" panel to show the wrong state when the current token is not from the currently-signed-in Cesium ion account and the signed-in account has a token named after the current Unity project.
+
 ### v1.10.1 - 2024-06-03
 
 This release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.35.0 to v0.36.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
