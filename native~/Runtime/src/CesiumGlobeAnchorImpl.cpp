@@ -30,9 +30,10 @@ const CesiumGeospatial::Ellipsoid&
 getAnchorEllipsoid(const ::DotNet::CesiumForUnity::CesiumGlobeAnchor& anchor) {
 
   anchor.UpdateGeoreferenceIfNecessary();
-  DotNet::CesiumForUnity::CesiumGeoreference& georeference =
-      anchor._georeference();
-  return georeference.ellipsoid().NativeImplementation().GetEllipsoid();
+  return anchor._georeference()
+      .ellipsoid()
+      .NativeImplementation()
+      .GetEllipsoid();
 }
 
 GlobeAnchor createOrUpdateNativeGlobeAnchorFromEcef(
