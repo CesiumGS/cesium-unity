@@ -256,4 +256,38 @@ public class TestCesiumGlobeAnchor
         Assert.That(goAnchored.transform.rotation.eulerAngles.y, Is.Not.EqualTo(20.0f).Using(FloatEqualityComparer.Instance));
         Assert.That(goAnchored.transform.rotation.eulerAngles.z, Is.Not.EqualTo(30.0f).Using(FloatEqualityComparer.Instance));
     }
+
+    [Test]
+    public void GivesCorrectResultsForDifferentEllipsoids()
+    {
+        IEqualityComparer<double3> epsilon6 = Comparers.Double3(1e-6, 1e-4);
+
+        double3 positionLlh = new double3(-20, -10, 1000.0);
+        
+        GameObject goGeoreference = new GameObject("Georeference");
+        CesiumGeoreference georeference = goGeoreference.AddComponent<CesiumGeoreference>();
+        georeference.ellipsoid = CesiumEllipsoid.WGS84;
+        georeference.SetOriginLongitudeLatitudeHeight(positionLlh.x, positionLlh.y, positionLlh.z);
+
+        GameObject goAnchored = new GameObject("Anchored");
+        goAnchored.transform.parent = goGeoreference.transform;
+        goAnchored.transform.SetPositionAndRotation(new Vector3(0, 0, 0), Quaternion.identity);
+
+        CesiumGlobeAnchor anchor = goAnchored.AddComponent<CesiumGlobeAnchor>();
+
+        // Test WGS84 first
+        double3 actualPosEcef = CesiumEllipsoid.WGS84.LongitudeLatitudeHeightToEllipsoidCenteredEllipsoidFixed(positionLlh);
+        Assert.That(anchor.positionGlobeFixed, Is.EqualTo(actualPosEcef).Using(epsilon6));
+
+        // Test with unit ellipsoid
+        CesiumEllipsoid unitEllipsoid = ScriptableObject.CreateInstance<CesiumEllipsoid>();
+        unitEllipsoid.SetRadii(new double3(1.0, 1.0, 1.0));
+        georeference.ellipsoid = unitEllipsoid;
+        georeference.SetOriginLongitudeLatitudeHeight(positionLlh.x, positionLlh.y, positionLlh.z);
+
+        actualPosEcef = unitEllipsoid.LongitudeLatitudeHeightToEllipsoidCenteredEllipsoidFixed(positionLlh);
+        goAnchored.transform.SetPositionAndRotation(new Vector3(0, 0, 0), Quaternion.identity);
+        anchor.Sync();
+        Assert.That(anchor.positionGlobeFixed, Is.EqualTo(actualPosEcef).Using(epsilon6));
+    }
 }

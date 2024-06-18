@@ -182,10 +182,10 @@ namespace CesiumForUnity
         /// </remarks>
         public double3 longitudeLatitudeHeight
         {
-            get => CesiumWgs84Ellipsoid.EarthCenteredEarthFixedToLongitudeLatitudeHeight(this.positionGlobeFixed);
+            get => this._georeference.ellipsoid.EllipsoidCenteredEllipsoidFixedToLongitudeLatitudeHeight(this.positionGlobeFixed);
             set
             {
-                this.positionGlobeFixed = CesiumWgs84Ellipsoid.LongitudeLatitudeHeightToEarthCenteredEarthFixed(value);
+                this.positionGlobeFixed = this._georeference.ellipsoid.LongitudeLatitudeHeightToEllipsoidCenteredEllipsoidFixed(value);
             }
         }
 

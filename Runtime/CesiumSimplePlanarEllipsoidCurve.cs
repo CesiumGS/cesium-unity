@@ -6,7 +6,7 @@ namespace CesiumForUnity
 {
     /// <summary>
     /// Describes a curve that's a section of an ellipse that lies on a plane intersecting the center of the earth and 
-    /// both the source and destination points on a WGS84 ellipsoid. This curve can be sampled at any point along its length.
+    /// both the source and destination points on an ellipsoid. This curve can be sampled at any point along its length.
     /// </summary>
     [ReinteropNativeImplementation("CesiumForUnityNative::CesiumSimplePlanarEllipsoidCurveImpl", "CesiumSimplePlanarEllipsoidCurveImpl.h")]
     [IconAttribute("Packages/com.cesium.unity/Editor/Resources/Cesium-24x24.png")]

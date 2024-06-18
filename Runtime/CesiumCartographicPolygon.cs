@@ -138,7 +138,7 @@ namespace CesiumForUnity
                 float3 worldPosition = knot.Transform(localToWorld).Position;
                 float3 unityPosition = worldToTileset.MultiplyPoint3x4(worldPosition);
                 double3 ecefPosition = georeference.TransformUnityPositionToEarthCenteredEarthFixed(unityPosition);
-                double3 cartographicPosition = CesiumWgs84Ellipsoid.EarthCenteredEarthFixedToLongitudeLatitudeHeight(ecefPosition);
+                double3 cartographicPosition = georeference.ellipsoid.EllipsoidCenteredEllipsoidFixedToLongitudeLatitudeHeight(ecefPosition);
 
                 cartographicPoints.Add(cartographicPosition.xy);
             }

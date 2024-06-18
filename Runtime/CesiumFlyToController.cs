@@ -486,7 +486,7 @@ namespace CesiumForUnity
             bool canInterruptByMoving)
         {
             double3 destinationECEF =
-                CesiumWgs84Ellipsoid.LongitudeLatitudeHeightToEarthCenteredEarthFixed(destination);
+                this._georeference.ellipsoid.LongitudeLatitudeHeightToEllipsoidCenteredEllipsoidFixed(destination);
 
             this.FlyToLocationEarthCenteredEarthFixed(
                 destinationECEF,
@@ -525,7 +525,7 @@ namespace CesiumForUnity
                 z = destination.z
             };
             double3 destinationECEF =
-                CesiumWgs84Ellipsoid.LongitudeLatitudeHeightToEarthCenteredEarthFixed(
+                this._georeference.ellipsoid.LongitudeLatitudeHeightToEllipsoidCenteredEllipsoidFixed(
                     destinationCoordinates);
 
             this.FlyToLocationEarthCenteredEarthFixed(
