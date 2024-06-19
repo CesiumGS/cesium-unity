@@ -30,7 +30,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ReferenceDocumentation
-          path: build/doc/html
+          path: Documentation~/Reference
   Windows:
     needs: [QuickChecks]
     runs-on: windows-latest
