@@ -7,7 +7,7 @@ project(CesiumForUnityNative
 )
 
 # Link with MSVC static runtime library
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+set(CESIUM_MSVC_STATIC_RUNTIME_ENABLED ON)
 
 # When building for the Editor, both Runtime and Editor assemblies are
 # written to the Editor directory so that Unity won't load them in
