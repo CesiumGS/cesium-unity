@@ -1,5 +1,11 @@
 # Change Log
 
+### ? - ?
+
+##### Fixes :wrench:
+
+- Cesium for Unity now links statically against the MSVC runtime library on Windows, avoiding the new for an MSVC redistributable to be installed.
+
 ### v1.10.1 - 2024-06-03
 
 This release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.35.0 to v0.36.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
