@@ -10,6 +10,9 @@
     "email": "hello@cesium.com",
     "url": "https://cesium.com"
   },
+  "scripts": {
+    "doxygen": "doxygen ./Documentation~/Doxyfile"
+  },
   "changelogUrl": "https://github.com/CesiumGS/cesium-unity/blob/main/CHANGES.md",
   "documentationUrl": "https://cesium.com/learn/unity/",
   "licensesUrl": "https://github.com/CesiumGS/cesium-unity/blob/main/LICENSE",
