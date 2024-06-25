@@ -1,5 +1,5 @@
 #pragma once
-#include <cstdint>
+
 #include "CesiumPropertyTablePropertyImpl.h"
 
 #include "CesiumFeaturesMetadataUtility.h"
