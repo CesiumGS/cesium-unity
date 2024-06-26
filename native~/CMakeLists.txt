@@ -6,10 +6,6 @@ project(CesiumForUnityNative
     LANGUAGES CXX C
 )
 
-# Link with MSVC static runtime library
-set(CESIUM_MSVC_STATIC_RUNTIME_ENABLED ON)
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-
 # When building for the Editor, both Runtime and Editor assemblies are
 # written to the Editor directory so that Unity won't load them in
 # a standalone build.
@@ -44,6 +40,10 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")
   file(CONFIGURE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/extern/tidy-html5/sprtf.c" CONTENT "${sprtSource}")
   list(APPEND tidySources "${CMAKE_CURRENT_BINARY_DIR}/extern/tidy-html5/sprtf.c")
   set_target_properties(tidy-static PROPERTIES "SOURCES" "${tidySources}")
+else()
+  # Link with MSVC static runtime library. This is not supported on UWP / WindowsStore.
+  set(CESIUM_MSVC_STATIC_RUNTIME_ENABLED ON)
+  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Android")
