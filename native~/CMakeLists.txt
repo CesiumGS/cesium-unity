@@ -25,8 +25,17 @@ endif()
 # position independent code.
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")
+  # Link with MSVC static runtime library. This is not supported on UWP / WindowsStore.
+  set(CESIUM_MSVC_STATIC_RUNTIME_ENABLED ON)
+  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
+  # This setting applies to tidy-html5
+  set(USE_STATIC_RUNTIME ON)
+endif()
+
 set(BUILD_SHARED_LIB OFF)
-set( SUPPORT_CONSOLE_APP OFF)
+set(SUPPORT_CONSOLE_APP OFF)
 add_subdirectory(extern/tidy-html5 EXCLUDE_FROM_ALL)
 
 # Patch tidy-html5's sprtf.c to work on UWP. UWP doesn't have lstrlen, but
@@ -40,10 +49,6 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")
   file(CONFIGURE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/extern/tidy-html5/sprtf.c" CONTENT "${sprtSource}")
   list(APPEND tidySources "${CMAKE_CURRENT_BINARY_DIR}/extern/tidy-html5/sprtf.c")
   set_target_properties(tidy-static PROPERTIES "SOURCES" "${tidySources}")
-else()
-  # Link with MSVC static runtime library. This is not supported on UWP / WindowsStore.
-  set(CESIUM_MSVC_STATIC_RUNTIME_ENABLED ON)
-  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Android")
