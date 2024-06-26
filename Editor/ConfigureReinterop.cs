@@ -245,6 +245,8 @@ namespace CesiumForUnity
             assetDetails.loaded = true;
 
             EditorApplication.ExecuteMenuItem("Window/General/Hierarchy");
+
+            EditorUtility.SetDirty(null);
         }
     }
 }
