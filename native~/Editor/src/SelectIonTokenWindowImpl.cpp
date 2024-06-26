@@ -305,8 +305,6 @@ void updateDefaultToken(
     server.defaultIonAccessTokenId(System::String(response.value->id));
     UnityEditor::EditorUtility::SetDirty(server);
 
-    // TODO: source control
-
     // Refresh all tilesets and overlays that are using the project
     // default token.
     System::Array1 tilesets = UnityEngine::Object::FindObjectsOfType<

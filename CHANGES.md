@@ -5,7 +5,7 @@
 ##### Fixes :wrench:
 
 - Fixed a bug that caused Cesium ion tokens selected on the Tokens panel to fail to save.
-- Fixed a bug that caused the "Select Cesium ion Token" panel to show the wrong state when the current token is not from the currently-signed-in Cesium ion account and the signed-in account has a token named after the current Unity project.
+- Fixed a bug that caused the "Select Cesium ion Token" panel to show the wrong state when the current token was not from the currently-signed-in Cesium ion account, but the signed-in account had a token named after the current Unity project.
 
 ### v1.10.1 - 2024-06-03
 
