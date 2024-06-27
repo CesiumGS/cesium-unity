@@ -36,12 +36,12 @@ public:
           ellipsoidCenteredEllipsoidFixed);
 
   DotNet::Unity::Mathematics::double3
-  LongitudeLatitudeHeightToEllipsoidCenteredEllipsoidFixed(
+  LongitudeLatitudeHeightToCenteredFixed(
       const DotNet::CesiumForUnity::CesiumEllipsoid& unityEllipsoid,
       const DotNet::Unity::Mathematics::double3& longitudeLatitudeHeight);
 
   DotNet::Unity::Mathematics::double3
-  EllipsoidCenteredEllipsoidFixedToLongitudeLatitudeHeight(
+  CenteredFixedToLongitudeLatitudeHeight(
       const DotNet::CesiumForUnity::CesiumEllipsoid& unityEllipsoid,
       const DotNet::Unity::Mathematics::double3&
           ellipsoidCenteredEllipsoidFixed);

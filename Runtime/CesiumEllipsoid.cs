@@ -1,10 +1,6 @@
 using Reinterop;
 using Unity.Mathematics;
 using UnityEngine;
-using Microsoft.Win32.SafeHandles;
-using System;
-using System.Runtime.ConstrainedExecution;
-using System.Runtime.InteropServices;
 
 
 namespace CesiumForUnity
@@ -24,6 +20,7 @@ namespace CesiumForUnity
                 if (_cachedWgs84 == null)
                 {
                     _cachedWgs84 = CreateInstance<CesiumEllipsoid>();
+                    _cachedWgs84.name = "WGS84";
                     _cachedWgs84.SetRadii(CesiumWgs84Ellipsoid.GetRadii());
                 }
 
@@ -95,7 +92,7 @@ namespace CesiumForUnity
         /// The longitude (X) and latitude (Y) are in degrees. The height (Z) is in meters above the ellipsoid,
         /// and should not be confused with a geoid, orthometric, or mean sea level height.</param>
         /// <returns>The ECEF coordinates in meters.</returns>
-        public partial double3 LongitudeLatitudeHeightToEllipsoidCenteredEllipsoidFixed(double3 longitudeLatitudeHeight);
+        public partial double3 LongitudeLatitudeHeightToCenteredFixed(double3 longitudeLatitudeHeight);
 
         /// <summary>
         /// Convert Ellipsoid-Centered, Ellipsoid-Fixed (ECEF) coordinates to longitude, latitude, and height.
@@ -105,6 +102,6 @@ namespace CesiumForUnity
         /// The longitude (X) and latitude (Y) are in degrees. The height (Z) is in meters above the ellipsoid,
         /// and should not be confused with a geoid, orthometric, or mean sea level height.
         /// </returns>
-        public partial double3 EllipsoidCenteredEllipsoidFixedToLongitudeLatitudeHeight(double3 ellipsoidCenteredEllipsoidFixed);
+        public partial double3 CenteredFixedToLongitudeLatitudeHeight(double3 ellipsoidCenteredEllipsoidFixed);
     }
 }

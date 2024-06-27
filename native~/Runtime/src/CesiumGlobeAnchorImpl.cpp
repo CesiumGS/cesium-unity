@@ -192,8 +192,10 @@ void CesiumGlobeAnchorImpl::SetLocalToEastUpNorthRotation(
   GlobeAnchor cppAnchor(
       UnityTransforms::fromUnity(anchor._localToGlobeFixedMatrix()));
 
+  const CesiumGeospatial::Ellipsoid& ellipsoid = getAnchorEllipsoid(anchor);
+
   LocalHorizontalCoordinateSystem eastUpNorth =
-      createEastUpNorth(cppAnchor, getAnchorEllipsoid(anchor));
+      createEastUpNorth(cppAnchor, ellipsoid);
 
   glm::dmat4 modelToEastUpNorth =
       cppAnchor.getAnchorToLocalTransform(eastUpNorth);
@@ -216,7 +218,7 @@ void CesiumGlobeAnchorImpl::SetLocalToEastUpNorthRotation(
       eastUpNorth,
       newModelToEastUpNorth,
       false,
-      getAnchorEllipsoid(anchor));
+      ellipsoid);
 
   updateAnchorFromCpp(anchor, cppAnchor);
 }

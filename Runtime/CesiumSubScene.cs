@@ -399,7 +399,7 @@ namespace CesiumForUnity
 
             if (this._originAuthority == CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight)
             {
-                double3 ecef = this._parentGeoreference.ellipsoid.LongitudeLatitudeHeightToEllipsoidCenteredEllipsoidFixed(new double3(
+                double3 ecef = this._parentGeoreference.ellipsoid.LongitudeLatitudeHeightToCenteredFixed(new double3(
                     this._longitude,
                     this._latitude,
                     this._height
@@ -412,7 +412,7 @@ namespace CesiumForUnity
 
             if (this._originAuthority == CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed)
             {
-                double3 llh = this._parentGeoreference.ellipsoid.EllipsoidCenteredEllipsoidFixedToLongitudeLatitudeHeight(new double3(
+                double3 llh = this._parentGeoreference.ellipsoid.CenteredFixedToLongitudeLatitudeHeight(new double3(
                     this._ecefX,
                     this._ecefY,
                     this._ecefZ

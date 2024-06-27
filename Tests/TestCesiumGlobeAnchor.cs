@@ -276,7 +276,7 @@ public class TestCesiumGlobeAnchor
         CesiumGlobeAnchor anchor = goAnchored.AddComponent<CesiumGlobeAnchor>();
 
         // Test WGS84 first
-        double3 actualPosEcef = CesiumEllipsoid.WGS84.LongitudeLatitudeHeightToEllipsoidCenteredEllipsoidFixed(positionLlh);
+        double3 actualPosEcef = CesiumEllipsoid.WGS84.LongitudeLatitudeHeightToCenteredFixed(positionLlh);
         Assert.That(anchor.positionGlobeFixed, Is.EqualTo(actualPosEcef).Using(epsilon6));
 
         // Test with unit ellipsoid
@@ -285,7 +285,7 @@ public class TestCesiumGlobeAnchor
         georeference.ellipsoid = unitEllipsoid;
         georeference.SetOriginLongitudeLatitudeHeight(positionLlh.x, positionLlh.y, positionLlh.z);
 
-        actualPosEcef = unitEllipsoid.LongitudeLatitudeHeightToEllipsoidCenteredEllipsoidFixed(positionLlh);
+        actualPosEcef = unitEllipsoid.CenteredFixedToLongitudeLatitudeHeight(positionLlh);
         goAnchored.transform.SetPositionAndRotation(new Vector3(0, 0, 0), Quaternion.identity);
         anchor.Sync();
         Assert.That(anchor.positionGlobeFixed, Is.EqualTo(actualPosEcef).Using(epsilon6));

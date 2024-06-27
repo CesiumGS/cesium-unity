@@ -361,7 +361,7 @@ namespace CesiumForUnity
             this._destinationRotation = Quaternion.Euler(pitchAtDestination, yawAtDestination, 0.0f);
             this._destinationECEF = destinationECEF;
 
-            this._flightPath = CesiumSimplePlanarEllipsoidCurve.FromEarthCenteredEarthFixedCoordinates(
+            this._flightPath = CesiumSimplePlanarEllipsoidCurve.FromCenteredFixedCoordinates(
                 this._georeference.ellipsoid,
                 sourceECEF, 
                 destinationECEF);
@@ -486,7 +486,7 @@ namespace CesiumForUnity
             bool canInterruptByMoving)
         {
             double3 destinationECEF =
-                this._georeference.ellipsoid.LongitudeLatitudeHeightToEllipsoidCenteredEllipsoidFixed(destination);
+                this._georeference.ellipsoid.LongitudeLatitudeHeightToCenteredFixed(destination);
 
             this.FlyToLocationEarthCenteredEarthFixed(
                 destinationECEF,
@@ -525,7 +525,7 @@ namespace CesiumForUnity
                 z = destination.z
             };
             double3 destinationECEF =
-                this._georeference.ellipsoid.LongitudeLatitudeHeightToEllipsoidCenteredEllipsoidFixed(
+                this._georeference.ellipsoid.LongitudeLatitudeHeightToCenteredFixed(
                     destinationCoordinates);
 
             this.FlyToLocationEarthCenteredEarthFixed(

@@ -265,7 +265,9 @@ namespace CesiumForUnity
             {
                 if (this._ellipsoid == null)
                 {
-                    this._ellipsoid = this._ellipsoidOverride ?? CesiumEllipsoid.WGS84;
+                    // Make a copy of the ellipsoid ScriptableObject
+                    this._ellipsoid = ScriptableObject.CreateInstance<CesiumEllipsoid>();
+                    this._ellipsoid.SetRadii((this._ellipsoidOverride ?? CesiumEllipsoid.WGS84).radii);
                 }
 
                 return this._ellipsoid;
@@ -383,7 +385,11 @@ namespace CesiumForUnity
         /// </summary>
         public void ReloadEllipsoid()
         {
-            this._ellipsoid = this._ellipsoidOverride ?? CesiumEllipsoid.WGS84;
+            // clear cached ellipsoid so it has to be rebuilt
+            this._ellipsoid = null;
+            this.UpdateTransformations();
+            this.UpdateOtherCoordinates();
+
             Cesium3DTileset[] tilesets = GetComponentsInChildren<Cesium3DTileset>();
             foreach(var tileset in tilesets)
             {
@@ -459,7 +465,7 @@ namespace CesiumForUnity
             if (this._originAuthority == CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight)
             {
                 double3 ecef =
-                    this.ellipsoid.LongitudeLatitudeHeightToEllipsoidCenteredEllipsoidFixed(
+                    this.ellipsoid.LongitudeLatitudeHeightToCenteredFixed(
                         new double3(this._longitude, this._latitude, this._height));
                 this._ecefX = ecef.x;
                 this._ecefY = ecef.y;
@@ -468,7 +474,7 @@ namespace CesiumForUnity
             else if (this._originAuthority == CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed)
             {
                 double3 llh =
-                    this.ellipsoid.EllipsoidCenteredEllipsoidFixedToLongitudeLatitudeHeight(
+                    this.ellipsoid.CenteredFixedToLongitudeLatitudeHeight(
                         new double3(this._ecefX, this._ecefY, this._ecefZ));
                 this._longitude = llh.x;
                 this._latitude = llh.y;

@@ -148,6 +148,7 @@ namespace CesiumForUnity
 
             Debug.Log("Logging");
             Debug.LogWarning("Warning");
+            Debug.LogError("Error");
 
             MeshRenderer meshRenderer = new MeshRenderer();
             GameObject meshGameObject = meshRenderer.gameObject;
@@ -517,7 +518,7 @@ namespace CesiumForUnity
             CesiumGlobeAnchor globeAnchor = globeAnchors[globeAnchors.Length - 1];
             globeAnchor.positionGlobeFixed = globeAnchor.positionGlobeFixed;
 
-            CesiumSimplePlanarEllipsoidCurve planarEllipsoidCurve = CesiumSimplePlanarEllipsoidCurve.FromEarthCenteredEarthFixedCoordinates(
+            CesiumSimplePlanarEllipsoidCurve planarEllipsoidCurve = CesiumSimplePlanarEllipsoidCurve.FromCenteredFixedCoordinates(
                 CesiumEllipsoid.WGS84,
                 new double3(0, 0, 0), 
                 new double3(0, 0, 0));

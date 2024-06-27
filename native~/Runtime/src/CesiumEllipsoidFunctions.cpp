@@ -39,7 +39,7 @@ CesiumEllipsoidFunctions::GeodeticSurfaceNormal(
 }
 
 DotNet::Unity::Mathematics::double3 CesiumEllipsoidFunctions::
-    LongitudeLatitudeHeightToEllipsoidCenteredEllipsoidFixed(
+    LongitudeLatitudeHeightToCenteredFixed(
         const CesiumGeospatial::Ellipsoid& ellipsoid,
         DotNet::Unity::Mathematics::double3 longitudeLatitudeHeight) {
   glm::dvec3 cartesian =
@@ -51,7 +51,7 @@ DotNet::Unity::Mathematics::double3 CesiumEllipsoidFunctions::
 }
 
 DotNet::Unity::Mathematics::double3 CesiumEllipsoidFunctions::
-    EllipsoidCenteredEllipsoidFixedToLongitudeLatitudeHeight(
+    CenteredFixedToLongitudeLatitudeHeight(
         const CesiumGeospatial::Ellipsoid& ellipsoid,
         DotNet::Unity::Mathematics::double3 earthCenteredEarthFixed) {
   std::optional<Cartographic> result =

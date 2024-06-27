@@ -119,6 +119,7 @@ namespace CesiumForUnity
             EditorGUILayout.PropertyField(this._ellipsoidOverride, ellipsoidOverrideContent);
             if(EditorGUI.EndChangeCheck())
             {
+                this.serializedObject.ApplyModifiedProperties();
                 this._georeference.ReloadEllipsoid();
             }
         }

@@ -18,11 +18,11 @@ public:
       const CesiumGeospatial::Ellipsoid& ellipsoid,
       DotNet::Unity::Mathematics::double3 earthCenteredEarthFixed);
   static DotNet::Unity::Mathematics::double3
-  LongitudeLatitudeHeightToEllipsoidCenteredEllipsoidFixed(
+  LongitudeLatitudeHeightToCenteredFixed(
       const CesiumGeospatial::Ellipsoid& ellipsoid,
       DotNet::Unity::Mathematics::double3 longitudeLatitudeHeight);
   static DotNet::Unity::Mathematics::double3
-  EllipsoidCenteredEllipsoidFixedToLongitudeLatitudeHeight(
+  CenteredFixedToLongitudeLatitudeHeight(
       const CesiumGeospatial::Ellipsoid& ellipsoid,
       DotNet::Unity::Mathematics::double3 earthCenteredEarthFixed);
 };

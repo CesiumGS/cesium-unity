@@ -34,7 +34,7 @@ double3
 CesiumWgs84EllipsoidImpl::LongitudeLatitudeHeightToEarthCenteredEarthFixed(
     double3 longitudeLatitudeHeight) {
   return CesiumEllipsoidFunctions::
-      LongitudeLatitudeHeightToEllipsoidCenteredEllipsoidFixed(
+      LongitudeLatitudeHeightToCenteredFixed(
           Ellipsoid::WGS84,
           longitudeLatitudeHeight);
 }
@@ -43,7 +43,7 @@ double3
 CesiumWgs84EllipsoidImpl::EarthCenteredEarthFixedToLongitudeLatitudeHeight(
     double3 earthCenteredEarthFixed) {
   return CesiumEllipsoidFunctions::
-      EllipsoidCenteredEllipsoidFixedToLongitudeLatitudeHeight(
+      CenteredFixedToLongitudeLatitudeHeight(
           Ellipsoid::WGS84,
           earthCenteredEarthFixed);
 }

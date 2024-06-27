@@ -23,7 +23,7 @@ public:
       const DotNet::CesiumForUnity::CesiumSimplePlanarEllipsoidCurve& path);
   ~CesiumSimplePlanarEllipsoidCurveImpl();
 
-  bool CreateFromEarthCenteredEarthFixedCoordinates(
+  bool CreateFromCenteredFixed(
       const DotNet::CesiumForUnity::CesiumSimplePlanarEllipsoidCurve& path,
       const DotNet::CesiumForUnity::CesiumEllipsoid& ellipsoid,
       const DotNet::Unity::Mathematics::double3 sourceEcef,

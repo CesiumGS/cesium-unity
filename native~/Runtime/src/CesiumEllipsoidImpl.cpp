@@ -3,17 +3,23 @@
 #include "CesiumEllipsoidFunctions.h"
 
 #include <DotNet/CesiumForUnity/CesiumEllipsoid.h>
+#include <DotNet/System/String.h>
 #include <DotNet/Unity/Mathematics/double3.h>
+#include <DotNet/UnityEngine/Debug.h>
+#include <DotNet/System/Object.h>
+
+#include <limits>
 
 using namespace DotNet::Unity::Mathematics;
 using namespace DotNet::CesiumForUnity;
 
+static constexpr double MinRadiiValue = std::numeric_limits<double>::epsilon();
+
 CesiumForUnityNative::CesiumEllipsoidImpl::CesiumEllipsoidImpl(
     const DotNet::CesiumForUnity::CesiumEllipsoid& unityEllipsoid)
-    : _ellipsoid(
-          unityEllipsoid.radii().x,
-          unityEllipsoid.radii().y,
-          unityEllipsoid.radii().z) {}
+    : _ellipsoid(1.0, 1.0, 1.0) {
+  this->SetRadii(unityEllipsoid, unityEllipsoid.radii());
+}
 
 CesiumForUnityNative::CesiumEllipsoidImpl::~CesiumEllipsoidImpl() {}
 
@@ -26,8 +32,23 @@ CesiumForUnityNative::CesiumEllipsoidImpl::GetRadii(
 void CesiumForUnityNative::CesiumEllipsoidImpl::SetRadii(
     const DotNet::CesiumForUnity::CesiumEllipsoid& unityEllipsoid,
     const DotNet::Unity::Mathematics::double3& newRadii) {
-  this->_ellipsoid =
-      CesiumGeospatial::Ellipsoid(newRadii.x, newRadii.y, newRadii.z);
+  if (newRadii.x < MinRadiiValue || newRadii.y < MinRadiiValue ||
+      newRadii.z < MinRadiiValue) {
+    DotNet::UnityEngine::Debug::LogError(
+        DotNet::System::String("Ellipsoid radii must be greater than 0 - "
+                               "clamping to minimum value to avoid crashes."));
+  }
+
+  double3 clampedRadii = double3::Construct(
+      std::max(newRadii.x, MinRadiiValue),
+      std::max(newRadii.y, MinRadiiValue),
+      std::max(newRadii.z, MinRadiiValue));
+
+  this->_ellipsoid = CesiumGeospatial::Ellipsoid(
+      clampedRadii.x,
+      clampedRadii.y,
+      clampedRadii.z);
+  unityEllipsoid.radii(clampedRadii);
 }
 
 std::optional<DotNet::Unity::Mathematics::double3>
@@ -51,22 +72,20 @@ CesiumForUnityNative::CesiumEllipsoidImpl::GeodeticSurfaceNormal(
 }
 
 DotNet::Unity::Mathematics::double3 CesiumForUnityNative::CesiumEllipsoidImpl::
-    LongitudeLatitudeHeightToEllipsoidCenteredEllipsoidFixed(
+    LongitudeLatitudeHeightToCenteredFixed(
         const DotNet::CesiumForUnity::CesiumEllipsoid& unityEllipsoid,
         const DotNet::Unity::Mathematics::double3& longitudeLatitudeHeight) {
-  return CesiumEllipsoidFunctions::
-      LongitudeLatitudeHeightToEllipsoidCenteredEllipsoidFixed(
-          this->_ellipsoid,
-          longitudeLatitudeHeight);
+  return CesiumEllipsoidFunctions::LongitudeLatitudeHeightToCenteredFixed(
+      this->_ellipsoid,
+      longitudeLatitudeHeight);
 }
 
 DotNet::Unity::Mathematics::double3 CesiumForUnityNative::CesiumEllipsoidImpl::
-    EllipsoidCenteredEllipsoidFixedToLongitudeLatitudeHeight(
+    CenteredFixedToLongitudeLatitudeHeight(
         const DotNet::CesiumForUnity::CesiumEllipsoid& unityEllipsoid,
         const DotNet::Unity::Mathematics::double3&
             ellipsoidCenteredEllipsoidFixed) {
-  return CesiumEllipsoidFunctions::
-      EllipsoidCenteredEllipsoidFixedToLongitudeLatitudeHeight(
-          this->_ellipsoid,
-          ellipsoidCenteredEllipsoidFixed);
+  return CesiumEllipsoidFunctions::CenteredFixedToLongitudeLatitudeHeight(
+      this->_ellipsoid,
+      ellipsoidCenteredEllipsoidFixed);
 }

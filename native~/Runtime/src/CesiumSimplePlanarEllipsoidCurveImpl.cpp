@@ -15,7 +15,7 @@ CesiumSimplePlanarEllipsoidCurveImpl::CesiumSimplePlanarEllipsoidCurveImpl(
 CesiumSimplePlanarEllipsoidCurveImpl::~CesiumSimplePlanarEllipsoidCurveImpl() {}
 
 bool CesiumSimplePlanarEllipsoidCurveImpl::
-    CreateFromEarthCenteredEarthFixedCoordinates(
+    CreateFromCenteredFixed(
         const DotNet::CesiumForUnity::CesiumSimplePlanarEllipsoidCurve& path,
         const DotNet::CesiumForUnity::CesiumEllipsoid& ellipsoid,
         const DotNet::Unity::Mathematics::double3 sourceEcef,
