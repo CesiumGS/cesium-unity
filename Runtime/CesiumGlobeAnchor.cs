@@ -84,6 +84,9 @@ namespace CesiumForUnity
         [NonSerialized]
         internal CesiumGeoreference _georeference;
 
+        [NonSerialized]
+        internal double3? _lastEllipsoidRadii;
+
         #endregion
 
         #region User-editable properties
@@ -396,7 +399,7 @@ namespace CesiumForUnity
             this.longitudeLatitudeHeight = new double3(longitude, latitude, height);
         }
 
-         
+
         [Obsolete("Set the positionGlobeFixed property instead.")]
         public void SetPositionEarthCenteredEarthFixed(double x, double y, double z)
         {
@@ -444,9 +447,16 @@ namespace CesiumForUnity
         /// </remarks>
         public void Sync()
         {
+            // If the ellipsoid changed since last sync, we need to update from transform since our ECEF mapping
+            // is going to be invalid.
+            bool isEllipsoidChanged = _lastEllipsoidRadii.HasValue ?
+                (_lastEllipsoidRadii.Value.x != _georeference.ellipsoid.radii.x ||
+                _lastEllipsoidRadii.Value.y != _georeference.ellipsoid.radii.y ||
+                _lastEllipsoidRadii.Value.z != _georeference.ellipsoid.radii.z) : true;
+
             // If we don't have a local -> globe fixed matrix yet, we must update from the Transform
             bool updateFromTransform = !this._localToGlobeFixedMatrixIsValid;
-            if (!updateFromTransform && this._lastLocalsAreValid)
+            if (!isEllipsoidChanged && !updateFromTransform && this._lastLocalsAreValid)
             {
                 // We may also need to update from the Transform if it has changed
                 // since the last time we computed the local -> globe fixed matrix.
@@ -456,7 +466,9 @@ namespace CesiumForUnity
                     this._lastLocalScale != this.transform.localScale;
             }
 
-            if (updateFromTransform)
+            _lastEllipsoidRadii = _georeference.ellipsoid.radii;
+
+            if (isEllipsoidChanged || updateFromTransform)
                 this.UpdateEcefFromTransform();
             else
                 this.UpdateEcef(this._localToGlobeFixedMatrix);

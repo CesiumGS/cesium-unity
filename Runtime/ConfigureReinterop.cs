@@ -550,6 +550,7 @@ namespace CesiumForUnity
             Cesium3DTile tile = new Cesium3DTile();
             tile._transform = new double4x4();
             tile._pTile = IntPtr.Zero;
+            tile._pTileEllipsoid = IntPtr.Zero;
 
             Cesium3DTileInfo info;
             info.usesAdditiveRefinement = true;
