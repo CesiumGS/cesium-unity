@@ -563,7 +563,7 @@ void Cesium3DTilesetImpl::LoadTileset(
         ionAssetEndpointUrl += '/';
 
       this->_pTileset = std::make_unique<Tileset>(
-          createTilesetExternals(tileset, options.ellipsoid),
+          createTilesetExternals(tileset),
           tileset.ionAssetID(),
           ionAccessToken.ToStlString(),
           options,
@@ -574,7 +574,7 @@ void Cesium3DTilesetImpl::LoadTileset(
     }
   } else {
     this->_pTileset = std::make_unique<Tileset>(
-        createTilesetExternals(tileset, options.ellipsoid),
+        createTilesetExternals(tileset),
         tileset.url().ToStlString(),
         options);
   }
