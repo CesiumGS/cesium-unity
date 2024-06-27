@@ -70,9 +70,10 @@ bool UnityTileExcluderAdaptor::shouldExclude(
       _georeference.ellipsoid().NativeImplementation().GetEllipsoid();
 
   this->_tile._pTile(const_cast<Cesium3DTilesSelection::Tile*>(&tile));
-  // it's ok for us to pass by pointer since it will only be valid for this call anyways
-  this->_tile
-      ._pTileEllipsoid(const_cast<CesiumGeospatial::Ellipsoid*>(&ellipsoid));
+  // it's ok for us to pass by pointer since it will only be valid for this call
+  // anyways
+  this->_tile._pTileEllipsoid(
+      const_cast<CesiumGeospatial::Ellipsoid*>(&ellipsoid));
   return this->_excluder.ShouldExclude(this->_tile);
 }
 

@@ -14,12 +14,11 @@ CesiumSimplePlanarEllipsoidCurveImpl::CesiumSimplePlanarEllipsoidCurveImpl(
 
 CesiumSimplePlanarEllipsoidCurveImpl::~CesiumSimplePlanarEllipsoidCurveImpl() {}
 
-bool CesiumSimplePlanarEllipsoidCurveImpl::
-    CreateFromCenteredFixed(
-        const DotNet::CesiumForUnity::CesiumSimplePlanarEllipsoidCurve& path,
-        const DotNet::CesiumForUnity::CesiumEllipsoid& ellipsoid,
-        const DotNet::Unity::Mathematics::double3 sourceEcef,
-        const DotNet::Unity::Mathematics::double3 destinationEcef) {
+bool CesiumSimplePlanarEllipsoidCurveImpl::CreateFromCenteredFixed(
+    const DotNet::CesiumForUnity::CesiumSimplePlanarEllipsoidCurve& path,
+    const DotNet::CesiumForUnity::CesiumEllipsoid& ellipsoid,
+    const DotNet::Unity::Mathematics::double3 sourceEcef,
+    const DotNet::Unity::Mathematics::double3 destinationEcef) {
   this->_curve =
       SimplePlanarEllipsoidCurve::fromEarthCenteredEarthFixedCoordinates(
           ellipsoid.NativeImplementation().GetEllipsoid(),

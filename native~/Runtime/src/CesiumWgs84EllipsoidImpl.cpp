@@ -33,19 +33,17 @@ double3 CesiumWgs84EllipsoidImpl::GeodeticSurfaceNormal(
 double3
 CesiumWgs84EllipsoidImpl::LongitudeLatitudeHeightToEarthCenteredEarthFixed(
     double3 longitudeLatitudeHeight) {
-  return CesiumEllipsoidFunctions::
-      LongitudeLatitudeHeightToCenteredFixed(
-          Ellipsoid::WGS84,
-          longitudeLatitudeHeight);
+  return CesiumEllipsoidFunctions::LongitudeLatitudeHeightToCenteredFixed(
+      Ellipsoid::WGS84,
+      longitudeLatitudeHeight);
 }
 
 double3
 CesiumWgs84EllipsoidImpl::EarthCenteredEarthFixedToLongitudeLatitudeHeight(
     double3 earthCenteredEarthFixed) {
-  return CesiumEllipsoidFunctions::
-      CenteredFixedToLongitudeLatitudeHeight(
-          Ellipsoid::WGS84,
-          earthCenteredEarthFixed);
+  return CesiumEllipsoidFunctions::CenteredFixedToLongitudeLatitudeHeight(
+      Ellipsoid::WGS84,
+      earthCenteredEarthFixed);
 }
 
 } // namespace CesiumForUnityNative

@@ -38,10 +38,10 @@ CesiumEllipsoidFunctions::GeodeticSurfaceNormal(
   return double3{result.x, result.y, result.z};
 }
 
-DotNet::Unity::Mathematics::double3 CesiumEllipsoidFunctions::
-    LongitudeLatitudeHeightToCenteredFixed(
-        const CesiumGeospatial::Ellipsoid& ellipsoid,
-        DotNet::Unity::Mathematics::double3 longitudeLatitudeHeight) {
+DotNet::Unity::Mathematics::double3
+CesiumEllipsoidFunctions::LongitudeLatitudeHeightToCenteredFixed(
+    const CesiumGeospatial::Ellipsoid& ellipsoid,
+    DotNet::Unity::Mathematics::double3 longitudeLatitudeHeight) {
   glm::dvec3 cartesian =
       ellipsoid.cartographicToCartesian(Cartographic::fromDegrees(
           longitudeLatitudeHeight.x,
@@ -50,10 +50,10 @@ DotNet::Unity::Mathematics::double3 CesiumEllipsoidFunctions::
   return double3{cartesian.x, cartesian.y, cartesian.z};
 }
 
-DotNet::Unity::Mathematics::double3 CesiumEllipsoidFunctions::
-    CenteredFixedToLongitudeLatitudeHeight(
-        const CesiumGeospatial::Ellipsoid& ellipsoid,
-        DotNet::Unity::Mathematics::double3 earthCenteredEarthFixed) {
+DotNet::Unity::Mathematics::double3
+CesiumEllipsoidFunctions::CenteredFixedToLongitudeLatitudeHeight(
+    const CesiumGeospatial::Ellipsoid& ellipsoid,
+    DotNet::Unity::Mathematics::double3 earthCenteredEarthFixed) {
   std::optional<Cartographic> result =
       ellipsoid.cartesianToCartographic(glm::dvec3(
           earthCenteredEarthFixed.x,

@@ -3,10 +3,10 @@
 #include "CesiumEllipsoidFunctions.h"
 
 #include <DotNet/CesiumForUnity/CesiumEllipsoid.h>
+#include <DotNet/System/Object.h>
 #include <DotNet/System/String.h>
 #include <DotNet/Unity/Mathematics/double3.h>
 #include <DotNet/UnityEngine/Debug.h>
-#include <DotNet/System/Object.h>
 
 #include <limits>
 
