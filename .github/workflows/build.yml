@@ -12,6 +12,25 @@ jobs:
       - name: Check source formatting
         run: |
           find native~/Runtime native~/Editor native~/Shared \( -iname '*.cpp' -o -iname '*.h' \) -print0 | xargs -0 clang-format --dry-run -Werror
+  Documentation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Doxygen
+        run: |
+          sudo apt install -y doxygen
+      - name: Check out repository code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Generate Documentation
+        run: |
+          doxygen ./Documentation~/Doxyfile
+      - name: Publish Documentation Artifact
+        if: ${{ success() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ReferenceDocumentation
+          path: Documentation~/Reference
   Windows:
     needs: [QuickChecks]
     runs-on: windows-latest
