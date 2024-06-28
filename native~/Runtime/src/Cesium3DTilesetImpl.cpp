@@ -575,10 +575,9 @@ void Cesium3DTilesetImpl::LoadTileset(
     }
   } else if (
       tileset.tilesetSource() ==
-      CesiumForUnity::CesiumDataSource::FromWGS84Ellipsoid) {
+      CesiumForUnity::CesiumDataSource::FromEllipsoid) {
     this->_pTileset = EllipsoidTilesetLoader::createTileset(
         createTilesetExternals(tileset),
-        CesiumGeospatial::Ellipsoid::WGS84,
         options);
   } else {
     this->_pTileset = std::make_unique<Tileset>(
