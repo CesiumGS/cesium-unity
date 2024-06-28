@@ -2,15 +2,15 @@
 
 ### ? - ?
 
-##### Fixes :wrench:
-
-- Fixed a bug that caused Cesium ion tokens selected on the Tokens panel to fail to save.
-- Fixed a bug that caused the "Select Cesium ion Token" panel to show the wrong state when the current token was not from the currently-signed-in Cesium ion account, but the signed-in account had a token named after the current Unity project.
-
 ##### Additions :tada:
 - Added support for custom non-WGS84 ellipsoids.
     - The ellipsoid can be changed by specifying a `CesiumEllipsoid` asset in the new "Ellipsoid Override" property of a `CesiumGeoreference`.
     - New `CesiumEllipsoid` assets can be created using the menu option `Assets > Create > Cesium > Ellipsoid`.
+
+##### Fixes :wrench:
+
+- Fixed a bug that caused Cesium ion tokens selected on the Tokens panel to fail to save.
+- Fixed a bug that caused the "Select Cesium ion Token" panel to show the wrong state when the current token was not from the currently-signed-in Cesium ion account, but the signed-in account had a token named after the current Unity project.
 
 ### v1.10.1 - 2024-06-03
 
