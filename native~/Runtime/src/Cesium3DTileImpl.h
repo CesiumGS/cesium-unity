@@ -14,6 +14,7 @@ class Cesium3DTileImpl {
 public:
   static DotNet::UnityEngine::Bounds getBounds(
       void* pTileVoid,
+      void* pTileEllipsoidVoid,
       const DotNet::Unity::Mathematics::double4x4& ecefToLocalMatrix);
 };
 
