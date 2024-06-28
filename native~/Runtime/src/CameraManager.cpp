@@ -7,6 +7,7 @@
 #include <CesiumGeospatial/GlobeTransforms.h>
 #include <CesiumUtility/Math.h>
 
+#include <DotNet/CesiumForUnity/CesiumEllipsoid.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/UnityEngine/Camera.h>
 #include <DotNet/UnityEngine/GameObject.h>
@@ -35,6 +36,7 @@ namespace CesiumForUnityNative {
 namespace {
 
 ViewState unityCameraToViewState(
+    const CesiumGeoreference& georeference,
     const LocalHorizontalCoordinateSystem* pCoordinateSystem,
     const glm::dmat4& unityWorldToTileset,
     Camera& camera) {
@@ -71,13 +73,19 @@ ViewState unityCameraToViewState(
   double horizontalFOV =
       2 * glm::atan(camera.aspect() * glm::tan(verticalFOV * 0.5));
 
+  const CesiumGeospatial::Ellipsoid& ellipsoid =
+      georeference != nullptr
+          ? georeference.ellipsoid().NativeImplementation().GetEllipsoid()
+          : CesiumGeospatial::Ellipsoid::WGS84;
+
   return ViewState::create(
       cameraPosition,
       glm::normalize(cameraDirection),
       glm::normalize(cameraUp),
       glm::dvec2(camera.pixelWidth(), camera.pixelHeight()),
       horizontalFOV,
-      verticalFOV);
+      verticalFOV,
+      ellipsoid);
 }
 
 } // namespace
@@ -100,8 +108,11 @@ std::vector<ViewState> CameraManager::getAllCameras(const GameObject& context) {
   std::vector<ViewState> result;
   Camera camera = Camera::main();
   if (camera != nullptr) {
-    result.emplace_back(
-        unityCameraToViewState(pCoordinateSystem, unityWorldToTileset, camera));
+    result.emplace_back(unityCameraToViewState(
+        georeferenceComponent,
+        pCoordinateSystem,
+        unityWorldToTileset,
+        camera));
   }
 
 #if UNITY_EDITOR
@@ -111,6 +122,7 @@ std::vector<ViewState> CameraManager::getAllCameras(const GameObject& context) {
       Camera editorCamera = lastActiveEditorView.camera();
       if (editorCamera != nullptr) {
         result.emplace_back(unityCameraToViewState(
+            georeferenceComponent,
             pCoordinateSystem,
             unityWorldToTileset,
             editorCamera));

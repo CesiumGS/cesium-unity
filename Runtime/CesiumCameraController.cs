@@ -622,7 +622,7 @@ namespace CesiumForUnity
             if (this._georeference != null)
             {
                 double3 positionECEF = this._globeAnchor.positionGlobeFixed;
-                double3 upECEF = CesiumWgs84Ellipsoid.GeodeticSurfaceNormal(positionECEF);
+                double3 upECEF = this._georeference.ellipsoid.GeodeticSurfaceNormal(positionECEF);
                 double3 upUnity =
                     this._georeference.TransformEarthCenteredEarthFixedDirectionToUnity(upECEF);
 
@@ -801,7 +801,7 @@ namespace CesiumForUnity
 
             if (height >= this._dynamicClippingPlanesMinHeight)
             {
-                farClipPlane = height + (float)(2.0 * CesiumWgs84Ellipsoid.GetMaximumRadius());
+                farClipPlane = height + (float)(2.0 * this._georeference.ellipsoid.GetMaximumRadius());
                 farClipPlane = Mathf.Min(farClipPlane, this._maximumFarClipPlane);
 
                 float farClipRatio = farClipPlane / this._maximumNearToFarRatio;

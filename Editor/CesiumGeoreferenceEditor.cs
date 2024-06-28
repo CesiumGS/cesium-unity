@@ -21,6 +21,7 @@ namespace CesiumForUnity
             }
         }
 
+        private SerializedProperty _ellipsoidOverride;
         private SerializedProperty _latitude;
         private SerializedProperty _longitude;
         private SerializedProperty _height;
@@ -35,6 +36,7 @@ namespace CesiumForUnity
         {
             this._georeference = (CesiumGeoreference)this.target;
 
+            this._ellipsoidOverride = this.serializedObject.FindProperty("_ellipsoidOverride");
             this._originAuthority =
                 this.serializedObject.FindProperty("_originAuthority");
 
@@ -56,6 +58,8 @@ namespace CesiumForUnity
             DrawInspectorButtons();
             EditorGUILayout.Space(5);
 
+            this.DrawEllipsoidOverrideProperty();
+            EditorGUILayout.Space(5);
             this.DrawScaleProperty();
             EditorGUILayout.Space(5);
             this.DrawOriginAuthorityProperty();
@@ -102,6 +106,22 @@ namespace CesiumForUnity
             GUILayout.EndHorizontal();
 
             EditorGUI.EndDisabledGroup();
+        }
+
+        private void DrawEllipsoidOverrideProperty()
+        {
+            GUIContent ellipsoidOverrideContent = new GUIContent(
+                "Ellipsoid Override",
+                "The ellipsoid definition to use for this tileset. If this is left blank, " +
+                "the ellipsoid specified by the tileset is used, or WGS84 if the tileset " +
+                "doesn't list an ellipsoid to use.");
+            EditorGUI.BeginChangeCheck();
+            EditorGUILayout.PropertyField(this._ellipsoidOverride, ellipsoidOverrideContent);
+            if(EditorGUI.EndChangeCheck())
+            {
+                this.serializedObject.ApplyModifiedProperties();
+                this._georeference.ReloadEllipsoid();
+            }
         }
 
         private void DrawScaleProperty()

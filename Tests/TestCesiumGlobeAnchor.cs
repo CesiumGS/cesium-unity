@@ -237,7 +237,7 @@ public class TestCesiumGlobeAnchor
 
         // Modify the object's position via the Transform.
         goAnchored.transform.position = new Vector3(20000.0f, 3000.0f, -80000.0f);
-        
+
         // The orientation should not immediately change, because the coroutine has to run first.
         Assert.That(goAnchored.transform.position.x, Is.EqualTo(20000.0f).Using(FloatEqualityComparer.Instance));
         Assert.That(goAnchored.transform.position.y, Is.EqualTo(3000.0f).Using(FloatEqualityComparer.Instance));
@@ -255,5 +255,39 @@ public class TestCesiumGlobeAnchor
         Assert.That(goAnchored.transform.rotation.eulerAngles.x, Is.Not.EqualTo(10.0f).Using(FloatEqualityComparer.Instance));
         Assert.That(goAnchored.transform.rotation.eulerAngles.y, Is.Not.EqualTo(20.0f).Using(FloatEqualityComparer.Instance));
         Assert.That(goAnchored.transform.rotation.eulerAngles.z, Is.Not.EqualTo(30.0f).Using(FloatEqualityComparer.Instance));
+    }
+
+    [Test]
+    public void GivesCorrectResultsForDifferentEllipsoids()
+    {
+        IEqualityComparer<double3> epsilon6 = Comparers.Double3(1e-6, 1e-4);
+
+        double3 positionLlh = new double3(-20, -10, 1000.0);
+
+        GameObject goGeoreference = new GameObject("Georeference");
+        CesiumGeoreference georeference = goGeoreference.AddComponent<CesiumGeoreference>();
+        georeference.ellipsoid = CesiumEllipsoid.WGS84;
+        georeference.SetOriginLongitudeLatitudeHeight(positionLlh.x, positionLlh.y, positionLlh.z);
+
+        GameObject goAnchored = new GameObject("Anchored");
+        goAnchored.transform.parent = goGeoreference.transform;
+        goAnchored.transform.SetPositionAndRotation(new Vector3(0, 0, 0), Quaternion.identity);
+
+        CesiumGlobeAnchor anchor = goAnchored.AddComponent<CesiumGlobeAnchor>();
+
+        // Test WGS84 first
+        double3 actualPosEcef = CesiumEllipsoid.WGS84.LongitudeLatitudeHeightToCenteredFixed(positionLlh);
+        Assert.That(anchor.positionGlobeFixed, Is.EqualTo(actualPosEcef).Using(epsilon6));
+
+        // Test with unit ellipsoid
+        CesiumEllipsoid unitEllipsoid = ScriptableObject.CreateInstance<CesiumEllipsoid>();
+        unitEllipsoid.SetRadii(new double3(1.0, 1.0, 1.0));
+        georeference.ellipsoid = unitEllipsoid;
+        georeference.SetOriginLongitudeLatitudeHeight(positionLlh.x, positionLlh.y, positionLlh.z);
+
+        actualPosEcef = unitEllipsoid.LongitudeLatitudeHeightToCenteredFixed(positionLlh);
+        goAnchored.transform.SetPositionAndRotation(new Vector3(0, 0, 0), Quaternion.identity);
+        anchor.Sync();
+        Assert.That(anchor.positionGlobeFixed, Is.EqualTo(actualPosEcef).Using(epsilon6));
     }
 }

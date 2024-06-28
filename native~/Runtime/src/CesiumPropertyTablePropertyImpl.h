@@ -1,6 +1,7 @@
 #pragma once
 
 #include <any>
+#include <cstdint>
 #include <unordered_map>
 
 namespace DotNet::CesiumForUnity {
