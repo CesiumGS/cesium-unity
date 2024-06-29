@@ -15,6 +15,7 @@ namespace CesiumForUnity
     {
         internal double4x4 _transform;
         internal IntPtr _pTile;
+        internal IntPtr _pTileEllipsoid;
 
         internal Cesium3DTile()
         {}
@@ -27,10 +28,10 @@ namespace CesiumForUnity
         {
             get
             {
-                return Cesium3DTile.getBounds(this._pTile, this._transform);
+                return Cesium3DTile.getBounds(this._pTile, this._pTileEllipsoid, this._transform);
             }
         }
 
-        private static partial Bounds getBounds(IntPtr pTile, double4x4 ecefToLocalMatrix);
+        private static partial Bounds getBounds(IntPtr pTile, IntPtr pTileEllipsoid, double4x4 ecefToLocalMatrix);
     }
 }

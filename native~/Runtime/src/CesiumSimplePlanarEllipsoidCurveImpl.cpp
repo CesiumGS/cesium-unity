@@ -14,14 +14,14 @@ CesiumSimplePlanarEllipsoidCurveImpl::CesiumSimplePlanarEllipsoidCurveImpl(
 
 CesiumSimplePlanarEllipsoidCurveImpl::~CesiumSimplePlanarEllipsoidCurveImpl() {}
 
-bool CesiumSimplePlanarEllipsoidCurveImpl::
-    CreateFromEarthCenteredEarthFixedCoordinates(
-        const DotNet::CesiumForUnity::CesiumSimplePlanarEllipsoidCurve& path,
-        const DotNet::Unity::Mathematics::double3 sourceEcef,
-        const DotNet::Unity::Mathematics::double3 destinationEcef) {
+bool CesiumSimplePlanarEllipsoidCurveImpl::CreateFromCenteredFixed(
+    const DotNet::CesiumForUnity::CesiumSimplePlanarEllipsoidCurve& path,
+    const DotNet::CesiumForUnity::CesiumEllipsoid& ellipsoid,
+    const DotNet::Unity::Mathematics::double3 sourceEcef,
+    const DotNet::Unity::Mathematics::double3 destinationEcef) {
   this->_curve =
       SimplePlanarEllipsoidCurve::fromEarthCenteredEarthFixedCoordinates(
-          Ellipsoid::WGS84,
+          ellipsoid.NativeImplementation().GetEllipsoid(),
           glm::dvec3(sourceEcef.x, sourceEcef.y, sourceEcef.z),
           glm::dvec3(destinationEcef.x, destinationEcef.y, destinationEcef.z));
 
@@ -30,10 +30,11 @@ bool CesiumSimplePlanarEllipsoidCurveImpl::
 
 bool CesiumSimplePlanarEllipsoidCurveImpl::CreateFromLongitudeLatitudeHeight(
     const DotNet::CesiumForUnity::CesiumSimplePlanarEllipsoidCurve& path,
+    const DotNet::CesiumForUnity::CesiumEllipsoid& ellipsoid,
     const DotNet::Unity::Mathematics::double3 sourceLlh,
     const DotNet::Unity::Mathematics::double3 destinationLlh) {
   this->_curve = SimplePlanarEllipsoidCurve::fromLongitudeLatitudeHeight(
-      Ellipsoid::WGS84,
+      ellipsoid.NativeImplementation().GetEllipsoid(),
       Cartographic(sourceLlh.x, sourceLlh.y, sourceLlh.z),
       Cartographic(destinationLlh.x, destinationLlh.y, destinationLlh.z));
 

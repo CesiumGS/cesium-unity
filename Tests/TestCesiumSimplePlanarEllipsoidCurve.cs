@@ -21,7 +21,7 @@ public class TestCesiumSimplePlanarEllipsoidCurve
     public IEnumerator StartAndEndOfPathAreIdenticalToInput()
     {
         CesiumSimplePlanarEllipsoidCurve flightPath =
-            CesiumSimplePlanarEllipsoidCurve.FromEarthCenteredEarthFixedCoordinates(_philadelphiaEcef, _tokyoEcef);
+            CesiumSimplePlanarEllipsoidCurve.FromCenteredFixedCoordinates(CesiumEllipsoid.WGS84, _philadelphiaEcef, _tokyoEcef);
         Assert.IsNotNull(flightPath);
 
         double3 startPosition = flightPath.GetPosition(0.0);
@@ -43,7 +43,7 @@ public class TestCesiumSimplePlanarEllipsoidCurve
     public IEnumerator ShouldCalculateMidpointCorrectly()
     {
         CesiumSimplePlanarEllipsoidCurve flightPath =
-            CesiumSimplePlanarEllipsoidCurve.FromEarthCenteredEarthFixedCoordinates(_philadelphiaEcef, _tokyoEcef);
+            CesiumSimplePlanarEllipsoidCurve.FromCenteredFixedCoordinates(CesiumEllipsoid.WGS84, _philadelphiaEcef, _tokyoEcef);
         Assert.IsNotNull(flightPath);
 
         double3 expectedResult = new double3(

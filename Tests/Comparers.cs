@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Unity.Mathematics;
 
 internal class Comparers
 {
@@ -37,6 +38,26 @@ internal class Comparers
         }
     }
 
+    private class Double3Comparer : IEqualityComparer<double3>
+    {
+        private DoubleComparer _doubleComparer;
+
+        public Double3Comparer(double absoluteEpsilon, double relativeEpsilon = 0.0)
+        {
+            this._doubleComparer = new DoubleComparer(absoluteEpsilon, relativeEpsilon);
+        }
+
+        public bool Equals(double3 a, double3 b)
+        {
+            return _doubleComparer.Equals(a.x, b.x) && _doubleComparer.Equals(a.y, b.y) && _doubleComparer.Equals(a.z, b.z);
+        }
+
+        public int GetHashCode(double3 obj)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public static IEqualityComparer<double> Double(double absoluteEpsilon)
     {
         return new DoubleComparer(absoluteEpsilon);
@@ -45,5 +66,15 @@ internal class Comparers
     public static IEqualityComparer<double> Double(double absoluteEpsilon, double relativeEpsilon)
     {
         return new DoubleComparer(absoluteEpsilon, relativeEpsilon);
+    }
+
+    public static IEqualityComparer<double3> Double3(double absoluteEpsilon)
+    {
+        return new Double3Comparer(absoluteEpsilon);
+    }
+
+    public static IEqualityComparer<double3> Double3(double absoluteEpsilon, double relativeEpsilon)
+    {
+        return new Double3Comparer(absoluteEpsilon, relativeEpsilon);
     }
 }
