@@ -1,17 +1,20 @@
 # Change Log
 
-### ? - ?
+### v1.11.0 - 2024-07-01
 
 ##### Additions :tada:
+
 - Added support for custom non-WGS84 ellipsoids.
-    - The ellipsoid can be changed by specifying a `CesiumEllipsoid` asset in the new "Ellipsoid Override" property of a `CesiumGeoreference`.
-    - New `CesiumEllipsoid` assets can be created using the menu option `Assets > Create > Cesium > Ellipsoid`.
+  - The ellipsoid can be changed by specifying a `CesiumEllipsoid` asset in the new "Ellipsoid Override" property of a `CesiumGeoreference`.
+  - New `CesiumEllipsoid` assets can be created using the menu option `Assets > Create > Cesium > Ellipsoid`.
 
 ##### Fixes :wrench:
 
-- Cesium for Unity now links statically against the MSVC runtime library on Windows, avoiding the new for an MSVC redistributable to be installed.
+- Cesium for Unity now links statically against the MSVC runtime library on Windows, avoiding the need for an MSVC redistributable to be installed.
 - Fixed a bug that caused Cesium ion tokens selected on the Tokens panel to fail to save.
 - Fixed a bug that caused the "Select Cesium ion Token" panel to show the wrong state when the current token was not from the currently-signed-in Cesium ion account, but the signed-in account had a token named after the current Unity project.
+
+This release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.36.0 to v0.37.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
 
 ### v1.10.1 - 2024-06-03
 
