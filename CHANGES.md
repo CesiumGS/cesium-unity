@@ -9,6 +9,7 @@
 
 ##### Fixes :wrench:
 
+- Cesium for Unity now links statically against the MSVC runtime library on Windows, avoiding the new for an MSVC redistributable to be installed.
 - Fixed a bug that caused Cesium ion tokens selected on the Tokens panel to fail to save.
 - Fixed a bug that caused the "Select Cesium ion Token" panel to show the wrong state when the current token was not from the currently-signed-in Cesium ion account, but the signed-in account had a token named after the current Unity project.
 
