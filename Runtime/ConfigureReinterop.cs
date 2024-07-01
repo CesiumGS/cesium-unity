@@ -540,6 +540,7 @@ namespace CesiumForUnity
             globeAnchor._lastLocalPosition = new Vector3();
             globeAnchor._lastLocalRotation = new Quaternion();
             globeAnchor._lastLocalScale = new Vector3();
+            globeAnchor._lastEllipsoidRadii = new double3();
             globeAnchor.UpdateGeoreferenceIfNecessary();
 
             CesiumTileExcluder[] excluders = go.GetComponentsInParent<CesiumTileExcluder>();
