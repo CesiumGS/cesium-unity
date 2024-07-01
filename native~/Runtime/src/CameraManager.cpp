@@ -9,6 +9,7 @@
 
 #include <DotNet/CesiumForUnity/CesiumEllipsoid.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
+#include <DotNet/CesiumForUnity/CesiumCamera.h>
 #include <DotNet/UnityEngine/Camera.h>
 #include <DotNet/UnityEngine/GameObject.h>
 #include <DotNet/UnityEngine/Matrix4x4.h>
@@ -106,7 +107,12 @@ std::vector<ViewState> CameraManager::getAllCameras(const GameObject& context) {
   }
 
   std::vector<ViewState> result;
-  Camera camera = Camera::main();
+  
+  Camera camera = CesiumCamera::camera();
+  if (camera == nullptr) {
+   camera = Camera::main();
+  }
+
   if (camera != nullptr) {
     result.emplace_back(unityCameraToViewState(
         georeferenceComponent,
