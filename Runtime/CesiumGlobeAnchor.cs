@@ -466,8 +466,6 @@ namespace CesiumForUnity
                     this._lastLocalScale != this.transform.localScale;
             }
 
-            _lastEllipsoidRadii = _georeference.ellipsoid.radii;
-
             if (isEllipsoidChanged || updateFromTransform)
                 this.UpdateEcefFromTransform();
             else

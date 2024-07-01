@@ -116,6 +116,7 @@ void updateAnchorFromCpp(
     anchor._lastLocalRotation(transform.localRotation());
     anchor._lastLocalScale(transform.localScale());
     anchor._lastLocalsAreValid(true);
+    anchor._lastEllipsoidRadii(georeference.ellipsoid().radii());
   }
 }
 
