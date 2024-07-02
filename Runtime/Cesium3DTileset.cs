@@ -20,9 +20,9 @@ namespace CesiumForUnity
         FromUrl,
 
         /// <summary>
-        /// The dataset is from a WGS84 Ellipsoid.
+        /// The dataset is from an ellipsoid.
         /// </summary>
-        FromWGS84Ellipsoid
+        FromEllipsoid
     }
 
     /// <summary>
