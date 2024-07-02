@@ -99,12 +99,14 @@ void CesiumPolygonRasterOverlayImpl::AddToTileset(
     nativePolygons.emplace_back(std::move(nativePolygon));
   }
 
+  const CesiumGeospatial::Ellipsoid& ellipsoid = pTileset->getEllipsoid();
+
   this->_pOverlay = new RasterizedPolygonsOverlay(
       overlay.materialKey().ToStlString(),
       nativePolygons,
       overlay.invertSelection(),
-      CesiumGeospatial::Ellipsoid::WGS84,
-      CesiumGeospatial::GeographicProjection(),
+      ellipsoid,
+      CesiumGeospatial::GeographicProjection(ellipsoid),
       options);
 
   pTileset->getOverlays().add(this->_pOverlay);

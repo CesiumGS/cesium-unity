@@ -1,6 +1,7 @@
 #include "Cesium3DTilesetImpl.h"
 
 #include "CameraManager.h"
+#include "CesiumEllipsoidImpl.h"
 #include "CesiumIonServerHelper.h"
 #include "UnityPrepareRendererResources.h"
 #include "UnityTileExcluderAdaptor.h"
@@ -16,6 +17,7 @@
 #include <DotNet/CesiumForUnity/Cesium3DTilesetLoadFailureDetails.h>
 #include <DotNet/CesiumForUnity/Cesium3DTilesetLoadType.h>
 #include <DotNet/CesiumForUnity/CesiumDataSource.h>
+#include <DotNet/CesiumForUnity/CesiumEllipsoid.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/CesiumForUnity/CesiumIonServer.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
@@ -266,7 +268,7 @@ struct CalculateECEFCameraPosition {
   }
 
   glm::dvec3 operator()(const CesiumGeospatial::S2CellBoundingVolume& s2) {
-    return (*this)(s2.computeBoundingRegion());
+    return (*this)(s2.computeBoundingRegion(ellipsoid));
   }
 };
 } // namespace
@@ -326,11 +328,13 @@ void Cesium3DTilesetImpl::FocusTileset(
   const glm::dmat4& ecefToUnityWorld =
       georeferenceCrs.getEcefToLocalTransformation();
 
+  const CesiumGeospatial::Ellipsoid& ellipsoid =
+      georeferenceComponent.ellipsoid().NativeImplementation().GetEllipsoid();
+
   const BoundingVolume& boundingVolume =
       this->_pTileset->getRootTile()->getBoundingVolume();
-  glm::dvec3 ecefCameraPosition = std::visit(
-      CalculateECEFCameraPosition{CesiumGeospatial::Ellipsoid::WGS84},
-      boundingVolume);
+  glm::dvec3 ecefCameraPosition =
+      std::visit(CalculateECEFCameraPosition{ellipsoid}, boundingVolume);
   glm::dvec3 unityCameraPosition =
       glm::dvec3(ecefToUnityWorld * glm::dvec4(ecefCameraPosition, 1.0));
 
@@ -469,6 +473,13 @@ void Cesium3DTilesetImpl::LoadTileset(
   // Generous per-frame time limits for loading / unloading on main thread.
   options.mainThreadLoadingTimeLimit = 5.0;
   options.tileCacheUnloadTimeLimit = 5.0;
+
+  DotNet::CesiumForUnity::CesiumGeoreference georeferenceComponent =
+      tileset.gameObject()
+          .GetComponentInParent<DotNet::CesiumForUnity::CesiumGeoreference>();
+
+  options.ellipsoid =
+      georeferenceComponent.ellipsoid().NativeImplementation().GetEllipsoid();
 
   TilesetContentOptions contentOptions{};
   contentOptions.generateMissingNormalsSmooth = tileset.generateSmoothNormals();

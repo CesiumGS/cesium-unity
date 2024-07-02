@@ -51,6 +51,8 @@ void CesiumWebMapTileServiceRasterOverlayImpl::AddToTileset(
     return;
   }
 
+  const CesiumGeospatial::Ellipsoid& ellipsoid = pTileset->getEllipsoid();
+
   WebMapTileServiceRasterOverlayOptions wmtsOptions;
   wmtsOptions.format = overlay.format().ToStlString();
   wmtsOptions.layer = overlay.layer().ToStlString();
@@ -68,9 +70,9 @@ void CesiumWebMapTileServiceRasterOverlayImpl::AddToTileset(
 
   if (overlay.projection() ==
       CesiumWebMapTileServiceRasterOverlayProjection::Geographic) {
-    wmtsOptions.projection = CesiumGeospatial::GeographicProjection();
+    wmtsOptions.projection = CesiumGeospatial::GeographicProjection(ellipsoid);
   } else {
-    wmtsOptions.projection = CesiumGeospatial::WebMercatorProjection();
+    wmtsOptions.projection = CesiumGeospatial::WebMercatorProjection(ellipsoid);
   }
 
   if (overlay.specifyTilingScheme()) {
