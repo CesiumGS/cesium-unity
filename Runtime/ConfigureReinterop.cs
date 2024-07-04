@@ -56,7 +56,19 @@ namespace CesiumForUnity
 
         public void ExposeToCPP()
         {
-            Camera c = CesiumCamera.camera ?? Camera.main;
+            
+            
+            Camera c = Camera.main;
+            List<Camera> lc = new List<Camera>();
+            
+            lc = CesiumCamera.cameraList;
+            lc.Add(c);
+            for (int i = 0; i < lc.Count; ++i)
+            {
+                c = lc[i];
+            }
+            
+
             
             
             Transform t = c.transform;
