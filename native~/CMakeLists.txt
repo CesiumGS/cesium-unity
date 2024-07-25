@@ -57,6 +57,22 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Android")
   set(ANDROID_NDK ${CMAKE_ANDROID_NDK})
 endif()
 
+# vcpkg setup
+#set(ENV{VCPKG_OVERLAY_PORTS} "${CMAKE_CURRENT_LIST_DIR}/vcpkg/ports")
+set(ENV{VCPKG_OVERLAY_TRIPLETS} "${CMAKE_CURRENT_LIST_DIR}/vcpkg/triplets")
+
+include(${CMAKE_CURRENT_SOURCE_DIR}/extern/cesium-native/cmake/detect-vcpkg-triplet.cmake)
+
+if (NOT VCPKG_TRIPLET)
+    if (DEFINED ENV{VCPKG_TRIPLET})
+        set(VCPKG_TRIPLET "$ENV{VCPKG_TRIPLET}")
+    elseif(DETECTED_VCPKG_TRIPLET_ERROR)
+        message(FATAL_ERROR "${DETECTED_VCPKG_TRIPLET_ERROR}")
+    else()
+        set(VCPKG_TRIPLET "${DETECTED_VCPKG_TRIPLET}-unity")
+    endif()
+endif()
+
 add_subdirectory(extern/cesium-native EXCLUDE_FROM_ALL)
 
 # Enum flags is a header-only library without a CMakeLists.txt

@@ -16,7 +16,7 @@
 #include <DotNet/UnityEngine/Quaternion.h>
 #include <DotNet/UnityEngine/Transform.h>
 #include <DotNet/UnityEngine/Vector3.h>
-#include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 using namespace CesiumGeometry;
 using namespace CesiumGeospatial;
