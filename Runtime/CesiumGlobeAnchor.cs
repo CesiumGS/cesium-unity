@@ -188,11 +188,25 @@ namespace CesiumForUnity
             get
             {
                 this.UpdateGeoreferenceIfNecessary();
+
+                if (this._georeference == null || this._georeference.ellipsoid == null)
+                {
+                    // Cannot get property if there is no georeference, or the georeference has no ellipsoid.
+                    return new double3(0.0, 0.0, 0.0);
+                }
+
                 return this._georeference.ellipsoid.CenteredFixedToLongitudeLatitudeHeight(this.positionGlobeFixed);
             }
             set
             {
                 this.UpdateGeoreferenceIfNecessary();
+
+                if (this._georeference == null || this._georeference.ellipsoid == null)
+                {
+                    // Cannot set property if there is no georeference, or the georeference has no ellipsoid.
+                    return;
+                }
+
                 this.positionGlobeFixed = this._georeference.ellipsoid.LongitudeLatitudeHeightToCenteredFixed(value);
             }
         }
@@ -454,10 +468,10 @@ namespace CesiumForUnity
         {
             // If the ellipsoid changed since last sync, we need to update from transform since our ECEF mapping
             // is going to be invalid.
-            bool isEllipsoidChanged = _lastEllipsoidRadii.HasValue ?
-                (_lastEllipsoidRadii.Value.x != _georeference.ellipsoid.radii.x ||
-                _lastEllipsoidRadii.Value.y != _georeference.ellipsoid.radii.y ||
-                _lastEllipsoidRadii.Value.z != _georeference.ellipsoid.radii.z) : true;
+            bool isEllipsoidChanged = this._lastEllipsoidRadii.HasValue && this._georeference != null ?
+                (this._lastEllipsoidRadii.Value.x != this._georeference.ellipsoid.radii.x ||
+                this._lastEllipsoidRadii.Value.y != this._georeference.ellipsoid.radii.y ||
+                this._lastEllipsoidRadii.Value.z != this._georeference.ellipsoid.radii.z) : true;
 
             // If we don't have a local -> globe fixed matrix yet, we must update from the Transform
             bool updateFromTransform = !this._localToGlobeFixedMatrixIsValid;

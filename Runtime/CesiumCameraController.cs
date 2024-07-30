@@ -408,6 +408,12 @@ namespace CesiumForUnity
 
         private bool RaycastTowardsEarthCenter(out float hitDistance)
         {
+            if (this._georeference == null)
+            {
+                hitDistance = 0.0f;
+                return false;
+            }
+
             double3 center =
                 this._georeference.TransformEarthCenteredEarthFixedPositionToUnity(new double3(0.0));
 
