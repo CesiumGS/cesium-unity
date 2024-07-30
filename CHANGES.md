@@ -1,5 +1,11 @@
 # Change Log
 
+## ? - ?
+
+##### Fixes :wrench:
+
+- Fixed a bug that caused a `NullReferenceException` when attempting to get or set the `longitudeLatitudeHeight` property on a disabled `CesiumGlobeAnchor`.
+
 ### v1.11.0 - 2024-07-01
 
 ##### Additions :tada:
