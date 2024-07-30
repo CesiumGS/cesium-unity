@@ -28,12 +28,12 @@ namespace {
 
 const CesiumGeospatial::Ellipsoid&
 getAnchorEllipsoid(const ::DotNet::CesiumForUnity::CesiumGlobeAnchor& anchor) {
-
   anchor.UpdateGeoreferenceIfNecessary();
-  return anchor._georeference()
-      .ellipsoid()
-      .NativeImplementation()
-      .GetEllipsoid();
+  CesiumForUnity::CesiumGeoreference georeference = anchor._georeference();
+  if (georeference == nullptr) {
+    return CesiumGeospatial::Ellipsoid::WGS84;
+  }
+  return georeference.ellipsoid().NativeImplementation().GetEllipsoid();
 }
 
 GlobeAnchor createOrUpdateNativeGlobeAnchorFromEcef(
