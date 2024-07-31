@@ -9,11 +9,14 @@
 
 #include <DotNet/CesiumForUnity/CesiumEllipsoid.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
+#include <DotNet/CesiumForUnity/CesiumCamera.h>
 #include <DotNet/UnityEngine/Camera.h>
 #include <DotNet/UnityEngine/GameObject.h>
 #include <DotNet/UnityEngine/Matrix4x4.h>
 #include <DotNet/UnityEngine/Transform.h>
 #include <DotNet/UnityEngine/Vector3.h>
+#include <DotNet/System/Collections/Generic/List1.h>
+
 #include <glm/trigonometric.hpp>
 
 #if UNITY_EDITOR
@@ -26,6 +29,7 @@ using namespace CesiumGeospatial;
 using namespace CesiumUtility;
 using namespace DotNet::UnityEngine;
 using namespace DotNet::CesiumForUnity;
+using namespace DotNet;
 
 #if UNITY_EDITOR
 using namespace DotNet::UnityEditor;
@@ -106,7 +110,16 @@ std::vector<ViewState> CameraManager::getAllCameras(const GameObject& context) {
   }
 
   std::vector<ViewState> result;
+  
+
   Camera camera = Camera::main();
+  
+  System::Collections::Generic::List1<Camera> cameraList = CesiumCamera::cameraList();
+
+  if (cameraList.Count()>0) {
+   camera = cameraList[0];
+  }
+
   if (camera != nullptr) {
     result.emplace_back(unityCameraToViewState(
         georeferenceComponent,
