@@ -5,6 +5,7 @@
 ##### Fixes :wrench:
 
 - Fixed a bug that caused a `NullReferenceException` when attempting to get or set the `longitudeLatitudeHeight` property on a disabled `CesiumGlobeAnchor`.
+- Fixed a bug introduced in v1.11.0 that caused `CesiumCartographicPolygon` positions to be interpreted incorrectly, making polygon clipping unusable.
 
 ### v1.11.0 - 2024-07-01
 
