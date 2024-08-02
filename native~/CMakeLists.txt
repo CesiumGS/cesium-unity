@@ -6,6 +6,12 @@ project(CesiumForUnityNative
     LANGUAGES CXX C
 )
 
+# By default, vcpkg (or is it cmake?) will try to link against the Debug version
+# of the vcpkg libraries when we build the RelWithDebInfo configuration. Tell it
+# to prefer Release instead. vcpkg Release builds DO have debug symbols, just like
+# RelWithDebInfo.
+SET(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO "RelWithDebInfo;Release;")
+
 # When building for the Editor, both Runtime and Editor assemblies are
 # written to the Editor directory so that Unity won't load them in
 # a standalone build.
