@@ -345,7 +345,7 @@ namespace CesiumForUnity
                 if (cpu != null)
                     library.ExtraConfigureArgs.Add("-DCMAKE_OSX_ARCHITECTURES=" + cpu.ToString().ToLowerInvariant());
 
-                library.ExtraConfigureArgs.Add("-DCMAKE_OSX_DEPLOYMENT_TARGET=10.13");
+                library.ExtraConfigureArgs.Add("-DCMAKE_OSX_DEPLOYMENT_TARGET=10.15");
             }
 
             if (platform.platform == BuildTarget.WSAPlayer)
