@@ -215,6 +215,8 @@ jobs:
       - name: Print log
         if: ${{ failure() }}
         run: |
+          cat /Users/runner/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity/native~/build-Standalone-x86_64/build.log
+          cat /Users/runner/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity/native~/build-Standalone-arm64/build.log
           cat /Users/runner/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity/native~/build-iOS/build.log
       - name: Publish package artifact
         if: ${{ success() }}
