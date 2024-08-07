@@ -529,7 +529,7 @@ namespace CesiumForUnity
 
             // If the NDK root has a space in it, this will confuse broken software like OpenSSL's build process.
             // So map a drive letter and rewrite the path.
-            if (ndkRoot.Contains(' '))
+            if (ndkRoot != null && ndkRoot.Contains(' '))
             {
                 if (!Directory.Exists("N:\\"))
                 {
