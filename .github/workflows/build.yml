@@ -103,6 +103,11 @@ jobs:
           mkdir -p d:\cesium\temp
           # Store temp files on the D drive, which is much faster than the EBS-backed C drive.
           $ENV:TEMP="d:\cesium\temp"
+          # We only need a release build of vcpkg dependencies
+          $ENV:CESIUM_VCPKG_RELEASE_ONLY="TRUE"
+          # Clear ANDROID_NDK_ROOT so that we use Unity's version
+          Remove-Item Env:ANDROID_NDK_ROOT
+          # Run the build
           dotnet run --project Build~
           cat D:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity\native~\build-Android-arm64\build.log
           dir d:\cesium\CesiumForUnityBuildProject
