@@ -207,6 +207,8 @@ jobs:
           dotnet publish Reinterop~ -o .
       - name: Build Package
         run: |
+          # We only need a release build of vcpkg dependencies
+          export CESIUM_VCPKG_RELEASE_ONLY="TRUE"
           cd ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
           dotnet run --project Build~
           ls -l ~/cesium/CesiumForUnityBuildProject
