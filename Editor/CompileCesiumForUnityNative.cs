@@ -195,7 +195,7 @@ namespace CesiumForUnity
 
         public int callbackOrder => 0;
 
-        public bool ExitAfterCompile = false;
+        public static bool ExitAfterCompile = false;
 
         /// <summary>
         /// Invoked after the managed script assemblies are compiled, including the CesiumForUnity
@@ -235,7 +235,7 @@ namespace CesiumForUnity
                 }
             }
 
-            if (this.ExitAfterCompile)
+            if (ExitAfterCompile)
             {
                 EditorApplication.Exit(0);
             }
