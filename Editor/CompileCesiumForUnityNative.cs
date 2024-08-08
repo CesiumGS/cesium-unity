@@ -195,6 +195,8 @@ namespace CesiumForUnity
 
         public int callbackOrder => 0;
 
+        public bool ExitAfterCompile = false;
+
         /// <summary>
         /// Invoked after the managed script assemblies are compiled, including the CesiumForUnity
         /// managed code. Building the CesiumForUnity assembly will generate C++ code via Reinterop,
@@ -231,6 +233,11 @@ namespace CesiumForUnity
                 {
                     Directory.Delete(library.InstallDirectory, true);
                 }
+            }
+
+            if (this.ExitAfterCompile)
+            {
+                EditorApplication.Exit(0);
             }
         }
 

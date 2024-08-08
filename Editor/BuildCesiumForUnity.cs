@@ -29,6 +29,8 @@ namespace CesiumForUnity
 
         public static void CompileForAndroidAndExit()
         {
+            CompileCesiumForUnityNative.ExitAfterCompile = true;
+
             string buildPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             Directory.CreateDirectory(buildPath);
             try
@@ -46,6 +48,8 @@ namespace CesiumForUnity
 
         public static void CompileForUWPAndExit()
         {
+            CompileCesiumForUnityNative.ExitAfterCompile = true;
+
             string buildPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             Directory.CreateDirectory(buildPath);
             try
@@ -62,6 +66,8 @@ namespace CesiumForUnity
 
         public static void CompileForIOSAndExit()
         {
+            CompileCesiumForUnityNative.ExitAfterCompile = true;
+
             string buildPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             Directory.CreateDirectory(buildPath);
             try
@@ -85,6 +91,8 @@ namespace CesiumForUnity
 
         public static void CompileForWindowsAndExit()
         {
+            CompileCesiumForUnityNative.ExitAfterCompile = true;
+
             string buildPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             Directory.CreateDirectory(buildPath);
             try
@@ -100,6 +108,8 @@ namespace CesiumForUnity
 
         public static void CompileForMacAndExit()
         {
+            CompileCesiumForUnityNative.ExitAfterCompile = true;
+
             string buildPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             Directory.CreateDirectory(buildPath);
             try
