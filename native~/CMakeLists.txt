@@ -79,7 +79,18 @@ if (NOT VCPKG_TRIPLET)
     endif()
 endif()
 
-add_subdirectory(extern/cesium-native EXCLUDE_FROM_ALL)
+# We never need any of cesium-native's header files to be installed.
+set(CESIUM_INSTALL_HEADERS OFF)
+
+# We only need cesium-native's static lib files to be installed on iOS.
+if (NOT IOS)
+    set(CESIUM_INSTALL_STATIC_LIBS OFF)
+endif()
+
+add_subdirectory(extern/cesium-native)
+
+# Don't build the cesium-native tests by default.
+set_target_properties(cesium-native-tests PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
 
 # Enum flags is a header-only library without a CMakeLists.txt
 file(GLOB ENUM_FLAGS_HEADERS ${CMAKE_CURRENT_LIST_DIR}/extern/enum-flags/include/*.hpp)
@@ -153,7 +164,6 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
     #   FRAMEWORK
     #     DESTINATION ${CMAKE_INSTALL_LIBDIR}
     # )
-    set_target_properties(cesium-native-tests PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
     set_target_properties(tidy-static PROPERTIES EXCLUDE_FROM_ALL 0 EXCLUDE_FROM_DEFAULT_BUILD 0)
     #set_target_properties(${ALL_TARGETS} PROPERTIES XCODE_ATTRIBUTE_ENABLE_BITCODE "YES")
 
