@@ -195,7 +195,15 @@ namespace CesiumForUnity
 
         public int callbackOrder => 0;
 
+        /// <summary>
+        /// True if Unity should exit immediately after `OnPostBuildPlayerScriptDLLs` completes.
+        /// </summary>
         public static bool ExitAfterCompile = false;
+
+        /// <summary>
+        /// The exit code of the last step of the build process, such as cmake or lipo.
+        /// </summary>
+        private static int LastRunExitCode = 0;
 
         /// <summary>
         /// Invoked after the managed script assemblies are compiled, including the CesiumForUnity
@@ -227,7 +235,10 @@ namespace CesiumForUnity
                 Process p = Process.Start("lipo", string.Join(' ', args));
                 p.WaitForExit();
                 if (p.ExitCode != 0)
-                    throw new Exception("lipo failed");
+                {
+                    UnityEngine.Debug.LogError($"Invocation of 'lipo' tool failed. The command-line was:{Environment.NewLine}lipo {string.Join(' ', args)}");
+                    LastRunExitCode = p.ExitCode;
+                }
 
                 foreach (LibraryToBuild library in libraries)
                 {
@@ -237,7 +248,7 @@ namespace CesiumForUnity
 
             if (ExitAfterCompile)
             {
-                EditorApplication.Exit(0);
+                EditorApplication.Exit(LastRunExitCode);
             }
         }
 
@@ -517,6 +528,7 @@ namespace CesiumForUnity
                 if (configure.ExitCode != 0)
                 {
                     UnityEngine.Debug.LogError($"An error occurred while building CesiumForUnityNative. See {logFilename} for details. The command-line was:{Environment.NewLine}{startInfo.FileName} {startInfo.Arguments}");
+                    LastRunExitCode = configure.ExitCode;
                 }
             }
         }
