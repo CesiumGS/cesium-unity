@@ -111,6 +111,9 @@ jobs:
           dotnet run --project Build~
           cat D:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity\native~\build-Android-arm64\build.log
           dir d:\cesium\CesiumForUnityBuildProject
+          dir C:\.ezvcpkg\2024.07.12\packages\spdlog_arm64-android-unity
+          dir C:\.ezvcpkg\2024.07.12\packages\spdlog_arm64-android-unity\include
+          dir C:\.ezvcpkg\2024.07.12\packages\spdlog_arm64-android-unity\include\spdlog
       - name: Publish package artifact
         if: ${{ success() }}
         uses: actions/upload-artifact@v4

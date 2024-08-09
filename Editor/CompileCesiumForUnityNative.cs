@@ -462,6 +462,7 @@ namespace CesiumForUnity
 
                     List<string> args = new List<string>()
                     {
+                        "--verbose",
                         "-B",
                         library.BuildDirectory,
                         "-S",
@@ -482,6 +483,7 @@ namespace CesiumForUnity
 
                     args = new List<string>()
                     {
+                        "--verbose",
                         "--build",
                         $"\"{library.BuildDirectory}\"",
                         "--config",
