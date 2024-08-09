@@ -483,7 +483,6 @@ namespace CesiumForUnity
 
                     args = new List<string>()
                     {
-                        "--trace-expand",
                         "--build",
                         $"\"{library.BuildDirectory}\"",
                         "--config",
@@ -491,7 +490,8 @@ namespace CesiumForUnity
                         "--parallel",
                         (Environment.ProcessorCount + 1).ToString(),
                         "--target",
-                        "install"
+                        "install",
+                        "--verbose"
                     };
                     args.AddRange(library.ExtraBuildArgs);
                     startInfo.Arguments = string.Join(' ', args);
