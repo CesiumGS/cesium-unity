@@ -109,6 +109,8 @@ jobs:
           Remove-Item Env:ANDROID_NDK_ROOT
           # Run the build
           dotnet run --project Build~
+          dir /.ezvcpkg/2024.07.12/installed/arm64-android-unity/include
+          dir /.ezvcpkg/2024.07.12/installed/arm64-android-unity/include/spdlog
           cat D:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity\native~\build-WSA-x86_64\build.log
           cat D:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity\native~\build-WSA-arm64\build.log
           cat D:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity\native~\build-Android-arm64\build.log
