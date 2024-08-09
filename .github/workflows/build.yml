@@ -111,13 +111,13 @@ jobs:
           dotnet run --project Build~
           dir /.ezvcpkg/2024.07.12/installed/arm64-android-unity/include
           dir /.ezvcpkg/2024.07.12/installed/arm64-android-unity/include/spdlog
-          cat D:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity\native~\build-WSA-x86_64\build.log
-          cat D:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity\native~\build-WSA-arm64\build.log
+          # cat D:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity\native~\build-WSA-x86_64\build.log
+          # cat D:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity\native~\build-WSA-arm64\build.log
           cat D:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity\native~\build-Android-arm64\build.log
-          dir d:\cesium\CesiumForUnityBuildProject
-          dir C:\.ezvcpkg\2024.07.12\packages\spdlog_arm64-android-unity
-          dir C:\.ezvcpkg\2024.07.12\packages\spdlog_arm64-android-unity\include
-          dir C:\.ezvcpkg\2024.07.12\packages\spdlog_arm64-android-unity\include\spdlog
+          # dir d:\cesium\CesiumForUnityBuildProject
+          # dir C:\.ezvcpkg\2024.07.12\packages\spdlog_arm64-android-unity
+          # dir C:\.ezvcpkg\2024.07.12\packages\spdlog_arm64-android-unity\include
+          # dir C:\.ezvcpkg\2024.07.12\packages\spdlog_arm64-android-unity\include\spdlog
       - name: Publish package artifact
         if: ${{ success() }}
         uses: actions/upload-artifact@v4
