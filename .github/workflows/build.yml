@@ -107,6 +107,7 @@ jobs:
           $ENV:CESIUM_VCPKG_RELEASE_ONLY="TRUE"
           # Clear ANDROID_NDK_ROOT so that we use Unity's version
           Remove-Item Env:ANDROID_NDK_ROOT
+          $ENV:EZVCPKG_BASEDIR="D:/.ezvcpkg"
           # Run the build
           dotnet run --project Build~
           dir /.ezvcpkg/2024.07.12/installed/arm64-android-unity/include
