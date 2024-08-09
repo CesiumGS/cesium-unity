@@ -145,41 +145,41 @@ namespace Build
                 if (OperatingSystem.IsWindows())
                 {
                     // TODO: we're currently only building for UWP on Windows. This should be an option, or a separate build command.
-                    Console.WriteLine("**** Compiling for Universal Windows Platform Player");
-                    unity.Run(new[]
-                    {
-                        "-batchmode",
-                        "-nographics",
-                        "-projectPath",
-                        Utility.ProjectRoot,
-                        "-buildTarget",
-                        "WindowsStoreApps",
-                        "-executeMethod",
-                        "CesiumForUnity.BuildCesiumForUnity.CompileForUWPAndExit"
-                    });
+                    // Console.WriteLine("**** Compiling for Universal Windows Platform Player");
+                    // unity.Run(new[]
+                    // {
+                    //     "-batchmode",
+                    //     "-nographics",
+                    //     "-projectPath",
+                    //     Utility.ProjectRoot,
+                    //     "-buildTarget",
+                    //     "WindowsStoreApps",
+                    //     "-executeMethod",
+                    //     "CesiumForUnity.BuildCesiumForUnity.CompileForUWPAndExit"
+                    // });
 
-                    Console.WriteLine("**** Adding generated files (for the UWP Player) to the package");
-                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_WSA", generatedRuntimePath, Path.Combine(outputPackagePath, "Runtime", "generated"));
+                    // Console.WriteLine("**** Adding generated files (for the UWP Player) to the package");
+                    // AddGeneratedFiles("!UNITY_EDITOR && UNITY_WSA", generatedRuntimePath, Path.Combine(outputPackagePath, "Runtime", "generated"));
 
-                    Console.WriteLine("**** Compiling for Windows Player");
-                    unity.Run(new[]
-                    {
-                        "-batchmode",
-                        "-nographics",
-                        "-projectPath",
-                        Utility.ProjectRoot,
-                        "-buildTarget",
-                        "Win64",
-                        "-executeMethod",
-                        "CesiumForUnity.BuildCesiumForUnity.CompileForWindowsAndExit"
-                    });
+                    // Console.WriteLine("**** Compiling for Windows Player");
+                    // unity.Run(new[]
+                    // {
+                    //     "-batchmode",
+                    //     "-nographics",
+                    //     "-projectPath",
+                    //     Utility.ProjectRoot,
+                    //     "-buildTarget",
+                    //     "Win64",
+                    //     "-executeMethod",
+                    //     "CesiumForUnity.BuildCesiumForUnity.CompileForWindowsAndExit"
+                    // });
 
-                    Console.WriteLine("**** Adding generated files (for the Windows Player) to the package");
-                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_STANDALONE_WIN", generatedRuntimePath, Path.Combine(outputPackagePath, "Runtime", "generated"));
+                    // Console.WriteLine("**** Adding generated files (for the Windows Player) to the package");
+                    // AddGeneratedFiles("!UNITY_EDITOR && UNITY_STANDALONE_WIN", generatedRuntimePath, Path.Combine(outputPackagePath, "Runtime", "generated"));
 
-                    // Clean the generated code directory.
-                    Directory.Delete(generatedRuntimePath, true);
-                    Directory.CreateDirectory(generatedRuntimePath);
+                    // // Clean the generated code directory.
+                    // Directory.Delete(generatedRuntimePath, true);
+                    // Directory.CreateDirectory(generatedRuntimePath);
 
                     // TODO: we're currently only building for Android on Windows. This should be an option, or a separate build command.
                     Console.WriteLine("**** Compiling for Android Player");
