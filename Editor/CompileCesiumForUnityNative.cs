@@ -564,13 +564,13 @@ namespace CesiumForUnity
             // the default) won't work to build for Android.
             if (library.Platform == BuildTarget.Android && Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
-                library.ExtraConfigureArgs.Add("-G \"Unix Makefiles\"");
+                library.ExtraConfigureArgs.Add("-G Ninja");
 
-                if (!string.IsNullOrEmpty(ndkRoot))
-                {
-                    string make = Path.Combine(ndkRoot, "prebuilt", "windows-x86_64", "bin", "make.exe").Replace('\\', '/');
-                    library.ExtraConfigureArgs.Add($"-DCMAKE_MAKE_PROGRAM=\"{make}\"");
-                }
+                // if (!string.IsNullOrEmpty(ndkRoot))
+                // {
+                //     string make = Path.Combine(ndkRoot, "prebuilt", "windows-x86_64", "bin", "make.exe").Replace('\\', '/');
+                //     library.ExtraConfigureArgs.Add($"-DCMAKE_MAKE_PROGRAM=\"{make}\"");
+                // }
             }
 
             if (!string.IsNullOrEmpty(ndkRoot))
