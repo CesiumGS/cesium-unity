@@ -418,6 +418,9 @@ namespace CesiumForUnity
                 return "Editor";
             else if (IsIOS(platformGroup, platform))
                 return "iOS";
+            // Make sure we use "WSA" and not "Metro"
+            else if (platformGroup == BuildTargetGroup.WSA)
+                return "WSA";
             return platformGroup.ToString();
         }
 
