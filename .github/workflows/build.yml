@@ -121,6 +121,7 @@ jobs:
           $ENV:EZVCPKG_BASEDIR="D:/.ezvcpkg"
           # Run the build
           dotnet run --project Build~
+          cat D:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity\native~\build-Android-arm64\build.log
       - name: Publish package artifact
         if: ${{ success() }}
         uses: actions/upload-artifact@v4
