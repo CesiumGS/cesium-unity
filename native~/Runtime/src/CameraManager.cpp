@@ -112,20 +112,18 @@ std::vector<ViewState> CameraManager::getAllCameras(const GameObject& context) {
   std::vector<ViewState> result;
   
 
-  Camera camera = Camera::main();
-  
   System::Collections::Generic::List1<Camera> cameraList = CesiumCamera::cameraList();
 
-  if (cameraList.Count()>0) {
-   camera = cameraList[0];
+  if (cameraList.Count()==0) {
+   cameraList.Add(Camera::main());
   }
 
-  if (camera != nullptr) {
-    result.emplace_back(unityCameraToViewState(
+  for (int i=0; i < cameraList.Count(); i++){
+     result.emplace_back(unityCameraToViewState(
         georeferenceComponent,
         pCoordinateSystem,
         unityWorldToTileset,
-        camera));
+        cameraList[i]));
   }
 
 #if UNITY_EDITOR
