@@ -41,6 +41,7 @@ namespace CesiumForUnity
 
         public partial bool IsDefaultsLoaded();
         public partial bool IsLoadingDefaults();
+        public partial bool IsAuthenticationRequired();
 
         public partial void Connect();
         public partial void Resume();

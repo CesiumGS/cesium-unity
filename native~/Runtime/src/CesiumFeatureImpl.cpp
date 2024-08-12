@@ -19,6 +19,11 @@ using namespace CesiumGltf;
 
 namespace CesiumForUnityNative {
 
+CesiumFeatureImpl::CesiumFeatureImpl(
+    const DotNet::CesiumForUnity::CesiumFeature& feature) {}
+
+CesiumFeatureImpl::~CesiumFeatureImpl() {}
+
 namespace {
 ::DotNet::CesiumForUnity::MetadataType
 getMetadataType(CesiumMetadataValueType valueType) {

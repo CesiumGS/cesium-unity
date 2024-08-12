@@ -23,10 +23,8 @@ namespace CesiumForUnityNative {
 
 class CesiumMetadataImpl {
 public:
-  ~CesiumMetadataImpl(){};
-  CesiumMetadataImpl(const DotNet::CesiumForUnity::CesiumMetadata& metadata){};
-  void
-  JustBeforeDelete(const DotNet::CesiumForUnity::CesiumMetadata& metadata){};
+  CesiumMetadataImpl(const DotNet::CesiumForUnity::CesiumMetadata& metadata);
+  ~CesiumMetadataImpl();
 
   void addMetadata(
       int32_t instanceID,

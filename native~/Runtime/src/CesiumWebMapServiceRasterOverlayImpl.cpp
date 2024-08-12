@@ -46,6 +46,7 @@ void CesiumWebMapServiceRasterOverlayImpl::AddToTileset(
     wmsOptions.minimumLevel = overlay.minimumLevel();
     wmsOptions.maximumLevel = overlay.maximumLevel();
   }
+
   wmsOptions.layers = overlay.layers().ToStlString();
   wmsOptions.tileWidth = overlay.tileWidth();
   wmsOptions.tileHeight = overlay.tileHeight();
@@ -55,7 +56,7 @@ void CesiumWebMapServiceRasterOverlayImpl::AddToTileset(
       CesiumRasterOverlayUtility::GetOverlayOptions(genericOverlay);
 
   this->_pOverlay = new WebMapServiceRasterOverlay(
-      overlay.name().ToStlString(),
+      overlay.materialKey().ToStlString(),
       overlay.baseUrl().ToStlString(),
       std::vector<CesiumAsync::IAssetAccessor::THeader>(),
       wmsOptions,

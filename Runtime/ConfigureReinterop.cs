@@ -95,7 +95,7 @@ namespace CesiumForUnity
             GameObject go = new GameObject();
             go.name = go.name;
             go = new GameObject("name");
-            go.SetActive(go.activeSelf);
+            go.SetActive(go.activeInHierarchy);
             int layer = go.layer;
             go.layer = layer;
             Transform transform = go.transform;
@@ -140,7 +140,6 @@ namespace CesiumForUnity
             texture.wrapModeV = texture.wrapModeV;
             texture.wrapModeW = texture.wrapModeW;
 
-
             Mesh mesh = new Mesh();
             Mesh[] meshes = new[] { mesh };
             mesh = meshes[0];
@@ -162,6 +161,8 @@ namespace CesiumForUnity
             meshCollider.sharedMesh = mesh;
 
             Debug.Log("Logging");
+            Debug.LogWarning("Warning");
+            Debug.LogError("Error");
 
             MeshRenderer meshRenderer = new MeshRenderer();
             GameObject meshGameObject = meshRenderer.gameObject;
@@ -311,6 +312,7 @@ namespace CesiumForUnity
             ionOverlay.AddToTilesetLater(null);
 
             CesiumRasterOverlay overlay = go.GetComponent<CesiumRasterOverlay>();
+            overlay.materialKey = overlay.materialKey;
             overlay.showCreditsOnScreen = overlay.showCreditsOnScreen;
             overlay.maximumScreenSpaceError = overlay.maximumScreenSpaceError;
             overlay.maximumTextureSize = overlay.maximumTextureSize;
@@ -345,6 +347,31 @@ namespace CesiumForUnity
             webMapServiceRasterOverlay.minimumLevel = webMapServiceRasterOverlay.minimumLevel;
             webMapServiceRasterOverlay.maximumLevel = webMapServiceRasterOverlay.maximumLevel;
             baseOverlay = webMapServiceRasterOverlay;
+
+            CesiumWebMapTileServiceRasterOverlay webMapTileServiceRasterOverlay =
+                go.GetComponent<CesiumWebMapTileServiceRasterOverlay>();
+            webMapTileServiceRasterOverlay.baseUrl = webMapTileServiceRasterOverlay.baseUrl;
+            webMapTileServiceRasterOverlay.layer = webMapTileServiceRasterOverlay.layer;
+            webMapTileServiceRasterOverlay.style = webMapTileServiceRasterOverlay.style;
+            webMapTileServiceRasterOverlay.format = webMapTileServiceRasterOverlay.format;
+            webMapTileServiceRasterOverlay.tileMatrixSetID = webMapTileServiceRasterOverlay.tileMatrixSetID;
+            webMapTileServiceRasterOverlay.tileMatrixSetLabelPrefix = webMapTileServiceRasterOverlay.tileMatrixSetLabelPrefix;
+            webMapTileServiceRasterOverlay.specifyTileMatrixSetLabels = webMapTileServiceRasterOverlay.specifyTileMatrixSetLabels;
+            webMapTileServiceRasterOverlay.tileMatrixSetLabels = webMapTileServiceRasterOverlay.tileMatrixSetLabels;
+            webMapTileServiceRasterOverlay.projection = webMapTileServiceRasterOverlay.projection;
+            webMapTileServiceRasterOverlay.specifyTilingScheme = webMapTileServiceRasterOverlay.specifyTilingScheme;
+            webMapTileServiceRasterOverlay.rootTilesX = webMapTileServiceRasterOverlay.rootTilesX;
+            webMapTileServiceRasterOverlay.rootTilesY = webMapTileServiceRasterOverlay.rootTilesY;
+            webMapTileServiceRasterOverlay.rectangleEast = webMapTileServiceRasterOverlay.rectangleEast;
+            webMapTileServiceRasterOverlay.rectangleSouth = webMapTileServiceRasterOverlay.rectangleSouth;
+            webMapTileServiceRasterOverlay.rectangleWest = webMapTileServiceRasterOverlay.rectangleWest;
+            webMapTileServiceRasterOverlay.rectangleNorth = webMapTileServiceRasterOverlay.rectangleNorth;
+            webMapTileServiceRasterOverlay.specifyZoomLevels = webMapTileServiceRasterOverlay.specifyZoomLevels;
+            webMapTileServiceRasterOverlay.minimumLevel = webMapTileServiceRasterOverlay.minimumLevel;
+            webMapTileServiceRasterOverlay.maximumLevel = webMapTileServiceRasterOverlay.maximumLevel;
+            webMapTileServiceRasterOverlay.tileWidth = webMapTileServiceRasterOverlay.tileWidth;
+            webMapTileServiceRasterOverlay.tileHeight = webMapTileServiceRasterOverlay.tileHeight;
+            baseOverlay = webMapTileServiceRasterOverlay;
 
             CesiumRasterOverlay[] overlaysArray = go.GetComponents<CesiumRasterOverlay>();
             int len = overlaysArray.Length;
@@ -465,10 +492,12 @@ namespace CesiumForUnity
             List<string> stringList = new List<string>();
             stringList.Add("item");
             stringList.Clear();
+            count = stringList.Count;
 
             string test = string.Concat("string", "string2");
             string[] stringArray = stringList.ToArray();
             test = stringArray[0];
+            test = stringList[0];
             test = string.Join(" ", stringArray);
             string.IsNullOrEmpty("value");
             string.IsNullOrWhiteSpace("value");
@@ -503,6 +532,14 @@ namespace CesiumForUnity
             CesiumGlobeAnchor globeAnchor = globeAnchors[globeAnchors.Length - 1];
             globeAnchor.positionGlobeFixed = globeAnchor.positionGlobeFixed;
 
+            CesiumSimplePlanarEllipsoidCurve planarEllipsoidCurve = CesiumSimplePlanarEllipsoidCurve.FromCenteredFixedCoordinates(
+                CesiumEllipsoid.WGS84,
+                new double3(0, 0, 0), 
+                new double3(0, 0, 0));
+            CesiumEllipsoid ellipsoid = CesiumEllipsoid.WGS84;
+            ellipsoid.radii = new double3(0.0, 0.0, 0.0);
+            georeference.ellipsoid = ellipsoid;
+
             globeAnchor = go.AddComponent<CesiumGlobeAnchor>();
             globeAnchor.detectTransformChanges = globeAnchor.detectTransformChanges;
             globeAnchor.adjustOrientationForGlobeWhenMoving = globeAnchor.adjustOrientationForGlobeWhenMoving;
@@ -517,6 +554,7 @@ namespace CesiumForUnity
             globeAnchor._lastLocalPosition = new Vector3();
             globeAnchor._lastLocalRotation = new Quaternion();
             globeAnchor._lastLocalScale = new Vector3();
+            globeAnchor._lastEllipsoidRadii = new double3();
             globeAnchor.UpdateGeoreferenceIfNecessary();
 
             CesiumTileExcluder[] excluders = go.GetComponentsInParent<CesiumTileExcluder>();
@@ -527,6 +565,7 @@ namespace CesiumForUnity
             Cesium3DTile tile = new Cesium3DTile();
             tile._transform = new double4x4();
             tile._pTile = IntPtr.Zero;
+            tile._pTileEllipsoid = IntPtr.Zero;
 
             Cesium3DTileInfo info;
             info.usesAdditiveRefinement = true;
@@ -787,10 +826,13 @@ namespace CesiumForUnity
             property.valueType = property.valueType;
 
             RaycastHit hitInfo = new RaycastHit();
+            primitiveFeatures = hitInfo.transform.GetComponent<CesiumPrimitiveFeatures>();
             int triangleIndex = hitInfo.triangleIndex;
-            Vector3 coordinate = hitInfo.barycentricCoordinate;
+            Vector3 hitPoint = hitInfo.point;
+
             Vector2 textureCoordinate = new Vector2();
             textureCoordinate.x = textureCoordinate.y;
+            hitPoint = m2.MultiplyPoint3x4(hitPoint);
 
             CesiumIonServer server = CesiumIonServer.defaultServer;
             server.serverUrl = "";
@@ -799,6 +841,20 @@ namespace CesiumForUnity
             server.defaultIonAccessToken = "";
             server.defaultIonAccessTokenId = "";
             server.serverUrlThatIsLoadingApiUrl = "";
+
+            CesiumCartographicPolygon polygon = go.GetComponent<CesiumCartographicPolygon>();
+            polygon.enabled = polygon.enabled;
+
+            List<double2> points = polygon.GetCartographicPoints(m);
+            len = points.Count;
+            myDouble2 = points[0];
+
+            CesiumPolygonRasterOverlay polygonRasterOverlay = go.GetComponent<CesiumPolygonRasterOverlay>();
+            List<CesiumCartographicPolygon> polygons = polygonRasterOverlay.polygons;
+            polygonRasterOverlay.excludeSelectedTiles = polygonRasterOverlay.excludeSelectedTiles;
+            polygonRasterOverlay.invertSelection = polygonRasterOverlay.invertSelection;
+            polygon = polygons[0];
+            len = polygons.Count;
 
             TestGltfModel testModel = new TestGltfModel();
 

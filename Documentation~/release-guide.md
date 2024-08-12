@@ -71,7 +71,7 @@ Assuming you tested the release candidate as described above, you should have [c
    * The name of the token should match "Cesium for Unity Samples x.x.x - Delete on September 1st, 2021". The expiry date should be two months later than present. 
    * The scope of the token should be "assets:read" for all assets.
 5. Copy the access token you just created.
-6. Paste the new token into the `_defaultIonAccessToken` property in [Assets/CesiumSettings/Resources/CesiumRuntimeSettings.asset](https://github.com/CesiumGS/cesium-unity-samples/blob/main/Assets/CesiumSettings/Resources/CesiumRuntimeSettings.asset).
+6. Paste the new token into the `_defaultIonAccessToken` property in [Assets/CesiumSettings/Resources/CesiumIonServers/ion.cesium.com.asset](https://github.com/CesiumGS/cesium-unity-samples/blob/main/Assets/CesiumSettings/Resources/CesiumIonServers/ion.cesium.com.asset).
 7. Open cesium-unity-samples in Unity.
 8. If the package update has replaced any Cesium scripts or prefabs that already exist in one of the scenes, e.g., DynamicCamera, replace the old version of the prefab with the new version, and test the scene with the play button to make sure everything is working. If you're unsure whether the package update has resulted in anything that needs to be changed in the Samples, ask the team. 
 9. Visit every scene again to make sure that the view is correct and that nothing appears to be broken or missing. 

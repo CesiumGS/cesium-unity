@@ -52,6 +52,11 @@ int64_t getFeatureIdFromVertex(
 
 } // namespace
 
+CesiumMetadataImpl::CesiumMetadataImpl(
+    const DotNet::CesiumForUnity::CesiumMetadata& metadata) {}
+
+CesiumMetadataImpl::~CesiumMetadataImpl() {}
+
 void CesiumMetadataImpl::addMetadata(
     int32_t instanceID,
     const CesiumGltf::Model* pModel,
@@ -124,9 +129,9 @@ CesiumForUnityNative::CesiumMetadataImpl::GetFeatures(
     features.Item(i, feature);
 
     const CesiumGltf::FeatureId& featureIdSet = *featureIdAttributes[i];
-    if (!featureIdSet.propertyTable || *featureIdSet.propertyTable < 0 ||
-        *featureIdSet.propertyTable >=
-            static_cast<int64_t>(pModelMetadata->propertyTables.size())) {
+    if (featureIdSet.propertyTable < 0 ||
+        size_t(featureIdSet.propertyTable) >=
+            pModelMetadata->propertyTables.size()) {
       continue;
     }
 

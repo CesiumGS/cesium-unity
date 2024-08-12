@@ -65,6 +65,8 @@ namespace CesiumForUnity
     public partial class CesiumGeoreference : MonoBehaviour
     {
         #region Fields
+        [SerializeField]
+        private CesiumEllipsoid _ellipsoidOverride = null;
 
         [SerializeField]
         private CesiumGeoreferenceOriginAuthority _originAuthority = CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight;
@@ -106,6 +108,9 @@ namespace CesiumForUnity
         [NonSerialized]
         private HashSet<CesiumGlobeAnchor> _globeAnchors = new HashSet<CesiumGlobeAnchor>();
 
+        [NonSerialized]
+        private CesiumEllipsoid _ellipsoid = null;
+
         #endregion
 
         /// <summary>
@@ -133,7 +138,7 @@ namespace CesiumForUnity
             get => this._latitude;
             set
             {
-                this._latitude = value;
+                this._latitude = Math.Clamp(value, -90, 90);
                 this.originAuthority = CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight;
             }
         }
@@ -149,7 +154,7 @@ namespace CesiumForUnity
             get => this._longitude;
             set
             {
-                this._longitude = value;
+                this._longitude = Math.Clamp(value, -180, 180);
                 this.originAuthority = CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight;
             }
         }
@@ -251,6 +256,25 @@ namespace CesiumForUnity
             {
                 this.Initialize();
                 return this._ecefToLocal;
+            }
+        }
+
+        public CesiumEllipsoid ellipsoid
+        {
+            get
+            {
+                if (this._ellipsoid == null)
+                {
+                    // Make a copy of the ellipsoid ScriptableObject
+                    this._ellipsoid = ScriptableObject.CreateInstance<CesiumEllipsoid>();
+                    this._ellipsoid.SetRadii((this._ellipsoidOverride ?? CesiumEllipsoid.WGS84).radii);
+                }
+
+                return this._ellipsoid;
+            }
+            set
+            {
+                this._ellipsoid = value;
             }
         }
 
@@ -356,6 +380,23 @@ namespace CesiumForUnity
             }
         }
 
+        /// <summary>
+        /// Called when the ellipsoid override property has changed.
+        /// </summary>
+        public void ReloadEllipsoid()
+        {
+            // clear cached ellipsoid so it has to be rebuilt
+            this._ellipsoid = null;
+            this.UpdateTransformations();
+            this.UpdateOtherCoordinates();
+
+            Cesium3DTileset[] tilesets = GetComponentsInChildren<Cesium3DTileset>();
+            foreach(var tileset in tilesets)
+            {
+                tileset.RecreateTileset();
+            }
+        }
+
         private void UpdateTransformations()
         {
             this._localToEcef = this.ComputeLocalToEarthCenteredEarthFixedTransformation();
@@ -424,7 +465,7 @@ namespace CesiumForUnity
             if (this._originAuthority == CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight)
             {
                 double3 ecef =
-                    CesiumWgs84Ellipsoid.LongitudeLatitudeHeightToEarthCenteredEarthFixed(
+                    this.ellipsoid.LongitudeLatitudeHeightToCenteredFixed(
                         new double3(this._longitude, this._latitude, this._height));
                 this._ecefX = ecef.x;
                 this._ecefY = ecef.y;
@@ -433,7 +474,7 @@ namespace CesiumForUnity
             else if (this._originAuthority == CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed)
             {
                 double3 llh =
-                    CesiumWgs84Ellipsoid.EarthCenteredEarthFixedToLongitudeLatitudeHeight(
+                    this.ellipsoid.CenteredFixedToLongitudeLatitudeHeight(
                         new double3(this._ecefX, this._ecefY, this._ecefZ));
                 this._longitude = llh.x;
                 this._latitude = llh.y;

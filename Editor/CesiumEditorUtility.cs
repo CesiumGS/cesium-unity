@@ -48,6 +48,23 @@ namespace CesiumForUnity
                 return;
             }
 
+            if(details.tileset.ionServer == null)
+            {
+                return;
+            }
+
+            CesiumIonSession session = CesiumIonServerManager.instance.GetSession(details.tileset.ionServer);
+            if(session == null)
+            {
+                return;
+            }
+
+            if(!session.IsAuthenticationRequired())
+            {
+                // The server we're connected to doesn't use tokens, so reauthorizing would be pointless
+                return;
+            }
+
             // Check for a 401 connecting to Cesium ion, which means the token is invalid
             // (or perhaps the asset ID is). Also check for a 404, because ion returns 404
             // when the token is valid but not authorized for the asset.
@@ -119,33 +136,33 @@ namespace CesiumForUnity
             return null;
         }
 
-        public static CesiumGeoreference FindFirstGeoreference()
+        public static CesiumGeoreference FindOrCreateGeoreference()
         {
+            CesiumGeoreference georeference = null;
             CesiumGeoreference[] georeferences =
                UnityEngine.Object.FindObjectsOfType<CesiumGeoreference>(true);
             for (int i = 0; i < georeferences.Length; i++)
             {
-                CesiumGeoreference georeference = georeferences[i];
+                georeference = georeferences[i];
                 if (georeference != null)
                 {
                     return georeference;
                 }
             }
 
-            return null;
+            GameObject georeferenceGameObject = new GameObject("CesiumGeoreference");
+            georeference =
+                georeferenceGameObject.AddComponent<CesiumGeoreference>();
+            Undo.RegisterCreatedObjectUndo(georeferenceGameObject, "Create Georeference");
+
+            return georeference;
+
         }
 
         public static Cesium3DTileset CreateTileset(string name, long assetID)
         {
             // Find a georeference in the scene, or create one if none exist.
-            CesiumGeoreference georeference = CesiumEditorUtility.FindFirstGeoreference();
-            if (georeference == null)
-            {
-                GameObject georeferenceGameObject = new GameObject("CesiumGeoreference");
-                georeference =
-                    georeferenceGameObject.AddComponent<CesiumGeoreference>();
-                Undo.RegisterCreatedObjectUndo(georeferenceGameObject, "Create Georeference");
-            }
+            CesiumGeoreference georeference = CesiumEditorUtility.FindOrCreateGeoreference();
 
             GameObject tilesetGameObject = new GameObject(name);
             tilesetGameObject.transform.SetParent(georeference.gameObject.transform);
@@ -318,14 +335,7 @@ namespace CesiumForUnity
             }
 
             // Find a georeference in the scene, or create one if none exist.
-            CesiumGeoreference georeference = CesiumEditorUtility.FindFirstGeoreference();
-            if (georeference == null)
-            {
-                GameObject georeferenceGameObject = new GameObject("CesiumGeoreference");
-                georeference =
-                    georeferenceGameObject.AddComponent<CesiumGeoreference>();
-                Undo.RegisterCreatedObjectUndo(georeferenceGameObject, "Create Georeference");
-            }
+            CesiumGeoreference georeference = CesiumEditorUtility.FindOrCreateGeoreference();
 
             GameObject dynamicCameraPrefab = Resources.Load<GameObject>("DynamicCamera");
             GameObject dynamicCameraObject =
@@ -335,6 +345,21 @@ namespace CesiumForUnity
             Undo.RegisterCreatedObjectUndo(dynamicCameraObject, "Create DynamicCamera");
 
             return dynamicCameraObject.GetComponent<CesiumCameraController>();
+        }
+
+        public static CesiumCartographicPolygon CreateCartographicPolygon()
+        {
+            // Find a georeference in the scene, or create one if none exist.
+            CesiumGeoreference georeference = CesiumEditorUtility.FindOrCreateGeoreference();
+
+            GameObject polygonGameObject = new GameObject("CesiumCartographicPolygon");
+            polygonGameObject.transform.SetParent(georeference.gameObject.transform);
+
+            CesiumCartographicPolygon polygon = polygonGameObject.AddComponent<CesiumCartographicPolygon>();
+
+            Undo.RegisterCreatedObjectUndo(polygonGameObject, "Create Cartographic Polygon");
+
+            return polygon;
         }
 
         private static Regex _findLineBreakSets = new Regex("(\r?\n)+[ \t]*");

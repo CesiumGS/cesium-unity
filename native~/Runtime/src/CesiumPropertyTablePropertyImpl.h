@@ -1,6 +1,7 @@
 #pragma once
 
 #include <any>
+#include <cstdint>
 #include <unordered_map>
 
 namespace DotNet::CesiumForUnity {
@@ -44,11 +45,9 @@ namespace CesiumForUnityNative {
 
 class CesiumPropertyTablePropertyImpl {
 public:
-  ~CesiumPropertyTablePropertyImpl(){};
   CesiumPropertyTablePropertyImpl(
-      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property){};
-  void JustBeforeDelete(
-      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property){};
+      const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property);
+  ~CesiumPropertyTablePropertyImpl();
 
   bool GetBoolean(
       const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property,

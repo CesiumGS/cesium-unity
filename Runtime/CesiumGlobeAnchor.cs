@@ -84,6 +84,9 @@ namespace CesiumForUnity
         [NonSerialized]
         internal CesiumGeoreference _georeference;
 
+        [NonSerialized]
+        internal double3? _lastEllipsoidRadii;
+
         #endregion
 
         #region User-editable properties
@@ -182,10 +185,29 @@ namespace CesiumForUnity
         /// </remarks>
         public double3 longitudeLatitudeHeight
         {
-            get => CesiumWgs84Ellipsoid.EarthCenteredEarthFixedToLongitudeLatitudeHeight(this.positionGlobeFixed);
+            get
+            {
+                this.UpdateGeoreferenceIfNecessary();
+
+                if (this._georeference == null || this._georeference.ellipsoid == null)
+                {
+                    // Cannot get property if there is no georeference, or the georeference has no ellipsoid.
+                    return new double3(0.0, 0.0, 0.0);
+                }
+
+                return this._georeference.ellipsoid.CenteredFixedToLongitudeLatitudeHeight(this.positionGlobeFixed);
+            }
             set
             {
-                this.positionGlobeFixed = CesiumWgs84Ellipsoid.LongitudeLatitudeHeightToEarthCenteredEarthFixed(value);
+                this.UpdateGeoreferenceIfNecessary();
+
+                if (this._georeference == null || this._georeference.ellipsoid == null)
+                {
+                    // Cannot set property if there is no georeference, or the georeference has no ellipsoid.
+                    return;
+                }
+
+                this.positionGlobeFixed = this._georeference.ellipsoid.LongitudeLatitudeHeightToCenteredFixed(value);
             }
         }
 
@@ -396,7 +418,7 @@ namespace CesiumForUnity
             this.longitudeLatitudeHeight = new double3(longitude, latitude, height);
         }
 
-         
+
         [Obsolete("Set the positionGlobeFixed property instead.")]
         public void SetPositionEarthCenteredEarthFixed(double x, double y, double z)
         {
@@ -444,9 +466,16 @@ namespace CesiumForUnity
         /// </remarks>
         public void Sync()
         {
+            // If the ellipsoid changed since last sync, we need to update from transform since our ECEF mapping
+            // is going to be invalid.
+            bool isEllipsoidChanged = this._lastEllipsoidRadii.HasValue && this._georeference != null ?
+                (this._lastEllipsoidRadii.Value.x != this._georeference.ellipsoid.radii.x ||
+                this._lastEllipsoidRadii.Value.y != this._georeference.ellipsoid.radii.y ||
+                this._lastEllipsoidRadii.Value.z != this._georeference.ellipsoid.radii.z) : true;
+
             // If we don't have a local -> globe fixed matrix yet, we must update from the Transform
             bool updateFromTransform = !this._localToGlobeFixedMatrixIsValid;
-            if (!updateFromTransform && this._lastLocalsAreValid)
+            if (!isEllipsoidChanged && !updateFromTransform && this._lastLocalsAreValid)
             {
                 // We may also need to update from the Transform if it has changed
                 // since the last time we computed the local -> globe fixed matrix.
@@ -456,7 +485,7 @@ namespace CesiumForUnity
                     this._lastLocalScale != this.transform.localScale;
             }
 
-            if (updateFromTransform)
+            if (isEllipsoidChanged || updateFromTransform)
                 this.UpdateEcefFromTransform();
             else
                 this.UpdateEcef(this._localToGlobeFixedMatrix);

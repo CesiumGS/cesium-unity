@@ -1,6 +1,6 @@
 {
   "name": "com.cesium.unity",
-  "version": "1.7.1",
+  "version": "1.11.1",
   "displayName": "Cesium for Unity",
   "description": "Cesium for Unity brings the 3D geospatial ecosystem to Unity. By combining a high-accuracy full-scale WGS84 globe, open APIs and open standards for spatial indexing such as 3D Tiles, and cloud-based real-world content from [Cesium ion](https://cesium.com/cesium-ion) with Unity, this plugin enables 3D geospatial workflows and applications in Unity.",
   "license": "Apache-2.0",
@@ -9,6 +9,9 @@
     "name": "Cesium",
     "email": "hello@cesium.com",
     "url": "https://cesium.com"
+  },
+  "scripts": {
+    "doxygen": "doxygen ./Documentation~/Doxyfile"
   },
   "changelogUrl": "https://github.com/CesiumGS/cesium-unity/blob/main/CHANGES.md",
   "documentationUrl": "https://cesium.com/learn/unity/",

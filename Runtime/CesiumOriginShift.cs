@@ -57,6 +57,12 @@ namespace CesiumForUnity
         {
             CesiumGeoreference georeference = this.GetComponentInParent<CesiumGeoreference>();
 
+            if (georeference == null)
+            {
+                Debug.LogWarning("CesiumOriginShift is doing nothing because it is not nested inside a game object with a CesiumGeoreference component.");
+                return;
+            }
+
             CesiumGlobeAnchor anchor = this.GetComponent<CesiumGlobeAnchor>();
 
             // The RequireComponent attribute should ensure the globe anchor exists, but it may not be active.

@@ -6,6 +6,8 @@
 
 #include <DotNet/CesiumForUnity/Cesium3DTile.h>
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
+#include <DotNet/CesiumForUnity/CesiumEllipsoid.h>
+#include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/CesiumForUnity/CesiumTileExcluder.h>
 #include <DotNet/UnityEngine/Quaternion.h>
 #include <DotNet/UnityEngine/Vector3.h>
@@ -64,7 +66,14 @@ bool UnityTileExcluderAdaptor::shouldExclude(
     return false;
   }
 
+  const CesiumGeospatial::Ellipsoid ellipsoid =
+      _georeference.ellipsoid().NativeImplementation().GetEllipsoid();
+
   this->_tile._pTile(const_cast<Cesium3DTilesSelection::Tile*>(&tile));
+  // it's ok for us to pass by pointer since it will only be valid for this call
+  // anyways
+  this->_tile._pTileEllipsoid(
+      const_cast<CesiumGeospatial::Ellipsoid*>(&ellipsoid));
   return this->_excluder.ShouldExclude(this->_tile);
 }
 

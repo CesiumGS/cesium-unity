@@ -76,12 +76,12 @@ void CesiumBingMapsRasterOverlayImpl::AddToTileset(
       CesiumRasterOverlayUtility::GetOverlayOptions(genericOverlay);
 
   this->_pOverlay = new BingMapsRasterOverlay(
-      overlay.name().ToStlString(),
+      overlay.materialKey().ToStlString(),
       "https://dev.virtualearth.net",
       overlay.bingMapsKey().ToStlString(),
       mapStyle,
       "",
-      CesiumGeospatial::Ellipsoid::WGS84,
+      pTileset->getEllipsoid(),
       options);
 
   pTileset->getOverlays().add(this->_pOverlay);

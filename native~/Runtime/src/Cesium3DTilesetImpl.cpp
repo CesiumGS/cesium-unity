@@ -1,6 +1,7 @@
 #include "Cesium3DTilesetImpl.h"
 
 #include "CameraManager.h"
+#include "CesiumEllipsoidImpl.h"
 #include "CesiumIonServerHelper.h"
 #include "UnityPrepareRendererResources.h"
 #include "UnityTileExcluderAdaptor.h"
@@ -15,12 +16,11 @@
 #include <DotNet/CesiumForUnity/Cesium3DTilesetLoadFailureDetails.h>
 #include <DotNet/CesiumForUnity/Cesium3DTilesetLoadType.h>
 #include <DotNet/CesiumForUnity/CesiumDataSource.h>
+#include <DotNet/CesiumForUnity/CesiumEllipsoid.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/CesiumForUnity/CesiumIonServer.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
 #include <DotNet/CesiumForUnity/CesiumTileExcluder.h>
-#include <DotNet/System/Action.h>
-#include <DotNet/System/Array1.h>
 #include <DotNet/System/Object.h>
 #include <DotNet/System/String.h>
 #include <DotNet/UnityEngine/Application.h>
@@ -110,6 +110,10 @@ void Cesium3DTilesetImpl::Update(
   }
 
 #endif
+  if (this->_creditSystem == nullptr) {
+    // Refresh the tileset so it creates and uses a new credit system.
+    this->DestroyTileset(tileset);
+  }
 
   if (!this->_pTileset) {
     this->LoadTileset(tileset);
@@ -263,10 +267,39 @@ struct CalculateECEFCameraPosition {
   }
 
   glm::dvec3 operator()(const CesiumGeospatial::S2CellBoundingVolume& s2) {
-    return (*this)(s2.computeBoundingRegion());
+    return (*this)(s2.computeBoundingRegion(ellipsoid));
   }
 };
 } // namespace
+
+void Cesium3DTilesetImpl::updateOverlayMaterialKeys(
+    const DotNet::System::Array1<DotNet::CesiumForUnity::CesiumRasterOverlay>&
+        overlays) {
+  if (!this->_pTileset ||
+      !this->_pTileset->getExternals().pPrepareRendererResources) {
+    return;
+  }
+
+  std::vector<std::string> overlayMaterialKeys(overlays.Length());
+  for (int32_t i = 0, len = overlays.Length(); i < len; ++i) {
+    CesiumForUnity::CesiumRasterOverlay overlay = overlays[i];
+    overlayMaterialKeys[i] = overlay.materialKey().ToStlString();
+  }
+
+  // Use material keys to resolve the property IDs in TilesetMaterialProperties.
+  UnityPrepareRendererResources* pRendererResources =
+      static_cast<UnityPrepareRendererResources*>(
+          this->_pTileset->getExternals().pPrepareRendererResources.get());
+  pRendererResources->getMaterialProperties().updateOverlayParameterIDs(
+      overlayMaterialKeys);
+}
+
+void Cesium3DTilesetImpl::UpdateOverlayMaterialKeys(
+    const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
+  this->updateOverlayMaterialKeys(
+      tileset.gameObject()
+          .GetComponents<CesiumForUnity::CesiumRasterOverlay>());
+}
 
 void Cesium3DTilesetImpl::FocusTileset(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
@@ -294,11 +327,13 @@ void Cesium3DTilesetImpl::FocusTileset(
   const glm::dmat4& ecefToUnityWorld =
       georeferenceCrs.getEcefToLocalTransformation();
 
+  const CesiumGeospatial::Ellipsoid& ellipsoid =
+      georeferenceComponent.ellipsoid().NativeImplementation().GetEllipsoid();
+
   const BoundingVolume& boundingVolume =
       this->_pTileset->getRootTile()->getBoundingVolume();
-  glm::dvec3 ecefCameraPosition = std::visit(
-      CalculateECEFCameraPosition{CesiumGeospatial::Ellipsoid::WGS84},
-      boundingVolume);
+  glm::dvec3 ecefCameraPosition =
+      std::visit(CalculateECEFCameraPosition{ellipsoid}, boundingVolume);
   glm::dvec3 unityCameraPosition =
       glm::dvec3(ecefToUnityWorld * glm::dvec4(ecefCameraPosition, 1.0));
 
@@ -438,6 +473,13 @@ void Cesium3DTilesetImpl::LoadTileset(
   options.mainThreadLoadingTimeLimit = 5.0;
   options.tileCacheUnloadTimeLimit = 5.0;
 
+  DotNet::CesiumForUnity::CesiumGeoreference georeferenceComponent =
+      tileset.gameObject()
+          .GetComponentInParent<DotNet::CesiumForUnity::CesiumGeoreference>();
+
+  options.ellipsoid =
+      georeferenceComponent.ellipsoid().NativeImplementation().GetEllipsoid();
+
   TilesetContentOptions contentOptions{};
   contentOptions.generateMissingNormalsSmooth = tileset.generateSmoothNormals();
 
@@ -537,7 +579,7 @@ void Cesium3DTilesetImpl::LoadTileset(
         options);
   }
 
-  // Add any overlay components
+  // Add any overlay components.
   System::Array1<CesiumForUnity::CesiumRasterOverlay> overlays =
       tileset.gameObject().GetComponents<CesiumForUnity::CesiumRasterOverlay>();
   for (int32_t i = 0, len = overlays.Length(); i < len; ++i) {
@@ -545,7 +587,9 @@ void Cesium3DTilesetImpl::LoadTileset(
     overlay.AddToTileset();
   }
 
-  // Add any tile excluder components
+  this->updateOverlayMaterialKeys(overlays);
+
+  // Add any tile excluder components.
   System::Array1<CesiumForUnity::CesiumTileExcluder> excluders =
       tileset.gameObject()
           .GetComponentsInParent<CesiumForUnity::CesiumTileExcluder>();
@@ -562,8 +606,7 @@ void Cesium3DTilesetImpl::LoadTileset(
   // destroying it on the first tick after creation.
   if (tileset.opaqueMaterial() != nullptr) {
     int32_t opaqueMaterialHash = tileset.opaqueMaterial().ComputeCRC();
-    _lastOpaqueMaterialHash = opaqueMaterialHash;
+    this->_lastOpaqueMaterialHash = opaqueMaterialHash;
   }
 }
-
 } // namespace CesiumForUnityNative

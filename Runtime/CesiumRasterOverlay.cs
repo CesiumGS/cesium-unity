@@ -11,7 +11,7 @@ namespace CesiumForUnity
     public abstract class CesiumRasterOverlay : MonoBehaviour
     {
         /// <summary>
-        /// Encapsulatess a method that receives details of a raster overlay load failure.
+        /// Encapsulates a method that receives details of a raster overlay load failure.
         /// </summary>
         /// <param name="details">The details of the load failure.</param>
         public delegate void RasterOverlayLoadFailureDelegate(
@@ -29,6 +29,34 @@ namespace CesiumForUnity
             if (OnCesiumRasterOverlayLoadFailure != null)
             {
                 OnCesiumRasterOverlayLoadFailure(details);
+            }
+        }
+
+        [SerializeField]
+        private string _materialKey = "0";
+
+        /// <summary>
+        /// The key to use to match this overlay to the corresponding parameters in the tileset's material.
+        /// </summary>
+        /// <remarks>
+        /// In the tileset's materials, an overlay requires parameters for its texture, texture coordinate index,
+        /// and translation and scale. Overlays must specify a string key to match with the correct parameters.
+        /// The format of these parameters is as follows.
+        /// <list type="bullet">
+        /// <item><b>Overlay Texture</b>: _overlayTexture_KEY</item>
+        /// <item><b>Overlay Texture Coordinate Index</b>: _overlayTextureCoordinateIndex_KEY</item>
+        /// <item><b>Overlay Translation and Scale</b>: _overlayTranslationScale_KEY</item>
+        /// </list>
+        /// Material keys are useful for specifying the order of the raster overlays, or distinguishing them for
+        /// overlay-specific effects.
+        /// </remarks>
+        public string materialKey
+        {
+            get => this._materialKey;
+            set
+            {
+                this._materialKey = value;
+                this.Refresh();
             }
         }
 
@@ -146,6 +174,9 @@ namespace CesiumForUnity
             if (tileset == null)
                 return;
 
+            // In case the material key changed, register the new key with the tileset.
+            tileset.UpdateOverlayMaterialKeys();
+
             this.AddToTileset(tileset);
         }
 
@@ -173,6 +204,7 @@ namespace CesiumForUnity
         public void Refresh()
         {
             this.RemoveFromTileset();
+
             if (this.enabled)
                 this.AddToTileset();
         }
