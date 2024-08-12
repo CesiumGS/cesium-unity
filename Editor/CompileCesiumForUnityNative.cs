@@ -443,7 +443,7 @@ namespace CesiumForUnity
                 string projectPath = Path.Combine(Application.dataPath, "..");
                 string logDisplayName = Path.GetRelativePath(projectPath, logFilename);
 
-                EditorUtility.DisplayProgressBar($"Building CesiumForUnityNative", $"See {logDisplayName}.", 0.0f);
+                EditorUtility.DisplayProgressBar($"Building CesiumForUnityNative: {Path.GetFileName(library.BuildDirectory)}", $"See {logDisplayName}.", 0.0f);
 
                 using (StreamWriter log = new StreamWriter(logFilename, false, Encoding.UTF8))
                 {
