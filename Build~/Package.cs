@@ -36,13 +36,16 @@ namespace Build
                 Directory.CreateDirectory(outputPackagePath);
 
                 Console.WriteLine("**** Modifying the csc.rsp files to write generated files to disk");
-                string generatedRuntimePath = Path.Combine(tempPath, "generated", "Runtime");
-                Directory.CreateDirectory(generatedRuntimePath);
-                string generatedEditorPath = Path.Combine(tempPath, "generated", "Editor");
-                Directory.CreateDirectory(generatedEditorPath);
+                string generatedRuntimeBasePath = Path.Combine(tempPath, "generated", "Runtime");
+                Directory.CreateDirectory(generatedRuntimeBasePath);
+                string generatedEditorBasePath = Path.Combine(tempPath, "generated", "Editor");
+                Directory.CreateDirectory(generatedEditorBasePath);
 
-                File.AppendAllText(runtimeCscRspPath, "-generatedfilesout:\"" + generatedRuntimePath + "\"" + Environment.NewLine, Encoding.UTF8);
-                File.AppendAllText(editorCscRspPath, "-generatedfilesout:\"" + generatedEditorPath + "\"" + Environment.NewLine, Encoding.UTF8);
+                File.AppendAllText(runtimeCscRspPath, "-generatedfilesout:\"" + generatedRuntimeBasePath + "\"" + Environment.NewLine, Encoding.UTF8);
+                File.AppendAllText(editorCscRspPath, "-generatedfilesout:\"" + generatedEditorBasePath + "\"" + Environment.NewLine, Encoding.UTF8);
+
+                string generatedRuntimePath = Path.Combine(generatedRuntimeBasePath, "Reinterop");
+                string generatedEditorPath = Path.Combine(generatedEditorBasePath, "Reinterop");
 
                 string sceneDirectory = Path.Combine(Utility.ProjectRoot, "Assets", "Scenes");
                 Directory.CreateDirectory(sceneDirectory);
