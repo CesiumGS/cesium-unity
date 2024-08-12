@@ -44,12 +44,13 @@ target_link_libraries(
     PRIVATE
       tidy-static
       enum-flags
+      swl-variant
 )
 
 set_target_properties(
   CesiumForUnityNative-Runtime
     PROPERTIES
-        CXX_STANDARD 17
+        CXX_STANDARD 20
         CXX_STANDARD_REQUIRED YES
         CXX_EXTENSIONS NO
 )
@@ -66,6 +67,7 @@ target_compile_definitions(
   CesiumForUnityNative-Runtime
   PUBLIC
     TIDY_STATIC
+    SWL_VARIANT_NO_CONSTEXPR_EMPLACE
 )
 
 # If we're building for the Unity Editor, set a #define accordingly.

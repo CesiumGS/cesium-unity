@@ -4,9 +4,9 @@
 
 #include <DotNet/CesiumForUnity/CesiumMetadataValue.h>
 #include <DotNet/CesiumForUnity/MetadataType.h>
+#include <swl/variant.hpp>
 
 #include <unordered_map>
-#include <variant>
 
 namespace DotNet::CesiumForUnity {
 class CesiumFeature;
@@ -18,7 +18,7 @@ class String;
 
 namespace CesiumForUnityNative {
 
-using ValueType = std::variant<
+using ValueType = swl::variant<
     int8_t,
     uint8_t,
     int16_t,
