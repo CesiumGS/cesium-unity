@@ -130,7 +130,7 @@ jobs:
           path: d:\cesium\CesiumForUnityBuildProject\*.tgz
       - name: Run Tests
         run: |
-          start -FilePath "C:\Program Files\Unity\Hub\Editor\2021.3.13f1\Editor\Unity.exe" -ArgumentList "-runTests -batchmode -projectPath d:\cesium\CesiumForUnityBuildProject -testResults d:\cesium\temp\TestResults.xml -testPlatform PlayMode -logFile d:\cesium\temp\test-log.txt" -Wait
+          start -FilePath "C:\Program Files\Unity\Hub\Editor\2022.3.41f1\Editor\Unity.exe" -ArgumentList "-runTests -batchmode -projectPath d:\cesium\CesiumForUnityBuildProject -testResults d:\cesium\temp\TestResults.xml -testPlatform PlayMode -logFile d:\cesium\temp\test-log.txt" -Wait
           cat d:\cesium\temp\test-log.txt
       - name: Test Report
         uses: kring/test-reporter@v1.6.2-kring
@@ -166,7 +166,7 @@ jobs:
           sudo cp -R "./UnityHubSetup/Unity Hub.app" /Applications
           hdiutil detach ./UnityHubSetup
           rm ./UnityHubSetup.dmg
-      - name: Install Unity 2021.3.13f1
+      - name: Install Unity 2022.3.41f1
         # This command sometimes returns exit code 130, despite actually succeeding.
         continue-on-error: true
         run: |
@@ -238,7 +238,7 @@ jobs:
           path: ~/cesium/CesiumForUnityBuildProject/*.tgz
       - name: Run Tests
         run: |
-          /Applications/Unity/Hub/Editor/2021.3.13f1/Unity.app/Contents/MacOS/Unity -runTests -batchmode -projectPath ~/cesium/CesiumForUnityBuildProject -testResults ~/cesium/CesiumForUnityBuildProject/TestResults.xml -testPlatform PlayMode -logFile ~/cesium/CesiumForUnityBuildProject/test-log.txt
+          /Applications/Unity/Hub/Editor/2022.3.41f1/Unity.app/Contents/MacOS/Unity -runTests -batchmode -projectPath ~/cesium/CesiumForUnityBuildProject -testResults ~/cesium/CesiumForUnityBuildProject/TestResults.xml -testPlatform PlayMode -logFile ~/cesium/CesiumForUnityBuildProject/test-log.txt
           cat ~/cesium/CesiumForUnityBuildProject/test-log.txt
           ls /Users/runner/cesium/CesiumForUnityBuildProject/TestResults.xml
       - name: Test Report
