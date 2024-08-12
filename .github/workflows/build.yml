@@ -63,8 +63,8 @@ jobs:
           del ./UnityHubSetup.exe
       - name: Install Unity
         run: |
-          Start-Process -FilePath "C:/Program Files/Unity Hub/Unity Hub.exe" -Args "-- --headless install --version 2021.3.13f1 --changeset 9e7d58001ecf" -Wait
-          Start-Process -FilePath "C:/Program Files/Unity Hub/Unity Hub.exe" -Args "-- --headless install-modules --version 2021.3.13f1 --changeset 9e7d58001ecf --module android android-sdk-ndk-tools android-open-jdk-8u172-b11 universal-windows-platform uwp-il2cpp" -Wait
+          Start-Process -FilePath "C:/Program Files/Unity Hub/Unity Hub.exe" -Args "-- --headless install --version 2022.3.41f1 --changeset 0f988161febf" -Wait
+          Start-Process -FilePath "C:/Program Files/Unity Hub/Unity Hub.exe" -Args "-- --headless install-modules --version 2022.3.41f1 --changeset 0f988161febf --module android android-sdk-ndk-tools android-open-jdk-8u172-b11 universal-windows-platform uwp-il2cpp" -Wait
       - name: Create SSH tunnel to Unity License Server
         env:
           UNITY_LICENSE_SERVER_SSH_KEY: ${{ secrets.UNITY_LICENSE_SERVER_SSH_KEY }}
@@ -170,10 +170,10 @@ jobs:
         # This command sometimes returns exit code 130, despite actually succeeding.
         continue-on-error: true
         run: |
-          /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub -- --headless install --version 2021.3.13f1 --changeset 9e7d58001ecf --architecture x86_64
+          /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub -- --headless install --version 2022.3.41f1 --changeset 0f988161febf --architecture x86_64
       - name: Install Unity iOS Support 
         run: |
-          /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub -- --headless install-modules --version 2021.3.13f1 --changeset 9e7d58001ecf --module ios --architecture x86_64
+          /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub -- --headless install-modules --version 2022.3.41f1 --changeset 0f988161febf --module ios --architecture x86_64
       - name: Configure Unity to Use the License Server
         run: |
           sudo mkdir -p "/Library/Application Support/Unity/config"
