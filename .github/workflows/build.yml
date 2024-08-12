@@ -64,7 +64,7 @@ jobs:
       - name: Install Unity
         run: |
           Start-Process -FilePath "C:/Program Files/Unity Hub/Unity Hub.exe" -Args "-- --headless install --version 2022.3.41f1 --changeset 0f988161febf" -Wait
-          Start-Process -FilePath "C:/Program Files/Unity Hub/Unity Hub.exe" -Args "-- --headless install-modules --version 2022.3.41f1 --changeset 0f988161febf --module android android-sdk-ndk-tools android-open-jdk universal-windows-platform uwp-il2cpp" -Wait
+          Start-Process -FilePath "C:/Program Files/Unity Hub/Unity Hub.exe" -Args "-- --headless install-modules --version 2022.3.41f1 --changeset 0f988161febf --module android android-sdk-ndk-tools  android-open-jdk-11.0.14.1+1 universal-windows-platform" -Wait
       - name: Create SSH tunnel to Unity License Server
         env:
           UNITY_LICENSE_SERVER_SSH_KEY: ${{ secrets.UNITY_LICENSE_SERVER_SSH_KEY }}
