@@ -103,6 +103,10 @@ jobs:
         run: |
           mkdir -p d:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
           mv $ENV:GITHUB_WORKSPACE/* d:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
+          # Disable Unity audio
+          mkdir -p d:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity\ProjectSettings
+          $text="%YAML 1.1`n%TAG !u! tag:unity3d.com,2011:`n--- !u!11 &1`nAudioManager:`n  m_DisableAudio: 1`n"
+          [IO.File]::WriteAllLines("d:/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity/ProjectSettings/AudioManager.asset",$text)
       - name: Build Reinterop
         run: |
           cd d:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
@@ -218,6 +222,9 @@ jobs:
         run: |
           mkdir -p ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
           mv $GITHUB_WORKSPACE/* ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
+          # Disable Unity audio
+          mkdir -p ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity/ProjectSettings
+          echo '%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!11 &1\nAudioManager:\n  m_DisableAudio: 1\n' > ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity/ProjectSettings/AudioManager.asset
       - name: Build Reinterop
         run: |
           cd ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
