@@ -126,7 +126,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Native Build Logs - Windows
-          path: native~/build-*/build.log
+          path: d:/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity/native~/build-*/build.log
       - name: Publish package artifact
         if: ${{ success() }}
         uses: actions/upload-artifact@v4
@@ -234,7 +234,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Native Build Logs - macOS
-          path: native~/build-*/build.log
+          path: ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity/native~/build-*/build.log
       - name: Publish package artifact
         if: ${{ success() }}
         uses: actions/upload-artifact@v4
