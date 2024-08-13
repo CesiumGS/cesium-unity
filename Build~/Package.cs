@@ -60,6 +60,24 @@ namespace Build
                     }
                 }
 
+                // Disable Unity audio, because we don't need it and because it seems to take 10-20 minutes
+                // to time out on macOS on GitHub Actions every time we start up Unity.
+                string projectSettingsDirectory = Path.Combine(Utility.ProjectRoot, "ProjectSettings");
+                Directory.CreateDirectory(projectSettingsDirectory);
+                string audioManagerPath = Path.Combine(projectSettingsDirectory, "AudioManager.asset");
+                if (!File.Exists(audioManagerPath))
+                {
+                    Console.WriteLine("**** Creating AudioManager.asset to disable Unity audio");
+                    using (StreamWriter audioManager = new StreamWriter(audioManagerPath))
+                    {
+                        audioManager.WriteLine("%YAML 1.1");
+                        audioManager.WriteLine("%TAG !u! tag:unity3d.com,2011:");
+                        audioManager.WriteLine("--- !u!11 &1");
+                        audioManager.WriteLine("AudioManager:");
+                        audioManager.WriteLine("  m_DisableAudio: 1");
+                    }
+                }
+
                 Console.WriteLine("**** Compiling C# code for the Editor");
                 unity.Run(new[]
                 {
