@@ -175,10 +175,10 @@ jobs:
         # This command sometimes returns exit code 130, despite actually succeeding.
         continue-on-error: true
         run: |
-          /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub -- --headless install --version 2022.3.41f1 --changeset 0f988161febf --architecture x86_64
+          /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub -- --headless install --version 2022.3.41f1 --changeset 0f988161febf
       - name: Install Unity iOS Support 
         run: |
-          /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub -- --headless install-modules --version 2022.3.41f1 --changeset 0f988161febf --module ios --architecture x86_64
+          /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub -- --headless install-modules --version 2022.3.41f1 --changeset 0f988161febf --module ios
       - name: Configure Unity to Use the License Server
         run: |
           sudo mkdir -p "/Library/Application Support/Unity/config"
