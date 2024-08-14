@@ -96,7 +96,7 @@ auto getNativeScalarValue(const DotNet::System::Object& object, F&& callback) {
   }
 
   if (maybeValue) {
-    return callback(std::move(*maybeValue));
+    return callback(*maybeValue);
   }
 
   return callback(swl::monostate());
