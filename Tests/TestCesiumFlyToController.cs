@@ -74,4 +74,63 @@ public class TestCesiumFlyToController
         Assert.That(goFlyer.transform.position.y, Is.EqualTo(0.0f).Using(FloatEqualityComparer.Instance));
         Assert.That(goFlyer.transform.position.z, Is.EqualTo(0.0f).Using(FloatEqualityComparer.Instance));
     }
+
+    [UnityTest]
+    public IEnumerator FlyToLocationLongitudeLatitudeHeightInterrupted()
+    {
+        GameObject goGeoreference = new GameObject("Georeference");
+        CesiumGeoreference georeference = goGeoreference.AddComponent<CesiumGeoreference>();
+        georeference.longitude = -55.0;
+        georeference.latitude = 55.0;
+        georeference.height = 1000.0;
+
+        GameObject goFlyer = new GameObject("Flyer");
+        goFlyer.transform.parent = goGeoreference.transform;
+
+        CesiumGlobeAnchor anchor = goFlyer.AddComponent<CesiumGlobeAnchor>();
+        goFlyer.AddComponent<CesiumOriginShift>();
+        CesiumFlyToController flyToController = goFlyer.AddComponent<CesiumFlyToController>();
+
+        // Make the flight fast so the test doesn't take too long.
+        flyToController.flyToDuration = 0.25;
+
+        anchor.adjustOrientationForGlobeWhenMoving = false;
+        anchor.longitudeLatitudeHeight = new double3(20.0, -25.0, 1000.0);
+        anchor.adjustOrientationForGlobeWhenMoving = true;
+
+        yield return null;
+
+        // The origin should have been shifted so the flyer is at the origin.
+        Assert.That(goFlyer.transform.position.x, Is.EqualTo(0.0f).Using(FloatEqualityComparer.Instance));
+        Assert.That(goFlyer.transform.position.y, Is.EqualTo(0.0f).Using(FloatEqualityComparer.Instance));
+        Assert.That(goFlyer.transform.position.z, Is.EqualTo(0.0f).Using(FloatEqualityComparer.Instance));
+
+        // Start a flight to elsewhere
+        bool flightComplete = false;
+        flyToController.OnFlightComplete += () =>
+        {
+            flightComplete = true;
+        };
+
+        bool flightInterrupted = false;
+        flyToController.OnFlightInterrupted += () =>
+        {
+            flightInterrupted = true;
+        };
+        
+        flyToController.FlyToLocationLongitudeLatitudeHeight(new double3(100.0, 25.0, 800.0), 0.0f, 0.0f, true);
+
+        yield return null;
+
+        Assert.IsFalse(flightComplete);
+        Assert.IsFalse(flightInterrupted);
+
+        // Give the object a new position, which should abort the flight.
+        goFlyer.transform.position = new Vector3(100.0f, 200.0f, 300.0f);
+
+        yield return null;
+
+        Assert.IsFalse(flightComplete);
+        Assert.IsTrue(flightInterrupted);
+    }
 }
