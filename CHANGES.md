@@ -1,5 +1,20 @@
 # Change Log
 
+## ? - ?
+
+##### Breaking Changes :mega:
+
+- Player builds for macOS now require macOS 10.15+. Previously, 10.13+ was supported.
+
+##### Additions :tada:
+
+- Editor builds for macOS now target macOS 10.15+. Previously, macOS 12.7+ was required.
+
+##### Fixes :wrench:
+
+- Fixed a bug that could cause a crash in `CesiumIonSession` when the object was garbage collected or the AppDomain was unloaded while network requests were in progress.
+- Fixed a bug that could cause `CesiumFlyToController` to unexpectedly interrupt a flight.
+
 ## v1.11.1 - 2024-08-01
 
 ##### Fixes :wrench:
