@@ -789,7 +789,7 @@ CesiumAsync::Future<bool> CesiumIonSessionImpl::ensureAppDataLoaded(
               CesiumIonClient::Response<CesiumIonClient::ApplicationData>&&
                   appData) {
             CesiumAsync::Promise<bool> promise =
-                _asyncSystem.createPromise<bool>();
+                asyncSystem.createPromise<bool>();
 
             if (session == nullptr) {
               UnityEngine::Debug::LogError(

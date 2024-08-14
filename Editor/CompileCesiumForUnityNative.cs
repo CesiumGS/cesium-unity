@@ -550,29 +550,23 @@ namespace CesiumForUnity
             }
 #endif
 
-            // If the NDK root has a space in it, this will confuse broken software like OpenSSL's build process.
-            // So map a drive letter and rewrite the path.
-            if (ndkRoot != null && ndkRoot.Contains(' '))
-            {
-                if (!Directory.Exists("N:\\"))
-                {
-                    Process.Start("subst", "N: \"" + ndkRoot + "\"").WaitForExit();
-                }
-
-                ndkRoot = "N:\\";
-            }
-
             // On Windows, use the make program included in the NDK. Because Visual Studio (which is usually
             // the default) won't work to build for Android.
             if (library.Platform == BuildTarget.Android && Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
                 library.ExtraConfigureArgs.Add("-G Ninja");
 
-                // if (!string.IsNullOrEmpty(ndkRoot))
-                // {
-                //     string make = Path.Combine(ndkRoot, "prebuilt", "windows-x86_64", "bin", "make.exe").Replace('\\', '/');
-                //     library.ExtraConfigureArgs.Add($"-DCMAKE_MAKE_PROGRAM=\"{make}\"");
-                // }
+                // If the NDK root has a space in it, this will confuse broken software like OpenSSL's build process.
+                // So map a drive letter and rewrite the path.
+                if (ndkRoot != null && ndkRoot.Contains(' '))
+                {
+                    if (!Directory.Exists("N:\\"))
+                    {
+                        Process.Start("subst", "N: \"" + ndkRoot + "\"").WaitForExit();
+                    }
+
+                    ndkRoot = "N:\\";
+                }
             }
 
             if (!string.IsNullOrEmpty(ndkRoot))
