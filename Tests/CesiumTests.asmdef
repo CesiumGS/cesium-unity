@@ -5,7 +5,8 @@
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "CesiumRuntime",
-        "Unity.Mathematics"
+        "Unity.Mathematics",
+        "Unity.Splines"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -18,6 +19,12 @@
     "defineConstraints": [
         "UNITY_INCLUDE_TESTS"
     ],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.splines",
+            "expression": "1.0.0",
+            "define": "SUPPORTS_SPLINES"
+        }
+    ],
     "noEngineReferences": false
 }

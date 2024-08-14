@@ -1,5 +1,14 @@
 # Change Log
 
+## v1.11.1 - 2024-08-01
+
+##### Fixes :wrench:
+
+- Fixed a bug that caused a `NullReferenceException` when attempting to get or set the `longitudeLatitudeHeight` property on a disabled `CesiumGlobeAnchor`.
+- Fixed a bug introduced in v1.11.0 that caused `CesiumCartographicPolygon` positions to be interpreted incorrectly, making polygon clipping unusable.
+
+This release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.37.0 to v0.38.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
+
 ### v1.11.0 - 2024-07-01
 
 ##### Additions :tada:
