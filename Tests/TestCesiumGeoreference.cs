@@ -24,22 +24,22 @@ public class TestCesiumGeoreference
 
         yield return null;
 
-        IEqualityComparer<double> epsilon8 = Comparers.Double(1e-8);
-        Assert.That(goAnchored.transform.localPosition.x, Is.EqualTo(0.0f).Using(epsilon8));
-        Assert.That(goAnchored.transform.localPosition.y, Is.EqualTo(0.0f).Using(epsilon8));
-        Assert.That(goAnchored.transform.localPosition.z, Is.EqualTo(0.0f).Using(epsilon8));
+        IEqualityComparer<float> epsilon8f = new FloatEqualityComparer(1e-8f);
+        Assert.That(goAnchored.transform.localPosition.x, Is.EqualTo(0.0f).Using(epsilon8f));
+        Assert.That(goAnchored.transform.localPosition.y, Is.EqualTo(0.0f).Using(epsilon8f));
+        Assert.That(goAnchored.transform.localPosition.z, Is.EqualTo(0.0f).Using(epsilon8f));
 
         georeference.SetOriginLongitudeLatitudeHeight(-55.1, 54.9, 1001.0);
 
-        Assert.That(goAnchored.transform.localPosition.x, Is.Not.EqualTo(0.0f).Using(epsilon8));
-        Assert.That(goAnchored.transform.localPosition.y, Is.Not.EqualTo(0.0f).Using(epsilon8));
-        Assert.That(goAnchored.transform.localPosition.z, Is.Not.EqualTo(0.0f).Using(epsilon8));
+        Assert.That(goAnchored.transform.localPosition.x, Is.Not.EqualTo(0.0f).Using(epsilon8f));
+        Assert.That(goAnchored.transform.localPosition.y, Is.Not.EqualTo(0.0f).Using(epsilon8f));
+        Assert.That(goAnchored.transform.localPosition.z, Is.Not.EqualTo(0.0f).Using(epsilon8f));
 
         yield return null;
 
-        Assert.That(goAnchored.transform.localPosition.x, Is.Not.EqualTo(0.0f).Using(epsilon8));
-        Assert.That(goAnchored.transform.localPosition.y, Is.Not.EqualTo(0.0f).Using(epsilon8));
-        Assert.That(goAnchored.transform.localPosition.z, Is.Not.EqualTo(0.0f).Using(epsilon8));
+        Assert.That(goAnchored.transform.localPosition.x, Is.Not.EqualTo(0.0f).Using(epsilon8f));
+        Assert.That(goAnchored.transform.localPosition.y, Is.Not.EqualTo(0.0f).Using(epsilon8f));
+        Assert.That(goAnchored.transform.localPosition.z, Is.Not.EqualTo(0.0f).Using(epsilon8f));
     }
 
     [UnityTest]
@@ -57,10 +57,10 @@ public class TestCesiumGeoreference
 
         yield return null;
 
-        IEqualityComparer<double> epsilon8 = Comparers.Double(1e-8);
-        Assert.That(goAnchored.transform.localPosition.x, Is.EqualTo(0.0f).Using(epsilon8));
-        Assert.That(goAnchored.transform.localPosition.y, Is.EqualTo(0.0f).Using(epsilon8));
-        Assert.That(goAnchored.transform.localPosition.z, Is.EqualTo(0.0f).Using(epsilon8));
+        IEqualityComparer<float> epsilon8f = new FloatEqualityComparer(1e-8f);
+        Assert.That(goAnchored.transform.localPosition.x, Is.EqualTo(0.0f).Using(epsilon8f));
+        Assert.That(goAnchored.transform.localPosition.y, Is.EqualTo(0.0f).Using(epsilon8f));
+        Assert.That(goAnchored.transform.localPosition.z, Is.EqualTo(0.0f).Using(epsilon8f));
 
         // Change both the origin and the transform.
         georeference.transform.localPosition = new Vector3(100.0f, 200.0f, 300.0f);
@@ -69,16 +69,17 @@ public class TestCesiumGeoreference
         yield return null;
 
         // The anchor should maintain its globe position.
+        IEqualityComparer<double> epsilon8 = Comparers.Double(1e-8);
         Assert.That(anchor.longitudeLatitudeHeight.x, Is.EqualTo(-55.0).Using(epsilon8));
         Assert.That(anchor.longitudeLatitudeHeight.y, Is.EqualTo(55.0).Using(epsilon8));
         Assert.That(anchor.longitudeLatitudeHeight.z, Is.EqualTo(1000.0).Using(epsilon8));
 
         // Its local local position should be affected by the georeference origin change
         // but not by the parent transform change.
-        IEqualityComparer<float> epsilon4 = new FloatEqualityComparer(1e-3f);
-        Assert.That(goAnchored.transform.localPosition.x, Is.EqualTo(0.0f).Using(epsilon4));
-        Assert.That(goAnchored.transform.localPosition.y, Is.EqualTo(-1000.0f).Using(epsilon4));
-        Assert.That(goAnchored.transform.localPosition.z, Is.EqualTo(0.0f).Using(epsilon4));
+        IEqualityComparer<float> epsilon3 = new FloatEqualityComparer(1e-3f);
+        Assert.That(goAnchored.transform.localPosition.x, Is.EqualTo(0.0f).Using(epsilon3));
+        Assert.That(goAnchored.transform.localPosition.y, Is.EqualTo(-1000.0f).Using(epsilon3));
+        Assert.That(goAnchored.transform.localPosition.z, Is.EqualTo(0.0f).Using(epsilon3));
     }
 
     [UnityTest]
@@ -98,16 +99,17 @@ public class TestCesiumGeoreference
 
         yield return null;
 
-        IEqualityComparer<double> epsilon8 = Comparers.Double(1e-8);
-        Assert.That(goAnchored.transform.localPosition.x, Is.EqualTo(1.0f).Using(epsilon8));
-        Assert.That(goAnchored.transform.localPosition.y, Is.EqualTo(2.0f).Using(epsilon8));
-        Assert.That(goAnchored.transform.localPosition.z, Is.EqualTo(3.0f).Using(epsilon8));
+        IEqualityComparer<float> epsilon8f = new FloatEqualityComparer(1e-8f);
+        Assert.That(goAnchored.transform.localPosition.x, Is.EqualTo(1.0f).Using(epsilon8f));
+        Assert.That(goAnchored.transform.localPosition.y, Is.EqualTo(2.0f).Using(epsilon8f));
+        Assert.That(goAnchored.transform.localPosition.z, Is.EqualTo(3.0f).Using(epsilon8f));
 
-        Assert.That(goAnchored.transform.localScale.x, Is.EqualTo(4.0f).Using(epsilon8));
-        Assert.That(goAnchored.transform.localScale.y, Is.EqualTo(5.0f).Using(epsilon8));
-        Assert.That(goAnchored.transform.localScale.z, Is.EqualTo(6.0f).Using(epsilon8));
+        Assert.That(goAnchored.transform.localScale.x, Is.EqualTo(4.0f).Using(epsilon8f));
+        Assert.That(goAnchored.transform.localScale.y, Is.EqualTo(5.0f).Using(epsilon8f));
+        Assert.That(goAnchored.transform.localScale.z, Is.EqualTo(6.0f).Using(epsilon8f));
 
         // The globe anchor's scale initially matches the local scale.
+        IEqualityComparer<double> epsilon8 = Comparers.Double(1e-8);
         Assert.That(anchor.scaleEastUpNorth.x, Is.EqualTo(4.0).Using(epsilon8));
         Assert.That(anchor.scaleEastUpNorth.y, Is.EqualTo(5.0).Using(epsilon8));
         Assert.That(anchor.scaleEastUpNorth.z, Is.EqualTo(6.0).Using(epsilon8));
