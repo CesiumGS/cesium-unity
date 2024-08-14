@@ -131,6 +131,11 @@ namespace Build
 
                 if (OperatingSystem.IsMacOS())
                 {
+                    configureArgs = configureArgs.Concat(new[]
+                    {
+                        "-DCMAKE_OSX_DEPLOYMENT_TARGET=10.15"
+                    }).ToList();
+
                     // On macOS, we must build the native code twice, once for x86_64 and once for arm64.
                     // In theory we can build universal binaries, but some of our third party libraries don't
                     // handle this well.

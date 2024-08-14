@@ -356,6 +356,7 @@ namespace CesiumForUnity
                 library.ExtraConfigureArgs.Add("-DCMAKE_SYSTEM_NAME=iOS");
                 library.ExtraConfigureArgs.Add("-DCMAKE_SYSTEM_PROCESSOR=aarch64");
                 library.ExtraConfigureArgs.Add("-DCMAKE_OSX_ARCHITECTURES=arm64");
+                library.ExtraConfigureArgs.Add("-DOSX_DEPLOYMENT_TARGET=12");
             }
 
             if (platform.platform == BuildTarget.StandaloneOSX)
