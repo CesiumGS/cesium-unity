@@ -418,6 +418,9 @@ namespace CesiumForUnity
                 return "Editor";
             else if (IsIOS(platformGroup, platform))
                 return "iOS";
+            // Make sure we use "WSA" and not "Metro"
+            else if (platformGroup == BuildTargetGroup.WSA)
+                return "WSA";
             return platformGroup.ToString();
         }
 
@@ -440,7 +443,7 @@ namespace CesiumForUnity
                 string projectPath = Path.Combine(Application.dataPath, "..");
                 string logDisplayName = Path.GetRelativePath(projectPath, logFilename);
 
-                EditorUtility.DisplayProgressBar($"Building CesiumForUnityNative", $"See {logDisplayName}.", 0.0f);
+                EditorUtility.DisplayProgressBar($"Building CesiumForUnityNative: {Path.GetFileName(library.BuildDirectory)}", $"See {logDisplayName}.", 0.0f);
 
                 using (StreamWriter log = new StreamWriter(logFilename, false, Encoding.UTF8))
                 {

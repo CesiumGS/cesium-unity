@@ -134,7 +134,7 @@ void CesiumEditorWindowImpl::AddAssetFromIon(
           }
           tileset.ionAssetID(tilesetID);
 
-          getNativeSession().getAssets();
+          getNativeSession().getAssets(getSession());
 
           if (overlayID > 0) {
             // TODO: Need to fix this when we support multiple overlays
