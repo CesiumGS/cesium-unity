@@ -6,6 +6,12 @@ project(CesiumForUnityNative
     LANGUAGES CXX C
 )
 
+# By default, vcpkg (or is it cmake?) will try to link against the Debug version
+# of the vcpkg libraries when we build the RelWithDebInfo configuration. Tell it
+# to prefer Release instead. vcpkg Release builds DO have debug symbols, just like
+# RelWithDebInfo.
+SET(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO "RelWithDebInfo;Release;")
+
 # When building for the Editor, both Runtime and Editor assemblies are
 # written to the Editor directory so that Unity won't load them in
 # a standalone build.
@@ -57,7 +63,35 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Android")
   set(ANDROID_NDK ${CMAKE_ANDROID_NDK})
 endif()
 
-add_subdirectory(extern/cesium-native EXCLUDE_FROM_ALL)
+# vcpkg setup
+set(ENV{VCPKG_OVERLAY_PORTS} "${CMAKE_CURRENT_LIST_DIR}/vcpkg/ports")
+set(ENV{VCPKG_OVERLAY_TRIPLETS} "${CMAKE_CURRENT_LIST_DIR}/vcpkg/triplets")
+
+include(${CMAKE_CURRENT_SOURCE_DIR}/extern/cesium-native/cmake/detect-vcpkg-triplet.cmake)
+
+if (NOT VCPKG_TRIPLET)
+    if (DEFINED ENV{VCPKG_TRIPLET})
+        set(VCPKG_TRIPLET "$ENV{VCPKG_TRIPLET}")
+    elseif(DETECTED_VCPKG_TRIPLET_ERROR)
+        message(FATAL_ERROR "${DETECTED_VCPKG_TRIPLET_ERROR}")
+    else()
+        set(VCPKG_TRIPLET "${DETECTED_VCPKG_TRIPLET}-unity")
+    endif()
+endif()
+
+# We never need any of cesium-native's header files to be installed.
+set(CESIUM_INSTALL_HEADERS OFF)
+
+# We only need cesium-native's static lib files to be installed on iOS.
+if (NOT IOS)
+    set(CESIUM_INSTALL_STATIC_LIBS OFF)
+endif()
+
+add_subdirectory(extern/swl-variant)
+add_subdirectory(extern/cesium-native)
+
+# Don't build the cesium-native tests by default.
+set_target_properties(cesium-native-tests PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
 
 # Enum flags is a header-only library without a CMakeLists.txt
 file(GLOB ENUM_FLAGS_HEADERS ${CMAKE_CURRENT_LIST_DIR}/extern/enum-flags/include/*.hpp)
@@ -73,70 +107,6 @@ set(LIB_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR})
 
 # Specify all targets that need to compile bitcode
 if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
-    set (ALL_TARGETS
-        CesiumForUnityNative-Runtime
-        Async++
-        Cesium3DTilesContent
-        Cesium3DTilesReader
-        Cesium3DTilesSelection
-        CesiumAsync
-        CesiumGeometry
-        CesiumGeospatial
-        CesiumGltf
-        CesiumGltfContent
-        CesiumGltfReader
-        CesiumJsonReader
-        CesiumRasterOverlays
-        CesiumQuantizedMeshTerrain
-        CesiumUtility
-        draco_attributes
-        draco_compression_attributes_dec
-        draco_compression_bit_coders
-        draco_compression_entropy
-        draco_compression_decode
-        draco_compression_mesh_dec
-        draco_compression_point_cloud_dec
-        draco_core
-        draco_mesh
-        draco_metadata
-        draco_metadata_dec
-        draco_point_cloud
-        draco_points_dec
-        draco_static
-        expected-lite
-        GSL
-        httplib
-        ktx
-        meshoptimizer
-        modp_b64
-        spdlog
-        sqlite3
-        s2geometry
-        tinyxml2
-        tidy-static
-        uriparser
-        webpdecode
-        webpdecoder
-        webpdspdecode
-        webputils
-        webputilsdecode
-        zlibstatic
-    )
-    set(MESHOPT_BUILD_SHARED_LIBS OFF BOOL FORCE)
     install(TARGETS tidy-static)
-    install(
-      TARGETS ${ALL_TARGETS}
-      PUBLIC_HEADER
-        EXCLUDE_FROM_ALL
-      FRAMEWORK
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    )
-    set_target_properties(cesium-native-tests PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
     set_target_properties(tidy-static PROPERTIES EXCLUDE_FROM_ALL 0 EXCLUDE_FROM_DEFAULT_BUILD 0)
-    set_target_properties(${ALL_TARGETS} PROPERTIES XCODE_ATTRIBUTE_ENABLE_BITCODE "YES")
-
-    # ktx tags itself as a FRAMEWORK on iOS, which causes linker errors. Undo that.
-    set_target_properties(ktx PROPERTIES FRAMEWORK FALSE)
 endif()
-
-

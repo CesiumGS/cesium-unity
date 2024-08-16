@@ -196,6 +196,16 @@ namespace CesiumForUnity
         public int callbackOrder => 0;
 
         /// <summary>
+        /// True if Unity should exit immediately after `OnPostBuildPlayerScriptDLLs` completes.
+        /// </summary>
+        public static bool ExitAfterCompile = false;
+
+        /// <summary>
+        /// The exit code of the last step of the build process, such as cmake or lipo.
+        /// </summary>
+        private static int LastRunExitCode = 0;
+
+        /// <summary>
         /// Invoked after the managed script assemblies are compiled, including the CesiumForUnity
         /// managed code. Building the CesiumForUnity assembly will generate C++ code via Reinterop,
         /// so we implement this method in order to compile that generated C++ code to a shared library
@@ -225,12 +235,20 @@ namespace CesiumForUnity
                 Process p = Process.Start("lipo", string.Join(' ', args));
                 p.WaitForExit();
                 if (p.ExitCode != 0)
-                    throw new Exception("lipo failed");
+                {
+                    UnityEngine.Debug.LogError($"Invocation of 'lipo' tool failed. The command-line was:{Environment.NewLine}lipo {string.Join(' ', args)}");
+                    LastRunExitCode = p.ExitCode;
+                }
 
                 foreach (LibraryToBuild library in libraries)
                 {
                     Directory.Delete(library.InstallDirectory, true);
                 }
+            }
+
+            if (ExitAfterCompile)
+            {
+                EditorApplication.Exit(LastRunExitCode);
             }
         }
 
@@ -338,6 +356,7 @@ namespace CesiumForUnity
                 library.ExtraConfigureArgs.Add("-DCMAKE_SYSTEM_NAME=iOS");
                 library.ExtraConfigureArgs.Add("-DCMAKE_SYSTEM_PROCESSOR=aarch64");
                 library.ExtraConfigureArgs.Add("-DCMAKE_OSX_ARCHITECTURES=arm64");
+                library.ExtraConfigureArgs.Add("-DOSX_DEPLOYMENT_TARGET=12");
             }
 
             if (platform.platform == BuildTarget.StandaloneOSX)
@@ -345,7 +364,7 @@ namespace CesiumForUnity
                 if (cpu != null)
                     library.ExtraConfigureArgs.Add("-DCMAKE_OSX_ARCHITECTURES=" + cpu.ToString().ToLowerInvariant());
 
-                library.ExtraConfigureArgs.Add("-DCMAKE_OSX_DEPLOYMENT_TARGET=10.13");
+                library.ExtraConfigureArgs.Add("-DCMAKE_OSX_DEPLOYMENT_TARGET=10.15");
             }
 
             if (platform.platform == BuildTarget.WSAPlayer)
@@ -400,6 +419,9 @@ namespace CesiumForUnity
                 return "Editor";
             else if (IsIOS(platformGroup, platform))
                 return "iOS";
+            // Make sure we use "WSA" and not "Metro"
+            else if (platformGroup == BuildTargetGroup.WSA)
+                return "WSA";
             return platformGroup.ToString();
         }
 
@@ -422,7 +444,7 @@ namespace CesiumForUnity
                 string projectPath = Path.Combine(Application.dataPath, "..");
                 string logDisplayName = Path.GetRelativePath(projectPath, logFilename);
 
-                EditorUtility.DisplayProgressBar($"Building CesiumForUnityNative", $"See {logDisplayName}.", 0.0f);
+                EditorUtility.DisplayProgressBar($"Building CesiumForUnityNative: {Path.GetFileName(library.BuildDirectory)}", $"See {logDisplayName}.", 0.0f);
 
                 using (StreamWriter log = new StreamWriter(logFilename, false, Encoding.UTF8))
                 {
@@ -510,6 +532,7 @@ namespace CesiumForUnity
                 if (configure.ExitCode != 0)
                 {
                     UnityEngine.Debug.LogError($"An error occurred while building CesiumForUnityNative. See {logFilename} for details. The command-line was:{Environment.NewLine}{startInfo.FileName} {startInfo.Arguments}");
+                    LastRunExitCode = configure.ExitCode;
                 }
             }
         }
@@ -531,12 +554,18 @@ namespace CesiumForUnity
             // the default) won't work to build for Android.
             if (library.Platform == BuildTarget.Android && Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
-                library.ExtraConfigureArgs.Add("-G \"Unix Makefiles\"");
+                library.ExtraConfigureArgs.Add("-G Ninja");
 
-                if (!string.IsNullOrEmpty(ndkRoot))
+                // If the NDK root has a space in it, this will confuse broken software like OpenSSL's build process.
+                // So map a drive letter and rewrite the path.
+                if (ndkRoot != null && ndkRoot.Contains(' '))
                 {
-                    string make = Path.Combine(ndkRoot, "prebuilt", "windows-x86_64", "bin", "make.exe").Replace('\\', '/');
-                    library.ExtraConfigureArgs.Add($"-DCMAKE_MAKE_PROGRAM=\"{make}\"");
+                    if (!Directory.Exists("N:\\"))
+                    {
+                        Process.Start("subst", "N: \"" + ndkRoot + "\"").WaitForExit();
+                    }
+
+                    ndkRoot = "N:\\";
                 }
             }
 

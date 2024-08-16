@@ -59,6 +59,10 @@ public:
   static DotNet::CesiumForUnity::CesiumPropertyArray
   makePropertyArray(const CesiumGltf::PropertyArrayView<T>& arrayView);
 
+  template <typename T>
+  static DotNet::CesiumForUnity::CesiumPropertyArray
+  makePropertyArray(const CesiumGltf::PropertyArrayCopy<T>& arrayCopy);
+
   template <typename T, bool Normalized>
   static DotNet::CesiumForUnity::CesiumPropertyTableProperty
   makePropertyTableProperty(
@@ -318,6 +322,13 @@ CesiumFeaturesMetadataUtility::makePropertyArray(
 
   array.values(values);
   return array;
+}
+
+template <typename T>
+DotNet::CesiumForUnity::CesiumPropertyArray
+CesiumFeaturesMetadataUtility::makePropertyArray(
+    const CesiumGltf::PropertyArrayCopy<T>& arrayCopy) {
+  return makePropertyArray(arrayCopy.view());
 }
 
 template <typename T, bool Normalized>
