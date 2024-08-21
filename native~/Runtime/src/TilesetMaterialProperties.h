@@ -13,6 +13,10 @@ class TilesetMaterialProperties {
 public:
   TilesetMaterialProperties();
 
+  const int32_t getCullID() const noexcept { return this->_cullID; }
+  const int32_t getBuiltInCullModeID() const noexcept { return this->_builtInCullModeID; }
+  const int32_t getCullModeID() const noexcept { return this->_cullModeID; }
+
   const int32_t getBaseColorFactorID() const noexcept {
     return this->_baseColorFactorID;
   }
@@ -88,6 +92,10 @@ public:
       const std::vector<std::string>& overlayMaterialKeys);
 
 private:
+  int32_t _cullID;
+  int32_t _cullModeID;
+  int32_t _builtInCullModeID;
+
   int32_t _baseColorFactorID;
   int32_t _baseColorTextureID;
   int32_t _baseColorTextureCoordinateIndexID;
@@ -117,6 +125,10 @@ private:
   std::unordered_map<std::string, int32_t> _overlayTextureCoordinateIndexIDs;
   std::unordered_map<std::string, int32_t> _overlayTextureIDs;
   std::unordered_map<std::string, int32_t> _overlayTranslationAndScaleIDs;
+
+  static const std::string _cullName;
+  static const std::string _cullModeName;
+  static const std::string _builtInCullModeName;
 
   static const std::string _baseColorFactorName;
   static const std::string _baseColorTextureName;

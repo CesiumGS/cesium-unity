@@ -158,6 +158,7 @@ namespace CesiumForUnity
             int crc = meshRenderer.material.ComputeCRC();
             meshRenderer.material.SetTexture(id, texture2D);
             meshRenderer.material.SetFloat(id, 1.0f);
+            meshRenderer.material.SetFloat(id, (float)CullMode.Off);
             meshRenderer.material.SetVector(id, new Vector4());
             meshRenderer.material.DisableKeyword("keywordName");
             meshRenderer.material.EnableKeyword("keywordName");
