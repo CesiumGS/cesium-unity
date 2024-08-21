@@ -14,7 +14,9 @@ public:
   TilesetMaterialProperties();
 
   const int32_t getCullID() const noexcept { return this->_cullID; }
-  const int32_t getBuiltInCullModeID() const noexcept { return this->_builtInCullModeID; }
+  const int32_t getBuiltInCullModeID() const noexcept {
+    return this->_builtInCullModeID;
+  }
   const int32_t getCullModeID() const noexcept { return this->_cullModeID; }
 
   const int32_t getBaseColorFactorID() const noexcept {
