@@ -14,6 +14,7 @@
 
 - Fixed a bug that could cause a crash in `CesiumIonSession` when the object was garbage collected or the AppDomain was unloaded while network requests were in progress.
 - Fixed a bug that could cause `CesiumFlyToController` to unexpectedly interrupt a flight.
+- glTF `doubleSided` materials are now supported. Previously, models using this property would appear inside-out.
 
 ## v1.11.1 - 2024-08-01
 
