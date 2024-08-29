@@ -393,6 +393,7 @@ namespace CesiumForUnity
             georeference.ecefX = georeference.ecefX;
             georeference.ecefY = georeference.ecefY;
             georeference.ecefZ = georeference.ecefZ;
+            georeference.originPlacement = georeference.originPlacement;
             georeference.originAuthority = georeference.originAuthority;
             georeference.scale = georeference.scale;
             double4x4 ecefToLocal = georeference.ecefToLocalMatrix;

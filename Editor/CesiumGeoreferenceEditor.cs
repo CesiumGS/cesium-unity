@@ -8,6 +8,19 @@ namespace CesiumForUnity
     {
         private CesiumGeoreference _georeference;
 
+        private SerializedProperty _originPlacement;
+
+        // Converts the SerializedProperty's value to the CesiumGeoreferenceOriginPlacement
+        // enum it corresponds to, for convenience.
+        internal CesiumGeoreferenceOriginPlacement originPlacement
+        {
+            get
+            {
+                return (CesiumGeoreferenceOriginPlacement)
+                    this._originPlacement.enumValueIndex;
+            }
+        }
+
         private SerializedProperty _originAuthority;
 
         // Converts the SerializedProperty's value to the CesiumGeoreferenceOriginAuthority
@@ -37,6 +50,8 @@ namespace CesiumForUnity
             this._georeference = (CesiumGeoreference)this.target;
 
             this._ellipsoidOverride = this.serializedObject.FindProperty("_ellipsoidOverride");
+            this._originPlacement =
+                this.serializedObject.FindProperty("_originPlacement");
             this._originAuthority =
                 this.serializedObject.FindProperty("_originAuthority");
 
@@ -57,16 +72,16 @@ namespace CesiumForUnity
 
             DrawInspectorButtons();
             EditorGUILayout.Space(5);
-
-            this.DrawEllipsoidOverrideProperty();
-            EditorGUILayout.Space(5);
-            this.DrawScaleProperty();
-            EditorGUILayout.Space(5);
-            this.DrawOriginAuthorityProperty();
+            
+            this.DrawOriginModeProperties();
             EditorGUILayout.Space(5);
             this.DrawLongitudeLatitudeHeightProperties();
             EditorGUILayout.Space(5);
             this.DrawEarthCenteredEarthFixedProperties();
+            EditorGUILayout.Space(5);
+            
+            this.DrawScaleProperty();
+            this.DrawEllipsoidOverrideProperty();
 
             this.serializedObject.ApplyModifiedProperties();
         }
@@ -74,7 +89,9 @@ namespace CesiumForUnity
         private void DrawInspectorButtons()
         {
             // Don't modify the georeference if the editor is in play mode.
-            EditorGUI.BeginDisabledGroup(EditorApplication.isPlaying);
+            EditorGUI.BeginDisabledGroup(
+                EditorApplication.isPlaying
+                || this.originPlacement != CesiumGeoreferenceOriginPlacement.CartographicOrigin);
 
             GUILayout.BeginHorizontal();
             GUIContent placeOriginHereContent = new GUIContent(
@@ -98,18 +115,53 @@ namespace CesiumForUnity
                 "Creates a child GameObject with a \"CesiumSubScene\" component whose origin " +
                 "is set to the camera's current location. A \"CesiumSubScene\" describes a " +
                 "corresponding world location that can be jumped to, and only one sub-scene " +
-                "can be worked on in the editor at a time.");
+                "can be worked on in the editor at a time." +
+                "\n\n" +
+                "This is disabled when \"Origin Placement\" is set to \"True Origin\".");
             if (GUILayout.Button("Create Sub-Scene Here"))
             {
                 CesiumEditorUtility.CreateSubScene(this._georeference);
             }
+
             GUILayout.EndHorizontal();
+
+            EditorGUI.EndDisabledGroup();
+        }
+
+        private void DrawOriginModeProperties()
+        {
+            GUILayout.Label("Origin Mode", EditorStyles.boldLabel);
+
+            GUIContent originPlacementContent = new GUIContent(
+                "Placement",
+                "The placement of this GameObject's origin (0,0,0) within the tileset." +
+                "\n\n" +
+                "3D Tiles tilesets often use Earth-centered, Earth-fixed coordinates, such that " +
+                "the tileset content is in a small bounding volume 6-7 million meters " +
+                "(the radius of the Earth) away from the coordinate system origin. This property " +
+                "allows an alternative position, other than the tileset's true origin, to be " +
+                "treated as the origin for the purpose of this GameObject. Using this property will " +
+                "preserve vertex precision (and thus avoid jittering) much better than setting the " +
+                "GameObject's Transform property.");
+            EditorGUILayout.PropertyField(this._originPlacement, originPlacementContent);
+            
+            EditorGUI.BeginDisabledGroup(
+                this.originPlacement != CesiumGeoreferenceOriginPlacement.CartographicOrigin);
+
+            GUIContent originAuthorityContent = new GUIContent(
+                "Authority",
+                "The set of coordinates that authoritatively define the origin of " +
+                "this georeference.");
+            EditorGUILayout.PropertyField(this._originAuthority, originAuthorityContent);
 
             EditorGUI.EndDisabledGroup();
         }
 
         private void DrawEllipsoidOverrideProperty()
         {
+            EditorGUI.BeginDisabledGroup(
+                this.originPlacement != CesiumGeoreferenceOriginPlacement.CartographicOrigin);
+
             GUIContent ellipsoidOverrideContent = new GUIContent(
                 "Ellipsoid Override",
                 "The ellipsoid definition to use for this tileset. If this is left blank, " +
@@ -117,11 +169,13 @@ namespace CesiumForUnity
                 "doesn't list an ellipsoid to use.");
             EditorGUI.BeginChangeCheck();
             EditorGUILayout.PropertyField(this._ellipsoidOverride, ellipsoidOverrideContent);
-            if(EditorGUI.EndChangeCheck())
+            if (EditorGUI.EndChangeCheck())
             {
                 this.serializedObject.ApplyModifiedProperties();
                 this._georeference.ReloadEllipsoid();
             }
+
+            EditorGUI.EndDisabledGroup();
         }
 
         private void DrawScaleProperty()
@@ -135,19 +189,12 @@ namespace CesiumForUnity
             EditorGUILayout.PropertyField(this._scale, scaleContent);
         }
 
-        private void DrawOriginAuthorityProperty()
-        {
-            GUIContent originAuthorityContent = new GUIContent(
-                "Origin Authority",
-                "The set of coordinates that authoritatively define the origin of " +
-                "this georeference.");
-            EditorGUILayout.PropertyField(this._originAuthority, originAuthorityContent);
-        }
-
         private void DrawLongitudeLatitudeHeightProperties()
         {
+            CesiumGeoreferenceOriginPlacement placement = this.originPlacement;
             CesiumGeoreferenceOriginAuthority authority = this.originAuthority;
             EditorGUI.BeginDisabledGroup(
+                placement != CesiumGeoreferenceOriginPlacement.CartographicOrigin ||
                 authority != CesiumGeoreferenceOriginAuthority.LongitudeLatitudeHeight);
 
             GUILayout.Label(
@@ -187,8 +234,10 @@ namespace CesiumForUnity
 
         private void DrawEarthCenteredEarthFixedProperties()
         {
+            CesiumGeoreferenceOriginPlacement placement = this.originPlacement;
             CesiumGeoreferenceOriginAuthority authority = this.originAuthority;
             EditorGUI.BeginDisabledGroup(
+                placement != CesiumGeoreferenceOriginPlacement.CartographicOrigin ||
                  authority != CesiumGeoreferenceOriginAuthority.EarthCenteredEarthFixed);
 
             GUILayout.Label(
