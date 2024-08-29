@@ -9,6 +9,7 @@
 ##### Additions :tada:
 
 - Editor builds for macOS now target macOS 10.15+. Previously, macOS 12.7+ was required.
+- Added `originPlacement` property to `CesiumGeoreference` to toggle between "Cartographic Origin" and "True Origin" reference modes. Whereas "Cartographic Origin" is the default for georeferenced tilesets, "True Origin" may be used for non-georeferenced tilesets centered at the origin.
 
 ##### Fixes :wrench:
 
