@@ -13,6 +13,9 @@ class TilesetMaterialProperties {
 public:
   TilesetMaterialProperties();
 
+  const int32_t getDoubleSidedEnableID() const noexcept {
+    return this->_doubleSidedEnableID;
+  }
   const int32_t getCullID() const noexcept { return this->_cullID; }
   const int32_t getBuiltInCullModeID() const noexcept {
     return this->_builtInCullModeID;
@@ -94,6 +97,7 @@ public:
       const std::vector<std::string>& overlayMaterialKeys);
 
 private:
+  int32_t _doubleSidedEnableID;
   int32_t _cullID;
   int32_t _cullModeID;
   int32_t _builtInCullModeID;
@@ -128,6 +132,7 @@ private:
   std::unordered_map<std::string, int32_t> _overlayTextureIDs;
   std::unordered_map<std::string, int32_t> _overlayTranslationAndScaleIDs;
 
+  static const std::string _doubleSidedEnableName;
   static const std::string _cullName;
   static const std::string _cullModeName;
   static const std::string _builtInCullModeName;

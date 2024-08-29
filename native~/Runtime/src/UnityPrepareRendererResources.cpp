@@ -1029,6 +1029,7 @@ void setGltfMaterialParameterValues(
   // pipelines (built-in, URP, HDRP). Rather than try to figure out which
   // applies, we just set them all.
   if (gltfMaterial.doubleSided) {
+    unityMaterial.SetFloat(materialProperties.getDoubleSidedEnableID(), 1.0f);
     unityMaterial.SetFloat(
         materialProperties.getCullID(),
         float(UnityEngine::Rendering::CullMode::Off));
@@ -1039,6 +1040,7 @@ void setGltfMaterialParameterValues(
         materialProperties.getBuiltInCullModeID(),
         float(UnityEngine::Rendering::CullMode::Off));
   } else {
+    unityMaterial.SetFloat(materialProperties.getDoubleSidedEnableID(), 0.0f);
     unityMaterial.SetFloat(
         materialProperties.getCullID(),
         float(UnityEngine::Rendering::CullMode::Back));
