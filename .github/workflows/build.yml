@@ -154,6 +154,30 @@ jobs:
     # Only allow a single macOS build at a time, for Unity licensing reasons
     concurrency: mac
     steps:
+      - name: Make some more disk space
+        run: |
+          df -h
+          ls /Applications
+          brew uninstall google-chrome
+          sudo rm -rf /Users/runner/Library/Android
+          sudo rm -rf /Applications/Xcode_15.0.1.app
+          sudo rm -rf /Applications/Xcode_15.0.app
+          sudo rm -rf /Applications/Xcode_15.1.0.app
+          sudo rm -rf /Applications/Xcode_15.1.app
+          sudo rm -rf /Applications/Xcode_15.2.0.app
+          sudo rm -rf /Applications/Xcode_15.2.app
+          sudo rm -rf /Applications/Xcode_15.3.0.app
+          sudo rm -rf /Applications/Xcode_15.3.app
+          sudo rm -rf /Applications/Xcode_15.4.0.app
+          sudo rm -rf /Applications/Xcode_15.4.app
+          sudo rm -rf /Applications/Xcode_16.0.0.app
+          sudo rm -rf /Applications/Xcode_16.0.app
+          sudo rm -rf /Applications/Xcode_16.1.0.app
+          sudo rm -rf /Applications/Xcode_16.1.app
+          sudo rm -rf /Applications/Xcode_16.1_beta.app
+          sudo rm -rf /Applications/Xcode_16_beta_6.app
+          ls /Applications
+          df -h
       - name: Check out repository code
         uses: actions/checkout@v4
         with:
