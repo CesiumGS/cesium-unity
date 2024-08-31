@@ -30,12 +30,13 @@ LocalHorizontalCoordinateSystem createCoordinateSystem(
       DotNet::CesiumForUnity::CesiumGeoreferenceOriginPlacement::TrueOrigin) {
     // In True Origin mode, we want a coordinate system that:
     // 1. Is at the origin,
-    // 2. Converts from Y-up to Z-up, and
-    // 3. Uses the georeference's scale
+    // 2. Inverts Y to create a left-handed coordinate system,
+    // 3. Converts from Z-up to Y-up, and
+    // 4. Uses the georeference's scale
     glm::dmat4 localToEcef(
         glm::dvec4(scale, 0.0, 0.0, 0.0),
         glm::dvec4(0.0, 0.0, scale, 0.0),
-        glm::dvec4(0.0, -scale, 0.0, 0.0),
+        glm::dvec4(0.0, scale, 0.0, 0.0),
         glm::dvec4(0.0, 0.0, 0.0, 1.0));
     return LocalHorizontalCoordinateSystem(localToEcef);
   }
