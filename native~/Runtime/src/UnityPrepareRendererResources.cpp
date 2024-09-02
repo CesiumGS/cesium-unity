@@ -56,6 +56,7 @@
 #include <DotNet/UnityEngine/Object.h>
 #include <DotNet/UnityEngine/Physics.h>
 #include <DotNet/UnityEngine/Quaternion.h>
+#include <DotNet/UnityEngine/Rendering/CullMode.h>
 #include <DotNet/UnityEngine/Rendering/IndexFormat.h>
 #include <DotNet/UnityEngine/Rendering/MeshUpdateFlags.h>
 #include <DotNet/UnityEngine/Rendering/SubMeshDescriptor.h>
@@ -1023,6 +1024,33 @@ void setGltfMaterialParameterValues(
     const UnityEngine::Material& unityMaterial,
     const TilesetMaterialProperties& materialProperties) {
   CESIUM_TRACE("Cesium::CreateMaterials");
+
+  // These similar-sounding material properties are used in various render
+  // pipelines (built-in, URP, HDRP). Rather than try to figure out which
+  // applies, we just set them all.
+  if (gltfMaterial.doubleSided) {
+    unityMaterial.SetFloat(materialProperties.getDoubleSidedEnableID(), 1.0f);
+    unityMaterial.SetFloat(
+        materialProperties.getCullID(),
+        float(UnityEngine::Rendering::CullMode::Off));
+    unityMaterial.SetFloat(
+        materialProperties.getCullModeID(),
+        float(UnityEngine::Rendering::CullMode::Off));
+    unityMaterial.SetFloat(
+        materialProperties.getBuiltInCullModeID(),
+        float(UnityEngine::Rendering::CullMode::Off));
+  } else {
+    unityMaterial.SetFloat(materialProperties.getDoubleSidedEnableID(), 0.0f);
+    unityMaterial.SetFloat(
+        materialProperties.getCullID(),
+        float(UnityEngine::Rendering::CullMode::Back));
+    unityMaterial.SetFloat(
+        materialProperties.getCullModeID(),
+        float(UnityEngine::Rendering::CullMode::Back));
+    unityMaterial.SetFloat(
+        materialProperties.getBuiltInCullModeID(),
+        float(UnityEngine::Rendering::CullMode::Back));
+  }
 
   const CesiumGltf::MaterialPBRMetallicRoughness& pbr =
       gltfMaterial.pbrMetallicRoughness
