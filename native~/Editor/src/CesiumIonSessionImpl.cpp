@@ -436,6 +436,9 @@ void CesiumIonSessionImpl::refreshProfile(
       .thenInMainThread(
           [this, session](
               CesiumIonClient::Response<CesiumIonClient::Profile>&& profile) {
+            if (session == nullptr)
+              return;
+
             this->_isLoadingProfile = false;
             this->_profile = std::move(profile.value);
             this->broadcastProfileUpdate();
@@ -443,6 +446,9 @@ void CesiumIonSessionImpl::refreshProfile(
               this->refreshProfile(session);
           })
       .catchInMainThread([this, session](std::exception&& e) {
+        if (session == nullptr)
+          return;
+
         this->_isLoadingProfile = false;
         this->_profile = std::nullopt;
         this->broadcastProfileUpdate();
@@ -470,6 +476,9 @@ void CesiumIonSessionImpl::refreshAssets(
       .thenInMainThread(
           [this, session](
               CesiumIonClient::Response<CesiumIonClient::Assets>&& assets) {
+            if (session == nullptr)
+              return;
+
             this->_isLoadingAssets = false;
             this->_assets = std::move(assets.value);
             this->broadcastAssetsUpdate();
@@ -477,6 +486,9 @@ void CesiumIonSessionImpl::refreshAssets(
               this->refreshAssets(session);
           })
       .catchInMainThread([this, session](std::exception&& e) {
+        if (session == nullptr)
+          return;
+
         this->_isLoadingAssets = false;
         this->_assets = std::nullopt;
         this->broadcastAssetsUpdate();
@@ -509,6 +521,9 @@ void CesiumIonSessionImpl::refreshTokens(
       .thenInMainThread(
           [this, session](
               CesiumIonClient::Response<CesiumIonClient::TokenList>&& tokens) {
+            if (session == nullptr)
+              return;
+
             this->_isLoadingTokens = false;
             this->_tokens =
                 tokens.value
@@ -519,6 +534,9 @@ void CesiumIonSessionImpl::refreshTokens(
               this->refreshTokens(session);
           })
       .catchInMainThread([this, session](std::exception&& e) {
+        if (session == nullptr)
+          return;
+
         this->_isLoadingTokens = false;
         this->_tokens = std::nullopt;
         this->broadcastTokensUpdate();
@@ -541,6 +559,9 @@ void CesiumIonSessionImpl::refreshDefaults(
       .thenInMainThread(
           [this, session](
               CesiumIonClient::Response<CesiumIonClient::Defaults>&& defaults) {
+            if (session == nullptr)
+              return;
+
             logResponseErrors(defaults);
             this->_isLoadingDefaults = false;
             this->_defaults = std::move(defaults.value);
@@ -550,6 +571,9 @@ void CesiumIonSessionImpl::refreshDefaults(
               this->refreshDefaults(session);
           })
       .catchInMainThread([this, session](std::exception&& e) {
+        if (session == nullptr)
+          return;
+
         logResponseErrors(e);
         this->_isLoadingDefaults = false;
         this->_defaults = std::nullopt;
