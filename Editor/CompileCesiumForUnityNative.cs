@@ -120,6 +120,8 @@ namespace CesiumForUnity
                     return $"{baseName}.dll";
                 case BuildTarget.iOS:
                     return $"lib{baseName}.a";
+                case BuildTarget.VisionOS:
+                    return $"lib{baseName}.a";
                 case BuildTarget.StandaloneOSX:
                     return $"lib{baseName}.dylib";
                 default:
@@ -349,7 +351,9 @@ namespace CesiumForUnity
                     library.ExtraConfigureArgs.Add("-DCMAKE_ANDROID_ARCH_ABI=arm64-v8a");
             }
 
-            if (platform.platformGroup == BuildTargetGroup.iOS)
+            if (platform.platformGroup == BuildTargetGroup.iOS 
+                //VisionOS will use IOS config and SDKROOT will be changed after as currently 3rd party libs could not be compiled for xros
+                || platform.platformGroup == BuildTargetGroup.VisionOS) 
             {
                 library.Toolchain = "extern/ios-toolchain.cmake";
                 library.ExtraConfigureArgs.Add("-GXcode");
@@ -407,6 +411,11 @@ namespace CesiumForUnity
         {
             return platformGroup == BuildTargetGroup.iOS && platform == BuildTarget.iOS;
         }
+        
+        private static bool IsVisionOS(BuildTargetGroup platformGroup, BuildTarget platform)
+        {
+            return platformGroup == BuildTargetGroup.VisionOS && platform == BuildTarget.VisionOS;
+        }
 
         private static string GetDirectoryNameForPlatform(PlatformToBuild platform)
         {
@@ -419,6 +428,8 @@ namespace CesiumForUnity
                 return "Editor";
             else if (IsIOS(platformGroup, platform))
                 return "iOS";
+            else if (IsVisionOS(platformGroup, platform))
+                return "VisionOS";
             // Make sure we use "WSA" and not "Metro"
             else if (platformGroup == BuildTargetGroup.WSA)
                 return "WSA";
@@ -450,7 +461,7 @@ namespace CesiumForUnity
                 {
                     ProcessStartInfo startInfo = new ProcessStartInfo();
                     startInfo.UseShellExecute = false;
-                    if (library.Platform == BuildTarget.StandaloneOSX || library.Platform == BuildTarget.iOS)
+                    if (library.Platform == BuildTarget.StandaloneOSX || library.Platform == BuildTarget.iOS || library.Platform == BuildTarget.VisionOS)
                     {
                         startInfo.FileName = File.Exists("/Applications/CMake.app/Contents/bin/cmake") ? "/Applications/CMake.app/Contents/bin/cmake" : "cmake";
                     }
@@ -483,7 +494,15 @@ namespace CesiumForUnity
                     startInfo.Arguments = string.Join(' ', args);
 
                     RunAndLog(startInfo, log, logFilename);
-
+                    
+                    if (IsVisionOS(library.PlatformGroup, library.Platform))
+                    {
+                        var xcodeProjectPath = Path.Combine(library.BuildDirectory, "CesiumForUnityNative.xcodeproj/project.pbxproj");
+                        var originalXcodeContents = File.ReadAllText(xcodeProjectPath);
+                        var xcodeContentsTargetedToXros = originalXcodeContents.Replace("SDKROOT = iphoneos;", "SDKROOT = xros;");
+                        File.WriteAllText(xcodeProjectPath, xcodeContentsTargetedToXros);
+                    }
+                    
                     args = new List<string>()
                     {
                         "--build",
@@ -499,7 +518,7 @@ namespace CesiumForUnity
                     startInfo.Arguments = string.Join(' ', args);
                     RunAndLog(startInfo, log, logFilename);
 
-                    if (library.Platform == BuildTarget.iOS)
+                    if (library.Platform == BuildTarget.iOS || library.Platform == BuildTarget.VisionOS)
                         AssetDatabase.Refresh();
                 }
             }
