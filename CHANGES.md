@@ -18,6 +18,8 @@
 - glTF `doubleSided` materials are now supported. Previously, models using this property would appear inside-out.
 - Fixed a bug that prevented clipping with CesiumCartographicPolygon from working with HDRP.
 
+This release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.38.0 to v0.39.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
+
 ## v1.11.1 - 2024-08-01
 
 ##### Fixes :wrench:
