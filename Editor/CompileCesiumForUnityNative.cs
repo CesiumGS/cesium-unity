@@ -8,6 +8,7 @@ using System.IO;
 using System.Text;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 #if UNITY_ANDROID
 using UnityEditor.Android;
 #endif
@@ -174,9 +175,18 @@ namespace CesiumForUnity
             {
                 importer.SetPlatformData(library.Platform, "CPU", "ARM64");
 
+                // TODO: WARN: this will likely cause issues, why native build generates those libs? Where are they needed?
+                var duplicatedSymbolsExcludeLibs = new string[] {
+                    "libjpeg.a",
+                    "libwebp.a"
+                };
+                
                 var projectPath = Application.dataPath.Replace("Assets", "");
                 foreach (var libFilePath in Directory.EnumerateFiles(library.InstallDirectory, "*.a", SearchOption.AllDirectories))
                 {
+                    if(duplicatedSymbolsExcludeLibs.Any(l =>  libFilePath.EndsWith(l)))
+                        continue;
+                    
                     var libRelativeFilePath = libFilePath.Replace(projectPath, "");
                     var libPluginImporter = AssetImporter.GetAtPath(libRelativeFilePath) as PluginImporter;
                     
