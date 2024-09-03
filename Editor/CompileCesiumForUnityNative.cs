@@ -173,6 +173,18 @@ namespace CesiumForUnity
             else if (library.Platform == BuildTarget.VisionOS)
             {
                 importer.SetPlatformData(library.Platform, "CPU", "ARM64");
+
+                var projectPath = Application.dataPath.Replace("Assets", "");
+                foreach (var libFilePath in Directory.EnumerateFiles(library.InstallDirectory, "*.a", SearchOption.AllDirectories))
+                {
+                    var libRelativeFilePath = libFilePath.Replace(projectPath, "");
+                    var libPluginImporter = AssetImporter.GetAtPath(libRelativeFilePath) as PluginImporter;
+                    
+                    if (libPluginImporter != null)
+                    {
+                        libPluginImporter.SetPlatformData(library.Platform, "CPU", "ARM64");
+                    }
+                }
             }
         }
 
