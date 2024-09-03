@@ -377,9 +377,7 @@ namespace CesiumForUnity
                     library.ExtraConfigureArgs.Add("-DCMAKE_ANDROID_ARCH_ABI=arm64-v8a");
             }
 
-            if (platform.platformGroup == BuildTargetGroup.iOS 
-                //VisionOS will use IOS config and SDKROOT will be changed after as currently 3rd party libs could not be compiled for xros
-                || platform.platformGroup == BuildTargetGroup.VisionOS) 
+            if (platform.platformGroup == BuildTargetGroup.iOS || platform.platformGroup == BuildTargetGroup.VisionOS) 
             {
                 library.Toolchain = "extern/ios-toolchain.cmake";
                 library.ExtraConfigureArgs.Add("-GXcode");
