@@ -38,13 +38,13 @@ namespace CesiumForUnity
         /// found by searching the logged-in Cesium ion account for the
         /// DefaultIonAccessToken.
         /// </summary>
-        public string defaultIonAccessTokenId;
+        public string defaultIonAccessTokenId = "";
 
         /// <summary>
         /// The default token used to access Cesium ion assets at runtime. This token
         /// is embedded in packaged games for use at runtime.
         /// </summary>
-        public string defaultIonAccessToken;
+        public string defaultIonAccessToken = "";
 
         // The server URL for which we are currently attempting to deduce an API URL. When this property
         // is null, we're not currently loading a config.json in order to deduce an API URL for the server.
