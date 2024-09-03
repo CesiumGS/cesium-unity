@@ -502,9 +502,16 @@ namespace CesiumForUnity
                     if (IsVisionOS(library.PlatformGroup, library.Platform))
                     {
                         var xcodeProjectPath = Path.Combine(library.BuildDirectory, "CesiumForUnityNative.xcodeproj/project.pbxproj");
-                        var originalXcodeContents = File.ReadAllText(xcodeProjectPath);
-                        var xcodeContentsTargetedToXros = originalXcodeContents.Replace("SDKROOT = iphoneos;", "SDKROOT = xros;");
-                        File.WriteAllText(xcodeProjectPath, xcodeContentsTargetedToXros);
+                        if (File.Exists(xcodeProjectPath))
+                        {
+                            var originalXcodeContents = File.ReadAllText(xcodeProjectPath);
+                            var xcodeContentsTargetedToXros = originalXcodeContents.Replace("SDKROOT = iphoneos;", "SDKROOT = xros;");
+                            File.WriteAllText(xcodeProjectPath, xcodeContentsTargetedToXros);
+                        }
+                        else
+                        {
+                            UnityEngine.Debug.Log("Xcode project does not exist, unable to change target to VisionOs");
+                        }
                     }
                     
                     args = new List<string>()
