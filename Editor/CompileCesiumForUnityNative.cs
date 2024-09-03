@@ -170,6 +170,10 @@ namespace CesiumForUnity
                     UnityEngine.Debug.LogAssertion("Unsupported processor: " + library.Cpu);
                 importer.SetPlatformData(library.Platform, "CPU", wsaPlatform);
             }
+            else if (library.Platform == BuildTarget.VisionOS)
+            {
+                importer.SetPlatformData(library.Platform, "CPU", "ARM64");
+            }
         }
 
         private static void OnPostprocessAllAssets(
