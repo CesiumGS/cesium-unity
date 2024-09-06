@@ -1,7 +1,8 @@
 #pragma once
 
+#include "CesiumImpl.h"
+
 #include <CesiumUtility/IntrusivePointer.h>
-#include <CesiumUtility/ReferenceCounted.h>
 
 #include <DotNet/System/Collections/Generic/List1.h>
 
@@ -27,8 +28,7 @@ class CartographicPolygon;
 namespace CesiumForUnityNative {
 
 class CesiumPolygonRasterOverlayImpl
-    : public CesiumUtility::ReferenceCountedThreadSafe<
-          CesiumPolygonRasterOverlayImpl> {
+    : public CesiumImpl<CesiumPolygonRasterOverlayImpl> {
 public:
   CesiumPolygonRasterOverlayImpl(
       const DotNet::CesiumForUnity::CesiumPolygonRasterOverlay& overlay);

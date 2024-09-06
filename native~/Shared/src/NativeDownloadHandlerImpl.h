@@ -1,6 +1,6 @@
 #pragma once
 
-#include <CesiumUtility/ReferenceCounted.h>
+#include "CesiumImpl.h"
 
 #include <gsl/span>
 
@@ -14,9 +14,7 @@ class NativeDownloadHandler;
 
 namespace CesiumForUnityNative {
 
-class NativeDownloadHandlerImpl
-    : public CesiumUtility::ReferenceCountedThreadSafe<
-          NativeDownloadHandlerImpl> {
+class NativeDownloadHandlerImpl : public CesiumImpl<NativeDownloadHandlerImpl> {
 public:
   NativeDownloadHandlerImpl(
       const ::DotNet::CesiumForUnity::NativeDownloadHandler& handler);

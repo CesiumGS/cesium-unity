@@ -1,8 +1,9 @@
 #pragma once
 
+#include "CesiumImpl.h"
+
 #include <CesiumGltf/AccessorUtility.h>
 #include <CesiumGltf/Model.h>
-#include <CesiumUtility/ReferenceCounted.h>
 
 #include <DotNet/CesiumForUnity/CesiumFeature.h>
 #include <DotNet/System/Array1.h>
@@ -22,8 +23,7 @@ class Transform;
 
 namespace CesiumForUnityNative {
 
-class CesiumMetadataImpl
-    : public CesiumUtility::ReferenceCountedThreadSafe<CesiumMetadataImpl> {
+class CesiumMetadataImpl : public CesiumImpl<CesiumMetadataImpl> {
 public:
   CesiumMetadataImpl(const DotNet::CesiumForUnity::CesiumMetadata& metadata);
   ~CesiumMetadataImpl();

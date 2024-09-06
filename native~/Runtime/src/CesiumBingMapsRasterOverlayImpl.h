@@ -1,7 +1,8 @@
 #pragma once
 
+#include "CesiumImpl.h"
+
 #include <CesiumUtility/IntrusivePointer.h>
-#include <CesiumUtility/ReferenceCounted.h>
 
 namespace DotNet::CesiumForUnity {
 class Cesium3DTileset;
@@ -15,8 +16,7 @@ class BingMapsRasterOverlay;
 namespace CesiumForUnityNative {
 
 class CesiumBingMapsRasterOverlayImpl
-    : public CesiumUtility::ReferenceCountedThreadSafe<
-          CesiumBingMapsRasterOverlayImpl> {
+    : public CesiumImpl<CesiumBingMapsRasterOverlayImpl> {
 public:
   CesiumBingMapsRasterOverlayImpl(
       const DotNet::CesiumForUnity::CesiumBingMapsRasterOverlay& overlay);

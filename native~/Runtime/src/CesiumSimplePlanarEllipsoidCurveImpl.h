@@ -1,7 +1,8 @@
 #pragma once
 
+#include "CesiumImpl.h"
+
 #include <CesiumGeospatial/SimplePlanarEllipsoidCurve.h>
-#include <CesiumUtility/ReferenceCounted.h>
 
 #include <DotNet/CesiumForUnity/CesiumEllipsoid.h>
 #include <DotNet/Unity/Mathematics/double3.h>
@@ -19,8 +20,7 @@ struct double3;
 namespace CesiumForUnityNative {
 
 class CesiumSimplePlanarEllipsoidCurveImpl
-    : public CesiumUtility::ReferenceCountedThreadSafe<
-          CesiumSimplePlanarEllipsoidCurveImpl> {
+    : public CesiumImpl<CesiumSimplePlanarEllipsoidCurveImpl> {
 public:
   CesiumSimplePlanarEllipsoidCurveImpl(
       const DotNet::CesiumForUnity::CesiumSimplePlanarEllipsoidCurve& path);

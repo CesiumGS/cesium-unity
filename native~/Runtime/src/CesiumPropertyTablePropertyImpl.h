@@ -1,6 +1,6 @@
 #pragma once
 
-#include <CesiumUtility/ReferenceCounted.h>
+#include "CesiumImpl.h"
 
 #include <any>
 #include <cstdint>
@@ -46,8 +46,7 @@ class double4x4;
 namespace CesiumForUnityNative {
 
 class CesiumPropertyTablePropertyImpl
-    : public CesiumUtility::ReferenceCountedThreadSafe<
-          CesiumPropertyTablePropertyImpl> {
+    : public CesiumImpl<CesiumPropertyTablePropertyImpl> {
 public:
   CesiumPropertyTablePropertyImpl(
       const DotNet::CesiumForUnity::CesiumPropertyTableProperty& property);

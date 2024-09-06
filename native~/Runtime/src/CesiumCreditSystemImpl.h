@@ -1,7 +1,8 @@
 #pragma once
 
+#include "CesiumImpl.h"
+
 #include <CesiumUtility/CreditSystem.h>
-#include <CesiumUtility/ReferenceCounted.h>
 
 #include <DotNet/CesiumForUnity/CesiumCredit.h>
 #include <DotNet/System/Collections/Generic/List1.h>
@@ -22,8 +23,7 @@ struct Credit;
 
 namespace CesiumForUnityNative {
 
-class CesiumCreditSystemImpl
-    : public CesiumUtility::ReferenceCountedThreadSafe<CesiumCreditSystemImpl> {
+class CesiumCreditSystemImpl : public CesiumImpl<CesiumCreditSystemImpl> {
 public:
   CesiumCreditSystemImpl(
       const DotNet::CesiumForUnity::CesiumCreditSystem& creditSystem);

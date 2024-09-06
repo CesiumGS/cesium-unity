@@ -1,8 +1,9 @@
 #pragma once
 
+#include "CesiumImpl.h"
+
 #include <CesiumGltf/AccessorUtility.h>
 #include <CesiumGltf/FeatureIdTextureView.h>
-#include <CesiumUtility/ReferenceCounted.h>
 
 namespace DotNet::CesiumForUnity {
 class CesiumFeatureIdTexture;
@@ -21,8 +22,7 @@ struct FeatureIdTexture;
 
 namespace CesiumForUnityNative {
 class CesiumFeatureIdTextureImpl
-    : public CesiumUtility::ReferenceCountedThreadSafe<
-          CesiumFeatureIdTextureImpl> {
+    : public CesiumImpl<CesiumFeatureIdTextureImpl> {
 public:
   CesiumFeatureIdTextureImpl(
       const DotNet::CesiumForUnity::CesiumFeatureIdTexture& featureIdTexture);
