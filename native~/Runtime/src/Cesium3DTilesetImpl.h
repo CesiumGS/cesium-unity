@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Cesium3DTilesSelection/ViewUpdateResult.h>
+#include <CesiumUtility/ReferenceCounted.h>
 
 #include <DotNet/CesiumForUnity/CesiumCreditSystem.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
@@ -25,7 +26,8 @@ class Tileset;
 
 namespace CesiumForUnityNative {
 
-class Cesium3DTilesetImpl {
+class Cesium3DTilesetImpl
+    : public CesiumUtility::ReferenceCountedThreadSafe<Cesium3DTilesetImpl> {
 public:
   Cesium3DTilesetImpl(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
   ~Cesium3DTilesetImpl();

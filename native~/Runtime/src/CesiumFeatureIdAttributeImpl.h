@@ -1,6 +1,7 @@
 #pragma once
 
 #include <CesiumGltf/AccessorUtility.h>
+#include <CesiumUtility/ReferenceCounted.h>
 
 namespace DotNet::CesiumForUnity {
 class CesiumFeatureIdAttribute;
@@ -12,7 +13,9 @@ struct MeshPrimitive;
 } // namespace CesiumGltf
 
 namespace CesiumForUnityNative {
-class CesiumFeatureIdAttributeImpl {
+class CesiumFeatureIdAttributeImpl
+    : public CesiumUtility::ReferenceCountedThreadSafe<
+          CesiumFeatureIdAttributeImpl> {
 public:
   CesiumFeatureIdAttributeImpl(
       const DotNet::CesiumForUnity::CesiumFeatureIdAttribute&

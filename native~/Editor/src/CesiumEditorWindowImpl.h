@@ -1,5 +1,7 @@
 #pragma once
 
+#include <CesiumUtility/ReferenceCounted.h>
+
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/System/String.h>
 #include <DotNet/UnityEngine/GameObject.h>
@@ -13,7 +15,8 @@ class CesiumEditorWindow;
 
 namespace CesiumForUnityNative {
 
-class CesiumEditorWindowImpl {
+class CesiumEditorWindowImpl
+    : public CesiumUtility::ReferenceCountedThreadSafe<CesiumEditorWindowImpl> {
 
 public:
   CesiumEditorWindowImpl(

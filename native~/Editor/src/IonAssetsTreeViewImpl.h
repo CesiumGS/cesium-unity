@@ -1,6 +1,7 @@
 #pragma once
 
 #include <CesiumIonClient/Assets.h>
+#include <CesiumUtility/ReferenceCounted.h>
 
 #include <DotNet/CesiumForUnity/IonAssetsColumn.h>
 #include <DotNet/System/String.h>
@@ -15,7 +16,8 @@ class IonAssetsTreeView;
 
 namespace CesiumForUnityNative {
 
-class IonAssetsTreeViewImpl {
+class IonAssetsTreeViewImpl
+    : public CesiumUtility::ReferenceCountedThreadSafe<IonAssetsTreeViewImpl> {
 public:
   IonAssetsTreeViewImpl(
       const DotNet::CesiumForUnity::IonAssetsTreeView& treeView);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <CesiumGltf/PropertyTablePropertyView.h>
+#include <CesiumUtility/ReferenceCounted.h>
 
 #include <DotNet/CesiumForUnity/CesiumMetadataValue.h>
 #include <DotNet/CesiumForUnity/MetadataType.h>
@@ -44,7 +45,8 @@ using ValueType = swl::variant<
     CesiumGltf::PropertyArrayView<bool>,
     CesiumGltf::PropertyArrayView<std::string_view>>;
 
-class CesiumFeatureImpl {
+class CesiumFeatureImpl
+    : public CesiumUtility::ReferenceCountedThreadSafe<CesiumFeatureImpl> {
 public:
   CesiumFeatureImpl(const DotNet::CesiumForUnity::CesiumFeature& feature);
   ~CesiumFeatureImpl();

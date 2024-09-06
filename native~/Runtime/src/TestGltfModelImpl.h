@@ -1,6 +1,7 @@
 #pragma once
 
 #include <CesiumGltf/Model.h>
+#include <CesiumUtility/ReferenceCounted.h>
 
 #include <DotNet/System/Array1.h>
 
@@ -26,7 +27,8 @@ struct float4x4;
 
 namespace CesiumForUnityNative {
 
-class TestGltfModelImpl {
+class TestGltfModelImpl
+    : public CesiumUtility::ReferenceCountedThreadSafe<TestGltfModelImpl> {
 public:
   TestGltfModelImpl(const DotNet::CesiumForUnity::TestGltfModel& model);
   ~TestGltfModelImpl();

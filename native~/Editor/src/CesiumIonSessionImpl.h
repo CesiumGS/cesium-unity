@@ -8,6 +8,7 @@
 #include <CesiumIonClient/Defaults.h>
 #include <CesiumIonClient/Profile.h>
 #include <CesiumIonClient/Token.h>
+#include <CesiumUtility/ReferenceCounted.h>
 
 #include <DotNet/System/Collections/Generic/List1.h>
 #include <DotNet/System/String.h>
@@ -33,7 +34,8 @@ class Token;
 } // namespace CesiumIonClient
 
 namespace CesiumForUnityNative {
-class CesiumIonSessionImpl {
+class CesiumIonSessionImpl
+    : public CesiumUtility::ReferenceCountedThreadSafe<CesiumIonSessionImpl> {
 public:
   CesiumIonSessionImpl(const DotNet::CesiumForUnity::CesiumIonSession& session);
   ~CesiumIonSessionImpl();

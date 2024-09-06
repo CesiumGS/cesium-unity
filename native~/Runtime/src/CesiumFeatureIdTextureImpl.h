@@ -2,6 +2,7 @@
 
 #include <CesiumGltf/AccessorUtility.h>
 #include <CesiumGltf/FeatureIdTextureView.h>
+#include <CesiumUtility/ReferenceCounted.h>
 
 namespace DotNet::CesiumForUnity {
 class CesiumFeatureIdTexture;
@@ -19,7 +20,9 @@ struct FeatureIdTexture;
 } // namespace CesiumGltf
 
 namespace CesiumForUnityNative {
-class CesiumFeatureIdTextureImpl {
+class CesiumFeatureIdTextureImpl
+    : public CesiumUtility::ReferenceCountedThreadSafe<
+          CesiumFeatureIdTextureImpl> {
 public:
   CesiumFeatureIdTextureImpl(
       const DotNet::CesiumForUnity::CesiumFeatureIdTexture& featureIdTexture);
