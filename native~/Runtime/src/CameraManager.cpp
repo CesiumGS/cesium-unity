@@ -165,8 +165,7 @@ CameraManager::getAllCameras(
         unityWorldToTileset);
   }
 
-  if (cameraManager == nullptr ||
-      cameraManager.useSceneViewCameraInEditor()) {
+  if (cameraManager == nullptr || cameraManager.useSceneViewCameraInEditor()) {
     addActiveSceneCameraInEditor(
         result,
         georeferenceComponent,
