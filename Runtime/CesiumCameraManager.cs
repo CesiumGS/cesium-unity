@@ -73,19 +73,19 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        private bool _useActiveSceneViewCameraInEditor = true;
+        private bool _useSceneViewCameraInEditor = true;
 
         /// <summary>
         /// Determines whether the camera associated with the Editor's active scene view should be
         /// used for Cesium3DTileset culling and level-of-detail. In a game, this property has
         /// no effect.
         /// </summary>
-        public bool useActiveSceneViewCameraInEditor
+        public bool useSceneViewCameraInEditor
         {
-            get => this._useActiveSceneViewCameraInEditor;
+            get => this._useSceneViewCameraInEditor;
             set
             {
-                this._useActiveSceneViewCameraInEditor = value;
+                this._useSceneViewCameraInEditor = value;
             }
         }
 

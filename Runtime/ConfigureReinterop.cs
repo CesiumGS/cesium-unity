@@ -883,7 +883,7 @@ namespace CesiumForUnity
 
             CesiumCameraManager manager = CesiumCameraManager.GetOrCreate(go);
             manager = CesiumCameraManager.GetOrCreate(tileset);
-            manager.useActiveSceneViewCameraInEditor = false;
+            manager.useSceneViewCameraInEditor = false;
             manager.useMainCamera = false;
             Camera camera = null;
             for (int i = 0; i < manager.additionalCameras.Count; ++i)

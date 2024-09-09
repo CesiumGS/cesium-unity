@@ -166,7 +166,7 @@ CameraManager::getAllCameras(
   }
 
   if (cameraManager == nullptr ||
-      cameraManager.useActiveSceneViewCameraInEditor()) {
+      cameraManager.useSceneViewCameraInEditor()) {
     addActiveSceneCameraInEditor(
         result,
         georeferenceComponent,
