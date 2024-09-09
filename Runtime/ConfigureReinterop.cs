@@ -172,6 +172,7 @@ namespace CesiumForUnity
             int crc = meshRenderer.material.ComputeCRC();
             meshRenderer.material.SetTexture(id, texture2D);
             meshRenderer.material.SetFloat(id, 1.0f);
+            meshRenderer.material.SetFloat(id, (float)CullMode.Off);
             meshRenderer.material.SetVector(id, new Vector4());
             meshRenderer.material.DisableKeyword("keywordName");
             meshRenderer.material.EnableKeyword("keywordName");
@@ -407,6 +408,7 @@ namespace CesiumForUnity
             georeference.ecefX = georeference.ecefX;
             georeference.ecefY = georeference.ecefY;
             georeference.ecefZ = georeference.ecefZ;
+            georeference.originPlacement = georeference.originPlacement;
             georeference.originAuthority = georeference.originAuthority;
             georeference.scale = georeference.scale;
             double4x4 ecefToLocal = georeference.ecefToLocalMatrix;

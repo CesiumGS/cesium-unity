@@ -84,16 +84,6 @@ public:
   void RefreshTokens(const DotNet::CesiumForUnity::CesiumIonSession& session);
   void RefreshDefaults(const DotNet::CesiumForUnity::CesiumIonSession& session);
 
-  void refreshProfile();
-  void refreshAssets();
-  void refreshTokens();
-  void refreshDefaults();
-
-  bool refreshProfileIfNeeded();
-  bool refreshAssetsIfNeeded();
-  bool refreshTokensIfNeeded();
-  bool refreshDefaultsIfNeeded();
-
   CesiumAsync::Future<CesiumIonClient::Response<CesiumIonClient::Token>>
   findToken(const std::string& token) const;
 
@@ -104,18 +94,37 @@ public:
   void invalidateProjectDefaultTokenDetails();
 
   const std::optional<CesiumIonClient::Connection>& getConnection() const;
-  const CesiumIonClient::Profile& getProfile();
-  const CesiumIonClient::Assets& getAssets();
-  const std::vector<CesiumIonClient::Token>& getTokens();
+  const CesiumIonClient::Profile&
+  getProfile(const DotNet::CesiumForUnity::CesiumIonSession& session);
+  const CesiumIonClient::Assets&
+  getAssets(const DotNet::CesiumForUnity::CesiumIonSession& session);
+  const std::vector<CesiumIonClient::Token>&
+  getTokens(const DotNet::CesiumForUnity::CesiumIonSession& session);
   const CesiumIonClient::ApplicationData& getAppData();
-  const CesiumIonClient::Defaults& getDefaults();
+  const CesiumIonClient::Defaults&
+  getDefaults(const DotNet::CesiumForUnity::CesiumIonSession& session);
 
   const std::shared_ptr<CesiumAsync::IAssetAccessor>& getAssetAccessor() const;
   const CesiumAsync::AsyncSystem& getAsyncSystem() const;
   CesiumAsync::AsyncSystem& getAsyncSystem();
 
 private:
-  void startQueuedLoads();
+  void refreshProfile(const DotNet::CesiumForUnity::CesiumIonSession& session);
+  void refreshAssets(const DotNet::CesiumForUnity::CesiumIonSession& session);
+  void refreshTokens(const DotNet::CesiumForUnity::CesiumIonSession& session);
+  void refreshDefaults(const DotNet::CesiumForUnity::CesiumIonSession& session);
+
+  bool refreshProfileIfNeeded(
+      const DotNet::CesiumForUnity::CesiumIonSession& session);
+  bool refreshAssetsIfNeeded(
+      const DotNet::CesiumForUnity::CesiumIonSession& session);
+  bool refreshTokensIfNeeded(
+      const DotNet::CesiumForUnity::CesiumIonSession& session);
+  bool refreshDefaultsIfNeeded(
+      const DotNet::CesiumForUnity::CesiumIonSession& session);
+
+  void
+  startQueuedLoads(const DotNet::CesiumForUnity::CesiumIonSession& session);
 
   /**
    * If the {@link _appData} field has no value, this method will request the

@@ -6,4 +6,8 @@
 	url = https://github.com/htacg/tidy-html5.git
 [submodule "native~/extern/enum-flags"]
 	path = native~/extern/enum-flags
-	url = https://github.com/grisumbras/enum-flags.git
+	url = https://github.com/kring/enum-flags.git
+[submodule "native~/extern/swl-variant"]
+	path = native~/extern/swl-variant
+	url = https://github.com/kring/swl-variant.git
+	branch = exception-public-inheritance

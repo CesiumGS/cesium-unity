@@ -219,8 +219,9 @@ namespace CesiumForUnity
         private bool DetectMovementInput()
         {
             double3 currentPositionECEF = this._globeAnchor.positionGlobeFixed;
-            bool3 positionEquality = currentPositionECEF == this._previousPositionECEF;
-            return !positionEquality.x || !positionEquality.y || !positionEquality.z;
+            double distanceSquared = math.lengthsq(currentPositionECEF - this._previousPositionECEF);
+            const double distanceConsideredMovement = 1e-6; // 1/1000 of a millimeter
+            return distanceSquared >= (distanceConsideredMovement * distanceConsideredMovement);
         }
 
         /// <summary>

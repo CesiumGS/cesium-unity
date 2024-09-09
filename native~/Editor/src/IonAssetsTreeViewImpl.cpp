@@ -117,7 +117,7 @@ void IonAssetsTreeViewImpl::CellGUI(
 void IonAssetsTreeViewImpl::Refresh(
     const DotNet::CesiumForUnity::IonAssetsTreeView& treeView) {
   CesiumIonSessionImpl& session = getNativeSession();
-  const CesiumIonClient::Assets& assets = session.getAssets();
+  const CesiumIonClient::Assets& assets = session.getAssets(getSession());
 
   this->_assets.resize(assets.items.size());
 

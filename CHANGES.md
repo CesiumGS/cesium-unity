@@ -1,5 +1,26 @@
 # Change Log
 
+## v1.12.0 - 2024-09-02
+
+##### Breaking Changes :mega:
+
+- Player builds for macOS now require macOS 10.15+. Previously, 10.13+ was supported.
+
+##### Additions :tada:
+
+- Editor builds for macOS now target macOS 10.15+. Previously, macOS 12.7+ was required.
+- Added `originPlacement` property to `CesiumGeoreference` to toggle between "Cartographic Origin" and "True Origin" reference modes. Whereas "Cartographic Origin" is the default for georeferenced tilesets, "True Origin" may be used for non-georeferenced tilesets centered at the origin.
+
+##### Fixes :wrench:
+
+- Fixed a bug that prevented using the Token panel with a new Cesium ion Server that had never had its token set before.
+- Fixed a bug that could cause a crash in `CesiumIonSession` when the object was garbage collected or the AppDomain was unloaded while network requests were in progress.
+- Fixed a bug that could cause `CesiumFlyToController` to unexpectedly interrupt a flight.
+- glTF `doubleSided` materials are now supported. Previously, models using this property would appear inside-out.
+- Fixed a bug that prevented clipping with CesiumCartographicPolygon from working with HDRP.
+
+This release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.38.0 to v0.39.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
+
 ## v1.11.1 - 2024-08-01
 
 ##### Fixes :wrench:

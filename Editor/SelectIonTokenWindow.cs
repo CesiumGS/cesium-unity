@@ -110,7 +110,7 @@ namespace CesiumForUnity
                 // The source will be set to "UseExisting" later by RefreshTokens
                 // if the _specifiedToken is from the currently signed-in ion account.
                 this._source = IonTokenSource.Specify;
-                if (this._specifiedToken.Length == 0 && session.IsConnected())
+                if (string.IsNullOrEmpty(this._specifiedToken) && session.IsConnected())
                 {
                     this._source = IonTokenSource.Create;
                 }

@@ -16,6 +16,13 @@ using namespace DotNet::UnityEngine;
 namespace CesiumForUnityNative {
 
 #pragma region Parameter Names
+const std::string TilesetMaterialProperties::_doubleSidedEnableName =
+    "_DoubleSidedEnable";
+const std::string TilesetMaterialProperties::_cullName = "_Cull";
+const std::string TilesetMaterialProperties::_cullModeName = "_CullMode";
+const std::string TilesetMaterialProperties::_builtInCullModeName =
+    "_BUILTIN_CullMode";
+
 const std::string TilesetMaterialProperties::_baseColorFactorName =
     "_baseColorFactor";
 const std::string TilesetMaterialProperties::_baseColorTextureName =
@@ -78,7 +85,13 @@ const std::string TilesetMaterialProperties::_overlayTranslationAndScalePrefix =
 #pragma endregion
 
 TilesetMaterialProperties::TilesetMaterialProperties()
-    : _baseColorFactorID(
+    : _doubleSidedEnableID(
+          Shader::PropertyToID(System::String(_doubleSidedEnableName))),
+      _cullID(Shader::PropertyToID(System::String(_cullName))),
+      _cullModeID(Shader::PropertyToID(System::String(_cullModeName))),
+      _builtInCullModeID(
+          Shader::PropertyToID(System::String(_builtInCullModeName))),
+      _baseColorFactorID(
           Shader::PropertyToID(System::String(_baseColorFactorName))),
       _baseColorTextureID(
           Shader::PropertyToID(System::String(_baseColorTextureName))),
