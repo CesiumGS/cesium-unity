@@ -325,6 +325,9 @@ void Cesium3DTilesetImpl::FocusTileset(
   DotNet::CesiumForUnity::CesiumGeoreference georeferenceComponent =
       tileset.gameObject()
           .GetComponentInParent<DotNet::CesiumForUnity::CesiumGeoreference>();
+  if (georeferenceComponent == nullptr) {
+    return;
+  }
 
   const CesiumGeospatial::LocalHorizontalCoordinateSystem& georeferenceCrs =
       georeferenceComponent.NativeImplementation().getCoordinateSystem(
@@ -491,9 +494,10 @@ void Cesium3DTilesetImpl::LoadTileset(
   DotNet::CesiumForUnity::CesiumGeoreference georeferenceComponent =
       tileset.gameObject()
           .GetComponentInParent<DotNet::CesiumForUnity::CesiumGeoreference>();
-
-  options.ellipsoid =
-      georeferenceComponent.ellipsoid().NativeImplementation().GetEllipsoid();
+  if (georeferenceComponent != nullptr) {
+    options.ellipsoid =
+        georeferenceComponent.ellipsoid().NativeImplementation().GetEllipsoid();
+  }
 
   TilesetContentOptions contentOptions{};
   contentOptions.generateMissingNormalsSmooth = tileset.generateSmoothNormals();

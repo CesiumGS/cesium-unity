@@ -39,7 +39,7 @@ namespace CesiumForUnity
         private static readonly string additionalCamerasTooltip = CesiumEditorUtility.FormatTooltip(@"
             Additional Cameras to use for Cesium3DTileset culling and level-of-detail, in addition to the ones
             controlled by the checkboxes above. These additional cameras may be disabled, which is useful for
-            creating a virtual camera that affects Cesium3DTileset but that is not actually rendered.");
+            creating a virtual camera that affects Cesium3DTileset but that is not actually used for rendering.");
 
         private void DrawProperties()
         {
