@@ -1,5 +1,15 @@
 # Change Log
 
+## Next Version (not yet released)
+
+##### Additions :tada:
+
+- Added a new `CesiumCameraManager` component. It allows configuration of the cameras to use for Cesium3DTileset culling and level-of-detail.
+
+##### Fixes :wrench:
+
+- Fixed a bug that could cause a `NullReferenceException` when a `Cesium3DTileset` was not nested into a game object with a `CesiumGeoreference`.
+
 ## v1.12.0 - 2024-09-02
 
 ##### Breaking Changes :mega:
