@@ -2,6 +2,7 @@
 
 #include <Cesium3DTilesSelection/ViewUpdateResult.h>
 
+#include <DotNet/CesiumForUnity/CesiumCameraManager.h>
 #include <DotNet/CesiumForUnity/CesiumCreditSystem.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/System/Action.h>
@@ -15,7 +16,6 @@
 
 namespace DotNet::CesiumForUnity {
 class Cesium3DTileset;
-class CesiumCreditSystem;
 class CesiumRasterOverlay;
 } // namespace DotNet::CesiumForUnity
 
@@ -65,6 +65,10 @@ public:
   void setCreditSystem(
       const DotNet::CesiumForUnity::CesiumCreditSystem& creditSystem);
 
+  const DotNet::CesiumForUnity::CesiumCameraManager& getCameraManager() const;
+  void setCameraManager(
+      const DotNet::CesiumForUnity::CesiumCameraManager& cameraManager);
+
 private:
   void updateOverlayMaterialKeys(
       const DotNet::System::Array1<DotNet::CesiumForUnity::CesiumRasterOverlay>&
@@ -81,6 +85,7 @@ private:
   DotNet::UnityEditor::CallbackFunction _updateInEditorCallback;
 #endif
   DotNet::CesiumForUnity::CesiumCreditSystem _creditSystem;
+  DotNet::CesiumForUnity::CesiumCameraManager _cameraManager;
   bool _destroyTilesetOnNextUpdate;
   int32_t _lastOpaqueMaterialHash;
 };

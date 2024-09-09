@@ -56,20 +56,7 @@ namespace CesiumForUnity
 
         public void ExposeToCPP()
         {
-            
-            
             Camera c = Camera.main;
-            List<Camera> lc = new List<Camera>();
-            
-            lc = CesiumCamera.cameraList;
-            lc.Add(c);
-            for (int i = 0; i < lc.Count; ++i)
-            {
-                c = lc[i];
-            }
-            
-
-            
             
             Transform t = c.transform;
             Vector3 u = t.up;
@@ -893,6 +880,16 @@ namespace CesiumForUnity
             length = float2x2Array.Length;
             length = float3x3Array.Length;
             length = float4x4Array.Length;
+
+            CesiumCameraManager manager = CesiumCameraManager.GetOrCreate(go);
+            manager = CesiumCameraManager.GetOrCreate(tileset);
+            manager.useActiveSceneViewCameraInEditor = false;
+            manager.useMainCamera = false;
+            Camera camera = null;
+            for (int i = 0; i < manager.additionalCameras.Count; ++i)
+            {
+                camera = manager.additionalCameras[i];
+            }
 
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;
