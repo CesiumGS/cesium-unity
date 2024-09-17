@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CesiumImpl.h"
+
 #include <Cesium3DTilesSelection/ViewUpdateResult.h>
 
 #include <DotNet/CesiumForUnity/CesiumCreditSystem.h>
@@ -25,7 +27,7 @@ class Tileset;
 
 namespace CesiumForUnityNative {
 
-class Cesium3DTilesetImpl {
+class Cesium3DTilesetImpl : public CesiumImpl<Cesium3DTilesetImpl> {
 public:
   Cesium3DTilesetImpl(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
   ~Cesium3DTilesetImpl();

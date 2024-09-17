@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CesiumImpl.h"
+
 #include <CesiumAsync/AsyncSystem.h>
 #include <CesiumAsync/IAssetAccessor.h>
 #include <CesiumAsync/SharedFuture.h>
@@ -33,7 +35,7 @@ class Token;
 } // namespace CesiumIonClient
 
 namespace CesiumForUnityNative {
-class CesiumIonSessionImpl {
+class CesiumIonSessionImpl : public CesiumImpl<CesiumIonSessionImpl> {
 public:
   CesiumIonSessionImpl(const DotNet::CesiumForUnity::CesiumIonSession& session);
   ~CesiumIonSessionImpl();

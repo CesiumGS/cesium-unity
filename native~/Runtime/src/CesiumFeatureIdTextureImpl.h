@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CesiumImpl.h"
+
 #include <CesiumGltf/AccessorUtility.h>
 #include <CesiumGltf/FeatureIdTextureView.h>
 
@@ -19,7 +21,8 @@ struct FeatureIdTexture;
 } // namespace CesiumGltf
 
 namespace CesiumForUnityNative {
-class CesiumFeatureIdTextureImpl {
+class CesiumFeatureIdTextureImpl
+    : public CesiumImpl<CesiumFeatureIdTextureImpl> {
 public:
   CesiumFeatureIdTextureImpl(
       const DotNet::CesiumForUnity::CesiumFeatureIdTexture& featureIdTexture);

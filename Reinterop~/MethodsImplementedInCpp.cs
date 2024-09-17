@@ -33,7 +33,9 @@ namespace Reinterop
                     #endif
                     void* {{createName}}(void* handle) {
                       const {{wrapperType.GetFullyQualifiedName()}} wrapper{{{objectHandleType.GetFullyQualifiedName()}}(handle)};
-                      return reinterpret_cast<void*>(new {{implType.GetFullyQualifiedName()}}(wrapper));
+                      auto pImpl = new {{implType.GetFullyQualifiedName()}}(wrapper);
+                      pImpl->addReference();
+                      return reinterpret_cast<void*>(pImpl);
                     }
                     """,
                     TypeDefinitionsReferenced: new[]
@@ -68,7 +70,7 @@ namespace Reinterop
                     #endif
                     void {{destroyName}}(void* pImpl) {
                       auto pImplTyped = reinterpret_cast<{{implType.GetFullyQualifiedName()}}*>(pImpl);
-                      delete pImplTyped;
+                      if (pImplTyped) pImplTyped->releaseReference();
                     }
                     """,
                     TypeDefinitionsReferenced: new[]

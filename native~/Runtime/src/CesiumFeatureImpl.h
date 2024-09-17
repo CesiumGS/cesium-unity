@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CesiumImpl.h"
+
 #include <CesiumGltf/PropertyTablePropertyView.h>
 
 #include <DotNet/CesiumForUnity/CesiumMetadataValue.h>
@@ -44,7 +46,7 @@ using ValueType = swl::variant<
     CesiumGltf::PropertyArrayView<bool>,
     CesiumGltf::PropertyArrayView<std::string_view>>;
 
-class CesiumFeatureImpl {
+class CesiumFeatureImpl : public CesiumImpl<CesiumFeatureImpl> {
 public:
   CesiumFeatureImpl(const DotNet::CesiumForUnity::CesiumFeature& feature);
   ~CesiumFeatureImpl();

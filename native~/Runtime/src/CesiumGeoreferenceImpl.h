@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CesiumImpl.h"
+
 #include <CesiumGeospatial/LocalHorizontalCoordinateSystem.h>
 
 #include <DotNet/Unity/Mathematics/double3.h>
@@ -16,7 +18,7 @@ class Transform;
 }
 
 namespace CesiumForUnityNative {
-class CesiumGeoreferenceImpl {
+class CesiumGeoreferenceImpl : public CesiumImpl<CesiumGeoreferenceImpl> {
 public:
   CesiumGeoreferenceImpl(
       const DotNet::CesiumForUnity::CesiumGeoreference& georeference);

@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "CesiumImpl.h"
+
 #include <CesiumUtility/IntrusivePointer.h>
 
 namespace DotNet::CesiumForUnity {
@@ -13,7 +15,8 @@ class WebMapTileServiceRasterOverlay;
 
 namespace CesiumForUnityNative {
 
-class CesiumWebMapTileServiceRasterOverlayImpl {
+class CesiumWebMapTileServiceRasterOverlayImpl
+    : public CesiumImpl<CesiumWebMapTileServiceRasterOverlayImpl> {
 public:
   CesiumWebMapTileServiceRasterOverlayImpl(
       const DotNet::CesiumForUnity::CesiumWebMapTileServiceRasterOverlay&

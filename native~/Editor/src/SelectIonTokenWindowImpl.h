@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CesiumImpl.h"
+
 #include <CesiumAsync/AsyncSystem.h>
 #include <CesiumIonClient/Token.h>
 
@@ -17,7 +19,7 @@ class CesiumIonServer;
 
 namespace CesiumForUnityNative {
 
-class SelectIonTokenWindowImpl {
+class SelectIonTokenWindowImpl : public CesiumImpl<SelectIonTokenWindowImpl> {
 
 public:
   static CesiumAsync::SharedFuture<std::optional<CesiumIonClient::Token>>

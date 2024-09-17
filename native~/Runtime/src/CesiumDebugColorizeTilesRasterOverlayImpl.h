@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CesiumImpl.h"
+
 #include <CesiumUtility/IntrusivePointer.h>
 
 namespace DotNet::CesiumForUnity {
@@ -13,7 +15,8 @@ class DebugColorizeTilesRasterOverlay;
 
 namespace CesiumForUnityNative {
 
-class CesiumDebugColorizeTilesRasterOverlayImpl {
+class CesiumDebugColorizeTilesRasterOverlayImpl
+    : public CesiumImpl<CesiumDebugColorizeTilesRasterOverlayImpl> {
 public:
   CesiumDebugColorizeTilesRasterOverlayImpl(
       const DotNet::CesiumForUnity::CesiumDebugColorizeTilesRasterOverlay&

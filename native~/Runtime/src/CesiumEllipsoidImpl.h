@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CesiumImpl.h"
+
 #include <CesiumGeospatial/Ellipsoid.h>
 
 #include <DotNet/Unity/Mathematics/double3.h>
@@ -12,7 +14,7 @@ class CesiumEllipsoid;
 
 namespace CesiumForUnityNative {
 
-class CesiumEllipsoidImpl {
+class CesiumEllipsoidImpl : public CesiumImpl<CesiumEllipsoidImpl> {
 public:
   CesiumEllipsoidImpl(
       const DotNet::CesiumForUnity::CesiumEllipsoid& unityEllipsoid);

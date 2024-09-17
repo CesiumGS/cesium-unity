@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CesiumImpl.h"
+
 #include <CesiumGltf/AccessorUtility.h>
 
 namespace DotNet::CesiumForUnity {
@@ -12,7 +14,8 @@ struct MeshPrimitive;
 } // namespace CesiumGltf
 
 namespace CesiumForUnityNative {
-class CesiumFeatureIdAttributeImpl {
+class CesiumFeatureIdAttributeImpl
+    : public CesiumImpl<CesiumFeatureIdAttributeImpl> {
 public:
   CesiumFeatureIdAttributeImpl(
       const DotNet::CesiumForUnity::CesiumFeatureIdAttribute&

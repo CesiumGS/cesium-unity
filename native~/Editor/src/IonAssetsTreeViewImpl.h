@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CesiumImpl.h"
+
 #include <CesiumIonClient/Assets.h>
 
 #include <DotNet/CesiumForUnity/IonAssetsColumn.h>
@@ -15,7 +17,7 @@ class IonAssetsTreeView;
 
 namespace CesiumForUnityNative {
 
-class IonAssetsTreeViewImpl {
+class IonAssetsTreeViewImpl : public CesiumImpl<IonAssetsTreeViewImpl> {
 public:
   IonAssetsTreeViewImpl(
       const DotNet::CesiumForUnity::IonAssetsTreeView& treeView);
