@@ -36,13 +36,6 @@ namespace CesiumForUnity
                 return result;
         }
 
-        internal static CesiumCameraManager GetOrCreate(Component component)
-        {
-            if (component == null) throw new ArgumentNullException("component");
-
-            return CesiumCameraManager.GetOrCreate(component.gameObject);
-        }
-
         private static CesiumCameraManager Create(GameObject gameObject)
         {
             // Add it to the same game object that has the CesiumGeoreference, if any.

@@ -882,7 +882,6 @@ namespace CesiumForUnity
             length = float4x4Array.Length;
 
             CesiumCameraManager manager = CesiumCameraManager.GetOrCreate(go);
-            manager = CesiumCameraManager.GetOrCreate(tileset);
             manager.useSceneViewCameraInEditor = false;
             manager.useMainCamera = false;
             Camera camera = null;

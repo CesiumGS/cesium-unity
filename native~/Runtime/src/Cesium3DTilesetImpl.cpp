@@ -565,7 +565,7 @@ void Cesium3DTilesetImpl::LoadTileset(
   options.contentOptions = contentOptions;
 
   CesiumForUnity::CesiumCameraManager cameraManager =
-      CesiumForUnity::CesiumCameraManager::GetOrCreate(tileset);
+      CesiumForUnity::CesiumCameraManager::GetOrCreate(tileset.gameObject());
   this->setCameraManager(cameraManager);
 
   this->_lastUpdateResult = ViewUpdateResult();
