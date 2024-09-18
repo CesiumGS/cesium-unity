@@ -23,6 +23,7 @@ namespace CesiumForUnity
         public override void OnInspectorGUI()
         {
             this.serializedObject.Update();
+            EditorGUIUtility.labelWidth = CesiumEditorStyle.inspectorLabelWidth;
             this.DrawProperties();
             this.serializedObject.ApplyModifiedProperties();
         }
@@ -37,9 +38,12 @@ namespace CesiumForUnity
             no effect.");
 
         private static readonly string additionalCamerasTooltip = CesiumEditorUtility.FormatTooltip(@"
-            Additional Cameras to use for Cesium3DTileset culling and level-of-detail, in addition to the ones
-            controlled by the checkboxes above. These additional cameras may be disabled, which is useful for
-            creating a virtual camera that affects Cesium3DTileset but that is not actually used for rendering.");
+            Other Cameras to use for Cesium3DTileset culling and level-of-detail, in addition to
+            the ones controlled by the checkboxes above.
+
+            These additional cameras will be used even when they are disabled, which is useful for
+            creating a virtual camera that affects Cesium3DTileset loading without being used for
+            rendering.");
 
         private void DrawProperties()
         {
@@ -47,9 +51,11 @@ namespace CesiumForUnity
             EditorGUILayout.PropertyField(
                 this._useMainCamera, useMainCameraContent);
 
+            EditorGUI.BeginDisabledGroup(EditorApplication.isPlaying);
             GUIContent useActiveSceneViewCameraInEditorContent = new GUIContent("Use Editor Scene View Camera", useActiveSceneViewCameraInEditorTooltip);
             EditorGUILayout.PropertyField(
                 this._useActiveSceneViewCameraInEditor, useActiveSceneViewCameraInEditorContent);
+            EditorGUI.EndDisabledGroup();
 
             GUIContent additionalCamerasContent = new GUIContent("Additional Cameras", additionalCamerasTooltip);
             EditorGUILayout.PropertyField(

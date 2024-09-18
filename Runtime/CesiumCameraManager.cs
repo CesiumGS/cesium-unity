@@ -36,7 +36,7 @@ namespace CesiumForUnity
                 return result;
         }
 
-        public static CesiumCameraManager GetOrCreate(Component component)
+        internal static CesiumCameraManager GetOrCreate(Component component)
         {
             if (component == null) throw new ArgumentNullException("component");
 
@@ -93,10 +93,15 @@ namespace CesiumForUnity
         private List<Camera> _additionalCameras = new List<Camera>();
 
         /// <summary>
-        /// Additional Cameras to use for Cesium3DTileset culling and level-of-detail. These cameras
-        /// may be disabled, which is useful for creating a virtual camera that affects Cesium3DTileset
-        /// but that is not actually rendered.
+        /// Other cameras to use for Cesium3DTileset culling and level-of-detail, in addition
+        /// to the ones controlled by <see cref="useMainCamera"/> and
+        /// <see cref="useSceneViewCameraInEditor"/>.
         /// </summary>
+        /// <remarks>
+        /// These additional cameras will be used even when they are disabled, which is useful for
+        /// creating a virtual camera that affects Cesium3DTileset loading without being used
+        /// for rendering.
+        /// </remarks>
         public List<Camera> additionalCameras
         {
             get => this._additionalCameras;
