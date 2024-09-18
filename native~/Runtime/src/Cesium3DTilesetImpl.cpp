@@ -15,6 +15,7 @@
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/CesiumForUnity/Cesium3DTilesetLoadFailureDetails.h>
 #include <DotNet/CesiumForUnity/Cesium3DTilesetLoadType.h>
+#include <DotNet/CesiumForUnity/CesiumCameraManager.h>
 #include <DotNet/CesiumForUnity/CesiumDataSource.h>
 #include <DotNet/CesiumForUnity/CesiumEllipsoid.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
@@ -25,6 +26,7 @@
 #include <DotNet/System/String.h>
 #include <DotNet/UnityEngine/Application.h>
 #include <DotNet/UnityEngine/Camera.h>
+#include <DotNet/UnityEngine/Component.h>
 #include <DotNet/UnityEngine/Debug.h>
 #include <DotNet/UnityEngine/Experimental/Rendering/FormatUsage.h>
 #include <DotNet/UnityEngine/Experimental/Rendering/GraphicsFormat.h>
@@ -59,6 +61,7 @@ Cesium3DTilesetImpl::Cesium3DTilesetImpl(
       _updateInEditorCallback(nullptr),
 #endif
       _creditSystem(nullptr),
+      _cameraManager(nullptr),
       _destroyTilesetOnNextUpdate(false),
       _lastOpaqueMaterialHash(0) {
 }
@@ -110,8 +113,9 @@ void Cesium3DTilesetImpl::Update(
   }
 
 #endif
-  if (this->_creditSystem == nullptr) {
-    // Refresh the tileset so it creates and uses a new credit system.
+  if (this->_creditSystem == nullptr || this->_cameraManager == nullptr) {
+    // Refresh the tileset so it creates and uses a new credit system and camera
+    // manager.
     this->DestroyTileset(tileset);
   }
 
@@ -122,7 +126,7 @@ void Cesium3DTilesetImpl::Update(
   }
 
   std::vector<ViewState> viewStates =
-      CameraManager::getAllCameras(tileset.gameObject());
+      CameraManager::getAllCameras(tileset, *this);
 
   const ViewUpdateResult& updateResult = this->_pTileset->updateView(
       viewStates,
@@ -209,6 +213,7 @@ void Cesium3DTilesetImpl::OnDisable(
 #endif
 
   this->_creditSystem = nullptr;
+  this->_cameraManager = nullptr;
 
   this->DestroyTileset(tileset);
 }
@@ -320,6 +325,9 @@ void Cesium3DTilesetImpl::FocusTileset(
   DotNet::CesiumForUnity::CesiumGeoreference georeferenceComponent =
       tileset.gameObject()
           .GetComponentInParent<DotNet::CesiumForUnity::CesiumGeoreference>();
+  if (georeferenceComponent == nullptr) {
+    return;
+  }
 
   const CesiumGeospatial::LocalHorizontalCoordinateSystem& georeferenceCrs =
       georeferenceComponent.NativeImplementation().getCoordinateSystem(
@@ -386,6 +394,16 @@ Cesium3DTilesetImpl::getCreditSystem() const {
 void Cesium3DTilesetImpl::setCreditSystem(
     const DotNet::CesiumForUnity::CesiumCreditSystem& creditSystem) {
   this->_creditSystem = creditSystem;
+}
+
+const DotNet::CesiumForUnity::CesiumCameraManager&
+Cesium3DTilesetImpl::getCameraManager() const {
+  return this->_cameraManager;
+}
+
+void Cesium3DTilesetImpl::setCameraManager(
+    const DotNet::CesiumForUnity::CesiumCameraManager& cameraManager) {
+  this->_cameraManager = cameraManager;
 }
 
 void Cesium3DTilesetImpl::updateLastViewUpdateResultState(
@@ -476,9 +494,10 @@ void Cesium3DTilesetImpl::LoadTileset(
   DotNet::CesiumForUnity::CesiumGeoreference georeferenceComponent =
       tileset.gameObject()
           .GetComponentInParent<DotNet::CesiumForUnity::CesiumGeoreference>();
-
-  options.ellipsoid =
-      georeferenceComponent.ellipsoid().NativeImplementation().GetEllipsoid();
+  if (georeferenceComponent != nullptr) {
+    options.ellipsoid =
+        georeferenceComponent.ellipsoid().NativeImplementation().GetEllipsoid();
+  }
 
   TilesetContentOptions contentOptions{};
   contentOptions.generateMissingNormalsSmooth = tileset.generateSmoothNormals();
@@ -544,6 +563,10 @@ void Cesium3DTilesetImpl::LoadTileset(
   contentOptions.applyTextureTransform = false;
 
   options.contentOptions = contentOptions;
+
+  CesiumForUnity::CesiumCameraManager cameraManager =
+      CesiumForUnity::CesiumCameraManager::GetOrCreate(tileset.gameObject());
+  this->setCameraManager(cameraManager);
 
   this->_lastUpdateResult = ViewUpdateResult();
 
