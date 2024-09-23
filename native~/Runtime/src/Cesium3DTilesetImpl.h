@@ -9,6 +9,7 @@
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/System/Action.h>
 #include <DotNet/System/Array1.h>
+#include <DotNet/System/Threading/Tasks/Task1.h>
 
 #include <memory>
 
@@ -19,7 +20,12 @@
 namespace DotNet::CesiumForUnity {
 class Cesium3DTileset;
 class CesiumRasterOverlay;
+class SampleHeightResult;
 } // namespace DotNet::CesiumForUnity
+
+namespace DotNet::Unity::Mathematics {
+struct double3;
+}
 
 namespace Cesium3DTilesSelection {
 class Tileset;
@@ -48,6 +54,13 @@ public:
 
   float
   ComputeLoadProgress(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
+
+  DotNet::System::Threading::Tasks::Task1<
+      DotNet::CesiumForUnity::SampleHeightResult>
+  SampleHeightMostDetailed(
+      const DotNet::CesiumForUnity::Cesium3DTileset& tileset,
+      const DotNet::System::Array1<DotNet::Unity::Mathematics::double3>&
+          longitudeLatitudeHeightPositions);
 
   Cesium3DTilesSelection::Tileset* getTileset();
   const Cesium3DTilesSelection::Tileset* getTileset() const;

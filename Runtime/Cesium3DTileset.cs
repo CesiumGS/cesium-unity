@@ -1,5 +1,8 @@
 using Reinterop;
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace CesiumForUnity
@@ -18,6 +21,13 @@ namespace CesiumForUnity
         /// The dataset is from a regular web URL.
         /// </summary>
         FromUrl
+    }
+
+    public class SampleHeightResult
+    {
+        public double3[] longitudeLatitudeHeightPositions { get; set; }
+        public bool[] heightSampled { get; set; }
+        public string[] warnings { get; set; }
     }
 
     /// <summary>
@@ -714,6 +724,8 @@ namespace CesiumForUnity
         /// </summary>
         public partial void FocusTileset();
 
+        public partial Task<SampleHeightResult> SampleHeightMostDetailed(params double3[] longitudeLatitudeHeightPositions);
+
         #endregion
 
         #region Private Methods
@@ -730,6 +742,8 @@ namespace CesiumForUnity
         internal partial void UpdateOverlayMaterialKeys();
 
         #endregion
+
+        #region Backward Compatibility
 
         void ISerializationCallbackReceiver.OnBeforeSerialize()
         {
@@ -748,5 +762,6 @@ namespace CesiumForUnity
 #if UNITY_EDITOR
         private bool _useDefaultServer = false;
 #endif
+        #endregion
     }
 }

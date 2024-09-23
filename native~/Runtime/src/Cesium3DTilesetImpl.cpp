@@ -22,8 +22,13 @@
 #include <DotNet/CesiumForUnity/CesiumIonServer.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
 #include <DotNet/CesiumForUnity/CesiumTileExcluder.h>
+#include <DotNet/CesiumForUnity/SampleHeightResult.h>
+#include <DotNet/System/Exception.h>
 #include <DotNet/System/Object.h>
 #include <DotNet/System/String.h>
+#include <DotNet/System/Threading/Tasks/Task1.h>
+#include <DotNet/System/Threading/Tasks/TaskCompletionSource1.h>
+#include <DotNet/Unity/Mathematics/double3.h>
 #include <DotNet/UnityEngine/Application.h>
 #include <DotNet/UnityEngine/Camera.h>
 #include <DotNet/UnityEngine/Component.h>
@@ -379,6 +384,78 @@ float Cesium3DTilesetImpl::ComputeLoadProgress(
     return 0;
   }
   return getTileset()->computeLoadProgress();
+}
+
+System::Threading::Tasks::Task1<CesiumForUnity::SampleHeightResult>
+Cesium3DTilesetImpl::SampleHeightMostDetailed(
+    const CesiumForUnity::Cesium3DTileset& tileset,
+    const System::Array1<Unity::Mathematics::double3>&
+        longitudeLatitudeHeightPositions) {
+  System::Threading::Tasks::TaskCompletionSource1<
+      CesiumForUnity::SampleHeightResult>
+      promise{};
+
+  Tileset* pTileset = this->getTileset();
+  if (pTileset == nullptr) {
+    // TODO: wait a tick for the tileset to be created.
+    promise.SetException(
+        System::Exception(System::String("Tileset not created yet.")));
+    return promise.Task();
+  }
+
+  std::vector<CesiumGeospatial::Cartographic> positions;
+  positions.reserve(longitudeLatitudeHeightPositions.Length());
+
+  for (int32_t i = 0, len = longitudeLatitudeHeightPositions.Length(); i < len;
+       ++i) {
+    Unity::Mathematics::double3 position = longitudeLatitudeHeightPositions[i];
+    positions.emplace_back(CesiumGeospatial::Cartographic::fromDegrees(
+        position.x,
+        position.y,
+        position.z));
+  }
+
+  pTileset->sampleHeightMostDetailed(positions)
+      .thenImmediately(
+          [promise](Cesium3DTilesSelection::SampleHeightResult&& result) {
+            System::Array1<Unity::Mathematics::double3> positions(
+                result.positions.size());
+            for (size_t i = 0; i < result.positions.size(); ++i) {
+              const CesiumGeospatial::Cartographic& positionRadians =
+                  result.positions[i];
+              positions.Item(
+                  i,
+                  Unity::Mathematics::double3{
+                      CesiumUtility::Math::radiansToDegrees(
+                          positionRadians.longitude),
+                      CesiumUtility::Math::radiansToDegrees(
+                          positionRadians.latitude),
+                      positionRadians.height});
+            }
+
+            System::Array1<bool> heightSampled(result.heightSampled.size());
+            for (size_t i = 0; i < result.heightSampled.size(); ++i) {
+              heightSampled.Item(i, result.heightSampled[i]);
+            }
+
+            System::Array1<System::String> warnings(result.warnings.size());
+            for (size_t i = 0; i < result.warnings.size(); ++i) {
+              warnings.Item(i, System::String(result.warnings[i]));
+            }
+
+            CesiumForUnity::SampleHeightResult unityResult;
+            unityResult.longitudeLatitudeHeightPositions(positions);
+            unityResult.heightSampled(heightSampled);
+            unityResult.warnings(warnings);
+
+            promise.SetResult(unityResult);
+          })
+      .catchImmediately([promise](std::exception&& exception) {
+        promise.SetException(
+            System::Exception(System::String(exception.what())));
+      });
+
+  return promise.Task();
 }
 
 Tileset* Cesium3DTilesetImpl::getTileset() { return this->_pTileset.get(); }
