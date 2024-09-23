@@ -20,7 +20,7 @@
 namespace DotNet::CesiumForUnity {
 class Cesium3DTileset;
 class CesiumRasterOverlay;
-class SampleHeightResult;
+class CesiumSampleHeightResult;
 } // namespace DotNet::CesiumForUnity
 
 namespace DotNet::Unity::Mathematics {
@@ -56,7 +56,7 @@ public:
   ComputeLoadProgress(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
 
   DotNet::System::Threading::Tasks::Task1<
-      DotNet::CesiumForUnity::SampleHeightResult>
+      DotNet::CesiumForUnity::CesiumSampleHeightResult>
   SampleHeightMostDetailed(
       const DotNet::CesiumForUnity::Cesium3DTileset& tileset,
       const DotNet::System::Array1<DotNet::Unity::Mathematics::double3>&

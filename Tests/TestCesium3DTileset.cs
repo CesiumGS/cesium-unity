@@ -21,14 +21,14 @@ public class TestCesium3DTileset
         // TODO: remove this
         yield return null;
 
-        Task<SampleHeightResult> task = tileset.SampleHeightMostDetailed();
+        Task<CesiumSampleHeightResult> task = tileset.SampleHeightMostDetailed();
 
         while (!task.IsCompleted)
         {
             yield return null;
         }
 
-        SampleHeightResult result = task.Result;
+        CesiumSampleHeightResult result = task.Result;
         Assert.IsNotNull(result);
         Assert.IsNotNull(result.longitudeLatitudeHeightPositions);
         Assert.IsNotNull(result.heightSampled);
@@ -50,14 +50,14 @@ public class TestCesium3DTileset
         // TODO: remove this
         yield return null;
 
-        Task<SampleHeightResult> task = tileset.SampleHeightMostDetailed(new double3(-105.1, 40.1, 1.0));
+        Task<CesiumSampleHeightResult> task = tileset.SampleHeightMostDetailed(new double3(-105.1, 40.1, 1.0));
 
         while (!task.IsCompleted)
         {
             yield return null;
         }
 
-        SampleHeightResult result = task.Result;
+        CesiumSampleHeightResult result = task.Result;
         Assert.IsNotNull(result);
         Assert.IsNotNull(result.longitudeLatitudeHeightPositions);
         Assert.IsNotNull(result.heightSampled);
@@ -85,7 +85,7 @@ public class TestCesium3DTileset
         // TODO: remove this
         yield return null;
 
-        Task<SampleHeightResult> task = tileset.SampleHeightMostDetailed(
+        Task<CesiumSampleHeightResult> task = tileset.SampleHeightMostDetailed(
             new double3(-105.1, 40.1, 1.0),
             new double3(105.1, -40.1, 1.0));
 
@@ -94,7 +94,7 @@ public class TestCesium3DTileset
             yield return null;
         }
 
-        SampleHeightResult result = task.Result;
+        CesiumSampleHeightResult result = task.Result;
         Assert.IsNotNull(result);
         Assert.IsNotNull(result.longitudeLatitudeHeightPositions);
         Assert.IsNotNull(result.heightSampled);
@@ -129,14 +129,14 @@ public class TestCesium3DTileset
         yield return null;
 
         // Somewhere in Sydney, not Melbourne
-        Task<SampleHeightResult> task = tileset.SampleHeightMostDetailed(new double3(151.20972, -33.87100, 1.0));
+        Task<CesiumSampleHeightResult> task = tileset.SampleHeightMostDetailed(new double3(151.20972, -33.87100, 1.0));
 
         while (!task.IsCompleted)
         {
             yield return null;
         }
 
-        SampleHeightResult result = task.Result;
+        CesiumSampleHeightResult result = task.Result;
         Assert.IsNotNull(result);
         Assert.IsNotNull(result.longitudeLatitudeHeightPositions);
         Assert.IsNotNull(result.heightSampled);

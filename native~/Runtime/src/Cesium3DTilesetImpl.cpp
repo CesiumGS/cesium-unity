@@ -21,8 +21,8 @@
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/CesiumForUnity/CesiumIonServer.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
+#include <DotNet/CesiumForUnity/CesiumSampleHeightResult.h>
 #include <DotNet/CesiumForUnity/CesiumTileExcluder.h>
-#include <DotNet/CesiumForUnity/SampleHeightResult.h>
 #include <DotNet/System/Exception.h>
 #include <DotNet/System/Object.h>
 #include <DotNet/System/String.h>
@@ -386,13 +386,13 @@ float Cesium3DTilesetImpl::ComputeLoadProgress(
   return getTileset()->computeLoadProgress();
 }
 
-System::Threading::Tasks::Task1<CesiumForUnity::SampleHeightResult>
+System::Threading::Tasks::Task1<CesiumForUnity::CesiumSampleHeightResult>
 Cesium3DTilesetImpl::SampleHeightMostDetailed(
     const CesiumForUnity::Cesium3DTileset& tileset,
     const System::Array1<Unity::Mathematics::double3>&
         longitudeLatitudeHeightPositions) {
   System::Threading::Tasks::TaskCompletionSource1<
-      CesiumForUnity::SampleHeightResult>
+      CesiumForUnity::CesiumSampleHeightResult>
       promise{};
 
   Tileset* pTileset = this->getTileset();
@@ -443,7 +443,7 @@ Cesium3DTilesetImpl::SampleHeightMostDetailed(
               warnings.Item(i, System::String(result.warnings[i]));
             }
 
-            CesiumForUnity::SampleHeightResult unityResult;
+            CesiumForUnity::CesiumSampleHeightResult unityResult;
             unityResult.longitudeLatitudeHeightPositions(positions);
             unityResult.heightSampled(heightSampled);
             unityResult.warnings(warnings);

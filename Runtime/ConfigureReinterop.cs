@@ -890,14 +890,14 @@ namespace CesiumForUnity
                 camera = manager.additionalCameras[i];
             }
 
-            TaskCompletionSource<SampleHeightResult> promise = new TaskCompletionSource<SampleHeightResult>();
+            TaskCompletionSource<CesiumSampleHeightResult> promise = new TaskCompletionSource<CesiumSampleHeightResult>();
             promise.SetException(new Exception("message"));
-            SampleHeightResult result = new SampleHeightResult();
+            CesiumSampleHeightResult result = new CesiumSampleHeightResult();
             result.longitudeLatitudeHeightPositions = null;
             result.heightSampled = null;
             result.warnings = null;
             promise.SetResult(result);
-            Task<SampleHeightResult> task = promise.Task;
+            Task<CesiumSampleHeightResult> task = promise.Task;
 
             double3[] positions = null;
             for (int i = 0; i < positions.Length; ++i)
