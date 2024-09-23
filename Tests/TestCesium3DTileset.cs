@@ -23,10 +23,7 @@ public class TestCesium3DTileset
 
         Task<CesiumSampleHeightResult> task = tileset.SampleHeightMostDetailed();
 
-        while (!task.IsCompleted)
-        {
-            yield return null;
-        }
+        yield return new WaitForTask(task);
 
         CesiumSampleHeightResult result = task.Result;
         Assert.IsNotNull(result);
@@ -52,10 +49,7 @@ public class TestCesium3DTileset
 
         Task<CesiumSampleHeightResult> task = tileset.SampleHeightMostDetailed(new double3(-105.1, 40.1, 1.0));
 
-        while (!task.IsCompleted)
-        {
-            yield return null;
-        }
+        yield return new WaitForTask(task);
 
         CesiumSampleHeightResult result = task.Result;
         Assert.IsNotNull(result);
@@ -89,10 +83,7 @@ public class TestCesium3DTileset
             new double3(-105.1, 40.1, 1.0),
             new double3(105.1, -40.1, 1.0));
 
-        while (!task.IsCompleted)
-        {
-            yield return null;
-        }
+        yield return new WaitForTask(task);
 
         CesiumSampleHeightResult result = task.Result;
         Assert.IsNotNull(result);
@@ -131,10 +122,7 @@ public class TestCesium3DTileset
         // Somewhere in Sydney, not Melbourne
         Task<CesiumSampleHeightResult> task = tileset.SampleHeightMostDetailed(new double3(151.20972, -33.87100, 1.0));
 
-        while (!task.IsCompleted)
-        {
-            yield return null;
-        }
+        yield return new WaitForTask(task);
 
         CesiumSampleHeightResult result = task.Result;
         Assert.IsNotNull(result);
