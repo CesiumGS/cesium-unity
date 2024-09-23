@@ -718,6 +718,27 @@ namespace CesiumForUnity
         /// </summary>
         public partial void FocusTileset();
 
+        /// <summary>
+        /// Initiates an asynchronous query for the height of this tileset at a list of positions,
+        /// expressed as longitude and latitude. The most detailed available tiles are used to
+        /// determine each height.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The height of the input positions is ignored. On output, the height is
+        /// expressed in meters above the ellipsoid (usually WGS84), which should not
+        /// be confused with a height above mean sea level.
+        /// </para>
+        /// <para>
+        /// Use <see cref="WaitForTask"/> inside a coroutine to wait for the asynchronous height
+        /// query to complete.
+        /// </para>
+        /// </remarks>
+        /// <param name="longitudeLatitudeHeightPositions">
+        /// The positions for which to sample heights. The X component is the Longitude (degrees),
+        /// the Y component is the Latitude (degrees), and the Z component is the Height (meters).
+        /// </param>
+        /// <returns>An asynchronous task that will provide the requested heights when complete.</returns>
         public partial Task<CesiumSampleHeightResult> SampleHeightMostDetailed(params double3[] longitudeLatitudeHeightPositions);
 
         #endregion
