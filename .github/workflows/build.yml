@@ -138,6 +138,8 @@ jobs:
           name: Windows Package
           path: d:\cesium\CesiumForUnityBuildProject\*.tgz
       - name: Run Tests
+        env:
+          CESIUM_ION_TOKEN_FOR_TESTS: ${{ secrets.CESIUM_ION_TOKEN_FOR_TESTS }}
         run: |
           start -FilePath "C:\Program Files\Unity\Hub\Editor\2022.3.41f1\Editor\Unity.exe" -ArgumentList "-runTests -batchmode -projectPath d:\cesium\CesiumForUnityBuildProject -testResults d:\cesium\temp\TestResults.xml -testPlatform PlayMode -logFile d:\cesium\temp\test-log.txt" -Wait
           cat d:\cesium\temp\test-log.txt
@@ -273,6 +275,8 @@ jobs:
           name: macOS Package
           path: ~/cesium/CesiumForUnityBuildProject/*.tgz
       - name: Run Tests
+        env:
+          CESIUM_ION_TOKEN_FOR_TESTS: ${{ secrets.CESIUM_ION_TOKEN_FOR_TESTS }}
         run: |
           /Applications/Unity/Hub/Editor/2022.3.41f1/Unity.app/Contents/MacOS/Unity -runTests -batchmode -projectPath ~/cesium/CesiumForUnityBuildProject -testResults ~/cesium/CesiumForUnityBuildProject/TestResults.xml -testPlatform PlayMode -logFile ~/cesium/CesiumForUnityBuildProject/test-log.txt
           cat ~/cesium/CesiumForUnityBuildProject/test-log.txt
