@@ -5,6 +5,7 @@
 ##### Additions :tada:
 
 - Added a new `CesiumCameraManager` component. It allows configuration of the cameras to use for Cesium3DTileset culling and level-of-detail.
+- Added `SampleHeightMostDetailed` method to `Cesium3DTileset`. It asynchronously queries the height of a tileset at a list of positions.
 
 ##### Fixes :wrench:
 
