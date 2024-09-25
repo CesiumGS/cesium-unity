@@ -9,6 +9,7 @@ This is a summary of the setup and workflows for developers who want to modify t
 * CMake v3.18 or later (the latest version is recommended)
 * [.NET SDK v6.0 or later](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
 * If you're using Visual Studio, you need Visual Studio 2022.
+* No matter what compiler you're using, it needs to have solid support for C++20.
 * Unity 2021.3+ (the latest version of the Unity 2021.3 LTS release is recommended)
 * On Windows, support for long file paths must be enabled, or you are likely to see build errors. See [Maximum Path Length Limitation](https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=registry#enable-long-paths-in-windows-10-version-1607-and-later).
 * For best JPEG-decoding performance, you must have [nasm](https://www.nasm.us/) installed so that CMake can find it. Everything will work fine without it, just slower.
@@ -18,7 +19,7 @@ The built Cesium for Unity Assembly will run on much older versions of .NET, inc
 To make sure things are set up correctly, open a command-prompt (PowerShell is a good choice on Windows) and run:
 
 * `dotnet --version` and verify that it reports 6.0 or later
-* `cmake --version` and verify that it reports 3.15 or later
+* `cmake --version` and verify that it reports 3.18 or later
 
 ### Setting up the development environment
 
@@ -50,6 +51,8 @@ dotnet publish Reinterop~ -o .
 This should be repeated if you modify Reinterop, or if you pull new changes that modify it.
 
 For more details, see the [Reinterop README](../Reinterop~/README.md).
+
+A common mistake is to open Unity before doing this step, which will cause Unity to delete `Reinterop.dll.meta` file because the `Reinterop.dll` file does not yet exist. Then, even after you publish `Reinterop.dll`, the `Reinterop.dll.meta` that Unity creates will be missing important information, and you'll get errors when Unity attemps to compile Cesium for Unity. If this happens to you, executing `git restore Reinterop.dll.meta` should fix it.
 
 ## Build for the Editor
 
