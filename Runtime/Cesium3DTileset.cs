@@ -1,5 +1,9 @@
 using Reinterop;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace CesiumForUnity
@@ -714,6 +718,30 @@ namespace CesiumForUnity
         /// </summary>
         public partial void FocusTileset();
 
+        /// <summary>
+        /// Initiates an asynchronous query for the height of this tileset at a list of 
+        /// cartographic positions, where the longitude (X) and latitude (Y) are given in degrees.
+        /// The most detailed available tiles are used to determine each height.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The height of the input positions is ignored, unless height sampling fails
+        /// at that location. The output height is expressed in meters above the ellipsoid 
+        /// (usually WGS84), which should not be confused with a height above mean sea level.
+        /// </para>
+        /// <para>
+        /// Use <see cref="WaitForTask"/> inside a coroutine to wait for the asynchronous height
+        /// query to complete.
+        /// </para>
+        /// </remarks>
+        /// <param name="longitudeLatitudeHeightPositions">
+        /// The cartographic positions for which to sample heights. The X component is the 
+        /// Longitude (degrees), the Y component is the Latitude (degrees), and the Z component
+        /// is the Height (meters).
+        /// </param>
+        /// <returns>An asynchronous task that will provide the requested heights when complete.</returns>
+        public partial Task<CesiumSampleHeightResult> SampleHeightMostDetailed(params double3[] longitudeLatitudeHeightPositions);
+
         #endregion
 
         #region Private Methods
@@ -730,6 +758,8 @@ namespace CesiumForUnity
         internal partial void UpdateOverlayMaterialKeys();
 
         #endregion
+
+        #region Backward Compatibility
 
         void ISerializationCallbackReceiver.OnBeforeSerialize()
         {
@@ -748,5 +778,6 @@ namespace CesiumForUnity
 #if UNITY_EDITOR
         private bool _useDefaultServer = false;
 #endif
+        #endregion
     }
 }

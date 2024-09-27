@@ -890,6 +890,21 @@ namespace CesiumForUnity
                 camera = manager.additionalCameras[i];
             }
 
+            TaskCompletionSource<CesiumSampleHeightResult> promise = new TaskCompletionSource<CesiumSampleHeightResult>();
+            promise.SetException(new Exception("message"));
+            CesiumSampleHeightResult result = new CesiumSampleHeightResult();
+            result.longitudeLatitudeHeightPositions = null;
+            result.sampleSuccess = null;
+            result.warnings = null;
+            promise.SetResult(result);
+            Task<CesiumSampleHeightResult> task = promise.Task;
+
+            double3[] positions = null;
+            for (int i = 0; i < positions.Length; ++i)
+            {
+                positions[i] = positions[i];
+            }
+
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;
             sv.pivot = sv.pivot;
