@@ -18,7 +18,7 @@ namespace CesiumForUnity
         /// values from its input. Its height will either be the height sampled from
         /// the tileset at that position, or the original input height if the sample
         /// was unsuccessful. To determine which, look at the value of
-        /// <see cref="CesiumSampleHeightResult.heightSampled"/> at the same index.
+        /// <see cref="CesiumSampleHeightResult.sampleSuccess"/> at the same index.
         /// </para>
         /// <para>
         /// The returned height is measured from the ellipsoid (usually WGS84) and
@@ -37,7 +37,7 @@ namespace CesiumForUnity
         /// the height sampled from the tileset. If false, the height could not be sampled for 
         /// the position, so its height is the same as the original input height.
         /// </remarks>
-        public bool[] heightSampled { get; set; }
+        public bool[] sampleSuccess { get; set; }
 
         /// <summary>
         /// Any warnings that occurred while sampling heights.

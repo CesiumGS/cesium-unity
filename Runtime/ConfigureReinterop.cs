@@ -894,7 +894,7 @@ namespace CesiumForUnity
             promise.SetException(new Exception("message"));
             CesiumSampleHeightResult result = new CesiumSampleHeightResult();
             result.longitudeLatitudeHeightPositions = null;
-            result.heightSampled = null;
+            result.sampleSuccess = null;
             result.warnings = null;
             promise.SetResult(result);
             Task<CesiumSampleHeightResult> task = promise.Task;

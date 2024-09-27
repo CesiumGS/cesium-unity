@@ -445,7 +445,7 @@ Cesium3DTilesetImpl::SampleHeightMostDetailed(
 
             CesiumForUnity::CesiumSampleHeightResult unityResult;
             unityResult.longitudeLatitudeHeightPositions(positions);
-            unityResult.heightSampled(heightSampled);
+            unityResult.sampleSuccess(heightSampled);
             unityResult.warnings(warnings);
 
             promise.SetResult(unityResult);

@@ -28,10 +28,10 @@ public class TestCesium3DTileset
         CesiumSampleHeightResult result = task.Result;
         Assert.IsNotNull(result);
         Assert.IsNotNull(result.longitudeLatitudeHeightPositions);
-        Assert.IsNotNull(result.heightSampled);
+        Assert.IsNotNull(result.sampleSuccess);
         Assert.IsNotNull(result.warnings);
         Assert.AreEqual(result.longitudeLatitudeHeightPositions.Length, 0);
-        Assert.AreEqual(result.heightSampled.Length, 0);
+        Assert.AreEqual(result.sampleSuccess.Length, 0);
         Assert.AreEqual(result.warnings.Length, 0);
     }
 
@@ -54,13 +54,13 @@ public class TestCesium3DTileset
         CesiumSampleHeightResult result = task.Result;
         Assert.IsNotNull(result);
         Assert.IsNotNull(result.longitudeLatitudeHeightPositions);
-        Assert.IsNotNull(result.heightSampled);
+        Assert.IsNotNull(result.sampleSuccess);
         Assert.IsNotNull(result.warnings);
         Assert.AreEqual(result.longitudeLatitudeHeightPositions.Length, 1);
-        Assert.AreEqual(result.heightSampled.Length, 1);
+        Assert.AreEqual(result.sampleSuccess.Length, 1);
         Assert.AreEqual(result.warnings.Length, 0);
 
-        Assert.AreEqual(result.heightSampled[0], true);
+        Assert.AreEqual(result.sampleSuccess[0], true);
         Assert.AreEqual(result.longitudeLatitudeHeightPositions[0].x, -105.1, 1e-12);
         Assert.AreEqual(result.longitudeLatitudeHeightPositions[0].y, 40.1, 1e-12);
         // Returned height should be different from the original height (1.0) by at least one meter.
@@ -88,19 +88,19 @@ public class TestCesium3DTileset
         CesiumSampleHeightResult result = task.Result;
         Assert.IsNotNull(result);
         Assert.IsNotNull(result.longitudeLatitudeHeightPositions);
-        Assert.IsNotNull(result.heightSampled);
+        Assert.IsNotNull(result.sampleSuccess);
         Assert.IsNotNull(result.warnings);
         Assert.AreEqual(result.longitudeLatitudeHeightPositions.Length, 2);
-        Assert.AreEqual(result.heightSampled.Length, 2);
+        Assert.AreEqual(result.sampleSuccess.Length, 2);
         Assert.AreEqual(result.warnings.Length, 0);
 
-        Assert.AreEqual(result.heightSampled[0], true);
+        Assert.AreEqual(result.sampleSuccess[0], true);
         Assert.AreEqual(result.longitudeLatitudeHeightPositions[0].x, -105.1, 1e-12);
         Assert.AreEqual(result.longitudeLatitudeHeightPositions[0].y, 40.1, 1e-12);
         // Returned height should be different from the original height (1.0) by at least one meter.
         Assert.IsTrue(math.abs(result.longitudeLatitudeHeightPositions[0].z - 1.0) > 1.0);
 
-        Assert.AreEqual(result.heightSampled[1], true);
+        Assert.AreEqual(result.sampleSuccess[1], true);
         Assert.AreEqual(result.longitudeLatitudeHeightPositions[1].x, 105.1, 1e-12);
         Assert.AreEqual(result.longitudeLatitudeHeightPositions[1].y, -40.1, 1e-12);
         // Returned height should be different from the original height (1.0) by at least one meter.
@@ -127,13 +127,13 @@ public class TestCesium3DTileset
         CesiumSampleHeightResult result = task.Result;
         Assert.IsNotNull(result);
         Assert.IsNotNull(result.longitudeLatitudeHeightPositions);
-        Assert.IsNotNull(result.heightSampled);
+        Assert.IsNotNull(result.sampleSuccess);
         Assert.IsNotNull(result.warnings);
         Assert.AreEqual(result.longitudeLatitudeHeightPositions.Length, 1);
-        Assert.AreEqual(result.heightSampled.Length, 1);
+        Assert.AreEqual(result.sampleSuccess.Length, 1);
         Assert.AreEqual(result.warnings.Length, 0);
 
-        Assert.AreEqual(result.heightSampled[0], false);
+        Assert.AreEqual(result.sampleSuccess[0], false);
         Assert.AreEqual(result.longitudeLatitudeHeightPositions[0].x, 151.20972, 1e-12);
         Assert.AreEqual(result.longitudeLatitudeHeightPositions[0].y, -33.87100, 1e-12);
         Assert.AreEqual(result.longitudeLatitudeHeightPositions[0].z, 1.0, 1e-12);
