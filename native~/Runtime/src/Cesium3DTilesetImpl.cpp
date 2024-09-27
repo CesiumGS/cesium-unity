@@ -440,9 +440,9 @@ Cesium3DTilesetImpl::SampleHeightMostDetailed(
                       positionRadians.height});
             }
 
-            System::Array1<bool> heightSampled(result.heightSampled.size());
-            for (size_t i = 0; i < result.heightSampled.size(); ++i) {
-              heightSampled.Item(i, result.heightSampled[i]);
+            System::Array1<bool> sampleSuccess(result.sampleSuccess.size());
+            for (size_t i = 0; i < result.sampleSuccess.size(); ++i) {
+              sampleSuccess.Item(i, result.sampleSuccess[i]);
             }
 
             System::Array1<System::String> warnings(result.warnings.size());
@@ -452,7 +452,7 @@ Cesium3DTilesetImpl::SampleHeightMostDetailed(
 
             CesiumForUnity::CesiumSampleHeightResult unityResult;
             unityResult.longitudeLatitudeHeightPositions(positions);
-            unityResult.sampleSuccess(heightSampled);
+            unityResult.sampleSuccess(sampleSuccess);
             unityResult.warnings(warnings);
 
             promise.SetResult(unityResult);
