@@ -46,7 +46,14 @@ namespace Reinterop
                         if (handle == IntPtr.Zero)
                             return;
 
-                        GCHandle.FromIntPtr(handle).Free();
+                        try
+                        {
+                            GCHandle.FromIntPtr(handle).Free();
+                        }
+                        catch (ArgumentException e)
+                        {
+                            System.Console.WriteLine(e.ToString());
+                        }
                     }
 
                     public static object GetObjectFromHandle(IntPtr handle)

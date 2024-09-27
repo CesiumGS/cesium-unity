@@ -94,7 +94,6 @@ void Cesium3DTilesetImpl::Update(
   }
 
   if (this->_destroyTilesetOnNextUpdate) {
-    this->_destroyTilesetOnNextUpdate = false;
     this->DestroyTileset(tileset);
   }
 
@@ -391,17 +390,15 @@ Cesium3DTilesetImpl::SampleHeightMostDetailed(
     const CesiumForUnity::Cesium3DTileset& tileset,
     const System::Array1<Unity::Mathematics::double3>&
         longitudeLatitudeHeightPositions) {
+  if (this->getTileset() == nullptr) {
+    // Calling DestroyTileset ensures _destroyTilesetOnNextUpdate is reset.
+    this->DestroyTileset(tileset);
+    this->LoadTileset(tileset);
+  }
+
   System::Threading::Tasks::TaskCompletionSource1<
       CesiumForUnity::CesiumSampleHeightResult>
       promise{};
-
-  Tileset* pTileset = this->getTileset();
-  if (pTileset == nullptr) {
-    // TODO: wait a tick for the tileset to be created.
-    promise.SetException(
-        System::Exception(System::String("Tileset not created yet.")));
-    return promise.Task();
-  }
 
   std::vector<CesiumGeospatial::Cartographic> positions;
   positions.reserve(longitudeLatitudeHeightPositions.Length());
@@ -415,7 +412,17 @@ Cesium3DTilesetImpl::SampleHeightMostDetailed(
         position.z));
   }
 
-  pTileset->sampleHeightMostDetailed(positions)
+  CesiumAsync::Future<SampleHeightResult> future =
+      this->getTileset()
+          ? this->getTileset()->sampleHeightMostDetailed(positions)
+          : getAsyncSystem().createResolvedFuture(
+                Cesium3DTilesSelection::SampleHeightResult{
+                    positions,
+                    std::vector<bool>(positions.size(), false),
+                    {"Could not sample heights from tileset because it has not "
+                     "been created."}});
+
+  std::move(future)
       .thenImmediately(
           [promise](Cesium3DTilesSelection::SampleHeightResult&& result) {
             System::Array1<Unity::Mathematics::double3> positions(
@@ -531,6 +538,8 @@ void Cesium3DTilesetImpl::DestroyTileset(
   }
 
   this->_pTileset.reset();
+
+  this->_destroyTilesetOnNextUpdate = false;
 }
 
 void Cesium3DTilesetImpl::LoadTileset(

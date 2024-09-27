@@ -18,9 +18,6 @@ public class TestCesium3DTileset
         tileset.ionAccessToken = Environment.GetEnvironmentVariable("CESIUM_ION_TOKEN_FOR_TESTS") ?? "";
         tileset.ionAssetID = 1;
 
-        // TODO: remove this
-        yield return null;
-
         Task<CesiumSampleHeightResult> task = tileset.SampleHeightMostDetailed();
 
         yield return new WaitForTask(task);
@@ -43,9 +40,6 @@ public class TestCesium3DTileset
         Cesium3DTileset tileset = go.AddComponent<Cesium3DTileset>();
         tileset.ionAccessToken = Environment.GetEnvironmentVariable("CESIUM_ION_TOKEN_FOR_TESTS") ?? "";
         tileset.ionAssetID = 1;
-
-        // TODO: remove this
-        yield return null;
 
         Task<CesiumSampleHeightResult> task = tileset.SampleHeightMostDetailed(new double3(-105.1, 40.1, 1.0));
 
@@ -75,9 +69,6 @@ public class TestCesium3DTileset
         Cesium3DTileset tileset = go.AddComponent<Cesium3DTileset>();
         tileset.ionAccessToken = Environment.GetEnvironmentVariable("CESIUM_ION_TOKEN_FOR_TESTS") ?? "";
         tileset.ionAssetID = 1;
-
-        // TODO: remove this
-        yield return null;
 
         Task<CesiumSampleHeightResult> task = tileset.SampleHeightMostDetailed(
             new double3(-105.1, 40.1, 1.0),
@@ -115,9 +106,6 @@ public class TestCesium3DTileset
         Cesium3DTileset tileset = go.AddComponent<Cesium3DTileset>();
         tileset.ionAccessToken = Environment.GetEnvironmentVariable("CESIUM_ION_TOKEN_FOR_TESTS") ?? "";
         tileset.ionAssetID = 69380;
-
-        // TODO: remove this
-        yield return null;
 
         // Somewhere in Sydney, not Melbourne
         Task<CesiumSampleHeightResult> task = tileset.SampleHeightMostDetailed(new double3(151.20972, -33.87100, 1.0));
