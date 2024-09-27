@@ -412,13 +412,15 @@ Cesium3DTilesetImpl::SampleHeightMostDetailed(
         position.z));
   }
 
+  size_t count = positions.size();
+
   CesiumAsync::Future<SampleHeightResult> future =
       this->getTileset()
           ? this->getTileset()->sampleHeightMostDetailed(positions)
           : getAsyncSystem().createResolvedFuture(
                 Cesium3DTilesSelection::SampleHeightResult{
                     std::move(positions),
-                    std::vector<bool>(positions.size(), false),
+                    std::vector<bool>(count, false),
                     {"Could not sample heights from tileset because it has not "
                      "been created."}});
 
