@@ -126,4 +126,21 @@ public class TestCesium3DTileset
         Assert.AreEqual(result.longitudeLatitudeHeightPositions[0].y, -33.87100, 1e-12);
         Assert.AreEqual(result.longitudeLatitudeHeightPositions[0].z, 1.0, 1e-12);
     }
+
+    [UnityTest]
+    public IEnumerator SampleHeightMostDetailedFailsIfTilesetFailsToLoad()
+    {
+        GameObject go = new GameObject();
+        go.name = "Invalid";
+        Cesium3DTileset tileset = go.AddComponent<Cesium3DTileset>();
+        tileset.tilesetSource = CesiumDataSource.FromUrl;
+        tileset.url = "http://localhost/notgonnawork";
+
+        Task<CesiumSampleHeightResult> task = tileset.SampleHeightMostDetailed(new double3(151.20972, -33.87100, 1.0));
+
+        yield return new WaitForTask(task);
+
+        Assert.NotNull(task.Exception);
+        Assert.IsTrue(task.Exception.Message.Contains("failed to load"));
+    }
 }
