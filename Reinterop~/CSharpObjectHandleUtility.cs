@@ -52,6 +52,11 @@ namespace Reinterop
                         }
                         catch (ArgumentException e)
                         {
+                            // The "GCHandle value belongs to a different domain" exception tends
+                            // to happen on AppDomain reload, which is common in Unity.
+                            // Catch the exception to prevent it propagating through our native
+                            // code and blowing things up.
+                            // See: https://github.com/CesiumGS/cesium-unity/issues/18
                             System.Console.WriteLine(e.ToString());
                         }
                     }
