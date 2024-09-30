@@ -1,6 +1,6 @@
 # Change Log
 
-## Next Version (not yet released)
+## v1.13.0 - 2024-10-01
 
 ##### Additions :tada:
 
@@ -10,6 +10,8 @@
 ##### Fixes :wrench:
 
 - Fixed a bug that could cause a `NullReferenceException` when a `Cesium3DTileset` was not nested into a game object with a `CesiumGeoreference`.
+
+This release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.39.0 to v0.40.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
 
 ## v1.12.0 - 2024-09-02
 
