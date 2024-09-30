@@ -140,7 +140,20 @@ public class TestCesium3DTileset
 
         yield return new WaitForTask(task);
 
-        Assert.NotNull(task.Exception);
-        Assert.IsTrue(task.Exception.Message.Contains("failed to load"));
+        CesiumSampleHeightResult result = task.Result;
+        Assert.IsNotNull(result);
+        Assert.IsNotNull(result.longitudeLatitudeHeightPositions);
+        Assert.IsNotNull(result.sampleSuccess);
+        Assert.IsNotNull(result.warnings);
+        Assert.AreEqual(result.longitudeLatitudeHeightPositions.Length, 1);
+        Assert.AreEqual(result.sampleSuccess.Length, 1);
+        Assert.AreEqual(result.warnings.Length, 1);
+
+        Assert.AreEqual(result.sampleSuccess[0], false);
+        Assert.AreEqual(result.longitudeLatitudeHeightPositions[0].x, 151.20972, 1e-12);
+        Assert.AreEqual(result.longitudeLatitudeHeightPositions[0].y, -33.87100, 1e-12);
+        Assert.AreEqual(result.longitudeLatitudeHeightPositions[0].z, 1.0, 1e-12);
+
+        Assert.IsTrue(result.warnings[0].Contains("failed to load"));
     }
 }

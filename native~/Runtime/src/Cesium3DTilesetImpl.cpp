@@ -412,19 +412,30 @@ Cesium3DTilesetImpl::SampleHeightMostDetailed(
         position.z));
   }
 
-  size_t count = positions.size();
+  auto sampleHeights = [this, &positions]() mutable {
+    if (this->getTileset()) {
+      return this->getTileset()
+          ->sampleHeightMostDetailed(positions)
+          .catchImmediately([positions = std::move(positions)](
+                                std::exception&& exception) mutable {
+            std::vector<bool> sampleSuccess(positions.size(), false);
+            return Cesium3DTilesSelection::SampleHeightResult{
+                std::move(positions),
+                std::move(sampleSuccess),
+                {exception.what()}};
+          });
+    } else {
+      std::vector<bool> sampleSuccess(positions.size(), false);
+      return getAsyncSystem().createResolvedFuture(
+          Cesium3DTilesSelection::SampleHeightResult{
+              std::move(positions),
+              std::move(sampleSuccess),
+              {"Could not sample heights from tileset because it has not "
+               "been created."}});
+    }
+  };
 
-  CesiumAsync::Future<SampleHeightResult> future =
-      this->getTileset()
-          ? this->getTileset()->sampleHeightMostDetailed(positions)
-          : getAsyncSystem().createResolvedFuture(
-                Cesium3DTilesSelection::SampleHeightResult{
-                    std::move(positions),
-                    std::vector<bool>(count, false),
-                    {"Could not sample heights from tileset because it has not "
-                     "been created."}});
-
-  std::move(future)
+  sampleHeights()
       .thenImmediately(
           [promise](Cesium3DTilesSelection::SampleHeightResult&& result) {
             System::Array1<Unity::Mathematics::double3> positions(
