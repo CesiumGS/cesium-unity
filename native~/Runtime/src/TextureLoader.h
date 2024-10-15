@@ -5,7 +5,7 @@
 namespace CesiumGltf {
 struct Model;
 struct Texture;
-struct ImageCesium;
+struct ImageAsset;
 } // namespace CesiumGltf
 
 namespace DotNet::UnityEngine {
@@ -17,7 +17,7 @@ namespace CesiumForUnityNative {
 class TextureLoader {
 public:
   static ::DotNet::UnityEngine::Texture
-  loadTexture(const CesiumGltf::ImageCesium& image, bool sRGB);
+  loadTexture(const CesiumGltf::ImageAsset& image, bool sRGB);
 
   static ::DotNet::UnityEngine::Texture loadTexture(
       const CesiumGltf::Model& model,

@@ -21,7 +21,7 @@ namespace CesiumForUnityNative {
 
 namespace {
 UnityEngine::TextureFormat
-getCompressedPixelFormat(const CesiumGltf::ImageCesium& image) {
+getCompressedPixelFormat(const CesiumGltf::ImageAsset& image) {
   switch (image.compressedPixelFormat) {
   case GpuCompressedPixelFormat::ETC1_RGB:
     return UnityEngine::TextureFormat::ETC_RGB4;
@@ -55,7 +55,7 @@ getCompressedPixelFormat(const CesiumGltf::ImageCesium& image) {
 }
 
 UnityEngine::TextureFormat
-getUncompressedPixelFormat(const CesiumGltf::ImageCesium& image) {
+getUncompressedPixelFormat(const CesiumGltf::ImageAsset& image) {
   switch (image.channels) {
   case 1:
     return UnityEngine::TextureFormat::R8;
@@ -72,7 +72,7 @@ getUncompressedPixelFormat(const CesiumGltf::ImageCesium& image) {
 } // namespace
 
 UnityEngine::Texture
-TextureLoader::loadTexture(const CesiumGltf::ImageCesium& image, bool sRGB) {
+TextureLoader::loadTexture(const CesiumGltf::ImageAsset& image, bool sRGB) {
   CESIUM_TRACE("TextureLoader::loadTexture");
   std::int32_t mipCount =
       image.mipPositions.empty() ? 1 : std::int32_t(image.mipPositions.size());
@@ -107,7 +107,7 @@ TextureLoader::loadTexture(const CesiumGltf::ImageCesium& image, bool sRGB) {
     std::uint8_t* pWritePosition = pixels;
     const std::byte* pReadBuffer = image.pixelData.data();
 
-    for (const ImageCesiumMipPosition& mip : image.mipPositions) {
+    for (const ImageAssetMipPosition& mip : image.mipPositions) {
       size_t start = mip.byteOffset;
       size_t end = mip.byteOffset + mip.byteSize;
       if (start >= textureLength || end > textureLength)
@@ -144,7 +144,7 @@ UnityEngine::Texture TextureLoader::loadTexture(
     return UnityEngine::Texture(nullptr);
   }
 
-  const ImageCesium& imageCesium = pImage->cesium;
+  const ImageAsset& imageCesium = *pImage->pCesium;
   UnityEngine::Texture unityTexture = loadTexture(imageCesium, sRGB);
 
   const Sampler* pSampler = Model::getSafe(&model.samplers, texture.sampler);

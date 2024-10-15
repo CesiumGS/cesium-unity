@@ -84,7 +84,7 @@ public:
       void* pMainThreadResult) noexcept override;
 
   virtual void* prepareRasterInLoadThread(
-      CesiumGltf::ImageCesium& image,
+      CesiumGltf::ImageAsset& image,
       const std::any& rendererOptions) override;
 
   virtual void* prepareRasterInMainThread(

@@ -274,7 +274,7 @@ void generateMipMaps(
         case CesiumGltf::Sampler::MinFilter::LINEAR_MIPMAP_NEAREST:
         case CesiumGltf::Sampler::MinFilter::NEAREST_MIPMAP_LINEAR:
         case CesiumGltf::Sampler::MinFilter::NEAREST_MIPMAP_NEAREST:
-          CesiumGltfReader::GltfReader::generateMipMaps(pImage->cesium);
+          CesiumGltfReader::GltfReader::generateMipMaps(*pImage->pCesium);
         }
       }
     }
@@ -1722,7 +1722,7 @@ void UnityPrepareRendererResources::free(
 }
 
 void* UnityPrepareRendererResources::prepareRasterInLoadThread(
-    CesiumGltf::ImageCesium& image,
+    CesiumGltf::ImageAsset& image,
     const std::any& rendererOptions) {
   CesiumGltfReader::GltfReader::generateMipMaps(image);
   return nullptr;
@@ -1732,7 +1732,7 @@ void* UnityPrepareRendererResources::prepareRasterInMainThread(
     CesiumRasterOverlays::RasterOverlayTile& rasterTile,
     void* pLoadThreadResult) {
   auto pTexture = std::make_unique<UnityEngine::Texture>(
-      TextureLoader::loadTexture(rasterTile.getImage(), true));
+      TextureLoader::loadTexture(*rasterTile.getImage(), true));
   pTexture->wrapMode(UnityEngine::TextureWrapMode::Clamp);
   pTexture->filterMode(UnityEngine::FilterMode::Trilinear);
   pTexture->anisoLevel(16);
