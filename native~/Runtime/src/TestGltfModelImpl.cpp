@@ -87,6 +87,7 @@ TestGltfModelImpl::AddFeatureIdTexture(
 
   // Copy feature IDs to texture.
   CesiumGltf::Image& image = this->_nativeModel.images.emplace_back();
+  image.pCesium.emplace();
   image.pCesium->width = 2;
   image.pCesium->height = 2;
   image.pCesium->bytesPerChannel = 1;
