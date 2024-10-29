@@ -10,7 +10,7 @@ This is a summary of the setup and workflows for developers who want to modify t
 * [.NET SDK v6.0 or later](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
 * If you're using Visual Studio, you need Visual Studio 2022.
 * No matter what compiler you're using, it needs to have solid support for C++20.
-* Unity 2021.3+ (the latest version of the Unity 2021.3 LTS release is recommended)
+* Unity 2022.3+ (the latest version of the Unity 2022.3 LTS release is recommended)
 * On Windows, support for long file paths must be enabled, or you are likely to see build errors. See [Maximum Path Length Limitation](https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=registry#enable-long-paths-in-windows-10-version-1607-and-later).
 * For best JPEG-decoding performance, you must have [nasm](https://www.nasm.us/) installed so that CMake can find it. Everything will work fine without it, just slower.
 
