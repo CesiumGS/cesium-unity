@@ -116,7 +116,7 @@ The cesium-unity-samples project has several scenes that help you to quickly get
 To create a release package of Cesium for Unity, suitable to be installed with the Unity Package Manager, do the following (adjust the Unity path for your system):
 
 ```
-$ENV:UNITY="C:\Program Files\Unity\Hub\Editor\2021.3.13f1\Editor\Unity.exe"
+$ENV:UNITY="C:\Program Files\Unity\Hub\Editor\2022.3.41f1\Editor\Unity.exe"
 mkdir -p c:\cesium\CesiumForUnityBuildProject\Packages
 cd c:\cesium\CesiumForUnityBuildProject\Packages
 git clone --recurse-submodules git@github.com:CesiumGS/cesium-unity.git com.cesium.unity
