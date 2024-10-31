@@ -1,5 +1,11 @@
 # Change Log
 
+## v1.?.? - 2024-11-01
+
+##### Fixes :wrench:
+
+- Added restrictions to `CesiumRuntime.asmdef` to prevent the plugin from attempting to load on platforms not supported by Cesium Native.
+
 ## v1.13.0 - 2024-10-01
 
 ##### Additions :tada:
