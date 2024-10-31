@@ -2,6 +2,7 @@
 
 #include "Cesium.h"
 
+#include <CesiumAsync/AsyncSystem.h>
 #include <CesiumAsync/IAssetResponse.h>
 #include <CesiumUtility/ScopeGuard.h>
 
