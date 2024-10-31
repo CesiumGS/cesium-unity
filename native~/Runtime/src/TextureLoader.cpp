@@ -144,7 +144,7 @@ UnityEngine::Texture TextureLoader::loadTexture(
     return UnityEngine::Texture(nullptr);
   }
 
-  const ImageAsset& imageCesium = *pImage->pCesium;
+  const ImageAsset& imageCesium = *pImage->pAsset;
   UnityEngine::Texture unityTexture = loadTexture(imageCesium, sRGB);
 
   const Sampler* pSampler = Model::getSafe(&model.samplers, texture.sampler);
