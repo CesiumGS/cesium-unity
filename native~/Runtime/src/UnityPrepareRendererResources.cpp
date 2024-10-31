@@ -274,7 +274,7 @@ void generateMipMaps(
         case CesiumGltf::Sampler::MinFilter::LINEAR_MIPMAP_NEAREST:
         case CesiumGltf::Sampler::MinFilter::NEAREST_MIPMAP_LINEAR:
         case CesiumGltf::Sampler::MinFilter::NEAREST_MIPMAP_NEAREST:
-          CesiumGltfReader::GltfReader::generateMipMaps(*pImage->pAsset);
+          CesiumGltfReader::ImageDecoder::generateMipMaps(*pImage->pAsset);
         }
       }
     }
