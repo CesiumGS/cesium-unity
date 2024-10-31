@@ -4,6 +4,7 @@
 #include "UnityPrepareRendererResources.h"
 #include "UnityTaskProcessor.h"
 
+#include <CesiumAsync/AsyncSystem.h>
 #include <CesiumAsync/CachingAssetAccessor.h>
 #include <CesiumAsync/GunzipAssetAccessor.h>
 #include <CesiumAsync/SqliteCache.h>
