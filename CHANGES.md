@@ -1,10 +1,12 @@
 # Change Log
 
-## v1.?.? - 2024-11-01
+## v1.13.1 - 2024-11-01
 
 ##### Fixes :wrench:
 
-- Added restrictions to `CesiumRuntime.asmdef` to prevent the plugin from attempting to load on platforms not supported by Cesium Native.
+- Added restrictions to `CesiumRuntime.asmdef` to prevent the plugin from attempting to load on platforms not supported by Cesium for Unity.
+
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.40.1 to v0.41.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
 
 ## v1.13.0 - 2024-10-01
 
