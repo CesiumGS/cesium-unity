@@ -4,6 +4,7 @@
 #include "UnityExternals.h"
 #include "UnityTaskProcessor.h"
 
+#include <CesiumAsync/AsyncSystem.h>
 #include <CesiumUtility/Uri.h>
 
 #include <DotNet/CesiumForUnity/CesiumIonServer.h>

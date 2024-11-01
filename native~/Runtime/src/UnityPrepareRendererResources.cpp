@@ -274,7 +274,7 @@ void generateMipMaps(
         case CesiumGltf::Sampler::MinFilter::LINEAR_MIPMAP_NEAREST:
         case CesiumGltf::Sampler::MinFilter::NEAREST_MIPMAP_LINEAR:
         case CesiumGltf::Sampler::MinFilter::NEAREST_MIPMAP_NEAREST:
-          CesiumGltfReader::GltfReader::generateMipMaps(*pImage->pCesium);
+          CesiumGltfReader::ImageDecoder::generateMipMaps(*pImage->pAsset);
         }
       }
     }
@@ -1724,7 +1724,7 @@ void UnityPrepareRendererResources::free(
 void* UnityPrepareRendererResources::prepareRasterInLoadThread(
     CesiumGltf::ImageAsset& image,
     const std::any& rendererOptions) {
-  CesiumGltfReader::GltfReader::generateMipMaps(image);
+  CesiumGltfReader::ImageDecoder::generateMipMaps(image);
   return nullptr;
 }
 
