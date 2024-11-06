@@ -21,7 +21,12 @@ namespace CesiumForUnity
         /// <summary>
         /// The dataset is from a regular web URL.
         /// </summary>
-        FromUrl
+        FromUrl,
+
+        /// <summary>
+        /// The dataset is generated from the georeference ellipsoid.
+        /// </summary>
+        FromEllipsoid
     }
 
     /// <summary>

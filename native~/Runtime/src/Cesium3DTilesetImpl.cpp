@@ -7,6 +7,7 @@
 #include "UnityTileExcluderAdaptor.h"
 #include "UnityTilesetExternals.h"
 
+#include <Cesium3DTilesSelection/EllipsoidTilesetLoader.h>
 #include <Cesium3DTilesSelection/Tileset.h>
 #include <CesiumGeospatial/GlobeTransforms.h>
 #include <CesiumIonClient/Connection.h>
@@ -694,6 +695,12 @@ void Cesium3DTilesetImpl::LoadTileset(
       // Resolve the API URL if it's not already in progress.
       resolveCesiumIonApiUrl(tileset.ionServer());
     }
+  } else if (
+      tileset.tilesetSource() ==
+      CesiumForUnity::CesiumDataSource::FromEllipsoid) {
+    this->_pTileset = EllipsoidTilesetLoader::createTileset(
+        createTilesetExternals(tileset),
+        options);
   } else {
     this->_pTileset = std::make_unique<Tileset>(
         createTilesetExternals(tileset),
