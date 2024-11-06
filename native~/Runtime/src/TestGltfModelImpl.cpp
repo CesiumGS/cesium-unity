@@ -87,14 +87,15 @@ TestGltfModelImpl::AddFeatureIdTexture(
 
   // Copy feature IDs to texture.
   CesiumGltf::Image& image = this->_nativeModel.images.emplace_back();
-  image.cesium.width = 2;
-  image.cesium.height = 2;
-  image.cesium.bytesPerChannel = 1;
-  image.cesium.channels = 2;
-  image.cesium.pixelData.resize(featureIdsLength * sizeof(std::uint16_t));
+  image.pAsset.emplace();
+  image.pAsset->width = 2;
+  image.pAsset->height = 2;
+  image.pAsset->bytesPerChannel = 1;
+  image.pAsset->channels = 2;
+  image.pAsset->pixelData.resize(featureIdsLength * sizeof(std::uint16_t));
 
   std::uint16_t* pFeatureId =
-      reinterpret_cast<std::uint16_t*>(image.cesium.pixelData.data());
+      reinterpret_cast<std::uint16_t*>(image.pAsset->pixelData.data());
   for (int32_t i = 0; i < featureIdsLength; i++) {
     *pFeatureId = featureIds[i];
     pFeatureId++;

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CesiumImpl.h"
+
 #include <CesiumUtility/IntrusivePointer.h>
 
 namespace DotNet::CesiumForUnity {
@@ -13,7 +15,8 @@ class IonRasterOverlay;
 
 namespace CesiumForUnityNative {
 
-class CesiumIonRasterOverlayImpl {
+class CesiumIonRasterOverlayImpl
+    : public CesiumImpl<CesiumIonRasterOverlayImpl> {
 public:
   CesiumIonRasterOverlayImpl(
       const DotNet::CesiumForUnity::CesiumIonRasterOverlay& overlay);

@@ -4,6 +4,7 @@
 #include "UnityPrepareRendererResources.h"
 #include "UnityTaskProcessor.h"
 
+#include <CesiumAsync/AsyncSystem.h>
 #include <CesiumAsync/CachingAssetAccessor.h>
 #include <CesiumAsync/GunzipAssetAccessor.h>
 #include <CesiumAsync/SqliteCache.h>
@@ -95,7 +96,7 @@ createTilesetExternals(const CesiumForUnity::Cesium3DTileset& tileset) {
   return TilesetExternals{
       getAssetAccessor(),
       std::make_shared<UnityPrepareRendererResources>(tileset.gameObject()),
-      AsyncSystem(getTaskProcessor()),
+      getAsyncSystem(),
       getOrCreateCreditSystem(tileset),
       spdlog::default_logger()};
 }

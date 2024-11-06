@@ -214,8 +214,9 @@ SelectIonTokenWindowImpl::~SelectIonTokenWindowImpl() {
 
 void SelectIonTokenWindowImpl::RefreshTokens(
     const DotNet::CesiumForUnity::SelectIonTokenWindow& window) {
+  CesiumForUnity::CesiumIonSession session = getSession(window);
   const std::vector<CesiumIonClient::Token>& tokens =
-      getSession(window).NativeImplementation().getTokens();
+      session.NativeImplementation().getTokens(session);
   this->_tokens.resize(tokens.size());
 
   System::Collections::Generic::List1<System::String> tokenNames =

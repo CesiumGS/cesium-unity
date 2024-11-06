@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CesiumImpl.h"
+
 #include <CesiumUtility/CreditSystem.h>
 
 #include <DotNet/CesiumForUnity/CesiumCredit.h>
@@ -21,7 +23,7 @@ struct Credit;
 
 namespace CesiumForUnityNative {
 
-class CesiumCreditSystemImpl {
+class CesiumCreditSystemImpl : public CesiumImpl<CesiumCreditSystemImpl> {
 public:
   CesiumCreditSystemImpl(
       const DotNet::CesiumForUnity::CesiumCreditSystem& creditSystem);

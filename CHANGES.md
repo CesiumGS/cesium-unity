@@ -1,5 +1,56 @@
 # Change Log
 
+## v1.13.1 - 2024-11-01
+
+##### Fixes :wrench:
+
+- Added restrictions to `CesiumRuntime.asmdef` to prevent the plugin from attempting to load on platforms not supported by Cesium for Unity.
+
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.40.1 to v0.41.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
+
+## v1.13.0 - 2024-10-01
+
+##### Additions :tada:
+
+- Added a new `CesiumCameraManager` component. It allows configuration of the cameras to use for Cesium3DTileset culling and level-of-detail.
+- Added `SampleHeightMostDetailed` method to `Cesium3DTileset`. It asynchronously queries the height of a tileset at a list of positions.
+
+##### Fixes :wrench:
+
+- Fixed a bug that could cause a `NullReferenceException` when a `Cesium3DTileset` was not nested into a game object with a `CesiumGeoreference`.
+
+This release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.39.0 to v0.40.1. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
+
+## v1.12.0 - 2024-09-02
+
+##### Breaking Changes :mega:
+
+- Player builds for macOS now require macOS 10.15+. Previously, 10.13+ was supported.
+
+##### Additions :tada:
+
+- Editor builds for macOS now target macOS 10.15+. Previously, macOS 12.7+ was required.
+- Added `originPlacement` property to `CesiumGeoreference` to toggle between "Cartographic Origin" and "True Origin" reference modes. Whereas "Cartographic Origin" is the default for georeferenced tilesets, "True Origin" may be used for non-georeferenced tilesets centered at the origin.
+
+##### Fixes :wrench:
+
+- Fixed a bug that prevented using the Token panel with a new Cesium ion Server that had never had its token set before.
+- Fixed a bug that could cause a crash in `CesiumIonSession` when the object was garbage collected or the AppDomain was unloaded while network requests were in progress.
+- Fixed a bug that could cause `CesiumFlyToController` to unexpectedly interrupt a flight.
+- glTF `doubleSided` materials are now supported. Previously, models using this property would appear inside-out.
+- Fixed a bug that prevented clipping with CesiumCartographicPolygon from working with HDRP.
+
+This release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.38.0 to v0.39.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
+
+## v1.11.1 - 2024-08-01
+
+##### Fixes :wrench:
+
+- Fixed a bug that caused a `NullReferenceException` when attempting to get or set the `longitudeLatitudeHeight` property on a disabled `CesiumGlobeAnchor`.
+- Fixed a bug introduced in v1.11.0 that caused `CesiumCartographicPolygon` positions to be interpreted incorrectly, making polygon clipping unusable.
+
+This release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.37.0 to v0.38.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
+
 ### v1.11.0 - 2024-07-01
 
 ##### Additions :tada:

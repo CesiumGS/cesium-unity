@@ -7,8 +7,6 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
-      - name: Install clang-format
-        run: pip install clang-format
       - name: Check source formatting
         run: |
           find native~/Runtime native~/Editor native~/Shared \( -iname '*.cpp' -o -iname '*.h' \) -print0 | xargs -0 clang-format --dry-run -Werror
@@ -41,6 +39,16 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+      - name: Cache vcpkg artifacts
+        uses: actions/cache@v4
+        with:
+          path: "d:/.ezvcpkg"
+          key: vcpkg-windows-${{ hashFiles('native~/vcpkg/ports/**/vcpkg.json', 'native~/vcpkg/triplets/**/*', 'native~/extern/*toolchain.cmake') }}-${{ hashFiles('native~/extern/cesium-native/CMakeLists.txt', 'native~/CMakeLists.txt') }}
+          restore-keys: |
+            vcpkg-windows-${{ hashFiles('native~/vcpkg/ports/**/vcpkg.json', 'native~/vcpkg/triplets/**/*', 'native~/extern/*toolchain.cmake') }}-
+      - name: Install Ninja
+        run: |
+          choco install -y ninja
       - name: Install nasm
         uses: ilammy/setup-nasm@v1.5.1
       - name: Install wget
@@ -53,8 +61,8 @@ jobs:
           del ./UnityHubSetup.exe
       - name: Install Unity
         run: |
-          Start-Process -FilePath "C:/Program Files/Unity Hub/Unity Hub.exe" -Args "-- --headless install --version 2021.3.13f1 --changeset 9e7d58001ecf" -Wait
-          Start-Process -FilePath "C:/Program Files/Unity Hub/Unity Hub.exe" -Args "-- --headless install-modules --version 2021.3.13f1 --changeset 9e7d58001ecf --module android android-sdk-ndk-tools android-open-jdk-8u172-b11 universal-windows-platform uwp-il2cpp" -Wait
+          Start-Process -FilePath "C:/Program Files/Unity Hub/Unity Hub.exe" -Args "-- --headless install --version 2022.3.41f1 --changeset 0f988161febf" -Wait
+          Start-Process -FilePath "C:/Program Files/Unity Hub/Unity Hub.exe" -Args "-- --headless install-modules --version 2022.3.41f1 --changeset 0f988161febf --module android android-sdk-ndk-tools  android-open-jdk-11.0.14.1+1 universal-windows-platform" -Wait
       - name: Create SSH tunnel to Unity License Server
         env:
           UNITY_LICENSE_SERVER_SSH_KEY: ${{ secrets.UNITY_LICENSE_SERVER_SSH_KEY }}
@@ -93,6 +101,10 @@ jobs:
         run: |
           mkdir -p d:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
           mv $ENV:GITHUB_WORKSPACE/* d:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
+          # Disable Unity audio
+          mkdir -p d:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity\ProjectSettings
+          $text="%YAML 1.1`n%TAG !u! tag:unity3d.com,2011:`n--- !u!11 &1`nAudioManager:`n  m_DisableAudio: 1`n"
+          [IO.File]::WriteAllLines("d:/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity/ProjectSettings/AudioManager.asset",$text)
       - name: Build Reinterop
         run: |
           cd d:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
@@ -103,9 +115,20 @@ jobs:
           mkdir -p d:\cesium\temp
           # Store temp files on the D drive, which is much faster than the EBS-backed C drive.
           $ENV:TEMP="d:\cesium\temp"
+          # We only need a release build of vcpkg dependencies
+          $ENV:CESIUM_VCPKG_RELEASE_ONLY="TRUE"
+          # Clear ANDROID_NDK_ROOT so that we use Unity's version
+          Remove-Item Env:ANDROID_NDK_ROOT
+          # Explicitly set the ezvcpkg path. Otherwise it will be `/.ezvcpkg` and the drive letter is ambiguous.
+          $ENV:EZVCPKG_BASEDIR="D:/.ezvcpkg"
+          # Run the build
           dotnet run --project Build~
-          cat D:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity\native~\build-WSA-x86_64\build.log
-          dir d:\cesium\CesiumForUnityBuildProject
+      - name: Publish Logs
+        if: success() || failure()    # run this step even if previous step failed
+        uses: actions/upload-artifact@v4
+        with:
+          name: Native Build Logs - Windows
+          path: d:/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity/native~/build-*/build.log
       - name: Publish package artifact
         if: ${{ success() }}
         uses: actions/upload-artifact@v4
@@ -113,8 +136,10 @@ jobs:
           name: Windows Package
           path: d:\cesium\CesiumForUnityBuildProject\*.tgz
       - name: Run Tests
+        env:
+          CESIUM_ION_TOKEN_FOR_TESTS: ${{ secrets.CESIUM_ION_TOKEN_FOR_TESTS }}
         run: |
-          start -FilePath "C:\Program Files\Unity\Hub\Editor\2021.3.13f1\Editor\Unity.exe" -ArgumentList "-runTests -batchmode -projectPath d:\cesium\CesiumForUnityBuildProject -testResults d:\cesium\temp\TestResults.xml -testPlatform PlayMode -logFile d:\cesium\temp\test-log.txt" -Wait
+          start -FilePath "C:\Program Files\Unity\Hub\Editor\2022.3.41f1\Editor\Unity.exe" -ArgumentList "-runTests -batchmode -projectPath d:\cesium\CesiumForUnityBuildProject -testResults d:\cesium\temp\TestResults.xml -testPlatform PlayMode -logFile d:\cesium\temp\test-log.txt" -Wait
           cat d:\cesium\temp\test-log.txt
       - name: Test Report
         uses: kring/test-reporter@v1.6.2-kring
@@ -125,22 +150,47 @@ jobs:
           reporter: dotnet-nunit
   MacOS:
     needs: [QuickChecks]
-    runs-on: macos-12
+    runs-on: macos-latest
     # Only allow a single macOS build at a time, for Unity licensing reasons
     concurrency: mac
     steps:
-      - name: Set XCode version
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: "14.1"
+      - name: Make some more disk space
+        run: |
+          df -h
+          ls /Applications
+          brew uninstall google-chrome
+          sudo rm -rf /Users/runner/Library/Android
+          sudo rm -rf /Applications/Xcode_14.3.1.app
+          sudo rm -rf /Applications/Xcode_14.3.app
+          sudo rm -rf /Applications/Xcode_15.0.1.app
+          sudo rm -rf /Applications/Xcode_15.0.app
+          sudo rm -rf /Applications/Xcode_15.1.0.app
+          sudo rm -rf /Applications/Xcode_15.1.app
+          sudo rm -rf /Applications/Xcode_15.2.0.app
+          sudo rm -rf /Applications/Xcode_15.2.app
+          sudo rm -rf /Applications/Xcode_15.3.0.app
+          sudo rm -rf /Applications/Xcode_15.3.app
+          sudo rm -rf /Applications/Xcode_16.0.0.app
+          sudo rm -rf /Applications/Xcode_16.0.app
+          sudo rm -rf /Applications/Xcode_16.1.0.app
+          sudo rm -rf /Applications/Xcode_16.1.app
+          sudo rm -rf /Applications/Xcode_16.1_beta.app
+          sudo rm -rf /Applications/Xcode_16_beta_6.app
+          ls /Applications
+          df -h
       - name: Check out repository code
         uses: actions/checkout@v4
         with:
           submodules: recursive
+      - name: Cache vcpkg artifacts
+        uses: actions/cache@v4
+        with:
+          path: "~/.ezvcpkg"
+          key: vcpkg-mac-${{ hashFiles('native~/vcpkg/ports/**/vcpkg.json', 'native~/vcpkg/triplets/**/*', 'native~/extern/*toolchain.cmake') }}-${{ hashFiles('native~/extern/cesium-native/CMakeLists.txt', 'native~/CMakeLists.txt') }}
+          restore-keys: |
+            vcpkg-mac-${{ hashFiles('native~/vcpkg/ports/**/vcpkg.json', 'native~/vcpkg/triplets/**/*', 'native~/extern/*toolchain.cmake') }}-
       - name: Install nasm
         uses: ilammy/setup-nasm@v1.5.1
-      - name: Install jq
-        run: brew install jq
       - name: Install Unity Hub
         run: |
           wget --quiet https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.dmg
@@ -149,14 +199,14 @@ jobs:
           sudo cp -R "./UnityHubSetup/Unity Hub.app" /Applications
           hdiutil detach ./UnityHubSetup
           rm ./UnityHubSetup.dmg
-      - name: Install Unity 2021.3.13f1
+      - name: Install Unity 2022.3.41f1
         # This command sometimes returns exit code 130, despite actually succeeding.
         continue-on-error: true
         run: |
-          /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub -- --headless install --version 2021.3.13f1 --changeset 9e7d58001ecf --architecture x86_64
+          /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub -- --headless install --version 2022.3.41f1 --changeset 0f988161febf --architecture arm64
       - name: Install Unity iOS Support 
         run: |
-          /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub -- --headless install-modules --version 2021.3.13f1 --changeset 9e7d58001ecf --module ios --architecture x86_64
+          /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub -- --headless install-modules --version 2022.3.41f1 --changeset 0f988161febf --module ios --architecture arm64
       - name: Configure Unity to Use the License Server
         run: |
           sudo mkdir -p "/Library/Application Support/Unity/config"
@@ -196,19 +246,26 @@ jobs:
         run: |
           mkdir -p ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
           mv $GITHUB_WORKSPACE/* ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
+          # Disable Unity audio
+          mkdir -p ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity/ProjectSettings
+          echo '%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!11 &1\nAudioManager:\n  m_DisableAudio: 1\n' > ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity/ProjectSettings/AudioManager.asset
       - name: Build Reinterop
         run: |
           cd ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
           dotnet publish Reinterop~ -o .
       - name: Build Package
         run: |
+          # We only need a release build of vcpkg dependencies
+          export CESIUM_VCPKG_RELEASE_ONLY="TRUE"
           cd ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
           dotnet run --project Build~
           ls -l ~/cesium/CesiumForUnityBuildProject
-      - name: Print log
-        if: ${{ failure() }}
-        run: |
-          cat /Users/runner/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity/native~/build-iOS/build.log
+      - name: Publish Logs
+        if: success() || failure()    # run this step even if previous step failed
+        uses: actions/upload-artifact@v4
+        with:
+          name: Native Build Logs - macOS
+          path: ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity/native~/build-*/build.log
       - name: Publish package artifact
         if: ${{ success() }}
         uses: actions/upload-artifact@v4
@@ -216,8 +273,10 @@ jobs:
           name: macOS Package
           path: ~/cesium/CesiumForUnityBuildProject/*.tgz
       - name: Run Tests
+        env:
+          CESIUM_ION_TOKEN_FOR_TESTS: ${{ secrets.CESIUM_ION_TOKEN_FOR_TESTS }}
         run: |
-          /Applications/Unity/Hub/Editor/2021.3.13f1/Unity.app/Contents/MacOS/Unity -runTests -batchmode -projectPath ~/cesium/CesiumForUnityBuildProject -testResults ~/cesium/CesiumForUnityBuildProject/TestResults.xml -testPlatform PlayMode -logFile ~/cesium/CesiumForUnityBuildProject/test-log.txt
+          /Applications/Unity/Hub/Editor/2022.3.41f1/Unity.app/Contents/MacOS/Unity -runTests -batchmode -projectPath ~/cesium/CesiumForUnityBuildProject -testResults ~/cesium/CesiumForUnityBuildProject/TestResults.xml -testPlatform PlayMode -logFile ~/cesium/CesiumForUnityBuildProject/test-log.txt
           cat ~/cesium/CesiumForUnityBuildProject/test-log.txt
           ls /Users/runner/cesium/CesiumForUnityBuildProject/TestResults.xml
       - name: Test Report

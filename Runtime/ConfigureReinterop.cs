@@ -57,6 +57,7 @@ namespace CesiumForUnity
         public void ExposeToCPP()
         {
             Camera c = Camera.main;
+            
             Transform t = c.transform;
             Vector3 u = t.up;
             Vector3 f = t.forward;
@@ -158,6 +159,7 @@ namespace CesiumForUnity
             int crc = meshRenderer.material.ComputeCRC();
             meshRenderer.material.SetTexture(id, texture2D);
             meshRenderer.material.SetFloat(id, 1.0f);
+            meshRenderer.material.SetFloat(id, (float)CullMode.Off);
             meshRenderer.material.SetVector(id, new Vector4());
             meshRenderer.material.DisableKeyword("keywordName");
             meshRenderer.material.EnableKeyword("keywordName");
@@ -393,6 +395,7 @@ namespace CesiumForUnity
             georeference.ecefX = georeference.ecefX;
             georeference.ecefY = georeference.ecefY;
             georeference.ecefZ = georeference.ecefZ;
+            georeference.originPlacement = georeference.originPlacement;
             georeference.originAuthority = georeference.originAuthority;
             georeference.scale = georeference.scale;
             double4x4 ecefToLocal = georeference.ecefToLocalMatrix;
@@ -877,6 +880,30 @@ namespace CesiumForUnity
             length = float2x2Array.Length;
             length = float3x3Array.Length;
             length = float4x4Array.Length;
+
+            CesiumCameraManager manager = CesiumCameraManager.GetOrCreate(go);
+            manager.useSceneViewCameraInEditor = false;
+            manager.useMainCamera = false;
+            Camera camera = null;
+            for (int i = 0; i < manager.additionalCameras.Count; ++i)
+            {
+                camera = manager.additionalCameras[i];
+            }
+
+            TaskCompletionSource<CesiumSampleHeightResult> promise = new TaskCompletionSource<CesiumSampleHeightResult>();
+            promise.SetException(new Exception("message"));
+            CesiumSampleHeightResult result = new CesiumSampleHeightResult();
+            result.longitudeLatitudeHeightPositions = null;
+            result.sampleSuccess = null;
+            result.warnings = null;
+            promise.SetResult(result);
+            Task<CesiumSampleHeightResult> task = promise.Task;
+
+            double3[] positions = null;
+            for (int i = 0; i < positions.Length; ++i)
+            {
+                positions[i] = positions[i];
+            }
 
 #if UNITY_EDITOR
             SceneView sv = SceneView.lastActiveSceneView;

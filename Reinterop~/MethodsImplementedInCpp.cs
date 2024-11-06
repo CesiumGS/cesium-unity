@@ -33,7 +33,9 @@ namespace Reinterop
                     #endif
                     void* {{createName}}(void* handle) {
                       const {{wrapperType.GetFullyQualifiedName()}} wrapper{{{objectHandleType.GetFullyQualifiedName()}}(handle)};
-                      return reinterpret_cast<void*>(new {{implType.GetFullyQualifiedName()}}(wrapper));
+                      auto pImpl = new {{implType.GetFullyQualifiedName()}}(wrapper);
+                      pImpl->addReference();
+                      return reinterpret_cast<void*>(pImpl);
                     }
                     """,
                     TypeDefinitionsReferenced: new[]
@@ -68,7 +70,7 @@ namespace Reinterop
                     #endif
                     void {{destroyName}}(void* pImpl) {
                       auto pImplTyped = reinterpret_cast<{{implType.GetFullyQualifiedName()}}*>(pImpl);
-                      delete pImplTyped;
+                      if (pImplTyped) pImplTyped->releaseReference();
                     }
                     """,
                     TypeDefinitionsReferenced: new[]
@@ -342,7 +344,7 @@ namespace Reinterop
 
             CSharpType csWrapperType = CSharpType.FromSymbol(context, item.Type);
             CSharpType csReturnType = CSharpType.FromSymbol(context, method.ReturnType);
-            var csParameters = method.Parameters.Select(parameter => (Name: parameter.Name, CallName: parameter.Name, Type: CSharpType.FromSymbol(context, parameter.Type)));
+            var csParameters = method.Parameters.Select(parameter => (Name: parameter.Name, CallName: parameter.Name, Type: CSharpType.FromSymbol(context, parameter.Type), IsParams: parameter.IsParams));
             var csParametersInterop = csParameters;
             var implementationPointer = new CSharpType(context, InteropTypeKind.Primitive, csWrapperType.Namespaces, csWrapperType.Name + ".ImplementationHandle", csWrapperType.SpecialType, null);
 
@@ -352,13 +354,13 @@ namespace Reinterop
                 {
                     csParametersInterop = new[]
                     {
-                        (Name: "implementation", CallName: "_implementation", Type: implementationPointer)
+                        (Name: "implementation", CallName: "_implementation", Type: implementationPointer, IsParams: false)
                     }.Concat(csParametersInterop);
                 }
 
                 csParametersInterop = new[]
                 {
-                    (Name: "thiz", CallName: "this", Type: csWrapperType),
+                    (Name: "thiz", CallName: "this", Type: csWrapperType, IsParams: false),
                 }.Concat(csParametersInterop);
             }
 
@@ -368,7 +370,7 @@ namespace Reinterop
             {
                 csParametersInterop = csParametersInterop.Concat(new[]
                 {
-                    (Name: "pReturnValue", CallName: "&returnValue", Type: csInteropReturnType.AsPointer())
+                    (Name : "pReturnValue", CallName : "&returnValue", Type : csInteropReturnType.AsPointer(), IsParams : false)
                 });
                 csInteropReturnType = CSharpType.FromSymbol(context, returnType.Kind == InteropTypeKind.Nullable ? context.Compilation.GetSpecialType(SpecialType.System_Byte) : context.Compilation.GetSpecialType(SpecialType.System_Void));
             }
@@ -427,7 +429,7 @@ namespace Reinterop
             result.CSharpPartialMethodDefinitions.Methods.Add(new(
                 methodDefinition:
                     $$"""
-                    {{modifiers}} partial {{csReturnType.GetFullyQualifiedName()}} {{method.Name}}({{string.Join(", ", csParameters.Select(parameter => $"{parameter.Type.GetFullyQualifiedName()} {parameter.Name}"))}})
+                    {{modifiers}} partial {{csReturnType.GetFullyQualifiedName()}} {{method.Name}}({{string.Join(", ", csParameters.Select(parameter => $"{(parameter.IsParams ? "params " : "")}{parameter.Type.GetFullyQualifiedName()} {parameter.Name}"))}})
                     {
                         unsafe
                         {

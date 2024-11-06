@@ -4,6 +4,7 @@
 #include "UnityExternals.h"
 #include "UnityTaskProcessor.h"
 
+#include <CesiumAsync/AsyncSystem.h>
 #include <CesiumUtility/Uri.h>
 
 #include <DotNet/CesiumForUnity/CesiumIonServer.h>
@@ -165,10 +166,13 @@ void CesiumIonSessionImpl::Connect(
                 ionServerUrl);
 
   std::move(futureApiUrl)
-      .thenInMainThread([ionServerUrl, server, session, this](
+      .thenInMainThread([ionServerUrl,
+                         server,
+                         session,
+                         this,
+                         asyncSystem = this->_asyncSystem](
                             std::optional<std::string>&& ionApiUrl) {
-        CesiumAsync::Promise<bool> promise =
-            this->_asyncSystem.createPromise<bool>();
+        CesiumAsync::Promise<bool> promise = asyncSystem.createPromise<bool>();
 
         if (session == nullptr) {
           promise.reject(
@@ -278,11 +282,15 @@ void CesiumIonSessionImpl::Resume(
 
   // Verify that the connection actually works.
   this->ensureAppDataLoaded(session)
-      .thenInMainThread([this, userAccessToken, server](bool loadedAppData) {
-        CesiumAsync::Promise<void> promise =
-            this->_asyncSystem.createPromise<void>();
+      .thenInMainThread([this,
+                         session,
+                         userAccessToken,
+                         server,
+                         asyncSystem = this->_asyncSystem](bool loadedAppData) {
+        CesiumAsync::Promise<void> promise = asyncSystem.createPromise<void>();
 
-        if (!loadedAppData || !this->_appData.has_value()) {
+        if (session == nullptr || !loadedAppData ||
+            !this->_appData.has_value()) {
           promise.reject(std::runtime_error(
               "Failed to obtain _appData, can't resume connection"));
           return promise.getFuture();
@@ -290,8 +298,8 @@ void CesiumIonSessionImpl::Resume(
 
         if (this->_appData->needsOauthAuthentication() &&
             System::String::IsNullOrEmpty(userAccessToken)) {
-          // No user access token was stored, so there's no existing session to
-          // resume.
+          // No user access token was stored, so there's no existing session
+          // to resume.
           promise.resolve();
           this->_isResuming = false;
           return promise.getFuture();
@@ -306,9 +314,12 @@ void CesiumIonSessionImpl::Resume(
                 server.apiUrl().ToStlString());
 
         return pConnection->me().thenInMainThread(
-            [this,
-             pConnection](CesiumIonClient::Response<CesiumIonClient::Profile>&&
-                              response) {
+            [this, session, pConnection](
+                CesiumIonClient::Response<CesiumIonClient::Profile>&&
+                    response) {
+              if (session == nullptr)
+                return;
+
               logResponseErrors(response);
               if (response.value.has_value()) {
                 this->_connection = std::move(*pConnection);
@@ -317,10 +328,13 @@ void CesiumIonSessionImpl::Resume(
               this->_quickAddItems = nullptr;
               this->broadcastConnectionUpdate();
 
-              this->startQueuedLoads();
+              this->startQueuedLoads(session);
             });
       })
-      .catchInMainThread([this](std::exception&& e) {
+      .catchInMainThread([this, session](std::exception&& e) {
+        if (session == nullptr)
+          return;
+
         logResponseErrors(e);
         this->_isResuming = false;
       });
@@ -356,7 +370,7 @@ void CesiumIonSessionImpl::Tick(
 
 System::String CesiumIonSessionImpl::GetProfileUsername(
     const DotNet::CesiumForUnity::CesiumIonSession& session) {
-  return System::String(this->getProfile().username);
+  return System::String(this->getProfile(session).username);
 }
 
 System::String CesiumIonSessionImpl::GetAuthorizeUrl(
@@ -381,7 +395,7 @@ CesiumIonSessionImpl::GetQuickAddItems(
       DotNet::CesiumForUnity::QuickAddItem>
       result{};
 
-  const CesiumIonClient::Defaults& defaults = this->getDefaults();
+  const CesiumIonClient::Defaults& defaults = this->getDefaults(session);
   for (const CesiumIonClient::QuickAddAsset& asset : defaults.quickAddAssets) {
     if (asset.type == "3DTILES" ||
         (asset.type == "TERRAIN" && !asset.rasterOverlays.empty())) {
@@ -406,10 +420,11 @@ CesiumIonSessionImpl::GetQuickAddItems(
 
 void CesiumIonSessionImpl::RefreshProfile(
     const DotNet::CesiumForUnity::CesiumIonSession& session) {
-  this->refreshProfile();
+  this->refreshProfile(session);
 }
 
-void CesiumIonSessionImpl::refreshProfile() {
+void CesiumIonSessionImpl::refreshProfile(
+    const DotNet::CesiumForUnity::CesiumIonSession& session) {
   if (!this->_connection || this->_isLoadingProfile) {
     this->_loadProfileQueued = true;
     return;
@@ -420,29 +435,36 @@ void CesiumIonSessionImpl::refreshProfile() {
 
   this->_connection->me()
       .thenInMainThread(
-          [this](
+          [this, session](
               CesiumIonClient::Response<CesiumIonClient::Profile>&& profile) {
+            if (session == nullptr)
+              return;
+
             this->_isLoadingProfile = false;
             this->_profile = std::move(profile.value);
             this->broadcastProfileUpdate();
             if (this->_loadProfileQueued)
-              this->refreshProfile();
+              this->refreshProfile(session);
           })
-      .catchInMainThread([this](std::exception&& e) {
+      .catchInMainThread([this, session](std::exception&& e) {
+        if (session == nullptr)
+          return;
+
         this->_isLoadingProfile = false;
         this->_profile = std::nullopt;
         this->broadcastProfileUpdate();
         if (this->_loadProfileQueued)
-          this->refreshProfile();
+          this->refreshProfile(session);
       });
 }
 
 void CesiumIonSessionImpl::RefreshAssets(
     const DotNet::CesiumForUnity::CesiumIonSession& session) {
-  this->refreshAssets();
+  this->refreshAssets(session);
 }
 
-void CesiumIonSessionImpl::refreshAssets() {
+void CesiumIonSessionImpl::refreshAssets(
+    const DotNet::CesiumForUnity::CesiumIonSession& session) {
   if (!this->_connection || this->_isLoadingAssets) {
     this->_loadAssetsQueued = true;
     return;
@@ -453,33 +475,41 @@ void CesiumIonSessionImpl::refreshAssets() {
 
   this->_connection->assets()
       .thenInMainThread(
-          [this](CesiumIonClient::Response<CesiumIonClient::Assets>&& assets) {
+          [this, session](
+              CesiumIonClient::Response<CesiumIonClient::Assets>&& assets) {
+            if (session == nullptr)
+              return;
+
             this->_isLoadingAssets = false;
             this->_assets = std::move(assets.value);
             this->broadcastAssetsUpdate();
             if (this->_loadAssetsQueued)
-              this->refreshAssets();
+              this->refreshAssets(session);
           })
-      .catchInMainThread([this](std::exception&& e) {
+      .catchInMainThread([this, session](std::exception&& e) {
+        if (session == nullptr)
+          return;
+
         this->_isLoadingAssets = false;
         this->_assets = std::nullopt;
         this->broadcastAssetsUpdate();
         if (this->_loadAssetsQueued)
-          this->refreshAssets();
+          this->refreshAssets(session);
       });
 }
 
 void CesiumIonSessionImpl::RefreshTokens(
     const DotNet::CesiumForUnity::CesiumIonSession& session) {
-  this->refreshTokens();
+  this->refreshTokens(session);
 }
 
 void CesiumIonSessionImpl::RefreshDefaults(
     const DotNet::CesiumForUnity::CesiumIonSession& session) {
-  this->refreshDefaults();
+  this->refreshDefaults(session);
 }
 
-void CesiumIonSessionImpl::refreshTokens() {
+void CesiumIonSessionImpl::refreshTokens(
+    const DotNet::CesiumForUnity::CesiumIonSession& session) {
   if (!this->_connection || this->_isLoadingTokens) {
     this->_loadTokensQueued = true;
     return;
@@ -490,8 +520,11 @@ void CesiumIonSessionImpl::refreshTokens() {
 
   this->_connection->tokens()
       .thenInMainThread(
-          [this](
+          [this, session](
               CesiumIonClient::Response<CesiumIonClient::TokenList>&& tokens) {
+            if (session == nullptr)
+              return;
+
             this->_isLoadingTokens = false;
             this->_tokens =
                 tokens.value
@@ -499,18 +532,22 @@ void CesiumIonSessionImpl::refreshTokens() {
                     : std::nullopt;
             this->broadcastTokensUpdate();
             if (this->_loadTokensQueued)
-              this->refreshTokens();
+              this->refreshTokens(session);
           })
-      .catchInMainThread([this](std::exception&& e) {
+      .catchInMainThread([this, session](std::exception&& e) {
+        if (session == nullptr)
+          return;
+
         this->_isLoadingTokens = false;
         this->_tokens = std::nullopt;
         this->broadcastTokensUpdate();
         if (this->_loadTokensQueued)
-          this->refreshTokens();
+          this->refreshTokens(session);
       });
 }
 
-void CesiumIonSessionImpl::refreshDefaults() {
+void CesiumIonSessionImpl::refreshDefaults(
+    const DotNet::CesiumForUnity::CesiumIonSession& session) {
   if (!this->_connection || this->_isLoadingDefaults) {
     this->_loadDefaultsQueued = true;
     return;
@@ -521,51 +558,61 @@ void CesiumIonSessionImpl::refreshDefaults() {
 
   this->_connection->defaults()
       .thenInMainThread(
-          [this](
+          [this, session](
               CesiumIonClient::Response<CesiumIonClient::Defaults>&& defaults) {
+            if (session == nullptr)
+              return;
+
             logResponseErrors(defaults);
             this->_isLoadingDefaults = false;
             this->_defaults = std::move(defaults.value);
             this->_quickAddItems = nullptr;
             this->broadcastDefaultsUpdate();
             if (this->_loadDefaultsQueued)
-              this->refreshDefaults();
+              this->refreshDefaults(session);
           })
-      .catchInMainThread([this](std::exception&& e) {
+      .catchInMainThread([this, session](std::exception&& e) {
+        if (session == nullptr)
+          return;
+
         logResponseErrors(e);
         this->_isLoadingDefaults = false;
         this->_defaults = std::nullopt;
         this->_quickAddItems = nullptr;
         this->broadcastDefaultsUpdate();
         if (this->_loadDefaultsQueued)
-          this->refreshDefaults();
+          this->refreshDefaults(session);
       });
 }
 
-bool CesiumIonSessionImpl::refreshProfileIfNeeded() {
+bool CesiumIonSessionImpl::refreshProfileIfNeeded(
+    const DotNet::CesiumForUnity::CesiumIonSession& session) {
   if (this->_loadProfileQueued || !this->_profile.has_value()) {
-    this->refreshProfile();
+    this->refreshProfile(session);
   }
   return this->_profile.has_value();
 }
 
-bool CesiumIonSessionImpl::refreshAssetsIfNeeded() {
+bool CesiumIonSessionImpl::refreshAssetsIfNeeded(
+    const DotNet::CesiumForUnity::CesiumIonSession& session) {
   if (this->_loadAssetsQueued || !this->_assets.has_value()) {
-    this->refreshAssets();
+    this->refreshAssets(session);
   }
   return this->_assets.has_value();
 }
 
-bool CesiumIonSessionImpl::refreshTokensIfNeeded() {
+bool CesiumIonSessionImpl::refreshTokensIfNeeded(
+    const DotNet::CesiumForUnity::CesiumIonSession& session) {
   if (this->_loadTokensQueued || !this->_tokens.has_value()) {
-    this->refreshTokens();
+    this->refreshTokens(session);
   }
   return this->_tokens.has_value();
 }
 
-bool CesiumIonSessionImpl::refreshDefaultsIfNeeded() {
+bool CesiumIonSessionImpl::refreshDefaultsIfNeeded(
+    const DotNet::CesiumForUnity::CesiumIonSession& session) {
   if (this->_loadDefaultsQueued || !this->_defaults.has_value()) {
-    this->refreshDefaults();
+    this->refreshDefaults(session);
   }
   return this->_defaults.has_value();
 }
@@ -677,32 +724,35 @@ CesiumIonSessionImpl::getConnection() const {
   return this->_connection;
 }
 
-const CesiumIonClient::Profile& CesiumIonSessionImpl::getProfile() {
+const CesiumIonClient::Profile& CesiumIonSessionImpl::getProfile(
+    const DotNet::CesiumForUnity::CesiumIonSession& session) {
   static const CesiumIonClient::Profile empty{};
   if (this->_profile) {
     return *this->_profile;
   } else {
-    this->refreshProfile();
+    this->refreshProfile(session);
     return empty;
   }
 }
 
-const CesiumIonClient::Assets& CesiumIonSessionImpl::getAssets() {
+const CesiumIonClient::Assets& CesiumIonSessionImpl::getAssets(
+    const DotNet::CesiumForUnity::CesiumIonSession& session) {
   static const CesiumIonClient::Assets empty;
   if (this->_assets) {
     return *this->_assets;
   } else {
-    this->refreshAssets();
+    this->refreshAssets(session);
     return empty;
   }
 }
 
-const std::vector<CesiumIonClient::Token>& CesiumIonSessionImpl::getTokens() {
+const std::vector<CesiumIonClient::Token>& CesiumIonSessionImpl::getTokens(
+    const DotNet::CesiumForUnity::CesiumIonSession& session) {
   static const std::vector<CesiumIonClient::Token> empty;
   if (this->_tokens) {
     return *this->_tokens;
   } else {
-    this->refreshTokens();
+    this->refreshTokens(session);
     return empty;
   }
 }
@@ -715,12 +765,13 @@ const CesiumIonClient::ApplicationData& CesiumIonSessionImpl::getAppData() {
   return empty;
 }
 
-const CesiumIonClient::Defaults& CesiumIonSessionImpl::getDefaults() {
+const CesiumIonClient::Defaults& CesiumIonSessionImpl::getDefaults(
+    const DotNet::CesiumForUnity::CesiumIonSession& session) {
   static const CesiumIonClient::Defaults empty;
   if (this->_defaults) {
     return *this->_defaults;
   } else {
-    this->refreshDefaults();
+    this->refreshDefaults(session);
     return empty;
   }
 }
@@ -738,15 +789,16 @@ CesiumAsync::AsyncSystem& CesiumIonSessionImpl::getAsyncSystem() {
   return this->_asyncSystem;
 }
 
-void CesiumIonSessionImpl::startQueuedLoads() {
+void CesiumIonSessionImpl::startQueuedLoads(
+    const DotNet::CesiumForUnity::CesiumIonSession& session) {
   if (this->_loadProfileQueued)
-    this->refreshProfile();
+    this->refreshProfile(session);
   if (this->_loadAssetsQueued)
-    this->refreshAssets();
+    this->refreshAssets(session);
   if (this->_loadTokensQueued)
-    this->refreshTokens();
+    this->refreshTokens(session);
   if (this->_loadDefaultsQueued)
-    this->refreshDefaults();
+    this->refreshDefaults(session);
 }
 
 CesiumAsync::Future<bool> CesiumIonSessionImpl::ensureAppDataLoaded(
@@ -758,11 +810,18 @@ CesiumAsync::Future<bool> CesiumIonSessionImpl::ensureAppDataLoaded(
              this->_pAssetAccessor,
              server.apiUrl().ToStlString())
       .thenInMainThread(
-          [this, session](
+          [this, session, asyncSystem = this->_asyncSystem](
               CesiumIonClient::Response<CesiumIonClient::ApplicationData>&&
                   appData) {
             CesiumAsync::Promise<bool> promise =
-                this->_asyncSystem.createPromise<bool>();
+                asyncSystem.createPromise<bool>();
+
+            if (session == nullptr) {
+              UnityEngine::Debug::LogError(
+                  System::String("CesiumIonSession unexpectedly nullptr"));
+              promise.resolve(false);
+              return promise.getFuture();
+            }
 
             this->_appData = appData.value;
             if (!appData.value.has_value()) {
@@ -776,9 +835,10 @@ CesiumAsync::Future<bool> CesiumIonSessionImpl::ensureAppDataLoaded(
 
             return promise.getFuture();
           })
-      .catchInMainThread([this](std::exception&& e) {
+      .catchInMainThread([this, session, asyncSystem = this->_asyncSystem](
+                             std::exception&& e) {
         logResponseErrors(e);
-        return this->_asyncSystem.createResolvedFuture(false);
+        return asyncSystem.createResolvedFuture(false);
       });
 }
 

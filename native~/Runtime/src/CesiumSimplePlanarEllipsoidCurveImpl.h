@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CesiumImpl.h"
+
 #include <CesiumGeospatial/SimplePlanarEllipsoidCurve.h>
 
 #include <DotNet/CesiumForUnity/CesiumEllipsoid.h>
@@ -17,7 +19,8 @@ struct double3;
 
 namespace CesiumForUnityNative {
 
-class CesiumSimplePlanarEllipsoidCurveImpl {
+class CesiumSimplePlanarEllipsoidCurveImpl
+    : public CesiumImpl<CesiumSimplePlanarEllipsoidCurveImpl> {
 public:
   CesiumSimplePlanarEllipsoidCurveImpl(
       const DotNet::CesiumForUnity::CesiumSimplePlanarEllipsoidCurve& path);

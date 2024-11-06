@@ -56,6 +56,7 @@
 #include <DotNet/UnityEngine/Object.h>
 #include <DotNet/UnityEngine/Physics.h>
 #include <DotNet/UnityEngine/Quaternion.h>
+#include <DotNet/UnityEngine/Rendering/CullMode.h>
 #include <DotNet/UnityEngine/Rendering/IndexFormat.h>
 #include <DotNet/UnityEngine/Rendering/MeshUpdateFlags.h>
 #include <DotNet/UnityEngine/Rendering/SubMeshDescriptor.h>
@@ -273,7 +274,7 @@ void generateMipMaps(
         case CesiumGltf::Sampler::MinFilter::LINEAR_MIPMAP_NEAREST:
         case CesiumGltf::Sampler::MinFilter::NEAREST_MIPMAP_LINEAR:
         case CesiumGltf::Sampler::MinFilter::NEAREST_MIPMAP_NEAREST:
-          CesiumGltfReader::GltfReader::generateMipMaps(pImage->cesium);
+          CesiumGltfReader::ImageDecoder::generateMipMaps(*pImage->pAsset);
         }
       }
     }
@@ -1024,6 +1025,33 @@ void setGltfMaterialParameterValues(
     const TilesetMaterialProperties& materialProperties) {
   CESIUM_TRACE("Cesium::CreateMaterials");
 
+  // These similar-sounding material properties are used in various render
+  // pipelines (built-in, URP, HDRP). Rather than try to figure out which
+  // applies, we just set them all.
+  if (gltfMaterial.doubleSided) {
+    unityMaterial.SetFloat(materialProperties.getDoubleSidedEnableID(), 1.0f);
+    unityMaterial.SetFloat(
+        materialProperties.getCullID(),
+        float(UnityEngine::Rendering::CullMode::Off));
+    unityMaterial.SetFloat(
+        materialProperties.getCullModeID(),
+        float(UnityEngine::Rendering::CullMode::Off));
+    unityMaterial.SetFloat(
+        materialProperties.getBuiltInCullModeID(),
+        float(UnityEngine::Rendering::CullMode::Off));
+  } else {
+    unityMaterial.SetFloat(materialProperties.getDoubleSidedEnableID(), 0.0f);
+    unityMaterial.SetFloat(
+        materialProperties.getCullID(),
+        float(UnityEngine::Rendering::CullMode::Back));
+    unityMaterial.SetFloat(
+        materialProperties.getCullModeID(),
+        float(UnityEngine::Rendering::CullMode::Back));
+    unityMaterial.SetFloat(
+        materialProperties.getBuiltInCullModeID(),
+        float(UnityEngine::Rendering::CullMode::Back));
+  }
+
   const CesiumGltf::MaterialPBRMetallicRoughness& pbr =
       gltfMaterial.pbrMetallicRoughness
           ? gltfMaterial.pbrMetallicRoughness.value()
@@ -1694,9 +1722,9 @@ void UnityPrepareRendererResources::free(
 }
 
 void* UnityPrepareRendererResources::prepareRasterInLoadThread(
-    CesiumGltf::ImageCesium& image,
+    CesiumGltf::ImageAsset& image,
     const std::any& rendererOptions) {
-  CesiumGltfReader::GltfReader::generateMipMaps(image);
+  CesiumGltfReader::ImageDecoder::generateMipMaps(image);
   return nullptr;
 }
 
@@ -1704,7 +1732,7 @@ void* UnityPrepareRendererResources::prepareRasterInMainThread(
     CesiumRasterOverlays::RasterOverlayTile& rasterTile,
     void* pLoadThreadResult) {
   auto pTexture = std::make_unique<UnityEngine::Texture>(
-      TextureLoader::loadTexture(rasterTile.getImage(), true));
+      TextureLoader::loadTexture(*rasterTile.getImage(), true));
   pTexture->wrapMode(UnityEngine::TextureWrapMode::Clamp);
   pTexture->filterMode(UnityEngine::FilterMode::Trilinear);
   pTexture->anisoLevel(16);

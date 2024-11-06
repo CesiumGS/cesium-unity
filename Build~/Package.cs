@@ -36,13 +36,16 @@ namespace Build
                 Directory.CreateDirectory(outputPackagePath);
 
                 Console.WriteLine("**** Modifying the csc.rsp files to write generated files to disk");
-                string generatedRuntimePath = Path.Combine(tempPath, "generated", "Runtime");
-                Directory.CreateDirectory(generatedRuntimePath);
-                string generatedEditorPath = Path.Combine(tempPath, "generated", "Editor");
-                Directory.CreateDirectory(generatedEditorPath);
+                string generatedRuntimeBasePath = Path.Combine(tempPath, "generated", "Runtime");
+                Directory.CreateDirectory(generatedRuntimeBasePath);
+                string generatedEditorBasePath = Path.Combine(tempPath, "generated", "Editor");
+                Directory.CreateDirectory(generatedEditorBasePath);
 
-                File.AppendAllText(runtimeCscRspPath, "-generatedfilesout:\"" + generatedRuntimePath + "\"" + Environment.NewLine, Encoding.UTF8);
-                File.AppendAllText(editorCscRspPath, "-generatedfilesout:\"" + generatedEditorPath + "\"" + Environment.NewLine, Encoding.UTF8);
+                File.AppendAllText(runtimeCscRspPath, "-generatedfilesout:\"" + generatedRuntimeBasePath + "\"" + Environment.NewLine, Encoding.UTF8);
+                File.AppendAllText(editorCscRspPath, "-generatedfilesout:\"" + generatedEditorBasePath + "\"" + Environment.NewLine, Encoding.UTF8);
+
+                string generatedRuntimePath = Path.Combine(generatedRuntimeBasePath, "Reinterop");
+                string generatedEditorPath = Path.Combine(generatedEditorBasePath, "Reinterop");
 
                 string sceneDirectory = Path.Combine(Utility.ProjectRoot, "Assets", "Scenes");
                 Directory.CreateDirectory(sceneDirectory);
@@ -54,6 +57,24 @@ namespace Build
                     {
                         emptyScene.WriteLine("%YAML 1.1");
                         emptyScene.WriteLine("%TAG !u! tag:unity3d.com,2011:");
+                    }
+                }
+
+                // Disable Unity audio, because we don't need it and because it seems to take 10-20 minutes
+                // to time out on macOS on GitHub Actions every time we start up Unity.
+                string projectSettingsDirectory = Path.Combine(Utility.ProjectRoot, "ProjectSettings");
+                Directory.CreateDirectory(projectSettingsDirectory);
+                string audioManagerPath = Path.Combine(projectSettingsDirectory, "AudioManager.asset");
+                if (!File.Exists(audioManagerPath))
+                {
+                    Console.WriteLine("**** Creating AudioManager.asset to disable Unity audio");
+                    using (StreamWriter audioManager = new StreamWriter(audioManagerPath))
+                    {
+                        audioManager.WriteLine("%YAML 1.1");
+                        audioManager.WriteLine("%TAG !u! tag:unity3d.com,2011:");
+                        audioManager.WriteLine("--- !u!11 &1");
+                        audioManager.WriteLine("AudioManager:");
+                        audioManager.WriteLine("  m_DisableAudio: 1");
                     }
                 }
 
@@ -110,6 +131,11 @@ namespace Build
 
                 if (OperatingSystem.IsMacOS())
                 {
+                    configureArgs = configureArgs.Concat(new[]
+                    {
+                        "-DCMAKE_OSX_DEPLOYMENT_TARGET=10.15"
+                    }).ToList();
+
                     // On macOS, we must build the native code twice, once for x86_64 and once for arm64.
                     // In theory we can build universal binaries, but some of our third party libraries don't
                     // handle this well.
@@ -160,6 +186,10 @@ namespace Build
 
                     Console.WriteLine("**** Adding generated files (for the UWP Player) to the package");
                     AddGeneratedFiles("!UNITY_EDITOR && UNITY_WSA", generatedRuntimePath, Path.Combine(outputPackagePath, "Runtime", "generated"));
+
+                    // Clean the generated code directory.
+                    Directory.Delete(generatedRuntimePath, true);
+                    Directory.CreateDirectory(generatedRuntimePath);
 
                     Console.WriteLine("**** Compiling for Windows Player");
                     unity.Run(new[]

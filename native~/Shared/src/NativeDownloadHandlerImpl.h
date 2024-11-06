@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CesiumImpl.h"
+
 #include <gsl/span>
 
 #include <cstddef>
@@ -12,7 +14,7 @@ class NativeDownloadHandler;
 
 namespace CesiumForUnityNative {
 
-class NativeDownloadHandlerImpl {
+class NativeDownloadHandlerImpl : public CesiumImpl<NativeDownloadHandlerImpl> {
 public:
   NativeDownloadHandlerImpl(
       const ::DotNet::CesiumForUnity::NativeDownloadHandler& handler);

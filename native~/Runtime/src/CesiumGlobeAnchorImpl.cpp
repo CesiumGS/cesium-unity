@@ -16,7 +16,7 @@
 #include <DotNet/UnityEngine/Quaternion.h>
 #include <DotNet/UnityEngine/Transform.h>
 #include <DotNet/UnityEngine/Vector3.h>
-#include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 using namespace CesiumGeometry;
 using namespace CesiumGeospatial;
@@ -28,12 +28,12 @@ namespace {
 
 const CesiumGeospatial::Ellipsoid&
 getAnchorEllipsoid(const ::DotNet::CesiumForUnity::CesiumGlobeAnchor& anchor) {
-
   anchor.UpdateGeoreferenceIfNecessary();
-  return anchor._georeference()
-      .ellipsoid()
-      .NativeImplementation()
-      .GetEllipsoid();
+  CesiumForUnity::CesiumGeoreference georeference = anchor._georeference();
+  if (georeference == nullptr) {
+    return CesiumGeospatial::Ellipsoid::WGS84;
+  }
+  return georeference.ellipsoid().NativeImplementation().GetEllipsoid();
 }
 
 GlobeAnchor createOrUpdateNativeGlobeAnchorFromEcef(

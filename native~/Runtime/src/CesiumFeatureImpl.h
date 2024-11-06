@@ -1,12 +1,14 @@
 #pragma once
 
+#include "CesiumImpl.h"
+
 #include <CesiumGltf/PropertyTablePropertyView.h>
 
 #include <DotNet/CesiumForUnity/CesiumMetadataValue.h>
 #include <DotNet/CesiumForUnity/MetadataType.h>
+#include <swl/variant.hpp>
 
 #include <unordered_map>
-#include <variant>
 
 namespace DotNet::CesiumForUnity {
 class CesiumFeature;
@@ -18,7 +20,7 @@ class String;
 
 namespace CesiumForUnityNative {
 
-using ValueType = std::variant<
+using ValueType = swl::variant<
     int8_t,
     uint8_t,
     int16_t,
@@ -44,7 +46,7 @@ using ValueType = std::variant<
     CesiumGltf::PropertyArrayView<bool>,
     CesiumGltf::PropertyArrayView<std::string_view>>;
 
-class CesiumFeatureImpl {
+class CesiumFeatureImpl : public CesiumImpl<CesiumFeatureImpl> {
 public:
   CesiumFeatureImpl(const DotNet::CesiumForUnity::CesiumFeature& feature);
   ~CesiumFeatureImpl();

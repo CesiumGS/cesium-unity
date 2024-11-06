@@ -290,4 +290,27 @@ public class TestCesiumGlobeAnchor
         anchor.Sync();
         Assert.That(anchor.positionGlobeFixed, Is.EqualTo(actualPosEcef).Using(epsilon6));
     }
+
+    [Test]
+    public void CanChangePositionWhileDisabled()
+    {
+        IEqualityComparer<double3> epsilon6 = Comparers.Double3(1e-6, 1e-4);
+
+        double3 positionLlh = new double3(-20, -10, 1000.0);
+
+        GameObject goGeoreference = new GameObject("Georeference");
+        CesiumGeoreference georeference = goGeoreference.AddComponent<CesiumGeoreference>();
+        georeference.ellipsoid = CesiumEllipsoid.WGS84;
+        georeference.SetOriginLongitudeLatitudeHeight(positionLlh.x, positionLlh.y, positionLlh.z);
+
+        GameObject goAnchored = new GameObject("Anchored");
+        goAnchored.transform.parent = goGeoreference.transform;
+        goAnchored.transform.SetPositionAndRotation(new Vector3(0, 0, 0), Quaternion.identity);
+        goAnchored.SetActive(false);
+
+        CesiumGlobeAnchor anchor = goAnchored.AddComponent<CesiumGlobeAnchor>();
+        anchor.enabled = false;
+        anchor.longitudeLatitudeHeight = new double3(1, 1, 1);
+        Assert.That(anchor.longitudeLatitudeHeight, Is.EqualTo(new double3(1, 1, 1)).Using(epsilon6));
+    }
 }
