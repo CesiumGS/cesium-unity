@@ -1,5 +1,11 @@
 # Change Log
 
+## Not Released Yet
+
+##### Additions :tada:
+
+- Added a "From Ellipsoid" option to `Cesium3DTileset` to generate a tileset by tesselating the surface of the ellipsoid, producing a simple globe tileset without terrain features.
+
 ## v1.13.1 - 2024-11-01
 
 ##### Fixes :wrench:
@@ -116,7 +122,7 @@ In addition to the above, this release updates [cesium-native](https://github.co
 - Added `CesiumMetadataValue`, which can hold a metadata value from `EXT_structural_metadata` while abstracting away its type.
 - Added a `distance` property to `CesiumOriginShift`, which specifies the maximum allowed distance from the current origin before it is shifted.
 - Added support for the `KHR_texture_transform` glTF extension - including rotation - in `baseColorTexture`, `metallicRoughnessTexture`, `emissiveTexture`, `normalTexture`, and `occlusionTexture`. The transformation is now applied on the GPU via nodes in the Material, rather than on the CPU by directly modifying texture coordinates.
-- Added `materialKey` to `CesiumRasterOverlay`, which matches the overlay to its corresponding parameters in the tileset's material. This allows for explicit ordering of raster overlays and overlay-specific effects. 
+- Added `materialKey` to `CesiumRasterOverlay`, which matches the overlay to its corresponding parameters in the tileset's material. This allows for explicit ordering of raster overlays and overlay-specific effects.
 - `CesiumCameraController` can now accept custom input actions that override the default inputs.
 
 ##### Fixes :wrench:
