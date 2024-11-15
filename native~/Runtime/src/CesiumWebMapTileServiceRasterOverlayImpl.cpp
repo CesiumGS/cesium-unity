@@ -107,7 +107,8 @@ void CesiumWebMapTileServiceRasterOverlayImpl::AddToTileset(
     if (!DotNet::System::String::IsNullOrEmpty(
             overlay.tileMatrixSetLabelPrefix())) {
       std::string prefix = overlay.tileMatrixSetLabelPrefix().ToStlString();
-      std::vector<std::string> labels(26);
+      std::vector<std::string> labels;
+      labels.reserve(26);
       for (size_t level = 0; level <= 25; ++level) {
         labels.emplace_back(prefix + std::to_string(level));
       }
