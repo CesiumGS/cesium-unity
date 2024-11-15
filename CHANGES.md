@@ -6,6 +6,10 @@
 
 - Added a "From Ellipsoid" option to `Cesium3DTileset` to generate a tileset by tesselating the surface of the ellipsoid, producing a simple globe tileset without terrain features.
 
+##### Fixes :wrench:
+
+- Fixed a bug in `CesiumWebMapTileServiceRasterOverlay` that caused automatic Tile Matrix Set Labels to be created incorrectly, leading to incorrect tile request URLs.
+
 ## v1.13.1 - 2024-11-01
 
 ##### Fixes :wrench:
