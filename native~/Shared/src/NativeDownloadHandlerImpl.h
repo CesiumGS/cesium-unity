@@ -2,10 +2,9 @@
 
 #include "CesiumImpl.h"
 
-#include <span>
-
 #include <cstddef>
 #include <cstdint>
+#include <span>
 #include <vector>
 
 namespace DotNet::CesiumForUnity {
