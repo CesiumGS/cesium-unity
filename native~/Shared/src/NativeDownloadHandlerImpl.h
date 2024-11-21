@@ -2,7 +2,7 @@
 
 #include "CesiumImpl.h"
 
-#include <gsl/span>
+#include <span>
 
 #include <cstddef>
 #include <cstdint>

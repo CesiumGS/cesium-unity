@@ -66,7 +66,7 @@ public:
 
   virtual const HttpHeaders& headers() const override { return _headers; }
 
-  virtual gsl::span<const std::byte> data() const override {
+  virtual std::span<const std::byte> data() const override {
     return this->_data;
   }
 
@@ -202,7 +202,7 @@ UnityAssetAccessor::request(
     const std::string& verb,
     const std::string& url,
     const std::vector<THeader>& headers,
-    const gsl::span<const std::byte>& contentPayload) {
+    const std::span<const std::byte>& contentPayload) {
   if (contentPayload.size() >
       size_t(std::numeric_limits<std::int32_t>::max())) {
     // This implementation cannot be used to send more than 2 gigabytes - just
