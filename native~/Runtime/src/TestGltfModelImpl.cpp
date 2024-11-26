@@ -186,7 +186,7 @@ TestGltfModelImpl::AddBooleanPropertyTableProperty(
       property,
       classProperty,
       size,
-      gsl::span<const std::byte>(
+      std::span<const std::byte>(
           buffer.cesium.data.data(),
           buffer.cesium.data.size()));
 
@@ -221,7 +221,7 @@ TestGltfModelImpl::AddIntPropertyTableProperty(
         property,
         classProperty,
         size,
-        gsl::span<const std::byte>(
+        std::span<const std::byte>(
             buffer.cesium.data.data(),
             buffer.cesium.data.size()));
 
@@ -233,7 +233,7 @@ TestGltfModelImpl::AddIntPropertyTableProperty(
       property,
       classProperty,
       size,
-      gsl::span<const std::byte>(
+      std::span<const std::byte>(
           buffer.cesium.data.data(),
           buffer.cesium.data.size()));
 
@@ -265,7 +265,7 @@ TestGltfModelImpl::AddDoublePropertyTableProperty(
       property,
       classProperty,
       size,
-      gsl::span<const std::byte>(
+      std::span<const std::byte>(
           buffer.cesium.data.data(),
           buffer.cesium.data.size()));
 
@@ -298,7 +298,7 @@ TestGltfModelImpl::AddVec2PropertyTableProperty(
       property,
       classProperty,
       size,
-      gsl::span<const std::byte>(
+      std::span<const std::byte>(
           buffer.cesium.data.data(),
           buffer.cesium.data.size()));
 
@@ -331,7 +331,7 @@ TestGltfModelImpl::AddVec3PropertyTableProperty(
       property,
       classProperty,
       size,
-      gsl::span<const std::byte>(
+      std::span<const std::byte>(
           buffer.cesium.data.data(),
           buffer.cesium.data.size()));
 
@@ -368,7 +368,7 @@ TestGltfModelImpl::AddVec4PropertyTableProperty(
       property,
       classProperty,
       size,
-      gsl::span<const std::byte>(
+      std::span<const std::byte>(
           buffer.cesium.data.data(),
           buffer.cesium.data.size()));
 
@@ -406,7 +406,7 @@ TestGltfModelImpl::AddMat2PropertyTableProperty(
       property,
       classProperty,
       size,
-      gsl::span<const std::byte>(
+      std::span<const std::byte>(
           buffer.cesium.data.data(),
           buffer.cesium.data.size()));
 
@@ -445,7 +445,7 @@ TestGltfModelImpl::AddMat3PropertyTableProperty(
       property,
       classProperty,
       size,
-      gsl::span<const std::byte>(
+      std::span<const std::byte>(
           buffer.cesium.data.data(),
           buffer.cesium.data.size()));
 
@@ -485,7 +485,7 @@ TestGltfModelImpl::AddMat4PropertyTableProperty(
       property,
       classProperty,
       size,
-      gsl::span<const std::byte>(
+      std::span<const std::byte>(
           buffer.cesium.data.data(),
           buffer.cesium.data.size()));
 
@@ -545,11 +545,11 @@ TestGltfModelImpl::AddStringPropertyTableProperty(
       property,
       classProperty,
       size,
-      gsl::span<const std::byte>(
+      std::span<const std::byte>(
           stringBuffer.cesium.data.data(),
           stringBuffer.cesium.data.size()),
-      gsl::span<const std::byte>(),
-      gsl::span<const std::byte>(
+      std::span<const std::byte>(),
+      std::span<const std::byte>(
           offsetBuffer.cesium.data.data(),
           offsetBuffer.cesium.data.size()),
       CesiumGltf::PropertyComponentType::None,
@@ -588,7 +588,7 @@ TestGltfModelImpl::AddFixedLengthArrayPropertyTableProperty(
           property,
           classProperty,
           numValues / count,
-          gsl::span<const std::byte>(
+          std::span<const std::byte>(
               buffer.cesium.data.data(),
               buffer.cesium.data.size()));
 
@@ -642,13 +642,13 @@ TestGltfModelImpl::AddVariableLengthArrayPropertyTableProperty(
           property,
           classProperty,
           size,
-          gsl::span<const std::byte>(
+          std::span<const std::byte>(
               buffer.cesium.data.data(),
               buffer.cesium.data.size()),
-          gsl::span<const std::byte>(
+          std::span<const std::byte>(
               offsetBuffer.cesium.data.data(),
               offsetBuffer.cesium.data.size()),
-          gsl::span<const std::byte>(),
+          std::span<const std::byte>(),
           CesiumGltf::PropertyComponentType::Uint16,
           CesiumGltf::PropertyComponentType::None);
 
