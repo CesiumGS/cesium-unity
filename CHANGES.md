@@ -4,7 +4,7 @@
 
 ##### Additions :tada:
 
-- Added a "From Ellipsoid" option to `Cesium3DTileset` to generate a tileset by tesselating the surface of the ellipsoid, producing a simple globe tileset without terrain features.
+- Added a "From Ellipsoid" option to `Cesium3DTileset` to generate a tileset by tessellating the surface of the ellipsoid, producing a simple globe tileset without terrain features.
 
 ##### Fixes :wrench:
 
