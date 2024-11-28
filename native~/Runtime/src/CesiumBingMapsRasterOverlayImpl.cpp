@@ -81,7 +81,6 @@ void CesiumBingMapsRasterOverlayImpl::AddToTileset(
       overlay.bingMapsKey().ToStlString(),
       mapStyle,
       "",
-      pTileset->getEllipsoid(),
       options);
 
   pTileset->getOverlays().add(this->_pOverlay);
