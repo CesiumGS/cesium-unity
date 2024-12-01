@@ -1,6 +1,6 @@
 # Change Log
 
-## Not Released Yet
+## v1.14.0 - 2024-12-02
 
 ##### Additions :tada:
 
@@ -9,6 +9,8 @@
 ##### Fixes :wrench:
 
 - Fixed a bug in `CesiumWebMapTileServiceRasterOverlay` that caused automatic Tile Matrix Set Labels to be created incorrectly, leading to incorrect tile request URLs.
+
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.41.0 to v0.42.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
 
 ## v1.13.1 - 2024-11-01
 
