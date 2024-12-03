@@ -252,7 +252,7 @@ namespace CesiumForUnity
             set
             {
                 this._maximumScreenSpaceError = value;
-                this.RecreateTileset();
+                this.UpdateTilesetOptions();
             }
         }
 
@@ -273,7 +273,7 @@ namespace CesiumForUnity
             set
             {
                 this._preloadAncestors = value;
-                this.RecreateTileset();
+                this.UpdateTilesetOptions();
             }
         }
 
@@ -294,7 +294,7 @@ namespace CesiumForUnity
             set
             {
                 this._preloadSiblings = value;
-                this.RecreateTileset();
+                this.UpdateTilesetOptions();
             }
         }
 
@@ -317,7 +317,7 @@ namespace CesiumForUnity
             set
             {
                 this._forbidHoles = value;
-                this.RecreateTileset();
+                this.UpdateTilesetOptions();
             }
         }
 
@@ -340,7 +340,7 @@ namespace CesiumForUnity
             set
             {
                 this._maximumSimultaneousTileLoads = value;
-                this.RecreateTileset();
+                this.UpdateTilesetOptions();
             }
         }
 
@@ -363,7 +363,7 @@ namespace CesiumForUnity
             set
             {
                 this._maximumCachedBytes = value;
-                this.RecreateTileset();
+                this.UpdateTilesetOptions();
             }
         }
 
@@ -387,7 +387,7 @@ namespace CesiumForUnity
             set
             {
                 this._loadingDescendantLimit = value;
-                this.RecreateTileset();
+                this.UpdateTilesetOptions();
             }
         }
 
@@ -417,7 +417,7 @@ namespace CesiumForUnity
             set
             {
                 this._enableFrustumCulling = value;
-                this.RecreateTileset();
+                this.UpdateTilesetOptions();
             }
         }
 
@@ -444,7 +444,7 @@ namespace CesiumForUnity
             set
             {
                 this._enableFogCulling = value;
-                this.RecreateTileset();
+                this.UpdateTilesetOptions();
             }
         }
 
@@ -483,7 +483,7 @@ namespace CesiumForUnity
             set
             {
                 this._enforceCulledScreenSpaceError = value;
-                this.RecreateTileset();
+                this.UpdateTilesetOptions();
             }
         }
 
@@ -520,7 +520,7 @@ namespace CesiumForUnity
             set
             {
                 this._culledScreenSpaceError = value;
-                this.RecreateTileset();
+                this.UpdateTilesetOptions();
             }
         }
 
@@ -549,7 +549,7 @@ namespace CesiumForUnity
         //    set
         //    {
         //        this._useLodTransitions = value;
-        //        this.RecreateTileset();
+        //        this.UpdateTilesetOptions();
         //    }
         //}
 
@@ -563,7 +563,7 @@ namespace CesiumForUnity
         //    set
         //    {
         //        this._lodTransitionLength = value;
-        //        this.RecreateTileset();
+        //        this.UpdateTilesetOptions();
         //    }
         //}
 
@@ -717,6 +717,12 @@ namespace CesiumForUnity
         /// based on the current view.
         /// </summary>
         public partial void RecreateTileset();
+        
+        /// <summary>
+        /// Update the tileset options. Tiles are not unloaded, but the Options of the tileset are updated
+        /// based on the current values of the properties.
+        /// </summary>
+        public partial void UpdateTilesetOptions();
 
         /// <summary>
         /// Zoom the Editor camera to this tileset. This method does nothing outside of the Editor.
