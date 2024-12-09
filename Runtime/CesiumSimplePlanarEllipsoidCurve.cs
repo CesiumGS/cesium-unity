@@ -25,6 +25,7 @@ namespace CesiumForUnity
         /// Creates a new <see cref="CesiumSimplePlanarEllipsoidCurve"/> object from a pair of 
         /// Ellipsoid-Centered, Ellipsoid-Fixed coordinates describing the beginning and end points of the curve.
         /// </summary>
+        /// <param name="ellipsoid">The ellipsoid to use for this curve.</param>
         /// <param name="sourceEcef">The start point of the curve.</param>
         /// <param name="destinationEcef">The end point of the curve.</param>
         /// <returns>
@@ -46,6 +47,7 @@ namespace CesiumForUnity
         /// Creates a new <see cref="CesiumSimplePlanarEllipsoidCurve"/> object from a pair of cartographic 
         /// coordinates (Longitude, Latitude, and Height) describing the beginning and end points of the curve.
         /// </summary>
+        /// <param name="ellipsoid">The ellipsoid to use for this curve.</param>
         /// <param name="sourceLlh">The start point of the curve.</param>
         /// <param name="destinationLlh">The end point of the curve.</param>
         /// <returns>
