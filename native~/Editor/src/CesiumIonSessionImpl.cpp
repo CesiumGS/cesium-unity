@@ -5,6 +5,7 @@
 #include "UnityTaskProcessor.h"
 
 #include <CesiumAsync/AsyncSystem.h>
+#include <CesiumUtility/IntrusivePointer.h>
 #include <CesiumUtility/Uri.h>
 
 #include <DotNet/CesiumForUnity/CesiumIonServer.h>
@@ -156,6 +157,8 @@ void CesiumIonSessionImpl::Connect(
   std::string ionServerUrl = server.serverUrl().ToStlString();
   std::string ionApiUrl = server.apiUrl().ToStlString();
 
+  CesiumUtility::IntrusivePointer<CesiumIonSessionImpl> pThis = this;
+
   CesiumAsync::Future<std::optional<std::string>> futureApiUrl =
       !ionApiUrl.empty()
           ? this->_asyncSystem.createResolvedFuture<std::optional<std::string>>(
@@ -169,7 +172,7 @@ void CesiumIonSessionImpl::Connect(
       .thenInMainThread([ionServerUrl,
                          server,
                          session,
-                         this,
+                         pThis,
                          asyncSystem = this->_asyncSystem](
                             std::optional<std::string>&& ionApiUrl) {
         CesiumAsync::Promise<bool> promise = asyncSystem.createPromise<bool>();
@@ -198,24 +201,24 @@ void CesiumIonSessionImpl::Connect(
         }
 
         // Make request to /appData to learn the server's authentication mode
-        return this->ensureAppDataLoaded(session);
+        return pThis->ensureAppDataLoaded(session);
       })
-      .thenInMainThread([ionServerUrl, server, session, this](
+      .thenInMainThread([ionServerUrl, server, session, pThis](
                             bool loadedAppData) {
-        if (!loadedAppData || !this->_appData.has_value()) {
+        if (!loadedAppData || !pThis->_appData.has_value()) {
           CesiumAsync::Promise<CesiumIonClient::Connection> promise =
-              this->_asyncSystem.createPromise<CesiumIonClient::Connection>();
+              pThis->_asyncSystem.createPromise<CesiumIonClient::Connection>();
 
           promise.reject(std::runtime_error(
               "Failed to load _appData, can't create connection"));
           return promise.getFuture();
         }
 
-        if (this->_appData->needsOauthAuthentication()) {
+        if (pThis->_appData->needsOauthAuthentication()) {
           int64_t clientID = server.oauth2ApplicationID();
           return CesiumIonClient::Connection::authorize(
-              this->_asyncSystem,
-              this->_pAssetAccessor,
+              pThis->_asyncSystem,
+              pThis->_pAssetAccessor,
               "Cesium for Unity",
               clientID,
               "/cesium-for-unity/oauth2/callback",
@@ -225,44 +228,44 @@ void CesiumIonSessionImpl::Connect(
                "tokens:read",
                "tokens:write",
                "geocode"},
-              [this](const std::string& url) {
-                this->_authorizeUrl = url;
-                this->_redirectUrl =
+              [pThis](const std::string& url) {
+                pThis->_authorizeUrl = url;
+                pThis->_redirectUrl =
                     CesiumUtility::Uri::getQueryValue(url, "redirect_uri");
                 UnityEngine::Application::OpenURL(url);
               },
-              this->_appData.value(),
+              pThis->_appData.value(),
               server.apiUrl().ToStlString(),
               CesiumUtility::Uri::resolve(ionServerUrl, "oauth"));
         }
 
-        return this->_asyncSystem
+        return pThis->_asyncSystem
             .createResolvedFuture<CesiumIonClient::Connection>(
                 CesiumIonClient::Connection(
-                    this->_asyncSystem,
-                    this->_pAssetAccessor,
+                    pThis->_asyncSystem,
+                    pThis->_pAssetAccessor,
                     "",
-                    this->_appData.value(),
+                    pThis->_appData.value(),
                     server.apiUrl().ToStlString()));
       })
-      .thenInMainThread([this,
+      .thenInMainThread([pThis,
                          session](CesiumIonClient::Connection&& connection) {
-        this->_isConnecting = false;
-        this->_connection = std::move(connection);
+        pThis->_isConnecting = false;
+        pThis->_connection = std::move(connection);
 
         CesiumForUnity::CesiumIonServer server = session.server();
         CesiumForUnity::CesiumIonServerManager::instance().SetUserAccessToken(
             server,
-            this->_connection.value().getAccessToken());
-        this->_quickAddItems = nullptr;
-        this->broadcastConnectionUpdate();
+            pThis->_connection.value().getAccessToken());
+        pThis->_quickAddItems = nullptr;
+        pThis->broadcastConnectionUpdate();
       })
-      .catchInMainThread([this](std::exception&& e) {
+      .catchInMainThread([pThis](std::exception&& e) {
         DotNet::UnityEngine::Debug::Log(System::String(e.what()));
-        this->_isConnecting = false;
-        this->_connection = std::nullopt;
-        this->_quickAddItems = nullptr;
-        this->broadcastConnectionUpdate();
+        pThis->_isConnecting = false;
+        pThis->_connection = std::nullopt;
+        pThis->_quickAddItems = nullptr;
+        pThis->broadcastConnectionUpdate();
       });
 }
 
@@ -280,9 +283,11 @@ void CesiumIonSessionImpl::Resume(
 
   this->_isResuming = true;
 
+  CesiumUtility::IntrusivePointer<CesiumIonSessionImpl> pThis = this;
+
   // Verify that the connection actually works.
   this->ensureAppDataLoaded(session)
-      .thenInMainThread([this,
+      .thenInMainThread([pThis,
                          session,
                          userAccessToken,
                          server,
@@ -290,31 +295,31 @@ void CesiumIonSessionImpl::Resume(
         CesiumAsync::Promise<void> promise = asyncSystem.createPromise<void>();
 
         if (session == nullptr || !loadedAppData ||
-            !this->_appData.has_value()) {
+            !pThis->_appData.has_value()) {
           promise.reject(std::runtime_error(
               "Failed to obtain _appData, can't resume connection"));
           return promise.getFuture();
         }
 
-        if (this->_appData->needsOauthAuthentication() &&
+        if (pThis->_appData->needsOauthAuthentication() &&
             System::String::IsNullOrEmpty(userAccessToken)) {
           // No user access token was stored, so there's no existing session
           // to resume.
           promise.resolve();
-          this->_isResuming = false;
+          pThis->_isResuming = false;
           return promise.getFuture();
         }
 
         std::shared_ptr<CesiumIonClient::Connection> pConnection =
             std::make_shared<CesiumIonClient::Connection>(
-                this->_asyncSystem,
-                this->_pAssetAccessor,
+                pThis->_asyncSystem,
+                pThis->_pAssetAccessor,
                 userAccessToken.ToStlString(),
-                this->_appData.value(),
+                pThis->_appData.value(),
                 server.apiUrl().ToStlString());
 
         return pConnection->me().thenInMainThread(
-            [this, session, pConnection](
+            [pThis, session, pConnection](
                 CesiumIonClient::Response<CesiumIonClient::Profile>&&
                     response) {
               if (session == nullptr)
@@ -322,21 +327,21 @@ void CesiumIonSessionImpl::Resume(
 
               logResponseErrors(response);
               if (response.value.has_value()) {
-                this->_connection = std::move(*pConnection);
+                pThis->_connection = std::move(*pConnection);
               }
-              this->_isResuming = false;
-              this->_quickAddItems = nullptr;
-              this->broadcastConnectionUpdate();
+              pThis->_isResuming = false;
+              pThis->_quickAddItems = nullptr;
+              pThis->broadcastConnectionUpdate();
 
-              this->startQueuedLoads(session);
+              pThis->startQueuedLoads(session);
             });
       })
-      .catchInMainThread([this, session](std::exception&& e) {
+      .catchInMainThread([pThis, session](std::exception&& e) {
         if (session == nullptr)
           return;
 
         logResponseErrors(e);
-        this->_isResuming = false;
+        pThis->_isResuming = false;
       });
 }
 
@@ -433,28 +438,30 @@ void CesiumIonSessionImpl::refreshProfile(
   this->_isLoadingProfile = true;
   this->_loadProfileQueued = false;
 
+  CesiumUtility::IntrusivePointer<CesiumIonSessionImpl> pThis = this;
+
   this->_connection->me()
       .thenInMainThread(
-          [this, session](
+          [pThis, session](
               CesiumIonClient::Response<CesiumIonClient::Profile>&& profile) {
             if (session == nullptr)
               return;
 
-            this->_isLoadingProfile = false;
-            this->_profile = std::move(profile.value);
-            this->broadcastProfileUpdate();
-            if (this->_loadProfileQueued)
-              this->refreshProfile(session);
+            pThis->_isLoadingProfile = false;
+            pThis->_profile = std::move(profile.value);
+            pThis->broadcastProfileUpdate();
+            if (pThis->_loadProfileQueued)
+              pThis->refreshProfile(session);
           })
-      .catchInMainThread([this, session](std::exception&& e) {
+      .catchInMainThread([pThis, session](std::exception&& e) {
         if (session == nullptr)
           return;
 
-        this->_isLoadingProfile = false;
-        this->_profile = std::nullopt;
-        this->broadcastProfileUpdate();
-        if (this->_loadProfileQueued)
-          this->refreshProfile(session);
+        pThis->_isLoadingProfile = false;
+        pThis->_profile = std::nullopt;
+        pThis->broadcastProfileUpdate();
+        if (pThis->_loadProfileQueued)
+          pThis->refreshProfile(session);
       });
 }
 
@@ -473,28 +480,30 @@ void CesiumIonSessionImpl::refreshAssets(
   this->_isLoadingAssets = true;
   this->_loadAssetsQueued = false;
 
+  CesiumUtility::IntrusivePointer<CesiumIonSessionImpl> pThis = this;
+
   this->_connection->assets()
       .thenInMainThread(
-          [this, session](
+          [pThis, session](
               CesiumIonClient::Response<CesiumIonClient::Assets>&& assets) {
             if (session == nullptr)
               return;
 
-            this->_isLoadingAssets = false;
-            this->_assets = std::move(assets.value);
-            this->broadcastAssetsUpdate();
-            if (this->_loadAssetsQueued)
-              this->refreshAssets(session);
+            pThis->_isLoadingAssets = false;
+            pThis->_assets = std::move(assets.value);
+            pThis->broadcastAssetsUpdate();
+            if (pThis->_loadAssetsQueued)
+              pThis->refreshAssets(session);
           })
-      .catchInMainThread([this, session](std::exception&& e) {
+      .catchInMainThread([pThis, session](std::exception&& e) {
         if (session == nullptr)
           return;
 
-        this->_isLoadingAssets = false;
-        this->_assets = std::nullopt;
-        this->broadcastAssetsUpdate();
-        if (this->_loadAssetsQueued)
-          this->refreshAssets(session);
+        pThis->_isLoadingAssets = false;
+        pThis->_assets = std::nullopt;
+        pThis->broadcastAssetsUpdate();
+        if (pThis->_loadAssetsQueued)
+          pThis->refreshAssets(session);
       });
 }
 
@@ -518,31 +527,33 @@ void CesiumIonSessionImpl::refreshTokens(
   this->_isLoadingTokens = true;
   this->_loadTokensQueued = false;
 
+  CesiumUtility::IntrusivePointer<CesiumIonSessionImpl> pThis = this;
+
   this->_connection->tokens()
       .thenInMainThread(
-          [this, session](
+          [pThis, session](
               CesiumIonClient::Response<CesiumIonClient::TokenList>&& tokens) {
             if (session == nullptr)
               return;
 
-            this->_isLoadingTokens = false;
-            this->_tokens =
+            pThis->_isLoadingTokens = false;
+            pThis->_tokens =
                 tokens.value
                     ? std::make_optional(std::move(tokens.value->items))
                     : std::nullopt;
-            this->broadcastTokensUpdate();
-            if (this->_loadTokensQueued)
-              this->refreshTokens(session);
+            pThis->broadcastTokensUpdate();
+            if (pThis->_loadTokensQueued)
+              pThis->refreshTokens(session);
           })
-      .catchInMainThread([this, session](std::exception&& e) {
+      .catchInMainThread([pThis, session](std::exception&& e) {
         if (session == nullptr)
           return;
 
-        this->_isLoadingTokens = false;
-        this->_tokens = std::nullopt;
-        this->broadcastTokensUpdate();
-        if (this->_loadTokensQueued)
-          this->refreshTokens(session);
+        pThis->_isLoadingTokens = false;
+        pThis->_tokens = std::nullopt;
+        pThis->broadcastTokensUpdate();
+        if (pThis->_loadTokensQueued)
+          pThis->refreshTokens(session);
       });
 }
 
@@ -556,32 +567,34 @@ void CesiumIonSessionImpl::refreshDefaults(
   this->_isLoadingDefaults = true;
   this->_loadDefaultsQueued = false;
 
+  CesiumUtility::IntrusivePointer<CesiumIonSessionImpl> pThis = this;
+
   this->_connection->defaults()
       .thenInMainThread(
-          [this, session](
+          [pThis, session](
               CesiumIonClient::Response<CesiumIonClient::Defaults>&& defaults) {
             if (session == nullptr)
               return;
 
             logResponseErrors(defaults);
-            this->_isLoadingDefaults = false;
-            this->_defaults = std::move(defaults.value);
-            this->_quickAddItems = nullptr;
-            this->broadcastDefaultsUpdate();
-            if (this->_loadDefaultsQueued)
-              this->refreshDefaults(session);
+            pThis->_isLoadingDefaults = false;
+            pThis->_defaults = std::move(defaults.value);
+            pThis->_quickAddItems = nullptr;
+            pThis->broadcastDefaultsUpdate();
+            if (pThis->_loadDefaultsQueued)
+              pThis->refreshDefaults(session);
           })
-      .catchInMainThread([this, session](std::exception&& e) {
+      .catchInMainThread([pThis, session](std::exception&& e) {
         if (session == nullptr)
           return;
 
         logResponseErrors(e);
-        this->_isLoadingDefaults = false;
-        this->_defaults = std::nullopt;
-        this->_quickAddItems = nullptr;
-        this->broadcastDefaultsUpdate();
-        if (this->_loadDefaultsQueued)
-          this->refreshDefaults(session);
+        pThis->_isLoadingDefaults = false;
+        pThis->_defaults = std::nullopt;
+        pThis->_quickAddItems = nullptr;
+        pThis->broadcastDefaultsUpdate();
+        if (pThis->_loadDefaultsQueued)
+          pThis->refreshDefaults(session);
       });
 }
 
@@ -805,12 +818,14 @@ CesiumAsync::Future<bool> CesiumIonSessionImpl::ensureAppDataLoaded(
     const DotNet::CesiumForUnity::CesiumIonSession& session) {
   CesiumForUnity::CesiumIonServer server = session.server();
 
+  CesiumUtility::IntrusivePointer<CesiumIonSessionImpl> pThis = this;
+
   return CesiumIonClient::Connection::appData(
              this->_asyncSystem,
              this->_pAssetAccessor,
              server.apiUrl().ToStlString())
       .thenInMainThread(
-          [this, session, asyncSystem = this->_asyncSystem](
+          [pThis, session, asyncSystem = this->_asyncSystem](
               CesiumIonClient::Response<CesiumIonClient::ApplicationData>&&
                   appData) {
             CesiumAsync::Promise<bool> promise =
@@ -823,7 +838,7 @@ CesiumAsync::Future<bool> CesiumIonSessionImpl::ensureAppDataLoaded(
               return promise.getFuture();
             }
 
-            this->_appData = appData.value;
+            pThis->_appData = appData.value;
             if (!appData.value.has_value()) {
               UnityEngine::Debug::LogError(System::String(fmt::format(
                   "Failed to obtain ion server application data: {}",
@@ -835,7 +850,7 @@ CesiumAsync::Future<bool> CesiumIonSessionImpl::ensureAppDataLoaded(
 
             return promise.getFuture();
           })
-      .catchInMainThread([this, session, asyncSystem = this->_asyncSystem](
+      .catchInMainThread([pThis, session, asyncSystem = this->_asyncSystem](
                              std::exception&& e) {
         logResponseErrors(e);
         return asyncSystem.createResolvedFuture(false);
