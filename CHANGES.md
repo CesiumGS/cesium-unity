@@ -1,5 +1,11 @@
 # Change Log
 
+## ? - ?
+
+##### Fixes :wrench:
+
+- Fixed a bug that could cause a crash on AppDomain reloads.
+
 ## v1.14.0 - 2024-12-02
 
 ##### Additions :tada:
