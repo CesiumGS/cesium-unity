@@ -103,8 +103,8 @@ namespace CesiumForUnity
         /// If the feature ID is out-of-bounds, the returned dictionary will be empty.
         /// </para>
         /// </remarks>
+        /// <param name="values">The dictionary of values that will be cleared and filled by this method.</param>
         /// <param name="featureId">The ID of the feature.</param>
-        /// <returns>A dictionary of the property values mapped by property name.</returns>
         public void GetMetadataValuesForFeature(Dictionary<String, CesiumMetadataValue> values, Int64 featureId)
         {
             values.Clear();

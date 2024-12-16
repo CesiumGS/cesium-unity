@@ -1,3 +1,5 @@
+# Creating MonoBehaviours {#creating-monobehaviours}
+
 Guidelines and tips for creating MonoBehaviours in Cesium for Unity.
 
 ## Avoid implementing non-static methods in C++
@@ -25,11 +27,11 @@ If you don't need C++-specific state, static methods are _much_ more efficient. 
 
 Carefully consider every field that you add to the class. In general, only the essential fields necessary to reconstruct the state of the object should by marked `[SerializeField]`. Cached and derived fields should instead be marked `[NonSerialized]`. Fields without any attribute should be extremely rare.
 
-| *Characteristic*              | *`[SerializeField]`* | *No attribute* | *`[NonSerialized]`* |
-|-------------------------------|----------------------|--------------|-------------------|
-| Saved / Loaded with the Scene | ✅                   | ❌          | ❌                |
-| Preserved on script change / AppDomain reload | ✅   | ✅          | ❌                |
-| Transfers from Edit mode to Play mode      | ✅   | ❌          | ❌                |
+| *Characteristic*                              | *`[SerializeField]`* | *No attribute* | *`[NonSerialized]`* |
+| --------------------------------------------- | -------------------- | -------------- | ------------------- |
+| Saved / Loaded with the Scene                 | ✅                    | ❌              | ❌                   |
+| Preserved on script change / AppDomain reload | ✅                    | ✅              | ❌                   |
+| Transfers from Edit mode to Play mode         | ✅                    | ❌              | ❌                   |
 
 ## Backward compatibility
 
