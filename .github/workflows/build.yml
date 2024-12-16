@@ -27,13 +27,13 @@ jobs:
           submodules: recursive
       - name: Generate Documentation
         run: |
-          doxygen ./Documentation/Doxyfile
+          npm run doxygen
       - name: Publish Documentation Artifact
         if: ${{ success() }}
         uses: actions/upload-artifact@v4
         with:
           name: ReferenceDocumentation
-          path: Documentation/Reference
+          path: Documentation~/Reference
   Windows:
     needs: [QuickChecks]
     runs-on: windows-latest

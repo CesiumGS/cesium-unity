@@ -11,6 +11,6 @@
 	path = native~/extern/swl-variant
 	url = https://github.com/kring/swl-variant.git
 	branch = exception-public-inheritance
-[submodule "Documentation/doxygen-awesome-css"]
-	path = Documentation/doxygen-awesome-css
+[submodule "Documentation~/doxygen-awesome-css"]
+	path = Documentation~/doxygen-awesome-css
 	url = https://github.com/jothepro/doxygen-awesome-css.git

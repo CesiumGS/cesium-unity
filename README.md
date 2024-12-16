@@ -1,4 +1,4 @@
-[![Cesium for Unity Logo](Documentation/images/Cesium_for_Unity-Logo-WhiteBGH.jpg)](https://cesium.com/)
+[![Cesium for Unity Logo](Documentation~/images/Cesium_for_Unity-Logo-WhiteBGH.jpg)](https://cesium.com/)
 
 Cesium for Unity enables building 3D geospatial applications and experiences with 3D Tiles and open standards using Unity 3D. By combining a high-accuracy full-scale WGS84 globe, open APIs and open standards for spatial indexing such as 3D Tiles, and cloud-based real-world content from [Cesium ion](https://cesium.com/cesium-ion) with Unity, this plugin enables rich 3D geospatial workflows and applications in Unity.
 
@@ -14,7 +14,7 @@ Have questions? Ask them on the [community forum](https://community.cesium.com/c
 
 ### 👏 Featured Demos
 
-[![](Documentation/images/cesium-for-unity-screenshot.jpg)](https://github.com/CesiumGS/cesium-unity-samples)
+[![](Documentation~/images/cesium-for-unity-screenshot.jpg)](https://github.com/CesiumGS/cesium-unity-samples)
 
 ### 🏡 Cesium for Unity and the 3D Geospatial Ecosystem
 
@@ -22,7 +22,7 @@ Cesium for Unity streams real-world 3D content such as high-resolution photogram
 
 Cesium for Unity supports cloud and private network content and services based on open standards and APIs. You are free to use any combination of supported content sources, standards, APIs with Cesium for Unity.
 
-![Cesium for Unity Architecture](Documentation/images/integration-workflow_Unity.png)
+![Cesium for Unity Architecture](Documentation~/images/integration-workflow_Unity.png)
 
 Using Cesium ion helps support Cesium for Unity development. ❤️
 
@@ -36,4 +36,4 @@ Cesium for Unity is tightly integrated with Unity making it possible to visualiz
 
 ### 🖥️ Developing Cesium for Unity
 
-See the [Developer Setup Guide](Documentation/developer-setup.md) to learn how to set up a development environment for Cesium for Unity, allowing you to compile it, customize it, and contribute to its development.
+See the [Developer Setup Guide](Documentation~/developer-setup.md) to learn how to set up a development environment for Cesium for Unity, allowing you to compile it, customize it, and contribute to its development.

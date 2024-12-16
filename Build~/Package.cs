@@ -401,7 +401,7 @@ namespace Build
                 "Editor",
                 "Runtime",
                 "Tests",
-                "Documentation",
+                "Documentation~",
                 "Plugins"
             };
 
