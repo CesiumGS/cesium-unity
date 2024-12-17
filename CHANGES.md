@@ -1,5 +1,11 @@
 # Change Log
 
+## ? - ?
+
+##### Fixes :wrench:
+
+- Fixed a bug in the Abseil vcpkg overlay port that could cause linker errors on some systems.
+
 ## v1.14.0 - 2024-12-02
 
 ##### Additions :tada:
