@@ -161,11 +161,11 @@ template <typename TIndex> struct CopyVertexColors {
     bool success = true;
     if (duplicateVertices) {
       for (size_t i = 0; success && i < vertexCount; ++i) {
-        if (i >= colorView.size()) {
+        TIndex vertexIndex = indices[i];
+        if (vertexIndex < 0 || vertexIndex >= colorView.size()) {
           success = false;
         } else {
           Color32& packedColor = *reinterpret_cast<Color32*>(pWritePos);
-          TIndex vertexIndex = indices[i];
           success = CopyVertexColors::convertColor(
               colorView[vertexIndex],
               packedColor);
