@@ -1,6 +1,7 @@
-# Reinterop
+# Reinterop {#reinterop}
 
 Reinterop generates C# and C++ code to allow a .NET library to be seamlessly used from C++ code.
+<!--! [TOC] -->
 
 **Note: Reinterop currently requires the latest preview version of Visual Studio 2022, because it uses C# 11 / .NET 7. However, the generated code can be used almost anywhere, including in Unity's version of Mono.**
 
