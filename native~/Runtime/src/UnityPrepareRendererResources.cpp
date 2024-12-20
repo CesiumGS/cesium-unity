@@ -272,7 +272,7 @@ void generateMipMaps(
         // associated with a depot, unshare it. This is necessary to avoid a
         // race condition where multiple threads attempt to generate mipmaps for
         // the same shared image simultaneously.
-        if (pImage->pAsset && pImage->pAsset->getDepot() != nullptr) {
+        if (pImage->pAsset && pImage->pAsset->getDepot()) {
           // Copy the asset.
           pImage->pAsset.emplace(*pImage->pAsset);
         }
