@@ -5,6 +5,8 @@
 ##### Fixes :wrench:
 
 - Fixed a bug that could cause a crash or incorrect textures when multiple `Cesium3DTileset` tiles referenced the same image by URL.
+- Fixed a bug that could cause incorrect colors in a model that did have vertex colors but did not have normals.
+- Fixed a bug that could cause a hang when attempting to load a model with UINT16 indices where generating flat normals required more than 2^16 vertices.
 
 ## v1.14.0 - 2024-12-02
 

@@ -347,6 +347,43 @@ void loadPrimitive(
     return;
   }
 
+  const CesiumGltf::Material* pMaterial =
+      Model::getSafe(&gltf.materials, primitive.material);
+
+  primitiveInfo.isUnlit =
+      pMaterial && pMaterial->hasExtension<ExtensionKhrMaterialsUnlit>();
+
+  bool hasNormals = false;
+  bool computeFlatNormals = false;
+  auto normalAccessorIt = primitive.attributes.find("NORMAL");
+  AccessorView<UnityEngine::Vector3> normalView;
+  if (normalAccessorIt != primitive.attributes.end()) {
+    normalView =
+        AccessorView<UnityEngine::Vector3>(gltf, normalAccessorIt->second);
+    hasNormals = normalView.status() == AccessorViewStatus::Valid;
+  } else if (
+      !primitiveInfo.isUnlit && primitive.mode != MeshPrimitive::Mode::POINTS) {
+    computeFlatNormals = hasNormals = true;
+  }
+
+  // Check if  we need to upgrade to a large index type to accommodate the
+  // larger number of vertices we need for flat normals.
+  if (computeFlatNormals && indexFormat == IndexFormat::UInt16 &&
+      indexCount >= std::numeric_limits<uint16_t>::max()) {
+    loadPrimitive<uint32_t>(
+        meshData,
+        primitiveInfo,
+        gltf,
+        node,
+        mesh,
+        primitive,
+        transform,
+        indicesView,
+        IndexFormat::UInt32,
+        positionView);
+    return;
+  }
+
   meshData.SetIndexBufferParams(indexCount, indexFormat);
   const Unity::Collections::NativeArray1<TIndex>& dest =
       meshData.GetIndexData<TIndex>();
@@ -399,25 +436,7 @@ void loadPrimitive(
   descriptor[numberOfAttributes].stream = streamIndex;
   ++numberOfAttributes;
 
-  const CesiumGltf::Material* pMaterial =
-      Model::getSafe(&gltf.materials, primitive.material);
-
-  primitiveInfo.isUnlit =
-      pMaterial && pMaterial->hasExtension<ExtensionKhrMaterialsUnlit>();
-
   // Add the NORMAL attribute, if it exists.
-  bool hasNormals = false;
-  bool computeFlatNormals = false;
-  auto normalAccessorIt = primitive.attributes.find("NORMAL");
-  AccessorView<UnityEngine::Vector3> normalView;
-  if (normalAccessorIt != primitive.attributes.end()) {
-    normalView =
-        AccessorView<UnityEngine::Vector3>(gltf, normalAccessorIt->second);
-    hasNormals = normalView.status() == AccessorViewStatus::Valid;
-  } else if (
-      !primitiveInfo.isUnlit && primitive.mode != MeshPrimitive::Mode::POINTS) {
-    computeFlatNormals = hasNormals = true;
-  }
   if (hasNormals) {
     assert(numberOfAttributes < MAX_ATTRIBUTES);
     descriptor[numberOfAttributes].attribute = VertexAttribute::Normal;

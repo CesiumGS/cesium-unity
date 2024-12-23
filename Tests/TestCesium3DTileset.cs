@@ -156,4 +156,47 @@ public class TestCesium3DTileset
 
         Assert.IsTrue(result.warnings[0].Contains("failed to load"));
     }
+
+    [UnityTest]
+    public IEnumerator UpgradeToLargerIndexType()
+    {
+        // This tileset has no normals, so we need to generate flat normals for it.
+        // When we do that, an index buffer will need to change from uint16 to uint32.
+        GameObject goGeoreference = new GameObject();
+        goGeoreference.name = "Georeference";
+        CesiumGeoreference georeference = goGeoreference.AddComponent<CesiumGeoreference>();
+
+        GameObject goTileset = new GameObject();
+        goTileset.name = "Snowdon Towers No Normals";
+        goTileset.transform.parent = goGeoreference.transform;
+
+        Cesium3DTileset tileset = goTileset.AddComponent<Cesium3DTileset>();
+        CesiumCameraManager cameraManager = goTileset.AddComponent<CesiumCameraManager>();
+        tileset.ionAccessToken = Environment.GetEnvironmentVariable("CESIUM_ION_TOKEN_FOR_TESTS") ?? "";
+        tileset.ionAssetID = 2887128;
+
+        georeference.SetOriginLongitudeLatitudeHeight(-79.88602625, 40.02228799, 222.65);
+
+        GameObject goCamera = new GameObject();
+        goCamera.name = "Camera";
+        goCamera.transform.parent = goGeoreference.transform;
+
+        Camera camera = goCamera.AddComponent<Camera>();
+        CesiumGlobeAnchor cameraAnchor = goCamera.AddComponent<CesiumGlobeAnchor>();
+
+        cameraManager.useMainCamera = false;
+        cameraManager.useSceneViewCameraInEditor = false;
+        cameraManager.additionalCameras.Add(camera);
+
+        camera.pixelRect = new Rect(0, 0, 128, 96);
+        camera.fieldOfView = 60.0f;
+        cameraAnchor.longitudeLatitudeHeight = new double3(-79.88593359, 40.02255615, 242.0224);
+        camera.transform.LookAt(new Vector3(0.0f, 0.0f, 0.0f));
+
+        // Make sure we can load all tiles successfully.
+        while (tileset.ComputeLoadProgress() < 100.0f)
+        {
+            yield return null;
+        }
+    }
 }
