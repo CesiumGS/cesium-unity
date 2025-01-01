@@ -1,8 +1,9 @@
-# Overview
+# Developer Setup {#developer-setup}
 
 This is a summary of the setup and workflows for developers who want to modify the Cesium for Unity plugin. If you just want to use Cesium for Unity in your own applications, see the main [README](../README.md).
+<!--! [TOC] -->
 
-## :computer: Building Cesium for Unity
+## 🖥️ Building Cesium for Unity
 
 ### Prerequisites
 
@@ -38,7 +39,7 @@ git clone --recurse-submodules git@github.com:CesiumGS/cesium-unity.git com.cesi
 
 Be sure to also clone the submodules. If you forgot the `--recurse-submodules` option when you cloned, run `git submodule update --init --recursive` inside the `com.cesium.unity` folder.
 
-## Reinterop
+## Reinterop {#reinterop-guide}
 
 Reinterop is a Roslyn (C# compiler) source generator that is automatically invoked by Unity while compiling the Cesium for Unity C# code, and generates C# <-> C++ interop layer.
 

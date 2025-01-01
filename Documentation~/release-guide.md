@@ -1,6 +1,7 @@
-# Releasing a new version of Cesium for Unity
+# Releasing a new version of Cesium for Unity {#release-guide}
 
 This is the process we follow when releasing a new version of Cesium for Unity on GitHub.
+<!--! [TOC] -->
 
 ## Test the release candidate
 
