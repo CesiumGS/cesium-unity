@@ -5,7 +5,7 @@
 namespace CesiumForUnityNative {
 
 template <typename TDerived>
-class CesiumImpl : public CesiumUtility::ReferenceCounted<TDerived> {
+class CesiumImpl : public CesiumUtility::ReferenceCountedThreadSafe<TDerived> {
 public:
   CesiumImpl() = default;
 
