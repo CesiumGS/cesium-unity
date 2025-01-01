@@ -1,6 +1,8 @@
 # Change Log
 
-## ? - ?
+## v1.14.1 - 2025-01-02
+
+This is the last release of Cesium for Unity that will support Unity 2021 LTS (2021.3). Future versions will require Unity 2022 LTS (2022.3) or Unity 6.
 
 ##### Fixes :wrench:
 
@@ -9,6 +11,8 @@
 - Fixed a bug that could cause incorrect colors in a model that did have vertex colors but did not have normals.
 - Fixed a bug that could cause a hang when attempting to load a model with UINT16 indices where generating flat normals required more than 2^16 vertices.
 - Fixed a bug in the Abseil vcpkg overlay port that could cause linker errors on some systems.
+
+This release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.42.0 to v0.43.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
 
 ## v1.14.0 - 2024-12-02
 
