@@ -6,6 +6,7 @@
 
 - Fixed a bug that could cause a crash on AppDomain reloads.
 - Fixed a bug that could cause a crash or incorrect textures when multiple `Cesium3DTileset` tiles referenced the same image by URL.
+- Fixed a bug in the Abseil vcpkg overlay port that could cause linker errors on some systems.
 
 ## v1.14.0 - 2024-12-02
 
