@@ -268,6 +268,15 @@ void generateMipMaps(
       const Sampler* pSampler =
           Model::getSafe(&pModel->samplers, pTexture->sampler);
       if (pImage && pSampler) {
+        // We currently do not support shared resources, so if this image is
+        // associated with a depot, unshare it. This is necessary to avoid a
+        // race condition where multiple threads attempt to generate mipmaps for
+        // the same shared image simultaneously.
+        if (pImage->pAsset && pImage->pAsset->getDepot()) {
+          // Copy the asset.
+          pImage->pAsset.emplace(*pImage->pAsset);
+        }
+
         switch (pSampler->minFilter.value_or(
             CesiumGltf::Sampler::MinFilter::LINEAR_MIPMAP_LINEAR)) {
         case CesiumGltf::Sampler::MinFilter::LINEAR_MIPMAP_LINEAR:
