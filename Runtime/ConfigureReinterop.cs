@@ -917,6 +917,8 @@ namespace CesiumForUnity
 
             EditorUtility.SetDirty(null);
 #endif
+
+            TestReinterop.ThrowAnException();
         }
     }
 }
