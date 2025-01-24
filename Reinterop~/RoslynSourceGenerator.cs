@@ -31,6 +31,7 @@ namespace Reinterop
             CSharpReinteropAttribute.Generate(context);
             CSharpReinteropNativeImplementationAttribute.Generate(context);
             CSharpObjectHandleUtility.Generate(context);
+            CSharpReinteropException.Generate(context);
 
             // Create a new Compilation with the CSharpObjectHandleUtility created above.
             // Newer versions of Roslyn make this easy, but not the one in Unity.

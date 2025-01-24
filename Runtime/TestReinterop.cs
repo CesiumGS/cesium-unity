@@ -8,7 +8,8 @@ namespace CesiumForUnity
     [ReinteropNativeImplementation("CesiumForUnityNative::TestReinteropImpl", "TestReinteropImpl.h", true)]
     internal partial class TestReinterop
     {
-        public partial bool CallThrowAnExceptionFromCpp();
+        public partial bool CallThrowAnExceptionFromCppAndCatchIt();
+        public partial bool CallThrowAnExceptionFromCppAndDontCatchIt();
 
         public static void ThrowAnException()
         {

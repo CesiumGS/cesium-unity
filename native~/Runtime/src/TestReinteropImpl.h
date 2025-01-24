@@ -10,7 +10,9 @@ namespace CesiumForUnityNative {
 
 class TestReinteropImpl {
 public:
-  static bool CallThrowAnExceptionFromCpp(
+  static bool CallThrowAnExceptionFromCppAndCatchIt(
+      const DotNet::CesiumForUnity::TestReinterop& instance);
+  static bool CallThrowAnExceptionFromCppAndDontCatchIt(
       const DotNet::CesiumForUnity::TestReinterop& instance);
 };
 

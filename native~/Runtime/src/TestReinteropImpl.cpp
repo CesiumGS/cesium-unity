@@ -4,7 +4,7 @@
 
 namespace CesiumForUnityNative {
 
-bool TestReinteropImpl::CallThrowAnExceptionFromCpp(
+bool TestReinteropImpl::CallThrowAnExceptionFromCppAndCatchIt(
     const DotNet::CesiumForUnity::TestReinterop& instance) {
   try {
     instance.ThrowAnException();
@@ -12,6 +12,12 @@ bool TestReinteropImpl::CallThrowAnExceptionFromCpp(
     return true;
   }
 
+  return false;
+}
+
+bool TestReinteropImpl::CallThrowAnExceptionFromCppAndDontCatchIt(
+    const DotNet::CesiumForUnity::TestReinterop& instance) {
+  instance.ThrowAnException();
   return false;
 }
 
