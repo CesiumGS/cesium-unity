@@ -100,7 +100,7 @@ namespace Reinterop
 
             // Method definition
             var parameterPassStrings = interopParameters.Select(parameter => parameter.Type.GetConversionToInteropType(context, parameter.CallSiteName));
-            parameterPassStrings = parameterPassStrings.Concat(new[] {"&reinteropException"}).Where(s => !string.IsNullOrEmpty(s));
+            parameterPassStrings = parameterPassStrings.Concat(new[] { "&reinteropException" }).Where(s => !string.IsNullOrEmpty(s));
             if (returnType.Name == "void" && !returnType.Flags.HasFlag(CppTypeFlags.Pointer))
             {
                 definition.Elements.Add(new(
@@ -110,7 +110,7 @@ namespace Reinterop
                             void* reinteropException = nullptr;
                             Property_{{method.Name}}({{string.Join(", ", parameterPassStrings)}});
                             if (reinteropException != nullptr)
-                                throw Reinterop::ReinteropException(::DotNet::System::Exception(::DotNet::Reinterop::ObjectHandle(reinteropException)));
+                                throw Reinterop::ReinteropNativeException(::DotNet::System::Exception(::DotNet::Reinterop::ObjectHandle(reinteropException)));
                         }
                         """,
                     TypeDefinitionsReferenced: new[]
@@ -140,7 +140,7 @@ namespace Reinterop
                             void* reinteropException = nullptr;
                             {{GenerationUtility.JoinAndIndent(invocation, "    ")}}
                             if (reinteropException != nullptr)
-                                throw Reinterop::ReinteropException(::DotNet::System::Exception(::DotNet::Reinterop::ObjectHandle(reinteropException)));
+                                throw Reinterop::ReinteropNativeException(::DotNet::System::Exception(::DotNet::Reinterop::ObjectHandle(reinteropException)));
                             return {{returnType.GetConversionFromInteropType(context, "result")}};
                         }
                         """,

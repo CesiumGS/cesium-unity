@@ -36,13 +36,37 @@ namespace Reinterop
             // Create a new Compilation with the CSharpObjectHandleUtility created above.
             // Newer versions of Roslyn make this easy, but not the one in Unity.
             CSharpParseOptions options = (CSharpParseOptions)((CSharpCompilation)context.Compilation).SyntaxTrees[0].Options;
-            Compilation compilation = context.Compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(SourceText.From(CSharpObjectHandleUtility.Source), options));
+            Compilation compilation = context.Compilation.AddSyntaxTrees(
+                CSharpSyntaxTree.ParseText(SourceText.From(CSharpObjectHandleUtility.Source), options),
+                CSharpSyntaxTree.ParseText(SourceText.From(CSharpReinteropException.Source), options)
+            );
 
             // Add ObjectHandleUtility's ExposeToCPP to the receiver.
             INamedTypeSymbol? objectHandleUtilityType = compilation.GetTypeByMetadataName("Reinterop.ObjectHandleUtility");
             if (objectHandleUtilityType != null)
             {
                 var exposeToCpp = CSharpTypeUtility.FindMembers(objectHandleUtilityType, "ExposeToCPP");
+                foreach (ISymbol symbol in exposeToCpp)
+                {
+                    IMethodSymbol? method = symbol as IMethodSymbol;
+                    if (method == null)
+                        continue;
+
+                    foreach (var reference in method.DeclaringSyntaxReferences)
+                    {
+                        if (reference.GetSyntax() is MethodDeclarationSyntax methodDeclaration)
+                        {
+                            receiver.ExposeToCppMethods.Add(methodDeclaration);
+                        }
+                    }
+                }
+            }
+
+            // Add ReinteropExceptions's ExposeToCPP to the receiver.
+            INamedTypeSymbol? reinteropExceptionType = compilation.GetTypeByMetadataName("Reinterop.ReinteropException");
+            if (reinteropExceptionType != null)
+            {
+                var exposeToCpp = CSharpTypeUtility.FindMembers(reinteropExceptionType, "ExposeToCPP");
                 foreach (ISymbol symbol in exposeToCpp)
                 {
                     IMethodSymbol? method = symbol as IMethodSymbol;

@@ -339,7 +339,7 @@ namespace Reinterop
                       try {
                         {{GenerationUtility.JoinAndIndent(new[] { getCallTarget }, "    ")}}
                         {{new[] { implementation }.JoinAndIndent("    ")}}
-                      } catch (::DotNet::Reinterop::ReinteropException& e) {
+                      } catch (::DotNet::Reinterop::ReinteropNativeException& e) {
                         *reinteropException = ::DotNet::Reinterop::ObjectHandle(e.GetDotNetException().GetHandle()).Release();
                         {{returnDefault}}
                       } catch (std::exception& e) {
@@ -357,7 +357,9 @@ namespace Reinterop
                     implType,
                     returnType,
                     objectHandleType,
-                    CppReinteropException.GetCppType(context)
+                    CppReinteropException.GetCppType(context),
+                    CSharpReinteropException.GetCppWrapperType(context),
+                    CppType.FromCSharp(context, context.Compilation.GetSpecialType(SpecialType.System_String))
                 }.Concat(parameters.Select(parameter => parameter.Type))
                  .Concat(parameters.Select(parameter => parameter.InteropType)),
                 AdditionalIncludes: hasStructRewrite ? new[] { "<utility>" } : null // for std::move

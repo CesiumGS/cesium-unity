@@ -14,7 +14,7 @@
             if (ns.Count >= 2 && ns[0] == ns[1])
                 ns.RemoveAt(0);
 
-            return new CppType(InteropTypeKind.ClassWrapper, ns, "ReinteropException", null, 0);
+            return new CppType(InteropTypeKind.ClassWrapper, ns, "ReinteropNativeException", null, 0);
         }
 
         public static void Generate(CppGenerationContext context, IDictionary<string, CppSourceFile> sourceFiles)
@@ -35,9 +35,9 @@
             var headerNamespace = headerFile.GetNamespace(type.GetFullyQualifiedNamespace(false));
             headerNamespace.Members.Add(
                 $$"""
-                class ReinteropException : public std::runtime_error {
+                class ReinteropNativeException : public std::runtime_error {
                 public:
-                  ReinteropException(const DotNet::System::Exception& exception);
+                  ReinteropNativeException(const DotNet::System::Exception& exception);
                   const ::DotNet::System::Exception& GetDotNetException() const;
                 
                 private:
@@ -69,11 +69,11 @@
             var sourceNamespace = sourceFile.GetNamespace(type.GetFullyQualifiedNamespace(false));
             sourceNamespace.Members.Add(
                 $$"""
-                ReinteropException::ReinteropException(const DotNet::System::Exception& exception)
+                ReinteropNativeException::ReinteropNativeException(const DotNet::System::Exception& exception)
                     : std::runtime_error(exception.Message().ToStlString()),
                     _exception(exception) {}
                 
-                const ::DotNet::System::Exception& ReinteropException::GetDotNetException() const {
+                const ::DotNet::System::Exception& ReinteropNativeException::GetDotNetException() const {
                     return this->_exception;
                 }
                 """);

@@ -236,7 +236,7 @@ namespace Reinterop
                             void* reinteropException = nullptr;
                             {{interopName}}({{string.Join(", ", parameterPassStrings)}});
                             if (reinteropException != nullptr)
-                                throw Reinterop::ReinteropException(::DotNet::System::Exception(::DotNet::Reinterop::ObjectHandle(reinteropException)));
+                                throw Reinterop::ReinteropNativeException(::DotNet::System::Exception(::DotNet::Reinterop::ObjectHandle(reinteropException)));
                         }
                         """,
                     TypeDefinitionsReferenced: new[]
@@ -280,7 +280,7 @@ namespace Reinterop
                             void* reinteropException = nullptr;
                             {{GenerationUtility.JoinAndIndent(invocation, "    ")}}
                             if (reinteropException != nullptr)
-                                throw Reinterop::ReinteropException(::DotNet::System::Exception(::DotNet::Reinterop::ObjectHandle(reinteropException)));
+                                throw Reinterop::ReinteropNativeException(::DotNet::System::Exception(::DotNet::Reinterop::ObjectHandle(reinteropException)));
                             {{returnStatement}}
                         }
                         """,

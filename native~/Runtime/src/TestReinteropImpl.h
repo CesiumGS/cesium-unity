@@ -14,6 +14,10 @@ public:
       const DotNet::CesiumForUnity::TestReinterop& instance);
   static bool CallThrowAnExceptionFromCppAndDontCatchIt(
       const DotNet::CesiumForUnity::TestReinterop& instance);
+  static bool
+  ThrowCppStdException(const DotNet::CesiumForUnity::TestReinterop& instance);
+  static bool ThrowOtherCppExceptionType(
+      const DotNet::CesiumForUnity::TestReinterop& instance);
 };
 
 } // namespace CesiumForUnityNative

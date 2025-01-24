@@ -10,6 +10,8 @@ namespace CesiumForUnity
     {
         public partial bool CallThrowAnExceptionFromCppAndCatchIt();
         public partial bool CallThrowAnExceptionFromCppAndDontCatchIt();
+        public partial bool ThrowCppStdException();
+        public partial bool ThrowOtherCppExceptionType();
 
         public static void ThrowAnException()
         {
