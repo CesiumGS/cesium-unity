@@ -919,6 +919,8 @@ namespace CesiumForUnity
 #endif
 
             TestReinterop.ThrowAnException();
+            System.Exception exception = null;
+            var message = exception.Message;
         }
     }
 }

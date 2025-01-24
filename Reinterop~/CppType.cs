@@ -7,7 +7,8 @@ namespace Reinterop
     {
         Pointer = 1,
         Reference = 2,
-        Const = 4
+        Const = 4,
+        DoublePointer = 9 // A double pointer is also a pointer
     }
 
     /// <summary>
@@ -42,6 +43,7 @@ namespace Reinterop
         public static readonly CppType Single = CreatePrimitiveType(NoNamespace, "float");
         public static readonly CppType Double = CreatePrimitiveType(NoNamespace, "double");
         public static readonly CppType VoidPointer = CreatePrimitiveType(NoNamespace, "void", CppTypeFlags.Pointer);
+        public static readonly CppType VoidPointerPointer = CreatePrimitiveType(NoNamespace, "void", CppTypeFlags.DoublePointer);
         public static readonly CppType Void = CreatePrimitiveType(NoNamespace, "void");
         public static readonly CppType NullPointer = CreatePrimitiveType(StandardNamespace, "nullptr_t", 0, IncludeCStdDef);
 
@@ -201,11 +203,13 @@ namespace Reinterop
             }
 
             string modifier = Flags.HasFlag(CppTypeFlags.Const) ? "const " : "";
-            string suffix = Flags.HasFlag(CppTypeFlags.Pointer)
-                ? "*"
-                : Flags.HasFlag(CppTypeFlags.Reference)
-                    ? "&"
-                    : "";
+            string suffix = "";
+            if (Flags.HasFlag(CppTypeFlags.DoublePointer))
+                suffix = "**";
+            else if (Flags.HasFlag(CppTypeFlags.Pointer))
+                suffix = "*";
+            else if (Flags.HasFlag(CppTypeFlags.Reference))
+                suffix = "&";
             string ns = GetFullyQualifiedNamespace(startWithGlobal);
             if (ns.Length > 0)
                 return $"{modifier}{ns}::{Name}{template}{suffix}";
