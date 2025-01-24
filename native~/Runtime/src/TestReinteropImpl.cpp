@@ -25,7 +25,7 @@ bool TestReinteropImpl::CallThrowAnExceptionFromCppAndDontCatchIt(
 
 bool TestReinteropImpl::ThrowCppStdException(
     const DotNet::CesiumForUnity::TestReinterop& instance) {
-  throw std::exception("An exceptional hello from C++!");
+  throw std::runtime_error("An exceptional hello from C++!");
 }
 
 bool TestReinteropImpl::ThrowOtherCppExceptionType(
