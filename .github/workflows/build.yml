@@ -114,6 +114,10 @@ jobs:
         run: |
           cd d:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
           dotnet publish Reinterop~ -o .
+      - name: Print disk space 1
+        if: success() || failure()    # run this step even if previous step failed
+        run: |
+          get-psdrive
       - name: Build Package
         run: |
           cd d:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
@@ -128,6 +132,10 @@ jobs:
           $ENV:EZVCPKG_BASEDIR="D:/.ezvcpkg"
           # Run the build
           dotnet run --project Build~
+      - name: Print disk space 2
+        if: success() || failure()    # run this step even if previous step failed
+        run: |
+          get-psdrive
       - name: Publish Logs
         if: success() || failure()    # run this step even if previous step failed
         uses: actions/upload-artifact@v4
