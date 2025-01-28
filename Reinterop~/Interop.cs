@@ -78,9 +78,6 @@ namespace Reinterop
                 invocationTarget = $"{csType.GetFullyQualifiedName()}{accessName}";
             }
 
-            // Add a parameter in which to return the exception, if there is one.
-            CSharpType exceptionCsType = CSharpType.FromSymbol(context, context.Compilation.GetSpecialType(SpecialType.System_IntPtr)).AsPointer();
-
             CSharpType csReturnType = CSharpType.FromSymbol(context, returnType);
             CSharpType csInteropReturnType = csReturnType.AsInteropTypeReturn();
 
@@ -102,6 +99,8 @@ namespace Reinterop
                 });
             }
 
+            // Add a parameter in which to return the exception, if there is one.
+            CSharpType exceptionCsType = CSharpType.FromSymbol(context, context.Compilation.GetSpecialType(SpecialType.System_IntPtr)).AsPointer();
             interopParameterDetails = interopParameterDetails.Concat(new[] { (Name: "reinteropException", Type: exceptionCsType, InteropType: exceptionCsType.AsInteropTypeParameter()) });
 
             string interopReturnTypeString = csInteropReturnType.GetFullyQualifiedName();
@@ -257,7 +256,7 @@ namespace Reinterop
                     {
                         try
                         {
-                            {{implementation.Replace(Environment.NewLine, Environment.NewLine + "    ")}}
+                            {{implementation.Replace(Environment.NewLine, Environment.NewLine + "        ")}}
                         }
                         catch (Exception e)
                         {
@@ -328,6 +327,10 @@ namespace Reinterop
                 });
             }
 
+            // Add a parameter in which to return the exception, if there is one.
+            CSharpType exceptionCsType = CSharpType.FromSymbol(context, context.Compilation.GetSpecialType(SpecialType.System_IntPtr)).AsPointer();
+            interopParameterDetails = interopParameterDetails.Concat(new[] { (Name: "reinteropException", Type: exceptionCsType, InteropType: exceptionCsType.AsInteropTypeParameter()) });
+
             string interopReturnTypeString = csInteropReturnType.GetFullyQualifiedName();
             string callParameterList = string.Join(", ", callParameterDetails.Select(parameter => parameter.Type.GetParameterConversionFromInteropType(parameter.Name)));
             string interopParameterList = string.Join(", ", interopParameterDetails.Select(parameter => $"{parameter.InteropType.GetFullyQualifiedName()} {parameter.Name}"));
@@ -359,6 +362,20 @@ namespace Reinterop
 
             string baseName = $"{GetUniqueNameForType(csType)}_Field_{(isGet ? "get" : "set")}_{field.Name}";
 
+            string returnDefaultInstance = "";
+            if (csInteropReturnType.SpecialType != SpecialType.System_Void)
+            {
+                if (csInteropReturnType.Symbol != null &&
+                    (csInteropReturnType.Symbol.TypeKind == TypeKind.Pointer || csInteropReturnType.Symbol.TypeKind == TypeKind.Class))
+                {
+                    returnDefaultInstance = "return null;";
+                }
+                else
+                { 
+                    returnDefaultInstance = $$"""return new {{interopReturnTypeString}}();""";
+                }
+            }
+
             return (
                 Name: $"{baseName}Delegate",
                 Content:
@@ -369,7 +386,15 @@ namespace Reinterop
                     [AOT.MonoPInvokeCallback(typeof({{baseName}}Type))]
                     private static unsafe {{interopReturnTypeString}} {{baseName}}({{interopParameterList}})
                     {
-                        {{implementation.Replace(Environment.NewLine, Environment.NewLine + "  ")}}
+                        try
+                        {
+                            {{implementation.Replace(Environment.NewLine, Environment.NewLine + "        ")}}
+                        }
+                        catch (Exception e)
+                        {
+                            *reinteropException = Reinterop.ObjectHandleUtility.CreateHandle(e);
+                            {{returnDefaultInstance}}
+                        }
                     }
                     """
             );

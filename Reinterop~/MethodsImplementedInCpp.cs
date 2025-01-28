@@ -208,7 +208,10 @@ namespace Reinterop
                         [AOT.MonoPInvokeCallback(typeof({{baseName}}Type))]
                         private static unsafe System.IntPtr {{baseName}}(IntPtr thiz)
                         {
-                            return ({{csWrapperType.GetParameterConversionFromInteropType("thiz")}}).NativeImplementation.DangerousGetHandle();
+                            var o = {{csWrapperType.GetParameterConversionFromInteropType("thiz")}};
+                            if (o == null)
+                                return System.IntPtr.Zero;
+                            return o.NativeImplementation.DangerousGetHandle();
                         }
                         """
                 ));
