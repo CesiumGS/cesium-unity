@@ -46,6 +46,9 @@ namespace Reinterop
 
             bool hasStructRewrite = Interop.RewriteStructReturn(ref interopParameters, ref returnType, ref interopReturnType);
 
+            // Add a parameter in which to return the exception, if there is one.
+            interopParameters = interopParameters.Concat(new[] { (ParameterName: "reinteropException", CallSiteName: "&reinteropException", Type: CppType.VoidPointerPointer, InteropType: CppType.VoidPointerPointer) });
+
             var interopParameterStrings = interopParameters.Select(parameter => $"{parameter.InteropType.GetFullyQualifiedName()} {parameter.ParameterName}");
 
             string interopFunctionName = $"Construct_{Interop.HashParameters(constructor.Parameters)}";
@@ -96,8 +99,11 @@ namespace Reinterop
                         $$"""
                         {{definition.Type.Name}} {{definition.Type.Name}}{{templateSpecialization}}::Construct({{string.Join(", ", parameterStrings)}})
                         {
+                            void* reinteropException = nullptr;
                             {{definition.Type.Name}} result;
                             {{interopFunctionName}}({{string.Join(", ", parameterPassStrings)}});
+                            if (reinteropException != nullptr)
+                                throw Reinterop::ReinteropNativeException(::DotNet::System::Exception(::DotNet::Reinterop::ObjectHandle(reinteropException)));
                             return result;
                         }
                         """,
@@ -105,7 +111,8 @@ namespace Reinterop
                     {
                         definition.Type,
                         interopReturnType,
-                        CppObjectHandle.GetCppType(context)
+                        CppObjectHandle.GetCppType(context),
+                        CppReinteropException.GetCppType(context)
                     }.Concat(parameters.Select(parameter => parameter.Type))
                 ));
             }
@@ -124,7 +131,13 @@ namespace Reinterop
                     Content:
                         $$"""
                         {{definition.Type.Name}}{{templateSpecialization}}::{{definition.Type.Name}}({{string.Join(", ", parameterStrings)}})
-                            : _handle({{interopFunctionName}}({{string.Join(", ", parameterPassStrings)}}))
+                            : _handle([&]() mutable {
+                                void* reinteropException = nullptr;
+                                void* handle = {{interopFunctionName}}({{string.Join(", ", parameterPassStrings)}});
+                                if (reinteropException != nullptr)
+                                    throw Reinterop::ReinteropNativeException(::DotNet::System::Exception(::DotNet::Reinterop::ObjectHandle(reinteropException)));
+                                return handle;
+                            }())
                         {
                         }
                         """,
@@ -132,7 +145,8 @@ namespace Reinterop
                     {
                         definition.Type,
                         interopReturnType,
-                        CppObjectHandle.GetCppType(context)
+                        CppObjectHandle.GetCppType(context),
+                        CppReinteropException.GetCppType(context)
                     }.Concat(parameters.Select(parameter => parameter.Type))
                 ));
             }
