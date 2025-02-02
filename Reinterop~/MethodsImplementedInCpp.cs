@@ -208,7 +208,10 @@ namespace Reinterop
                         [AOT.MonoPInvokeCallback(typeof({{baseName}}Type))]
                         private static unsafe System.IntPtr {{baseName}}(IntPtr thiz)
                         {
-                            return ({{csWrapperType.GetParameterConversionFromInteropType("thiz")}}).NativeImplementation.DangerousGetHandle();
+                            var o = {{csWrapperType.GetParameterConversionFromInteropType("thiz")}};
+                            if (o == null)
+                                return System.IntPtr.Zero;
+                            return o.NativeImplementation.DangerousGetHandle();
                         }
                         """
                 ));
@@ -300,7 +303,7 @@ namespace Reinterop
             var parameterList = parameters.Select(parameter => $"{parameter.InteropType.GetFullyQualifiedName()} {parameter.ParameterName}");
             var callParameterList = parameters.Where(parameter => parameter.CallSiteName.Length > 0).Select(parameter => parameter.Type.GetConversionFromInteropType(context, parameter.CallSiteName));
 
-            string parameterListString = string.Join(", ", parameterList);
+            string parameterListString = string.Join(", ", parameterList.Concat(new[] {"void** reinteropException"}));
             string callParameterListString = string.Join(", ", callParameterList);
 
             string implementation;
@@ -320,6 +323,15 @@ namespace Reinterop
                     """;
             }
 
+            string returnDefault = "";
+            if (interopReturnType != CppType.Void)
+            {
+                if (interopReturnType.Flags.HasFlag(CppTypeFlags.Pointer))
+                    returnDefault = "return nullptr;";
+                else
+                    returnDefault = $$"""return {{interopReturnType.GetFullyQualifiedName()}}();""";
+            }
+
             result.CppImplementationInvoker.Functions.Add(new(
                 Content:
                     $$"""
@@ -327,8 +339,19 @@ namespace Reinterop
                     __declspec(dllexport)
                     #endif
                     {{interopReturnType.GetFullyQualifiedName()}} {{name}}({{parameterListString}}) {
-                      {{GenerationUtility.JoinAndIndent(new[] { getCallTarget }, "  ")}}
-                      {{new[] { implementation }.JoinAndIndent("  ")}}
+                      try {
+                        {{GenerationUtility.JoinAndIndent(new[] { getCallTarget }, "    ")}}
+                        {{new[] { implementation }.JoinAndIndent("    ")}}
+                      } catch (::DotNet::Reinterop::ReinteropNativeException& e) {
+                        *reinteropException = ::DotNet::Reinterop::ObjectHandle(e.GetDotNetException().GetHandle()).Release();
+                        {{returnDefault}}
+                      } catch (std::exception& e) {
+                        *reinteropException = ::DotNet::Reinterop::ReinteropException(::DotNet::System::String(e.what())).GetHandle().Release();
+                        {{returnDefault}}
+                      } catch (...) {
+                        *reinteropException = ::DotNet::Reinterop::ReinteropException(::DotNet::System::String("An unknown native exception occurred.")).GetHandle().Release();
+                        {{returnDefault}}
+                      }                   
                     }
                     """,
                 TypeDefinitionsReferenced: new[]
@@ -336,7 +359,10 @@ namespace Reinterop
                     wrapperType,
                     implType,
                     returnType,
-                    objectHandleType
+                    objectHandleType,
+                    CppReinteropException.GetCppType(context),
+                    CSharpReinteropException.GetCppWrapperType(context),
+                    CppType.FromCSharp(context, context.Compilation.GetSpecialType(SpecialType.System_String))
                 }.Concat(parameters.Select(parameter => parameter.Type))
                  .Concat(parameters.Select(parameter => parameter.InteropType)),
                 AdditionalIncludes: hasStructRewrite ? new[] { "<utility>" } : null // for std::move
@@ -375,6 +401,10 @@ namespace Reinterop
                 csInteropReturnType = CSharpType.FromSymbol(context, returnType.Kind == InteropTypeKind.Nullable ? context.Compilation.GetSpecialType(SpecialType.System_Byte) : context.Compilation.GetSpecialType(SpecialType.System_Void));
             }
 
+            // Add a parameter in which to receive an exception from the C++ side.
+            CSharpType exceptionPtr = CSharpType.FromSymbol(context, context.Compilation.GetSpecialType(SpecialType.System_IntPtr)).AsPointer();
+            csParametersInterop = csParametersInterop.Concat(new[] { (Name: "reinteropException", CallName: "&reinteropException", Type: exceptionPtr, IsParams: false) });
+
             List<string> csImplementationLines = new List<string>();
             if (hasStructRewrite)
             {
@@ -385,6 +415,8 @@ namespace Reinterop
                 csImplementationLines.Add($"{name}({string.Join(", ", csParametersInterop.Select(parameter => parameter.Type.GetConversionToInteropType(parameter.CallName)))});");
             else
                 csImplementationLines.Add($"var result = {name}({string.Join(", ", csParametersInterop.Select(parameter => parameter.Type.GetConversionToInteropType(parameter.CallName)))});");
+
+            csImplementationLines.Add("if (reinteropException != IntPtr.Zero) throw (System.Exception)Reinterop.ObjectHandleUtility.GetObjectAndFreeHandle(reinteropException);");
 
             if (csReturnType.SpecialType != SpecialType.System_Void)
             {
@@ -434,6 +466,7 @@ namespace Reinterop
                         unsafe
                         {
                             {{GenerationUtility.JoinAndIndent(new[] { implementationCheck }, "        ")}}
+                            System.IntPtr reinteropException = System.IntPtr.Zero;
                             {{csImplementationLines.JoinAndIndent("        ")}}
                         }
                     }
