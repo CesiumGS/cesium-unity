@@ -1,10 +1,14 @@
 # Change Log
 
-## ? - ?
+## v1.15.0 - 2025-02-03
+
+Cesium for Unity now requires Unity 2022 LTS (2022.3), Unity 6, or later.
 
 ##### Fixes :wrench:
 
 - Exceptions in either C# or C++ code are now handled much more reliably.
+
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.43.0 to v0.44.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
 
 ## v1.14.1 - 2025-01-02
 
