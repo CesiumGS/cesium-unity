@@ -9,6 +9,7 @@
 #include <CesiumUtility/Math.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
+#include <DotNet/CesiumForUnity/CesiumCameraGroup.h>
 #include <DotNet/CesiumForUnity/CesiumEllipsoid.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/System/Collections/Generic/List1.h>
@@ -191,5 +192,66 @@ CameraManager::getAllCameras(
 
   return result;
 }
+
+/*static*/ std::vector<Cesium3DTilesSelection::ViewState>
+CameraManager::getAllCameras(
+    const DotNet::CesiumForUnity::Cesium3DTileset& tileset,
+    const DotNet::CesiumForUnity::CesiumCameraGroup& group,
+    const CesiumForUnityNative::Cesium3DTilesetImpl& impl) {
+  const LocalHorizontalCoordinateSystem* pCoordinateSystem = nullptr;
+
+  glm::dmat4 unityWorldToTileset =
+      UnityTransforms::fromUnity(tileset.transform().worldToLocalMatrix());
+
+  CesiumGeoreference georeferenceComponent =
+      tileset.gameObject().GetComponentInParent<CesiumGeoreference>();
+  if (georeferenceComponent != nullptr) {
+    CesiumGeoreferenceImpl& georeference =
+        georeferenceComponent.NativeImplementation();
+    pCoordinateSystem =
+        &georeference.getCoordinateSystem(georeferenceComponent);
+  }
+
+  std::vector<ViewState> result;
+
+  const CesiumCameraManager& cameraManager = impl.getCameraManager();
+
+  if (cameraManager != nullptr) {
+    System::Collections::Generic::List1<Camera> cameras = group.cameras();
+    for (int32_t i = 0, len = cameras.Count(); i < len; ++i) {
+      Camera camera = cameras[i];
+      if (camera == nullptr)
+        continue;
+
+      result.emplace_back(unityCameraToViewState(
+          georeferenceComponent,
+          pCoordinateSystem,
+          unityWorldToTileset,
+          camera));
+    }
+  }
+
+  return result;
+}
+
+// DotNet::System::Collections::Generic::List1<DotNet::UnityEngine::Camera>
+// cameras = group.cameras();
+
+// std::vector<ViewState> viewStates;
+// viewStates.reserve(cameras.Count());
+
+// for (int32_t cameraIndex = 0, camerasLength = cameras.Count();
+//  cameraIndex < camerasLength;
+//  ++cameraIndex) {
+// DotNet::UnityEngine::Camera camera = cameras[cameraIndex];
+// if (camera == nullptr)
+// continue;
+
+// viewStates.emplace_back(unityCameraToViewState(
+//   georeferenceComponent,
+//   pCoordinateSystem,
+//   unityWorldToTileset,
+//   camera));
+// }
 
 } // namespace CesiumForUnityNative

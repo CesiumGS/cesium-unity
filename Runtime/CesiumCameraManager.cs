@@ -100,6 +100,14 @@ namespace CesiumForUnity
             get => this._additionalCameras;
         }
 
+        [SerializeField]
+        private List<CesiumCameraGroup> _groups = new List<CesiumCameraGroup>();
+
+        public List<CesiumCameraGroup> groups
+        {
+            get => this._groups;
+        }
+
         #endregion
     }
 }

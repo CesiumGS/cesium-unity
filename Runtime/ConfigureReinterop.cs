@@ -890,6 +890,14 @@ namespace CesiumForUnity
                 camera = manager.additionalCameras[i];
             }
 
+            CesiumCameraGroup group = null;
+            for (int i = 0; i < manager.groups.Count; ++i)
+            {
+                group = manager.groups[i];
+                int groupLayer = group.layer;
+                List<Camera> groupCameras = group.cameras;
+            }
+
             TaskCompletionSource<CesiumSampleHeightResult> promise = new TaskCompletionSource<CesiumSampleHeightResult>();
             promise.SetException(new Exception("message"));
             CesiumSampleHeightResult result = new CesiumSampleHeightResult();

@@ -3,12 +3,19 @@ using UnityEngine;
 
 namespace CesiumForUnity
 {
+    [CustomEditor(typeof(CesiumCameraGroup))]
+    public class CesiumCameraGroupEditor : Editor
+    {
+
+    }
+
     [CustomEditor(typeof(CesiumCameraManager))]
     public class CesiumCameraManagerEditor : Editor
     {
         private SerializedProperty _useMainCamera;
         private SerializedProperty _useActiveSceneViewCameraInEditor;
         private SerializedProperty _additionalCameras;
+        private SerializedProperty _groups;
 
         private void OnEnable()
         {
@@ -18,6 +25,8 @@ namespace CesiumForUnity
                 this.serializedObject.FindProperty("_useSceneViewCameraInEditor");
             this._additionalCameras =
                 this.serializedObject.FindProperty("_additionalCameras");
+            this._groups =
+                this.serializedObject.FindProperty("_groups");
         }
 
         public override void OnInspectorGUI()
@@ -60,6 +69,10 @@ namespace CesiumForUnity
             GUIContent additionalCamerasContent = new GUIContent("Additional Cameras", additionalCamerasTooltip);
             EditorGUILayout.PropertyField(
                 this._additionalCameras, additionalCamerasContent);
+
+            GUIContent groupsContent = new GUIContent("Camera Groups", additionalCamerasTooltip);
+            EditorGUILayout.PropertyField(
+                this._groups, groupsContent);
         }
     }
 }

@@ -2,6 +2,7 @@
 
 #include "CesiumImpl.h"
 
+#include <Cesium3DTilesSelection/ViewGroup.h>
 #include <Cesium3DTilesSelection/ViewUpdateResult.h>
 
 #include <DotNet/CesiumForUnity/CesiumCameraManager.h>
@@ -103,6 +104,7 @@ private:
   DotNet::CesiumForUnity::CesiumCameraManager _cameraManager;
   bool _destroyTilesetOnNextUpdate;
   int32_t _lastOpaqueMaterialHash;
+  std::vector<Cesium3DTilesSelection::ViewGroup> _viewGroups;
 };
 
 } // namespace CesiumForUnityNative

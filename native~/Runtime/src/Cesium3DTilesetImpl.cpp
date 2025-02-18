@@ -16,6 +16,7 @@
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/CesiumForUnity/Cesium3DTilesetLoadFailureDetails.h>
 #include <DotNet/CesiumForUnity/Cesium3DTilesetLoadType.h>
+#include <DotNet/CesiumForUnity/CesiumCameraGroup.h>
 #include <DotNet/CesiumForUnity/CesiumCameraManager.h>
 #include <DotNet/CesiumForUnity/CesiumDataSource.h>
 #include <DotNet/CesiumForUnity/CesiumEllipsoid.h>
@@ -85,6 +86,49 @@ void Cesium3DTilesetImpl::SetShowCreditsOnScreen(
 void Cesium3DTilesetImpl::Start(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {}
 
+namespace {
+
+void applyViewUpdateResult(
+    const Cesium3DTilesSelection::ViewUpdateResult& updateResult) {
+  for (auto pTile : updateResult.tilesFadingOut) {
+    if (pTile->getState() != TileLoadState::Done) {
+      continue;
+    }
+
+    const Cesium3DTilesSelection::TileContent& content = pTile->getContent();
+    const Cesium3DTilesSelection::TileRenderContent* pRenderContent =
+        content.getRenderContent();
+    if (pRenderContent) {
+      CesiumGltfGameObject* pCesiumGameObject =
+          static_cast<CesiumGltfGameObject*>(
+              pRenderContent->getRenderResources());
+      if (pCesiumGameObject && pCesiumGameObject->pGameObject) {
+        pCesiumGameObject->pGameObject->SetActive(false);
+      }
+    }
+  }
+
+  for (auto pTile : updateResult.tilesToRenderThisFrame) {
+    if (pTile->getState() != TileLoadState::Done) {
+      continue;
+    }
+
+    const Cesium3DTilesSelection::TileContent& content = pTile->getContent();
+    const Cesium3DTilesSelection::TileRenderContent* pRenderContent =
+        content.getRenderContent();
+    if (pRenderContent) {
+      CesiumGltfGameObject* pCesiumGameObject =
+          static_cast<CesiumGltfGameObject*>(
+              pRenderContent->getRenderResources());
+      if (pCesiumGameObject && pCesiumGameObject->pGameObject) {
+        pCesiumGameObject->pGameObject->SetActive(true);
+      }
+    }
+  }
+}
+
+} // namespace
+
 void Cesium3DTilesetImpl::Update(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
   assert(tileset.enabled());
@@ -137,41 +181,28 @@ void Cesium3DTilesetImpl::Update(
       viewStates,
       DotNet::UnityEngine::Time::deltaTime());
   this->updateLastViewUpdateResultState(tileset, updateResult);
+  applyViewUpdateResult(updateResult);
 
-  for (auto pTile : updateResult.tilesFadingOut) {
-    if (pTile->getState() != TileLoadState::Done) {
-      continue;
-    }
+  const DotNet::CesiumForUnity::CesiumCameraManager& cameraManager =
+      this->getCameraManager();
 
-    const Cesium3DTilesSelection::TileContent& content = pTile->getContent();
-    const Cesium3DTilesSelection::TileRenderContent* pRenderContent =
-        content.getRenderContent();
-    if (pRenderContent) {
-      CesiumGltfGameObject* pCesiumGameObject =
-          static_cast<CesiumGltfGameObject*>(
-              pRenderContent->getRenderResources());
-      if (pCesiumGameObject && pCesiumGameObject->pGameObject) {
-        pCesiumGameObject->pGameObject->SetActive(false);
-      }
-    }
-  }
+  DotNet::System::Collections::Generic::List1<
+      DotNet::CesiumForUnity::CesiumCameraGroup>
+      groups = cameraManager.groups();
 
-  for (auto pTile : updateResult.tilesToRenderThisFrame) {
-    if (pTile->getState() != TileLoadState::Done) {
-      continue;
-    }
+  int32_t groupsLength = groups.Count();
+  this->_viewGroups.resize(size_t(groupsLength));
 
-    const Cesium3DTilesSelection::TileContent& content = pTile->getContent();
-    const Cesium3DTilesSelection::TileRenderContent* pRenderContent =
-        content.getRenderContent();
-    if (pRenderContent) {
-      CesiumGltfGameObject* pCesiumGameObject =
-          static_cast<CesiumGltfGameObject*>(
-              pRenderContent->getRenderResources());
-      if (pCesiumGameObject && pCesiumGameObject->pGameObject) {
-        pCesiumGameObject->pGameObject->SetActive(true);
-      }
-    }
+  for (int32_t groupIndex = 0; groupIndex < groupsLength; ++groupIndex) {
+    DotNet::CesiumForUnity::CesiumCameraGroup group = groups[groupIndex];
+
+    std::vector<ViewState> viewStates =
+        CameraManager::getAllCameras(tileset, group, *this);
+
+    applyViewUpdateResult(this->_pTileset->updateView(
+        this->_viewGroups[groupIndex],
+        viewStates,
+        DotNet::UnityEngine::Time::deltaTime()));
   }
 }
 
