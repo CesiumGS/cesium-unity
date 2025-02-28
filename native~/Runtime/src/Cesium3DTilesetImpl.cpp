@@ -279,6 +279,10 @@ struct CalculateECEFCameraPosition {
   glm::dvec3 operator()(const CesiumGeospatial::S2CellBoundingVolume& s2) {
     return (*this)(s2.computeBoundingRegion(ellipsoid));
   }
+
+  glm::dvec3 operator()(const CesiumGeometry::BoundingCylinderRegion& cyl) {
+    return (*this)(cyl.toOrientedBoundingBox());
+  }
 };
 } // namespace
 
