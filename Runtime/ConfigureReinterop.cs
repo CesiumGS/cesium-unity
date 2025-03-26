@@ -917,6 +917,10 @@ namespace CesiumForUnity
 
             EditorUtility.SetDirty(null);
 #endif
+
+            TestReinterop.ThrowAnException();
+            System.Exception exception = null;
+            var message = exception.Message;
         }
     }
 }
