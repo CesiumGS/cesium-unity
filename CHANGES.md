@@ -1,5 +1,11 @@
 # Change Log
 
+## ? - ?
+
+##### Fixes :wrench:
+
+- Fixed a bug that could cause a crash when reloading a scene or tileset repeatedly.
+
 ## v1.15.4 - 2025-03-03
 
 ##### Fixes :wrench:

@@ -920,6 +920,15 @@ UnityPrepareRendererResources::prepareInLoadThread(
       .thenInMainThread(
           [asyncSystem, tileset = this->_tilesetGameObject](
               IntermediateLoadThreadResult&& workerResult) mutable {
+            if (tileset == nullptr) {
+              // Tileset GameObject was deleted while we were loading a tile
+              // (possibly play mode was exited or another cause).
+              return asyncSystem.createResolvedFuture(
+                  TileLoadResultAndRenderResources{
+                      std::move(workerResult.tileLoadResult),
+                      nullptr});
+            }
+
             bool shouldCreatePhysicsMeshes = false;
             bool shouldShowTilesInHierarchy = false;
 
