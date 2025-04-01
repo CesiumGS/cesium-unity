@@ -51,9 +51,10 @@ jobs:
           key: vcpkg-windows-${{ hashFiles('native~/vcpkg/ports/**/vcpkg.json', 'native~/vcpkg/triplets/**/*', 'native~/extern/*toolchain.cmake') }}-${{ hashFiles('native~/extern/cesium-native/CMakeLists.txt', 'native~/CMakeLists.txt') }}
           restore-keys: |
             vcpkg-windows-${{ hashFiles('native~/vcpkg/ports/**/vcpkg.json', 'native~/vcpkg/triplets/**/*', 'native~/extern/*toolchain.cmake') }}-
-      - name: Install Ninja
-        run: |
-          choco install -y ninja
+      - name: Install latest ninja and cmake
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: "3.31.6"
       - name: Install nasm
         uses: ilammy/setup-nasm@v1.5.1
       - name: Install wget
