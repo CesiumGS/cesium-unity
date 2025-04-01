@@ -1,10 +1,12 @@
 # Change Log
 
-## ? - ?
+## v1.15.5
 
 ##### Fixes :wrench:
 
 - Fixed a bug that could cause a crash when reloading a scene or tileset repeatedly.
+
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.45.0 to v0.46.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
 
 ## v1.15.4 - 2025-03-03
 
