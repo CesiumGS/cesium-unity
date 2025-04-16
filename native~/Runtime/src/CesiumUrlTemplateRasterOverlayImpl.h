@@ -23,12 +23,10 @@ public:
   ~CesiumUrlTemplateRasterOverlayImpl();
 
   void AddToTileset(
-      const ::DotNet::CesiumForUnity::CesiumUrlTemplateRasterOverlay&
-          overlay,
+      const ::DotNet::CesiumForUnity::CesiumUrlTemplateRasterOverlay& overlay,
       const ::DotNet::CesiumForUnity::Cesium3DTileset& tileset);
   void RemoveFromTileset(
-      const ::DotNet::CesiumForUnity::CesiumUrlTemplateRasterOverlay&
-          overlay,
+      const ::DotNet::CesiumForUnity::CesiumUrlTemplateRasterOverlay& overlay,
       const ::DotNet::CesiumForUnity::Cesium3DTileset& tileset);
 
 private:
