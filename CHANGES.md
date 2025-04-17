@@ -1,5 +1,11 @@
 # Change Log
 
+## ? - ?
+
+##### Fixes :wrench:
+
+- Fixed a bug where credits would not display in the Game tab after entering Play Mode.
+
 ## v1.15.5
 
 ##### Fixes :wrench:
