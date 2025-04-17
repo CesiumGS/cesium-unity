@@ -8,6 +8,7 @@ using UnityEngine.Networking;
 
 #if UNITY_EDITOR
 using UnityEditor.SceneManagement;
+using UnityEditor;
 #endif
 
 namespace CesiumForUnity
@@ -102,8 +103,8 @@ namespace CesiumForUnity
         private int _numLoadingImages = 0;
 
         const string base64Prefix = "data:image/png;base64,";
-        const string defaultName = "CesiumCreditSystemDefault";
         const string creditSystemPrefabName = "CesiumCreditSystem";
+        const string defaultName = "CesiumCreditSystemDefault";
 
         #region Fields and Events
         /// <summary>
@@ -160,6 +161,7 @@ namespace CesiumForUnity
 
             Cesium3DTileset.OnSetShowCreditsOnScreen += this.ForceUpdateCredits;
 #if UNITY_EDITOR
+            EditorApplication.playModeStateChanged += HandleEnteringPlayMode;
             EditorSceneManager.sceneClosing += HandleClosingSceneView;
 #endif
         }
@@ -183,8 +185,12 @@ namespace CesiumForUnity
 
             this._images.Clear();
 
-            if (_defaultCreditSystem == this)
+            if (this == _defaultCreditSystem)
             {
+#if UNITY_EDITOR
+                EditorApplication.playModeStateChanged -= HandleEnteringPlayMode;
+                EditorSceneManager.sceneClosing -= HandleClosingSceneView;
+#endif
                 _defaultCreditSystem = null;
             }
         }
@@ -322,7 +328,6 @@ namespace CesiumForUnity
             texture.wrapMode = TextureWrapMode.Clamp;
         }
 
-
 #if UNITY_EDITOR
         /// <summary>
         /// This handles the destruction of the credit system between scene switches in the Unity Editor.
@@ -335,6 +340,19 @@ namespace CesiumForUnity
         {
             if (_defaultCreditSystem != null && _defaultCreditSystem.gameObject.scene == scene)
             {
+                UnityLifetime.Destroy(_defaultCreditSystem.gameObject);
+            }
+        }
+
+        /// <summary>   
+        /// This handles the destruction of the credit system while entering Play Mode.
+        /// Without this, the persisting credit system's UI will not register with the Play Mode view, leading
+        /// to missing credits.
+        /// </summary>
+        /// <param name="state">The state change between the Edit and Play modes.</param>
+        private static void HandleEnteringPlayMode(PlayModeStateChange state)
+        {
+            if (state == PlayModeStateChange.EnteredPlayMode && _defaultCreditSystem != null) {
                 UnityLifetime.Destroy(_defaultCreditSystem.gameObject);
             }
         }
