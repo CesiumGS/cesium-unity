@@ -117,7 +117,7 @@ namespace CesiumForUnity
 
             EditorGUILayout.PropertyField(
                 this._projection,
-                new GUIContent("Projection", "The type of projection used to protect the imagery onto the globe."));
+                new GUIContent("Projection", "The type of projection used to project the imagery onto the globe."));
 
             EditorGUILayout.PropertyField(
                 this._specifyTilingScheme,
