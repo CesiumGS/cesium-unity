@@ -2,6 +2,10 @@
 
 ## ? - ?
 
+##### Additions :tada:
+
+- Added `CesiumUrlTemplateRasterOverlay` component, allowing a raster overlay to be added using tiles requested based on a specified URL template.
+
 ##### Fixes :wrench:
 
 - Fixed a bug where credits would not display in the Game tab after entering Play Mode.

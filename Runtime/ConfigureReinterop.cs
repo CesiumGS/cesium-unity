@@ -57,7 +57,7 @@ namespace CesiumForUnity
         public void ExposeToCPP()
         {
             Camera c = Camera.main;
-            
+
             Transform t = c.transform;
             Vector3 u = t.up;
             Vector3 f = t.forward;
@@ -361,6 +361,28 @@ namespace CesiumForUnity
             webMapTileServiceRasterOverlay.tileHeight = webMapTileServiceRasterOverlay.tileHeight;
             baseOverlay = webMapTileServiceRasterOverlay;
 
+            CesiumUrlTemplateRasterOverlay urlTemplateRasterOverlay = go.GetComponent<CesiumUrlTemplateRasterOverlay>();
+            urlTemplateRasterOverlay.templateUrl = urlTemplateRasterOverlay.templateUrl;
+            urlTemplateRasterOverlay.projection = urlTemplateRasterOverlay.projection;
+            urlTemplateRasterOverlay.specifyTilingScheme = urlTemplateRasterOverlay.specifyTilingScheme;
+            urlTemplateRasterOverlay.rootTilesX = urlTemplateRasterOverlay.rootTilesX;
+            urlTemplateRasterOverlay.rootTilesY = urlTemplateRasterOverlay.rootTilesY;
+            urlTemplateRasterOverlay.rectangleWest = urlTemplateRasterOverlay.rectangleWest;
+            urlTemplateRasterOverlay.rectangleSouth = urlTemplateRasterOverlay.rectangleSouth;
+            urlTemplateRasterOverlay.rectangleEast = urlTemplateRasterOverlay.rectangleEast;
+            urlTemplateRasterOverlay.rectangleNorth = urlTemplateRasterOverlay.rectangleNorth;
+            urlTemplateRasterOverlay.minimumLevel = urlTemplateRasterOverlay.minimumLevel;
+            urlTemplateRasterOverlay.maximumLevel = urlTemplateRasterOverlay.maximumLevel;
+            urlTemplateRasterOverlay.tileWidth = urlTemplateRasterOverlay.tileWidth;
+            urlTemplateRasterOverlay.tileHeight = urlTemplateRasterOverlay.tileHeight;
+            urlTemplateRasterOverlay.requestHeaders = urlTemplateRasterOverlay.requestHeaders;
+            baseOverlay = urlTemplateRasterOverlay;
+
+            int headerLen = urlTemplateRasterOverlay.requestHeaders.Count;
+            CesiumUrlTemplateRasterOverlay.HeaderEntry headerEntry = urlTemplateRasterOverlay.requestHeaders[0];
+            string headerName = headerEntry.Name;
+            string headerValue = headerEntry.Value;
+
             CesiumRasterOverlay[] overlaysArray = go.GetComponents<CesiumRasterOverlay>();
             int len = overlaysArray.Length;
             overlay = overlaysArray[0];
@@ -523,7 +545,7 @@ namespace CesiumForUnity
 
             CesiumSimplePlanarEllipsoidCurve planarEllipsoidCurve = CesiumSimplePlanarEllipsoidCurve.FromCenteredFixedCoordinates(
                 CesiumEllipsoid.WGS84,
-                new double3(0, 0, 0), 
+                new double3(0, 0, 0),
                 new double3(0, 0, 0));
             CesiumEllipsoid ellipsoid = CesiumEllipsoid.WGS84;
             ellipsoid.radii = new double3(0.0, 0.0, 0.0);
