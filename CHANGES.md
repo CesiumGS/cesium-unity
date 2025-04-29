@@ -1,6 +1,12 @@
 # Change Log
 
-## v1.15.5
+## ? - ?
+
+##### Additions :tada:
+
+- Added `CesiumUrlTemplateRasterOverlay` component, allowing a raster overlay to be added using tiles requested based on a specified URL template.
+
+## v1.15.5 - 2025-04-01
 
 ##### Fixes :wrench:
 
