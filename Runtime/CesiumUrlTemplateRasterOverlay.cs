@@ -6,6 +6,21 @@ using UnityEngine;
 namespace CesiumForUnity
 {
     /// <summary>
+    /// Specifies the type of projection used for projecting a URL template raster overlay.
+    /// </summary>
+    public enum CesiumUrlTemplateRasterOverlayProjection
+    {
+        /// <summary>
+        /// The raster overlay is projected using Web Mercator.
+        /// </summary>
+        WebMercator,
+        /// <summary>
+        /// The raster overlay is projected using a geographic projection.
+        /// </summary>
+        Geographic
+    }
+
+    /// <summary>
     /// A raster overlay that loads tiles from a templated URL.
     /// </summary>
     [ReinteropNativeImplementation(
@@ -316,21 +331,6 @@ namespace CesiumForUnity
             /// The value of the header.
             /// </summary>
             public string Value;
-        }
-
-        /// <summary>
-        /// Specifies the type of projection used for projecting a URL template raster overlay.
-        /// </summary>
-        public enum CesiumUrlTemplateRasterOverlayProjection
-        {
-            /// <summary>
-            /// The raster overlay is projected using Web Mercator.
-            /// </summary>
-            WebMercator,
-            /// <summary>
-            /// The raster overlay is projected using a geographic projection.
-            /// </summary>
-            Geographic
         }
     }
 }
