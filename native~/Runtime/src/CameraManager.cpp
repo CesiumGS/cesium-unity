@@ -82,7 +82,7 @@ ViewState unityCameraToViewState(
           ? georeference.ellipsoid().NativeImplementation().GetEllipsoid()
           : CesiumGeospatial::Ellipsoid::WGS84;
 
-  return ViewState::create(
+  return ViewState(
       cameraPosition,
       glm::normalize(cameraDirection),
       glm::normalize(cameraUp),
