@@ -160,10 +160,6 @@ namespace CesiumForUnity
             this._images = new List<Texture2D>();
 
             Cesium3DTileset.OnSetShowCreditsOnScreen += this.ForceUpdateCredits;
-#if UNITY_EDITOR
-            EditorApplication.playModeStateChanged += HandleEnteringPlayMode;
-            EditorSceneManager.sceneClosing += HandleClosingSceneView;
-#endif
         }
 
         private void Update()
@@ -187,10 +183,6 @@ namespace CesiumForUnity
 
             if (this == _defaultCreditSystem)
             {
-#if UNITY_EDITOR
-                EditorApplication.playModeStateChanged -= HandleEnteringPlayMode;
-                EditorSceneManager.sceneClosing -= HandleClosingSceneView;
-#endif
                 _defaultCreditSystem = null;
             }
         }
@@ -252,7 +244,7 @@ namespace CesiumForUnity
         /// Gets the default credit system, or creates a new default credit system instance if none exist.
         /// </summary>
         /// <returns>The default CesiumCreditSystem instance.</returns>
-        internal static CesiumCreditSystem GetDefaultCreditSystem()
+        public static CesiumCreditSystem GetDefaultCreditSystem()
         {
             if (_defaultCreditSystem == null)
             {
@@ -327,35 +319,5 @@ namespace CesiumForUnity
 
             texture.wrapMode = TextureWrapMode.Clamp;
         }
-
-#if UNITY_EDITOR
-        /// <summary>
-        /// This handles the destruction of the credit system between scene switches in the Unity Editor.
-        /// Without this, the credit system will live between instances and won't properly render the 
-        /// current scene's credits.
-        /// </summary>
-        /// <param name="scene">The scene.</param>
-        /// <param name="removingScene">Whether or not the closing scene is also being removed.</param>
-        private static void HandleClosingSceneView(Scene scene, bool removingScene)
-        {
-            if (_defaultCreditSystem != null && _defaultCreditSystem.gameObject.scene == scene)
-            {
-                UnityLifetime.Destroy(_defaultCreditSystem.gameObject);
-            }
-        }
-
-        /// <summary>   
-        /// This handles the destruction of the credit system while entering Play Mode.
-        /// Without this, the persisting credit system's UI will not register with the Play Mode view, leading
-        /// to missing credits.
-        /// </summary>
-        /// <param name="state">The state change between the Edit and Play modes.</param>
-        private static void HandleEnteringPlayMode(PlayModeStateChange state)
-        {
-            if (state == PlayModeStateChange.EnteredPlayMode && _defaultCreditSystem != null) {
-                UnityLifetime.Destroy(_defaultCreditSystem.gameObject);
-            }
-        }
-#endif
     }
 }
