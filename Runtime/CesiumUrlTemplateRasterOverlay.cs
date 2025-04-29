@@ -63,7 +63,7 @@ namespace CesiumForUnity
         private CesiumUrlTemplateRasterOverlayProjection _projection = CesiumUrlTemplateRasterOverlayProjection.WebMercator;
 
         /// <summary>
-        /// The type of projection used to protect the imagery onto the globe.
+        /// The type of projection used to project the imagery onto the globe.
         /// 
         /// For instance, EPSG:4326 uses geographic projection and EPSG:3857 uses Web Mercator.
         /// </summary>
@@ -191,7 +191,7 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        private double _rectangleNorth = -90.0;
+        private double _rectangleNorth = 90.0;
 
         /// <summary>
         /// The north boundary of the bounding rectangle used for the quadtree tiling
