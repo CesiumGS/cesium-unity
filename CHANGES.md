@@ -1,6 +1,6 @@
 # Change Log
 
-## ? - ?
+## v1.16.0 - 2025-05-01
 
 ##### Additions :tada:
 
@@ -10,6 +10,8 @@
 
 - Fixed a bug where credits would not display in the Game tab after entering Play Mode.
 - Improved stability during AppDomain reloads by catching exceptions thrown while freeing tiles.
+
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.46.0 to v0.47.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
 
 ## v1.15.5 - 2025-04-01
 
