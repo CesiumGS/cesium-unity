@@ -1716,45 +1716,53 @@ void UnityPrepareRendererResources::free(
     Cesium3DTilesSelection::Tile& tile,
     void* pLoadThreadResult,
     void* pMainThreadResult) noexcept {
-  if (pLoadThreadResult) {
-    LoadThreadResult* pTyped =
-        static_cast<LoadThreadResult*>(pLoadThreadResult);
-    for (int32_t i = 0, len = pTyped->meshes.Length(); i < len; ++i) {
-      CesiumForUnity::CesiumObjectPools::MeshPool().Release(pTyped->meshes[i]);
-    }
-    delete pTyped;
-  }
-
-  if (pMainThreadResult) {
-    std::unique_ptr<CesiumGltfGameObject> pCesiumGameObject(
-        static_cast<CesiumGltfGameObject*>(pMainThreadResult));
-
-    // It's possible that the game object has already been destroyed. In which
-    // case Unity will throw a MissingReferenceException if we try to use it. So
-    // don't do that.
-    if (*pCesiumGameObject->pGameObject != nullptr) {
-      auto metadataComponent =
-          pCesiumGameObject->pGameObject
-              ->GetComponentInParent<DotNet::CesiumForUnity::CesiumMetadata>();
-
-      UnityEngine::Transform parentTransform =
-          pCesiumGameObject->pGameObject->transform();
-
-      // Destroying primitives will remove them from the child list, so
-      // work backwards.
-      for (int32_t i = parentTransform.childCount() - 1; i >= 0; --i) {
-        UnityEngine::GameObject primitiveGameObject =
-            parentTransform.GetChild(i).gameObject();
-        freePrimitiveGameObject(primitiveGameObject, metadataComponent);
-        UnityLifetime::Destroy(primitiveGameObject);
+  try {
+    if (pLoadThreadResult) {
+      LoadThreadResult* pTyped =
+          static_cast<LoadThreadResult*>(pLoadThreadResult);
+      for (int32_t i = 0, len = pTyped->meshes.Length(); i < len; ++i) {
+        CesiumForUnity::CesiumObjectPools::MeshPool().Release(
+            pTyped->meshes[i]);
       }
-
-      if (metadataComponent == nullptr) {
-        freeModelMetadata(*pCesiumGameObject->pGameObject);
-      }
-
-      UnityLifetime::Destroy(*pCesiumGameObject->pGameObject);
+      delete pTyped;
     }
+
+    if (pMainThreadResult) {
+      std::unique_ptr<CesiumGltfGameObject> pCesiumGameObject(
+          static_cast<CesiumGltfGameObject*>(pMainThreadResult));
+
+      // It's possible that the game object has already been destroyed. In which
+      // case Unity will throw a MissingReferenceException if we try to use it.
+      // So don't do that.
+      if (*pCesiumGameObject->pGameObject != nullptr) {
+        auto metadataComponent =
+            pCesiumGameObject->pGameObject->GetComponentInParent<
+                DotNet::CesiumForUnity::CesiumMetadata>();
+
+        UnityEngine::Transform parentTransform =
+            pCesiumGameObject->pGameObject->transform();
+
+        // Destroying primitives will remove them from the child list, so
+        // work backwards.
+        for (int32_t i = parentTransform.childCount() - 1; i >= 0; --i) {
+          UnityEngine::GameObject primitiveGameObject =
+              parentTransform.GetChild(i).gameObject();
+          freePrimitiveGameObject(primitiveGameObject, metadataComponent);
+          UnityLifetime::Destroy(primitiveGameObject);
+        }
+
+        if (metadataComponent == nullptr) {
+          freeModelMetadata(*pCesiumGameObject->pGameObject);
+        }
+
+        UnityLifetime::Destroy(*pCesiumGameObject->pGameObject);
+      }
+    }
+  } catch (...) {
+    // This function is a hotspot for crashes caused by AppDomain reloads.
+    UnityEngine::Debug::Log(
+        System::String("A tile was not cleaned up properly, probably due to an "
+                       "AppDomain reload."));
   }
 }
 
