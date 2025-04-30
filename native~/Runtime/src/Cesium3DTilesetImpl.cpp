@@ -133,9 +133,12 @@ void Cesium3DTilesetImpl::Update(
   std::vector<ViewState> viewStates =
       CameraManager::getAllCameras(tileset, *this);
 
-  const ViewUpdateResult& updateResult = this->_pTileset->updateView(
+  const ViewUpdateResult& updateResult = this->_pTileset->updateViewGroup(
+      this->_pTileset->getDefaultViewGroup(),
       viewStates,
       DotNet::UnityEngine::Time::deltaTime());
+  this->_pTileset->loadTiles();
+
   this->updateLastViewUpdateResultState(tileset, updateResult);
 
   for (auto pTile : updateResult.tilesFadingOut) {
