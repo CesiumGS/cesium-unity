@@ -21,6 +21,8 @@ namespace CesiumForUnity
 
         static void UpdateIonSession()
         {
+            if (Application.internetReachability == NetworkReachability.NotReachable)
+                return;
             try
             {
                 CesiumIonServerManager.instance.currentSession.Tick();
