@@ -3,7 +3,6 @@
   "version": "1.2",
   "description": "Async++ is a lightweight concurrency framework for C++11",
   "license": "MIT",
-  "supports": "!uwp",
   "dependencies": [
     {
       "name": "vcpkg-cmake",
