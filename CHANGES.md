@@ -1,5 +1,12 @@
 # Change Log
 
+## ? - ?
+
+##### Additions :tada:
+
+##### Fixes :wrench:
+- Fixed a bug related to using offline tilesets without internet connection.
+  
 ## v1.16.0 - 2025-05-01
 
 ##### Additions :tada:
