@@ -392,12 +392,6 @@ void loadPrimitive(
           GetUnsafeBufferPointerWithoutChecks(dest));
 
   switch (primitive.mode) {
-  case MeshPrimitive::Mode::TRIANGLES:
-  case MeshPrimitive::Mode::POINTS:
-    for (int64_t i = 0; i < indicesView.size(); ++i) {
-      indices[i] = indicesView[i];
-    }
-    break;
   case MeshPrimitive::Mode::TRIANGLE_STRIP:
     for (int64_t i = 0; i < indicesView.size() - 2; ++i) {
       if (i % 2) {
@@ -412,11 +406,17 @@ void loadPrimitive(
     }
     break;
   case MeshPrimitive::Mode::TRIANGLE_FAN:
-  default:
-    for (int64_t i = 2; i < indicesView.size(); ++i) {
+    for (int64_t i = 0; i < indicesView.size()-2; ++i) {
       indices[3 * i] = indicesView[0];
-      indices[3 * i + 1] = indicesView[i - 1];
-      indices[3 * i + 2] = indicesView[i];
+      indices[3 * i + 1] = indicesView[i + 1];
+      indices[3 * i + 2] = indicesView[i + 2];
+    }
+    break;
+  case MeshPrimitive::Mode::TRIANGLES:
+  case MeshPrimitive::Mode::POINTS:
+  default:
+    for (int64_t i = 0; i < indicesView.size(); ++i) {
+      indices[i] = indicesView[i];
     }
     break;
   }
