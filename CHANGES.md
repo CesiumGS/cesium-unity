@@ -1,5 +1,11 @@
 # Change Log
 
+## ? - ?
+
+##### Fixes :wrench:
+
+- Fixed broken support for `TRIANGLE_FAN` primitives in tile meshes.
+
 ## v1.16.1 - 2025-06-02
 
 This release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.47.0 to v0.48.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
