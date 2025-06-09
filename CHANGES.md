@@ -2,7 +2,7 @@
 
 ## ? - ?
 
-##### Additions :tada:
+##### Fixes :wrench:
 
 - Added support for `TRIANGLE_FAN` primitives in tile meshes.
 
