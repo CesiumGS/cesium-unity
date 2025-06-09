@@ -406,7 +406,7 @@ void loadPrimitive(
     }
     break;
   case MeshPrimitive::Mode::TRIANGLE_FAN:
-    for (int64_t i = 0; i < indicesView.size()-2; ++i) {
+    for (int64_t i = 0; i < indicesView.size() - 2; ++i) {
       indices[3 * i] = indicesView[0];
       indices[3 * i + 1] = indicesView[i + 1];
       indices[3 * i + 2] = indicesView[i + 2];
