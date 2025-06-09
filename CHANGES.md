@@ -4,7 +4,7 @@
 
 ##### Fixes :wrench:
 
-- Added support for `TRIANGLE_FAN` primitives in tile meshes.
+- Fixed broken support for `TRIANGLE_FAN` primitives in tile meshes.
 
 ## v1.16.1 - 2025-06-02
 
