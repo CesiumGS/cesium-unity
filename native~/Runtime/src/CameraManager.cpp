@@ -150,7 +150,6 @@ CameraManager::getAllCameras(
       0.0 == unityWorldToTileset[2].z)
     return {};
 
-
   CesiumGeoreference georeferenceComponent =
       tileset.gameObject().GetComponentInParent<CesiumGeoreference>();
   if (georeferenceComponent != nullptr) {
