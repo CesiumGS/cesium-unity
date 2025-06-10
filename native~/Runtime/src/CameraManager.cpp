@@ -121,12 +121,18 @@ void addActiveSceneCameraInEditor(
     SceneView lastActiveEditorView = SceneView::lastActiveSceneView();
     if (lastActiveEditorView != nullptr) {
       Camera editorCamera = lastActiveEditorView.camera();
+      // check for invalid scale
+      if (0.0 == unityWorldToTileset[0].x ||
+          0.0 == unityWorldToTileset[1].y ||
+          0.0 == unityWorldToTileset[2].z)
+        return;
+
       if (editorCamera != nullptr) {
         result.emplace_back(unityCameraToViewState(
-            georeferenceComponent,
-            pCoordinateSystem,
-            unityWorldToTileset,
-            editorCamera));
+          georeferenceComponent,
+          pCoordinateSystem,
+          unityWorldToTileset,
+          editorCamera));
       }
     }
   }
@@ -143,6 +149,13 @@ CameraManager::getAllCameras(
 
   glm::dmat4 unityWorldToTileset =
       UnityTransforms::fromUnity(tileset.transform().worldToLocalMatrix());
+
+  // check for invalid scale
+  if (0.0 == unityWorldToTileset[0].x ||
+      0.0 == unityWorldToTileset[1].y ||
+      0.0 == unityWorldToTileset[2].z)
+    return {};
+
 
   CesiumGeoreference georeferenceComponent =
       tileset.gameObject().GetComponentInParent<CesiumGeoreference>();
