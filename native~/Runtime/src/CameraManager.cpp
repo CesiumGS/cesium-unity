@@ -123,10 +123,10 @@ void addActiveSceneCameraInEditor(
       Camera editorCamera = lastActiveEditorView.camera();
       if (editorCamera != nullptr) {
         result.emplace_back(unityCameraToViewState(
-          georeferenceComponent,
-          pCoordinateSystem,
-          unityWorldToTileset,
-          editorCamera));
+            georeferenceComponent,
+            pCoordinateSystem,
+            unityWorldToTileset,
+            editorCamera));
       }
     }
   }
@@ -145,8 +145,7 @@ CameraManager::getAllCameras(
       UnityTransforms::fromUnity(tileset.transform().worldToLocalMatrix());
 
   // check for invalid scale
-  if (0.0 == unityWorldToTileset[0].x ||
-      0.0 == unityWorldToTileset[1].y ||
+  if (0.0 == unityWorldToTileset[0].x || 0.0 == unityWorldToTileset[1].y ||
       0.0 == unityWorldToTileset[2].z)
     return {};
 
