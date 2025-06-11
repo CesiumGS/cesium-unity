@@ -5,7 +5,7 @@
 ##### Fixes :wrench:
 
 - Fixed broken support for `TRIANGLE_FAN` primitives in tile meshes.
-- Fixed editor crash when any 3D Tile scale component was set to zero. 
+- Fixed editor crash when any scale component on `Cesium3DTileset` was set to zero. 
 
 ## v1.16.1 - 2025-06-02
 
