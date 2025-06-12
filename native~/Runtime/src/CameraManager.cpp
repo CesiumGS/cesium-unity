@@ -4,6 +4,7 @@
 #include "CesiumGeoreferenceImpl.h"
 #include "UnityTransforms.h"
 
+#include <CesiumGeometry/Transforms.h>
 #include <CesiumGeospatial/Ellipsoid.h>
 #include <CesiumGeospatial/GlobeTransforms.h>
 #include <CesiumUtility/Math.h>
@@ -143,6 +144,17 @@ CameraManager::getAllCameras(
 
   glm::dmat4 unityWorldToTileset =
       UnityTransforms::fromUnity(tileset.transform().worldToLocalMatrix());
+
+  glm::dvec3 worldScale;
+  CesiumGeometry::Transforms::computeTranslationRotationScaleFromMatrix(
+      unityWorldToTileset,
+      nullptr,
+      nullptr,
+      &worldScale);
+
+  // check for invalid scale
+  if (worldScale.x == 0.0 || worldScale.y == 0.0 || worldScale.z == 0.0)
+    return {};
 
   CesiumGeoreference georeferenceComponent =
       tileset.gameObject().GetComponentInParent<CesiumGeoreference>();
