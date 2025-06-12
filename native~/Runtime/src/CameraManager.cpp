@@ -146,7 +146,11 @@ CameraManager::getAllCameras(
       UnityTransforms::fromUnity(tileset.transform().worldToLocalMatrix());
 
   glm::dvec3 worldScale;
-  CesiumGeometry::Transforms::computeTranslationRotationScaleFromMatrix(unityWorldToTileset,nullptr,nullptr, &worldScale);
+  CesiumGeometry::Transforms::computeTranslationRotationScaleFromMatrix(
+      unityWorldToTileset,
+      nullptr,
+      nullptr,
+      &worldScale);
 
   // check for invalid scale
   if (worldScale.x == 0.0 || worldScale.y == 0.0 || worldScale.z == 0.0)
