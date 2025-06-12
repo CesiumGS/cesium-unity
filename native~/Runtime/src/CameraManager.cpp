@@ -1,6 +1,7 @@
 #include "CameraManager.h"
 
 #include "Cesium3DTilesetImpl.h"
+#include "CesiumGeometry/Transforms.h"
 #include "CesiumGeoreferenceImpl.h"
 #include "UnityTransforms.h"
 
@@ -144,9 +145,11 @@ CameraManager::getAllCameras(
   glm::dmat4 unityWorldToTileset =
       UnityTransforms::fromUnity(tileset.transform().worldToLocalMatrix());
 
+  glm::dvec3 worldScale;
+  CesiumGeometry::Transforms::computeTranslationRotationScaleFromMatrix(unityWorldToTileset,nullptr,nullptr, &worldScale);
+
   // check for invalid scale
-  if (0.0 == unityWorldToTileset[0].x || 0.0 == unityWorldToTileset[1].y ||
-      0.0 == unityWorldToTileset[2].z)
+  if (worldScale.x == 0.0 || worldScale.y == 0.0 || worldScale.z == 0.0)
     return {};
 
   CesiumGeoreference georeferenceComponent =
