@@ -329,6 +329,7 @@ namespace CesiumForUnity
         private void InterruptFlight()
         {
             this._flyingToLocation = false;
+            this._currentFlyToTime = 0.0;
 
             // Set the controller's roll to 0.0
             Vector3 angles = this.transform.eulerAngles;
@@ -418,6 +419,7 @@ namespace CesiumForUnity
 
             // Indicate that the controller will be flying from now
             this._flyingToLocation = true;
+            this._currentFlyToTime = 0.0;
             this._canInterruptFlight = canInterruptByMoving;
             this._globeAnchor.adjustOrientationForGlobeWhenMoving = false;
             this._globeAnchor.detectTransformChanges = false;
