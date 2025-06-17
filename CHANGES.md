@@ -6,7 +6,7 @@
 
 - Fixed broken support for `TRIANGLE_FAN` primitives in tile meshes.
 - Fixed editor crash when any scale component on `Cesium3DTileset` was set to zero. 
-- Reset CesiumFlyController.currentFlyTime to zero when a flight is started or interrupted. 
+- Fixed a bug where CameraFlyToController, after the user interrupted a flight, would jump to the middle of the flight path immediately upon starting the next flight.
 
 ## v1.16.1 - 2025-06-02
 
