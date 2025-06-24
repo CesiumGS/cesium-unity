@@ -11,6 +11,8 @@ Plugins.meta
 CesiumForUnityNativeBindings/native/
 .vs/
 *.user
+.DS_STORE
+.idea
 Reinterop.dll
 Reinterop.deps.json
 Reinterop.deps.json.meta
