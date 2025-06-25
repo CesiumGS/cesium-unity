@@ -943,6 +943,23 @@ namespace CesiumForUnity
             TestReinterop.ThrowAnException();
             System.Exception exception = null;
             var message = exception.Message;
+
+            CesiumIonGeocoder geocoder = new CesiumIonGeocoder();
+            CesiumIonGeocoderProviderType providerType = CesiumIonGeocoderProviderType.Google;
+            CesiumIonGeocoderRequestType requestType = CesiumIonGeocoderRequestType.Autocomplete;
+            TaskCompletionSource<CesiumIonGeocoderResult> geocoderPromise = new TaskCompletionSource<CesiumIonGeocoderResult>();
+            geocoderPromise.SetException(new Exception("message"));
+            CesiumIonGeocoderResult geocoderResult = new CesiumIonGeocoderResult();
+            geocoderResult.features = new CesiumIonGeocoderFeature[1];
+            CesiumIonGeocoderFeature geocoderFeature = new CesiumIonGeocoderFeature();
+            geocoderResult.features[0].displayName = "";
+            geocoderResult.features[0].positionLlh = new double3(1, 2, 3);
+            geocoderResult.attributions = new CesiumIonGeocoderAttribution[1];
+            CesiumIonGeocoderAttribution attribution = new CesiumIonGeocoderAttribution();
+            attribution.html = "";
+            attribution.showOnScreen = true;
+            geocoderPromise.SetResult(geocoderResult);
+            Task<CesiumIonGeocoderResult> geocoderTask = geocoderPromise.Task;
         }
     }
 }
