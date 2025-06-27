@@ -4,6 +4,7 @@
 
 #include <CesiumIonClient/Connection.h>
 #include <CesiumIonClient/Geocoder.h>
+#include <CesiumUtility/Assert.h>
 
 #include <DotNet/CesiumForUnity/CesiumIonGeocoder.h>
 #include <DotNet/CesiumForUnity/CesiumIonGeocoderAttribution.h>
@@ -29,6 +30,9 @@ CesiumIonClient::GeocoderProviderType geocoderProviderTypeEnumToNative(
   case DotNet::CesiumForUnity::CesiumIonGeocoderProviderType::Default:
     return CesiumIonClient::GeocoderProviderType::Default;
   }
+
+  CESIUM_ASSERT(false && "Invalid CesiumIonGeocoderProviderType value");
+  return CesiumIonClient::GeocoderProviderType::Default;
 }
 
 CesiumIonClient::GeocoderRequestType geocoderRequestTypeEnumToNative(
@@ -39,6 +43,9 @@ CesiumIonClient::GeocoderRequestType geocoderRequestTypeEnumToNative(
   case DotNet::CesiumForUnity::CesiumIonGeocoderRequestType::Search:
     return CesiumIonClient::GeocoderRequestType::Search;
   }
+
+  CESIUM_ASSERT(false && "Invalid CesiumIonGeocoderRequestType value");
+  return CesiumIonClient::GeocoderRequestType::Search;
 }
 } // namespace
 
@@ -56,11 +63,13 @@ CesiumIonGeocoderImpl::Geocode(
     DotNet::CesiumForUnity::CesiumIonGeocoderProviderType providerType,
     DotNet::CesiumForUnity::CesiumIonGeocoderRequestType requestType,
     DotNet::System::String query) {
+  CesiumAsync::AsyncSystem asyncSystem = getAsyncSystem();
+
   DotNet::System::Threading::Tasks::TaskCompletionSource1<
       DotNet::CesiumForUnity::CesiumIonGeocoderResult>
       promise{};
 
-  getConnection(server, ionToken)
+  getConnection(asyncSystem, server, ionToken)
       .thenImmediately(
           [providerType, requestType, query](
               std::shared_ptr<CesiumIonClient::Connection>&& pConnection) {
@@ -69,7 +78,7 @@ CesiumIonGeocoderImpl::Geocode(
                 geocoderRequestTypeEnumToNative(requestType),
                 query.ToStlString());
           })
-      .thenImmediately([&promise](CesiumIonClient::Response<
+      .thenImmediately([promise](CesiumIonClient::Response<
                                   CesiumIonClient::GeocoderResult>&& response) {
         if (!response.errorCode.empty()) {
           promise.SetException(DotNet::System::Exception(DotNet::System::String(
@@ -116,37 +125,46 @@ CesiumIonGeocoderImpl::Geocode(
 
 CesiumAsync::Future<std::shared_ptr<CesiumIonClient::Connection>>
 CesiumIonGeocoderImpl::getConnection(
+    const CesiumAsync::AsyncSystem& asyncSystem,
     const DotNet::CesiumForUnity::CesiumIonServer& server,
     DotNet::System::String ionToken) {
   if (this->_pConnection != nullptr) {
-    return getAsyncSystem().createResolvedFuture(
+    return asyncSystem.createResolvedFuture(
         std::shared_ptr(this->_pConnection));
   }
 
+  std::shared_ptr<CesiumAsync::IAssetAccessor> pAssetAccessor =
+      getAssetAccessor();
+
   return CesiumIonClient::Connection::appData(
-             getAsyncSystem(),
-             getAssetAccessor(),
+             asyncSystem,
+             pAssetAccessor,
              server.apiUrl().ToStlString())
-      .thenInMainThread(
-          [ionToken, server, this](
+      .thenImmediately(
+          [ionToken, server, this, asyncSystem, pAssetAccessor](
               CesiumIonClient::Response<CesiumIonClient::ApplicationData>&&
                   response) {
             if (!response.value) {
               return std::shared_ptr<CesiumIonClient::Connection>(nullptr);
             }
 
+            this->_connectionMutex.lock();
             if (this->_pConnection != nullptr) {
               // Another query has already created a connection before this one
               // returned.
+              this->_connectionMutex.unlock();
               return this->_pConnection;
             }
 
             this->_pConnection = std::make_shared<CesiumIonClient::Connection>(
-                getAsyncSystem(),
-                getAssetAccessor(),
-                ionToken.ToStlString(),
+                asyncSystem,
+                pAssetAccessor,
+                DotNet::System::String::IsNullOrWhiteSpace(ionToken)
+                    ? server.defaultIonAccessToken().ToStlString()
+                    : ionToken.ToStlString(),
                 *response.value,
                 server.apiUrl().ToStlString());
+            this->_connectionMutex.unlock();
             return this->_pConnection;
           });
 }

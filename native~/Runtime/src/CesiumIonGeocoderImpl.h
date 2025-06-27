@@ -7,6 +7,7 @@
 #include <DotNet/System/String.h>
 #include <DotNet/System/Threading/Tasks/Task1.h>
 
+#include <mutex>
 #include <memory>
 
 namespace DotNet::CesiumForUnity {
@@ -42,10 +43,12 @@ public:
 private:
   CesiumAsync::Future<std::shared_ptr<CesiumIonClient::Connection>>
   getConnection(
+      const CesiumAsync::AsyncSystem& asyncSystem,
       const DotNet::CesiumForUnity::CesiumIonServer& server,
       DotNet::System::String ionToken);
 
   std::shared_ptr<CesiumIonClient::Connection> _pConnection;
+  std::mutex _connectionMutex;
 };
 
 } // namespace CesiumForUnityNative
