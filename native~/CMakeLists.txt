@@ -89,6 +89,8 @@ if (NOT IOS)
 endif()
 
 add_subdirectory(extern/swl-variant)
+
+set(CESIUM_DISABLE_CURL ON)
 add_subdirectory(extern/cesium-native)
 
 # Don't build the cesium-native tests by default.
