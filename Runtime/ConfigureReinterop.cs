@@ -76,6 +76,8 @@ namespace CesiumForUnity
             int pixelHeight = c.pixelHeight;
             int pixelWidth = c.pixelWidth;
             float aspect = c.aspect;
+            bool isOrtho = c.orthographic;
+            float orthoSize = c.orthographicSize;            
             //IFormattable f = new Vector3();
             //IEquatable<Vector3> f2 = new Vector3();
 
