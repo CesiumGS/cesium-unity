@@ -66,7 +66,20 @@ DllNotFoundException: CesiumForUnityNative assembly:<unknown assembly> type:<unk
 NotImplementedException: The native implementation is missing so OnValidate cannot be invoked.
 ```
 
-This is because the C++ code has not yet been compiled. To compile the C++ code for use in the Editor, run:
+This is because the C++ code has not yet been compiled. 
+
+> [!NOTE]
+> Once this step is complete, verify that Reinterop has generated the `.cpp` and `.h` source files. These should be located in `/native~/Runtime/generated-Editor/` and `/native~/Editor/>generated-Editor/`. If those directories are not present, it may be necessary to force Reinterop to run. This can be done by adding a comment or other minor change to `./Runtime/ConfigureReinterop.cs`
+and `./Editor/ConfigureReinterop.cs` . 
+> ```
+> cd cesium-unity-samples/Packages/com.cesium.unity
+> echo "" >> ./Runtime/ConfigureReinterop.cs
+> echo "" >> ./Editor/ConfigureReinterop.cs
+> ```
+> Alternatively, one may simple add a blank line or other minor change to both `ConfigureReinterop.cs` files in any text editor. 
+> Once those changes have been saved, go back to the Unity editor to force it to re-run Reinterop. 
+
+To compile the C++ code for use in the Editor, run:
 
 ```
 cd cesium-unity-samples/Packages/com.cesium.unity/native~
@@ -83,6 +96,8 @@ cd cesium-unity-samples/Packages/com.cesium.unity/native~
 cmake -B build -S . -DCMAKE_BUILD_TYPE=RelWithDebInfo
 cmake --build build -j14 --target install --config RelWithDebInfo
 ```
+
+
 
 Once this build/install completes, Cesium for Unity should work the next time Unity loads Cesium for Unity. You can get it to do so by either restarting the Editor, or by making a small change to any Cesium for Unity script (.cs) file in `Packages/com.cesium.unity/Runtime`.
 
