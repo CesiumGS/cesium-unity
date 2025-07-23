@@ -77,7 +77,7 @@ and `./Editor/ConfigureReinterop.cs` .
 > echo "" >> ./Editor/ConfigureReinterop.cs
 > ```
 > Alternatively, one may simple add a blank line or other minor change to both `ConfigureReinterop.cs` files in any text editor. 
-> Once those changes have been saved, go back to the Unity editor to force it to re-run Reinterop. 
+> Once those changes have been saved, go back to the Unity editor. It should automatically run Reinterop to generate the required native source files. 
 
 To compile the C++ code for use in the Editor, run:
 
