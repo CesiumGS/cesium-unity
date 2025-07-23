@@ -76,12 +76,10 @@ namespace CesiumForUnity
             int pixelHeight = c.pixelHeight;
             int pixelWidth = c.pixelWidth;
             float aspect = c.aspect;
-            //IFormattable f = new Vector3();
-            //IEquatable<Vector3> f2 = new Vector3();
-
             bool isOrtho = c.orthographic;
             float orthoSize = c.orthographicSize;            
-            
+            //IFormattable f = new Vector3();
+            //IEquatable<Vector3> f2 = new Vector3();
 
             GameObject go = new GameObject();
             go.name = go.name;
