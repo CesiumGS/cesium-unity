@@ -69,17 +69,6 @@ NotImplementedException: The native implementation is missing so OnValidate cann
 
 This is because the C++ code has not yet been compiled. 
 
-> [!NOTE]
-> Once this step is complete, verify that Reinterop has generated the `.cpp` and `.h` source files. These should be located in `/native~/Runtime/generated-Editor/` and `/native~/Editor/>generated-Editor/`. If those directories are not present, it may be necessary to force Reinterop to run. This can be done by adding a comment or other minor change to `./Runtime/ConfigureReinterop.cs`
-and `./Editor/ConfigureReinterop.cs` . 
-> ```
-> cd cesium-unity-samples/Packages/com.cesium.unity
-> echo "" >> ./Runtime/ConfigureReinterop.cs
-> echo "" >> ./Editor/ConfigureReinterop.cs
-> ```
-> Alternatively, one may simple add a blank line or other minor change to both `ConfigureReinterop.cs` files in any text editor. 
-> Once those changes have been saved, go back to the Unity editor. It should automatically run Reinterop to generate the required native source files. 
-
 To compile the C++ code for use in the Editor, run:
 
 ```
@@ -98,7 +87,17 @@ cmake -B build -S . -DCMAKE_BUILD_TYPE=RelWithDebInfo
 cmake --build build -j14 --target install --config RelWithDebInfo
 ```
 
-
+> [!NOTE]
+> If you receive compilation errors, verify that Reinterop has generated the `.cpp` and `.h` source files. These should be located in `com.cesium.unity/native~/Runtime/generated-Editor/` and `com.cesium.unity/native~/Editor/>generated-Editor/`. 
+> If those directories are not present, you may force Reinterop to run by adding a comment or other minor change to `./Runtime/ConfigureReinterop.cs`
+and `./Editor/ConfigureReinterop.cs` . 
+> ```
+> cd cesium-unity-samples/Packages/com.cesium.unity
+> echo "" >> ./Runtime/ConfigureReinterop.cs
+> echo "" >> ./Editor/ConfigureReinterop.cs
+> ```
+> Alternatively, one may add a blank line or other minor change to both `ConfigureReinterop.cs` files in any text editor. 
+> Once those changes have been saved, go back to the Unity editor. It should detect the file changes and cause Reinterop to generate the required native source files. 
 
 Once this build/install completes, Cesium for Unity should work the next time Unity loads Cesium for Unity. You can get it to do so by either restarting the Editor, or by making a small change to any Cesium for Unity script (.cs) file in `Packages/com.cesium.unity/Runtime`.
 
