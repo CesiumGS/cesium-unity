@@ -1,5 +1,10 @@
 # Change Log
 
+## ? - ?
+
+##### Fixes :wrench:
+- Fixed tile culling when in orthographic view.
+
 ## v1.16.2 - 2025-07-01
 
 ##### Fixes :wrench:

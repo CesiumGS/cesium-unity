@@ -79,6 +79,10 @@ namespace CesiumForUnity
             //IFormattable f = new Vector3();
             //IEquatable<Vector3> f2 = new Vector3();
 
+            bool isOrtho = c.orthographic;
+            float orthoSize = c.orthographicSize;            
+            
+
             GameObject go = new GameObject();
             go.name = go.name;
             go = new GameObject("name");
