@@ -53,7 +53,8 @@ This should be repeated if you modify Reinterop, or if you pull new changes that
 
 For more details, see the [Reinterop README](../Reinterop~/README.md).
 
-A common mistake is to open Unity before doing this step, which will cause Unity to delete `Reinterop.dll.meta` file because the `Reinterop.dll` file does not yet exist. Then, even after you publish `Reinterop.dll`, the `Reinterop.dll.meta` that Unity creates will be missing important information, and you'll get errors when Unity attemps to compile Cesium for Unity. If this happens to you, executing `git restore Reinterop.dll.meta` should fix it.
+> [!IMPORTANT] 
+> A common mistake is to open Unity before doing this step, which will cause Unity to delete `Reinterop.dll.meta` file because the `Reinterop.dll` file does not yet exist. Then, even after you publish `Reinterop.dll`, the `Reinterop.dll.meta` that Unity creates will be missing important information, and you'll get errors when Unity attemps to compile Cesium for Unity. If this happens to you, executing `git restore Reinterop.dll.meta` should fix it.
 
 ## Build for the Editor
 
