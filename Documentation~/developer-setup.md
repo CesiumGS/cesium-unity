@@ -67,9 +67,7 @@ DllNotFoundException: CesiumForUnityNative assembly:<unknown assembly> type:<unk
 NotImplementedException: The native implementation is missing so OnValidate cannot be invoked.
 ```
 
-This is because the C++ code has not yet been compiled. 
-
-To compile the C++ code for use by the Editor, run:
+This is because the C++ code has not yet been compiled. To compile the C++ code for use by the Editor, run:
 
 ```
 cd cesium-unity-samples/Packages/com.cesium.unity/native~
