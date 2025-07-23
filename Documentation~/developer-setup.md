@@ -87,6 +87,8 @@ cmake -B build -S . -DCMAKE_BUILD_TYPE=RelWithDebInfo
 cmake --build build -j14 --target install --config RelWithDebInfo
 ```
 
+Once this build/install completes, Cesium for Unity should work the next time Unity loads Cesium for Unity. You can get it to do so by either restarting the Editor, or by making a small change to any Cesium for Unity script (.cs) file in `Packages/com.cesium.unity/Runtime`.
+
 > [!NOTE]
 > If you receive compilation errors such as, 
 > `IonTokenTroubleshootingWindowImpl.h:3:10: fatal error: 'DotNet/System/String.h' file not found`
@@ -100,8 +102,6 @@ and `./Editor/ConfigureReinterop.cs` .
 > ```
 > (Alternatively, one may add a blank line or other minor change to both `ConfigureReinterop.cs` files in any text editor.)
 > Once those changes have been saved, go back to the Unity editor. It should detect the file changes and cause Reinterop to generate the required native source files. 
-
-Once this build/install completes, Cesium for Unity should work the next time Unity loads Cesium for Unity. You can get it to do so by either restarting the Editor, or by making a small change to any Cesium for Unity script (.cs) file in `Packages/com.cesium.unity/Runtime`.
 
 ## Building and Running Games
 
