@@ -101,7 +101,7 @@ and `./Editor/ConfigureReinterop.cs` .
 > echo "" >> ./Editor/ConfigureReinterop.cs
 > ```
 > (Alternatively, one may open both `ConfigureReinterop.cs` files from within Unity or any text editor, make a whitespace or other minor change, and save the files.)
-> Once those changes have been saved, go back to the Unity editor. It should detect the file changes and cause Reinterop to generate the required native source files. 
+> Once those changes have been saved, go back to the Unity editor. It should detect the file changes and cause Reinterop to generate the required C++ source files. 
 
 ## Building and Running Games
 
