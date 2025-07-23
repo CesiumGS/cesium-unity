@@ -89,9 +89,7 @@ cmake --build build -j14 --target install --config RelWithDebInfo
 
 > [!NOTE]
 > If you receive compilation errors such as, 
-> ```
-> IonTokenTroubleshootingWindowImpl.h:3:10: fatal error: 'DotNet/System/String.h' file not found
-> ```
+> `IonTokenTroubleshootingWindowImpl.h:3:10: fatal error: 'DotNet/System/String.h' file not found`
 > Verify that Reinterop has generated the required `.cpp` and `.h` source files. These should be located in `com.cesium.unity/native~/Runtime/generated-Editor/` and `com.cesium.unity/native~/Editor/generated-Editor`. 
 > If those directories are not present, you may force Reinterop to run by adding a comment or other minor change to `./Runtime/ConfigureReinterop.cs`
 and `./Editor/ConfigureReinterop.cs` . 
