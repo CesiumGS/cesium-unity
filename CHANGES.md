@@ -1,9 +1,12 @@
 # Change Log
 
-## ? - ?
+## v1.17.0 - 2025-08-01
 
-##### Fixes :wrench:
-- Fixed tile culling when in orthographic view.
+##### Additions :tada:
+
+- Added support for Cesium3DTileset tile selection using orthographic views.
+
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.49.0 to v0.50.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
 
 ## v1.16.2 - 2025-07-01
 
