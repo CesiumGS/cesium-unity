@@ -1,5 +1,11 @@
 # Change Log
 
+## ? - ?
+
+##### Additions :tada:
+
+- Added support for `KHR_material_unlit` extension to override rendering on unlit tilesets. 
+
 ## v1.17.0 - 2025-08-01
 
 ##### Additions :tada:
