@@ -429,7 +429,7 @@ namespace CesiumForUnity
             EditorGUILayout.PropertyField(this._generateSmoothNormals, generateSmoothNormalsContent);
 
             var ignoreKHRMaterialsUnlit = new GUIContent(
-                "Ignore KHR Materials Unlit",
+                "Ignore KHR_materials_unlit",
                 "Whether to ignore the KHR_materials_unlit extension on the glTF tiles in "+
                 "this tileset, if it exists, and instead render with standard lighting and "+
                 "shadows. This property will have no effect if the tileset does not have any "+
