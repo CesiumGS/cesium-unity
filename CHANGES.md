@@ -4,7 +4,7 @@
 
 ##### Additions :tada:
 
-- Added support for `KHR_material_unlit` extension to override rendering on unlit tilesets. 
+- Added option to ignore the `KHR_material_unlit` extension to force default lighting on tilesets. 
 
 ## v1.17.0 - 2025-08-01
 
