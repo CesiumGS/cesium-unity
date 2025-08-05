@@ -1535,7 +1535,8 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             tilesetComponent.opaqueMaterial();
 
         if (opaqueMaterial == nullptr) {
-          if (tilesetComponent.ignoreKHRMaterialsUnlit() || !primitiveInfo.isUnlit) {
+          if (tilesetComponent.ignoreKHRMaterialsUnlit() ||
+              !primitiveInfo.isUnlit) {
             opaqueMaterial =
                 UnityEngine::Resources::Load<UnityEngine::Material>(
                     System::String("CesiumDefaultTilesetMaterial"));
