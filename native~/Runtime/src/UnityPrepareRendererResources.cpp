@@ -1535,14 +1535,14 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             tilesetComponent.opaqueMaterial();
 
         if (opaqueMaterial == nullptr) {
-          if (primitiveInfo.isUnlit) {
-            opaqueMaterial =
-                UnityEngine::Resources::Load<UnityEngine::Material>(
-                    System::String("CesiumUnlitTilesetMaterial"));
-          } else {
+          if (tilesetComponent.ignoreKHRMaterialsUnlit() || !primitiveInfo.isUnlit) {
             opaqueMaterial =
                 UnityEngine::Resources::Load<UnityEngine::Material>(
                     System::String("CesiumDefaultTilesetMaterial"));
+          } else {
+            opaqueMaterial =
+                UnityEngine::Resources::Load<UnityEngine::Material>(
+                    System::String("CesiumUnlitTilesetMaterial"));
           }
         }
 
