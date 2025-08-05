@@ -1369,7 +1369,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
       static_cast<LoadThreadResult*>(pLoadThreadResult_));
 
   const System::Array1<UnityEngine::Mesh>& meshes = pLoadThreadResult->meshes;
-  const std::vector<CesiumPrimitiveInfo>& primitiveInfos =
+  std::vector<CesiumPrimitiveInfo>& primitiveInfos =
       pLoadThreadResult->primitiveInfos;
 
   const Cesium3DTilesSelection::TileContent& content = tile.getContent();
@@ -1474,7 +1474,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           const Mesh& mesh,
           const MeshPrimitive& primitive,
           const glm::dmat4& transform) {
-        const CesiumPrimitiveInfo& primitiveInfo = primitiveInfos[meshIndex];
+        CesiumPrimitiveInfo& primitiveInfo = primitiveInfos[meshIndex];
         UnityEngine::Mesh unityMesh = meshes[meshIndex++];
         if (unityMesh == nullptr) {
           // This indicates Unity destroyed the mesh already, which really
@@ -1534,16 +1534,18 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         UnityEngine::Material opaqueMaterial =
             tilesetComponent.opaqueMaterial();
 
+        if (tilesetComponent.ignoreKHRMaterialsUnlit())
+          primitiveInfo.isUnlit = false;
+
         if (opaqueMaterial == nullptr) {
-          if (tilesetComponent.ignoreKHRMaterialsUnlit() ||
-              !primitiveInfo.isUnlit) {
-            opaqueMaterial =
-                UnityEngine::Resources::Load<UnityEngine::Material>(
-                    System::String("CesiumDefaultTilesetMaterial"));
-          } else {
+          if (primitiveInfo.isUnlit) {
             opaqueMaterial =
                 UnityEngine::Resources::Load<UnityEngine::Material>(
                     System::String("CesiumUnlitTilesetMaterial"));
+          } else {
+            opaqueMaterial =
+                UnityEngine::Resources::Load<UnityEngine::Material>(
+                    System::String("CesiumDefaultTilesetMaterial"));
           }
         }
 
