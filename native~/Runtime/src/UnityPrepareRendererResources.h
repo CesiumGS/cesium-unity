@@ -72,6 +72,7 @@ public:
       const CesiumAsync::AsyncSystem& asyncSystem,
       Cesium3DTilesSelection::TileLoadResult&& tileLoadResult,
       const glm::dmat4& transform,
+      const Cesium3DTilesSelection::TilesetContentOptions& contentOptions,
       const std::any& rendererOptions) override;
 
   virtual void* prepareInMainThread(

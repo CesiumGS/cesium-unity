@@ -608,6 +608,7 @@ void Cesium3DTilesetImpl::LoadTileset(
 
   TilesetContentOptions contentOptions{};
   contentOptions.generateMissingNormalsSmooth = tileset.generateSmoothNormals();
+  contentOptions.ignoreKHRMaterialUnlit = tileset.ignoreKHRMaterialsUnlit();
 
   CesiumGltf::SupportedGpuCompressedPixelFormats supportedFormats;
   supportedFormats.ETC2_RGBA = UnityEngine::SystemInfo::IsFormatSupported(

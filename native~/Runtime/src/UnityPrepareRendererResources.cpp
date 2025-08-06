@@ -8,6 +8,7 @@
 
 #include <Cesium3DTilesSelection/Tile.h>
 #include <Cesium3DTilesSelection/Tileset.h>
+#include <Cesium3DTilesSelection/TilesetOptions.h>
 #include <CesiumGeometry/Transforms.h>
 #include <CesiumGeospatial/Ellipsoid.h>
 #include <CesiumGltf/AccessorView.h>
@@ -314,6 +315,7 @@ template <typename TIndex, class TIndexAccessor>
 void loadPrimitive(
     UnityEngine::MeshData meshData,
     CesiumPrimitiveInfo& primitiveInfo,
+    const TilesetContentOptions& contentOptions,
     const Model& gltf,
     const Node& node,
     const Mesh& mesh,
@@ -350,7 +352,7 @@ void loadPrimitive(
   const CesiumGltf::Material* pMaterial =
       Model::getSafe(&gltf.materials, primitive.material);
 
-  primitiveInfo.isUnlit =
+  primitiveInfo.isUnlit = contentOptions.ignoreKHRMaterialUnlit ? false :
       pMaterial && pMaterial->hasExtension<ExtensionKhrMaterialsUnlit>();
 
   bool hasNormals = false;
@@ -373,6 +375,7 @@ void loadPrimitive(
     loadPrimitive<uint32_t>(
         meshData,
         primitiveInfo,
+        contentOptions,
         gltf,
         node,
         mesh,
@@ -692,7 +695,8 @@ int32_t countPrimitives(const CesiumGltf::Model& model) {
 
 void populateMeshDataArray(
     MeshDataResult& meshDataResult,
-    TileLoadResult& tileLoadResult) {
+    TileLoadResult& tileLoadResult,
+    const TilesetContentOptions& contentOptions) {
   CesiumGltf::Model* pModel =
       std::get_if<CesiumGltf::Model>(&tileLoadResult.contentKind);
   if (!pModel)
@@ -704,7 +708,7 @@ void populateMeshDataArray(
 
   pModel->forEachPrimitiveInScene(
       -1,
-      [&meshDataResult, &meshDataInstance, pModel](
+      [&meshDataResult, &meshDataInstance, pModel, &contentOptions](
           const Model& gltf,
           const Node& node,
           const Mesh& mesh,
@@ -739,6 +743,7 @@ void populateMeshDataArray(
             loadPrimitive<std::uint32_t>(
                 meshData,
                 primitiveInfo,
+                contentOptions,
                 gltf,
                 node,
                 mesh,
@@ -751,6 +756,7 @@ void populateMeshDataArray(
             loadPrimitive<std::uint16_t>(
                 meshData,
                 primitiveInfo,
+                contentOptions,
                 gltf,
                 node,
                 mesh,
@@ -768,6 +774,7 @@ void populateMeshDataArray(
             loadPrimitive<std::uint16_t>(
                 meshData,
                 primitiveInfo,
+                contentOptions,
                 gltf,
                 node,
                 mesh,
@@ -783,6 +790,7 @@ void populateMeshDataArray(
             loadPrimitive<std::uint16_t>(
                 meshData,
                 primitiveInfo,
+                contentOptions,
                 gltf,
                 node,
                 mesh,
@@ -798,6 +806,7 @@ void populateMeshDataArray(
             loadPrimitive<std::uint16_t>(
                 meshData,
                 primitiveInfo,
+                contentOptions,
                 gltf,
                 node,
                 mesh,
@@ -813,6 +822,7 @@ void populateMeshDataArray(
             loadPrimitive<std::uint16_t>(
                 meshData,
                 primitiveInfo,
+                contentOptions,
                 gltf,
                 node,
                 mesh,
@@ -828,6 +838,7 @@ void populateMeshDataArray(
             loadPrimitive<std::uint32_t>(
                 meshData,
                 primitiveInfo,
+                contentOptions,
                 gltf,
                 node,
                 mesh,
@@ -880,7 +891,10 @@ UnityPrepareRendererResources::prepareInLoadThread(
     const CesiumAsync::AsyncSystem& asyncSystem,
     TileLoadResult&& tileLoadResult,
     const glm::dmat4& transform,
+    const Cesium3DTilesSelection::TilesetContentOptions& contentOptions,
     const std::any& rendererOptions) {
+
+
   CesiumGltf::Model* pModel =
       std::get_if<CesiumGltf::Model>(&tileLoadResult.contentKind);
   if (!pModel)
@@ -895,13 +909,13 @@ UnityPrepareRendererResources::prepareInLoadThread(
   };
 
   return asyncSystem
-      .runInMainThread([numberOfPrimitives]() {
+      .runInMainThread([numberOfPrimitives,tileset = this->_tilesetGameObject]() {
         // Allocate a MeshDataArray for the primitives.
         // Unfortunately, this must be done on the main thread.
         return UnityEngine::Mesh::AllocateWritableMeshData(numberOfPrimitives);
       })
       .thenInWorkerThread(
-          [tileLoadResult = std::move(tileLoadResult)](
+          [tileLoadResult = std::move(tileLoadResult), &contentOptions](
               UnityEngine::MeshDataArray&& meshDataArray) mutable {
             MeshDataResult meshDataResult{std::move(meshDataArray), {}};
             // Free the MeshDataArray if something goes wrong.
@@ -909,7 +923,7 @@ UnityPrepareRendererResources::prepareInLoadThread(
               meshDataResult.meshDataArray.Dispose();
             });
 
-            populateMeshDataArray(meshDataResult, tileLoadResult);
+            populateMeshDataArray(meshDataResult, tileLoadResult, contentOptions);
 
             // We're returning the MeshDataArray, so don't free it.
             sg.release();
@@ -928,7 +942,6 @@ UnityPrepareRendererResources::prepareInLoadThread(
                       std::move(workerResult.tileLoadResult),
                       nullptr});
             }
-
             bool shouldCreatePhysicsMeshes = false;
             bool shouldShowTilesInHierarchy = false;
 
@@ -1534,9 +1547,6 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         UnityEngine::Material opaqueMaterial =
             tilesetComponent.opaqueMaterial();
 
-        if (tilesetComponent.ignoreKHRMaterialsUnlit())
-          primitiveInfo.isUnlit = false;
-
         if (opaqueMaterial == nullptr) {
           if (primitiveInfo.isUnlit) {
             opaqueMaterial =
@@ -1553,7 +1563,6 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             UnityEngine::Object::Instantiate(opaqueMaterial);
         material.hideFlags(UnityEngine::HideFlags::HideAndDontSave);
         meshRenderer.material(material);
-
         if (pMaterial) {
           setGltfMaterialParameterValues(
               gltf,
@@ -1562,6 +1571,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
               material,
               materialProperties);
         }
+
 
         if (primitiveInfo.containsPoints) {
           CesiumForUnity::CesiumPointCloudRenderer pointCloudRenderer =
