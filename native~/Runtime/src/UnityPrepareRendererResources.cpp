@@ -1,6 +1,5 @@
 #include "UnityPrepareRendererResources.h"
 
-#include "CesiumCreateModelOptions.h"
 #include "CesiumFeaturesMetadataUtility.h"
 #include "TextureLoader.h"
 #include "TilesetMaterialProperties.h"
