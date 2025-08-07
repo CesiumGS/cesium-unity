@@ -949,4 +949,3 @@ namespace CesiumForUnity
         }
     }
 }
-
