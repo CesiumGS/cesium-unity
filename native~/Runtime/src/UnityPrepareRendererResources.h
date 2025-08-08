@@ -15,12 +15,12 @@ struct CreateModelOptions {
    * is true and the extension is present, then flat normals will be generated
    * for the model as it loads.
    */
-  bool ignoreKHRMaterialUnlit = false;
+  bool ignoreKhrMaterialUnlit = false;
 
   CreateModelOptions() = default;
   CreateModelOptions(
       const DotNet::CesiumForUnity::Cesium3DTileset& tilesetComponent)
-      : ignoreKHRMaterialUnlit(tilesetComponent.ignoreKHRMaterialsUnlit()) {}
+      : ignoreKhrMaterialUnlit(tilesetComponent.ignoreKHRMaterialsUnlit()) {}
 };
 /**
  * @brief Information about how a given glTF primitive was converted into

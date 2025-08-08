@@ -353,7 +353,7 @@ void loadPrimitive(
       Model::getSafe(&gltf.materials, primitive.material);
 
   primitiveInfo.isUnlit =
-      options.ignoreKHRMaterialUnlit
+      options.ignoreKhrMaterialUnlit
           ? false
           : pMaterial && pMaterial->hasExtension<ExtensionKhrMaterialsUnlit>();
 
@@ -917,7 +917,7 @@ UnityPrepareRendererResources::prepareInLoadThread(
         const auto tilesetComponent =
             tileset.GetComponent<DotNet::CesiumForUnity::Cesium3DTileset>();
         if (tilesetComponent != nullptr)
-          options.ignoreKHRMaterialUnlit =
+          options.ignoreKhrMaterialUnlit =
               tilesetComponent.ignoreKHRMaterialsUnlit();
         // Allocate a MeshDataArray for the primitives.
         // Unfortunately, this must be done on the main thread.
