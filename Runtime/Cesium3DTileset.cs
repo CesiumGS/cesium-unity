@@ -590,6 +590,33 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
+        private bool _ignoreKhrMaterialsUnlit = false;
+
+        /// <summary>
+        /// Whether to ignore the KHR_materials_unlit extension on the glTF tiles in
+        /// this tileset, if it exists
+        /// </summary>
+        /// <remarks>
+        /// Whether to ignore the KHR_materials_unlit extension on the glTF tiles in
+        /// this tileset, if it exists, and instead render with standard lighting and
+        /// shadows. This property will have no effect if the tileset does not have any
+        /// tiles that use this extension.
+        /// 
+        /// The KHR_materials_unlit extension is often applied to photogrammetry
+        /// tilesets because lighting and shadows are already baked into their
+        /// textures.
+        /// </remarks>
+        public bool ignoreKhrMaterialsUnlit
+        {
+            get => this._ignoreKhrMaterialsUnlit;
+            set
+            {
+                this._ignoreKhrMaterialsUnlit = value;
+                this.RecreateTileset();
+            }
+        }
+
+        [SerializeField]
         private CesiumPointCloudShading _pointCloudShading;
 
         /// <summary>
