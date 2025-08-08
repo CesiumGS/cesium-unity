@@ -84,7 +84,7 @@ namespace CesiumForUnity
             //    this.serializedObject.FindProperty("_lodTransitionLength");
             this._generateSmoothNormals =
                 this.serializedObject.FindProperty("_generateSmoothNormals");
-            this._ignoreKhrMaterialsUnlit = this.serializedObject.FindProperty("_ignoreKHRMaterialsUnlit");
+            this._ignoreKhrMaterialsUnlit = this.serializedObject.FindProperty("_ignoreKhrMaterialsUnlit");
 
             this._pointCloudShading = this.serializedObject.FindProperty("_pointCloudShading");
 
@@ -428,7 +428,7 @@ namespace CesiumForUnity
                 "rendered with smooth normals instead when the original glTF is missing normals.");
             EditorGUILayout.PropertyField(this._generateSmoothNormals, generateSmoothNormalsContent);
 
-            var ignoreKHRMaterialsUnlit = new GUIContent(
+            var ignoreKhrMaterialsUnlit = new GUIContent(
                 "Ignore KHR_materials_unlit",
                 "Whether to ignore the KHR_materials_unlit extension on the glTF tiles in "+
                 "this tileset, if it exists, and instead render with standard lighting and "+
@@ -439,7 +439,7 @@ namespace CesiumForUnity
                 "tilesets because lighting and shadows are already baked into their "+
                 "textures. "
             );
-            EditorGUILayout.PropertyField(this._ignoreKhrMaterialsUnlit, ignoreKHRMaterialsUnlit);
+            EditorGUILayout.PropertyField(this._ignoreKhrMaterialsUnlit, ignoreKhrMaterialsUnlit);
         }
 
         private void DrawPointCloudShadingProperties()

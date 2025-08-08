@@ -566,6 +566,7 @@ void Cesium3DTilesetImpl::DestroyTileset(
 void Cesium3DTilesetImpl::LoadTileset(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
   TilesetOptions options{};
+  options.rendererOptions = CreateModelOptions(tileset);
   options.maximumScreenSpaceError = tileset.maximumScreenSpaceError();
   options.preloadAncestors = tileset.preloadAncestors();
   options.preloadSiblings = tileset.preloadSiblings();

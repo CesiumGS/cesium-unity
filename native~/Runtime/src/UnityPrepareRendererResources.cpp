@@ -907,31 +907,25 @@ UnityPrepareRendererResources::prepareInLoadThread(
     TileLoadResult tileLoadResult;
   };
 
-  CreateModelOptions options{};
-
   return asyncSystem
-      .runInMainThread([numberOfPrimitives,
-                        tileset = this->_tilesetGameObject,
-                        &options]() {
-        const auto tilesetComponent =
-            tileset.GetComponent<DotNet::CesiumForUnity::Cesium3DTileset>();
-        if (tilesetComponent != nullptr)
-          options.ignoreKhrMaterialUnlit =
-              tilesetComponent.ignoreKhrMaterialsUnlit();
+      .runInMainThread([numberOfPrimitives]() {
         // Allocate a MeshDataArray for the primitives.
         // Unfortunately, this must be done on the main thread.
         return UnityEngine::Mesh::AllocateWritableMeshData(numberOfPrimitives);
       })
       .thenInWorkerThread(
-          [tileLoadResult = std::move(tileLoadResult),
-           &options](UnityEngine::MeshDataArray&& meshDataArray) mutable {
+          [tileLoadResult = std::move(tileLoadResult), rendererOptions](UnityEngine::MeshDataArray&& meshDataArray) mutable {
             MeshDataResult meshDataResult{std::move(meshDataArray), {}};
             // Free the MeshDataArray if something goes wrong.
             ScopeGuard sg([&meshDataResult]() {
               meshDataResult.meshDataArray.Dispose();
             });
 
-            populateMeshDataArray(meshDataResult, tileLoadResult, options);
+            const auto* pOptions = std::any_cast<CreateModelOptions>(&rendererOptions);
+            if (pOptions)
+              populateMeshDataArray(meshDataResult, tileLoadResult, *pOptions);
+            else
+              populateMeshDataArray(meshDataResult, tileLoadResult, {});
 
             // We're returning the MeshDataArray, so don't free it.
             sg.release();
