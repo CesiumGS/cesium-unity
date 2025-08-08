@@ -914,14 +914,16 @@ UnityPrepareRendererResources::prepareInLoadThread(
         return UnityEngine::Mesh::AllocateWritableMeshData(numberOfPrimitives);
       })
       .thenInWorkerThread(
-          [tileLoadResult = std::move(tileLoadResult), rendererOptions](UnityEngine::MeshDataArray&& meshDataArray) mutable {
+          [tileLoadResult = std::move(tileLoadResult), rendererOptions](
+              UnityEngine::MeshDataArray&& meshDataArray) mutable {
             MeshDataResult meshDataResult{std::move(meshDataArray), {}};
             // Free the MeshDataArray if something goes wrong.
             ScopeGuard sg([&meshDataResult]() {
               meshDataResult.meshDataArray.Dispose();
             });
 
-            const auto* pOptions = std::any_cast<CreateModelOptions>(&rendererOptions);
+            const auto* pOptions =
+                std::any_cast<CreateModelOptions>(&rendererOptions);
             if (pOptions)
               populateMeshDataArray(meshDataResult, tileLoadResult, *pOptions);
             else
