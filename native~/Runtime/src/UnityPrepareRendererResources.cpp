@@ -73,7 +73,6 @@
 
 #include <algorithm>
 #include <array>
-#include <iostream>
 #include <unordered_map>
 #include <variant>
 
@@ -918,7 +917,7 @@ UnityPrepareRendererResources::prepareInLoadThread(
             tileset.GetComponent<DotNet::CesiumForUnity::Cesium3DTileset>();
         if (tilesetComponent != nullptr)
           options.ignoreKhrMaterialUnlit =
-              tilesetComponent.ignoreKHRMaterialsUnlit();
+              tilesetComponent.ignoreKhrMaterialsUnlit();
         // Allocate a MeshDataArray for the primitives.
         // Unfortunately, this must be done on the main thread.
         return UnityEngine::Mesh::AllocateWritableMeshData(numberOfPrimitives);
@@ -1391,7 +1390,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
       static_cast<LoadThreadResult*>(pLoadThreadResult_));
 
   const System::Array1<UnityEngine::Mesh>& meshes = pLoadThreadResult->meshes;
-  std::vector<CesiumPrimitiveInfo>& primitiveInfos =
+  const std::vector<CesiumPrimitiveInfo>& primitiveInfos =
       pLoadThreadResult->primitiveInfos;
 
   const Cesium3DTilesSelection::TileContent& content = tile.getContent();
@@ -1496,7 +1495,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           const Mesh& mesh,
           const MeshPrimitive& primitive,
           const glm::dmat4& transform) {
-        CesiumPrimitiveInfo& primitiveInfo = primitiveInfos[meshIndex];
+        const CesiumPrimitiveInfo& primitiveInfo = primitiveInfos[meshIndex];
         UnityEngine::Mesh unityMesh = meshes[meshIndex++];
         if (unityMesh == nullptr) {
           // This indicates Unity destroyed the mesh already, which really

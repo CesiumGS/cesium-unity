@@ -279,7 +279,7 @@ namespace CesiumForUnity
             //tileset.useLodTransitions = tileset.useLodTransitions;
             //tileset.lodTransitionLength = tileset.lodTransitionLength;
             tileset.generateSmoothNormals = tileset.generateSmoothNormals;
-            tileset.ignoreKHRMaterialsUnlit = tileset.ignoreKHRMaterialsUnlit;
+            tileset.ignoreKhrMaterialsUnlit = tileset.ignoreKhrMaterialsUnlit;
             tileset.createPhysicsMeshes = tileset.createPhysicsMeshes;
             tileset.suspendUpdate = tileset.suspendUpdate;
             tileset.previousSuspendUpdate = tileset.previousSuspendUpdate;
@@ -949,3 +949,4 @@ namespace CesiumForUnity
         }
     }
 }
+

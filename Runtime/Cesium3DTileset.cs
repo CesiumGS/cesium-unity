@@ -590,7 +590,7 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        private bool _ignoreKHRMaterialsUnlit = false;
+        private bool _ignoreKhrMaterialsUnlit = false;
 
         /// <summary>
         /// Whether to ignore the KHR_materials_unlit extension on the glTF tiles in
@@ -606,16 +606,15 @@ namespace CesiumForUnity
         /// tilesets because lighting and shadows are already baked into their
         /// textures.
         /// </remarks>
-        public bool ignoreKHRMaterialsUnlit
+        public bool ignoreKhrMaterialsUnlit
         {
-            get => this._ignoreKHRMaterialsUnlit;
+            get => this._ignoreKhrMaterialsUnlit;
             set
             {
-                this._ignoreKHRMaterialsUnlit = value;
+                this._ignoreKhrMaterialsUnlit = value;
                 this.RecreateTileset();
             }
         }
-
 
         [SerializeField]
         private CesiumPointCloudShading _pointCloudShading;

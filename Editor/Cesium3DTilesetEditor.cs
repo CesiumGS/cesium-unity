@@ -31,7 +31,7 @@ namespace CesiumForUnity
         private SerializedProperty _culledScreenSpaceError;
 
         private SerializedProperty _opaqueMaterial;
-        private SerializedProperty _ignoreKHRMaterialsUnlit;
+        private SerializedProperty _ignoreKhrMaterialsUnlit;
         //private SerializedProperty _useLodTransitions;
         //private SerializedProperty _lodTransitionLength;
         private SerializedProperty _generateSmoothNormals;
@@ -84,7 +84,7 @@ namespace CesiumForUnity
             //    this.serializedObject.FindProperty("_lodTransitionLength");
             this._generateSmoothNormals =
                 this.serializedObject.FindProperty("_generateSmoothNormals");
-            this._ignoreKHRMaterialsUnlit = this.serializedObject.FindProperty("_ignoreKHRMaterialsUnlit");
+            this._ignoreKhrMaterialsUnlit = this.serializedObject.FindProperty("_ignoreKHRMaterialsUnlit");
 
             this._pointCloudShading = this.serializedObject.FindProperty("_pointCloudShading");
 
@@ -439,7 +439,7 @@ namespace CesiumForUnity
                 "tilesets because lighting and shadows are already baked into their "+
                 "textures. "
             );
-            EditorGUILayout.PropertyField(this._ignoreKHRMaterialsUnlit, ignoreKHRMaterialsUnlit);
+            EditorGUILayout.PropertyField(this._ignoreKhrMaterialsUnlit, ignoreKHRMaterialsUnlit);
         }
 
         private void DrawPointCloudShadingProperties()

@@ -20,7 +20,7 @@ struct CreateModelOptions {
   CreateModelOptions() = default;
   CreateModelOptions(
       const DotNet::CesiumForUnity::Cesium3DTileset& tilesetComponent)
-      : ignoreKhrMaterialUnlit(tilesetComponent.ignoreKHRMaterialsUnlit()) {}
+      : ignoreKhrMaterialUnlit(tilesetComponent.ignoreKhrMaterialsUnlit()) {}
 };
 /**
  * @brief Information about how a given glTF primitive was converted into
