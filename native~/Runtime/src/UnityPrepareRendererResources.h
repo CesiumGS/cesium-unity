@@ -18,7 +18,7 @@ struct CreateModelOptions {
   bool ignoreKhrMaterialUnlit = false;
 
   CreateModelOptions() = default;
-  CreateModelOptions(
+  explicit CreateModelOptions(
       const DotNet::CesiumForUnity::Cesium3DTileset& tilesetComponent)
       : ignoreKhrMaterialUnlit(tilesetComponent.ignoreKhrMaterialsUnlit()) {}
 };
