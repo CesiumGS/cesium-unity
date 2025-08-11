@@ -1,5 +1,11 @@
 # Change Log
 
+## ? - ?
+
+##### Additions :tada:
+
+- Added option to ignore the `KHR_material_unlit` extension to force default lighting on tilesets. 
+
 ## v1.17.0 - 2025-08-01
 
 ##### Additions :tada:
