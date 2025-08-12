@@ -122,6 +122,8 @@ namespace CesiumForUnity
                     return $"lib{baseName}.a";
                 case BuildTarget.StandaloneOSX:
                     return $"lib{baseName}.dylib";
+                case BuildTarget.WebGL:
+                    return $"lib{baseName}.a";
                 default:
                     // Assume Linux-ish
                     return $"lib{baseName}.so";
@@ -454,6 +456,10 @@ namespace CesiumForUnity
                     {
                         startInfo.FileName = File.Exists("/Applications/CMake.app/Contents/bin/cmake") ? "/Applications/CMake.app/Contents/bin/cmake" : "cmake";
                     }
+                    else if (library.Platform == BuildTarget.WebGL)
+                    {
+                        startInfo.FileName = "emcmake";
+                    }
                     else
                     {
                         startInfo.FileName = "cmake";
@@ -475,6 +481,10 @@ namespace CesiumForUnity
                         $"-DCMAKE_INSTALL_PREFIX=\"{library.InstallDirectory}\"",
                         $"-DREINTEROP_GENERATED_DIRECTORY={library.GeneratedDirectoryName}",
                     };
+
+                    if (library.Platform == BuildTarget.WebGL)
+                        args.Insert(0, "cmake");
+
                     args.AddRange(library.ExtraConfigureArgs);
 
                     if (library.Toolchain != null)

@@ -6,6 +6,23 @@ project(CesiumForUnityNative
     LANGUAGES CXX C
 )
 
+get_filename_component(toolchainFile "${CMAKE_TOOLCHAIN_FILE}" NAME)
+if(toolchainFile STREQUAL "Emscripten.cmake")
+    set(CESIUM_TARGET_WASM ON)
+    # Include the toolchain directly as ezvcpkg will overwrite the 
+    # toolchain before it's loaded
+    include(${CMAKE_TOOLCHAIN_FILE})
+endif()
+
+if(CESIUM_TARGET_WASM)
+    # vcpkg will attempt to second-guess our CMAKE_C_COMPILER setting, choosing to go with the value of CC instead.
+    # While normally this is the correct value to go with, for wasm we need to be using emcc and em++.
+    # So we set CC and CXX to emcc and em++ here so vcpkg will pick them up properly.
+    # Does this make sense? No. Does it work? Somehow. ¯\_(ツ)_/¯
+    set(ENV{CC} ${CMAKE_C_COMPILER})
+    set(ENV{CXX} ${CMAKE_CXX_COMPILER})
+endif()
+
 # By default, vcpkg (or is it cmake?) will try to link against the Debug version
 # of the vcpkg libraries when we build the RelWithDebInfo configuration. Tell it
 # to prefer Release instead. vcpkg Release builds DO have debug symbols, just like
@@ -17,6 +34,10 @@ SET(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO "RelWithDebInfo;Release;")
 # a standalone build.
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/../Editor" CACHE PATH "Installed to the Editor directory." FORCE)
+endif()
+
+if (CESIUM_TARGET_WASM)
+  set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/out_wasm")
 endif()
 
 option(CESIUM_TRACING_ENABLED "Whether to enable the Cesium performance tracing framework (CESIUM_TRACE_* macros)." OFF)
@@ -80,6 +101,11 @@ if (NOT VCPKG_TRIPLET)
     endif()
 endif()
 
+if(CESIUM_TARGET_WASM)
+    # vcpkg will attempt to make this wasm32-emscripten if we don't declare it
+    set(VCPKG_TARGET_TRIPLET wasm32-emscripten-unity)
+endif()
+
 # We never need any of cesium-native's header files to be installed.
 set(CESIUM_INSTALL_HEADERS OFF)
 
@@ -109,7 +135,7 @@ endif()
 set(LIB_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR})
 
 # Specify all targets that need to compile bitcode
-if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
+if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS" AND NOT CESIUM_TARGET_WASM)
     install(TARGETS tidy-static)
     set_target_properties(tidy-static PROPERTIES EXCLUDE_FROM_ALL 0 EXCLUDE_FROM_DEFAULT_BUILD 0)
 endif()

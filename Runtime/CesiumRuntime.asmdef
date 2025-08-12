@@ -12,7 +12,8 @@
         "iOS",
         "macOSStandalone",
         "WSA",
-        "WindowsStandalone64"
+        "WindowsStandalone64",
+        "WebGL"
     ],
     "excludePlatforms": [],
     "allowUnsafeCode": true,
