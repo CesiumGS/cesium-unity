@@ -85,7 +85,7 @@ namespace CesiumForUnity
                 LibraryToBuild[] libraries = GetLibrariesToBuildForPlatform(report.summary, finalLibrariesOnly: true);
                 foreach (LibraryToBuild library in libraries)
                 {
-                    CreatePlaceholders(library, "CesiumForUnityNative-Runtime");
+                    //CreatePlaceholders(library, "CesiumForUnityNative-Runtime");
                 }
             }
             finally
@@ -436,6 +436,7 @@ namespace CesiumForUnity
 
         internal static void BuildNativeLibrary(LibraryToBuild library)
         {
+            return;
             if (library.CleanBuild && library.BuildDirectory.Length > 2 && Directory.Exists(library.BuildDirectory))
                 Directory.Delete(library.BuildDirectory, true);
             Directory.CreateDirectory(library.BuildDirectory);
