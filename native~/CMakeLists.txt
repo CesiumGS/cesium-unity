@@ -110,7 +110,7 @@ endif()
 set(CESIUM_INSTALL_HEADERS OFF)
 
 # We only need cesium-native's static lib files to be installed on iOS.
-if (NOT IOS)
+if (NOT IOS AND NOT CESIUM_TARGET_WASM)
     set(CESIUM_INSTALL_STATIC_LIBS OFF)
 endif()
 
@@ -132,10 +132,16 @@ if (EDITOR)
   add_subdirectory(Editor)
 endif()
 
-set(LIB_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR})
+if (CESIUM_TARGET_WASM)
+  set(LIB_INSTALL_DIR "out_wasm")
+else()
+  set(LIB_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR})  
+endif()
 
 # Specify all targets that need to compile bitcode
-if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS" AND NOT CESIUM_TARGET_WASM)
-    install(TARGETS tidy-static)
-    set_target_properties(tidy-static PROPERTIES EXCLUDE_FROM_ALL 0 EXCLUDE_FROM_DEFAULT_BUILD 0)
+if (NOT CESIUM_TARGET_WASM)
+  if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
+      install(TARGETS tidy-static)
+      set_target_properties(tidy-static PROPERTIES EXCLUDE_FROM_ALL 0 EXCLUDE_FROM_DEFAULT_BUILD 0)
+  endif()
 endif()
