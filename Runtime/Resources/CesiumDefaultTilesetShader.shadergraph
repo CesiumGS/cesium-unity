@@ -3743,8 +3743,8 @@
     "m_ObjectId": "17fca4c4bf154cdfb4da09cd13cad27c",
     "m_Title": "Clipping",
     "m_Position": {
-        "x": 426.9998779296875,
-        "y": 526.999755859375
+        "x": 427.0,
+        "y": 527.0
     }
 }
 
@@ -6014,8 +6014,8 @@
     "m_ObjectId": "4424b7499dd74a28bbc9df16dee0cf5e",
     "m_Title": "Compute Flat Normal",
     "m_Position": {
-        "x": 464.635498046875,
-        "y": 1098.280029296875
+        "x": 465.0,
+        "y": 1098.0
     }
 }
 
@@ -7025,7 +7025,7 @@
     "m_ObjectId": "589f4e11412a4cbb90d671b22e237450",
     "m_Title": "glTF Base Color",
     "m_Position": {
-        "x": -1874.0001220703125,
+        "x": -1874.0,
         "y": 177.0
     }
 }
@@ -7971,7 +7971,7 @@
     "m_ObjectId": "69cd55544d0c4d0398f9591b9fbe134d",
     "m_Title": "glTF PBR Metallic-Roughness",
     "m_Position": {
-        "x": -1865.000244140625,
+        "x": -1865.0,
         "y": 1692.0
     }
 }
@@ -10189,8 +10189,8 @@
     "m_ObjectId": "9152a890faa84cd7b266b944cf210185",
     "m_Title": "glTF Emissive Texture",
     "m_Position": {
-        "x": -1865.000244140625,
-        "y": 2352.00048828125
+        "x": -1865.0,
+        "y": 2352.0
     }
 }
 
@@ -13701,8 +13701,8 @@
     "m_ObjectId": "da5f26e4dc7649dbae635a3bcb0ac50b",
     "m_Title": "glTF Ambient Occlusion",
     "m_Position": {
-        "x": -1869.000244140625,
-        "y": 3089.000244140625
+        "x": -1869.0,
+        "y": 3089.0
     }
 }
 
@@ -13816,8 +13816,8 @@
     "m_ObjectId": "dbd4e9568a614874b25288e2229220e7",
     "m_Title": "glTF Normal Texture",
     "m_Position": {
-        "x": -1868.0001220703125,
-        "y": 946.9998779296875
+        "x": -1868.0,
+        "y": 947.0
     }
 }
 
@@ -15320,8 +15320,8 @@
     "m_ObjectId": "fb5719d9c5c74100943dcfd4d0eb6eb7",
     "m_Title": "Raster Overlays",
     "m_Position": {
-        "x": 422.0001220703125,
-        "y": -356.9998779296875
+        "x": 422.0,
+        "y": -357.0
     }
 }
 
