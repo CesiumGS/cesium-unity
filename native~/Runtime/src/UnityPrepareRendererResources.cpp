@@ -1,7 +1,6 @@
 #include "UnityPrepareRendererResources.h"
 
 #include "CesiumFeaturesMetadataUtility.h"
-#include "DotNet/UnityEngine/Shader.h"
 #include "TextureLoader.h"
 #include "TilesetMaterialProperties.h"
 #include "UnityLifetime.h"
@@ -100,36 +99,7 @@ std::vector<TIndex> generateIndices(const int32_t count) {
   }
   return syntheticIndexBuffer;
 }
-/*
-template <typename TIndex>
-void computeFlatNormals(
-    uint8_t* pWritePos,
-    size_t stride,
-    TIndex* indices,
-    int32_t indexCount,
-    const AccessorView<UnityEngine::Vector3>& positionView) {
 
-  for (int i = 0; i < indexCount; i += 3) {
-
-    TIndex i0 = indices[i];
-    TIndex i1 = indices[i + 1];
-    TIndex i2 = indices[i + 2];
-
-    const glm::vec3& v0 =
-        *reinterpret_cast<const glm::vec3*>(&positionView[i0]);
-    const glm::vec3& v1 =
-        *reinterpret_cast<const glm::vec3*>(&positionView[i1]);
-    const glm::vec3& v2 =
-        *reinterpret_cast<const glm::vec3*>(&positionView[i2]);
-
-    glm::vec3 normal = glm::normalize(glm::cross(v1 - v0, v2 - v0));
-    for (int j = 0; j < 3; j++) {
-      *reinterpret_cast<glm::vec3*>(pWritePos) = normal;
-      pWritePos += stride;
-    }
-  }
-}
-*/
 /**
  * @brief The result after populating Unity mesh data with loaded glTF content.
  */
