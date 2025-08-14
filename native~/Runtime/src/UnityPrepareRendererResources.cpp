@@ -327,7 +327,6 @@ void loadPrimitive(
           ? false
           : pMaterial && pMaterial->hasExtension<ExtensionKhrMaterialsUnlit>();
 
-
   auto normalAccessorIt = primitive.attributes.find("NORMAL");
   AccessorView<UnityEngine::Vector3> normalView;
   if (normalAccessorIt != primitive.attributes.end()) {
@@ -532,28 +531,27 @@ void loadPrimitive(
   }
   stride += numTexCoords * sizeof(Vector2);
 
-    for (int64_t i = 0; i < vertexCount; ++i) {
-      *reinterpret_cast<Vector3*>(pWritePos) = positionView[i];
+  for (int64_t i = 0; i < vertexCount; ++i) {
+    *reinterpret_cast<Vector3*>(pWritePos) = positionView[i];
+    pWritePos += sizeof(Vector3);
+
+    if (primitiveInfo.hasNormals) {
+      *reinterpret_cast<Vector3*>(pWritePos) = normalView[i];
       pWritePos += sizeof(Vector3);
-
-      if (primitiveInfo.hasNormals) {
-        *reinterpret_cast<Vector3*>(pWritePos) = normalView[i];
-        pWritePos += sizeof(Vector3);
-      }
-
-      // Skip the slot allocated for vertex colors, we will fill them in
-      // bulk later.
-      if (hasVertexColors) {
-        pWritePos += sizeof(uint32_t);
-      }
-
-      for (uint32_t texCoordIndex = 0; texCoordIndex < numTexCoords;
-           ++texCoordIndex) {
-        *reinterpret_cast<Vector2*>(pWritePos) =
-            texCoordViews[texCoordIndex][i];
-        pWritePos += sizeof(Vector2);
-      }
     }
+
+    // Skip the slot allocated for vertex colors, we will fill them in
+    // bulk later.
+    if (hasVertexColors) {
+      pWritePos += sizeof(uint32_t);
+    }
+
+    for (uint32_t texCoordIndex = 0; texCoordIndex < numTexCoords;
+         ++texCoordIndex) {
+      *reinterpret_cast<Vector2*>(pWritePos) = texCoordViews[texCoordIndex][i];
+      pWritePos += sizeof(Vector2);
+    }
+  }
 
   // Fill in vertex colors separately, if they exist.
   if (hasVertexColors) {
@@ -565,7 +563,7 @@ void loadPrimitive(
             pBufferStart + colorByteOffset,
             stride,
             static_cast<size_t>(vertexCount),
-            //computeFlatNormals,
+            // computeFlatNormals,
             false,
             indices});
   }
@@ -1481,10 +1479,12 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             UnityEngine::Object::Instantiate(opaqueMaterial);
         material.hideFlags(UnityEngine::HideFlags::HideAndDontSave);
 
-        int32_t computeFlatNormalsPropertyID = materialProperties.getComputeFlatNormalsID();
+        int32_t computeFlatNormalsPropertyID =
+            materialProperties.getComputeFlatNormalsID();
         bool computeFlatNormals = tilesetComponent.computeFlatNormals();
         if (!computeFlatNormals && !primitiveInfo.hasNormals) {
-          computeFlatNormals |= !primitiveInfo.isUnlit && primitive.mode != MeshPrimitive::Mode::POINTS;
+          computeFlatNormals |= !primitiveInfo.isUnlit &&
+                                primitive.mode != MeshPrimitive::Mode::POINTS;
         }
         material.SetFloat(computeFlatNormalsPropertyID, computeFlatNormals);
 
