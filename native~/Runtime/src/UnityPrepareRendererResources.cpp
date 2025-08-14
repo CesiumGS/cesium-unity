@@ -366,25 +366,6 @@ void loadPrimitive(
     primitiveInfo.hasNormals = normalView.status() == AccessorViewStatus::Valid;
   }
 
-  // // Check if  we need to upgrade to a large index type to accommodate the
-  // // larger number of vertices we need for flat normals.
-  // if (computeFlatNormals && indexFormat == IndexFormat::UInt16 &&
-  //     indexCount >= std::numeric_limits<uint16_t>::max()) {
-  //   loadPrimitive<uint32_t>(
-  //       meshData,
-  //       primitiveInfo,
-  //       options,
-  //       gltf,
-  //       node,
-  //       mesh,
-  //       primitive,
-  //       transform,
-  //       indicesView,
-  //       IndexFormat::UInt32,
-  //       positionView);
-  //   return;
-  // }
-
   meshData.SetIndexBufferParams(indexCount, indexFormat);
   const Unity::Collections::NativeArray1<TIndex>& dest =
       meshData.GetIndexData<TIndex>();
@@ -551,10 +532,7 @@ void loadPrimitive(
     attributes.Item(i, descriptor[i]);
   }
 
-  int32_t vertexCount = /*computeFlatNormals
-                            ? indexCount
-                            : */
-    static_cast<int32_t>(positionView.size());
+  int32_t vertexCount = static_cast<int32_t>(positionView.size());
   meshData.SetVertexBufferParams(vertexCount, attributes);
 
   NativeArray1<uint8_t> nativeVertexBuffer =
@@ -584,31 +562,6 @@ void loadPrimitive(
   }
   stride += numTexCoords * sizeof(Vector2);
 
- /* if (computeFlatNormals) {
-    ::computeFlatNormals(
-        pWritePos + normalByteOffset,
-        stride,
-        indices,
-        indexCount,
-        positionView);
-    for (int64_t i = 0; i < vertexCount; ++i) {
-      TIndex vertexIndex = indices[i];
-      *reinterpret_cast<Vector3*>(pWritePos) = positionView[vertexIndex];
-      // skip position and normal
-      pWritePos += 2 * sizeof(Vector3);
-      // Skip the slot allocated for vertex colors, we will fill them in
-      // bulk later.
-      if (hasVertexColors) {
-        pWritePos += sizeof(uint32_t);
-      }
-      for (uint32_t texCoordIndex = 0; texCoordIndex < numTexCoords;
-           ++texCoordIndex) {
-        *reinterpret_cast<Vector2*>(pWritePos) =
-            texCoordViews[texCoordIndex][vertexIndex];
-        pWritePos += sizeof(Vector2);
-      }
-    }
-  } else*/ {
     for (int64_t i = 0; i < vertexCount; ++i) {
       *reinterpret_cast<Vector3*>(pWritePos) = positionView[i];
       pWritePos += sizeof(Vector3);
@@ -631,7 +584,6 @@ void loadPrimitive(
         pWritePos += sizeof(Vector2);
       }
     }
-  }
 
   // Fill in vertex colors separately, if they exist.
   if (hasVertexColors) {
@@ -647,14 +599,7 @@ void loadPrimitive(
             false,
             indices});
   }
-/*
-  if (computeFlatNormals) {
-    // rewrite indices
-    for (TIndex i = 0; i < indexCount; i++) {
-      indices[i] = i;
-    }
-  }
-*/
+
   meshData.subMeshCount(1);
 
   // TODO: use sub-meshes for glTF primitives, instead of a separate mesh
