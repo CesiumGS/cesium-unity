@@ -49,6 +49,13 @@ struct CesiumPrimitiveInfo {
   bool isUnlit = false;
 
   /**
+   * @brief Whether the primitive contains normals
+   * @remarks If normals are not present, they should be generated on the CPU
+   * or in the shader.
+   */
+  bool hasNormals = false;
+
+  /**
    * @brief Maps a texture coordinate index i (TEXCOORD_<i>) to the
    * corresponding Unity texture coordinate index.
    */

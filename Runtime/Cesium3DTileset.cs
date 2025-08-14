@@ -590,6 +590,26 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
+        private bool _computeFlatNormals;
+
+        /// <summary>
+        /// Whether to generate flat normals in the pixel shader when normals are missing in the glTF. 
+        /// </summary>
+        /// <remarks>
+        /// According to the glTF spec: "When normals are not specified, client
+        /// implementations should calculate flat normals." 
+        /// </remarks>
+        public bool computeFlatNormals
+        {
+            get => this._computeFlatNormals;
+            set
+            {
+                this._computeFlatNormals = value;
+                this.RecreateTileset();
+            }
+        }
+
+        [SerializeField]
         private bool _ignoreKhrMaterialsUnlit = false;
 
         /// <summary>

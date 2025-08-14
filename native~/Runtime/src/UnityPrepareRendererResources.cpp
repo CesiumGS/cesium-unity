@@ -1,6 +1,7 @@
 #include "UnityPrepareRendererResources.h"
 
 #include "CesiumFeaturesMetadataUtility.h"
+#include "DotNet/UnityEngine/Shader.h"
 #include "TextureLoader.h"
 #include "TilesetMaterialProperties.h"
 #include "UnityLifetime.h"
@@ -99,7 +100,7 @@ std::vector<TIndex> generateIndices(const int32_t count) {
   }
   return syntheticIndexBuffer;
 }
-
+/*
 template <typename TIndex>
 void computeFlatNormals(
     uint8_t* pWritePos,
@@ -128,7 +129,7 @@ void computeFlatNormals(
     }
   }
 }
-
+*/
 /**
  * @brief The result after populating Unity mesh data with loaded glTF content.
  */
@@ -356,37 +357,33 @@ void loadPrimitive(
           ? false
           : pMaterial && pMaterial->hasExtension<ExtensionKhrMaterialsUnlit>();
 
-  bool hasNormals = false;
-  bool computeFlatNormals = false;
+
   auto normalAccessorIt = primitive.attributes.find("NORMAL");
   AccessorView<UnityEngine::Vector3> normalView;
   if (normalAccessorIt != primitive.attributes.end()) {
     normalView =
         AccessorView<UnityEngine::Vector3>(gltf, normalAccessorIt->second);
-    hasNormals = normalView.status() == AccessorViewStatus::Valid;
-  } else if (
-      !primitiveInfo.isUnlit && primitive.mode != MeshPrimitive::Mode::POINTS) {
-    computeFlatNormals = hasNormals = true;
+    primitiveInfo.hasNormals = normalView.status() == AccessorViewStatus::Valid;
   }
 
-  // Check if  we need to upgrade to a large index type to accommodate the
-  // larger number of vertices we need for flat normals.
-  if (computeFlatNormals && indexFormat == IndexFormat::UInt16 &&
-      indexCount >= std::numeric_limits<uint16_t>::max()) {
-    loadPrimitive<uint32_t>(
-        meshData,
-        primitiveInfo,
-        options,
-        gltf,
-        node,
-        mesh,
-        primitive,
-        transform,
-        indicesView,
-        IndexFormat::UInt32,
-        positionView);
-    return;
-  }
+  // // Check if  we need to upgrade to a large index type to accommodate the
+  // // larger number of vertices we need for flat normals.
+  // if (computeFlatNormals && indexFormat == IndexFormat::UInt16 &&
+  //     indexCount >= std::numeric_limits<uint16_t>::max()) {
+  //   loadPrimitive<uint32_t>(
+  //       meshData,
+  //       primitiveInfo,
+  //       options,
+  //       gltf,
+  //       node,
+  //       mesh,
+  //       primitive,
+  //       transform,
+  //       indicesView,
+  //       IndexFormat::UInt32,
+  //       positionView);
+  //   return;
+  // }
 
   meshData.SetIndexBufferParams(indexCount, indexFormat);
   const Unity::Collections::NativeArray1<TIndex>& dest =
@@ -441,7 +438,7 @@ void loadPrimitive(
   ++numberOfAttributes;
 
   // Add the NORMAL attribute, if it exists.
-  if (hasNormals) {
+  if (primitiveInfo.hasNormals) {
     assert(numberOfAttributes < MAX_ATTRIBUTES);
     descriptor[numberOfAttributes].attribute = VertexAttribute::Normal;
     descriptor[numberOfAttributes].format = VertexAttributeFormat::Float32;
@@ -554,9 +551,10 @@ void loadPrimitive(
     attributes.Item(i, descriptor[i]);
   }
 
-  int32_t vertexCount = computeFlatNormals
+  int32_t vertexCount = /*computeFlatNormals
                             ? indexCount
-                            : static_cast<int32_t>(positionView.size());
+                            : */
+    static_cast<int32_t>(positionView.size());
   meshData.SetVertexBufferParams(vertexCount, attributes);
 
   NativeArray1<uint8_t> nativeVertexBuffer =
@@ -576,7 +574,7 @@ void loadPrimitive(
 
   size_t stride = sizeof(Vector3);
   size_t normalByteOffset, colorByteOffset;
-  if (hasNormals) {
+  if (primitiveInfo.hasNormals) {
     normalByteOffset = stride;
     stride += sizeof(Vector3);
   }
@@ -586,7 +584,7 @@ void loadPrimitive(
   }
   stride += numTexCoords * sizeof(Vector2);
 
-  if (computeFlatNormals) {
+ /* if (computeFlatNormals) {
     ::computeFlatNormals(
         pWritePos + normalByteOffset,
         stride,
@@ -610,12 +608,12 @@ void loadPrimitive(
         pWritePos += sizeof(Vector2);
       }
     }
-  } else {
+  } else*/ {
     for (int64_t i = 0; i < vertexCount; ++i) {
       *reinterpret_cast<Vector3*>(pWritePos) = positionView[i];
       pWritePos += sizeof(Vector3);
 
-      if (hasNormals) {
+      if (primitiveInfo.hasNormals) {
         *reinterpret_cast<Vector3*>(pWritePos) = normalView[i];
         pWritePos += sizeof(Vector3);
       }
@@ -645,17 +643,18 @@ void loadPrimitive(
             pBufferStart + colorByteOffset,
             stride,
             static_cast<size_t>(vertexCount),
-            computeFlatNormals,
+            //computeFlatNormals,
+            false,
             indices});
   }
-
+/*
   if (computeFlatNormals) {
     // rewrite indices
     for (TIndex i = 0; i < indexCount; i++) {
       indices[i] = i;
     }
   }
-
+*/
   meshData.subMeshCount(1);
 
   // TODO: use sub-meshes for glTF primitives, instead of a separate mesh
@@ -1566,6 +1565,14 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         UnityEngine::Material material =
             UnityEngine::Object::Instantiate(opaqueMaterial);
         material.hideFlags(UnityEngine::HideFlags::HideAndDontSave);
+
+        int32_t computeFlatNormalsPropertyID = materialProperties.getComputeFlatNormalsID();
+        bool computeFlatNormals = tilesetComponent.computeFlatNormals();
+        if (!computeFlatNormals && !primitiveInfo.hasNormals) {
+          computeFlatNormals |= !primitiveInfo.isUnlit && primitive.mode != MeshPrimitive::Mode::POINTS;
+        }
+        material.SetFloat(computeFlatNormalsPropertyID, computeFlatNormals);
+
         meshRenderer.material(material);
         if (pMaterial) {
           setGltfMaterialParameterValues(
