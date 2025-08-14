@@ -436,7 +436,7 @@ namespace CesiumForUnity
                 "When normals are missing in the glTF, caclulate flat normals in the pixel shader." +
                 "\n\n" +
                 "When using a custom material, the shader should expose the boolean `calculateFlatNormals` "+
-                " and implement this feature.");
+                " and implement this feature. Select this option to force creation of flat normals on the GPU.");
             EditorGUILayout.PropertyField(this._computeFlatNormals, computeFlatNormalsContent);
 
             var ignoreKhrMaterialsUnlitContent = new GUIContent(
