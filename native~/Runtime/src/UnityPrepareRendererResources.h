@@ -28,13 +28,13 @@ struct CreateModelOptions {
  */
 struct CesiumPrimitiveInfo {
   /**
-   * @brief Whether or not the primitive's mode is set to POINTS.
-   * This affects whether or not it can be baked into a physics mesh.
+   * @brief Whether the primitive's mode is set to POINTS.
+   * This affects whether it can be baked into a physics mesh.
    */
   bool containsPoints = false;
 
   /**
-   * @brief Whether or not the primitive contains translucent vertex
+   * @brief Whether the primitive contains translucent vertex
    * colors. This can affect material tags used to render the model.
    */
   bool isTranslucent = false;
@@ -50,8 +50,8 @@ struct CesiumPrimitiveInfo {
 
   /**
    * @brief Whether the primitive contains normals
-   * @remarks If normals are not present, they should be generated on the CPU
-   * or in the shader.
+   * @remarks If normals are not present amd using a lit material, they should
+   * be generated on the CPU or in the shader.
    */
   bool hasNormals = false;
 
