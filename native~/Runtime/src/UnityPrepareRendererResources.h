@@ -40,10 +40,10 @@ struct CesiumPrimitiveInfo {
   bool isTranslucent = false;
 
   /**
-   * @brief Whether or not the primitive material has the KHR_materials_unlit
+   * @brief Whether the primitive material has the KHR_materials_unlit
    * extension.
    * @remarks This may be overridden if
-   * DotNet::CesiumForUnity::Cesium3DTileset::ignoreignoreKHRMaterialsUnlit() is
+   * DotNet::CesiumForUnity::Cesium3DTileset::ignoreKhrMaterialsUnlit() is
    * set.
    */
   bool isUnlit = false;

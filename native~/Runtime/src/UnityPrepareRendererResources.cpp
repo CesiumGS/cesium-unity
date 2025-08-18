@@ -1481,11 +1481,10 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
         int32_t computeFlatNormalsPropertyID =
             materialProperties.getComputeFlatNormalsID();
-        bool computeFlatNormals = tilesetComponent.computeFlatNormals();
-        if (!computeFlatNormals && !primitiveInfo.hasNormals) {
-          computeFlatNormals |= !primitiveInfo.isUnlit &&
-                                primitive.mode != MeshPrimitive::Mode::POINTS;
-        }
+        bool computeFlatNormals = !primitiveInfo.hasNormals &&
+                                  !primitiveInfo.isUnlit &&
+                                  primitive.mode != MeshPrimitive::Mode::POINTS;
+
         material.SetFloat(computeFlatNormalsPropertyID, computeFlatNormals);
 
         meshRenderer.material(material);

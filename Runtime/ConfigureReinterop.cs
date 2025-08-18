@@ -77,7 +77,7 @@ namespace CesiumForUnity
             int pixelWidth = c.pixelWidth;
             float aspect = c.aspect;
             bool isOrtho = c.orthographic;
-            float orthoSize = c.orthographicSize;            
+            float orthoSize = c.orthographicSize;
             //IFormattable f = new Vector3();
             //IEquatable<Vector3> f2 = new Vector3();
 
@@ -236,7 +236,8 @@ namespace CesiumForUnity
             string e = request.error;
             string method = request.method;
             string url = request.url;
-            if (request.result == UnityWebRequest.Result.Success) { };
+            if (request.result == UnityWebRequest.Result.Success) { }
+            ;
             request.downloadHandler = new NativeDownloadHandler();
             request.SetRequestHeader("name", "value");
             request.GetResponseHeader("name");
@@ -279,7 +280,6 @@ namespace CesiumForUnity
             //tileset.useLodTransitions = tileset.useLodTransitions;
             //tileset.lodTransitionLength = tileset.lodTransitionLength;
             tileset.generateSmoothNormals = tileset.generateSmoothNormals;
-            tileset.computeFlatNormals = tileset.computeFlatNormals;
             tileset.ignoreKhrMaterialsUnlit = tileset.ignoreKhrMaterialsUnlit;
             tileset.createPhysicsMeshes = tileset.createPhysicsMeshes;
             tileset.suspendUpdate = tileset.suspendUpdate;
@@ -950,4 +950,3 @@ namespace CesiumForUnity
         }
     }
 }
-

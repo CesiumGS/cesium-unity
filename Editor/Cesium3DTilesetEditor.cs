@@ -36,8 +36,6 @@ namespace CesiumForUnity
         //private SerializedProperty _lodTransitionLength;
         private SerializedProperty _generateSmoothNormals;
 
-        private SerializedProperty _computeFlatNormals;
-
         private SerializedProperty _pointCloudShading;
 
         private SerializedProperty _showTilesInHierarchy;
@@ -86,8 +84,6 @@ namespace CesiumForUnity
             //    this.serializedObject.FindProperty("_lodTransitionLength");
             this._generateSmoothNormals =
                 this.serializedObject.FindProperty("_generateSmoothNormals");
-            this._computeFlatNormals =
-                this.serializedObject.FindProperty("_computeFlatNormals");
             this._ignoreKhrMaterialsUnlit = this.serializedObject.FindProperty("_ignoreKhrMaterialsUnlit");
 
             this._pointCloudShading = this.serializedObject.FindProperty("_pointCloudShading");
@@ -426,18 +422,11 @@ namespace CesiumForUnity
                 "Generate Smooth Normals",
                 "Whether to generate smooth normals when normals are missing in the glTF." +
                 "\n\n" +
-                "According to the glTF spec: \"When normals are not specified, client " +
-                "implementations should calculate flat normals.\" However, calculating flat " +
-                "normals requires duplicating vertices. This option allows the glTFs to be " +
-                "rendered with smooth normals instead when the original glTF is missing normals.");
+                "This option allows the glTFs to be rendered with smooth normals when the " +
+                " original glTF is missing normals. If normals are missing and this option " +
+                "is not enabled, flat normals should be generated in the shader. "
+                );
             EditorGUILayout.PropertyField(this._generateSmoothNormals, generateSmoothNormalsContent);
-
-            var computeFlatNormalsContent = new GUIContent("Calculate Flat Normals",
-                "When normals are missing in the glTF, caclulate flat normals in the pixel shader." +
-                "\n\n" +
-                "When using a custom material, the shader should expose the boolean `calculateFlatNormals` "+
-                " and implement this feature. Select this option to force creation of flat normals on the GPU.");
-            EditorGUILayout.PropertyField(this._computeFlatNormals, computeFlatNormalsContent);
 
             var ignoreKhrMaterialsUnlitContent = new GUIContent(
                 "Ignore KHR_materials_unlit",
