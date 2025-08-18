@@ -172,7 +172,7 @@ Material:
     - _ZWrite: 1
     - _ZWriteControl: 0
     - _baseColorTextureCoordinateIndex: 0
-    - _computeFlatNormals: 0
+    - _computeFlatNormals: 1
     - _emissiveTextureCoordinateIndex: 0
     - _metallicRoughnessTextureCoordinateIndex: 0
     - _normalMapScale: 0
