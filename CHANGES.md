@@ -5,7 +5,7 @@
 ##### Additions :tada:
 
 - Added option to ignore the `KHR_material_unlit` extension to force default lighting on tilesets. 
-- Moved flat normal generation into `CesiumDefaultTilesetShader` pixel shader. Custom lit materials should expose a boolean property `calculateFlatNormals` and generate normals accordingly. 
+- Moved flat normal generation into `CesiumDefaultTilesetShader` pixel shader. Custom lit materials should expose a boolean property `computeFlatNormals` and generate normals accordingly. 
 
 ## v1.17.0 - 2025-08-01
 
