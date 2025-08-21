@@ -42,6 +42,7 @@ endif()
 
 set(BUILD_SHARED_LIB OFF)
 set(SUPPORT_CONSOLE_APP OFF)
+set(CMAKE_POLICY_VERSION_MINIMUM "3.5")
 add_subdirectory(extern/tidy-html5 EXCLUDE_FROM_ALL)
 
 # Patch tidy-html5's sprtf.c to work on UWP. UWP doesn't have lstrlen, but
@@ -88,6 +89,8 @@ if (NOT IOS)
 endif()
 
 add_subdirectory(extern/swl-variant)
+
+set(CESIUM_DISABLE_CURL ON)
 add_subdirectory(extern/cesium-native)
 
 # Don't build the cesium-native tests by default.

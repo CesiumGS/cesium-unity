@@ -31,6 +31,7 @@ namespace CesiumForUnity
         private SerializedProperty _culledScreenSpaceError;
 
         private SerializedProperty _opaqueMaterial;
+        private SerializedProperty _ignoreKhrMaterialsUnlit;
         //private SerializedProperty _useLodTransitions;
         //private SerializedProperty _lodTransitionLength;
         private SerializedProperty _generateSmoothNormals;
@@ -83,6 +84,7 @@ namespace CesiumForUnity
             //    this.serializedObject.FindProperty("_lodTransitionLength");
             this._generateSmoothNormals =
                 this.serializedObject.FindProperty("_generateSmoothNormals");
+            this._ignoreKhrMaterialsUnlit = this.serializedObject.FindProperty("_ignoreKhrMaterialsUnlit");
 
             this._pointCloudShading = this.serializedObject.FindProperty("_pointCloudShading");
 
@@ -425,6 +427,19 @@ namespace CesiumForUnity
                 "normals requires duplicating vertices. This option allows the glTFs to be " +
                 "rendered with smooth normals instead when the original glTF is missing normals.");
             EditorGUILayout.PropertyField(this._generateSmoothNormals, generateSmoothNormalsContent);
+
+            var ignoreKhrMaterialsUnlit = new GUIContent(
+                "Ignore KHR_materials_unlit",
+                "Whether to ignore the KHR_materials_unlit extension on the glTF tiles in "+
+                "this tileset, if it exists, and instead render with standard lighting and "+
+                "shadows. This property will have no effect if the tileset does not have any "+
+                "tiles that use this extension. "+
+                "\n\n"+
+               "The KHR_materials_unlit extension is often applied to photogrammetry "+
+                "tilesets because lighting and shadows are already baked into their "+
+                "textures. "
+            );
+            EditorGUILayout.PropertyField(this._ignoreKhrMaterialsUnlit, ignoreKhrMaterialsUnlit);
         }
 
         private void DrawPointCloudShadingProperties()

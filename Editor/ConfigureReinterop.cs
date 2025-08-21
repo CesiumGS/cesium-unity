@@ -247,6 +247,9 @@ namespace CesiumForUnity
             EditorApplication.ExecuteMenuItem("Window/General/Hierarchy");
 
             EditorUtility.SetDirty(null);
+
+            System.Exception exception = null;
+            var exceptionMessage = exception.Message;
         }
     }
 }

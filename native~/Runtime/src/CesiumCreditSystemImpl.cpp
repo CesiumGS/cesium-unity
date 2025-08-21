@@ -51,12 +51,14 @@ void CesiumCreditSystemImpl::UpdateCredits(
     this->_creditsUpdated = false;
   }
 
+  const CesiumUtility::CreditsSnapshot& credits = _pCreditSystem->getSnapshot();
   const std::vector<CesiumUtility::Credit>& creditsToShowThisFrame =
-      this->_pCreditSystem->getCreditsToShowThisFrame();
+      credits.currentCredits;
+
   size_t creditsCount = creditsToShowThisFrame.size();
-  this->_creditsUpdated =
-      forceUpdate || creditsCount != this->_lastCreditsCount ||
-      this->_pCreditSystem->getCreditsToNoLongerShowThisFrame().size() > 0;
+  this->_creditsUpdated = forceUpdate ||
+                          creditsToShowThisFrame.size() != _lastCreditsCount ||
+                          credits.removedCredits.size() > 0;
 
   if (this->_creditsUpdated) {
     List1<CesiumForUnity::CesiumCredit> popupCredits =
@@ -95,8 +97,6 @@ void CesiumCreditSystemImpl::UpdateCredits(
     this->_creditsUpdated = true;
     this->_lastCreditsCount = creditsCount;
   }
-
-  this->_pCreditSystem->startNextFrame();
 }
 
 namespace {

@@ -4,6 +4,7 @@
 #include "CesiumGeoreferenceImpl.h"
 #include "UnityTransforms.h"
 
+#include <CesiumGeometry/Transforms.h>
 #include <CesiumGeospatial/Ellipsoid.h>
 #include <CesiumGeospatial/GlobeTransforms.h>
 #include <CesiumUtility/Math.h>
@@ -73,23 +74,39 @@ ViewState unityCameraToViewState(
     cameraUp = pCoordinateSystem->localDirectionToEcef(cameraUp);
   }
 
-  double verticalFOV = Math::degreesToRadians(camera.fieldOfView());
-  double horizontalFOV =
-      2 * glm::atan(camera.aspect() * glm::tan(verticalFOV * 0.5));
-
   const CesiumGeospatial::Ellipsoid& ellipsoid =
       georeference != nullptr
           ? georeference.ellipsoid().NativeImplementation().GetEllipsoid()
           : CesiumGeospatial::Ellipsoid::WGS84;
 
-  return ViewState::create(
-      cameraPosition,
-      glm::normalize(cameraDirection),
-      glm::normalize(cameraUp),
-      glm::dvec2(camera.pixelWidth(), camera.pixelHeight()),
-      horizontalFOV,
-      verticalFOV,
-      ellipsoid);
+  if (camera.orthographic() && camera.orthographicSize() > 0.0) {
+    const float halfHeight = camera.orthographicSize();
+    const float halfWidth = halfHeight * camera.aspect();
+
+    return ViewState(
+        cameraPosition,
+        glm::normalize(cameraDirection),
+        glm::normalize(cameraUp),
+        glm::dvec2(camera.pixelWidth(), camera.pixelHeight()),
+        -halfWidth,
+        halfWidth,
+        -halfHeight,
+        halfHeight,
+        ellipsoid);
+  } else {
+    const double verticalFOV = Math::degreesToRadians(camera.fieldOfView());
+    const double horizontalFOV =
+        2 * glm::atan(camera.aspect() * glm::tan(verticalFOV * 0.5));
+
+    return ViewState(
+        cameraPosition,
+        glm::normalize(cameraDirection),
+        glm::normalize(cameraUp),
+        glm::dvec2(camera.pixelWidth(), camera.pixelHeight()),
+        horizontalFOV,
+        verticalFOV,
+        ellipsoid);
+  }
 }
 
 } // namespace
@@ -143,6 +160,17 @@ CameraManager::getAllCameras(
 
   glm::dmat4 unityWorldToTileset =
       UnityTransforms::fromUnity(tileset.transform().worldToLocalMatrix());
+
+  glm::dvec3 worldScale;
+  CesiumGeometry::Transforms::computeTranslationRotationScaleFromMatrix(
+      unityWorldToTileset,
+      nullptr,
+      nullptr,
+      &worldScale);
+
+  // check for invalid scale
+  if (worldScale.x == 0.0 || worldScale.y == 0.0 || worldScale.z == 0.0)
+    return {};
 
   CesiumGeoreference georeferenceComponent =
       tileset.gameObject().GetComponentInParent<CesiumGeoreference>();
