@@ -1,4 +1,4 @@
-#include "UnityPrepareRendererResources.h"
+﻿#include "UnityPrepareRendererResources.h"
 
 #include "CesiumFeaturesMetadataUtility.h"
 #include "TextureLoader.h"
@@ -15,6 +15,7 @@
 #include <CesiumGltf/ExtensionKhrMaterialsUnlit.h>
 #include <CesiumGltf/ExtensionKhrTextureTransform.h>
 #include <CesiumGltf/ExtensionModelExtStructuralMetadata.h>
+#include <CesiumGltf/ExtensionExtMeshGpuInstancing.h>
 #include <CesiumGltf/KhrTextureTransform.h>
 #include <CesiumGltfContent/GltfUtilities.h>
 #include <CesiumGltfReader/GltfReader.h>
@@ -26,6 +27,7 @@
 #include <DotNet/CesiumForUnity/CesiumFeatureIdSet.h>
 #include <DotNet/CesiumForUnity/CesiumGeoreference.h>
 #include <DotNet/CesiumForUnity/CesiumGlobeAnchor.h>
+#include <DotNet/CesiumForUnity/I3dmInstanceRenderer.h>
 #include <DotNet/CesiumForUnity/CesiumMetadata.h>
 #include <DotNet/CesiumForUnity/CesiumModelMetadata.h>
 #include <DotNet/CesiumForUnity/CesiumObjectPool1.h>
@@ -135,6 +137,24 @@ void computeFlatNormals(
 struct MeshDataResult {
   UnityEngine::MeshDataArray meshDataArray;
   std::vector<CesiumPrimitiveInfo> primitiveInfos;
+};
+
+/**
+ * @brief Instance data structure for GPU Instancing
+ */
+struct InstanceData {
+  /**
+   * @brief transform matrix
+   */
+  glm::dmat4 transform; // transform matrix
+  /**
+   * @brief for color of each instance (optional)
+   */
+  glm::dvec4 color;
+  /**
+   * @brief batchId
+   */
+  uint32_t batchId;
 };
 
 template <typename TIndex> struct CopyVertexColors {
@@ -1351,6 +1371,163 @@ void setGltfMaterialParameterValues(
     }
   }
 }
+void ExtractInstanceDataFromExtMeshGpuInstancing(
+    const CesiumGltf::Model& gltf,
+    const CesiumGltf::Node& node,
+    const CesiumGltf::ExtensionExtMeshGpuInstancing& gpuExt,
+    const glm::dmat4& nodeTransform,
+    std::vector<InstanceData>& outInstanceData) {
+
+  // Get TRANSLATION property
+  auto translationIt = gpuExt.attributes.find("TRANSLATION");
+  const CesiumGltf::Accessor* pTranslationAccessor = nullptr;
+  if (translationIt != gpuExt.attributes.end()) {
+    pTranslationAccessor =
+        CesiumGltf::Model::getSafe(&gltf.accessors, translationIt->second);
+  }
+
+  // Get ROTATION property
+  auto rotationIt = gpuExt.attributes.find("ROTATION");
+  const CesiumGltf::Accessor* pRotationAccessor = nullptr;
+  if (rotationIt != gpuExt.attributes.end()) {
+    pRotationAccessor =
+        CesiumGltf::Model::getSafe(&gltf.accessors, rotationIt->second);
+  }
+
+  // Get SCALE property
+  auto scaleIt = gpuExt.attributes.find("SCALE");
+  const CesiumGltf::Accessor* pScaleAccessor = nullptr;
+  if (scaleIt != gpuExt.attributes.end()) {
+    pScaleAccessor =
+        CesiumGltf::Model::getSafe(&gltf.accessors, scaleIt->second);
+  }
+
+  // Determine the number of instances
+  int64_t instanceCount = 0;
+  if (pTranslationAccessor) {
+    instanceCount = pTranslationAccessor->count;
+  } else if (pRotationAccessor) {
+    instanceCount = pRotationAccessor->count;
+  } else if (pScaleAccessor) {
+    instanceCount = pScaleAccessor->count;
+  }
+
+  if (instanceCount == 0) {
+    return;
+  }
+
+  // Create AccessorView
+  CesiumGltf::AccessorView<CesiumGltf::AccessorTypes::VEC3<float>>
+      translationView;
+  if (pTranslationAccessor) {
+    translationView =
+        CesiumGltf::AccessorView<CesiumGltf::AccessorTypes::VEC3<float>>(
+            gltf,
+            *pTranslationAccessor);
+  }
+
+  CesiumGltf::AccessorView<CesiumGltf::AccessorTypes::VEC4<float>> rotationView;
+  if (pRotationAccessor) {
+    rotationView =
+        CesiumGltf::AccessorView<CesiumGltf::AccessorTypes::VEC4<float>>(
+            gltf,
+            *pRotationAccessor);
+  }
+
+  CesiumGltf::AccessorView<CesiumGltf::AccessorTypes::VEC3<float>> scaleView;
+  if (pScaleAccessor) {
+    scaleView =
+        CesiumGltf::AccessorView<CesiumGltf::AccessorTypes::VEC3<float>>(
+            gltf,
+            *pScaleAccessor);
+  }
+
+  // Create InstanceData for each instance
+  for (int64_t i = 0; i < instanceCount; ++i) {
+    InstanceData instanceData;
+
+    // Location settings
+    glm::dvec3 position(0.0);
+    if (translationView.status() == CesiumGltf::AccessorViewStatus::Valid &&
+        i < translationView.size()) {
+      auto translation = translationView[i];
+      position = glm::dvec3(
+          translation.value[0],
+          translation.value[1],
+          translation.value[2]);
+    }
+
+    // Rotation settings (quaternion)
+    glm::dquat rotation(1.0, 0.0, 0.0, 0.0); // Unit quaternion
+    if (rotationView.status() == CesiumGltf::AccessorViewStatus::Valid &&
+        i < rotationView.size()) {
+      auto rot = rotationView[i];
+      rotation = glm::dquat(
+          rot.value[3],
+          rot.value[0],
+          rot.value[1],
+          rot.value[2]); // w, x, y, z
+    }
+
+    // Set scale
+    glm::dvec3 scale(1.0);
+    if (scaleView.status() == CesiumGltf::AccessorViewStatus::Valid &&
+        i < scaleView.size()) {
+      auto scaleVec = scaleView[i];
+      scale =
+          glm::dvec3(scaleVec.value[0], scaleVec.value[1], scaleVec.value[2]);
+    }
+
+    // Construct the transformation matrix
+    glm::dmat4 instanceTransform = glm::dmat4(1.0);
+    instanceTransform = glm::translate(instanceTransform, position);
+    instanceTransform *= glm::mat4_cast(rotation);
+    instanceTransform = glm::scale(instanceTransform, scale);
+
+    // Apply node transformation
+    instanceData.transform = nodeTransform * instanceTransform;
+
+    // Set other properties
+    instanceData.color = glm::dvec4(1.0, 1.0, 1.0, 1.0); // white color
+    instanceData.batchId = static_cast<uint32_t>(i);     // batch ID
+
+    outInstanceData.push_back(instanceData);
+  }
+}
+
+void ExtractInstanceDataFromGltfModel(
+    const CesiumGltf::Model& gltf,
+    const glm::dmat4& tileTransform,
+    std::vector<InstanceData>& outInstanceData) {
+
+  // check i3dm extras
+  auto i3dmIt = gltf.extras.find("i3dm");
+  if (i3dmIt == gltf.extras.end()) {
+    return;
+  }
+
+  // Extracting EXT_mesh_gpu_instancing data from a model converted by I3dmToGltfConverter
+  gltf.forEachPrimitiveInScene(
+      -1,
+      [&](const Model& model,
+          const Node& node,
+          const Mesh& mesh,
+          const MeshPrimitive& primitive,
+          const glm::dmat4& nodeTransform) {
+        // Check the EXT_mesh_gpu_instancing extension
+        const auto* pGpuInstancing =
+            node.getExtension<CesiumGltf::ExtensionExtMeshGpuInstancing>();
+
+        if (pGpuInstancing && !pGpuInstancing->attributes.empty()) {
+          ExtractInstanceDataFromExtMeshGpuInstancing(
+              model,
+              node,
+              *pGpuInstancing,
+              tileTransform * nodeTransform,
+              outInstanceData);
+        }
+      });
+}
 } // namespace
 
 void* UnityPrepareRendererResources::prepareInMainThread(
@@ -1502,111 +1679,252 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
         primitiveGameObject.transform().parent(pModelGameObject->transform());
         primitiveGameObject.layer(tilesetLayer);
+		
+        //check i3dm 
+        auto i3dmIt = gltf.extras.find("i3dm");
+        bool isI3dmType = i3dmIt != gltf.extras.end();
+
+        std::vector<InstanceData> instanceData;
+        std::vector<UnityEngine::GameObject> intanceObjects;
+
+        if (isI3dmType) {
+          // Extract instance data from models already processed by existing converters
+          ExtractInstanceDataFromGltfModel(
+              gltf,
+              tileTransform,
+              instanceData);
+
+          intanceObjects.push_back(primitiveGameObject);
+
+          for (size_t instanceDataIndex = 1;
+               instanceDataIndex < instanceData.size();
+               ++instanceDataIndex) {
+
+            int64_t primitiveIndex = &primitive - &mesh.primitives[0];
+            UnityEngine::GameObject intanceGameObject(System::String(
+                "Mesh " + std::to_string(instanceDataIndex) +
+                " Primitive " +
+                std::to_string(primitiveIndex)));
+            if (showTilesInHierarchy) {
+              intanceGameObject.hideFlags(UnityEngine::HideFlags::DontSave);
+            } else {
+              intanceGameObject.hideFlags(
+                  UnityEngine::HideFlags::DontSave |
+                  UnityEngine::HideFlags::HideInHierarchy);
+            }
+
+            intanceGameObject.transform().parent(
+                pModelGameObject->transform());
+            intanceGameObject.layer(tilesetLayer);
+            intanceObjects.push_back(intanceGameObject);
+          }
+        }
+
         glm::dmat4 modelToEcef = tileTransform * transform;
 
-        CesiumForUnity::CesiumGlobeAnchor anchor =
-            primitiveGameObject
-                .AddComponent<CesiumForUnity::CesiumGlobeAnchor>();
-        anchor.detectTransformChanges(false);
-        anchor.adjustOrientationForGlobeWhenMoving(false);
-        anchor.localToGlobeFixedMatrix(
-            UnityTransforms::toUnityMathematics(modelToEcef));
+        if (isI3dmType) {
+          
+          if (!instanceData.empty() && meshes.Length() != 0) {
+            // Using the first mesh (i3dm is an instance of the same model)
+            UnityEngine::Mesh baseMesh = meshes[0];
 
-        UnityEngine::MeshFilter meshFilter =
-            primitiveGameObject.AddComponent<UnityEngine::MeshFilter>();
-        meshFilter.sharedMesh(unityMesh);
+            UnityEngine::Material opaqueMaterial =
+                tilesetComponent.opaqueMaterial();
 
-        UnityEngine::MeshRenderer meshRenderer =
-            primitiveGameObject.AddComponent<UnityEngine::MeshRenderer>();
+            if (opaqueMaterial == nullptr) {
+              opaqueMaterial =
+                  UnityEngine::Resources::Load<UnityEngine::Material>(
+                      System::String("CesiumDefaultTilesetMaterial"));
+            }
 
-        const Material* pMaterial =
-            Model::getSafe(&gltf.materials, primitive.material);
+            UnityEngine::Material material =
+                UnityEngine::Object::Instantiate(opaqueMaterial);
 
-        UnityEngine::Material opaqueMaterial =
-            tilesetComponent.opaqueMaterial();
+            // set shader for GPU Instancing
+            material.enableInstancing(true);
 
-        if (opaqueMaterial == nullptr) {
-          if (primitiveInfo.isUnlit) {
-            opaqueMaterial =
-                UnityEngine::Resources::Load<UnityEngine::Material>(
-                    System::String("CesiumUnlitTilesetMaterial"));
-          } else {
-            opaqueMaterial =
-                UnityEngine::Resources::Load<UnityEngine::Material>(
-                    System::String("CesiumDefaultTilesetMaterial"));
+            const std::string* url =
+                std::get_if<std::string>(&tile.getTileID());
+
+            std::string groupId = *url;
+            
+            for (size_t i = 0; i < intanceObjects.size(); ++i) {
+
+              const InstanceData& instance = instanceData[i];
+
+              modelToEcef = instance.transform;
+
+              UnityEngine::GameObject& instanceGameObject =
+                  intanceObjects[i];
+
+              CesiumForUnity::CesiumGlobeAnchor instanceAnchor =
+                  instanceGameObject.AddComponent<CesiumForUnity::CesiumGlobeAnchor>();
+              instanceAnchor.detectTransformChanges(false);
+              instanceAnchor.adjustOrientationForGlobeWhenMoving(false);
+              instanceAnchor.localToGlobeFixedMatrix(
+              UnityTransforms::toUnityMathematics(modelToEcef));
+
+              if (createPhysicsMeshes) {
+                // This should not trigger mesh baking for physics, because
+                // the meshes were already baked in the worker thread.
+                UnityEngine::MeshCollider meshCollider =
+                    instanceGameObject
+                        .AddComponent<UnityEngine::MeshCollider>();
+                meshCollider.sharedMesh(baseMesh);
+              }
+            }
+
+
+
+            CesiumForUnity::I3dmInstanceRenderer i3dmInstanceRenderer =
+                pModelGameObject
+                    ->AddComponent<CesiumForUnity::I3dmInstanceRenderer>();
+
+            DotNet::System::Collections::Generic::List1<
+                DotNet::Unity::Mathematics::double4x4>
+                matList = DotNet::System::Collections::Generic::List1<
+                    DotNet::Unity::Mathematics::double4x4>();
+
+            for (size_t i = 0; i < instanceData.size(); ++i) {
+              const InstanceData& instance = instanceData[i];
+              matList.Add(
+                  UnityTransforms::toUnityMathematics(instance.transform));
+            }
+
+            i3dmInstanceRenderer.AddInstanceGroup(
+                System::String(groupId),
+                baseMesh,
+                material,
+                matList);
+
+
+            UnityEngine::MeshFilter meshFilter =
+                pModelGameObject->AddComponent<UnityEngine::MeshFilter>();
+            meshFilter.sharedMesh(baseMesh);
+
+            // For backwards compatibility.
+            if (metadataComponent != nullptr) {
+              metadataComponent.NativeImplementation().addMetadata(
+                  primitiveGameObject.transform().GetInstanceID(),
+                  &gltf,
+                  &primitive);
+            } else {
+              const ExtensionExtMeshFeatures* pFeatures =
+                  primitive.getExtension<ExtensionExtMeshFeatures>();
+              if (pFeatures) {
+                CesiumFeaturesMetadataUtility::addPrimitiveFeatures(
+                    primitiveGameObject,
+                    gltf,
+                    primitive,
+                    *pFeatures);
+              }
+            }
           }
-        }
-
-        UnityEngine::Material material =
-            UnityEngine::Object::Instantiate(opaqueMaterial);
-        material.hideFlags(UnityEngine::HideFlags::HideAndDontSave);
-        meshRenderer.material(material);
-
-        if (pMaterial) {
-          setGltfMaterialParameterValues(
-              gltf,
-              primitiveInfo,
-              *pMaterial,
-              material,
-              materialProperties);
-        }
-
-        if (primitiveInfo.containsPoints) {
-          CesiumForUnity::CesiumPointCloudRenderer pointCloudRenderer =
-              primitiveGameObject
-                  .AddComponent<CesiumForUnity::CesiumPointCloudRenderer>();
-
-          CesiumForUnity::Cesium3DTileInfo tileInfo;
-          tileInfo.usesAdditiveRefinement =
-              tile.getRefine() == Cesium3DTilesSelection::TileRefine::Add;
-          tileInfo.geometricError =
-              static_cast<float>(tile.getGeometricError());
-
-          // TODO: can we make AccessorView retrieve the min/max for us?
-          const Accessor* pPositionAccessor =
-              Model::getSafe(&gltf.accessors, positionAccessorID);
-          glm::vec3 min(
-              pPositionAccessor->min[0],
-              pPositionAccessor->min[1],
-              pPositionAccessor->min[2]);
-          glm::vec3 max(
-              pPositionAccessor->max[0],
-              pPositionAccessor->max[1],
-              pPositionAccessor->max[2]);
-          glm::vec3 dimensions(transform * glm::dvec4(max - min, 0));
-
-          tileInfo.dimensions =
-              UnityEngine::Vector3{dimensions.x, dimensions.y, dimensions.z};
-          tileInfo.isTranslucent = primitiveInfo.isTranslucent;
-          pointCloudRenderer.tileInfo(tileInfo);
-        }
-
-        if (createPhysicsMeshes) {
-          if (!primitiveInfo.containsPoints &&
-              !isDegenerateTriangleMesh(unityMesh)) {
-            // This should not trigger mesh baking for physics, because the
-            // meshes were already baked in the worker thread.
-            UnityEngine::MeshCollider meshCollider =
-                primitiveGameObject.AddComponent<UnityEngine::MeshCollider>();
-            meshCollider.sharedMesh(unityMesh);
-          }
-        }
-
-        // For backwards compatibility.
-        if (metadataComponent != nullptr) {
-          metadataComponent.NativeImplementation().addMetadata(
-              primitiveGameObject.transform().GetInstanceID(),
-              &gltf,
-              &primitive);
         } else {
-          const ExtensionExtMeshFeatures* pFeatures =
-              primitive.getExtension<ExtensionExtMeshFeatures>();
-          if (pFeatures) {
-            CesiumFeaturesMetadataUtility::addPrimitiveFeatures(
-                primitiveGameObject,
+          CesiumForUnity::CesiumGlobeAnchor anchor =
+              primitiveGameObject
+                  .AddComponent<CesiumForUnity::CesiumGlobeAnchor>();
+          anchor.detectTransformChanges(false);
+          anchor.adjustOrientationForGlobeWhenMoving(false);
+          anchor.localToGlobeFixedMatrix(
+              UnityTransforms::toUnityMathematics(modelToEcef));
+
+          UnityEngine::MeshFilter meshFilter =
+              primitiveGameObject.AddComponent<UnityEngine::MeshFilter>();
+          meshFilter.sharedMesh(unityMesh);
+
+          UnityEngine::MeshRenderer meshRenderer =
+              primitiveGameObject.AddComponent<UnityEngine::MeshRenderer>();
+
+          const Material* pMaterial =
+              Model::getSafe(&gltf.materials, primitive.material);
+
+          UnityEngine::Material opaqueMaterial =
+              tilesetComponent.opaqueMaterial();
+
+          if (opaqueMaterial == nullptr) {
+            if (primitiveInfo.isUnlit) {
+              opaqueMaterial =
+                  UnityEngine::Resources::Load<UnityEngine::Material>(
+                      System::String("CesiumUnlitTilesetMaterial"));
+            } else {
+              opaqueMaterial =
+                  UnityEngine::Resources::Load<UnityEngine::Material>(
+                      System::String("CesiumDefaultTilesetMaterial"));
+            }
+          }
+
+          UnityEngine::Material material =
+              UnityEngine::Object::Instantiate(opaqueMaterial);
+          material.hideFlags(UnityEngine::HideFlags::HideAndDontSave);
+          meshRenderer.material(material);
+
+          if (pMaterial) {
+            setGltfMaterialParameterValues(
                 gltf,
-                primitive,
-                *pFeatures);
+                primitiveInfo,
+                *pMaterial,
+                material,
+                materialProperties);
+          }
+
+          if (primitiveInfo.containsPoints) {
+            CesiumForUnity::CesiumPointCloudRenderer pointCloudRenderer =
+                primitiveGameObject
+                    .AddComponent<CesiumForUnity::CesiumPointCloudRenderer>();
+
+            CesiumForUnity::Cesium3DTileInfo tileInfo;
+            tileInfo.usesAdditiveRefinement =
+                tile.getRefine() == Cesium3DTilesSelection::TileRefine::Add;
+            tileInfo.geometricError =
+                static_cast<float>(tile.getGeometricError());
+
+            // TODO: can we make AccessorView retrieve the min/max for us?
+            const Accessor* pPositionAccessor =
+                Model::getSafe(&gltf.accessors, positionAccessorID);
+            glm::vec3 min(
+                pPositionAccessor->min[0],
+                pPositionAccessor->min[1],
+                pPositionAccessor->min[2]);
+            glm::vec3 max(
+                pPositionAccessor->max[0],
+                pPositionAccessor->max[1],
+                pPositionAccessor->max[2]);
+            glm::vec3 dimensions(transform * glm::dvec4(max - min, 0));
+
+            tileInfo.dimensions =
+                UnityEngine::Vector3{dimensions.x, dimensions.y, dimensions.z};
+            tileInfo.isTranslucent = primitiveInfo.isTranslucent;
+            pointCloudRenderer.tileInfo(tileInfo);
+          }
+
+          if (createPhysicsMeshes) {
+            if (!primitiveInfo.containsPoints &&
+                !isDegenerateTriangleMesh(unityMesh)) {
+              // This should not trigger mesh baking for physics, because the
+              // meshes were already baked in the worker thread.
+              UnityEngine::MeshCollider meshCollider =
+                  primitiveGameObject.AddComponent<UnityEngine::MeshCollider>();
+              meshCollider.sharedMesh(unityMesh);
+            }
+          }
+
+          // For backwards compatibility.
+          if (metadataComponent != nullptr) {
+            metadataComponent.NativeImplementation().addMetadata(
+                primitiveGameObject.transform().GetInstanceID(),
+                &gltf,
+                &primitive);
+          } else {
+            const ExtensionExtMeshFeatures* pFeatures =
+                primitive.getExtension<ExtensionExtMeshFeatures>();
+            if (pFeatures) {
+              CesiumFeaturesMetadataUtility::addPrimitiveFeatures(
+                  primitiveGameObject,
+                  gltf,
+                  primitive,
+                  *pFeatures);
+            }
           }
         }
       });

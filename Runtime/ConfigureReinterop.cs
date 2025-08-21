@@ -64,6 +64,12 @@ namespace CesiumForUnity
 
             Vector4 v = new Vector4(1.0f, 0.0f, 1.0f, 0.0f);
 
+            MaterialPropertyBlock propertyBlock = new MaterialPropertyBlock();
+            propertyBlock.SetVectorArray(0, new Vector4[0]);
+            propertyBlock.SetVectorArray(0, new List<Vector4>());
+            propertyBlock.SetVectorArray("name", new Vector4[0]);
+            propertyBlock.SetVectorArray("name", new List<Vector4>());
+
             t.position = new Vector3();
             Vector3 p = t.position;
             float x = p.x;
@@ -129,6 +135,9 @@ namespace CesiumForUnity
 
             Mesh mesh = new Mesh();
             Mesh[] meshes = new[] { mesh };
+
+            Matrix4x4[] mats = new[] { m2 };
+
             mesh = meshes[0];
             int meshesLength = meshes.Length;
             mesh.SetVertices(new NativeArray<Vector3>());
@@ -136,11 +145,15 @@ namespace CesiumForUnity
             mesh.SetUVs(0, new NativeArray<Vector2>());
             mesh.SetIndices(new NativeArray<int>(), MeshTopology.Triangles, 0, true, 0);
             mesh.RecalculateBounds();
+            mesh.indexFormat = IndexFormat.UInt32;
             int vertexCount = mesh.vertexCount;
             int instanceID = mesh.GetInstanceID();
 
             Vector3[] vertices = mesh.vertices;
             Vector3 vertex = vertices[0];
+
+            int[] triangles = mesh.triangles;
+            int triangle = triangles[0];
 
             Bounds bounds = new Bounds(new Vector3(0, 0, 0), new Vector3(1, 2, 1));
 
@@ -175,6 +188,7 @@ namespace CesiumForUnity
             meshRenderer.material.shaderKeywords = meshRenderer.material.shaderKeywords;
             meshRenderer.sharedMaterial = meshRenderer.sharedMaterial;
             meshRenderer.material.shader = meshRenderer.material.shader;
+            meshRenderer.material.enableInstancing = true;
             UnityEngine.Object.Destroy(meshGameObject);
             UnityEngine.Object.DestroyImmediate(meshGameObject, true);
             UnityEngine.Object.DestroyImmediate(meshGameObject);
@@ -483,6 +497,16 @@ namespace CesiumForUnity
             stringList.Clear();
             count = stringList.Count;
 
+            List<Matrix4x4> matList = new List<Matrix4x4>();
+            matList.Add(m2);
+            matList.Clear();
+            count = matList.Count;
+
+            List<double4x4> double4x4List = new List<double4x4>();
+            double4x4List.Add(ecefToLocal);
+            double4x4List.Clear();
+            count = double4x4List.Count;
+			
             string test = string.Concat("string", "string2");
             string[] stringArray = stringList.ToArray();
             test = stringArray[0];
@@ -514,6 +538,14 @@ namespace CesiumForUnity
             cv3.x = cv3.y = cv3.z;
             double3 cv4 = new double3(1.0, 2.0, 3.0);
             double3x3 matrix3x3 = double3x3.identity;
+
+            go.GetComponent<I3dmInstanceRenderer>();
+            I3dmInstanceRenderer[] i3dmRenderers = go.GetComponentsInChildren<I3dmInstanceRenderer>();
+            i3dmRenderers = go.GetComponentsInChildren<I3dmInstanceRenderer>(true);
+            I3dmInstanceRenderer i3dmRenderer = i3dmRenderers[i3dmRenderers.Length - 1];
+            i3dmRenderer = go.AddComponent<I3dmInstanceRenderer>();
+
+            i3dmRenderer.AddInstanceGroup("groupId",mesh,meshRenderer.material,double4x4List);
 
             go.GetComponent<CesiumGlobeAnchor>();
             CesiumGlobeAnchor[] globeAnchors = go.GetComponentsInChildren<CesiumGlobeAnchor>();
