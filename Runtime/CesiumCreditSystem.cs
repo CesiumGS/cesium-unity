@@ -267,11 +267,19 @@ namespace CesiumForUnity
             return _defaultCreditSystem;
         }
 
+        /// <summary>
+        /// Gets the number of images on this credit system that are being loaded.
+        /// </summary>
+        /// <returns>The number of loading images.</returns>
         internal int GetNumberOfLoadingImages()
         {
             return this._numLoadingImages;
         }
 
+        /// <summary>
+        /// A function invoked with StartCoroutine() to asynchronously load images from an HTML credit.
+        /// </summary>
+        /// <param name="url">A string containing either the base64-encoded image data or the URL of the image.</param>
         internal IEnumerator LoadImage(string url)
         {
             int index = this._images.Count;
