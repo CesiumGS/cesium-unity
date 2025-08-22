@@ -131,7 +131,9 @@ namespace CesiumForUnity
                 5.0f :
                 this._tileset.maximumScreenSpaceError;
 
-            if (this._tileset.pointCloudShading.maximumAttenuation > 0.0f)
+            CesiumPointCloudShading pointCloudShading = this._tileset.pointCloudShading;
+
+            if (pointCloudShading.maximumAttenuation > 0.0f)
             {
                 maximumPointSize = this._tileset.pointCloudShading.maximumAttenuation;
             }
@@ -141,8 +143,6 @@ namespace CesiumForUnity
                 // Approximation of device pixel ratio
                 maximumPointSize *= Screen.dpi / 150;
             }
-
-            CesiumPointCloudShading pointCloudShading = this._tileset.pointCloudShading;
 
             float geometricError = this.GetGeometricError(pointCloudShading);
             geometricError *= pointCloudShading.geometricErrorScale;
@@ -227,7 +227,8 @@ namespace CesiumForUnity
 
         void Update()
         {
-            if (this._tileset.pointCloudShading.attenuation)
+            CesiumPointCloudShading pointCloudShading = this._tileset.pointCloudShading;
+            if (pointCloudShading != null && pointCloudShading.attenuation)
             {
                 this.DrawPointsWithAttenuation();
                 this._meshRenderer.enabled = false;

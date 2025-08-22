@@ -6,6 +6,10 @@
 
 - Added option to ignore the `KHR_material_unlit` extension to force default lighting on tilesets. 
 
+##### Fixes :wrench:
+
+- Fixed a bug where `CesiumPointCloudRenderer` could dereference a null `CesiumPointCloudShading` on `Cesium3DTileset`.
+
 ## v1.17.0 - 2025-08-01
 
 ##### Additions :tada:

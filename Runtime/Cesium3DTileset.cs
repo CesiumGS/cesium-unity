@@ -617,7 +617,7 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        private CesiumPointCloudShading _pointCloudShading;
+        private CesiumPointCloudShading _pointCloudShading = new CesiumPointCloudShading();
 
         /// <summary>
         /// The CesiumPointCloudShading attached to this tileset. If the tileset
