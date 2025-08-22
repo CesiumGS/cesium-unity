@@ -36,7 +36,7 @@ namespace CesiumForUnity
 #elif UNITY_64
         public const string CppOutputPath = "../native~/Runtime/generated-Standalone";
 #elif UNITY_WEBGL
-        public const string CppOutputPath = "../native~/Runtime/generated-Web";
+        public const string CppOutputPath = "../native~/Runtime/generated-WebGL";
 #else
         public const string CppOutputPath = "../native~/Runtime/generated-Unknown";
 #endif
