@@ -21,6 +21,9 @@ if(CESIUM_TARGET_WASM)
     # Does this make sense? No. Does it work? Somehow. ¯\_(ツ)_/¯
     set(ENV{CC} ${CMAKE_C_COMPILER})
     set(ENV{CXX} ${CMAKE_CXX_COMPILER})
+
+    set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fwasm-exceptions -mbulk-memory -mnontrapping-fptoint -sSUPPORT_LONGJMP=wasm -pthread" )
+    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fwasm-exceptions -mbulk-memory -mnontrapping-fptoint -sSUPPORT_LONGJMP=wasm -pthread" )
 endif()
 
 # By default, vcpkg (or is it cmake?) will try to link against the Debug version
@@ -139,9 +142,7 @@ else()
 endif()
 
 # Specify all targets that need to compile bitcode
-if (NOT CESIUM_TARGET_WASM)
-  if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
-      install(TARGETS tidy-static)
-      set_target_properties(tidy-static PROPERTIES EXCLUDE_FROM_ALL 0 EXCLUDE_FROM_DEFAULT_BUILD 0)
-  endif()
+if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS" OR CESIUM_TARGET_WASM)
+  install(TARGETS tidy-static)
+  set_target_properties(tidy-static PROPERTIES EXCLUDE_FROM_ALL 0 EXCLUDE_FROM_DEFAULT_BUILD 0)
 endif()
