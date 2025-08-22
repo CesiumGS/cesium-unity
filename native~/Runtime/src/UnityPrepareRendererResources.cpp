@@ -1521,16 +1521,18 @@ void ExtractInstanceDataFromExtMeshGpuInstancing(
   }
 }
 
+bool CheckForExtMeshGpuInstancing(
+    const CesiumGltf::Model& gltf,
+    const CesiumGltf::Node& node) {
+  // Check if the EXT_mesh_gpu_instancing extension is present
+  return node.getExtension<CesiumGltf::ExtensionExtMeshGpuInstancing>() !=
+         nullptr;
+}
+
 void ExtractInstanceDataFromGltfModel(
     const CesiumGltf::Model& gltf,
     const glm::dmat4& tileTransform,
     std::vector<InstanceData>& outInstanceData) {
-
-  // check i3dm extras
-  auto i3dmIt = gltf.extras.find("i3dm");
-  if (i3dmIt == gltf.extras.end()) {
-    return;
-  }
 
   // Extracting EXT_mesh_gpu_instancing data from a model converted by I3dmToGltfConverter
   gltf.forEachPrimitiveInScene(
@@ -1707,8 +1709,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         primitiveGameObject.layer(tilesetLayer);
 		
         //check i3dm 
-        auto i3dmIt = gltf.extras.find("i3dm");
-        bool isI3dmType = i3dmIt != gltf.extras.end();
+        bool isI3dmType = CheckForExtMeshGpuInstancing(gltf,node);
 
         std::vector<InstanceData> instanceData;
         std::vector<UnityEngine::GameObject> intanceObjects;
