@@ -495,7 +495,7 @@ namespace CesiumForUnity
             credits.Add(credit);
             credits.Clear();
 
-            if (!creditSystem.HasLoadingImages())
+            if (creditSystem.GetNumberOfLoadingImages() == 0)
             {
                 creditSystem.BroadcastCreditsUpdate();
             }

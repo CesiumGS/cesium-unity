@@ -48,7 +48,8 @@ private:
       _htmlToUnityCredit;
 
   size_t _lastCreditsCount;
-  bool _creditsUpdated;
+  size_t _lastLoadingImagesCount;
+  bool _shouldBroadcastUpdate;
 };
 
 } // namespace CesiumForUnityNative

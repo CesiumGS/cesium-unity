@@ -32,7 +32,8 @@ CesiumCreditSystemImpl::CesiumCreditSystemImpl(
     : _pCreditSystem(std::make_shared<CesiumUtility::CreditSystem>()),
       _htmlToUnityCredit(),
       _lastCreditsCount(0),
-      _creditsUpdated(false) {}
+      _lastLoadingImagesCount(0),
+      _shouldBroadcastUpdate(false) {}
 
 CesiumCreditSystemImpl::~CesiumCreditSystemImpl() {}
 
@@ -43,12 +44,20 @@ void CesiumCreditSystemImpl::UpdateCredits(
     return;
   }
 
-  // If the credits were updated in a previous frame, the update will not get
-  // broadcasted until all of the images are fully loaded. Broadcast the
-  // previous update first before handling the next one.
-  if (this->_creditsUpdated && !creditSystem.HasLoadingImages()) {
+  // Images are handled asynchronously by Unity's coroutine system, so their
+  // progress must be accounted for separately.
+  size_t loadingImagesCount = creditSystem.GetNumberOfLoadingImages();
+  if (loadingImagesCount != this->_lastLoadingImagesCount) {
+    this->_shouldBroadcastUpdate = true;
+    this->_lastLoadingImagesCount = loadingImagesCount;
+  }
+
+  // If the credits were updated in a previous frame, do not broadcast the
+  // update until all of the images are fully loaded. Then, broadcast the
+  // previous update before handling the next one.
+  if (this->_shouldBroadcastUpdate && loadingImagesCount == 0) {
     creditSystem.BroadcastCreditsUpdate();
-    this->_creditsUpdated = false;
+    this->_shouldBroadcastUpdate = false;
   }
 
   const CesiumUtility::CreditsSnapshot& credits = _pCreditSystem->getSnapshot();
@@ -56,11 +65,11 @@ void CesiumCreditSystemImpl::UpdateCredits(
       credits.currentCredits;
 
   size_t creditsCount = creditsToShowThisFrame.size();
-  this->_creditsUpdated = forceUpdate ||
-                          creditsToShowThisFrame.size() != _lastCreditsCount ||
-                          credits.removedCredits.size() > 0;
+  bool creditsUpdated =
+      forceUpdate || creditsToShowThisFrame.size() != this->_lastCreditsCount ||
+      credits.removedCredits.size() > 0;
 
-  if (this->_creditsUpdated) {
+  if (creditsUpdated) {
     List1<CesiumForUnity::CesiumCredit> popupCredits =
         creditSystem.popupCredits();
     List1<CesiumForUnity::CesiumCredit> onScreenCredits =
@@ -94,8 +103,8 @@ void CesiumCreditSystemImpl::UpdateCredits(
       }
     }
 
-    this->_creditsUpdated = true;
     this->_lastCreditsCount = creditsCount;
+    this->_shouldBroadcastUpdate = true;
   }
 }
 

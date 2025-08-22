@@ -267,14 +267,23 @@ namespace CesiumForUnity
             return _defaultCreditSystem;
         }
 
-        internal bool HasLoadingImages()
+        /// <summary>
+        /// Gets the number of images on this credit system that are being loaded.
+        /// </summary>
+        /// <returns>The number of loading images.</returns>
+        internal int GetNumberOfLoadingImages()
         {
-            return this._numLoadingImages > 0;
+            return this._numLoadingImages;
         }
 
+        /// <summary>
+        /// A function invoked with StartCoroutine() to asynchronously load images from an HTML credit.
+        /// </summary>
+        /// <param name="url">A string containing either the base64-encoded image data or the URL of the image.</param>
         internal IEnumerator LoadImage(string url)
         {
             int index = this._images.Count;
+            this._numLoadingImages++;
 
             // Initialize a texture of arbitrary size as a placeholder,
             // so that when other images are loaded, their IDs align properly
@@ -297,7 +306,6 @@ namespace CesiumForUnity
             {
                 // Load an image from a URL.
                 UnityWebRequest request = UnityWebRequestTexture.GetTexture(url);
-                this._numLoadingImages++;
                 yield return request.SendWebRequest();
 
                 if (request.result == UnityWebRequest.Result.ConnectionError ||
@@ -314,10 +322,10 @@ namespace CesiumForUnity
                     UnityLifetime.Destroy(placeholderTexture);
                 }
 
-                this._numLoadingImages--;
             }
 
             texture.wrapMode = TextureWrapMode.Clamp;
+            this._numLoadingImages--;
         }
     }
 }
