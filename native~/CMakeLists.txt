@@ -21,6 +21,9 @@ if(CESIUM_TARGET_WASM)
     # Does this make sense? No. Does it work? Somehow. ¯\_(ツ)_/¯
     set(ENV{CC} ${CMAKE_C_COMPILER})
     set(ENV{CXX} ${CMAKE_CXX_COMPILER})
+
+    set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fwasm-exceptions -mbulk-memory -mnontrapping-fptoint -sSUPPORT_LONGJMP=wasm -pthread -DHAS_FUTIME=0" )
+    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fwasm-exceptions -mbulk-memory -mnontrapping-fptoint -sSUPPORT_LONGJMP=wasm -pthread -DHAS_FUTIME=0" )
 endif()
 
 # By default, vcpkg (or is it cmake?) will try to link against the Debug version
