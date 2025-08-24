@@ -436,7 +436,9 @@ namespace CesiumForUnity
 
         internal static void BuildNativeLibrary(LibraryToBuild library)
         {
-            return;
+            // TODO: don't do this
+            if (library.Platform == BuildTarget.WebGL)
+                return;
             if (library.CleanBuild && library.BuildDirectory.Length > 2 && Directory.Exists(library.BuildDirectory))
                 Directory.Delete(library.BuildDirectory, true);
             Directory.CreateDirectory(library.BuildDirectory);
