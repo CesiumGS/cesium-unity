@@ -136,7 +136,7 @@ if (EDITOR)
 endif()
 
 if (CESIUM_TARGET_WASM)
-  set(LIB_INSTALL_DIR "out_wasm")
+  set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}")
 else()
   set(LIB_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR})  
 endif()
