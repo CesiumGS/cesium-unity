@@ -34,6 +34,32 @@ using namespace CesiumAsync;
 using namespace CesiumUtility;
 using namespace DotNet;
 
+#if __EMSCRIPTEN__
+struct RequestMetaDataLengths
+{
+    RequestMetaDataLengths()
+        : headerLength(0u)
+        , responseUrlLength(0u)
+    {
+    }
+
+    uint32_t headerLength;
+    uint32_t responseUrlLength;
+};
+typedef void (*OnResponseCallback)(void* instance, int statusCode, void* data, uint32_t size, char* error, int webError);
+typedef void (*OnProgressCallback)(void* instance, int statusCode, uint32_t bytes, uint32_t total, void* data, uint32_t size);
+
+extern "C" {
+extern uint32_t JS_WebRequest_Create(const char* url, const char* method);
+extern void JS_WebRequest_SetRequestHeader(uint32_t request, const char* header, const char* value);
+extern void JS_WebRequest_Send(uint32_t request, void *ptr, uint32_t length, void *ref, OnResponseCallback onresponse, OnProgressCallback onprogress);
+extern void JS_WebRequest_GetResponseMetaDataLengths(uint32_t request, RequestMetaDataLengths* buffer);
+extern void JS_WebRequest_GetResponseMetaData(uint32_t request, char* headerBuffer, uint32_t headerSize, char* responseUrlBuffer, uint32_t responseUrlSize);
+extern void JS_WebRequest_Abort(uint32_t request);
+extern void JS_WebRequest_Release(uint32_t request);
+} // extern "C"
+#endif // __EMSCRIPTEN__
+
 namespace {
 
 class UnityAssetResponse : public IAssetResponse {
@@ -114,6 +140,75 @@ std::string replaceInvalidChars(const std::string& input) {
   return result;
 }
 
+#if __EMSCRIPTEN__
+class JSAssetResponse : public IAssetResponse {
+public:
+  JSAssetResponse(const HttpHeaders& headers, int statusCode, void* data, uint32_t size)
+      : _headers(headers)
+      , _statusCode(statusCode)
+      , _data(size) {
+      memcpy(_data.data(), data, size);
+  }
+
+  virtual uint16_t statusCode() const override { return _statusCode; }
+
+  virtual std::string contentType() const override {
+    auto find = this->_headers.find("content-type");
+    if (find != this->_headers.end()) {
+      return find->second;
+    }
+    return "";
+  }
+
+  virtual const HttpHeaders& headers() const override { return _headers; }
+
+  virtual std::span<const std::byte> data() const override { return _data; }
+
+private:
+  HttpHeaders _headers;
+  int _statusCode;
+  std::vector<std::byte> _data;
+  std::vector<char> _headerBuffer;
+  std::vector<char> _responseUrlBuffer;
+};
+
+class JSAssetRequest : public IAssetRequest {
+public:
+  JSAssetRequest(const std::string& method,
+                 const std::string& url,
+                 const HttpHeaders& headers,
+                 IAssetResponse* response)
+      : _method(method)
+      , _url(url)
+      , _headers(headers)
+      , _response(response) {}
+
+  virtual ~JSAssetRequest() {
+    delete this->_response;
+  }
+
+  virtual const std::string& method() const override { return _method; }
+  virtual const std::string& url() const override { return _url; }
+  virtual const HttpHeaders& headers() const override { return _headers; }
+  virtual const IAssetResponse* response() const override { return _response; }
+
+private:
+  std::string _method;
+  std::string _url;
+  HttpHeaders _headers;
+  IAssetResponse* _response;
+};
+#endif // __EMSCRIPTEN__
+
+struct ResponseData {
+  uint32_t request;
+  std::string url;
+  HttpHeaders requestHeaders;
+  HttpHeaders responseHeaders;
+  Promise<std::shared_ptr<CesiumAsync::IAssetRequest>> promise;
+  std::vector<uint8_t> data;
+};
+
 } // namespace
 
 namespace CesiumForUnityNative {
@@ -137,6 +232,127 @@ UnityAssetAccessor::UnityAssetAccessor() : _cesiumRequestHeaders() {
   this->_cesiumRequestHeaders.insert({"X-Cesium-Client-OS", osVersion});
 }
 
+static bool IsSpace(char c) {
+  return c == ' ' || c == '\t' || c == '\r' || c == '\n';
+}
+
+static void SetUnvalidated(std::string_view name, std::string_view value, bool replace, HttpHeaders& headers)
+{
+    // Insert or replace header
+    std::string nameStr(name.data(), name.size());
+    HttpHeaders::iterator it = headers.find(nameStr);
+    if (it != headers.end()) {
+      if (replace) {
+        it->second = value;
+      } else {
+        // According HTTP spec header with the same name can appear more than-once if and only if it's entire value is comma separated values.
+        // Multiple such headers always can be combined into one. (case 791722)
+        it->second.reserve(it->second.size() + 1 + value.size());
+        it->second.append(",");
+        it->second.append(value);
+      }
+    } else {
+      headers.insert({std::string(name), std::string(value)});
+    }
+}
+
+static void ParseAndSetAllHeaders(const char* buf, size_t length, HttpHeaders& headers) {
+  while (length > 0) {
+    // Find : character delimiting the key from the value
+    const char* delim = buf;
+    while ((delim - buf) < length && *delim != ':') {
+      ++delim;
+
+      // If we hit a new line and did not find a delimiter character, skip this line.
+      if (*delim == '\r' || *delim == '\n') {
+        length -= (delim  - buf);
+        buf = delim;
+      }
+    }
+
+    // skip leading newline characters
+    while (*buf == '\r' || *buf == '\n') {
+      length--;
+      buf++;
+    }
+
+    if ((delim - buf) >= length)
+        break;
+
+    const char* end = delim;
+    while ((end - buf) < length && *end != '\r' && *end != '\n') {
+      ++end;
+    }
+
+    // If we found a delimiter, parse it into headers
+    size_t keyLen = delim - buf;
+    // skip ':'
+    delim++;
+
+    // Skip starting spaces in value
+    while (delim < end && IsSpace(*delim)) {
+      delim++;
+    }
+
+    std::string_view key(buf, keyLen);
+
+    if (delim < end) {
+      // Value was not all spaces
+      std::string_view value(delim, end - delim);
+      SetUnvalidated(key, value, true, headers);
+    } else {
+      SetUnvalidated(key, "", true, headers);
+    }
+
+    while ((end - buf) < length && (*end == '\r' || *end == '\n')) {
+      ++end;
+    }
+
+    length -= (end - buf);
+    buf = end;
+  }
+}
+
+static void _OnProgress(void* _instance, int statusCode, uint32_t bytes, uint32_t total, void* data, uint32_t size) {
+    ResponseData* responseData = static_cast<ResponseData*>(_instance);
+    if (size > 0) {
+      size_t endPosition = responseData->data.size();
+      responseData->data.resize(responseData->data.size() + size);
+      memcpy(responseData->data.data() + endPosition, data, size);
+    }
+
+    RequestMetaDataLengths lengths;
+    JS_WebRequest_GetResponseMetaDataLengths(responseData->request, &lengths);
+    std::string headers((size_t)lengths.headerLength + 1, 0);
+    std::string responseUrl((size_t)lengths.responseUrlLength + 1, 0);
+    JS_WebRequest_GetResponseMetaData(responseData->request, (char *)headers.data(), headers.size(), (char *)responseUrl.data(), responseUrl.size());
+    headers.resize(headers.size() - 1); // strip null terminator
+    responseUrl.resize(responseUrl.size() - 1); // strip null terminator
+    ParseAndSetAllHeaders(headers.c_str(), headers.size(), responseData->responseHeaders);
+}
+
+static void _OnResponse(void* _instance, int statusCode, void* data, uint32_t size, char* error, int webError) {
+    ResponseData* responseData = static_cast<ResponseData*>(_instance);
+    printf("#### completed request: url:%s status:%d size:%d data:%p error:%s webError:%d\n", responseData->url.c_str(), statusCode, size, data, error, webError);
+    auto& promise = responseData->promise;
+    if (webError == 0) {
+      // Success
+      //printf("data: %.*s\n", responseData->data.size(), responseData->data.data());
+      for (const auto& header : responseData->responseHeaders) {
+        printf("    &&&& ResponseHeader: '%s' = '%s'\n", header.first.c_str(), header.second.c_str());
+      }
+      promise.resolve(std::make_shared<JSAssetRequest>("GET", responseData->url, responseData->requestHeaders,
+        new JSAssetResponse(responseData->responseHeaders, statusCode, responseData->data.data(), responseData->data.size())));
+    } else {
+      // Error
+      promise.reject(std::runtime_error(fmt::format(
+          "Request for `{}` failed: {}",
+          responseData->url,
+          error)));
+    }
+    delete responseData;
+}
+
 CesiumAsync::Future<std::shared_ptr<CesiumAsync::IAssetRequest>>
 UnityAssetAccessor::get(
     const CesiumAsync::AsyncSystem& asyncSystem,
@@ -147,8 +363,27 @@ UnityAssetAccessor::get(
   return asyncSystem.runInMainThread([asyncSystem,
                                       url,
                                       headers,
-                                      &cesiumRequestHeaders =
-                                          this->_cesiumRequestHeaders]() {
+                                      &cesiumRequestHeaders = this->_cesiumRequestHeaders]() {
+
+    #if __EMSCRIPTEN__
+    auto promise = asyncSystem.createPromise<std::shared_ptr<CesiumAsync::IAssetRequest>>();
+
+    auto future = promise.getFuture();
+
+    uint32_t request = JS_WebRequest_Create(url.c_str(), "GET");
+    HttpHeaders requestHeaders = cesiumRequestHeaders;
+    for (const auto& header : headers) {
+      requestHeaders.insert(header);
+    }
+    for (const auto& header : requestHeaders) {
+      JS_WebRequest_SetRequestHeader(request, header.first.c_str(), header.second.c_str());
+    }
+
+    ResponseData* responseData = new ResponseData{request, url, std::move(requestHeaders), {}, std::move(promise)};
+    JS_WebRequest_Send(request, nullptr, 0, responseData, _OnResponse, _OnProgress);
+
+    return future;
+    #else
     UnityEngine::Networking::UnityWebRequest request =
         UnityEngine::Networking::UnityWebRequest::Get(System::String(url));
 
@@ -165,9 +400,7 @@ UnityAssetAccessor::get(
           System::String(header.second));
     }
 
-    auto promise =
-        asyncSystem
-            .createPromise<std::shared_ptr<CesiumAsync::IAssetRequest>>();
+    auto promise = asyncSystem.createPromise<std::shared_ptr<CesiumAsync::IAssetRequest>>();
 
     auto future = promise.getFuture();
 
@@ -192,8 +425,8 @@ UnityAssetAccessor::get(
                 request.error().ToStlString())));
           }
         }));
-
     return future;
+    #endif // __EMSCRIPTEN__
   });
 }
 
