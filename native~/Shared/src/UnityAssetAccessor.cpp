@@ -313,6 +313,7 @@ static void ParseAndSetAllHeaders(const char* buf, size_t length, HttpHeaders& h
   }
 }
 
+#if __EMSCRIPTEN__
 static void _OnProgress(void* _instance, int statusCode, uint32_t bytes, uint32_t total, void* data, uint32_t size) {
     ResponseData* responseData = static_cast<ResponseData*>(_instance);
     if (size > 0) {
@@ -337,7 +338,6 @@ static void _OnResponse(void* _instance, int statusCode, void* data, uint32_t si
     auto& promise = responseData->promise;
     if (webError == 0) {
       // Success
-      //printf("data: %.*s\n", responseData->data.size(), responseData->data.data());
       for (const auto& header : responseData->responseHeaders) {
         printf("    &&&& ResponseHeader: '%s' = '%s'\n", header.first.c_str(), header.second.c_str());
       }
@@ -352,6 +352,7 @@ static void _OnResponse(void* _instance, int statusCode, void* data, uint32_t si
     }
     delete responseData;
 }
+#endif // __EMSCRIPTEN__
 
 CesiumAsync::Future<std::shared_ptr<CesiumAsync::IAssetRequest>>
 UnityAssetAccessor::get(
@@ -365,7 +366,7 @@ UnityAssetAccessor::get(
                                       headers,
                                       &cesiumRequestHeaders = this->_cesiumRequestHeaders]() {
 
-    #if __EMSCRIPTEN__
+#if __EMSCRIPTEN__
     auto promise = asyncSystem.createPromise<std::shared_ptr<CesiumAsync::IAssetRequest>>();
 
     auto future = promise.getFuture();
@@ -383,7 +384,7 @@ UnityAssetAccessor::get(
     JS_WebRequest_Send(request, nullptr, 0, responseData, _OnResponse, _OnProgress);
 
     return future;
-    #else
+#else
     UnityEngine::Networking::UnityWebRequest request =
         UnityEngine::Networking::UnityWebRequest::Get(System::String(url));
 
@@ -426,7 +427,7 @@ UnityAssetAccessor::get(
           }
         }));
     return future;
-    #endif // __EMSCRIPTEN__
+#endif // __EMSCRIPTEN__
   });
 }
 
@@ -437,6 +438,7 @@ UnityAssetAccessor::request(
     const std::string& url,
     const std::vector<THeader>& headers,
     const std::span<const std::byte>& contentPayload) {
+  printf("!!!!!!!!! request: url:%s verb:%s size:%zu data:%p\n", url.c_str(), verb.c_str(), contentPayload.size(), contentPayload.data());
   if (contentPayload.size() >
       size_t(std::numeric_limits<std::int32_t>::max())) {
     // This implementation cannot be used to send more than 2 gigabytes - just
