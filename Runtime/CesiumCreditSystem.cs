@@ -296,10 +296,17 @@ namespace CesiumForUnity
                 // Load an image from a string that contains the
                 // "data:image/png;base64," prefix
                 string byteString = url.Substring(base64Prefix.Length);
-                byte[] bytes = Convert.FromBase64String(byteString);
-                if (!texture.LoadImage(bytes))
+                try
                 {
-                    Debug.Log("Could not parse image from base64 string.");
+                    byte[] bytes = Convert.FromBase64String(byteString);
+                    if (!texture.LoadImage(bytes))
+                    {
+                        Debug.Log("Credit image could not be loaded into Texture2D.");
+                    }
+                }
+                catch (FormatException e)
+                {
+                    Debug.Log("Could not parse credit image from base64 string.");
                 }
             }
             else
@@ -311,7 +318,7 @@ namespace CesiumForUnity
                 if (request.result == UnityWebRequest.Result.ConnectionError ||
                     request.result == UnityWebRequest.Result.ProtocolError)
                 {
-                    Debug.Log(request.error);
+                    Debug.LogError(request.error);
                 }
                 else
                 {
