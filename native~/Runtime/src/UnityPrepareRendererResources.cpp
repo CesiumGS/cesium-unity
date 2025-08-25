@@ -100,35 +100,6 @@ std::vector<TIndex> generateIndices(const int32_t count) {
   return syntheticIndexBuffer;
 }
 
-template <typename TIndex>
-void computeFlatNormals(
-    uint8_t* pWritePos,
-    size_t stride,
-    TIndex* indices,
-    int32_t indexCount,
-    const AccessorView<UnityEngine::Vector3>& positionView) {
-
-  for (int i = 0; i < indexCount; i += 3) {
-
-    TIndex i0 = indices[i];
-    TIndex i1 = indices[i + 1];
-    TIndex i2 = indices[i + 2];
-
-    const glm::vec3& v0 =
-        *reinterpret_cast<const glm::vec3*>(&positionView[i0]);
-    const glm::vec3& v1 =
-        *reinterpret_cast<const glm::vec3*>(&positionView[i1]);
-    const glm::vec3& v2 =
-        *reinterpret_cast<const glm::vec3*>(&positionView[i2]);
-
-    glm::vec3 normal = glm::normalize(glm::cross(v1 - v0, v2 - v0));
-    for (int j = 0; j < 3; j++) {
-      *reinterpret_cast<glm::vec3*>(pWritePos) = normal;
-      pWritePos += stride;
-    }
-  }
-}
-
 /**
  * @brief The result after populating Unity mesh data with loaded glTF content.
  */
@@ -141,7 +112,6 @@ template <typename TIndex> struct CopyVertexColors {
   uint8_t* pWritePos;
   size_t stride;
   size_t vertexCount;
-  bool duplicateVertices;
   TIndex* indices;
 
   struct Color32 {
@@ -159,28 +129,14 @@ template <typename TIndex> struct CopyVertexColors {
     }
 
     bool success = true;
-    if (duplicateVertices) {
-      for (size_t i = 0; success && i < vertexCount; ++i) {
-        TIndex vertexIndex = indices[i];
-        if (vertexIndex < 0 || vertexIndex >= colorView.size()) {
-          success = false;
-        } else {
-          Color32& packedColor = *reinterpret_cast<Color32*>(pWritePos);
-          success = CopyVertexColors::convertColor(
-              colorView[vertexIndex],
-              packedColor);
-          pWritePos += stride;
-        }
-      }
-    } else {
-      for (size_t i = 0; success && i < vertexCount; ++i) {
-        if (i >= colorView.size()) {
-          success = false;
-        } else {
-          Color32& packedColor = *reinterpret_cast<Color32*>(pWritePos);
-          success = CopyVertexColors::convertColor(colorView[i], packedColor);
-          pWritePos += stride;
-        }
+
+    for (size_t i = 0; success && i < vertexCount; ++i) {
+      if (i >= colorView.size()) {
+        success = false;
+      } else {
+        Color32& packedColor = *reinterpret_cast<Color32*>(pWritePos);
+        success = CopyVertexColors::convertColor(colorView[i], packedColor);
+        pWritePos += stride;
       }
     }
 
@@ -356,36 +312,12 @@ void loadPrimitive(
           ? false
           : pMaterial && pMaterial->hasExtension<ExtensionKhrMaterialsUnlit>();
 
-  bool hasNormals = false;
-  bool computeFlatNormals = false;
   auto normalAccessorIt = primitive.attributes.find("NORMAL");
   AccessorView<UnityEngine::Vector3> normalView;
   if (normalAccessorIt != primitive.attributes.end()) {
     normalView =
         AccessorView<UnityEngine::Vector3>(gltf, normalAccessorIt->second);
-    hasNormals = normalView.status() == AccessorViewStatus::Valid;
-  } else if (
-      !primitiveInfo.isUnlit && primitive.mode != MeshPrimitive::Mode::POINTS) {
-    computeFlatNormals = hasNormals = true;
-  }
-
-  // Check if  we need to upgrade to a large index type to accommodate the
-  // larger number of vertices we need for flat normals.
-  if (computeFlatNormals && indexFormat == IndexFormat::UInt16 &&
-      indexCount >= std::numeric_limits<uint16_t>::max()) {
-    loadPrimitive<uint32_t>(
-        meshData,
-        primitiveInfo,
-        options,
-        gltf,
-        node,
-        mesh,
-        primitive,
-        transform,
-        indicesView,
-        IndexFormat::UInt32,
-        positionView);
-    return;
+    primitiveInfo.hasNormals = normalView.status() == AccessorViewStatus::Valid;
   }
 
   meshData.SetIndexBufferParams(indexCount, indexFormat);
@@ -441,7 +373,7 @@ void loadPrimitive(
   ++numberOfAttributes;
 
   // Add the NORMAL attribute, if it exists.
-  if (hasNormals) {
+  if (primitiveInfo.hasNormals) {
     assert(numberOfAttributes < MAX_ATTRIBUTES);
     descriptor[numberOfAttributes].attribute = VertexAttribute::Normal;
     descriptor[numberOfAttributes].format = VertexAttributeFormat::Float32;
@@ -554,9 +486,7 @@ void loadPrimitive(
     attributes.Item(i, descriptor[i]);
   }
 
-  int32_t vertexCount = computeFlatNormals
-                            ? indexCount
-                            : static_cast<int32_t>(positionView.size());
+  int32_t vertexCount = static_cast<int32_t>(positionView.size());
   meshData.SetVertexBufferParams(vertexCount, attributes);
 
   NativeArray1<uint8_t> nativeVertexBuffer =
@@ -576,7 +506,7 @@ void loadPrimitive(
 
   size_t stride = sizeof(Vector3);
   size_t normalByteOffset, colorByteOffset;
-  if (hasNormals) {
+  if (primitiveInfo.hasNormals) {
     normalByteOffset = stride;
     stride += sizeof(Vector3);
   }
@@ -586,52 +516,25 @@ void loadPrimitive(
   }
   stride += numTexCoords * sizeof(Vector2);
 
-  if (computeFlatNormals) {
-    ::computeFlatNormals(
-        pWritePos + normalByteOffset,
-        stride,
-        indices,
-        indexCount,
-        positionView);
-    for (int64_t i = 0; i < vertexCount; ++i) {
-      TIndex vertexIndex = indices[i];
-      *reinterpret_cast<Vector3*>(pWritePos) = positionView[vertexIndex];
-      // skip position and normal
-      pWritePos += 2 * sizeof(Vector3);
-      // Skip the slot allocated for vertex colors, we will fill them in
-      // bulk later.
-      if (hasVertexColors) {
-        pWritePos += sizeof(uint32_t);
-      }
-      for (uint32_t texCoordIndex = 0; texCoordIndex < numTexCoords;
-           ++texCoordIndex) {
-        *reinterpret_cast<Vector2*>(pWritePos) =
-            texCoordViews[texCoordIndex][vertexIndex];
-        pWritePos += sizeof(Vector2);
-      }
-    }
-  } else {
-    for (int64_t i = 0; i < vertexCount; ++i) {
-      *reinterpret_cast<Vector3*>(pWritePos) = positionView[i];
+  for (int64_t i = 0; i < vertexCount; ++i) {
+    *reinterpret_cast<Vector3*>(pWritePos) = positionView[i];
+    pWritePos += sizeof(Vector3);
+
+    if (primitiveInfo.hasNormals) {
+      *reinterpret_cast<Vector3*>(pWritePos) = normalView[i];
       pWritePos += sizeof(Vector3);
+    }
 
-      if (hasNormals) {
-        *reinterpret_cast<Vector3*>(pWritePos) = normalView[i];
-        pWritePos += sizeof(Vector3);
-      }
+    // Skip the slot allocated for vertex colors, we will fill them in
+    // bulk later.
+    if (hasVertexColors) {
+      pWritePos += sizeof(uint32_t);
+    }
 
-      // Skip the slot allocated for vertex colors, we will fill them in
-      // bulk later.
-      if (hasVertexColors) {
-        pWritePos += sizeof(uint32_t);
-      }
-
-      for (uint32_t texCoordIndex = 0; texCoordIndex < numTexCoords;
-           ++texCoordIndex) {
-        *reinterpret_cast<Vector2*>(pWritePos) =
-            texCoordViews[texCoordIndex][i];
-        pWritePos += sizeof(Vector2);
-      }
+    for (uint32_t texCoordIndex = 0; texCoordIndex < numTexCoords;
+         ++texCoordIndex) {
+      *reinterpret_cast<Vector2*>(pWritePos) = texCoordViews[texCoordIndex][i];
+      pWritePos += sizeof(Vector2);
     }
   }
 
@@ -645,15 +548,7 @@ void loadPrimitive(
             pBufferStart + colorByteOffset,
             stride,
             static_cast<size_t>(vertexCount),
-            computeFlatNormals,
             indices});
-  }
-
-  if (computeFlatNormals) {
-    // rewrite indices
-    for (TIndex i = 0; i < indexCount; i++) {
-      indices[i] = i;
-    }
   }
 
   meshData.subMeshCount(1);
@@ -1566,6 +1461,15 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         UnityEngine::Material material =
             UnityEngine::Object::Instantiate(opaqueMaterial);
         material.hideFlags(UnityEngine::HideFlags::HideAndDontSave);
+
+        int32_t computeFlatNormalsPropertyID =
+            materialProperties.getComputeFlatNormalsID();
+        bool computeFlatNormals = !primitiveInfo.hasNormals &&
+                                  !primitiveInfo.isUnlit &&
+                                  primitive.mode != MeshPrimitive::Mode::POINTS;
+
+        material.SetFloat(computeFlatNormalsPropertyID, computeFlatNormals);
+
         meshRenderer.material(material);
         if (pMaterial) {
           setGltfMaterialParameterValues(

@@ -422,13 +422,13 @@ namespace CesiumForUnity
                 "Generate Smooth Normals",
                 "Whether to generate smooth normals when normals are missing in the glTF." +
                 "\n\n" +
-                "According to the glTF spec: \"When normals are not specified, client " +
-                "implementations should calculate flat normals.\" However, calculating flat " +
-                "normals requires duplicating vertices. This option allows the glTFs to be " +
-                "rendered with smooth normals instead when the original glTF is missing normals.");
+                "This option allows glTFs to be rendered with smooth normals when the original glTF " +
+                "is missing normals. If this option is not enabled and normals are missing, " +
+                "flat normals will be generated in the shader. "
+                );
             EditorGUILayout.PropertyField(this._generateSmoothNormals, generateSmoothNormalsContent);
 
-            var ignoreKhrMaterialsUnlit = new GUIContent(
+            var ignoreKhrMaterialsUnlitContent = new GUIContent(
                 "Ignore KHR_materials_unlit",
                 "Whether to ignore the KHR_materials_unlit extension on the glTF tiles in "+
                 "this tileset, if it exists, and instead render with standard lighting and "+
@@ -439,7 +439,7 @@ namespace CesiumForUnity
                 "tilesets because lighting and shadows are already baked into their "+
                 "textures. "
             );
-            EditorGUILayout.PropertyField(this._ignoreKhrMaterialsUnlit, ignoreKhrMaterialsUnlit);
+            EditorGUILayout.PropertyField(this._ignoreKhrMaterialsUnlit, ignoreKhrMaterialsUnlitContent);
         }
 
         private void DrawPointCloudShadingProperties()

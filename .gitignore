@@ -25,3 +25,5 @@ libCesiumForUnityNative-*.so.meta
 libCesiumForUnityNative-*.dylib
 libCesiumForUnityNative-*.dylib.meta
 Documentation~/Reference/
+package-lock.json
+

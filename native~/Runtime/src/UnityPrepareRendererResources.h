@@ -28,25 +28,32 @@ struct CreateModelOptions {
  */
 struct CesiumPrimitiveInfo {
   /**
-   * @brief Whether or not the primitive's mode is set to POINTS.
-   * This affects whether or not it can be baked into a physics mesh.
+   * @brief Whether the primitive's mode is set to POINTS.
+   * This affects whether it can be baked into a physics mesh.
    */
   bool containsPoints = false;
 
   /**
-   * @brief Whether or not the primitive contains translucent vertex
+   * @brief Whether the primitive contains translucent vertex
    * colors. This can affect material tags used to render the model.
    */
   bool isTranslucent = false;
 
   /**
-   * @brief Whether or not the primitive material has the KHR_materials_unlit
+   * @brief Whether the primitive material has the KHR_materials_unlit
    * extension.
    * @remarks This may be overridden if
-   * DotNet::CesiumForUnity::Cesium3DTileset::ignoreignoreKHRMaterialsUnlit() is
+   * DotNet::CesiumForUnity::Cesium3DTileset::ignoreKhrMaterialsUnlit() is
    * set.
    */
   bool isUnlit = false;
+
+  /**
+   * @brief Whether the primitive contains normals
+   * @remarks If normals are not present and using a lit material,
+   * they should be generated on the CPU or in the material's shader.
+   */
+  bool hasNormals = false;
 
   /**
    * @brief Maps a texture coordinate index i (TEXCOORD_<i>) to the
