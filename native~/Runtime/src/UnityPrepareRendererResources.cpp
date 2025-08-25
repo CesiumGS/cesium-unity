@@ -1,4 +1,4 @@
-#include "UnityPrepareRendererResources.h"
+﻿#include "UnityPrepareRendererResources.h"
 
 #include "CesiumFeaturesMetadataUtility.h"
 #include "TextureLoader.h"
@@ -8,6 +8,7 @@
 
 #include <Cesium3DTilesSelection/Tile.h>
 #include <Cesium3DTilesSelection/Tileset.h>
+#include <CesiumEllipsoidFunctions.h>
 #include <CesiumGeometry/Transforms.h>
 #include <CesiumGeospatial/Ellipsoid.h>
 #include <CesiumGltf/AccessorView.h>
@@ -75,6 +76,7 @@
 #include <array>
 #include <unordered_map>
 #include <variant>
+#include <sstream>
 
 using namespace CesiumRasterOverlays;
 using namespace CesiumGltfContent;
@@ -1351,6 +1353,349 @@ void setGltfMaterialParameterValues(
     }
   }
 }
+
+// String parsing helper function
+std::vector<uint32_t> parseCommaSeparatedInts(const std::string& str) {
+  std::vector<uint32_t> result;
+  std::stringstream ss(str);
+  std::string item;
+
+  while (std::getline(ss, item, ',')) {
+    try {
+      uint32_t value = static_cast<uint32_t>(std::stoul(item));
+      result.push_back(value);
+    } catch (const std::exception&) {
+      // Ignore if parsing fails
+    }
+  }
+
+  return result;
+}
+
+// Polygon information structure for VCTR polygons
+struct PolygonInfo {
+  size_t vertexStart;
+  size_t vertexCount;
+  size_t indexStart;
+  size_t indexCount;
+};
+
+// Extract polygon information from glTF extras (string parsing method)
+void extractPolygonInfo(
+    const CesiumGltf::Model& gltf,
+    std::vector<PolygonInfo>& polygons) {
+  auto polygonCountIt = gltf.extras.find("vctr_polygon_count");
+  auto vertexCountsIt = gltf.extras.find("vctr_polygon_vertex_counts");
+  auto indexCountsIt = gltf.extras.find("vctr_polygon_index_counts");
+
+  if (polygonCountIt == gltf.extras.end() ||
+      vertexCountsIt == gltf.extras.end() ||
+      indexCountsIt == gltf.extras.end()) {
+    return;
+  }
+
+  int64_t polygonCount = polygonCountIt->second.getInt64OrDefault(0);
+  std::string vertexCountsStr = vertexCountsIt->second.getStringOrDefault("");
+  std::string indexCountsStr = indexCountsIt->second.getStringOrDefault("");
+
+  if (polygonCount == 0 || vertexCountsStr.empty() || indexCountsStr.empty()) {
+    return;
+  }
+
+  // string parsing
+  std::vector<uint32_t> vertexCounts = parseCommaSeparatedInts(vertexCountsStr);
+  std::vector<uint32_t> indexCounts = parseCommaSeparatedInts(indexCountsStr);
+
+  if (vertexCounts.size() != indexCounts.size() ||
+      static_cast<int64_t>(vertexCounts.size()) != polygonCount) {
+    return;
+  }
+
+  // Create PolygonInfo
+  size_t vertexOffset = 0;
+  size_t indexOffset = 0;
+
+  for (size_t i = 0; i < vertexCounts.size(); i++) {
+    PolygonInfo info;
+    info.vertexStart = vertexOffset;
+    info.vertexCount = vertexCounts[i];
+    info.indexStart = indexOffset;
+    info.indexCount = indexCounts[i];
+
+    polygons.push_back(info);
+
+    vertexOffset += vertexCounts[i];
+    indexOffset += indexCounts[i];
+  }
+}
+
+// Add Cap to individual polygons
+void addPolygonCap(
+    const System::Array1<int32_t>& originalIndices,
+    size_t indexStart,
+    size_t indexCount,
+    std::vector<int32_t>& newIndices,
+    bool isTop,
+    int32_t vertexOffset = 0) {
+
+  for (size_t i = indexStart; i < indexStart + indexCount; i += 3) {
+    if (i + 2 < static_cast<size_t>(originalIndices.Length())) {
+      if (isTop) {
+        // Top cap (maintain original order)
+        newIndices.push_back(
+            originalIndices[static_cast<int32_t>(i)] + vertexOffset);
+        newIndices.push_back(
+            originalIndices[static_cast<int32_t>(i + 1)] + vertexOffset);
+        newIndices.push_back(
+            originalIndices[static_cast<int32_t>(i + 2)] + vertexOffset);
+      } else {
+        // Bottom cap (winding order reversed)
+        newIndices.push_back(originalIndices[static_cast<int32_t>(i + 2)]);
+        newIndices.push_back(originalIndices[static_cast<int32_t>(i + 1)]);
+        newIndices.push_back(originalIndices[static_cast<int32_t>(i)]);
+      }
+    }
+  }
+}
+
+void addPolygonWallsWithNormal(
+    const std::vector<glm::dvec3>& vertices,
+    size_t vertexStart,
+    size_t vertexCount,
+    std::vector<int32_t>& indices,
+    int32_t topVertexOffset,
+    const glm::dvec3& polygonNormal,
+    double extrusionMaxHeight,
+    double extrusionMinHeight) {
+
+  // Create a wall along the boundary of the polygon
+  for (size_t i = 0; i < vertexCount; i++) {
+    size_t current = vertexStart + i;
+    size_t next = vertexStart + ((i + 1) % vertexCount);
+
+    // Wall square (2 triangles)
+    // Triangle 1: bottom-current, bottom-next, top-next
+    indices.push_back(static_cast<int32_t>(current));
+    indices.push_back(static_cast<int32_t>(next));
+    indices.push_back(static_cast<int32_t>(next + topVertexOffset));
+
+    // Triangle 2: bottom-current, top-next, top-current
+    indices.push_back(static_cast<int32_t>(current));
+    indices.push_back(static_cast<int32_t>(next + topVertexOffset));
+    indices.push_back(static_cast<int32_t>(current + topVertexOffset));
+  }
+}
+
+// Generating a simple wall based on normals
+void createSimpleWallsWithNormal(
+    const std::vector<glm::dvec3>& vertices,
+    int32_t vertexCount,
+    std::vector<int32_t>& indices,
+    int32_t topVertexOffset,
+    const glm::dvec3& polygonNormal,
+    double extrusionMaxHeight,
+    double extrusionMinHeight) {
+
+  // Create a wall by connecting all adjacent vertices
+  for (int32_t i = 0; i < vertexCount - 1; i++) {
+    int32_t current = i;
+    int32_t next = i + 1;
+
+    // Wall square (2 triangles)
+    indices.push_back(current);
+    indices.push_back(next);
+    indices.push_back(next + topVertexOffset);
+
+    indices.push_back(current);
+    indices.push_back(next + topVertexOffset);
+    indices.push_back(current + topVertexOffset);
+  }
+
+  // Create a closed shape by connecting the last vertex to the first vertex
+  if (vertexCount > 2) {
+    int32_t last = vertexCount - 1;
+    int32_t first = 0;
+
+    indices.push_back(last);
+    indices.push_back(first);
+    indices.push_back(first + topVertexOffset);
+
+    indices.push_back(last);
+    indices.push_back(first + topVertexOffset);
+    indices.push_back(last + topVertexOffset);
+  }
+}
+
+// Mesh generation helper function for VCTR extrusion
+UnityEngine::Mesh createMeshFromData(
+    const std::vector<UnityEngine::Vector3>& vertices,
+    const std::vector<int32_t>& indices) {
+
+  UnityEngine::Mesh extrudedMesh = UnityEngine::Mesh();
+
+  extrudedMesh.indexFormat(UnityEngine::Rendering::IndexFormat::UInt32);
+
+  // Create a vertex array
+  System::Array1<UnityEngine::Vector3> verticesArray(
+      static_cast<int32_t>(vertices.size()));
+  for (int32_t i = 0; i < static_cast<int32_t>(vertices.size()); i++) {
+    verticesArray.Item(i, vertices[i]);
+  }
+
+  // Create an index array
+  System::Array1<int32_t> indicesArray(static_cast<int32_t>(indices.size()));
+  for (int32_t i = 0; i < static_cast<int32_t>(indices.size()); i++) {
+    indicesArray.Item(i, indices[i]);
+  }
+
+  extrudedMesh.vertices(verticesArray);
+  extrudedMesh.triangles(indicesArray);
+  extrudedMesh.RecalculateBounds();
+
+  return extrudedMesh;
+}
+
+UnityEngine::Mesh createExtrudedMesh(
+    UnityEngine::Mesh originalMesh,
+    bool isPolygon,
+    const CesiumGltf::Model& gltf,
+    DotNet::Unity::Mathematics::double3& earthCenteredEarthFixed) {
+  if (originalMesh == nullptr) {
+    return nullptr;
+  }
+
+  // Get the original mesh data
+  System::Array1<UnityEngine::Vector3> originalVertices =
+      originalMesh.vertices();
+  System::Array1<int32_t> originalIndices = originalMesh.triangles();
+
+  if (originalVertices.Length() == 0) {
+    return originalMesh;
+  }
+
+  // Convert Unity Vector3 to glm::dvec3
+  std::vector<glm::dvec3> glmVertices;
+  glmVertices.reserve(originalVertices.Length());
+
+  for (int32_t i = 0; i < originalVertices.Length(); i++) {
+    UnityEngine::Vector3 unityVert = originalVertices[i];
+    glmVertices.push_back(glm::dvec3(unityVert.x, unityVert.y, unityVert.z));
+  }
+
+  // Extract polygon information
+  std::vector<PolygonInfo> polygons;
+  if (isPolygon) {
+    extractPolygonInfo(gltf, polygons);
+  }
+
+  // To-Do: Need to change extrusion height setting to receive it externally.if
+  // needed
+  double extrusionMaxHeight = 1000.0; // defalt extusion max height. hardcoded
+  double extrusionMinHeight = -200.0; // defalt extusion min height. hardcoded
+
+  std::vector<glm::dvec3> newGlmVertices;
+  std::vector<int32_t> newIndices;
+
+  int32_t vertexCount = originalVertices.Length();
+
+  DotNet::Unity::Mathematics::double3 geodeticNormal =
+      CesiumEllipsoidFunctions::GeodeticSurfaceNormal(
+          Ellipsoid::WGS84,
+          earthCenteredEarthFixed);
+
+  glm::dvec3 polygonNormal(
+      geodeticNormal.x,
+      geodeticNormal.y,
+      geodeticNormal.z);
+
+  // Create bottom vertices (moving in the reverse direction of normal)
+  glm::dvec3 bottomOffset = polygonNormal * extrusionMinHeight;
+  for (int32_t i = 0; i < vertexCount; i++) {
+    glm::dvec3 bottomVertex = glmVertices[i] + bottomOffset;
+    newGlmVertices.push_back(bottomVertex);
+  }
+
+  // Create top vertices (moving in normal direction)
+  glm::dvec3 topOffset = polygonNormal * extrusionMaxHeight;
+  for (int32_t i = 0; i < vertexCount; i++) {
+    glm::dvec3 topVertex = glmVertices[i] + topOffset;
+    newGlmVertices.push_back(topVertex);
+  }
+
+  if (isPolygon && !polygons.empty()) {
+    // Processing each individual polygon
+    for (const auto& polygon : polygons) {
+      // Bottom Cap
+      addPolygonCap(
+          originalIndices,
+          polygon.indexStart,
+          polygon.indexCount,
+          newIndices,
+          false);
+
+      // Top Cap
+      addPolygonCap(
+          originalIndices,
+          polygon.indexStart,
+          polygon.indexCount,
+          newIndices,
+          true,
+          vertexCount);
+
+      // Walls
+      addPolygonWallsWithNormal(
+          glmVertices,
+          polygon.vertexStart,
+          polygon.vertexCount,
+          newIndices,
+          vertexCount,
+          polygonNormal,
+          extrusionMaxHeight,
+          extrusionMinHeight);
+    }
+  } else {
+    // fallback (Treat as a single polygon)
+    // Bottom Cap
+    for (int32_t i = 0; i < originalIndices.Length(); i += 3) {
+      newIndices.push_back(originalIndices[i + 2]);
+      newIndices.push_back(originalIndices[i + 1]);
+      newIndices.push_back(originalIndices[i]);
+    }
+
+    // Top Cap
+    for (int32_t i = 0; i < originalIndices.Length(); i += 3) {
+      if (i + 2 < originalIndices.Length()) {
+        newIndices.push_back(originalIndices[i] + vertexCount);
+        newIndices.push_back(originalIndices[i + 1] + vertexCount);
+        newIndices.push_back(originalIndices[i + 2] + vertexCount);
+      }
+    }
+
+    // Walls
+    createSimpleWallsWithNormal(
+        glmVertices,
+        vertexCount,
+        newIndices,
+        vertexCount,
+        polygonNormal,
+        extrusionMaxHeight,
+        extrusionMinHeight);
+  }
+
+  // Convert glm::dvec3 to UnityEngine::Vector3
+  std::vector<UnityEngine::Vector3> finalVertices;
+  finalVertices.reserve(newGlmVertices.size());
+
+  for (const auto& glmVert : newGlmVertices) {
+    finalVertices.push_back(UnityEngine::Vector3{
+        static_cast<float>(glmVert.x),
+        static_cast<float>(glmVert.y),
+        static_cast<float>(glmVert.z)});
+  }
+
+  // Create mesh
+  return createMeshFromData(finalVertices, newIndices);
+}
 } // namespace
 
 void* UnityPrepareRendererResources::prepareInMainThread(
@@ -1409,6 +1754,17 @@ void* UnityPrepareRendererResources::prepareInMainThread(
   pModelGameObject->SetActive(false);
 
   glm::dmat4 tileTransform = tile.getTransform();
+
+  // VCTR type check
+  auto vctrItPoint = model.extras.find("vctr_point");
+  auto vctrItPolygon = model.extras.find("vctr_polygon");
+  auto vctrItPolyline = model.extras.find("vctr_polyline");
+
+  bool isVctrPoint = vctrItPoint != model.extras.end();
+  bool isVctrPolygon = vctrItPolygon != model.extras.end();
+  bool isVctrPolyline = vctrItPolyline != model.extras.end();
+  bool isVctrType = (isVctrPoint || isVctrPolygon || isVctrPolyline);
+
   tileTransform = GltfUtilities::applyRtcCenter(model, tileTransform);
   tileTransform = GltfUtilities::applyGltfUpAxisTransform(model, tileTransform);
 
@@ -1423,7 +1779,8 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             georeferenceComponent);
   }
 
-  const bool createPhysicsMeshes = tilesetComponent.createPhysicsMeshes();
+  const bool createPhysicsMeshes =
+      isVctrType ? false : tilesetComponent.createPhysicsMeshes();
 
   int32_t meshIndex = 0;
 
@@ -1502,7 +1859,58 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
         primitiveGameObject.transform().parent(pModelGameObject->transform());
         primitiveGameObject.layer(tilesetLayer);
+
         glm::dmat4 modelToEcef = tileTransform * transform;
+
+        // VCTR type check
+        auto vctrItPoint = gltf.extras.find("vctr_point");
+        auto vctrItPolygon = gltf.extras.find("vctr_polygon");
+        auto vctrItPolyline = gltf.extras.find("vctr_polyline");
+
+        bool isVctrPoint = vctrItPoint != gltf.extras.end();
+        bool isVctrPolygon = vctrItPolygon != gltf.extras.end();
+        bool isVctrPolyline = vctrItPolyline != gltf.extras.end();
+        bool isVctrType = isVctrPoint || isVctrPolygon || isVctrPolyline;
+
+        if (isVctrPoint) {
+          const Accessor* pPositionAccessor =
+              Model::getSafe(&gltf.accessors, positionAccessorID);
+          glm::vec3 min(
+              pPositionAccessor->min[0],
+              pPositionAccessor->min[1],
+              pPositionAccessor->min[2]);
+          glm::vec3 max(
+              pPositionAccessor->max[0],
+              pPositionAccessor->max[1],
+              pPositionAccessor->max[2]);
+
+          glm::vec3 halfPos = glm::vec3(
+              (max.x - min.x) / 2,
+              (max.y - min.y) / 2,
+              (max.z - min.z) / 2);
+
+          glm::dvec3 pointPos = glm::dvec3(min + halfPos);
+
+          glm::dmat4 pointModelToEcef = modelToEcef;
+          pointModelToEcef[3] = glm::dvec4(
+              pointModelToEcef[3][0] + pointPos.x,
+              pointModelToEcef[3][1] + pointPos.y,
+              pointModelToEcef[3][2] + pointPos.z,
+              1.0);
+          modelToEcef = pointModelToEcef;
+        }
+
+        // VCTR Polygon extrusion
+        if (isVctrPolygon || isVctrPolyline) {
+
+          DotNet::Unity::Mathematics::double3 ecefPos;
+          ecefPos.x = static_cast<double>(modelToEcef[3][0]);
+          ecefPos.y = static_cast<double>(modelToEcef[3][2]);
+          ecefPos.z = static_cast<double>(modelToEcef[3][1]) * -1.0;
+
+          unityMesh =
+              createExtrudedMesh(unityMesh, isVctrPolygon, gltf, ecefPos);
+        }
 
         CesiumForUnity::CesiumGlobeAnchor anchor =
             primitiveGameObject
