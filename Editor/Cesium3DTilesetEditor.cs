@@ -422,9 +422,9 @@ namespace CesiumForUnity
                 "Generate Smooth Normals",
                 "Whether to generate smooth normals when normals are missing in the glTF." +
                 "\n\n" +
-                "This option allows the glTFs to be rendered with smooth normals when the " +
-                " original glTF is missing normals. If normals are missing and this option " +
-                "is not enabled, flat normals should be generated in the shader. "
+                "This option allows glTFs to be rendered with smooth normals when the original glTF " +
+                "is missing normals. If this option is not enabled and normals are missing, " +
+                "flat normals will be generated in the shader. "
                 );
             EditorGUILayout.PropertyField(this._generateSmoothNormals, generateSmoothNormalsContent);
 

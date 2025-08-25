@@ -50,8 +50,8 @@ struct CesiumPrimitiveInfo {
 
   /**
    * @brief Whether the primitive contains normals
-   * @remarks If normals are not present amd using a lit material, they should
-   * be generated on the CPU or in the shader.
+   * @remarks If normals are not present and using a lit material,
+   * they should be generated on the CPU or in the material's shader.
    */
   bool hasNormals = false;
 

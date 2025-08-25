@@ -112,7 +112,6 @@ template <typename TIndex> struct CopyVertexColors {
   uint8_t* pWritePos;
   size_t stride;
   size_t vertexCount;
-  bool duplicateVertices;
   TIndex* indices;
 
   struct Color32 {
@@ -130,28 +129,14 @@ template <typename TIndex> struct CopyVertexColors {
     }
 
     bool success = true;
-    if (duplicateVertices) {
-      for (size_t i = 0; success && i < vertexCount; ++i) {
-        TIndex vertexIndex = indices[i];
-        if (vertexIndex < 0 || vertexIndex >= colorView.size()) {
-          success = false;
-        } else {
-          Color32& packedColor = *reinterpret_cast<Color32*>(pWritePos);
-          success = CopyVertexColors::convertColor(
-              colorView[vertexIndex],
-              packedColor);
-          pWritePos += stride;
-        }
-      }
-    } else {
-      for (size_t i = 0; success && i < vertexCount; ++i) {
-        if (i >= colorView.size()) {
-          success = false;
-        } else {
-          Color32& packedColor = *reinterpret_cast<Color32*>(pWritePos);
-          success = CopyVertexColors::convertColor(colorView[i], packedColor);
-          pWritePos += stride;
-        }
+
+    for (size_t i = 0; success && i < vertexCount; ++i) {
+      if (i >= colorView.size()) {
+        success = false;
+      } else {
+        Color32& packedColor = *reinterpret_cast<Color32*>(pWritePos);
+        success = CopyVertexColors::convertColor(colorView[i], packedColor);
+        pWritePos += stride;
       }
     }
 
@@ -563,8 +548,6 @@ void loadPrimitive(
             pBufferStart + colorByteOffset,
             stride,
             static_cast<size_t>(vertexCount),
-            // computeFlatNormals,
-            false,
             indices});
   }
 

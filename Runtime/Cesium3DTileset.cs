@@ -575,8 +575,7 @@ namespace CesiumForUnity
         /// </summary>
         /// <remarks>
         /// This option allows the glTFs to be rendered with smooth normals instead when the original glTF is missing normals. 
-        /// If normals are missing and this option is not enabled, flat normals should be generated
-        /// in the shader. 
+        /// If normals are missing and this option is not enabled, flat normals will be generated in the shader. 
         /// </remarks>
         public bool generateSmoothNormals
         {

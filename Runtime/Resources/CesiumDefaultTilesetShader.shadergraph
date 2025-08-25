@@ -3226,7 +3226,7 @@
         "else"
     ],
     "m_Precision": 0,
-    "m_PreviewExpanded": false,
+    "m_PreviewExpanded": true,
     "m_DismissedVersion": 0,
     "m_PreviewMode": 0,
     "m_CustomColors": {
@@ -3262,7 +3262,7 @@
         "m_Position": {
             "serializedVersion": "2",
             "x": 2038.0,
-            "y": -219.0,
+            "y": -220.0,
             "width": 132.0,
             "height": 94.0
         }
@@ -5998,10 +5998,10 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": 2202.0,
-            "y": -221.0,
+            "x": 2199.0,
+            "y": -220.0,
             "width": 211.0,
-            "height": 157.00001525878907
+            "height": 157.0
         }
     },
     "m_Slots": [
@@ -7640,7 +7640,7 @@
     "m_Title": "Compute Flat Normals",
     "m_Position": {
         "x": 1465.0,
-        "y": -280.0
+        "y": -279.0
     }
 }
 
@@ -8227,7 +8227,7 @@
     "m_Title": "glTF PBR Metallic-Roughness",
     "m_Position": {
         "x": -1865.0,
-        "y": 1692.0001220703125
+        "y": 1692.0
     }
 }
 
@@ -9591,8 +9591,8 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": 1885.0,
-            "y": -219.0,
+            "x": 1882.0,
+            "y": -220.0,
             "width": 130.0,
             "height": 118.0
         }
@@ -10121,10 +10121,10 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": -1539.60009765625,
-            "y": 1179.2000732421875,
+            "x": -1540.0,
+            "y": 1179.0,
             "width": 356.0,
-            "height": 95.2000732421875
+            "height": 95.0
         }
     },
     "m_Slots": [
@@ -10612,7 +10612,7 @@
     "m_Title": "glTF Emissive Texture",
     "m_Position": {
         "x": -1865.0,
-        "y": 2351.999755859375
+        "y": 2352.0
     }
 }
 
@@ -10729,9 +10729,9 @@
         "m_Position": {
             "serializedVersion": "2",
             "x": 2079.0,
-            "y": -13.99997615814209,
+            "y": -13.999979019165039,
             "width": 186.0,
-            "height": 33.999969482421878
+            "height": 33.99996566772461
         }
     },
     "m_Slots": [
@@ -14371,7 +14371,7 @@
     "m_Title": "glTF Normal Texture",
     "m_Position": {
         "x": -1868.0,
-        "y": 947.0001220703125
+        "y": 947.0
     }
 }
 
