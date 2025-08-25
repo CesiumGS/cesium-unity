@@ -334,13 +334,9 @@ static void _OnProgress(void* _instance, int statusCode, uint32_t bytes, uint32_
 
 static void _OnResponse(void* _instance, int statusCode, void* data, uint32_t size, char* error, int webError) {
     ResponseData* responseData = static_cast<ResponseData*>(_instance);
-    printf("#### completed request: url:%s status:%d size:%d data:%p error:%s webError:%d\n", responseData->url.c_str(), statusCode, size, data, error, webError);
     auto& promise = responseData->promise;
     if (webError == 0) {
       // Success
-      for (const auto& header : responseData->responseHeaders) {
-        printf("    &&&& ResponseHeader: '%s' = '%s'\n", header.first.c_str(), header.second.c_str());
-      }
       promise.resolve(std::make_shared<JSAssetRequest>("GET", responseData->url, responseData->requestHeaders,
         new JSAssetResponse(responseData->responseHeaders, statusCode, responseData->data.data(), responseData->data.size())));
     } else {
@@ -438,7 +434,6 @@ UnityAssetAccessor::request(
     const std::string& url,
     const std::vector<THeader>& headers,
     const std::span<const std::byte>& contentPayload) {
-  printf("!!!!!!!!! request: url:%s verb:%s size:%zu data:%p\n", url.c_str(), verb.c_str(), contentPayload.size(), contentPayload.data());
   if (contentPayload.size() >
       size_t(std::numeric_limits<std::int32_t>::max())) {
     // This implementation cannot be used to send more than 2 gigabytes - just
