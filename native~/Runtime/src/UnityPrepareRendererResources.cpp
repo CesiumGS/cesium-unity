@@ -900,7 +900,12 @@ UnityPrepareRendererResources::prepareInLoadThread(
         // Unfortunately, this must be done on the main thread.
         return UnityEngine::Mesh::AllocateWritableMeshData(numberOfPrimitives);
       })
+#ifndef __EMSCRIPTEN__
       .thenInWorkerThread(
+#else
+      // Unity Wasm can only access managed code from the main thread.
+      .thenInMainThread(
+#endif
           [tileLoadResult = std::move(tileLoadResult)](
               UnityEngine::MeshDataArray&& meshDataArray) mutable {
             MeshDataResult meshDataResult{std::move(meshDataArray), {}};
@@ -997,7 +1002,12 @@ UnityPrepareRendererResources::prepareInLoadThread(
               }
 
               if (instanceIDs.size() > 0) {
+#ifndef __EMSCRIPTEN__
                 return asyncSystem.runInWorkerThread(
+#else
+                // Unity Wasm can only access managed code from the main thread.
+                return asyncSystem.runInMainThread(
+#endif
                     [workerResult = std::move(workerResult),
                      instanceIDs = std::move(instanceIDs),
                      meshes = std::move(meshes)]() mutable {
