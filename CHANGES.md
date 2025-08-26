@@ -8,6 +8,7 @@
 
 ##### Fixes :wrench:
 
+- Fixed a bug where `CesiumCreditSystem` did not accurately track the loading progress of images, which could result in missing credits.
 - Fixed a bug where `CesiumPointCloudRenderer` could dereference a null `CesiumPointCloudShading` on `Cesium3DTileset`.
 
 ## v1.17.0 - 2025-08-01
