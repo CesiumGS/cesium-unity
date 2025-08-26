@@ -316,6 +316,7 @@ template <typename TIndex, class TIndexAccessor>
 void loadPrimitive(
     UnityEngine::MeshData meshData,
     CesiumPrimitiveInfo& primitiveInfo,
+    const CreateModelOptions& options,
     const Model& gltf,
     const Node& node,
     const Mesh& mesh,
@@ -353,7 +354,9 @@ void loadPrimitive(
       Model::getSafe(&gltf.materials, primitive.material);
 
   primitiveInfo.isUnlit =
-      pMaterial && pMaterial->hasExtension<ExtensionKhrMaterialsUnlit>();
+      options.ignoreKhrMaterialUnlit
+          ? false
+          : pMaterial && pMaterial->hasExtension<ExtensionKhrMaterialsUnlit>();
 
   bool hasNormals = false;
   bool computeFlatNormals = false;
@@ -375,6 +378,7 @@ void loadPrimitive(
     loadPrimitive<uint32_t>(
         meshData,
         primitiveInfo,
+        options,
         gltf,
         node,
         mesh,
@@ -394,12 +398,6 @@ void loadPrimitive(
           GetUnsafeBufferPointerWithoutChecks(dest));
 
   switch (primitive.mode) {
-  case MeshPrimitive::Mode::TRIANGLES:
-  case MeshPrimitive::Mode::POINTS:
-    for (int64_t i = 0; i < indicesView.size(); ++i) {
-      indices[i] = indicesView[i];
-    }
-    break;
   case MeshPrimitive::Mode::TRIANGLE_STRIP:
     for (int64_t i = 0; i < indicesView.size() - 2; ++i) {
       if (i % 2) {
@@ -414,11 +412,17 @@ void loadPrimitive(
     }
     break;
   case MeshPrimitive::Mode::TRIANGLE_FAN:
-  default:
-    for (int64_t i = 2; i < indicesView.size(); ++i) {
+    for (int64_t i = 0; i < indicesView.size() - 2; ++i) {
       indices[3 * i] = indicesView[0];
-      indices[3 * i + 1] = indicesView[i - 1];
-      indices[3 * i + 2] = indicesView[i];
+      indices[3 * i + 1] = indicesView[i + 1];
+      indices[3 * i + 2] = indicesView[i + 2];
+    }
+    break;
+  case MeshPrimitive::Mode::TRIANGLES:
+  case MeshPrimitive::Mode::POINTS:
+  default:
+    for (int64_t i = 0; i < indicesView.size(); ++i) {
+      indices[i] = indicesView[i];
     }
     break;
   }
@@ -694,7 +698,8 @@ int32_t countPrimitives(const CesiumGltf::Model& model) {
 
 void populateMeshDataArray(
     MeshDataResult& meshDataResult,
-    TileLoadResult& tileLoadResult) {
+    TileLoadResult& tileLoadResult,
+    const CreateModelOptions& options) {
   CesiumGltf::Model* pModel =
       std::get_if<CesiumGltf::Model>(&tileLoadResult.contentKind);
   if (!pModel)
@@ -706,7 +711,7 @@ void populateMeshDataArray(
 
   pModel->forEachPrimitiveInScene(
       -1,
-      [&meshDataResult, &meshDataInstance, pModel](
+      [&meshDataResult, &meshDataInstance, pModel, &options](
           const Model& gltf,
           const Node& node,
           const Mesh& mesh,
@@ -741,6 +746,7 @@ void populateMeshDataArray(
             loadPrimitive<std::uint32_t>(
                 meshData,
                 primitiveInfo,
+                options,
                 gltf,
                 node,
                 mesh,
@@ -753,6 +759,7 @@ void populateMeshDataArray(
             loadPrimitive<std::uint16_t>(
                 meshData,
                 primitiveInfo,
+                options,
                 gltf,
                 node,
                 mesh,
@@ -770,6 +777,7 @@ void populateMeshDataArray(
             loadPrimitive<std::uint16_t>(
                 meshData,
                 primitiveInfo,
+                options,
                 gltf,
                 node,
                 mesh,
@@ -785,6 +793,7 @@ void populateMeshDataArray(
             loadPrimitive<std::uint16_t>(
                 meshData,
                 primitiveInfo,
+                options,
                 gltf,
                 node,
                 mesh,
@@ -800,6 +809,7 @@ void populateMeshDataArray(
             loadPrimitive<std::uint16_t>(
                 meshData,
                 primitiveInfo,
+                options,
                 gltf,
                 node,
                 mesh,
@@ -815,6 +825,7 @@ void populateMeshDataArray(
             loadPrimitive<std::uint16_t>(
                 meshData,
                 primitiveInfo,
+                options,
                 gltf,
                 node,
                 mesh,
@@ -830,6 +841,7 @@ void populateMeshDataArray(
             loadPrimitive<std::uint32_t>(
                 meshData,
                 primitiveInfo,
+                options,
                 gltf,
                 node,
                 mesh,
@@ -883,6 +895,7 @@ UnityPrepareRendererResources::prepareInLoadThread(
     TileLoadResult&& tileLoadResult,
     const glm::dmat4& transform,
     const std::any& rendererOptions) {
+
   CesiumGltf::Model* pModel =
       std::get_if<CesiumGltf::Model>(&tileLoadResult.contentKind);
   if (!pModel)
@@ -903,7 +916,7 @@ UnityPrepareRendererResources::prepareInLoadThread(
         return UnityEngine::Mesh::AllocateWritableMeshData(numberOfPrimitives);
       })
       .thenInWorkerThread(
-          [tileLoadResult = std::move(tileLoadResult)](
+          [tileLoadResult = std::move(tileLoadResult), rendererOptions](
               UnityEngine::MeshDataArray&& meshDataArray) mutable {
             MeshDataResult meshDataResult{std::move(meshDataArray), {}};
             // Free the MeshDataArray if something goes wrong.
@@ -911,7 +924,12 @@ UnityPrepareRendererResources::prepareInLoadThread(
               meshDataResult.meshDataArray.Dispose();
             });
 
-            populateMeshDataArray(meshDataResult, tileLoadResult);
+            const auto* pOptions =
+                std::any_cast<CreateModelOptions>(&rendererOptions);
+            if (pOptions)
+              populateMeshDataArray(meshDataResult, tileLoadResult, *pOptions);
+            else
+              populateMeshDataArray(meshDataResult, tileLoadResult, {});
 
             // We're returning the MeshDataArray, so don't free it.
             sg.release();
@@ -922,10 +940,18 @@ UnityPrepareRendererResources::prepareInLoadThread(
       .thenInMainThread(
           [asyncSystem, tileset = this->_tilesetGameObject](
               IntermediateLoadThreadResult&& workerResult) mutable {
+            if (tileset == nullptr) {
+              // Tileset GameObject was deleted while we were loading a tile
+              // (possibly play mode was exited or another cause).
+              return asyncSystem.createResolvedFuture(
+                  TileLoadResultAndRenderResources{
+                      std::move(workerResult.tileLoadResult),
+                      nullptr});
+            }
             bool shouldCreatePhysicsMeshes = false;
             bool shouldShowTilesInHierarchy = false;
 
-            DotNet::CesiumForUnity::Cesium3DTileset tilesetComponent =
+            auto tilesetComponent =
                 tileset.GetComponent<DotNet::CesiumForUnity::Cesium3DTileset>();
             if (tilesetComponent != nullptr) {
               shouldCreatePhysicsMeshes =
@@ -1949,7 +1975,6 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             UnityEngine::Object::Instantiate(opaqueMaterial);
         material.hideFlags(UnityEngine::HideFlags::HideAndDontSave);
         meshRenderer.material(material);
-
         if (pMaterial) {
           setGltfMaterialParameterValues(
               gltf,
@@ -2115,45 +2140,53 @@ void UnityPrepareRendererResources::free(
     Cesium3DTilesSelection::Tile& tile,
     void* pLoadThreadResult,
     void* pMainThreadResult) noexcept {
-  if (pLoadThreadResult) {
-    LoadThreadResult* pTyped =
-        static_cast<LoadThreadResult*>(pLoadThreadResult);
-    for (int32_t i = 0, len = pTyped->meshes.Length(); i < len; ++i) {
-      CesiumForUnity::CesiumObjectPools::MeshPool().Release(pTyped->meshes[i]);
-    }
-    delete pTyped;
-  }
-
-  if (pMainThreadResult) {
-    std::unique_ptr<CesiumGltfGameObject> pCesiumGameObject(
-        static_cast<CesiumGltfGameObject*>(pMainThreadResult));
-
-    // It's possible that the game object has already been destroyed. In which
-    // case Unity will throw a MissingReferenceException if we try to use it. So
-    // don't do that.
-    if (*pCesiumGameObject->pGameObject != nullptr) {
-      auto metadataComponent =
-          pCesiumGameObject->pGameObject
-              ->GetComponentInParent<DotNet::CesiumForUnity::CesiumMetadata>();
-
-      UnityEngine::Transform parentTransform =
-          pCesiumGameObject->pGameObject->transform();
-
-      // Destroying primitives will remove them from the child list, so
-      // work backwards.
-      for (int32_t i = parentTransform.childCount() - 1; i >= 0; --i) {
-        UnityEngine::GameObject primitiveGameObject =
-            parentTransform.GetChild(i).gameObject();
-        freePrimitiveGameObject(primitiveGameObject, metadataComponent);
-        UnityLifetime::Destroy(primitiveGameObject);
+  try {
+    if (pLoadThreadResult) {
+      LoadThreadResult* pTyped =
+          static_cast<LoadThreadResult*>(pLoadThreadResult);
+      for (int32_t i = 0, len = pTyped->meshes.Length(); i < len; ++i) {
+        CesiumForUnity::CesiumObjectPools::MeshPool().Release(
+            pTyped->meshes[i]);
       }
-
-      if (metadataComponent == nullptr) {
-        freeModelMetadata(*pCesiumGameObject->pGameObject);
-      }
-
-      UnityLifetime::Destroy(*pCesiumGameObject->pGameObject);
+      delete pTyped;
     }
+
+    if (pMainThreadResult) {
+      std::unique_ptr<CesiumGltfGameObject> pCesiumGameObject(
+          static_cast<CesiumGltfGameObject*>(pMainThreadResult));
+
+      // It's possible that the game object has already been destroyed. In which
+      // case Unity will throw a MissingReferenceException if we try to use it.
+      // So don't do that.
+      if (*pCesiumGameObject->pGameObject != nullptr) {
+        auto metadataComponent =
+            pCesiumGameObject->pGameObject->GetComponentInParent<
+                DotNet::CesiumForUnity::CesiumMetadata>();
+
+        UnityEngine::Transform parentTransform =
+            pCesiumGameObject->pGameObject->transform();
+
+        // Destroying primitives will remove them from the child list, so
+        // work backwards.
+        for (int32_t i = parentTransform.childCount() - 1; i >= 0; --i) {
+          UnityEngine::GameObject primitiveGameObject =
+              parentTransform.GetChild(i).gameObject();
+          freePrimitiveGameObject(primitiveGameObject, metadataComponent);
+          UnityLifetime::Destroy(primitiveGameObject);
+        }
+
+        if (metadataComponent == nullptr) {
+          freeModelMetadata(*pCesiumGameObject->pGameObject);
+        }
+
+        UnityLifetime::Destroy(*pCesiumGameObject->pGameObject);
+      }
+    }
+  } catch (...) {
+    // This function is a hotspot for crashes caused by AppDomain reloads.
+    UnityEngine::Debug::Log(
+        System::String("A tile was not cleaned up properly, probably due to an "
+                       "AppDomain reload."));
   }
 }
 

@@ -105,6 +105,7 @@ namespace Reinterop
 
             // Create source files for the standard types.
             CppObjectHandle.Generate(this.Options, sourceFiles);
+            CppReinteropException.Generate(this.Options, sourceFiles);
 
             // Create source files for the generated types.
             foreach (GeneratedResult? generated in generatedResults)

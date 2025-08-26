@@ -1,5 +1,84 @@
 # Change Log
 
+## ? - ?
+
+##### Additions :tada:
+
+- Added option to ignore the `KHR_material_unlit` extension to force default lighting on tilesets. 
+
+## v1.17.0 - 2025-08-01
+
+##### Additions :tada:
+
+- Added support for Cesium3DTileset tile selection using orthographic views.
+
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.49.0 to v0.50.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
+
+## v1.16.2 - 2025-07-01
+
+##### Fixes :wrench:
+
+- Fixed broken support for `TRIANGLE_FAN` primitives in tile meshes.
+- Fixed editor crash when any scale component on `Cesium3DTileset` was set to zero. 
+- Fixed a bug where CameraFlyToController, after the user interrupted a flight, would jump to the middle of the flight path immediately upon starting the next flight.
+
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.48.0 to v0.49.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
+
+## v1.16.1 - 2025-06-02
+
+This release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.47.0 to v0.48.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
+
+## v1.16.0 - 2025-05-01
+
+##### Additions :tada:
+
+- Added `CesiumUrlTemplateRasterOverlay` component, allowing a raster overlay to be added using tiles requested based on a specified URL template.
+
+##### Fixes :wrench:
+
+- Fixed a bug where credits would not display in the Game tab after entering Play Mode.
+- Improved stability during AppDomain reloads by catching exceptions thrown while freeing tiles.
+
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.46.0 to v0.47.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
+
+## v1.15.5 - 2025-04-01
+
+##### Fixes :wrench:
+
+- Fixed a bug that could cause a crash when reloading a scene or tileset repeatedly.
+
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.45.0 to v0.46.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
+
+## v1.15.4 - 2025-03-03
+
+##### Fixes :wrench:
+
+- "External Tilesets" are now unloaded when they are no longer used. This will significantly reduce the growth of memory usage over time when using Google Photorealistic 3D Tiles and similar tilesets.
+
+This release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.44.3 to v0.45.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
+
+## v1.15.3 - 2025-02-12
+
+This release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.44.2 to v0.44.3. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
+
+## v1.15.2 - 2025-02-10
+
+This release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.44.1 to v0.44.2. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
+
+## v1.15.1 - 2025-02-03
+
+This release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.44.0 to v0.44.1. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
+
+## v1.15.0 - 2025-02-03
+
+Cesium for Unity now requires Unity 2022 LTS (2022.3), Unity 6, or later.
+
+##### Fixes :wrench:
+
+- Exceptions in either C# or C++ code are now handled much more reliably.
+
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.43.0 to v0.44.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
+
 ## v1.14.1 - 2025-01-02
 
 This is the last release of Cesium for Unity that will support Unity 2021 LTS (2021.3). Future versions will require Unity 2022 LTS (2022.3) or Unity 6.

@@ -53,7 +53,8 @@ This should be repeated if you modify Reinterop, or if you pull new changes that
 
 For more details, see the [Reinterop README](../Reinterop~/README.md).
 
-A common mistake is to open Unity before doing this step, which will cause Unity to delete `Reinterop.dll.meta` file because the `Reinterop.dll` file does not yet exist. Then, even after you publish `Reinterop.dll`, the `Reinterop.dll.meta` that Unity creates will be missing important information, and you'll get errors when Unity attemps to compile Cesium for Unity. If this happens to you, executing `git restore Reinterop.dll.meta` should fix it.
+> [!IMPORTANT] 
+> A common mistake is to open Unity before doing this step, which will cause Unity to delete `Reinterop.dll.meta` file because the `Reinterop.dll` file does not yet exist. Then, even after you publish `Reinterop.dll`, the `Reinterop.dll.meta` that Unity creates will be missing important information, and you'll get errors when Unity attemps to compile Cesium for Unity. If this happens to you, executing `git restore Reinterop.dll.meta` should fix it.
 
 ## Build for the Editor
 
@@ -66,7 +67,7 @@ DllNotFoundException: CesiumForUnityNative assembly:<unknown assembly> type:<unk
 NotImplementedException: The native implementation is missing so OnValidate cannot be invoked.
 ```
 
-This is because the C++ code has not yet been compiled. To compile the C++ code for use in the Editor, run:
+This is because the C++ code has not yet been compiled. To compile the C++ code for use by the Editor, run:
 
 ```
 cd cesium-unity-samples/Packages/com.cesium.unity/native~
@@ -85,6 +86,22 @@ cmake --build build -j14 --target install --config RelWithDebInfo
 ```
 
 Once this build/install completes, Cesium for Unity should work the next time Unity loads Cesium for Unity. You can get it to do so by either restarting the Editor, or by making a small change to any Cesium for Unity script (.cs) file in `Packages/com.cesium.unity/Runtime`.
+
+> [!NOTE]
+> If you receive compilation errors such as, 
+> ```
+> IonTokenTroubleshootingWindowImpl.h:3:10: fatal error: 'DotNet/System/String.h' file not found
+> ```
+> Verify that Reinterop has generated the required `.cpp` and `.h` source files. These should be located in `com.cesium.unity/native~/Runtime/generated-Editor/` and `com.cesium.unity/native~/Editor/generated-Editor/`. 
+> If those directories are not present, you may force Reinterop to run by adding a comment or other minor change to `./Runtime/ConfigureReinterop.cs`
+and `./Editor/ConfigureReinterop.cs` . 
+> ```
+> cd cesium-unity-samples/Packages/com.cesium.unity
+> echo "" >> ./Runtime/ConfigureReinterop.cs
+> echo "" >> ./Editor/ConfigureReinterop.cs
+> ```
+> (Alternatively, one may open both `ConfigureReinterop.cs` files from within Unity or any text editor, make a whitespace or other minor change, and save the files.)
+> Once those changes have been saved, go back to the Unity editor. It should detect the file changes and cause Reinterop to generate the required C++ source files. 
 
 ## Building and Running Games
 

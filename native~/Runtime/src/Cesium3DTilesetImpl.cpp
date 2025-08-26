@@ -133,9 +133,12 @@ void Cesium3DTilesetImpl::Update(
   std::vector<ViewState> viewStates =
       CameraManager::getAllCameras(tileset, *this);
 
-  const ViewUpdateResult& updateResult = this->_pTileset->updateView(
+  const ViewUpdateResult& updateResult = this->_pTileset->updateViewGroup(
+      this->_pTileset->getDefaultViewGroup(),
       viewStates,
       DotNet::UnityEngine::Time::deltaTime());
+  this->_pTileset->loadTiles();
+
   this->updateLastViewUpdateResultState(tileset, updateResult);
 
   for (auto pTile : updateResult.tilesFadingOut) {
@@ -278,6 +281,10 @@ struct CalculateECEFCameraPosition {
 
   glm::dvec3 operator()(const CesiumGeospatial::S2CellBoundingVolume& s2) {
     return (*this)(s2.computeBoundingRegion(ellipsoid));
+  }
+
+  glm::dvec3 operator()(const CesiumGeometry::BoundingCylinderRegion& cyl) {
+    return (*this)(cyl.toOrientedBoundingBox());
   }
 };
 } // namespace
@@ -559,6 +566,7 @@ void Cesium3DTilesetImpl::DestroyTileset(
 void Cesium3DTilesetImpl::LoadTileset(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
   TilesetOptions options{};
+  options.rendererOptions = std::make_any<CreateModelOptions>(tileset);
   options.maximumScreenSpaceError = tileset.maximumScreenSpaceError();
   options.preloadAncestors = tileset.preloadAncestors();
   options.preloadSiblings = tileset.preloadSiblings();

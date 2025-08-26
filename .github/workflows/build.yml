@@ -51,9 +51,10 @@ jobs:
           key: vcpkg-windows-${{ hashFiles('native~/vcpkg/ports/**/vcpkg.json', 'native~/vcpkg/triplets/**/*', 'native~/extern/*toolchain.cmake') }}-${{ hashFiles('native~/extern/cesium-native/CMakeLists.txt', 'native~/CMakeLists.txt') }}
           restore-keys: |
             vcpkg-windows-${{ hashFiles('native~/vcpkg/ports/**/vcpkg.json', 'native~/vcpkg/triplets/**/*', 'native~/extern/*toolchain.cmake') }}-
-      - name: Install Ninja
-        run: |
-          choco install -y ninja
+      - name: Install latest ninja and cmake
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: "3.31.6"
       - name: Install nasm
         uses: ilammy/setup-nasm@v1.5.1
       - name: Install wget
@@ -114,6 +115,10 @@ jobs:
         run: |
           cd d:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
           dotnet publish Reinterop~ -o .
+      - name: Print disk space 1
+        if: success() || failure()    # run this step even if previous step failed
+        run: |
+          get-psdrive
       - name: Build Package
         run: |
           cd d:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
@@ -128,6 +133,10 @@ jobs:
           $ENV:EZVCPKG_BASEDIR="D:/.ezvcpkg"
           # Run the build
           dotnet run --project Build~
+      - name: Print disk space 2
+        if: success() || failure()    # run this step even if previous step failed
+        run: |
+          get-psdrive
       - name: Publish Logs
         if: success() || failure()    # run this step even if previous step failed
         uses: actions/upload-artifact@v4

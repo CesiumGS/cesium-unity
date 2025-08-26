@@ -4,10 +4,24 @@
 
 #include <Cesium3DTilesSelection/IPrepareRendererResources.h>
 
+#include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/UnityEngine/GameObject.h>
 
 namespace CesiumForUnityNative {
 
+struct CreateModelOptions {
+  /**
+   * Whether to ignore the KHR_materials_unlit extension in the model. If this
+   * is true and the extension is present, then flat normals will be generated
+   * for the model as it loads.
+   */
+  bool ignoreKhrMaterialUnlit = false;
+
+  CreateModelOptions() = default;
+  explicit CreateModelOptions(
+      const DotNet::CesiumForUnity::Cesium3DTileset& tilesetComponent)
+      : ignoreKhrMaterialUnlit(tilesetComponent.ignoreKhrMaterialsUnlit()) {}
+};
 /**
  * @brief Information about how a given glTF primitive was converted into
  * Unity MeshData.
@@ -28,6 +42,9 @@ struct CesiumPrimitiveInfo {
   /**
    * @brief Whether or not the primitive material has the KHR_materials_unlit
    * extension.
+   * @remarks This may be overridden if
+   * DotNet::CesiumForUnity::Cesium3DTileset::ignoreignoreKHRMaterialsUnlit() is
+   * set.
    */
   bool isUnlit = false;
 
