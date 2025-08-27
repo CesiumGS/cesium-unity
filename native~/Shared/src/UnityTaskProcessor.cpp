@@ -19,7 +19,7 @@ namespace CesiumForUnityNative {
 // How many threads to use in the pool. This is somewhat arbitrary; we
 // just don't want to create a new thread for every task, to keep the number
 // of threads under the Emscripten limit.
-static const int UNITY_THREAD_POOL_SIZE = 10;
+static const int UNITY_THREAD_POOL_SIZE = 4;
 
 class UnityThreadPool {
 public:
