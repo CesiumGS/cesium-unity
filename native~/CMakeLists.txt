@@ -14,6 +14,8 @@ if(toolchainFile STREQUAL "Emscripten.cmake")
     include(${CMAKE_TOOLCHAIN_FILE})
 endif()
 
+option(CESIUM_WASM64 "Enable 64-bit WebAssembly target" OFF)
+
 if(CESIUM_TARGET_WASM)
     # vcpkg will attempt to second-guess our CMAKE_C_COMPILER setting, choosing to go with the value of CC instead.
     # While normally this is the correct value to go with, for wasm we need to be using emcc and em++.
@@ -22,8 +24,15 @@ if(CESIUM_TARGET_WASM)
     set(ENV{CC} ${CMAKE_C_COMPILER})
     set(ENV{CXX} ${CMAKE_CXX_COMPILER})
 
-    set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fwasm-exceptions -mbulk-memory -mnontrapping-fptoint -sSUPPORT_LONGJMP=wasm -pthread -DHAS_FUTIME=0" )
-    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fwasm-exceptions -mbulk-memory -mnontrapping-fptoint -sSUPPORT_LONGJMP=wasm -pthread -DHAS_FUTIME=0" )
+    # Make sure all files are compiled with -pthread and other required flags.
+    # HAS_FUTIME is for tidy-html5 to keep it from using <sys/utime.h>, which is not available with Emscripten.
+    if(CESIUM_WASM64)
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -sMEMORY64=1 -fwasm-exceptions -mbulk-memory -mnontrapping-fptoint -sSUPPORT_LONGJMP=wasm -pthread -DHAS_FUTIME=0")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -sMEMORY64=1 -fwasm-exceptions -mbulk-memory -mnontrapping-fptoint -sSUPPORT_LONGJMP=wasm -pthread -DHAS_FUTIME=0")
+    else()
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fwasm-exceptions -mbulk-memory -mnontrapping-fptoint -sSUPPORT_LONGJMP=wasm -pthread -DHAS_FUTIME=0")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fwasm-exceptions -mbulk-memory -mnontrapping-fptoint -sSUPPORT_LONGJMP=wasm -pthread -DHAS_FUTIME=0")
+    endif()
 endif()
 
 # By default, vcpkg (or is it cmake?) will try to link against the Debug version
@@ -105,8 +114,13 @@ if (NOT VCPKG_TRIPLET)
 endif()
 
 if(CESIUM_TARGET_WASM)
-    # vcpkg will attempt to make this wasm32-emscripten if we don't declare it
-    set(VCPKG_TARGET_TRIPLET wasm32-emscripten-unity)
+    if(CESIUM_WASM64)
+        # vcpkg will attempt to make this wasm32-emscripten if we don't declare it
+        set(VCPKG_TARGET_TRIPLET wasm64-emscripten-unity)
+    else()
+        # vcpkg will attempt to make this wasm32-emscripten if we don't declare it
+        set(VCPKG_TARGET_TRIPLET wasm32-emscripten-unity)
+    endif()
 endif()
 
 # We never need any of cesium-native's header files to be installed.
