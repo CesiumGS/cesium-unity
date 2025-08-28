@@ -24,6 +24,11 @@ if(CESIUM_TARGET_WASM)
     set(ENV{CC} ${CMAKE_C_COMPILER})
     set(ENV{CXX} ${CMAKE_CXX_COMPILER})
 
+    set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY BOTH)
+    set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE BOTH)
+    set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH)
+    set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+
     # Make sure all files are compiled with -pthread and other required flags.
     # HAS_FUTIME is for tidy-html5 to keep it from using <sys/utime.h>, which is not available with Emscripten.
     if(CESIUM_WASM64)
