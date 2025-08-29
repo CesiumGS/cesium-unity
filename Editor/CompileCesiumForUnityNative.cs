@@ -436,14 +436,14 @@ namespace CesiumForUnity
 
         internal static void BuildNativeLibrary(LibraryToBuild library)
         {
-            // Uncomment to skip WebGL builds of the library, allowing for manual building of it externally.
-            if (library.Platform == BuildTarget.WebGL)
-                return;
+            // Comment the below line to skip building the native library for Web, allowing for manual building of it externally.
+            //if (library.Platform == BuildTarget.WebGL) return;
 
             var emscriptenDir = "";
 
             if (library.Platform == BuildTarget.WebGL)
             {
+                // Find the Emscripten that ships with the Unity WebGL platform
                 var editorDir = EditorApplication.applicationContentsPath;
                 emscriptenDir = Path.Combine(editorDir, "PlaybackEngines", "WebGLSupport", "BuildTools", "Emscripten");
                 if (!Directory.Exists(emscriptenDir))
@@ -453,7 +453,7 @@ namespace CesiumForUnity
                     emscriptenDir = Path.Combine(editorDir, "WebGLSupport", "BuildTools", "Emscripten");
                     if (!Directory.Exists(emscriptenDir))
                     {
-                        UnityEngine.Debug.LogError($"Emscripten directory does not exist at: {emscriptenDir}. Cannot build WebGL version of CesiumForUnityNative.");
+                        UnityEngine.Debug.LogError($"Emscripten directory does not exist at: {emscriptenDir}. Cannot build Web version of CesiumForUnityNative.");
                         return;
                     }
                 }
@@ -516,7 +516,12 @@ namespace CesiumForUnity
                     };
 
                     if (library.Platform == BuildTarget.WebGL)
+                    {
                         args.Insert(0, "cmake");
+                        args.Add("-DBUILD_SHARED_LIB=OFF");
+                        var generatedInclude = Path.Combine(library.SourceDirectory, "Runtime", library.GeneratedDirectoryName, "include");
+                        args.Add($"-DCMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES=\"{generatedInclude}\"");
+                    }
 
                     args.AddRange(library.ExtraConfigureArgs);
 
