@@ -34,14 +34,13 @@ using namespace CesiumAsync;
 using namespace CesiumUtility;
 using namespace DotNet;
 
-#if __EMSCRIPTEN__
+#ifdef __EMSCRIPTEN__
 struct RequestMetaDataLengths
 {
     RequestMetaDataLengths()
         : headerLength(0u)
         , responseUrlLength(0u)
-    {
-    }
+    {}
 
     uint32_t headerLength;
     uint32_t responseUrlLength;
@@ -140,7 +139,7 @@ std::string replaceInvalidChars(const std::string& input) {
   return result;
 }
 
-#if __EMSCRIPTEN__
+#ifdef __EMSCRIPTEN__
 class JSAssetResponse : public IAssetResponse {
 public:
   JSAssetResponse(const HttpHeaders& headers, int statusCode, void* data, uint32_t size)
@@ -225,13 +224,16 @@ UnityAssetAccessor::UnityAssetAccessor() : _cesiumRequestHeaders() {
   std::string osVersion =
       System::Environment::OSVersion().VersionString().ToStlString();
 
+#ifndef __EMSCRIPTEN__
   this->_cesiumRequestHeaders.insert({"X-Cesium-Client", "Cesium For Unity"});
   this->_cesiumRequestHeaders.insert({"X-Cesium-Client-Version", version});
   this->_cesiumRequestHeaders.insert({"X-Cesium-Client-Project", projectName});
   this->_cesiumRequestHeaders.insert({"X-Cesium-Client-Engine", engine});
   this->_cesiumRequestHeaders.insert({"X-Cesium-Client-OS", osVersion});
+#endif // __EMSCRIPTEN__
 }
 
+#ifdef __EMSCRIPTEN__
 static bool IsSpace(char c) {
   return c == ' ' || c == '\t' || c == '\r' || c == '\n';
 }
@@ -313,7 +315,6 @@ static void ParseAndSetAllHeaders(const char* buf, size_t length, HttpHeaders& h
   }
 }
 
-#if __EMSCRIPTEN__
 static void _OnProgress(void* _instance, int statusCode, uint32_t bytes, uint32_t total, void* data, uint32_t size) {
     ResponseData* responseData = static_cast<ResponseData*>(_instance);
     if (size > 0) {
@@ -362,7 +363,7 @@ UnityAssetAccessor::get(
                                       headers,
                                       &cesiumRequestHeaders = this->_cesiumRequestHeaders]() {
 
-#if __EMSCRIPTEN__
+#ifdef __EMSCRIPTEN__
     auto promise = asyncSystem.createPromise<std::shared_ptr<CesiumAsync::IAssetRequest>>();
 
     auto future = promise.getFuture();
