@@ -436,9 +436,28 @@ namespace CesiumForUnity
 
         internal static void BuildNativeLibrary(LibraryToBuild library)
         {
-            // TODO: don't do this
+            // Uncomment to skip WebGL builds of the library, allowing for manual building of it externally.
+            //if (library.Platform == BuildTarget.WebGL)
+                //return;
+            var emscriptenDir = "";
+
             if (library.Platform == BuildTarget.WebGL)
-                return;
+            {
+                var editorDir = EditorApplication.applicationContentsPath;
+                emscriptenDir = Path.Combine(editorDir, "PlaybackEngines", "WebGLSupport", "BuildTools", "Emscripten");
+                if (!Directory.Exists(emscriptenDir))
+                {
+                    //UnityEngine.Debug.Log($"Emscripten directory does not exist at: {emscriptenDir}");
+                    // Check for editor built from source
+                    editorDir = new FileInfo(Path.Combine(editorDir, "..", "..", "..", "..")).FullName;
+                    emscriptenDir = Path.Combine(editorDir, "WebGLSupport", "BuildTools", "Emscripten");
+                    if (!Directory.Exists(emscriptenDir))
+                    {
+                        return;
+                    }
+                }
+            }
+
             if (library.CleanBuild && library.BuildDirectory.Length > 2 && Directory.Exists(library.BuildDirectory))
                 Directory.Delete(library.BuildDirectory, true);
             Directory.CreateDirectory(library.BuildDirectory);
@@ -461,7 +480,7 @@ namespace CesiumForUnity
                     }
                     else if (library.Platform == BuildTarget.WebGL)
                     {
-                        startInfo.FileName = "emcmake";
+                        startInfo.FileName = $"{emscriptenDir}/emscripten/emcmake.bat";
                     }
                     else
                     {
@@ -472,6 +491,13 @@ namespace CesiumForUnity
                     startInfo.RedirectStandardError = true;
                     startInfo.RedirectStandardOutput = true;
                     ConfigureEnvironmentVariables(startInfo.Environment, library);
+
+                    if (library.Platform == BuildTarget.WebGL)
+                    {
+                        startInfo.Environment["EMSDK"] = emscriptenDir;
+                        startInfo.Environment["EM_CONFIG"] = Path.Combine(emscriptenDir, ".emscripten");
+                        startInfo.Environment["PATH"] = $"{emscriptenDir}/emscripten;{emscriptenDir}/node;{emscriptenDir}/python;{startInfo.Environment["PATH"]}";
+                    }
 
                     List<string> args = new List<string>()
                     {
@@ -496,6 +522,9 @@ namespace CesiumForUnity
                     startInfo.Arguments = string.Join(' ', args);
 
                     RunAndLog(startInfo, log, logFilename);
+
+                    if (library.Platform == BuildTarget.WebGL)
+                        startInfo.FileName = "cmake";
 
                     args = new List<string>()
                     {
