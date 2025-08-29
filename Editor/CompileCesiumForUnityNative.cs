@@ -437,8 +437,9 @@ namespace CesiumForUnity
         internal static void BuildNativeLibrary(LibraryToBuild library)
         {
             // Uncomment to skip WebGL builds of the library, allowing for manual building of it externally.
-            //if (library.Platform == BuildTarget.WebGL)
-                //return;
+            if (library.Platform == BuildTarget.WebGL)
+                return;
+
             var emscriptenDir = "";
 
             if (library.Platform == BuildTarget.WebGL)
@@ -447,12 +448,12 @@ namespace CesiumForUnity
                 emscriptenDir = Path.Combine(editorDir, "PlaybackEngines", "WebGLSupport", "BuildTools", "Emscripten");
                 if (!Directory.Exists(emscriptenDir))
                 {
-                    //UnityEngine.Debug.Log($"Emscripten directory does not exist at: {emscriptenDir}");
                     // Check for editor built from source
                     editorDir = new FileInfo(Path.Combine(editorDir, "..", "..", "..", "..")).FullName;
                     emscriptenDir = Path.Combine(editorDir, "WebGLSupport", "BuildTools", "Emscripten");
                     if (!Directory.Exists(emscriptenDir))
                     {
+                        UnityEngine.Debug.LogError($"Emscripten directory does not exist at: {emscriptenDir}. Cannot build WebGL version of CesiumForUnityNative.");
                         return;
                     }
                 }
@@ -496,7 +497,10 @@ namespace CesiumForUnity
                     {
                         startInfo.Environment["EMSDK"] = emscriptenDir;
                         startInfo.Environment["EM_CONFIG"] = Path.Combine(emscriptenDir, ".emscripten");
-                        startInfo.Environment["PATH"] = $"{emscriptenDir}/emscripten;{emscriptenDir}/node;{emscriptenDir}/python;{startInfo.Environment["PATH"]}";
+                        var path = startInfo.Environment.ContainsKey("PATH") ? startInfo.Environment["PATH"] : "";
+                        if (path == "")
+                            path = Environment.GetEnvironmentVariable("Path");
+                        startInfo.Environment["PATH"] = $"{emscriptenDir}/emscripten;{emscriptenDir}/node;{emscriptenDir}/python;{path}";
                     }
 
                     List<string> args = new List<string>()
