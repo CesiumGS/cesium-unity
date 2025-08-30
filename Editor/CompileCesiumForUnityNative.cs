@@ -85,7 +85,7 @@ namespace CesiumForUnity
                 LibraryToBuild[] libraries = GetLibrariesToBuildForPlatform(report.summary, finalLibrariesOnly: true);
                 foreach (LibraryToBuild library in libraries)
                 {
-                    //CreatePlaceholders(library, "CesiumForUnityNative-Runtime");
+                    CreatePlaceholders(library, "CesiumForUnityNative-Runtime");
                 }
             }
             finally
@@ -93,6 +93,13 @@ namespace CesiumForUnity
                 AssetDatabase.StopAssetEditing();
                 importsInProgress.Clear();
             }
+
+            /*if (report.summary.platform == BuildTarget.WebGL)
+            {
+                // This is just an experiment, remove if it turns out not to be necessary.
+                if (PlayerSettings.WebGL.emscriptenArgs == "" || !PlayerSettings.WebGL.emscriptenArgs.Contains("PTHREAD_POOL_SIZE"))
+                    PlayerSettings.WebGL.emscriptenArgs = "-sPTHREAD_POOL_SIZE=8 " + PlayerSettings.WebGL.emscriptenArgs;
+            }*/
         }
 
         internal static void CreatePlaceholders(LibraryToBuild libraryToBuild, string sharedLibraryName)
@@ -550,7 +557,9 @@ namespace CesiumForUnity
                     startInfo.Arguments = string.Join(' ', args);
                     RunAndLog(startInfo, log, logFilename);
 
-                    if (library.Platform == BuildTarget.iOS)
+                    // Refresh the asset database for platforms that use static linking so the Unity
+                    // builder can find the libraries.
+                    if (library.Platform == BuildTarget.iOS || library.Platform == BuildTarget.WebGL)
                         AssetDatabase.Refresh();
                 }
             }
