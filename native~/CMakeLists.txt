@@ -131,12 +131,32 @@ endif()
 # We never need any of cesium-native's header files to be installed.
 set(CESIUM_INSTALL_HEADERS OFF)
 
-# We only need cesium-native's static lib files to be installed on iOS.
+# We only need cesium-native's static lib files to be installed on iOS and Wasm.
 if (NOT IOS AND NOT CESIUM_TARGET_WASM)
     set(CESIUM_INSTALL_STATIC_LIBS OFF)
 endif()
 
+if (CESIUM_TARGET_WASM)
+  list(APPEND CESIUM_EXCLUDE_INSTALL_STATIC_LIBS "libjpeg-turbo") # This conflicts with Unity symbols
+endif()
+
 add_subdirectory(extern/swl-variant)
+
+if(CESIUM_TARGET_WASM)
+  # fix blend2d not working from vcpkg install
+  set(BLEND2D_EXTERNAL_ASMJIT OFF)
+  set(BLEND2D_STATIC ON)
+  add_subdirectory(extern/blend2d)
+  install(TARGETS blend2d) # TODO: just install static lib, not headers
+  set_target_properties(blend2d PROPERTIES EXCLUDE_FROM_ALL 0 EXCLUDE_FROM_DEFAULT_BUILD 0)
+
+  # install a meta file to keep libastcenc-none-static.a from being included in unity web builds.
+  # This is because I don't know how to exclude this library from being installed.
+  install(
+      FILES extern/libastcenc-none-static.a.meta
+      DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  )
+endif()
 
 set(CESIUM_DISABLE_CURL ON)
 add_subdirectory(extern/cesium-native)
