@@ -1,6 +1,6 @@
 # Change Log
 
-## ? - ?
+## v1.18.0 - 2025-09-02
 
 ##### Additions :tada:
 
@@ -10,6 +10,8 @@
 
 - Fixed a bug where `CesiumCreditSystem` did not accurately track the loading progress of images, which could result in missing credits.
 - Fixed a bug where `CesiumPointCloudRenderer` could dereference a null `CesiumPointCloudShading` on `Cesium3DTileset`.
+
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.50.0 to v0.51.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
 
 ## v1.17.0 - 2025-08-01
 
