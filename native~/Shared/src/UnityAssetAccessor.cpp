@@ -28,6 +28,8 @@
 #include <DotNet/UnityEngine/Networking/UploadHandlerRaw.h>
 
 #include <algorithm>
+#include <regex>
+#include <filesystem>
 
 using namespace CesiumAsync;
 using namespace CesiumUtility;
@@ -113,6 +115,28 @@ std::string replaceInvalidChars(const std::string& input) {
   return result;
 }
 
+std::string extractFilePath(const std::string& url) {
+    // 正则表达式：匹配 file:// 后的路径部分，忽略查询参数
+    std::string strregex;
+    if (url.find("file:///") == 0)
+    {
+        strregex = R"(file:///([^?]+))";
+    }
+    else
+    {
+        strregex = R"(file://([^?]+))";
+    }
+    std::regex re(strregex);
+    std::smatch match;
+
+    // 查找匹配的部分
+    if (std::regex_search(url, match, re)) {
+        return match[1];  // 返回匹配到的文件路径
+    }
+    else {
+        return "";  // 如果没有匹配到，返回空字符串
+    }
+}
 } // namespace
 
 namespace CesiumForUnityNative {
@@ -169,6 +193,19 @@ UnityAssetAccessor::get(
             .createPromise<std::shared_ptr<CesiumAsync::IAssetRequest>>();
 
     auto future = promise.getFuture();
+    bool isOffline = url.find("file") == 0;
+    if (isOffline)
+    {
+        std::string filePath = extractFilePath(url);
+        if (!std::filesystem::exists(filePath))
+        {
+            promise.reject(std::runtime_error(fmt::format(
+                "Request for `{}` failed: {}",
+                request.url().ToStlString(),
+                request.error().ToStlString())));
+            return future;
+        }
+    }
 
     UnityEngine::Networking::UnityWebRequestAsyncOperation op =
         request.SendWebRequest();
@@ -202,7 +239,7 @@ UnityAssetAccessor::request(
     const std::string& verb,
     const std::string& url,
     const std::vector<THeader>& headers,
-    const std::span<const std::byte>& contentPayload) {
+    const gsl::span<const std::byte>& contentPayload) {
   if (contentPayload.size() >
       size_t(std::numeric_limits<std::int32_t>::max())) {
     // This implementation cannot be used to send more than 2 gigabytes - just
