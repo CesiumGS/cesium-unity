@@ -142,7 +142,7 @@ endif()
 
 add_subdirectory(extern/swl-variant)
 
-if(CESIUM_TARGET_WASM)
+if(CESIUM_TARGET_WASM AND EXISTS extern/blend2d)
   # fix blend2d not working from vcpkg install
   set(BLEND2D_EXTERNAL_ASMJIT OFF)
   set(BLEND2D_STATIC ON)

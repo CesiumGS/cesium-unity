@@ -460,8 +460,14 @@ namespace CesiumForUnity
                     emscriptenDir = Path.Combine(editorDir, "WebGLSupport", "BuildTools", "Emscripten");
                     if (!Directory.Exists(emscriptenDir))
                     {
-                        UnityEngine.Debug.LogError($"Emscripten directory does not exist at: {emscriptenDir}. Cannot build Web version of CesiumForUnityNative.");
-                        return;
+                        // Check for editor built from source on mac
+                        editorDir = new FileInfo(Path.Combine(editorDir, "..")).FullName;
+                        emscriptenDir = Path.Combine(editorDir, "WebGLSupport", "BuildTools", "Emscripten");
+                        if (!Directory.Exists(emscriptenDir))
+                        {
+                            UnityEngine.Debug.LogError($"Emscripten directory does not exist at: {emscriptenDir}. Cannot build Web version of CesiumForUnityNative.");
+                            return;
+                        }
                     }
                 }
             }
@@ -488,7 +494,10 @@ namespace CesiumForUnity
                     }
                     else if (library.Platform == BuildTarget.WebGL)
                     {
-                        startInfo.FileName = $"{emscriptenDir}/emscripten/emcmake.bat";
+                        if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.Windows)
+                            startInfo.FileName = $"{emscriptenDir}/emscripten/emcmake.bat";
+                        else
+                            startInfo.FileName = $"{emscriptenDir}/emscripten/emcmake";
                     }
                     else
                     {
@@ -507,7 +516,8 @@ namespace CesiumForUnity
                         var path = startInfo.Environment.ContainsKey("PATH") ? startInfo.Environment["PATH"] : "";
                         if (path == "")
                             path = Environment.GetEnvironmentVariable("Path");
-                        startInfo.Environment["PATH"] = $"{emscriptenDir}/emscripten;{emscriptenDir}/node;{emscriptenDir}/python;{path}";
+                        startInfo.Environment["PATH"] = $"{emscriptenDir}/emscripten;{emscriptenDir}/node;{emscriptenDir}/python;{emscriptenDir}/python/bin;{path}";
+                        UnityEngine.Debug.Log($"!!!! PATH: {startInfo.Environment["PATH"]}");
                     }
 
                     List<string> args = new List<string>()

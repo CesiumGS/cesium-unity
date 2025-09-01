@@ -14,3 +14,6 @@
 [submodule "Documentation~/doxygen-awesome-css"]
 	path = Documentation~/doxygen-awesome-css
 	url = https://github.com/jothepro/doxygen-awesome-css.git
+[submodule "native~/extern/blend2d"]
+	path = native~/extern/blend2d
+	url = https://github.com/blend2d/blend2d
