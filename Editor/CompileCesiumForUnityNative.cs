@@ -517,7 +517,6 @@ namespace CesiumForUnity
                         if (path == "")
                             path = Environment.GetEnvironmentVariable("Path");
                         startInfo.Environment["PATH"] = $"{emscriptenDir}/emscripten;{emscriptenDir}/node;{emscriptenDir}/python;{emscriptenDir}/python/bin;{path}";
-                        UnityEngine.Debug.Log($"!!!! PATH: {startInfo.Environment["PATH"]}");
                     }
 
                     List<string> args = new List<string>()
