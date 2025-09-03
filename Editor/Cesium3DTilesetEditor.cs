@@ -35,6 +35,7 @@ namespace CesiumForUnity
         //private SerializedProperty _useLodTransitions;
         //private SerializedProperty _lodTransitionLength;
         private SerializedProperty _generateSmoothNormals;
+        private SerializedProperty _generateTangents;
 
         private SerializedProperty _pointCloudShading;
 
@@ -84,6 +85,9 @@ namespace CesiumForUnity
             //    this.serializedObject.FindProperty("_lodTransitionLength");
             this._generateSmoothNormals =
                 this.serializedObject.FindProperty("_generateSmoothNormals");
+            this._generateTangents =
+                this.serializedObject.FindProperty("_generateTangents");
+
             this._ignoreKhrMaterialsUnlit = this.serializedObject.FindProperty("_ignoreKhrMaterialsUnlit");
 
             this._pointCloudShading = this.serializedObject.FindProperty("_pointCloudShading");
@@ -427,6 +431,12 @@ namespace CesiumForUnity
                 "flat normals will be generated in the shader. "
                 );
             EditorGUILayout.PropertyField(this._generateSmoothNormals, generateSmoothNormalsContent);
+
+            var generateTangentsContent = new GUIContent(
+                "Generate Tangents",
+                "Whether to generate per-vertex tangets if they are missing in the source glTF."
+            );
+            EditorGUILayout.PropertyField(this._generateTangents, generateTangentsContent);
 
             var ignoreKhrMaterialsUnlitContent = new GUIContent(
                 "Ignore KHR_materials_unlit",

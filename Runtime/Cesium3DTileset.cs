@@ -588,6 +588,31 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
+        private bool _generateTangents = false;
+
+        /// <summary>
+        /// Whether to generate per-vertex tangents when tangents are missing in the glTF.
+        /// </summary>
+        /// <remarks>
+        /// The glTF 2.0 specification suggests that tangents should be generated when they 
+        /// are missing. 
+        /// "When tangents are not specified, client implementations SHOULD calculate tangents using 
+        /// default MikkTSpace algorithms with the specified vertex positions, normals, and texture 
+        /// coordinates associated with the normal texture."
+        /// </remarks>
+        /// <seealso cref="https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html"/>
+
+        public bool generateTangents
+        {
+            get => _generateTangents;
+            set
+            {
+                this._generateSmoothNormals = value;
+                this.RecreateTileset();
+            }
+        }
+
+        [SerializeField]
         private bool _ignoreKhrMaterialsUnlit = false;
 
         /// <summary>
