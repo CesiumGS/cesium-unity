@@ -1508,6 +1508,11 @@ void ExtractInstanceDataFromExtMeshGpuInstancing(
     glm::dmat4 instanceTransform = glm::dmat4(1.0);
     instanceTransform = glm::translate(instanceTransform, position);
     instanceTransform *= glm::mat4_cast(rotation);
+	
+    //upside down.
+    instanceTransform *= CesiumGeometry::Transforms::Y_UP_TO_Z_UP;
+    instanceTransform *= CesiumGeometry::Transforms::Y_UP_TO_Z_UP;
+
     instanceTransform = glm::scale(instanceTransform, scale);
 
     // Apply node transformation
@@ -1715,19 +1720,17 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         std::vector<UnityEngine::GameObject> intanceObjects;
 
         if (isI3dmType) {
-          // Extract instance data from models already processed by existing converters
-          ExtractInstanceDataFromGltfModel(
-              gltf,
-              tileTransform,
-              instanceData);
+          // Extract instance data from models already processed by existing
+          // converters
 
-          intanceObjects.push_back(primitiveGameObject);
+          ::DotNet::UnityEngine::Object::DestroyImmediate(primitiveGameObject);
 
-          for (size_t instanceDataIndex = 1;
-               instanceDataIndex < instanceData.size();
+          ExtractInstanceDataFromGltfModel(gltf, tileTransform, instanceData);
+
+          for (size_t instanceDataIndex = 0;
+               instanceDataIndex < instanceData.size() / mesh.primitives.size();
                ++instanceDataIndex) {
 
-            int64_t primitiveIndex = &primitive - &mesh.primitives[0];
             UnityEngine::GameObject intanceGameObject(System::String(
                 "Mesh " + std::to_string(instanceDataIndex) +
                 " Primitive " +
@@ -1753,7 +1756,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           
           if (!instanceData.empty() && meshes.Length() != 0) {
             // Using the first mesh (i3dm is an instance of the same model)
-            UnityEngine::Mesh baseMesh = meshes[0];
+            UnityEngine::Mesh baseMesh = meshes[primitiveIndex];
 
             UnityEngine::Material opaqueMaterial =
                 tilesetComponent.opaqueMaterial();
@@ -1841,11 +1844,6 @@ void* UnityPrepareRendererResources::prepareInMainThread(
                 baseMesh,
                 material,
                 matList);
-
-
-            UnityEngine::MeshFilter meshFilter =
-                pModelGameObject->AddComponent<UnityEngine::MeshFilter>();
-            meshFilter.sharedMesh(baseMesh);
 
             // For backwards compatibility.
             if (metadataComponent != nullptr) {
