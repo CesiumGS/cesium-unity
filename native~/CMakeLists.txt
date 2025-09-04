@@ -149,13 +149,6 @@ if(CESIUM_TARGET_WASM AND EXISTS extern/blend2d)
   add_subdirectory(extern/blend2d)
   install(TARGETS blend2d) # TODO: just install static lib, not headers
   set_target_properties(blend2d PROPERTIES EXCLUDE_FROM_ALL 0 EXCLUDE_FROM_DEFAULT_BUILD 0)
-
-  # install a meta file to keep libastcenc-none-static.a from being included in unity web builds.
-  # This is because I don't know how to exclude this library from being installed.
-  install(
-      FILES extern/libastcenc-none-static.a.meta
-      DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  )
 endif()
 
 set(CESIUM_DISABLE_CURL ON)

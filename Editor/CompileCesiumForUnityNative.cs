@@ -93,13 +93,6 @@ namespace CesiumForUnity
                 AssetDatabase.StopAssetEditing();
                 importsInProgress.Clear();
             }
-
-            /*if (report.summary.platform == BuildTarget.WebGL)
-            {
-                // This is just an experiment, remove if it turns out not to be necessary.
-                if (PlayerSettings.WebGL.emscriptenArgs == "" || !PlayerSettings.WebGL.emscriptenArgs.Contains("PTHREAD_POOL_SIZE"))
-                    PlayerSettings.WebGL.emscriptenArgs = "-sPTHREAD_POOL_SIZE=8 " + PlayerSettings.WebGL.emscriptenArgs;
-            }*/
         }
 
         internal static void CreatePlaceholders(LibraryToBuild libraryToBuild, string sharedLibraryName)
@@ -441,6 +434,60 @@ namespace CesiumForUnity
             return Path.Combine(packagePath, "Plugins", GetDirectoryNameForPlatform(platform));
         }
 
+        // Web builds use static libraries (.a files) that need to be marked as only
+        // compatible with WebGL. This is normally done in OnPostprocessAllAssets, but
+        // that only includes the main libCesiumForUnityNative.a library, not the other
+        // static libraries.
+        private static void SetWebGLStaticLibrariesPlatform(string webglPluginsPath)
+        {
+            if (!Directory.Exists(webglPluginsPath))
+                return;
+
+            // Find all static library files (.a) in the directory and its subdirectories.
+            string[] libraryFiles = Directory.GetFiles(webglPluginsPath, "*.a", SearchOption.AllDirectories);
+            if (libraryFiles.Length == 0)
+                return;
+
+            AssetDatabase.StartAssetEditing();
+
+            foreach (string filePath in libraryFiles)
+            {
+                // Application.datapath is the <project>/Assets folder. We need to strip off that
+                // part and prepend "Packages" to get the correct asset path.
+                string assetPath = "Packages" + filePath.Substring(Application.dataPath.Length + 2);
+
+                // Get the importer for the asset.
+                PluginImporter importer = AssetImporter.GetAtPath(assetPath) as PluginImporter;
+
+                if (importer != null)
+                {
+                    // Disable "Any Platform" to enable platform-specific settings.
+                    importer.SetCompatibleWithAnyPlatform(false);
+
+                    // Exclude from all platforms before enabling the desired one.
+                    // This ensures the library is ONLY active on WebGL.
+                    importer.SetCompatibleWithPlatform(BuildTarget.Android, false);
+                    importer.SetCompatibleWithPlatform(BuildTarget.iOS, false);
+                    importer.SetCompatibleWithPlatform(BuildTarget.StandaloneWindows, false);
+                    importer.SetCompatibleWithPlatform(BuildTarget.StandaloneWindows64, false);
+                    importer.SetCompatibleWithPlatform(BuildTarget.StandaloneOSX, false);
+                    importer.SetCompatibleWithPlatform(BuildTarget.StandaloneLinux64, false);
+                    importer.SetCompatibleWithEditor(false);
+
+                    // We need to exclude libastcenc-none-static.a as it's being installed, but conflicts with
+                    // Unity's symbols.
+                    bool supportsWebGL = !assetPath.EndsWith("libastcenc-none-static.a");
+
+                    importer.SetCompatibleWithPlatform(BuildTarget.WebGL, supportsWebGL);
+
+                    importer.SaveAndReimport();
+                }
+            }
+
+            AssetDatabase.StopAssetEditing();
+        }
+
+
         internal static void BuildNativeLibrary(LibraryToBuild library)
         {
             // Comment the below line to skip building the native library for Web, allowing for manual building of it externally.
@@ -509,14 +556,28 @@ namespace CesiumForUnity
                     startInfo.RedirectStandardOutput = true;
                     ConfigureEnvironmentVariables(startInfo.Environment, library);
 
+                    var EM_CONFIG = "";
                     if (library.Platform == BuildTarget.WebGL)
                     {
-                        startInfo.Environment["EMSDK"] = emscriptenDir;
-                        startInfo.Environment["EM_CONFIG"] = Path.Combine(emscriptenDir, ".emscripten");
-                        var path = startInfo.Environment.ContainsKey("PATH") ? startInfo.Environment["PATH"] : "";
+                        startInfo.EnvironmentVariables["EMSDK"] = emscriptenDir;
+                        startInfo.EnvironmentVariables["EMCC_SKIP_SANITY_CHECK"] = "1";
+                        startInfo.EnvironmentVariables["EM_FROZEN_CACHE"] = "1";
+                        startInfo.EnvironmentVariables["EM_WORKAROUND_PYTHON_BUG_34780"] = "1";
+                        startInfo.EnvironmentVariables["EM_WORKAROUND_WIN7_BAD_ERRORLEVEL_BUG"] = "1";
+                        startInfo.EnvironmentVariables["PYTHONUTF8"] = "1";
+
+                        EM_CONFIG = Path.Combine(emscriptenDir, ".emscripten");
+                        startInfo.EnvironmentVariables["EM_CONFIG"] = Path.Combine(emscriptenDir, ".emscripten");
+                        startInfo.EnvironmentVariables["EM_PYTHON"] = Path.Combine(emscriptenDir, "python",
+                            (SystemInfo.operatingSystemFamily == OperatingSystemFamily.Linux) ? "python3" :
+                            (SystemInfo.operatingSystemFamily == OperatingSystemFamily.Windows) ? Path.Combine("python.exe") :
+                            (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX) ? Path.Combine("bin", "python3") :
+                            "python");
+
+                        var path = startInfo.EnvironmentVariables.ContainsKey("PATH") ? startInfo.EnvironmentVariables["PATH"] : "";
                         if (path == "")
                             path = Environment.GetEnvironmentVariable("Path");
-                        startInfo.Environment["PATH"] = $"{emscriptenDir}/emscripten;{emscriptenDir}/node;{emscriptenDir}/python;{emscriptenDir}/python/bin;{path}";
+                        startInfo.EnvironmentVariables["PATH"] = $"{emscriptenDir}/emscripten;{emscriptenDir}/node;{emscriptenDir}/python;{emscriptenDir}/python/bin;{path}";                        
                     }
 
                     List<string> args = new List<string>()
@@ -570,6 +631,9 @@ namespace CesiumForUnity
                     // builder can find the libraries.
                     if (library.Platform == BuildTarget.iOS || library.Platform == BuildTarget.WebGL)
                         AssetDatabase.Refresh();
+
+                    if (library.Platform == BuildTarget.WebGL)
+                        SetWebGLStaticLibrariesPlatform(library.InstallDirectory);
                 }
             }
             finally
