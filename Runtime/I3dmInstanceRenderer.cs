@@ -27,6 +27,7 @@ public static class MatrixUtils
         return result;
     }
 }
+[ExecuteInEditMode]
 public class I3dmInstanceRenderer : MonoBehaviour
 {
     // Instance groups prepared in the C++ cesium-unity dll

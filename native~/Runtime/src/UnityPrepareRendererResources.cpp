@@ -1501,7 +1501,7 @@ void ExtractInstanceDataFromExtMeshGpuInstancing(
         i < scaleView.size()) {
       auto scaleVec = scaleView[i];
       scale =
-          glm::dvec3(scaleVec.value[0], scaleVec.value[1], scaleVec.value[2]);
+          glm::dvec3(-scaleVec.value[0], -scaleVec.value[1], -scaleVec.value[2]);
     }
 
     // Construct the transformation matrix
@@ -1759,13 +1759,31 @@ void* UnityPrepareRendererResources::prepareInMainThread(
                 tilesetComponent.opaqueMaterial();
 
             if (opaqueMaterial == nullptr) {
-              opaqueMaterial =
-                  UnityEngine::Resources::Load<UnityEngine::Material>(
-                      System::String("CesiumDefaultTilesetMaterial"));
+              if (primitiveInfo.isUnlit) {
+                opaqueMaterial =
+                    UnityEngine::Resources::Load<UnityEngine::Material>(
+                        System::String("CesiumUnlitTilesetMaterial"));
+              } else {
+                opaqueMaterial =
+                    UnityEngine::Resources::Load<UnityEngine::Material>(
+                        System::String("CesiumDefaultTilesetMaterial"));
+              }
             }
 
             UnityEngine::Material material =
                 UnityEngine::Object::Instantiate(opaqueMaterial);
+
+            const Material* pMaterial =
+                Model::getSafe(&gltf.materials, primitive.material);
+
+              if (pMaterial) {
+              setGltfMaterialParameterValues(
+                  gltf,
+                  primitiveInfo,
+                  *pMaterial,
+                  material,
+                  materialProperties);
+            }
 
             // set shader for GPU Instancing
             material.enableInstancing(true);
