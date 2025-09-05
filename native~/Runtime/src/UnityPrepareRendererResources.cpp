@@ -1143,7 +1143,10 @@ void setGltfMaterialParameterValues(
       materialProperties.getMetallicRoughnessFactorID(),
       {(float)pbr.metallicFactor, (float)pbr.roughnessFactor, 0, 0});
 
+  // Process baseColorTexture with fallback for legacy materials
   const std::optional<TextureInfo>& baseColorTexture = pbr.baseColorTexture;
+  bool textureSet = false;
+
   if (baseColorTexture) {
     auto texCoordIndexIt =
         primitiveInfo.uvIndexMap.find(baseColorTexture->texCoord);
@@ -1158,7 +1161,33 @@ void setGltfMaterialParameterValues(
         unityMaterial.SetFloat(
             materialProperties.getBaseColorTextureCoordinateIndexID(),
             static_cast<float>(texCoordIndexIt->second));
+        textureSet = true;
       }
+    }
+  }
+
+  // Fallback: If no standard PBR baseColorTexture, try to use first available
+  // texture Only apply fallback if this primitive actually has UV coordinates
+  if (!textureSet && !model.textures.empty() &&
+      !primitiveInfo.uvIndexMap.empty()) {
+
+    // Find first available UV channel
+    int32_t fallbackUvIndex = primitiveInfo.uvIndexMap.begin()->second;
+
+    // Try to load first texture
+    UnityEngine::Texture fallbackTexture =
+        TextureLoader::loadTexture(model, 0, true);
+    if (fallbackTexture != nullptr) {
+      fallbackTexture.hideFlags(
+          DotNet::UnityEngine::HideFlags::HideAndDontSave);
+      unityMaterial.SetTexture(
+          materialProperties.getBaseColorTextureID(),
+          fallbackTexture);
+      unityMaterial.SetFloat(
+          materialProperties.getBaseColorTextureCoordinateIndexID(),
+          static_cast<float>(fallbackUvIndex));
+      textureSet = true;
+
     }
   }
 
