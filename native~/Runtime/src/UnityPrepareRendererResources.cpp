@@ -1925,18 +1925,18 @@ void* UnityPrepareRendererResources::prepareInMainThread(
                       System::String("CesiumDefaultTilesetMaterial"));
             }
           }
-        UnityEngine::Material material =
-            UnityEngine::Object::Instantiate(opaqueMaterial);
-        material.hideFlags(UnityEngine::HideFlags::HideAndDontSave);
-        meshRenderer.material(material);
-        if (pMaterial) {
-          setGltfMaterialParameterValues(
-              gltf,
-              primitiveInfo,
-              *pMaterial,
-              material,
-              materialProperties);
-        }
+          UnityEngine::Material material =
+              UnityEngine::Object::Instantiate(opaqueMaterial);
+          material.hideFlags(UnityEngine::HideFlags::HideAndDontSave);
+          meshRenderer.material(material);
+          if (pMaterial) {
+            setGltfMaterialParameterValues(
+                gltf,
+                primitiveInfo,
+                *pMaterial,
+                material,
+                materialProperties);
+          }
 
           if (primitiveInfo.containsPoints) {
             CesiumForUnity::CesiumPointCloudRenderer pointCloudRenderer =
