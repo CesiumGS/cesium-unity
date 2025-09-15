@@ -1366,6 +1366,22 @@ void* UnityPrepareRendererResources::prepareInMainThread(
     }
   }
 
+  if (tilesetComponent.generateTangents()) {
+    for (size_t i = 0; i < meshes.Length(); ++i) {
+      const UnityEngine::Mesh& mesh = meshes[i];
+      if (mesh.tangents().Length() == 0) {
+        const bool useTempVertexNormals = mesh.normals().Length() == 0;
+        if (useTempVertexNormals) {
+          mesh.RecalculateNormals();
+        }
+        mesh.RecalculateTangents();
+        if (useTempVertexNormals) {
+          mesh.normals(System::Array1<::DotNet::UnityEngine::Vector3>(nullptr));
+        }
+      }
+    }
+  }
+
   model.forEachPrimitiveInScene(
       -1,
       [&meshes,
@@ -1436,9 +1452,9 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         UnityEngine::MeshFilter meshFilter =
             primitiveGameObject.AddComponent<UnityEngine::MeshFilter>();
         meshFilter.sharedMesh(unityMesh);
-
         UnityEngine::MeshRenderer meshRenderer =
             primitiveGameObject.AddComponent<UnityEngine::MeshRenderer>();
+
 
         const Material* pMaterial =
             Model::getSafe(&gltf.materials, primitive.material);

@@ -185,6 +185,14 @@ namespace CesiumForUnity
             meshFilter.mesh = mesh;
             meshFilter.sharedMesh = mesh;
 
+            Debug.Log("Hello world");
+
+            mesh.RecalculateTangents();
+            var tangents = mesh.tangents;
+            var normals = mesh.normals;
+            mesh.RecalculateNormals();
+            
+
             Resources.Load<Material>("name");
 
             byte b;
@@ -289,6 +297,7 @@ namespace CesiumForUnity
             tileset.showCreditsOnScreen = tileset.showCreditsOnScreen;
             tileset.ionServer = tileset.ionServer;
             tileset.RecreateTileset();
+
 
             GraphicsFormat gfxFmt = GraphicsFormat.RGB_ETC_UNorm;
             FormatUsage fmtUsage = FormatUsage.Sample;
