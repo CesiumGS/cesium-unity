@@ -1365,22 +1365,22 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           *pModelMetadata);
     }
   }
-
-  if (tilesetComponent.generateTangents()) {
-    for (size_t i = 0; i < meshes.Length(); ++i) {
-      const UnityEngine::Mesh& mesh = meshes[i];
-      if (mesh.tangents().Length() == 0) {
-        const bool useTempVertexNormals = mesh.normals().Length() == 0;
-        if (useTempVertexNormals) {
-          mesh.RecalculateNormals();
-        }
-        mesh.RecalculateTangents();
-        if (useTempVertexNormals) {
-          mesh.normals(System::Array1<::DotNet::UnityEngine::Vector3>(nullptr));
-        }
-      }
-    }
-  }
+  //
+  // if (tilesetComponent.generateTangents()) {
+  //   for (size_t i = 0; i < meshes.Length(); ++i) {
+  //     const UnityEngine::Mesh& mesh = meshes[i];
+  //     if (mesh.tangents().Length() == 0) {
+  //       const bool useTempVertexNormals = mesh.normals().Length() == 0;
+  //       if (useTempVertexNormals) {
+  //         mesh.RecalculateNormals();
+  //       }
+  //       mesh.RecalculateTangents();
+  //       if (useTempVertexNormals) {
+  //         mesh.normals(System::Array1<::DotNet::UnityEngine::Vector3>(nullptr));
+  //       }
+  //     }
+  //   }
+  // }
 
   model.forEachPrimitiveInScene(
       -1,
@@ -1455,6 +1455,21 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         UnityEngine::MeshRenderer meshRenderer =
             primitiveGameObject.AddComponent<UnityEngine::MeshRenderer>();
 
+
+        if (tilesetComponent.generateTangents()) {
+          for (size_t i = 0; i < meshes.Length(); ++i) {
+            if (unityMesh.tangents().Length() == 0) {
+              const bool useTempVertexNormals = unityMesh.normals().Length() == 0;
+              if (useTempVertexNormals) {
+                unityMesh.RecalculateNormals();
+              }
+              unityMesh.RecalculateTangents();
+              if (useTempVertexNormals) {
+                unityMesh.normals(System::Array1<::DotNet::UnityEngine::Vector3>(nullptr));
+              }
+            }
+          }
+        }
 
         const Material* pMaterial =
             Model::getSafe(&gltf.materials, primitive.material);
