@@ -596,6 +596,7 @@ namespace CesiumForUnity
                     {
                         args.Insert(0, "cmake");
                         args.Add("-DBUILD_SHARED_LIB=OFF");
+                        args.Add("-DCESIUM_ENABLE_CLANG_TIDY=OFF");
                         var generatedInclude = Path.Combine(library.SourceDirectory, "Runtime", library.GeneratedDirectoryName, "include");
                         args.Add($"-DCMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES=\"{generatedInclude}\"");
                     }

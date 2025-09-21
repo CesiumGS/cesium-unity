@@ -281,6 +281,7 @@ namespace CesiumForUnity
             //tileset.useLodTransitions = tileset.useLodTransitions;
             //tileset.lodTransitionLength = tileset.lodTransitionLength;
             tileset.generateSmoothNormals = tileset.generateSmoothNormals;
+            tileset.ignoreKhrMaterialsUnlit = tileset.ignoreKhrMaterialsUnlit;
             tileset.createPhysicsMeshes = tileset.createPhysicsMeshes;
             tileset.suspendUpdate = tileset.suspendUpdate;
             tileset.previousSuspendUpdate = tileset.previousSuspendUpdate;
@@ -496,7 +497,7 @@ namespace CesiumForUnity
             credits.Add(credit);
             credits.Clear();
 
-            if (!creditSystem.HasLoadingImages())
+            if (creditSystem.GetNumberOfLoadingImages() == 0)
             {
                 creditSystem.BroadcastCreditsUpdate();
             }
@@ -950,3 +951,4 @@ namespace CesiumForUnity
         }
     }
 }
+
