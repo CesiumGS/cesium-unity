@@ -4,6 +4,7 @@ using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.IO;
 using System.Text;
 using System;
@@ -487,6 +488,24 @@ namespace CesiumForUnity
             AssetDatabase.StopAssetEditing();
         }
 
+        internal static string GetTemporaryDirectory()
+        {
+            string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            if (Directory.Exists(tempDirectory))
+                return GetTemporaryDirectory();
+            Directory.CreateDirectory(tempDirectory);
+            return tempDirectory;
+        }
+
+        private static void CopyFilesRecursively(string sourcePath, string targetPath)
+        {
+            foreach (string dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
+                Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
+
+            foreach (string newPath in Directory.GetFiles(sourcePath, "*.*",SearchOption.AllDirectories))
+                File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
+        }
+
 
         internal static void BuildNativeLibrary(LibraryToBuild library)
         {
@@ -516,6 +535,27 @@ namespace CesiumForUnity
                             return;
                         }
                     }
+                }
+
+                if (emscriptenDir.Contains(' '))
+                {
+                    // Some ezvcpkg libraries fail to build if the path to compilation tools contains spaces.
+                    // So copy the Emscripten directory to a temporary directory that doesn't contain spaces.
+                    // Ideally this would be done with a symbolic link, but Windows requires elevated privileges to create those.
+                    // TODO: The temp directory isn't automatically cleaned up.
+                    // TODO: The temp directory itself may have a space in it if the user's name or custom temp path contains spaces.
+                    string tempDirectory = GetTemporaryDirectory();
+                    string tempEmscriptenDir = Path.Combine(tempDirectory, "Emscripten");
+
+                    if (tempEmscriptenDir.Contains(' '))
+                        UnityEngine.Debug.LogWarning($"Temporary Emscripten directory contains spaces: {tempEmscriptenDir}. Build will likely fail.");
+                    else
+                        UnityEngine.Debug.LogWarning($"Copying Emscripten from '{emscriptenDir}' to '{tempEmscriptenDir}' to avoid spaces in path.");
+
+                    CopyFilesRecursively(emscriptenDir, tempEmscriptenDir);
+                    emscriptenDir = tempEmscriptenDir;
+
+                    
                 }
             }
 
