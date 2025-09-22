@@ -542,15 +542,18 @@ namespace CesiumForUnity
                     // Some ezvcpkg libraries fail to build if the path to compilation tools contains spaces.
                     // So copy the Emscripten directory to a temporary directory that doesn't contain spaces.
                     // Ideally this would be done with a symbolic link, but Windows requires elevated privileges to create those.
+                    // The temp directory itself may have a space in it if the userid or custom temp path contains spaces.
                     // TODO: The temp directory isn't automatically cleaned up.
-                    // TODO: The temp directory itself may have a space in it if the user's name or custom temp path contains spaces.
                     string tempDirectory = GetTemporaryDirectory();
                     string tempEmscriptenDir = Path.Combine(tempDirectory, "Emscripten");
 
                     if (tempEmscriptenDir.Contains(' '))
-                        UnityEngine.Debug.LogWarning($"Temporary Emscripten directory contains spaces: {tempEmscriptenDir}. Build will likely fail.");
-                    else
-                        UnityEngine.Debug.LogWarning($"Copying Emscripten from '{emscriptenDir}' to '{tempEmscriptenDir}' to avoid spaces in path.");
+                    {
+                        UnityEngine.Debug.LogError($"Temporary Emscripten directory contains spaces: {tempEmscriptenDir}. Build will fail. Set the system environment variable TEMP to a path without spaces.");
+                        return;
+                    }
+
+                    UnityEngine.Debug.LogWarning($"Copying Emscripten from '{emscriptenDir}' to '{tempEmscriptenDir}' to avoid spaces in path.");
 
                     CopyFilesRecursively(emscriptenDir, tempEmscriptenDir);
                     emscriptenDir = tempEmscriptenDir;
