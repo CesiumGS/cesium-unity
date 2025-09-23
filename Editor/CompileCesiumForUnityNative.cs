@@ -506,13 +506,13 @@ namespace CesiumForUnity
                 File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
         }
 
-
         internal static void BuildNativeLibrary(LibraryToBuild library)
         {
             // Comment the below line to skip building the native library for Web, allowing for manual building of it externally.
             //if (library.Platform == BuildTarget.WebGL) return;
 
             var emscriptenDir = "";
+            var deleteTemporaryEmscriptenDir = false;
 
             if (library.Platform == BuildTarget.WebGL)
             {
@@ -543,7 +543,7 @@ namespace CesiumForUnity
                     // So copy the Emscripten directory to a temporary directory that doesn't contain spaces.
                     // Ideally this would be done with a symbolic link, but Windows requires elevated privileges to create those.
                     // The temp directory itself may have a space in it if the userid or custom temp path contains spaces.
-                    // TODO: The temp directory isn't automatically cleaned up.
+                    // NOTE: using windows short names (e.g. C:\Progra~1) did not work as the paths got expanded by the build system.
                     string tempDirectory = GetTemporaryDirectory();
                     string tempEmscriptenDir = Path.Combine(tempDirectory, "Emscripten");
 
@@ -557,8 +557,7 @@ namespace CesiumForUnity
 
                     CopyFilesRecursively(emscriptenDir, tempEmscriptenDir);
                     emscriptenDir = tempEmscriptenDir;
-
-                    
+                    deleteTemporaryEmscriptenDir = true;
                 }
             }
 
@@ -610,7 +609,7 @@ namespace CesiumForUnity
                         startInfo.EnvironmentVariables["PYTHONUTF8"] = "1";
 
                         EM_CONFIG = Path.Combine(emscriptenDir, ".emscripten");
-                        startInfo.EnvironmentVariables["EM_CONFIG"] = Path.Combine(emscriptenDir, ".emscripten");
+                        startInfo.EnvironmentVariables["EM_CONFIG"] = EM_CONFIG;
                         startInfo.EnvironmentVariables["EM_PYTHON"] = Path.Combine(emscriptenDir, "python",
                             (SystemInfo.operatingSystemFamily == OperatingSystemFamily.Linux) ? "python3" :
                             (SystemInfo.operatingSystemFamily == OperatingSystemFamily.Windows) ? Path.Combine("python.exe") :
@@ -620,7 +619,8 @@ namespace CesiumForUnity
                         var path = startInfo.EnvironmentVariables.ContainsKey("PATH") ? startInfo.EnvironmentVariables["PATH"] : "";
                         if (path == "")
                             path = Environment.GetEnvironmentVariable("Path");
-                        startInfo.EnvironmentVariables["PATH"] = $"{emscriptenDir}/emscripten;{emscriptenDir}/node;{emscriptenDir}/python;{emscriptenDir}/python/bin;{path}";                        
+                        startInfo.EnvironmentVariables["PATH"] = $"{emscriptenDir}/emscripten;{emscriptenDir}/node;{emscriptenDir}/python;{emscriptenDir}/python/bin;{path}";
+                        UnityEngine.Debug.Log($"!!!! EM_CONFIG: {EM_CONFIG}");
                     }
 
                     List<string> args = new List<string>()
@@ -683,6 +683,17 @@ namespace CesiumForUnity
             finally
             {
                 EditorUtility.ClearProgressBar();
+                if (deleteTemporaryEmscriptenDir)
+                {
+                    try
+                    {
+                        Directory.Delete(emscriptenDir, true);
+                    }
+                    catch (Exception)
+                    {
+                        // Ignore any errors here.
+                    }
+                }
             }
         }
 
