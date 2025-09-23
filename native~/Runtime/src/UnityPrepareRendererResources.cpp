@@ -457,11 +457,6 @@ void loadPrimitive(
   using namespace DotNet::Unity::Collections;
   using namespace DotNet::Unity::Collections::LowLevel::Unsafe;
 
-  static bool earlyOut = false;
-  if (earlyOut) {
-    return;
-  }
-
   CESIUM_TRACE("Cesium::loadPrimitive<T>");
   int32_t indexCount = 0;
   switch (primitive.mode) {
