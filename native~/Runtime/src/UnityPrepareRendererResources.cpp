@@ -849,7 +849,7 @@ void loadPrimitive(
             pBufferStart + colorByteOffset,
             stride,
             static_cast<size_t>(vertexCount),
-            computeFlatNormals,
+            duplicateVertices,
             indices});
   }
 
