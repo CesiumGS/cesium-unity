@@ -17,10 +17,18 @@ struct CreateModelOptions {
    */
   bool ignoreKhrMaterialUnlit = false;
 
+  /*
+   * Whether to include tangents in the vertex buffer. If tangents are not
+   * present in the source glTF, they will be generated via the mikktspace
+   * algorithm.
+   */
+  bool alwaysIncludeTangents = false;
+
   CreateModelOptions() = default;
   explicit CreateModelOptions(
       const DotNet::CesiumForUnity::Cesium3DTileset& tilesetComponent)
-      : ignoreKhrMaterialUnlit(tilesetComponent.ignoreKhrMaterialsUnlit()) {}
+      : ignoreKhrMaterialUnlit(tilesetComponent.ignoreKhrMaterialsUnlit()),
+  alwaysIncludeTangents(tilesetComponent.alwaysIncludeTangents()) {}
 };
 /**
  * @brief Information about how a given glTF primitive was converted into
