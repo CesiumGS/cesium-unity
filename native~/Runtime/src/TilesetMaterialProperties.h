@@ -85,9 +85,6 @@ public:
   const int32_t getOcclusionTextureRotationID() const noexcept {
     return this->_occlusionTextureRotationID;
   }
-  const int32_t getComputeFlatNormalsID() const noexcept {
-    return this->_computeFlatNormalsID;
-  }
 
   const std::optional<int32_t>
   getOverlayTextureCoordinateIndexID(const std::string& key) const noexcept;
