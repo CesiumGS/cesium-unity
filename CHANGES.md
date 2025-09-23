@@ -1,5 +1,11 @@
 # Change Log
 
+## ? - ?
+
+##### Additions :tada:
+
+- When missing and required, tangents will be generated on the CPU. 
+
 ## v1.18.0 - 2025-09-02
 
 ##### Additions :tada:

@@ -433,7 +433,7 @@ namespace CesiumForUnity
 
             var alwaysIncludeTangents = new GUIContent(
                 "Always Include Tangents",
-                "Whether to generate tangents when they are missing from the glTF." +
+                "Whether to generate tangents when they are missing from the glTF. " +
                 "According to the glTF spec: \"When tangents are not specified, client " +
                 "implementations SHOULD calculate tangents using default MikkTSpace algorithms " +
                 "with the specified vertex positions, normals, and texture coordinates " +
