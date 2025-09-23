@@ -72,7 +72,6 @@
 #include <glm/gtc/quaternion.hpp>
 #include <mikktspace.h>
 
-
 #include <algorithm>
 #include <array>
 #include <unordered_map>
@@ -131,8 +130,7 @@ void computeFlatNormals(
   }
 }
 
-namespace
-{
+namespace {
 
 struct MikkTPayload {
   int numIndices;
@@ -164,7 +162,6 @@ struct MikkTPayload {
     tan.z = tangent[2];
     tan.w = sign;
   }
-
 };
 
 int mikkGetNumFaces(const SMikkTSpaceContext* context) {
@@ -172,15 +169,18 @@ int mikkGetNumFaces(const SMikkTSpaceContext* context) {
   return payload.numIndices / 3;
 }
 
-int mikkGetNumVerticesOfFaces(const SMikkTSpaceContext* context, const int face) {
+int mikkGetNumVerticesOfFaces(
+    const SMikkTSpaceContext* context,
+    const int face) {
   const auto& payload = *reinterpret_cast<MikkTPayload*>(context->m_pUserData);
   return face < payload.numIndices / 3 ? 3 : 0;
 }
 
-void mikkGetPosition(const SMikkTSpaceContext* context,
-  float position[3],
-  const int face,
-  const int vert) {
+void mikkGetPosition(
+    const SMikkTSpaceContext* context,
+    float position[3],
+    const int face,
+    const int vert) {
 
   const auto& payload = *reinterpret_cast<MikkTPayload*>(context->m_pUserData);
   auto& pos = payload.getPosition(face * 3 + vert);
@@ -190,10 +190,11 @@ void mikkGetPosition(const SMikkTSpaceContext* context,
   position[2] = pos.z;
 }
 
-void mikkGetNormal(const SMikkTSpaceContext* context,
-  float normal[3],
-  const int face,
-  const int vert) {
+void mikkGetNormal(
+    const SMikkTSpaceContext* context,
+    float normal[3],
+    const int face,
+    const int vert) {
   const auto& payload = *reinterpret_cast<MikkTPayload*>(context->m_pUserData);
 
   const auto& norm = payload.getNormal(face * 3 + vert);
@@ -202,10 +203,11 @@ void mikkGetNormal(const SMikkTSpaceContext* context,
   normal[2] = norm.z;
 }
 
-void mikkGetTexCoords(const SMikkTSpaceContext* context,
-  float uv[2],
-  const int face,
-  const int vert) {
+void mikkGetTexCoords(
+    const SMikkTSpaceContext* context,
+    float uv[2],
+    const int face,
+    const int vert) {
 
   const auto& payload = *reinterpret_cast<MikkTPayload*>(context->m_pUserData);
   const auto& texCoord = payload.getTexCoord(face * 3 + vert);
@@ -213,15 +215,15 @@ void mikkGetTexCoords(const SMikkTSpaceContext* context,
   uv[1] = texCoord.y;
 }
 
-void mikkSetTSpaceBasic(const SMikkTSpaceContext* context,
-  const float tangent[3],
-  const float sign,
-  const int face,
-  const int vert) {
+void mikkSetTSpaceBasic(
+    const SMikkTSpaceContext* context,
+    const float tangent[3],
+    const float sign,
+    const int face,
+    const int vert) {
   auto& payload = *reinterpret_cast<MikkTPayload*>(context->m_pUserData);
   payload.setTangent(face * 3 + vert, tangent, sign);
 }
-
 
 template <typename TIndex>
 void computeTangents(
@@ -231,8 +233,7 @@ void computeTangents(
     uint8_t* positions,
     uint8_t* normals,
     uint8_t* texCoords,
-    uint8_t* tangents
-    ) {
+    uint8_t* tangents) {
   SMikkTSpaceInterface interface {};
   interface.m_getNormal = mikkGetNormal;
   interface.m_getNumFaces = mikkGetNumFaces;
@@ -241,7 +242,7 @@ void computeTangents(
   interface.m_getTexCoord = mikkGetTexCoords;
   interface.m_setTSpaceBasic = mikkSetTSpaceBasic;
 
-  MikkTPayload payload {};
+  MikkTPayload payload{};
   payload.stride = stride;
   payload.numIndices = numIndices;
   payload.positions = positions;
@@ -249,13 +250,13 @@ void computeTangents(
   payload.texCoords = texCoords;
   payload.tangents = tangents;
 
-  SMikkTSpaceContext context {};
+  SMikkTSpaceContext context{};
   context.m_pInterface = &interface;
   context.m_pUserData = &payload;
 
   genTangSpaceDefault(&context);
 }
-}
+} // namespace
 
 /**
  * @brief The result after populating Unity mesh data with loaded glTF content.
@@ -507,14 +508,16 @@ void loadPrimitive(
 
   bool hasTangents = false;
   bool computeTangents = false;
-  auto tangentAccessorIt =  primitive.attributes.find("TANGENT");
-  AccessorView<UnityEngine::Vector4> tangentView {};
+  auto tangentAccessorIt = primitive.attributes.find("TANGENT");
+  AccessorView<UnityEngine::Vector4> tangentView{};
   if (tangentAccessorIt != primitive.attributes.end()) {
     int tangentAccessorId = tangentAccessorIt->second;
     tangentView = AccessorView<UnityEngine::Vector4>(gltf, tangentAccessorId);
     hasTangents = tangentView.status() == AccessorViewStatus::Valid;
-  } else if (!primitiveInfo.isUnlit && primitive.mode != MeshPrimitive::Mode::POINTS) {
-    computeTangents = hasTangents = options.alwaysIncludeTangents || pMaterial->normalTexture;
+  } else if (
+      !primitiveInfo.isUnlit && primitive.mode != MeshPrimitive::Mode::POINTS) {
+    computeTangents = hasTangents =
+        options.alwaysIncludeTangents || pMaterial->normalTexture;
     duplicateVertices |= computeTangents;
   }
 
@@ -797,18 +800,18 @@ void loadPrimitive(
         *reinterpret_cast<Vector2*>(pWritePos) =
             texCoordViews[texCoordIndex][vertexIndex];
         pWritePos += sizeof(Vector2);
-           }
+      }
     }
 
     if (computeTangents) {
       ::computeTangents(
-        stride,
-        indices,
-        indexCount,
-        pBufferStart,
-        pBufferStart + normalByteOffset,
-        pBufferStart + texCoordByteOffset,
-        pBufferStart + tangentByteOffset);
+          stride,
+          indices,
+          indexCount,
+          pBufferStart,
+          pBufferStart + normalByteOffset,
+          pBufferStart + texCoordByteOffset,
+          pBufferStart + tangentByteOffset);
     }
 
   } else {

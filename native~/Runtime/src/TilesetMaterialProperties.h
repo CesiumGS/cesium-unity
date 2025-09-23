@@ -85,6 +85,9 @@ public:
   const int32_t getOcclusionTextureRotationID() const noexcept {
     return this->_occlusionTextureRotationID;
   }
+  const int32_t getComputeFlatNormalsID() const noexcept {
+    return this->_computeFlatNormalsID;
+  }
 
   const std::optional<int32_t>
   getOverlayTextureCoordinateIndexID(const std::string& key) const noexcept;
@@ -128,6 +131,8 @@ private:
   int32_t _normalMapTextureRotationID;
   int32_t _occlusionTextureRotationID;
 
+  int32_t _computeFlatNormalsID;
+
   std::unordered_map<std::string, int32_t> _overlayTextureCoordinateIndexIDs;
   std::unordered_map<std::string, int32_t> _overlayTextureIDs;
   std::unordered_map<std::string, int32_t> _overlayTranslationAndScaleIDs;
@@ -166,6 +171,8 @@ private:
   static const std::string _overlayTexturePrefix;
   static const std::string _overlayTextureCoordinateIndexPrefix;
   static const std::string _overlayTranslationAndScalePrefix;
+
+  static const std::string _computeFlatNormalsName;
 };
 
 } // namespace CesiumForUnityNative
