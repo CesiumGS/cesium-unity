@@ -70,6 +70,8 @@
 #include <DotNet/UnityEngine/Vector4.h>
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <mikktspace.h>
+
 
 #include <algorithm>
 #include <array>
@@ -131,34 +133,61 @@ void computeFlatNormals(
 
 namespace
 {
-#include <mikktspace.h>
 
 struct MikkTPayload {
-  int numVertices;
   int numIndices;
   size_t stride;
   uint8_t* positions;
   uint8_t* normals;
-  uint8_t* tangents;
   uint8_t* texCoords;
+  uint8_t* tangents;
+
+  glm::vec3& getPosition(const int vert) const {
+    uint8_t* ptr = &positions[vert * stride];
+    return *reinterpret_cast<glm::vec3*>(ptr);
+  }
+
+  glm::vec3& getNormal(const int vert) const {
+    uint8_t* ptr = &normals[vert * stride];
+    return *reinterpret_cast<glm::vec3*>(ptr);
+  }
+
+  glm::vec2& getTexCoord(const int vert) const {
+    uint8_t* ptr = &texCoords[vert * stride];
+    return *reinterpret_cast<glm::vec2*>(ptr);
+  }
+
+  void setTangent(const int vert, const float tangent[4], const float sign) {
+    glm::vec4& tan = *reinterpret_cast<glm::vec4*>(tangents + vert * stride);
+    tan.x = tangent[0];
+    tan.y = tangent[1];
+    tan.z = tangent[2];
+    tan.w = sign;
+  }
+
 };
 
 int mikkGetNumFaces(const SMikkTSpaceContext* context) {
   const auto& payload = *reinterpret_cast<MikkTPayload*>(context->m_pUserData);
-  return -1;
+  return payload.numIndices / 3;
 }
 
 int mikkGetNumVerticesOfFaces(const SMikkTSpaceContext* context, const int face) {
   const auto& payload = *reinterpret_cast<MikkTPayload*>(context->m_pUserData);
-  return -1;
+  return face < payload.numIndices / 3 ? 3 : 0;
 }
 
 void mikkGetPosition(const SMikkTSpaceContext* context,
   float position[3],
   const int face,
   const int vert) {
-  const auto& payload = *reinterpret_cast<MikkTPayload*>(context->m_pUserData);
 
+  const auto& payload = *reinterpret_cast<MikkTPayload*>(context->m_pUserData);
+  auto& pos = payload.getPosition(face * 3 + vert);
+
+  position[0] = pos.x;
+  position[1] = pos.y;
+  position[2] = pos.z;
 }
 
 void mikkGetNormal(const SMikkTSpaceContext* context,
@@ -167,14 +196,21 @@ void mikkGetNormal(const SMikkTSpaceContext* context,
   const int vert) {
   const auto& payload = *reinterpret_cast<MikkTPayload*>(context->m_pUserData);
 
+  const auto& norm = payload.getNormal(face * 3 + vert);
+  normal[0] = norm.x;
+  normal[1] = norm.y;
+  normal[2] = norm.z;
 }
 
 void mikkGetTexCoords(const SMikkTSpaceContext* context,
   float uv[2],
   const int face,
   const int vert) {
-  const auto& payload = *reinterpret_cast<MikkTPayload*>(context->m_pUserData);
 
+  const auto& payload = *reinterpret_cast<MikkTPayload*>(context->m_pUserData);
+  const auto& texCoord = payload.getTexCoord(face * 3 + vert);
+  uv[0] = texCoord.x;
+  uv[1] = texCoord.y;
 }
 
 void mikkSetTSpaceBasic(const SMikkTSpaceContext* context,
@@ -182,8 +218,8 @@ void mikkSetTSpaceBasic(const SMikkTSpaceContext* context,
   const float sign,
   const int face,
   const int vert) {
-  const auto& payload = *reinterpret_cast<MikkTPayload*>(context->m_pUserData);
-
+  auto& payload = *reinterpret_cast<MikkTPayload*>(context->m_pUserData);
+  payload.setTangent(face * 3 + vert, tangent, sign);
 }
 
 
@@ -191,14 +227,12 @@ template <typename TIndex>
 void computeTangents(
     const size_t stride,
     const TIndex* indices,
-    const int32_t indexCount,
+    const int32_t numIndices,
     uint8_t* positions,
     uint8_t* normals,
     uint8_t* texCoords,
     uint8_t* tangents
     ) {
-
-#if true
   SMikkTSpaceInterface interface {};
   interface.m_getNormal = mikkGetNormal;
   interface.m_getNumFaces = mikkGetNumFaces;
@@ -209,37 +243,18 @@ void computeTangents(
 
   MikkTPayload payload {};
   payload.stride = stride;
-  payload.numVertices = indexCount;
+  payload.numIndices = numIndices;
   payload.positions = positions;
   payload.normals = normals;
   payload.texCoords = texCoords;
-
-  /*
-   *TODO:
-   *Modify the mikk*() functions to retrieve data as required from the
-   *buffers referenced via uint8_t* pointers in the Payload struct
-   */
+  payload.tangents = tangents;
 
   SMikkTSpaceContext context {};
   context.m_pInterface = &interface;
   context.m_pUserData = &payload;
 
   genTangSpaceDefault(&context);
-
-#else
-
-  static bool earlyOut = true;
-  if (earlyOut)
-    return;
-
-  for (int i=0; i < indexCount; i ++) {
-    *reinterpret_cast<glm::vec4*>(pWritePos) = glm::vec4 {1.0f, 0.0f, 1.0f, 1.0f };
-    pWritePos += stride;
-  }
-#endif
-
 }
-
 }
 
 /**
@@ -752,16 +767,6 @@ void loadPrimitive(
           indexCount,
           positionView);
     }
-    if (computeTangents) {
-      ::computeTangents(
-        stride,
-        indices,
-        indexCount,
-        pWritePos,
-        pWritePos + normalByteOffset,
-        pWritePos + texCoordByteOffset,
-        pWritePos + tangentByteOffset);
-    }
     for (int64_t i = 0; i < vertexCount; ++i) {
       TIndex vertexIndex = indices[i];
       *reinterpret_cast<Vector3*>(pWritePos) = positionView[vertexIndex];
@@ -794,6 +799,18 @@ void loadPrimitive(
         pWritePos += sizeof(Vector2);
            }
     }
+
+    if (computeTangents) {
+      ::computeTangents(
+        stride,
+        indices,
+        indexCount,
+        pBufferStart,
+        pBufferStart + normalByteOffset,
+        pBufferStart + texCoordByteOffset,
+        pBufferStart + tangentByteOffset);
+    }
+
   } else {
     for (int64_t i = 0; i < vertexCount; ++i) {
       *reinterpret_cast<Vector3*>(pWritePos) = positionView[i];
