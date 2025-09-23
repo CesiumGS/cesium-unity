@@ -83,8 +83,6 @@ const std::string
 const std::string TilesetMaterialProperties::_overlayTranslationAndScalePrefix =
     "_overlayTranslationAndScale_";
 
-const std::string TilesetMaterialProperties::_computeFlatNormalsName =
-    "_computeFlatNormals";
 #pragma endregion
 
 TilesetMaterialProperties::TilesetMaterialProperties()
@@ -134,8 +132,6 @@ TilesetMaterialProperties::TilesetMaterialProperties()
           Shader::PropertyToID(System::String(_normalMapTextureRotationName))),
       _occlusionTextureRotationID(
           Shader::PropertyToID(System::String(_occlusionTextureRotationName))),
-      _computeFlatNormalsID(
-          Shader::PropertyToID(System::String(_computeFlatNormalsName))),
       _overlayTextureCoordinateIndexIDs(),
       _overlayTextureIDs(),
       _overlayTranslationAndScaleIDs() {}
