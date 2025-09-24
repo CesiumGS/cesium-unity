@@ -135,28 +135,28 @@ namespace {
 struct MikkTPayload {
   int numIndices;
   size_t stride;
-  uint8_t* positions;
-  uint8_t* normals;
-  uint8_t* texCoords;
-  uint8_t* tangents;
+  uint8_t* pPositionData;
+  uint8_t* pNormalData;
+  uint8_t* pTexCoordData;
+  uint8_t* pTangentData;
 
   glm::vec3& getPosition(const int vert) const {
-    uint8_t* ptr = &positions[vert * stride];
+    uint8_t* ptr = &pPositionData[vert * stride];
     return *reinterpret_cast<glm::vec3*>(ptr);
   }
 
   glm::vec3& getNormal(const int vert) const {
-    uint8_t* ptr = &normals[vert * stride];
+    uint8_t* ptr = &pNormalData[vert * stride];
     return *reinterpret_cast<glm::vec3*>(ptr);
   }
 
   glm::vec2& getTexCoord(const int vert) const {
-    uint8_t* ptr = &texCoords[vert * stride];
+    uint8_t* ptr = &pTexCoordData[vert * stride];
     return *reinterpret_cast<glm::vec2*>(ptr);
   }
 
   void setTangent(const int vert, const float tangent[4], const float sign) {
-    glm::vec4& tan = *reinterpret_cast<glm::vec4*>(tangents + vert * stride);
+    glm::vec4& tan = *reinterpret_cast<glm::vec4*>(pTangentData + vert * stride);
     tan.x = tangent[0];
     tan.y = tangent[1];
     tan.z = tangent[2];
@@ -245,10 +245,10 @@ void computeTangents(
   MikkTPayload payload{};
   payload.stride = stride;
   payload.numIndices = numIndices;
-  payload.positions = positions;
-  payload.normals = normals;
-  payload.texCoords = texCoords;
-  payload.tangents = tangents;
+  payload.pPositionData = positions;
+  payload.pNormalData = normals;
+  payload.pTexCoordData = texCoords;
+  payload.pTangentData = tangents;
 
   SMikkTSpaceContext context{};
   context.m_pInterface = &interface;
@@ -772,14 +772,14 @@ void loadPrimitive(
       pWritePos += sizeof(Vector3);
       // load normal from view or reserve space
       if (hasNormals) {
-        if (normalView.size() > vertexIndex) {
+        if (vertexIndex < normalView.size()) {
           *reinterpret_cast<Vector3*>(pWritePos) = normalView[vertexIndex];
         }
         pWritePos += sizeof(Vector3);
       }
       // load tangent from view or reserve space
       if (hasTangents) {
-        if (tangentView.size() > vertexIndex) {
+        if (vertexIndex < tangentView.size()) {
           *reinterpret_cast<Vector4*>(pWritePos) = tangentView[vertexIndex];
         }
         pWritePos += sizeof(Vector4);

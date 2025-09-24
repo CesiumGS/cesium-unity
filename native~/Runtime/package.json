@@ -28,8 +28,4 @@
   "devDependencies": {
     "clang-format": "^1.5.0"
   },
-  "dependencies": {
-    "clang-tidy": "^19.1.1",
-    "format": "^0.2.2"
-  }
 }
