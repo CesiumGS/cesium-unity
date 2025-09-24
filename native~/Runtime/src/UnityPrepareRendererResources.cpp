@@ -156,7 +156,8 @@ struct MikkTPayload {
   }
 
   void setTangent(const int vert, const float tangent[4], const float sign) {
-    glm::vec4& tan = *reinterpret_cast<glm::vec4*>(pTangentData + vert * stride);
+    glm::vec4& tan =
+        *reinterpret_cast<glm::vec4*>(pTangentData + vert * stride);
     tan.x = tangent[0];
     tan.y = tangent[1];
     tan.z = tangent[2];
@@ -234,7 +235,7 @@ void computeTangents(
     uint8_t* normals,
     uint8_t* texCoords,
     uint8_t* tangents) {
-  SMikkTSpaceInterface interface{};
+  SMikkTSpaceInterface interface {};
   interface.m_getNormal = mikkGetNormal;
   interface.m_getNumFaces = mikkGetNumFaces;
   interface.m_getNumVerticesOfFace = mikkGetNumVerticesOfFaces;
