@@ -733,7 +733,7 @@ void loadPrimitive(
   // 5. texcoords (first all TEXCOORD_i, then all _CESIUMOVERLAY_i)
 
   size_t stride = sizeof(Vector3);
-  size_t normalByteOffset, colorByteOffset;
+  size_t normalByteOffset;
   if (hasNormals) {
     normalByteOffset = stride;
     stride += sizeof(Vector3);
@@ -745,6 +745,7 @@ void loadPrimitive(
     stride += sizeof(Vector4);
   }
 
+  size_t colorByteOffset;
   if (hasVertexColors) {
     colorByteOffset = stride;
     stride += sizeof(uint32_t);
