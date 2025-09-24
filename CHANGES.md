@@ -4,7 +4,7 @@
 
 ##### Additions :tada:
 
-- When missing and required, tangents will be generated on the CPU. 
+- Added an option to `Cesium3DTileset` to enable tangent generation on the CPU for any tiles that are missing them. 
 
 ## v1.18.0 - 2025-09-02
 
