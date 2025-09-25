@@ -110,7 +110,7 @@ struct MikkTPayload {
   uint8_t* pNormalData;
   uint8_t* pTexCoordData;
   uint8_t* pTangentData;
-  std::unordered_map<int,glm::vec3> normalCache;
+  std::unordered_map<int, glm::vec3> normalCache;
 
   glm::vec3& getPosition(const int vert) const {
     uint8_t* ptr = &pPositionData[vert * stride];
@@ -128,13 +128,15 @@ struct MikkTPayload {
       if (normalCache.contains(i0))
         return normalCache[i0];
       else {
-        assert(i0+2 < numIndices && "Not enough vertices. Is this an indexed model?");
+        assert(
+            i0 + 2 < numIndices && "Not enough vertices. Model must be "
+                                   "non-indexed to use this function.");
         glm::vec3& v0 = getPosition(i0);
         glm::vec3& v1 = getPosition(i0 + 1);
         glm::vec3& v2 = getPosition(i0 + 2);
 
         glm::vec3 normal = glm::normalize(glm::cross(v1 - v0, v2 - v0));
-        normalCache.insert({i0,normal});
+        normalCache.insert({i0, normal});
 
         return normal;
       }
@@ -226,7 +228,7 @@ void computeTangents(
     uint8_t* normals,
     uint8_t* texCoords,
     uint8_t* tangents) {
-  SMikkTSpaceInterface interface{};
+  SMikkTSpaceInterface interface {};
   interface.m_getNormal = mikkGetNormal;
   interface.m_getNumFaces = mikkGetNumFaces;
   interface.m_getNumVerticesOfFace = mikkGetNumVerticesOfFaces;
@@ -1395,10 +1397,11 @@ void setGltfMaterialParameterValues(
     }
   }
 
-  const float computeFlatNormals = !primitiveInfo.isUnlit && !primitiveInfo.hasNormals;
+  const float computeFlatNormals =
+      !primitiveInfo.isUnlit && !primitiveInfo.hasNormals;
   unityMaterial.SetFloat(
-    materialProperties.getComputeFlatNormalsID(),
-     computeFlatNormals);
+      materialProperties.getComputeFlatNormalsID(),
+      computeFlatNormals);
 
   if (gltfMaterial.occlusionTexture) {
     auto texCoordIndexIt =
