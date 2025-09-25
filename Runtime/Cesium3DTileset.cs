@@ -590,6 +590,27 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
+        private bool _alwaysIncludeTangents = false;
+        /// <summary>
+        /// Whether to generate tangents when they are missing from the glTF. 
+        /// </summary>
+        /// <remarks>
+        /// According to the glTF spec: "When tangents are not specified, client 
+        /// implementations SHOULD calculate tangents using default MikkTSpace algorithms 
+        /// with the specified vertex positions, normals, and texture coordinates 
+        /// associated with the normal texture."
+        /// </remarks>
+        public bool alwaysIncludeTangents
+        {
+            get => this._alwaysIncludeTangents;
+            set
+            {
+                this._alwaysIncludeTangents = value;
+                this.RecreateTileset();
+            }
+        }
+
+        [SerializeField]
         private bool _ignoreKhrMaterialsUnlit = false;
 
         /// <summary>

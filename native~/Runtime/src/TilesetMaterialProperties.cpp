@@ -82,6 +82,7 @@ const std::string
         "_overlayTextureCoordinateIndex_";
 const std::string TilesetMaterialProperties::_overlayTranslationAndScalePrefix =
     "_overlayTranslationAndScale_";
+
 #pragma endregion
 
 TilesetMaterialProperties::TilesetMaterialProperties()

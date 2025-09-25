@@ -70,6 +70,7 @@
 #include <DotNet/UnityEngine/Vector4.h>
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <mikktspace.h>
 
 #include <algorithm>
 #include <array>
@@ -109,7 +110,6 @@ void computeFlatNormals(
     const AccessorView<UnityEngine::Vector3>& positionView) {
 
   for (int i = 0; i < indexCount; i += 3) {
-
     TIndex i0 = indices[i];
     TIndex i1 = indices[i + 1];
     TIndex i2 = indices[i + 2];
@@ -128,6 +128,135 @@ void computeFlatNormals(
     }
   }
 }
+
+namespace {
+
+struct MikkTPayload {
+  int numIndices;
+  size_t stride;
+  uint8_t* pPositionData;
+  uint8_t* pNormalData;
+  uint8_t* pTexCoordData;
+  uint8_t* pTangentData;
+
+  glm::vec3& getPosition(const int vert) const {
+    uint8_t* ptr = &pPositionData[vert * stride];
+    return *reinterpret_cast<glm::vec3*>(ptr);
+  }
+
+  glm::vec3& getNormal(const int vert) const {
+    uint8_t* ptr = &pNormalData[vert * stride];
+    return *reinterpret_cast<glm::vec3*>(ptr);
+  }
+
+  glm::vec2& getTexCoord(const int vert) const {
+    uint8_t* ptr = &pTexCoordData[vert * stride];
+    return *reinterpret_cast<glm::vec2*>(ptr);
+  }
+
+  void setTangent(const int vert, const float tangent[4], const float sign) {
+    glm::vec4& tan =
+        *reinterpret_cast<glm::vec4*>(pTangentData + vert * stride);
+    tan.x = tangent[0];
+    tan.y = tangent[1];
+    tan.z = tangent[2];
+    tan.w = sign;
+  }
+};
+
+int mikkGetNumFaces(const SMikkTSpaceContext* context) {
+  const auto& payload = *reinterpret_cast<MikkTPayload*>(context->m_pUserData);
+  return payload.numIndices / 3;
+}
+
+int mikkGetNumVerticesOfFaces(
+    const SMikkTSpaceContext* context,
+    const int face) {
+  const auto& payload = *reinterpret_cast<MikkTPayload*>(context->m_pUserData);
+  return face < payload.numIndices / 3 ? 3 : 0;
+}
+
+void mikkGetPosition(
+    const SMikkTSpaceContext* context,
+    float position[3],
+    const int face,
+    const int vert) {
+
+  const auto& payload = *reinterpret_cast<MikkTPayload*>(context->m_pUserData);
+  auto& pos = payload.getPosition(face * 3 + vert);
+
+  position[0] = pos.x;
+  position[1] = pos.y;
+  position[2] = pos.z;
+}
+
+void mikkGetNormal(
+    const SMikkTSpaceContext* context,
+    float normal[3],
+    const int face,
+    const int vert) {
+  const auto& payload = *reinterpret_cast<MikkTPayload*>(context->m_pUserData);
+
+  const auto& norm = payload.getNormal(face * 3 + vert);
+  normal[0] = norm.x;
+  normal[1] = norm.y;
+  normal[2] = norm.z;
+}
+
+void mikkGetTexCoords(
+    const SMikkTSpaceContext* context,
+    float uv[2],
+    const int face,
+    const int vert) {
+
+  const auto& payload = *reinterpret_cast<MikkTPayload*>(context->m_pUserData);
+  const auto& texCoord = payload.getTexCoord(face * 3 + vert);
+  uv[0] = texCoord.x;
+  uv[1] = texCoord.y;
+}
+
+void mikkSetTSpaceBasic(
+    const SMikkTSpaceContext* context,
+    const float tangent[3],
+    const float sign,
+    const int face,
+    const int vert) {
+  auto& payload = *reinterpret_cast<MikkTPayload*>(context->m_pUserData);
+  payload.setTangent(face * 3 + vert, tangent, sign);
+}
+
+template <typename TIndex>
+void computeTangents(
+    const size_t stride,
+    const TIndex* indices,
+    const int32_t numIndices,
+    uint8_t* positions,
+    uint8_t* normals,
+    uint8_t* texCoords,
+    uint8_t* tangents) {
+  SMikkTSpaceInterface interface{};
+  interface.m_getNormal = mikkGetNormal;
+  interface.m_getNumFaces = mikkGetNumFaces;
+  interface.m_getNumVerticesOfFace = mikkGetNumVerticesOfFaces;
+  interface.m_getPosition = mikkGetPosition;
+  interface.m_getTexCoord = mikkGetTexCoords;
+  interface.m_setTSpaceBasic = mikkSetTSpaceBasic;
+
+  MikkTPayload payload{};
+  payload.stride = stride;
+  payload.numIndices = numIndices;
+  payload.pPositionData = positions;
+  payload.pNormalData = normals;
+  payload.pTexCoordData = texCoords;
+  payload.pTangentData = tangents;
+
+  SMikkTSpaceContext context{};
+  context.m_pInterface = &interface;
+  context.m_pUserData = &payload;
+
+  genTangSpaceDefault(&context);
+}
+} // namespace
 
 /**
  * @brief The result after populating Unity mesh data with loaded glTF content.
@@ -356,6 +485,8 @@ void loadPrimitive(
           ? false
           : pMaterial && pMaterial->hasExtension<ExtensionKhrMaterialsUnlit>();
 
+  bool duplicateVertices = false;
+
   bool hasNormals = false;
   bool computeFlatNormals = false;
   auto normalAccessorIt = primitive.attributes.find("NORMAL");
@@ -367,11 +498,27 @@ void loadPrimitive(
   } else if (
       !primitiveInfo.isUnlit && primitive.mode != MeshPrimitive::Mode::POINTS) {
     computeFlatNormals = hasNormals = true;
+    duplicateVertices = true;
+  }
+
+  bool hasTangents = false;
+  bool computeTangents = false;
+  auto tangentAccessorIt = primitive.attributes.find("TANGENT");
+  AccessorView<UnityEngine::Vector4> tangentView{};
+  if (tangentAccessorIt != primitive.attributes.end()) {
+    int tangentAccessorId = tangentAccessorIt->second;
+    tangentView = AccessorView<UnityEngine::Vector4>(gltf, tangentAccessorId);
+    hasTangents = tangentView.status() == AccessorViewStatus::Valid;
+  } else if (
+      !primitiveInfo.isUnlit && primitive.mode != MeshPrimitive::Mode::POINTS) {
+    computeTangents = hasTangents =
+        options.alwaysIncludeTangents || pMaterial->normalTexture;
+    duplicateVertices |= computeTangents;
   }
 
   // Check if  we need to upgrade to a large index type to accommodate the
-  // larger number of vertices we need for flat normals.
-  if (computeFlatNormals && indexFormat == IndexFormat::UInt16 &&
+  // larger number of vertices we need for flat normals or calculated tangents.
+  if (duplicateVertices && indexFormat == IndexFormat::UInt16 &&
       indexCount >= std::numeric_limits<uint16_t>::max()) {
     loadPrimitive<uint32_t>(
         meshData,
@@ -446,6 +593,16 @@ void loadPrimitive(
     descriptor[numberOfAttributes].attribute = VertexAttribute::Normal;
     descriptor[numberOfAttributes].format = VertexAttributeFormat::Float32;
     descriptor[numberOfAttributes].dimension = 3;
+    descriptor[numberOfAttributes].stream = streamIndex;
+    ++numberOfAttributes;
+  }
+
+  // Add the TANGENT attribute, if it exists or is required
+  if (hasTangents) {
+    assert(numberOfAttributes < MAX_ATTRIBUTES);
+    descriptor[numberOfAttributes].attribute = VertexAttribute::Tangent;
+    descriptor[numberOfAttributes].format = VertexAttributeFormat::Float32;
+    descriptor[numberOfAttributes].dimension = 4;
     descriptor[numberOfAttributes].stream = streamIndex;
     ++numberOfAttributes;
   }
@@ -554,7 +711,7 @@ void loadPrimitive(
     attributes.Item(i, descriptor[i]);
   }
 
-  int32_t vertexCount = computeFlatNormals
+  int32_t vertexCount = duplicateVertices
                             ? indexCount
                             : static_cast<int32_t>(positionView.size());
   meshData.SetVertexBufferParams(vertexCount, attributes);
@@ -571,33 +728,64 @@ void loadPrimitive(
   // The vertex layout will be as follows:
   // 1. position
   // 2. normals (skip if N/A)
-  // 3. vertex colors (skip if N/A)
-  // 4. texcoords (first all TEXCOORD_i, then all _CESIUMOVERLAY_i)
+  // 3. tangents (skip if N/A)
+  // 4. vertex colors (skip if N/A)
+  // 5. texcoords (first all TEXCOORD_i, then all _CESIUMOVERLAY_i)
 
   size_t stride = sizeof(Vector3);
-  size_t normalByteOffset, colorByteOffset;
+  size_t normalByteOffset;
   if (hasNormals) {
     normalByteOffset = stride;
     stride += sizeof(Vector3);
   }
+
+  size_t tangentByteOffset;
+  if (hasTangents) {
+    tangentByteOffset = stride;
+    stride += sizeof(Vector4);
+  }
+
+  size_t colorByteOffset;
   if (hasVertexColors) {
     colorByteOffset = stride;
     stride += sizeof(uint32_t);
   }
-  stride += numTexCoords * sizeof(Vector2);
 
-  if (computeFlatNormals) {
-    ::computeFlatNormals(
-        pWritePos + normalByteOffset,
-        stride,
-        indices,
-        indexCount,
-        positionView);
+  size_t texCoordByteOffset;
+  if (numTexCoords > 0) {
+    texCoordByteOffset = stride;
+    stride += numTexCoords * sizeof(Vector2);
+  }
+
+  if (duplicateVertices) {
+    if (computeFlatNormals) {
+      ::computeFlatNormals(
+          pWritePos + normalByteOffset,
+          stride,
+          indices,
+          indexCount,
+          positionView);
+    }
     for (int64_t i = 0; i < vertexCount; ++i) {
       TIndex vertexIndex = indices[i];
       *reinterpret_cast<Vector3*>(pWritePos) = positionView[vertexIndex];
-      // skip position and normal
-      pWritePos += 2 * sizeof(Vector3);
+      // skip position
+      pWritePos += sizeof(Vector3);
+      // load normal from view or reserve space
+      if (hasNormals) {
+        if (vertexIndex < normalView.size()) {
+          *reinterpret_cast<Vector3*>(pWritePos) = normalView[vertexIndex];
+        }
+        pWritePos += sizeof(Vector3);
+      }
+      // load tangent from view or reserve space
+      if (hasTangents) {
+        if (vertexIndex < tangentView.size()) {
+          *reinterpret_cast<Vector4*>(pWritePos) = tangentView[vertexIndex];
+        }
+        pWritePos += sizeof(Vector4);
+      }
+
       // Skip the slot allocated for vertex colors, we will fill them in
       // bulk later.
       if (hasVertexColors) {
@@ -610,6 +798,18 @@ void loadPrimitive(
         pWritePos += sizeof(Vector2);
       }
     }
+
+    if (computeTangents) {
+      ::computeTangents(
+          stride,
+          indices,
+          indexCount,
+          pBufferStart,
+          pBufferStart + normalByteOffset,
+          pBufferStart + texCoordByteOffset,
+          pBufferStart + tangentByteOffset);
+    }
+
   } else {
     for (int64_t i = 0; i < vertexCount; ++i) {
       *reinterpret_cast<Vector3*>(pWritePos) = positionView[i];
@@ -618,6 +818,11 @@ void loadPrimitive(
       if (hasNormals) {
         *reinterpret_cast<Vector3*>(pWritePos) = normalView[i];
         pWritePos += sizeof(Vector3);
+      }
+
+      if (hasTangents) {
+        *reinterpret_cast<Vector4*>(pWritePos) = tangentView[i];
+        pWritePos += sizeof(Vector4);
       }
 
       // Skip the slot allocated for vertex colors, we will fill them in
@@ -645,11 +850,11 @@ void loadPrimitive(
             pBufferStart + colorByteOffset,
             stride,
             static_cast<size_t>(vertexCount),
-            computeFlatNormals,
+            duplicateVertices,
             indices});
   }
 
-  if (computeFlatNormals) {
+  if (duplicateVertices) {
     // rewrite indices
     for (TIndex i = 0; i < indexCount; i++) {
       indices[i] = i;
