@@ -228,7 +228,7 @@ void computeTangents(
     uint8_t* normals,
     uint8_t* texCoords,
     uint8_t* tangents) {
-  SMikkTSpaceInterface interface {};
+  SMikkTSpaceInterface interface{};
   interface.m_getNormal = mikkGetNormal;
   interface.m_getNumFaces = mikkGetNumFaces;
   interface.m_getNumVerticesOfFace = mikkGetNumVerticesOfFaces;
