@@ -110,7 +110,6 @@ void computeFlatNormals(
     const AccessorView<UnityEngine::Vector3>& positionView) {
 
   for (int i = 0; i < indexCount; i += 3) {
-
     TIndex i0 = indices[i];
     TIndex i1 = indices[i + 1];
     TIndex i2 = indices[i + 2];
@@ -235,7 +234,7 @@ void computeTangents(
     uint8_t* normals,
     uint8_t* texCoords,
     uint8_t* tangents) {
-  SMikkTSpaceInterface interface {};
+  SMikkTSpaceInterface interface{};
   interface.m_getNormal = mikkGetNormal;
   interface.m_getNumFaces = mikkGetNumFaces;
   interface.m_getNumVerticesOfFace = mikkGetNumVerticesOfFaces;
