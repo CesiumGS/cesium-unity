@@ -11,17 +11,17 @@ namespace CesiumForUnityNative {
 
 struct CreateModelOptions {
   /**
-   * Whether to ignore the KHR_materials_unlit extension in the model. If this
-   * is true and the extension is present, then flat normals will be generated
-   * for the model as it loads.
-   */
+   * @brief Whether to ignore the KHR_materials_unlit extension in the model.
+   * @remarks If this is true and the extension is present, then flat normals
+   * will be generated for the model as it loads.
+   **/
   bool ignoreKhrMaterialUnlit = false;
 
-  /*
-   * Whether to include tangents in the vertex buffer. If tangents are not
-   * present in the source glTF, they will be generated via the mikktspace
-   * algorithm.
-   */
+  /**
+   * @brief Whether to include tangents in the vertex buffer.
+   * @remarks If tangents are not present in the source glTF, they will be
+   * generated via the mikktspace algorithm.
+   **/
   bool alwaysIncludeTangents = false;
 
   CreateModelOptions() = default;
@@ -36,25 +36,33 @@ struct CreateModelOptions {
  */
 struct CesiumPrimitiveInfo {
   /**
-   * @brief Whether or not the primitive's mode is set to POINTS.
-   * This affects whether or not it can be baked into a physics mesh.
+   * @brief Whether the primitive's mode is set to POINTS.
+   * This affects whether it can be baked into a physics mesh.
    */
   bool containsPoints = false;
 
   /**
-   * @brief Whether or not the primitive contains translucent vertex
+   * @brief Whether the primitive contains translucent vertex
    * colors. This can affect material tags used to render the model.
    */
   bool isTranslucent = false;
 
   /**
-   * @brief Whether or not the primitive material has the KHR_materials_unlit
+   * @brief Whether the primitive material has the KHR_materials_unlit
    * extension.
    * @remarks This may be overridden if
    * DotNet::CesiumForUnity::Cesium3DTileset::ignoreignoreKHRMaterialsUnlit() is
    * set.
    */
   bool isUnlit = false;
+
+  /**
+   * @brief Whether the primitive vertex buffer has normals
+   * @remarks When rendering a lit tileset that does not have normals, and
+   * the generateSmoothNormals option is not enabled, the shader should
+   * generate flat normals in the pixel shader.
+   */
+  bool hasNormals = false;
 
   /**
    * @brief Maps a texture coordinate index i (TEXCOORD_<i>) to the
