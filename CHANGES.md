@@ -6,6 +6,8 @@
 
 - Added an option to `Cesium3DTileset` to enable tangent generation on the CPU for any tiles that are missing them. 
 
+- Flat normals are now generated in the pixel shader when rendering lit models that do not include normals.  
+
 ## v1.18.0 - 2025-09-02
 
 ##### Additions :tada:

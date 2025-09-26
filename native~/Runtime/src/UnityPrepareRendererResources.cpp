@@ -101,34 +101,6 @@ std::vector<TIndex> generateIndices(const int32_t count) {
   return syntheticIndexBuffer;
 }
 
-template <typename TIndex>
-void computeFlatNormals(
-    uint8_t* pWritePos,
-    size_t stride,
-    TIndex* indices,
-    int32_t indexCount,
-    const AccessorView<UnityEngine::Vector3>& positionView) {
-
-  for (int i = 0; i < indexCount; i += 3) {
-    TIndex i0 = indices[i];
-    TIndex i1 = indices[i + 1];
-    TIndex i2 = indices[i + 2];
-
-    const glm::vec3& v0 =
-        *reinterpret_cast<const glm::vec3*>(&positionView[i0]);
-    const glm::vec3& v1 =
-        *reinterpret_cast<const glm::vec3*>(&positionView[i1]);
-    const glm::vec3& v2 =
-        *reinterpret_cast<const glm::vec3*>(&positionView[i2]);
-
-    glm::vec3 normal = glm::normalize(glm::cross(v1 - v0, v2 - v0));
-    for (int j = 0; j < 3; j++) {
-      *reinterpret_cast<glm::vec3*>(pWritePos) = normal;
-      pWritePos += stride;
-    }
-  }
-}
-
 namespace {
 
 struct MikkTPayload {
@@ -138,15 +110,38 @@ struct MikkTPayload {
   uint8_t* pNormalData;
   uint8_t* pTexCoordData;
   uint8_t* pTangentData;
+  std::unordered_map<int, glm::vec3> normalCache;
 
   glm::vec3& getPosition(const int vert) const {
     uint8_t* ptr = &pPositionData[vert * stride];
     return *reinterpret_cast<glm::vec3*>(ptr);
   }
 
-  glm::vec3& getNormal(const int vert) const {
-    uint8_t* ptr = &pNormalData[vert * stride];
-    return *reinterpret_cast<glm::vec3*>(ptr);
+  glm::vec3 getNormal(const int vert) {
+    if (pNormalData) {
+      uint8_t* ptr = &pNormalData[vert * stride];
+      return *reinterpret_cast<glm::vec3*>(ptr);
+    } else {
+      // calculate the face normal from the vertex stream
+      // assumes a non-indexed model.
+      int i0 = 3 * (vert / 3);
+      if (normalCache.contains(i0))
+        return normalCache[i0];
+      else {
+        assert(
+            i0 + 2 < numIndices && "Not enough vertices. Model must be "
+                                   "non-indexed to use this function.");
+        glm::vec3& v0 = getPosition(i0);
+        glm::vec3& v1 = getPosition(i0 + 1);
+        glm::vec3& v2 = getPosition(i0 + 2);
+
+        // glm::vec3 normal = glm::normalize(glm::cross(v1 - v0, v2 - v0));
+        glm::vec3 normal = glm::normalize(glm::cross( v0 - v1, v2 - v1));
+        normalCache.insert({i0, normal});
+
+        return normal;
+      }
+    }
   }
 
   glm::vec2& getTexCoord(const int vert) const {
@@ -195,7 +190,7 @@ void mikkGetNormal(
     float normal[3],
     const int face,
     const int vert) {
-  const auto& payload = *reinterpret_cast<MikkTPayload*>(context->m_pUserData);
+  auto& payload = *reinterpret_cast<MikkTPayload*>(context->m_pUserData);
 
   const auto& norm = payload.getNormal(face * 3 + vert);
   normal[0] = norm.x;
@@ -487,18 +482,15 @@ void loadPrimitive(
 
   bool duplicateVertices = false;
 
-  bool hasNormals = false;
-  bool computeFlatNormals = false;
   auto normalAccessorIt = primitive.attributes.find("NORMAL");
   AccessorView<UnityEngine::Vector3> normalView;
   if (normalAccessorIt != primitive.attributes.end()) {
     normalView =
         AccessorView<UnityEngine::Vector3>(gltf, normalAccessorIt->second);
-    hasNormals = normalView.status() == AccessorViewStatus::Valid;
+    primitiveInfo.hasNormals = normalView.status() == AccessorViewStatus::Valid;
   } else if (
       !primitiveInfo.isUnlit && primitive.mode != MeshPrimitive::Mode::POINTS) {
-    computeFlatNormals = hasNormals = true;
-    duplicateVertices = true;
+    primitiveInfo.hasNormals = false;
   }
 
   bool hasTangents = false;
@@ -512,7 +504,7 @@ void loadPrimitive(
   } else if (
       !primitiveInfo.isUnlit && primitive.mode != MeshPrimitive::Mode::POINTS) {
     computeTangents = hasTangents =
-        options.alwaysIncludeTangents || pMaterial->normalTexture;
+        options.alwaysIncludeTangents;// || pMaterial->normalTexture;
     duplicateVertices |= computeTangents;
   }
 
@@ -588,7 +580,7 @@ void loadPrimitive(
   ++numberOfAttributes;
 
   // Add the NORMAL attribute, if it exists.
-  if (hasNormals) {
+  if (primitiveInfo.hasNormals) {
     assert(numberOfAttributes < MAX_ATTRIBUTES);
     descriptor[numberOfAttributes].attribute = VertexAttribute::Normal;
     descriptor[numberOfAttributes].format = VertexAttributeFormat::Float32;
@@ -734,7 +726,7 @@ void loadPrimitive(
 
   size_t stride = sizeof(Vector3);
   size_t normalByteOffset;
-  if (hasNormals) {
+  if (primitiveInfo.hasNormals) {
     normalByteOffset = stride;
     stride += sizeof(Vector3);
   }
@@ -758,21 +750,13 @@ void loadPrimitive(
   }
 
   if (duplicateVertices) {
-    if (computeFlatNormals) {
-      ::computeFlatNormals(
-          pWritePos + normalByteOffset,
-          stride,
-          indices,
-          indexCount,
-          positionView);
-    }
     for (int64_t i = 0; i < vertexCount; ++i) {
       TIndex vertexIndex = indices[i];
       *reinterpret_cast<Vector3*>(pWritePos) = positionView[vertexIndex];
       // skip position
       pWritePos += sizeof(Vector3);
       // load normal from view or reserve space
-      if (hasNormals) {
+      if (primitiveInfo.hasNormals) {
         if (vertexIndex < normalView.size()) {
           *reinterpret_cast<Vector3*>(pWritePos) = normalView[vertexIndex];
         }
@@ -805,7 +789,7 @@ void loadPrimitive(
           indices,
           indexCount,
           pBufferStart,
-          pBufferStart + normalByteOffset,
+          primitiveInfo.hasNormals ? pBufferStart + normalByteOffset : nullptr,
           pBufferStart + texCoordByteOffset,
           pBufferStart + tangentByteOffset);
     }
@@ -815,7 +799,7 @@ void loadPrimitive(
       *reinterpret_cast<Vector3*>(pWritePos) = positionView[i];
       pWritePos += sizeof(Vector3);
 
-      if (hasNormals) {
+      if (primitiveInfo.hasNormals) {
         *reinterpret_cast<Vector3*>(pWritePos) = normalView[i];
         pWritePos += sizeof(Vector3);
       }
@@ -1413,6 +1397,12 @@ void setGltfMaterialParameterValues(
       }
     }
   }
+
+  const float computeFlatNormals =
+      !primitiveInfo.isUnlit && !primitiveInfo.hasNormals;
+  unityMaterial.SetFloat(
+      materialProperties.getComputeFlatNormalsID(),
+      computeFlatNormals);
 
   if (gltfMaterial.occlusionTexture) {
     auto texCoordIndexIt =
