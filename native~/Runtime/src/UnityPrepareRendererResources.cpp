@@ -135,7 +135,8 @@ struct MikkTPayload {
         glm::vec3& v1 = getPosition(i0 + 1);
         glm::vec3& v2 = getPosition(i0 + 2);
 
-        glm::vec3 normal = glm::normalize(glm::cross(v1 - v0, v2 - v0));
+        // glm::vec3 normal = glm::normalize(glm::cross(v1 - v0, v2 - v0));
+        glm::vec3 normal = glm::normalize(glm::cross( v0 - v1, v2 - v1));
         normalCache.insert({i0, normal});
 
         return normal;
@@ -503,7 +504,7 @@ void loadPrimitive(
   } else if (
       !primitiveInfo.isUnlit && primitive.mode != MeshPrimitive::Mode::POINTS) {
     computeTangents = hasTangents =
-        options.alwaysIncludeTangents || pMaterial->normalTexture;
+        options.alwaysIncludeTangents;// || pMaterial->normalTexture;
     duplicateVertices |= computeTangents;
   }
 
