@@ -1666,6 +1666,9 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
   int32_t meshIndex = 0;
 
+  // i3dm index tracking variable
+  int i3dmGlobalIndex = 0;
+
   // For backwards compatibility.
   CesiumForUnity::CesiumMetadata metadataComponent =
       pModelGameObject
@@ -1691,6 +1694,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
        &pModelGameObject,
        &tileTransform,
        &meshIndex,
+       &i3dmGlobalIndex,
        &tilesetComponent,
        pCoordinateSystem,
        createPhysicsMeshes,
@@ -1754,14 +1758,26 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
           ::DotNet::UnityEngine::Object::DestroyImmediate(primitiveGameObject);
 
-          ExtractInstanceDataFromGltfModel(gltf, tileTransform, instanceData);
+          // Extract only instances of the current node (i3dm) (to prevent duplication)
+          const auto* pGpuInstancing = 
+              node.getExtension<CesiumGltf::ExtensionExtMeshGpuInstancing>();
+          
+          if (pGpuInstancing && !pGpuInstancing->attributes.empty()) {
+            ExtractInstanceDataFromExtMeshGpuInstancing(
+                gltf,
+                node,
+                *pGpuInstancing,
+                tileTransform * transform,
+                instanceData);
+          }
 
           for (size_t instanceDataIndex = 0;
-               instanceDataIndex < instanceData.size() / mesh.primitives.size();
+               instanceDataIndex < instanceData.size();
                ++instanceDataIndex) {
 
             UnityEngine::GameObject intanceGameObject(System::String(
-                "Mesh " + std::to_string(instanceDataIndex) +
+                "I3dm " + std::to_string(i3dmGlobalIndex) +
+                " Mesh " + std::to_string(instanceDataIndex) +
                 " Primitive " +
                 std::to_string(primitiveIndex)));
             if (showTilesInHierarchy) {
@@ -1777,6 +1793,9 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             intanceGameObject.layer(tilesetLayer);
             intanceObjects.push_back(intanceGameObject);
           }
+          
+          // Increment the index with the next i3dm
+          i3dmGlobalIndex++;
         }
 
         glm::dmat4 modelToEcef = tileTransform * transform;
