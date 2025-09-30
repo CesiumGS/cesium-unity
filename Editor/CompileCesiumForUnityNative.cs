@@ -539,25 +539,20 @@ namespace CesiumForUnity
 
                 if (emscriptenDir.Contains(' '))
                 {
-                    // Some ezvcpkg libraries fail to build if the path to compilation tools contains spaces.
-                    // So copy the Emscripten directory to a temporary directory that doesn't contain spaces.
-                    // Ideally this would be done with a symbolic link, but Windows requires elevated privileges to create those.
-                    // The temp directory itself may have a space in it if the userid or custom temp path contains spaces.
-                    // NOTE: using windows short names (e.g. C:\Progra~1) did not work as the paths got expanded by the build system.
-                    string tempDirectory = GetTemporaryDirectory();
-                    string tempEmscriptenDir = Path.Combine(tempDirectory, "Emscripten");
-
-                    if (tempEmscriptenDir.Contains(' '))
+                    // Some ezvcpkg libraries like openssl fail to build if the path to compilation tools contains spaces.
+                    // The default Unity install path on Windows does contain spaces as it's put into "Program Files".
+                    // Use subst to map the Emscripten directory to a drive letter, eliminating the space.
+                    // When the process finishes, we will delete the mapping.
+                    for (char driveLetter = 'M'; driveLetter <= 'Z'; driveLetter++)
                     {
-                        UnityEngine.Debug.LogError($"Temporary Emscripten directory contains spaces: {tempEmscriptenDir}. Build will fail. Set the system environment variable TEMP to a path without spaces.");
-                        return;
+                        if (!Directory.Exists(driveLetter + ":\\"))
+                        {
+                            Process.Start("subst", driveLetter + ": \"" + emscriptenDir + "\"").WaitForExit();
+                            deleteTemporaryEmscriptenDir = true;
+                            emscriptenDir = driveLetter + ":\\";
+                            break;
+                        }
                     }
-
-                    UnityEngine.Debug.LogWarning($"Copying Emscripten from '{emscriptenDir}' to '{tempEmscriptenDir}' to avoid spaces in path.");
-
-                    CopyFilesRecursively(emscriptenDir, tempEmscriptenDir);
-                    emscriptenDir = tempEmscriptenDir;
-                    deleteTemporaryEmscriptenDir = true;
                 }
             }
 
@@ -687,7 +682,7 @@ namespace CesiumForUnity
                 {
                     try
                     {
-                        Directory.Delete(emscriptenDir, true);
+                        Process.Start("subst", emscriptenDir + " /D").WaitForExit();
                     }
                     catch (Exception)
                     {
