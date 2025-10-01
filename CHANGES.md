@@ -2,7 +2,7 @@
 
 ## v1.18.1 - 2025-10-01
 
-This release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.51.0 to v0.52.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
+This release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.51.0 to v0.52.1. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
 
 ## v1.18.0 - 2025-09-02
 
