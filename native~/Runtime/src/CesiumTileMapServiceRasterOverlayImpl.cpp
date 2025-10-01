@@ -74,7 +74,9 @@ void CesiumTileMapServiceRasterOverlayImpl::RemoveFromTileset(
   if (!pTileset)
     return;
 
-  pTileset->getOverlays().remove(this->_pOverlay);
+  CesiumUtility::IntrusivePointer<CesiumRasterOverlays::RasterOverlay>
+      pOverlay = this->_pOverlay.get();
+  pTileset->getOverlays().remove(pOverlay);
   this->_pOverlay = nullptr;
 }
 
