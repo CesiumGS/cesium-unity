@@ -304,7 +304,7 @@ namespace CesiumForUnity
                         Debug.Log("Credit image could not be loaded into Texture2D.");
                     }
                 }
-                catch (FormatException e)
+                catch (FormatException)
                 {
                     Debug.Log("Could not parse credit image from base64 string.");
                 }

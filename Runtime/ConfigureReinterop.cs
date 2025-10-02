@@ -77,7 +77,7 @@ namespace CesiumForUnity
             int pixelWidth = c.pixelWidth;
             float aspect = c.aspect;
             bool isOrtho = c.orthographic;
-            float orthoSize = c.orthographicSize;            
+            float orthoSize = c.orthographicSize;
             //IFormattable f = new Vector3();
             //IEquatable<Vector3> f2 = new Vector3();
 
@@ -319,6 +319,23 @@ namespace CesiumForUnity
             bingMapsRasterOverlay.bingMapsKey = bingMapsRasterOverlay.bingMapsKey;
             bingMapsRasterOverlay.mapStyle = bingMapsRasterOverlay.mapStyle;
             baseOverlay = bingMapsRasterOverlay;
+
+            CesiumGoogleMapTilesRasterOverlay googleMapTilesRasterOverlay =
+                go.GetComponent<CesiumGoogleMapTilesRasterOverlay>();
+            googleMapTilesRasterOverlay.apiKey = googleMapTilesRasterOverlay.apiKey;
+            googleMapTilesRasterOverlay.mapType = googleMapTilesRasterOverlay.mapType;
+            googleMapTilesRasterOverlay.language = googleMapTilesRasterOverlay.language;
+            googleMapTilesRasterOverlay.region = googleMapTilesRasterOverlay.region;
+            googleMapTilesRasterOverlay.scale = googleMapTilesRasterOverlay.scale;
+            googleMapTilesRasterOverlay.highDpi = googleMapTilesRasterOverlay.highDpi;
+            googleMapTilesRasterOverlay.layerTypes = googleMapTilesRasterOverlay.layerTypes;
+            googleMapTilesRasterOverlay.styles = googleMapTilesRasterOverlay.styles;
+            googleMapTilesRasterOverlay.overlay = googleMapTilesRasterOverlay.overlay;
+            baseOverlay = googleMapTilesRasterOverlay;
+
+            List<GoogleMapTilesLayerType> layers = new List<GoogleMapTilesLayerType>();
+            if (layers.Count > 0)
+                layers[0] = layers[0];
 
             CesiumTileMapServiceRasterOverlay tileMapServiceRasterOverlay =
                 go.GetComponent<CesiumTileMapServiceRasterOverlay>();
