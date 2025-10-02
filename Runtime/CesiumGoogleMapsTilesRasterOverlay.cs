@@ -227,7 +227,7 @@ namespace CesiumForUnity
         private List<string> _styles;
 
         /// <summary>
-        /// An array of JSON style objects that specify the appearance and
+        /// A list of JSON style objects that specify the appearance and
         /// detail level of map features such as roads, parks, and built-up areas.
         /// </summary>
         /// <remarks>

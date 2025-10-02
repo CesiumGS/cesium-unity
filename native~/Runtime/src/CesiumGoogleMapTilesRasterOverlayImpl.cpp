@@ -63,7 +63,7 @@ std::optional<std::vector<std::string>> getLayerTypes(
 
   int32_t count = layerTypes.Count();
   if (count > 0) {
-    result.reserve(layerTypes.Count());
+    result.reserve(count);
 
     for (int32_t i = 0; i < count; i++) {
       CesiumForUnity::GoogleMapTilesLayerType layerType = layerTypes[i];
