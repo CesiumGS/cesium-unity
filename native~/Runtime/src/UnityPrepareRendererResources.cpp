@@ -157,9 +157,25 @@ struct MikkTPayload {
   void setTangent(const int vert, const float tangent[4], const float sign) {
     glm::vec4& tan =
         *reinterpret_cast<glm::vec4*>(pTangentData + vert * stride);
+    static bool flipX = false;
+    static bool flipY = false;
+    static bool flipZ = false;
+
     tan.x = tangent[0];
+    if (flipX) {
+      tan.x = -tan.x;
+    }
+
     tan.y = tangent[1];
+    if (flipY) {
+      tan.y = -tan.y;
+    }
+
     tan.z = tangent[2];
+    if (flipZ) {
+      tan.z = -tan.z;
+    }
+
     tan.w = sign;
   }
 };

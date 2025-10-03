@@ -20,22 +20,18 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: CesiumDefaultTilesetMaterial
-  m_Shader: {fileID: -6465566751694194690, guid: 407c0cff68611ac46a65eec87a5203f5,
+  m_Name: LivelyMaterial
+  m_Shader: {fileID: -6465566751694194690, guid: 33125bd9cc819428a884c036eda2fdb8,
     type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
   - _ALPHATEST_ON
-  - _BUILTIN_ALPHATEST_ON
-  - _BUILTIN_AlphaClip
-  m_InvalidKeywords:
-  - _DISABLE_SSR_TRANSPARENT
-  - _DOUBLESIDED_ON
+  m_InvalidKeywords: []
   m_LightmapFlags: 2
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 1
-  m_CustomRenderQueue: 2450
+  m_CustomRenderQueue: -1
   stringTagMap:
     MotionVector: User
     RenderType: TransparentCutout
@@ -172,6 +168,7 @@ Material:
     - _ZWrite: 1
     - _ZWriteControl: 0
     - _baseColorTextureCoordinateIndex: 0
+    - _computeFlatNormals: 0
     - _emissiveTextureCoordinateIndex: 0
     - _metallicRoughnessTextureCoordinateIndex: 0
     - _normalMapScale: 0
