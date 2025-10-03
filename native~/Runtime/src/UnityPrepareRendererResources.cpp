@@ -636,6 +636,7 @@ void loadPrimitive(
       for (uint32_t texCoordIndex = 0; texCoordIndex < numTexCoords;
            ++texCoordIndex) {
         Vector2 texCoord = texCoordViews[texCoordIndex][vertexIndex];
+        // flip Y to comply with Unity's left-handed UV coordinates
         texCoord.y = 1 - texCoord.y;
         *reinterpret_cast<Vector2*>(pWritePos) =texCoord;
         pWritePos += sizeof(Vector2);
@@ -650,18 +651,15 @@ void loadPrimitive(
         *reinterpret_cast<Vector3*>(pWritePos) = normalView[i];
         pWritePos += sizeof(Vector3);
       }
-
       if (hasTangents) {
         *reinterpret_cast<Vector4*>(pWritePos) = tangentView[i];
         pWritePos += sizeof(Vector4);
       }
-
       // Skip the slot allocated for vertex colors, we will fill them in
       // bulk later.
       if (hasVertexColors) {
         pWritePos += sizeof(uint32_t);
       }
-
       for (uint32_t texCoordIndex = 0; texCoordIndex < numTexCoords;
            ++texCoordIndex) {
         Vector2 texCoord = texCoordViews[texCoordIndex][i];
