@@ -5,6 +5,7 @@
 ##### Fixes :wrench:
 
 - Corrected glTF import process to flip textures and UV coordinates from glTF's U-right, V-down convention to comply with Unity's U-right, V-up coordinate system. 
+- Modified model importer to include tangents when they are present in the source glTF. 
 
 ## v1.18.1 - 2025-10-01
 
