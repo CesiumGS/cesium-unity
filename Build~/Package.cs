@@ -136,6 +136,17 @@ namespace Build
                         "-DCMAKE_OSX_DEPLOYMENT_TARGET=10.15"
                     }).ToList();
 
+                    configureArgs[1] = "native~/build-arm64";
+                    var armConfigureArgs = configureArgs.Concat(new[]
+                    {
+                        "-DCMAKE_OSX_ARCHITECTURES=arm64",
+                        "-DCMAKE_INSTALL_PREFIX=" + Path.Combine(Utility.PackageRoot, "Editor", "arm64")
+                    });
+                    Utility.Run("cmake", armConfigureArgs);
+
+                    buildArgs[1] = "native~/build-arm64";
+                    Utility.Run("cmake", buildArgs);
+
                     // On macOS, we must build the native code twice, once for x86_64 and once for arm64.
                     // In theory we can build universal binaries, but some of our third party libraries don't
                     // handle this well.
@@ -148,17 +159,6 @@ namespace Build
                     Utility.Run("cmake", x64ConfigureArgs);
 
                     buildArgs[1] = "native~/build-x64";
-                    Utility.Run("cmake", buildArgs);
-
-                    configureArgs[1] = "native~/build-arm64";
-                    var armConfigureArgs = configureArgs.Concat(new[]
-                    {
-                        "-DCMAKE_OSX_ARCHITECTURES=arm64",
-                        "-DCMAKE_INSTALL_PREFIX=" + Path.Combine(Utility.PackageRoot, "Editor", "arm64")
-                    });
-                    Utility.Run("cmake", armConfigureArgs);
-
-                    buildArgs[1] = "native~/build-arm64";
                     Utility.Run("cmake", buildArgs);
                 }
                 else
