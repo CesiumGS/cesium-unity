@@ -84,7 +84,7 @@ void copyAndFlipY(
     const size_t height) {
   assert(
       (dataLength % height) == 0 &&
-      "Image data size is not an even multiple of image width.");
+      "Image data size is not an even multiple of image height.");
 
   const size_t stride = dataLength / height;
 
