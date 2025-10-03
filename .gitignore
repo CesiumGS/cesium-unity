@@ -13,6 +13,8 @@ CesiumForUnityNativeBindings/native/
 *.user
 .DS_STORE
 .idea
+obj.meta
+bin.meta
 Reinterop.dll
 Reinterop.deps.json
 Reinterop.deps.json.meta
