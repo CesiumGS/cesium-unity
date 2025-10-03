@@ -605,8 +605,9 @@ void loadPrimitive(
       }
       for (uint32_t texCoordIndex = 0; texCoordIndex < numTexCoords;
            ++texCoordIndex) {
-        *reinterpret_cast<Vector2*>(pWritePos) =
-            texCoordViews[texCoordIndex][vertexIndex];
+        Vector2 texCoord = texCoordViews[texCoordIndex][vertexIndex];
+        texCoord.y = 1 - texCoord.y;
+        *reinterpret_cast<Vector2*>(pWritePos) =texCoord;
         pWritePos += sizeof(Vector2);
       }
     }
