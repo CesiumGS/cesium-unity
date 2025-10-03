@@ -300,6 +300,7 @@ namespace CesiumForUnity
             ionOverlay.ionAssetID = ionOverlay.ionAssetID;
             ionOverlay.ionAccessToken = ionOverlay.ionAccessToken;
             ionOverlay.ionServer = ionOverlay.ionServer;
+            ionOverlay.assetOptions = ionOverlay.assetOptions;
             ionOverlay.AddToTilesetLater(null);
 
             CesiumRasterOverlay overlay = go.GetComponent<CesiumRasterOverlay>();
