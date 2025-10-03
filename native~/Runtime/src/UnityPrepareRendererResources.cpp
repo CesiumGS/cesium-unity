@@ -647,7 +647,6 @@ void loadPrimitive(
     for (int64_t i = 0; i < vertexCount; ++i) {
       *reinterpret_cast<Vector3*>(pWritePos) = positionView[i];
       pWritePos += sizeof(Vector3);
-
       if (hasNormals) {
         *reinterpret_cast<Vector3*>(pWritePos) = normalView[i];
         pWritePos += sizeof(Vector3);
