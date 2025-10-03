@@ -369,6 +369,14 @@ void loadPrimitive(
     computeFlatNormals = hasNormals = true;
   }
 
+  bool hasTangents = false;
+  auto tangentAcccessorIt = primitive.attributes.find("TANGENT");
+  AccessorView<UnityEngine::Vector4> tangentView;
+  if (tangentAcccessorIt != primitive.attributes.end()) {
+    tangentView = AccessorView<UnityEngine::Vector4>(gltf, tangentAcccessorIt->second);
+    hasTangents = tangentView.status() == AccessorViewStatus::Valid;
+  }
+
   // Check if  we need to upgrade to a large index type to accommodate the
   // larger number of vertices we need for flat normals.
   if (computeFlatNormals && indexFormat == IndexFormat::UInt16 &&
@@ -446,6 +454,15 @@ void loadPrimitive(
     descriptor[numberOfAttributes].attribute = VertexAttribute::Normal;
     descriptor[numberOfAttributes].format = VertexAttributeFormat::Float32;
     descriptor[numberOfAttributes].dimension = 3;
+    descriptor[numberOfAttributes].stream = streamIndex;
+    ++numberOfAttributes;
+  }
+
+  if (hasTangents) {
+    assert(numberOfAttributes < MAX_ATTRIBUTES);
+    descriptor[numberOfAttributes].attribute = VertexAttribute::Tangent;
+    descriptor[numberOfAttributes].format = VertexAttributeFormat::Float32;
+    descriptor[numberOfAttributes].dimension = 4;
     descriptor[numberOfAttributes].stream = streamIndex;
     ++numberOfAttributes;
   }
@@ -571,19 +588,27 @@ void loadPrimitive(
   // The vertex layout will be as follows:
   // 1. position
   // 2. normals (skip if N/A)
-  // 3. vertex colors (skip if N/A)
-  // 4. texcoords (first all TEXCOORD_i, then all _CESIUMOVERLAY_i)
+  // 3. tangents (skip if N/A)
+  // 4. vertex colors (skip if N/A)
+  // 5. texcoords (first all TEXCOORD_i, then all _CESIUMOVERLAY_i)
 
   size_t stride = sizeof(Vector3);
-  size_t normalByteOffset, colorByteOffset;
+  size_t normalByteOffset;
   if (hasNormals) {
     normalByteOffset = stride;
     stride += sizeof(Vector3);
   }
+
+  if (hasTangents) {
+    stride += sizeof(Vector4);
+  }
+
+  size_t colorByteOffset;
   if (hasVertexColors) {
     colorByteOffset = stride;
     stride += sizeof(uint32_t);
   }
+
   stride += numTexCoords * sizeof(Vector2);
 
   if (computeFlatNormals) {
@@ -593,11 +618,16 @@ void loadPrimitive(
         indices,
         indexCount,
         positionView);
+
     for (int64_t i = 0; i < vertexCount; ++i) {
       TIndex vertexIndex = indices[i];
       *reinterpret_cast<Vector3*>(pWritePos) = positionView[vertexIndex];
       // skip position and normal
       pWritePos += 2 * sizeof(Vector3);
+      if (hasTangents) {
+        *reinterpret_cast<Vector4*>(pWritePos) = tangentView[vertexIndex];
+        pWritePos += sizeof(Vector4);
+      }
       // Skip the slot allocated for vertex colors, we will fill them in
       // bulk later.
       if (hasVertexColors) {
@@ -618,6 +648,11 @@ void loadPrimitive(
       if (hasNormals) {
         *reinterpret_cast<Vector3*>(pWritePos) = normalView[i];
         pWritePos += sizeof(Vector3);
+      }
+
+      if (hasTangents) {
+        *reinterpret_cast<Vector4*>(pWritePos) = tangentView[i];
+        pWritePos += sizeof(Vector4);
       }
 
       // Skip the slot allocated for vertex colors, we will fill them in
