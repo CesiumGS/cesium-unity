@@ -373,7 +373,8 @@ void loadPrimitive(
   auto tangentAcccessorIt = primitive.attributes.find("TANGENT");
   AccessorView<UnityEngine::Vector4> tangentView;
   if (tangentAcccessorIt != primitive.attributes.end()) {
-    tangentView = AccessorView<UnityEngine::Vector4>(gltf, tangentAcccessorIt->second);
+    tangentView =
+        AccessorView<UnityEngine::Vector4>(gltf, tangentAcccessorIt->second);
     hasTangents = tangentView.status() == AccessorViewStatus::Valid;
   }
 
@@ -638,7 +639,7 @@ void loadPrimitive(
         Vector2 texCoord = texCoordViews[texCoordIndex][vertexIndex];
         // flip Y to comply with Unity's left-handed UV coordinates
         texCoord.y = 1 - texCoord.y;
-        *reinterpret_cast<Vector2*>(pWritePos) =texCoord;
+        *reinterpret_cast<Vector2*>(pWritePos) = texCoord;
         pWritePos += sizeof(Vector2);
       }
     }
