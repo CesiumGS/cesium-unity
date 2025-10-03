@@ -608,7 +608,7 @@ void loadPrimitive(
         Vector2 texCoord = texCoordViews[texCoordIndex][vertexIndex];
         // flip Y to comply with Unity's left-handed UV coordinates
         texCoord.y = 1 - texCoord.y;
-        *reinterpret_cast<Vector2*>(pWritePos) =texCoord;
+        *reinterpret_cast<Vector2*>(pWritePos) = texCoord;
         pWritePos += sizeof(Vector2);
       }
     }
