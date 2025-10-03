@@ -628,8 +628,10 @@ void loadPrimitive(
 
       for (uint32_t texCoordIndex = 0; texCoordIndex < numTexCoords;
            ++texCoordIndex) {
-        *reinterpret_cast<Vector2*>(pWritePos) =
-            texCoordViews[texCoordIndex][i];
+        Vector2 texCoord = texCoordViews[texCoordIndex][i];
+        // flip Y to comply with Unity's left-handed UV coordinates
+        texCoord.y = 1 - texCoord.y;
+        *reinterpret_cast<Vector2*>(pWritePos) = texCoord;
         pWritePos += sizeof(Vector2);
       }
     }

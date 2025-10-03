@@ -69,6 +69,25 @@ getUncompressedPixelFormat(const CesiumGltf::ImageAsset& image) {
   }
 }
 
+/**
+ * Copy image data while flipping the data vertically. According to the glTF 2.0
+ * spec, glTF stores textures in x-right, y-down (right-handed) coordinates.
+ * However, Unity uses x-right, y-up coordinates, so we need to flip the textures
+ * and UV coordinates. See loadPrimitive() in UnityPrepareRenderResources.cpp for
+ * the corresponding UV flip.
+ **/
+template<typename TSrcByte, typename TDstByte>
+void copyAndFlipY(TSrcByte* dst, const TDstByte* src, const size_t dataLength, const size_t height) {
+  assert((dataLength % height) == 0 && "Image data size is not an even multiple of image width.");
+
+  const size_t stride = dataLength / height;
+
+  for (size_t j=0; j < height; ++j) {
+    memcpy(dst, src + (height - j) * stride, stride);
+    dst += stride;
+  }
+}
+
 } // namespace
 
 UnityEngine::Texture
@@ -100,21 +119,29 @@ TextureLoader::loadTexture(const CesiumGltf::ImageAsset& image, bool sRGB) {
   if (image.mipPositions.empty()) {
     // No mipmaps, copy the whole thing and then let Unity generate mipmaps on a
     // worker thread.
-    std::memcpy(pixels, image.pixelData.data(), image.pixelData.size());
+    copyAndFlipY(pixels, image.pixelData.data(), image.pixelData.size(), image.height);
     result.Apply(false, true);
   } else {
     // Copy the mipmaps explicitly.
     std::uint8_t* pWritePosition = pixels;
     const std::byte* pReadBuffer = image.pixelData.data();
 
-    for (const ImageAssetMipPosition& mip : image.mipPositions) {
-      size_t start = mip.byteOffset;
-      size_t end = mip.byteOffset + mip.byteSize;
-      if (start >= textureLength || end > textureLength)
-        continue; // invalid mip spec, ignore it
+    // track square image dimension for each mip level
+    int32_t mipHeight = image.height;
 
-      std::memcpy(pWritePosition, pReadBuffer + start, mip.byteSize);
+    for (const ImageAssetMipPosition& mip : image.mipPositions) {
+      assert(mipHeight > 0 && "Invalid image size.");
+      const size_t start = mip.byteOffset;
+      const size_t end = mip.byteOffset + mip.byteSize;
+      if (start >= textureLength || end > textureLength) {
+        mipHeight /= 2;
+        continue; // invalid mip spec, ignore it
+      }
+
+      copyAndFlipY(pWritePosition, pReadBuffer + start, mip.byteSize, mipHeight);
       pWritePosition += mip.byteSize;
+      // adjust height for next mip level.
+      mipHeight /= 2;
     }
 
     result.Apply(false, true);

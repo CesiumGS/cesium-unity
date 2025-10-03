@@ -1,5 +1,11 @@
 # Change Log
 
+## ? - ?
+
+##### Fixes :wrench:
+
+- Corrected texture import process to flip textures and UV coordinates from glTF's U-right, V-down convention to comply with Unity's U-right, V-up coordinate system. 
+
 ## v1.18.1 - 2025-10-01
 
 This release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.51.0 to v0.52.1. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
