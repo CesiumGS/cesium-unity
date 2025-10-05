@@ -130,7 +130,9 @@ void CesiumPolygonRasterOverlayImpl::RemoveFromTileset(
     return;
 
   if (this->_pOverlay) {
-    pTileset->getOverlays().remove(this->_pOverlay);
+    CesiumUtility::IntrusivePointer<CesiumRasterOverlays::RasterOverlay>
+        pOverlay = this->_pOverlay.get();
+    pTileset->getOverlays().remove(pOverlay);
     this->_pOverlay = nullptr;
   }
 
