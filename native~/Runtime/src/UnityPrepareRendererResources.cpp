@@ -670,7 +670,7 @@ void loadPrimitive(
             indices});
   }
 
-  if (computeFlatNormals) {
+  if (duplicateVertices) {
     // rewrite indices
     for (TIndex i = 0; i < indexCount; i++) {
       indices[i] = i;
