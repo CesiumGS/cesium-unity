@@ -572,9 +572,9 @@ void loadPrimitive(
     attributes.Item(i, descriptor[i]);
   }
 
-  int32_t vertexCount = computeFlatNormals
-                            ? indexCount
-                            : static_cast<int32_t>(positionView.size());
+  const int32_t vertexCount = computeFlatNormals
+                                  ? indexCount
+                                  : static_cast<int32_t>(positionView.size());
   meshData.SetVertexBufferParams(vertexCount, attributes);
 
   NativeArray1<uint8_t> nativeVertexBuffer =
@@ -612,6 +612,7 @@ void loadPrimitive(
 
   stride += numTexCoords * sizeof(Vector2);
 
+  const bool duplicateVertices = computeFlatNormals;
   if (computeFlatNormals) {
     ::computeFlatNormals(
         pWritePos + normalByteOffset,
@@ -619,56 +620,39 @@ void loadPrimitive(
         indices,
         indexCount,
         positionView);
+  }
 
-    for (int64_t i = 0; i < vertexCount; ++i) {
-      TIndex vertexIndex = indices[i];
-      *reinterpret_cast<Vector3*>(pWritePos) = positionView[vertexIndex];
-      // skip position and normal
-      pWritePos += 2 * sizeof(Vector3);
-      if (hasTangents) {
-        *reinterpret_cast<Vector4*>(pWritePos) = tangentView[vertexIndex];
-        pWritePos += sizeof(Vector4);
-      }
-      // Skip the slot allocated for vertex colors, we will fill them in
-      // bulk later.
-      if (hasVertexColors) {
-        pWritePos += sizeof(uint32_t);
-      }
-      for (uint32_t texCoordIndex = 0; texCoordIndex < numTexCoords;
-           ++texCoordIndex) {
-        Vector2 texCoord = texCoordViews[texCoordIndex][vertexIndex];
-        // Flip Y to comply with Unity's V-up coordinate convention
-        texCoord.y = 1 - texCoord.y;
-        *reinterpret_cast<Vector2*>(pWritePos) = texCoord;
-        pWritePos += sizeof(Vector2);
-      }
-    }
-  } else {
-    for (int64_t i = 0; i < vertexCount; ++i) {
-      *reinterpret_cast<Vector3*>(pWritePos) = positionView[i];
+  for (int64_t i = 0; i < vertexCount; ++i) {
+    TIndex vertexIndex = duplicateVertices ? indices[i] : i;
+    *reinterpret_cast<Vector3*>(pWritePos) = positionView[vertexIndex];
+    pWritePos += sizeof(Vector3);
+
+    if (computeFlatNormals) {
+      // skip computed normal
       pWritePos += sizeof(Vector3);
+    } else if (hasNormals) {
+      *reinterpret_cast<Vector3*>(pWritePos) = normalView[vertexIndex];
+      pWritePos += sizeof(Vector3);
+    }
 
-      if (hasNormals) {
-        *reinterpret_cast<Vector3*>(pWritePos) = normalView[i];
-        pWritePos += sizeof(Vector3);
-      }
-      if (hasTangents) {
-        *reinterpret_cast<Vector4*>(pWritePos) = tangentView[i];
-        pWritePos += sizeof(Vector4);
-      }
-      // Skip the slot allocated for vertex colors, we will fill them in
-      // bulk later.
-      if (hasVertexColors) {
-        pWritePos += sizeof(uint32_t);
-      }
-      for (uint32_t texCoordIndex = 0; texCoordIndex < numTexCoords;
-           ++texCoordIndex) {
-        Vector2 texCoord = texCoordViews[texCoordIndex][i];
-        // Flip Y to comply with Unity's V-up coordinate convention
-        texCoord.y = 1 - texCoord.y;
-        *reinterpret_cast<Vector2*>(pWritePos) = texCoord;
-        pWritePos += sizeof(Vector2);
-      }
+    if (hasTangents) {
+      *reinterpret_cast<Vector4*>(pWritePos) = tangentView[vertexIndex];
+      pWritePos += sizeof(Vector4);
+    }
+
+    // Skip the slot allocated for vertex colors, we will fill them in
+    // bulk later.
+    if (hasVertexColors) {
+      pWritePos += sizeof(uint32_t);
+    }
+
+    for (uint32_t texCoordIndex = 0; texCoordIndex < numTexCoords;
+         ++texCoordIndex) {
+      Vector2 texCoord = texCoordViews[texCoordIndex][vertexIndex];
+      // Flip Y to comply with Unity's V-up coordinate convention
+      texCoord.y = 1 - texCoord.y;
+      *reinterpret_cast<Vector2*>(pWritePos) = texCoord;
+      pWritePos += sizeof(Vector2);
     }
   }
 
