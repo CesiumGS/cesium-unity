@@ -543,16 +543,14 @@ namespace CesiumForUnity
                     // The default Unity install path on Windows does contain spaces as it's put into "Program Files".
                     // Use subst to map the Emscripten directory to a drive letter, eliminating the space.
                     // When the process finishes, we will delete the mapping.
-                    for (char driveLetter = 'M'; driveLetter <= 'Z'; driveLetter++)
+                    //for (char driveLetter = 'M'; driveLetter <= 'Z'; driveLetter++)
+                    char driveLetter = 'M';
+                    if (!Directory.Exists(driveLetter + ":\\"))
                     {
-                        if (!Directory.Exists(driveLetter + ":\\"))
-                        {
-                            Process.Start("subst", driveLetter + ": \"" + emscriptenDir + "\"").WaitForExit();
-                            deleteTemporaryEmscriptenDir = true;
-                            emscriptenDir = driveLetter + ":\\";
-                            break;
-                        }
+                        Process.Start("subst", driveLetter + ": \"" + emscriptenDir + "\"").WaitForExit();
+                        deleteTemporaryEmscriptenDir = true;
                     }
+                    emscriptenDir = driveLetter + ":\\";
                 }
             }
 
@@ -615,7 +613,6 @@ namespace CesiumForUnity
                         if (path == "")
                             path = Environment.GetEnvironmentVariable("Path");
                         startInfo.EnvironmentVariables["PATH"] = $"{emscriptenDir}/emscripten;{emscriptenDir}/node;{emscriptenDir}/python;{emscriptenDir}/python/bin;{path}";
-                        UnityEngine.Debug.Log($"!!!! EM_CONFIG: {EM_CONFIG}");
                     }
 
                     List<string> args = new List<string>()
@@ -682,11 +679,14 @@ namespace CesiumForUnity
                 {
                     try
                     {
-                        Process.Start("subst", emscriptenDir + " /D").WaitForExit();
+                        var driveLetter = emscriptenDir[0];
+                        UnityEngine.Debug.Log("Deleting temporary Emscripten drive mapping: " + driveLetter + ":");
+                        Process.Start("subst", driveLetter + ": /D").WaitForExit();
                     }
                     catch (Exception)
                     {
                         // Ignore any errors here.
+                        UnityEngine.Debug.LogWarning("Failed to delete temporary Emscripten drive mapping: " + emscriptenDir);
                     }
                 }
             }
