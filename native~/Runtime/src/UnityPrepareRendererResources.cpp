@@ -623,7 +623,7 @@ void loadPrimitive(
   }
 
   for (int64_t i = 0; i < vertexCount; ++i) {
-    TIndex vertexIndex = duplicateVertices ? indices[i] : i;
+    const TIndex vertexIndex = duplicateVertices ? indices[i] : i;
     *reinterpret_cast<Vector3*>(pWritePos) = positionView[vertexIndex];
     pWritePos += sizeof(Vector3);
 
@@ -658,7 +658,7 @@ void loadPrimitive(
 
   // Fill in vertex colors separately, if they exist.
   if (hasVertexColors) {
-    // Color comes after position and normal.
+    // Color comes after position, normal and tangent
     createAccessorView(
         gltf,
         colorAccessorIt->second,
