@@ -3,8 +3,7 @@
 ## ? - ?
 
 ##### Fixes :wrench:
-
-- Corrected glTF import process to flip textures and UV coordinates from glTF's U-right, V-down convention to comply with Unity's U-right, V-up coordinate system. 
+- Textures and UV coordinates from glTFs are now flipped to properly comply with Unity's U-right, V-up convention.
 
 ## v1.18.1 - 2025-10-01
 

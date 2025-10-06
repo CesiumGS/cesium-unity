@@ -606,7 +606,7 @@ void loadPrimitive(
       for (uint32_t texCoordIndex = 0; texCoordIndex < numTexCoords;
            ++texCoordIndex) {
         Vector2 texCoord = texCoordViews[texCoordIndex][vertexIndex];
-        // flip Y to comply with Unity's left-handed UV coordinates
+        // Flip Y to comply with Unity's Y-up coordinate convention
         texCoord.y = 1 - texCoord.y;
         *reinterpret_cast<Vector2*>(pWritePos) = texCoord;
         pWritePos += sizeof(Vector2);
@@ -628,7 +628,7 @@ void loadPrimitive(
       for (uint32_t texCoordIndex = 0; texCoordIndex < numTexCoords;
            ++texCoordIndex) {
         Vector2 texCoord = texCoordViews[texCoordIndex][i];
-        // flip Y to comply with Unity's left-handed UV coordinates
+        // Flip Y to comply with Unity's Y-up coordinate convention
         texCoord.y = 1 - texCoord.y;
         *reinterpret_cast<Vector2*>(pWritePos) = texCoord;
         pWritePos += sizeof(Vector2);
