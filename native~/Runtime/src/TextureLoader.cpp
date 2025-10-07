@@ -77,8 +77,8 @@ getUncompressedPixelFormat(const CesiumGltf::ImageAsset& image) {
  * UnityPrepareRenderResources.cpp for the corresponding UV flip.
  **/
 void copyAndFlipTexture(
-    std::uint8_t* dst,
-    const std::byte* src,
+    std::uint8_t* pDst,
+    const std::byte* pSrc,
     const size_t dataLength,
     const size_t height) {
   assert(
@@ -88,8 +88,8 @@ void copyAndFlipTexture(
   const size_t stride = dataLength / height;
 
   for (int32_t i = int32_t(height) - 1; i >= 0; --i) {
-    memcpy(dst, src + i * stride, stride);
-    dst += stride;
+    memcpy(pDst, pSrc + i * stride, stride);
+    pDst += stride;
   }
 }
 
@@ -144,7 +144,7 @@ TextureLoader::loadTexture(const CesiumGltf::ImageAsset& image, bool sRGB) {
       const size_t end = mip.byteOffset + mip.byteSize;
       if (start >= textureLength || end > textureLength) {
         // Invalid mip, skip this level.
-        mipHeight /= 2;
+        mipHeight >>= 1;
         continue;
       }
 
