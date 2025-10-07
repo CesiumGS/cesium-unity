@@ -71,6 +71,7 @@
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/quaternion.hpp>
 
+#include <mikktspace.h>
 #include <algorithm>
 #include <array>
 #include <unordered_map>
@@ -128,6 +129,154 @@ void computeFlatNormals(
     }
   }
 }
+
+struct MikkTPayload {
+  size_t stride;
+  int numVertices;
+  uint8_t* pPositions;
+  uint8_t* pNormals;
+  uint8_t* pTexCoords;
+  uint8_t* pTangents;
+
+  std::unordered_map<int,glm::vec3> normalCache;
+
+  const glm::vec3& getPosition(int index) const {
+    return *reinterpret_cast<glm::vec3*>(&pPositions[index * stride]);
+  }
+  const glm::vec3& getNormal(int index) const {
+    return *reinterpret_cast<glm::vec3*>(&pNormals[index * stride]);
+  }
+  const glm::vec2& getTexCoord(int index) const {
+    return *reinterpret_cast<glm::vec2*>(&pTexCoords[index * stride]);
+  }
+  glm::vec4& tangent(int index) {
+    return *reinterpret_cast<glm::vec4*>(&pTangents[index * stride]);
+  }
+
+};
+
+int mikkGetNumFaces(const SMikkTSpaceContext* context) {
+  const auto& payload = *reinterpret_cast<MikkTPayload*>(context->m_pUserData);
+  return payload.numVertices / 3;
+}
+
+int mikkGetNumVerticesOfFaces(
+    const SMikkTSpaceContext* context,
+    const int face) {
+  const auto& payload = *reinterpret_cast<MikkTPayload*>(context->m_pUserData);
+  return face < payload.numVertices / 3 ? 3 : 0;
+}
+
+void mikkGetPosition (
+    const SMikkTSpaceContext* context,
+    float position[3],
+    const int face,
+    const int vert) {
+  const auto& payload = *reinterpret_cast<MikkTPayload*>(context->m_pUserData);
+  const int index = 3 * face + vert;
+  const glm::vec3& pos = payload.getPosition(3 * face + vert);
+
+  position[0] = pos.x;
+  position[1] = pos.y;
+  position[2] = pos.z;
+}
+
+
+void mikkGetNormal(
+    const SMikkTSpaceContext* context,
+    float normal[3],
+    const int face,
+    const int vert) {
+  auto& payload = *reinterpret_cast<MikkTPayload*>(context->m_pUserData);
+
+  static bool debugMe = false;
+  glm::vec3* pNormal;
+  glm::vec3 debugNormal = { 1.0f,0.0f,1.0f};
+  if (payload.pNormals) {
+    int index = 3 * face + vert;
+    assert(index < payload.numVertices && "Invalid vertex index");
+    pNormal = reinterpret_cast<glm::vec3*>(payload.pNormals + index * payload.stride);
+  } else {
+    if (payload.normalCache.contains(face)) {
+      pNormal = &payload.normalCache[face];
+    } else {
+      // calculate normal for this face
+      const glm::vec3& p0 = payload.getPosition(face * 3 + 0);
+      const glm::vec3& p1 = payload.getPosition(face * 3 + 1);
+      const glm::vec3& p2 = payload.getPosition(face * 3 + 2);
+      // and cache it since we'll need it at least two more times.
+      payload.normalCache[face] = glm::normalize(glm::cross(p2 - p0, p1 - p0));
+      pNormal = &payload.normalCache[face];
+    }
+  }
+  normal[0] = pNormal->x;
+  normal[1] = pNormal->y;
+  normal[2] = pNormal->z;
+}
+
+void mikkGetTexCoords(
+    const SMikkTSpaceContext* context,
+    float uv[2],
+    const int face,
+    const int vert) {
+  const auto& payload = *reinterpret_cast<MikkTPayload*>(context->m_pUserData);
+  const glm::vec2& texCoord = payload.getTexCoord(face * 3 + vert);;
+  uv[0] = texCoord.x;
+  uv[1] = texCoord.y;
+}
+
+void mikkSetTSpaceBasic(
+    const SMikkTSpaceContext* context,
+    const float tangent[3],
+    const float sign,
+    const int face,
+    const int vert) {
+  auto& payload = *reinterpret_cast<MikkTPayload*>(context->m_pUserData);
+  glm::vec4 vTan { tangent[0], tangent[1], tangent[2], sign };
+
+  payload.tangent(face * 3 + vert) = vTan;
+}
+
+template<typename TIndex>
+void computeTangents(
+  uint8_t* pWritePos,
+  const size_t stride,
+  const TIndex*, // indices,
+  const int32_t numIndices,
+  uint8_t* pPositions,
+  uint8_t* pNormals,
+  uint8_t* pTexCoords) {
+
+  MikkTPayload payload {};
+  payload.stride = stride;
+  payload.numVertices = numIndices;
+  payload.pPositions = pPositions;;
+  payload.pNormals = pNormals;
+  payload.pTexCoords = pTexCoords;
+  payload.pTangents = pWritePos;
+
+  SMikkTSpaceInterface interface {};
+  interface.m_getNormal = mikkGetNormal;
+  interface.m_getNumFaces = mikkGetNumFaces;
+  interface.m_getNumVerticesOfFace = mikkGetNumVerticesOfFaces;
+  interface.m_getPosition = mikkGetPosition;
+  interface.m_getTexCoord = mikkGetTexCoords;
+  interface.m_setTSpaceBasic = mikkSetTSpaceBasic;
+
+  /*
+  for (int i=0; i < numIndices; ++i) {
+    *reinterpret_cast<glm::vec4*>(pWritePos) = {1,0,1,1};
+    pWritePos += stride;
+  }
+  */
+
+  SMikkTSpaceContext context {};
+  context.m_pUserData = &payload;
+  context.m_pInterface = &interface;
+
+  genTangSpaceDefault(&context);
+}
+
 
 /**
  * @brief The result after populating Unity mesh data with loaded glTF content.
@@ -356,6 +505,7 @@ void loadPrimitive(
           ? false
           : pMaterial && pMaterial->hasExtension<ExtensionKhrMaterialsUnlit>();
 
+  bool duplicateVertices = false;
   bool hasNormals = false;
   bool computeFlatNormals = false;
   auto normalAccessorIt = primitive.attributes.find("NORMAL");
@@ -366,21 +516,25 @@ void loadPrimitive(
     hasNormals = normalView.status() == AccessorViewStatus::Valid;
   } else if (
       !primitiveInfo.isUnlit && primitive.mode != MeshPrimitive::Mode::POINTS) {
-    computeFlatNormals = hasNormals = true;
+    duplicateVertices = computeFlatNormals = hasNormals = true;
   }
 
   bool hasTangents = false;
+  bool computeTangents = false;
   auto tangentAcccessorIt = primitive.attributes.find("TANGENT");
   AccessorView<UnityEngine::Vector4> tangentView;
   if (tangentAcccessorIt != primitive.attributes.end()) {
     tangentView =
         AccessorView<UnityEngine::Vector4>(gltf, tangentAcccessorIt->second);
     hasTangents = tangentView.status() == AccessorViewStatus::Valid;
+  } else if (!primitiveInfo.isUnlit && primitive.mode != MeshPrimitive::Mode::POINTS) {
+    computeTangents = hasTangents = options.alwaysIncludeTangents;// || pMaterial->normalTexture;
+    duplicateVertices |= computeTangents;
   }
 
-  // Check if  we need to upgrade to a large index type to accommodate the
+  // Check if we need to upgrade to a large index type to accommodate the
   // larger number of vertices we need for flat normals.
-  if (computeFlatNormals && indexFormat == IndexFormat::UInt16 &&
+  if (duplicateVertices && indexFormat == IndexFormat::UInt16 &&
       indexCount >= std::numeric_limits<uint16_t>::max()) {
     loadPrimitive<uint32_t>(
         meshData,
@@ -572,7 +726,7 @@ void loadPrimitive(
     attributes.Item(i, descriptor[i]);
   }
 
-  const int32_t vertexCount = computeFlatNormals
+  const int32_t vertexCount = duplicateVertices
                                   ? indexCount
                                   : static_cast<int32_t>(positionView.size());
   meshData.SetVertexBufferParams(vertexCount, attributes);
@@ -600,7 +754,9 @@ void loadPrimitive(
     stride += sizeof(Vector3);
   }
 
+  size_t tangentByteOffset;
   if (hasTangents) {
+    tangentByteOffset = stride;
     stride += sizeof(Vector4);
   }
 
@@ -610,9 +766,9 @@ void loadPrimitive(
     stride += sizeof(uint32_t);
   }
 
+  size_t vertexCoordByteOffset = stride;
   stride += numTexCoords * sizeof(Vector2);
 
-  const bool duplicateVertices = computeFlatNormals;
   if (computeFlatNormals) {
     ::computeFlatNormals(
         pWritePos + normalByteOffset,
@@ -635,7 +791,9 @@ void loadPrimitive(
       pWritePos += sizeof(Vector3);
     }
 
-    if (hasTangents) {
+    if (computeTangents) {
+      pWritePos += sizeof(Vector4);
+    } else if (hasTangents) {
       *reinterpret_cast<Vector4*>(pWritePos) = tangentView[vertexIndex];
       pWritePos += sizeof(Vector4);
     }
@@ -666,7 +824,7 @@ void loadPrimitive(
             pBufferStart + colorByteOffset,
             stride,
             static_cast<size_t>(vertexCount),
-            computeFlatNormals,
+            duplicateVertices,
             indices});
   }
 
@@ -675,6 +833,16 @@ void loadPrimitive(
     for (TIndex i = 0; i < indexCount; i++) {
       indices[i] = i;
     }
+  }
+
+  if (computeTangents) {
+    ::computeTangents(pBufferStart + tangentByteOffset,
+        stride,
+        indices,
+        indexCount,
+        pBufferStart,
+        pBufferStart + normalByteOffset,
+        pBufferStart + vertexCoordByteOffset);
   }
 
   meshData.subMeshCount(1);

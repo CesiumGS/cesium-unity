@@ -35,6 +35,7 @@ namespace CesiumForUnity
         //private SerializedProperty _useLodTransitions;
         //private SerializedProperty _lodTransitionLength;
         private SerializedProperty _generateSmoothNormals;
+        private SerializedProperty _alwaysIncludeTangents;
 
         private SerializedProperty _pointCloudShading;
 
@@ -84,6 +85,7 @@ namespace CesiumForUnity
             //    this.serializedObject.FindProperty("_lodTransitionLength");
             this._generateSmoothNormals =
                 this.serializedObject.FindProperty("_generateSmoothNormals");
+            this._alwaysIncludeTangents = this.serializedObject.FindProperty("_alwaysIncludeTangents");
             this._ignoreKhrMaterialsUnlit = this.serializedObject.FindProperty("_ignoreKhrMaterialsUnlit");
 
             this._pointCloudShading = this.serializedObject.FindProperty("_pointCloudShading");
@@ -417,7 +419,7 @@ namespace CesiumForUnity
             //    "Only relevant if \"Use Lod Transitions\" is true.");
             //EditorGUILayout.PropertyField(this._lodTransitionLength, lodTransitionLengthContent);
             //EditorGUI.EndDisabledGroup();
-
+      
             GUIContent generateSmoothNormalsContent = new GUIContent(
                 "Generate Smooth Normals",
                 "Whether to generate smooth normals when normals are missing in the glTF." +
@@ -427,6 +429,16 @@ namespace CesiumForUnity
                 "normals requires duplicating vertices. This option allows the glTFs to be " +
                 "rendered with smooth normals instead when the original glTF is missing normals.");
             EditorGUILayout.PropertyField(this._generateSmoothNormals, generateSmoothNormalsContent);
+
+            var alwaysIncludeTangents = new GUIContent(
+                "Always Include Tangents",
+                "Whether to generate tangents when they are missing from the glTF. " +
+                "According to the glTF spec: \"When tangents are not specified, client " +
+                "implementations SHOULD calculate tangents using default MikkTSpace algorithms " +
+                "with the specified vertex positions, normals, and texture coordinates " +
+                "associated with the normal texture.\""
+            );
+            EditorGUILayout.PropertyField(this._alwaysIncludeTangents, alwaysIncludeTangents);                  
 
             var ignoreKhrMaterialsUnlit = new GUIContent(
                 "Ignore KHR_materials_unlit",

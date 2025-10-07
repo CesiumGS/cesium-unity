@@ -17,10 +17,14 @@ struct CreateModelOptions {
    */
   bool ignoreKhrMaterialUnlit = false;
 
+  bool alwaysIncludeTangents = false;
+
   CreateModelOptions() = default;
   explicit CreateModelOptions(
       const DotNet::CesiumForUnity::Cesium3DTileset& tilesetComponent)
-      : ignoreKhrMaterialUnlit(tilesetComponent.ignoreKhrMaterialsUnlit()) {}
+      : ignoreKhrMaterialUnlit(tilesetComponent.ignoreKhrMaterialsUnlit()),
+  alwaysIncludeTangents(tilesetComponent.alwaysIncludeTangents())
+         {}
 };
 /**
  * @brief Information about how a given glTF primitive was converted into
