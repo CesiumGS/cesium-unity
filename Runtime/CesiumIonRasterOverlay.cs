@@ -78,6 +78,23 @@ namespace CesiumForUnity
             }
         }
 
+        [SerializeField]
+        private string _assetOptions = "";
+
+        /// <summary>
+        /// Extra options to pass to Cesium ion when accessing the asset.
+        /// This should be a JSON string.
+        /// </summary>
+        public string assetOptions
+        {
+            get => this._assetOptions;
+            set
+            {
+                this._assetOptions = value;
+                this.Refresh();
+            }
+        }
+
         /// <inheritdoc/>
         protected override partial void AddToTileset(Cesium3DTileset tileset);
         /// <inheritdoc/>
