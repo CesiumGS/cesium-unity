@@ -80,14 +80,13 @@ void copyAndFlipTexture(
     std::uint8_t* pDst,
     const std::byte* pSrc,
     const size_t dataLength,
-    const size_t height) {
+    const size_t stride) {
   assert(
-      (dataLength % height) == 0 &&
-      "Image data size is not an even multiple of image height.");
+      (dataLength % stride == 0) &&
+      "Image data size is not an even multiple of the given row pitch.");
 
-  const size_t stride = dataLength / height;
-
-  for (int32_t i = int32_t(height) - 1; i >= 0; --i) {
+  const int32_t height = static_cast<int32_t>(dataLength / stride);
+  for (int32_t i = height-1; i >= 0; --i) {
     memcpy(pDst, pSrc + i * stride, stride);
     pDst += stride;
   }
@@ -124,38 +123,31 @@ TextureLoader::loadTexture(const CesiumGltf::ImageAsset& image, bool sRGB) {
   if (image.mipPositions.empty()) {
     // No mipmaps, copy the whole thing and then let Unity generate mipmaps on a
     // worker thread.
+    const size_t stride = image.pixelData.size() / image.height;
     copyAndFlipTexture(
         pixels,
         image.pixelData.data(),
         image.pixelData.size(),
-        image.height);
+        stride);
     result.Apply(false, true);
   } else {
     // Copy the mipmaps explicitly.
     std::uint8_t* pWritePosition = pixels;
     const std::byte* pReadBuffer = image.pixelData.data();
 
-    // Track image height for each mip level
-    size_t mipHeight = image.height;
-
     for (const ImageAssetMipPosition& mip : image.mipPositions) {
-      assert(mipHeight > 0 && "Invalid image size.");
       const size_t start = mip.byteOffset;
       const size_t end = mip.byteOffset + mip.byteSize;
       if (start >= textureLength || end > textureLength) {
         // Invalid mip, skip this level.
-        mipHeight >>= 1;
         continue;
       }
-
       copyAndFlipTexture(
           pWritePosition,
           pReadBuffer + start,
           mip.byteSize,
-          mipHeight);
+          mip.rowPitch);
       pWritePosition += mip.byteSize;
-      // adjust height for next mip level.
-      mipHeight >>= 1;
     }
 
     result.Apply(false, true);
