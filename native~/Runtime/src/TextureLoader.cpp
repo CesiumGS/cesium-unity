@@ -86,7 +86,7 @@ void copyAndFlipTexture(
       "Image data size is not an even multiple of the given row pitch.");
 
   const int32_t height = static_cast<int32_t>(dataLength / stride);
-  for (int32_t i = height-1; i >= 0; --i) {
+  for (int32_t i = height - 1; i >= 0; --i) {
     memcpy(pDst, pSrc + i * stride, stride);
     pDst += stride;
   }
