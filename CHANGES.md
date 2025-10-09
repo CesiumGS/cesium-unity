@@ -3,6 +3,7 @@
 ## ? - ?
 
 ##### Fixes :wrench:
+
 - Textures and UV coordinates from glTFs are now flipped to properly comply with Unity's U-right, V-up convention.
 - Vertex tangents from glTFs are properly imported. 
 
