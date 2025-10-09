@@ -69,6 +69,29 @@ getUncompressedPixelFormat(const CesiumGltf::ImageAsset& image) {
   }
 }
 
+/**
+ * Copy image data while flipping the data vertically. According to the glTF 2.0
+ * spec, glTF stores textures in x-right, y-down coordinates.
+ * However, Unity uses x-right, y-up coordinates, so we need to flip the
+ * textures and UV coordinates. See loadPrimitive() in
+ * UnityPrepareRenderResources.cpp for the corresponding UV flip.
+ **/
+void copyAndFlipTexture(
+    std::uint8_t* pDst,
+    const std::byte* pSrc,
+    const size_t dataLength,
+    const size_t stride) {
+  assert(
+      (dataLength % stride == 0) &&
+      "Image data size is not an even multiple of the given row pitch.");
+
+  const int32_t height = static_cast<int32_t>(dataLength / stride);
+  for (int32_t i = height - 1; i >= 0; --i) {
+    memcpy(pDst, pSrc + i * stride, stride);
+    pDst += stride;
+  }
+}
+
 } // namespace
 
 UnityEngine::Texture
@@ -100,7 +123,12 @@ TextureLoader::loadTexture(const CesiumGltf::ImageAsset& image, bool sRGB) {
   if (image.mipPositions.empty()) {
     // No mipmaps, copy the whole thing and then let Unity generate mipmaps on a
     // worker thread.
-    std::memcpy(pixels, image.pixelData.data(), image.pixelData.size());
+    const size_t stride = image.pixelData.size() / image.height;
+    copyAndFlipTexture(
+        pixels,
+        image.pixelData.data(),
+        image.pixelData.size(),
+        stride);
     result.Apply(false, true);
   } else {
     // Copy the mipmaps explicitly.
@@ -108,12 +136,17 @@ TextureLoader::loadTexture(const CesiumGltf::ImageAsset& image, bool sRGB) {
     const std::byte* pReadBuffer = image.pixelData.data();
 
     for (const ImageAssetMipPosition& mip : image.mipPositions) {
-      size_t start = mip.byteOffset;
-      size_t end = mip.byteOffset + mip.byteSize;
-      if (start >= textureLength || end > textureLength)
-        continue; // invalid mip spec, ignore it
-
-      std::memcpy(pWritePosition, pReadBuffer + start, mip.byteSize);
+      const size_t start = mip.byteOffset;
+      const size_t end = mip.byteOffset + mip.byteSize;
+      if (start >= textureLength || end > textureLength) {
+        // Invalid mip, skip this level.
+        continue;
+      }
+      copyAndFlipTexture(
+          pWritePosition,
+          pReadBuffer + start,
+          mip.byteSize,
+          mip.rowPitch);
       pWritePosition += mip.byteSize;
     }
 

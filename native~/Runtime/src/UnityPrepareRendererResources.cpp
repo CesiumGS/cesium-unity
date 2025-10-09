@@ -605,8 +605,10 @@ void loadPrimitive(
       }
       for (uint32_t texCoordIndex = 0; texCoordIndex < numTexCoords;
            ++texCoordIndex) {
-        *reinterpret_cast<Vector2*>(pWritePos) =
-            texCoordViews[texCoordIndex][vertexIndex];
+        Vector2 texCoord = texCoordViews[texCoordIndex][vertexIndex];
+        // Flip Y to comply with Unity's V-up coordinate convention
+        texCoord.y = 1 - texCoord.y;
+        *reinterpret_cast<Vector2*>(pWritePos) = texCoord;
         pWritePos += sizeof(Vector2);
       }
     }
@@ -614,22 +616,21 @@ void loadPrimitive(
     for (int64_t i = 0; i < vertexCount; ++i) {
       *reinterpret_cast<Vector3*>(pWritePos) = positionView[i];
       pWritePos += sizeof(Vector3);
-
       if (hasNormals) {
         *reinterpret_cast<Vector3*>(pWritePos) = normalView[i];
         pWritePos += sizeof(Vector3);
       }
-
       // Skip the slot allocated for vertex colors, we will fill them in
       // bulk later.
       if (hasVertexColors) {
         pWritePos += sizeof(uint32_t);
       }
-
       for (uint32_t texCoordIndex = 0; texCoordIndex < numTexCoords;
            ++texCoordIndex) {
-        *reinterpret_cast<Vector2*>(pWritePos) =
-            texCoordViews[texCoordIndex][i];
+        Vector2 texCoord = texCoordViews[texCoordIndex][i];
+        // Flip Y to comply with Unity's V-up coordinate convention
+        texCoord.y = 1 - texCoord.y;
+        *reinterpret_cast<Vector2*>(pWritePos) = texCoord;
         pWritePos += sizeof(Vector2);
       }
     }
