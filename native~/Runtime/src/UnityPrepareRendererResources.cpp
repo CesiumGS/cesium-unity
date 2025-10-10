@@ -370,7 +370,7 @@ void loadPrimitive(
   }
 
   bool hasTangents = false;
-  auto tangentAcccessorIt = primitive.attributes.find("TANGENT");
+  auto tangentAccessorIt = primitive.attributes.find("TANGENT");
   AccessorView<UnityEngine::Vector4> tangentView;
   if (tangentAcccessorIt != primitive.attributes.end()) {
     tangentView =
