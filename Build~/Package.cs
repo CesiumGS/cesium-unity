@@ -143,17 +143,18 @@ namespace Build
                     var x64ConfigureArgs = configureArgs.Concat(new[]
                     {
                         "-DCMAKE_OSX_ARCHITECTURES=x86_64",
+                        "-DCMAKE_SYSTEM_NAME=Darwin",
                         "-DCMAKE_INSTALL_PREFIX=" + Path.Combine(Utility.PackageRoot, "Editor", "x86_64")
                     });
                     Utility.Run("cmake", x64ConfigureArgs);
 
                     buildArgs[1] = "native~/build-x64";
                     Utility.Run("cmake", buildArgs);
-
                     configureArgs[1] = "native~/build-arm64";
                     var armConfigureArgs = configureArgs.Concat(new[]
                     {
                         "-DCMAKE_OSX_ARCHITECTURES=arm64",
+                        "-DCMAKE_SYSTEM_NAME=Darwin",
                         "-DCMAKE_INSTALL_PREFIX=" + Path.Combine(Utility.PackageRoot, "Editor", "arm64")
                     });
                     Utility.Run("cmake", armConfigureArgs);
