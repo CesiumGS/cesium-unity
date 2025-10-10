@@ -369,6 +369,15 @@ void loadPrimitive(
     computeFlatNormals = hasNormals = true;
   }
 
+  bool hasTangents = false;
+  auto tangentAccessorIt = primitive.attributes.find("TANGENT");
+  AccessorView<UnityEngine::Vector4> tangentView;
+  if (tangentAcccessorIt != primitive.attributes.end()) {
+    tangentView =
+        AccessorView<UnityEngine::Vector4>(gltf, tangentAcccessorIt->second);
+    hasTangents = tangentView.status() == AccessorViewStatus::Valid;
+  }
+
   // Check if  we need to upgrade to a large index type to accommodate the
   // larger number of vertices we need for flat normals.
   if (computeFlatNormals && indexFormat == IndexFormat::UInt16 &&
@@ -446,6 +455,15 @@ void loadPrimitive(
     descriptor[numberOfAttributes].attribute = VertexAttribute::Normal;
     descriptor[numberOfAttributes].format = VertexAttributeFormat::Float32;
     descriptor[numberOfAttributes].dimension = 3;
+    descriptor[numberOfAttributes].stream = streamIndex;
+    ++numberOfAttributes;
+  }
+
+  if (hasTangents) {
+    assert(numberOfAttributes < MAX_ATTRIBUTES);
+    descriptor[numberOfAttributes].attribute = VertexAttribute::Tangent;
+    descriptor[numberOfAttributes].format = VertexAttributeFormat::Float32;
+    descriptor[numberOfAttributes].dimension = 4;
     descriptor[numberOfAttributes].stream = streamIndex;
     ++numberOfAttributes;
   }
@@ -554,9 +572,9 @@ void loadPrimitive(
     attributes.Item(i, descriptor[i]);
   }
 
-  int32_t vertexCount = computeFlatNormals
-                            ? indexCount
-                            : static_cast<int32_t>(positionView.size());
+  const int32_t vertexCount = computeFlatNormals
+                                  ? indexCount
+                                  : static_cast<int32_t>(positionView.size());
   meshData.SetVertexBufferParams(vertexCount, attributes);
 
   NativeArray1<uint8_t> nativeVertexBuffer =
@@ -571,21 +589,30 @@ void loadPrimitive(
   // The vertex layout will be as follows:
   // 1. position
   // 2. normals (skip if N/A)
-  // 3. vertex colors (skip if N/A)
-  // 4. texcoords (first all TEXCOORD_i, then all _CESIUMOVERLAY_i)
+  // 3. tangents (skip if N/A)
+  // 4. vertex colors (skip if N/A)
+  // 5. texcoords (first all TEXCOORD_i, then all _CESIUMOVERLAY_i)
 
   size_t stride = sizeof(Vector3);
-  size_t normalByteOffset, colorByteOffset;
+  size_t normalByteOffset;
   if (hasNormals) {
     normalByteOffset = stride;
     stride += sizeof(Vector3);
   }
+
+  if (hasTangents) {
+    stride += sizeof(Vector4);
+  }
+
+  size_t colorByteOffset;
   if (hasVertexColors) {
     colorByteOffset = stride;
     stride += sizeof(uint32_t);
   }
+
   stride += numTexCoords * sizeof(Vector2);
 
+  const bool duplicateVertices = computeFlatNormals;
   if (computeFlatNormals) {
     ::computeFlatNormals(
         pWritePos + normalByteOffset,
@@ -593,52 +620,45 @@ void loadPrimitive(
         indices,
         indexCount,
         positionView);
-    for (int64_t i = 0; i < vertexCount; ++i) {
-      TIndex vertexIndex = indices[i];
-      *reinterpret_cast<Vector3*>(pWritePos) = positionView[vertexIndex];
-      // skip position and normal
-      pWritePos += 2 * sizeof(Vector3);
-      // Skip the slot allocated for vertex colors, we will fill them in
-      // bulk later.
-      if (hasVertexColors) {
-        pWritePos += sizeof(uint32_t);
-      }
-      for (uint32_t texCoordIndex = 0; texCoordIndex < numTexCoords;
-           ++texCoordIndex) {
-        Vector2 texCoord = texCoordViews[texCoordIndex][vertexIndex];
-        // Flip Y to comply with Unity's V-up coordinate convention
-        texCoord.y = 1 - texCoord.y;
-        *reinterpret_cast<Vector2*>(pWritePos) = texCoord;
-        pWritePos += sizeof(Vector2);
-      }
-    }
-  } else {
-    for (int64_t i = 0; i < vertexCount; ++i) {
-      *reinterpret_cast<Vector3*>(pWritePos) = positionView[i];
+  }
+
+  for (int64_t i = 0; i < vertexCount; ++i) {
+    const TIndex vertexIndex = duplicateVertices ? indices[i] : i;
+    *reinterpret_cast<Vector3*>(pWritePos) = positionView[vertexIndex];
+    pWritePos += sizeof(Vector3);
+
+    if (computeFlatNormals) {
+      // skip computed normal
       pWritePos += sizeof(Vector3);
-      if (hasNormals) {
-        *reinterpret_cast<Vector3*>(pWritePos) = normalView[i];
-        pWritePos += sizeof(Vector3);
-      }
-      // Skip the slot allocated for vertex colors, we will fill them in
-      // bulk later.
-      if (hasVertexColors) {
-        pWritePos += sizeof(uint32_t);
-      }
-      for (uint32_t texCoordIndex = 0; texCoordIndex < numTexCoords;
-           ++texCoordIndex) {
-        Vector2 texCoord = texCoordViews[texCoordIndex][i];
-        // Flip Y to comply with Unity's V-up coordinate convention
-        texCoord.y = 1 - texCoord.y;
-        *reinterpret_cast<Vector2*>(pWritePos) = texCoord;
-        pWritePos += sizeof(Vector2);
-      }
+    } else if (hasNormals) {
+      *reinterpret_cast<Vector3*>(pWritePos) = normalView[vertexIndex];
+      pWritePos += sizeof(Vector3);
+    }
+
+    if (hasTangents) {
+      *reinterpret_cast<Vector4*>(pWritePos) = tangentView[vertexIndex];
+      pWritePos += sizeof(Vector4);
+    }
+
+    // Skip the slot allocated for vertex colors, we will fill them in
+    // bulk later.
+    if (hasVertexColors) {
+      pWritePos += sizeof(uint32_t);
+    }
+
+    for (uint32_t texCoordIndex = 0; texCoordIndex < numTexCoords;
+         ++texCoordIndex) {
+      Vector2 texCoord = texCoordViews[texCoordIndex][vertexIndex];
+      // Flip Y to comply with Unity's V-up coordinate convention
+      texCoord.y = 1 - texCoord.y;
+      *reinterpret_cast<Vector2*>(pWritePos) = texCoord;
+      pWritePos += sizeof(Vector2);
     }
   }
 
   // Fill in vertex colors separately, if they exist.
   if (hasVertexColors) {
-    // Color comes after position and normal.
+    // Color comes after position, normal and tangent
     createAccessorView(
         gltf,
         colorAccessorIt->second,
@@ -650,7 +670,7 @@ void loadPrimitive(
             indices});
   }
 
-  if (computeFlatNormals) {
+  if (duplicateVertices) {
     // rewrite indices
     for (TIndex i = 0; i < indexCount; i++) {
       indices[i] = i;
