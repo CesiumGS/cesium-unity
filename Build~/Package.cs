@@ -150,6 +150,7 @@ namespace Build
 
                     buildArgs[1] = "native~/build-x64";
                     Utility.Run("cmake", buildArgs);
+                    
                     configureArgs[1] = "native~/build-arm64";
                     var armConfigureArgs = configureArgs.Concat(new[]
                     {
