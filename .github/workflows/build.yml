@@ -164,7 +164,7 @@ jobs:
           reporter: dotnet-nunit
   MacOS:
     needs: [QuickChecks]
-    runs-on: macos-latest
+    runs-on: macos-14
     # Only allow a single macOS build at a time, for Unity licensing reasons
     concurrency: mac
     steps:
@@ -192,6 +192,13 @@ jobs:
           sudo rm -rf /Applications/Xcode_16_beta_6.app
           ls /Applications
           df -h
+      - name: Set XCode version
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: "15.4"
+      - name: Print XCode version
+        run: |
+          xcode-select --print-path
       - name: Check out repository code
         uses: actions/checkout@v4
         with:

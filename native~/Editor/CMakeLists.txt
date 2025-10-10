@@ -38,6 +38,15 @@ target_link_libraries(
         enum-flags
 )
 
+# cpp-httplib, as of v0.26.0, seems to be missing a required dependency on CoreServices on macOS, so add it here.
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+  target_link_libraries(
+    CesiumForUnityNative-Editor
+    PRIVATE
+      "-framework CoreServices"
+  )
+endif()
+
 set_target_properties(
     CesiumForUnityNative-Editor
     PROPERTIES
