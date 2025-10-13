@@ -147,7 +147,7 @@ namespace CesiumForUnity
 
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            if (EditorGUILayout.LinkButton("Maps Tile API Style reference"))
+            if (EditorGUILayout.LinkButton("Map Tiles API Style reference"))
             {
                 Application.OpenURL("https://developers.google.com/maps/documentation/tile/style-reference");
             }
