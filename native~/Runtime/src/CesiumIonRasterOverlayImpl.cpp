@@ -67,6 +67,10 @@ void CesiumIonRasterOverlayImpl::AddToTileset(
         options,
         apiUrl);
 
+    if (!System::String::IsNullOrEmpty(overlay.assetOptions())) {
+      this->_pOverlay->setAssetOptions(overlay.assetOptions().ToStlString());
+    }
+
     pTileset->getOverlays().add(this->_pOverlay);
   } else {
     // Resolve the API URL if it's not already in progress.
