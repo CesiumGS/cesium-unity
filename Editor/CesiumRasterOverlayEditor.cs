@@ -44,6 +44,28 @@ namespace CesiumForUnity
             this._materialKeys = new string[] { };
         }
 
+        public virtual void DrawInspectorButtons()
+        {
+            GUILayout.BeginHorizontal();
+            var refreshOverlayContent = new GUIContent("Refresh Overlay",
+                "Refreshes this overlay.");
+            if (GUILayout.Button(refreshOverlayContent))
+            {
+                this._overlay?.Refresh();
+            }
+            //
+            //
+            // var troubleshootTokenContent = new GUIContent(
+            //     "Troubleshoot Token",
+            //     "Check if the Cesium ion token used to access this raster overlay is working " +
+            //     "correctly, and fix it if necessary.");
+            // if (GUILayout.Button(troubleshootTokenContent))
+            // {
+            //     IonTokenTroubleshootingWindow.ShowWindow(this._ionOverlay, false);
+            // }
+            GUILayout.EndHorizontal();
+        }
+        
         public override void OnInspectorGUI()
         {
             this.serializedObject.Update();
@@ -76,6 +98,18 @@ namespace CesiumForUnity
                 EditorGUILayout.HelpBox("CesiumRasterOverlay should be used in combination with a " +
                     "Cesium3DTileset component on this GameObject.", MessageType.Warning);
             }
+        }
+
+        private void DrawRefreshButton()
+        {
+            if (this._overlay != null)
+            {
+                var refreshOverlayContent = new GUIContent("Refresh Overlay", "Refresh this raster overlay");
+                if (GUILayout.Button(refreshOverlayContent)) {
+                    this._overlay.Refresh();
+                }
+            }
+            
         }
 
         private void UpdateMaterialKeys()

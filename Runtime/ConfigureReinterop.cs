@@ -320,6 +320,11 @@ namespace CesiumForUnity
             bingMapsRasterOverlay.bingMapsKey = bingMapsRasterOverlay.bingMapsKey;
             bingMapsRasterOverlay.mapStyle = bingMapsRasterOverlay.mapStyle;
             baseOverlay = bingMapsRasterOverlay;
+            
+            var azureMapsOverlay = go.GetComponent<CesiumAzureMapsRasterOverlay>();
+            azureMapsOverlay.mapStyle = azureMapsOverlay.mapStyle;
+            azureMapsOverlay.azureMapsKey = azureMapsOverlay.azureMapsKey;
+            
 
             CesiumGoogleMapTilesRasterOverlay googleMapTilesRasterOverlay =
                 go.GetComponent<CesiumGoogleMapTilesRasterOverlay>();
@@ -967,4 +972,6 @@ namespace CesiumForUnity
         }
     }
 }
+
+
 

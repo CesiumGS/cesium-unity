@@ -3,12 +3,12 @@ using UnityEngine;
 
 namespace CesiumForUnity
 {
-    [CustomEditor(typeof(CesiumBingMapsRasterOverlay))]
-    public class CesiumBingMapsRasterOverlayEditor : Editor
+    [CustomEditor(typeof(CesiumAzureMapsRasterOverlay))]
+    public class CesiumAzureMapsRasterOverlayEditor : Editor
     {
         private CesiumRasterOverlayEditor _rasterOverlayEditor;
 
-        private SerializedProperty _bingMapsKey;
+        private SerializedProperty _azureMapsKey;
         private SerializedProperty _mapStyle;
 
         private void OnEnable()
@@ -18,7 +18,7 @@ namespace CesiumForUnity
                                                      this.target,
                                                      typeof(CesiumRasterOverlayEditor));
 
-            this._bingMapsKey = this.serializedObject.FindProperty("_bingMapsKey");
+            this._azureMapsKey = this.serializedObject.FindProperty("_azureMapsKey");
             this._mapStyle = this.serializedObject.FindProperty("_mapStyle");
         }
 
@@ -36,19 +36,19 @@ namespace CesiumForUnity
             this._rasterOverlayEditor?.DrawInspectorButtons();
 
             EditorGUIUtility.labelWidth = CesiumEditorStyle.inspectorLabelWidth;
-            this.DrawBingMapsProperties();
+            this.DrawAzureMapsProperties();
             EditorGUILayout.Space(5);
             this.DrawRasterOverlayProperties();
 
             this.serializedObject.ApplyModifiedProperties();
         }
 
-        private void DrawBingMapsProperties()
+        private void DrawAzureMapsProperties()
         {
-            GUIContent bingMapsKeyContent = new GUIContent(
-                "Bing Maps Key",
-                "The Bing Maps API key to use.");
-            EditorGUILayout.DelayedTextField(this._bingMapsKey, bingMapsKeyContent);
+            GUIContent azureMapsKeyContent = new GUIContent(
+                "Azure Maps Key",
+                "The Azure Maps API key to use.");
+            EditorGUILayout.DelayedTextField(this._azureMapsKey, azureMapsKeyContent);
 
             GUIContent mapStyleContent = new GUIContent(
                 "Map Style",
@@ -56,12 +56,6 @@ namespace CesiumForUnity
             EditorGUILayout.PropertyField(this._mapStyle, mapStyleContent);
         }
 
-        private void DrawRasterOverlayProperties()
-        {
-            if (this._rasterOverlayEditor != null)
-            {
-                this._rasterOverlayEditor.OnInspectorGUI();
-            }
-        }
+        private void DrawRasterOverlayProperties() => this._rasterOverlayEditor?.OnInspectorGUI();
     }
 }
