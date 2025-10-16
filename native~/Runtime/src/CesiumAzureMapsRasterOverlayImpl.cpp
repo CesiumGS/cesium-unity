@@ -66,6 +66,11 @@ CesiumAzureMapsRasterOverlayImpl::~CesiumAzureMapsRasterOverlayImpl() {}
 void CesiumAzureMapsRasterOverlayImpl::AddToTileset(
     const ::DotNet::CesiumForUnity::CesiumAzureMapsRasterOverlay& overlay,
     const ::DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
+
+  static bool debugMe = true;
+  if (debugMe) {
+    return;
+  }
   if (this->_pOverlay != nullptr) {
     // Overlay already added.
     return;
@@ -76,55 +81,21 @@ void CesiumAzureMapsRasterOverlayImpl::AddToTileset(
     return;
   }
 
+  const CesiumForUnity::CesiumRasterOverlay& genericOverlay = overlay;
+  auto options = CesiumRasterOverlayUtility::GetOverlayOptions(genericOverlay);
 
-
-/*
-  Cesium3DTilesetImpl& tilesetImpl = tileset.NativeImplementation();
+  auto& tilesetImpl = tileset.NativeImplementation();
   Tileset* pTileset = tilesetImpl.getTileset();
-  if (!pTileset)
-    return;
-  std::string mapStyle;
-  switch (overlay.mapStyle()) {
-  case CesiumForUnity::AzureMapsStyle::Aerial:
-    mapStyle = AzureMapsStyle::AERIAL;
-    break;
-  case CesiumForUnity::AzureMapsStyle::AerialWithLabelsOnDemand:
-    mapStyle = AzureMapsStyle::AERIAL_WITH_LABELS_ON_DEMAND;
-    break;
-  case CesiumForUnity::AzureMapsStyle::RoadOnDemand:
-    mapStyle = AzureMapsStyle::ROAD_ON_DEMAND;
-    break;
-  case CesiumForUnity::AzureMapsStyle::CanvasDark:
-    mapStyle = AzureMapsStyle::CANVAS_DARK;
-    break;
-  case CesiumForUnity::AzureMapsStyle::CanvasLight:
-    mapStyle = AzureMapsStyle::CANVAS_LIGHT;
-    break;
-  case CesiumForUnity::AzureMapsStyle::CanvasGray:
-    mapStyle = AzureMapsStyle::CANVAS_GRAY;
-    break;
-  case CesiumForUnity::AzureMapsStyle::OrdnanceSurvey:
-    mapStyle = AzureMapsStyle::ORDNANCE_SURVEY;
-    break;
-  case CesiumForUnity::AzureMapsStyle::CollinsBart:
-    mapStyle = AzureMapsStyle::COLLINS_BART;
-    break;
-  }
-
-  CesiumForUnity::CesiumRasterOverlay genericOverlay = overlay;
-  RasterOverlayOptions options =
-      CesiumRasterOverlayUtility::GetOverlayOptions(genericOverlay);
-
-  this->_pOverlay = new AzureMapsRasterOverlay(
-      overlay.materialKey().ToStlString(),
-      "https://dev.virtualearth.net",
-      overlay.AzureMapsKey().ToStlString(),
-      mapStyle,
-      "",
-      options);
-
+  AzureMapsSessionParameters sessionParameters {
+    .key = overlay.key().ToStlString(),
+      .apiVersion = overlay.apiVersion().ToStlString(),
+      .tilesetId = getTilesetId(overlay.tilesetId()),
+      .language = overlay.language().ToStlString(),
+      .view = overlay.view().ToStlString(),
+  };
+  this->_pOverlay = new AzureMapsRasterOverlay(overlay.materialKey().ToStlString(),
+  sessionParameters, options);
   pTileset->getOverlays().add(this->_pOverlay);
-  */
 }
 
 void CesiumAzureMapsRasterOverlayImpl::RemoveFromTileset(
