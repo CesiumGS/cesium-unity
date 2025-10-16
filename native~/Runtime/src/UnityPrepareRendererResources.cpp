@@ -328,6 +328,10 @@ void loadPrimitive(
   using namespace DotNet::Unity::Collections;
   using namespace DotNet::Unity::Collections::LowLevel::Unsafe;
 
+  static int flipMask = 0;
+  if (flipMask++ > 15)
+    flipMask = 0;
+
   CESIUM_TRACE("Cesium::loadPrimitive<T>");
   int32_t indexCount = 0;
   switch (primitive.mode) {
@@ -368,6 +372,19 @@ void loadPrimitive(
       !primitiveInfo.isUnlit && primitive.mode != MeshPrimitive::Mode::POINTS) {
     computeFlatNormals = hasNormals = true;
   }
+  const bool duplicateVertices = computeFlatNormals;
+
+
+  static bool ignoreTangents = true;
+  bool hasTangents = false;
+  AccessorView<UnityEngine::Vector4> tangentView {};
+  auto tangentAccessorIt = primitive.attributes.find("TANGENT");
+  if (tangentAccessorIt != primitive.attributes.end()) {
+    tangentView =
+        AccessorView<UnityEngine::Vector4>(gltf, tangentAccessorIt->second);
+    hasTangents = tangentView.status() == AccessorViewStatus::Valid;
+  }
+  hasTangents &= !ignoreTangents;
 
   // Check if  we need to upgrade to a large index type to accommodate the
   // larger number of vertices we need for flat normals.
@@ -446,6 +463,15 @@ void loadPrimitive(
     descriptor[numberOfAttributes].attribute = VertexAttribute::Normal;
     descriptor[numberOfAttributes].format = VertexAttributeFormat::Float32;
     descriptor[numberOfAttributes].dimension = 3;
+    descriptor[numberOfAttributes].stream = streamIndex;
+    ++numberOfAttributes;
+  }
+
+  if (hasTangents) {
+    assert(numberOfAttributes < MAX_ATTRIBUTES);
+    descriptor[numberOfAttributes].attribute = VertexAttribute::Tangent;
+    descriptor[numberOfAttributes].format = VertexAttributeFormat::Float32;
+    descriptor[numberOfAttributes].dimension = 4;
     descriptor[numberOfAttributes].stream = streamIndex;
     ++numberOfAttributes;
   }
@@ -554,9 +580,9 @@ void loadPrimitive(
     attributes.Item(i, descriptor[i]);
   }
 
-  int32_t vertexCount = computeFlatNormals
-                            ? indexCount
-                            : static_cast<int32_t>(positionView.size());
+  const int32_t vertexCount = computeFlatNormals
+                                  ? indexCount
+                                  : static_cast<int32_t>(positionView.size());
   meshData.SetVertexBufferParams(vertexCount, attributes);
 
   NativeArray1<uint8_t> nativeVertexBuffer =
@@ -571,15 +597,22 @@ void loadPrimitive(
   // The vertex layout will be as follows:
   // 1. position
   // 2. normals (skip if N/A)
-  // 3. vertex colors (skip if N/A)
-  // 4. texcoords (first all TEXCOORD_i, then all _CESIUMOVERLAY_i)
+  // 3. tangents (skip if N/A)
+  // 4. vertex colors (skip if N/A)
+  // 5. texcoords (first all TEXCOORD_i, then all _CESIUMOVERLAY_i)
 
   size_t stride = sizeof(Vector3);
-  size_t normalByteOffset, colorByteOffset;
+  size_t normalByteOffset;
   if (hasNormals) {
     normalByteOffset = stride;
     stride += sizeof(Vector3);
   }
+
+  if (hasTangents) {
+    stride += sizeof(Vector4);
+  }
+
+  size_t colorByteOffset;
   if (hasVertexColors) {
     colorByteOffset = stride;
     stride += sizeof(uint32_t);
@@ -593,51 +626,59 @@ void loadPrimitive(
         indices,
         indexCount,
         positionView);
-    for (int64_t i = 0; i < vertexCount; ++i) {
-      TIndex vertexIndex = indices[i];
-      *reinterpret_cast<Vector3*>(pWritePos) = positionView[vertexIndex];
-      // skip position and normal
-      pWritePos += 2 * sizeof(Vector3);
-      // Skip the slot allocated for vertex colors, we will fill them in
-      // bulk later.
-      if (hasVertexColors) {
-        pWritePos += sizeof(uint32_t);
-      }
-      for (uint32_t texCoordIndex = 0; texCoordIndex < numTexCoords;
-           ++texCoordIndex) {
-        *reinterpret_cast<Vector2*>(pWritePos) =
-            texCoordViews[texCoordIndex][vertexIndex];
-        pWritePos += sizeof(Vector2);
-      }
-    }
-  } else {
-    for (int64_t i = 0; i < vertexCount; ++i) {
-      *reinterpret_cast<Vector3*>(pWritePos) = positionView[i];
+  }
+
+  for (int64_t i = 0; i < vertexCount; ++i) {
+    const TIndex vertexIndex = duplicateVertices ? indices[i] : i;
+    *reinterpret_cast<Vector3*>(pWritePos) = positionView[vertexIndex];
+    pWritePos += sizeof(Vector3);
+
+    if (computeFlatNormals) {
+      // skip computed normal
       pWritePos += sizeof(Vector3);
+    } else if (hasNormals) {
+      *reinterpret_cast<Vector3*>(pWritePos) = normalView[vertexIndex];
+      pWritePos += sizeof(Vector3);
+    }
 
-      if (hasNormals) {
-        *reinterpret_cast<Vector3*>(pWritePos) = normalView[i];
-        pWritePos += sizeof(Vector3);
-      }
+    if (hasTangents) {
+      Vector4 tangent = tangentView[vertexIndex];
+      // *reinterpret_cast<Vector4*>(pWritePos) = tangentView[vertexIndex];
+      // tangent.w *= -1;
+      // if (flipMask & 1) {
+      //   tangent.x *= -1;
+      // }
+      // if (flipMask & 2) {
+      //   tangent.y *= -1;
+      // }
+      // if (flipMask & 4) {
+      //   tangent.z *= -1;
+      // }
+      // if (flipMask & 8) {
+      //   tangent.w *= -1;
+      // }
 
-      // Skip the slot allocated for vertex colors, we will fill them in
-      // bulk later.
-      if (hasVertexColors) {
-        pWritePos += sizeof(uint32_t);
-      }
+      *reinterpret_cast<Vector4*>(pWritePos) = tangent;
+      pWritePos += sizeof(Vector4);
+    }
 
-      for (uint32_t texCoordIndex = 0; texCoordIndex < numTexCoords;
-           ++texCoordIndex) {
-        *reinterpret_cast<Vector2*>(pWritePos) =
-            texCoordViews[texCoordIndex][i];
-        pWritePos += sizeof(Vector2);
-      }
+    // Skip the slot allocated for vertex colors, we will fill them in
+    // bulk later.
+    if (hasVertexColors) {
+      pWritePos += sizeof(uint32_t);
+    }
+
+    for (uint32_t texCoordIndex = 0; texCoordIndex < numTexCoords;
+         ++texCoordIndex) {
+      *reinterpret_cast<Vector2*>(pWritePos) =
+          texCoordViews[texCoordIndex][i];
+      pWritePos += sizeof(Vector2);
     }
   }
 
   // Fill in vertex colors separately, if they exist.
   if (hasVertexColors) {
-    // Color comes after position and normal.
+    // Color comes after position, normal and tangent
     createAccessorView(
         gltf,
         colorAccessorIt->second,
@@ -645,11 +686,11 @@ void loadPrimitive(
             pBufferStart + colorByteOffset,
             stride,
             static_cast<size_t>(vertexCount),
-            computeFlatNormals,
+            duplicateVertices,
             indices});
   }
 
-  if (computeFlatNormals) {
+  if (duplicateVertices) {
     // rewrite indices
     for (TIndex i = 0; i < indexCount; i++) {
       indices[i] = i;
