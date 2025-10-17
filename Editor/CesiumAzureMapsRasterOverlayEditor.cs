@@ -13,7 +13,6 @@ namespace CesiumForUnity
         private SerializedProperty _tilesetId;
         private SerializedProperty _language;
         private SerializedProperty _view;
-        
 
         private void OnEnable()
         {

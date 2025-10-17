@@ -44,7 +44,7 @@ namespace CesiumForUnity
             this._materialKeys = new string[] { };
         }
 
-        public virtual void DrawInspectorButtons()
+        public void DrawInspectorButtons()
         {
             var refreshOverlayContent = new GUIContent("Refresh Overlay",
                 "Refreshes this overlay.");
@@ -86,18 +86,6 @@ namespace CesiumForUnity
                 EditorGUILayout.HelpBox("CesiumRasterOverlay should be used in combination with a " +
                     "Cesium3DTileset component on this GameObject.", MessageType.Warning);
             }
-        }
-
-        private void DrawRefreshButton()
-        {
-            if (this._overlay != null)
-            {
-                var refreshOverlayContent = new GUIContent("Refresh Overlay", "Refresh this raster overlay");
-                if (GUILayout.Button(refreshOverlayContent)) {
-                    this._overlay.Refresh();
-                }
-            }
-            
         }
 
         private void UpdateMaterialKeys()
