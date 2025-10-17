@@ -17,7 +17,7 @@ class AzureMapsRasterOverlay;
 namespace CesiumForUnityNative {
 
 class CesiumAzureMapsRasterOverlayImpl
-  : public CesiumImpl<CesiumAzureMapsRasterOverlayImpl> {
+    : public CesiumImpl<CesiumAzureMapsRasterOverlayImpl> {
 public:
   CesiumAzureMapsRasterOverlayImpl(
       const DotNet::CesiumForUnity::CesiumAzureMapsRasterOverlay& overlay);
@@ -35,7 +35,4 @@ private:
       _pOverlay;
 };
 
-}
-
-
-
+} // namespace CesiumForUnityNative
