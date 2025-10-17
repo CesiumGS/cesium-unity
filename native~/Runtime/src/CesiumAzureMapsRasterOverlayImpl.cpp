@@ -21,7 +21,8 @@ using namespace DotNet;
 namespace CesiumForUnityNative {
 
 namespace {
-std::string getTilesetId(::DotNet::CesiumForUnity::AzureMapsTilesetId tilesetId) {
+std::string
+getTilesetId(::DotNet::CesiumForUnity::AzureMapsTilesetId tilesetId) {
   switch (tilesetId) {
   case ::DotNet::CesiumForUnity::AzureMapsTilesetId::BaseDarkGrey:
     return AzureMapsTilesetId::baseDarkGrey;
@@ -79,7 +80,8 @@ void CesiumAzureMapsRasterOverlayImpl::AddToTileset(
   }
 
   const CesiumForUnity::CesiumRasterOverlay& genericOverlay = overlay;
-  const auto& options = CesiumRasterOverlayUtility::GetOverlayOptions(genericOverlay);
+  const auto& options =
+      CesiumRasterOverlayUtility::GetOverlayOptions(genericOverlay);
 
   auto& tilesetImpl = tileset.NativeImplementation();
   Tileset* pTileset = tilesetImpl.getTileset();
@@ -87,15 +89,17 @@ void CesiumAzureMapsRasterOverlayImpl::AddToTileset(
     return;
   }
 
-  AzureMapsSessionParameters sessionParameters {
-    .key = overlay.key().ToStlString(),
+  AzureMapsSessionParameters sessionParameters{
+      .key = overlay.key().ToStlString(),
       .apiVersion = overlay.apiVersion().ToStlString(),
       .tilesetId = getTilesetId(overlay.tilesetId()),
       .language = overlay.language().ToStlString(),
       .view = overlay.view().ToStlString(),
   };
-  this->_pOverlay = new AzureMapsRasterOverlay(overlay.materialKey().ToStlString(),
-  sessionParameters, options);
+  this->_pOverlay = new AzureMapsRasterOverlay(
+      overlay.materialKey().ToStlString(),
+      sessionParameters,
+      options);
   pTileset->getOverlays().add(this->_pOverlay);
 }
 
