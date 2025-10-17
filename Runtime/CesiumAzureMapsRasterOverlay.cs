@@ -110,7 +110,7 @@ namespace CesiumForUnity
         private string _key = "";
 
         /// <summary>
-        /// The Azure Maps subscription key to use..
+        /// The Azure Maps subscription key to use.
         /// </summary>
         public string key
         {

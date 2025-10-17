@@ -60,7 +60,6 @@ namespace CesiumForUnity
         {
             this.serializedObject.Update();
             this._rasterOverlayEditor?.DrawInspectorButtons();
-            // this.DrawInspectorButtons();
             EditorGUIUtility.labelWidth = CesiumEditorStyle.inspectorLabelWidth;
             this.DrawGoogleMapTilesProperties();
             EditorGUILayout.Space(5);

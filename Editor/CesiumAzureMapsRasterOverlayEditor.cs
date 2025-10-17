@@ -41,12 +41,10 @@ namespace CesiumForUnity
         {
             this.serializedObject.Update();
             this._rasterOverlayEditor?.DrawInspectorButtons();
-
             EditorGUIUtility.labelWidth = CesiumEditorStyle.inspectorLabelWidth;
             this.DrawAzureMapsProperties();
             EditorGUILayout.Space(5);
             this.DrawRasterOverlayProperties();
-
             this.serializedObject.ApplyModifiedProperties();
         }
 

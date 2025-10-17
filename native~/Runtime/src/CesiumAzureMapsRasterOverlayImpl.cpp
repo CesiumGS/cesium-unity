@@ -1,5 +1,6 @@
 #include "CesiumAzureMapsRasterOverlayImpl.h"
 
+#include "../../Editor/generated-Editor/include/DotNet/UnityEngine/Debug.h"
 #include "Cesium3DTilesetImpl.h"
 #include "CesiumRasterOverlayUtility.h"
 
@@ -67,11 +68,7 @@ void CesiumAzureMapsRasterOverlayImpl::AddToTileset(
     const ::DotNet::CesiumForUnity::CesiumAzureMapsRasterOverlay& overlay,
     const ::DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
 
-  static bool debugMe = true;
-  if (debugMe) {
-    return;
-  }
-  if (this->_pOverlay != nullptr) {
+  if (this->_pOverlay) {
     // Overlay already added.
     return;
   }
@@ -82,10 +79,14 @@ void CesiumAzureMapsRasterOverlayImpl::AddToTileset(
   }
 
   const CesiumForUnity::CesiumRasterOverlay& genericOverlay = overlay;
-  auto options = CesiumRasterOverlayUtility::GetOverlayOptions(genericOverlay);
+  const auto& options = CesiumRasterOverlayUtility::GetOverlayOptions(genericOverlay);
 
   auto& tilesetImpl = tileset.NativeImplementation();
   Tileset* pTileset = tilesetImpl.getTileset();
+  if (!pTileset) {
+    return;
+  }
+
   AzureMapsSessionParameters sessionParameters {
     .key = overlay.key().ToStlString(),
       .apiVersion = overlay.apiVersion().ToStlString(),
