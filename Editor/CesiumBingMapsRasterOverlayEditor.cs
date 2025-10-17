@@ -33,6 +33,7 @@ namespace CesiumForUnity
         public override void OnInspectorGUI()
         {
             this.serializedObject.Update();
+            this._rasterOverlayEditor?.DrawInspectorButtons();
 
             EditorGUIUtility.labelWidth = CesiumEditorStyle.inspectorLabelWidth;
             this.DrawBingMapsProperties();

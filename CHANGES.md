@@ -6,6 +6,7 @@
 
 - Added `CesiumGoogleMapTilesRasterOverlay` to stream imagery from Google Maps.
 - Added `assetOptions` to `CesiumIonRasterOverlay` to pass JSON-string options to Cesium ion as it accesses an asset.
+- Added `CesiumAzureMapsRasterOverlay` to stream imagery from Microsoft Azure.
 
 ## v1.18.1 - 2025-10-01
 

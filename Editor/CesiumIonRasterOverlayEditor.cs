@@ -41,7 +41,7 @@ namespace CesiumForUnity
             this.serializedObject.Update();
 
             EditorGUIUtility.labelWidth = CesiumEditorStyle.inspectorLabelWidth;
-            DrawTroubleshootButton();
+            DrawInspectorButtons();
             EditorGUILayout.Space(5);
             DrawIonProperties();
             EditorGUILayout.Space(5);
@@ -50,9 +50,17 @@ namespace CesiumForUnity
             this.serializedObject.ApplyModifiedProperties();
         }
 
-        private void DrawTroubleshootButton()
+        private void DrawInspectorButtons()
         {
-            GUIContent troubleshootTokenContent = new GUIContent(
+            GUILayout.BeginHorizontal();
+            var refreshOverlayContent = new GUIContent("Refresh Overlay",
+                "Refreshes this overlay.");
+            if (GUILayout.Button(refreshOverlayContent))
+            {
+                this._ionOverlay.Refresh();
+            }
+            
+            var troubleshootTokenContent = new GUIContent(
                "Troubleshoot Token",
                "Check if the Cesium ion token used to access this raster overlay is working " +
                "correctly, and fix it if necessary.");
@@ -60,6 +68,7 @@ namespace CesiumForUnity
             {
                 IonTokenTroubleshootingWindow.ShowWindow(this._ionOverlay, false);
             }
+            GUILayout.EndHorizontal();
         }
 
         private void DrawIonProperties()
