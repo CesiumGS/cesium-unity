@@ -25,4 +25,3 @@ libCesiumForUnityNative-*.so.meta
 libCesiumForUnityNative-*.dylib
 libCesiumForUnityNative-*.dylib.meta
 Documentation~/Reference/
-build_wasm

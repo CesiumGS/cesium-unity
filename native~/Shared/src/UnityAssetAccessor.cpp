@@ -35,8 +35,7 @@ using namespace CesiumUtility;
 using namespace DotNet;
 
 #ifdef __EMSCRIPTEN__
-struct RequestMetaDataLengths
-{
+struct RequestMetaDataLengths {
     RequestMetaDataLengths()
         : headerLength(0u)
         , responseUrlLength(0u)
