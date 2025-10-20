@@ -237,8 +237,7 @@ static bool IsSpace(char c) {
   return c == ' ' || c == '\t' || c == '\r' || c == '\n';
 }
 
-static void SetUnvalidated(std::string_view name, std::string_view value, bool replace, HttpHeaders& headers)
-{
+static void SetUnvalidated(std::string_view name, std::string_view value, bool replace, HttpHeaders& headers) {
     // Insert or replace header
     std::string nameStr(name.data(), name.size());
     HttpHeaders::iterator it = headers.find(nameStr);
@@ -246,8 +245,6 @@ static void SetUnvalidated(std::string_view name, std::string_view value, bool r
       if (replace) {
         it->second = value;
       } else {
-        // According HTTP spec header with the same name can appear more than-once if and only if it's entire value is comma separated values.
-        // Multiple such headers always can be combined into one. (case 791722)
         it->second.reserve(it->second.size() + 1 + value.size());
         it->second.append(",");
         it->second.append(value);
