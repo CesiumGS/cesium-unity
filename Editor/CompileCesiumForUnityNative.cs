@@ -522,7 +522,6 @@ namespace CesiumForUnity
                     // The default Unity install path on Windows does contain spaces as it's put into "Program Files".
                     // Use subst to map the Emscripten directory to a drive letter, eliminating the space.
                     // When the process finishes, we will delete the mapping.
-                    //for (char driveLetter = 'M'; driveLetter <= 'Z'; driveLetter++)
                     char driveLetter = 'M';
                     if (!Directory.Exists(driveLetter + ":\\"))
                     {
