@@ -488,29 +488,8 @@ namespace CesiumForUnity
             AssetDatabase.StopAssetEditing();
         }
 
-        internal static string GetTemporaryDirectory()
-        {
-            string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-            if (Directory.Exists(tempDirectory))
-                return GetTemporaryDirectory();
-            Directory.CreateDirectory(tempDirectory);
-            return tempDirectory;
-        }
-
-        private static void CopyFilesRecursively(string sourcePath, string targetPath)
-        {
-            foreach (string dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
-                Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
-
-            foreach (string newPath in Directory.GetFiles(sourcePath, "*.*",SearchOption.AllDirectories))
-                File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
-        }
-
         internal static void BuildNativeLibrary(LibraryToBuild library)
         {
-            // Comment the below line to skip building the native library for Web, allowing for manual building of it externally.
-            //if (library.Platform == BuildTarget.WebGL) return;
-
             var emscriptenDir = "";
             var deleteTemporaryEmscriptenDir = false;
 
