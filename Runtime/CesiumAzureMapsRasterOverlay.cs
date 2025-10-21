@@ -107,7 +107,6 @@ namespace CesiumForUnity
         }
 
         [SerializeField] private string _apiVersion = "2024-04-01";
-
         /// <summary>
         /// The version number of Azure Maps API.
         /// </summary>
