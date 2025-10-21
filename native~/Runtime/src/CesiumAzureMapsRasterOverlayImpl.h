@@ -1,4 +1,3 @@
-// Copyright 2020-2025 CesiumGS, Inc. and Contributors
 #pragma once
 
 #include "CesiumImpl.h"

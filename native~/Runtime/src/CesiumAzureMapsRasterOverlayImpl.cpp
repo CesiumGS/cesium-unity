@@ -1,6 +1,5 @@
 #include "CesiumAzureMapsRasterOverlayImpl.h"
 
-#include "../../Editor/generated-Editor/include/DotNet/UnityEngine/Debug.h"
 #include "Cesium3DTilesetImpl.h"
 #include "CesiumRasterOverlayUtility.h"
 
@@ -22,37 +21,37 @@ namespace CesiumForUnityNative {
 
 namespace {
 std::string
-getTilesetId(::DotNet::CesiumForUnity::AzureMapsTilesetId tilesetId) {
+getTilesetId(const CesiumForUnity::AzureMapsTilesetId tilesetId) {
   switch (tilesetId) {
-  case ::DotNet::CesiumForUnity::AzureMapsTilesetId::BaseDarkGrey:
+  case CesiumForUnity::AzureMapsTilesetId::BaseDarkGrey:
     return AzureMapsTilesetId::baseDarkGrey;
-  case ::DotNet::CesiumForUnity::AzureMapsTilesetId::BaseLabelsRoad:
+  case CesiumForUnity::AzureMapsTilesetId::BaseLabelsRoad:
     return AzureMapsTilesetId::baseLabelsRoad;
-  case ::DotNet::CesiumForUnity::AzureMapsTilesetId::BaseLabelsDarkGrey:
+  case CesiumForUnity::AzureMapsTilesetId::BaseLabelsDarkGrey:
     return AzureMapsTilesetId::baseLabelsDarkGrey;
-  case ::DotNet::CesiumForUnity::AzureMapsTilesetId::BaseHybridRoad:
+  case CesiumForUnity::AzureMapsTilesetId::BaseHybridRoad:
     return AzureMapsTilesetId::baseHybridRoad;
-  case ::DotNet::CesiumForUnity::AzureMapsTilesetId::BaseHybridDarkGrey:
+  case CesiumForUnity::AzureMapsTilesetId::BaseHybridDarkGrey:
     return AzureMapsTilesetId::baseHybridDarkGrey;
-  case ::DotNet::CesiumForUnity::AzureMapsTilesetId::Imagery:
+  case CesiumForUnity::AzureMapsTilesetId::Imagery:
     return AzureMapsTilesetId::imagery;
-  case ::DotNet::CesiumForUnity::AzureMapsTilesetId::Terra:
+  case CesiumForUnity::AzureMapsTilesetId::Terra:
     return AzureMapsTilesetId::terra;
-  case ::DotNet::CesiumForUnity::AzureMapsTilesetId::WeatherRadar:
+  case CesiumForUnity::AzureMapsTilesetId::WeatherRadar:
     return AzureMapsTilesetId::weatherRadar;
-  case ::DotNet::CesiumForUnity::AzureMapsTilesetId::WeatherInfrared:
+  case CesiumForUnity::AzureMapsTilesetId::WeatherInfrared:
     return AzureMapsTilesetId::weatherInfrared;
-  case ::DotNet::CesiumForUnity::AzureMapsTilesetId::TrafficAbsolute:
+  case CesiumForUnity::AzureMapsTilesetId::TrafficAbsolute:
     return AzureMapsTilesetId::trafficAbsolute;
-  case ::DotNet::CesiumForUnity::AzureMapsTilesetId::TrafficRelativeMain:
+  case CesiumForUnity::AzureMapsTilesetId::TrafficRelativeMain:
     return AzureMapsTilesetId::trafficRelativeMain;
-  case ::DotNet::CesiumForUnity::AzureMapsTilesetId::TrafficRelativeDark:
+  case CesiumForUnity::AzureMapsTilesetId::TrafficRelativeDark:
     return AzureMapsTilesetId::trafficRelativeDark;
-  case ::DotNet::CesiumForUnity::AzureMapsTilesetId::TrafficDelay:
+  case CesiumForUnity::AzureMapsTilesetId::TrafficDelay:
     return AzureMapsTilesetId::trafficDelay;
-  case ::DotNet::CesiumForUnity::AzureMapsTilesetId::TrafficReduced:
+  case CesiumForUnity::AzureMapsTilesetId::TrafficReduced:
     return AzureMapsTilesetId::trafficReduced;
-  case ::DotNet::CesiumForUnity::AzureMapsTilesetId::BaseRoad:
+  case CesiumForUnity::AzureMapsTilesetId::BaseRoad:
   default:
     return AzureMapsTilesetId::baseRoad;
   }
@@ -63,11 +62,11 @@ CesiumAzureMapsRasterOverlayImpl::CesiumAzureMapsRasterOverlayImpl(
     const DotNet::CesiumForUnity::CesiumAzureMapsRasterOverlay& overlay)
     : _pOverlay(nullptr) {}
 
-CesiumAzureMapsRasterOverlayImpl::~CesiumAzureMapsRasterOverlayImpl() {}
+CesiumAzureMapsRasterOverlayImpl::~CesiumAzureMapsRasterOverlayImpl() = default;
 
 void CesiumAzureMapsRasterOverlayImpl::AddToTileset(
-    const ::DotNet::CesiumForUnity::CesiumAzureMapsRasterOverlay& overlay,
-    const ::DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
+    const CesiumForUnity::CesiumAzureMapsRasterOverlay& overlay,
+    const CesiumForUnity::Cesium3DTileset& tileset) {
 
   if (this->_pOverlay) {
     // Overlay already added.
@@ -104,8 +103,8 @@ void CesiumAzureMapsRasterOverlayImpl::AddToTileset(
 }
 
 void CesiumAzureMapsRasterOverlayImpl::RemoveFromTileset(
-    const ::DotNet::CesiumForUnity::CesiumAzureMapsRasterOverlay& overlay,
-    const ::DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
+    const CesiumForUnity::CesiumAzureMapsRasterOverlay& overlay,
+    const CesiumForUnity::Cesium3DTileset& tileset) {
   if (this->_pOverlay == nullptr)
     return;
 

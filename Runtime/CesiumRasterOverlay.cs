@@ -170,7 +170,7 @@ namespace CesiumForUnity
         /// </remarks>
         public void AddToTileset()
         {
-            if (!isActiveAndEnabled)
+            if (!this.isActiveAndEnabled)
                 return;
             
             Cesium3DTileset tileset = this.gameObject.GetComponent<Cesium3DTileset>();

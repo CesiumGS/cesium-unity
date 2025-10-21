@@ -1,7 +1,4 @@
 using Reinterop;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
 using UnityEngine;
 
 namespace CesiumForUnity
@@ -11,88 +8,75 @@ namespace CesiumForUnity
     /// </summary>
     public enum AzureMapsTilesetId
     {
-    /**
-    * All roadmap layers with Azure Maps' main style.
-    */
-    [Description("Base")]
-    BaseRoad,
-    /**
-    * All roadmap layers with Azure Maps' dark grey style.
-    */
-    [Description("Base (Dark Grey)")]
-    BaseDarkGrey,
-    /**
-    * Label data in Azure Maps' main style.
-    */
-    [Description("Labels")]
-    BaseLabelsRoad, 
-    /**
-    * Label data in Azure Maps' dark grey style.
-    */
-    [Description("Labels (Dark Grey)")]
-    BaseLabelsDarkGrey,
-    /**
-    * Road, boundary, and label data in Azure Maps' main style.
-    */
-    [Description("Hybrid")]
-    BaseHybridRoad, 
-    /**
-    * Road, boundary, and label data in Azure Maps' dark grey style.
-    */
-    [Description("Hybrid (Dark Grey)")]
-    BaseHybridDarkGrey, 
-    /**
-    * A combination of satellite or aerial imagery. Only available for accounts
-    * under S1 and G2 pricing SKU.
-    */
-    Imagery,
-    /**
-    * Shaded relief and terra layers.
-    */
-    Terra,
-    /**
-    * Weather radar tiles. Latest weather radar images including areas of rain,
-    * snow, ice and mixed conditions.
-    */
-    [Description("Weather (Radar)")]
-    WeatherRadar ,
-    /**
-    * Weather infrared tiles. Latest infrared satellite images showing clouds by
-    * their temperature.
-    */
-    [Description("Weather (Infrared)")]
-    WeatherInfrared ,
-    /**
-    * Absolute traffic tiles in Azure Maps' main style.
-    */
-    [Description("Traffic (Absolute)")]
-    TrafficAbsolute ,
-    /**
-    * Relative traffic tiles in Azure Maps' main style. This filters out traffic
-    * data from smaller streets that are otherwise included in TrafficAbsolute.
-    */
-    [Description("Traffic (Relative)")]
-    TrafficRelativeMain ,
-    /**
-    * Relative traffic tiles in Azure Maps' dark style. This filters out traffic
-    * data from smaller streets that are otherwise included in TrafficAbsolute.
-    */
-    [Description("Traffic (Relative, Dark)")]
-    TrafficRelativeDark ,
-    /**
-    * Delay traffic tiles in Azure Maps' dark style. This only shows the points
-    * of delay along traffic routes that are otherwise included in
-    * TrafficAbsolute.
-    */
-    [Description("Traffic (Delay)")]
-    TrafficDelay ,
-    /**
-    * Reduced traffic tiles in Azure Maps' dark style. This shows the traffic
-    * routes and major delay points, but filters out some data that is otherwise
-    * included in TrafficAbsolute.
-    */
-    [Description("Traffic (Reduced)")]
-    TrafficReduced ,
+        /// <summary>
+        /// All roadmap layers with Azure Maps' main style.
+        /// </summary>
+        BaseRoad,
+        /// <summary>
+        /// All roadmap layers with Azure Maps' dark grey style.
+        /// </summary>
+        BaseDarkGrey,
+        /// <summary>
+        /// Label data in Azure Maps' main style.
+        /// </summary>
+        BaseLabelsRoad, 
+        /// <summary>
+        /// Label data in Azure Maps' dark grey style.
+        /// </summary>
+        BaseLabelsDarkGrey,
+        /// <summary>
+        /// Road, boundary, and label data in Azure Maps' main style.
+        /// </summary>
+        BaseHybridRoad, 
+        /// <summary>
+        /// Road, boundary, and label data in Azure Maps' dark grey style.
+        /// </summary>
+        BaseHybridDarkGrey, 
+        /// <summary>
+        /// A combination of satellite or aerial imagery. Only available for accounts
+        /// under S1 and G2 pricing SKU.
+        /// </summary>
+        Imagery,
+        /// <summary>
+        /// Shaded relief and terra layers.
+        /// </summary>
+        Terra,
+        /// <summary>
+        /// Weather radar tiles. Latest weather radar images including areas of rain,
+        /// snow, ice and mixed conditions.
+        /// </summary>
+        WeatherRadar,
+        /// <summary>
+        /// Weather infrared tiles. Latest infrared satellite images showing clouds by
+        /// their temperature.
+        /// </summary>
+        WeatherInfrared,
+        /// <summary>
+        /// Absolute traffic tiles in Azure Maps' main style.
+        /// </summary>
+        TrafficAbsolute,
+        /// <summary>
+        /// Relative traffic tiles in Azure Maps' main style. This filters out traffic
+        /// data from smaller streets that are otherwise included in TrafficAbsolute.
+        /// </summary>
+        TrafficRelativeMain,
+        /// <summary>
+        /// Relative traffic tiles in Azure Maps' dark style. This filters out traffic
+        /// data from smaller streets that are otherwise included in TrafficAbsolute.
+        /// </summary>
+        TrafficRelativeDark,
+        /// <summary>
+        /// Delay traffic tiles in Azure Maps' dark style. This only shows the points
+        /// of delay along traffic routes that are otherwise included in
+        /// TrafficAbsolute.
+        /// </summary>
+        TrafficDelay,
+        /// <summary>
+        /// Reduced traffic tiles in Azure Maps' dark style. This shows the traffic
+        /// routes and major delay points, but filters out some data that is otherwise
+        /// included in TrafficAbsolute.
+        /// </summary>
+        TrafficReduced,
     }
 
     /// <summary>
@@ -158,7 +142,7 @@ namespace CesiumForUnity
 
         /// <summary>
         /// The language in which search results should be returned. This should be one
-        /// of the supported IETF language tags, case insensitive. When data in the
+        /// of the supported IETF language tags, case-insensitive. When data in the
         /// specified language is not available for a specific field, default language
         /// is used.
         /// </summary>
