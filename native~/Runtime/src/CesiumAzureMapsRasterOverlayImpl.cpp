@@ -20,8 +20,7 @@ using namespace DotNet;
 namespace CesiumForUnityNative {
 
 namespace {
-std::string
-getTilesetId(const CesiumForUnity::AzureMapsTilesetId tilesetId) {
+std::string getTilesetId(const CesiumForUnity::AzureMapsTilesetId tilesetId) {
   switch (tilesetId) {
   case CesiumForUnity::AzureMapsTilesetId::BaseDarkGrey:
     return AzureMapsTilesetId::baseDarkGrey;
