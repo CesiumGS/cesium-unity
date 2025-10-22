@@ -1,4 +1,5 @@
 #include "UnityLoggerSink.h"
+#include <fmt/format.h>
 
 #include <DotNet/System/Object.h>
 #include <DotNet/System/String.h>

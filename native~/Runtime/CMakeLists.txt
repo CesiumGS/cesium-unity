@@ -6,10 +6,15 @@ project(CesiumForUnityNative
     LANGUAGES CXX C
 )
 
+get_filename_component(toolchainFile "${CMAKE_TOOLCHAIN_FILE}" NAME)
+if(toolchainFile STREQUAL "Emscripten.cmake")
+    set(CESIUM_TARGET_WASM ON)
+endif()
+
 file(GLOB_RECURSE CESIUMFORUNITYNATIVE_SOURCES CONFIGURE_DEPENDS src/*.cpp ../Shared/src/*.cpp ${REINTEROP_GENERATED_DIRECTORY}/src/*.cpp)
 file(GLOB_RECURSE CESIUMFORUNITYNATIVE_HEADERS CONFIGURE_DEPENDS src/*.h ${REINTEROP_GENERATED_DIRECTORY}/src/*.h)
 
-if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
+if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS" OR CESIUM_TARGET_WASM)
     add_library(CesiumForUnityNative-Runtime STATIC)
 else()
     add_library(CesiumForUnityNative-Runtime SHARED)

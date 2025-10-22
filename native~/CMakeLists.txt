@@ -6,6 +6,40 @@ project(CesiumForUnityNative
     LANGUAGES CXX C
 )
 
+get_filename_component(toolchainFile "${CMAKE_TOOLCHAIN_FILE}" NAME)
+if(toolchainFile STREQUAL "Emscripten.cmake")
+    set(CESIUM_TARGET_WASM ON)
+    # Include the toolchain directly as ezvcpkg will overwrite the 
+    # toolchain before it's loaded
+    include(${CMAKE_TOOLCHAIN_FILE})
+endif()
+
+option(CESIUM_WASM64 "Enable 64-bit WebAssembly target" OFF)
+
+if(CESIUM_TARGET_WASM)
+    # vcpkg will attempt to second-guess our CMAKE_C_COMPILER setting, choosing to go with the value of CC instead.
+    # While normally this is the correct value to go with, for wasm we need to be using emcc and em++.
+    # So we set CC and CXX to emcc and em++ here so vcpkg will pick them up properly.
+    # Does this make sense? No. Does it work? Somehow. ¯\_(ツ)_/¯
+    set(ENV{CC} ${CMAKE_C_COMPILER})
+    set(ENV{CXX} ${CMAKE_CXX_COMPILER})
+
+    set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY BOTH)
+    set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE BOTH)
+    set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH)
+    set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+
+    # Make sure all files are compiled with -pthread and other required flags.
+    # HAS_FUTIME is for tidy-html5 to keep it from using <sys/utime.h>, which is not available with Emscripten.
+    if(CESIUM_WASM64)
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -sMEMORY64=1 -fwasm-exceptions -mbulk-memory -mnontrapping-fptoint -sSUPPORT_LONGJMP=wasm -pthread -DHAS_FUTIME=0")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -sMEMORY64=1 -fwasm-exceptions -mbulk-memory -mnontrapping-fptoint -sSUPPORT_LONGJMP=wasm -pthread -DHAS_FUTIME=0")
+    else()
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fwasm-exceptions -mbulk-memory -mnontrapping-fptoint -sSUPPORT_LONGJMP=wasm -pthread -DHAS_FUTIME=0")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fwasm-exceptions -mbulk-memory -mnontrapping-fptoint -sSUPPORT_LONGJMP=wasm -pthread -DHAS_FUTIME=0")
+    endif()
+endif()
+
 # By default, vcpkg (or is it cmake?) will try to link against the Debug version
 # of the vcpkg libraries when we build the RelWithDebInfo configuration. Tell it
 # to prefer Release instead. vcpkg Release builds DO have debug symbols, just like
@@ -17,6 +51,10 @@ SET(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO "RelWithDebInfo;Release;")
 # a standalone build.
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/../Editor" CACHE PATH "Installed to the Editor directory." FORCE)
+endif()
+
+if (CESIUM_TARGET_WASM)
+  set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/../Plugins/WebGL")
 endif()
 
 option(CESIUM_TRACING_ENABLED "Whether to enable the Cesium performance tracing framework (CESIUM_TRACE_* macros)." OFF)
@@ -80,15 +118,38 @@ if (NOT VCPKG_TRIPLET)
     endif()
 endif()
 
+if(CESIUM_TARGET_WASM)
+    if(CESIUM_WASM64)
+        # vcpkg will attempt to make this wasm32-emscripten if we don't declare it
+        set(VCPKG_TARGET_TRIPLET wasm64-emscripten-unity)
+    else()
+        # vcpkg will attempt to make this wasm32-emscripten if we don't declare it
+        set(VCPKG_TARGET_TRIPLET wasm32-emscripten-unity)
+    endif()
+endif()
+
 # We never need any of cesium-native's header files to be installed.
 set(CESIUM_INSTALL_HEADERS OFF)
 
-# We only need cesium-native's static lib files to be installed on iOS.
-if (NOT IOS)
+# We only need cesium-native's static lib files to be installed on iOS and Wasm.
+if (NOT IOS AND NOT CESIUM_TARGET_WASM)
     set(CESIUM_INSTALL_STATIC_LIBS OFF)
 endif()
 
+if (CESIUM_TARGET_WASM)
+  list(APPEND CESIUM_EXCLUDE_INSTALL_STATIC_LIBS "libjpeg-turbo") # This conflicts with Unity symbols
+endif()
+
 add_subdirectory(extern/swl-variant)
+
+if(CESIUM_TARGET_WASM AND EXISTS extern/blend2d)
+  # fix blend2d not working from vcpkg install
+  set(BLEND2D_EXTERNAL_ASMJIT OFF)
+  set(BLEND2D_STATIC ON)
+  add_subdirectory(extern/blend2d)
+  install(TARGETS blend2d) # TODO: just install static lib, not headers
+  set_target_properties(blend2d PROPERTIES EXCLUDE_FROM_ALL 0 EXCLUDE_FROM_DEFAULT_BUILD 0)
+endif()
 
 set(CESIUM_DISABLE_CURL ON)
 add_subdirectory(extern/cesium-native)
@@ -106,10 +167,14 @@ if (EDITOR)
   add_subdirectory(Editor)
 endif()
 
-set(LIB_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR})
+if (CESIUM_TARGET_WASM)
+  set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}")
+else()
+  set(LIB_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR})  
+endif()
 
 # Specify all targets that need to compile bitcode
-if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
-    install(TARGETS tidy-static)
-    set_target_properties(tidy-static PROPERTIES EXCLUDE_FROM_ALL 0 EXCLUDE_FROM_DEFAULT_BUILD 0)
+if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS" OR CESIUM_TARGET_WASM)
+  install(TARGETS tidy-static)
+  set_target_properties(tidy-static PROPERTIES EXCLUDE_FROM_ALL 0 EXCLUDE_FROM_DEFAULT_BUILD 0)
 endif()
