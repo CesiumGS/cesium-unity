@@ -310,7 +310,7 @@ namespace CesiumForUnity
             overlay.maximumTextureSize = overlay.maximumTextureSize;
             overlay.maximumSimultaneousTileLoads = overlay.maximumSimultaneousTileLoads;
             overlay.subTileCacheBytes = overlay.subTileCacheBytes;
-
+            
             CesiumRasterOverlay baseOverlay = ionOverlay;
             baseOverlay.AddToTileset();
             baseOverlay.RemoveFromTileset();
@@ -320,6 +320,14 @@ namespace CesiumForUnity
             bingMapsRasterOverlay.bingMapsKey = bingMapsRasterOverlay.bingMapsKey;
             bingMapsRasterOverlay.mapStyle = bingMapsRasterOverlay.mapStyle;
             baseOverlay = bingMapsRasterOverlay;
+            
+            var azureMapsOverlay = go.GetComponent<CesiumAzureMapsRasterOverlay>();
+            azureMapsOverlay.key = azureMapsOverlay.key;
+            azureMapsOverlay.apiVersion = azureMapsOverlay.apiVersion;
+            azureMapsOverlay.tilesetId = azureMapsOverlay.tilesetId;
+            azureMapsOverlay.language = azureMapsOverlay.language;
+            azureMapsOverlay.view = azureMapsOverlay.view;
+            baseOverlay = azureMapsOverlay;
 
             CesiumGoogleMapTilesRasterOverlay googleMapTilesRasterOverlay =
                 go.GetComponent<CesiumGoogleMapTilesRasterOverlay>();
@@ -337,6 +345,7 @@ namespace CesiumForUnity
             List<GoogleMapTilesLayerType> layers = new List<GoogleMapTilesLayerType>();
             if (layers.Count > 0)
                 layers[0] = layers[0];
+            
 
             CesiumTileMapServiceRasterOverlay tileMapServiceRasterOverlay =
                 go.GetComponent<CesiumTileMapServiceRasterOverlay>();
@@ -967,4 +976,3 @@ namespace CesiumForUnity
         }
     }
 }
-
