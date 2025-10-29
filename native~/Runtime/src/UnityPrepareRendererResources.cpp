@@ -586,6 +586,9 @@ void loadPrimitive(
   }
   stride += numTexCoords * sizeof(Vector2);
 
+  Vector3 minPosition;
+  Vector3 maxPosition;
+
   if (computeFlatNormals) {
     ::computeFlatNormals(
         pWritePos + normalByteOffset,
@@ -595,7 +598,19 @@ void loadPrimitive(
         positionView);
     for (int64_t i = 0; i < vertexCount; ++i) {
       TIndex vertexIndex = indices[i];
-      *reinterpret_cast<Vector3*>(pWritePos) = positionView[vertexIndex];
+      Vector3 position = positionView[vertexIndex];
+      if (i == 0) {
+        minPosition = position;
+        maxPosition = position;
+      } else {
+        minPosition.x = glm::min(minPosition.x, position.x);
+        minPosition.y = glm::min(minPosition.y, position.y);
+        minPosition.z = glm::min(minPosition.z, position.z);
+        maxPosition.x = glm::max(maxPosition.x, position.x);
+        maxPosition.y = glm::max(maxPosition.y, position.y);
+        maxPosition.z = glm::max(maxPosition.z, position.z);
+      }
+      *reinterpret_cast<Vector3*>(pWritePos) = position;
       // skip position and normal
       pWritePos += 2 * sizeof(Vector3);
       // Skip the slot allocated for vertex colors, we will fill them in
@@ -612,7 +627,19 @@ void loadPrimitive(
     }
   } else {
     for (int64_t i = 0; i < vertexCount; ++i) {
-      *reinterpret_cast<Vector3*>(pWritePos) = positionView[i];
+      Vector3 position = positionView[i];
+      if (i == 0) {
+        minPosition = position;
+        maxPosition = position;
+      } else {
+        minPosition.x = glm::min(minPosition.x, position.x);
+        minPosition.y = glm::min(minPosition.y, position.y);
+        minPosition.z = glm::min(minPosition.z, position.z);
+        maxPosition.x = glm::max(maxPosition.x, position.x);
+        maxPosition.y = glm::max(maxPosition.y, position.y);
+        maxPosition.z = glm::max(maxPosition.z, position.z);
+      }
+      *reinterpret_cast<Vector3*>(pWritePos) = position;
       pWritePos += sizeof(Vector3);
 
       if (hasNormals) {
@@ -633,6 +660,26 @@ void loadPrimitive(
         pWritePos += sizeof(Vector2);
       }
     }
+  }
+
+  glm::dvec3 widths(
+      maxPosition.x - minPosition.x,
+      maxPosition.y - minPosition.y,
+      maxPosition.z - minPosition.z);
+
+  double nextPowerOfTwo = glm::ceil(glm::log2(glm::length(widths)));
+  primitiveInfo.vertexScaleFactor = glm::exp2(nextPowerOfTwo);
+
+  float vertexScaleFactor = float(primitiveInfo.vertexScaleFactor);
+
+  pWritePos = pBufferStart;
+  uint8_t* pEndPos = pBufferStart + nativeVertexBuffer.Length();
+  while (pWritePos < pEndPos) {
+    Vector3& position = *reinterpret_cast<Vector3*>(pWritePos);
+    position.x /= vertexScaleFactor;
+    position.y /= vertexScaleFactor;
+    position.z /= vertexScaleFactor;
+    pWritePos += stride;
   }
 
   // Fill in vertex colors separately, if they exist.
@@ -900,6 +947,12 @@ UnityPrepareRendererResources::prepareInLoadThread(
     return asyncSystem.createResolvedFuture(
         TileLoadResultAndRenderResources{std::move(tileLoadResult), nullptr});
 
+  const auto urlIt = pModel->extras.find("Cesium3DTiles_TileUrl");
+  std::string modelUrl = "Unknown";
+  if (urlIt != pModel->extras.end()) {
+    modelUrl = urlIt->second.getStringOrDefault("Unknown glTF");
+  }
+
   int32_t numberOfPrimitives = countPrimitives(*pModel);
 
   struct IntermediateLoadThreadResult {
@@ -936,7 +989,7 @@ UnityPrepareRendererResources::prepareInLoadThread(
                 std::move(tileLoadResult)};
           })
       .thenInMainThread(
-          [asyncSystem, tileset = this->_tilesetGameObject](
+          [asyncSystem, tileset = this->_tilesetGameObject, modelUrl](
               IntermediateLoadThreadResult&& workerResult) mutable {
             if (tileset == nullptr) {
               // Tileset GameObject was deleted while we were loading a tile
@@ -970,6 +1023,8 @@ UnityPrepareRendererResources::prepareInLoadThread(
             for (int32_t i = 0, len = meshes.Length(); i < len; ++i) {
               UnityEngine::Mesh unityMesh =
                   CesiumForUnity::CesiumObjectPools::MeshPool().Get();
+              unityMesh.name(
+                  "Tile URL " + modelUrl + " Primitive " + std::to_string(i));
               // Don't let Unity unload this mesh during the time in between
               // when we create it and when we attach it to a GameObject.
               if (shouldShowTilesInHierarchy) {
@@ -1526,9 +1581,17 @@ void* UnityPrepareRendererResources::prepareInMainThread(
               UnityEngine::HideFlags::HideInHierarchy);
         }
 
+        double vertexScaleFactor = primitiveInfo.vertexScaleFactor;
+
         primitiveGameObject.transform().parent(pModelGameObject->transform());
         primitiveGameObject.layer(tilesetLayer);
-        glm::dmat4 modelToEcef = tileTransform * transform;
+        glm::dmat4 modelToEcef =
+            tileTransform * transform *
+            glm::dmat4(
+                glm::dvec4(vertexScaleFactor, 0.0, 0.0, 0.0),
+                glm::dvec4(0.0, vertexScaleFactor, 0.0, 0.0),
+                glm::dvec4(0.0, 0.0, vertexScaleFactor, 0.0),
+                glm::dvec4(0.0, 0.0, 0.0, 1.0));
 
         CesiumForUnity::CesiumGlobeAnchor anchor =
             primitiveGameObject
