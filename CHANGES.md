@@ -40,6 +40,7 @@ In addition to the above, this release updates [cesium-native](https://github.co
 - Fixed broken support for `TRIANGLE_FAN` primitives in tile meshes.
 - Fixed editor crash when any scale component on `Cesium3DTileset` was set to zero. 
 - Fixed a bug where CameraFlyToController, after the user interrupted a flight, would jump to the middle of the flight path immediately upon starting the next flight.
+- Fixed a bug related to using offline tilesets in Editor without internet connection.
 
 In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.48.0 to v0.49.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
 
@@ -47,6 +48,7 @@ In addition to the above, this release updates [cesium-native](https://github.co
 
 This release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.47.0 to v0.48.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
 
+>>>>>>> main
 ## v1.16.0 - 2025-05-01
 
 ##### Additions :tada:
