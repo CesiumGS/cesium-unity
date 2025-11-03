@@ -59,6 +59,19 @@ struct CesiumPrimitiveInfo {
    * the corresponding Unity texture coordinate index.
    */
   std::unordered_map<uint32_t, uint32_t> rasterOverlayUvIndexMap{};
+
+  /**
+   * @brief The scale factor that was used to divide each vertex position in
+   * this primitive when creating the Unity mesh. The primitive's transformation
+   * matrix must scale up (multiply) by this same factor in order to return the
+   * mesh to its original size.
+   *
+   * We do this silly dance because Unity (or perhaps PhysX) complains
+   * incessantly about meshes with triangles that are more than 500 units.
+   *
+   * For best precision, this factor should be a power of two.
+   */
+  double vertexScaleFactor = 1.0f;
 };
 
 /**
