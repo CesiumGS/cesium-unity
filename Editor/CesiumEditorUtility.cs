@@ -21,6 +21,8 @@ namespace CesiumForUnity
 
         static void UpdateIonSession()
         {
+            if (!IsNetworkReachable())
+                return;
             try
             {
                 CesiumIonServerManager.instance.currentSession.Tick();
@@ -31,6 +33,28 @@ namespace CesiumForUnity
             }
             catch (TypeInitializationException)
             {
+            }
+        }
+
+        private static bool IsNetworkReachable()
+        {
+            switch (Application.internetReachability)
+            {
+                case NetworkReachability.ReachableViaCarrierDataNetwork:
+                    // Reachable via carrier data network
+                    return true;
+
+                case NetworkReachability.ReachableViaLocalAreaNetwork:
+                    // Reachable via Local Area Network.
+                    return true;
+
+                case NetworkReachability.NotReachable:
+                    // Not Reachable.
+                    return false;
+
+                default:
+                    // Not Reachable.
+                    return false;
             }
         }
 
