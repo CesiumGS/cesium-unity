@@ -44,6 +44,16 @@ namespace CesiumForUnity
             this._materialKeys = new string[] { };
         }
 
+        public void DrawInspectorButtons()
+        {
+            var refreshOverlayContent = new GUIContent("Refresh Overlay",
+                "Refreshes this overlay.");
+            if (GUILayout.Button(refreshOverlayContent))
+            {
+                this._overlay?.Refresh();
+            }
+        }
+        
         public override void OnInspectorGUI()
         {
             this.serializedObject.Update();

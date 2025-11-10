@@ -59,7 +59,7 @@ namespace CesiumForUnity
         public override void OnInspectorGUI()
         {
             this.serializedObject.Update();
-
+            this._rasterOverlayEditor?.DrawInspectorButtons();
             EditorGUIUtility.labelWidth = CesiumEditorStyle.inspectorLabelWidth;
             this.DrawGoogleMapTilesProperties();
             EditorGUILayout.Space(5);
@@ -157,10 +157,7 @@ namespace CesiumForUnity
 
         private void DrawRasterOverlayProperties()
         {
-            if (this._rasterOverlayEditor != null)
-            {
-                this._rasterOverlayEditor.OnInspectorGUI();
-            }
+            this._rasterOverlayEditor?.OnInspectorGUI();
         }
     }
 }

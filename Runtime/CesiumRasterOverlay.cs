@@ -170,6 +170,9 @@ namespace CesiumForUnity
         /// </remarks>
         public void AddToTileset()
         {
+            if (!this.isActiveAndEnabled)
+                return;
+            
             Cesium3DTileset tileset = this.gameObject.GetComponent<Cesium3DTileset>();
             if (tileset == null)
                 return;
@@ -204,9 +207,7 @@ namespace CesiumForUnity
         public void Refresh()
         {
             this.RemoveFromTileset();
-
-            if (this.enabled)
-                this.AddToTileset();
+            this.AddToTileset();
         }
 
         private void OnEnable()

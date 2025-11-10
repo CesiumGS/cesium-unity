@@ -9,6 +9,7 @@ using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 using UnityEngine.Networking;
 
+
 namespace CesiumForUnity
 {
     [Reinterop]
@@ -64,12 +65,13 @@ namespace CesiumForUnity
             string e = request.error;
             string method = request.method;
             string url = request.url;
-            if (request.result == UnityWebRequest.Result.Success) { };
+            if (request.result == UnityWebRequest.Result.Success) { }
+            ;
             request.downloadHandler = new NativeDownloadHandler();
             request.SetRequestHeader("name", "value");
             request.GetResponseHeader("name");
-            Dictionary<string,string>.Enumerator enumerator = request.GetResponseHeaders().GetEnumerator();
-            while(enumerator.MoveNext())
+            Dictionary<string, string>.Enumerator enumerator = request.GetResponseHeaders().GetEnumerator();
+            while (enumerator.MoveNext())
             {
                 string key = enumerator.Current.Key;
                 string value = enumerator.Current.Value;
@@ -102,7 +104,7 @@ namespace CesiumForUnity
 
             item = new QuickAddItem(QuickAddItemType.IonTileset, "name", "tooltip", "tilesetName", 1, "overlayName", 2);
             items.Add(item);
-            
+
             server.defaultIonAccessToken = "";
             server.defaultIonAccessTokenId = "";
             server.apiUrl = "";
@@ -255,3 +257,4 @@ namespace CesiumForUnity
         }
     }
 }
+
