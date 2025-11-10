@@ -136,10 +136,6 @@ if (NOT IOS AND NOT CESIUM_TARGET_WASM)
     set(CESIUM_INSTALL_STATIC_LIBS OFF)
 endif()
 
-if (CESIUM_TARGET_WASM)
-  list(APPEND CESIUM_EXCLUDE_INSTALL_STATIC_LIBS "libjpeg-turbo") # This conflicts with Unity symbols
-endif()
-
 add_subdirectory(extern/swl-variant)
 
 if(CESIUM_TARGET_WASM AND EXISTS extern/blend2d)
@@ -151,7 +147,16 @@ if(CESIUM_TARGET_WASM AND EXISTS extern/blend2d)
   set_target_properties(blend2d PROPERTIES EXCLUDE_FROM_ALL 0 EXCLUDE_FROM_DEFAULT_BUILD 0)
 endif()
 
+# We don't need cesium-native's Curl-based asset accessor, because Cesium for Unity supplies
+# its own built on .NET libraries.
 set(CESIUM_DISABLE_CURL ON)
+
+# In Emscripten builds _only_, using libjpeg-turbo leads to multiply-defined symbols because
+# Unity itself appears to include this library. So disable it for Wasm builds.
+if (CESIUM_TARGET_WASM)
+  set(CESIUM_DISABLE_LIBJPEG_TURBO ON)
+endif()
+
 add_subdirectory(extern/cesium-native)
 
 # Don't build the cesium-native tests by default.
