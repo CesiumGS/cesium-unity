@@ -16,7 +16,8 @@ public:
 
 private:
 #ifdef __EMSCRIPTEN__
-  // Unity Wasm can't use C# System/Threads, so we need to implement our own thread pool.
+  // Unity Wasm can't use C# System/Threads, so we need to implement our own
+  // thread pool.
   UnityThreadPool* _threadPool = nullptr;
 #endif
 };

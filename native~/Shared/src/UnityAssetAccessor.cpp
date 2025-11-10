@@ -26,9 +26,9 @@
 #include <DotNet/UnityEngine/Networking/UnityWebRequestAsyncOperation.h>
 #include <DotNet/UnityEngine/Networking/UploadHandler.h>
 #include <DotNet/UnityEngine/Networking/UploadHandlerRaw.h>
+#include <fmt/format.h>
 
 #include <algorithm>
-#include <fmt/format.h>
 
 using namespace CesiumAsync;
 using namespace CesiumUtility;
@@ -36,23 +36,48 @@ using namespace DotNet;
 
 #ifdef __EMSCRIPTEN__
 struct RequestMetaDataLengths {
-    RequestMetaDataLengths()
-        : headerLength(0u)
-        , responseUrlLength(0u)
-    {}
+  RequestMetaDataLengths() : headerLength(0u), responseUrlLength(0u) {}
 
-    uint32_t headerLength;
-    uint32_t responseUrlLength;
+  uint32_t headerLength;
+  uint32_t responseUrlLength;
 };
-typedef void (*OnResponseCallback)(void* instance, int statusCode, void* data, uint32_t size, char* error, int webError);
-typedef void (*OnProgressCallback)(void* instance, int statusCode, uint32_t bytes, uint32_t total, void* data, uint32_t size);
+typedef void (*OnResponseCallback)(
+    void* instance,
+    int statusCode,
+    void* data,
+    uint32_t size,
+    char* error,
+    int webError);
+typedef void (*OnProgressCallback)(
+    void* instance,
+    int statusCode,
+    uint32_t bytes,
+    uint32_t total,
+    void* data,
+    uint32_t size);
 
 extern "C" {
 extern uint32_t JS_WebRequest_Create(const char* url, const char* method);
-extern void JS_WebRequest_SetRequestHeader(uint32_t request, const char* header, const char* value);
-extern void JS_WebRequest_Send(uint32_t request, void *ptr, uint32_t length, void *ref, OnResponseCallback onresponse, OnProgressCallback onprogress);
-extern void JS_WebRequest_GetResponseMetaDataLengths(uint32_t request, RequestMetaDataLengths* buffer);
-extern void JS_WebRequest_GetResponseMetaData(uint32_t request, char* headerBuffer, uint32_t headerSize, char* responseUrlBuffer, uint32_t responseUrlSize);
+extern void JS_WebRequest_SetRequestHeader(
+    uint32_t request,
+    const char* header,
+    const char* value);
+extern void JS_WebRequest_Send(
+    uint32_t request,
+    void* ptr,
+    uint32_t length,
+    void* ref,
+    OnResponseCallback onresponse,
+    OnProgressCallback onprogress);
+extern void JS_WebRequest_GetResponseMetaDataLengths(
+    uint32_t request,
+    RequestMetaDataLengths* buffer);
+extern void JS_WebRequest_GetResponseMetaData(
+    uint32_t request,
+    char* headerBuffer,
+    uint32_t headerSize,
+    char* responseUrlBuffer,
+    uint32_t responseUrlSize);
 extern void JS_WebRequest_Abort(uint32_t request);
 extern void JS_WebRequest_Release(uint32_t request);
 } // extern "C"
@@ -141,11 +166,13 @@ std::string replaceInvalidChars(const std::string& input) {
 #ifdef __EMSCRIPTEN__
 class JSAssetResponse : public IAssetResponse {
 public:
-  JSAssetResponse(const HttpHeaders& headers, int statusCode, void* data, uint32_t size)
-      : _headers(headers)
-      , _statusCode(statusCode)
-      , _data(size) {
-      memcpy(_data.data(), data, size);
+  JSAssetResponse(
+      const HttpHeaders& headers,
+      int statusCode,
+      void* data,
+      uint32_t size)
+      : _headers(headers), _statusCode(statusCode), _data(size) {
+    memcpy(_data.data(), data, size);
   }
 
   virtual uint16_t statusCode() const override { return _statusCode; }
@@ -172,18 +199,14 @@ private:
 
 class JSAssetRequest : public IAssetRequest {
 public:
-  JSAssetRequest(const std::string& method,
-                 const std::string& url,
-                 const HttpHeaders& headers,
-                 IAssetResponse* response)
-      : _method(method)
-      , _url(url)
-      , _headers(headers)
-      , _response(response) {}
+  JSAssetRequest(
+      const std::string& method,
+      const std::string& url,
+      const HttpHeaders& headers,
+      IAssetResponse* response)
+      : _method(method), _url(url), _headers(headers), _response(response) {}
 
-  virtual ~JSAssetRequest() {
-    delete this->_response;
-  }
+  virtual ~JSAssetRequest() { delete this->_response; }
 
   virtual const std::string& method() const override { return _method; }
   virtual const std::string& url() const override { return _url; }
@@ -237,33 +260,39 @@ static bool IsSpace(char c) {
   return c == ' ' || c == '\t' || c == '\r' || c == '\n';
 }
 
-static void SetUnvalidated(std::string_view name, std::string_view value, bool replace, HttpHeaders& headers) {
-    // Insert or replace header
-    std::string nameStr(name.data(), name.size());
-    HttpHeaders::iterator it = headers.find(nameStr);
-    if (it != headers.end()) {
-      if (replace) {
-        it->second = value;
-      } else {
-        it->second.reserve(it->second.size() + 1 + value.size());
-        it->second.append(",");
-        it->second.append(value);
-      }
+static void SetUnvalidated(
+    std::string_view name,
+    std::string_view value,
+    bool replace,
+    HttpHeaders& headers) {
+  // Insert or replace header
+  std::string nameStr(name.data(), name.size());
+  HttpHeaders::iterator it = headers.find(nameStr);
+  if (it != headers.end()) {
+    if (replace) {
+      it->second = value;
     } else {
-      headers.insert({std::string(name), std::string(value)});
+      it->second.reserve(it->second.size() + 1 + value.size());
+      it->second.append(",");
+      it->second.append(value);
     }
+  } else {
+    headers.insert({std::string(name), std::string(value)});
+  }
 }
 
-static void ParseAndSetAllHeaders(const char* buf, size_t length, HttpHeaders& headers) {
+static void
+ParseAndSetAllHeaders(const char* buf, size_t length, HttpHeaders& headers) {
   while (length > 0) {
     // Find : character delimiting the key from the value
     const char* delim = buf;
     while ((delim - buf) < length && *delim != ':') {
       ++delim;
 
-      // If we hit a new line and did not find a delimiter character, skip this line.
+      // If we hit a new line and did not find a delimiter character, skip this
+      // line.
       if (*delim == '\r' || *delim == '\n') {
-        length -= (delim  - buf);
+        length -= (delim - buf);
         buf = delim;
       }
     }
@@ -275,7 +304,7 @@ static void ParseAndSetAllHeaders(const char* buf, size_t length, HttpHeaders& h
     }
 
     if ((delim - buf) >= length)
-        break;
+      break;
 
     const char* end = delim;
     while ((end - buf) < length && *end != '\r' && *end != '\n') {
@@ -311,39 +340,64 @@ static void ParseAndSetAllHeaders(const char* buf, size_t length, HttpHeaders& h
   }
 }
 
-static void _OnProgress(void* _instance, int statusCode, uint32_t bytes, uint32_t total, void* data, uint32_t size) {
-    ResponseData* responseData = static_cast<ResponseData*>(_instance);
-    if (size > 0) {
-      size_t endPosition = responseData->data.size();
-      responseData->data.resize(responseData->data.size() + size);
-      memcpy(responseData->data.data() + endPosition, data, size);
-    }
+static void _OnProgress(
+    void* _instance,
+    int statusCode,
+    uint32_t bytes,
+    uint32_t total,
+    void* data,
+    uint32_t size) {
+  ResponseData* responseData = static_cast<ResponseData*>(_instance);
+  if (size > 0) {
+    size_t endPosition = responseData->data.size();
+    responseData->data.resize(responseData->data.size() + size);
+    memcpy(responseData->data.data() + endPosition, data, size);
+  }
 
-    RequestMetaDataLengths lengths;
-    JS_WebRequest_GetResponseMetaDataLengths(responseData->request, &lengths);
-    std::string headers((size_t)lengths.headerLength + 1, 0);
-    std::string responseUrl((size_t)lengths.responseUrlLength + 1, 0);
-    JS_WebRequest_GetResponseMetaData(responseData->request, (char *)headers.data(), headers.size(), (char *)responseUrl.data(), responseUrl.size());
-    headers.resize(headers.size() - 1); // strip null terminator
-    responseUrl.resize(responseUrl.size() - 1); // strip null terminator
-    ParseAndSetAllHeaders(headers.c_str(), headers.size(), responseData->responseHeaders);
+  RequestMetaDataLengths lengths;
+  JS_WebRequest_GetResponseMetaDataLengths(responseData->request, &lengths);
+  std::string headers((size_t)lengths.headerLength + 1, 0);
+  std::string responseUrl((size_t)lengths.responseUrlLength + 1, 0);
+  JS_WebRequest_GetResponseMetaData(
+      responseData->request,
+      (char*)headers.data(),
+      headers.size(),
+      (char*)responseUrl.data(),
+      responseUrl.size());
+  headers.resize(headers.size() - 1);         // strip null terminator
+  responseUrl.resize(responseUrl.size() - 1); // strip null terminator
+  ParseAndSetAllHeaders(
+      headers.c_str(),
+      headers.size(),
+      responseData->responseHeaders);
 }
 
-static void _OnResponse(void* _instance, int statusCode, void* data, uint32_t size, char* error, int webError) {
-    ResponseData* responseData = static_cast<ResponseData*>(_instance);
-    auto& promise = responseData->promise;
-    if (webError == 0) {
-      // Success
-      promise.resolve(std::make_shared<JSAssetRequest>("GET", responseData->url, responseData->requestHeaders,
-        new JSAssetResponse(responseData->responseHeaders, statusCode, responseData->data.data(), responseData->data.size())));
-    } else {
-      // Error
-      promise.reject(std::runtime_error(fmt::format(
-          "Request for `{}` failed: {}",
-          responseData->url,
-          error)));
-    }
-    delete responseData;
+static void _OnResponse(
+    void* _instance,
+    int statusCode,
+    void* data,
+    uint32_t size,
+    char* error,
+    int webError) {
+  ResponseData* responseData = static_cast<ResponseData*>(_instance);
+  auto& promise = responseData->promise;
+  if (webError == 0) {
+    // Success
+    promise.resolve(std::make_shared<JSAssetRequest>(
+        "GET",
+        responseData->url,
+        responseData->requestHeaders,
+        new JSAssetResponse(
+            responseData->responseHeaders,
+            statusCode,
+            responseData->data.data(),
+            responseData->data.size())));
+  } else {
+    // Error
+    promise.reject(std::runtime_error(
+        fmt::format("Request for `{}` failed: {}", responseData->url, error)));
+  }
+  delete responseData;
 }
 #endif // __EMSCRIPTEN__
 
@@ -354,74 +408,95 @@ UnityAssetAccessor::get(
     const std::vector<THeader>& headers) {
 
   // Sadly, Unity requires us to call this from the main thread.
-  return asyncSystem.runInMainThread([asyncSystem,
-                                      url,
-                                      headers,
-                                      &cesiumRequestHeaders = this->_cesiumRequestHeaders]() {
+  return asyncSystem.runInMainThread(
+      [asyncSystem,
+       url,
+       headers,
+       &cesiumRequestHeaders = this->_cesiumRequestHeaders]() {
 
 #ifdef __EMSCRIPTEN__
-    auto promise = asyncSystem.createPromise<std::shared_ptr<CesiumAsync::IAssetRequest>>();
+        auto promise =
+            asyncSystem
+                .createPromise<std::shared_ptr<CesiumAsync::IAssetRequest>>();
 
-    auto future = promise.getFuture();
+        auto future = promise.getFuture();
 
-    uint32_t request = JS_WebRequest_Create(url.c_str(), "GET");
-    HttpHeaders requestHeaders = cesiumRequestHeaders;
-    for (const auto& header : headers) {
-      requestHeaders.insert(header);
-    }
-    for (const auto& header : requestHeaders) {
-      JS_WebRequest_SetRequestHeader(request, header.first.c_str(), header.second.c_str());
-    }
+        uint32_t request = JS_WebRequest_Create(url.c_str(), "GET");
+        HttpHeaders requestHeaders = cesiumRequestHeaders;
+        for (const auto& header : headers) {
+          requestHeaders.insert(header);
+        }
+        for (const auto& header : requestHeaders) {
+          JS_WebRequest_SetRequestHeader(
+              request,
+              header.first.c_str(),
+              header.second.c_str());
+        }
 
-    ResponseData* responseData = new ResponseData{request, url, std::move(requestHeaders), {}, std::move(promise)};
-    JS_WebRequest_Send(request, nullptr, 0, responseData, _OnResponse, _OnProgress);
+        ResponseData* responseData = new ResponseData{
+            request,
+            url,
+            std::move(requestHeaders),
+            {},
+            std::move(promise)};
+        JS_WebRequest_Send(
+            request,
+            nullptr,
+            0,
+            responseData,
+            _OnResponse,
+            _OnProgress);
 
-    return future;
+        return future;
 #else
-    UnityEngine::Networking::UnityWebRequest request =
-        UnityEngine::Networking::UnityWebRequest::Get(System::String(url));
+        UnityEngine::Networking::UnityWebRequest request =
+            UnityEngine::Networking::UnityWebRequest::Get(System::String(url));
 
-    DotNet::CesiumForUnity::NativeDownloadHandler handler{};
-    request.downloadHandler(handler);
+        DotNet::CesiumForUnity::NativeDownloadHandler handler{};
+        request.downloadHandler(handler);
 
-    HttpHeaders requestHeaders = cesiumRequestHeaders;
-    for (const auto& header : headers) {
-      requestHeaders.insert(header);
-    }
-    for (const auto& header : requestHeaders) {
-      request.SetRequestHeader(
-          System::String(header.first),
-          System::String(header.second));
-    }
+        HttpHeaders requestHeaders = cesiumRequestHeaders;
+        for (const auto& header : headers) {
+          requestHeaders.insert(header);
+        }
+        for (const auto& header : requestHeaders) {
+          request.SetRequestHeader(
+              System::String(header.first),
+              System::String(header.second));
+        }
 
-    auto promise = asyncSystem.createPromise<std::shared_ptr<CesiumAsync::IAssetRequest>>();
+        auto promise =
+            asyncSystem
+                .createPromise<std::shared_ptr<CesiumAsync::IAssetRequest>>();
 
-    auto future = promise.getFuture();
+        auto future = promise.getFuture();
 
-    UnityEngine::Networking::UnityWebRequestAsyncOperation op =
-        request.SendWebRequest();
-    op.add_completed(System::Action1<UnityEngine::AsyncOperation>(
-        [request,
-         headers = std::move(requestHeaders),
-         promise = std::move(promise),
-         handler = std::move(handler)](
-            const UnityEngine::AsyncOperation& operation) mutable {
-          ScopeGuard disposeHandler{[&handler]() { handler.Dispose(); }};
-          if (request.isDone() &&
-              request.result() !=
-                  UnityEngine::Networking::Result::ConnectionError) {
-            promise.resolve(
-                std::make_shared<UnityAssetRequest>(request, headers, handler));
-          } else {
-            promise.reject(std::runtime_error(fmt::format(
-                "Request for `{}` failed: {}",
-                request.url().ToStlString(),
-                request.error().ToStlString())));
-          }
-        }));
-    return future;
+        UnityEngine::Networking::UnityWebRequestAsyncOperation op =
+            request.SendWebRequest();
+        op.add_completed(System::Action1<UnityEngine::AsyncOperation>(
+            [request,
+             headers = std::move(requestHeaders),
+             promise = std::move(promise),
+             handler = std::move(handler)](
+                const UnityEngine::AsyncOperation& operation) mutable {
+              ScopeGuard disposeHandler{[&handler]() { handler.Dispose(); }};
+              if (request.isDone() &&
+                  request.result() !=
+                      UnityEngine::Networking::Result::ConnectionError) {
+                promise.resolve(std::make_shared<UnityAssetRequest>(
+                    request,
+                    headers,
+                    handler));
+              } else {
+                promise.reject(std::runtime_error(fmt::format(
+                    "Request for `{}` failed: {}",
+                    request.url().ToStlString(),
+                    request.error().ToStlString())));
+              }
+            }));
+        return future;
 #endif // __EMSCRIPTEN__
-  });
+      });
 }
 
 CesiumAsync::Future<std::shared_ptr<CesiumAsync::IAssetRequest>>
