@@ -393,6 +393,10 @@ jobs:
         if: success() || failure()    # run this step even if previous step failed
         run: |
           get-psdrive
+      - name: Delete ccache
+        run: |
+          # To prevent the ada-url build from trying (and failing) to use it.
+          rm C:/Strawberry/c/bin/ccache.exe
       - name: Build Package
         run: |
           cd d:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
