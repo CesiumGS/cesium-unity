@@ -415,7 +415,7 @@ jobs:
         if: success() || failure()    # run this step even if previous step failed
         uses: actions/upload-artifact@v4
         with:
-          name: Native Build Logs - Windows
+          name: Native Build Logs - Emscripten
           path: d:/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity/native~/build-*/build.log
       - name: Publish package artifact
         if: ${{ success() }}
@@ -427,7 +427,7 @@ jobs:
         env:
           CESIUM_ION_TOKEN_FOR_TESTS: ${{ secrets.CESIUM_ION_TOKEN_FOR_TESTS }}
         run: |
-          start -FilePath "C:\Program Files\Unity\Hub\Editor\2022.3.41f1\Editor\Unity.exe" -ArgumentList "-runTests -batchmode -projectPath d:\cesium\CesiumForUnityBuildProject -testResults d:\cesium\temp\TestResults.xml -testPlatform PlayMode -logFile d:\cesium\temp\test-log.txt" -Wait
+          start -FilePath "C:\Program Files\Unity\Hub\Editor\6000.0.62f1\Editor\Unity.exe" -ArgumentList "-runTests -batchmode -projectPath d:\cesium\CesiumForUnityBuildProject -testResults d:\cesium\temp\TestResults.xml -testPlatform PlayMode -logFile d:\cesium\temp\test-log.txt" -Wait
           cat d:\cesium\temp\test-log.txt
       - name: Test Report
         uses: kring/test-reporter@v1.6.2-kring
