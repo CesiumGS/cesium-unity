@@ -406,7 +406,7 @@ jobs:
           # Explicitly set the ezvcpkg path. Otherwise it will be `/.ezvcpkg` and the drive letter is ambiguous.
           $ENV:EZVCPKG_BASEDIR="D:/.ezvcpkg"
           # Run the build
-          dotnet run --project Build~ --platform Web
+          dotnet run --project Build~ package --platform Web
       - name: Print disk space 2
         if: success() || failure()    # run this step even if previous step failed
         run: |
