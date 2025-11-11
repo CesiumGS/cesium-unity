@@ -68,7 +68,7 @@ jobs:
       - name: Install Unity
         run: |
           Start-Process -FilePath "C:/Program Files/Unity Hub/Unity Hub.exe" -Args "-- --headless install --version 2022.3.41f1 --changeset 0f988161febf" -Wait
-          Start-Process -FilePath "C:/Program Files/Unity Hub/Unity Hub.exe" -Args "-- --headless install-modules --version 2022.3.41f1 --changeset 0f988161febf --module android android-sdk-ndk-tools android-open-jdk-11.0.14.1+1 universal-windows-platform webgl" -Wait
+          Start-Process -FilePath "C:/Program Files/Unity Hub/Unity Hub.exe" -Args "-- --headless install-modules --version 2022.3.41f1 --changeset 0f988161febf --module android android-sdk-ndk-tools android-open-jdk-11.0.14.1+1 universal-windows-platform" -Wait
       - name: Create SSH tunnel to Unity License Server
         env:
           UNITY_LICENSE_SERVER_SSH_KEY: ${{ secrets.UNITY_LICENSE_SERVER_SSH_KEY }}
@@ -132,7 +132,7 @@ jobs:
           # Explicitly set the ezvcpkg path. Otherwise it will be `/.ezvcpkg` and the drive letter is ambiguous.
           $ENV:EZVCPKG_BASEDIR="D:/.ezvcpkg"
           # Run the build
-          dotnet run --project Build~
+          dotnet run --project Build~ package --platform Editor --platform Windows --platform UWP --platform Android
       - name: Print disk space 2
         if: success() || failure()    # run this step even if previous step failed
         run: |
@@ -279,7 +279,7 @@ jobs:
           # We only need a release build of vcpkg dependencies
           export CESIUM_VCPKG_RELEASE_ONLY="TRUE"
           cd ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
-          dotnet run --project Build~
+          dotnet run --project Build~ package --platform Editor --platform macOS --platform iOS
           ls -l ~/cesium/CesiumForUnityBuildProject
       - name: Publish Logs
         if: success() || failure()    # run this step even if previous step failed
