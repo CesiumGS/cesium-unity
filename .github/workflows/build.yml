@@ -417,6 +417,12 @@ jobs:
         with:
           name: Native Build Logs - Emscripten
           path: d:/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity/native~/build-*/build.log
+      - name: Publish ada-url build logs
+        if: success() || failure()    # run this step even if previous step failed
+        uses: actions/upload-artifact@v4
+        with:
+          name: Emscripten ada-url Build Log
+          path: D:/.ezvcpkg/afc0a2e01ae104a2474216a2df0e8d78516fd5af/buildtrees/ada-url/*.log
       - name: Publish package artifact
         if: ${{ success() }}
         uses: actions/upload-artifact@v4
