@@ -92,7 +92,7 @@ jobs:
         run: |
           mkdir -p $ENV:PROGRAMDATA/Unity/config
           $filename="$ENV:PROGRAMDATA/Unity/config/services-config.json"
-          $text='{"licensingServiceBaseUrl":"http://localhost:12331","enableEntitlementLicensing":true,"clientConnectTimeoutSec":120,"clientHandshakeTimeoutSec":60}'
+          $text='{"licensingServiceBaseUrl":"http://localhost:12331","enableEntitlementLicensing":true,"clientConnectTimeoutSec":120,"clientHandshakeTimeoutSec":60,"toolset":"UnityLicenseServer_16768262570522_2"}'
           [IO.File]::WriteAllLines($filename,$text)
       - name: Update the version in Cesium.cpp
         run: |
@@ -233,7 +233,7 @@ jobs:
           sudo mkdir -p "/Library/Application Support/Unity/config"
           sudo chmod g+w "/Library/Application Support/Unity"
           sudo chmod g+w "/Library/Application Support/Unity/config"
-          sudo echo '{"licensingServiceBaseUrl": "http://localhost:12331","enableEntitlementLicensing": true,"clientConnectTimeoutSec": 60,"clientHandshakeTimeoutSec": 120}' > "/Library/Application Support/Unity/config/services-config.json"
+          sudo echo '{"licensingServiceBaseUrl": "http://localhost:12331","enableEntitlementLicensing": true,"clientConnectTimeoutSec": 60,"clientHandshakeTimeoutSec": 120,"toolset":"UnityLicenseServer_16768262570522_2"}' > "/Library/Application Support/Unity/config/services-config.json"
       - name: Create SSH tunnel to Unity License Server
         env:
           UNITY_LICENSE_SERVER_SSH_KEY: ${{ secrets.UNITY_LICENSE_SERVER_SSH_KEY }}
@@ -366,7 +366,7 @@ jobs:
         run: |
           mkdir -p $ENV:PROGRAMDATA/Unity/config
           $filename="$ENV:PROGRAMDATA/Unity/config/services-config.json"
-          $text='{"licensingServiceBaseUrl":"http://localhost:12331","enableEntitlementLicensing":true,"clientConnectTimeoutSec":120,"clientHandshakeTimeoutSec":60}'
+          $text='{"licensingServiceBaseUrl":"http://localhost:12331","enableEntitlementLicensing":true,"clientConnectTimeoutSec":120,"clientHandshakeTimeoutSec":60,"toolset":"UnityLicenseServer_16768262643415_1"}'
           [IO.File]::WriteAllLines($filename,$text)
       - name: Update the version in Cesium.cpp
         run: |
