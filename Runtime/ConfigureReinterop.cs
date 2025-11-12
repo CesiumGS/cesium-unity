@@ -35,6 +35,8 @@ namespace CesiumForUnity
         public const string CppOutputPath = "../native~/Runtime/generated-WSA";
 #elif UNITY_64
         public const string CppOutputPath = "../native~/Runtime/generated-Standalone";
+#elif UNITY_WEBGL
+        public const string CppOutputPath = "../native~/Runtime/generated-WebGL";
 #else
         public const string CppOutputPath = "../native~/Runtime/generated-Unknown";
 #endif
@@ -45,7 +47,7 @@ namespace CesiumForUnity
         public const string BaseNamespace = "DotNet";
 
         // The name of the DLL or SO containing the C++ code.
-#if UNITY_IOS && !UNITY_EDITOR
+#if (UNITY_IOS || UNITY_WEBGL) && !UNITY_EDITOR
         public const string NativeLibraryName = "__Internal";
 #else
         public const string NativeLibraryName = "CesiumForUnityNative-Runtime";
