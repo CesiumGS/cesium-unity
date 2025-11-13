@@ -52,6 +52,8 @@ public:
   void UpdateOverlayMaterialKeys(
       const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
 
+  void WaitUntilIdle(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
+
   float
   ComputeLoadProgress(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
 

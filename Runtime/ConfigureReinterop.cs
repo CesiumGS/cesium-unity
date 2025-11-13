@@ -288,6 +288,7 @@ namespace CesiumForUnity
             tileset.showCreditsOnScreen = tileset.showCreditsOnScreen;
             tileset.ionServer = tileset.ionServer;
             tileset.RecreateTileset();
+            tileset.WaitUntilIdle();
 
             GraphicsFormat gfxFmt = GraphicsFormat.RGB_ETC_UNorm;
             FormatUsage fmtUsage = FormatUsage.Sample;
@@ -976,3 +977,4 @@ namespace CesiumForUnity
         }
     }
 }
+

@@ -1,5 +1,6 @@
 #include "Cesium3DTilesetImpl.h"
 
+#include "../../extern/cesium-native/Cesium3DTilesSelection/src/TilesetContentManager.h"
 #include "CameraManager.h"
 #include "CesiumEllipsoidImpl.h"
 #include "CesiumIonServerHelper.h"
@@ -561,6 +562,10 @@ void Cesium3DTilesetImpl::DestroyTileset(
   this->_pTileset.reset();
 
   this->_destroyTilesetOnNextUpdate = false;
+}
+
+void Cesium3DTilesetImpl::WaitUntilIdle(const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
+  this->getTileset()->getTilesetContentManager().waitUntilIdle();
 }
 
 void Cesium3DTilesetImpl::LoadTileset(

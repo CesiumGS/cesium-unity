@@ -745,6 +745,8 @@ namespace CesiumForUnity
         /// </summary>
         public partial void RecreateTileset();
 
+        public partial void WaitUntilIdle();
+
         /// <summary>
         /// Zoom the Editor camera to this tileset. This method does nothing outside of the Editor.
         /// </summary>
