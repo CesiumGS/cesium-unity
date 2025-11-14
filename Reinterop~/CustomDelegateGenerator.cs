@@ -139,19 +139,27 @@ namespace Reinterop
                             this._callbackFunction = null;
                         }
 
-                        public {{csReturnType.GetFullyQualifiedName()}} Invoke({{string.Join(", ", invokeParameters)}})
+                        public unsafe {{csReturnType.GetFullyQualifiedName()}} Invoke({{string.Join(", ", invokeParameters)}})
                         {
                             if (_callbackFunction == null)
                                 throw new System.ObjectDisposedException("{{csType.Name}}");
-                    
-                            {{csResultImplementation}}{{invokeCallbackName}}({{string.Join(", ", callInvokeInteropParameters)}});
-                            {{csReturnImplementation}};
+
+                            unsafe
+                            {
+                                System.IntPtr reinteropException = System.IntPtr.Zero;
+                                {{csResultImplementation}}{{invokeCallbackName}}({{string.Join(", ", callInvokeInteropParameters)}}, &reinteropException);
+                                if (reinteropException != System.IntPtr.Zero)
+                                {
+                                    throw (System.Exception)Reinterop.ObjectHandleUtility.GetObjectAndFreeHandle(reinteropException);
+                                }
+                                {{csReturnImplementation}};
+                            }
                         }
 
                         [System.Runtime.InteropServices.DllImport("{{context.NativeLibraryName}}", CallingConvention=System.Runtime.InteropServices.CallingConvention.Cdecl)]
                         private static extern void {{disposeCallbackName}}(IntPtr callbackFunction);
                         [System.Runtime.InteropServices.DllImport("{{context.NativeLibraryName}}", CallingConvention=System.Runtime.InteropServices.CallingConvention.Cdecl)]
-                        private static extern {{csReturnType.AsInteropTypeReturn().GetFullyQualifiedName()}} {{invokeCallbackName}}({{string.Join(", ", invokeInteropParameters)}});
+                        private static unsafe extern {{csReturnType.AsInteropTypeReturn().GetFullyQualifiedName()}} {{invokeCallbackName}}({{string.Join(", ", invokeInteropParameters)}}, IntPtr* reinteropException);
                     }
                     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
                     private unsafe delegate IntPtr {{csBaseName}}Type(IntPtr callbackFunction);
@@ -168,12 +176,19 @@ namespace Reinterop
             var interopParameters = new[] { (Name: "pCallbackFunction", CsType: CSharpType.FromSymbol(context, context.Compilation.GetSpecialType(SpecialType.System_IntPtr)), Type: CppType.VoidPointer, InteropType: CppType.VoidPointer) }.Concat(callbackParameters);
             var callParameters = callbackParameters.Select(p => p.Type.GetConversionFromInteropType(context, p.Name));
 
+            CppType interopReturnType = returnType.AsInteropType();
+
             string resultImplementation = "";
             string returnImplementation = "return;";
+            string returnDefault = "return;";
             if (invokeMethod.ReturnType.SpecialType != SpecialType.System_Void)
             {
                 resultImplementation = "auto result = ";
                 returnImplementation = $"return {returnType.GetConversionToInteropType(context, "result")};";
+                if (interopReturnType.Flags.HasFlag(CppTypeFlags.Pointer))
+                    returnDefault = "return nullptr;";
+                else
+                    returnDefault = $$"""return {{interopReturnType.GetFullyQualifiedName()}}();""";
             }
 
             result.CppImplementationInvoker.Functions.Add(new(
@@ -182,12 +197,29 @@ namespace Reinterop
                     #if defined(_WIN32)
                     __declspec(dllexport)
                     #endif
-                    {{returnType.AsInteropType().GetFullyQualifiedName()}} {{invokeCallbackName}}({{string.Join(", ", interopParameters.Select(p => $"{p.InteropType.GetFullyQualifiedName()} {p.Name}"))}}) {
+                    {{interopReturnType.GetFullyQualifiedName()}} {{invokeCallbackName}}({{string.Join(", ", interopParameters.Select(p => $"{p.InteropType.GetFullyQualifiedName()} {p.Name}").Concat(new[] { "void** reinteropException" }))}}) {
                       auto pFunc = reinterpret_cast<std::function<{{itemType.GetFullyQualifiedName()}}::FunctionSignature>*>(pCallbackFunction);
-                      {{resultImplementation}}(*pFunc)({{string.Join(", ", callParameters)}});
-                      {{returnImplementation}}
+                      try {
+                        {{resultImplementation}}(*pFunc)({{string.Join(", ", callParameters)}});
+                        {{returnImplementation}}
+                      } catch (::DotNet::Reinterop::ReinteropNativeException& e) {
+                        *reinteropException = ::DotNet::Reinterop::ObjectHandle(e.GetDotNetException().GetHandle()).Release();
+                        {{returnDefault}}
+                      } catch (std::exception& e) {
+                        *reinteropException = ::DotNet::Reinterop::ReinteropException(::DotNet::System::String(e.what())).GetHandle().Release();
+                        {{returnDefault}}
+                      } catch (...) {
+                        *reinteropException = ::DotNet::Reinterop::ReinteropException(::DotNet::System::String("An unknown native exception occurred.")).GetHandle().Release();
+                        {{returnDefault}}
+                      }                   
                     }
-                    """));
+                    """,
+                TypeDefinitionsReferenced: new[]
+                {
+                    CppReinteropException.GetCppType(context),
+                    CSharpReinteropException.GetCppWrapperType(context),
+                    CppType.FromCSharp(context, context.Compilation.GetSpecialType(SpecialType.System_String))
+                }));
 
             result.CppImplementationInvoker.Functions.Add(new(
                 Content:
