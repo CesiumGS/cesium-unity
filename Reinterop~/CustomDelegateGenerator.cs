@@ -72,7 +72,7 @@ namespace Reinterop
                     """
                 ));
 
-            // A a C# delegate type that wraps a std::function, and arrange for
+            // A C# delegate type that wraps a std::function, and arrange for
             // the invoke and dispose to be implemented in C++.
             CSharpType csType = CSharpType.FromSymbol(context, item.Type);
 
@@ -88,7 +88,7 @@ namespace Reinterop
             string disposeCallbackName = $"{csType.GetFullyQualifiedNamespace().Replace(".", "_")}_{item.Type.Name}{genericTypeHash}_DisposeCallback";
 
             var invokeParameters = callbackParameters.Select(p => $"{p.CsType.GetFullyQualifiedName()} {p.Name}");
-            var invokeInteropParameters = new[] { "IntPtr callbackFunction" }.Concat(callbackParameters.Select(p => $"{p.CsType.AsInteropTypeParameter().GetFullyQualifiedName()} {p.Name}"));
+            var invokeInteropParameters = new[] { "ImplementationHandle callbackFunction" }.Concat(callbackParameters.Select(p => $"{p.CsType.AsInteropTypeParameter().GetFullyQualifiedName()} {p.Name}"));
             var callInvokeInteropParameters = new[] { "_callbackFunction" }.Concat(callbackParameters.Select(p => p.CsType.GetConversionToInteropType(p.Name)));
             var csReturnType = CSharpType.FromSymbol(context, invokeMethod.ReturnType);
 
@@ -109,31 +109,34 @@ namespace Reinterop
                     $$"""
                     private class {{csType.Name}}{{genericTypeHash}}NativeFunction : System.IDisposable
                     {
-                        private IntPtr _callbackFunction;
+                        internal class ImplementationHandle : Microsoft.Win32.SafeHandles.SafeHandleZeroOrMinusOneIsInvalid
+                        {
+                            public ImplementationHandle(IntPtr nativeImplementation) : base(true)
+                            {
+                                SetHandle(nativeImplementation);
+                            }
+
+                            [System.Runtime.ConstrainedExecution.ReliabilityContract(System.Runtime.ConstrainedExecution.Consistency.WillNotCorruptState, System.Runtime.ConstrainedExecution.Cer.Success)]
+                            protected override bool ReleaseHandle()
+                            {
+                                {{disposeCallbackName}}(this.handle);
+                                return true;
+                            }
+                        }
+
+                        [System.NonSerialized]
+                        private ImplementationHandle _callbackFunction;
 
                         public {{csType.Name}}{{genericTypeHash}}NativeFunction(IntPtr callbackFunction)
                         {
-                            _callbackFunction = callbackFunction;
+                            _callbackFunction = new ImplementationHandle(callbackFunction);
                         }
 
-                        ~{{csType.Name}}{{genericTypeHash}}NativeFunction()
-                        {
-                            Dispose(false);
-                        }
-                    
                         public void Dispose()
                         {
-                            Dispose(true);
-                            GC.SuppressFinalize(this);
-                        }
-
-                        private void Dispose(bool disposing)
-                        {
-                            if (_callbackFunction != IntPtr.Zero)
-                            {
-                                {{disposeCallbackName}}(_callbackFunction);
-                                _callbackFunction = IntPtr.Zero;
-                            }
+                            if (this._callbackFunction != null && !this._callbackFunction.IsInvalid)
+                                this._callbackFunction.Dispose();
+                            this._callbackFunction = null;
                         }
 
                         public {{csReturnType.GetFullyQualifiedName()}} Invoke({{string.Join(", ", invokeParameters)}})
