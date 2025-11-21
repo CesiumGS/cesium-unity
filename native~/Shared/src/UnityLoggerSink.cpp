@@ -3,6 +3,7 @@
 #include <DotNet/System/Object.h>
 #include <DotNet/System/String.h>
 #include <DotNet/UnityEngine/Debug.h>
+#include <fmt/format.h>
 
 using namespace CesiumForUnity;
 using namespace DotNet;
