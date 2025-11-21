@@ -72,7 +72,7 @@ namespace Reinterop
                     """
                 ));
 
-            // A a C# delegate type that wraps a std::function, and arrange for
+            // A C# delegate type that wraps a std::function, and arranges for
             // the invoke and dispose to be implemented in C++.
             CSharpType csType = CSharpType.FromSymbol(context, item.Type);
 
@@ -88,7 +88,7 @@ namespace Reinterop
             string disposeCallbackName = $"{csType.GetFullyQualifiedNamespace().Replace(".", "_")}_{item.Type.Name}{genericTypeHash}_DisposeCallback";
 
             var invokeParameters = callbackParameters.Select(p => $"{p.CsType.GetFullyQualifiedName()} {p.Name}");
-            var invokeInteropParameters = new[] { "IntPtr callbackFunction" }.Concat(callbackParameters.Select(p => $"{p.CsType.AsInteropTypeParameter().GetFullyQualifiedName()} {p.Name}"));
+            var invokeInteropParameters = new[] { "ImplementationHandle callbackFunction" }.Concat(callbackParameters.Select(p => $"{p.CsType.AsInteropTypeParameter().GetFullyQualifiedName()} {p.Name}"));
             var callInvokeInteropParameters = new[] { "_callbackFunction" }.Concat(callbackParameters.Select(p => p.CsType.GetConversionToInteropType(p.Name)));
             var csReturnType = CSharpType.FromSymbol(context, invokeMethod.ReturnType);
 
@@ -109,46 +109,57 @@ namespace Reinterop
                     $$"""
                     private class {{csType.Name}}{{genericTypeHash}}NativeFunction : System.IDisposable
                     {
-                        private IntPtr _callbackFunction;
-
-                        public {{csType.Name}}{{genericTypeHash}}NativeFunction(IntPtr callbackFunction)
+                        internal class ImplementationHandle : Microsoft.Win32.SafeHandles.SafeHandleZeroOrMinusOneIsInvalid
                         {
-                            _callbackFunction = callbackFunction;
-                        }
-
-                        ~{{csType.Name}}{{genericTypeHash}}NativeFunction()
-                        {
-                            Dispose(false);
-                        }
-                    
-                        public void Dispose()
-                        {
-                            Dispose(true);
-                            GC.SuppressFinalize(this);
-                        }
-
-                        private void Dispose(bool disposing)
-                        {
-                            if (_callbackFunction != IntPtr.Zero)
+                            public ImplementationHandle(IntPtr nativeImplementation) : base(true)
                             {
-                                {{disposeCallbackName}}(_callbackFunction);
-                                _callbackFunction = IntPtr.Zero;
+                                SetHandle(nativeImplementation);
+                            }
+
+                            [System.Runtime.ConstrainedExecution.ReliabilityContract(System.Runtime.ConstrainedExecution.Consistency.WillNotCorruptState, System.Runtime.ConstrainedExecution.Cer.Success)]
+                            protected override bool ReleaseHandle()
+                            {
+                                {{disposeCallbackName}}(this.handle);
+                                return true;
                             }
                         }
 
-                        public {{csReturnType.GetFullyQualifiedName()}} Invoke({{string.Join(", ", invokeParameters)}})
+                        [System.NonSerialized]
+                        private ImplementationHandle _callbackFunction;
+
+                        public {{csType.Name}}{{genericTypeHash}}NativeFunction(IntPtr callbackFunction)
+                        {
+                            _callbackFunction = new ImplementationHandle(callbackFunction);
+                        }
+
+                        public void Dispose()
+                        {
+                            if (this._callbackFunction != null && !this._callbackFunction.IsInvalid)
+                                this._callbackFunction.Dispose();
+                            this._callbackFunction = null;
+                        }
+
+                        public unsafe {{csReturnType.GetFullyQualifiedName()}} Invoke({{string.Join(", ", invokeParameters)}})
                         {
                             if (_callbackFunction == null)
                                 throw new System.ObjectDisposedException("{{csType.Name}}");
-                    
-                            {{csResultImplementation}}{{invokeCallbackName}}({{string.Join(", ", callInvokeInteropParameters)}});
-                            {{csReturnImplementation}};
+
+                            unsafe
+                            {
+                                System.IntPtr reinteropException = System.IntPtr.Zero;
+                                {{csResultImplementation}}{{invokeCallbackName}}({{string.Join(", ", callInvokeInteropParameters)}}, &reinteropException);
+                                if (reinteropException != System.IntPtr.Zero)
+                                {
+                                    throw (System.Exception)Reinterop.ObjectHandleUtility.GetObjectAndFreeHandle(reinteropException);
+                                }
+                                {{csReturnImplementation}};
+                            }
                         }
 
                         [System.Runtime.InteropServices.DllImport("{{context.NativeLibraryName}}", CallingConvention=System.Runtime.InteropServices.CallingConvention.Cdecl)]
                         private static extern void {{disposeCallbackName}}(IntPtr callbackFunction);
                         [System.Runtime.InteropServices.DllImport("{{context.NativeLibraryName}}", CallingConvention=System.Runtime.InteropServices.CallingConvention.Cdecl)]
-                        private static extern {{csReturnType.AsInteropTypeReturn().GetFullyQualifiedName()}} {{invokeCallbackName}}({{string.Join(", ", invokeInteropParameters)}});
+                        private static unsafe extern {{csReturnType.AsInteropTypeReturn().GetFullyQualifiedName()}} {{invokeCallbackName}}({{string.Join(", ", invokeInteropParameters)}}, IntPtr* reinteropException);
                     }
                     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
                     private unsafe delegate IntPtr {{csBaseName}}Type(IntPtr callbackFunction);
@@ -165,12 +176,19 @@ namespace Reinterop
             var interopParameters = new[] { (Name: "pCallbackFunction", CsType: CSharpType.FromSymbol(context, context.Compilation.GetSpecialType(SpecialType.System_IntPtr)), Type: CppType.VoidPointer, InteropType: CppType.VoidPointer) }.Concat(callbackParameters);
             var callParameters = callbackParameters.Select(p => p.Type.GetConversionFromInteropType(context, p.Name));
 
+            CppType interopReturnType = returnType.AsInteropType();
+
             string resultImplementation = "";
             string returnImplementation = "return;";
+            string returnDefault = "return;";
             if (invokeMethod.ReturnType.SpecialType != SpecialType.System_Void)
             {
                 resultImplementation = "auto result = ";
                 returnImplementation = $"return {returnType.GetConversionToInteropType(context, "result")};";
+                if (interopReturnType.Flags.HasFlag(CppTypeFlags.Pointer))
+                    returnDefault = "return nullptr;";
+                else
+                    returnDefault = $$"""return {{interopReturnType.GetFullyQualifiedName()}}();""";
             }
 
             result.CppImplementationInvoker.Functions.Add(new(
@@ -179,12 +197,29 @@ namespace Reinterop
                     #if defined(_WIN32)
                     __declspec(dllexport)
                     #endif
-                    {{returnType.AsInteropType().GetFullyQualifiedName()}} {{invokeCallbackName}}({{string.Join(", ", interopParameters.Select(p => $"{p.InteropType.GetFullyQualifiedName()} {p.Name}"))}}) {
+                    {{interopReturnType.GetFullyQualifiedName()}} {{invokeCallbackName}}({{string.Join(", ", interopParameters.Select(p => $"{p.InteropType.GetFullyQualifiedName()} {p.Name}").Concat(new[] { "void** reinteropException" }))}}) {
                       auto pFunc = reinterpret_cast<std::function<{{itemType.GetFullyQualifiedName()}}::FunctionSignature>*>(pCallbackFunction);
-                      {{resultImplementation}}(*pFunc)({{string.Join(", ", callParameters)}});
-                      {{returnImplementation}}
+                      try {
+                        {{resultImplementation}}(*pFunc)({{string.Join(", ", callParameters)}});
+                        {{returnImplementation}}
+                      } catch (::DotNet::Reinterop::ReinteropNativeException& e) {
+                        *reinteropException = ::DotNet::Reinterop::ObjectHandle(e.GetDotNetException().GetHandle()).Release();
+                        {{returnDefault}}
+                      } catch (std::exception& e) {
+                        *reinteropException = ::DotNet::Reinterop::ReinteropException(::DotNet::System::String(e.what())).GetHandle().Release();
+                        {{returnDefault}}
+                      } catch (...) {
+                        *reinteropException = ::DotNet::Reinterop::ReinteropException(::DotNet::System::String("An unknown native exception occurred.")).GetHandle().Release();
+                        {{returnDefault}}
+                      }                   
                     }
-                    """));
+                    """,
+                TypeDefinitionsReferenced: new[]
+                {
+                    CppReinteropException.GetCppType(context),
+                    CSharpReinteropException.GetCppWrapperType(context),
+                    CppType.FromCSharp(context, context.Compilation.GetSpecialType(SpecialType.System_String))
+                }));
 
             result.CppImplementationInvoker.Functions.Add(new(
                 Content:
