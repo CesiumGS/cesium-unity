@@ -72,7 +72,7 @@ namespace Reinterop
                     """
                 ));
 
-            // A C# delegate type that wraps a std::function, and arrange for
+            // A C# delegate type that wraps a std::function, and arranges for
             // the invoke and dispose to be implemented in C++.
             CSharpType csType = CSharpType.FromSymbol(context, item.Type);
 
