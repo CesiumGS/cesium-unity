@@ -35,74 +35,6 @@ using namespace DotNet;
 
 namespace {
 
-class UnityAssetResponse : public IAssetResponse {
-public:
-  UnityAssetResponse(
-      const UnityEngine::Networking::UnityWebRequest& request,
-      const DotNet::CesiumForUnity::NativeDownloadHandler& handler)
-      : _statusCode(uint16_t(request.responseCode())),
-        _contentType(),
-        _data(std::move(handler.NativeImplementation().getData())) {
-    System::Collections::Generic::Dictionary2<System::String, System::String>
-        responseHeaders = request.GetResponseHeaders();
-    if (responseHeaders != nullptr) {
-      System::Collections::Generic::Enumerator0 enumerator =
-          responseHeaders.GetEnumerator();
-      while (enumerator.MoveNext()) {
-        this->_headers.emplace(
-            enumerator.Current().Key().ToStlString(),
-            enumerator.Current().Value().ToStlString());
-      }
-      auto find = this->_headers.find("content-type");
-      if (find != this->_headers.end()) {
-        this->_contentType = find->second;
-      }
-    }
-  }
-
-  virtual uint16_t statusCode() const override { return _statusCode; }
-
-  virtual std::string contentType() const override { return _contentType; }
-
-  virtual const HttpHeaders& headers() const override { return _headers; }
-
-  virtual std::span<const std::byte> data() const override {
-    return this->_data;
-  }
-
-private:
-  uint16_t _statusCode;
-  std::string _contentType;
-  HttpHeaders _headers;
-  std::vector<std::byte> _data;
-};
-
-class UnityAssetRequest : public IAssetRequest {
-public:
-  UnityAssetRequest(
-      const DotNet::UnityEngine::Networking::UnityWebRequest& request,
-      const HttpHeaders& headers,
-      const DotNet::CesiumForUnity::NativeDownloadHandler& handler)
-      : _method(request.method().ToStlString()),
-        _url(request.url().ToStlString()),
-        _headers(headers),
-        _response(request, handler) {}
-
-  virtual const std::string& method() const override { return _method; }
-
-  virtual const std::string& url() const override { return _url; }
-
-  virtual const HttpHeaders& headers() const override { return _headers; }
-
-  virtual const IAssetResponse* response() const override { return &_response; }
-
-private:
-  std::string _method;
-  std::string _url;
-  HttpHeaders _headers;
-  UnityAssetResponse _response;
-};
-
 std::string replaceInvalidChars(const std::string& input) {
   std::string result(input.size(), '?');
   std::transform(
@@ -147,7 +79,8 @@ UnityAssetAccessor::get(
                                       url,
                                       headers,
                                       &cesiumRequestHeaders =
-                                          this->_cesiumRequestHeaders]() {
+                                      this->_cesiumRequestHeaders,
+                                      &requestList = this->_activeRequests]() {
     UnityEngine::Networking::UnityWebRequest request =
         UnityEngine::Networking::UnityWebRequest::Get(System::String(url));
 
@@ -170,20 +103,26 @@ UnityAssetAccessor::get(
 
     auto future = promise.getFuture();
 
+    auto assetRequest = std::make_shared<UnityAssetRequest>(request, requestHeaders, handler);
+    // requestList.insertAtTail(*pAssetRequest);
+
     UnityEngine::Networking::UnityWebRequestAsyncOperation op =
         request.SendWebRequest();
+
     op.add_completed(System::Action1<UnityEngine::AsyncOperation>(
         [request,
          headers = std::move(requestHeaders),
          promise = std::move(promise),
-         handler = std::move(handler)](
+         handler = std::move(handler),
+         assetRequest
+         ](
             const UnityEngine::AsyncOperation& operation) mutable {
           ScopeGuard disposeHandler{[&handler]() { handler.Dispose(); }};
           if (request.isDone() &&
               request.result() !=
                   UnityEngine::Networking::Result::ConnectionError) {
-            promise.resolve(
-                std::make_shared<UnityAssetRequest>(request, headers, handler));
+            promise.resolve(assetRequest);
+            // promise.resolve(std::make_shared<UnityAssetRequest>(request, headers, handler));
           } else {
             promise.reject(std::runtime_error(fmt::format(
                 "Request for `{}` failed: {}",
@@ -220,6 +159,7 @@ UnityAssetAccessor::request(
       Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
           GetUnsafeBufferPointerWithoutChecks(payloadBytes));
   std::memcpy(pDest, contentPayload.data(), contentPayload.size());
+
 
   // Sadly, Unity requires us to call this from the main thread.
   return asyncSystem.runInMainThread([asyncSystem,
@@ -266,8 +206,7 @@ UnityAssetAccessor::request(
           if (request.isDone() &&
               request.result() !=
                   UnityEngine::Networking::Result::ConnectionError) {
-            promise.resolve(
-                std::make_shared<UnityAssetRequest>(request, headers, handler));
+            promise.resolve(std::make_shared<UnityAssetRequest>(request, headers, handler));
           } else {
             promise.reject(std::runtime_error(fmt::format(
                 "Request for `{}` failed: {}",
