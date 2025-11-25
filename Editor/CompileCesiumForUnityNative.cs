@@ -8,6 +8,7 @@ using System.IO;
 using System.Text;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 #if UNITY_ANDROID
 using UnityEditor.Android;
 #endif
@@ -120,6 +121,8 @@ namespace CesiumForUnity
                     return $"{baseName}.dll";
                 case BuildTarget.iOS:
                     return $"lib{baseName}.a";
+                case BuildTarget.VisionOS:
+                    return $"lib{baseName}.a";
                 case BuildTarget.StandaloneOSX:
                     return $"lib{baseName}.dylib";
                 default:
@@ -167,6 +170,31 @@ namespace CesiumForUnity
                 else
                     UnityEngine.Debug.LogAssertion("Unsupported processor: " + library.Cpu);
                 importer.SetPlatformData(library.Platform, "CPU", wsaPlatform);
+            }
+            else if (library.Platform == BuildTarget.VisionOS)
+            {
+                importer.SetPlatformData(library.Platform, "CPU", "ARM64");
+
+                // TODO: WARN: this will likely cause issues, why native build generates those libs? Where are they needed?
+                var duplicatedSymbolsExcludeLibs = new string[] {
+                    "libjpeg.a",
+                    "libwebp.a"
+                };
+                
+                var projectPath = Application.dataPath.Replace("Assets", "");
+                foreach (var libFilePath in Directory.EnumerateFiles(library.InstallDirectory, "*.a", SearchOption.AllDirectories))
+                {
+                    if(duplicatedSymbolsExcludeLibs.Any(l =>  libFilePath.EndsWith(l)))
+                        continue;
+                    
+                    var libRelativeFilePath = libFilePath.Replace(projectPath, "");
+                    var libPluginImporter = AssetImporter.GetAtPath(libRelativeFilePath) as PluginImporter;
+                    
+                    if (libPluginImporter != null)
+                    {
+                        libPluginImporter.SetPlatformData(library.Platform, "CPU", "ARM64");
+                    }
+                }
             }
         }
 
@@ -349,7 +377,7 @@ namespace CesiumForUnity
                     library.ExtraConfigureArgs.Add("-DCMAKE_ANDROID_ARCH_ABI=arm64-v8a");
             }
 
-            if (platform.platformGroup == BuildTargetGroup.iOS)
+            if (platform.platformGroup == BuildTargetGroup.iOS || platform.platformGroup == BuildTargetGroup.VisionOS) 
             {
                 library.Toolchain = "extern/ios-toolchain.cmake";
                 library.ExtraConfigureArgs.Add("-GXcode");
@@ -407,6 +435,11 @@ namespace CesiumForUnity
         {
             return platformGroup == BuildTargetGroup.iOS && platform == BuildTarget.iOS;
         }
+        
+        private static bool IsVisionOS(BuildTargetGroup platformGroup, BuildTarget platform)
+        {
+            return platformGroup == BuildTargetGroup.VisionOS && platform == BuildTarget.VisionOS;
+        }
 
         private static string GetDirectoryNameForPlatform(PlatformToBuild platform)
         {
@@ -419,6 +452,8 @@ namespace CesiumForUnity
                 return "Editor";
             else if (IsIOS(platformGroup, platform))
                 return "iOS";
+            else if (IsVisionOS(platformGroup, platform))
+                return "VisionOS";
             // Make sure we use "WSA" and not "Metro"
             else if (platformGroup == BuildTargetGroup.WSA)
                 return "WSA";
@@ -450,7 +485,7 @@ namespace CesiumForUnity
                 {
                     ProcessStartInfo startInfo = new ProcessStartInfo();
                     startInfo.UseShellExecute = false;
-                    if (library.Platform == BuildTarget.StandaloneOSX || library.Platform == BuildTarget.iOS)
+                    if (library.Platform == BuildTarget.StandaloneOSX || library.Platform == BuildTarget.iOS || library.Platform == BuildTarget.VisionOS)
                     {
                         startInfo.FileName = File.Exists("/Applications/CMake.app/Contents/bin/cmake") ? "/Applications/CMake.app/Contents/bin/cmake" : "cmake";
                     }
@@ -483,7 +518,22 @@ namespace CesiumForUnity
                     startInfo.Arguments = string.Join(' ', args);
 
                     RunAndLog(startInfo, log, logFilename);
-
+                    
+                    if (IsVisionOS(library.PlatformGroup, library.Platform))
+                    {
+                        var xcodeProjectPath = Path.Combine(library.BuildDirectory, "CesiumForUnityNative.xcodeproj/project.pbxproj");
+                        if (File.Exists(xcodeProjectPath))
+                        {
+                            var originalXcodeContents = File.ReadAllText(xcodeProjectPath);
+                            var xcodeContentsTargetedToXros = originalXcodeContents.Replace("SDKROOT = iphoneos;", "SDKROOT = xros;");
+                            File.WriteAllText(xcodeProjectPath, xcodeContentsTargetedToXros);
+                        }
+                        else
+                        {
+                            UnityEngine.Debug.Log("Xcode project does not exist, unable to change target to VisionOs");
+                        }
+                    }
+                    
                     args = new List<string>()
                     {
                         "--build",
@@ -499,7 +549,7 @@ namespace CesiumForUnity
                     startInfo.Arguments = string.Join(' ', args);
                     RunAndLog(startInfo, log, logFilename);
 
-                    if (library.Platform == BuildTarget.iOS)
+                    if (library.Platform == BuildTarget.iOS || library.Platform == BuildTarget.VisionOS)
                         AssetDatabase.Refresh();
                 }
             }
