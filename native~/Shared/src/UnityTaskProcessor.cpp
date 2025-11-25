@@ -14,13 +14,16 @@
 namespace CesiumForUnityNative {
 
 #ifdef __EMSCRIPTEN__
+
 // Unity Wasm can't use C# System/Threads, so we need to implement our own
 // thread pool.
 
 // How many threads to use in the pool. This is somewhat arbitrary; we
 // just don't want to create a new thread for every task, to keep the number
 // of threads under the Emscripten limit.
-static const int UNITY_THREAD_POOL_SIZE = 4;
+namespace {
+const int UNITY_THREAD_POOL_SIZE = 4;
+}
 
 class UnityThreadPool {
 public:
@@ -31,32 +34,32 @@ public:
   void enqueue(std::function<void()> f);
 
 private:
-  std::vector<std::thread> workers;
-  std::queue<std::function<void()>> tasks;
-  std::mutex queue_mutex;
-  std::condition_variable condition;
-  bool stop;
+  std::vector<std::thread> _workers;
+  std::queue<std::function<void()>> _tasks;
+  std::mutex _queueMutex;
+  std::condition_variable _condition;
+  bool _stop;
 };
 
-UnityThreadPool::UnityThreadPool(size_t threads) : stop(false) {
+UnityThreadPool::UnityThreadPool(size_t threads) : _stop(false) {
   for (size_t i = 0; i < threads; ++i) {
-    workers.emplace_back([this] {
+    this->_workers.emplace_back([this] {
       while (true) {
         std::function<void()> task;
 
         {
-          std::unique_lock<std::mutex> lock(this->queue_mutex);
+          std::unique_lock<std::mutex> lock(this->_queueMutex);
 
-          this->condition.wait(lock, [this] {
-            return this->stop || !this->tasks.empty();
+          this->_condition.wait(lock, [this] {
+            return this->_stop || !this->_tasks.empty();
           });
 
-          if (this->stop && this->tasks.empty()) {
+          if (this->_stop && this->_tasks.empty()) {
             return;
           }
 
-          task = std::move(this->tasks.front());
-          this->tasks.pop();
+          task = std::move(this->_tasks.front());
+          this->_tasks.pop();
         }
 
         task();
@@ -67,41 +70,38 @@ UnityThreadPool::UnityThreadPool(size_t threads) : stop(false) {
 
 void UnityThreadPool::enqueue(std::function<void()> task) {
   {
-    std::unique_lock<std::mutex> lock(queue_mutex);
-    if (stop) {
+    std::unique_lock<std::mutex> lock(this->_queueMutex);
+    if (this->_stop) {
       return;
     }
-    tasks.emplace(task);
+    this->_tasks.emplace(std::move(task));
+    this->_condition.notify_one();
   }
-  condition.notify_one();
 }
 
 UnityThreadPool::~UnityThreadPool() {
   {
-    std::unique_lock<std::mutex> lock(queue_mutex);
-    stop = true;
+    std::unique_lock<std::mutex> lock(this->_queueMutex);
+    this->_stop = true;
   }
 
-  condition.notify_all();
-
-  for (std::thread& worker : workers) {
+  this->_condition.notify_all();
+  for (std::thread& worker : this->_workers) {
     worker.join();
   }
 }
 
 UnityTaskProcessor::UnityTaskProcessor()
-    : _threadPool(new UnityThreadPool(UNITY_THREAD_POOL_SIZE)) {}
-
-UnityTaskProcessor::~UnityTaskProcessor() { delete _threadPool; }
+    : _pThreadPool(std::make_unique<UnityThreadPool>(UNITY_THREAD_POOL_SIZE)) {}
 #else
-UnityTaskProcessor::UnityTaskProcessor() {}
-
-UnityTaskProcessor::~UnityTaskProcessor() {}
+UnityTaskProcessor::UnityTaskProcessor() = default;
 #endif // __EMSCRIPTEN__
+
+UnityTaskProcessor::~UnityTaskProcessor() = default;
 
 void UnityTaskProcessor::startTask(std::function<void()> f) {
 #ifdef __EMSCRIPTEN__
-  _threadPool->enqueue(f);
+  this->_pThreadPool->enqueue(f);
 #else // __EMSCRIPTEN__
   DotNet::System::Threading::Tasks::Task::Run(f);
 #endif

@@ -2,6 +2,10 @@
 
 #include <CesiumAsync/ITaskProcessor.h>
 
+#ifdef __EMSCRIPTEN__
+#include <memory>
+#endif
+
 namespace CesiumForUnityNative {
 
 class UnityThreadPool;
@@ -18,7 +22,7 @@ private:
 #ifdef __EMSCRIPTEN__
   // Unity Wasm can't use C# System/Threads, so we need to implement our own
   // thread pool.
-  UnityThreadPool* _threadPool = nullptr;
+  std::unique_ptr<UnityThreadPool> _pThreadPool;
 #endif
 };
 
