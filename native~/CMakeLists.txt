@@ -53,6 +53,25 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
     PUBLIC
       HAS_FUTIME=0
   )
+
+  target_compile_options(
+    tidy-static
+    PRIVATE
+      -pthread
+      -msimd128
+      -mnontrapping-fptoint
+      -mbulk-memory
+      -fwasm-exceptions
+      -sSUPPORT_LONGJMP=wasm
+  )
+
+  if (CESIUM_WASM64)
+    target_compile_options(
+      tidy-static
+      PRIVATE
+        -sMEMORY64=1
+    )
+  endif()
 endif()
 
 # Patch tidy-html5's sprtf.c to work on UWP. UWP doesn't have lstrlen, but

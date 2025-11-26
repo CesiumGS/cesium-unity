@@ -1,6 +1,5 @@
 #include "CesiumIonSessionImpl.h"
 
-#include "UnityAssetAccessor.h"
 #include "UnityExternals.h"
 #include "UnityTaskProcessor.h"
 
