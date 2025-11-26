@@ -134,6 +134,8 @@ private:
   std::mutex _assetRequestMutex;
   CesiumAsync::HttpHeaders _cesiumRequestHeaders;
   CesiumUtility::DoublyLinkedList<UnityAssetRequest, &UnityAssetRequest::links> _activeRequests;
+
+  void cancelActiveRequests();
 };
 
 

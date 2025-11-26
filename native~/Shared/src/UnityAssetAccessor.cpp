@@ -1,5 +1,10 @@
 #include "UnityAssetAccessor.h"
 
+#if UNITY_EDITOR
+#include "../../Runtime/generated-Editor/include/DotNet/UnityEditor/AssemblyReloadEvents.h"
+#include "../../Runtime/generated-Editor/include/DotNet/UnityEditor/AssemblyReloadCallback.h"
+#endif
+
 #include "Cesium.h"
 
 #include <CesiumAsync/AsyncSystem.h>
@@ -51,7 +56,7 @@ namespace CesiumForUnityNative {
 
 void UnityAssetRequest::cancel() {
   this->_canceled = true;
-  // this->_webRequest.Abort();
+  this->_webRequest.Abort();
 }
 
 UnityAssetRequest::~UnityAssetRequest() {
@@ -81,9 +86,17 @@ UnityAssetAccessor::UnityAssetAccessor() : _cesiumRequestHeaders() {
   this->_cesiumRequestHeaders.insert({"X-Cesium-Client-Project", projectName});
   this->_cesiumRequestHeaders.insert({"X-Cesium-Client-Engine", engine});
   this->_cesiumRequestHeaders.insert({"X-Cesium-Client-OS", osVersion});
+
+#if UNITY_EDITOR
+  UnityEditor::AssemblyReloadEvents::add_beforeAssemblyReload(
+      UnityEditor::AssemblyReloadCallback(
+        [this]() {
+          this->cancelActiveRequests();
+        }));
+#endif
 }
 
-UnityAssetAccessor::~UnityAssetAccessor() {
+void UnityAssetAccessor::cancelActiveRequests() {
   std::lock_guard<std::mutex> lock(_assetRequestMutex);
 
   auto* ptr = _activeRequests.head();
@@ -93,6 +106,9 @@ UnityAssetAccessor::~UnityAssetAccessor() {
   }
 }
 
+UnityAssetAccessor::~UnityAssetAccessor() {
+  this->cancelActiveRequests();
+}
 
 CesiumAsync::Future<std::shared_ptr<CesiumAsync::IAssetRequest>>
 UnityAssetAccessor::get(
