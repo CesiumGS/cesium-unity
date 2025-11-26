@@ -99,6 +99,7 @@ UnityAssetAccessor::get(
     const CesiumAsync::AsyncSystem& asyncSystem,
     const std::string& url,
     const std::vector<THeader>& headers) {
+
   // Sadly, Unity requires us to call this from the main thread.
   return asyncSystem.runInMainThread([asyncSystem,
                                       url,
