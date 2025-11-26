@@ -2,6 +2,10 @@
 
 ## ? - ?
 
+##### Additions :tada:
+
+- Added experimental support for Web builds.
+
 ##### Fixes :wrench:
 
 - Exceptions thrown by delegates implemented in native code are now correctly propagated back to the managed caller. Previously, this scenario could cause crashes and undefined behavior.
