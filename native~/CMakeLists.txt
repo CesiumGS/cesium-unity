@@ -126,15 +126,6 @@ endif()
 
 add_subdirectory(extern/swl-variant)
 
-# if(CESIUM_TARGET_WASM AND EXISTS extern/blend2d)
-#   # fix blend2d not working from vcpkg install
-#   set(BLEND2D_EXTERNAL_ASMJIT OFF)
-#   set(BLEND2D_STATIC ON)
-#   add_subdirectory(extern/blend2d)
-#   install(TARGETS blend2d) # TODO: just install static lib, not headers
-#   set_target_properties(blend2d PROPERTIES EXCLUDE_FROM_ALL 0 EXCLUDE_FROM_DEFAULT_BUILD 0)
-# endif()
-
 # We don't need cesium-native's Curl-based asset accessor, because Cesium for Unity supplies
 # its own built on .NET libraries.
 set(CESIUM_DISABLE_CURL ON)
