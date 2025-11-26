@@ -272,8 +272,8 @@ namespace Build
                         "CesiumForUnity.BuildCesiumForUnity.CompileForWebAndExit"
                     });
 
-                    Console.WriteLine("**** Adding generated files (for the Android Player) to the package");
-                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_ANDROID", generatedRuntimePath, Path.Combine(outputPackagePath, "Runtime", "generated"));
+                    Console.WriteLine("**** Adding generated files (for the Web Player) to the package");
+                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_WEBGL", generatedRuntimePath, Path.Combine(outputPackagePath, "Runtime", "generated"));
                 }
 
                 if (options.Platforms.Contains("macOS"))
