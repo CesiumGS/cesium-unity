@@ -1,5 +1,10 @@
 name: Cesium for Unity
 on: [push]
+env:
+  VCPKG_BINARY_SOURCES: 'clear;x-aws,s3://cesium-builds/vcpkg/cesium-native-cache/,readwrite'
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_INTERNAL_SERVICES_VCPKG_ACCESS_KEY }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_INTERNAL_SERVICES_VCPKG_SECRET_KEY }}
+  AWS_REGION: us-east-1
 jobs:
   QuickChecks:
     name: "Quick Checks"
