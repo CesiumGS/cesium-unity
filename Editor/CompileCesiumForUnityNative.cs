@@ -648,10 +648,10 @@ namespace CesiumForUnity
                     // Refresh the asset database for platforms that use static linking so the Unity
                     // builder can find the libraries.
                     if (library.Platform == BuildTarget.iOS || library.Platform == BuildTarget.WebGL)
+                    {
                         AssetDatabase.Refresh();
-
-                    if (library.Platform == BuildTarget.WebGL)
                         SetStaticLibrariesPlatform(library);
+                    }
                 }
             }
             finally
