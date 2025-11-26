@@ -49,6 +49,21 @@ std::string replaceInvalidChars(const std::string& input) {
 
 namespace CesiumForUnityNative {
 
+void UnityAssetRequest::cancel() {
+  this->_canceled = true;
+  // this->_webRequest.Abort();
+}
+
+UnityAssetRequest::~UnityAssetRequest() {
+  std::lock_guard<std::mutex> lock(_requestMutex);
+  _activeRequests.remove(*this);
+  this->cancel();
+}
+
+void UnityAssetRequest::createResponse(const DotNet::UnityEngine::Networking::UnityWebRequest& request, const DotNet::CesiumForUnity::NativeDownloadHandler& handler) {
+  _pResponse = std::make_unique<UnityAssetResponse>(request, handler);
+}
+
 UnityAssetAccessor::UnityAssetAccessor() : _cesiumRequestHeaders() {
   std::string version = CesiumForUnityNative::Cesium::version + " " +
                         CesiumForUnityNative::Cesium::commit;
@@ -66,6 +81,16 @@ UnityAssetAccessor::UnityAssetAccessor() : _cesiumRequestHeaders() {
   this->_cesiumRequestHeaders.insert({"X-Cesium-Client-Project", projectName});
   this->_cesiumRequestHeaders.insert({"X-Cesium-Client-Engine", engine});
   this->_cesiumRequestHeaders.insert({"X-Cesium-Client-OS", osVersion});
+}
+
+UnityAssetAccessor::~UnityAssetAccessor() {
+  std::lock_guard<std::mutex> lock(_assetRequestMutex);
+
+  auto* ptr = _activeRequests.head();
+  while (ptr) {
+    ptr->cancel();
+    ptr=_activeRequests.next(*ptr);
+  }
 }
 
 
@@ -106,11 +131,6 @@ UnityAssetAccessor::get(
 
     auto assetRequest = std::make_shared<UnityAssetRequest>(request, requestHeaders, handler, requestList, requestMutex);
 
-    {
-      std::lock_guard<std::mutex> lock(requestMutex);
-      requestList.insertAtTail(*assetRequest);
-    }
-
     UnityEngine::Networking::UnityWebRequestAsyncOperation op =
         request.SendWebRequest();
 
@@ -123,7 +143,8 @@ UnityAssetAccessor::get(
          ](
             const UnityEngine::AsyncOperation& operation) mutable {
           ScopeGuard disposeHandler{[&handler]() { handler.Dispose(); }};
-          if (request.isDone() &&
+          if (!assetRequest->canceled() &&
+              request.isDone() &&
               request.result() !=
                   UnityEngine::Networking::Result::ConnectionError) {
             assetRequest->createResponse(request, handler);
@@ -174,7 +195,8 @@ UnityAssetAccessor::request(
                                       payloadBytes,
                                       &cesiumRequestHeaders =
                                           this->_cesiumRequestHeaders,
-                                      &requestList = this->_activeRequests
+                                      &requestList = this->_activeRequests,
+                                      &requestMutex = this->_assetRequestMutex
                                           ]() {
     DotNet::CesiumForUnity::NativeDownloadHandler downloadHandler{};
     UnityEngine::Networking::UploadHandlerRaw uploadHandler(payloadBytes, true);
@@ -201,18 +223,23 @@ UnityAssetAccessor::request(
 
     auto future = promise.getFuture();
 
+    auto assetRequest = std::make_shared<UnityAssetRequest>(request, requestHeaders, downloadHandler, requestList, requestMutex);
+
     UnityEngine::Networking::UnityWebRequestAsyncOperation op =
         request.SendWebRequest();
     op.add_completed(System::Action1<UnityEngine::AsyncOperation>(
         [request,
          headers = std::move(requestHeaders),
          promise = std::move(promise),
-         handler = std::move(downloadHandler)](
+         handler = std::move(downloadHandler),
+         assetRequest](
             const UnityEngine::AsyncOperation& operation) mutable {
           ScopeGuard disposeHandler{[&handler]() { handler.Dispose(); }};
-          if (request.isDone() &&
+          if (!assetRequest->canceled() &&
+            request.isDone() &&
               request.result() !=
                   UnityEngine::Networking::Result::ConnectionError) {
+            promise.resolve(assetRequest);
             // promise.resolve(std::make_shared<UnityAssetRequest>(request, headers, handler));
           } else {
             promise.reject(std::runtime_error(fmt::format(

@@ -14,6 +14,9 @@
 #include <DotNet/System/Collections/Generic/Enumerator0.h>
 #include <DotNet/System/Collections/Generic/KeyValuePair2.h>
 
+#include <DotNet/UnityEngine/Networking/UnityWebRequest.h>
+
+
 namespace CesiumForUnityNative {
 
 class UnityAssetResponse : public CesiumAsync::IAssetResponse {
@@ -63,27 +66,25 @@ public:
   CesiumUtility::DoublyLinkedListPointers<UnityAssetRequest> links;
 
   UnityAssetRequest(
-      const DotNet::UnityEngine::Networking::UnityWebRequest& request,
+      DotNet::UnityEngine::Networking::UnityWebRequest& request,
       const CesiumAsync::HttpHeaders& headers,
       const DotNet::CesiumForUnity::NativeDownloadHandler& handler,
-      CesiumUtility::DoublyLinkedList<UnityAssetRequest, &UnityAssetRequest::links>& activeRequestList,
+      CesiumUtility::DoublyLinkedList<UnityAssetRequest, &UnityAssetRequest::links>& requestList,
       std::mutex& requestMutex)
       : _method(request.method().ToStlString()),
         _url(request.url().ToStlString()),
         _headers(headers),
-        _activeRequests(activeRequestList),
-        _requestMutex(requestMutex)
+        _activeRequests(requestList),
+        _requestMutex(requestMutex),
+        _webRequest(request)
+      {
+          std::lock_guard<std::mutex> lock(requestMutex);
+          _activeRequests.insertAtTail(*this);
+      }
 
-         {}
+  ~UnityAssetRequest();
 
-  ~UnityAssetRequest() {
-    std::lock_guard<std::mutex> guard(_requestMutex);
-    _activeRequests.remove(*this);
-  }
-
-  void createResponse(const DotNet::UnityEngine::Networking::UnityWebRequest& request, const DotNet::CesiumForUnity::NativeDownloadHandler& handler) {
-    _pResponse = std::make_unique<UnityAssetResponse>(request, handler);
-  }
+  void createResponse(const DotNet::UnityEngine::Networking::UnityWebRequest& request, const DotNet::CesiumForUnity::NativeDownloadHandler& handler);
 
   virtual const std::string& method() const override { return _method; }
 
@@ -93,19 +94,26 @@ public:
 
   virtual const CesiumAsync::IAssetResponse* response() const override { return &*_pResponse; }
 
+  const bool canceled() const { return _canceled; }
+  void cancel();
 
 private:
   std::string _method;
   std::string _url;
   CesiumAsync::HttpHeaders _headers;
+
   std::unique_ptr<UnityAssetResponse> _pResponse;
+  DotNet::UnityEngine::Networking::UnityWebRequest& _webRequest;
   CesiumUtility::DoublyLinkedList<UnityAssetRequest, &UnityAssetRequest::links>& _activeRequests;
   std::mutex& _requestMutex;
+  bool _canceled;
 };
 
 class UnityAssetAccessor : public CesiumAsync::IAssetAccessor {
 public:
   UnityAssetAccessor();
+
+  ~UnityAssetAccessor();
 
   virtual CesiumAsync::Future<std::shared_ptr<CesiumAsync::IAssetRequest>>
   get(const CesiumAsync::AsyncSystem& asyncSystem,

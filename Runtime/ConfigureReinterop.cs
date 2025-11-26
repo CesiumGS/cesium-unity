@@ -222,6 +222,7 @@ namespace CesiumForUnity
 
             UnityWebRequest request = UnityWebRequest.Get("url");
 
+            
             var uploadHandler = new UploadHandlerRaw(new byte[0]);
 
             var rawBytes = new NativeArray<byte>(1, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
@@ -247,6 +248,9 @@ namespace CesiumForUnity
                 string value = enumerator.Current.Value;
             }
             request.downloadHandler.Dispose();
+            request.Abort();
+            
+            
             long responseCode = request.responseCode;
             UnityWebRequestAsyncOperation op = request.SendWebRequest();
             //Action<AsyncOperation> foo = (ao) => { };
@@ -976,3 +980,4 @@ namespace CesiumForUnity
         }
     }
 }
+
