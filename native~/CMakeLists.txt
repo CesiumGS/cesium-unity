@@ -46,6 +46,11 @@ set(CMAKE_POLICY_VERSION_MINIMUM "3.5")
 add_subdirectory(extern/tidy-html5 EXCLUDE_FROM_ALL)
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
+  # Make sure we use the same compiler options as cesium-native. Yes, this is like
+  # using a giant sledgehammer to pound in a tack. Watch your fingers.
+  set(CESIUM_TARGET_WASM ON)
+  include(extern/cesium-native/cmake/compiler.cmake)
+
   # The version of Emscripten included with Unity doesn't include sys/utime.h,
   # so tell tidy-html5 not to use it.
   target_compile_definitions(
