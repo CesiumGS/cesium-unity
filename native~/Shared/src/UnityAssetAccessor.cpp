@@ -121,6 +121,10 @@ UnityAssetAccessor::get(
           if (request.isDone() &&
               request.result() !=
                   UnityEngine::Networking::Result::ConnectionError) {
+            static bool debugMe = false;
+            if (debugMe) {
+              assetRequest->createResponse(request, handler);
+            }
             promise.resolve(assetRequest);
             // promise.resolve(std::make_shared<UnityAssetRequest>(request, headers, handler));
           } else {

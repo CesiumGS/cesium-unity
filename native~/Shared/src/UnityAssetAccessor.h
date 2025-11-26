@@ -66,8 +66,9 @@ public:
       const DotNet::CesiumForUnity::NativeDownloadHandler& handler)
       : _method(request.method().ToStlString()),
         _url(request.url().ToStlString()),
-        _headers(headers),
-        _pResponse(std::make_unique<UnityAssetResponse>(request, handler)) {}
+        _headers(headers)
+  //       _pResponse(std::make_unique<UnityAssetResponse>(request, handler)
+         {}
 
   // UnityAssetRequest() = default;
 
@@ -80,6 +81,10 @@ public:
   //   _headers = headers;
   //   _pResponse = std::make_unique<UnityAssetResponse>(request, handler);
   // }
+
+  void createResponse(const DotNet::UnityEngine::Networking::UnityWebRequest& request, const DotNet::CesiumForUnity::NativeDownloadHandler& handler) {
+    _pResponse = std::make_unique<UnityAssetResponse>(request, handler);
+  }
 
   virtual const std::string& method() const override { return _method; }
 
