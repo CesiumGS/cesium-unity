@@ -60,14 +60,26 @@ private:
 
 class UnityAssetRequest : public CesiumAsync::IAssetRequest {
 public:
+  CesiumUtility::DoublyLinkedListPointers<UnityAssetRequest> links;
+
   UnityAssetRequest(
       const DotNet::UnityEngine::Networking::UnityWebRequest& request,
       const CesiumAsync::HttpHeaders& headers,
-      const DotNet::CesiumForUnity::NativeDownloadHandler& handler)
+      const DotNet::CesiumForUnity::NativeDownloadHandler& handler,
+      CesiumUtility::DoublyLinkedList<UnityAssetRequest, &UnityAssetRequest::links>& activeRequestList,
+      std::mutex& requestMutex)
       : _method(request.method().ToStlString()),
         _url(request.url().ToStlString()),
-        _headers(headers)
+        _headers(headers),
+        _activeRequests(activeRequestList),
+        _requestMutex(requestMutex)
+
          {}
+
+  ~UnityAssetRequest() {
+    std::lock_guard<std::mutex> guard(_requestMutex);
+    _activeRequests.remove(*this);
+  }
 
   void createResponse(const DotNet::UnityEngine::Networking::UnityWebRequest& request, const DotNet::CesiumForUnity::NativeDownloadHandler& handler) {
     _pResponse = std::make_unique<UnityAssetResponse>(request, handler);
@@ -81,13 +93,14 @@ public:
 
   virtual const CesiumAsync::IAssetResponse* response() const override { return &*_pResponse; }
 
-  CesiumUtility::DoublyLinkedListPointers<UnityAssetRequest> links;
 
 private:
   std::string _method;
   std::string _url;
   CesiumAsync::HttpHeaders _headers;
   std::unique_ptr<UnityAssetResponse> _pResponse;
+  CesiumUtility::DoublyLinkedList<UnityAssetRequest, &UnityAssetRequest::links>& _activeRequests;
+  std::mutex& _requestMutex;
 };
 
 class UnityAssetAccessor : public CesiumAsync::IAssetAccessor {
@@ -110,6 +123,7 @@ public:
   virtual void tick() noexcept override;
 
 private:
+  std::mutex _assetRequestMutex;
   CesiumAsync::HttpHeaders _cesiumRequestHeaders;
   CesiumUtility::DoublyLinkedList<UnityAssetRequest, &UnityAssetRequest::links> _activeRequests;
 };

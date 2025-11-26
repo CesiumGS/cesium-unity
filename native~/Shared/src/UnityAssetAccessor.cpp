@@ -68,19 +68,20 @@ UnityAssetAccessor::UnityAssetAccessor() : _cesiumRequestHeaders() {
   this->_cesiumRequestHeaders.insert({"X-Cesium-Client-OS", osVersion});
 }
 
+
 CesiumAsync::Future<std::shared_ptr<CesiumAsync::IAssetRequest>>
 UnityAssetAccessor::get(
     const CesiumAsync::AsyncSystem& asyncSystem,
     const std::string& url,
     const std::vector<THeader>& headers) {
-
   // Sadly, Unity requires us to call this from the main thread.
   return asyncSystem.runInMainThread([asyncSystem,
                                       url,
                                       headers,
                                       &cesiumRequestHeaders =
                                       this->_cesiumRequestHeaders,
-                                      &requestList = this->_activeRequests]() {
+                                      &requestList = this->_activeRequests,
+                                      &requestMutex=this->_assetRequestMutex]() {
     UnityEngine::Networking::UnityWebRequest request =
         UnityEngine::Networking::UnityWebRequest::Get(System::String(url));
 
@@ -103,8 +104,12 @@ UnityAssetAccessor::get(
 
     auto future = promise.getFuture();
 
-    auto assetRequest = std::make_shared<UnityAssetRequest>(request, requestHeaders, handler);
-    requestList.insertAtTail(*assetRequest);
+    auto assetRequest = std::make_shared<UnityAssetRequest>(request, requestHeaders, handler, requestList, requestMutex);
+
+    {
+      std::lock_guard<std::mutex> lock(requestMutex);
+      requestList.insertAtTail(*assetRequest);
+    }
 
     UnityEngine::Networking::UnityWebRequestAsyncOperation op =
         request.SendWebRequest();
@@ -123,7 +128,6 @@ UnityAssetAccessor::get(
                   UnityEngine::Networking::Result::ConnectionError) {
             assetRequest->createResponse(request, handler);
             promise.resolve(assetRequest);
-            // promise.resolve(std::make_shared<UnityAssetRequest>(request, headers, handler));
           } else {
             promise.reject(std::runtime_error(fmt::format(
                 "Request for `{}` failed: {}",
@@ -169,7 +173,9 @@ UnityAssetAccessor::request(
                                       headers,
                                       payloadBytes,
                                       &cesiumRequestHeaders =
-                                          this->_cesiumRequestHeaders]() {
+                                          this->_cesiumRequestHeaders,
+                                      &requestList = this->_activeRequests
+                                          ]() {
     DotNet::CesiumForUnity::NativeDownloadHandler downloadHandler{};
     UnityEngine::Networking::UploadHandlerRaw uploadHandler(payloadBytes, true);
     UnityEngine::Networking::UnityWebRequest request(
@@ -207,7 +213,7 @@ UnityAssetAccessor::request(
           if (request.isDone() &&
               request.result() !=
                   UnityEngine::Networking::Result::ConnectionError) {
-            promise.resolve(std::make_shared<UnityAssetRequest>(request, headers, handler));
+            // promise.resolve(std::make_shared<UnityAssetRequest>(request, headers, handler));
           } else {
             promise.reject(std::runtime_error(fmt::format(
                 "Request for `{}` failed: {}",
