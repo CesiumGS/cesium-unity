@@ -104,7 +104,7 @@ UnityAssetAccessor::get(
     auto future = promise.getFuture();
 
     auto assetRequest = std::make_shared<UnityAssetRequest>(request, requestHeaders, handler);
-    // requestList.insertAtTail(*pAssetRequest);
+    requestList.insertAtTail(*assetRequest);
 
     UnityEngine::Networking::UnityWebRequestAsyncOperation op =
         request.SendWebRequest();
@@ -121,10 +121,7 @@ UnityAssetAccessor::get(
           if (request.isDone() &&
               request.result() !=
                   UnityEngine::Networking::Result::ConnectionError) {
-            static bool debugMe = false;
-            if (debugMe) {
-              assetRequest->createResponse(request, handler);
-            }
+            assetRequest->createResponse(request, handler);
             promise.resolve(assetRequest);
             // promise.resolve(std::make_shared<UnityAssetRequest>(request, headers, handler));
           } else {

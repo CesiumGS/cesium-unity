@@ -67,20 +67,7 @@ public:
       : _method(request.method().ToStlString()),
         _url(request.url().ToStlString()),
         _headers(headers)
-  //       _pResponse(std::make_unique<UnityAssetResponse>(request, handler)
          {}
-
-  // UnityAssetRequest() = default;
-
-  // void initialize(const DotNet::UnityEngine::Networking::UnityWebRequest& request,
-  //             const CesiumAsync::HttpHeaders& headers,
-  //             const DotNet::CesiumForUnity::NativeDownloadHandler& handler)
-  // {
-  //   _method = request.method().ToStlString();
-  //   _url = request.url().ToStlString();
-  //   _headers = headers;
-  //   _pResponse = std::make_unique<UnityAssetResponse>(request, handler);
-  // }
 
   void createResponse(const DotNet::UnityEngine::Networking::UnityWebRequest& request, const DotNet::CesiumForUnity::NativeDownloadHandler& handler) {
     _pResponse = std::make_unique<UnityAssetResponse>(request, handler);
