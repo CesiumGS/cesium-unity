@@ -435,17 +435,19 @@ namespace CesiumForUnity
             return Path.Combine(packagePath, "Plugins", GetDirectoryNameForPlatform(platform));
         }
 
-        // Web builds use static libraries (.a files) that need to be marked as only
-        // compatible with WebGL. This is normally done in OnPostprocessAllAssets, but
+        // Web and iOS builds use static libraries (.a files) that need to be marked as only
+        // compatible with their respective platform. This is normally done in OnPostprocessAllAssets, but
         // that only includes the main libCesiumForUnityNative.a library, not the other
         // static libraries.
-        private static void SetWebGLStaticLibrariesPlatform(string webglPluginsPath)
+        private static void SetStaticLibrariesPlatform(LibraryToBuild library)
         {
-            if (!Directory.Exists(webglPluginsPath))
+            string pluginsPath = library.InstallDirectory;
+
+            if (!Directory.Exists(pluginsPath))
                 return;
 
             // Find all static library files (.a) in the directory and its subdirectories.
-            string[] libraryFiles = Directory.GetFiles(webglPluginsPath, "*.a", SearchOption.AllDirectories);
+            string[] libraryFiles = Directory.GetFiles(pluginsPath, "*.a", SearchOption.AllDirectories);
             if (libraryFiles.Length == 0)
                 return;
 
@@ -468,18 +470,19 @@ namespace CesiumForUnity
                     // Exclude from all platforms before enabling the desired one.
                     // This ensures the library is ONLY active on WebGL.
                     importer.SetCompatibleWithPlatform(BuildTarget.Android, false);
-                    importer.SetCompatibleWithPlatform(BuildTarget.iOS, false);
                     importer.SetCompatibleWithPlatform(BuildTarget.StandaloneWindows, false);
                     importer.SetCompatibleWithPlatform(BuildTarget.StandaloneWindows64, false);
                     importer.SetCompatibleWithPlatform(BuildTarget.StandaloneOSX, false);
                     importer.SetCompatibleWithPlatform(BuildTarget.StandaloneLinux64, false);
                     importer.SetCompatibleWithEditor(false);
 
-                    // We need to exclude libastcenc-none-static.a as it's being installed, but conflicts with
+                    // We need to exclude libastcenc-none-static.a for WebGL as it's being installed, but conflicts with
                     // Unity's symbols.
-                    bool supportsWebGL = !assetPath.EndsWith("libastcenc-none-static.a");
+                    bool supportsWebGL = library.Platform == BuildTarget.WebGL && !assetPath.EndsWith("libastcenc-none-static.a");
+                    bool supportsIOS = library.Platform == BuildTarget.iOS;
 
                     importer.SetCompatibleWithPlatform(BuildTarget.WebGL, supportsWebGL);
+                    importer.SetCompatibleWithPlatform(BuildTarget.iOS, supportsIOS);
 
                     importer.SaveAndReimport();
                 }
@@ -648,7 +651,7 @@ namespace CesiumForUnity
                         AssetDatabase.Refresh();
 
                     if (library.Platform == BuildTarget.WebGL)
-                        SetWebGLStaticLibrariesPlatform(library.InstallDirectory);
+                        SetStaticLibrariesPlatform(library);
                 }
             }
             finally
