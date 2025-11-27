@@ -1,7 +1,8 @@
 #include "UnityExternals.h"
 
-#include "UnityAssetAccessor.h"
+#include "UnityEmscriptenAssetAccessor.h"
 #include "UnityTaskProcessor.h"
+#include "UnityWebRequestAssetAccessor.h"
 
 #include <CesiumAsync/AsyncSystem.h>
 #include <CesiumAsync/CachingAssetAccessor.h>
@@ -41,7 +42,11 @@ const std::shared_ptr<IAssetAccessor>& getAssetAccessor() {
     pAccessor = std::make_shared<GunzipAssetAccessor>(
         std::make_shared<CachingAssetAccessor>(
             spdlog::default_logger(),
-            std::make_shared<UnityAssetAccessor>(),
+#ifdef __EMSCRIPTEN__
+            std::make_shared<UnityEmscriptenAssetAccessor>(),
+#else
+            std::make_shared<UnityWebRequestAssetAccessor>(),
+#endif
             std::make_shared<SqliteCache>(
                 spdlog::default_logger(),
                 cacheDBPath,

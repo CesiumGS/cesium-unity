@@ -4,6 +4,7 @@ using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.IO;
 using System.Text;
 using System;
@@ -122,6 +123,8 @@ namespace CesiumForUnity
                     return $"lib{baseName}.a";
                 case BuildTarget.StandaloneOSX:
                     return $"lib{baseName}.dylib";
+                case BuildTarget.WebGL:
+                    return $"lib{baseName}.a";
                 default:
                     // Assume Linux-ish
                     return $"lib{baseName}.so";
@@ -432,8 +435,106 @@ namespace CesiumForUnity
             return Path.Combine(packagePath, "Plugins", GetDirectoryNameForPlatform(platform));
         }
 
+        // Web and iOS builds use static libraries (.a files) that need to be marked as only
+        // compatible with their respective platform. This is normally done in OnPostprocessAllAssets, but
+        // that only includes the main libCesiumForUnityNative.a library, not the other
+        // static libraries.
+        private static void SetStaticLibrariesPlatform(LibraryToBuild library)
+        {
+            string pluginsPath = library.InstallDirectory;
+
+            if (!Directory.Exists(pluginsPath))
+                return;
+
+            // Find all static library files (.a) in the directory and its subdirectories.
+            string[] libraryFiles = Directory.GetFiles(pluginsPath, "*.a", SearchOption.AllDirectories);
+            if (libraryFiles.Length == 0)
+                return;
+
+            AssetDatabase.StartAssetEditing();
+
+            foreach (string filePath in libraryFiles)
+            {
+                // Application.datapath is the <project>/Assets folder. We need to strip off that
+                // part and prepend "Packages" to get the correct asset path.
+                string assetPath = "Packages" + filePath.Substring(Application.dataPath.Length + 2);
+
+                // Get the importer for the asset.
+                PluginImporter importer = AssetImporter.GetAtPath(assetPath) as PluginImporter;
+
+                if (importer != null)
+                {
+                    // Disable "Any Platform" to enable platform-specific settings.
+                    importer.SetCompatibleWithAnyPlatform(false);
+
+                    // Exclude from all platforms before enabling the desired one.
+                    // This ensures the library is ONLY active on WebGL.
+                    importer.SetCompatibleWithPlatform(BuildTarget.Android, false);
+                    importer.SetCompatibleWithPlatform(BuildTarget.StandaloneWindows, false);
+                    importer.SetCompatibleWithPlatform(BuildTarget.StandaloneWindows64, false);
+                    importer.SetCompatibleWithPlatform(BuildTarget.StandaloneOSX, false);
+                    importer.SetCompatibleWithPlatform(BuildTarget.StandaloneLinux64, false);
+                    importer.SetCompatibleWithEditor(false);
+
+                    // We need to exclude libastcenc-none-static.a for WebGL as it's being installed, but conflicts with
+                    // Unity's symbols.
+                    bool supportsWebGL = library.Platform == BuildTarget.WebGL && !assetPath.EndsWith("libastcenc-none-static.a");
+                    bool supportsIOS = library.Platform == BuildTarget.iOS;
+
+                    importer.SetCompatibleWithPlatform(BuildTarget.WebGL, supportsWebGL);
+                    importer.SetCompatibleWithPlatform(BuildTarget.iOS, supportsIOS);
+
+                    importer.SaveAndReimport();
+                }
+            }
+
+            AssetDatabase.StopAssetEditing();
+        }
+
         internal static void BuildNativeLibrary(LibraryToBuild library)
         {
+            var emscriptenDir = "";
+            var deleteTemporaryEmscriptenDir = false;
+
+            if (library.Platform == BuildTarget.WebGL)
+            {
+                // Find the Emscripten that ships with the Unity WebGL platform
+                var editorDir = EditorApplication.applicationContentsPath;
+                emscriptenDir = Path.Combine(editorDir, "PlaybackEngines", "WebGLSupport", "BuildTools", "Emscripten");
+                if (!Directory.Exists(emscriptenDir))
+                {
+                    // Check for editor built from source
+                    editorDir = new FileInfo(Path.Combine(editorDir, "..", "..", "..", "..")).FullName;
+                    emscriptenDir = Path.Combine(editorDir, "WebGLSupport", "BuildTools", "Emscripten");
+                    if (!Directory.Exists(emscriptenDir))
+                    {
+                        // Check for editor built from source on mac
+                        editorDir = new FileInfo(Path.Combine(editorDir, "..")).FullName;
+                        emscriptenDir = Path.Combine(editorDir, "WebGLSupport", "BuildTools", "Emscripten");
+                        if (!Directory.Exists(emscriptenDir))
+                        {
+                            UnityEngine.Debug.LogError($"Emscripten directory does not exist at: {emscriptenDir}. Cannot build Web version of CesiumForUnityNative.");
+                            return;
+                        }
+                    }
+                }
+
+                if (emscriptenDir.Contains(' '))
+                {
+                    // Some ezvcpkg libraries like openssl fail to build if the path to compilation tools contains spaces.
+                    // The default Unity install path on Windows does contain spaces as it's put into "Program Files".
+                    // Use subst to map the Emscripten directory to a drive letter, eliminating the space.
+                    // When the process finishes, we will delete the mapping.
+                    char driveLetter = 'M';
+                    if (!Directory.Exists(driveLetter + ":\\"))
+                    {
+                        Process.Start("subst", driveLetter + ": \"" + emscriptenDir + "\"").WaitForExit();
+                        deleteTemporaryEmscriptenDir = true;
+                    }
+                    emscriptenDir = driveLetter + ":\\";
+                }
+            }
+
             if (library.CleanBuild && library.BuildDirectory.Length > 2 && Directory.Exists(library.BuildDirectory))
                 Directory.Delete(library.BuildDirectory, true);
             Directory.CreateDirectory(library.BuildDirectory);
@@ -454,6 +555,13 @@ namespace CesiumForUnity
                     {
                         startInfo.FileName = File.Exists("/Applications/CMake.app/Contents/bin/cmake") ? "/Applications/CMake.app/Contents/bin/cmake" : "cmake";
                     }
+                    else if (library.Platform == BuildTarget.WebGL)
+                    {
+                        if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.Windows)
+                            startInfo.FileName = $"{emscriptenDir}/emscripten/emcmake.bat";
+                        else
+                            startInfo.FileName = $"{emscriptenDir}/emscripten/emcmake";
+                    }
                     else
                     {
                         startInfo.FileName = "cmake";
@@ -463,6 +571,30 @@ namespace CesiumForUnity
                     startInfo.RedirectStandardError = true;
                     startInfo.RedirectStandardOutput = true;
                     ConfigureEnvironmentVariables(startInfo.Environment, library);
+
+                    var EM_CONFIG = "";
+                    if (library.Platform == BuildTarget.WebGL)
+                    {
+                        startInfo.EnvironmentVariables["EMSDK"] = emscriptenDir;
+                        startInfo.EnvironmentVariables["EMCC_SKIP_SANITY_CHECK"] = "1";
+                        startInfo.EnvironmentVariables["EM_FROZEN_CACHE"] = "1";
+                        startInfo.EnvironmentVariables["EM_WORKAROUND_PYTHON_BUG_34780"] = "1";
+                        startInfo.EnvironmentVariables["EM_WORKAROUND_WIN7_BAD_ERRORLEVEL_BUG"] = "1";
+                        startInfo.EnvironmentVariables["PYTHONUTF8"] = "1";
+
+                        EM_CONFIG = Path.Combine(emscriptenDir, ".emscripten");
+                        startInfo.EnvironmentVariables["EM_CONFIG"] = EM_CONFIG;
+                        startInfo.EnvironmentVariables["EM_PYTHON"] = Path.Combine(emscriptenDir, "python",
+                            (SystemInfo.operatingSystemFamily == OperatingSystemFamily.Linux) ? "python3" :
+                            (SystemInfo.operatingSystemFamily == OperatingSystemFamily.Windows) ? Path.Combine("python.exe") :
+                            (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX) ? Path.Combine("bin", "python3") :
+                            "python");
+
+                        var path = startInfo.EnvironmentVariables.ContainsKey("PATH") ? startInfo.EnvironmentVariables["PATH"] : "";
+                        if (path == "")
+                            path = Environment.GetEnvironmentVariable("Path");
+                        startInfo.EnvironmentVariables["PATH"] = $"{emscriptenDir}/emscripten;{emscriptenDir}/node;{emscriptenDir}/python;{emscriptenDir}/python/bin;{path}";
+                    }
 
                     List<string> args = new List<string>()
                     {
@@ -475,6 +607,17 @@ namespace CesiumForUnity
                         $"-DCMAKE_INSTALL_PREFIX=\"{library.InstallDirectory}\"",
                         $"-DREINTEROP_GENERATED_DIRECTORY={library.GeneratedDirectoryName}",
                     };
+
+                    if (library.Platform == BuildTarget.WebGL)
+                    {
+                        args.Insert(0, "cmake");
+                        args.Add("-DBUILD_SHARED_LIB=OFF");
+                        args.Add("-DCESIUM_ENABLE_CLANG_TIDY=OFF");
+                        var generatedInclude = Path.Combine(library.SourceDirectory, "Runtime", library.GeneratedDirectoryName, "include");
+                        args.Add($"-DCMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES=\"{generatedInclude}\"");
+                        args.Add("-G Ninja");
+                    }
+
                     args.AddRange(library.ExtraConfigureArgs);
 
                     if (library.Toolchain != null)
@@ -483,6 +626,9 @@ namespace CesiumForUnity
                     startInfo.Arguments = string.Join(' ', args);
 
                     RunAndLog(startInfo, log, logFilename);
+
+                    if (library.Platform == BuildTarget.WebGL)
+                        startInfo.FileName = "cmake";
 
                     args = new List<string>()
                     {
@@ -499,13 +645,32 @@ namespace CesiumForUnity
                     startInfo.Arguments = string.Join(' ', args);
                     RunAndLog(startInfo, log, logFilename);
 
-                    if (library.Platform == BuildTarget.iOS)
+                    // Refresh the asset database for platforms that use static linking so the Unity
+                    // builder can find the libraries.
+                    if (library.Platform == BuildTarget.iOS || library.Platform == BuildTarget.WebGL)
+                    {
                         AssetDatabase.Refresh();
+                        SetStaticLibrariesPlatform(library);
+                    }
                 }
             }
             finally
             {
                 EditorUtility.ClearProgressBar();
+                if (deleteTemporaryEmscriptenDir)
+                {
+                    try
+                    {
+                        var driveLetter = emscriptenDir[0];
+                        UnityEngine.Debug.Log("Deleting temporary Emscripten drive mapping: " + driveLetter + ":");
+                        Process.Start("subst", driveLetter + ": /D").WaitForExit();
+                    }
+                    catch (Exception)
+                    {
+                        // Ignore any errors here.
+                        UnityEngine.Debug.LogWarning("Failed to delete temporary Emscripten drive mapping: " + emscriptenDir);
+                    }
+                }
             }
         }
 

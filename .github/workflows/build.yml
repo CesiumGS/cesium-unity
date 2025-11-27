@@ -1,5 +1,10 @@
 name: Cesium for Unity
 on: [push]
+env:
+  VCPKG_BINARY_SOURCES: 'clear;x-aws,s3://cesium-builds/vcpkg/cesium-native-cache/,readwrite'
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_INTERNAL_SERVICES_VCPKG_ACCESS_KEY }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_INTERNAL_SERVICES_VCPKG_SECRET_KEY }}
+  AWS_REGION: us-east-1
 jobs:
   QuickChecks:
     name: "Quick Checks"
@@ -68,7 +73,7 @@ jobs:
       - name: Install Unity
         run: |
           Start-Process -FilePath "C:/Program Files/Unity Hub/Unity Hub.exe" -Args "-- --headless install --version 2022.3.41f1 --changeset 0f988161febf" -Wait
-          Start-Process -FilePath "C:/Program Files/Unity Hub/Unity Hub.exe" -Args "-- --headless install-modules --version 2022.3.41f1 --changeset 0f988161febf --module android android-sdk-ndk-tools  android-open-jdk-11.0.14.1+1 universal-windows-platform" -Wait
+          Start-Process -FilePath "C:/Program Files/Unity Hub/Unity Hub.exe" -Args "-- --headless install-modules --version 2022.3.41f1 --changeset 0f988161febf --module android android-sdk-ndk-tools android-open-jdk-11.0.14.1+1 universal-windows-platform" -Wait
       - name: Create SSH tunnel to Unity License Server
         env:
           UNITY_LICENSE_SERVER_SSH_KEY: ${{ secrets.UNITY_LICENSE_SERVER_SSH_KEY }}
@@ -92,7 +97,7 @@ jobs:
         run: |
           mkdir -p $ENV:PROGRAMDATA/Unity/config
           $filename="$ENV:PROGRAMDATA/Unity/config/services-config.json"
-          $text='{"licensingServiceBaseUrl":"http://localhost:12331","enableEntitlementLicensing":true,"clientConnectTimeoutSec":120,"clientHandshakeTimeoutSec":60}'
+          $text='{"licensingServiceBaseUrl":"http://localhost:12331","enableEntitlementLicensing":true,"clientConnectTimeoutSec":120,"clientHandshakeTimeoutSec":60,"toolset":"UnityLicenseServer_16768262570522_2"}'
           [IO.File]::WriteAllLines($filename,$text)
       - name: Update the version in Cesium.cpp
         run: |
@@ -132,7 +137,7 @@ jobs:
           # Explicitly set the ezvcpkg path. Otherwise it will be `/.ezvcpkg` and the drive letter is ambiguous.
           $ENV:EZVCPKG_BASEDIR="D:/.ezvcpkg"
           # Run the build
-          dotnet run --project Build~
+          dotnet run --project Build~ package --platform Editor --platform Windows --platform UWP --platform Android
       - name: Print disk space 2
         if: success() || failure()    # run this step even if previous step failed
         run: |
@@ -233,7 +238,7 @@ jobs:
           sudo mkdir -p "/Library/Application Support/Unity/config"
           sudo chmod g+w "/Library/Application Support/Unity"
           sudo chmod g+w "/Library/Application Support/Unity/config"
-          sudo echo '{"licensingServiceBaseUrl": "http://localhost:12331","enableEntitlementLicensing": true,"clientConnectTimeoutSec": 60,"clientHandshakeTimeoutSec": 120}' > "/Library/Application Support/Unity/config/services-config.json"
+          sudo echo '{"licensingServiceBaseUrl": "http://localhost:12331","enableEntitlementLicensing": true,"clientConnectTimeoutSec": 60,"clientHandshakeTimeoutSec": 120,"toolset":"UnityLicenseServer_16768262570522_2"}' > "/Library/Application Support/Unity/config/services-config.json"
       - name: Create SSH tunnel to Unity License Server
         env:
           UNITY_LICENSE_SERVER_SSH_KEY: ${{ secrets.UNITY_LICENSE_SERVER_SSH_KEY }}
@@ -279,7 +284,7 @@ jobs:
           # We only need a release build of vcpkg dependencies
           export CESIUM_VCPKG_RELEASE_ONLY="TRUE"
           cd ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
-          dotnet run --project Build~
+          dotnet run --project Build~ package --platform Editor --platform macOS --platform iOS
           ls -l ~/cesium/CesiumForUnityBuildProject
       - name: Publish Logs
         if: success() || failure()    # run this step even if previous step failed
@@ -307,9 +312,129 @@ jobs:
           name: Tests - macOS
           path: /Users/runner/cesium/CesiumForUnityBuildProject/TestResults.xml
           reporter: dotnet-nunit
+  Emscripten:
+    needs: [QuickChecks]
+    runs-on: windows-latest
+    # Only allow a single Emscripten build at a time, for Unity licensing reasons
+    concurrency: emscripten
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Cache vcpkg artifacts
+        uses: actions/cache@v4
+        with:
+          path: "d:/.ezvcpkg"
+          key: vcpkg-windows-${{ hashFiles('native~/vcpkg/ports/**/vcpkg.json', 'native~/vcpkg/triplets/**/*', 'native~/extern/*toolchain.cmake') }}-${{ hashFiles('native~/extern/cesium-native/CMakeLists.txt', 'native~/CMakeLists.txt') }}
+          restore-keys: |
+            vcpkg-windows-${{ hashFiles('native~/vcpkg/ports/**/vcpkg.json', 'native~/vcpkg/triplets/**/*', 'native~/extern/*toolchain.cmake') }}-
+      - name: Install latest ninja and cmake
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: "3.31.6"
+      - name: Install nasm
+        uses: ilammy/setup-nasm@v1.5.1
+      - name: Install wget
+        run: |
+          choco install -y wget
+      - name: Install Unity Hub
+        run: |
+          wget https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.exe
+          Start-Process "./UnityHubSetup.exe" -Args "/S" -Wait
+          del ./UnityHubSetup.exe
+      - name: Install Unity
+        run: |
+          # We must use Unity 6+ because the Emscripten version in older releases is too old.
+          Start-Process -FilePath "C:/Program Files/Unity Hub/Unity Hub.exe" -Args "-- --headless install --version 6000.0.62f1 --changeset f99f05b3e950" -Wait
+          Start-Process -FilePath "C:/Program Files/Unity Hub/Unity Hub.exe" -Args "-- --headless install-modules --version 6000.0.62f1 --changeset f99f05b3e950 --module webgl" -Wait
+      - name: Create SSH tunnel to Unity License Server
+        env:
+          UNITY_LICENSE_SERVER_SSH_KEY: ${{ secrets.UNITY_LICENSE_SERVER_SSH_KEY }}
+        run: |
+          $ENV:UNITY_LICENSE_SERVER_SSH_KEY | Set-Content ~/unity-client-ssh-key
+          # Without StrictHostKeyChecking, OpenSSH will sit forever waiting for local input to confirm the server key is ok.
+          # We don't really care if the server is authentic, because we're not sending anything sensitive to it.
+          # The license server VM's sshd_config also needed to be modified with the following options, in order to prevent
+          # the tunnel from being closed between here and when we're ready to use it.
+          #   TCPKeepAlive yes
+          #   ClientAliveInterval 30
+          #   ClientAliveCountMax 9999
+          start -FilePath ssh -ArgumentList "-o StrictHostKeyChecking=no -i ~/unity-client-ssh-key -L 127.0.0.1:12331:127.0.0.1:8080 unity-client@ec2-44-204-244-196.compute-1.amazonaws.com"
+          sleep 5
+      - name: Test Connection to Unity License Server
+        run: |
+          wget.exe http://127.0.0.1:12331/v1/admin/status
+          cat status
+          rm status
+      - name: Configure Unity to Use the License Server
+        run: |
+          mkdir -p $ENV:PROGRAMDATA/Unity/config
+          $filename="$ENV:PROGRAMDATA/Unity/config/services-config.json"
+          $text='{"licensingServiceBaseUrl":"http://localhost:12331","enableEntitlementLicensing":true,"clientConnectTimeoutSec":120,"clientHandshakeTimeoutSec":60,"toolset":"UnityLicenseServer_16768262643415_1"}'
+          [IO.File]::WriteAllLines($filename,$text)
+      - name: Update the version in Cesium.cpp
+        run: |
+          $VERSION = (Get-Content -path package.json | ConvertFrom-Json).version
+          $COMMIT = $(git rev-parse --short HEAD)
+          ((Get-Content -path native~/Shared/src/Cesium.cpp -Raw) -replace 'Cesium::version = "Development Build"',"Cesium::version = ""$VERSION""") | Set-Content -Path native~/Shared/src/Cesium.cpp
+          ((Get-Content -path native~/Shared/src/Cesium.cpp -Raw) -replace 'Cesium::commit = "Unknown"',"Cesium::commit = ""$COMMIT""") | Set-Content -Path native~/Shared/src/Cesium.cpp
+          # Sanity check that the replacements happened
+          if (-Not ((Get-Content -path native~/Shared/src/Cesium.cpp -Raw) -match "$COMMIT")) { throw "Commit does not exist in file after replacement" }
+          if (-Not ((Get-Content -path native~/Shared/src/Cesium.cpp -Raw) -match "$VERSION")) { throw "Version does not exist in file after replacement" }
+      - name: Move cesium-unity Repo Under Empty Project
+        run: |
+          mkdir -p d:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
+          mv $ENV:GITHUB_WORKSPACE/* d:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
+          # Disable Unity audio
+          mkdir -p d:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity\ProjectSettings
+          $text="%YAML 1.1`n%TAG !u! tag:unity3d.com,2011:`n--- !u!11 &1`nAudioManager:`n  m_DisableAudio: 1`n"
+          [IO.File]::WriteAllLines("d:/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity/ProjectSettings/AudioManager.asset",$text)
+      - name: Build Reinterop
+        run: |
+          cd d:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
+          dotnet publish Reinterop~ -o .
+      - name: Print disk space 1
+        if: success() || failure()    # run this step even if previous step failed
+        run: |
+          get-psdrive
+      - name: Delete ccache
+        run: |
+          # To prevent the ada-url build from trying (and failing) to use it.
+          rm C:/Strawberry/c/bin/ccache.exe
+      - name: Build Package
+        run: |
+          cd d:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
+          mkdir -p d:\cesium\temp
+          # Store temp files on the D drive, which is much faster than the EBS-backed C drive.
+          $ENV:TEMP="d:\cesium\temp"
+          # We only need a release build of vcpkg dependencies
+          $ENV:CESIUM_VCPKG_RELEASE_ONLY="TRUE"
+          # Clear ANDROID_NDK_ROOT so that we use Unity's version
+          Remove-Item Env:ANDROID_NDK_ROOT
+          # Explicitly set the ezvcpkg path. Otherwise it will be `/.ezvcpkg` and the drive letter is ambiguous.
+          $ENV:EZVCPKG_BASEDIR="D:/.ezvcpkg"
+          # Run the build
+          dotnet run --project Build~ package --platform Web
+      - name: Print disk space 2
+        if: success() || failure()    # run this step even if previous step failed
+        run: |
+          get-psdrive
+      - name: Publish Logs
+        if: success() || failure()    # run this step even if previous step failed
+        uses: actions/upload-artifact@v4
+        with:
+          name: Native Build Logs - Emscripten
+          path: d:/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity/native~/build-*/build.log
+      - name: Publish package artifact
+        if: ${{ success() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: Emscripten Package
+          path: d:\cesium\CesiumForUnityBuildProject\*.tgz
   Combine:
     runs-on: ubuntu-latest
-    needs: [Windows, MacOS]
+    needs: [Windows, MacOS, Emscripten]
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -323,6 +448,16 @@ jobs:
       - name: Extract macOS build
         run: |
           cd combine/macos
+          tar xzf *.tgz
+          rm *.tgz
+      - name: Download Emscripten build
+        uses: actions/download-artifact@v4
+        with:
+          name: Emscripten Package
+          path: combine/emscripten
+      - name: Extract Emscripten build
+        run: |
+          cd combine/emscripten
           tar xzf *.tgz
           rm *.tgz
       - name: Download Windows build
@@ -342,6 +477,7 @@ jobs:
           
           # Copy the everything. For files that exist in multiple packages, the Windows one will win.
           cp -r ../macos/* .
+          cp -r ../emscripten/* .
           cp -r ../windows/* .
           
           # Remove the generated C# files
@@ -366,6 +502,21 @@ jobs:
             mkdir -p $(dirname "../merged/$file")
             cp "$file" "../merged/$file"
           done;
+
+          cd ../emscripten
+          for file in $(find package/Runtime/generated -name '*.cs');
+          do
+            echo Merging $file
+            mkdir -p $(dirname "../merged/$file")
+            cat "$file" >> "../merged/$file"
+          done;
+          for file in $(find package/Editor/generated -name '*.cs');
+          do
+            echo Merging $file
+            mkdir -p $(dirname "../merged/$file")
+            cat "$file" >> "../merged/$file"
+          done;
+
           cd ../windows
           for file in $(find package/Runtime/generated -name '*.cs');
           do

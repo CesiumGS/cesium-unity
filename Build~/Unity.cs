@@ -111,35 +111,43 @@ namespace Build
             public int Patch;
         }
 
-        public static Unity? FindUnity(string? version = null)
+        public static Unity? FindUnity(FileInfo? fullPathToUnityExecutable = null, string? version = null, DirectoryInfo? unityDir = null)
         {
-            DirectoryInfo? unityDir = null;
+            if (fullPathToUnityExecutable != null)
+            {
+                if (fullPathToUnityExecutable.Exists)
+                    return new Unity(fullPathToUnityExecutable.FullName);
+                else
+                    return null;
+            }
 
+            DirectoryInfo unityDefaultBaseDirectory;
+            string unityExecutableSubPath;
             if (OperatingSystem.IsWindows())
             {
-                if (version != null)
-                {
-                    string path = $"C:\\Program Files\\Unity\\Hub\\Editor\\{version}\\Editor\\Unity.exe";
-                    if (File.Exists(path))
-                        return new Unity(path);
-                }
-
-                unityDir = new DirectoryInfo("C:\\Program Files\\Unity\\Hub\\Editor\\");
+                unityDefaultBaseDirectory = new DirectoryInfo("C:\\Program Files\\Unity\\Hub\\Editor");
+                unityExecutableSubPath = "Editor\\Unity.exe";
             }
             else if (OperatingSystem.IsMacOS())
             {
-                if (version != null)
-                {
-                    string path = "/Applications/Unity/Hub/Editor/{version}/Unity.app/Contents/MacOS/Unity";
-                    if (File.Exists(path))
-                        return new Unity(path);
-                }
-
-                unityDir = new DirectoryInfo("/Applications/Unity/Hub/Editor/");
+                unityDefaultBaseDirectory = new DirectoryInfo("/Applications/Unity/Hub/Editor");
+                unityExecutableSubPath = "Unity.app/Contents/MacOS/Unity";
+            }
+            else
+            {
+                return null;
             }
 
             if (unityDir == null)
-                return null;
+                unityDir = unityDefaultBaseDirectory;
+
+            if (version != null)
+            {
+                FileInfo unityExecutable = new FileInfo(Path.Combine(unityDir.FullName, version, unityExecutableSubPath));
+                if (unityExecutable.Exists)
+                    return new Unity(unityExecutable.FullName);
+                else return null;
+            }
 
             DirectoryInfo[] subDirectories = unityDir.GetDirectories();
             List<UnityVersion?> versions = subDirectories.Select((di) =>
@@ -178,12 +186,7 @@ namespace Build
             if (versions.Count == 0 || versions.Last() == null)
                 return null;
 
-            if (OperatingSystem.IsWindows())
-                return new Unity(Path.Combine(versions.Last()!.FullPath, "Editor", "Unity.exe"));
-            else if (OperatingSystem.IsMacOS())
-                return new Unity(Path.Combine(versions.Last()!.FullPath, "Unity.app", "Contents", "MacOS", "Unity"));
-
-            return null;
+            return new Unity(Path.Combine(versions.Last()!.FullPath, unityExecutableSubPath));
         }
     }
 }

@@ -1,4 +1,4 @@
-#include "UnityAssetAccessor.h"
+#include "UnityWebRequestAssetAccessor.h"
 
 #include "Cesium.h"
 
@@ -26,6 +26,7 @@
 #include <DotNet/UnityEngine/Networking/UnityWebRequestAsyncOperation.h>
 #include <DotNet/UnityEngine/Networking/UploadHandler.h>
 #include <DotNet/UnityEngine/Networking/UploadHandlerRaw.h>
+#include <fmt/format.h>
 
 #include <algorithm>
 
@@ -117,7 +118,8 @@ std::string replaceInvalidChars(const std::string& input) {
 
 namespace CesiumForUnityNative {
 
-UnityAssetAccessor::UnityAssetAccessor() : _cesiumRequestHeaders() {
+UnityWebRequestAssetAccessor::UnityWebRequestAssetAccessor()
+    : _cesiumRequestHeaders() {
   std::string version = CesiumForUnityNative::Cesium::version + " " +
                         CesiumForUnityNative::Cesium::commit;
   std::string projectName = replaceInvalidChars(
@@ -137,7 +139,7 @@ UnityAssetAccessor::UnityAssetAccessor() : _cesiumRequestHeaders() {
 }
 
 CesiumAsync::Future<std::shared_ptr<CesiumAsync::IAssetRequest>>
-UnityAssetAccessor::get(
+UnityWebRequestAssetAccessor::get(
     const CesiumAsync::AsyncSystem& asyncSystem,
     const std::string& url,
     const std::vector<THeader>& headers) {
@@ -191,13 +193,12 @@ UnityAssetAccessor::get(
                 request.error().ToStlString())));
           }
         }));
-
     return future;
   });
 }
 
 CesiumAsync::Future<std::shared_ptr<CesiumAsync::IAssetRequest>>
-UnityAssetAccessor::request(
+UnityWebRequestAssetAccessor::request(
     const CesiumAsync::AsyncSystem& asyncSystem,
     const std::string& verb,
     const std::string& url,
@@ -280,6 +281,6 @@ UnityAssetAccessor::request(
   });
 }
 
-void UnityAssetAccessor::tick() noexcept {}
+void UnityWebRequestAssetAccessor::tick() noexcept {}
 
 } // namespace CesiumForUnityNative

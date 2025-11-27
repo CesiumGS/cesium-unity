@@ -1,12 +1,14 @@
 #pragma once
 
+#ifdef __EMSCRIPTEN__
+
 #include <CesiumAsync/IAssetAccessor.h>
 
 namespace CesiumForUnityNative {
 
-class UnityAssetAccessor : public CesiumAsync::IAssetAccessor {
+class UnityEmscriptenAssetAccessor : public CesiumAsync::IAssetAccessor {
 public:
-  UnityAssetAccessor();
+  UnityEmscriptenAssetAccessor();
 
   virtual CesiumAsync::Future<std::shared_ptr<CesiumAsync::IAssetRequest>>
   get(const CesiumAsync::AsyncSystem& asyncSystem,
@@ -22,9 +24,8 @@ public:
       const std::span<const std::byte>& contentPayload = {}) override;
 
   virtual void tick() noexcept override;
-
-private:
-  CesiumAsync::HttpHeaders _cesiumRequestHeaders;
 };
 
 } // namespace CesiumForUnityNative
+
+#endif // __EMSCRIPTEN__
