@@ -18,7 +18,7 @@
 
 namespace CesiumForUnityNative {
 
-class UnityAssetAccessor;
+class UnityWebRequestAssetAccessor;
 
 class UnityAssetResponse : public CesiumAsync::IAssetResponse {
 public:
@@ -72,7 +72,7 @@ public:
   CesiumUtility::DoublyLinkedListPointers<UnityAssetRequest> links;
 
   UnityAssetRequest(
-      const std::shared_ptr<UnityAssetAccessor>& pAccessor,
+      const std::shared_ptr<UnityWebRequestAssetAccessor>& pAccessor,
       DotNet::UnityEngine::Networking::UnityWebRequest&& request,
       CesiumAsync::HttpHeaders&& headers,
       CesiumAsync::Promise<std::shared_ptr<CesiumAsync::IAssetRequest>>&&
@@ -105,18 +105,18 @@ private:
   CesiumAsync::HttpHeaders _headers;
   DotNet::UnityEngine::Networking::UnityWebRequest _webRequest;
   CesiumAsync::Promise<std::shared_ptr<CesiumAsync::IAssetRequest>> _promise;
-  std::shared_ptr<UnityAssetAccessor> _pAccessor;
+  std::shared_ptr<UnityWebRequestAssetAccessor> _pAccessor;
   std::atomic<State> _state;
   std::optional<UnityAssetResponse> _maybeResponse;
 };
 
-class UnityAssetAccessor
+class UnityWebRequestAssetAccessor
     : public CesiumAsync::IAssetAccessor,
-      public std::enable_shared_from_this<UnityAssetAccessor> {
+      public std::enable_shared_from_this<UnityWebRequestAssetAccessor> {
 public:
-  UnityAssetAccessor();
+  UnityWebRequestAssetAccessor();
 
-  ~UnityAssetAccessor();
+  ~UnityWebRequestAssetAccessor();
 
   virtual CesiumAsync::Future<std::shared_ptr<CesiumAsync::IAssetRequest>>
   get(const CesiumAsync::AsyncSystem& asyncSystem,

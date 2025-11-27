@@ -1,5 +1,16 @@
 # Change Log
 
+## ? - ?
+
+##### Additions :tada:
+
+- Added experimental support for Web builds.
+
+##### Fixes :wrench:
+
+- Exceptions thrown by delegates implemented in native code are now correctly propagated back to the managed caller. Previously, this scenario could cause crashes and undefined behavior.
+- Delegate wrappers for native functions now use `SafeHandle` to ensure the native function will not be destroyed by the garbage collector while it is running.
+
 ## v1.19.0 - 2025-11-03
 
 ##### Additions :tada:

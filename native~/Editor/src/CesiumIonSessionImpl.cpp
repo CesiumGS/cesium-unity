@@ -1,6 +1,5 @@
 #include "CesiumIonSessionImpl.h"
 
-#include "UnityAssetAccessor.h"
 #include "UnityExternals.h"
 #include "UnityTaskProcessor.h"
 
@@ -16,6 +15,7 @@
 #include <DotNet/System/Object.h>
 #include <DotNet/UnityEngine/Application.h>
 #include <DotNet/UnityEngine/Debug.h>
+#include <fmt/format.h>
 
 using namespace DotNet;
 

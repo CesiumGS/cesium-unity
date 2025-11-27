@@ -1,4 +1,4 @@
-#include "UnityAssetAccessor.h"
+#include "UnityWebRequestAssetAccessor.h"
 
 #include "Cesium.h"
 
@@ -26,6 +26,7 @@
 #include <DotNet/UnityEngine/Networking/UnityWebRequestAsyncOperation.h>
 #include <DotNet/UnityEngine/Networking/UploadHandler.h>
 #include <DotNet/UnityEngine/Networking/UploadHandlerRaw.h>
+#include <fmt/format.h>
 
 #if UNITY_EDITOR
 #include <DotNet/UnityEditor/AssemblyReloadCallback.h>
@@ -55,7 +56,7 @@ std::string replaceInvalidChars(const std::string& input) {
 namespace CesiumForUnityNative {
 
 UnityAssetRequest::UnityAssetRequest(
-    const std::shared_ptr<UnityAssetAccessor>& pAccessor,
+    const std::shared_ptr<UnityWebRequestAssetAccessor>& pAccessor,
     DotNet::UnityEngine::Networking::UnityWebRequest&& request,
     HttpHeaders&& headers,
     Promise<std::shared_ptr<IAssetRequest>>&& promise)
@@ -137,7 +138,7 @@ UnityAssetRequest::~UnityAssetRequest() {
   this->_pAccessor->notifyRequestDestroyed(*this);
 }
 
-UnityAssetAccessor::UnityAssetAccessor() : _cesiumRequestHeaders() {
+UnityWebRequestAssetAccessor::UnityWebRequestAssetAccessor() : _cesiumRequestHeaders() {
   std::string version = CesiumForUnityNative::Cesium::version + " " +
                         CesiumForUnityNative::Cesium::commit;
   std::string projectName = replaceInvalidChars(
@@ -162,7 +163,7 @@ UnityAssetAccessor::UnityAssetAccessor() : _cesiumRequestHeaders() {
 #endif
 }
 
-void UnityAssetAccessor::cancelActiveRequests() {
+void UnityWebRequestAssetAccessor::cancelActiveRequests() {
   std::lock_guard<std::mutex> lock(this->_assetRequestMutex);
 
   UnityAssetRequest* p = this->_activeRequests.head();
@@ -173,14 +174,14 @@ void UnityAssetAccessor::cancelActiveRequests() {
   }
 }
 
-UnityAssetAccessor::~UnityAssetAccessor() { this->cancelActiveRequests(); }
+UnityWebRequestAssetAccessor::~UnityWebRequestAssetAccessor() { this->cancelActiveRequests(); }
 
 CesiumAsync::Future<std::shared_ptr<CesiumAsync::IAssetRequest>>
-UnityAssetAccessor::get(
+UnityWebRequestAssetAccessor::get(
     const CesiumAsync::AsyncSystem& asyncSystem,
     const std::string& url,
     const std::vector<THeader>& headers) {
-  std::shared_ptr<UnityAssetAccessor> thiz = this->shared_from_this();
+  std::shared_ptr<UnityWebRequestAssetAccessor> thiz = this->shared_from_this();
 
   // Sadly, Unity requires us to call this from the main thread.
   return asyncSystem.runInMainThread([asyncSystem, url, headers, thiz]() {
@@ -215,7 +216,7 @@ UnityAssetAccessor::get(
 }
 
 CesiumAsync::Future<std::shared_ptr<CesiumAsync::IAssetRequest>>
-UnityAssetAccessor::request(
+UnityWebRequestAssetAccessor::request(
     const CesiumAsync::AsyncSystem& asyncSystem,
     const std::string& verb,
     const std::string& url,
@@ -239,7 +240,7 @@ UnityAssetAccessor::request(
           GetUnsafeBufferPointerWithoutChecks(payloadBytes));
   std::memcpy(pDest, contentPayload.data(), contentPayload.size());
 
-  std::shared_ptr<UnityAssetAccessor> thiz = this->shared_from_this();
+  std::shared_ptr<UnityWebRequestAssetAccessor> thiz = this->shared_from_this();
 
   // Sadly, Unity requires us to call this from the main thread.
   return asyncSystem.runInMainThread(
@@ -282,9 +283,9 @@ UnityAssetAccessor::request(
       });
 }
 
-void UnityAssetAccessor::tick() noexcept {}
+void UnityWebRequestAssetAccessor::tick() noexcept {}
 
-void UnityAssetAccessor::notifyRequestDestroyed(
+void UnityWebRequestAssetAccessor::notifyRequestDestroyed(
     UnityAssetRequest& request) noexcept {
   std::lock_guard<std::mutex> lock(this->_assetRequestMutex);
   this->_activeRequests.remove(request);

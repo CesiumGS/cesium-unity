@@ -46,6 +46,25 @@ namespace CesiumForUnity
             EditorApplication.Exit(0);
         }
 
+        public static void CompileForWebAndExit()
+        {
+            CompileCesiumForUnityNative.ExitAfterCompile = true;
+
+            string buildPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(buildPath);
+            try
+            {
+                PlayerSettings.SetScriptingBackend(BuildTargetGroup.WebGL, ScriptingImplementation.IL2CPP);
+                PlayerSettings.WebGL.threadsSupport = true;
+                BuildPlayer(BuildTargetGroup.WebGL, BuildTarget.WebGL, Path.Combine(buildPath, "WebGL"));
+            }
+            finally
+            {
+                Directory.Delete(buildPath, true);
+            }
+            EditorApplication.Exit(0);
+        }
+
         public static void CompileForUWPAndExit()
         {
             CompileCesiumForUnityNative.ExitAfterCompile = true;
