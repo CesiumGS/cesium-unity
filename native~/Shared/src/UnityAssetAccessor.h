@@ -74,9 +74,11 @@ public:
       : _method(request.method().ToStlString()),
         _url(request.url().ToStlString()),
         _headers(headers),
+        _pResponse(),
+        _webRequest(request),
         _activeRequests(requestList),
         _requestMutex(requestMutex),
-        _webRequest(request)
+        _canceled(false)
       {
           std::lock_guard<std::mutex> lock(requestMutex);
           _activeRequests.insertAtTail(*this);

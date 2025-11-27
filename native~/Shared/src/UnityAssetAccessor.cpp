@@ -1,10 +1,5 @@
 #include "UnityAssetAccessor.h"
 
-#if UNITY_EDITOR
-#include "../../Runtime/generated-Editor/include/DotNet/UnityEditor/AssemblyReloadEvents.h"
-#include "../../Runtime/generated-Editor/include/DotNet/UnityEditor/AssemblyReloadCallback.h"
-#endif
-
 #include "Cesium.h"
 
 #include <CesiumAsync/AsyncSystem.h>
@@ -31,6 +26,11 @@
 #include <DotNet/UnityEngine/Networking/UnityWebRequestAsyncOperation.h>
 #include <DotNet/UnityEngine/Networking/UploadHandler.h>
 #include <DotNet/UnityEngine/Networking/UploadHandlerRaw.h>
+
+#if UNITY_EDITOR
+#include <DotNet/UnityEditor/AssemblyReloadCallback.h>
+#include <DotNet/UnityEditor/AssemblyReloadEvents.h>
+#endif
 
 #include <algorithm>
 
@@ -65,7 +65,9 @@ UnityAssetRequest::~UnityAssetRequest() {
   this->cancel();
 }
 
-void UnityAssetRequest::createResponse(const DotNet::UnityEngine::Networking::UnityWebRequest& request, const DotNet::CesiumForUnity::NativeDownloadHandler& handler) {
+void UnityAssetRequest::createResponse(
+    const DotNet::UnityEngine::Networking::UnityWebRequest& request,
+    const DotNet::CesiumForUnity::NativeDownloadHandler& handler) {
   _pResponse = std::make_unique<UnityAssetResponse>(request, handler);
 }
 
@@ -90,9 +92,7 @@ UnityAssetAccessor::UnityAssetAccessor() : _cesiumRequestHeaders() {
 #if UNITY_EDITOR
   UnityEditor::AssemblyReloadEvents::add_beforeAssemblyReload(
       UnityEditor::AssemblyReloadCallback(
-        [this]() {
-          this->cancelActiveRequests();
-        }));
+          [this]() { this->cancelActiveRequests(); }));
 #endif
 }
 
@@ -102,13 +102,11 @@ void UnityAssetAccessor::cancelActiveRequests() {
   auto* ptr = _activeRequests.head();
   while (ptr) {
     ptr->cancel();
-    ptr=_activeRequests.next(*ptr);
+    ptr = _activeRequests.next(*ptr);
   }
 }
 
-UnityAssetAccessor::~UnityAssetAccessor() {
-  this->cancelActiveRequests();
-}
+UnityAssetAccessor::~UnityAssetAccessor() { this->cancelActiveRequests(); }
 
 CesiumAsync::Future<std::shared_ptr<CesiumAsync::IAssetRequest>>
 UnityAssetAccessor::get(
@@ -121,9 +119,10 @@ UnityAssetAccessor::get(
                                       url,
                                       headers,
                                       &cesiumRequestHeaders =
-                                      this->_cesiumRequestHeaders,
+                                          this->_cesiumRequestHeaders,
                                       &requestList = this->_activeRequests,
-                                      &requestMutex=this->_assetRequestMutex]() {
+                                      &requestMutex =
+                                          this->_assetRequestMutex]() {
     UnityEngine::Networking::UnityWebRequest request =
         UnityEngine::Networking::UnityWebRequest::Get(System::String(url));
 
@@ -146,7 +145,12 @@ UnityAssetAccessor::get(
 
     auto future = promise.getFuture();
 
-    auto assetRequest = std::make_shared<UnityAssetRequest>(request, requestHeaders, handler, requestList, requestMutex);
+    auto assetRequest = std::make_shared<UnityAssetRequest>(
+        request,
+        requestHeaders,
+        handler,
+        requestList,
+        requestMutex);
 
     UnityEngine::Networking::UnityWebRequestAsyncOperation op =
         request.SendWebRequest();
@@ -156,12 +160,9 @@ UnityAssetAccessor::get(
          headers = std::move(requestHeaders),
          promise = std::move(promise),
          handler = std::move(handler),
-         assetRequest
-         ](
-            const UnityEngine::AsyncOperation& operation) mutable {
+         assetRequest](const UnityEngine::AsyncOperation& operation) mutable {
           ScopeGuard disposeHandler{[&handler]() { handler.Dispose(); }};
-          if (!assetRequest->canceled() &&
-              request.isDone() &&
+          if (!assetRequest->canceled() && request.isDone() &&
               request.result() !=
                   UnityEngine::Networking::Result::ConnectionError) {
             assetRequest->createResponse(request, handler);
@@ -203,7 +204,6 @@ UnityAssetAccessor::request(
           GetUnsafeBufferPointerWithoutChecks(payloadBytes));
   std::memcpy(pDest, contentPayload.data(), contentPayload.size());
 
-
   // Sadly, Unity requires us to call this from the main thread.
   return asyncSystem.runInMainThread([asyncSystem,
                                       url,
@@ -213,8 +213,8 @@ UnityAssetAccessor::request(
                                       &cesiumRequestHeaders =
                                           this->_cesiumRequestHeaders,
                                       &requestList = this->_activeRequests,
-                                      &requestMutex = this->_assetRequestMutex
-                                          ]() {
+                                      &requestMutex =
+                                          this->_assetRequestMutex]() {
     DotNet::CesiumForUnity::NativeDownloadHandler downloadHandler{};
     UnityEngine::Networking::UploadHandlerRaw uploadHandler(payloadBytes, true);
     UnityEngine::Networking::UnityWebRequest request(
@@ -240,7 +240,12 @@ UnityAssetAccessor::request(
 
     auto future = promise.getFuture();
 
-    auto assetRequest = std::make_shared<UnityAssetRequest>(request, requestHeaders, downloadHandler, requestList, requestMutex);
+    auto assetRequest = std::make_shared<UnityAssetRequest>(
+        request,
+        requestHeaders,
+        downloadHandler,
+        requestList,
+        requestMutex);
 
     UnityEngine::Networking::UnityWebRequestAsyncOperation op =
         request.SendWebRequest();
@@ -249,15 +254,14 @@ UnityAssetAccessor::request(
          headers = std::move(requestHeaders),
          promise = std::move(promise),
          handler = std::move(downloadHandler),
-         assetRequest](
-            const UnityEngine::AsyncOperation& operation) mutable {
+         assetRequest](const UnityEngine::AsyncOperation& operation) mutable {
           ScopeGuard disposeHandler{[&handler]() { handler.Dispose(); }};
-          if (!assetRequest->canceled() &&
-            request.isDone() &&
+          if (!assetRequest->canceled() && request.isDone() &&
               request.result() !=
                   UnityEngine::Networking::Result::ConnectionError) {
             promise.resolve(assetRequest);
-            // promise.resolve(std::make_shared<UnityAssetRequest>(request, headers, handler));
+            // promise.resolve(std::make_shared<UnityAssetRequest>(request,
+            // headers, handler));
           } else {
             promise.reject(std::runtime_error(fmt::format(
                 "Request for `{}` failed: {}",
