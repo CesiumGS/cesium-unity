@@ -1,5 +1,6 @@
 #include "CesiumUtility/Tracing.h"
 #include "UnityLoggerSink.h"
+#include "UnityTilesetExternals.h"
 
 #include <Cesium3DTilesContent/registerAllTileContentTypes.h>
 
@@ -23,6 +24,14 @@ void start() {
                          .time_since_epoch()
                          .count()) +
       ".json");
+
+//   CesiumForUnityNative::initializeExternals();
+
+// #if UNITY_EDITOR
+//   DotNet::UnityEditor::AssemblyReloadEvents::add_beforeAssemblyReload(
+//       DotNet::UnityEditor::AssemblyReloadCallback(
+//           []() { CesiumForUnityNative::shutdownExternals(); }));
+// #endif
 }
 
 void stop() {}

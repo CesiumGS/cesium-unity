@@ -67,10 +67,8 @@ UnityAssetRequest::UnityAssetRequest(
       _promise(std::move(promise)),
       _pAccessor(pAccessor),
       _state(State::Pending),
-      _maybeResponse() {
-  // std::lock_guard<std::mutex> lock(requestMutex);
-  // _activeRequests.insertAtTail(*this);
-}
+      _maybeResponse(),
+      _completedCallback(nullptr) {}
 
 void UnityAssetRequest::start() {
   DotNet::CesiumForUnity::NativeDownloadHandler handler{};
@@ -79,8 +77,8 @@ void UnityAssetRequest::start() {
   UnityEngine::Networking::UnityWebRequestAsyncOperation op =
       this->_webRequest.SendWebRequest();
 
-  op.add_completed(System::Action1<UnityEngine::AsyncOperation>(
-      [handler = std::move(handler), thiz = this->shared_from_this()](
+  this->_completedCallback = System::Action1<UnityEngine::AsyncOperation>(
+      [handler = std::move(handler), thiz = this->shared_from_this(), op](
           const UnityEngine::AsyncOperation& operation) mutable {
         ScopeGuard disposeHandler{[&handler]() { handler.Dispose(); }};
 
@@ -100,7 +98,15 @@ void UnityAssetRequest::start() {
                 thiz->_webRequest.error().ToStlString())));
           }
         }
-      }));
+
+        // Clean up this delegate immediately. Otherwise, this function would
+        // not be disposed until the finalizer runs.
+        op.remove_completed(thiz->_completedCallback);
+        thiz->_completedCallback.Dispose();
+        thiz->_completedCallback = nullptr;
+      });
+
+  op.add_completed(this->_completedCallback);
 }
 
 const std::string& UnityAssetRequest::method() const { return this->_method; }
@@ -138,7 +144,8 @@ UnityAssetRequest::~UnityAssetRequest() {
   this->_pAccessor->notifyRequestDestroyed(*this);
 }
 
-UnityWebRequestAssetAccessor::UnityWebRequestAssetAccessor() : _cesiumRequestHeaders() {
+UnityWebRequestAssetAccessor::UnityWebRequestAssetAccessor()
+    : _cesiumRequestHeaders() {
   std::string version = CesiumForUnityNative::Cesium::version + " " +
                         CesiumForUnityNative::Cesium::commit;
   std::string projectName = replaceInvalidChars(
@@ -155,12 +162,6 @@ UnityWebRequestAssetAccessor::UnityWebRequestAssetAccessor() : _cesiumRequestHea
   this->_cesiumRequestHeaders.insert({"X-Cesium-Client-Project", projectName});
   this->_cesiumRequestHeaders.insert({"X-Cesium-Client-Engine", engine});
   this->_cesiumRequestHeaders.insert({"X-Cesium-Client-OS", osVersion});
-
-#if UNITY_EDITOR
-  UnityEditor::AssemblyReloadEvents::add_beforeAssemblyReload(
-      UnityEditor::AssemblyReloadCallback(
-          [this]() { this->cancelActiveRequests(); }));
-#endif
 }
 
 void UnityWebRequestAssetAccessor::cancelActiveRequests() {
@@ -174,7 +175,9 @@ void UnityWebRequestAssetAccessor::cancelActiveRequests() {
   }
 }
 
-UnityWebRequestAssetAccessor::~UnityWebRequestAssetAccessor() { this->cancelActiveRequests(); }
+UnityWebRequestAssetAccessor::~UnityWebRequestAssetAccessor() {
+  this->cancelActiveRequests();
+}
 
 CesiumAsync::Future<std::shared_ptr<CesiumAsync::IAssetRequest>>
 UnityWebRequestAssetAccessor::get(
@@ -209,6 +212,12 @@ UnityWebRequestAssetAccessor::get(
         std::move(request),
         std::move(requestHeaders),
         std::move(promise));
+
+    {
+      std::lock_guard<std::mutex> lock(thiz->_assetRequestMutex);
+      thiz->_activeRequests.insertAtTail(*pAssetRequest);
+    }
+
     pAssetRequest->start();
 
     return future;
@@ -277,6 +286,12 @@ UnityWebRequestAssetAccessor::request(
             std::move(request),
             std::move(requestHeaders),
             std::move(promise));
+
+        {
+          std::lock_guard<std::mutex> lock(thiz->_assetRequestMutex);
+          thiz->_activeRequests.insertAtTail(*pAssetRequest);
+        }
+
         pAssetRequest->start();
 
         return future;

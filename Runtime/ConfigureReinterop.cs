@@ -13,6 +13,7 @@ using UnityEngine.Experimental.Rendering;
 using Unity.Mathematics;
 using UnityEngine.Pool;
 using UnityEngine.UIElements;
+using UnityEngine.SceneManagement;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -591,6 +592,9 @@ namespace CesiumForUnity
             CesiumGlobeAnchor globeAnchor = globeAnchors[globeAnchors.Length - 1];
             globeAnchor.positionGlobeFixed = globeAnchor.positionGlobeFixed;
 
+            Cesium3DTileset[] tilesets = go.GetComponentsInChildren<Cesium3DTileset>();
+            tileset = tilesets[tilesets.Length - 1];
+
             CesiumSimplePlanarEllipsoidCurve planarEllipsoidCurve =
                 CesiumSimplePlanarEllipsoidCurve.FromCenteredFixedCoordinates(
                     CesiumEllipsoid.WGS84,
@@ -996,6 +1000,9 @@ namespace CesiumForUnity
 
             AssemblyReloadEvents.afterAssemblyReload += () => { };
             AssemblyReloadEvents.beforeAssemblyReload += () => { };
+
+            Scene scene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
+            scene.GetRootGameObjects();
         }
     }
 }

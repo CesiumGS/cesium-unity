@@ -8,10 +8,12 @@
 #include <CesiumUtility/DoublyLinkedList.h>
 
 #include <DotNet/CesiumForUnity/NativeDownloadHandler.h>
+#include <DotNet/System/Action1.h>
 #include <DotNet/System/Collections/Generic/Dictionary2.h>
 #include <DotNet/System/Collections/Generic/Enumerator0.h>
 #include <DotNet/System/Collections/Generic/KeyValuePair2.h>
 #include <DotNet/System/String.h>
+#include <DotNet/UnityEngine/AsyncOperation.h>
 #include <DotNet/UnityEngine/Networking/UnityWebRequest.h>
 
 #include <atomic>
@@ -108,6 +110,8 @@ private:
   std::shared_ptr<UnityWebRequestAssetAccessor> _pAccessor;
   std::atomic<State> _state;
   std::optional<UnityAssetResponse> _maybeResponse;
+  DotNet::System::Action1<DotNet::UnityEngine::AsyncOperation>
+      _completedCallback;
 };
 
 class UnityWebRequestAssetAccessor
@@ -135,13 +139,13 @@ public:
 
   void notifyRequestDestroyed(UnityAssetRequest& request) noexcept;
 
+  void cancelActiveRequests();
+
 private:
   std::mutex _assetRequestMutex;
   CesiumAsync::HttpHeaders _cesiumRequestHeaders;
   CesiumUtility::DoublyLinkedList<UnityAssetRequest, &UnityAssetRequest::links>
       _activeRequests;
-
-  void cancelActiveRequests();
 };
 
 } // namespace CesiumForUnityNative
