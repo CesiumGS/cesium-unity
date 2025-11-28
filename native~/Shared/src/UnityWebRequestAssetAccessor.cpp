@@ -305,12 +305,22 @@ UnityWebRequestAssetAccessor::request(
             std::move(requestHeaders),
             std::move(promise));
 
+        bool failRequest = false;
+
         {
           std::lock_guard<std::mutex> lock(thiz->_assetRequestMutex);
-          thiz->_activeRequests.insertAtTail(*pAssetRequest);
+          if (thiz->_failAllRequests) {
+            failRequest = true;
+          } else {
+            thiz->_activeRequests.insertAtTail(*pAssetRequest);
+          }
         }
 
-        pAssetRequest->start();
+        if (failRequest) {
+          pAssetRequest->cancel();
+        } else {
+          pAssetRequest->start();
+        }
 
         return future;
       });
