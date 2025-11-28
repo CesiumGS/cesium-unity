@@ -1,6 +1,9 @@
 using UnityEngine;
 using UnityEngine.Rendering;
+
+#if ENABLE_XR_MODULE
 using UnityEngine.XR;
+#endif
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -98,11 +101,13 @@ namespace CesiumForUnity
                 this._pointMaterial.EnableKeyword("HAS_POINT_NORMALS");
             }
 
+#if ENABLE_XR_MODULE
             if (XRSettings.stereoRenderingMode == XRSettings.StereoRenderingMode.SinglePassInstanced ||
                 XRSettings.stereoRenderingMode == XRSettings.StereoRenderingMode.SinglePassMultiview)
             {
                 this._pointMaterial.EnableKeyword("INSTANCING_ON");
             }
+#endif
         }
 
         private float GetGeometricError(CesiumPointCloudShading pointCloudShading)
