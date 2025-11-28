@@ -15,8 +15,10 @@
 #include <DotNet/CesiumForUnity/CesiumCreditSystem.h>
 #include <DotNet/CesiumForUnity/CesiumRuntimeSettings.h>
 #include <DotNet/System/Array1.h>
+#include <DotNet/System/Object.h>
 #include <DotNet/System/String.h>
 #include <DotNet/UnityEngine/Application.h>
+#include <DotNet/UnityEngine/Debug.h>
 #include <DotNet/UnityEngine/GameObject.h>
 #include <DotNet/UnityEngine/SceneManagement/Scene.h>
 #include <DotNet/UnityEngine/SceneManagement/SceneManager.h>
@@ -98,7 +100,6 @@ void shutdownExternals() {
   if (pWebRequestAccessor) {
     pWebRequestAccessor->failAllFutureRequests();
     pWebRequestAccessor->cancelActiveRequests();
-    pWebRequestAccessor.reset();
   }
 #endif
 
@@ -118,12 +119,23 @@ void shutdownExternals() {
       for (int32_t k = 0; k < tilesets.Length(); ++k) {
         Tileset* pTileset = tilesets[k].NativeImplementation().getTileset();
         if (pTileset) {
-          pTileset->waitForAllLoadsToComplete();
+          if (!pTileset->waitForAllLoadsToComplete(1000.0)) {
+            UnityEngine::Debug::LogWarning(System::String(fmt::format(
+                "Waiting up to 30 seconds for '{}' loads to "
+                "complete so that the AppDomain can be unloaded.",
+                tilesets[k].name().ToStlString())));
+            if (!pTileset->waitForAllLoadsToComplete(30000.0)) {
+              UnityEngine::Debug::LogError(System::String(fmt::format(
+                  "Timed out waiting for '{}' loads to complete.",
+                  tilesets[k].name().ToStlString())));
+            }
+          }
         }
       }
     }
   }
 
+  pWebRequestAccessor.reset();
   pAccessor.reset();
   pTaskProcessor.reset();
   asyncSystem.reset();

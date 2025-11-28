@@ -248,7 +248,6 @@ namespace CesiumForUnity
             {
             }
 
-            ;
             request.downloadHandler = new NativeDownloadHandler();
             request.SetRequestHeader("name", "value");
             request.GetResponseHeader("name");
