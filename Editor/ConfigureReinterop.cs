@@ -256,9 +256,11 @@ namespace CesiumForUnity
             System.Exception exception = null;
             var exceptionMessage = exception.Message;
             
+
+#if UNITY_EDITOR
             AssemblyReloadEvents.afterAssemblyReload += () => { };
             AssemblyReloadEvents.beforeAssemblyReload += () => { };
-            
+#endif            
         }
     }
 }
