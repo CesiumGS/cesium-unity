@@ -25,13 +25,13 @@ void start() {
                          .count()) +
       ".json");
 
-//   CesiumForUnityNative::initializeExternals();
+  //   CesiumForUnityNative::initializeExternals();
 
-// #if UNITY_EDITOR
-//   DotNet::UnityEditor::AssemblyReloadEvents::add_beforeAssemblyReload(
-//       DotNet::UnityEditor::AssemblyReloadCallback(
-//           []() { CesiumForUnityNative::shutdownExternals(); }));
-// #endif
+  // #if UNITY_EDITOR
+  //   DotNet::UnityEditor::AssemblyReloadEvents::add_beforeAssemblyReload(
+  //       DotNet::UnityEditor::AssemblyReloadCallback(
+  //           []() { CesiumForUnityNative::shutdownExternals(); }));
+  // #endif
 }
 
 void stop() {}
