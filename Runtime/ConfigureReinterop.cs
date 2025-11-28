@@ -997,8 +997,10 @@ namespace CesiumForUnity
             System.Exception exception = null;
             var message = exception.Message;
 
+#if UNITY_EDITOR
             AssemblyReloadEvents.afterAssemblyReload += () => { };
             AssemblyReloadEvents.beforeAssemblyReload += () => { };
+#endif
 
             Scene scene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
             scene.GetRootGameObjects();
