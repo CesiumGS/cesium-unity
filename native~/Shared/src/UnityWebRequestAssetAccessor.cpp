@@ -145,7 +145,10 @@ UnityAssetRequest::~UnityAssetRequest() {
 }
 
 UnityWebRequestAssetAccessor::UnityWebRequestAssetAccessor()
-    : _cesiumRequestHeaders() {
+    : _assetRequestMutex(),
+      _cesiumRequestHeaders(),
+      _activeRequests(),
+      _failAllRequests(false) {
   std::string version = CesiumForUnityNative::Cesium::version + " " +
                         CesiumForUnityNative::Cesium::commit;
   std::string projectName = replaceInvalidChars(
@@ -162,6 +165,11 @@ UnityWebRequestAssetAccessor::UnityWebRequestAssetAccessor()
   this->_cesiumRequestHeaders.insert({"X-Cesium-Client-Project", projectName});
   this->_cesiumRequestHeaders.insert({"X-Cesium-Client-Engine", engine});
   this->_cesiumRequestHeaders.insert({"X-Cesium-Client-OS", osVersion});
+}
+
+void UnityWebRequestAssetAccessor::failAllFutureRequests() {
+  std::lock_guard<std::mutex> lock(this->_assetRequestMutex);
+  this->_failAllRequests = true;
 }
 
 void UnityWebRequestAssetAccessor::cancelActiveRequests() {
@@ -213,12 +221,22 @@ UnityWebRequestAssetAccessor::get(
         std::move(requestHeaders),
         std::move(promise));
 
+    bool failRequest = false;
+
     {
       std::lock_guard<std::mutex> lock(thiz->_assetRequestMutex);
-      thiz->_activeRequests.insertAtTail(*pAssetRequest);
+      if (thiz->_failAllRequests) {
+        failRequest = true;
+      } else {
+        thiz->_activeRequests.insertAtTail(*pAssetRequest);
+      }
     }
 
-    pAssetRequest->start();
+    if (failRequest) {
+      pAssetRequest->cancel();
+    } else {
+      pAssetRequest->start();
+    }
 
     return future;
   });

@@ -139,6 +139,7 @@ public:
 
   void notifyRequestDestroyed(UnityAssetRequest& request) noexcept;
 
+  void failAllFutureRequests();
   void cancelActiveRequests();
 
 private:
@@ -146,6 +147,7 @@ private:
   CesiumAsync::HttpHeaders _cesiumRequestHeaders;
   CesiumUtility::DoublyLinkedList<UnityAssetRequest, &UnityAssetRequest::links>
       _activeRequests;
+  bool _failAllRequests;
 };
 
 } // namespace CesiumForUnityNative

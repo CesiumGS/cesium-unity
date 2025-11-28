@@ -96,6 +96,7 @@ void initializeExternals() {
 void shutdownExternals() {
 #ifndef __EMSCRIPTEN__
   if (pWebRequestAccessor) {
+    pWebRequestAccessor->failAllFutureRequests();
     pWebRequestAccessor->cancelActiveRequests();
     pWebRequestAccessor.reset();
   }
