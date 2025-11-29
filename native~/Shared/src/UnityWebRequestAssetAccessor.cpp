@@ -132,16 +132,15 @@ const bool UnityAssetRequest::isCanceled() const {
 void UnityAssetRequest::cancel() {
   State expected = State::Pending;
   if (this->_state.compare_exchange_strong(expected, State::Canceled)) {
-    // TODO: Unity probably requires us to call this on the main thread.
-    // this->_webRequest.Abort();
-
-    this->_promise.reject(std::runtime_error("Request was canceled."));
+    this->_webRequest.Abort();
+    this->_promise.reject(std::runtime_error("Request was canceled because the Unity AppDomain is reloading."));
   }
 }
 
 UnityAssetRequest::~UnityAssetRequest() {
   this->cancel();
   this->_pAccessor->notifyRequestDestroyed(*this);
+  this->_webRequest.Dispose();
 }
 
 UnityWebRequestAssetAccessor::UnityWebRequestAssetAccessor()

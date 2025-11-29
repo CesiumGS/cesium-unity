@@ -51,6 +51,7 @@ namespace CesiumForUnity
 
             UnityWebRequest request = UnityWebRequest.Get("url");
             request.Abort();
+            request.Dispose();
 
             var uploadHandler = new UploadHandlerRaw(new byte[0]);
 

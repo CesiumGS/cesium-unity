@@ -227,6 +227,7 @@ namespace CesiumForUnity
             Marshal.FreeCoTaskMem(Marshal.StringToCoTaskMemUTF8("hi"));
 
             UnityWebRequest request = UnityWebRequest.Get("url");
+            request.Dispose();
 
 
             var uploadHandler = new UploadHandlerRaw(new byte[0]);
