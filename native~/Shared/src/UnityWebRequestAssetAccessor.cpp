@@ -133,7 +133,8 @@ void UnityAssetRequest::cancel() {
   State expected = State::Pending;
   if (this->_state.compare_exchange_strong(expected, State::Canceled)) {
     this->_webRequest.Abort();
-    this->_promise.reject(std::runtime_error("Request was canceled because the Unity AppDomain is reloading."));
+    this->_promise.reject(std::runtime_error(
+        "Request was canceled because the Unity AppDomain is reloading."));
   }
 }
 
