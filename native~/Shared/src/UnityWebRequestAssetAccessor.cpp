@@ -132,7 +132,10 @@ const bool UnityAssetRequest::isCanceled() const {
 void UnityAssetRequest::cancel() {
   State expected = State::Pending;
   if (this->_state.compare_exchange_strong(expected, State::Canceled)) {
-    this->_webRequest.Abort();
+    // It would be nice to call this->_webRequest.Abort() here, but the problem
+    // is that we can't be sure we're currently running on the game thread. If
+    // we're not, Unity will throw an exception. If this is AppDomain reload,
+    // the outstanding request is Unity's problem anyway, so just let it be.
     this->_promise.reject(std::runtime_error(
         "Request was canceled because the Unity AppDomain is reloading."));
   }
