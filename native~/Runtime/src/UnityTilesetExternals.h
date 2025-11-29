@@ -26,13 +26,16 @@ class Cesium3DTileset;
 
 namespace CesiumForUnityNative {
 
+void initializeExternals();
+void shutdownExternals();
+
 const std::shared_ptr<CesiumAsync::IAssetAccessor>& getAssetAccessor();
 const std::shared_ptr<CesiumAsync::ITaskProcessor>& getTaskProcessor();
-CesiumAsync::AsyncSystem getAsyncSystem();
+CesiumAsync::AsyncSystem& getAsyncSystem();
 
 // Gets the credit system on the input Cesium3DTileset. If it does not exist,
 // this will create a new default credit system for the tileset.
-const std::shared_ptr<CesiumUtility::CreditSystem>&
+std::shared_ptr<CesiumUtility::CreditSystem>
 getOrCreateCreditSystem(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
 
 Cesium3DTilesSelection::TilesetExternals

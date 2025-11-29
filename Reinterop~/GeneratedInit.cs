@@ -118,6 +118,9 @@ namespace Reinterop
 
                 namespace Reinterop
                 {
+                #if UNITY_EDITOR
+                    [UnityEditor.InitializeOnLoad]
+                #endif
                     internal class ReinteropInitializer
                     {
                         public static void Initialize()

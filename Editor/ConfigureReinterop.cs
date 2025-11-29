@@ -50,6 +50,8 @@ namespace CesiumForUnity
             Debug.Log("log");
 
             UnityWebRequest request = UnityWebRequest.Get("url");
+            request.Abort();
+            request.Dispose();
 
             var uploadHandler = new UploadHandlerRaw(new byte[0]);
 
@@ -254,7 +256,11 @@ namespace CesiumForUnity
 
             System.Exception exception = null;
             var exceptionMessage = exception.Message;
+            
+            AssemblyReloadEvents.afterAssemblyReload += () => { };
+            AssemblyReloadEvents.beforeAssemblyReload += () => { };
         }
     }
 }
+
 
