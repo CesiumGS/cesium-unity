@@ -1,6 +1,6 @@
 # Change Log
 
-## ? - ?
+## v1.20.0 - 2025-12-01
 
 ##### Additions :tada:
 
@@ -12,6 +12,8 @@
 - Fixed incorrect association of the iOS libraries with the iOS platform, which could cause errors when packaging for other platforms.
 - Exceptions thrown by delegates implemented in native code are now correctly propagated back to the managed caller. Previously, this scenario could cause crashes and undefined behavior.
 - Delegate wrappers for native functions now use `SafeHandle` to ensure the native function will not be destroyed by the garbage collector while it is running.
+
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.53.0 to v0.55.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
 
 ## v1.19.0 - 2025-11-03
 
