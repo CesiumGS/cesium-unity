@@ -312,6 +312,46 @@ namespace Reinterop
                     }
                     """
             ));
+
+            // Add a Dispose method to free the native function without waiting for the finalizer.
+            result.CppDeclaration.Elements.Add(new(
+                Content: $"static void (*DisposeDelegate)(void* thiz);",
+                IsPrivate: true));
+            result.CppDefinition.Elements.Add(new(
+                Content: $"void (*{itemType.GetFullyQualifiedName()}::DisposeDelegate)(void* thiz) = nullptr;"));
+            result.CppDeclaration.Elements.Add(new(
+                Content: $"void Dispose();"));
+            result.CppDefinition.Elements.Add(new(
+                Content: 
+                    $$"""
+                    void {{itemType.GetFullyQualifiedName()}}::Dispose() {
+                        DisposeDelegate(this->GetHandle().GetRaw());
+                    }
+                    """
+            ));
+
+            result.Init.Functions.Add(new(
+                CppName: $"{itemType.GetFullyQualifiedName()}::DisposeDelegate",
+                CppTypeSignature: $"void (*)(void*)",
+                CppTypeDefinitionsReferenced: new[] { itemType, objectHandle },
+                CSharpName: csTypeName + "_DisposeDelegateDelegate",
+                CSharpContent:
+                    $$"""
+                    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+                    private unsafe delegate void {{csTypeName}}_DisposeDelegateType(System.IntPtr thiz);
+                    private static unsafe readonly {{csTypeName}}_DisposeDelegateType {{csTypeName}}_DisposeDelegateDelegate = new {{csTypeName}}_DisposeDelegateType({{csTypeName}}_DisposeDelegate);
+                    [AOT.MonoPInvokeCallback(typeof({{csTypeName}}_DisposeDelegateType))]
+                    private static unsafe void {{csTypeName}}_DisposeDelegate(System.IntPtr thiz)
+                    {
+                        var delegateObject = ({{csType.GetFullyQualifiedName()}})ObjectHandleUtility.GetObjectFromHandle(thiz)!;
+                        var nativeFunction = delegateObject.Target as {{csType.Name}}{{genericTypeHash}}NativeFunction;
+                        if (nativeFunction != null)
+                        {
+                            nativeFunction.Dispose();
+                        }
+                    }
+                    """
+            ));
         }
     }
 }

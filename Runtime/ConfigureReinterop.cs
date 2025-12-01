@@ -13,6 +13,7 @@ using UnityEngine.Experimental.Rendering;
 using Unity.Mathematics;
 using UnityEngine.Pool;
 using UnityEngine.UIElements;
+using UnityEngine.SceneManagement;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -176,6 +177,7 @@ namespace CesiumForUnity
             {
                 meshRenderer.material.GetTexture(ids[i]);
             }
+
             meshRenderer.material.shaderKeywords = meshRenderer.material.shaderKeywords;
             meshRenderer.sharedMaterial = meshRenderer.sharedMaterial;
             meshRenderer.material.shader = meshRenderer.material.shader;
@@ -195,8 +197,10 @@ namespace CesiumForUnity
                 string s = Encoding.UTF8.GetString(&b, 0);
             }
 
-            NativeArray<Vector3> nav = new NativeArray<Vector3>(1, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
-            NativeArray<Vector2> nav2 = new NativeArray<Vector2>(1, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+            NativeArray<Vector3> nav =
+                new NativeArray<Vector3>(1, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+            NativeArray<Vector2> nav2 =
+                new NativeArray<Vector2>(1, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
             NativeArray<int> nai = new NativeArray<int>(1, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
 
             unsafe
@@ -223,6 +227,8 @@ namespace CesiumForUnity
             Marshal.FreeCoTaskMem(Marshal.StringToCoTaskMemUTF8("hi"));
 
             UnityWebRequest request = UnityWebRequest.Get("url");
+            request.Dispose();
+
 
             var uploadHandler = new UploadHandlerRaw(new byte[0]);
 
@@ -231,6 +237,7 @@ namespace CesiumForUnity
             {
                 NativeArrayUnsafeUtility.GetUnsafeBufferPointerWithoutChecks(rawBytes);
             }
+
             uploadHandler = new UploadHandlerRaw(rawBytes, true);
             request = new UnityWebRequest("url", "method", new NativeDownloadHandler(), uploadHandler);
 
@@ -238,7 +245,10 @@ namespace CesiumForUnity
             string e = request.error;
             string method = request.method;
             string url = request.url;
-            if (request.result == UnityWebRequest.Result.Success) { };
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+            }
+
             request.downloadHandler = new NativeDownloadHandler();
             request.SetRequestHeader("name", "value");
             request.GetResponseHeader("name");
@@ -248,7 +258,11 @@ namespace CesiumForUnity
                 string key = enumerator.Current.Key;
                 string value = enumerator.Current.Value;
             }
+
             request.downloadHandler.Dispose();
+            request.Abort();
+
+
             long responseCode = request.responseCode;
             UnityWebRequestAsyncOperation op = request.SendWebRequest();
             //Action<AsyncOperation> foo = (ao) => { };
@@ -312,7 +326,7 @@ namespace CesiumForUnity
             overlay.maximumTextureSize = overlay.maximumTextureSize;
             overlay.maximumSimultaneousTileLoads = overlay.maximumSimultaneousTileLoads;
             overlay.subTileCacheBytes = overlay.subTileCacheBytes;
-            
+
             CesiumRasterOverlay baseOverlay = ionOverlay;
             baseOverlay.AddToTileset();
             baseOverlay.RemoveFromTileset();
@@ -322,7 +336,7 @@ namespace CesiumForUnity
             bingMapsRasterOverlay.bingMapsKey = bingMapsRasterOverlay.bingMapsKey;
             bingMapsRasterOverlay.mapStyle = bingMapsRasterOverlay.mapStyle;
             baseOverlay = bingMapsRasterOverlay;
-            
+
             var azureMapsOverlay = go.GetComponent<CesiumAzureMapsRasterOverlay>();
             azureMapsOverlay.key = azureMapsOverlay.key;
             azureMapsOverlay.apiVersion = azureMapsOverlay.apiVersion;
@@ -347,7 +361,7 @@ namespace CesiumForUnity
             List<GoogleMapTilesLayerType> layers = new List<GoogleMapTilesLayerType>();
             if (layers.Count > 0)
                 layers[0] = layers[0];
-            
+
 
             CesiumTileMapServiceRasterOverlay tileMapServiceRasterOverlay =
                 go.GetComponent<CesiumTileMapServiceRasterOverlay>();
@@ -375,8 +389,10 @@ namespace CesiumForUnity
             webMapTileServiceRasterOverlay.style = webMapTileServiceRasterOverlay.style;
             webMapTileServiceRasterOverlay.format = webMapTileServiceRasterOverlay.format;
             webMapTileServiceRasterOverlay.tileMatrixSetID = webMapTileServiceRasterOverlay.tileMatrixSetID;
-            webMapTileServiceRasterOverlay.tileMatrixSetLabelPrefix = webMapTileServiceRasterOverlay.tileMatrixSetLabelPrefix;
-            webMapTileServiceRasterOverlay.specifyTileMatrixSetLabels = webMapTileServiceRasterOverlay.specifyTileMatrixSetLabels;
+            webMapTileServiceRasterOverlay.tileMatrixSetLabelPrefix =
+                webMapTileServiceRasterOverlay.tileMatrixSetLabelPrefix;
+            webMapTileServiceRasterOverlay.specifyTileMatrixSetLabels =
+                webMapTileServiceRasterOverlay.specifyTileMatrixSetLabels;
             webMapTileServiceRasterOverlay.tileMatrixSetLabels = webMapTileServiceRasterOverlay.tileMatrixSetLabels;
             webMapTileServiceRasterOverlay.projection = webMapTileServiceRasterOverlay.projection;
             webMapTileServiceRasterOverlay.specifyTilingScheme = webMapTileServiceRasterOverlay.specifyTilingScheme;
@@ -432,6 +448,7 @@ namespace CesiumForUnity
             {
                 type = MetadataType.Int16;
             }
+
             metadata.GetFeatures(transform, 3);
             CesiumFeature[] features = new CesiumFeature[2];
             var feature = features[0] = new CesiumFeature();
@@ -556,10 +573,10 @@ namespace CesiumForUnity
 
             CesiumRasterOverlayLoadFailureDetails
                 overlayDetails = new CesiumRasterOverlayLoadFailureDetails(
-                                                overlay,
-                                                CesiumRasterOverlayLoadType.Unknown,
-                                                0,
-                                                "");
+                    overlay,
+                    CesiumRasterOverlayLoadType.Unknown,
+                    0,
+                    "");
             CesiumRasterOverlay.BroadcastCesiumRasterOverlayLoadFailure(overlayDetails);
 
             tileset.BroadcastNewGameObjectCreated(new GameObject());
@@ -575,10 +592,14 @@ namespace CesiumForUnity
             CesiumGlobeAnchor globeAnchor = globeAnchors[globeAnchors.Length - 1];
             globeAnchor.positionGlobeFixed = globeAnchor.positionGlobeFixed;
 
-            CesiumSimplePlanarEllipsoidCurve planarEllipsoidCurve = CesiumSimplePlanarEllipsoidCurve.FromCenteredFixedCoordinates(
-                CesiumEllipsoid.WGS84,
-                new double3(0, 0, 0),
-                new double3(0, 0, 0));
+            Cesium3DTileset[] tilesets = go.GetComponentsInChildren<Cesium3DTileset>();
+            tileset = tilesets[tilesets.Length - 1];
+
+            CesiumSimplePlanarEllipsoidCurve planarEllipsoidCurve =
+                CesiumSimplePlanarEllipsoidCurve.FromCenteredFixedCoordinates(
+                    CesiumEllipsoid.WGS84,
+                    new double3(0, 0, 0),
+                    new double3(0, 0, 0));
             CesiumEllipsoid ellipsoid = CesiumEllipsoid.WGS84;
             ellipsoid.radii = new double3(0.0, 0.0, 0.0);
             georeference.ellipsoid = ellipsoid;
@@ -944,7 +965,8 @@ namespace CesiumForUnity
                 camera = manager.additionalCameras[i];
             }
 
-            TaskCompletionSource<CesiumSampleHeightResult> promise = new TaskCompletionSource<CesiumSampleHeightResult>();
+            TaskCompletionSource<CesiumSampleHeightResult> promise =
+                new TaskCompletionSource<CesiumSampleHeightResult>();
             promise.SetException(new Exception("message"));
             CesiumSampleHeightResult result = new CesiumSampleHeightResult();
             result.longitudeLatitudeHeightPositions = null;
@@ -975,6 +997,15 @@ namespace CesiumForUnity
             TestReinterop.ThrowAnException();
             System.Exception exception = null;
             var message = exception.Message;
+
+#if UNITY_EDITOR
+            AssemblyReloadEvents.afterAssemblyReload += () => { };
+            AssemblyReloadEvents.beforeAssemblyReload += () => { };
+#endif
+
+            Scene scene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
+            scene.GetRootGameObjects();
         }
     }
 }
+
