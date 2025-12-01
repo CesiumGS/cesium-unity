@@ -97,6 +97,10 @@ void UnityAssetRequest::start() {
                 thiz->_webRequest.url().ToStlString(),
                 thiz->_webRequest.error().ToStlString())));
           }
+
+          // We no longer need the UnityWebRequest, so dispose it here.
+          thiz->_webRequest.Dispose();
+          thiz->_webRequest = nullptr;
         }
 
         // Clean up this delegate immediately. Otherwise, this function would
@@ -138,13 +142,16 @@ void UnityAssetRequest::cancel() {
     // the outstanding request is Unity's problem anyway, so just let it be.
     this->_promise.reject(std::runtime_error(
         "Request was canceled because the Unity AppDomain is reloading."));
+
+    // We no longer need the UnityWebRequest, so dispose it here.
+    this->_webRequest.Dispose();
+    this->_webRequest = nullptr;
   }
 }
 
 UnityAssetRequest::~UnityAssetRequest() {
   this->cancel();
   this->_pAccessor->notifyRequestDestroyed(*this);
-  this->_webRequest.Dispose();
 }
 
 UnityWebRequestAssetAccessor::UnityWebRequestAssetAccessor()
