@@ -88,12 +88,16 @@
                 }
 
                 ObjectHandle::~ObjectHandle() noexcept {
-                  ObjectHandleUtility::FreeHandle(this->_handle);
+                  if (this->_handle != nullptr) {
+                    ObjectHandleUtility::FreeHandle(this->_handle);
+                  }
                 }
 
                 ObjectHandle& ObjectHandle::operator=(const ObjectHandle& rhs) noexcept {
                   if (&rhs != this) {
-                    ObjectHandleUtility::FreeHandle(this->_handle);
+                    if (this->_handle != nullptr) {
+                      ObjectHandleUtility::FreeHandle(this->_handle);
+                    }
                     this->_handle = ObjectHandleUtility::CopyHandle(rhs._handle);
                   }
 
@@ -102,7 +106,9 @@
 
                 ObjectHandle& ObjectHandle::operator=(ObjectHandle&& rhs) noexcept {
                   if (&rhs != this) {
-                    ObjectHandleUtility::FreeHandle(this->_handle);
+                    if (this->_handle != nullptr) {
+                      ObjectHandleUtility::FreeHandle(this->_handle);
+                    }
                     this->_handle = rhs._handle;
                     rhs._handle = nullptr;
                   }
