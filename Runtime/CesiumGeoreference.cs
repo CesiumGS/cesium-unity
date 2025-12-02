@@ -355,7 +355,14 @@ namespace CesiumForUnity
             }
             set
             {
-                this._ellipsoid = value;
+                // Don't set the _ellipsoid field directly; instead, set the ellipsoidOverride,
+                // so that transforms are updated properly. _ellipsoid will be set through that
+                // process.
+                if (this._ellipsoidOverride != value)
+                {
+                    this._ellipsoidOverride = value;
+                    this.ReloadEllipsoid();
+                }
             }
         }
 
