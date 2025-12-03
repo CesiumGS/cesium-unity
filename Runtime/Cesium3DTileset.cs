@@ -30,7 +30,7 @@ namespace CesiumForUnity
     }
 
     /// <summary>
-    /// A tileset in the 3D Tiles format. <see href="https://github.com/CesiumGS/3d-tiles">3D Tiles</see>
+    /// A tileset in the 3D Tiles format. [3D Tiles](https://github.com/CesiumGS/3d-tiles)
     /// is an open specification for sharing, visualizing, fusing, and interacting with massive
     /// heterogenous 3D geospatial content across desktop, web, and mobile applications. The tileset is
     /// streamed incrementally into Unity based on the current camera view(s).

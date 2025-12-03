@@ -238,8 +238,7 @@ namespace CesiumForUnity
         /// </para>
         /// <para>
         /// For the complete style syntax, see the
-        /// <see href="https://developers.google.com/maps/documentation/tile/style-reference">
-        /// Style Reference.</see>
+        /// [Style Reference](https://developers.google.com/maps/documentation/tile/style-reference).
         /// </para>
         /// </remarks>
         public List<string> styles
