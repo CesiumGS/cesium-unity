@@ -28,7 +28,7 @@ Cesium for Unity runs natively on both Intel x86-64 and Applie Silicon (M1, M2, 
 
 Cesium for Unity supports Android and Meta Quest as a Unity Player platforms. See the [Unity Android](https://docs.unity3d.com/Manual/android.html) documentation for general information about develping Unity applications for the Android platform.
 
-Cesium for Units supports both Intel x86-64 and ARM64 processors. Most Android devices use ARM64, but the x86-64 support is important to support the Magic Leap 2 device. 32-bit Android devices with ARMv7 processors are _not_ supported.
+Cesium for Unity supports both Intel x86-64 and ARM64 processors. Most Android devices use ARM64, but the x86-64 support is important to support the Magic Leap 2 device. 32-bit Android devices with ARMv7 processors are _not_ supported.
 
 The Android Player Settings must be configured as follows:
 
