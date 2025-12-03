@@ -80,7 +80,7 @@ Cesium for Unity's native code is quite portable, so building it for other platf
 The basic steps are as follows:
 
 1. Make sure you're able to build and run Cesium for Unity for the Unity Editor on your development machine by following the [Developer Setup Instructions](#developer-setup). If you're trying to run the Editor on a previously-unsupported platform, you will need to adapt these steps for your platform.
-2. Add the new platform to the list of `SupportedPlatforms` near the top of [Build~\Package.cs](https://github.com/CesiumGS/cesium-unity/blob/main/Build~/Package.cs). This is the name that is used to refer to the platform on the command-line.
+2. Add the new platform to the list of `SupportedPlatforms` near the top of [Build~/Package.cs](https://github.com/CesiumGS/cesium-unity/blob/main/Build~/Package.cs). This is the name that is used to refer to the platform on the command-line.
 3. Add new code to the `Run` method in that same file to launch Unity and build it for the new platform. Copy an existing platform and modify it as appropriate.
 4. Add a new function for your platform to [Editor/BuildCesiumForUnity.cs](https://github.com/CesiumGS/cesium-unity/blob/main/Editor/BuildCesiumForUnity.cs), again copying an existing platform as appropriate.
 5. The hardest part: Modify [Editor/CompileCesiumForUnityNative.cs](https://github.com/CesiumGS/cesium-unity/blob/main/Editor/CompileCesiumForUnityNative.cs) to teach it how to compile the native code for your platform. Again, it's usually easiest to start with a similar platform, copy it, and modify as appropriate.
