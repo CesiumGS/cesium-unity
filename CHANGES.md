@@ -1,5 +1,11 @@
 # Change Log
 
+## v.21.0 - 
+
+##### Fixes :wrench:
+
+- Setting CesiumGeoreference.ellipsoid at runtime will now correctly update the Georeference and associated transforms.
+
 ## v1.20.0 - 2025-12-01
 
 ##### Additions :tada:
