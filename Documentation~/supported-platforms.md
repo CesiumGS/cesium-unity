@@ -54,7 +54,7 @@ Be sure that the `InternetClient` capability is enabled in the Player Settings.
 
 Cesium for Unity supports the Web as a Unity Player platform. Both WebGL and WebGPU are supported. Unity 6 or later is required. See the [Unity Web](https://docs.unity3d.com/Manual/webgl.html) documentation for general information about developing Unity applications for the Web.
 
-You _must_ turn on "Enable Native C/C++ Multithreading" in the Player Settings. If you don't, you will see errors like this at build time:
+You _must_ turn on "Enable Native C/C++ Multithreading" in the [Player Settings](https://docs.unity3d.com/Manual/class-PlayerSettingsWebGL.html). If you don't, you will see errors like this at build time:
 
 > wasm-ld: error: Library/PackageCache/com.cesium.unity@57778A6EB39E/Plugins/WebGL/libCesiumForUnityNative-Runtime.a(CesiumCreditSystem.cpp.o): undefined symbol: __wasm_lpad_context
 wasm-ld: error: Library/PackageCache/com.cesium.unity@57778A6EB39E/Plugins/WebGL/libCesiumForUnityNative-Runtime.a(CesiumCreditSystem.cpp.o): undefined symbol: _Unwind_CallPersonality
