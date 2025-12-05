@@ -43,6 +43,7 @@ public:
       bool value);
   void Start(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
   void Update(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
+  void UpdateInternal(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
   void OnValidate(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
   void OnEnable(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);
   void OnDisable(const DotNet::CesiumForUnity::Cesium3DTileset& tileset);

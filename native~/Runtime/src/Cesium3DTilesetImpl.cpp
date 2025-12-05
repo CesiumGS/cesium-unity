@@ -87,6 +87,21 @@ void Cesium3DTilesetImpl::Start(
 
 void Cesium3DTilesetImpl::Update(
     const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
+#if UNITY_EDITOR
+  // In the Editor, outside Play mode, we arrange for UpdateInternal to be
+  // called directly. See the OnEnable method. The return here avoids
+  // double-calling UpdateInternal.
+  if (UnityEngine::Application::isEditor() &&
+      !UnityEditor::EditorApplication::isPlaying()) {
+    return;
+  }
+#endif
+
+  this->UpdateInternal(tileset);
+}
+
+void Cesium3DTilesetImpl::UpdateInternal(
+    const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
   assert(tileset.enabled());
 
   // If "Suspend Update" is true, return early.
@@ -201,7 +216,7 @@ void Cesium3DTilesetImpl::OnEnable(
   if (UnityEngine::Application::isEditor() &&
       !UnityEditor::EditorApplication::isPlaying()) {
     this->_updateInEditorCallback = UnityEditor::CallbackFunction(
-        [this, tileset]() { this->Update(tileset); });
+        [this, tileset]() { this->UpdateInternal(tileset); });
     UnityEditor::EditorApplication::update(
         UnityEditor::EditorApplication::update() +
         this->_updateInEditorCallback);

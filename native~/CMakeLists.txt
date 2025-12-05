@@ -27,6 +27,12 @@ if (CESIUM_TRACING_ENABLED)
     add_compile_definitions(CESIUM_TRACING_ENABLED=1)
 endif()
 
+# In Debug builds on Windows, the default _ITERATOR_DEBUG_LEVEL=2 makes things _really_ slow,
+# for little benefit. Use a more reasonable debug level.
+if(WIN32)
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /D_ITERATOR_DEBUG_LEVEL=1")
+endif()
+
 # Static libraries are eventually built into shared libraries, so we need
 # position independent code.
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
