@@ -240,6 +240,10 @@ namespace CesiumForUnity
                 {
                     element.AddManipulator(new Clickable(evt => Application.OpenURL(creditComponent.link)));
                 }
+                else
+                {
+                    element.pickingMode = PickingMode.Ignore;
+                }
 
                 visualElements.Add(element);
             }
