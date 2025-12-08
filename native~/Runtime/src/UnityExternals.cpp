@@ -144,7 +144,7 @@ void shutdownExternals() {
   asyncSystem.reset();
 }
 
-} // namespace  
+} // namespace
 
 CESIUMFORUNITYNATIVERUNTIME_API const std::shared_ptr<IAssetAccessor>&
 getAssetAccessor() {
