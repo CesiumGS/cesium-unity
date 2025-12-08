@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Cesium3DTilesSelection/TilesetExternals.h>
+#include <CesiumForUnityNative/UnityExternals.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 
@@ -25,13 +26,6 @@ class Cesium3DTileset;
 }
 
 namespace CesiumForUnityNative {
-
-void initializeExternals();
-void shutdownExternals();
-
-const std::shared_ptr<CesiumAsync::IAssetAccessor>& getAssetAccessor();
-const std::shared_ptr<CesiumAsync::ITaskProcessor>& getTaskProcessor();
-CesiumAsync::AsyncSystem& getAsyncSystem();
 
 // Gets the credit system on the input Cesium3DTileset. If it does not exist,
 // this will create a new default credit system for the tileset.

@@ -1,8 +1,8 @@
 #include "SelectIonTokenWindowImpl.h"
 
 #include "CesiumIonSessionImpl.h"
-#include "UnityExternals.h"
 
+#include <CesiumForUnityNative/UnityExternals.h>
 #include <CesiumIonClient/Response.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>

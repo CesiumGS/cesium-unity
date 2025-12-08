@@ -29,9 +29,10 @@ target_sources(
 
 target_include_directories(
   CesiumForUnityNative-Runtime
+    PUBLIC
+        include
     PRIVATE
         src
-        include
         ../Shared/src
         ${REINTEROP_GENERATED_DIRECTORY}/src
         ${REINTEROP_GENERATED_DIRECTORY}/include
@@ -82,6 +83,8 @@ target_compile_definitions(
   PUBLIC
     TIDY_STATIC
     SWL_VARIANT_NO_CONSTEXPR_EMPLACE
+  PRIVATE
+    CESIUMFORUNITYNATIVERUNTIME_BUILDING
 )
 
 # If we're building for the Unity Editor, set a #define accordingly.

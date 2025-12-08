@@ -1,9 +1,9 @@
 #include "CesiumIonSessionImpl.h"
 
-#include "UnityExternals.h"
 #include "UnityTaskProcessor.h"
 
 #include <CesiumAsync/AsyncSystem.h>
+#include <CesiumForUnityNative/UnityExternals.h>
 #include <CesiumUtility/IntrusivePointer.h>
 #include <CesiumUtility/Uri.h>
 

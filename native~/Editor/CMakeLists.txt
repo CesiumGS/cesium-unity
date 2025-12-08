@@ -34,6 +34,7 @@ target_link_libraries(
     CesiumForUnityNative-Editor
     PUBLIC
         CesiumIonClient
+        CesiumForUnityNative-Runtime
     PRIVATE
         enum-flags
 )
