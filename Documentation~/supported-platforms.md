@@ -10,7 +10,7 @@ The following platforms are currently supported:
 - [iOS](#ios)
 - [Universal Windows Platform](#uwp)
 - [Web](#web)
-- [Others?](#others)
+- [Other platforms](#other-platforms)
 
 ## Windows {#windows}
 
@@ -73,7 +73,7 @@ Your custom web server must also be configured to serve files with the extension
 
 If this header is missing, the web page will display an error explaining that this needs to be done. If this is difficult to arrange, you can avoid the need by enabling the `Decompression Fallback` option in the Player Settings. However, this will increase startup time.
 
-## Others? {#others}
+## Others Platforms {#other-platforms}
 
 Cesium for Unity's native code is quite portable, so building it for other platforms should be possible. However, it is _not_ possible to target other platforms when using the released Cesium for Unity packages. Instead, you will need to build it from the source code on [GitHub](https://github.com/CesiumGS/cesium-unity).
 
