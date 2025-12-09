@@ -156,7 +156,7 @@ if(toolchainFile STREQUAL "Emscripten.cmake")
     set(CESIUM_TARGET_WASM ON)
 endif()
 
-file(GLOB_RECURSE CESIUMFORUNITYNATIVE_SOURCES CONFIGURE_DEPENDS Runtime/src/*.cpp Shared/src/*.cpp ${REINTEROP_GENERATED_DIRECTORY}/src/*.cpp)
+file(GLOB_RECURSE CESIUMFORUNITYNATIVE_SOURCES CONFIGURE_DEPENDS Runtime/src/*.cpp ${REINTEROP_GENERATED_DIRECTORY}/src/*.cpp)
 file(GLOB_RECURSE CESIUMFORUNITYNATIVE_HEADERS CONFIGURE_DEPENDS Runtime/src/*.h ${REINTEROP_GENERATED_DIRECTORY}/src/*.h)
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS" OR CESIUM_TARGET_WASM)
@@ -176,10 +176,8 @@ target_include_directories(
   CesiumForUnityNative
     PUBLIC
         Runtime/include
-        Shared/include
     PRIVATE
         Runtime/src
-        Shared/src
         ${REINTEROP_GENERATED_DIRECTORY}/src
         ${REINTEROP_GENERATED_DIRECTORY}/include
         # tidy-html5 doesn't use target_include_directories, so add it manually

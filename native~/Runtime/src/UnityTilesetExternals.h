@@ -1,7 +1,8 @@
 #pragma once
 
+#include "UnityExternals.h"
+
 #include <Cesium3DTilesSelection/TilesetExternals.h>
-#include <CesiumForUnityNative/UnityExternals.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 

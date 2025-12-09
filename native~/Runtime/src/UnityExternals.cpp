@@ -1,3 +1,5 @@
+#include "UnityExternals.h"
+
 #include "UnityEmscriptenAssetAccessor.h"
 #include "UnityPrepareRendererResources.h"
 #include "UnityTaskProcessor.h"
@@ -8,7 +10,6 @@
 #include <CesiumAsync/CachingAssetAccessor.h>
 #include <CesiumAsync/GunzipAssetAccessor.h>
 #include <CesiumAsync/SqliteCache.h>
-#include <CesiumForUnityNative/UnityExternals.h>
 #include <CesiumUtility/CreditSystem.h>
 
 #include <DotNet/CesiumForUnity/CesiumCreditSystem.h>
