@@ -416,6 +416,8 @@ namespace Build
         {
             string[] filesToCopy = new[]
             {
+                "CesiumForUnity.asmdef",
+                "CesiumForUnity.asmdef.meta",
                 "Editor.meta",
                 "LICENSE",
                 "LICENSE.meta",
