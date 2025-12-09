@@ -227,14 +227,12 @@ target_compile_definitions(
     SWL_VARIANT_NO_CONSTEXPR_EMPLACE
 )
 
-# If we're building for the Unity Editor, set a #define accordingly.
-if (EDITOR)
-  target_compile_definitions(CesiumForUnityNative PRIVATE UNITY_EDITOR)
-endif()
-
 install(FILES $<TARGET_FILE:CesiumForUnityNative> DESTINATION ".")
 
 if (EDITOR)
+  # If we're building for the Unity Editor, set a #define accordingly.
+  target_compile_definitions(CesiumForUnityNative PRIVATE UNITY_EDITOR)
+
   file(GLOB_RECURSE CESIUMFORUNITYNATIVEEDITOR_SOURCES CONFIGURE_DEPENDS src/Editor/*.cpp)
   file(GLOB_RECURSE CESIUMFORUNITYNATIVEEDITOR_HEADERS CONFIGURE_DEPENDS src/Editor/*.h)
 
