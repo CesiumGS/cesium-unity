@@ -43,10 +43,8 @@ namespace Build
 
             Console.WriteLine("**** Output directory " + tempPath);
 
-            string runtimeCscRspPath = Path.Combine(Utility.PackageRoot, "Runtime", "csc.rsp");
-            string runtimeCscRsp = File.ReadAllText(runtimeCscRspPath, Encoding.UTF8);
-            string editorCscRspPath = Path.Combine(Utility.PackageRoot, "Editor", "csc.rsp");
-            string editorCscRsp = File.ReadAllText(editorCscRspPath, Encoding.UTF8);
+            string cscRspPath = Path.Combine(Utility.PackageRoot, "csc.rsp");
+            string cscRsp = File.ReadAllText(cscRspPath, Encoding.UTF8);
 
             try
             {
@@ -55,17 +53,13 @@ namespace Build
                 string outputPackagePath = Path.Combine(tempPath, "package");
                 Directory.CreateDirectory(outputPackagePath);
 
-                Console.WriteLine("**** Modifying the csc.rsp files to write generated files to disk");
-                string generatedRuntimeBasePath = Path.Combine(tempPath, "generated", "Runtime");
-                Directory.CreateDirectory(generatedRuntimeBasePath);
-                string generatedEditorBasePath = Path.Combine(tempPath, "generated", "Editor");
-                Directory.CreateDirectory(generatedEditorBasePath);
+                Console.WriteLine("**** Modifying the csc.rsp file to write generated files to disk");
+                string generatedBasePath = Path.Combine(tempPath, "generated");
+                Directory.CreateDirectory(generatedBasePath);
 
-                File.AppendAllText(runtimeCscRspPath, "-generatedfilesout:\"" + generatedRuntimeBasePath + "\"" + Environment.NewLine, Encoding.UTF8);
-                File.AppendAllText(editorCscRspPath, "-generatedfilesout:\"" + generatedEditorBasePath + "\"" + Environment.NewLine, Encoding.UTF8);
+                File.AppendAllText(cscRspPath, "-generatedfilesout:\"" + generatedBasePath + "\"" + Environment.NewLine, Encoding.UTF8);
 
-                string generatedRuntimePath = Path.Combine(generatedRuntimeBasePath, "Reinterop");
-                string generatedEditorPath = Path.Combine(generatedEditorBasePath, "Reinterop");
+                string generatedPath = Path.Combine(generatedBasePath, "Reinterop");
 
                 string sceneDirectory = Path.Combine(Utility.ProjectRoot, "Assets", "Scenes");
                 Directory.CreateDirectory(sceneDirectory);
@@ -120,14 +114,11 @@ namespace Build
                     else if (OperatingSystem.IsLinux())
                         platformEditorConditional = "UNITY_EDITOR_LINUX";
 
-                    AddGeneratedFiles(platformEditorConditional, generatedRuntimePath, Path.Combine(outputPackagePath, "Runtime", "generated"));
-                    AddGeneratedFiles(platformEditorConditional, generatedEditorPath, Path.Combine(outputPackagePath, "Editor", "generated"));
+                    AddGeneratedFiles(platformEditorConditional, generatedPath, Path.Combine(outputPackagePath, "generated"));
 
                     // Clean the generated code directories.
-                    Directory.Delete(generatedRuntimePath, true);
-                    Directory.CreateDirectory(generatedRuntimePath);
-                    Directory.Delete(generatedEditorPath, true);
-                    Directory.CreateDirectory(generatedEditorPath);
+                    Directory.Delete(generatedPath, true);
+                    Directory.CreateDirectory(generatedPath);
 
                     Console.WriteLine("**** Compiling C++ code for the Editor");
 
@@ -207,11 +198,11 @@ namespace Build
                     });
 
                     Console.WriteLine("**** Adding generated files (for the UWP Player) to the package");
-                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_WSA", generatedRuntimePath, Path.Combine(outputPackagePath, "Runtime", "generated"));
+                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_WSA", generatedPath, Path.Combine(outputPackagePath, "generated"));
 
                     // Clean the generated code directory.
-                    Directory.Delete(generatedRuntimePath, true);
-                    Directory.CreateDirectory(generatedRuntimePath);
+                    Directory.Delete(generatedPath, true);
+                    Directory.CreateDirectory(generatedPath);
                 }
 
                 if (options.Platforms.Contains("Windows"))
@@ -230,11 +221,11 @@ namespace Build
                     });
 
                     Console.WriteLine("**** Adding generated files (for the Windows Player) to the package");
-                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_STANDALONE_WIN", generatedRuntimePath, Path.Combine(outputPackagePath, "Runtime", "generated"));
+                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_STANDALONE_WIN", generatedPath, Path.Combine(outputPackagePath, "generated"));
 
                     // Clean the generated code directory.
-                    Directory.Delete(generatedRuntimePath, true);
-                    Directory.CreateDirectory(generatedRuntimePath);
+                    Directory.Delete(generatedPath, true);
+                    Directory.CreateDirectory(generatedPath);
                 }
 
                 if (options.Platforms.Contains("Android"))
@@ -253,7 +244,7 @@ namespace Build
                     });
 
                     Console.WriteLine("**** Adding generated files (for the Android Player) to the package");
-                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_ANDROID", generatedRuntimePath, Path.Combine(outputPackagePath, "Runtime", "generated"));
+                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_ANDROID", generatedPath, Path.Combine(outputPackagePath, "generated"));
                 }
 
 
@@ -273,7 +264,7 @@ namespace Build
                     });
 
                     Console.WriteLine("**** Adding generated files (for the Web Player) to the package");
-                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_WEBGL", generatedRuntimePath, Path.Combine(outputPackagePath, "Runtime", "generated"));
+                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_WEBGL", generatedPath, Path.Combine(outputPackagePath, "generated"));
                 }
 
                 if (options.Platforms.Contains("macOS"))
@@ -292,11 +283,11 @@ namespace Build
                     });
 
                     Console.WriteLine("**** Adding generated files (for the macOS Player) to the package");
-                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_STANDALONE_OSX", generatedRuntimePath, Path.Combine(outputPackagePath, "Runtime", "generated"));
+                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_STANDALONE_OSX", generatedPath, Path.Combine(outputPackagePath, "generated"));
 
                     // Clean the generated code directory.
-                    Directory.Delete(generatedRuntimePath, true);
-                    Directory.CreateDirectory(generatedRuntimePath);
+                    Directory.Delete(generatedPath, true);
+                    Directory.CreateDirectory(generatedPath);
                 }
 
                 if (options.Platforms.Contains("iOS"))
@@ -315,7 +306,7 @@ namespace Build
                     });
 
                     Console.WriteLine("**** Adding generated files (for the iOS Player) to the package");
-                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_IOS", generatedRuntimePath, Path.Combine(outputPackagePath, "Runtime", "generated"));
+                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_IOS", generatedPath, Path.Combine(outputPackagePath, "generated"));
                 }
 
                 Console.WriteLine("**** Copying the rest of the package");
@@ -335,8 +326,7 @@ namespace Build
             finally
             {
                 // Restore the original contents of the rsp files.
-                File.WriteAllText(runtimeCscRspPath, runtimeCscRsp, Encoding.UTF8);
-                File.WriteAllText(editorCscRspPath, editorCscRsp, Encoding.UTF8);
+                File.WriteAllText(cscRspPath, cscRsp, Encoding.UTF8);
 
                 // Delete the temp directory.
                 Directory.Delete(tempPath, true);
