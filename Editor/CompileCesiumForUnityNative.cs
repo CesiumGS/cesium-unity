@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
 using UnityEditor.Build;
@@ -86,7 +87,7 @@ namespace CesiumForUnity
                 LibraryToBuild[] libraries = GetLibrariesToBuildForPlatform(report.summary, finalLibrariesOnly: true);
                 foreach (LibraryToBuild library in libraries)
                 {
-                    CreatePlaceholders(library, "CesiumForUnityNative-Runtime");
+                    CreatePlaceholders(library, "CesiumForUnityNative");
                 }
             }
             finally
@@ -231,10 +232,10 @@ namespace CesiumForUnity
                 args.Add("-create");
                 foreach (LibraryToBuild library in libraries)
                 {
-                    args.Add(Path.Combine(library.InstallDirectory, "libCesiumForUnityNative-Runtime.dylib"));
+                    args.Add(Path.Combine(library.InstallDirectory, "libCesiumForUnityNative.dylib"));
                 }
                 args.Add("-output");
-                args.Add(Path.GetFullPath(Path.Combine(libraries[0].InstallDirectory, "..", "libCesiumForUnityNative-Runtime.dylib")));
+                args.Add(Path.GetFullPath(Path.Combine(libraries[0].InstallDirectory, "..", "libCesiumForUnityNative.dylib")));
                 Process p = Process.Start("lipo", string.Join(' ', args));
                 p.WaitForExit();
                 if (p.ExitCode != 0)
@@ -744,3 +745,4 @@ namespace CesiumForUnity
         }
     }
 }
+#endif

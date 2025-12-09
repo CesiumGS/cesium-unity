@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System;
 using System.Text.RegularExpressions;
 using Unity.Mathematics;
@@ -392,3 +393,4 @@ namespace CesiumForUnity
         }
     }
 }
+#endif

@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System.Collections.Generic;
 using System;
 using UnityEditor;
@@ -151,3 +152,4 @@ namespace CesiumForUnity
         private List<CesiumIonServer> _servers = new List<CesiumIonServer>();
     }
 }
+#endif

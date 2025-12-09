@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using Reinterop;
 using System;
 using System.Collections.Generic;
@@ -211,4 +212,4 @@ namespace CesiumForUnity
         public partial void AddOverlayToTerrain(int index);
     }
 }
-
+#endif

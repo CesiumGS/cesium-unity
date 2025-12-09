@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using Reinterop;
 using System;
 using UnityEngine;
@@ -445,3 +446,4 @@ namespace CesiumForUnity
     }
 
 }
+#endif

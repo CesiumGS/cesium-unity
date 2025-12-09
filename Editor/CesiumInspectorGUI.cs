@@ -1,4 +1,4 @@
-﻿
+﻿#if UNITY_EDITOR
 using System;
 using Unity.Mathematics;
 using UnityEditor;
@@ -185,3 +185,4 @@ namespace CesiumForUnity
         }
     }
 }
+#endif

@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using Reinterop;
 using System;
 using System.Collections.Generic;
@@ -232,5 +233,4 @@ namespace CesiumForUnity
         }
     }
 }
-
-
+#endif

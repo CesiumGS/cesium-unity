@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using UnityEditor.IMGUI.Controls;
 
 namespace CesiumForUnity
@@ -43,3 +44,4 @@ namespace CesiumForUnity
     }
 
 }
+#endif

@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 namespace CesiumForUnity
 {
     public enum QuickAddItemType
@@ -41,3 +42,4 @@ namespace CesiumForUnity
         }
     }
 }
+#endif
