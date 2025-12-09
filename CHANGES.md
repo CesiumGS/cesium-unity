@@ -5,6 +5,7 @@
 ##### Fixes :wrench:
 
 - Setting CesiumGeoreference.ellipsoid at runtime will now correctly update the Georeference and associated transforms.
+- Fixed a bug that could cause `Cesium3DTileset::Update` to be called more than once per frame in the Editor.
 
 ## v1.20.0 - 2025-12-01
 
