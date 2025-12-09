@@ -14,7 +14,9 @@ jobs:
         uses: actions/checkout@v4
       - name: Check source formatting
         run: |
-          find native~/Runtime native~/Editor native~/Shared \( -iname '*.cpp' -o -iname '*.h' \) -print0 | xargs -0 clang-format --dry-run -Werror
+          cd native~
+          npm ci
+          npm run format -- --dry-run -Werror
   Documentation:
     runs-on: ubuntu-latest
     steps:
@@ -103,11 +105,11 @@ jobs:
         run: |
           $VERSION = (Get-Content -path package.json | ConvertFrom-Json).version
           $COMMIT = $(git rev-parse --short HEAD)
-          ((Get-Content -path native~/Shared/src/Cesium.cpp -Raw) -replace 'Cesium::version = "Development Build"',"Cesium::version = ""$VERSION""") | Set-Content -Path native~/Shared/src/Cesium.cpp
-          ((Get-Content -path native~/Shared/src/Cesium.cpp -Raw) -replace 'Cesium::commit = "Unknown"',"Cesium::commit = ""$COMMIT""") | Set-Content -Path native~/Shared/src/Cesium.cpp
+          ((Get-Content -path native~/src/Runtime/Cesium.cpp -Raw) -replace 'Cesium::version = "Development Build"',"Cesium::version = ""$VERSION""") | Set-Content -Path native~/src/Runtime/Cesium.cpp
+          ((Get-Content -path native~/src/Runtime/Cesium.cpp -Raw) -replace 'Cesium::commit = "Unknown"',"Cesium::commit = ""$COMMIT""") | Set-Content -Path native~/src/Runtime/Cesium.cpp
           # Sanity check that the replacements happened
-          if (-Not ((Get-Content -path native~/Shared/src/Cesium.cpp -Raw) -match "$COMMIT")) { throw "Commit does not exist in file after replacement" }
-          if (-Not ((Get-Content -path native~/Shared/src/Cesium.cpp -Raw) -match "$VERSION")) { throw "Version does not exist in file after replacement" }
+          if (-Not ((Get-Content -path native~/src/Runtime/Cesium.cpp -Raw) -match "$COMMIT")) { throw "Commit does not exist in file after replacement" }
+          if (-Not ((Get-Content -path native~/src/Runtime/Cesium.cpp -Raw) -match "$VERSION")) { throw "Version does not exist in file after replacement" }
       - name: Move cesium-unity Repo Under Empty Project
         run: |
           mkdir -p d:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
@@ -263,11 +265,11 @@ jobs:
         run: |
           export VERSION=$(jq -r ".version" package.json)
           export COMMIT=$(git rev-parse --short HEAD)
-          sed -i '' 's/Cesium::version = "Development Build"/Cesium::version = "'$VERSION'"/g' native~/Shared/src/Cesium.cpp
-          sed -i '' 's/Cesium::commit = "Unknown"/Cesium::commit = "'$COMMIT'"/g' native~/Shared/src/Cesium.cpp
+          sed -i '' 's/Cesium::version = "Development Build"/Cesium::version = "'$VERSION'"/g' native~/src/Runtime/Cesium.cpp
+          sed -i '' 's/Cesium::commit = "Unknown"/Cesium::commit = "'$COMMIT'"/g' native~/src/Runtime/Cesium.cpp
           # Sanity check that the replacements happened
-          grep $VERSION native~/Shared/src/Cesium.cpp
-          grep $COMMIT native~/Shared/src/Cesium.cpp
+          grep $VERSION native~/src/Runtime/Cesium.cpp
+          grep $COMMIT native~/src/Runtime/Cesium.cpp
       - name: Move cesium-unity Repo Under Empty Project
         run: |
           mkdir -p ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
@@ -377,11 +379,11 @@ jobs:
         run: |
           $VERSION = (Get-Content -path package.json | ConvertFrom-Json).version
           $COMMIT = $(git rev-parse --short HEAD)
-          ((Get-Content -path native~/Shared/src/Cesium.cpp -Raw) -replace 'Cesium::version = "Development Build"',"Cesium::version = ""$VERSION""") | Set-Content -Path native~/Shared/src/Cesium.cpp
-          ((Get-Content -path native~/Shared/src/Cesium.cpp -Raw) -replace 'Cesium::commit = "Unknown"',"Cesium::commit = ""$COMMIT""") | Set-Content -Path native~/Shared/src/Cesium.cpp
+          ((Get-Content -path native~/src/Runtime/Cesium.cpp -Raw) -replace 'Cesium::version = "Development Build"',"Cesium::version = ""$VERSION""") | Set-Content -Path native~/src/Runtime/Cesium.cpp
+          ((Get-Content -path native~/src/Runtime/Cesium.cpp -Raw) -replace 'Cesium::commit = "Unknown"',"Cesium::commit = ""$COMMIT""") | Set-Content -Path native~/src/Runtime/Cesium.cpp
           # Sanity check that the replacements happened
-          if (-Not ((Get-Content -path native~/Shared/src/Cesium.cpp -Raw) -match "$COMMIT")) { throw "Commit does not exist in file after replacement" }
-          if (-Not ((Get-Content -path native~/Shared/src/Cesium.cpp -Raw) -match "$VERSION")) { throw "Version does not exist in file after replacement" }
+          if (-Not ((Get-Content -path native~/src/Runtime/Cesium.cpp -Raw) -match "$COMMIT")) { throw "Commit does not exist in file after replacement" }
+          if (-Not ((Get-Content -path native~/src/Runtime/Cesium.cpp -Raw) -match "$VERSION")) { throw "Version does not exist in file after replacement" }
       - name: Move cesium-unity Repo Under Empty Project
         run: |
           mkdir -p d:\cesium\CesiumForUnityBuildProject\Packages\com.cesium.unity
