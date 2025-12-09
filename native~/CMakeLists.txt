@@ -156,8 +156,8 @@ if(toolchainFile STREQUAL "Emscripten.cmake")
     set(CESIUM_TARGET_WASM ON)
 endif()
 
-file(GLOB_RECURSE CESIUMFORUNITYNATIVE_SOURCES CONFIGURE_DEPENDS Runtime/src/*.cpp ${REINTEROP_GENERATED_DIRECTORY}/src/*.cpp)
-file(GLOB_RECURSE CESIUMFORUNITYNATIVE_HEADERS CONFIGURE_DEPENDS Runtime/src/*.h ${REINTEROP_GENERATED_DIRECTORY}/src/*.h)
+file(GLOB_RECURSE CESIUMFORUNITYNATIVE_SOURCES CONFIGURE_DEPENDS src/Runtime/*.cpp ${REINTEROP_GENERATED_DIRECTORY}/src/*.cpp)
+file(GLOB_RECURSE CESIUMFORUNITYNATIVE_HEADERS CONFIGURE_DEPENDS src/Runtime/*.h ${REINTEROP_GENERATED_DIRECTORY}/src/*.h)
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS" OR CESIUM_TARGET_WASM)
     add_library(CesiumForUnityNative STATIC)
@@ -174,10 +174,8 @@ target_sources(
 
 target_include_directories(
   CesiumForUnityNative
-    PUBLIC
-        Runtime/include
     PRIVATE
-        Runtime/src
+        src/Runtime
         ${REINTEROP_GENERATED_DIRECTORY}/src
         ${REINTEROP_GENERATED_DIRECTORY}/include
         # tidy-html5 doesn't use target_include_directories, so add it manually
@@ -237,7 +235,21 @@ endif()
 install(FILES $<TARGET_FILE:CesiumForUnityNative> DESTINATION ".")
 
 if (EDITOR)
-  add_subdirectory(Editor)
+  file(GLOB_RECURSE CESIUMFORUNITYNATIVEEDITOR_SOURCES CONFIGURE_DEPENDS src/Editor/*.cpp)
+  file(GLOB_RECURSE CESIUMFORUNITYNATIVEEDITOR_HEADERS CONFIGURE_DEPENDS src/Editor/*.h)
+
+  target_sources(
+      CesiumForUnityNative
+      PRIVATE
+          ${CESIUMFORUNITYNATIVEEDITOR_SOURCES}
+          ${CESIUMFORUNITYNATIVEEDITOR_HEADERS}
+  )
+
+  target_include_directories(
+      CesiumForUnityNative
+      PRIVATE
+          src/Editor
+  )
 endif()
 
 set(LIB_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR})
