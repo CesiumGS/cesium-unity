@@ -1,5 +1,5 @@
 {
-    "name": "CesiumRuntime",
+    "name": "CesiumForUnity",
     "rootNamespace": "",
     "references": [
         "Unity.InputSystem",

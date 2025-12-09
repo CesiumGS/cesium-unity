@@ -146,23 +146,21 @@ void shutdownExternals() {
 
 } // namespace
 
-CESIUMFORUNITYNATIVERUNTIME_API const std::shared_ptr<IAssetAccessor>&
-getAssetAccessor() {
+const std::shared_ptr<IAssetAccessor>& getAssetAccessor() {
   if (pAccessor == nullptr) {
     initializeExternals();
   }
   return pAccessor;
 }
 
-CESIUMFORUNITYNATIVERUNTIME_API const std::shared_ptr<ITaskProcessor>&
-getTaskProcessor() {
+const std::shared_ptr<ITaskProcessor>& getTaskProcessor() {
   if (pTaskProcessor == nullptr) {
     initializeExternals();
   }
   return pTaskProcessor;
 }
 
-CESIUMFORUNITYNATIVERUNTIME_API AsyncSystem& getAsyncSystem() {
+AsyncSystem& getAsyncSystem() {
   if (!asyncSystem) {
     initializeExternals();
   }

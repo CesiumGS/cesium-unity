@@ -13,38 +13,8 @@ using UnityEngine.Networking;
 namespace CesiumForUnity
 {
     [Reinterop]
-    internal partial class ConfigureReinterop
+    internal partial class ConfigureReinteropEditor
     {
-        // The output path for generated C++ files.
-        // If this is relative, it is relative to the this file.
-#if UNITY_EDITOR
-        public const string CppOutputPath = "../native~/Editor/generated-Editor";
-#elif UNITY_ANDROID
-        public const string CppOutputPath = "../native~/Editor/generated-Android";
-#elif UNITY_IOS
-        public const string CppOutputPath = "../native~/Editor/generated-iOS";
-#elif UNITY_WSA
-        public const string CppOutputPath = "../native~/Runtime/generated-WSA";
-#elif UNITY_64
-        public const string CppOutputPath = "../native~/Editor/generated-Standalone";
-#elif UNITY_WEBGL
-        public const string CppOutputPath = "../native~/Editor/generated-WebGL";
-#else
-        public const string CppOutputPath = "../native~/Editor/generated-Unknown";
-#endif
-
-        // The namespace with which to prefix all C# namespaces. For example, if this
-        // property is set to "DotNet", then anything in the "System" namespace in C#
-        // will be found in the "DotNet::System" namespace in C++.
-        public const string BaseNamespace = "DotNet";
-
-        // The name of the DLL or SO containing the C++ code.
-        public const string NativeLibraryName = "CesiumForUnityNative-Editor";
-
-        // Comma-separated types to treat as non-blittable, even if their fields would
-        // otherwise cause Reinterop to treat them as blittable.
-        public const string NonBlittableTypes = "Unity.Collections.LowLevel.Unsafe.AtomicSafetyHandle,Unity.Collections.NativeArray,UnityEngine.MeshData,UnityEngine.MeshDataArray";
-
         public void ExposeToCPP()
         {
             Debug.Log("log");

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <Cesium3DTilesSelection/TilesetExternals.h>
-#include <CesiumForUnityNative/Library.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 
@@ -15,12 +14,8 @@ class ITaskProcessor;
 
 namespace CesiumForUnityNative {
 
-CESIUMFORUNITYNATIVERUNTIME_API const
-    std::shared_ptr<CesiumAsync::IAssetAccessor>&
-    getAssetAccessor();
-CESIUMFORUNITYNATIVERUNTIME_API const
-    std::shared_ptr<CesiumAsync::ITaskProcessor>&
-    getTaskProcessor();
-CESIUMFORUNITYNATIVERUNTIME_API CesiumAsync::AsyncSystem& getAsyncSystem();
+const std::shared_ptr<CesiumAsync::IAssetAccessor>& getAssetAccessor();
+const std::shared_ptr<CesiumAsync::ITaskProcessor>& getTaskProcessor();
+CesiumAsync::AsyncSystem& getAsyncSystem();
 
 } // namespace CesiumForUnityNative

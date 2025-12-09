@@ -27,21 +27,21 @@ namespace CesiumForUnity
         // The output path for generated C++ files.
         // If this is relative, it is relative to the this file.
 #if UNITY_EDITOR
-        public const string CppOutputPath = "../native~/Runtime/generated-Editor";
+        public const string CppOutputPath = "../native~/generated-Editor";
 #elif UNITY_ANDROID
-        public const string CppOutputPath = "../native~/Runtime/generated-Android";
+        public const string CppOutputPath = "../native~/generated-Android";
 #elif UNITY_IOS
-        public const string CppOutputPath = "../native~/Runtime/generated-iOS";
+        public const string CppOutputPath = "../native~/generated-iOS";
 #elif UNITY_WSA
-        public const string CppOutputPath = "../native~/Runtime/generated-WSA";
+        public const string CppOutputPath = "../native~/generated-WSA";
 #elif UNITY_64
-        public const string CppOutputPath = "../native~/Runtime/generated-Standalone";
+        public const string CppOutputPath = "../native~/generated-Standalone";
 #elif UNITY_WEBGL
-        public const string CppOutputPath = "../native~/Runtime/generated-WebGL";
+        public const string CppOutputPath = "../native~/generated-WebGL";
 #else
-        public const string CppOutputPath = "../native~/Runtime/generated-Unknown";
+        public const string CppOutputPath = "../native~/generated-Unknown";
 #endif
-
+//
         // The namespace with which to prefix all C# namespaces. For example, if this
         // property is set to "DotNet", then anything in the "System" namespace in C#
         // will be found in the "DotNet::System" namespace in C++.
@@ -51,7 +51,7 @@ namespace CesiumForUnity
 #if (UNITY_IOS || UNITY_WEBGL) && !UNITY_EDITOR
         public const string NativeLibraryName = "__Internal";
 #else
-        public const string NativeLibraryName = "CesiumForUnityNative-Runtime";
+        public const string NativeLibraryName = "CesiumForUnityNative";
 #endif
         // Comma-separated types to treat as non-blittable, even if their fields would
         // otherwise cause Reinterop to treat them as blittable.
