@@ -53,6 +53,9 @@ namespace Build
                 string outputPackagePath = Path.Combine(tempPath, "package");
                 Directory.CreateDirectory(outputPackagePath);
 
+                string outputGeneratedPath = Path.Combine(outputPackagePath, "Source", "generated");
+                Directory.CreateDirectory(outputGeneratedPath);
+
                 Console.WriteLine("**** Modifying the csc.rsp file to write generated files to disk");
                 string generatedBasePath = Path.Combine(tempPath, "generated~");
                 Directory.CreateDirectory(generatedBasePath);
@@ -115,7 +118,7 @@ namespace Build
                     else if (OperatingSystem.IsLinux())
                         platformEditorConditional = "UNITY_EDITOR_LINUX";
 
-                    AddGeneratedFiles(platformEditorConditional, generatedPath, Path.Combine(outputPackagePath, "generated"));
+                    AddGeneratedFiles(platformEditorConditional, generatedPath, outputGeneratedPath);
 
                     // Clean the generated code directories.
                     Directory.Delete(generatedPath, true);
@@ -199,7 +202,7 @@ namespace Build
                     });
 
                     Console.WriteLine("**** Adding generated files (for the UWP Player) to the package");
-                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_WSA", generatedPath, Path.Combine(outputPackagePath, "generated"));
+                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_WSA", generatedPath, outputGeneratedPath);
 
                     // Clean the generated code directory.
                     Directory.Delete(generatedPath, true);
@@ -222,7 +225,7 @@ namespace Build
                     });
 
                     Console.WriteLine("**** Adding generated files (for the Windows Player) to the package");
-                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_STANDALONE_WIN", generatedPath, Path.Combine(outputPackagePath, "generated"));
+                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_STANDALONE_WIN", generatedPath, outputGeneratedPath);
 
                     // Clean the generated code directory.
                     Directory.Delete(generatedPath, true);
@@ -245,7 +248,7 @@ namespace Build
                     });
 
                     Console.WriteLine("**** Adding generated files (for the Android Player) to the package");
-                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_ANDROID", generatedPath, Path.Combine(outputPackagePath, "generated"));
+                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_ANDROID", generatedPath, outputGeneratedPath);
 
                     // Clean the generated code directory.
                     Directory.Delete(generatedPath, true);
@@ -269,7 +272,7 @@ namespace Build
                     });
 
                     Console.WriteLine("**** Adding generated files (for the Web Player) to the package");
-                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_WEBGL", generatedPath, Path.Combine(outputPackagePath, "generated"));
+                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_WEBGL", generatedPath, outputGeneratedPath);
 
                     // Clean the generated code directory.
                     Directory.Delete(generatedPath, true);
@@ -292,7 +295,7 @@ namespace Build
                     });
 
                     Console.WriteLine("**** Adding generated files (for the macOS Player) to the package");
-                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_STANDALONE_OSX", generatedPath, Path.Combine(outputPackagePath, "generated"));
+                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_STANDALONE_OSX", generatedPath, outputGeneratedPath);
 
                     // Clean the generated code directory.
                     Directory.Delete(generatedPath, true);
@@ -315,7 +318,7 @@ namespace Build
                     });
 
                     Console.WriteLine("**** Adding generated files (for the iOS Player) to the package");
-                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_IOS", generatedPath, Path.Combine(outputPackagePath, "generated"));
+                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_IOS", generatedPath, outputGeneratedPath);
 
                     // Clean the generated code directory.
                     Directory.Delete(generatedPath, true);
