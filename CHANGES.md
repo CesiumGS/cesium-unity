@@ -41,6 +41,7 @@ This release updates [cesium-native](https://github.com/CesiumGS/cesium-native) 
 ##### Additions :tada:
 
 - Added option to ignore the `KHR_material_unlit` extension to force default lighting on tilesets. 
+- Added support for VCTR Polygon and VCTR Point
 
 ##### Fixes :wrench:
 
