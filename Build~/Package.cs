@@ -60,6 +60,7 @@ namespace Build
                 File.AppendAllText(cscRspPath, "-generatedfilesout:\"" + generatedBasePath + "\"" + Environment.NewLine, Encoding.UTF8);
 
                 string generatedPath = Path.Combine(generatedBasePath, "Reinterop");
+                Environment.SetEnvironmentVariable("CESIUM_GENERATED_CODE_PATH_DELETE_BEFORE_BUILD", generatedPath);
 
                 string sceneDirectory = Path.Combine(Utility.ProjectRoot, "Assets", "Scenes");
                 Directory.CreateDirectory(sceneDirectory);

@@ -79,6 +79,13 @@ namespace CesiumForUnity
         /// <param name="report"></param>
         public void OnPreprocessBuild(BuildReport report)
         {
+            // Clear the generated code (if we're told where it is) in case there's something hanging around from a previous build.
+            string? deletePath = Environment.GetEnvironmentVariable("CESIUM_GENERATED_CODE_PATH_DELETE_BEFORE_BUILD");
+            if (!String.IsNullOrEmpty(deletePath))
+            {
+                Directory.Delete(deletePath, true);
+            }
+
             importsInProgress.Clear();
 
             AssetDatabase.StartAssetEditing();
