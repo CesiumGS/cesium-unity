@@ -54,7 +54,7 @@ namespace Build
                 Directory.CreateDirectory(outputPackagePath);
 
                 Console.WriteLine("**** Modifying the csc.rsp file to write generated files to disk");
-                string generatedBasePath = Path.Combine(tempPath, "generated");
+                string generatedBasePath = Path.Combine(tempPath, "generated~");
                 Directory.CreateDirectory(generatedBasePath);
 
                 File.AppendAllText(cscRspPath, "-generatedfilesout:\"" + generatedBasePath + "\"" + Environment.NewLine, Encoding.UTF8);
@@ -245,6 +245,10 @@ namespace Build
 
                     Console.WriteLine("**** Adding generated files (for the Android Player) to the package");
                     AddGeneratedFiles("!UNITY_EDITOR && UNITY_ANDROID", generatedPath, Path.Combine(outputPackagePath, "generated"));
+
+                    // Clean the generated code directory.
+                    Directory.Delete(generatedPath, true);
+                    Directory.CreateDirectory(generatedPath);
                 }
 
 
@@ -265,6 +269,10 @@ namespace Build
 
                     Console.WriteLine("**** Adding generated files (for the Web Player) to the package");
                     AddGeneratedFiles("!UNITY_EDITOR && UNITY_WEBGL", generatedPath, Path.Combine(outputPackagePath, "generated"));
+
+                    // Clean the generated code directory.
+                    Directory.Delete(generatedPath, true);
+                    Directory.CreateDirectory(generatedPath);
                 }
 
                 if (options.Platforms.Contains("macOS"))
@@ -307,6 +315,10 @@ namespace Build
 
                     Console.WriteLine("**** Adding generated files (for the iOS Player) to the package");
                     AddGeneratedFiles("!UNITY_EDITOR && UNITY_IOS", generatedPath, Path.Combine(outputPackagePath, "generated"));
+
+                    // Clean the generated code directory.
+                    Directory.Delete(generatedPath, true);
+                    Directory.CreateDirectory(generatedPath);
                 }
 
                 Console.WriteLine("**** Copying the rest of the package");
@@ -460,14 +472,16 @@ namespace Build
                 "Editor/CompileCesiumForUnityNative.cs.meta",
                 "Editor/BuildCesiumForUnity.cs",
                 "Editor/BuildCesiumForUnity.cs.meta",
-                "Editor/ConfigureReinterop.cs",
-                "Editor/ConfigureReinterop.cs.meta",
+                "Editor/ConfigureReinteropEditor.cs",
+                "Editor/ConfigureReinteropEditor.cs.meta",
                 "Editor/csc.rsp",
                 "Editor/csc.rsp.meta",
                 "Runtime/ConfigureReinterop.cs",
                 "Runtime/ConfigureReinterop.cs.meta",
                 "Runtime/csc.rsp",
-                "Runtime/csc.rsp.meta"
+                "Runtime/csc.rsp.meta",
+                "csc.rsp",
+                "csc.rsp.meta"
             };
 
             foreach (string fileToDelete in filesToDelete)
