@@ -321,7 +321,7 @@ namespace CesiumForUnity
         public static LibraryToBuild GetLibraryToBuild(PlatformToBuild platform, LibraryCpuArchitecture? cpu = null)
         {
             string sourceFilename = GetSourceFilePathName();
-            string packagePath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(sourceFilename), $".."));
+            string packagePath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(sourceFilename), "..", ".."));
             string nativeDirectory = Path.Combine(packagePath, "native~");
 
             string platformDirectoryName = GetDirectoryNameForPlatform(platform);
