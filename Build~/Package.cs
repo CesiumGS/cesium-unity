@@ -43,7 +43,7 @@ namespace Build
 
             Console.WriteLine("**** Output directory " + tempPath);
 
-            string cscRspPath = Path.Combine(Utility.PackageRoot, "csc.rsp");
+            string cscRspPath = Path.Combine(Utility.PackageRoot, "Sources", "csc.rsp");
             string cscRsp = File.ReadAllText(cscRspPath, Encoding.UTF8);
 
             try
