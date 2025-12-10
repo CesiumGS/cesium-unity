@@ -466,20 +466,16 @@ namespace Build
             // Remove build-related sources files that don't make sense in the published package
             string[] filesToDelete = new[]
             {
-                "Editor/CompileCesiumForUnityNative.cs",
-                "Editor/CompileCesiumForUnityNative.cs.meta",
-                "Editor/BuildCesiumForUnity.cs",
-                "Editor/BuildCesiumForUnity.cs.meta",
-                "Editor/ConfigureReinteropEditor.cs",
-                "Editor/ConfigureReinteropEditor.cs.meta",
-                "Editor/csc.rsp",
-                "Editor/csc.rsp.meta",
-                "Runtime/ConfigureReinterop.cs",
-                "Runtime/ConfigureReinterop.cs.meta",
-                "Runtime/csc.rsp",
-                "Runtime/csc.rsp.meta",
-                "csc.rsp",
-                "csc.rsp.meta"
+                "Source/Editor/CompileCesiumForUnityNative.cs",
+                "Source/Editor/CompileCesiumForUnityNative.cs.meta",
+                "Source/Editor/BuildCesiumForUnity.cs",
+                "Source/Editor/BuildCesiumForUnity.cs.meta",
+                "Source/Editor/ConfigureReinteropEditor.cs",
+                "Source/Editor/ConfigureReinteropEditor.cs.meta",
+                "Source/Runtime/ConfigureReinterop.cs",
+                "Source/Runtime/ConfigureReinterop.cs.meta",
+                "Source/csc.rsp",
+                "Source/csc.rsp.meta"
             };
 
             foreach (string fileToDelete in filesToDelete)
