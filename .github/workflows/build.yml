@@ -483,36 +483,21 @@ jobs:
           cp -r ../windows/* .
           
           # Remove the generated C# files
-          for file in $(find package/Runtime/generated -name '*.cs');
-          do
-            rm $file
-          done;
-          for file in $(find package/Editor/generated -name '*.cs');
+          for file in $(find package/generated -name '*.cs');
           do
             rm $file
           done;
           
           # Merge the generated files by concatentation
           cd ../macos
-          for file in $(find package/Runtime/generated -name '*.cs');
-          do
-            mkdir -p $(dirname "../merged/$file")
-            cp "$file" "../merged/$file"
-          done;
-          for file in $(find package/Editor/generated -name '*.cs');
+          for file in $(find package/generated -name '*.cs');
           do
             mkdir -p $(dirname "../merged/$file")
             cp "$file" "../merged/$file"
           done;
 
           cd ../emscripten
-          for file in $(find package/Runtime/generated -name '*.cs');
-          do
-            echo Merging $file
-            mkdir -p $(dirname "../merged/$file")
-            cat "$file" >> "../merged/$file"
-          done;
-          for file in $(find package/Editor/generated -name '*.cs');
+          for file in $(find package/generated -name '*.cs');
           do
             echo Merging $file
             mkdir -p $(dirname "../merged/$file")
@@ -520,13 +505,7 @@ jobs:
           done;
 
           cd ../windows
-          for file in $(find package/Runtime/generated -name '*.cs');
-          do
-            echo Merging $file
-            mkdir -p $(dirname "../merged/$file")
-            cat "$file" >> "../merged/$file"
-          done;
-          for file in $(find package/Editor/generated -name '*.cs');
+          for file in $(find package/generated -name '*.cs');
           do
             echo Merging $file
             mkdir -p $(dirname "../merged/$file")
