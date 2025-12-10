@@ -428,9 +428,6 @@ namespace Build
         {
             string[] filesToCopy = new[]
             {
-                "CesiumForUnity.asmdef",
-                "CesiumForUnity.asmdef.meta",
-                "Editor.meta",
                 "LICENSE",
                 "LICENSE.meta",
                 "package.json",
@@ -440,8 +437,9 @@ namespace Build
                 "README.md.meta",
                 "CHANGES.md",
                 "CHANGES.md.meta",
-                "Runtime.meta",
+                "Source.meta",
                 "Tests.meta",
+                "EditorTests.meta",
                 "ThirdParty.json",
                 "ThirdParty.json.meta"
             };
@@ -453,9 +451,9 @@ namespace Build
 
             string[] pathsToCopy = new[]
             {
-                "Editor",
-                "Runtime",
+                "Source",
                 "Tests",
+                "EditorTests",
                 "Documentation~",
                 "Plugins"
             };
