@@ -1,0 +1,32 @@
+{
+    "name": "CesiumForUnity",
+    "rootNamespace": "",
+    "references": [
+        "Unity.InputSystem",
+        "Unity.Mathematics",
+        "Unity.Splines"
+    ],
+    "includePlatforms": [
+        "Android",
+        "Editor",
+        "iOS",
+        "macOSStandalone",
+        "WSA",
+        "WindowsStandalone64",
+        "WebGL"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.splines",
+            "expression": "1.0.0",
+            "define": "SUPPORTS_SPLINES"
+        }
+    ],
+    "noEngineReferences": false
+}
