@@ -436,6 +436,7 @@ namespace Build
                 "LICENSE.meta",
                 "package.json",
                 "package.json.meta",
+                "Editor.meta",
                 "Plugins.meta",
                 "README.md",
                 "README.md.meta",
