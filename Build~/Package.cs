@@ -450,7 +450,11 @@ namespace Build
 
             foreach (string file in filesToCopy)
             {
-                File.Copy(Path.Combine(sourcePath, file), Path.Combine(targetPath, file));
+                string completeSource = Path.Combine(sourcePath, file);
+                if (File.Exists(completeSource))
+                {
+                    File.Copy(completeSource, Path.Combine(targetPath, file));
+                }
             }
 
             string[] pathsToCopy = new[]
@@ -465,7 +469,11 @@ namespace Build
 
             foreach (string pathToCopy in pathsToCopy)
             {
-                CopyDirectory(Path.Combine(sourcePath, pathToCopy), Path.Combine(targetPath, pathToCopy));
+                string completeSource = Path.Combine(sourcePath, pathToCopy);
+                if (Directory.Exists(completeSource))
+                {
+                    CopyDirectory(completeSource, Path.Combine(targetPath, pathToCopy));
+                }
             }
 
             // Remove build-related sources files that don't make sense in the published package
