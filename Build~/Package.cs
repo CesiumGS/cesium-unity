@@ -459,7 +459,8 @@ namespace Build
                 "Tests",
                 "EditorTests",
                 "Documentation~",
-                "Plugins"
+                "Plugins",
+                "Editor"
             };
 
             foreach (string pathToCopy in pathsToCopy)
