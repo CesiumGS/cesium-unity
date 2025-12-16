@@ -4,7 +4,7 @@
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "CesiumRuntime",
+        "CesiumForUnity",
         "Unity.Mathematics",
         "Unity.Splines"
     ],
