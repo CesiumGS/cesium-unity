@@ -41,7 +41,7 @@ namespace CesiumForUnity
 #else
         public const string CppOutputPath = "../../native~/generated-Unknown";
 #endif
-//
+
         // The namespace with which to prefix all C# namespaces. For example, if this
         // property is set to "DotNet", then anything in the "System" namespace in C#
         // will be found in the "DotNet::System" namespace in C++.
