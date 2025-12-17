@@ -40,6 +40,8 @@ public:
   CesiumIonSessionImpl(const DotNet::CesiumForUnity::CesiumIonSession& session);
   ~CesiumIonSessionImpl();
 
+  bool IsBusy(const DotNet::CesiumForUnity::CesiumIonSession& session);
+
   bool IsConnected(const DotNet::CesiumForUnity::CesiumIonSession& session);
   bool IsConnecting(const DotNet::CesiumForUnity::CesiumIonSession& session);
   bool IsResuming(const DotNet::CesiumForUnity::CesiumIonSession& session);
@@ -161,12 +163,6 @@ private:
   bool _loadAssetsQueued;
   bool _loadTokensQueued;
   bool _loadDefaultsQueued;
-
-  std::function<void()> broadcastConnectionUpdate;
-  std::function<void()> broadcastAssetsUpdate;
-  std::function<void()> broadcastProfileUpdate;
-  std::function<void()> broadcastTokensUpdate;
-  std::function<void()> broadcastDefaultsUpdate;
 
   std::string _authorizeUrl;
   std::string _redirectUrl;

@@ -231,6 +231,7 @@ void Cesium3DTilesetImpl::OnDisable(
     UnityEditor::EditorApplication::update(
         UnityEditor::EditorApplication::update() -
         this->_updateInEditorCallback);
+    this->_updateInEditorCallback.Dispose();
     this->_updateInEditorCallback = nullptr;
   }
 #endif

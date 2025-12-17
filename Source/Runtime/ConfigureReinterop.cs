@@ -1001,6 +1001,7 @@ namespace CesiumForUnity
 #if UNITY_EDITOR
             AssemblyReloadEvents.afterAssemblyReload += () => { };
             AssemblyReloadEvents.beforeAssemblyReload += () => { };
+            AppDomain.CurrentDomain.DomainUnload += (sender, e) => { };
 #endif
 
             Scene scene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);

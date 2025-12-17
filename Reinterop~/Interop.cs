@@ -258,9 +258,9 @@ namespace Reinterop
                         {
                             {{implementation.Replace(Environment.NewLine, Environment.NewLine + "        ")}}
                         }
-                        catch (Exception e)
+                        catch (Exception reinteropManagedException)
                         {
-                            *reinteropException = Reinterop.ObjectHandleUtility.CreateHandle(e);
+                            *reinteropException = Reinterop.ObjectHandleUtility.CreateHandle(reinteropManagedException);
                             {{returnDefaultInstance}}
                         }
                     }
@@ -390,9 +390,9 @@ namespace Reinterop
                         {
                             {{implementation.Replace(Environment.NewLine, Environment.NewLine + "        ")}}
                         }
-                        catch (Exception e)
+                        catch (Exception reinteropManagedException)
                         {
-                            *reinteropException = Reinterop.ObjectHandleUtility.CreateHandle(e);
+                            *reinteropException = Reinterop.ObjectHandleUtility.CreateHandle(reinteropManagedException);
                             {{returnDefaultInstance}}
                         }
                     }
