@@ -1004,6 +1004,8 @@ namespace CesiumForUnity
             AppDomain.CurrentDomain.DomainUnload += (sender, e) => { };
 #endif
 
+            int appDomainId = AppDomain.CurrentDomain.Id;
+
             Scene scene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
             scene.GetRootGameObjects();
         }

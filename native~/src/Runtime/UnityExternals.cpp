@@ -102,11 +102,11 @@ void initializeExternals() {
   DotNet::UnityEditor::AssemblyReloadEvents::add_beforeAssemblyReload(
       DotNet::UnityEditor::AssemblyReloadCallback(
           []() { shutdownExternals(); }));
-  DotNet::System::AppDomain::CurrentDomain().add_DomainUnload(
-      DotNet::System::EventHandler([](const DotNet::System::Object& sender,
-                                      const DotNet::System::EventArgs& e) {
-        Reinterop::ObjectHandle::endCurrentAppDomain();
-      }));
+  // DotNet::System::AppDomain::CurrentDomain().add_DomainUnload(
+  //     DotNet::System::EventHandler([](const DotNet::System::Object& sender,
+  //                                     const DotNet::System::EventArgs& e) {
+  //       Reinterop::ObjectHandle::endCurrentAppDomain();
+  //     }));
 #endif
 }
 

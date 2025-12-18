@@ -108,12 +108,18 @@ namespace Reinterop
                         gcHandle.Target = newValue;
                     }
 
+                    public static int GetCurrentAppDomainId()
+                    {
+                        return System.AppDomain.CurrentDomain.GetHashCode();
+                    }
+
                     public static void ExposeToCPP()
                     {
                         IntPtr p = CreateHandle(new object());
                         IntPtr copy = CopyHandle(p);
                         FreeHandle(p);
                         FreeHandle(copy);
+                        int id = GetCurrentAppDomainId();
                     }
                 }
             }

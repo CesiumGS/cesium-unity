@@ -54,14 +54,9 @@
                   // so it will not be released when this object is destroyed.
                   void* Release();
 
-                  static void startNewAppDomain();
-                  static void endCurrentAppDomain();
-                
                 private:
                   void* _handle;
-                  int32_t _appDomainIndex;
-                  
-                  static std::atomic<int32_t> _runningAppDomainIndex;
+                  int32_t _appDomainId;
                 };
                 """);
 
@@ -87,47 +82,42 @@
             sourceFile.Includes.Add("<CesiumUtility/Assert.h>");
             sourceNamespace.Members.Add(
                 $$"""
-                std::atomic<int32_t> ObjectHandle::_runningAppDomainIndex = -1;
+                ObjectHandle::ObjectHandle() noexcept : _handle(nullptr), _appDomainId(ObjectHandleUtility::GetCurrentAppDomainId()) {}
 
-                ObjectHandle::ObjectHandle() noexcept : _handle(nullptr), _appDomainIndex(_runningAppDomainIndex) {}
-
-                ObjectHandle::ObjectHandle(void* handle) noexcept : _handle(handle), _appDomainIndex(_runningAppDomainIndex) {
-                  CESIUM_ASSERT(this->_handle == nullptr || this->_appDomainIndex > 0);
+                ObjectHandle::ObjectHandle(void* handle) noexcept : _handle(handle), _appDomainId(ObjectHandleUtility::GetCurrentAppDomainId()) {
                 }
 
                 ObjectHandle::ObjectHandle(const ObjectHandle& rhs) noexcept
-                    : _handle(ObjectHandleUtility::CopyHandle(rhs.GetRaw())), _appDomainIndex(_runningAppDomainIndex) {
-                  CESIUM_ASSERT(this->_appDomainIndex > 0);
+                    : _handle(nullptr), _appDomainId(ObjectHandleUtility::GetCurrentAppDomainId()) {
+                  void* handle = rhs.GetRaw();
+                  if (handle != nullptr)
+                    this->_handle = ObjectHandleUtility::CopyHandle(handle);
                 }
 
-                ObjectHandle::ObjectHandle(ObjectHandle&& rhs) noexcept : _handle(rhs.GetRaw()), _appDomainIndex(rhs._appDomainIndex) {
+                ObjectHandle::ObjectHandle(ObjectHandle&& rhs) noexcept : _handle(rhs._handle), _appDomainId(rhs._appDomainId) {
                   rhs._handle = nullptr;
                 }
 
                 ObjectHandle::~ObjectHandle() noexcept {
-                  // Unlike other operations, the destructor is allowed to be called after AppDomain reload.
-                  // But we won't try to free the handle.
-                  if (this->_handle != nullptr && this->_appDomainIndex == _runningAppDomainIndex)
-                    ObjectHandleUtility::FreeHandle(this->_handle);
+                  void* handle = this->GetRaw();
+                  if (handle != nullptr)
+                    ObjectHandleUtility::FreeHandle(handle);
                 }
 
                 ObjectHandle& ObjectHandle::operator=(const ObjectHandle& rhs) noexcept {
                   if (&rhs != this) {
                     void* handle = this->GetRaw();
-                    if (handle != nullptr) {
-                      CESIUM_ASSERT(_runningAppDomainIndex > 0);
+                    if (handle != nullptr)
                       ObjectHandleUtility::FreeHandle(handle);
-                    }
                     
                     void* rhsHandle = rhs.GetRaw();
                     if (rhsHandle != nullptr) {
-                      CESIUM_ASSERT(_runningAppDomainIndex > 0);
                       this->_handle = ObjectHandleUtility::CopyHandle(rhsHandle);
                     } else {
                       this->_handle = nullptr;
                     }
 
-                    this->_appDomainIndex = _runningAppDomainIndex;
+                    this->_appDomainId = ObjectHandleUtility::GetCurrentAppDomainId();
                   }
 
                   return *this;
@@ -146,7 +136,7 @@
                 }
 
                 void* ObjectHandle::GetRaw() const {
-                  CESIUM_ASSERT(this->_handle == nullptr || this->_appDomainIndex == _runningAppDomainIndex);
+                  CESIUM_ASSERT(this->_handle == nullptr || this->_appDomainId == ObjectHandleUtility::GetCurrentAppDomainId());
                   return this->_handle;
                 }
 
@@ -155,14 +145,6 @@
                   this->_handle = nullptr;
                   return handle;
                 }
-
-                /*static*/ void ObjectHandle::startNewAppDomain() {
-                    _runningAppDomainIndex = -_runningAppDomainIndex;
-                }
-
-                /*static*/ void ObjectHandle::endCurrentAppDomain() {
-                    _runningAppDomainIndex = -(_runningAppDomainIndex + 1);
-                }                
                 """);
         }
     }
