@@ -59,9 +59,11 @@
                 
                 private:
                   void* _handle;
-                  int32_t _appDomainIndex;
-                  
+
+                #if UNITY_EDITOR
+                  int32_t _appDomainIndex;                  
                   static std::atomic<int32_t> _runningAppDomainIndex;
+                #endif
                 };
                 """);
 
@@ -87,6 +89,8 @@
             sourceFile.Includes.Add("<CesiumUtility/Assert.h>");
             sourceNamespace.Members.Add(
                 $$"""
+                #if UNITY_EDITOR
+
                 // When this is negative, it indicates either:
                 // - initializeReinterop hasn't been called yet at all, or
                 // - The current (previous) AppDomain is unloading or unloaded, and initializeReinterop
@@ -173,7 +177,77 @@
 
                 /*static*/ void ObjectHandle::endCurrentAppDomain() {
                     _runningAppDomainIndex = -(_runningAppDomainIndex + 1);
-                }                
+                }
+                
+                #else // #if UNITY_EDITOR
+
+                ObjectHandle::ObjectHandle() noexcept : _handle(nullptr) {}
+                
+                ObjectHandle::ObjectHandle(void* handle) noexcept : _handle(handle) {}
+                
+                ObjectHandle::ObjectHandle(const ObjectHandle& rhs) noexcept : _handle(nullptr) {
+                  void* handle = rhs.GetRaw();
+                  if (handle != nullptr)
+                    this->_handle = ObjectHandleUtility::CopyHandle(handle);
+                }
+                
+                ObjectHandle::ObjectHandle(ObjectHandle&& rhs) noexcept : _handle(rhs._handle) {
+                  rhs._handle = nullptr;
+                }
+                
+                ObjectHandle::~ObjectHandle() noexcept {
+                  void* handle = this->GetRaw();
+                  if (handle != nullptr)
+                    ObjectHandleUtility::FreeHandle(handle);
+                }
+                
+                ObjectHandle& ObjectHandle::operator=(const ObjectHandle& rhs) noexcept {
+                  if (&rhs != this) {
+                    void* handle = this->GetRaw();
+                    if (handle != nullptr) {
+                      ObjectHandleUtility::FreeHandle(handle);
+                    }
+                    
+                    void* rhsHandle = rhs.GetRaw();
+                    if (rhsHandle != nullptr) {
+                      this->_handle = ObjectHandleUtility::CopyHandle(rhsHandle);
+                    } else {
+                      this->_handle = nullptr;
+                    }
+                  }
+                
+                  return *this;
+                }
+                
+                ObjectHandle& ObjectHandle::operator=(ObjectHandle&& rhs) noexcept {
+                  if (&rhs != this) {
+                    void* handle = this->GetRaw();
+                    if (handle != nullptr)
+                        ObjectHandleUtility::FreeHandle(handle);
+                    this->_handle = rhs.GetRaw();
+                    rhs._handle = nullptr;
+                  }
+                
+                  return *this;
+                }
+                
+                void* ObjectHandle::GetRaw() const {
+                  return this->_handle;
+                }
+                
+                void* ObjectHandle::Release() {
+                  void* handle = this->GetRaw();
+                  this->_handle = nullptr;
+                  return handle;
+                }
+                
+                /*static*/ void ObjectHandle::startNewAppDomain() {
+                }
+                
+                /*static*/ void ObjectHandle::endCurrentAppDomain() {
+                }
+                
+                #endif // #if UNITY_EDITOR #else
                 """);
         }
     }
