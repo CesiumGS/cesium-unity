@@ -15,7 +15,6 @@
 #include <DotNet/CesiumForUnity/CesiumCreditSystem.h>
 #include <DotNet/CesiumForUnity/CesiumIonServer.h>
 #include <DotNet/CesiumForUnity/CesiumRuntimeSettings.h>
-#include <DotNet/System/AppDomain.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/Collections/Generic/IReadOnlyCollection1.h>
 #include <DotNet/System/Collections/Generic/IReadOnlyList1.h>
@@ -32,6 +31,7 @@
 #if UNITY_EDITOR
 #include <DotNet/CesiumForUnity/CesiumIonServerManager.h>
 #include <DotNet/CesiumForUnity/CesiumIonSession.h>
+#include <DotNet/System/AppDomain.h>
 #include <DotNet/UnityEditor/AssemblyReloadCallback.h>
 #include <DotNet/UnityEditor/AssemblyReloadEvents.h>
 #endif
