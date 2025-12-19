@@ -10,8 +10,8 @@ class CesiumFeatureIdTexture;
 } // namespace DotNet::CesiumForUnity
 
 namespace DotNet::UnityEngine {
-class Vector2;
-class RaycastHit;
+struct Vector2;
+struct RaycastHit;
 } // namespace DotNet::UnityEngine
 
 namespace CesiumGltf {
