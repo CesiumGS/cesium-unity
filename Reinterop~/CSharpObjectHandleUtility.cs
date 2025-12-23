@@ -108,12 +108,17 @@ namespace Reinterop
                         gcHandle.Target = newValue;
                     }
 
+                    public static bool IsAppDomainFinalizingForUnload() {
+                        return System.AppDomain.CurrentDomain.IsFinalizingForUnload();
+                    }
+
                     public static void ExposeToCPP()
                     {
                         IntPtr p = CreateHandle(new object());
                         IntPtr copy = CopyHandle(p);
                         FreeHandle(p);
                         FreeHandle(copy);
+                        bool isFinalizing = IsAppDomainFinalizingForUnload();
                     }
                 }
             }

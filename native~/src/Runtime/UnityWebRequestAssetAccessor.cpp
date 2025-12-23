@@ -144,8 +144,10 @@ void UnityAssetRequest::cancel() {
         "Request was canceled because the Unity AppDomain is reloading."));
 
     // We no longer need the UnityWebRequest, so dispose it here.
-    this->_webRequest.Dispose();
-    this->_webRequest = nullptr;
+    if (this->_webRequest != nullptr) {
+      this->_webRequest.Dispose();
+      this->_webRequest = nullptr;
+    }
   }
 }
 

@@ -27,6 +27,8 @@ namespace CesiumForUnity
             this.CreateImplementation();
         }
 
+        public partial bool IsBusy();
+
         public partial bool IsConnected();
         public partial bool IsConnecting();
         public partial bool IsResuming();
