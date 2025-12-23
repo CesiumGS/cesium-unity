@@ -106,7 +106,7 @@ void initializeExternals() {
       DotNet::System::EventHandler([](const DotNet::System::Object& sender,
                                       const DotNet::System::EventArgs& e) {
         // This is hacky. We need to free the ObjectHandles for the two
-        // parameters before we call endCurrentAppDomain, or else we're assert
+        // parameters before we call endCurrentAppDomain, or else we assert
         // when we do it afterward because the handles are from the "wrong"
         // AppDomain and finalization hasn't started yet. To free the handles,
         // we need to cast away const.
