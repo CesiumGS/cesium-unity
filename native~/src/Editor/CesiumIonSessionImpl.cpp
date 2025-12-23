@@ -603,38 +603,6 @@ void CesiumIonSessionImpl::refreshDefaults(
       });
 }
 
-bool CesiumIonSessionImpl::refreshProfileIfNeeded(
-    const DotNet::CesiumForUnity::CesiumIonSession& session) {
-  if (this->_loadProfileQueued || !this->_profile.has_value()) {
-    this->refreshProfile(session);
-  }
-  return this->_profile.has_value();
-}
-
-bool CesiumIonSessionImpl::refreshAssetsIfNeeded(
-    const DotNet::CesiumForUnity::CesiumIonSession& session) {
-  if (this->_loadAssetsQueued || !this->_assets.has_value()) {
-    this->refreshAssets(session);
-  }
-  return this->_assets.has_value();
-}
-
-bool CesiumIonSessionImpl::refreshTokensIfNeeded(
-    const DotNet::CesiumForUnity::CesiumIonSession& session) {
-  if (this->_loadTokensQueued || !this->_tokens.has_value()) {
-    this->refreshTokens(session);
-  }
-  return this->_tokens.has_value();
-}
-
-bool CesiumIonSessionImpl::refreshDefaultsIfNeeded(
-    const DotNet::CesiumForUnity::CesiumIonSession& session) {
-  if (this->_loadDefaultsQueued || !this->_defaults.has_value()) {
-    this->refreshDefaults(session);
-  }
-  return this->_defaults.has_value();
-}
-
 CesiumAsync::Future<CesiumIonClient::Response<CesiumIonClient::Token>>
 CesiumIonSessionImpl::findToken(const std::string& token) const {
   if (!this->_connection) {

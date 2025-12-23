@@ -118,15 +118,6 @@ private:
   void refreshTokens(const DotNet::CesiumForUnity::CesiumIonSession& session);
   void refreshDefaults(const DotNet::CesiumForUnity::CesiumIonSession& session);
 
-  bool refreshProfileIfNeeded(
-      const DotNet::CesiumForUnity::CesiumIonSession& session);
-  bool refreshAssetsIfNeeded(
-      const DotNet::CesiumForUnity::CesiumIonSession& session);
-  bool refreshTokensIfNeeded(
-      const DotNet::CesiumForUnity::CesiumIonSession& session);
-  bool refreshDefaultsIfNeeded(
-      const DotNet::CesiumForUnity::CesiumIonSession& session);
-
   void
   startQueuedLoads(const DotNet::CesiumForUnity::CesiumIonSession& session);
 
