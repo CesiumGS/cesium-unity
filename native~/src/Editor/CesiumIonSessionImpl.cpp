@@ -15,8 +15,16 @@
 #include <DotNet/System/Object.h>
 #include <DotNet/UnityEngine/Application.h>
 #include <DotNet/UnityEngine/Debug.h>
+#include <DotNet/UnityEngine/Object.h>
 #include <fmt/format.h>
 
+#if UNITY_EDITOR
+#include <DotNet/UnityEditor/EditorUtility.h>
+#endif
+
+using namespace CesiumAsync;
+using namespace CesiumIonClient;
+using namespace CesiumUtility;
 using namespace DotNet;
 
 namespace {
@@ -33,6 +41,18 @@ void logResponseErrors(const CesiumIonClient::Response<T>& response) {
         System::String(fmt::format("Code {}", response.errorCode)));
   } else if (!response.errorMessage.empty()) {
     UnityEngine::Debug::LogError(System::String(response.errorMessage));
+  }
+}
+
+template <typename T>
+bool disconnectOnNoValidToken(
+    const DotNet::CesiumForUnity::CesiumIonSession& session,
+    const Response<T>& response) {
+  if (response.errorCode == "NoValidToken") {
+    session.NativeImplementation().Disconnect(session);
+    return true;
+  } else {
+    return false;
   }
 }
 
@@ -185,6 +205,9 @@ void CesiumIonSessionImpl::Connect(
 
         if (System::String::IsNullOrEmpty(server.apiUrl())) {
           server.apiUrl(System::String(*ionApiUrl));
+#if UNITY_EDITOR
+          UnityEditor::EditorUtility::SetDirty(server);
+#endif
         }
 
         // Make request to /appData to learn the server's authentication mode
@@ -204,26 +227,40 @@ void CesiumIonSessionImpl::Connect(
         if (pThis->_appData->needsOauthAuthentication()) {
           int64_t clientID = server.oauth2ApplicationID();
           return CesiumIonClient::Connection::authorize(
-              pThis->_asyncSystem,
-              pThis->_pAssetAccessor,
-              "Cesium for Unity",
-              clientID,
-              "/cesium-for-unity/oauth2/callback",
-              {"assets:list",
-               "assets:read",
-               "profile:read",
-               "tokens:read",
-               "tokens:write",
-               "geocode"},
-              [pThis](const std::string& url) {
-                pThis->_authorizeUrl = url;
-                pThis->_redirectUrl =
-                    CesiumUtility::Uri::getQueryValue(url, "redirect_uri");
-                UnityEngine::Application::OpenURL(url);
-              },
-              pThis->_appData.value(),
-              server.apiUrl().ToStlString(),
-              CesiumUtility::Uri::resolve(ionServerUrl, "oauth"));
+                     pThis->_asyncSystem,
+                     pThis->_pAssetAccessor,
+                     "Cesium for Unity",
+                     clientID,
+                     "/cesium-for-unity/oauth2/callback",
+                     {"assets:list",
+                      "assets:read",
+                      "profile:read",
+                      "tokens:read",
+                      "tokens:write",
+                      "geocode"},
+                     [pThis](const std::string& url) {
+                       pThis->_authorizeUrl = url;
+                       pThis->_redirectUrl = CesiumUtility::Uri::getQueryValue(
+                           url,
+                           "redirect_uri");
+                       UnityEngine::Application::OpenURL(url);
+                     },
+                     pThis->_appData.value(),
+                     server.apiUrl().ToStlString(),
+                     CesiumUtility::Uri::resolve(ionServerUrl, "oauth"))
+              .thenInMainThread(
+                  [pThis](CesiumUtility::Result<Connection>&& result) {
+                    Promise<Connection> promise =
+                        pThis->_asyncSystem.createPromise<Connection>();
+                    if (!result.value) {
+                      promise.reject(std::runtime_error(result.errors.format(
+                          "Errors connecting to Cesium ion:")));
+                    } else {
+                      promise.resolve(std::move(*result.value));
+                    }
+
+                    return promise.getFuture();
+                  });
         }
 
         return pThis->_asyncSystem
@@ -231,19 +268,19 @@ void CesiumIonSessionImpl::Connect(
                 CesiumIonClient::Connection(
                     pThis->_asyncSystem,
                     pThis->_pAssetAccessor,
-                    "",
                     pThis->_appData.value(),
                     server.apiUrl().ToStlString()));
       })
-      .thenInMainThread([pThis,
-                         session](CesiumIonClient::Connection&& connection) {
+      .thenInMainThread([pThis, session](Connection&& connection) {
         pThis->_isConnecting = false;
         pThis->_connection = std::move(connection);
 
         CesiumForUnity::CesiumIonServer server = session.server();
-        CesiumForUnity::CesiumIonServerManager::instance().SetUserAccessToken(
-            server,
-            pThis->_connection.value().getAccessToken());
+        CesiumForUnity::CesiumIonServerManager::instance()
+            .SetUserAccessTokenAndRefreshToken(
+                server,
+                pThis->_connection->getAccessToken(),
+                pThis->_connection->getRefreshToken());
         pThis->_quickAddItems = nullptr;
         session.BroadcastConnectionUpdate();
       })
@@ -264,9 +301,22 @@ void CesiumIonSessionImpl::Resume(
     return;
   }
 
+  if (System::String::IsNullOrEmpty(server.apiUrl())) {
+    // Don't try to resume a connection if we don't have an API URL.
+    return;
+  }
+
   System::String userAccessToken =
       CesiumForUnity::CesiumIonServerManager::instance().GetUserAccessToken(
           server);
+  System::String refreshToken =
+      CesiumForUnity::CesiumIonServerManager::instance().GetUserRefreshToken(
+          server);
+
+  if (userAccessToken == nullptr)
+    userAccessToken = System::String("");
+  if (refreshToken == nullptr)
+    refreshToken = System::String("");
 
   this->_isResuming = true;
 
@@ -277,6 +327,7 @@ void CesiumIonSessionImpl::Resume(
       .thenInMainThread([pThis,
                          session,
                          userAccessToken,
+                         refreshToken,
                          server,
                          asyncSystem = this->_asyncSystem](bool loadedAppData) {
         CesiumAsync::Promise<void> promise = asyncSystem.createPromise<void>();
@@ -288,8 +339,22 @@ void CesiumIonSessionImpl::Resume(
           return promise.getFuture();
         }
 
+        CesiumUtility::Result<LoginToken> tokenResult =
+            System::String::IsNullOrEmpty(userAccessToken)
+                ? LoginToken("", std::nullopt)
+                : LoginToken::parse(userAccessToken.ToStlString());
+        if (!tokenResult.value) {
+          Promise<void> promise = pThis->_asyncSystem.createPromise<void>();
+          promise.reject(std::runtime_error(
+              tokenResult.errors.format("Failed to parse access token:")));
+          return promise.getFuture();
+        }
+
+        // We can resume a session with an access token or with a refresh token,
+        // or both.
         if (pThis->_appData->needsOauthAuthentication() &&
-            System::String::IsNullOrEmpty(userAccessToken)) {
+            System::String::IsNullOrEmpty(userAccessToken) &&
+            System::String::IsNullOrEmpty(refreshToken)) {
           // No user access token was stored, so there's no existing session
           // to resume.
           promise.resolve();
@@ -301,7 +366,10 @@ void CesiumIonSessionImpl::Resume(
             std::make_shared<CesiumIonClient::Connection>(
                 pThis->_asyncSystem,
                 pThis->_pAssetAccessor,
-                userAccessToken.ToStlString(),
+                *tokenResult.value,
+                refreshToken.ToStlString(),
+                server.oauth2ApplicationID(),
+                pThis->_redirectUrl,
                 pThis->_appData.value(),
                 server.apiUrl().ToStlString());
 
@@ -344,10 +412,14 @@ void CesiumIonSessionImpl::Disconnect(
   this->_defaults.reset();
   this->_appData.reset();
 
+  this->_loadProfileQueued = false;
+  this->_loadAssetsQueued = false;
+  this->_loadTokensQueued = false;
+  this->_loadDefaultsQueued = false;
+
   CesiumForUnity::CesiumIonServer server = session.server();
-  CesiumForUnity::CesiumIonServerManager::instance().SetUserAccessToken(
-      server,
-      nullptr);
+  CesiumForUnity::CesiumIonServerManager::instance()
+      .SetUserAccessTokenAndRefreshToken(server, nullptr, nullptr);
 
   this->_quickAddItems = nullptr;
 
@@ -438,6 +510,9 @@ void CesiumIonSessionImpl::refreshProfile(
               return;
 
             pThis->_isLoadingProfile = false;
+            if (disconnectOnNoValidToken(session, profile))
+              return;
+
             pThis->_profile = std::move(profile.value);
             session.BroadcastProfileUpdate();
             if (pThis->_loadProfileQueued)
@@ -484,6 +559,9 @@ void CesiumIonSessionImpl::refreshAssets(
               return;
 
             pThis->_isLoadingAssets = false;
+            if (disconnectOnNoValidToken(session, assets))
+              return;
+
             pThis->_assets = std::move(assets.value);
             session.BroadcastAssetsUpdate();
             if (pThis->_loadAssetsQueued)
@@ -535,6 +613,9 @@ void CesiumIonSessionImpl::refreshTokens(
               return;
 
             pThis->_isLoadingTokens = false;
+            if (disconnectOnNoValidToken(session, tokens))
+              return;
+
             pThis->_tokens =
                 tokens.value
                     ? std::make_optional(std::move(tokens.value->items))
@@ -580,6 +661,9 @@ void CesiumIonSessionImpl::refreshDefaults(
 
             logResponseErrors(defaults);
             pThis->_isLoadingDefaults = false;
+            if (disconnectOnNoValidToken(session, defaults))
+              return;
+
             pThis->_defaults = std::move(defaults.value);
             pThis->_quickAddItems = nullptr;
             session.BroadcastDefaultsUpdate();
