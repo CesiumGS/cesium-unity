@@ -29,6 +29,8 @@ using namespace DotNet;
 
 namespace {
 
+const char* OAUTH2_REDIRECT_URI = "/cesium-for-unity/oauth2/callback";
+
 template <typename T>
 void logResponseErrors(const CesiumIonClient::Response<T>& response) {
   if (!response.errorCode.empty() && !response.errorMessage.empty()) {
@@ -231,7 +233,7 @@ void CesiumIonSessionImpl::Connect(
                      pThis->_pAssetAccessor,
                      "Cesium for Unity",
                      clientID,
-                     "/cesium-for-unity/oauth2/callback",
+                     OAUTH2_REDIRECT_URI,
                      {"assets:list",
                       "assets:read",
                       "profile:read",
@@ -369,7 +371,7 @@ void CesiumIonSessionImpl::Resume(
                 *tokenResult.value,
                 refreshToken.ToStlString(),
                 server.oauth2ApplicationID(),
-                pThis->_redirectUrl,
+                OAUTH2_REDIRECT_URI,
                 pThis->_appData.value(),
                 server.apiUrl().ToStlString());
 
@@ -509,6 +511,7 @@ void CesiumIonSessionImpl::refreshProfile(
             if (session == nullptr)
               return;
 
+            logResponseErrors(profile);
             pThis->_isLoadingProfile = false;
             if (disconnectOnNoValidToken(session, profile))
               return;
@@ -558,6 +561,7 @@ void CesiumIonSessionImpl::refreshAssets(
             if (session == nullptr)
               return;
 
+            logResponseErrors(assets);
             pThis->_isLoadingAssets = false;
             if (disconnectOnNoValidToken(session, assets))
               return;
@@ -612,6 +616,7 @@ void CesiumIonSessionImpl::refreshTokens(
             if (session == nullptr)
               return;
 
+            logResponseErrors(tokens);
             pThis->_isLoadingTokens = false;
             if (disconnectOnNoValidToken(session, tokens))
               return;
