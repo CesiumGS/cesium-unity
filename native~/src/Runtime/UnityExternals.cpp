@@ -13,6 +13,7 @@
 #include <CesiumUtility/CreditSystem.h>
 
 #include <DotNet/CesiumForUnity/CesiumCreditSystem.h>
+#include <DotNet/CesiumForUnity/CesiumIonServer.h>
 #include <DotNet/CesiumForUnity/CesiumRuntimeSettings.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/Object.h>
@@ -24,6 +25,13 @@
 #include <DotNet/UnityEngine/SceneManagement/SceneManager.h>
 
 #if UNITY_EDITOR
+#include <DotNet/CesiumForUnity/CesiumIonServerManager.h>
+#include <DotNet/CesiumForUnity/CesiumIonSession.h>
+#include <DotNet/System/AppDomain.h>
+#include <DotNet/System/Collections/Generic/IReadOnlyCollection1.h>
+#include <DotNet/System/Collections/Generic/IReadOnlyList1.h>
+#include <DotNet/System/EventArgs.h>
+#include <DotNet/System/EventHandler.h>
 #include <DotNet/UnityEditor/AssemblyReloadCallback.h>
 #include <DotNet/UnityEditor/AssemblyReloadEvents.h>
 #endif
@@ -94,6 +102,18 @@ void initializeExternals() {
   DotNet::UnityEditor::AssemblyReloadEvents::add_beforeAssemblyReload(
       DotNet::UnityEditor::AssemblyReloadCallback(
           []() { shutdownExternals(); }));
+  DotNet::System::AppDomain::CurrentDomain().add_DomainUnload(
+      DotNet::System::EventHandler([](const DotNet::System::Object& sender,
+                                      const DotNet::System::EventArgs& e) {
+        // This is hacky. We need to free the ObjectHandles for the two
+        // parameters before we call endCurrentAppDomain, or else we assert
+        // when we do it afterward because the handles are from the "wrong"
+        // AppDomain and finalization hasn't started yet. To free the handles,
+        // we need to cast away const.
+        const_cast<DotNet::System::Object&>(sender) = nullptr;
+        const_cast<DotNet::System::EventArgs&>(e) = nullptr;
+        Reinterop::ObjectHandle::endCurrentAppDomain();
+      }));
 #endif
 }
 
@@ -138,6 +158,24 @@ void shutdownExternals() {
       }
     }
   }
+
+#if UNITY_EDITOR
+  // We also need to wait for in-progress CesiumIonSessions to finish.
+  System::Collections::Generic::IReadOnlyList1<CesiumForUnity::CesiumIonServer>
+      serverList = CesiumForUnity::CesiumIonServerManager::instance().servers();
+  System::Collections::Generic::IReadOnlyCollection1<
+      CesiumForUnity::CesiumIonServer>
+      serverCollection = serverList;
+  for (int32_t i = 0; i < serverCollection.Count(); ++i) {
+    CesiumForUnity::CesiumIonSession session =
+        CesiumForUnity::CesiumIonServerManager::instance().GetSession(
+            serverList[i]);
+    while (session.IsBusy()) {
+      pAccessor->tick();
+      asyncSystem->dispatchMainThreadTasks();
+    }
+  }
+#endif
 
   pWebRequestAccessor.reset();
   pAccessor.reset();

@@ -92,6 +92,8 @@ namespace Reinterop
                 
                   {{GetFieldAssignments().JoinAndIndent("  ")}}
 
+                  DotNet::Reinterop::ObjectHandle::startNewAppDomain();
+
                   // Invoke user startup code.
                   start();
 

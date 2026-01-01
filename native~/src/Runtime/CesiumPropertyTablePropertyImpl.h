@@ -17,30 +17,30 @@ class String;
 }
 
 namespace DotNet::Unity::Mathematics {
-class int2;
-class int3;
-class int4;
-class uint2;
-class uint3;
-class uint4;
-class float2;
-class float3;
-class float4;
-class double2;
-class double3;
-class double4;
-class int2x2;
-class uint2x2;
-class float2x2;
-class double2x2;
-class int3x3;
-class uint3x3;
-class float3x3;
-class double3x3;
-class int4x4;
-class uint4x4;
-class float4x4;
-class double4x4;
+struct int2;
+struct int3;
+struct int4;
+struct uint2;
+struct uint3;
+struct uint4;
+struct float2;
+struct float3;
+struct float4;
+struct double2;
+struct double3;
+struct double4;
+struct int2x2;
+struct uint2x2;
+struct float2x2;
+struct double2x2;
+struct int3x3;
+struct uint3x3;
+struct float3x3;
+struct double3x3;
+struct int4x4;
+struct uint4x4;
+struct float4x4;
+struct double4x4;
 } // namespace DotNet::Unity::Mathematics
 
 namespace CesiumForUnityNative {

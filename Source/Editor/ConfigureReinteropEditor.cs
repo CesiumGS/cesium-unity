@@ -63,6 +63,14 @@ namespace CesiumForUnity
             server = session.server;
             session.server = server;
 
+            IReadOnlyList<CesiumIonServer> servers = CesiumIonServerManager.instance.servers;
+            for (int i = 0; i < servers.Count; ++i)
+            {
+                server = servers[i];
+                session = CesiumIonServerManager.instance.GetSession(server);
+                bool isBusy = session.IsBusy();
+            }            
+
             List<QuickAddItem> items = new List<QuickAddItem>();
             items = session.GetQuickAddItems();
 
