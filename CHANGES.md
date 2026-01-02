@@ -2,6 +2,10 @@
 
 ## v.21.0 - 
 
+##### Additions :tada:
+
+- Added support for refreshing Cesium ion login tokens after they expire and the refresh token is still valid.
+
 ##### Fixes :wrench:
 
 - Setting CesiumGeoreference.ellipsoid at runtime will now correctly update the Georeference and associated transforms.

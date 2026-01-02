@@ -93,7 +93,8 @@ namespace CesiumForUnity
             server.oauth2ApplicationID = 1;
 
             CesiumIonServerManager.instance.GetUserAccessToken(null);
-            CesiumIonServerManager.instance.SetUserAccessToken(null, null);
+            CesiumIonServerManager.instance.GetUserRefreshToken(null);
+            CesiumIonServerManager.instance.SetUserAccessTokenAndRefreshToken(null, null, null);
 
             EditorPrefs.HasKey("Key");
             EditorPrefs.GetString("Key");

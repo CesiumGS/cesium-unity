@@ -28,7 +28,7 @@ namespace CesiumForUnity
                         string userAccessToken = EditorPrefs.GetString(editorPrefKey);
                         if (!string.IsNullOrEmpty(userAccessToken))
                         {
-                            this.SetUserAccessToken(this._currentCesiumIonServer, userAccessToken);
+                            this.SetUserAccessTokenAndRefreshToken(this._currentCesiumIonServer, userAccessToken, "");
                             EditorPrefs.DeleteKey(editorPrefKey);
                         }
                     }
@@ -105,18 +105,27 @@ namespace CesiumForUnity
             return index >= 0 ? this._userAccessTokenMap[index].token : null;
         }
 
-        internal void SetUserAccessToken(CesiumIonServer server, string token)
+        internal string GetUserRefreshToken(CesiumIonServer server)
+        {
+            int index = this._userAccessTokenMap.FindIndex(record => record.server == server);
+            return index >= 0 ? this._userAccessTokenMap[index].refreshToken : null;
+        }
+
+        internal void SetUserAccessTokenAndRefreshToken(CesiumIonServer server, string token, string refreshToken)
         {
             int index = this._userAccessTokenMap.FindIndex(record => record.server == server);
             if (index >= 0)
             {
-                this._userAccessTokenMap[index].token = token;
+                UserAccessTokenRecord record = this._userAccessTokenMap[index];
+                record.token = token;
+                record.refreshToken = refreshToken;
             }
             else
             {
                 UserAccessTokenRecord record = new UserAccessTokenRecord();
                 record.server = server;
                 record.token = token;
+                record.refreshToken = refreshToken;
                 this._userAccessTokenMap.Add(record);
             }
 
@@ -140,6 +149,7 @@ namespace CesiumForUnity
         {
             public CesiumIonServer server;
             public string token;
+            public string refreshToken;
         }
 
         [SerializeField]
