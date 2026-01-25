@@ -31,8 +31,9 @@ public:
   DotNet::CesiumForUnity::CesiumGeoJsonObject
   GetRootObject(const DotNet::CesiumForUnity::CesiumGeoJsonDocument& document);
 
-  static DotNet::CesiumForUnity::CesiumGeoJsonDocument
-  Parse(DotNet::System::String geoJsonString);
+  bool ParseInternal(
+      const DotNet::CesiumForUnity::CesiumGeoJsonDocument& document,
+      DotNet::System::String geoJsonString);
 
   static void LoadFromUrl(
       DotNet::System::String url,

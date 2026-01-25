@@ -53,8 +53,9 @@ CesiumForUnity::CesiumGeoJsonObject CesiumGeoJsonDocumentImpl::GetRootObject(
   return result;
 }
 
-CesiumForUnity::CesiumGeoJsonDocument
-CesiumGeoJsonDocumentImpl::Parse(System::String geoJsonString) {
+bool CesiumGeoJsonDocumentImpl::ParseInternal(
+    const CesiumForUnity::CesiumGeoJsonDocument& document,
+    System::String geoJsonString) {
   std::string str = geoJsonString.ToStlString();
 
   std::vector<std::byte> bytes(str.size());
@@ -64,12 +65,12 @@ CesiumGeoJsonDocumentImpl::Parse(System::String geoJsonString) {
       GeoJsonDocument::fromGeoJson(std::span<const std::byte>(bytes));
 
   if (!result.value.has_value()) {
-    return CesiumForUnity::CesiumGeoJsonDocument(nullptr);
+    return false;
   }
 
-  CesiumForUnity::CesiumGeoJsonDocument doc;
-  doc.NativeImplementation().setNativeDocument(std::move(*result.value));
-  return doc;
+  _document = std::move(*result.value);
+  _isValid = true;
+  return true;
 }
 
 void CesiumGeoJsonDocumentImpl::LoadFromUrl(

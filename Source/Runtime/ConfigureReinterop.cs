@@ -933,7 +933,7 @@ namespace CesiumForUnity
 
             // CesiumGeoJsonDocument and CesiumGeoJsonObject
             CesiumGeoJsonDocument geoJsonDoc = new CesiumGeoJsonDocument();
-            geoJsonDoc = CesiumGeoJsonDocument.Parse("");
+            geoJsonDoc.ParseInternal("");
             bool isDocValid = geoJsonDoc.IsValid();
             CesiumGeoJsonObject geoJsonObj = new CesiumGeoJsonObject();
             geoJsonObj = geoJsonDoc.GetRootObject();

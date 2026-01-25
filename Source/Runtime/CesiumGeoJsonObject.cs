@@ -20,7 +20,10 @@ namespace CesiumForUnity
         /// <summary>
         /// Internal constructor used by native code.
         /// </summary>
-        internal CesiumGeoJsonObject() { }
+        internal CesiumGeoJsonObject()
+        {
+            CreateImplementation();
+        }
         /// <summary>
         /// Gets the type of this GeoJSON object.
         /// </summary>

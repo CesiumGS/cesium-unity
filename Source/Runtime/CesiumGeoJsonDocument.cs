@@ -21,7 +21,10 @@ namespace CesiumForUnity
         /// <summary>
         /// Internal constructor used by native code.
         /// </summary>
-        internal CesiumGeoJsonDocument() { }
+        internal CesiumGeoJsonDocument()
+        {
+            CreateImplementation();
+        }
         /// <summary>
         /// Checks whether this GeoJSON document is valid.
         /// </summary>
@@ -39,7 +42,20 @@ namespace CesiumForUnity
         /// </summary>
         /// <param name="geoJsonString">The GeoJSON string to parse.</param>
         /// <returns>A new CesiumGeoJsonDocument, or null if parsing failed.</returns>
-        public static partial CesiumGeoJsonDocument Parse(string geoJsonString);
+        public static CesiumGeoJsonDocument Parse(string geoJsonString)
+        {
+            var document = new CesiumGeoJsonDocument();
+            if (document.ParseInternal(geoJsonString))
+            {
+                return document;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Internal method to parse GeoJSON string into this document.
+        /// </summary>
+        internal partial bool ParseInternal(string geoJsonString);
 
         /// <summary>
         /// Loads a GeoJSON document from a URL asynchronously.
