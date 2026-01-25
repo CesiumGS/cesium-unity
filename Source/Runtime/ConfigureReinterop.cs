@@ -930,6 +930,30 @@ namespace CesiumForUnity
             geoJsonOverlay.mipLevels = geoJsonOverlay.mipLevels;
             CesiumVectorStyle vectorStyle = geoJsonOverlay.defaultStyle;
             geoJsonOverlay.defaultStyle = vectorStyle;
+
+            // CesiumGeoJsonDocument and CesiumGeoJsonObject
+            CesiumGeoJsonDocument geoJsonDoc = new CesiumGeoJsonDocument();
+            geoJsonDoc = CesiumGeoJsonDocument.Parse("");
+            bool isDocValid = geoJsonDoc.IsValid();
+            CesiumGeoJsonObject geoJsonObj = new CesiumGeoJsonObject();
+            geoJsonObj = geoJsonDoc.GetRootObject();
+            CesiumGeoJsonObjectType objType = geoJsonObj.GetObjectType();
+            bool isObjValid = geoJsonObj.IsValid();
+            int childCount = geoJsonObj.GetChildCount();
+            geoJsonObj = geoJsonObj.GetChild(0);
+            bool hasGeoJsonStyle = geoJsonObj.HasStyle();
+            vectorStyle = geoJsonObj.GetStyle();
+            geoJsonObj.SetStyle(vectorStyle);
+            geoJsonObj.ClearStyle();
+            string featureIdStr = geoJsonObj.GetFeatureIdString();
+            long featureIdInt = geoJsonObj.GetFeatureIdInt();
+            bool hasFeatureId = geoJsonObj.HasFeatureId();
+            bool hasFeatureIdStr = geoJsonObj.HasFeatureIdString();
+            string propsJson = geoJsonObj.GetPropertiesAsJson();
+            string strProp = geoJsonObj.GetStringProperty("");
+            double numProp = geoJsonObj.GetNumericProperty("");
+            bool hasProp = geoJsonObj.HasProperty("");
+            Action<CesiumGeoJsonDocument> docCallback = (doc) => { };
             CesiumVectorLineStyle lineStyle = vectorStyle.lineStyle;
             vectorStyle.lineStyle = lineStyle;
             UnityEngine.Color32 lineColor = lineStyle.color;
