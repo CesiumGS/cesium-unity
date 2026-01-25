@@ -2,6 +2,10 @@
 
 ## v1.22.0 - 2026-02-02
 
+##### Additions :tada:
+
+- Added `CesiumGeoJsonDocumentRasterOverlay`, allowing stylized GeoJSON to be rasterized and draped over terrain and other 3D Tiles.
+
 ##### Fixes :wrench:
 
 - Fixed a typo in the the name of the `CesiumGoogleMapTilesRasterOverlay.cs` file that prevented users from adding this component to a `GameObject` in more recent versions of Unity.

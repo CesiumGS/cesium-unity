@@ -920,6 +920,42 @@ namespace CesiumForUnity
             polygon = polygons[0];
             len = polygons.Count;
 
+            CesiumGeoJsonDocumentRasterOverlay geoJsonOverlay =
+                go.GetComponent<CesiumGeoJsonDocumentRasterOverlay>();
+            geoJsonOverlay.source = geoJsonOverlay.source;
+            geoJsonOverlay.url = geoJsonOverlay.url;
+            geoJsonOverlay.ionAssetID = geoJsonOverlay.ionAssetID;
+            geoJsonOverlay.ionAccessToken = geoJsonOverlay.ionAccessToken;
+            geoJsonOverlay.ionServer = geoJsonOverlay.ionServer;
+            geoJsonOverlay.mipLevels = geoJsonOverlay.mipLevels;
+            CesiumVectorStyle vectorStyle = geoJsonOverlay.defaultStyle;
+            geoJsonOverlay.defaultStyle = vectorStyle;
+            CesiumVectorLineStyle lineStyle = vectorStyle.lineStyle;
+            vectorStyle.lineStyle = lineStyle;
+            UnityEngine.Color32 lineColor = lineStyle.color;
+            lineStyle.color = lineColor;
+            CesiumVectorColorMode colorMode = lineStyle.colorMode;
+            lineStyle.colorMode = colorMode;
+            double lineWidth = lineStyle.width;
+            lineStyle.width = lineWidth;
+            CesiumVectorLineWidthMode widthMode = lineStyle.widthMode;
+            lineStyle.widthMode = widthMode;
+            CesiumVectorPolygonStyle polygonStyleV = vectorStyle.polygonStyle;
+            vectorStyle.polygonStyle = polygonStyleV;
+            bool fillEnabled = polygonStyleV.fill;
+            polygonStyleV.fill = fillEnabled;
+            CesiumVectorPolygonFillStyle fillStyle = polygonStyleV.fillStyle;
+            polygonStyleV.fillStyle = fillStyle;
+            UnityEngine.Color32 fillColor = fillStyle.color;
+            fillStyle.color = fillColor;
+            CesiumVectorColorMode fillColorMode = fillStyle.colorMode;
+            fillStyle.colorMode = fillColorMode;
+            bool outlineEnabled = polygonStyleV.outline;
+            polygonStyleV.outline = outlineEnabled;
+            CesiumVectorLineStyle outlineStyle = polygonStyleV.outlineStyle;
+            polygonStyleV.outlineStyle = outlineStyle;
+            baseOverlay = geoJsonOverlay;
+
             TestGltfModel testModel = new TestGltfModel();
 
             bool[] boolArray = { };
