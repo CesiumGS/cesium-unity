@@ -14,8 +14,8 @@
 #include <DotNet/CesiumForUnity/CesiumVectorPolygonFillStyle.h>
 #include <DotNet/CesiumForUnity/CesiumVectorPolygonStyle.h>
 #include <DotNet/CesiumForUnity/CesiumVectorStyle.h>
+#include <DotNet/CesiumForUnity/CesiumColor32.h>
 #include <DotNet/System/String.h>
-#include <DotNet/UnityEngine/Color32.h>
 
 #include <rapidjson/document.h>
 #include <rapidjson/stringbuffer.h>
@@ -33,9 +33,9 @@ namespace CesiumForUnityNative {
 
 namespace {
 
-// Convert CesiumUtility::Color (0-255 components) to Unity Color32
-UnityEngine::Color32 toUnityColor(const CesiumUtility::Color& color) {
-  UnityEngine::Color32 result;
+// Convert CesiumUtility::Color (0-255 components) to CesiumColor32
+CesiumForUnity::CesiumColor32 toUnityColor(const CesiumUtility::Color& color) {
+  CesiumForUnity::CesiumColor32 result;
   result.r = static_cast<std::uint8_t>(color.r);
   result.g = static_cast<std::uint8_t>(color.g);
   result.b = static_cast<std::uint8_t>(color.b);
@@ -43,8 +43,8 @@ UnityEngine::Color32 toUnityColor(const CesiumUtility::Color& color) {
   return result;
 }
 
-// Convert Unity Color32 to CesiumUtility::Color
-CesiumUtility::Color fromUnityColor(const UnityEngine::Color32& color) {
+// Convert CesiumColor32 to CesiumUtility::Color
+CesiumUtility::Color fromUnityColor(const CesiumForUnity::CesiumColor32& color) {
   return CesiumUtility::Color(color.r, color.g, color.b, color.a);
 }
 

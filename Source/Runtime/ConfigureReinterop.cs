@@ -956,7 +956,7 @@ namespace CesiumForUnity
             Action<CesiumGeoJsonDocument> docCallback = (doc) => { };
             CesiumVectorLineStyle lineStyle = vectorStyle.lineStyle;
             vectorStyle.lineStyle = lineStyle;
-            UnityEngine.Color32 lineColor = lineStyle.color;
+            CesiumColor32 lineColor = lineStyle.color;
             lineStyle.color = lineColor;
             CesiumVectorColorMode colorMode = lineStyle.colorMode;
             lineStyle.colorMode = colorMode;
@@ -970,7 +970,7 @@ namespace CesiumForUnity
             polygonStyleV.fill = fillEnabled;
             CesiumVectorPolygonFillStyle fillStyle = polygonStyleV.fillStyle;
             polygonStyleV.fillStyle = fillStyle;
-            UnityEngine.Color32 fillColor = fillStyle.color;
+            CesiumColor32 fillColor = fillStyle.color;
             fillStyle.color = fillColor;
             CesiumVectorColorMode fillColorMode = fillStyle.colorMode;
             fillStyle.colorMode = fillColorMode;
@@ -1070,3 +1070,4 @@ namespace CesiumForUnity
     }
 }
 
+// Trigger Reinterop rebuild

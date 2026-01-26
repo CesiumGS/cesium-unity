@@ -23,8 +23,8 @@
 #include <DotNet/CesiumForUnity/CesiumVectorPolygonFillStyle.h>
 #include <DotNet/CesiumForUnity/CesiumVectorPolygonStyle.h>
 #include <DotNet/CesiumForUnity/CesiumVectorStyle.h>
+#include <DotNet/CesiumForUnity/CesiumColor32.h>
 #include <DotNet/System/String.h>
-#include <DotNet/UnityEngine/Color32.h>
 
 using namespace Cesium3DTilesSelection;
 using namespace CesiumRasterOverlays;
@@ -47,13 +47,9 @@ toNativeLineWidthMode(CesiumForUnity::CesiumVectorLineWidthMode mode) {
 
 CesiumVectorData::LineStyle
 toNativeLineStyle(const CesiumForUnity::CesiumVectorLineStyle& lineStyle) {
-  UnityEngine::Color32 color = lineStyle.color;
+  CesiumForUnity::CesiumColor32 color = lineStyle.color;
   CesiumVectorData::LineStyle native;
-  native.color = CesiumUtility::Color(
-      color.r / 255.0f,
-      color.g / 255.0f,
-      color.b / 255.0f,
-      color.a / 255.0f);
+  native.color = CesiumUtility::Color(color.r, color.g, color.b, color.a);
   native.colorMode = toNativeColorMode(lineStyle.colorMode);
   native.width = lineStyle.width;
   native.widthMode = toNativeLineWidthMode(lineStyle.widthMode);
@@ -62,13 +58,9 @@ toNativeLineStyle(const CesiumForUnity::CesiumVectorLineStyle& lineStyle) {
 
 CesiumVectorData::ColorStyle toNativeFillStyle(
     const CesiumForUnity::CesiumVectorPolygonFillStyle& fillStyle) {
-  UnityEngine::Color32 color = fillStyle.color;
+  CesiumForUnity::CesiumColor32 color = fillStyle.color;
   CesiumVectorData::ColorStyle native;
-  native.color = CesiumUtility::Color(
-      color.r / 255.0f,
-      color.g / 255.0f,
-      color.b / 255.0f,
-      color.a / 255.0f);
+  native.color = CesiumUtility::Color(color.r, color.g, color.b, color.a);
   native.colorMode = toNativeColorMode(fillStyle.colorMode);
   return native;
 }
@@ -100,12 +92,26 @@ wrapLoaderFuture(
       [](CesiumUtility::Result<CesiumVectorData::GeoJsonDocument>&&
              documentResult)
           -> std::shared_ptr<CesiumVectorData::GeoJsonDocument> {
+        spdlog::default_logger()->info(
+            "GeoJSON document loader future resolved");
+
         if (documentResult.errors) {
+          spdlog::default_logger()->error(
+              "GeoJSON document has errors!");
           documentResult.errors.logError(
               spdlog::default_logger(),
               "Errors loading GeoJSON document: ");
           return nullptr;
         }
+
+        if (!documentResult.value.has_value()) {
+          spdlog::default_logger()->error(
+              "GeoJSON document result has no value!");
+          return nullptr;
+        }
+
+        spdlog::default_logger()->info(
+            "GeoJSON document loaded successfully");
 
         return std::make_shared<CesiumVectorData::GeoJsonDocument>(
             std::move(*documentResult.value));
@@ -126,15 +132,19 @@ CesiumGeoJsonDocumentRasterOverlayImpl::
 void CesiumGeoJsonDocumentRasterOverlayImpl::AddToTileset(
     const ::DotNet::CesiumForUnity::CesiumGeoJsonDocumentRasterOverlay& overlay,
     const ::DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
+  spdlog::default_logger()->info("CesiumGeoJsonDocumentRasterOverlay::AddToTileset called");
+
   if (this->_pOverlay != nullptr) {
-    // Overlay already added.
+    spdlog::default_logger()->info("Overlay already added, returning");
     return;
   }
 
   Cesium3DTilesetImpl& tilesetImpl = tileset.NativeImplementation();
   Tileset* pTileset = tilesetImpl.getTileset();
-  if (!pTileset)
+  if (!pTileset) {
+    spdlog::default_logger()->error("No tileset found!");
     return;
+  }
 
   CesiumForUnity::CesiumRasterOverlay genericOverlay = overlay;
   RasterOverlayOptions options =
@@ -142,8 +152,29 @@ void CesiumGeoJsonDocumentRasterOverlayImpl::AddToTileset(
 
   const CesiumGeospatial::Ellipsoid& ellipsoid = pTileset->getEllipsoid();
 
+  CesiumVectorData::VectorStyle nativeStyle = toNativeVectorStyle(overlay.defaultStyle());
+
+  spdlog::default_logger()->info(
+      "GeoJSON style - Line color: ({}, {}, {}, {}), width: {}, Polygon fill: {}, outline: {}",
+      nativeStyle.line.color.r,
+      nativeStyle.line.color.g,
+      nativeStyle.line.color.b,
+      nativeStyle.line.color.a,
+      nativeStyle.line.width,
+      nativeStyle.polygon.fill.has_value(),
+      nativeStyle.polygon.outline.has_value());
+
+  if (nativeStyle.polygon.fill.has_value()) {
+    spdlog::default_logger()->info(
+        "GeoJSON polygon fill color: ({}, {}, {}, {})",
+        nativeStyle.polygon.fill->color.r,
+        nativeStyle.polygon.fill->color.g,
+        nativeStyle.polygon.fill->color.b,
+        nativeStyle.polygon.fill->color.a);
+  }
+
   GeoJsonDocumentRasterOverlayOptions vectorOptions{
-      toNativeVectorStyle(overlay.defaultStyle()),
+      nativeStyle,
       ellipsoid,
       static_cast<uint32_t>(overlay.mipLevels())};
 
@@ -180,21 +211,29 @@ void CesiumGeoJsonDocumentRasterOverlayImpl::AddToTileset(
     // FromUrl
     System::String url = overlay.url();
     if (System::String::IsNullOrEmpty(url)) {
-      // Don't create an overlay without a URL.
+      spdlog::default_logger()->error("GeoJSON URL is empty!");
       return;
     }
+
+    std::string urlStr = url.ToStlString();
+    spdlog::default_logger()->info("Loading GeoJSON from URL: {}", urlStr);
 
     this->_pOverlay = new GeoJsonDocumentRasterOverlay(
         overlay.materialKey().ToStlString(),
         wrapLoaderFuture(GeoJsonDocument::fromUrl(
             getAsyncSystem(),
             getAssetAccessor(),
-            url.ToStlString())),
+            urlStr)),
         vectorOptions,
         options);
   }
 
+  spdlog::default_logger()->info(
+      "GeoJSON overlay created with materialKey: {}",
+      overlay.materialKey().ToStlString());
+
   pTileset->getOverlays().add(this->_pOverlay);
+  spdlog::default_logger()->info("GeoJSON overlay added to tileset");
 }
 
 void CesiumGeoJsonDocumentRasterOverlayImpl::RemoveFromTileset(

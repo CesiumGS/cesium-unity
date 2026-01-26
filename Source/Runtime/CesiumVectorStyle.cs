@@ -1,8 +1,63 @@
 using System;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 namespace CesiumForUnity
 {
+    /// <summary>
+    /// A simple 32-bit color struct that marshals correctly between C# and C++.
+    /// Unlike Unity's Color32, this struct does not use a union layout that
+    /// confuses Reinterop's code generation.
+    /// </summary>
+    [Serializable]
+    [StructLayout(LayoutKind.Sequential)]
+    public struct CesiumColor32
+    {
+        /// <summary>Red component (0-255)</summary>
+        public byte r;
+        /// <summary>Green component (0-255)</summary>
+        public byte g;
+        /// <summary>Blue component (0-255)</summary>
+        public byte b;
+        /// <summary>Alpha component (0-255)</summary>
+        public byte a;
+
+        /// <summary>
+        /// Creates a new CesiumColor32 with the specified components.
+        /// </summary>
+        public CesiumColor32(byte r, byte g, byte b, byte a)
+        {
+            this.r = r;
+            this.g = g;
+            this.b = b;
+            this.a = a;
+        }
+
+        /// <summary>
+        /// Implicit conversion from Unity's Color32.
+        /// </summary>
+        public static implicit operator CesiumColor32(Color32 color)
+        {
+            return new CesiumColor32(color.r, color.g, color.b, color.a);
+        }
+
+        /// <summary>
+        /// Implicit conversion to Unity's Color32.
+        /// </summary>
+        public static implicit operator Color32(CesiumColor32 color)
+        {
+            return new Color32(color.r, color.g, color.b, color.a);
+        }
+
+        /// <summary>
+        /// Returns a string representation of the color.
+        /// </summary>
+        public override string ToString()
+        {
+            return $"RGBA({r}, {g}, {b}, {a})";
+        }
+    }
+
     /// <summary>
     /// The mode used to interpret the color value provided in a style.
     /// </summary>
@@ -53,7 +108,7 @@ namespace CesiumForUnity
         /// The color to be used.
         /// </summary>
         [Tooltip("The color to be used.")]
-        public Color32 color;
+        public CesiumColor32 color;
 
         /// <summary>
         /// The color mode to be used.
@@ -79,7 +134,7 @@ namespace CesiumForUnity
         /// </summary>
         public static CesiumVectorLineStyle Default => new CesiumVectorLineStyle
         {
-            color = new Color32(255, 255, 255, 255),
+            color = new CesiumColor32(255, 255, 255, 255),
             colorMode = CesiumVectorColorMode.Normal,
             width = 1.0,
             widthMode = CesiumVectorLineWidthMode.Pixels
@@ -96,7 +151,7 @@ namespace CesiumForUnity
         /// The color to be used.
         /// </summary>
         [Tooltip("The color to be used.")]
-        public Color32 color;
+        public CesiumColor32 color;
 
         /// <summary>
         /// The color mode to be used.
@@ -109,7 +164,7 @@ namespace CesiumForUnity
         /// </summary>
         public static CesiumVectorPolygonFillStyle Default => new CesiumVectorPolygonFillStyle
         {
-            color = new Color32(255, 255, 255, 255),
+            color = new CesiumColor32(255, 255, 255, 255),
             colorMode = CesiumVectorColorMode.Normal
         };
     }
