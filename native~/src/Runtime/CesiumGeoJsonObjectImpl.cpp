@@ -227,8 +227,8 @@ void CesiumGeoJsonObjectImpl::setNativeFeatureInDocument(
 std::int32_t CesiumGeoJsonObjectImpl::GetObjectType(
     const CesiumForUnity::CesiumGeoJsonObject& object) {
   if (_pFeature) {
-    // Features are type 1 (GeoJsonObjectType::Feature)
-    return 1;
+    // Features are type 7 (CesiumGeoJsonObjectType::Feature)
+    return 7;
   }
   if (!_pObject) {
     return 0;
