@@ -50,11 +50,15 @@ public:
   void DisposeNative(const DotNet::CesiumForUnity::CesiumGeoJsonDocument& document);
 
   const CesiumVectorData::GeoJsonDocument& getNativeDocument() const {
-    return _document;
+    return *_pDocument;
+  }
+
+  std::shared_ptr<CesiumVectorData::GeoJsonDocument> getSharedDocument() const {
+    return _pDocument;
   }
 
 private:
-  CesiumVectorData::GeoJsonDocument _document;
+  std::shared_ptr<CesiumVectorData::GeoJsonDocument> _pDocument;
   bool _isValid;
 };
 

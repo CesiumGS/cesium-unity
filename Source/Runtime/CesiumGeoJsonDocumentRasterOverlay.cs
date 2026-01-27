@@ -19,7 +19,13 @@ namespace CesiumForUnity
         /// <summary>
         /// The raster overlay will load a GeoJSON document from Cesium ion.
         /// </summary>
-        FromCesiumIon = 1
+        FromCesiumIon = 1,
+
+        /// <summary>
+        /// The raster overlay will use a GeoJSON document that has been parsed
+        /// and styled in code using <see cref="CesiumGeoJsonDocumentRasterOverlay.SetGeoJsonDocument"/>.
+        /// </summary>
+        FromDocument = 2
     }
 
     /// <summary>
@@ -180,6 +186,38 @@ namespace CesiumForUnity
                 this._defaultStyle = value;
                 this.Refresh();
             }
+        }
+
+        private CesiumGeoJsonDocument _document = null;
+
+        /// <summary>
+        /// Gets the GeoJSON document used by this overlay when source is FromDocument.
+        /// </summary>
+        public CesiumGeoJsonDocument document => this._document;
+
+        /// <summary>
+        /// Sets a pre-parsed and optionally styled GeoJSON document to use for this overlay.
+        /// </summary>
+        /// <remarks>
+        /// This method automatically sets <see cref="source"/> to
+        /// <see cref="CesiumGeoJsonDocumentRasterOverlaySource.FromDocument"/>.
+        /// You can style individual features in the document before calling this method
+        /// by using <see cref="CesiumGeoJsonObject.SetStyle"/>.
+        /// </remarks>
+        /// <param name="geoJsonDocument">The parsed GeoJSON document to use.</param>
+        public void SetGeoJsonDocument(CesiumGeoJsonDocument geoJsonDocument)
+        {
+            this._document = geoJsonDocument;
+            this._source = CesiumGeoJsonDocumentRasterOverlaySource.FromDocument;
+            this.Refresh();
+        }
+
+        /// <summary>
+        /// Internal method to get the document for native code.
+        /// </summary>
+        internal CesiumGeoJsonDocument GetDocumentInternal()
+        {
+            return this._document;
         }
 
         /// <inheritdoc/>

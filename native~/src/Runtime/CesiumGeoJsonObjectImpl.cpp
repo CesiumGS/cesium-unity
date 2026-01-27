@@ -194,17 +194,42 @@ void writeJsonValue(
 
 CesiumGeoJsonObjectImpl::CesiumGeoJsonObjectImpl(
     const CesiumForUnity::CesiumGeoJsonObject& object)
-    : _pObject(nullptr) {}
+    : _pDocument(nullptr), _pObject(nullptr), _pFeature(nullptr), _pStandaloneObject(nullptr) {}
 
 CesiumGeoJsonObjectImpl::~CesiumGeoJsonObjectImpl() {}
 
 void CesiumGeoJsonObjectImpl::setNativeObject(
     std::shared_ptr<GeoJsonObject> pObject) {
-  _pObject = std::move(pObject);
+  _pStandaloneObject = std::move(pObject);
+  _pObject = _pStandaloneObject.get();
+  _pFeature = nullptr;
+  _pDocument = nullptr;
+}
+
+void CesiumGeoJsonObjectImpl::setNativeObjectInDocument(
+    std::shared_ptr<GeoJsonDocument> pDocument,
+    GeoJsonObject* pObject) {
+  _pDocument = std::move(pDocument);
+  _pObject = pObject;
+  _pFeature = nullptr;
+  _pStandaloneObject = nullptr;
+}
+
+void CesiumGeoJsonObjectImpl::setNativeFeatureInDocument(
+    std::shared_ptr<GeoJsonDocument> pDocument,
+    GeoJsonFeature* pFeature) {
+  _pDocument = std::move(pDocument);
+  _pObject = nullptr;
+  _pFeature = pFeature;
+  _pStandaloneObject = nullptr;
 }
 
 std::int32_t CesiumGeoJsonObjectImpl::GetObjectType(
     const CesiumForUnity::CesiumGeoJsonObject& object) {
+  if (_pFeature) {
+    // Features are type 1 (GeoJsonObjectType::Feature)
+    return 1;
+  }
   if (!_pObject) {
     return 0;
   }
@@ -214,11 +239,19 @@ std::int32_t CesiumGeoJsonObjectImpl::GetObjectType(
 
 bool CesiumGeoJsonObjectImpl::IsValid(
     const CesiumForUnity::CesiumGeoJsonObject& object) {
-  return _pObject != nullptr;
+  return _pObject != nullptr || _pFeature != nullptr;
 }
 
 std::int32_t CesiumGeoJsonObjectImpl::GetChildCount(
     const CesiumForUnity::CesiumGeoJsonObject& object) {
+  // If we have a direct feature pointer
+  if (_pFeature) {
+    if (_pFeature->geometry) {
+      return 1;
+    }
+    return 0;
+  }
+
   if (!_pObject) {
     return 0;
   }
@@ -242,79 +275,122 @@ std::int32_t CesiumGeoJsonObjectImpl::GetChildCount(
 CesiumForUnity::CesiumGeoJsonObject CesiumGeoJsonObjectImpl::GetChild(
     const CesiumForUnity::CesiumGeoJsonObject& object,
     std::int32_t index) {
+  // Handle direct feature pointer case
+  if (_pFeature) {
+    // Features can only have geometry as a child
+    if (index == 0 && _pFeature->geometry) {
+      // Geometry children - create a standalone copy for now
+      CesiumForUnity::CesiumGeoJsonObject result;
+      auto pGeomCopy = std::make_shared<GeoJsonObject>(*_pFeature->geometry);
+      result.NativeImplementation().setNativeObject(std::move(pGeomCopy));
+      return result;
+    }
+    return CesiumForUnity::CesiumGeoJsonObject(nullptr);
+  }
+
   if (!_pObject) {
     return CesiumForUnity::CesiumGeoJsonObject(nullptr);
   }
 
-  std::shared_ptr<GeoJsonObject> pChild;
-
+  // For FeatureCollection, return direct pointers to features
   if (auto* pFeatureCollection =
           _pObject->getIf<GeoJsonFeatureCollection>()) {
     if (index >= 0 &&
         static_cast<size_t>(index) < pFeatureCollection->features.size()) {
-      pChild = std::make_shared<GeoJsonObject>(
-          pFeatureCollection->features[static_cast<size_t>(index)]);
+      CesiumForUnity::CesiumGeoJsonObject result;
+      // Get the GeoJsonObject at this index, then check if it's a feature
+      GeoJsonObject& featureObject = pFeatureCollection->features[static_cast<size_t>(index)];
+      GeoJsonFeature* pFeature = featureObject.getIf<GeoJsonFeature>();
+      if (pFeature) {
+        // It's a feature, use the direct feature pointer
+        result.NativeImplementation().setNativeFeatureInDocument(
+            _pDocument,
+            pFeature);
+      } else {
+        // Not a feature, use the object-in-document method
+        result.NativeImplementation().setNativeObjectInDocument(
+            _pDocument,
+            &featureObject);
+      }
+      return result;
     }
   } else if (auto* pGeometryCollection =
                  _pObject->getIf<GeoJsonGeometryCollection>()) {
     if (index >= 0 &&
         static_cast<size_t>(index) < pGeometryCollection->geometries.size()) {
-      pChild = std::make_shared<GeoJsonObject>(
+      // Geometries - create a standalone copy
+      CesiumForUnity::CesiumGeoJsonObject result;
+      auto pGeomCopy = std::make_shared<GeoJsonObject>(
           pGeometryCollection->geometries[static_cast<size_t>(index)]);
+      result.NativeImplementation().setNativeObject(std::move(pGeomCopy));
+      return result;
     }
   } else if (auto* pFeature = _pObject->getIf<GeoJsonFeature>()) {
     if (index == 0 && pFeature->geometry) {
-      pChild = std::make_shared<GeoJsonObject>(*pFeature->geometry);
+      // Geometry child - create a standalone copy
+      CesiumForUnity::CesiumGeoJsonObject result;
+      auto pGeomCopy = std::make_shared<GeoJsonObject>(*pFeature->geometry);
+      result.NativeImplementation().setNativeObject(std::move(pGeomCopy));
+      return result;
     }
   }
 
-  if (!pChild) {
-    return CesiumForUnity::CesiumGeoJsonObject(nullptr);
-  }
-
-  CesiumForUnity::CesiumGeoJsonObject result;
-  result.NativeImplementation().setNativeObject(std::move(pChild));
-  return result;
+  return CesiumForUnity::CesiumGeoJsonObject(nullptr);
 }
 
 bool CesiumGeoJsonObjectImpl::HasStyle(
     const CesiumForUnity::CesiumGeoJsonObject& object) {
+  if (_pFeature) {
+    return _pFeature->style.has_value();
+  }
   return _pObject != nullptr && _pObject->getStyle().has_value();
 }
 
 CesiumForUnity::CesiumVectorStyle CesiumGeoJsonObjectImpl::GetStyle(
     const CesiumForUnity::CesiumGeoJsonObject& object) {
-  if (!_pObject || !_pObject->getStyle().has_value()) {
-    // Return default style
-    CesiumForUnity::CesiumVectorStyle result;
-
-    result.lineStyle.color.r = 255;
-    result.lineStyle.color.g = 255;
-    result.lineStyle.color.b = 255;
-    result.lineStyle.color.a = 255;
-    result.lineStyle.colorMode = CesiumForUnity::CesiumVectorColorMode::Normal;
-    result.lineStyle.width = 1.0;
-    result.lineStyle.widthMode =
-        CesiumForUnity::CesiumVectorLineWidthMode::Pixels;
-
-    result.polygonStyle.fill = true;
-    result.polygonStyle.fillStyle.color.r = 255;
-    result.polygonStyle.fillStyle.color.g = 255;
-    result.polygonStyle.fillStyle.color.b = 255;
-    result.polygonStyle.fillStyle.color.a = 255;
-    result.polygonStyle.fillStyle.colorMode =
-        CesiumForUnity::CesiumVectorColorMode::Normal;
-    result.polygonStyle.outline = false;
-
-    return result;
+  // Check if we have a feature pointer with a style
+  if (_pFeature && _pFeature->style.has_value()) {
+    return toUnityStyle(*_pFeature->style);
   }
 
-  return toUnityStyle(*_pObject->getStyle());
+  // Check if we have an object with a style
+  if (_pObject && _pObject->getStyle().has_value()) {
+    return toUnityStyle(*_pObject->getStyle());
+  }
+
+  // Return default style
+  CesiumForUnity::CesiumVectorStyle result;
+
+  result.lineStyle.color.r = 255;
+  result.lineStyle.color.g = 255;
+  result.lineStyle.color.b = 255;
+  result.lineStyle.color.a = 255;
+  result.lineStyle.colorMode = CesiumForUnity::CesiumVectorColorMode::Normal;
+  result.lineStyle.width = 1.0;
+  result.lineStyle.widthMode =
+      CesiumForUnity::CesiumVectorLineWidthMode::Pixels;
+
+  result.polygonStyle.fill = true;
+  result.polygonStyle.fillStyle.color.r = 255;
+  result.polygonStyle.fillStyle.color.g = 255;
+  result.polygonStyle.fillStyle.color.b = 255;
+  result.polygonStyle.fillStyle.color.a = 255;
+  result.polygonStyle.fillStyle.colorMode =
+      CesiumForUnity::CesiumVectorColorMode::Normal;
+  result.polygonStyle.outline = false;
+
+  return result;
 }
 
 void CesiumGeoJsonObjectImpl::SetStyle(
     const CesiumForUnity::CesiumGeoJsonObject& object,
     CesiumForUnity::CesiumVectorStyle style) {
+  // If we have a direct feature pointer, set its style
+  if (_pFeature) {
+    _pFeature->style = fromUnityStyle(style);
+    return;
+  }
+
   if (!_pObject) {
     return;
   }
@@ -324,6 +400,12 @@ void CesiumGeoJsonObjectImpl::SetStyle(
 
 void CesiumGeoJsonObjectImpl::ClearStyle(
     const CesiumForUnity::CesiumGeoJsonObject& object) {
+  // If we have a direct feature pointer, clear its style
+  if (_pFeature) {
+    _pFeature->style = std::nullopt;
+    return;
+  }
+
   if (!_pObject) {
     return;
   }
@@ -333,11 +415,12 @@ void CesiumGeoJsonObjectImpl::ClearStyle(
 
 System::String CesiumGeoJsonObjectImpl::GetFeatureIdString(
     const CesiumForUnity::CesiumGeoJsonObject& object) {
-  if (!_pObject) {
-    return System::String("");
+  // Determine which feature to use
+  const GeoJsonFeature* pFeature = _pFeature;
+  if (!pFeature && _pObject) {
+    pFeature = _pObject->getIf<GeoJsonFeature>();
   }
 
-  auto* pFeature = _pObject->getIf<GeoJsonFeature>();
   if (!pFeature) {
     return System::String("");
   }
@@ -361,11 +444,12 @@ System::String CesiumGeoJsonObjectImpl::GetFeatureIdString(
 
 std::int64_t CesiumGeoJsonObjectImpl::GetFeatureIdInt(
     const CesiumForUnity::CesiumGeoJsonObject& object) {
-  if (!_pObject) {
-    return 0;
+  // Determine which feature to use
+  const GeoJsonFeature* pFeature = _pFeature;
+  if (!pFeature && _pObject) {
+    pFeature = _pObject->getIf<GeoJsonFeature>();
   }
 
-  auto* pFeature = _pObject->getIf<GeoJsonFeature>();
   if (!pFeature) {
     return 0;
   }
@@ -379,11 +463,12 @@ std::int64_t CesiumGeoJsonObjectImpl::GetFeatureIdInt(
 
 bool CesiumGeoJsonObjectImpl::HasFeatureId(
     const CesiumForUnity::CesiumGeoJsonObject& object) {
-  if (!_pObject) {
-    return false;
+  // Determine which feature to use
+  const GeoJsonFeature* pFeature = _pFeature;
+  if (!pFeature && _pObject) {
+    pFeature = _pObject->getIf<GeoJsonFeature>();
   }
 
-  auto* pFeature = _pObject->getIf<GeoJsonFeature>();
   if (!pFeature) {
     return false;
   }
@@ -393,11 +478,12 @@ bool CesiumGeoJsonObjectImpl::HasFeatureId(
 
 bool CesiumGeoJsonObjectImpl::HasFeatureIdString(
     const CesiumForUnity::CesiumGeoJsonObject& object) {
-  if (!_pObject) {
-    return false;
+  // Determine which feature to use
+  const GeoJsonFeature* pFeature = _pFeature;
+  if (!pFeature && _pObject) {
+    pFeature = _pObject->getIf<GeoJsonFeature>();
   }
 
-  auto* pFeature = _pObject->getIf<GeoJsonFeature>();
   if (!pFeature) {
     return false;
   }
@@ -407,11 +493,12 @@ bool CesiumGeoJsonObjectImpl::HasFeatureIdString(
 
 System::String CesiumGeoJsonObjectImpl::GetPropertiesAsJson(
     const CesiumForUnity::CesiumGeoJsonObject& object) {
-  if (!_pObject) {
-    return System::String("{}");
+  // Determine which feature to use
+  const GeoJsonFeature* pFeature = _pFeature;
+  if (!pFeature && _pObject) {
+    pFeature = _pObject->getIf<GeoJsonFeature>();
   }
 
-  auto* pFeature = _pObject->getIf<GeoJsonFeature>();
   if (!pFeature || !pFeature->properties.has_value()) {
     return System::String("{}");
   }
@@ -432,11 +519,12 @@ System::String CesiumGeoJsonObjectImpl::GetPropertiesAsJson(
 System::String CesiumGeoJsonObjectImpl::GetStringProperty(
     const CesiumForUnity::CesiumGeoJsonObject& object,
     System::String propertyName) {
-  if (!_pObject) {
-    return System::String("");
+  // Determine which feature to use
+  const GeoJsonFeature* pFeature = _pFeature;
+  if (!pFeature && _pObject) {
+    pFeature = _pObject->getIf<GeoJsonFeature>();
   }
 
-  auto* pFeature = _pObject->getIf<GeoJsonFeature>();
   if (!pFeature || !pFeature->properties.has_value()) {
     return System::String("");
   }
@@ -457,11 +545,12 @@ System::String CesiumGeoJsonObjectImpl::GetStringProperty(
 double CesiumGeoJsonObjectImpl::GetNumericProperty(
     const CesiumForUnity::CesiumGeoJsonObject& object,
     System::String propertyName) {
-  if (!_pObject) {
-    return 0.0;
+  // Determine which feature to use
+  const GeoJsonFeature* pFeature = _pFeature;
+  if (!pFeature && _pObject) {
+    pFeature = _pObject->getIf<GeoJsonFeature>();
   }
 
-  auto* pFeature = _pObject->getIf<GeoJsonFeature>();
   if (!pFeature || !pFeature->properties.has_value()) {
     return 0.0;
   }
@@ -486,11 +575,12 @@ double CesiumGeoJsonObjectImpl::GetNumericProperty(
 bool CesiumGeoJsonObjectImpl::HasProperty(
     const CesiumForUnity::CesiumGeoJsonObject& object,
     System::String propertyName) {
-  if (!_pObject) {
-    return false;
+  // Determine which feature to use
+  const GeoJsonFeature* pFeature = _pFeature;
+  if (!pFeature && _pObject) {
+    pFeature = _pObject->getIf<GeoJsonFeature>();
   }
 
-  auto* pFeature = _pObject->getIf<GeoJsonFeature>();
   if (!pFeature || !pFeature->properties.has_value()) {
     return false;
   }
@@ -501,7 +591,10 @@ bool CesiumGeoJsonObjectImpl::HasProperty(
 
 void CesiumGeoJsonObjectImpl::DisposeNative(
     const CesiumForUnity::CesiumGeoJsonObject& object) {
+  _pDocument = nullptr;
   _pObject = nullptr;
+  _pFeature = nullptr;
+  _pStandaloneObject = nullptr;
 }
 
 } // namespace CesiumForUnityNative

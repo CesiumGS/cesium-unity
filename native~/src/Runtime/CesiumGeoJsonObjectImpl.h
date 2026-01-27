@@ -2,6 +2,7 @@
 
 #include "CesiumImpl.h"
 
+#include <CesiumVectorData/GeoJsonDocument.h>
 #include <CesiumVectorData/GeoJsonObject.h>
 
 #include <DotNet/System/String.h>
@@ -21,7 +22,13 @@ public:
       const DotNet::CesiumForUnity::CesiumGeoJsonObject& object);
   ~CesiumGeoJsonObjectImpl();
 
+  // Set a standalone object (legacy, creates a copy)
   void setNativeObject(std::shared_ptr<CesiumVectorData::GeoJsonObject> pObject);
+
+  // Set an object that references data within a document (no copy, modifications persist)
+  void setNativeObjectInDocument(
+      std::shared_ptr<CesiumVectorData::GeoJsonDocument> pDocument,
+      CesiumVectorData::GeoJsonObject* pObject);
 
   std::int32_t GetObjectType(
       const DotNet::CesiumForUnity::CesiumGeoJsonObject& object);
@@ -73,12 +80,28 @@ public:
 
   void DisposeNative(const DotNet::CesiumForUnity::CesiumGeoJsonObject& object);
 
-  std::shared_ptr<CesiumVectorData::GeoJsonObject> getNativeObject() const {
+  CesiumVectorData::GeoJsonObject* getNativeObject() const {
     return _pObject;
   }
 
+  std::shared_ptr<CesiumVectorData::GeoJsonDocument> getDocument() const {
+    return _pDocument;
+  }
+
+  // Set a direct pointer to a feature within a document
+  void setNativeFeatureInDocument(
+      std::shared_ptr<CesiumVectorData::GeoJsonDocument> pDocument,
+      CesiumVectorData::GeoJsonFeature* pFeature);
+
 private:
-  std::shared_ptr<CesiumVectorData::GeoJsonObject> _pObject;
+  // The document that owns this object (keeps it alive)
+  std::shared_ptr<CesiumVectorData::GeoJsonDocument> _pDocument;
+  // Pointer to the actual object within the document (or standalone copy)
+  CesiumVectorData::GeoJsonObject* _pObject;
+  // Direct pointer to a feature (for child features in collections)
+  CesiumVectorData::GeoJsonFeature* _pFeature;
+  // For standalone objects that aren't part of a document
+  std::shared_ptr<CesiumVectorData::GeoJsonObject> _pStandaloneObject;
 };
 
 } // namespace CesiumForUnityNative

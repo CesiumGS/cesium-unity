@@ -27,29 +27,31 @@ namespace CesiumForUnityNative {
 
 CesiumGeoJsonDocumentImpl::CesiumGeoJsonDocumentImpl(
     const CesiumForUnity::CesiumGeoJsonDocument& document)
-    : _document(), _isValid(false) {}
+    : _pDocument(nullptr), _isValid(false) {}
 
 CesiumGeoJsonDocumentImpl::~CesiumGeoJsonDocumentImpl() {}
 
 void CesiumGeoJsonDocumentImpl::setNativeDocument(GeoJsonDocument&& document) {
-  _document = std::move(document);
+  _pDocument = std::make_shared<GeoJsonDocument>(std::move(document));
   _isValid = true;
 }
 
 bool CesiumGeoJsonDocumentImpl::IsValid(
     const CesiumForUnity::CesiumGeoJsonDocument& document) {
-  return _isValid;
+  return _isValid && _pDocument != nullptr;
 }
 
 CesiumForUnity::CesiumGeoJsonObject CesiumGeoJsonDocumentImpl::GetRootObject(
     const CesiumForUnity::CesiumGeoJsonDocument& document) {
-  if (!_isValid) {
+  if (!_isValid || !_pDocument) {
     return CesiumForUnity::CesiumGeoJsonObject(nullptr);
   }
 
-  auto pObject = std::make_shared<GeoJsonObject>(_document.rootObject);
   CesiumForUnity::CesiumGeoJsonObject result;
-  result.NativeImplementation().setNativeObject(std::move(pObject));
+  // Pass a pointer to the root object within the document, not a copy
+  result.NativeImplementation().setNativeObjectInDocument(
+      _pDocument,
+      &_pDocument->rootObject);
   return result;
 }
 
@@ -68,7 +70,7 @@ bool CesiumGeoJsonDocumentImpl::ParseInternal(
     return false;
   }
 
-  _document = std::move(*result.value);
+  _pDocument = std::make_shared<GeoJsonDocument>(std::move(*result.value));
   _isValid = true;
   return true;
 }
@@ -129,6 +131,7 @@ void CesiumGeoJsonDocumentImpl::LoadFromCesiumIon(
 
 void CesiumGeoJsonDocumentImpl::DisposeNative(
     const CesiumForUnity::CesiumGeoJsonDocument& document) {
+  _pDocument = nullptr;
   _isValid = false;
 }
 

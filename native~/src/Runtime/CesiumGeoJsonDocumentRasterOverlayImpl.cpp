@@ -1,8 +1,11 @@
 #include "CesiumGeoJsonDocumentRasterOverlayImpl.h"
 
 #include "Cesium3DTilesetImpl.h"
+#include "CesiumGeoJsonDocumentImpl.h"
 #include "CesiumRasterOverlayUtility.h"
 #include "UnityExternals.h"
+
+#include <DotNet/CesiumForUnity/CesiumGeoJsonDocument.h>
 
 #include <Cesium3DTilesSelection/Tileset.h>
 #include <CesiumRasterOverlays/GeoJsonDocumentRasterOverlay.h>
@@ -205,6 +208,35 @@ void CesiumGeoJsonDocumentRasterOverlayImpl::AddToTileset(
             overlay.ionAssetID(),
             ionAccessToken.ToStlString(),
             apiUrl)),
+        vectorOptions,
+        options);
+  } else if (source ==
+             CesiumForUnity::CesiumGeoJsonDocumentRasterOverlaySource::
+                 FromDocument) {
+    // FromDocument - use a pre-parsed and styled document
+    CesiumForUnity::CesiumGeoJsonDocument doc = overlay.GetDocumentInternal();
+    if (doc == nullptr) {
+      spdlog::default_logger()->error(
+          "GeoJSON document is null! Call SetGeoJsonDocument first.");
+      return;
+    }
+
+    CesiumGeoJsonDocumentImpl& docImpl = doc.NativeImplementation();
+
+    // Use the shared_ptr directly to preserve per-feature styles
+    std::shared_ptr<GeoJsonDocument> pDocument = docImpl.getSharedDocument();
+    if (!pDocument) {
+      spdlog::default_logger()->error(
+          "GeoJSON document shared_ptr is null!");
+      return;
+    }
+
+    spdlog::default_logger()->info(
+        "Loading GeoJSON from pre-parsed document with per-feature styles");
+
+    this->_pOverlay = new GeoJsonDocumentRasterOverlay(
+        overlay.materialKey().ToStlString(),
+        getAsyncSystem().createResolvedFuture(std::move(pDocument)),
         vectorOptions,
         options);
   } else {
