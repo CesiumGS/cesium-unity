@@ -136,4 +136,17 @@ private:
   TilesetMaterialProperties _materialProperties;
 };
 
+/**
+ * @brief Sets glTF material parameter values on a Unity material.
+ *
+ * This function is used internally to apply glTF material properties
+ * (base color, metallic, roughness, textures, etc.) to a Unity Material.
+ */
+void setGltfMaterialParameterValues(
+    const CesiumGltf::Model& model,
+    const CesiumPrimitiveInfo& primitiveInfo,
+    const CesiumGltf::Material& gltfMaterial,
+    const DotNet::UnityEngine::Material& unityMaterial,
+    const TilesetMaterialProperties& materialProperties);
+
 } // namespace CesiumForUnityNative
