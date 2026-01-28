@@ -1070,5 +1070,3 @@ namespace CesiumForUnity
         }
     }
 }
-
-// Trigger Reinterop rebuild
