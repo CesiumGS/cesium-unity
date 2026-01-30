@@ -23,7 +23,6 @@
 #include <DotNet/UnityEngine/HideFlags.h>
 #include <DotNet/UnityEngine/Material.h>
 #include <DotNet/UnityEngine/Object.h>
-#include <DotNet/UnityEngine/Resources.h>
 #include <DotNet/UnityEngine/Texture.h>
 #include <DotNet/UnityEngine/Vector4.h>
 #include <DotNet/UnityEngine/Rendering/CullMode.h>
@@ -40,6 +39,7 @@ CesiumMaterialVariantsUtility::addMaterialVariants(
     const CesiumGltf::MeshPrimitive& primitive,
     const CesiumPrimitiveInfo& primitiveInfo,
     const DotNet::UnityEngine::Material& defaultMaterial,
+    const DotNet::UnityEngine::Material& opaqueMaterial,
     const TilesetMaterialProperties& materialProperties) noexcept {
 
   // Get the model-level extension (contains variant names)
@@ -89,16 +89,9 @@ CesiumMaterialVariantsUtility::addMaterialVariants(
 
   variantsComponent.defaultMaterial(defaultMaterial);
 
-  // Load the base material for creating variant materials
-  UnityEngine::Material baseMaterial =
-      UnityEngine::Resources::Load<UnityEngine::Material>(
-          primitiveInfo.isUnlit
-              ? System::String("CesiumUnlitTilesetMaterial")
-              : System::String("CesiumDefaultTilesetMaterial"));
-
-  if (baseMaterial == nullptr) {
+  if (opaqueMaterial == nullptr) {
     UnityEngine::Debug::LogWarning(static_cast<System::Object>(System::String(
-        "CesiumMaterialVariants: Failed to load base material. Material variants will not be available.")));
+        "CesiumMaterialVariants: No opaque material provided. Material variants will not be available.")));
     return variantsComponent;
   }
 
@@ -109,9 +102,9 @@ CesiumMaterialVariantsUtility::addMaterialVariants(
     const CesiumGltf::Material* pVariantMaterial =
         CesiumGltf::Model::getSafe(&model.materials, materialIndex);
 
-    if (pVariantMaterial && baseMaterial != nullptr) {
+    if (pVariantMaterial) {
       UnityEngine::Material variantMaterial =
-          UnityEngine::Object::Instantiate(baseMaterial);
+          UnityEngine::Object::Instantiate(opaqueMaterial);
 
       if (variantMaterial == nullptr) {
         continue;

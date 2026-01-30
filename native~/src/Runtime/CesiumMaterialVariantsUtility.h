@@ -32,6 +32,7 @@ public:
    * @param primitive The glTF primitive (checked for KHR_materials_variants extension).
    * @param primitiveInfo Information about the primitive, including UV mappings.
    * @param defaultMaterial The default Unity material for this primitive.
+   * @param opaqueMaterial The tileset's base opaque material to use for variant materials.
    * @param materialProperties Material properties for creating variant materials.
    * @return The CesiumMaterialVariants component, or null if no variants exist.
    */
@@ -41,6 +42,7 @@ public:
       const CesiumGltf::MeshPrimitive& primitive,
       const CesiumPrimitiveInfo& primitiveInfo,
       const DotNet::UnityEngine::Material& defaultMaterial,
+      const DotNet::UnityEngine::Material& opaqueMaterial,
       const TilesetMaterialProperties& materialProperties) noexcept;
 };
 

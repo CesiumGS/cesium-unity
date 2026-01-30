@@ -1659,6 +1659,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             primitive,
             primitiveInfo,
             material,
+            opaqueMaterial,
             materialProperties);
       });
 
