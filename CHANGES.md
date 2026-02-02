@@ -1,10 +1,12 @@
 # Change Log {#changes}
 
-## ? - ?
+## v1.22.0 - 2026-02-02
 
 ##### Fixes :wrench:
 
 - Fixed a typo in the the name of the `CesiumGoogleMapTilesRasterOverlay.cs` file that prevented users from adding this component to a `GameObject` in more recent versions of Unity.
+
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.56.0 to v0.57.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
 
 ## v1.21.0 - 2026-01-05
 
