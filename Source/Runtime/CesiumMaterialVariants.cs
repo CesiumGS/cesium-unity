@@ -42,12 +42,8 @@ namespace CesiumForUnity
         } = new Dictionary<int, Material>();
 
         private MeshRenderer _meshRenderer;
+        private MeshRenderer CurrentMeshRenderer => _meshRenderer ??= GetComponent<MeshRenderer>();
         private int _currentVariantIndex = -1; // -1 means default material is active
-
-        void Start()
-        {
-            _meshRenderer = GetComponent<MeshRenderer>();
-        }
 
         /// <summary>
         /// Gets the index of the currently active variant, or -1 if the default material is active.
@@ -77,7 +73,7 @@ namespace CesiumForUnity
         /// <returns>True if the variant was successfully set, false otherwise.</returns>
         public bool SetVariant(int variantIndex)
         {
-            if (_meshRenderer == null)
+            if (CurrentMeshRenderer == null)
             {
                 Debug.LogWarning("CesiumMaterialVariants: MeshRenderer not found.");
                 return false;
@@ -88,7 +84,7 @@ namespace CesiumForUnity
             {
                 if (defaultMaterial != null)
                 {
-                    _meshRenderer.material = defaultMaterial;
+                    CurrentMeshRenderer.material = defaultMaterial;
                     _currentVariantIndex = -1;
                     return true;
                 }
@@ -108,7 +104,7 @@ namespace CesiumForUnity
             {
                 if (variantMaterial != null)
                 {
-                    _meshRenderer.material = variantMaterial;
+                    CurrentMeshRenderer.material = variantMaterial;
                     _currentVariantIndex = variantIndex;
                     return true;
                 }
