@@ -11,7 +11,8 @@
     "url": "https://cesium.com"
   },
   "scripts": {
-    "doxygen": "doxygen ./Documentation~/Doxyfile && cd Documentation~ && node copy-images.js && cd .."
+    "doxygen": "doxygen ./Documentation~/Doxyfile && cd Documentation~ && node copy-images.js && cd ..",
+    "preinstall": "echo \"ERROR: This is a Unity package, not an npm package. Do not run npm install.\" && exit 1"
   },
   "changelogUrl": "https://github.com/CesiumGS/cesium-unity/blob/main/CHANGES.md",
   "documentationUrl": "https://cesium.com/learn/unity/",
