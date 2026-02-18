@@ -2,6 +2,11 @@
 
 ## v1.22.0 - 2026-02-02
 
+##### Additions :tada:
+
+- Added support for the `KHR_materials_variants` glTF extension. Primitives with this extension will have a `CesiumMaterialVariants` component that allows switching between material variants at runtime using `SetVariant(int index)` or `SetVariant(string name)`.
+
+
 ##### Fixes :wrench:
 
 - Fixed a typo in the the name of the `CesiumGoogleMapTilesRasterOverlay.cs` file that prevented users from adding this component to a `GameObject` in more recent versions of Unity.

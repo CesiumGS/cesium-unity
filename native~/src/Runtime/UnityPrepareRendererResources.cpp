@@ -1,6 +1,7 @@
 #include "UnityPrepareRendererResources.h"
 
 #include "CesiumFeaturesMetadataUtility.h"
+#include "CesiumMaterialVariantsUtility.h"
 #include "TextureLoader.h"
 #include "TilesetMaterialProperties.h"
 #include "UnityLifetime.h"
@@ -30,6 +31,7 @@
 #include <DotNet/CesiumForUnity/CesiumModelMetadata.h>
 #include <DotNet/CesiumForUnity/CesiumObjectPool1.h>
 #include <DotNet/CesiumForUnity/CesiumObjectPools.h>
+#include <DotNet/CesiumForUnity/CesiumMaterialVariants.h>
 #include <DotNet/CesiumForUnity/CesiumPointCloudRenderer.h>
 #include <DotNet/CesiumForUnity/CesiumPrimitiveFeatures.h>
 #include <DotNet/CesiumForUnity/CesiumPropertyTable.h>
@@ -1081,6 +1083,10 @@ gltfVectorToUnityVector(const std::vector<double>& values, float defaultValue) {
   return result;
 }
 
+} // namespace
+
+namespace CesiumForUnityNative {
+
 void setGltfMaterialParameterValues(
     const CesiumGltf::Model& model,
     const CesiumPrimitiveInfo& primitiveInfo,
@@ -1387,7 +1393,8 @@ void setGltfMaterialParameterValues(
     }
   }
 }
-} // namespace
+
+} // namespace CesiumForUnityNative
 
 void* UnityPrepareRendererResources::prepareInMainThread(
     Cesium3DTilesSelection::Tile& tile,
@@ -1644,6 +1651,16 @@ void* UnityPrepareRendererResources::prepareInMainThread(
                 *pFeatures);
           }
         }
+
+        // Add material variants component if the primitive has variants
+        CesiumMaterialVariantsUtility::addMaterialVariants(
+            primitiveGameObject,
+            gltf,
+            primitive,
+            primitiveInfo,
+            material,
+            opaqueMaterial,
+            materialProperties);
       });
 
   tilesetComponent.BroadcastNewGameObjectCreated(*pModelGameObject);

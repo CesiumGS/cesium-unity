@@ -844,6 +844,14 @@ namespace CesiumForUnity
             sets[0].propertyTableIndex = 0;
             sets[0].Dispose();
 
+            // CesiumMaterialVariants - for KHR_materials_variants support
+            CesiumMaterialVariants materialVariants = go.AddComponent<CesiumMaterialVariants>();
+            materialVariants = go.GetComponent<CesiumMaterialVariants>();
+            materialVariants.variantNames = new string[] { "variant1", "variant2" };
+            materialVariants.defaultMaterial = meshRenderer.sharedMaterial;
+            materialVariants.variantMaterials = new Dictionary<int, Material>();
+            materialVariants.variantMaterials.Add(0, meshRenderer.sharedMaterial);
+
             CesiumFeatureIdAttribute featureIdAttribute = new CesiumFeatureIdAttribute();
             featureIdAttribute.status = featureIdAttribute.status;
             featureIdAttribute.featureCount = 1;
@@ -1009,4 +1017,3 @@ namespace CesiumForUnity
         }
     }
 }
-
