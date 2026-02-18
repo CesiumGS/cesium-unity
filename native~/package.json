@@ -1,5 +1,6 @@
 {
-  "name": "cesium-unity-native",
+  "name": "@cesium/cesium-unity-native",
+  "private": true,
   "version": "0.0.1",
   "description": "Cesium for Native",
   "main": "index.js",
