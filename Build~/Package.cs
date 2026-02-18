@@ -446,7 +446,8 @@ namespace Build
                 "Tests.meta",
                 "EditorTests.meta",
                 "ThirdParty.json",
-                "ThirdParty.json.meta"
+                "ThirdParty.json.meta",
+                ".npmrc"
             };
 
             foreach (string file in filesToCopy)
