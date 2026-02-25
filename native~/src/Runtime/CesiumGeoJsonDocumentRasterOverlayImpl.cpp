@@ -191,8 +191,6 @@ void CesiumGeoJsonDocumentRasterOverlayImpl::AddToTileset(
     // FromDocument - use a pre-parsed and styled document
     CesiumForUnity::CesiumGeoJsonDocument doc = overlay.document();
     if (doc == nullptr) {
-      spdlog::default_logger()->error(
-          "GeoJSON document is null! Call SetGeoJsonDocument first.");
       return;
     }
 
