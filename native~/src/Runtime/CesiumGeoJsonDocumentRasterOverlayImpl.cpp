@@ -243,7 +243,6 @@ void CesiumGeoJsonDocumentRasterOverlayImpl::AddToTileset(
     // FromUrl
     System::String url = overlay.url();
     if (System::String::IsNullOrEmpty(url)) {
-      spdlog::default_logger()->error("GeoJSON URL is empty!");
       return;
     }
 
