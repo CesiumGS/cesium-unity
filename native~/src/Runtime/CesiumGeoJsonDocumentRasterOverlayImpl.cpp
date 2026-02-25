@@ -179,16 +179,18 @@ void CesiumGeoJsonDocumentRasterOverlayImpl::AddToTileset(
     if (!apiUrl.empty() && *apiUrl.rbegin() != '/')
       apiUrl += '/';
 
-    this->_pOverlay = new GeoJsonDocumentRasterOverlay(
-        overlay.materialKey().ToStlString(),
-        wrapLoaderFuture(GeoJsonDocument::fromCesiumIonAsset(
-            getAsyncSystem(),
-            getAssetAccessor(),
-            overlay.ionAssetID(),
-            ionAccessToken.ToStlString(),
-            apiUrl)),
-        vectorOptions,
-        options);
+    if (!apiUrl.empty()) {
+      this->_pOverlay = new GeoJsonDocumentRasterOverlay(
+          overlay.materialKey().ToStlString(),
+          wrapLoaderFuture(GeoJsonDocument::fromCesiumIonAsset(
+              getAsyncSystem(),
+              getAssetAccessor(),
+              overlay.ionAssetID(),
+              ionAccessToken.ToStlString(),
+              apiUrl)),
+          vectorOptions,
+          options);
+    }
   } else if (source ==
              CesiumForUnity::CesiumGeoJsonDocumentRasterOverlaySource::
                  FromDocument) {
