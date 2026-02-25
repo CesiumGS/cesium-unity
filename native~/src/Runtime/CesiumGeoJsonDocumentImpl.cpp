@@ -13,10 +13,8 @@
 #include <DotNet/System/Action1.h>
 #include <DotNet/System/String.h>
 
-#include <cstring>
 #include <memory>
 #include <span>
-#include <vector>
 
 using namespace DotNet;
 using namespace CesiumAsync;
@@ -63,11 +61,10 @@ bool CesiumGeoJsonDocumentImpl::ParseInternal(
     System::String geoJsonString) {
   std::string str = geoJsonString.ToStlString();
 
-  std::vector<std::byte> bytes(str.size());
-  std::memcpy(bytes.data(), str.data(), str.size());
-
-  Result<GeoJsonDocument> result =
-      GeoJsonDocument::fromGeoJson(std::span<const std::byte>(bytes));
+  Result<GeoJsonDocument> result = GeoJsonDocument::fromGeoJson(
+      std::span<const std::byte>(
+          reinterpret_cast<const std::byte*>(str.data()),
+          str.size()));
 
   if (!result.value.has_value()) {
     return false;
