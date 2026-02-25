@@ -25,26 +25,24 @@ namespace CesiumForUnityNative {
 
 CesiumGeoJsonDocumentImpl::CesiumGeoJsonDocumentImpl(
     const CesiumForUnity::CesiumGeoJsonDocument& document)
-    : _pDocument(nullptr), _isValid(false) {}
+    : _pDocument(nullptr) {}
 
 CesiumGeoJsonDocumentImpl::~CesiumGeoJsonDocumentImpl() {
   _pDocument = nullptr;
-  _isValid = false;
 }
 
 void CesiumGeoJsonDocumentImpl::setNativeDocument(GeoJsonDocument&& document) {
   _pDocument = std::make_shared<GeoJsonDocument>(std::move(document));
-  _isValid = true;
 }
 
 bool CesiumGeoJsonDocumentImpl::IsValid(
     const CesiumForUnity::CesiumGeoJsonDocument& document) {
-  return _isValid && _pDocument != nullptr;
+  return _pDocument != nullptr;
 }
 
 CesiumForUnity::CesiumGeoJsonObject CesiumGeoJsonDocumentImpl::GetRootObject(
     const CesiumForUnity::CesiumGeoJsonDocument& document) {
-  if (!_isValid || !_pDocument) {
+  if (!_pDocument) {
     return CesiumForUnity::CesiumGeoJsonObject(nullptr);
   }
 
@@ -71,7 +69,6 @@ bool CesiumGeoJsonDocumentImpl::ParseInternal(
   }
 
   _pDocument = std::make_shared<GeoJsonDocument>(std::move(*result.value));
-  _isValid = true;
   return true;
 }
 

@@ -57,7 +57,6 @@ public:
 
 private:
   std::shared_ptr<CesiumVectorData::GeoJsonDocument> _pDocument;
-  bool _isValid;
 };
 
 } // namespace CesiumForUnityNative
