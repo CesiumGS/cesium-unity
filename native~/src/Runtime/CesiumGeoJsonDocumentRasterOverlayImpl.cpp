@@ -138,14 +138,12 @@ void CesiumGeoJsonDocumentRasterOverlayImpl::AddToTileset(
   spdlog::default_logger()->info("CesiumGeoJsonDocumentRasterOverlay::AddToTileset called");
 
   if (this->_pOverlay != nullptr) {
-    spdlog::default_logger()->info("Overlay already added, returning");
     return;
   }
 
   Cesium3DTilesetImpl& tilesetImpl = tileset.NativeImplementation();
   Tileset* pTileset = tilesetImpl.getTileset();
   if (!pTileset) {
-    spdlog::default_logger()->error("No tileset found!");
     return;
   }
 
