@@ -42,6 +42,10 @@ namespace Reinterop
             // TODO: Implement these as functions that call into the C#?
             if (field.IsStatic)
                 return;
+                
+            // Skip any fields with an "Ignore" attribute.
+            if (field.GetAttributes().Where(attrib => attrib.AttributeClass != null && (attrib.AttributeClass.Name == "IgnoreAttribute")).Any())
+                return;
 
             string fieldName = CSharpTypeUtility.GetFieldName(field);
             bool isPrivate = CSharpTypeUtility.GetFieldIsPrivate(field);
