@@ -240,12 +240,7 @@ void CesiumGeoJsonDocumentRasterOverlayImpl::AddToTileset(
         options);
   }
 
-  spdlog::default_logger()->info(
-      "GeoJSON overlay created with materialKey: {}",
-      overlay.materialKey().ToStlString());
-
   pTileset->getOverlays().add(this->_pOverlay);
-  spdlog::default_logger()->info("GeoJSON overlay added to tileset");
 }
 
 void CesiumGeoJsonDocumentRasterOverlayImpl::RemoveFromTileset(
