@@ -42,7 +42,7 @@ namespace CesiumForUnity
     {
         [SerializeField]
         private CesiumGeoJsonDocumentRasterOverlaySource _source =
-            CesiumGeoJsonDocumentRasterOverlaySource.FromUrl;
+            CesiumGeoJsonDocumentRasterOverlaySource.FromCesiumIon;
 
         /// <summary>
         /// The source from which to load the GeoJSON document.
@@ -191,33 +191,23 @@ namespace CesiumForUnity
         private CesiumGeoJsonDocument _document = null;
 
         /// <summary>
-        /// Gets the GeoJSON document used by this overlay when source is FromDocument.
-        /// </summary>
-        public CesiumGeoJsonDocument document => this._document;
-
-        /// <summary>
-        /// Sets a pre-parsed and optionally styled GeoJSON document to use for this overlay.
+        /// Gets or sets the GeoJSON document used by this overlay.
         /// </summary>
         /// <remarks>
-        /// This method automatically sets <see cref="source"/> to
+        /// Setting this property automatically changes <see cref="source"/> to
         /// <see cref="CesiumGeoJsonDocumentRasterOverlaySource.FromDocument"/>.
-        /// You can style individual features in the document before calling this method
+        /// You can style individual features in the document before setting it
         /// by using <see cref="CesiumGeoJsonObject.SetStyle"/>.
         /// </remarks>
-        /// <param name="geoJsonDocument">The parsed GeoJSON document to use.</param>
-        public void SetGeoJsonDocument(CesiumGeoJsonDocument geoJsonDocument)
+        public CesiumGeoJsonDocument document
         {
-            this._document = geoJsonDocument;
-            this._source = CesiumGeoJsonDocumentRasterOverlaySource.FromDocument;
-            this.Refresh();
-        }
-
-        /// <summary>
-        /// Internal method to get the document for native code.
-        /// </summary>
-        internal CesiumGeoJsonDocument GetDocumentInternal()
-        {
-            return this._document;
+            get => this._document;
+            set
+            {
+                this._document = value;
+                this._source = CesiumGeoJsonDocumentRasterOverlaySource.FromDocument;
+                this.Refresh();
+            }
         }
 
         /// <inheritdoc/>
