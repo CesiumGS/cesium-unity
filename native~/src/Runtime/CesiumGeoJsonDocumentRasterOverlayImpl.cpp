@@ -228,7 +228,6 @@ void CesiumGeoJsonDocumentRasterOverlayImpl::AddToTileset(
     }
 
     std::string urlStr = url.ToStlString();
-    spdlog::default_logger()->info("Loading GeoJSON from URL: {}", urlStr);
 
     this->_pOverlay = new GeoJsonDocumentRasterOverlay(
         overlay.materialKey().ToStlString(),
