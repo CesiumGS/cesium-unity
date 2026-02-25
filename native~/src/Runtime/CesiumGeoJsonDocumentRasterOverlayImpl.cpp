@@ -207,13 +207,8 @@ void CesiumGeoJsonDocumentRasterOverlayImpl::AddToTileset(
     // Use the shared_ptr directly to preserve per-feature styles
     std::shared_ptr<GeoJsonDocument> pDocument = docImpl.getSharedDocument();
     if (!pDocument) {
-      spdlog::default_logger()->error(
-          "GeoJSON document shared_ptr is null!");
       return;
     }
-
-    spdlog::default_logger()->info(
-        "Loading GeoJSON from pre-parsed document with per-feature styles");
 
     this->_pOverlay = new GeoJsonDocumentRasterOverlay(
         overlay.materialKey().ToStlString(),
