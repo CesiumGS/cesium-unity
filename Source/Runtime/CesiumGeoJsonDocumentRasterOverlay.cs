@@ -12,9 +12,10 @@ namespace CesiumForUnity
     public enum CesiumGeoJsonDocumentRasterOverlaySource
     {
         /// <summary>
-        /// The raster overlay will load a GeoJSON document from a URL.
+        /// The raster overlay will use a GeoJSON document that has been parsed
+        /// and styled in code using <see cref="CesiumGeoJsonDocumentRasterOverlay.document"/>.
         /// </summary>
-        FromUrl = 0,
+        FromDocument = 0,
 
         /// <summary>
         /// The raster overlay will load a GeoJSON document from Cesium ion.
@@ -22,10 +23,9 @@ namespace CesiumForUnity
         FromCesiumIon = 1,
 
         /// <summary>
-        /// The raster overlay will use a GeoJSON document that has been parsed
-        /// and styled in code using <see cref="CesiumGeoJsonDocumentRasterOverlay.SetGeoJsonDocument"/>.
+        /// The raster overlay will load a GeoJSON document from a URL.
         /// </summary>
-        FromDocument = 2
+        FromUrl = 2
     }
 
     /// <summary>
