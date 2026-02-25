@@ -157,25 +157,6 @@ void CesiumGeoJsonDocumentRasterOverlayImpl::AddToTileset(
 
   CesiumVectorData::VectorStyle nativeStyle = toNativeVectorStyle(overlay.defaultStyle());
 
-  spdlog::default_logger()->info(
-      "GeoJSON style - Line color: ({}, {}, {}, {}), width: {}, Polygon fill: {}, outline: {}",
-      nativeStyle.line.color.r,
-      nativeStyle.line.color.g,
-      nativeStyle.line.color.b,
-      nativeStyle.line.color.a,
-      nativeStyle.line.width,
-      nativeStyle.polygon.fill.has_value(),
-      nativeStyle.polygon.outline.has_value());
-
-  if (nativeStyle.polygon.fill.has_value()) {
-    spdlog::default_logger()->info(
-        "GeoJSON polygon fill color: ({}, {}, {}, {})",
-        nativeStyle.polygon.fill->color.r,
-        nativeStyle.polygon.fill->color.g,
-        nativeStyle.polygon.fill->color.b,
-        nativeStyle.polygon.fill->color.a);
-  }
-
   GeoJsonDocumentRasterOverlayOptions vectorOptions{
       nativeStyle,
       ellipsoid,
