@@ -147,7 +147,6 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
-        [Range(0, 8)]
         private int _mipLevels = 0;
 
         /// <summary>

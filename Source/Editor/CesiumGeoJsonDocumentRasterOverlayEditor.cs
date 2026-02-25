@@ -132,7 +132,7 @@ namespace CesiumForUnity
                 "The number of mip levels to generate for each tile of this raster overlay. " +
                 "Additional mip levels can improve the visual quality of tiles farther from " +
                 "the camera at the cost of additional rasterization time.");
-            EditorGUILayout.IntSlider(this._mipLevels, 0, 8, mipLevelsContent);
+            EditorGUILayout.DelayedIntField(this._mipLevels, mipLevelsContent);
 
             GUIContent defaultStyleContent = new GUIContent(
                 "Default Style",
