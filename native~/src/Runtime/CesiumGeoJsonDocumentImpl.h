@@ -47,10 +47,6 @@ public:
       DotNet::System::Action1<DotNet::CesiumForUnity::CesiumGeoJsonDocument>
           callback);
 
-  const CesiumVectorData::GeoJsonDocument& getNativeDocument() const {
-    return *_pDocument;
-  }
-
   std::shared_ptr<CesiumVectorData::GeoJsonDocument> getSharedDocument() const {
     return _pDocument;
   }
