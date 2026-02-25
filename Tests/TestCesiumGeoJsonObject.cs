@@ -1,6 +1,5 @@
 using NUnit.Framework;
 using CesiumForUnity;
-using System.Collections.Generic;
 
 public class TestCesiumGeoJsonObject
 {
@@ -69,49 +68,45 @@ public class TestCesiumGeoJsonObject
         _featureNoIdDoc = CesiumGeoJsonDocument.Parse(FeatureWithNoId);
     }
 
-    #region Child Access Tests
+    #region Feature Access Tests
 
     [Test]
-    public void GetChildReturnsValidFeature()
+    public void GetObjectAsFeatureCollectionReturnsFeatures()
     {
         CesiumGeoJsonObject root = _featureCollectionDoc.GetRootObject();
-        CesiumGeoJsonObject child = root.GetChild(0);
+        CesiumGeoJsonFeature[] features = root.GetObjectAsFeatureCollection();
 
-        Assert.IsNotNull(child);
-        Assert.IsTrue(child.IsValid());
-        Assert.AreEqual(CesiumGeoJsonObjectType.Feature, child.GetObjectType());
+        Assert.IsNotNull(features);
+        Assert.AreEqual(2, features.Length);
     }
 
     [Test]
-    public void GetChildWithInvalidIndexReturnsNull()
+    public void GetObjectAsFeatureReturnsFeatureForFeatureObject()
     {
-        CesiumGeoJsonObject root = _featureCollectionDoc.GetRootObject();
-        CesiumGeoJsonObject child = root.GetChild(100);
+        CesiumGeoJsonObject root = _featureNoIdDoc.GetRootObject();
+        CesiumGeoJsonFeature feature = root.GetObjectAsFeature();
 
-        Assert.IsNull(child);
+        Assert.IsNotNull(feature);
     }
 
     [Test]
-    public void GetChildWithNegativeIndexReturnsNull()
+    public void GetObjectAsFeatureReturnsNullForNonFeature()
     {
         CesiumGeoJsonObject root = _featureCollectionDoc.GetRootObject();
-        CesiumGeoJsonObject child = root.GetChild(-1);
+        CesiumGeoJsonFeature feature = root.GetObjectAsFeature();
 
-        Assert.IsNull(child);
+        // Root is a FeatureCollection, not a Feature
+        Assert.IsNull(feature);
     }
 
     [Test]
-    public void GetChildrenReturnsAllChildren()
+    public void GetObjectAsFeatureCollectionReturnsNullForNonCollection()
     {
-        CesiumGeoJsonObject root = _featureCollectionDoc.GetRootObject();
-        List<CesiumGeoJsonObject> children = root.GetChildren();
+        CesiumGeoJsonObject root = _featureNoIdDoc.GetRootObject();
+        CesiumGeoJsonFeature[] features = root.GetObjectAsFeatureCollection();
 
-        Assert.AreEqual(2, children.Count);
-        foreach (var child in children)
-        {
-            Assert.IsNotNull(child);
-            Assert.IsTrue(child.IsValid());
-        }
+        // Root is a Feature, not a FeatureCollection
+        Assert.IsNull(features);
     }
 
     #endregion
@@ -119,49 +114,48 @@ public class TestCesiumGeoJsonObject
     #region Feature ID Tests
 
     [Test]
-    public void FeatureWithStringIdHasFeatureId()
+    public void FeatureWithStringIdHasStringIdType()
     {
         CesiumGeoJsonObject root = _featureCollectionDoc.GetRootObject();
-        CesiumGeoJsonObject feature = root.GetChild(0);
+        CesiumGeoJsonFeature feature = root.GetObjectAsFeatureCollection()[0];
 
-        Assert.IsTrue(feature.HasFeatureId());
-        Assert.IsTrue(feature.HasFeatureIdString());
+        Assert.AreEqual(CesiumGeoJsonFeatureIdType.String, feature.GetIdType());
     }
 
     [Test]
     public void FeatureWithStringIdReturnsCorrectId()
     {
         CesiumGeoJsonObject root = _featureCollectionDoc.GetRootObject();
-        CesiumGeoJsonObject feature = root.GetChild(0);
+        CesiumGeoJsonFeature feature = root.GetObjectAsFeatureCollection()[0];
 
-        Assert.AreEqual("feature-string-id", feature.GetFeatureIdString());
+        Assert.AreEqual("feature-string-id", feature.GetIdAsString());
     }
 
     [Test]
-    public void FeatureWithIntIdHasFeatureId()
+    public void FeatureWithIntIdHasIntegerIdType()
     {
         CesiumGeoJsonObject root = _featureCollectionDoc.GetRootObject();
-        CesiumGeoJsonObject feature = root.GetChild(1);
+        CesiumGeoJsonFeature feature = root.GetObjectAsFeatureCollection()[1];
 
-        Assert.IsTrue(feature.HasFeatureId());
-        Assert.IsFalse(feature.HasFeatureIdString());
+        Assert.AreEqual(CesiumGeoJsonFeatureIdType.Integer, feature.GetIdType());
     }
 
     [Test]
     public void FeatureWithIntIdReturnsCorrectId()
     {
         CesiumGeoJsonObject root = _featureCollectionDoc.GetRootObject();
-        CesiumGeoJsonObject feature = root.GetChild(1);
+        CesiumGeoJsonFeature feature = root.GetObjectAsFeatureCollection()[1];
 
-        Assert.AreEqual(999, feature.GetFeatureIdInt());
+        Assert.AreEqual(999, feature.GetIdAsInteger());
     }
 
     [Test]
-    public void FeatureWithNoIdReturnsFalse()
+    public void FeatureWithNoIdHasNoneIdType()
     {
         CesiumGeoJsonObject root = _featureNoIdDoc.GetRootObject();
+        CesiumGeoJsonFeature feature = root.GetObjectAsFeature();
 
-        Assert.IsFalse(root.HasFeatureId());
+        Assert.AreEqual(CesiumGeoJsonFeatureIdType.None, feature.GetIdType());
     }
 
     #endregion
@@ -172,7 +166,7 @@ public class TestCesiumGeoJsonObject
     public void HasPropertyReturnsTrueForExistingProperty()
     {
         CesiumGeoJsonObject root = _featureCollectionDoc.GetRootObject();
-        CesiumGeoJsonObject feature = root.GetChild(0);
+        CesiumGeoJsonFeature feature = root.GetObjectAsFeatureCollection()[0];
 
         Assert.IsTrue(feature.HasProperty("name"));
         Assert.IsTrue(feature.HasProperty("count"));
@@ -183,7 +177,7 @@ public class TestCesiumGeoJsonObject
     public void HasPropertyReturnsFalseForNonExistentProperty()
     {
         CesiumGeoJsonObject root = _featureCollectionDoc.GetRootObject();
-        CesiumGeoJsonObject feature = root.GetChild(0);
+        CesiumGeoJsonFeature feature = root.GetObjectAsFeatureCollection()[0];
 
         Assert.IsFalse(feature.HasProperty("nonexistent"));
     }
@@ -192,7 +186,7 @@ public class TestCesiumGeoJsonObject
     public void GetStringPropertyReturnsCorrectValue()
     {
         CesiumGeoJsonObject root = _featureCollectionDoc.GetRootObject();
-        CesiumGeoJsonObject feature = root.GetChild(0);
+        CesiumGeoJsonFeature feature = root.GetObjectAsFeatureCollection()[0];
 
         Assert.AreEqual("Test Feature", feature.GetStringProperty("name"));
     }
@@ -201,7 +195,7 @@ public class TestCesiumGeoJsonObject
     public void GetStringPropertyReturnsEmptyForNonExistent()
     {
         CesiumGeoJsonObject root = _featureCollectionDoc.GetRootObject();
-        CesiumGeoJsonObject feature = root.GetChild(0);
+        CesiumGeoJsonFeature feature = root.GetObjectAsFeatureCollection()[0];
 
         Assert.AreEqual("", feature.GetStringProperty("nonexistent"));
     }
@@ -210,7 +204,7 @@ public class TestCesiumGeoJsonObject
     public void GetNumericPropertyReturnsCorrectIntValue()
     {
         CesiumGeoJsonObject root = _featureCollectionDoc.GetRootObject();
-        CesiumGeoJsonObject feature = root.GetChild(0);
+        CesiumGeoJsonFeature feature = root.GetObjectAsFeatureCollection()[0];
 
         Assert.AreEqual(42.0, feature.GetNumericProperty("count"), 0.001);
     }
@@ -219,7 +213,7 @@ public class TestCesiumGeoJsonObject
     public void GetNumericPropertyReturnsCorrectDoubleValue()
     {
         CesiumGeoJsonObject root = _featureCollectionDoc.GetRootObject();
-        CesiumGeoJsonObject feature = root.GetChild(0);
+        CesiumGeoJsonFeature feature = root.GetObjectAsFeatureCollection()[0];
 
         Assert.AreEqual(4.5, feature.GetNumericProperty("rating"), 0.001);
     }
@@ -228,7 +222,7 @@ public class TestCesiumGeoJsonObject
     public void GetNumericPropertyReturnsZeroForNonExistent()
     {
         CesiumGeoJsonObject root = _featureCollectionDoc.GetRootObject();
-        CesiumGeoJsonObject feature = root.GetChild(0);
+        CesiumGeoJsonFeature feature = root.GetObjectAsFeatureCollection()[0];
 
         Assert.AreEqual(0.0, feature.GetNumericProperty("nonexistent"), 0.001);
     }
@@ -237,7 +231,7 @@ public class TestCesiumGeoJsonObject
     public void GetPropertiesAsJsonReturnsValidJson()
     {
         CesiumGeoJsonObject root = _featureCollectionDoc.GetRootObject();
-        CesiumGeoJsonObject feature = root.GetChild(0);
+        CesiumGeoJsonFeature feature = root.GetObjectAsFeatureCollection()[0];
 
         string json = feature.GetPropertiesAsJson();
 
@@ -255,7 +249,7 @@ public class TestCesiumGeoJsonObject
     public void NewFeatureHasNoStyle()
     {
         CesiumGeoJsonObject root = _featureCollectionDoc.GetRootObject();
-        CesiumGeoJsonObject feature = root.GetChild(0);
+        CesiumGeoJsonFeature feature = root.GetObjectAsFeatureCollection()[0];
 
         Assert.IsFalse(feature.HasStyle());
     }
@@ -264,7 +258,7 @@ public class TestCesiumGeoJsonObject
     public void SetStyleMakesHasStyleReturnTrue()
     {
         CesiumGeoJsonObject root = _featureCollectionDoc.GetRootObject();
-        CesiumGeoJsonObject feature = root.GetChild(0);
+        CesiumGeoJsonFeature feature = root.GetObjectAsFeatureCollection()[0];
 
         CesiumVectorStyle style = CesiumVectorStyle.Default;
         feature.SetStyle(style);
@@ -276,7 +270,7 @@ public class TestCesiumGeoJsonObject
     public void SetStyleWithCustomColorPreservesColor()
     {
         CesiumGeoJsonObject root = _featureCollectionDoc.GetRootObject();
-        CesiumGeoJsonObject feature = root.GetChild(0);
+        CesiumGeoJsonFeature feature = root.GetObjectAsFeatureCollection()[0];
 
         CesiumVectorStyle style = new CesiumVectorStyle();
         style.polygonStyle.fill = true;
@@ -297,7 +291,7 @@ public class TestCesiumGeoJsonObject
     public void ClearStyleMakesHasStyleReturnFalse()
     {
         CesiumGeoJsonObject root = _featureCollectionDoc.GetRootObject();
-        CesiumGeoJsonObject feature = root.GetChild(0);
+        CesiumGeoJsonFeature feature = root.GetObjectAsFeatureCollection()[0];
 
         CesiumVectorStyle style = CesiumVectorStyle.Default;
         feature.SetStyle(style);
@@ -311,8 +305,9 @@ public class TestCesiumGeoJsonObject
     public void DifferentFeaturesCanHaveDifferentStyles()
     {
         CesiumGeoJsonObject root = _featureCollectionDoc.GetRootObject();
-        CesiumGeoJsonObject feature1 = root.GetChild(0);
-        CesiumGeoJsonObject feature2 = root.GetChild(1);
+        CesiumGeoJsonFeature[] features = root.GetObjectAsFeatureCollection();
+        CesiumGeoJsonFeature feature1 = features[0];
+        CesiumGeoJsonFeature feature2 = features[1];
 
         // Set red style on feature 1
         CesiumVectorStyle redStyle = new CesiumVectorStyle();
@@ -341,7 +336,7 @@ public class TestCesiumGeoJsonObject
     public void LineStylePropertiesArePreserved()
     {
         CesiumGeoJsonObject root = _featureCollectionDoc.GetRootObject();
-        CesiumGeoJsonObject feature = root.GetChild(0);
+        CesiumGeoJsonFeature feature = root.GetObjectAsFeatureCollection()[0];
 
         CesiumVectorStyle style = new CesiumVectorStyle();
         style.lineStyle.color = new CesiumColor32(0, 255, 0, 200);
@@ -365,7 +360,7 @@ public class TestCesiumGeoJsonObject
     public void PolygonOutlineStyleIsPreserved()
     {
         CesiumGeoJsonObject root = _featureCollectionDoc.GetRootObject();
-        CesiumGeoJsonObject feature = root.GetChild(0);
+        CesiumGeoJsonFeature feature = root.GetObjectAsFeatureCollection()[0];
 
         CesiumVectorStyle style = new CesiumVectorStyle();
         style.polygonStyle.fill = true;

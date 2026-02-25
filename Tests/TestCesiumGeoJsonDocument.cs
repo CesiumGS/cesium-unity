@@ -150,20 +150,24 @@ public class TestCesiumGeoJsonDocument
     }
 
     [Test]
-    public void FeatureCollectionHasCorrectChildCount()
+    public void FeatureCollectionHasCorrectFeatureCount()
     {
         CesiumGeoJsonDocument document = CesiumGeoJsonDocument.Parse(ValidFeatureCollectionJson);
         CesiumGeoJsonObject root = document.GetRootObject();
+        CesiumGeoJsonFeature[] features = root.GetObjectAsFeatureCollection();
 
-        Assert.AreEqual(2, root.GetChildCount());
+        Assert.IsNotNull(features);
+        Assert.AreEqual(2, features.Length);
     }
 
     [Test]
-    public void EmptyFeatureCollectionHasZeroChildren()
+    public void EmptyFeatureCollectionHasZeroFeatures()
     {
         CesiumGeoJsonDocument document = CesiumGeoJsonDocument.Parse(EmptyFeatureCollectionJson);
         CesiumGeoJsonObject root = document.GetRootObject();
+        CesiumGeoJsonFeature[] features = root.GetObjectAsFeatureCollection();
 
-        Assert.AreEqual(0, root.GetChildCount());
+        Assert.IsNotNull(features);
+        Assert.AreEqual(0, features.Length);
     }
 }

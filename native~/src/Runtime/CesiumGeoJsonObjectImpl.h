@@ -10,9 +10,14 @@
 #include <memory>
 
 namespace DotNet::CesiumForUnity {
+class CesiumGeoJsonFeature;
 class CesiumGeoJsonObject;
 struct CesiumVectorStyle;
 } // namespace DotNet::CesiumForUnity
+
+namespace DotNet::System {
+template <typename T> class Array1;
+} // namespace DotNet::System
 
 namespace CesiumForUnityNative {
 
@@ -35,11 +40,12 @@ public:
 
   bool IsValid(const DotNet::CesiumForUnity::CesiumGeoJsonObject& object);
 
-  std::int32_t
-  GetChildCount(const DotNet::CesiumForUnity::CesiumGeoJsonObject& object);
+  DotNet::CesiumForUnity::CesiumGeoJsonFeature
+  GetObjectAsFeature(const DotNet::CesiumForUnity::CesiumGeoJsonObject& object);
 
-  DotNet::CesiumForUnity::CesiumGeoJsonObject
-  GetChild(const DotNet::CesiumForUnity::CesiumGeoJsonObject& object, std::int32_t index);
+  DotNet::System::Array1<DotNet::CesiumForUnity::CesiumGeoJsonFeature>
+  GetObjectAsFeatureCollection(
+      const DotNet::CesiumForUnity::CesiumGeoJsonObject& object);
 
   bool HasStyle(const DotNet::CesiumForUnity::CesiumGeoJsonObject& object);
 
@@ -52,32 +58,6 @@ public:
 
   void ClearStyle(const DotNet::CesiumForUnity::CesiumGeoJsonObject& object);
 
-  DotNet::System::String
-  GetFeatureIdString(const DotNet::CesiumForUnity::CesiumGeoJsonObject& object);
-
-  std::int64_t
-  GetFeatureIdInt(const DotNet::CesiumForUnity::CesiumGeoJsonObject& object);
-
-  bool HasFeatureId(const DotNet::CesiumForUnity::CesiumGeoJsonObject& object);
-
-  bool HasFeatureIdString(
-      const DotNet::CesiumForUnity::CesiumGeoJsonObject& object);
-
-  DotNet::System::String GetPropertiesAsJson(
-      const DotNet::CesiumForUnity::CesiumGeoJsonObject& object);
-
-  DotNet::System::String GetStringProperty(
-      const DotNet::CesiumForUnity::CesiumGeoJsonObject& object,
-      DotNet::System::String propertyName);
-
-  double GetNumericProperty(
-      const DotNet::CesiumForUnity::CesiumGeoJsonObject& object,
-      DotNet::System::String propertyName);
-
-  bool HasProperty(
-      const DotNet::CesiumForUnity::CesiumGeoJsonObject& object,
-      DotNet::System::String propertyName);
-
   void DisposeNative(const DotNet::CesiumForUnity::CesiumGeoJsonObject& object);
 
   CesiumVectorData::GeoJsonObject* getNativeObject() const {
@@ -88,18 +68,11 @@ public:
     return _pDocument;
   }
 
-  // Set a direct pointer to a feature within a document
-  void setNativeFeatureInDocument(
-      std::shared_ptr<CesiumVectorData::GeoJsonDocument> pDocument,
-      CesiumVectorData::GeoJsonFeature* pFeature);
-
 private:
   // The document that owns this object (keeps it alive)
   std::shared_ptr<CesiumVectorData::GeoJsonDocument> _pDocument;
   // Pointer to the actual object within the document (or standalone copy)
   CesiumVectorData::GeoJsonObject* _pObject;
-  // Direct pointer to a feature (for child features in collections)
-  CesiumVectorData::GeoJsonFeature* _pFeature;
   // For standalone objects that aren't part of a document
   std::shared_ptr<CesiumVectorData::GeoJsonObject> _pStandaloneObject;
 };
