@@ -215,12 +215,5 @@ namespace CesiumForUnity
 
         /// <inheritdoc/>
         protected override partial void RemoveFromTileset(Cesium3DTileset tileset);
-
-#if UNITY_EDITOR
-        private void Reset()
-        {
-            this._defaultStyle = CesiumVectorStyle.Default;
-        }
-#endif
     }
 }
