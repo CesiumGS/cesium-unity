@@ -963,6 +963,34 @@ namespace CesiumForUnity
             vectorStyle = geoJsonFeature.GetStyle();
             geoJsonFeature.SetStyle(vectorStyle);
             geoJsonFeature.ClearStyle();
+            // CesiumGeoJsonLineString
+            CesiumGeoJsonLineString geoJsonLineString = new CesiumGeoJsonLineString();
+            double3[] lineStringPoints = geoJsonLineString.Points;
+            geoJsonLineString.Points = lineStringPoints;
+
+            // CesiumGeoJsonPolygon
+            CesiumGeoJsonPolygon geoJsonPolygon = new CesiumGeoJsonPolygon();
+            CesiumGeoJsonLineString[] polygonRings = geoJsonPolygon.GetPolygonRings();
+            CesiumGeoJsonLineString polygonRing = polygonRings[0];
+            int polygonRingCount = polygonRings.Length;
+
+            // Geometry subtypes on CesiumGeoJsonObject
+            double3 pointCoord = geoJsonObj.GetObjectAsPoint();
+            double3[] multiPointCoords = geoJsonObj.GetObjectAsMultiPoint();
+            double3 multiPointCoord = multiPointCoords[0];
+            int multiPointCount = multiPointCoords.Length;
+            CesiumGeoJsonLineString lineStringGeom = geoJsonObj.GetObjectAsLineString();
+            CesiumGeoJsonLineString[] multiLineStringGeom = geoJsonObj.GetObjectAsMultiLineString();
+            CesiumGeoJsonLineString multiLineStringItem = multiLineStringGeom[0];
+            int multiLineStringCount = multiLineStringGeom.Length;
+            CesiumGeoJsonPolygon polygonGeom = geoJsonObj.GetObjectAsPolygon();
+            CesiumGeoJsonPolygon[] multiPolygonGeom = geoJsonObj.GetObjectAsMultiPolygon();
+            CesiumGeoJsonPolygon multiPolygonItem = multiPolygonGeom[0];
+            int multiPolygonCount = multiPolygonGeom.Length;
+            CesiumGeoJsonObject[] geometryCollection = geoJsonObj.GetObjectAsGeometryCollection();
+            CesiumGeoJsonObject geometryCollectionItem = geometryCollection[0];
+            int geometryCollectionCount = geometryCollection.Length;
+
             Action<CesiumGeoJsonDocument> docCallback = (doc) => { };
             CesiumVectorLineStyle lineStyle = vectorStyle.lineStyle;
             vectorStyle.lineStyle = lineStyle;

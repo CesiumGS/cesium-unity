@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using CesiumForUnity;
+using Unity.Mathematics;
 
 public class TestCesiumGeoJsonObject
 {
@@ -432,6 +433,275 @@ public class TestCesiumGeoJsonObject
         CesiumGeoJsonObject root = doc.GetRootObject();
 
         Assert.AreEqual(CesiumGeoJsonObjectType.Point, root.GetObjectType());
+    }
+
+    #endregion
+
+    #region Geometry Subtype Tests
+
+    [Test]
+    public void GetObjectAsPointReturnsCorrectCoordinates()
+    {
+        CesiumGeoJsonDocument doc = CesiumGeoJsonDocument.Parse(@"{
+            ""type"": ""Point"",
+            ""coordinates"": [102.0, 0.5, 100.0]
+        }");
+
+        CesiumGeoJsonObject root = doc.GetRootObject();
+        double3 point = root.GetObjectAsPoint();
+
+        Assert.AreEqual(102.0, point.x, 0.001);
+        Assert.AreEqual(0.5, point.y, 0.001);
+        Assert.AreEqual(100.0, point.z, 0.001);
+    }
+
+    [Test]
+    public void GetObjectAsPointReturnsZeroForWrongType()
+    {
+        CesiumGeoJsonDocument doc = CesiumGeoJsonDocument.Parse(@"{
+            ""type"": ""LineString"",
+            ""coordinates"": [[0, 0], [1, 1]]
+        }");
+
+        CesiumGeoJsonObject root = doc.GetRootObject();
+        double3 point = root.GetObjectAsPoint();
+
+        Assert.AreEqual(0.0, point.x, 0.001);
+        Assert.AreEqual(0.0, point.y, 0.001);
+        Assert.AreEqual(0.0, point.z, 0.001);
+    }
+
+    [Test]
+    public void GetObjectAsMultiPointReturnsCorrectCoordinates()
+    {
+        CesiumGeoJsonDocument doc = CesiumGeoJsonDocument.Parse(@"{
+            ""type"": ""MultiPoint"",
+            ""coordinates"": [[10, 20, 30], [40, 50, 60]]
+        }");
+
+        CesiumGeoJsonObject root = doc.GetRootObject();
+        double3[] points = root.GetObjectAsMultiPoint();
+
+        Assert.IsNotNull(points);
+        Assert.AreEqual(2, points.Length);
+        Assert.AreEqual(10.0, points[0].x, 0.001);
+        Assert.AreEqual(20.0, points[0].y, 0.001);
+        Assert.AreEqual(30.0, points[0].z, 0.001);
+        Assert.AreEqual(40.0, points[1].x, 0.001);
+        Assert.AreEqual(50.0, points[1].y, 0.001);
+        Assert.AreEqual(60.0, points[1].z, 0.001);
+    }
+
+    [Test]
+    public void GetObjectAsMultiPointReturnsNullForWrongType()
+    {
+        CesiumGeoJsonDocument doc = CesiumGeoJsonDocument.Parse(@"{
+            ""type"": ""Point"",
+            ""coordinates"": [0, 0]
+        }");
+
+        CesiumGeoJsonObject root = doc.GetRootObject();
+        double3[] points = root.GetObjectAsMultiPoint();
+
+        Assert.IsNull(points);
+    }
+
+    [Test]
+    public void GetObjectAsLineStringReturnsCorrectPoints()
+    {
+        CesiumGeoJsonDocument doc = CesiumGeoJsonDocument.Parse(@"{
+            ""type"": ""LineString"",
+            ""coordinates"": [[0, 0], [1, 1], [2, 0]]
+        }");
+
+        CesiumGeoJsonObject root = doc.GetRootObject();
+        CesiumGeoJsonLineString lineString = root.GetObjectAsLineString();
+
+        Assert.IsNotNull(lineString);
+        Assert.AreEqual(3, lineString.Points.Length);
+        Assert.AreEqual(0.0, lineString.Points[0].x, 0.001);
+        Assert.AreEqual(0.0, lineString.Points[0].y, 0.001);
+        Assert.AreEqual(1.0, lineString.Points[1].x, 0.001);
+        Assert.AreEqual(1.0, lineString.Points[1].y, 0.001);
+        Assert.AreEqual(2.0, lineString.Points[2].x, 0.001);
+        Assert.AreEqual(0.0, lineString.Points[2].y, 0.001);
+    }
+
+    [Test]
+    public void GetObjectAsLineStringReturnsNullForWrongType()
+    {
+        CesiumGeoJsonDocument doc = CesiumGeoJsonDocument.Parse(@"{
+            ""type"": ""Point"",
+            ""coordinates"": [0, 0]
+        }");
+
+        CesiumGeoJsonObject root = doc.GetRootObject();
+        CesiumGeoJsonLineString lineString = root.GetObjectAsLineString();
+
+        Assert.IsNull(lineString);
+    }
+
+    [Test]
+    public void GetObjectAsMultiLineStringReturnsCorrectLineStrings()
+    {
+        CesiumGeoJsonDocument doc = CesiumGeoJsonDocument.Parse(@"{
+            ""type"": ""MultiLineString"",
+            ""coordinates"": [
+                [[0, 0], [1, 1]],
+                [[2, 2], [3, 3], [4, 4]]
+            ]
+        }");
+
+        CesiumGeoJsonObject root = doc.GetRootObject();
+        CesiumGeoJsonLineString[] lineStrings = root.GetObjectAsMultiLineString();
+
+        Assert.IsNotNull(lineStrings);
+        Assert.AreEqual(2, lineStrings.Length);
+        Assert.AreEqual(2, lineStrings[0].Points.Length);
+        Assert.AreEqual(3, lineStrings[1].Points.Length);
+        Assert.AreEqual(0.0, lineStrings[0].Points[0].x, 0.001);
+        Assert.AreEqual(4.0, lineStrings[1].Points[2].x, 0.001);
+    }
+
+    [Test]
+    public void GetObjectAsMultiLineStringReturnsNullForWrongType()
+    {
+        CesiumGeoJsonDocument doc = CesiumGeoJsonDocument.Parse(@"{
+            ""type"": ""LineString"",
+            ""coordinates"": [[0, 0], [1, 1]]
+        }");
+
+        CesiumGeoJsonObject root = doc.GetRootObject();
+        CesiumGeoJsonLineString[] lineStrings = root.GetObjectAsMultiLineString();
+
+        Assert.IsNull(lineStrings);
+    }
+
+    [Test]
+    public void GetObjectAsPolygonReturnsCorrectRings()
+    {
+        CesiumGeoJsonDocument doc = CesiumGeoJsonDocument.Parse(@"{
+            ""type"": ""Polygon"",
+            ""coordinates"": [
+                [[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]],
+                [[2, 2], [8, 2], [8, 8], [2, 8], [2, 2]]
+            ]
+        }");
+
+        CesiumGeoJsonObject root = doc.GetRootObject();
+        CesiumGeoJsonPolygon polygon = root.GetObjectAsPolygon();
+
+        Assert.IsNotNull(polygon);
+
+        CesiumGeoJsonLineString[] rings = polygon.GetPolygonRings();
+        Assert.IsNotNull(rings);
+        Assert.AreEqual(2, rings.Length);
+
+        // Exterior ring
+        Assert.AreEqual(5, rings[0].Points.Length);
+        Assert.AreEqual(0.0, rings[0].Points[0].x, 0.001);
+        Assert.AreEqual(10.0, rings[0].Points[1].x, 0.001);
+
+        // Interior ring (hole)
+        Assert.AreEqual(5, rings[1].Points.Length);
+        Assert.AreEqual(2.0, rings[1].Points[0].x, 0.001);
+        Assert.AreEqual(8.0, rings[1].Points[1].x, 0.001);
+    }
+
+    [Test]
+    public void GetObjectAsPolygonReturnsNullForWrongType()
+    {
+        CesiumGeoJsonDocument doc = CesiumGeoJsonDocument.Parse(@"{
+            ""type"": ""Point"",
+            ""coordinates"": [0, 0]
+        }");
+
+        CesiumGeoJsonObject root = doc.GetRootObject();
+        CesiumGeoJsonPolygon polygon = root.GetObjectAsPolygon();
+
+        Assert.IsNull(polygon);
+    }
+
+    [Test]
+    public void GetObjectAsMultiPolygonReturnsCorrectPolygons()
+    {
+        CesiumGeoJsonDocument doc = CesiumGeoJsonDocument.Parse(@"{
+            ""type"": ""MultiPolygon"",
+            ""coordinates"": [
+                [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]],
+                [[[2, 2], [3, 2], [3, 3], [2, 3], [2, 2]]]
+            ]
+        }");
+
+        CesiumGeoJsonObject root = doc.GetRootObject();
+        CesiumGeoJsonPolygon[] polygons = root.GetObjectAsMultiPolygon();
+
+        Assert.IsNotNull(polygons);
+        Assert.AreEqual(2, polygons.Length);
+
+        CesiumGeoJsonLineString[] rings0 = polygons[0].GetPolygonRings();
+        Assert.AreEqual(1, rings0.Length);
+        Assert.AreEqual(5, rings0[0].Points.Length);
+        Assert.AreEqual(0.0, rings0[0].Points[0].x, 0.001);
+
+        CesiumGeoJsonLineString[] rings1 = polygons[1].GetPolygonRings();
+        Assert.AreEqual(1, rings1.Length);
+        Assert.AreEqual(5, rings1[0].Points.Length);
+        Assert.AreEqual(2.0, rings1[0].Points[0].x, 0.001);
+    }
+
+    [Test]
+    public void GetObjectAsMultiPolygonReturnsNullForWrongType()
+    {
+        CesiumGeoJsonDocument doc = CesiumGeoJsonDocument.Parse(@"{
+            ""type"": ""Polygon"",
+            ""coordinates"": [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]]
+        }");
+
+        CesiumGeoJsonObject root = doc.GetRootObject();
+        CesiumGeoJsonPolygon[] polygons = root.GetObjectAsMultiPolygon();
+
+        Assert.IsNull(polygons);
+    }
+
+    [Test]
+    public void GetObjectAsGeometryCollectionReturnsCorrectObjects()
+    {
+        CesiumGeoJsonDocument doc = CesiumGeoJsonDocument.Parse(@"{
+            ""type"": ""GeometryCollection"",
+            ""geometries"": [
+                {
+                    ""type"": ""Point"",
+                    ""coordinates"": [100.0, 0.0]
+                },
+                {
+                    ""type"": ""LineString"",
+                    ""coordinates"": [[101.0, 0.0], [102.0, 1.0]]
+                }
+            ]
+        }");
+
+        CesiumGeoJsonObject root = doc.GetRootObject();
+        CesiumGeoJsonObject[] geometries = root.GetObjectAsGeometryCollection();
+
+        Assert.IsNotNull(geometries);
+        Assert.AreEqual(2, geometries.Length);
+        Assert.AreEqual(CesiumGeoJsonObjectType.Point, geometries[0].GetObjectType());
+        Assert.AreEqual(CesiumGeoJsonObjectType.LineString, geometries[1].GetObjectType());
+    }
+
+    [Test]
+    public void GetObjectAsGeometryCollectionReturnsNullForWrongType()
+    {
+        CesiumGeoJsonDocument doc = CesiumGeoJsonDocument.Parse(@"{
+            ""type"": ""Point"",
+            ""coordinates"": [0, 0]
+        }");
+
+        CesiumGeoJsonObject root = doc.GetRootObject();
+        CesiumGeoJsonObject[] geometries = root.GetObjectAsGeometryCollection();
+
+        Assert.IsNull(geometries);
     }
 
     #endregion

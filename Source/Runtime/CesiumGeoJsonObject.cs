@@ -1,5 +1,6 @@
 using Reinterop;
 using System;
+using Unity.Mathematics;
 
 namespace CesiumForUnity
 {
@@ -50,6 +51,55 @@ namespace CesiumForUnity
         /// <returns>An array of <see cref="CesiumGeoJsonFeature"/> if this object
         /// is a FeatureCollection; null otherwise.</returns>
         public partial CesiumGeoJsonFeature[] GetObjectAsFeatureCollection();
+
+        /// <summary>
+        /// Gets this object as a Point geometry.
+        /// </summary>
+        /// <returns>A <see cref="double3"/> with the point's LLH coordinates,
+        /// or a zero vector if this object is not a Point.</returns>
+        public partial double3 GetObjectAsPoint();
+
+        /// <summary>
+        /// Gets this object as a MultiPoint geometry.
+        /// </summary>
+        /// <returns>An array of <see cref="double3"/> with the points' LLH
+        /// coordinates, or null if this object is not a MultiPoint.</returns>
+        public partial double3[] GetObjectAsMultiPoint();
+
+        /// <summary>
+        /// Gets this object as a LineString geometry.
+        /// </summary>
+        /// <returns>A <see cref="CesiumGeoJsonLineString"/> if this object is a
+        /// LineString; null otherwise.</returns>
+        public partial CesiumGeoJsonLineString GetObjectAsLineString();
+
+        /// <summary>
+        /// Gets this object as a MultiLineString geometry.
+        /// </summary>
+        /// <returns>An array of <see cref="CesiumGeoJsonLineString"/> if this
+        /// object is a MultiLineString; null otherwise.</returns>
+        public partial CesiumGeoJsonLineString[] GetObjectAsMultiLineString();
+
+        /// <summary>
+        /// Gets this object as a Polygon geometry.
+        /// </summary>
+        /// <returns>A <see cref="CesiumGeoJsonPolygon"/> if this object is a
+        /// Polygon; null otherwise.</returns>
+        public partial CesiumGeoJsonPolygon GetObjectAsPolygon();
+
+        /// <summary>
+        /// Gets this object as a MultiPolygon geometry.
+        /// </summary>
+        /// <returns>An array of <see cref="CesiumGeoJsonPolygon"/> if this
+        /// object is a MultiPolygon; null otherwise.</returns>
+        public partial CesiumGeoJsonPolygon[] GetObjectAsMultiPolygon();
+
+        /// <summary>
+        /// Gets this object as a GeometryCollection.
+        /// </summary>
+        /// <returns>An array of <see cref="CesiumGeoJsonObject"/> if this
+        /// object is a GeometryCollection; null otherwise.</returns>
+        public partial CesiumGeoJsonObject[] GetObjectAsGeometryCollection();
 
         /// <summary>
         /// Checks whether this GeoJSON object has a style.

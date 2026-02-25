@@ -9,9 +9,15 @@
 
 #include <memory>
 
+namespace DotNet::Unity::Mathematics {
+struct double3;
+} // namespace DotNet::Unity::Mathematics
+
 namespace DotNet::CesiumForUnity {
 class CesiumGeoJsonFeature;
+class CesiumGeoJsonLineString;
 class CesiumGeoJsonObject;
+class CesiumGeoJsonPolygon;
 struct CesiumVectorStyle;
 } // namespace DotNet::CesiumForUnity
 
@@ -45,6 +51,31 @@ public:
 
   DotNet::System::Array1<DotNet::CesiumForUnity::CesiumGeoJsonFeature>
   GetObjectAsFeatureCollection(
+      const DotNet::CesiumForUnity::CesiumGeoJsonObject& object);
+
+  DotNet::Unity::Mathematics::double3
+  GetObjectAsPoint(const DotNet::CesiumForUnity::CesiumGeoJsonObject& object);
+
+  DotNet::System::Array1<DotNet::Unity::Mathematics::double3>
+  GetObjectAsMultiPoint(
+      const DotNet::CesiumForUnity::CesiumGeoJsonObject& object);
+
+  DotNet::CesiumForUnity::CesiumGeoJsonLineString GetObjectAsLineString(
+      const DotNet::CesiumForUnity::CesiumGeoJsonObject& object);
+
+  DotNet::System::Array1<DotNet::CesiumForUnity::CesiumGeoJsonLineString>
+  GetObjectAsMultiLineString(
+      const DotNet::CesiumForUnity::CesiumGeoJsonObject& object);
+
+  DotNet::CesiumForUnity::CesiumGeoJsonPolygon
+  GetObjectAsPolygon(const DotNet::CesiumForUnity::CesiumGeoJsonObject& object);
+
+  DotNet::System::Array1<DotNet::CesiumForUnity::CesiumGeoJsonPolygon>
+  GetObjectAsMultiPolygon(
+      const DotNet::CesiumForUnity::CesiumGeoJsonObject& object);
+
+  DotNet::System::Array1<DotNet::CesiumForUnity::CesiumGeoJsonObject>
+  GetObjectAsGeometryCollection(
       const DotNet::CesiumForUnity::CesiumGeoJsonObject& object);
 
   bool HasStyle(const DotNet::CesiumForUnity::CesiumGeoJsonObject& object);
