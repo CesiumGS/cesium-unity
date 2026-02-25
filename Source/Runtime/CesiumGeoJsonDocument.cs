@@ -117,17 +117,5 @@ namespace CesiumForUnity
             string ionApiUrl,
             Action<CesiumGeoJsonDocument> callback);
 
-        /// <summary>
-        /// Releases native resources associated with this GeoJSON document.
-        /// </summary>
-        internal partial void DisposeNative();
-
-        /// <summary>
-        /// Finalizer to release native resources.
-        /// </summary>
-        ~CesiumGeoJsonDocument()
-        {
-            DisposeNative();
-        }
     }
 }

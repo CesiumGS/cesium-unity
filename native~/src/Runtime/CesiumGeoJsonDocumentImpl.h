@@ -47,8 +47,6 @@ public:
       DotNet::System::Action1<DotNet::CesiumForUnity::CesiumGeoJsonDocument>
           callback);
 
-  void DisposeNative(const DotNet::CesiumForUnity::CesiumGeoJsonDocument& document);
-
   const CesiumVectorData::GeoJsonDocument& getNativeDocument() const {
     return *_pDocument;
   }
