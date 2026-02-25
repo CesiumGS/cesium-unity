@@ -95,9 +95,6 @@ wrapLoaderFuture(
       [](CesiumUtility::Result<CesiumVectorData::GeoJsonDocument>&&
              documentResult)
           -> std::shared_ptr<CesiumVectorData::GeoJsonDocument> {
-        spdlog::default_logger()->info(
-            "GeoJSON document loader future resolved");
-
         if (documentResult.errors) {
           spdlog::default_logger()->error(
               "GeoJSON document has errors!");
@@ -112,9 +109,6 @@ wrapLoaderFuture(
               "GeoJSON document result has no value!");
           return nullptr;
         }
-
-        spdlog::default_logger()->info(
-            "GeoJSON document loaded successfully");
 
         return std::make_shared<CesiumVectorData::GeoJsonDocument>(
             std::move(*documentResult.value));
