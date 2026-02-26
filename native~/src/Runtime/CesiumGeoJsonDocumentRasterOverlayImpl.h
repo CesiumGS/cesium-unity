@@ -19,7 +19,8 @@ class CesiumGeoJsonDocumentRasterOverlayImpl
     : public CesiumImpl<CesiumGeoJsonDocumentRasterOverlayImpl> {
 public:
   CesiumGeoJsonDocumentRasterOverlayImpl(
-      const DotNet::CesiumForUnity::CesiumGeoJsonDocumentRasterOverlay& overlay);
+      const DotNet::CesiumForUnity::CesiumGeoJsonDocumentRasterOverlay&
+          overlay);
   ~CesiumGeoJsonDocumentRasterOverlayImpl();
 
   void AddToTileset(

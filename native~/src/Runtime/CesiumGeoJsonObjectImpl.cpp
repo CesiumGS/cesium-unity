@@ -1,4 +1,5 @@
 #include "CesiumGeoJsonObjectImpl.h"
+
 #include "CesiumGeoJsonFeatureImpl.h"
 #include "CesiumVectorStyleConversions.h"
 
@@ -69,7 +70,9 @@ CesiumGeoJsonObjectImpl::GetObjectAsFeature(
   }
 
   CesiumForUnity::CesiumGeoJsonFeature result;
-  result.NativeImplementation().setNativeFeatureInDocument(_pDocument, pFeature);
+  result.NativeImplementation().setNativeFeatureInDocument(
+      _pDocument,
+      pFeature);
   return result;
 }
 
@@ -96,7 +99,9 @@ CesiumGeoJsonObjectImpl::GetObjectAsFeatureCollection(
 
     CesiumForUnity::CesiumGeoJsonFeature feature;
     if (pFeature) {
-      feature.NativeImplementation().setNativeFeatureInDocument(_pDocument, pFeature);
+      feature.NativeImplementation().setNativeFeatureInDocument(
+          _pDocument,
+          pFeature);
     }
     result.Item(i, feature);
   }
@@ -162,8 +167,7 @@ CesiumGeoJsonObjectImpl::GetObjectAsLineString(
   System::Array1<Unity::Mathematics::double3> points(count);
 
   for (std::int32_t i = 0; i < count; ++i) {
-    const glm::dvec3& coord =
-        pLineString->coordinates[static_cast<size_t>(i)];
+    const glm::dvec3& coord = pLineString->coordinates[static_cast<size_t>(i)];
     points.Item(i, Unity::Mathematics::double3{coord.x, coord.y, coord.z});
   }
 
@@ -267,16 +271,13 @@ CesiumGeoJsonObjectImpl::GetObjectAsMultiPolygon(
     System::Array1<CesiumForUnity::CesiumGeoJsonLineString> rings(ringCount);
 
     for (std::int32_t r = 0; r < ringCount; ++r) {
-      const std::vector<glm::dvec3>& ring =
-          polyRings[static_cast<size_t>(r)];
+      const std::vector<glm::dvec3>& ring = polyRings[static_cast<size_t>(r)];
       std::int32_t pointCount = static_cast<std::int32_t>(ring.size());
 
       System::Array1<Unity::Mathematics::double3> points(pointCount);
       for (std::int32_t j = 0; j < pointCount; ++j) {
         const glm::dvec3& coord = ring[static_cast<size_t>(j)];
-        points.Item(
-            j,
-            Unity::Mathematics::double3{coord.x, coord.y, coord.z});
+        points.Item(j, Unity::Mathematics::double3{coord.x, coord.y, coord.z});
       }
 
       CesiumForUnity::CesiumGeoJsonLineString lineString;

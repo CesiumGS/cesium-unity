@@ -1,4 +1,5 @@
 #include "CesiumGeoJsonDocumentImpl.h"
+
 #include "CesiumGeoJsonObjectImpl.h"
 #include "UnityTilesetExternals.h"
 
@@ -59,8 +60,8 @@ bool CesiumGeoJsonDocumentImpl::ParseInternal(
     System::String geoJsonString) {
   std::string str = geoJsonString.ToStlString();
 
-  Result<GeoJsonDocument> result = GeoJsonDocument::fromGeoJson(
-      std::span<const std::byte>(
+  Result<GeoJsonDocument> result =
+      GeoJsonDocument::fromGeoJson(std::span<const std::byte>(
           reinterpret_cast<const std::byte*>(str.data()),
           str.size()));
 
@@ -81,18 +82,16 @@ void CesiumGeoJsonDocumentImpl::LoadFromUrl(
   std::shared_ptr<IAssetAccessor> pAssetAccessor = getAssetAccessor();
 
   GeoJsonDocument::fromUrl(asyncSystem, pAssetAccessor, urlStr)
-      .thenInMainThread(
-          [callback](Result<GeoJsonDocument>&& result) {
-            if (!result.value.has_value()) {
-              callback.Invoke(CesiumForUnity::CesiumGeoJsonDocument(nullptr));
-              return;
-            }
+      .thenInMainThread([callback](Result<GeoJsonDocument>&& result) {
+        if (!result.value.has_value()) {
+          callback.Invoke(CesiumForUnity::CesiumGeoJsonDocument(nullptr));
+          return;
+        }
 
-            CesiumForUnity::CesiumGeoJsonDocument doc;
-            doc.NativeImplementation().setNativeDocument(
-                std::move(*result.value));
-            callback.Invoke(doc);
-          });
+        CesiumForUnity::CesiumGeoJsonDocument doc;
+        doc.NativeImplementation().setNativeDocument(std::move(*result.value));
+        callback.Invoke(doc);
+      });
 }
 
 void CesiumGeoJsonDocumentImpl::LoadFromCesiumIon(
@@ -112,18 +111,16 @@ void CesiumGeoJsonDocumentImpl::LoadFromCesiumIon(
       ionAssetId,
       accessToken,
       apiUrl)
-      .thenInMainThread(
-          [callback](Result<GeoJsonDocument>&& result) {
-            if (!result.value.has_value()) {
-              callback.Invoke(CesiumForUnity::CesiumGeoJsonDocument(nullptr));
-              return;
-            }
+      .thenInMainThread([callback](Result<GeoJsonDocument>&& result) {
+        if (!result.value.has_value()) {
+          callback.Invoke(CesiumForUnity::CesiumGeoJsonDocument(nullptr));
+          return;
+        }
 
-            CesiumForUnity::CesiumGeoJsonDocument doc;
-            doc.NativeImplementation().setNativeDocument(
-                std::move(*result.value));
-            callback.Invoke(doc);
-          });
+        CesiumForUnity::CesiumGeoJsonDocument doc;
+        doc.NativeImplementation().setNativeDocument(std::move(*result.value));
+        callback.Invoke(doc);
+      });
 }
 
 } // namespace CesiumForUnityNative

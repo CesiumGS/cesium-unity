@@ -1,4 +1,5 @@
 #include "CesiumGeoJsonFeatureImpl.h"
+
 #include "CesiumGeoJsonObjectImpl.h"
 
 #include <CesiumUtility/JsonValue.h>
@@ -10,7 +11,6 @@
 #include <DotNet/CesiumForUnity/CesiumGeoJsonFeatureIdType.h>
 #include <DotNet/CesiumForUnity/CesiumGeoJsonObject.h>
 #include <DotNet/System/String.h>
-
 #include <rapidjson/document.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>

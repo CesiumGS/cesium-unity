@@ -3,13 +3,13 @@
 #include <CesiumUtility/Color.h>
 #include <CesiumVectorData/VectorStyle.h>
 
-#include <DotNet/UnityEngine/Color32.h>
 #include <DotNet/CesiumForUnity/CesiumVectorColorMode.h>
 #include <DotNet/CesiumForUnity/CesiumVectorLineStyle.h>
 #include <DotNet/CesiumForUnity/CesiumVectorLineWidthMode.h>
 #include <DotNet/CesiumForUnity/CesiumVectorPolygonFillStyle.h>
 #include <DotNet/CesiumForUnity/CesiumVectorPolygonStyle.h>
 #include <DotNet/CesiumForUnity/CesiumVectorStyle.h>
+#include <DotNet/UnityEngine/Color32.h>
 
 #include <cstdint>
 
@@ -34,8 +34,8 @@ fromUnityLineWidthMode(DotNet::CesiumForUnity::CesiumVectorLineWidthMode mode) {
       static_cast<std::uint8_t>(mode));
 }
 
-inline CesiumVectorData::LineStyle
-fromUnityLineStyle(const DotNet::CesiumForUnity::CesiumVectorLineStyle& lineStyle) {
+inline CesiumVectorData::LineStyle fromUnityLineStyle(
+    const DotNet::CesiumForUnity::CesiumVectorLineStyle& lineStyle) {
   CesiumVectorData::LineStyle native;
   native.color = fromUnityColor(lineStyle.color);
   native.colorMode = fromUnityColorMode(lineStyle.colorMode);
@@ -44,8 +44,8 @@ fromUnityLineStyle(const DotNet::CesiumForUnity::CesiumVectorLineStyle& lineStyl
   return native;
 }
 
-inline CesiumVectorData::ColorStyle
-fromUnityFillStyle(const DotNet::CesiumForUnity::CesiumVectorPolygonFillStyle& fillStyle) {
+inline CesiumVectorData::ColorStyle fromUnityFillStyle(
+    const DotNet::CesiumForUnity::CesiumVectorPolygonFillStyle& fillStyle) {
   CesiumVectorData::ColorStyle native;
   native.color = fromUnityColor(fillStyle.color);
   native.colorMode = fromUnityColorMode(fillStyle.colorMode);
@@ -62,7 +62,8 @@ fromUnityStyle(const DotNet::CesiumForUnity::CesiumVectorStyle& style) {
   }
 
   if (style.polygonStyle.outline) {
-    native.polygon.outline = fromUnityLineStyle(style.polygonStyle.outlineStyle);
+    native.polygon.outline =
+        fromUnityLineStyle(style.polygonStyle.outlineStyle);
   }
 
   return native;

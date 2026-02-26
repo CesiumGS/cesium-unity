@@ -6,22 +6,20 @@
 #include "CesiumVectorStyleConversions.h"
 #include "UnityExternals.h"
 
-#include <DotNet/CesiumForUnity/CesiumGeoJsonDocument.h>
-
 #include <Cesium3DTilesSelection/Tileset.h>
 #include <CesiumRasterOverlays/GeoJsonDocumentRasterOverlay.h>
 #include <CesiumUtility/Color.h>
 #include <CesiumVectorData/GeoJsonDocument.h>
 #include <CesiumVectorData/VectorStyle.h>
 
-#include <spdlog/spdlog.h>
-
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
+#include <DotNet/CesiumForUnity/CesiumGeoJsonDocument.h>
 #include <DotNet/CesiumForUnity/CesiumGeoJsonDocumentRasterOverlay.h>
 #include <DotNet/CesiumForUnity/CesiumGeoJsonDocumentRasterOverlaySource.h>
 #include <DotNet/CesiumForUnity/CesiumIonServer.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
 #include <DotNet/System/String.h>
+#include <spdlog/spdlog.h>
 
 using namespace Cesium3DTilesSelection;
 using namespace CesiumRasterOverlays;
@@ -32,15 +30,14 @@ namespace {
 
 CesiumAsync::Future<std::shared_ptr<CesiumVectorData::GeoJsonDocument>>
 wrapLoaderFuture(
-    CesiumAsync::Future<CesiumUtility::Result<CesiumVectorData::GeoJsonDocument>>&&
-        future) {
+    CesiumAsync::Future<
+        CesiumUtility::Result<CesiumVectorData::GeoJsonDocument>>&& future) {
   return std::move(future).thenImmediately(
       [](CesiumUtility::Result<CesiumVectorData::GeoJsonDocument>&&
              documentResult)
           -> std::shared_ptr<CesiumVectorData::GeoJsonDocument> {
         if (documentResult.errors) {
-          spdlog::default_logger()->error(
-              "GeoJSON document has errors!");
+          spdlog::default_logger()->error("GeoJSON document has errors!");
           documentResult.errors.logError(
               spdlog::default_logger(),
               "Errors loading GeoJSON document: ");
@@ -88,7 +85,8 @@ void CesiumGeoJsonDocumentRasterOverlayImpl::AddToTileset(
 
   const CesiumGeospatial::Ellipsoid& ellipsoid = pTileset->getEllipsoid();
 
-  CesiumVectorData::VectorStyle nativeStyle = CesiumForUnityNative::fromUnityStyle(overlay.defaultStyle());
+  CesiumVectorData::VectorStyle nativeStyle =
+      CesiumForUnityNative::fromUnityStyle(overlay.defaultStyle());
 
   GeoJsonDocumentRasterOverlayOptions vectorOptions{
       nativeStyle,
@@ -126,9 +124,9 @@ void CesiumGeoJsonDocumentRasterOverlayImpl::AddToTileset(
           vectorOptions,
           options);
     }
-  } else if (source ==
-             CesiumForUnity::CesiumGeoJsonDocumentRasterOverlaySource::
-                 FromDocument) {
+  } else if (
+      source ==
+      CesiumForUnity::CesiumGeoJsonDocumentRasterOverlaySource::FromDocument) {
     // FromDocument - use a pre-parsed and styled document
     CesiumForUnity::CesiumGeoJsonDocument doc = overlay.document();
     if (doc == nullptr) {

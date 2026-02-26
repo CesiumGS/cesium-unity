@@ -16,8 +16,7 @@ class CesiumGeoJsonObject;
 
 namespace CesiumForUnityNative {
 
-class CesiumGeoJsonFeatureImpl
-    : public CesiumImpl<CesiumGeoJsonFeatureImpl> {
+class CesiumGeoJsonFeatureImpl : public CesiumImpl<CesiumGeoJsonFeatureImpl> {
 public:
   CesiumGeoJsonFeatureImpl(
       const DotNet::CesiumForUnity::CesiumGeoJsonFeature& feature);

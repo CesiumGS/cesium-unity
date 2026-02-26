@@ -33,13 +33,14 @@ public:
       const DotNet::CesiumForUnity::CesiumGeoJsonObject& object);
   ~CesiumGeoJsonObjectImpl();
 
-  // Set an object that references data within a document (no copy, modifications persist)
+  // Set an object that references data within a document (no copy,
+  // modifications persist)
   void setNativeObjectInDocument(
       std::shared_ptr<CesiumVectorData::GeoJsonDocument> pDocument,
       CesiumVectorData::GeoJsonObject* pObject);
 
-  std::int32_t GetObjectType(
-      const DotNet::CesiumForUnity::CesiumGeoJsonObject& object);
+  std::int32_t
+  GetObjectType(const DotNet::CesiumForUnity::CesiumGeoJsonObject& object);
 
   bool IsValid(const DotNet::CesiumForUnity::CesiumGeoJsonObject& object);
 
@@ -86,9 +87,7 @@ public:
 
   void ClearStyle(const DotNet::CesiumForUnity::CesiumGeoJsonObject& object);
 
-  CesiumVectorData::GeoJsonObject* getNativeObject() const {
-    return _pObject;
-  }
+  CesiumVectorData::GeoJsonObject* getNativeObject() const { return _pObject; }
 
   std::shared_ptr<CesiumVectorData::GeoJsonDocument> getDocument() const {
     return _pDocument;
