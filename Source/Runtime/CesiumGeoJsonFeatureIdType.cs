@@ -11,13 +11,13 @@ namespace CesiumForUnity
         None = 0,
 
         /// <summary>
-        /// The feature has a string ID.
-        /// </summary>
-        String = 1,
-
-        /// <summary>
         /// The feature has an integer ID.
         /// </summary>
-        Integer = 2
+        Integer = 1,
+
+        /// <summary>
+        /// The feature has a string ID.
+        /// </summary>
+        String = 2
     }
 }
