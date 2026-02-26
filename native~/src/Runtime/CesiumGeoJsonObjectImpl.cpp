@@ -24,6 +24,8 @@
 using namespace DotNet;
 using namespace CesiumVectorData;
 
+namespace CesiumForUnityNative {
+
 CesiumGeoJsonObjectImpl::CesiumGeoJsonObjectImpl(
     const CesiumForUnity::CesiumGeoJsonObject& object)
     : _pDocument(nullptr), _pObject(nullptr), _pStandaloneObject(nullptr) {}
@@ -340,7 +342,7 @@ CesiumForUnity::CesiumVectorStyle CesiumGeoJsonObjectImpl::GetStyle(
     return toUnityStyle(*_pObject->getStyle());
   }
 
-  return CesiumForUnity::CesiumVectorStyle::Default();
+  return toUnityStyle(CesiumVectorData::VectorStyle{});
 }
 
 void CesiumGeoJsonObjectImpl::SetStyle(

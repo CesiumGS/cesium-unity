@@ -28,6 +28,8 @@ using namespace CesiumRasterOverlays;
 using namespace CesiumVectorData;
 using namespace DotNet;
 
+namespace {
+
 CesiumAsync::Future<std::shared_ptr<CesiumVectorData::GeoJsonDocument>>
 wrapLoaderFuture(
     CesiumAsync::Future<CesiumUtility::Result<CesiumVectorData::GeoJsonDocument>>&&

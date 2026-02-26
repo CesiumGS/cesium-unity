@@ -959,10 +959,6 @@ namespace CesiumForUnity
             double numProp = geoJsonFeature.GetNumericProperty("");
             bool hasProp = geoJsonFeature.HasProperty("");
             CesiumGeoJsonObject featureGeom = geoJsonFeature.GetGeometry();
-            bool hasFeatureStyle = geoJsonFeature.HasStyle();
-            vectorStyle = geoJsonFeature.GetStyle();
-            geoJsonFeature.SetStyle(vectorStyle);
-            geoJsonFeature.ClearStyle();
             // CesiumGeoJsonLineString
             CesiumGeoJsonLineString geoJsonLineString = new CesiumGeoJsonLineString();
             double3[] lineStringPoints = geoJsonLineString.Points;
