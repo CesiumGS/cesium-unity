@@ -8,11 +8,6 @@
 - Added `CesiumGeoJsonDocument` to parse and manipulate GeoJSON documents in code.
 - Added `CesiumGeoJsonObject` to access individual features, geometries, and collections within a GeoJSON document.
 - Added `CesiumVectorStyle`, `CesiumVectorLineStyle`, `CesiumVectorPolygonStyle`, and `CesiumVectorPolygonFillStyle` structs for styling vector data.
-- Added support for per-feature styling, allowing different features in a single GeoJSON document to have different colors and styles.
-- Added `CesiumGeoJsonObjectType` enum for identifying GeoJSON object types (Point, LineString, Polygon, Feature, FeatureCollection, etc.).
-- Added `CesiumVectorColorMode` enum with `Normal` and `Random` color modes.
-- Added `CesiumVectorLineWidthMode` enum with `Pixels` and `Meters` width modes.
-- GeoJSON documents can be loaded from URLs, Cesium ion assets, or parsed directly from strings.
 
 ##### Fixes :wrench:
 
