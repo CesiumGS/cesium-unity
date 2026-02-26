@@ -177,7 +177,7 @@ CesiumGeoJsonObjectImpl::GetObjectAsLineString(
   }
 
   CesiumForUnity::CesiumGeoJsonLineString result;
-  result.Points(points);
+  result.points(points);
   return result;
 }
 
@@ -209,7 +209,7 @@ CesiumGeoJsonObjectImpl::GetObjectAsMultiLineString(
     }
 
     CesiumForUnity::CesiumGeoJsonLineString lineString;
-    lineString.Points(points);
+    lineString.points(points);
     result.Item(i, lineString);
   }
 
@@ -244,7 +244,7 @@ CesiumGeoJsonObjectImpl::GetObjectAsPolygon(
     }
 
     CesiumForUnity::CesiumGeoJsonLineString lineString;
-    lineString.Points(points);
+    lineString.points(points);
     rings.Item(i, lineString);
   }
 
@@ -289,7 +289,7 @@ CesiumGeoJsonObjectImpl::GetObjectAsMultiPolygon(
       }
 
       CesiumForUnity::CesiumGeoJsonLineString lineString;
-      lineString.Points(points);
+      lineString.points(points);
       rings.Item(r, lineString);
     }
 

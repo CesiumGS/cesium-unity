@@ -16,14 +16,14 @@ namespace CesiumForUnity
         /// <summary>
         /// Gets the points in longitude, latitude, height that make up this line string.
         /// </summary>
-        public double3[] Points { get; internal set; }
+        public double3[] points { get; internal set; }
 
         /// <summary>
         /// Internal constructor used by native code.
         /// </summary>
         internal CesiumGeoJsonLineString()
         {
-            Points = Array.Empty<double3>();
+            points = Array.Empty<double3>();
         }
     }
 }

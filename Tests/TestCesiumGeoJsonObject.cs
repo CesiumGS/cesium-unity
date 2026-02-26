@@ -525,13 +525,13 @@ public class TestCesiumGeoJsonObject
         CesiumGeoJsonLineString lineString = root.GetObjectAsLineString();
 
         Assert.IsNotNull(lineString);
-        Assert.AreEqual(3, lineString.Points.Length);
-        Assert.AreEqual(0.0, lineString.Points[0].x, 0.001);
-        Assert.AreEqual(0.0, lineString.Points[0].y, 0.001);
-        Assert.AreEqual(1.0, lineString.Points[1].x, 0.001);
-        Assert.AreEqual(1.0, lineString.Points[1].y, 0.001);
-        Assert.AreEqual(2.0, lineString.Points[2].x, 0.001);
-        Assert.AreEqual(0.0, lineString.Points[2].y, 0.001);
+        Assert.AreEqual(3, lineString.points.Length);
+        Assert.AreEqual(0.0, lineString.points[0].x, 0.001);
+        Assert.AreEqual(0.0, lineString.points[0].y, 0.001);
+        Assert.AreEqual(1.0, lineString.points[1].x, 0.001);
+        Assert.AreEqual(1.0, lineString.points[1].y, 0.001);
+        Assert.AreEqual(2.0, lineString.points[2].x, 0.001);
+        Assert.AreEqual(0.0, lineString.points[2].y, 0.001);
     }
 
     [Test]
@@ -564,10 +564,10 @@ public class TestCesiumGeoJsonObject
 
         Assert.IsNotNull(lineStrings);
         Assert.AreEqual(2, lineStrings.Length);
-        Assert.AreEqual(2, lineStrings[0].Points.Length);
-        Assert.AreEqual(3, lineStrings[1].Points.Length);
-        Assert.AreEqual(0.0, lineStrings[0].Points[0].x, 0.001);
-        Assert.AreEqual(4.0, lineStrings[1].Points[2].x, 0.001);
+        Assert.AreEqual(2, lineStrings[0].points.Length);
+        Assert.AreEqual(3, lineStrings[1].points.Length);
+        Assert.AreEqual(0.0, lineStrings[0].points[0].x, 0.001);
+        Assert.AreEqual(4.0, lineStrings[1].points[2].x, 0.001);
     }
 
     [Test]
@@ -605,14 +605,14 @@ public class TestCesiumGeoJsonObject
         Assert.AreEqual(2, rings.Length);
 
         // Exterior ring
-        Assert.AreEqual(5, rings[0].Points.Length);
-        Assert.AreEqual(0.0, rings[0].Points[0].x, 0.001);
-        Assert.AreEqual(10.0, rings[0].Points[1].x, 0.001);
+        Assert.AreEqual(5, rings[0].points.Length);
+        Assert.AreEqual(0.0, rings[0].points[0].x, 0.001);
+        Assert.AreEqual(10.0, rings[0].points[1].x, 0.001);
 
         // Interior ring (hole)
-        Assert.AreEqual(5, rings[1].Points.Length);
-        Assert.AreEqual(2.0, rings[1].Points[0].x, 0.001);
-        Assert.AreEqual(8.0, rings[1].Points[1].x, 0.001);
+        Assert.AreEqual(5, rings[1].points.Length);
+        Assert.AreEqual(2.0, rings[1].points[0].x, 0.001);
+        Assert.AreEqual(8.0, rings[1].points[1].x, 0.001);
     }
 
     [Test]
@@ -648,13 +648,13 @@ public class TestCesiumGeoJsonObject
 
         CesiumGeoJsonLineString[] rings0 = polygons[0].rings;
         Assert.AreEqual(1, rings0.Length);
-        Assert.AreEqual(5, rings0[0].Points.Length);
-        Assert.AreEqual(0.0, rings0[0].Points[0].x, 0.001);
+        Assert.AreEqual(5, rings0[0].points.Length);
+        Assert.AreEqual(0.0, rings0[0].points[0].x, 0.001);
 
         CesiumGeoJsonLineString[] rings1 = polygons[1].rings;
         Assert.AreEqual(1, rings1.Length);
-        Assert.AreEqual(5, rings1[0].Points.Length);
-        Assert.AreEqual(2.0, rings1[0].Points[0].x, 0.001);
+        Assert.AreEqual(5, rings1[0].points.Length);
+        Assert.AreEqual(2.0, rings1[0].points[0].x, 0.001);
     }
 
     [Test]

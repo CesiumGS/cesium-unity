@@ -961,8 +961,8 @@ namespace CesiumForUnity
             CesiumGeoJsonObject featureGeom = geoJsonFeature.GetGeometry();
             // CesiumGeoJsonLineString
             CesiumGeoJsonLineString geoJsonLineString = new CesiumGeoJsonLineString();
-            double3[] lineStringPoints = geoJsonLineString.Points;
-            geoJsonLineString.Points = lineStringPoints;
+            double3[] lineStringPoints = geoJsonLineString.points;
+            geoJsonLineString.points = lineStringPoints;
 
             // CesiumGeoJsonPolygon
             CesiumGeoJsonPolygon geoJsonPolygon = new CesiumGeoJsonPolygon();
