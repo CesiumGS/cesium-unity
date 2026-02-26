@@ -229,28 +229,7 @@ CesiumForUnity::CesiumVectorStyle CesiumGeoJsonFeatureImpl::GetStyle(
     return toUnityStyle(*_pFeature->style);
   }
 
-  // Return default style
-  CesiumForUnity::CesiumVectorStyle result;
-
-  result.lineStyle.color.r = 255;
-  result.lineStyle.color.g = 255;
-  result.lineStyle.color.b = 255;
-  result.lineStyle.color.a = 255;
-  result.lineStyle.colorMode = CesiumForUnity::CesiumVectorColorMode::Normal;
-  result.lineStyle.width = 1.0;
-  result.lineStyle.widthMode =
-      CesiumForUnity::CesiumVectorLineWidthMode::Pixels;
-
-  result.polygonStyle.fill = true;
-  result.polygonStyle.fillStyle.color.r = 255;
-  result.polygonStyle.fillStyle.color.g = 255;
-  result.polygonStyle.fillStyle.color.b = 255;
-  result.polygonStyle.fillStyle.color.a = 255;
-  result.polygonStyle.fillStyle.colorMode =
-      CesiumForUnity::CesiumVectorColorMode::Normal;
-  result.polygonStyle.outline = false;
-
-  return result;
+  return CesiumForUnity::CesiumVectorStyle::Default();
 }
 
 void CesiumGeoJsonFeatureImpl::SetStyle(
