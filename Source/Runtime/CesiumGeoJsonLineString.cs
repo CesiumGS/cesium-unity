@@ -14,7 +14,7 @@ namespace CesiumForUnity
     public class CesiumGeoJsonLineString
     {
         /// <summary>
-        /// Gets the points (LLH coordinates) that make up this line string.
+        /// Gets the points in longitude, latitude, height that make up this line string.
         /// </summary>
         public double3[] Points { get; internal set; }
 
