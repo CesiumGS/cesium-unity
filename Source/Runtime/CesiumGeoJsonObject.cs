@@ -127,18 +127,5 @@ namespace CesiumForUnity
         /// its parent, or use the default style if no parent has a style.
         /// </remarks>
         public partial void ClearStyle();
-
-        /// <summary>
-        /// Releases native resources associated with this GeoJSON object.
-        /// </summary>
-        internal partial void DisposeNative();
-
-        /// <summary>
-        /// Finalizer to release native resources.
-        /// </summary>
-        ~CesiumGeoJsonObject()
-        {
-            DisposeNative();
-        }
     }
 }

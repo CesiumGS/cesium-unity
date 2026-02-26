@@ -89,8 +89,6 @@ public:
 
   void ClearStyle(const DotNet::CesiumForUnity::CesiumGeoJsonObject& object);
 
-  void DisposeNative(const DotNet::CesiumForUnity::CesiumGeoJsonObject& object);
-
   CesiumVectorData::GeoJsonObject* getNativeObject() const {
     return _pObject;
   }

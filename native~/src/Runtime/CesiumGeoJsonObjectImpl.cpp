@@ -166,7 +166,11 @@ CesiumGeoJsonObjectImpl::CesiumGeoJsonObjectImpl(
     const CesiumForUnity::CesiumGeoJsonObject& object)
     : _pDocument(nullptr), _pObject(nullptr), _pStandaloneObject(nullptr) {}
 
-CesiumGeoJsonObjectImpl::~CesiumGeoJsonObjectImpl() {}
+CesiumGeoJsonObjectImpl::~CesiumGeoJsonObjectImpl() {
+  _pDocument = nullptr;
+  _pObject = nullptr;
+  _pStandaloneObject = nullptr;
+}
 
 void CesiumGeoJsonObjectImpl::setNativeObject(
     std::shared_ptr<GeoJsonObject> pObject) {
@@ -480,13 +484,6 @@ void CesiumGeoJsonObjectImpl::ClearStyle(
   }
 
   _pObject->getStyle() = std::nullopt;
-}
-
-void CesiumGeoJsonObjectImpl::DisposeNative(
-    const CesiumForUnity::CesiumGeoJsonObject& object) {
-  _pDocument = nullptr;
-  _pObject = nullptr;
-  _pStandaloneObject = nullptr;
 }
 
 } // namespace CesiumForUnityNative
