@@ -107,18 +107,5 @@ namespace CesiumForUnity
         /// After calling this method, the feature will use the default style.
         /// </remarks>
         public partial void ClearStyle();
-
-        /// <summary>
-        /// Releases native resources associated with this feature.
-        /// </summary>
-        internal partial void DisposeNative();
-
-        /// <summary>
-        /// Finalizer to release native resources.
-        /// </summary>
-        ~CesiumGeoJsonFeature()
-        {
-            DisposeNative();
-        }
     }
 }

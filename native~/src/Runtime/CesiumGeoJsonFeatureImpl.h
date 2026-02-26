@@ -67,9 +67,6 @@ public:
   void
   ClearStyle(const DotNet::CesiumForUnity::CesiumGeoJsonFeature& feature);
 
-  void DisposeNative(
-      const DotNet::CesiumForUnity::CesiumGeoJsonFeature& feature);
-
   CesiumVectorData::GeoJsonFeature* getNativeFeature() const {
     return _pFeature;
   }

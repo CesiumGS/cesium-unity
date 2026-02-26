@@ -188,7 +188,10 @@ CesiumGeoJsonFeatureImpl::CesiumGeoJsonFeatureImpl(
     const CesiumForUnity::CesiumGeoJsonFeature& feature)
     : _pDocument(nullptr), _pFeature(nullptr) {}
 
-CesiumGeoJsonFeatureImpl::~CesiumGeoJsonFeatureImpl() {}
+CesiumGeoJsonFeatureImpl::~CesiumGeoJsonFeatureImpl() {
+  _pDocument = nullptr;
+  _pFeature = nullptr;
+}
 
 void CesiumGeoJsonFeatureImpl::setNativeFeatureInDocument(
     std::shared_ptr<GeoJsonDocument> pDocument,
@@ -392,12 +395,6 @@ void CesiumGeoJsonFeatureImpl::ClearStyle(
   }
 
   _pFeature->style = std::nullopt;
-}
-
-void CesiumGeoJsonFeatureImpl::DisposeNative(
-    const CesiumForUnity::CesiumGeoJsonFeature& feature) {
-  _pDocument = nullptr;
-  _pFeature = nullptr;
 }
 
 } // namespace CesiumForUnityNative
