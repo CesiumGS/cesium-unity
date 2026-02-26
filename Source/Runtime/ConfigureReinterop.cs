@@ -930,7 +930,7 @@ namespace CesiumForUnity
             geoJsonOverlay.mipLevels = geoJsonOverlay.mipLevels;
             CesiumVectorStyle vectorStyle = geoJsonOverlay.defaultStyle;
             geoJsonOverlay.defaultStyle = vectorStyle;
-            CesiumGeoJsonDocument overlayDoc = geoJsonOverlay.GetDocumentInternal();
+            CesiumGeoJsonDocument overlayDoc = geoJsonOverlay.document;
 
             // CesiumGeoJsonDocument and CesiumGeoJsonObject
             CesiumGeoJsonDocument geoJsonDoc = new CesiumGeoJsonDocument();
