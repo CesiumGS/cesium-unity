@@ -593,7 +593,7 @@ public class TestCesiumGeoJsonObject
 
         Assert.IsNotNull(polygon);
 
-        CesiumGeoJsonLineString[] rings = polygon.GetPolygonRings();
+        CesiumGeoJsonLineString[] rings = polygon.Rings;
         Assert.IsNotNull(rings);
         Assert.AreEqual(2, rings.Length);
 
@@ -639,12 +639,12 @@ public class TestCesiumGeoJsonObject
         Assert.IsNotNull(polygons);
         Assert.AreEqual(2, polygons.Length);
 
-        CesiumGeoJsonLineString[] rings0 = polygons[0].GetPolygonRings();
+        CesiumGeoJsonLineString[] rings0 = polygons[0].Rings;
         Assert.AreEqual(1, rings0.Length);
         Assert.AreEqual(5, rings0[0].Points.Length);
         Assert.AreEqual(0.0, rings0[0].Points[0].x, 0.001);
 
-        CesiumGeoJsonLineString[] rings1 = polygons[1].GetPolygonRings();
+        CesiumGeoJsonLineString[] rings1 = polygons[1].Rings;
         Assert.AreEqual(1, rings1.Length);
         Assert.AreEqual(5, rings1[0].Points.Length);
         Assert.AreEqual(2.0, rings1[0].Points[0].x, 0.001);

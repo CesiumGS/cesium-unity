@@ -1,6 +1,5 @@
 #include "CesiumGeoJsonObjectImpl.h"
 #include "CesiumGeoJsonFeatureImpl.h"
-#include "CesiumGeoJsonPolygonImpl.h"
 
 #include <CesiumUtility/JsonValue.h>
 #include <CesiumVectorData/GeoJsonDocument.h>
@@ -364,10 +363,28 @@ CesiumGeoJsonObjectImpl::GetObjectAsPolygon(
     return CesiumForUnity::CesiumGeoJsonPolygon(nullptr);
   }
 
+  std::int32_t ringCount =
+      static_cast<std::int32_t>(pPolygon->coordinates.size());
+  System::Array1<CesiumForUnity::CesiumGeoJsonLineString> rings(ringCount);
+
+  for (std::int32_t i = 0; i < ringCount; ++i) {
+    const std::vector<glm::dvec3>& ring =
+        pPolygon->coordinates[static_cast<size_t>(i)];
+    std::int32_t pointCount = static_cast<std::int32_t>(ring.size());
+
+    System::Array1<Unity::Mathematics::double3> points(pointCount);
+    for (std::int32_t j = 0; j < pointCount; ++j) {
+      const glm::dvec3& coord = ring[static_cast<size_t>(j)];
+      points.Item(j, Unity::Mathematics::double3{coord.x, coord.y, coord.z});
+    }
+
+    CesiumForUnity::CesiumGeoJsonLineString lineString;
+    lineString.Points(points);
+    rings.Item(i, lineString);
+  }
+
   CesiumForUnity::CesiumGeoJsonPolygon result;
-  result.NativeImplementation().setNativePolygonInDocument(
-      _pDocument,
-      &pPolygon->coordinates);
+  result.Rings(rings);
   return result;
 }
 
@@ -388,10 +405,31 @@ CesiumGeoJsonObjectImpl::GetObjectAsMultiPolygon(
   System::Array1<CesiumForUnity::CesiumGeoJsonPolygon> result(count);
 
   for (std::int32_t i = 0; i < count; ++i) {
+    const std::vector<std::vector<glm::dvec3>>& polyRings =
+        pMultiPolygon->coordinates[static_cast<size_t>(i)];
+    std::int32_t ringCount = static_cast<std::int32_t>(polyRings.size());
+    System::Array1<CesiumForUnity::CesiumGeoJsonLineString> rings(ringCount);
+
+    for (std::int32_t r = 0; r < ringCount; ++r) {
+      const std::vector<glm::dvec3>& ring =
+          polyRings[static_cast<size_t>(r)];
+      std::int32_t pointCount = static_cast<std::int32_t>(ring.size());
+
+      System::Array1<Unity::Mathematics::double3> points(pointCount);
+      for (std::int32_t j = 0; j < pointCount; ++j) {
+        const glm::dvec3& coord = ring[static_cast<size_t>(j)];
+        points.Item(
+            j,
+            Unity::Mathematics::double3{coord.x, coord.y, coord.z});
+      }
+
+      CesiumForUnity::CesiumGeoJsonLineString lineString;
+      lineString.Points(points);
+      rings.Item(r, lineString);
+    }
+
     CesiumForUnity::CesiumGeoJsonPolygon polygon;
-    polygon.NativeImplementation().setNativePolygonInDocument(
-        _pDocument,
-        &pMultiPolygon->coordinates[static_cast<size_t>(i)]);
+    polygon.Rings(rings);
     result.Item(i, polygon);
   }
 

@@ -1,4 +1,3 @@
-using Reinterop;
 using System;
 
 namespace CesiumForUnity
@@ -8,23 +7,10 @@ namespace CesiumForUnity
     /// </summary>
     /// <remarks>
     /// A GeoJSON Polygon consists of one or more linear rings. The first ring
-    /// is the exterior ring, and any subsequent rings are holes. Use
-    /// <see cref="GetPolygonRings"/> to access the rings as an array of
-    /// <see cref="CesiumGeoJsonLineString"/>.
+    /// is the exterior ring, and any subsequent rings are holes.
     /// </remarks>
-    [ReinteropNativeImplementation(
-        "CesiumForUnityNative::CesiumGeoJsonPolygonImpl",
-        "CesiumGeoJsonPolygonImpl.h")]
-    public partial class CesiumGeoJsonPolygon
+    public class CesiumGeoJsonPolygon
     {
-        /// <summary>
-        /// Internal constructor used by native code.
-        /// </summary>
-        internal CesiumGeoJsonPolygon()
-        {
-            CreateImplementation();
-        }
-
         /// <summary>
         /// Gets the rings of this polygon as an array of line strings.
         /// </summary>
@@ -32,21 +18,14 @@ namespace CesiumForUnity
         /// The first element is the exterior ring, and any subsequent elements
         /// are interior rings (holes).
         /// </remarks>
-        /// <returns>An array of <see cref="CesiumGeoJsonLineString"/> representing
-        /// the polygon's rings.</returns>
-        public partial CesiumGeoJsonLineString[] GetPolygonRings();
+        public CesiumGeoJsonLineString[] Rings { get; internal set; }
 
         /// <summary>
-        /// Releases native resources associated with this polygon.
+        /// Internal constructor used by native code.
         /// </summary>
-        internal partial void DisposeNative();
-
-        /// <summary>
-        /// Finalizer to release native resources.
-        /// </summary>
-        ~CesiumGeoJsonPolygon()
+        internal CesiumGeoJsonPolygon()
         {
-            DisposeNative();
+            Rings = Array.Empty<CesiumGeoJsonLineString>();
         }
     }
 }
