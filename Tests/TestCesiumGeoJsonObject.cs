@@ -247,12 +247,13 @@ public class TestCesiumGeoJsonObject
     #region Style Tests
 
     [Test]
-    public void NewFeatureHasNoStyle()
+    public void NewFeatureGeometryHasNoStyle()
     {
         CesiumGeoJsonObject root = _featureCollectionDoc.GetRootObject();
         CesiumGeoJsonFeature feature = root.GetObjectAsFeatureCollection()[0];
+        CesiumGeoJsonObject geometry = feature.GetGeometry();
 
-        Assert.IsFalse(feature.HasStyle());
+        Assert.IsFalse(geometry.HasStyle());
     }
 
     [Test]
@@ -260,11 +261,12 @@ public class TestCesiumGeoJsonObject
     {
         CesiumGeoJsonObject root = _featureCollectionDoc.GetRootObject();
         CesiumGeoJsonFeature feature = root.GetObjectAsFeatureCollection()[0];
+        CesiumGeoJsonObject geometry = feature.GetGeometry();
 
         CesiumVectorStyle style = CesiumVectorStyle.Default;
-        feature.SetStyle(style);
+        geometry.SetStyle(style);
 
-        Assert.IsTrue(feature.HasStyle());
+        Assert.IsTrue(geometry.HasStyle());
     }
 
     [Test]
@@ -272,15 +274,16 @@ public class TestCesiumGeoJsonObject
     {
         CesiumGeoJsonObject root = _featureCollectionDoc.GetRootObject();
         CesiumGeoJsonFeature feature = root.GetObjectAsFeatureCollection()[0];
+        CesiumGeoJsonObject geometry = feature.GetGeometry();
 
         CesiumVectorStyle style = new CesiumVectorStyle();
         style.polygonStyle.fill = true;
         style.polygonStyle.fillStyle.color = new CesiumColor32(255, 0, 0, 255);
         style.polygonStyle.fillStyle.colorMode = CesiumVectorColorMode.Normal;
 
-        feature.SetStyle(style);
+        geometry.SetStyle(style);
 
-        CesiumVectorStyle retrievedStyle = feature.GetStyle();
+        CesiumVectorStyle retrievedStyle = geometry.GetStyle();
 
         Assert.AreEqual(255, retrievedStyle.polygonStyle.fillStyle.color.r);
         Assert.AreEqual(0, retrievedStyle.polygonStyle.fillStyle.color.g);
@@ -293,13 +296,14 @@ public class TestCesiumGeoJsonObject
     {
         CesiumGeoJsonObject root = _featureCollectionDoc.GetRootObject();
         CesiumGeoJsonFeature feature = root.GetObjectAsFeatureCollection()[0];
+        CesiumGeoJsonObject geometry = feature.GetGeometry();
 
         CesiumVectorStyle style = CesiumVectorStyle.Default;
-        feature.SetStyle(style);
-        Assert.IsTrue(feature.HasStyle());
+        geometry.SetStyle(style);
+        Assert.IsTrue(geometry.HasStyle());
 
-        feature.ClearStyle();
-        Assert.IsFalse(feature.HasStyle());
+        geometry.ClearStyle();
+        Assert.IsFalse(geometry.HasStyle());
     }
 
     [Test]
@@ -307,24 +311,24 @@ public class TestCesiumGeoJsonObject
     {
         CesiumGeoJsonObject root = _featureCollectionDoc.GetRootObject();
         CesiumGeoJsonFeature[] features = root.GetObjectAsFeatureCollection();
-        CesiumGeoJsonFeature feature1 = features[0];
-        CesiumGeoJsonFeature feature2 = features[1];
+        CesiumGeoJsonObject geometry1 = features[0].GetGeometry();
+        CesiumGeoJsonObject geometry2 = features[1].GetGeometry();
 
         // Set red style on feature 1
         CesiumVectorStyle redStyle = new CesiumVectorStyle();
         redStyle.polygonStyle.fill = true;
         redStyle.polygonStyle.fillStyle.color = new CesiumColor32(255, 0, 0, 255);
-        feature1.SetStyle(redStyle);
+        geometry1.SetStyle(redStyle);
 
         // Set blue style on feature 2
         CesiumVectorStyle blueStyle = new CesiumVectorStyle();
         blueStyle.polygonStyle.fill = true;
         blueStyle.polygonStyle.fillStyle.color = new CesiumColor32(0, 0, 255, 255);
-        feature2.SetStyle(blueStyle);
+        geometry2.SetStyle(blueStyle);
 
         // Verify each has its own style
-        CesiumVectorStyle style1 = feature1.GetStyle();
-        CesiumVectorStyle style2 = feature2.GetStyle();
+        CesiumVectorStyle style1 = geometry1.GetStyle();
+        CesiumVectorStyle style2 = geometry2.GetStyle();
 
         Assert.AreEqual(255, style1.polygonStyle.fillStyle.color.r);
         Assert.AreEqual(0, style1.polygonStyle.fillStyle.color.b);
@@ -338,6 +342,7 @@ public class TestCesiumGeoJsonObject
     {
         CesiumGeoJsonObject root = _featureCollectionDoc.GetRootObject();
         CesiumGeoJsonFeature feature = root.GetObjectAsFeatureCollection()[0];
+        CesiumGeoJsonObject geometry = feature.GetGeometry();
 
         CesiumVectorStyle style = new CesiumVectorStyle();
         style.lineStyle.color = new CesiumColor32(0, 255, 0, 200);
@@ -345,9 +350,9 @@ public class TestCesiumGeoJsonObject
         style.lineStyle.widthMode = CesiumVectorLineWidthMode.Meters;
         style.lineStyle.colorMode = CesiumVectorColorMode.Normal;
 
-        feature.SetStyle(style);
+        geometry.SetStyle(style);
 
-        CesiumVectorStyle retrievedStyle = feature.GetStyle();
+        CesiumVectorStyle retrievedStyle = geometry.GetStyle();
 
         Assert.AreEqual(0, retrievedStyle.lineStyle.color.r);
         Assert.AreEqual(255, retrievedStyle.lineStyle.color.g);
@@ -362,6 +367,7 @@ public class TestCesiumGeoJsonObject
     {
         CesiumGeoJsonObject root = _featureCollectionDoc.GetRootObject();
         CesiumGeoJsonFeature feature = root.GetObjectAsFeatureCollection()[0];
+        CesiumGeoJsonObject geometry = feature.GetGeometry();
 
         CesiumVectorStyle style = new CesiumVectorStyle();
         style.polygonStyle.fill = true;
@@ -370,9 +376,9 @@ public class TestCesiumGeoJsonObject
         style.polygonStyle.outlineStyle.color = new CesiumColor32(255, 255, 0, 255);
         style.polygonStyle.outlineStyle.width = 3.0;
 
-        feature.SetStyle(style);
+        geometry.SetStyle(style);
 
-        CesiumVectorStyle retrievedStyle = feature.GetStyle();
+        CesiumVectorStyle retrievedStyle = geometry.GetStyle();
 
         Assert.IsTrue(retrievedStyle.polygonStyle.fill);
         Assert.IsTrue(retrievedStyle.polygonStyle.outline);

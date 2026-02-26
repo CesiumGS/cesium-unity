@@ -12,7 +12,6 @@
 namespace DotNet::CesiumForUnity {
 class CesiumGeoJsonFeature;
 class CesiumGeoJsonObject;
-struct CesiumVectorStyle;
 } // namespace DotNet::CesiumForUnity
 
 namespace CesiumForUnityNative {
@@ -54,18 +53,6 @@ public:
 
   DotNet::CesiumForUnity::CesiumGeoJsonObject
   GetGeometry(const DotNet::CesiumForUnity::CesiumGeoJsonFeature& feature);
-
-  bool HasStyle(const DotNet::CesiumForUnity::CesiumGeoJsonFeature& feature);
-
-  DotNet::CesiumForUnity::CesiumVectorStyle
-  GetStyle(const DotNet::CesiumForUnity::CesiumGeoJsonFeature& feature);
-
-  void SetStyle(
-      const DotNet::CesiumForUnity::CesiumGeoJsonFeature& feature,
-      DotNet::CesiumForUnity::CesiumVectorStyle style);
-
-  void
-  ClearStyle(const DotNet::CesiumForUnity::CesiumGeoJsonFeature& feature);
 
   CesiumVectorData::GeoJsonFeature* getNativeFeature() const {
     return _pFeature;

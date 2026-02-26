@@ -82,31 +82,5 @@ namespace CesiumForUnity
         /// <returns>The geometry as a <see cref="CesiumGeoJsonObject"/>, or null
         /// if this feature has no geometry.</returns>
         public partial CesiumGeoJsonObject GetGeometry();
-
-        /// <summary>
-        /// Checks whether this feature has a style.
-        /// </summary>
-        /// <returns>True if this feature has a style; false otherwise.</returns>
-        public partial bool HasStyle();
-
-        /// <summary>
-        /// Gets the style of this feature.
-        /// </summary>
-        /// <returns>The style, or the default style if no style is set.</returns>
-        public partial CesiumVectorStyle GetStyle();
-
-        /// <summary>
-        /// Sets the style of this feature.
-        /// </summary>
-        /// <param name="style">The style to set.</param>
-        public partial void SetStyle(CesiumVectorStyle style);
-
-        /// <summary>
-        /// Clears any style set on this feature.
-        /// </summary>
-        /// <remarks>
-        /// After calling this method, the feature will use the default style.
-        /// </remarks>
-        public partial void ClearStyle();
     }
 }

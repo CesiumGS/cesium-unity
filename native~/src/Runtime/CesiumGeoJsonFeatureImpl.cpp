@@ -1,12 +1,10 @@
 #include "CesiumGeoJsonFeatureImpl.h"
 #include "CesiumGeoJsonObjectImpl.h"
-#include "CesiumVectorStyleConversions.h"
 
 #include <CesiumUtility/JsonValue.h>
 #include <CesiumVectorData/GeoJsonDocument.h>
 #include <CesiumVectorData/GeoJsonObject.h>
 #include <CesiumVectorData/GeoJsonObjectTypes.h>
-#include <CesiumVectorData/VectorStyle.h>
 
 #include <DotNet/CesiumForUnity/CesiumGeoJsonFeature.h>
 #include <DotNet/CesiumForUnity/CesiumGeoJsonFeatureIdType.h>
@@ -219,39 +217,6 @@ CesiumForUnity::CesiumGeoJsonObject CesiumGeoJsonFeatureImpl::GetGeometry(
       _pDocument,
       _pFeature->geometry.get());
   return result;
-}
-
-bool CesiumGeoJsonFeatureImpl::HasStyle(
-    const CesiumForUnity::CesiumGeoJsonFeature& feature) {
-  return _pFeature != nullptr && _pFeature->style.has_value();
-}
-
-CesiumForUnity::CesiumVectorStyle CesiumGeoJsonFeatureImpl::GetStyle(
-    const CesiumForUnity::CesiumGeoJsonFeature& feature) {
-  if (_pFeature && _pFeature->style.has_value()) {
-    return toUnityStyle(*_pFeature->style);
-  }
-
-  return CesiumForUnity::CesiumVectorStyle::Default();
-}
-
-void CesiumGeoJsonFeatureImpl::SetStyle(
-    const CesiumForUnity::CesiumGeoJsonFeature& feature,
-    CesiumForUnity::CesiumVectorStyle style) {
-  if (!_pFeature) {
-    return;
-  }
-
-  _pFeature->style = fromUnityStyle(style);
-}
-
-void CesiumGeoJsonFeatureImpl::ClearStyle(
-    const CesiumForUnity::CesiumGeoJsonFeature& feature) {
-  if (!_pFeature) {
-    return;
-  }
-
-  _pFeature->style = std::nullopt;
 }
 
 } // namespace CesiumForUnityNative
