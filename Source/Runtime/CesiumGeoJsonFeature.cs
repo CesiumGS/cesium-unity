@@ -35,7 +35,8 @@ namespace CesiumForUnity
         /// Gets the feature ID as a string.
         /// </summary>
         /// <returns>The feature ID as a string, or an empty string if the
-        /// feature has no ID or the ID is not a string.</returns>
+        /// feature has no ID. If the ID is an integer, it will be converted
+        /// to a string.</returns>
         public partial string GetIdAsString();
 
         /// <summary>
