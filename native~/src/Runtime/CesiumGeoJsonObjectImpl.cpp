@@ -1,5 +1,6 @@
 #include "CesiumGeoJsonObjectImpl.h"
 #include "CesiumGeoJsonFeatureImpl.h"
+#include "CesiumVectorStyleConversions.h"
 
 #include <CesiumUtility/JsonValue.h>
 #include <CesiumVectorData/GeoJsonDocument.h>
@@ -12,13 +13,6 @@
 #include <DotNet/CesiumForUnity/CesiumGeoJsonObject.h>
 #include <DotNet/CesiumForUnity/CesiumGeoJsonObjectType.h>
 #include <DotNet/CesiumForUnity/CesiumGeoJsonPolygon.h>
-#include <DotNet/CesiumForUnity/CesiumVectorColorMode.h>
-#include <DotNet/CesiumForUnity/CesiumVectorLineStyle.h>
-#include <DotNet/CesiumForUnity/CesiumVectorLineWidthMode.h>
-#include <DotNet/CesiumForUnity/CesiumVectorPolygonFillStyle.h>
-#include <DotNet/CesiumForUnity/CesiumVectorPolygonStyle.h>
-#include <DotNet/CesiumForUnity/CesiumVectorStyle.h>
-#include <DotNet/CesiumForUnity/CesiumColor32.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/String.h>
 #include <DotNet/Unity/Mathematics/double3.h>
@@ -29,137 +23,6 @@
 
 using namespace DotNet;
 using namespace CesiumVectorData;
-
-namespace CesiumForUnityNative {
-
-namespace {
-
-// Convert CesiumUtility::Color (0-255 components) to CesiumColor32
-CesiumForUnity::CesiumColor32 toUnityColor(const CesiumUtility::Color& color) {
-  CesiumForUnity::CesiumColor32 result;
-  result.r = static_cast<std::uint8_t>(color.r);
-  result.g = static_cast<std::uint8_t>(color.g);
-  result.b = static_cast<std::uint8_t>(color.b);
-  result.a = static_cast<std::uint8_t>(color.a);
-  return result;
-}
-
-// Convert CesiumColor32 to CesiumUtility::Color
-CesiumUtility::Color fromUnityColor(const CesiumForUnity::CesiumColor32& color) {
-  return CesiumUtility::Color(color.r, color.g, color.b, color.a);
-}
-
-// Convert native ColorMode to Unity CesiumVectorColorMode
-CesiumForUnity::CesiumVectorColorMode toUnityColorMode(ColorMode mode) {
-  switch (mode) {
-  case ColorMode::Random:
-    return CesiumForUnity::CesiumVectorColorMode::Random;
-  case ColorMode::Normal:
-  default:
-    return CesiumForUnity::CesiumVectorColorMode::Normal;
-  }
-}
-
-// Convert Unity CesiumVectorColorMode to native ColorMode
-ColorMode fromUnityColorMode(CesiumForUnity::CesiumVectorColorMode mode) {
-  switch (mode) {
-  case CesiumForUnity::CesiumVectorColorMode::Random:
-    return ColorMode::Random;
-  case CesiumForUnity::CesiumVectorColorMode::Normal:
-  default:
-    return ColorMode::Normal;
-  }
-}
-
-// Convert native LineWidthMode to Unity CesiumVectorLineWidthMode
-CesiumForUnity::CesiumVectorLineWidthMode
-toUnityLineWidthMode(LineWidthMode mode) {
-  switch (mode) {
-  case LineWidthMode::Meters:
-    return CesiumForUnity::CesiumVectorLineWidthMode::Meters;
-  case LineWidthMode::Pixels:
-  default:
-    return CesiumForUnity::CesiumVectorLineWidthMode::Pixels;
-  }
-}
-
-// Convert Unity CesiumVectorLineWidthMode to native LineWidthMode
-LineWidthMode
-fromUnityLineWidthMode(CesiumForUnity::CesiumVectorLineWidthMode mode) {
-  switch (mode) {
-  case CesiumForUnity::CesiumVectorLineWidthMode::Meters:
-    return LineWidthMode::Meters;
-  case CesiumForUnity::CesiumVectorLineWidthMode::Pixels:
-  default:
-    return LineWidthMode::Pixels;
-  }
-}
-
-// Convert native VectorStyle to Unity CesiumVectorStyle
-CesiumForUnity::CesiumVectorStyle toUnityStyle(const VectorStyle& style) {
-  CesiumForUnity::CesiumVectorStyle result;
-
-  // Line style
-  result.lineStyle.color = toUnityColor(style.line.color);
-  result.lineStyle.colorMode = toUnityColorMode(style.line.colorMode);
-  result.lineStyle.width = style.line.width;
-  result.lineStyle.widthMode = toUnityLineWidthMode(style.line.widthMode);
-
-  // Polygon style
-  result.polygonStyle.fill = style.polygon.fill.has_value();
-  if (style.polygon.fill.has_value()) {
-    result.polygonStyle.fillStyle.color = toUnityColor(style.polygon.fill->color);
-    result.polygonStyle.fillStyle.colorMode =
-        toUnityColorMode(style.polygon.fill->colorMode);
-  }
-
-  result.polygonStyle.outline = style.polygon.outline.has_value();
-  if (style.polygon.outline.has_value()) {
-    result.polygonStyle.outlineStyle.color =
-        toUnityColor(style.polygon.outline->color);
-    result.polygonStyle.outlineStyle.colorMode =
-        toUnityColorMode(style.polygon.outline->colorMode);
-    result.polygonStyle.outlineStyle.width = style.polygon.outline->width;
-    result.polygonStyle.outlineStyle.widthMode =
-        toUnityLineWidthMode(style.polygon.outline->widthMode);
-  }
-
-  return result;
-}
-
-// Convert Unity CesiumVectorStyle to native VectorStyle
-VectorStyle fromUnityStyle(const CesiumForUnity::CesiumVectorStyle& style) {
-  VectorStyle result;
-
-  // Line style
-  result.line.color = fromUnityColor(style.lineStyle.color);
-  result.line.colorMode = fromUnityColorMode(style.lineStyle.colorMode);
-  result.line.width = style.lineStyle.width;
-  result.line.widthMode = fromUnityLineWidthMode(style.lineStyle.widthMode);
-
-  // Polygon style
-  if (style.polygonStyle.fill) {
-    ColorStyle fill;
-    fill.color = fromUnityColor(style.polygonStyle.fillStyle.color);
-    fill.colorMode = fromUnityColorMode(style.polygonStyle.fillStyle.colorMode);
-    result.polygon.fill = fill;
-  }
-
-  if (style.polygonStyle.outline) {
-    LineStyle outline;
-    outline.color = fromUnityColor(style.polygonStyle.outlineStyle.color);
-    outline.colorMode =
-        fromUnityColorMode(style.polygonStyle.outlineStyle.colorMode);
-    outline.width = style.polygonStyle.outlineStyle.width;
-    outline.widthMode =
-        fromUnityLineWidthMode(style.polygonStyle.outlineStyle.widthMode);
-    result.polygon.outline = outline;
-  }
-
-  return result;
-}
-
-} // namespace
 
 CesiumGeoJsonObjectImpl::CesiumGeoJsonObjectImpl(
     const CesiumForUnity::CesiumGeoJsonObject& object)

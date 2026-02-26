@@ -3,6 +3,7 @@
 #include "Cesium3DTilesetImpl.h"
 #include "CesiumGeoJsonDocumentImpl.h"
 #include "CesiumRasterOverlayUtility.h"
+#include "CesiumVectorStyleConversions.h"
 #include "UnityExternals.h"
 
 #include <DotNet/CesiumForUnity/CesiumGeoJsonDocument.h>
@@ -20,72 +21,12 @@
 #include <DotNet/CesiumForUnity/CesiumGeoJsonDocumentRasterOverlaySource.h>
 #include <DotNet/CesiumForUnity/CesiumIonServer.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
-#include <DotNet/CesiumForUnity/CesiumVectorColorMode.h>
-#include <DotNet/CesiumForUnity/CesiumVectorLineStyle.h>
-#include <DotNet/CesiumForUnity/CesiumVectorLineWidthMode.h>
-#include <DotNet/CesiumForUnity/CesiumVectorPolygonFillStyle.h>
-#include <DotNet/CesiumForUnity/CesiumVectorPolygonStyle.h>
-#include <DotNet/CesiumForUnity/CesiumVectorStyle.h>
-#include <DotNet/CesiumForUnity/CesiumColor32.h>
 #include <DotNet/System/String.h>
 
 using namespace Cesium3DTilesSelection;
 using namespace CesiumRasterOverlays;
 using namespace CesiumVectorData;
 using namespace DotNet;
-
-namespace {
-
-CesiumVectorData::ColorMode
-toNativeColorMode(CesiumForUnity::CesiumVectorColorMode mode) {
-  return static_cast<CesiumVectorData::ColorMode>(
-      static_cast<uint8_t>(mode));
-}
-
-CesiumVectorData::LineWidthMode
-toNativeLineWidthMode(CesiumForUnity::CesiumVectorLineWidthMode mode) {
-  return static_cast<CesiumVectorData::LineWidthMode>(
-      static_cast<uint8_t>(mode));
-}
-
-CesiumVectorData::LineStyle
-toNativeLineStyle(const CesiumForUnity::CesiumVectorLineStyle& lineStyle) {
-  CesiumForUnity::CesiumColor32 color = lineStyle.color;
-  CesiumVectorData::LineStyle native;
-  native.color = CesiumUtility::Color(color.r, color.g, color.b, color.a);
-  native.colorMode = toNativeColorMode(lineStyle.colorMode);
-  native.width = lineStyle.width;
-  native.widthMode = toNativeLineWidthMode(lineStyle.widthMode);
-  return native;
-}
-
-CesiumVectorData::ColorStyle toNativeFillStyle(
-    const CesiumForUnity::CesiumVectorPolygonFillStyle& fillStyle) {
-  CesiumForUnity::CesiumColor32 color = fillStyle.color;
-  CesiumVectorData::ColorStyle native;
-  native.color = CesiumUtility::Color(color.r, color.g, color.b, color.a);
-  native.colorMode = toNativeColorMode(fillStyle.colorMode);
-  return native;
-}
-
-CesiumVectorData::VectorStyle
-toNativeVectorStyle(const CesiumForUnity::CesiumVectorStyle& style) {
-  CesiumForUnity::CesiumVectorLineStyle lineStyle = style.lineStyle;
-  CesiumForUnity::CesiumVectorPolygonStyle polygonStyle = style.polygonStyle;
-
-  CesiumVectorData::VectorStyle native;
-  native.line = toNativeLineStyle(lineStyle);
-
-  if (polygonStyle.fill) {
-    native.polygon.fill = toNativeFillStyle(polygonStyle.fillStyle);
-  }
-
-  if (polygonStyle.outline) {
-    native.polygon.outline = toNativeLineStyle(polygonStyle.outlineStyle);
-  }
-
-  return native;
-}
 
 CesiumAsync::Future<std::shared_ptr<CesiumVectorData::GeoJsonDocument>>
 wrapLoaderFuture(
@@ -145,7 +86,7 @@ void CesiumGeoJsonDocumentRasterOverlayImpl::AddToTileset(
 
   const CesiumGeospatial::Ellipsoid& ellipsoid = pTileset->getEllipsoid();
 
-  CesiumVectorData::VectorStyle nativeStyle = toNativeVectorStyle(overlay.defaultStyle());
+  CesiumVectorData::VectorStyle nativeStyle = CesiumForUnityNative::fromUnityStyle(overlay.defaultStyle());
 
   GeoJsonDocumentRasterOverlayOptions vectorOptions{
       nativeStyle,
