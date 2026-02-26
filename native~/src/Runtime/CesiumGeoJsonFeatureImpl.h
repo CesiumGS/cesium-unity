@@ -2,12 +2,9 @@
 
 #include "CesiumImpl.h"
 
-#include <CesiumVectorData/GeoJsonDocument.h>
 #include <CesiumVectorData/GeoJsonObject.h>
 
 #include <DotNet/System/String.h>
-
-#include <memory>
 
 namespace DotNet::CesiumForUnity {
 class CesiumGeoJsonFeature;
@@ -25,7 +22,6 @@ public:
   ~CesiumGeoJsonFeatureImpl();
 
   void setNativeFeatureInDocument(
-      std::shared_ptr<CesiumVectorData::GeoJsonDocument> pDocument,
       CesiumVectorData::GeoJsonFeature* pFeature);
 
   std::int32_t
@@ -71,12 +67,7 @@ public:
     return _pFeature;
   }
 
-  std::shared_ptr<CesiumVectorData::GeoJsonDocument> getDocument() const {
-    return _pDocument;
-  }
-
 private:
-  std::shared_ptr<CesiumVectorData::GeoJsonDocument> _pDocument;
   CesiumVectorData::GeoJsonFeature* _pFeature;
 };
 

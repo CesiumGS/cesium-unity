@@ -186,17 +186,14 @@ void writeJsonValue(
 
 CesiumGeoJsonFeatureImpl::CesiumGeoJsonFeatureImpl(
     const CesiumForUnity::CesiumGeoJsonFeature& feature)
-    : _pDocument(nullptr), _pFeature(nullptr) {}
+    : _pFeature(nullptr) {}
 
 CesiumGeoJsonFeatureImpl::~CesiumGeoJsonFeatureImpl() {
-  _pDocument = nullptr;
   _pFeature = nullptr;
 }
 
 void CesiumGeoJsonFeatureImpl::setNativeFeatureInDocument(
-    std::shared_ptr<GeoJsonDocument> pDocument,
     GeoJsonFeature* pFeature) {
-  _pDocument = std::move(pDocument);
   _pFeature = pFeature;
 }
 
