@@ -3,7 +3,7 @@
 #include <CesiumUtility/Color.h>
 #include <CesiumVectorData/VectorStyle.h>
 
-#include <DotNet/CesiumForUnity/CesiumColor32.h>
+#include <DotNet/UnityEngine/Color32.h>
 #include <DotNet/CesiumForUnity/CesiumVectorColorMode.h>
 #include <DotNet/CesiumForUnity/CesiumVectorLineStyle.h>
 #include <DotNet/CesiumForUnity/CesiumVectorLineWidthMode.h>
@@ -18,7 +18,7 @@ namespace CesiumForUnityNative {
 // Unity -> Native conversions
 
 inline CesiumUtility::Color
-fromUnityColor(const DotNet::CesiumForUnity::CesiumColor32& color) {
+fromUnityColor(const DotNet::UnityEngine::Color32& color) {
   return CesiumUtility::Color(color.r, color.g, color.b, color.a);
 }
 
@@ -70,9 +70,9 @@ fromUnityStyle(const DotNet::CesiumForUnity::CesiumVectorStyle& style) {
 
 // Native -> Unity conversions
 
-inline DotNet::CesiumForUnity::CesiumColor32
+inline DotNet::UnityEngine::Color32
 toUnityColor(const CesiumUtility::Color& color) {
-  DotNet::CesiumForUnity::CesiumColor32 result;
+  DotNet::UnityEngine::Color32 result;
   result.r = static_cast<std::uint8_t>(color.r);
   result.g = static_cast<std::uint8_t>(color.g);
   result.b = static_cast<std::uint8_t>(color.b);

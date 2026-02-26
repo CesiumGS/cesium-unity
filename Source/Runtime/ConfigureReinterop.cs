@@ -991,7 +991,7 @@ namespace CesiumForUnity
             Action<CesiumGeoJsonDocument> docCallback = (doc) => { };
             CesiumVectorLineStyle lineStyle = vectorStyle.lineStyle;
             vectorStyle.lineStyle = lineStyle;
-            CesiumColor32 lineColor = lineStyle.color;
+            Color32 lineColor = lineStyle.color;
             lineStyle.color = lineColor;
             CesiumVectorColorMode colorMode = lineStyle.colorMode;
             lineStyle.colorMode = colorMode;
@@ -1005,7 +1005,7 @@ namespace CesiumForUnity
             polygonStyleV.fill = fillEnabled;
             CesiumVectorPolygonFillStyle fillStyle = polygonStyleV.fillStyle;
             polygonStyleV.fillStyle = fillStyle;
-            CesiumColor32 fillColor = fillStyle.color;
+            Color32 fillColor = fillStyle.color;
             fillStyle.color = fillColor;
             CesiumVectorColorMode fillColorMode = fillStyle.colorMode;
             fillStyle.colorMode = fillColorMode;

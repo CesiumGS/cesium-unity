@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using CesiumForUnity;
 using Unity.Mathematics;
+using UnityEngine;
 
 public class TestCesiumGeoJsonObject
 {
@@ -278,7 +279,7 @@ public class TestCesiumGeoJsonObject
 
         CesiumVectorStyle style = new CesiumVectorStyle();
         style.polygonStyle.fill = true;
-        style.polygonStyle.fillStyle.color = new CesiumColor32(255, 0, 0, 255);
+        style.polygonStyle.fillStyle.color = new Color32(255, 0, 0, 255);
         style.polygonStyle.fillStyle.colorMode = CesiumVectorColorMode.Normal;
 
         geometry.SetStyle(style);
@@ -317,13 +318,13 @@ public class TestCesiumGeoJsonObject
         // Set red style on feature 1
         CesiumVectorStyle redStyle = new CesiumVectorStyle();
         redStyle.polygonStyle.fill = true;
-        redStyle.polygonStyle.fillStyle.color = new CesiumColor32(255, 0, 0, 255);
+        redStyle.polygonStyle.fillStyle.color = new Color32(255, 0, 0, 255);
         geometry1.SetStyle(redStyle);
 
         // Set blue style on feature 2
         CesiumVectorStyle blueStyle = new CesiumVectorStyle();
         blueStyle.polygonStyle.fill = true;
-        blueStyle.polygonStyle.fillStyle.color = new CesiumColor32(0, 0, 255, 255);
+        blueStyle.polygonStyle.fillStyle.color = new Color32(0, 0, 255, 255);
         geometry2.SetStyle(blueStyle);
 
         // Verify each has its own style
@@ -345,7 +346,7 @@ public class TestCesiumGeoJsonObject
         CesiumGeoJsonObject geometry = feature.GetGeometry();
 
         CesiumVectorStyle style = new CesiumVectorStyle();
-        style.lineStyle.color = new CesiumColor32(0, 255, 0, 200);
+        style.lineStyle.color = new Color32(0, 255, 0, 200);
         style.lineStyle.width = 5.0;
         style.lineStyle.widthMode = CesiumVectorLineWidthMode.Meters;
         style.lineStyle.colorMode = CesiumVectorColorMode.Normal;
@@ -371,9 +372,9 @@ public class TestCesiumGeoJsonObject
 
         CesiumVectorStyle style = new CesiumVectorStyle();
         style.polygonStyle.fill = true;
-        style.polygonStyle.fillStyle.color = new CesiumColor32(100, 100, 100, 255);
+        style.polygonStyle.fillStyle.color = new Color32(100, 100, 100, 255);
         style.polygonStyle.outline = true;
-        style.polygonStyle.outlineStyle.color = new CesiumColor32(255, 255, 0, 255);
+        style.polygonStyle.outlineStyle.color = new Color32(255, 255, 0, 255);
         style.polygonStyle.outlineStyle.width = 3.0;
 
         geometry.SetStyle(style);

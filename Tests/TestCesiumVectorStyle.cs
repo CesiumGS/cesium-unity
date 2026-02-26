@@ -4,67 +4,6 @@ using UnityEngine;
 
 public class TestCesiumVectorStyle
 {
-    #region CesiumColor32 Tests
-
-    [Test]
-    public void CesiumColor32ConstructorSetsAllComponents()
-    {
-        CesiumColor32 color = new CesiumColor32(100, 150, 200, 250);
-
-        Assert.AreEqual(100, color.r);
-        Assert.AreEqual(150, color.g);
-        Assert.AreEqual(200, color.b);
-        Assert.AreEqual(250, color.a);
-    }
-
-    [Test]
-    public void CesiumColor32ImplicitConversionFromColor32()
-    {
-        Color32 unityColor = new Color32(50, 100, 150, 200);
-        CesiumColor32 cesiumColor = unityColor;
-
-        Assert.AreEqual(50, cesiumColor.r);
-        Assert.AreEqual(100, cesiumColor.g);
-        Assert.AreEqual(150, cesiumColor.b);
-        Assert.AreEqual(200, cesiumColor.a);
-    }
-
-    [Test]
-    public void CesiumColor32ImplicitConversionToColor32()
-    {
-        CesiumColor32 cesiumColor = new CesiumColor32(25, 75, 125, 175);
-        Color32 unityColor = cesiumColor;
-
-        Assert.AreEqual(25, unityColor.r);
-        Assert.AreEqual(75, unityColor.g);
-        Assert.AreEqual(125, unityColor.b);
-        Assert.AreEqual(175, unityColor.a);
-    }
-
-    [Test]
-    public void CesiumColor32ToStringReturnsFormattedString()
-    {
-        CesiumColor32 color = new CesiumColor32(255, 128, 64, 32);
-
-        string result = color.ToString();
-
-        Assert.AreEqual("RGBA(255, 128, 64, 32)", result);
-    }
-
-    [Test]
-    public void CesiumColor32HandlesMinMaxValues()
-    {
-        CesiumColor32 minColor = new CesiumColor32(0, 0, 0, 0);
-        CesiumColor32 maxColor = new CesiumColor32(255, 255, 255, 255);
-
-        Assert.AreEqual(0, minColor.r);
-        Assert.AreEqual(0, minColor.a);
-        Assert.AreEqual(255, maxColor.r);
-        Assert.AreEqual(255, maxColor.a);
-    }
-
-    #endregion
-
     #region CesiumVectorLineStyle Tests
 
     [Test]
@@ -85,7 +24,7 @@ public class TestCesiumVectorStyle
     public void LineStyleCanBeModified()
     {
         CesiumVectorLineStyle style = new CesiumVectorLineStyle();
-        style.color = new CesiumColor32(255, 0, 0, 128);
+        style.color = new Color32(255, 0, 0, 128);
         style.colorMode = CesiumVectorColorMode.Random;
         style.width = 10.5;
         style.widthMode = CesiumVectorLineWidthMode.Meters;
@@ -118,7 +57,7 @@ public class TestCesiumVectorStyle
     public void PolygonFillStyleCanBeModified()
     {
         CesiumVectorPolygonFillStyle style = new CesiumVectorPolygonFillStyle();
-        style.color = new CesiumColor32(0, 255, 0, 200);
+        style.color = new Color32(0, 255, 0, 200);
         style.colorMode = CesiumVectorColorMode.Random;
 
         Assert.AreEqual(0, style.color.r);
@@ -189,17 +128,17 @@ public class TestCesiumVectorStyle
         CesiumVectorStyle style = new CesiumVectorStyle();
 
         // Configure line style
-        style.lineStyle.color = new CesiumColor32(255, 0, 0, 255);
+        style.lineStyle.color = new Color32(255, 0, 0, 255);
         style.lineStyle.width = 5.0;
         style.lineStyle.widthMode = CesiumVectorLineWidthMode.Meters;
         style.lineStyle.colorMode = CesiumVectorColorMode.Normal;
 
         // Configure polygon style
         style.polygonStyle.fill = true;
-        style.polygonStyle.fillStyle.color = new CesiumColor32(0, 255, 0, 180);
+        style.polygonStyle.fillStyle.color = new Color32(0, 255, 0, 180);
         style.polygonStyle.fillStyle.colorMode = CesiumVectorColorMode.Normal;
         style.polygonStyle.outline = true;
-        style.polygonStyle.outlineStyle.color = new CesiumColor32(0, 0, 255, 255);
+        style.polygonStyle.outlineStyle.color = new Color32(0, 0, 255, 255);
         style.polygonStyle.outlineStyle.width = 2.0;
 
         // Verify line style
