@@ -11,10 +11,10 @@ namespace CesiumForUnity
         private static readonly (string Template, string Desc)[] TEMPLATE_PARAMS = new (string Template, string Desc)[]
         {
             ("x", "The tile X coordinate in the tiling scheme, where 0 is the westernmost tile."),
-            ("y", "The tile Y coordinate in the tiling scheme, where 0 is the nothernmost tile."),
+            ("y", "The tile Y coordinate in the tiling scheme, where 0 is the southernmost tile."),
             ("z", "The level of the tile in the tiling scheme, where 0 is the root of the quadtree pyramid."),
             ("reverseX", "The tile X coordinate in the tiling scheme, where 0 is the easternmost tile."),
-            ("reverseY", "The tile Y coordinate in the tiling scheme, where 0 is the southernmost tile."),
+            ("reverseY", "The tile Y coordinate in the tiling scheme, where 0 is the northernmost tile."),
             ("reverseZ", "The tile Z coordinate in the tiling scheme, where 0 is equivalent to `maximumLevel`."),
             ("westDegrees", "The western edge of the tile in geodetic degrees."),
             ("southDegrees", "The southern edge of the tile in geodetic degrees."),
