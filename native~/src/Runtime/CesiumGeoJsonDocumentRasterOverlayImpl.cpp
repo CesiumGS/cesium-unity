@@ -129,8 +129,6 @@ CesiumGeoJsonDocumentRasterOverlayImpl::
 void CesiumGeoJsonDocumentRasterOverlayImpl::AddToTileset(
     const ::DotNet::CesiumForUnity::CesiumGeoJsonDocumentRasterOverlay& overlay,
     const ::DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
-  spdlog::default_logger()->info("CesiumGeoJsonDocumentRasterOverlay::AddToTileset called");
-
   if (this->_pOverlay != nullptr) {
     return;
   }
