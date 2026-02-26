@@ -249,7 +249,7 @@ CesiumGeoJsonObjectImpl::GetObjectAsPolygon(
   }
 
   CesiumForUnity::CesiumGeoJsonPolygon result;
-  result.Rings(rings);
+  result.rings(rings);
   return result;
 }
 
@@ -294,7 +294,7 @@ CesiumGeoJsonObjectImpl::GetObjectAsMultiPolygon(
     }
 
     CesiumForUnity::CesiumGeoJsonPolygon polygon;
-    polygon.Rings(rings);
+    polygon.rings(rings);
     result.Item(i, polygon);
   }
 

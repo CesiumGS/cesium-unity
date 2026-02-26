@@ -966,8 +966,8 @@ namespace CesiumForUnity
 
             // CesiumGeoJsonPolygon
             CesiumGeoJsonPolygon geoJsonPolygon = new CesiumGeoJsonPolygon();
-            CesiumGeoJsonLineString[] polygonRings = geoJsonPolygon.Rings;
-            geoJsonPolygon.Rings = polygonRings;
+            CesiumGeoJsonLineString[] polygonRings = geoJsonPolygon.rings;
+            geoJsonPolygon.rings = polygonRings;
             CesiumGeoJsonLineString polygonRing = polygonRings[0];
             int polygonRingCount = polygonRings.Length;
 

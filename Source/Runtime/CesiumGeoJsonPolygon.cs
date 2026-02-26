@@ -18,14 +18,14 @@ namespace CesiumForUnity
         /// The first element is the exterior ring, and any subsequent elements
         /// are interior rings (holes).
         /// </remarks>
-        public CesiumGeoJsonLineString[] Rings { get; internal set; }
+        public CesiumGeoJsonLineString[] rings { get; internal set; }
 
         /// <summary>
         /// Internal constructor used by native code.
         /// </summary>
         internal CesiumGeoJsonPolygon()
         {
-            Rings = Array.Empty<CesiumGeoJsonLineString>();
+            rings = Array.Empty<CesiumGeoJsonLineString>();
         }
     }
 }
