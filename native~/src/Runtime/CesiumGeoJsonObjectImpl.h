@@ -33,9 +33,6 @@ public:
       const DotNet::CesiumForUnity::CesiumGeoJsonObject& object);
   ~CesiumGeoJsonObjectImpl();
 
-  // Set a standalone object (legacy, creates a copy)
-  void setNativeObject(std::shared_ptr<CesiumVectorData::GeoJsonObject> pObject);
-
   // Set an object that references data within a document (no copy, modifications persist)
   void setNativeObjectInDocument(
       std::shared_ptr<CesiumVectorData::GeoJsonDocument> pDocument,
@@ -100,10 +97,8 @@ public:
 private:
   // The document that owns this object (keeps it alive)
   std::shared_ptr<CesiumVectorData::GeoJsonDocument> _pDocument;
-  // Pointer to the actual object within the document (or standalone copy)
+  // Pointer to the actual object within the document
   CesiumVectorData::GeoJsonObject* _pObject;
-  // For standalone objects that aren't part of a document
-  std::shared_ptr<CesiumVectorData::GeoJsonObject> _pStandaloneObject;
 };
 
 } // namespace CesiumForUnityNative

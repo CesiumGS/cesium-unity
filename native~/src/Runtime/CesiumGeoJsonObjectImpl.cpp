@@ -28,19 +28,11 @@ namespace CesiumForUnityNative {
 
 CesiumGeoJsonObjectImpl::CesiumGeoJsonObjectImpl(
     const CesiumForUnity::CesiumGeoJsonObject& object)
-    : _pDocument(nullptr), _pObject(nullptr), _pStandaloneObject(nullptr) {}
+    : _pDocument(nullptr), _pObject(nullptr) {}
 
 CesiumGeoJsonObjectImpl::~CesiumGeoJsonObjectImpl() {
   _pDocument = nullptr;
   _pObject = nullptr;
-  _pStandaloneObject = nullptr;
-}
-
-void CesiumGeoJsonObjectImpl::setNativeObject(
-    std::shared_ptr<GeoJsonObject> pObject) {
-  _pStandaloneObject = std::move(pObject);
-  _pObject = _pStandaloneObject.get();
-  _pDocument = nullptr;
 }
 
 void CesiumGeoJsonObjectImpl::setNativeObjectInDocument(
@@ -48,7 +40,6 @@ void CesiumGeoJsonObjectImpl::setNativeObjectInDocument(
     GeoJsonObject* pObject) {
   _pDocument = std::move(pDocument);
   _pObject = pObject;
-  _pStandaloneObject = nullptr;
 }
 
 std::int32_t CesiumGeoJsonObjectImpl::GetObjectType(
