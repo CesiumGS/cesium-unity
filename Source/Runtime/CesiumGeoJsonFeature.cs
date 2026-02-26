@@ -28,7 +28,7 @@ namespace CesiumForUnity
         /// <summary>
         /// Gets the type of ID on this feature.
         /// </summary>
-        /// <returns>The ID type: None, String, or Integer.</returns>
+        /// <returns>The ID type: None, Integer, or String.</returns>
         public partial CesiumGeoJsonFeatureIdType GetIdType();
 
         /// <summary>
