@@ -76,7 +76,7 @@ CesiumGeoJsonObjectImpl::GetObjectAsFeature(
   }
 
   CesiumForUnity::CesiumGeoJsonFeature result;
-  result.NativeImplementation().setNativeFeatureInDocument(pFeature);
+  result.NativeImplementation().setNativeFeatureInDocument(_pDocument, pFeature);
   return result;
 }
 
@@ -103,7 +103,7 @@ CesiumGeoJsonObjectImpl::GetObjectAsFeatureCollection(
 
     CesiumForUnity::CesiumGeoJsonFeature feature;
     if (pFeature) {
-      feature.NativeImplementation().setNativeFeatureInDocument(pFeature);
+      feature.NativeImplementation().setNativeFeatureInDocument(_pDocument, pFeature);
     }
     result.Item(i, feature);
   }

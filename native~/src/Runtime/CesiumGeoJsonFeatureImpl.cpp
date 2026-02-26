@@ -64,14 +64,17 @@ void writeJsonValue(
 
 CesiumGeoJsonFeatureImpl::CesiumGeoJsonFeatureImpl(
     const CesiumForUnity::CesiumGeoJsonFeature& feature)
-    : _pFeature(nullptr) {}
+    : _pDocument(nullptr), _pFeature(nullptr) {}
 
 CesiumGeoJsonFeatureImpl::~CesiumGeoJsonFeatureImpl() {
+  _pDocument = nullptr;
   _pFeature = nullptr;
 }
 
 void CesiumGeoJsonFeatureImpl::setNativeFeatureInDocument(
+    std::shared_ptr<GeoJsonDocument> pDocument,
     GeoJsonFeature* pFeature) {
+  _pDocument = std::move(pDocument);
   _pFeature = pFeature;
 }
 
@@ -212,9 +215,9 @@ CesiumForUnity::CesiumGeoJsonObject CesiumGeoJsonFeatureImpl::GetGeometry(
   }
 
   CesiumForUnity::CesiumGeoJsonObject result;
-  auto pGeomCopy =
-      std::make_shared<GeoJsonObject>(*_pFeature->geometry);
-  result.NativeImplementation().setNativeObject(std::move(pGeomCopy));
+  result.NativeImplementation().setNativeObjectInDocument(
+      _pDocument,
+      _pFeature->geometry.get());
   return result;
 }
 
