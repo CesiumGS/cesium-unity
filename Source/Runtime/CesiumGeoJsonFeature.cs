@@ -41,7 +41,7 @@ namespace CesiumForUnity
         /// <summary>
         /// Gets the feature ID as an integer.
         /// </summary>
-        /// <returns>The feature ID as a long, or 0 if the feature has no ID
+        /// <returns>The feature ID as a long, or -1 if the feature has no ID
         /// or the ID is not an integer.</returns>
         public partial long GetIdAsInteger();
 

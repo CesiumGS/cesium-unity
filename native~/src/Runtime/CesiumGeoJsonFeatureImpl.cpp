@@ -121,14 +121,14 @@ System::String CesiumGeoJsonFeatureImpl::GetIdAsString(
 std::int64_t CesiumGeoJsonFeatureImpl::GetIdAsInteger(
     const CesiumForUnity::CesiumGeoJsonFeature& feature) {
   if (!_pFeature) {
-    return 0;
+    return -1;
   }
 
   if (auto* pIntId = std::get_if<std::int64_t>(&_pFeature->id)) {
     return *pIntId;
   }
 
-  return 0;
+  return -1;
 }
 
 System::String CesiumGeoJsonFeatureImpl::GetPropertiesAsJson(
