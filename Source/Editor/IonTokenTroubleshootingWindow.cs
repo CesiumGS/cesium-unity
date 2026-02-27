@@ -185,6 +185,11 @@ namespace CesiumForUnity
             ShowWindow(new CesiumIonAsset(overlay), triggeredByError);
         }
 
+        public static void ShowWindow(CesiumGeoJsonDocumentRasterOverlay overlay, bool triggeredByError)
+        {
+            ShowWindow(new CesiumIonAsset(overlay), triggeredByError);
+        }
+
         private static void ShowWindow(CesiumIonAsset ionAsset, bool triggeredByError)
         {
             if (ionAsset.IsNull())
@@ -270,6 +275,8 @@ namespace CesiumForUnity
                     return this.ionAsset.tileset.ionServer;
                 else if (this.ionAsset.overlay != null)
                     return this.ionAsset.overlay.ionServer;
+                else if (this.ionAsset.geoJsonOverlay != null)
+                    return this.ionAsset.geoJsonOverlay.ionServer;
                 else
                     return null;
             }
@@ -513,6 +520,10 @@ namespace CesiumForUnity
             else if (asset.overlay != null)
             {
                 Undo.RecordObject(asset.overlay, "Use Default ion Access Token for Raster Overlay");
+            }
+            else if (asset.geoJsonOverlay != null)
+            {
+                Undo.RecordObject(asset.geoJsonOverlay, "Use Default ion Access Token for Raster Overlay");
             }
 
             asset.ionAccessToken = "";

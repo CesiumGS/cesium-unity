@@ -15,12 +15,14 @@ namespace CesiumForUnity
         {
             Tileset,
             Overlay,
+            GeoJsonOverlay,
             Null
         }
 
         private AssetType _type = AssetType.Null;
         private Cesium3DTileset _tileset;
         private CesiumIonRasterOverlay _overlay;
+        private CesiumGeoJsonDocumentRasterOverlay _geoJsonOverlay;
 
         public CesiumIonAsset()
         {
@@ -39,6 +41,12 @@ namespace CesiumForUnity
             this._overlay = overlay;
         }
 
+        public CesiumIonAsset(CesiumGeoJsonDocumentRasterOverlay overlay)
+        {
+            this._type = AssetType.GeoJsonOverlay;
+            this._geoJsonOverlay = overlay;
+        }
+
         public Cesium3DTileset tileset
         {
             get => this._type == AssetType.Tileset ? this._tileset : null;
@@ -47,6 +55,11 @@ namespace CesiumForUnity
         public CesiumIonRasterOverlay overlay
         {
             get => this._type == AssetType.Overlay ? this._overlay : null;
+        }
+
+        public CesiumGeoJsonDocumentRasterOverlay geoJsonOverlay
+        {
+            get => this._type == AssetType.GeoJsonOverlay ? this._geoJsonOverlay : null;
         }
 
         public string objectName
@@ -63,6 +76,11 @@ namespace CesiumForUnity
                     return this._overlay.gameObject.name;
                 }
 
+                if (this._type == AssetType.GeoJsonOverlay && this._geoJsonOverlay != null)
+                {
+                    return this._geoJsonOverlay.gameObject.name;
+                }
+
                 return "";
             }
         }
@@ -76,7 +94,7 @@ namespace CesiumForUnity
                     return "Tileset";
                 }
 
-                if (this._type == AssetType.Overlay)
+                if (this._type == AssetType.Overlay || this._type == AssetType.GeoJsonOverlay)
                 {
                     return "Raster Overlay";
                 }
@@ -99,6 +117,11 @@ namespace CesiumForUnity
                     return this._overlay.GetType().Name;
                 }
 
+                if (this._type == AssetType.GeoJsonOverlay && this._geoJsonOverlay != null)
+                {
+                    return this._geoJsonOverlay.GetType().Name;
+                }
+
                 return "";
             }
         }
@@ -119,6 +142,12 @@ namespace CesiumForUnity
                     return ionOverlay != null ? ionOverlay.ionAccessToken : "";
                 }
 
+                if (this._type == AssetType.GeoJsonOverlay && this._geoJsonOverlay != null)
+                {
+                    return this._geoJsonOverlay.source == CesiumGeoJsonDocumentRasterOverlaySource.FromCesiumIon
+                        ? this._geoJsonOverlay.ionAccessToken : "";
+                }
+
                 return "";
             }
             set
@@ -135,6 +164,11 @@ namespace CesiumForUnity
                     {
                         ionOverlay.ionAccessToken = value;
                     }
+                }
+
+                if (this._type == AssetType.GeoJsonOverlay && this._geoJsonOverlay != null)
+                {
+                    this._geoJsonOverlay.ionAccessToken = value;
                 }
             }
         }
@@ -155,6 +189,12 @@ namespace CesiumForUnity
                     return ionOverlay != null ? ionOverlay.ionAssetID : 0;
                 }
 
+                if (this._type == AssetType.GeoJsonOverlay && this._geoJsonOverlay != null)
+                {
+                    return this._geoJsonOverlay.source == CesiumGeoJsonDocumentRasterOverlaySource.FromCesiumIon
+                        ? this._geoJsonOverlay.ionAssetID : 0;
+                }
+
                 return 0;
             }
         }
@@ -171,6 +211,11 @@ namespace CesiumForUnity
                 return this._overlay == null;
             }
 
+            if(this._type == AssetType.GeoJsonOverlay)
+            {
+                return this._geoJsonOverlay == null;
+            }
+
             return true;
         }
 
@@ -185,6 +230,11 @@ namespace CesiumForUnity
             {
                 CesiumIonRasterOverlay ionOverlay = this._overlay as CesiumIonRasterOverlay;
                 return ionOverlay != null;
+            }
+
+            if (this._type == AssetType.GeoJsonOverlay && this._geoJsonOverlay != null)
+            {
+                return this._geoJsonOverlay.source == CesiumGeoJsonDocumentRasterOverlaySource.FromCesiumIon;
             }
 
             return false;

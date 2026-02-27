@@ -1,0 +1,65 @@
+#pragma once
+
+#include "CesiumImpl.h"
+
+#include <CesiumVectorData/GeoJsonDocument.h>
+#include <CesiumVectorData/GeoJsonObject.h>
+
+#include <DotNet/System/String.h>
+
+#include <memory>
+
+namespace DotNet::CesiumForUnity {
+class CesiumGeoJsonFeature;
+class CesiumGeoJsonObject;
+} // namespace DotNet::CesiumForUnity
+
+namespace CesiumForUnityNative {
+
+class CesiumGeoJsonFeatureImpl : public CesiumImpl<CesiumGeoJsonFeatureImpl> {
+public:
+  CesiumGeoJsonFeatureImpl(
+      const DotNet::CesiumForUnity::CesiumGeoJsonFeature& feature);
+  ~CesiumGeoJsonFeatureImpl();
+
+  void setNativeFeatureInDocument(
+      std::shared_ptr<CesiumVectorData::GeoJsonDocument> pDocument,
+      CesiumVectorData::GeoJsonFeature* pFeature);
+
+  std::int32_t
+  GetIdType(const DotNet::CesiumForUnity::CesiumGeoJsonFeature& feature);
+
+  DotNet::System::String
+  GetIdAsString(const DotNet::CesiumForUnity::CesiumGeoJsonFeature& feature);
+
+  std::int64_t
+  GetIdAsInteger(const DotNet::CesiumForUnity::CesiumGeoJsonFeature& feature);
+
+  DotNet::System::String GetPropertiesAsJson(
+      const DotNet::CesiumForUnity::CesiumGeoJsonFeature& feature);
+
+  DotNet::System::String GetStringProperty(
+      const DotNet::CesiumForUnity::CesiumGeoJsonFeature& feature,
+      DotNet::System::String propertyName);
+
+  double GetNumericProperty(
+      const DotNet::CesiumForUnity::CesiumGeoJsonFeature& feature,
+      DotNet::System::String propertyName);
+
+  bool HasProperty(
+      const DotNet::CesiumForUnity::CesiumGeoJsonFeature& feature,
+      DotNet::System::String propertyName);
+
+  DotNet::CesiumForUnity::CesiumGeoJsonObject
+  GetGeometry(const DotNet::CesiumForUnity::CesiumGeoJsonFeature& feature);
+
+  CesiumVectorData::GeoJsonFeature* getNativeFeature() const {
+    return _pFeature;
+  }
+
+private:
+  std::shared_ptr<CesiumVectorData::GeoJsonDocument> _pDocument;
+  CesiumVectorData::GeoJsonFeature* _pFeature;
+};
+
+} // namespace CesiumForUnityNative

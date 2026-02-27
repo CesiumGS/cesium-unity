@@ -920,6 +920,101 @@ namespace CesiumForUnity
             polygon = polygons[0];
             len = polygons.Count;
 
+            CesiumGeoJsonDocumentRasterOverlay geoJsonOverlay =
+                go.GetComponent<CesiumGeoJsonDocumentRasterOverlay>();
+            geoJsonOverlay.source = geoJsonOverlay.source;
+            geoJsonOverlay.url = geoJsonOverlay.url;
+            geoJsonOverlay.ionAssetID = geoJsonOverlay.ionAssetID;
+            geoJsonOverlay.ionAccessToken = geoJsonOverlay.ionAccessToken;
+            geoJsonOverlay.ionServer = geoJsonOverlay.ionServer;
+            geoJsonOverlay.mipLevels = geoJsonOverlay.mipLevels;
+            CesiumVectorStyle vectorStyle = geoJsonOverlay.defaultStyle;
+            geoJsonOverlay.defaultStyle = vectorStyle;
+            CesiumGeoJsonDocument overlayDoc = geoJsonOverlay.document;
+
+            // CesiumGeoJsonDocument and CesiumGeoJsonObject
+            CesiumGeoJsonDocument geoJsonDoc = new CesiumGeoJsonDocument();
+            geoJsonDoc.ParseInternal("");
+            bool isDocValid = geoJsonDoc.IsValid();
+            CesiumGeoJsonObject geoJsonObj = new CesiumGeoJsonObject();
+            geoJsonObj = geoJsonDoc.GetRootObject();
+            CesiumGeoJsonObjectType objType = geoJsonObj.GetObjectType();
+            bool isObjValid = geoJsonObj.IsValid();
+            bool hasGeoJsonStyle = geoJsonObj.HasStyle();
+            vectorStyle = geoJsonObj.GetStyle();
+            geoJsonObj.SetStyle(vectorStyle);
+            geoJsonObj.ClearStyle();
+
+            // CesiumGeoJsonFeature
+            CesiumGeoJsonFeature geoJsonFeature = new CesiumGeoJsonFeature();
+            geoJsonFeature = geoJsonObj.GetObjectAsFeature();
+            CesiumGeoJsonFeature[] geoJsonFeatures = geoJsonObj.GetObjectAsFeatureCollection();
+            geoJsonFeature = geoJsonFeatures[0];
+            int featureCount = geoJsonFeatures.Length;
+            CesiumGeoJsonFeatureIdType idType = geoJsonFeature.GetIdType();
+            string featureIdStr = geoJsonFeature.GetIdAsString();
+            long featureIdInt = geoJsonFeature.GetIdAsInteger();
+            string propsJson = geoJsonFeature.GetPropertiesAsJson();
+            string strProp = geoJsonFeature.GetStringProperty("");
+            double numProp = geoJsonFeature.GetNumericProperty("");
+            bool hasProp = geoJsonFeature.HasProperty("");
+            CesiumGeoJsonObject featureGeom = geoJsonFeature.GetGeometry();
+            // CesiumGeoJsonLineString
+            CesiumGeoJsonLineString geoJsonLineString = new CesiumGeoJsonLineString();
+            double3[] lineStringPoints = geoJsonLineString.points;
+            geoJsonLineString.points = lineStringPoints;
+
+            // CesiumGeoJsonPolygon
+            CesiumGeoJsonPolygon geoJsonPolygon = new CesiumGeoJsonPolygon();
+            CesiumGeoJsonLineString[] polygonRings = geoJsonPolygon.rings;
+            geoJsonPolygon.rings = polygonRings;
+            CesiumGeoJsonLineString polygonRing = polygonRings[0];
+            int polygonRingCount = polygonRings.Length;
+
+            // Geometry subtypes on CesiumGeoJsonObject
+            double3 pointCoord = geoJsonObj.GetObjectAsPoint();
+            double3[] multiPointCoords = geoJsonObj.GetObjectAsMultiPoint();
+            double3 multiPointCoord = multiPointCoords[0];
+            int multiPointCount = multiPointCoords.Length;
+            CesiumGeoJsonLineString lineStringGeom = geoJsonObj.GetObjectAsLineString();
+            CesiumGeoJsonLineString[] multiLineStringGeom = geoJsonObj.GetObjectAsMultiLineString();
+            CesiumGeoJsonLineString multiLineStringItem = multiLineStringGeom[0];
+            int multiLineStringCount = multiLineStringGeom.Length;
+            CesiumGeoJsonPolygon polygonGeom = geoJsonObj.GetObjectAsPolygon();
+            CesiumGeoJsonPolygon[] multiPolygonGeom = geoJsonObj.GetObjectAsMultiPolygon();
+            CesiumGeoJsonPolygon multiPolygonItem = multiPolygonGeom[0];
+            int multiPolygonCount = multiPolygonGeom.Length;
+            CesiumGeoJsonObject[] geometryCollection = geoJsonObj.GetObjectAsGeometryCollection();
+            CesiumGeoJsonObject geometryCollectionItem = geometryCollection[0];
+            int geometryCollectionCount = geometryCollection.Length;
+
+            Action<CesiumGeoJsonDocument> docCallback = (doc) => { };
+            CesiumVectorLineStyle lineStyle = vectorStyle.lineStyle;
+            vectorStyle.lineStyle = lineStyle;
+            Color32 lineColor = lineStyle.color;
+            lineStyle.color = lineColor;
+            CesiumVectorColorMode colorMode = lineStyle.colorMode;
+            lineStyle.colorMode = colorMode;
+            double lineWidth = lineStyle.width;
+            lineStyle.width = lineWidth;
+            CesiumVectorLineWidthMode widthMode = lineStyle.widthMode;
+            lineStyle.widthMode = widthMode;
+            CesiumVectorPolygonStyle polygonStyleV = vectorStyle.polygonStyle;
+            vectorStyle.polygonStyle = polygonStyleV;
+            bool fillEnabled = polygonStyleV.fill;
+            polygonStyleV.fill = fillEnabled;
+            CesiumVectorPolygonFillStyle fillStyle = polygonStyleV.fillStyle;
+            polygonStyleV.fillStyle = fillStyle;
+            Color32 fillColor = fillStyle.color;
+            fillStyle.color = fillColor;
+            CesiumVectorColorMode fillColorMode = fillStyle.colorMode;
+            fillStyle.colorMode = fillColorMode;
+            bool outlineEnabled = polygonStyleV.outline;
+            polygonStyleV.outline = outlineEnabled;
+            CesiumVectorLineStyle outlineStyle = polygonStyleV.outlineStyle;
+            polygonStyleV.outlineStyle = outlineStyle;
+            baseOverlay = geoJsonOverlay;
+
             TestGltfModel testModel = new TestGltfModel();
 
             bool[] boolArray = { };
@@ -1009,4 +1104,3 @@ namespace CesiumForUnity
         }
     }
 }
-
