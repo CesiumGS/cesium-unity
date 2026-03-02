@@ -1,6 +1,6 @@
 # Change Log {#changes}
 
-## v1.22.0 - 2026-02-02
+## v1.23.0 - 2026-03-02
 
 ##### Additions :tada:
 
@@ -8,6 +8,8 @@
 - Added `CesiumGeoJsonDocument` to parse and manipulate GeoJSON documents in code.
 - Added `CesiumGeoJsonObject` to access individual features, geometries, and collections within a GeoJSON document.
 - Added `CesiumVectorStyle`, `CesiumVectorLineStyle`, `CesiumVectorPolygonStyle`, and `CesiumVectorPolygonFillStyle` structs for styling vector data.
+
+## v1.22.0 - 2026-02-02
 
 ##### Fixes :wrench:
 
