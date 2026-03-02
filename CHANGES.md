@@ -9,6 +9,8 @@
 - Added `CesiumGeoJsonObject` to access individual features, geometries, and collections within a GeoJSON document.
 - Added `CesiumVectorStyle`, `CesiumVectorLineStyle`, `CesiumVectorPolygonStyle`, and `CesiumVectorPolygonFillStyle` structs for styling vector data.
 
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.57.0 to v0.58.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
+
 ## v1.22.0 - 2026-02-02
 
 ##### Fixes :wrench:
