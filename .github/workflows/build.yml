@@ -289,6 +289,24 @@ jobs:
         run: |
           cd ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
           dotnet publish Reinterop~ -o .
+      - name: Verify Reinterop analyzer inputs
+        run: |
+          cd ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
+          echo "dotnet version: $(dotnet --version)"
+          ls -l Reinterop.dll Reinterop.dll.meta Source/csc.rsp
+          shasum -a 256 Reinterop.dll
+
+          if [ ! -f Reinterop.dll ]; then
+            echo "Reinterop.dll is missing before Build Package"
+            exit 1
+          fi
+
+          if ! grep -q "RoslynAnalyzer" Reinterop.dll.meta; then
+            echo "Reinterop.dll.meta is missing the RoslynAnalyzer label"
+            echo "Current Reinterop.dll.meta:"
+            cat Reinterop.dll.meta
+            exit 1
+          fi
       - name: Build Package
         run: |
           # We only need a release build of vcpkg dependencies
