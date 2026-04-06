@@ -279,6 +279,29 @@ namespace Build
                     Directory.CreateDirectory(generatedPath);
                 }
 
+                if (options.Platforms.Contains("Linux"))
+                {
+                    Console.WriteLine("**** Compiling for Linux Player");
+                    unity.Run(new[]
+                    {
+                        "-batchmode",
+                        "-nographics",
+                        "-projectPath",
+                        Utility.ProjectRoot,
+                        "-buildTarget",
+                        "Linux64",
+                        "-executeMethod",
+                        "CesiumForUnity.BuildCesiumForUnity.CompileForLinuxAndExit"
+                    });
+
+                    Console.WriteLine("**** Adding generated files (for the Linux Player) to the package");
+                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_STANDALONE_LINUX", generatedPath, outputGeneratedPath);
+
+                    // Clean the generated code directory.
+                    Directory.Delete(generatedPath, true);
+                    Directory.CreateDirectory(generatedPath);
+                }
+
                 if (options.Platforms.Contains("macOS"))
                 {
                     Console.WriteLine("**** Compiling for macOS Player");
