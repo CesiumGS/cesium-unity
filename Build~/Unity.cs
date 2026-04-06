@@ -146,6 +146,9 @@ namespace Build
             if (unityDir == null)
                 unityDir = unityDefaultBaseDirectory;
 
+            if (!unityDir.Exists)
+                return null;
+
             if (version != null)
             {
                 FileInfo unityExecutable = new FileInfo(Path.Combine(unityDir.FullName, version, unityExecutableSubPath));
