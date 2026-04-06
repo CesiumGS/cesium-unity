@@ -378,8 +378,8 @@ jobs:
           xvfb-run -a /opt/unityhub/unityhub-bin --no-sandbox --headless install --version 2022.3.41f1 --changeset 0f988161febf
       - name: Configure Unity to Use the License Server
         run: |
-          sudo mkdir -p /etc/unity3d/config
-          sudo bash -c 'echo "{\"licensingServiceBaseUrl\": \"http://localhost:12331\",\"enableEntitlementLicensing\": true,\"clientConnectTimeoutSec\": 60,\"clientHandshakeTimeoutSec\": 120,\"toolset\":\"UnityLicenseServer_16768262570522_9\"}" > /etc/unity3d/config/services-config.json'
+          sudo mkdir -p /usr/share/unity3d/config
+          sudo bash -c 'echo "{\"licensingServiceBaseUrl\": \"http://localhost:12331\",\"enableEntitlementLicensing\": true,\"clientConnectTimeoutSec\": 60,\"clientHandshakeTimeoutSec\": 120,\"toolset\":\"UnityLicenseServer_16768262570522_9\"}" > /usr/share/unity3d/config/services-config.json'
       - name: Create SSH tunnel to Unity License Server
         env:
           UNITY_LICENSE_SERVER_SSH_KEY: ${{ secrets.UNITY_LICENSE_SERVER_SSH_KEY }}
