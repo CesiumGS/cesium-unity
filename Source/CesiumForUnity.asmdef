@@ -10,6 +10,7 @@
         "Android",
         "Editor",
         "iOS",
+        "LinuxStandalone64",
         "macOSStandalone",
         "WSA",
         "WindowsStandalone64",
