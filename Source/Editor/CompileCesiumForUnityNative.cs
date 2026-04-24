@@ -711,11 +711,12 @@ namespace CesiumForUnity
             File.WriteAllText(scriptPath,
                 "#!/bin/bash\n" +
                 "set -e\n" +
+                "dnf install -q -y epel-release\n" +
                 "dnf module enable -y llvm-toolset\n" +
                 "dnf install -q -y clang cmake make nasm\n" +
                 $"cmake {configureArgs}\n" +
                 $"cmake {buildArgs}\n",
-                Encoding.UTF8);
+                new UTF8Encoding(false));
 
             try
             {
