@@ -632,8 +632,15 @@ namespace CesiumForUnity
                         args.Add($"-DCMAKE_TOOLCHAIN_FILE=\"{library.Toolchain}\"");
 
                     startInfo.Arguments = string.Join(' ', args);
+                    string configureArgsStr = startInfo.Arguments;
 
-                    RunAndLog(startInfo, log, logFilename);
+                    string? containerImage = Environment.GetEnvironmentVariable("CESIUM_NATIVE_BUILD_CONTAINER");
+                    bool useContainer = !string.IsNullOrEmpty(containerImage) &&
+                        SystemInfo.operatingSystemFamily == OperatingSystemFamily.Linux &&
+                        library.Platform == BuildTarget.StandaloneLinux64;
+
+                    if (!useContainer)
+                        RunAndLog(startInfo, log, logFilename);
 
                     if (library.Platform == BuildTarget.WebGL)
                         startInfo.FileName = "cmake";
@@ -651,7 +658,12 @@ namespace CesiumForUnity
                     };
                     args.AddRange(library.ExtraBuildArgs);
                     startInfo.Arguments = string.Join(' ', args);
-                    RunAndLog(startInfo, log, logFilename);
+                    string buildArgsStr = startInfo.Arguments;
+
+                    if (useContainer)
+                        RunCmakeInContainer(containerImage!, library, configureArgsStr, buildArgsStr, log, logFilename);
+                    else
+                        RunAndLog(startInfo, log, logFilename);
 
                     // Refresh the asset database for platforms that use static linking so the Unity
                     // builder can find the libraries.
@@ -679,6 +691,66 @@ namespace CesiumForUnity
                         UnityEngine.Debug.LogWarning("Failed to delete temporary Emscripten drive mapping: " + emscriptenDir);
                     }
                 }
+            }
+        }
+
+        private static void RunCmakeInContainer(
+            string containerImage,
+            LibraryToBuild library,
+            string configureArgs,
+            string buildArgs,
+            StreamWriter log,
+            string logFilename)
+        {
+            string packageRoot = Path.GetDirectoryName(library.SourceDirectory)!;
+            string ezvcpkgHostPath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".ezvcpkg");
+
+            // Write cmake commands to a script file to avoid shell quoting complexity.
+            string scriptPath = Path.Combine(Path.GetTempPath(), $"cesium-cmake-{Guid.NewGuid():N}.sh");
+            File.WriteAllText(scriptPath,
+                "#!/bin/bash\n" +
+                "set -e\n" +
+                "dnf module enable -y llvm-toolset\n" +
+                "dnf install -q -y clang cmake make nasm\n" +
+                $"cmake {configureArgs}\n" +
+                $"cmake {buildArgs}\n",
+                Encoding.UTF8);
+
+            try
+            {
+                ProcessStartInfo dockerInfo = new ProcessStartInfo("docker");
+                dockerInfo.UseShellExecute = false;
+                dockerInfo.CreateNoWindow = true;
+                dockerInfo.WorkingDirectory = library.SourceDirectory;
+                dockerInfo.RedirectStandardError = true;
+                dockerInfo.RedirectStandardOutput = true;
+
+                StringBuilder dockerArgsBuilder = new StringBuilder("run --rm");
+                dockerArgsBuilder.Append($" --workdir \"{library.SourceDirectory}\"");
+                dockerArgsBuilder.Append($" -v \"{packageRoot}:{packageRoot}\"");
+                dockerArgsBuilder.Append($" -v \"{ezvcpkgHostPath}:/root/.ezvcpkg\"");
+                dockerArgsBuilder.Append($" -v \"{scriptPath}:/tmp/cesium-build.sh:ro\"");
+                dockerArgsBuilder.Append(" -e CC=clang");
+                dockerArgsBuilder.Append(" -e CXX=clang++");
+
+                foreach (string envVarName in new[] {
+                    "VCPKG_BINARY_SOURCES", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY",
+                    "AWS_REGION", "CESIUM_VCPKG_RELEASE_ONLY" })
+                {
+                    string? value = Environment.GetEnvironmentVariable(envVarName);
+                    if (!string.IsNullOrEmpty(value))
+                        dockerArgsBuilder.Append($" -e \"{envVarName}={value}\"");
+                }
+
+                dockerArgsBuilder.Append($" {containerImage} bash /tmp/cesium-build.sh");
+                dockerInfo.Arguments = dockerArgsBuilder.ToString();
+
+                RunAndLog(dockerInfo, log, logFilename);
+            }
+            finally
+            {
+                try { File.Delete(scriptPath); } catch (Exception) { }
             }
         }
 

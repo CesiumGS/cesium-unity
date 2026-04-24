@@ -358,11 +358,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: "~/.ezvcpkg"
-          key: vcpkg-linux-${{ hashFiles('native~/vcpkg/ports/**/vcpkg.json', 'native~/vcpkg/triplets/**/*', 'native~/extern/*toolchain.cmake') }}-${{ hashFiles('native~/extern/cesium-native/CMakeLists.txt', 'native~/CMakeLists.txt') }}
+          key: vcpkg-linux-alma-${{ hashFiles('native~/vcpkg/ports/**/vcpkg.json', 'native~/vcpkg/triplets/**/*', 'native~/extern/*toolchain.cmake') }}-${{ hashFiles('native~/extern/cesium-native/CMakeLists.txt', 'native~/CMakeLists.txt') }}
           restore-keys: |
-            vcpkg-linux-${{ hashFiles('native~/vcpkg/ports/**/vcpkg.json', 'native~/vcpkg/triplets/**/*', 'native~/extern/*toolchain.cmake') }}-
-      - name: Install nasm
-        uses: ilammy/setup-nasm@v1.5.1
+            vcpkg-linux-alma-${{ hashFiles('native~/vcpkg/ports/**/vcpkg.json', 'native~/vcpkg/triplets/**/*', 'native~/extern/*toolchain.cmake') }}-
       - name: Install Unity Hub
         run: |
           sudo apt-get install -y gnupg libgbm1 xvfb
@@ -421,6 +419,8 @@ jobs:
           cd ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
           dotnet publish Reinterop~ -o .
       - name: Build Package
+        env:
+          CESIUM_NATIVE_BUILD_CONTAINER: almalinux:8
         run: |
           # We only need a release build of vcpkg dependencies
           export CESIUM_VCPKG_RELEASE_ONLY="TRUE"
