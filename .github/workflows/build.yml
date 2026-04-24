@@ -443,7 +443,7 @@ jobs:
         env:
           CESIUM_ION_TOKEN_FOR_TESTS: ${{ secrets.CESIUM_ION_TOKEN_FOR_TESTS }}
         run: |
-          ~/Unity/Hub/Editor/2022.3.41f1/Editor/Unity -runTests -batchmode -projectPath ~/cesium/CesiumForUnityBuildProject -testResults ~/cesium/CesiumForUnityBuildProject/TestResults.xml -testPlatform PlayMode -logFile ~/cesium/CesiumForUnityBuildProject/test-log.txt
+          xvfb-run -a ~/Unity/Hub/Editor/2022.3.41f1/Editor/Unity -runTests -batchmode -projectPath ~/cesium/CesiumForUnityBuildProject -testResults ~/cesium/CesiumForUnityBuildProject/TestResults.xml -testPlatform PlayMode -logFile ~/cesium/CesiumForUnityBuildProject/test-log.txt
           cat ~/cesium/CesiumForUnityBuildProject/test-log.txt
       - name: Test Report
         uses: kring/test-reporter@v1.6.2-kring
