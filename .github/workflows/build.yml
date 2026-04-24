@@ -73,7 +73,7 @@ jobs:
           choco install -y wget
       - name: Install Unity Hub
         run: |
-          wget https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.exe
+          wget https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-x64.exe
           Start-Process "./UnityHubSetup.exe" -Args "/S" -Wait
           del ./UnityHubSetup.exe
       - name: Install Unity
@@ -229,7 +229,7 @@ jobs:
         uses: ilammy/setup-nasm@v1.5.1
       - name: Install Unity Hub
         run: |
-          wget --quiet https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.dmg
+          wget --quiet https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-arm64.dmg
           mkdir UnityHubSetup
           hdiutil attach UnityHubSetup.dmg -mountpoint ./UnityHubSetup
           sudo cp -R "./UnityHubSetup/Unity Hub.app" /Applications
@@ -372,7 +372,7 @@ jobs:
           choco install -y wget
       - name: Install Unity Hub
         run: |
-          wget https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.exe
+          wget https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-x64.exe
           Start-Process "./UnityHubSetup.exe" -Args "/S" -Wait
           del ./UnityHubSetup.exe
       - name: Install Unity
