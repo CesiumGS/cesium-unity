@@ -74,8 +74,8 @@ jobs:
       - name: Install Unity Hub
         run: |
           wget https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-x64.exe
-          Start-Process "./UnityHubSetup.exe" -Args "/S" -Wait
-          del ./UnityHubSetup.exe
+          Start-Process "./UnityHubSetup-x64.exe" -Args "/S" -Wait
+          del ./UnityHubSetup-x64.exe
       - name: Install Unity
         run: |
           Start-Process -FilePath "C:/Program Files/Unity Hub/Unity Hub.exe" -Args "-- --headless install --version 2022.3.41f1 --changeset 0f988161febf" -Wait
@@ -231,10 +231,10 @@ jobs:
         run: |
           wget --quiet https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-arm64.dmg
           mkdir UnityHubSetup
-          hdiutil attach UnityHubSetup.dmg -mountpoint ./UnityHubSetup
+          hdiutil attach UnityHubSetup-arm64.dmg -mountpoint ./UnityHubSetup
           sudo cp -R "./UnityHubSetup/Unity Hub.app" /Applications
           hdiutil detach ./UnityHubSetup
-          rm ./UnityHubSetup.dmg
+          rm ./UnityHubSetup-arm64.dmg
       - name: Install Unity 2022.3.41f1
         # This command sometimes returns exit code 130, despite actually succeeding.
         continue-on-error: true
@@ -373,8 +373,8 @@ jobs:
       - name: Install Unity Hub
         run: |
           wget https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-x64.exe
-          Start-Process "./UnityHubSetup.exe" -Args "/S" -Wait
-          del ./UnityHubSetup.exe
+          Start-Process "./UnityHubSetup-x64.exe" -Args "/S" -Wait
+          del ./UnityHubSetup-x64.exe
       - name: Install Unity
         run: |
           # We must use Unity 6+ because the Emscripten version in older releases is too old.
