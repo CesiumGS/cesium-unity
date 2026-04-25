@@ -414,7 +414,7 @@ namespace Build
                 "dnf install -q -y dnf-plugins-core\n" +
                 "dnf config-manager --set-enabled powertools\n" +
                 "dnf module enable -y llvm-toolset\n" +
-                "dnf install -q -y clang cmake make nasm git\n" +
+                "dnf install -q -y clang cmake make nasm git curl zip unzip tar\n" +
                 $"cmake {string.Join(' ', configureArgs)}\n" +
                 $"cmake {string.Join(' ', buildArgs)}\n",
                 new UTF8Encoding(false));
