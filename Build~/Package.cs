@@ -414,7 +414,8 @@ namespace Build
                 "dnf install -q -y dnf-plugins-core\n" +
                 "dnf config-manager --set-enabled powertools\n" +
                 "dnf module enable -y llvm-toolset\n" +
-                "dnf install -q -y clang cmake make nasm git curl zip unzip tar\n" +
+                "dnf install -q -y clang make nasm git curl zip unzip tar\n" +
+                "curl -fsSL https://github.com/Kitware/CMake/releases/download/v3.31.12/cmake-3.31.12-linux-x86_64.tar.gz | tar -xz -C /usr/local --strip-components=1\n" +
                 $"cmake {string.Join(' ', configureArgs)}\n" +
                 $"cmake {string.Join(' ', buildArgs)}\n",
                 new UTF8Encoding(false));
