@@ -73,6 +73,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cstddef>
 #include <unordered_map>
 #include <variant>
 
@@ -151,7 +152,7 @@ template <typename TIndex> struct CopyVertexColors {
     uint8_t a;
   };
 
-  bool operator()(AccessorView<nullptr_t>&& invalidView) { return false; }
+  bool operator()(AccessorView<std::nullptr_t>&& invalidView) { return false; }
 
   template <typename TColorView> bool operator()(TColorView&& colorView) {
     if (colorView.status() != AccessorViewStatus::Valid) {
