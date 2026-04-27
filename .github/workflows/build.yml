@@ -340,6 +340,118 @@ jobs:
           name: Tests - macOS
           path: /Users/runner/cesium/CesiumForUnityBuildProject/TestResults.xml
           reporter: dotnet-nunit
+  Linux:
+    needs: [QuickChecks]
+    runs-on: ubuntu-latest
+    # Only allow a single Linux build at a time, for Unity licensing reasons
+    concurrency: linux
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.103"
+      - name: Cache vcpkg artifacts
+        uses: actions/cache@v4
+        with:
+          path: "~/.ezvcpkg"
+          key: vcpkg-linux-alma-${{ hashFiles('native~/vcpkg/ports/**/vcpkg.json', 'native~/vcpkg/triplets/**/*', 'native~/extern/*toolchain.cmake') }}-${{ hashFiles('native~/extern/cesium-native/CMakeLists.txt', 'native~/CMakeLists.txt') }}
+          restore-keys: |
+            vcpkg-linux-alma-${{ hashFiles('native~/vcpkg/ports/**/vcpkg.json', 'native~/vcpkg/triplets/**/*', 'native~/extern/*toolchain.cmake') }}-
+      - name: Install Unity Hub
+        run: |
+          sudo apt-get install -y gnupg libgbm1 xvfb
+          wget -qO - https://hub.unity3d.com/linux/keys/public | gpg --dearmor | sudo tee /usr/share/keyrings/Unity_Technologies_ApS.gpg > /dev/null
+          sudo sh -c 'echo "deb [signed-by=/usr/share/keyrings/Unity_Technologies_ApS.gpg] https://hub.unity3d.com/linux/repos/deb stable main" > /etc/apt/sources.list.d/unityhub.list'
+          sudo apt-get update
+          sudo apt-get install -y unityhub
+      - name: Install Unity 2022.3.41f1
+        # This command sometimes returns exit code 130, despite actually succeeding.
+        # unityhub-bin requires a virtual display even in headless mode.
+        continue-on-error: true
+        run: |
+          xvfb-run -a /opt/unityhub/unityhub-bin --no-sandbox --headless install --version 2022.3.41f1 --changeset 0f988161febf
+      - name: Configure Unity to Use the License Server
+        run: |
+          sudo mkdir -p /usr/share/unity3d/config
+          sudo bash -c 'echo "{\"licensingServiceBaseUrl\": \"http://localhost:12331\",\"enableEntitlementLicensing\": true,\"clientConnectTimeoutSec\": 60,\"clientHandshakeTimeoutSec\": 120,\"toolset\":\"UnityLicenseServer_16768262570522_9\"}" > /usr/share/unity3d/config/services-config.json'
+      - name: Create SSH tunnel to Unity License Server
+        env:
+          UNITY_LICENSE_SERVER_SSH_KEY: ${{ secrets.UNITY_LICENSE_SERVER_SSH_KEY }}
+        run: |
+          echo "$UNITY_LICENSE_SERVER_SSH_KEY" > ~/unity-client-ssh-key
+          chmod 600 ~/unity-client-ssh-key
+          # Without StrictHostKeyChecking, OpenSSH will sit forever waiting for local input to confirm the server key is ok.
+          # We don't really care if the server is authentic, because we're not sending anything sensitive to it.
+          # The license server VM's sshd_config also needed to be modified with the following options, in order to prevent
+          # the tunnel from being closed between here and when we're ready to use it.
+          #   TCPKeepAlive yes
+          #   ClientAliveInterval 30
+          #   ClientAliveCountMax 9999
+          ssh -fNT -o StrictHostKeyChecking=no -i ~/unity-client-ssh-key -L 127.0.0.1:12331:127.0.0.1:8080 unity-client@ec2-44-204-244-196.compute-1.amazonaws.com
+          sleep 5
+      - name: Test Connection to Unity License Server
+        run: |
+          wget http://127.0.0.1:12331/v1/admin/status
+          cat status
+          rm status
+      - name: Update the version in Cesium.cpp
+        run: |
+          export VERSION=$(jq -r ".version" package.json)
+          export COMMIT=$(git rev-parse --short HEAD)
+          sed -i 's/Cesium::version = "Development Build"/Cesium::version = "'$VERSION'"/g' native~/src/Runtime/Cesium.cpp
+          sed -i 's/Cesium::commit = "Unknown"/Cesium::commit = "'$COMMIT'"/g' native~/src/Runtime/Cesium.cpp
+          # Sanity check that the replacements happened
+          grep $VERSION native~/src/Runtime/Cesium.cpp
+          grep $COMMIT native~/src/Runtime/Cesium.cpp
+      - name: Move cesium-unity Repo Under Empty Project
+        run: |
+          mkdir -p ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
+          mv $GITHUB_WORKSPACE/* ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
+          # Disable Unity audio
+          mkdir -p ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity/ProjectSettings
+          echo '%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!11 &1\nAudioManager:\n  m_DisableAudio: 1\n' > ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity/ProjectSettings/AudioManager.asset
+      - name: Build Reinterop
+        run: |
+          cd ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
+          dotnet publish Reinterop~ -o .
+      - name: Build Package
+        env:
+          CESIUM_NATIVE_BUILD_CONTAINER: almalinux:8
+        run: |
+          # We only need a release build of vcpkg dependencies
+          export CESIUM_VCPKG_RELEASE_ONLY="TRUE"
+          cd ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
+          dotnet run --project Build~ package --platform Editor --platform Linux
+          ls -l ~/cesium/CesiumForUnityBuildProject
+      - name: Publish Logs
+        if: success() || failure()    # run this step even if previous step failed
+        uses: actions/upload-artifact@v4
+        with:
+          name: Native Build Logs - Linux
+          path: ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity/native~/build-*/build.log
+      - name: Publish package artifact
+        if: ${{ success() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: Linux Package
+          path: ~/cesium/CesiumForUnityBuildProject/*.tgz
+      - name: Run Tests
+        env:
+          CESIUM_ION_TOKEN_FOR_TESTS: ${{ secrets.CESIUM_ION_TOKEN_FOR_TESTS }}
+        run: |
+          xvfb-run -a ~/Unity/Hub/Editor/2022.3.41f1/Editor/Unity -runTests -batchmode -projectPath ~/cesium/CesiumForUnityBuildProject -testResults ~/cesium/CesiumForUnityBuildProject/TestResults.xml -testPlatform PlayMode -logFile ~/cesium/CesiumForUnityBuildProject/test-log.txt
+          cat ~/cesium/CesiumForUnityBuildProject/test-log.txt
+      - name: Test Report
+        uses: kring/test-reporter@v1.6.2-kring
+        if: success() || failure()    # run this step even if previous step failed
+        with:
+          name: Tests - Linux
+          path: /home/runner/cesium/CesiumForUnityBuildProject/TestResults.xml
+          reporter: dotnet-nunit
   Emscripten:
     needs: [QuickChecks]
     runs-on: windows-latest
@@ -466,7 +578,7 @@ jobs:
           path: d:\cesium\CesiumForUnityBuildProject\*.tgz
   Combine:
     runs-on: ubuntu-latest
-    needs: [Windows, MacOS, Emscripten]
+    needs: [Windows, MacOS, Linux, Emscripten]
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -492,6 +604,16 @@ jobs:
           cd combine/emscripten
           tar xzf *.tgz
           rm *.tgz
+      - name: Download Linux build
+        uses: actions/download-artifact@v4
+        with:
+          name: Linux Package
+          path: combine/linux
+      - name: Extract Linux build
+        run: |
+          cd combine/linux
+          tar xzf *.tgz
+          rm *.tgz
       - name: Download Windows build
         uses: actions/download-artifact@v4
         with:
@@ -510,6 +632,7 @@ jobs:
           # Copy the everything. For files that exist in multiple packages, the Windows one will win.
           cp -r ../macos/* .
           cp -r ../emscripten/* .
+          cp -r ../linux/* .
           cp -r ../windows/* .
           
           # Remove the generated C# files
@@ -527,6 +650,14 @@ jobs:
           done;
 
           cd ../emscripten
+          for file in $(find package/Source/generated -name '*.cs');
+          do
+            echo Merging $file
+            mkdir -p $(dirname "../merged/$file")
+            cat "$file" >> "../merged/$file"
+          done;
+
+          cd ../linux
           for file in $(find package/Source/generated -name '*.cs');
           do
             echo Merging $file

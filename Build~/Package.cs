@@ -181,8 +181,14 @@ namespace Build
                     else
                     {
                         // On other platforms, just build once.
-                        Utility.Run("cmake", configureArgs);
-                        Utility.Run("cmake", buildArgs);
+                        string? containerImage = Environment.GetEnvironmentVariable("CESIUM_NATIVE_BUILD_CONTAINER");
+                        if (OperatingSystem.IsLinux() && !string.IsNullOrEmpty(containerImage))
+                            RunCmakeInContainer(containerImage, configureArgs, buildArgs);
+                        else
+                        {
+                            Utility.Run("cmake", configureArgs);
+                            Utility.Run("cmake", buildArgs);
+                        }
                     }
                 }
 
@@ -279,6 +285,29 @@ namespace Build
                     Directory.CreateDirectory(generatedPath);
                 }
 
+                if (options.Platforms.Contains("Linux"))
+                {
+                    Console.WriteLine("**** Compiling for Linux Player");
+                    unity.Run(new[]
+                    {
+                        "-batchmode",
+                        "-nographics",
+                        "-projectPath",
+                        Utility.ProjectRoot,
+                        "-buildTarget",
+                        "Linux64",
+                        "-executeMethod",
+                        "CesiumForUnity.BuildCesiumForUnity.CompileForLinuxAndExit"
+                    });
+
+                    Console.WriteLine("**** Adding generated files (for the Linux Player) to the package");
+                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_STANDALONE_LINUX", generatedPath, outputGeneratedPath);
+
+                    // Clean the generated code directory.
+                    Directory.Delete(generatedPath, true);
+                    Directory.CreateDirectory(generatedPath);
+                }
+
                 if (options.Platforms.Contains("macOS"))
                 {
                     Console.WriteLine("**** Compiling for macOS Player");
@@ -365,6 +394,74 @@ namespace Build
             foreach (DirectoryInfo dir in directories)
             {
                 TraverseDirectoryRecursively(dir.FullName, Path.Combine(builtPath, dir.Name), fileCallback, directoryCallback);
+            }
+        }
+
+        private static void RunCmakeInContainer(
+            string containerImage,
+            IEnumerable<string> configureArgs,
+            IEnumerable<string> buildArgs)
+        {
+            string packageRoot = Utility.PackageRoot;
+            string ezvcpkgHostPath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".ezvcpkg");
+
+            // Write cmake commands to a script file to avoid shell quoting complexity.
+            string scriptPath = Path.Combine(Path.GetTempPath(), $"cesium-cmake-{Guid.NewGuid():N}.sh");
+            File.WriteAllText(scriptPath,
+                "#!/bin/bash\n" +
+                "set -e\n" +
+                "dnf install -q -y dnf-plugins-core\n" +
+                "dnf config-manager --set-enabled powertools\n" +
+                "dnf module enable -y llvm-toolset\n" +
+                "dnf install -q -y clang make nasm git curl zip unzip tar kernel-headers perl-core ninja-build python3 pkgconfig autoconf automake libtool patch\n" +
+                "curl -fsSL https://github.com/Kitware/CMake/releases/download/v3.31.12/cmake-3.31.12-linux-x86_64.tar.gz | tar -xz -C /usr/local --strip-components=1\n" +
+                "curl -fsSL https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o /tmp/awscliv2.zip && unzip -q /tmp/awscliv2.zip -d /tmp && /tmp/aws/install && rm -rf /tmp/awscliv2.zip /tmp/aws\n" +
+                $"cmake {string.Join(' ', configureArgs)}\n" +
+                $"cmake {string.Join(' ', buildArgs)}\n",
+                new UTF8Encoding(false));
+
+            try
+            {
+                ProcessStartInfo dockerInfo = new ProcessStartInfo("docker");
+                dockerInfo.WorkingDirectory = packageRoot;
+
+                dockerInfo.ArgumentList.Add("run");
+                dockerInfo.ArgumentList.Add("--rm");
+                dockerInfo.ArgumentList.Add("--workdir");
+                dockerInfo.ArgumentList.Add(packageRoot);
+                dockerInfo.ArgumentList.Add("-v");
+                dockerInfo.ArgumentList.Add($"{packageRoot}:{packageRoot}");
+                dockerInfo.ArgumentList.Add("-v");
+                dockerInfo.ArgumentList.Add($"{ezvcpkgHostPath}:/root/.ezvcpkg");
+                dockerInfo.ArgumentList.Add("-v");
+                dockerInfo.ArgumentList.Add($"{scriptPath}:/tmp/cesium-build.sh:ro");
+                dockerInfo.ArgumentList.Add("-e");
+                dockerInfo.ArgumentList.Add("CC=clang");
+                dockerInfo.ArgumentList.Add("-e");
+                dockerInfo.ArgumentList.Add("CXX=clang++");
+
+                foreach (string envVarName in new[] {
+                    "VCPKG_BINARY_SOURCES", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY",
+                    "AWS_REGION", "CESIUM_VCPKG_RELEASE_ONLY" })
+                {
+                    string? value = Environment.GetEnvironmentVariable(envVarName);
+                    if (!string.IsNullOrEmpty(value))
+                    {
+                        dockerInfo.ArgumentList.Add("-e");
+                        dockerInfo.ArgumentList.Add($"{envVarName}={value}");
+                    }
+                }
+
+                dockerInfo.ArgumentList.Add(containerImage);
+                dockerInfo.ArgumentList.Add("bash");
+                dockerInfo.ArgumentList.Add("/tmp/cesium-build.sh");
+
+                Utility.RunAndLog(dockerInfo);
+            }
+            finally
+            {
+                try { File.Delete(scriptPath); } catch (Exception) { }
             }
         }
 

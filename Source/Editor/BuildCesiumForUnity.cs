@@ -126,6 +126,23 @@ namespace CesiumForUnity
             EditorApplication.Exit(0);
         }
 
+        public static void CompileForLinuxAndExit()
+        {
+            CompileCesiumForUnityNative.ExitAfterCompile = true;
+
+            string buildPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(buildPath);
+            try
+            {
+                BuildPlayer(BuildTargetGroup.Standalone, BuildTarget.StandaloneLinux64, Path.Combine(buildPath, "Linux"));
+            }
+            finally
+            {
+                Directory.Delete(buildPath, true);
+            }
+            EditorApplication.Exit(0);
+        }
+
         public static void CompileForMacAndExit()
         {
             CompileCesiumForUnityNative.ExitAfterCompile = true;
