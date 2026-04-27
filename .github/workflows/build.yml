@@ -450,7 +450,7 @@ jobs:
         if: success() || failure()    # run this step even if previous step failed
         with:
           name: Tests - Linux
-          path: ~/cesium/CesiumForUnityBuildProject/TestResults.xml
+          path: /home/runner/cesium/CesiumForUnityBuildProject/TestResults.xml
           reporter: dotnet-nunit
   Emscripten:
     needs: [QuickChecks]
