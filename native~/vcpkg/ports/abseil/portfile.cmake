@@ -38,6 +38,14 @@ vcpkg_from_github(
         # Fixes DLL builds when targeting MinGW. Taken from the upstream vcpkg
         # port.
         fix-mingw-dll.patch
+        # Fixes a build failure when targeting UWP (arm64-uwp-unity). In
+        # abseil 20260107.1, time_zone_name_win.cc is only compiled when
+        # PLATFORM_ID is "Windows", but on UWP CMAKE_SYSTEM_NAME is
+        # "WindowsStore", so the file is excluded. However, time_zone_lookup.cc
+        # still references GetWindowsLocalTimeZone() under #if defined(_WIN32),
+        # which is true on UWP. This patch guards those references so they are
+        # also excluded on UWP (WINAPI_FAMILY_APP).
+        fix-uwp-time-zone-lookup.patch
         # NOTE: The upstream vcpkg port also includes 003-force-cxx-17.patch,
         # which prevents abseil from advertising cxx_std_20 as a requirement
         # to consumers (via target_compile_features) even when a C++20 compiler
