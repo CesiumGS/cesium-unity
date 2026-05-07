@@ -1,0 +1,14 @@
+diff --git a/src/s2/base/spinlock.h b/src/s2/base/spinlock.h
+index c1cdda3..3e1d4a7 100644
+--- a/src/s2/base/spinlock.h
++++ b/src/s2/base/spinlock.h
+@@ -47,6 +47,8 @@ class ABSL_LOCKABLE ABSL_ATTRIBUTE_WARN_UNUSED SpinLock {
+ };
+ 
+-class [[nodiscard]] ABSL_SCOPED_LOCKABLE SpinLockHolder {
++// [[nodiscard]] removed: Clang 12 (Android NDK r23) fails to parse the combination of a
++// C++ standard attribute ([[nodiscard]]) and a GNU attribute (from ABSL_SCOPED_LOCKABLE).
++class ABSL_SCOPED_LOCKABLE SpinLockHolder {
+  public:
+   inline explicit SpinLockHolder(SpinLock& l) ABSL_EXCLUSIVE_LOCK_FUNCTION(l)
+       : lock_(l) {
