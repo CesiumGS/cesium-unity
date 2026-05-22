@@ -590,6 +590,29 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
+        private bool _forceDoubleSided = false;
+
+        /// <summary>
+        /// When enabled, all tile primitives are rendered with back-face culling
+        /// disabled, regardless of the glTF material's doubleSided flag or the
+        /// settings on a user-supplied opaqueMaterial.
+        /// </summary>
+        /// <remarks>
+        /// Useful when assigning a custom Material whose Render Face is set to
+        /// Both - Cesium would otherwise overwrite the material's cull state from
+        /// the glTF on every tile load.
+        /// </remarks>
+        public bool forceDoubleSided
+        {
+            get => this._forceDoubleSided;
+            set
+            {
+                this._forceDoubleSided = value;
+                this.RecreateTileset();
+            }
+        }
+
+        [SerializeField]
         private bool _ignoreKhrMaterialsUnlit = false;
 
         /// <summary>

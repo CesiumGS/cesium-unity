@@ -1586,6 +1586,21 @@ void* UnityPrepareRendererResources::prepareInMainThread(
               materialProperties);
         }
 
+        if (tilesetComponent.forceDoubleSided()) {
+          material.SetFloat(
+              materialProperties.getDoubleSidedEnableID(),
+              1.0f);
+          material.SetFloat(
+              materialProperties.getCullID(),
+              float(UnityEngine::Rendering::CullMode::Off));
+          material.SetFloat(
+              materialProperties.getCullModeID(),
+              float(UnityEngine::Rendering::CullMode::Off));
+          material.SetFloat(
+              materialProperties.getBuiltInCullModeID(),
+              float(UnityEngine::Rendering::CullMode::Off));
+        }
+
         if (primitiveInfo.containsPoints) {
           CesiumForUnity::CesiumPointCloudRenderer pointCloudRenderer =
               primitiveGameObject
