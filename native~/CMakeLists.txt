@@ -189,6 +189,7 @@ target_link_libraries(
       Cesium3DTilesSelection
       CesiumAsync
       CesiumIonClient
+      CesiumVectorOverlays
     PRIVATE
       tidy-static
       enum-flags
