@@ -23,6 +23,7 @@
 
 using namespace Cesium3DTilesSelection;
 using namespace CesiumVectorOverlays;
+using namespace CesiumRasterOverlays;
 using namespace CesiumVectorData;
 using namespace DotNet;
 
