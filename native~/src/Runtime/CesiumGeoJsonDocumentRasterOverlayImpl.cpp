@@ -7,10 +7,10 @@
 #include "UnityExternals.h"
 
 #include <Cesium3DTilesSelection/Tileset.h>
-#include <CesiumRasterOverlays/GeoJsonDocumentRasterOverlay.h>
 #include <CesiumUtility/Color.h>
 #include <CesiumVectorData/GeoJsonDocument.h>
 #include <CesiumVectorData/VectorStyle.h>
+#include <CesiumVectorOverlays/GeoJsonDocumentRasterOverlay.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/CesiumForUnity/CesiumGeoJsonDocument.h>
@@ -22,7 +22,7 @@
 #include <spdlog/spdlog.h>
 
 using namespace Cesium3DTilesSelection;
-using namespace CesiumRasterOverlays;
+using namespace CesiumVectorOverlays;
 using namespace CesiumVectorData;
 using namespace DotNet;
 
