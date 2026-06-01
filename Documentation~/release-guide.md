@@ -46,7 +46,7 @@ If the uploaded package is later found to have problems during testing, this ste
 
 1. Clone a fresh copy of [cesium-unity-samples](https://github.com/CesiumGS/cesium-unity-samples) to a new directory.
 2. Before opening the project, go to the Packages folder and open `Packages/manifest.json` in a text editor. Find the `com.cesium.unity` dependency under the `"dependencies"` object and change the version to the version number of the in-progress release.
-3. Open `ProjectSettings/ProjectSettings.asset` and find the `bundleVersion` key (under `PlayerSettings`). Set this to the version number in the in-progress release.
+3. Open `ProjectSettings/ProjectSettings.asset` and find the `bundleVersion` key (under `PlayerSettings`). Set this to the version number of the in-progress release.
 4. Create a new Cesium ion token for this release under the "CesiumJS" account:
    - Visit https://ion.cesium.com.
    - Log in using your own `@cesium.com` email address.
