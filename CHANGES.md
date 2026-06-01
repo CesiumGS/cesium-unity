@@ -1,6 +1,6 @@
 # Change Log {#changes}
 
-## v1.24.0 - 2026-06-01
+## v1.23.3 - 2026-06-01
 
 ##### Fixes :wrench:
 
