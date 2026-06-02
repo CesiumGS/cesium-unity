@@ -46,7 +46,8 @@ If the uploaded package is later found to have problems during testing, this ste
 
 1. Clone a fresh copy of [cesium-unity-samples](https://github.com/CesiumGS/cesium-unity-samples) to a new directory.
 2. Before opening the project, go to the Packages folder and open `Packages/manifest.json` in a text editor. Find the `com.cesium.unity` dependency under the `"dependencies"` object and change the version to the version number of the in-progress release.
-3. Create a new Cesium ion token for this release under the "CesiumJS" account:
+3. Open `ProjectSettings/ProjectSettings.asset` and find the `bundleVersion` key (under `PlayerSettings`). Set this to the version number of the in-progress release.
+4. Create a new Cesium ion token for this release under the "CesiumJS" account:
    - Visit https://ion.cesium.com.
    - Log in using your own `@cesium.com` email address.
    - Click your name in the top-right corner and choose "Switch to CesiumJS". If you don't see this option, ask someone on the ion team to add you to the CesiumJS account.
@@ -56,8 +57,8 @@ If the uploaded package is later found to have problems during testing, this ste
    - Set the other properties as follows (these should be the defaults):
      - `Allow URLs`: "All Urls"
      - `Resources`: "All assets"
-4. Open `Assets/CesiumSettings/Resources/CesiumIonServers/ion.cesium.com.asset` in a text editor and change the `defaultIonAccessToken` property to the new token you created above.
-5. Commit the above changes but do _not_ push it yet. If you do, anyone trying to use cesium-unity-samples will be broken until the new version is published.
+5. Open `Assets/CesiumSettings/Resources/CesiumIonServers/ion.cesium.com.asset` in a text editor and change the `defaultIonAccessToken` property to the new token you created above.
+6. Commit the above changes but do _not_ push it yet. If you do, anyone trying to use cesium-unity-samples will be broken until the new version is published.
 
 ## Test the release candidate
 
