@@ -189,6 +189,7 @@ target_link_libraries(
       Cesium3DTilesSelection
       CesiumAsync
       CesiumIonClient
+      CesiumVectorOverlays
     PRIVATE
       tidy-static
       enum-flags
@@ -217,6 +218,18 @@ if (MSVC)
     CesiumForUnityNative
     PRIVATE
       /bigobj
+  )
+endif()
+
+# Android 15+ devices may use 16 KB memory pages. Support them by aligning
+# ELF segments to 16 KB. NDK r28+ does this by default; for older NDK versions
+# we add the linker flags explicitly.
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Android")
+  target_link_options(
+    CesiumForUnityNative
+    PRIVATE
+      "-Wl,-z,max-page-size=16384"
+      "-Wl,-z,common-page-size=16384"
   )
 endif()
 

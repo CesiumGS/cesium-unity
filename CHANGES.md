@@ -1,5 +1,13 @@
 # Change Log {#changes}
 
+## v1.23.3 - 2026-06-01
+
+##### Fixes :wrench:
+
+- The native Android library (`libCesiumForUnityNative.so`) is now built with 16 KB ELF segment alignment, enabling compatibility with Android 15+ devices that use 16 KB memory pages.
+
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.60.0 to v0.61.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
+
 ## v1.23.2 - 2026-05-01
 
 This release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.59.0 to v0.60.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
