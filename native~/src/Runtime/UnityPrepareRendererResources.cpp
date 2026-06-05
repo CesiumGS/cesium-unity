@@ -1793,7 +1793,7 @@ void UnityPrepareRendererResources::free(
 }
 
 void* UnityPrepareRendererResources::prepareRasterInLoadThread(
-    CesiumGltf::ImageAsset& image,
+    CesiumImage::ImageAsset& image,
     const std::any& rendererOptions) {
   CesiumGltfReader::ImageDecoder::generateMipMaps(image);
   return nullptr;
