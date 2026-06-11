@@ -18,6 +18,7 @@
 #include <CesiumGltf/KhrTextureTransform.h>
 #include <CesiumGltfContent/GltfUtilities.h>
 #include <CesiumGltfReader/GltfReader.h>
+#include <CesiumImage/ImageDecoder.h>
 #include <CesiumUtility/ScopeGuard.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTileInfo.h>
@@ -83,6 +84,7 @@ using namespace CesiumForUnityNative;
 using namespace CesiumGeometry;
 using namespace CesiumGeospatial;
 using namespace CesiumGltf;
+using namespace CesiumImage;
 using namespace CesiumUtility;
 using namespace DotNet;
 
@@ -283,7 +285,7 @@ void generateMipMaps(
         case CesiumGltf::Sampler::MinFilter::LINEAR_MIPMAP_NEAREST:
         case CesiumGltf::Sampler::MinFilter::NEAREST_MIPMAP_LINEAR:
         case CesiumGltf::Sampler::MinFilter::NEAREST_MIPMAP_NEAREST:
-          CesiumGltfReader::ImageDecoder::generateMipMaps(*pImage->pAsset);
+          CesiumImage::ImageDecoder::generateMipMaps(*pImage->pAsset);
         }
       }
     }
@@ -1795,7 +1797,7 @@ void UnityPrepareRendererResources::free(
 void* UnityPrepareRendererResources::prepareRasterInLoadThread(
     CesiumImage::ImageAsset& image,
     const std::any& rendererOptions) {
-  CesiumGltfReader::ImageDecoder::generateMipMaps(image);
+  CesiumImage::ImageDecoder::generateMipMaps(image);
   return nullptr;
 }
 
