@@ -28,10 +28,9 @@ struct CreateModelOptions {
  */
 struct CesiumPrimitiveInfo {
   /**
-   * @brief Whether or not the primitive's mode is set to POINTS.
-   * This affects whether or not it can be baked into a physics mesh.
+   * @brief The mode of the glTF primitive.
    */
-  bool containsPoints = false;
+  int32_t mode = CesiumGltf::MeshPrimitive::Mode::TRIANGLES;
 
   /**
    * @brief Whether or not the primitive contains translucent vertex
