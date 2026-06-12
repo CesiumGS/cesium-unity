@@ -64,8 +64,6 @@ jobs:
             vcpkg-windows-${{ hashFiles('native~/vcpkg/ports/**/vcpkg.json', 'native~/vcpkg/triplets/**/*', 'native~/extern/*toolchain.cmake') }}-
       - name: Install latest ninja and cmake
         uses: lukka/get-cmake@latest
-      - name: Set up MSVC developer command prompt
-        uses: ilammy/msvc-dev-cmd@v1
       - name: Install nasm
         uses: ilammy/setup-nasm@v1.5.1
       - name: Install wget
