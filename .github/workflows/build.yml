@@ -66,6 +66,8 @@ jobs:
         uses: lukka/get-cmake@latest
         with:
           cmakeVersion: "3.31.6"
+      - name: Set up MSVC developer command prompt
+        uses: ilammy/msvc-dev-cmd@v1
       - name: Install nasm
         uses: ilammy/setup-nasm@v1.5.1
       - name: Install wget
