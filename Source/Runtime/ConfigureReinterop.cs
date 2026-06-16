@@ -905,7 +905,7 @@ namespace CesiumForUnity
             server.defaultIonAccessTokenId = "";
             server.serverUrlThatIsLoadingApiUrl = "";
 
-            CesiumCartographicPolygon polygon = go.GetComponent<CesiumCartographicPolygon>();
+            CesiumCartographicPolygonBase polygon = go.GetComponent<CesiumCartographicPolygonBase>();
             polygon.enabled = polygon.enabled;
 
             List<double2> points = polygon.GetCartographicPoints(m);
@@ -913,7 +913,7 @@ namespace CesiumForUnity
             myDouble2 = points[0];
 
             CesiumPolygonRasterOverlay polygonRasterOverlay = go.GetComponent<CesiumPolygonRasterOverlay>();
-            List<CesiumCartographicPolygon> polygons = polygonRasterOverlay.polygons;
+            List<CesiumCartographicPolygonBase> polygons = polygonRasterOverlay.polygons;
             polygonRasterOverlay.excludeSelectedTiles = polygonRasterOverlay.excludeSelectedTiles;
             polygonRasterOverlay.invertSelection = polygonRasterOverlay.invertSelection;
             polygon = polygons[0];

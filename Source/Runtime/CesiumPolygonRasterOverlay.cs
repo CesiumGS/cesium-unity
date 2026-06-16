@@ -23,12 +23,12 @@ namespace CesiumForUnity
     public partial class CesiumPolygonRasterOverlay : CesiumRasterOverlay
     {
         [SerializeField]
-        private List<CesiumCartographicPolygon> _polygons;
+        private List<CesiumCartographicPolygonBase> _polygons;
 
         /// <summary>
         /// The polygons to rasterize for this overlay.
         /// </summary>
-        public List<CesiumCartographicPolygon> polygons
+        public List<CesiumCartographicPolygonBase> polygons
         {
             get => this._polygons;
             set

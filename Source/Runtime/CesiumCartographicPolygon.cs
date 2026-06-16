@@ -21,7 +21,7 @@ namespace CesiumForUnity
     [AddComponentMenu("")]
 #endif
     [IconAttribute("Packages/com.cesium.unity/Editor/Resources/Cesium-24x24.png")]
-    public partial class CesiumCartographicPolygon : MonoBehaviour
+    public partial class CesiumCartographicPolygon : CesiumCartographicPolygonBase
     {
 #if SUPPORTS_SPLINES
         private SplineContainer _splineContainer;
@@ -84,9 +84,7 @@ namespace CesiumForUnity
         }
 #endif
 
-        static List<double2> emptyList = new List<double2>();
-
-        internal List<double2> GetCartographicPoints(Matrix4x4 worldToTileset)
+        internal override List<double2> GetCartographicPoints(Matrix4x4 worldToTileset)
         {
 #if SUPPORTS_SPLINES
             CesiumGeoreference georeference = this._globeAnchor.GetComponentInParent<CesiumGeoreference>();

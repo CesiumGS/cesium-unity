@@ -9,7 +9,7 @@
 #include <CesiumRasterOverlays/RasterizedPolygonsOverlay.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
-#include <DotNet/CesiumForUnity/CesiumCartographicPolygon.h>
+#include <DotNet/CesiumForUnity/CesiumCartographicPolygonBase.h>
 #include <DotNet/CesiumForUnity/CesiumPolygonRasterOverlay.h>
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
 #include <DotNet/System/String.h>
@@ -68,7 +68,7 @@ void CesiumPolygonRasterOverlayImpl::AddToTileset(
   RasterOverlayOptions options =
       CesiumRasterOverlayUtility::GetOverlayOptions(genericOverlay);
 
-  List1<CesiumForUnity::CesiumCartographicPolygon> unityPolygons =
+  List1<CesiumForUnity::CesiumCartographicPolygonBase> unityPolygons =
       overlay.polygons();
   if (unityPolygons == nullptr) {
     return;
@@ -82,7 +82,7 @@ void CesiumPolygonRasterOverlayImpl::AddToTileset(
   nativePolygons.reserve(polygonCount);
 
   for (int32_t i = 0; i < polygonCount; i++) {
-    CesiumForUnity::CesiumCartographicPolygon unityPolygon = unityPolygons[i];
+    CesiumForUnity::CesiumCartographicPolygonBase unityPolygon = unityPolygons[i];
     if (unityPolygon == nullptr) {
       continue;
     }
