@@ -91,7 +91,7 @@ std::int64_t CesiumFeatureIdTextureImpl::GetFeatureIdFromRaycastHit(
     return -1;
   }
 
-  if (this->_positionAccessor.status() !=
+  if (std::visit(CesiumGltf::StatusFromAccessor{}, this->_positionAccessor) !=
       CesiumGltf::AccessorViewStatus::Valid) {
     return -1;
   }
@@ -123,10 +123,13 @@ std::int64_t CesiumFeatureIdTextureImpl::GetFeatureIdFromRaycastHit(
     }
     uvs[i] = *maybeTexCoord;
 
-    CesiumGltf::AccessorTypes::VEC3<float> position =
-        this->_positionAccessor[index];
-    positions[i] =
-        glm::vec3(position.value[0], position.value[1], position.value[2]);
+    std::optional<glm::dvec3> maybePosition = std::visit(
+        CesiumGltf::PositionFromAccessor{index},
+        this->_positionAccessor);
+    if (!maybePosition) {
+      return -1;
+    }
+    positions[i] = glm::vec3(*maybePosition);
   }
 
   // The barycentric coordinates in RaycastHit don't align with the positions
