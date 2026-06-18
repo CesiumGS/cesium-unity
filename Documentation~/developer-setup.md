@@ -14,6 +14,7 @@ This is a summary of the setup and workflows for developers who want to modify t
 * Unity 2022.3+ (the latest version of the Unity 2022.3 LTS release is recommended)
 * On Windows, support for long file paths must be enabled, or you are likely to see build errors. See [Maximum Path Length Limitation](https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=registry#enable-long-paths-in-windows-10-version-1607-and-later).
 * For best JPEG-decoding performance, you must have [nasm](https://www.nasm.us/) installed so that CMake can find it. Everything will work fine without it, just slower.
+* For Web Build Support [Ninja](https://ninja-build.org/) is needed.
 
 The built Cesium for Unity Assembly will run on much older versions of .NET, including the version of Mono included in Unity. However, these very recent versions are required for the C#<->C++ interop code generator (Reinterop).
 
@@ -140,8 +141,11 @@ cd c:\cesium\CesiumForUnityBuildProject\Packages
 git clone --recurse-submodules git@github.com:CesiumGS/cesium-unity.git com.cesium.unity
 cd com.cesium.unity
 dotnet publish Reinterop~ -o .
-dotnet run --project Build~
+dotnet run --project Build~ package
 ```
+
+> [!NOTE]
+> When building for `--platform Web` you must use Unity 6000.0.x or newer.
 
 On success, the built .tar.gz package is found in the root directory of the project (e.g. `c:\cesium\CesiumForUnityBuildProject`).
 
