@@ -91,7 +91,7 @@ std::int64_t CesiumFeatureIdTextureImpl::GetFeatureIdFromRaycastHit(
     return -1;
   }
 
-  if (this->_positionAccessor.status() !=
+  if (std::visit(CesiumGltf::StatusFromAccessor{}, this->_positionAccessor) !=
       CesiumGltf::AccessorViewStatus::Valid) {
     return -1;
   }
@@ -107,7 +107,7 @@ std::int64_t CesiumFeatureIdTextureImpl::GetFeatureIdFromRaycastHit(
       this->_indexAccessor);
 
   std::array<glm::dvec2, 3> uvs;
-  std::array<glm::vec3, 3> positions;
+  std::array<glm::dvec3, 3> positions;
 
   for (size_t i = 0; i < positions.size(); i++) {
     int64_t index = vertexIndices[i];
@@ -123,10 +123,13 @@ std::int64_t CesiumFeatureIdTextureImpl::GetFeatureIdFromRaycastHit(
     }
     uvs[i] = *maybeTexCoord;
 
-    CesiumGltf::AccessorTypes::VEC3<float> position =
-        this->_positionAccessor[index];
-    positions[i] =
-        glm::vec3(position.value[0], position.value[1], position.value[2]);
+    std::optional<glm::dvec3> maybePosition = std::visit(
+        CesiumGltf::PositionFromAccessor{index},
+        this->_positionAccessor);
+    if (!maybePosition) {
+      return -1;
+    }
+    positions[i] = *maybePosition;
   }
 
   // The barycentric coordinates in RaycastHit don't align with the positions
@@ -140,9 +143,9 @@ std::int64_t CesiumFeatureIdTextureImpl::GetFeatureIdFromRaycastHit(
   glm::dvec3 barycentricCoordinates;
   bool foundIntersection = CesiumGeometry::IntersectionTests::pointInTriangle(
       glm::dvec3(localPosition.x, localPosition.y, localPosition.z),
-      glm::dvec3(positions[0]),
-      glm::dvec3(positions[1]),
-      glm::dvec3(positions[2]),
+      positions[0],
+      positions[1],
+      positions[2],
       barycentricCoordinates);
   if (!foundIntersection) {
     return -1;

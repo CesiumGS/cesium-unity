@@ -10,6 +10,7 @@
 #include <Cesium3DTilesSelection/EllipsoidTilesetLoader.h>
 #include <Cesium3DTilesSelection/Tileset.h>
 #include <CesiumGeospatial/GlobeTransforms.h>
+#include <CesiumImage/Ktx2TranscodeTargets.h>
 #include <CesiumIonClient/Connection.h>
 #include <CesiumRasterOverlays/IonRasterOverlay.h>
 
@@ -627,7 +628,7 @@ void Cesium3DTilesetImpl::LoadTileset(
   TilesetContentOptions contentOptions{};
   contentOptions.generateMissingNormalsSmooth = tileset.generateSmoothNormals();
 
-  CesiumGltf::SupportedGpuCompressedPixelFormats supportedFormats;
+  CesiumImage::SupportedGpuCompressedPixelFormats supportedFormats;
   supportedFormats.ETC2_RGBA = UnityEngine::SystemInfo::IsFormatSupported(
       DotNet::UnityEngine::Experimental::Rendering::GraphicsFormat::
           RGBA_ETC2_SRGB,
@@ -683,7 +684,7 @@ void Cesium3DTilesetImpl::LoadTileset(
           DotNet::UnityEngine::Experimental::Rendering::FormatUsage::Sample);
 
   contentOptions.ktx2TranscodeTargets =
-      CesiumGltf::Ktx2TranscodeTargets(supportedFormats, false);
+      CesiumImage::Ktx2TranscodeTargets(supportedFormats, false);
 
   contentOptions.applyTextureTransform = false;
 
