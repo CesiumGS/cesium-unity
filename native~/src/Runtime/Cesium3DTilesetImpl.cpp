@@ -693,8 +693,11 @@ void Cesium3DTilesetImpl::LoadTileset(
       false);
   contentOptions.applyTextureTransform = false;
 
-  // Unity provides MeshTopology.LineStrip, but doesn't support the other modes.
+  // Although Unity provides MeshTopology.LineStrip, it crashes when given an
+  // index buffer with a primitive restart constant. Therefore, ensure all
+  // primitive modes are converted before they are processed by Unity.
   contentOptions.primitiveModeOptions.convertLineLoop = true;
+  contentOptions.primitiveModeOptions.convertLineStrip = true;
   contentOptions.primitiveModeOptions.convertTriangleFan = true;
   contentOptions.primitiveModeOptions.convertTriangleStrip = true;
 

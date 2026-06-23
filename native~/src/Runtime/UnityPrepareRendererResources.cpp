@@ -336,7 +336,6 @@ void loadPrimitive(
   case MeshPrimitive::Mode::POINTS:
     break;
   case MeshPrimitive::Mode::LINES:
-  case MeshPrimitive::Mode::LINE_STRIP:
     if (indexCount < 2) {
       return;
     }
@@ -649,9 +648,7 @@ void loadPrimitive(
   case MeshPrimitive::Mode::LINES:
     subMeshDescriptor.topology = MeshTopology::Lines;
     break;
-  case MeshPrimitive::Mode::LINE_STRIP:
-    subMeshDescriptor.topology = MeshTopology::LineStrip;
-    break;
+  case MeshPrimitive::Mode::TRIANGLES:
   default:
     subMeshDescriptor.topology = MeshTopology::Triangles;
     break;
@@ -1002,7 +999,6 @@ UnityPrepareRendererResources::prepareInLoadThread(
                 switch (primitiveInfos[i].mode) {
                 case CesiumGltf::MeshPrimitive::Mode::POINTS:
                 case CesiumGltf::MeshPrimitive::Mode::LINES:
-                case CesiumGltf::MeshPrimitive::Mode::LINE_STRIP:
                   continue;
                 default:
                   if (isDegenerateTriangleMesh(meshes[i])) {
@@ -1615,7 +1611,6 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           switch (primitiveInfo.mode) {
           case CesiumGltf::MeshPrimitive::Mode::POINTS:
           case CesiumGltf::MeshPrimitive::Mode::LINES:
-          case CesiumGltf::MeshPrimitive::Mode::LINE_STRIP:
             break;
           default:
             if (!isDegenerateTriangleMesh(unityMesh)) {
