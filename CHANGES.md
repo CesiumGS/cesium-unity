@@ -2,6 +2,10 @@
 
 ## v1.23.3 - 2026-06-01
 
+##### Additions :tada:
+
+- Added support for the Linux platform (x86-64 only).
+
 ##### Fixes :wrench:
 
 - The native Android library (`libCesiumForUnityNative.so`) is now built with 16 KB ELF segment alignment, enabling compatibility with Android 15+ devices that use 16 KB memory pages.

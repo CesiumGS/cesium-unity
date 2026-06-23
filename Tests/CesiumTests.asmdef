@@ -17,8 +17,7 @@
     ],
     "autoReferenced": false,
     "defineConstraints": [
-        "UNITY_INCLUDE_TESTS",
-        "!UNITY_EDITOR_LINUX"
+        "UNITY_INCLUDE_TESTS"
     ],
     "versionDefines": [
         {

@@ -133,6 +133,11 @@ namespace Build
                 unityDefaultBaseDirectory = new DirectoryInfo("/Applications/Unity/Hub/Editor");
                 unityExecutableSubPath = "Unity.app/Contents/MacOS/Unity";
             }
+            else if (OperatingSystem.IsLinux())
+            {
+                unityDefaultBaseDirectory = new DirectoryInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Unity", "Hub", "Editor"));
+                unityExecutableSubPath = "Editor/Unity";
+            }
             else
             {
                 return null;
@@ -140,6 +145,9 @@ namespace Build
 
             if (unityDir == null)
                 unityDir = unityDefaultBaseDirectory;
+
+            if (!unityDir.Exists)
+                return null;
 
             if (version != null)
             {
