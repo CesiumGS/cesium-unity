@@ -581,53 +581,9 @@ void Cesium3DTilesetImpl::DestroyTileset(
   this->_destroyTilesetOnNextUpdate = false;
 }
 
-void Cesium3DTilesetImpl::LoadTileset(
-    const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
-  TilesetOptions options{};
-  options.rendererOptions = std::make_any<CreateModelOptions>(tileset);
-  options.maximumScreenSpaceError = tileset.maximumScreenSpaceError();
-  options.preloadAncestors = tileset.preloadAncestors();
-  options.preloadSiblings = tileset.preloadSiblings();
-  options.forbidHoles = tileset.forbidHoles();
-  options.maximumSimultaneousTileLoads = tileset.maximumSimultaneousTileLoads();
-  options.maximumCachedBytes = tileset.maximumCachedBytes();
-  options.loadingDescendantLimit = tileset.loadingDescendantLimit();
-  options.enableFrustumCulling = tileset.enableFrustumCulling();
-  options.enableFogCulling = tileset.enableFogCulling();
-  options.enforceCulledScreenSpaceError =
-      tileset.enforceCulledScreenSpaceError();
-  options.culledScreenSpaceError = tileset.culledScreenSpaceError();
-  // options.enableLodTransitionPeriod = tileset.useLodTransitions();
-  // options.lodTransitionLength = tileset.lodTransitionLength();
-  options.showCreditsOnScreen = tileset.showCreditsOnScreen();
-  options.loadErrorCallback =
-      [tileset](const TilesetLoadFailureDetails& details) {
-        int typeValue = (int)details.type;
-        CesiumForUnity::Cesium3DTilesetLoadFailureDetails unityDetails(
-            tileset,
-            CesiumForUnity::Cesium3DTilesetLoadType(typeValue),
-            details.statusCode,
-            System::String(details.message));
-
-        CesiumForUnity::Cesium3DTileset::BroadcastCesium3DTilesetLoadFailure(
-            unityDetails);
-      };
-
-  // Generous per-frame time limits for loading / unloading on main thread.
-  options.mainThreadLoadingTimeLimit = 5.0;
-  options.tileCacheUnloadTimeLimit = 5.0;
-
-  DotNet::CesiumForUnity::CesiumGeoreference georeferenceComponent =
-      tileset.gameObject()
-          .GetComponentInParent<DotNet::CesiumForUnity::CesiumGeoreference>();
-  if (georeferenceComponent != nullptr) {
-    options.ellipsoid =
-        georeferenceComponent.ellipsoid().NativeImplementation().GetEllipsoid();
-  }
-
-  TilesetContentOptions contentOptions{};
-  contentOptions.generateMissingNormalsSmooth = tileset.generateSmoothNormals();
-
+namespace {
+CesiumImage::SupportedGpuCompressedPixelFormats
+getSupportedGpuCompressedPixelFormats() {
   CesiumImage::SupportedGpuCompressedPixelFormats supportedFormats;
   supportedFormats.ETC2_RGBA = UnityEngine::SystemInfo::IsFormatSupported(
       DotNet::UnityEngine::Experimental::Rendering::GraphicsFormat::
@@ -682,11 +638,68 @@ void Cesium3DTilesetImpl::LoadTileset(
           DotNet::UnityEngine::Experimental::Rendering::GraphicsFormat::
               RG_EAC_UNorm,
           DotNet::UnityEngine::Experimental::Rendering::FormatUsage::Sample);
+  return supportedFormats;
+}
+} // namespace
 
-  contentOptions.ktx2TranscodeTargets =
-      CesiumImage::Ktx2TranscodeTargets(supportedFormats, false);
+void Cesium3DTilesetImpl::LoadTileset(
+    const DotNet::CesiumForUnity::Cesium3DTileset& tileset) {
+  TilesetOptions options{};
+  options.rendererOptions = std::make_any<CreateModelOptions>(tileset);
+  options.maximumScreenSpaceError = tileset.maximumScreenSpaceError();
+  options.preloadAncestors = tileset.preloadAncestors();
+  options.preloadSiblings = tileset.preloadSiblings();
+  options.forbidHoles = tileset.forbidHoles();
+  options.maximumSimultaneousTileLoads = tileset.maximumSimultaneousTileLoads();
+  options.maximumCachedBytes = tileset.maximumCachedBytes();
+  options.loadingDescendantLimit = tileset.loadingDescendantLimit();
+  options.enableFrustumCulling = tileset.enableFrustumCulling();
+  options.enableFogCulling = tileset.enableFogCulling();
+  options.enforceCulledScreenSpaceError =
+      tileset.enforceCulledScreenSpaceError();
+  options.culledScreenSpaceError = tileset.culledScreenSpaceError();
+  // options.enableLodTransitionPeriod = tileset.useLodTransitions();
+  // options.lodTransitionLength = tileset.lodTransitionLength();
+  options.showCreditsOnScreen = tileset.showCreditsOnScreen();
+  options.loadErrorCallback =
+      [tileset](const TilesetLoadFailureDetails& details) {
+        int typeValue = (int)details.type;
+        CesiumForUnity::Cesium3DTilesetLoadFailureDetails unityDetails(
+            tileset,
+            CesiumForUnity::Cesium3DTilesetLoadType(typeValue),
+            details.statusCode,
+            System::String(details.message));
 
+        CesiumForUnity::Cesium3DTileset::BroadcastCesium3DTilesetLoadFailure(
+            unityDetails);
+      };
+
+  // Generous per-frame time limits for loading / unloading on main thread.
+  options.mainThreadLoadingTimeLimit = 5.0;
+  options.tileCacheUnloadTimeLimit = 5.0;
+
+  DotNet::CesiumForUnity::CesiumGeoreference georeferenceComponent =
+      tileset.gameObject()
+          .GetComponentInParent<DotNet::CesiumForUnity::CesiumGeoreference>();
+  if (georeferenceComponent != nullptr) {
+    options.ellipsoid =
+        georeferenceComponent.ellipsoid().NativeImplementation().GetEllipsoid();
+  }
+
+  TilesetContentOptions contentOptions{};
+  contentOptions.generateMissingNormalsSmooth = tileset.generateSmoothNormals();
+  contentOptions.ktx2TranscodeTargets = CesiumImage::Ktx2TranscodeTargets(
+      getSupportedGpuCompressedPixelFormats(),
+      false);
   contentOptions.applyTextureTransform = false;
+
+  // Although Unity provides MeshTopology.LineStrip, it crashes when given an
+  // index buffer with a primitive restart constant. Therefore, ensure all
+  // primitive modes are converted before they are processed by Unity.
+  contentOptions.primitiveModeOptions.convertLineLoop = true;
+  contentOptions.primitiveModeOptions.convertLineStrip = true;
+  contentOptions.primitiveModeOptions.convertTriangleFan = true;
+  contentOptions.primitiveModeOptions.convertTriangleStrip = true;
 
   options.contentOptions = contentOptions;
 

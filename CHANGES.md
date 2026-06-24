@@ -1,5 +1,11 @@
 # Change Log {#changes}
 
+## ? - ?
+
+##### Additions :tada:
+
+- Added support for rendering glTFs with line primitives.
+
 ## v1.23.3 - 2026-06-01
 
 ##### Fixes :wrench:
