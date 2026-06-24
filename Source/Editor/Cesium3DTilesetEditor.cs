@@ -36,6 +36,7 @@ namespace CesiumForUnity
         //private SerializedProperty _useLodTransitions;
         //private SerializedProperty _lodTransitionLength;
         private SerializedProperty _generateSmoothNormals;
+        private SerializedProperty _forceDoubleSided;
 
         private SerializedProperty _pointCloudShading;
 
@@ -85,6 +86,8 @@ namespace CesiumForUnity
             //    this.serializedObject.FindProperty("_lodTransitionLength");
             this._generateSmoothNormals =
                 this.serializedObject.FindProperty("_generateSmoothNormals");
+            this._forceDoubleSided =
+                this.serializedObject.FindProperty("_forceDoubleSided");
             this._ignoreKhrMaterialsUnlit = this.serializedObject.FindProperty("_ignoreKhrMaterialsUnlit");
 
             this._pointCloudShading = this.serializedObject.FindProperty("_pointCloudShading");
@@ -428,6 +431,14 @@ namespace CesiumForUnity
                 "normals requires duplicating vertices. This option allows the glTFs to be " +
                 "rendered with smooth normals instead when the original glTF is missing normals.");
             EditorGUILayout.PropertyField(this._generateSmoothNormals, generateSmoothNormalsContent);
+
+            GUIContent forceDoubleSidedContent = new GUIContent(
+                "Force Double Sided",
+                "Disable back-face culling on every tile material, ignoring the " +
+                "glTF doubleSided flag. Use this when you assign a custom Opaque " +
+                "Material with double-sided rendering and don't want Cesium to " +
+                "overwrite that setting per tile.");
+            EditorGUILayout.PropertyField(this._forceDoubleSided, forceDoubleSidedContent);
 
             var ignoreKhrMaterialsUnlit = new GUIContent(
                 "Ignore KHR_materials_unlit",

@@ -2,6 +2,10 @@
 
 ## v1.23.3 - 2026-06-01
 
+##### Additions :tada:
+
+- Added a `Force Double Sided` toggle to `Cesium3DTileset`. When enabled, all tile primitives are rendered with back-face culling disabled, regardless of the glTF material's `doubleSided` flag or the cull state of a user-supplied `Opaque Material`.
+
 ##### Fixes :wrench:
 
 - The native Android library (`libCesiumForUnityNative.so`) is now built with 16 KB ELF segment alignment, enabling compatibility with Android 15+ devices that use 16 KB memory pages.
