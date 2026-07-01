@@ -9,7 +9,7 @@ class Cesium3DTileset;
 class CesiumGeoJsonDocumentRasterOverlay;
 } // namespace DotNet::CesiumForUnity
 
-namespace CesiumRasterOverlays {
+namespace CesiumVectorOverlays {
 class GeoJsonDocumentRasterOverlay;
 }
 
@@ -34,7 +34,7 @@ public:
 
 private:
   CesiumUtility::IntrusivePointer<
-      CesiumRasterOverlays::GeoJsonDocumentRasterOverlay>
+      CesiumVectorOverlays::GeoJsonDocumentRasterOverlay>
       _pOverlay;
 };
 

@@ -1,0 +1,25 @@
+--- a/absl/time/internal/cctz/src/time_zone_lookup.cc
++++ b/absl/time/internal/cctz/src/time_zone_lookup.cc
+@@ -42,8 +42,12 @@
+ #include "absl/time/internal/cctz/src/time_zone_impl.h"
+ 
+ #if defined(_WIN32)
++#include <winapifamily.h>
++#endif
++
++#if defined(_WIN32) && !(defined(WINAPI_FAMILY) && WINAPI_FAMILY == WINAPI_FAMILY_APP)
+ #include "absl/time/internal/cctz/src/time_zone_name_win.h"
+-#endif  // _WIN32
++#endif  // _WIN32 && !UWP
+ 
+ namespace absl {
+ ABSL_NAMESPACE_BEGIN
+@@ -164,7 +168,7 @@
+     zone = primary_tz.c_str();
+   }
+ #endif
+-#if defined(_WIN32)
++#if defined(_WIN32) && !(defined(WINAPI_FAMILY) && WINAPI_FAMILY == WINAPI_FAMILY_APP)
+   std::string win32_tz = GetWindowsLocalTimeZone();
+   if (!win32_tz.empty()) {
+     zone = win32_tz.c_str();

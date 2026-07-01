@@ -18,6 +18,7 @@
 #include <CesiumGltf/KhrTextureTransform.h>
 #include <CesiumGltfContent/GltfUtilities.h>
 #include <CesiumGltfReader/GltfReader.h>
+#include <CesiumImage/ImageDecoder.h>
 #include <CesiumUtility/ScopeGuard.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTileInfo.h>
@@ -84,6 +85,7 @@ using namespace CesiumForUnityNative;
 using namespace CesiumGeometry;
 using namespace CesiumGeospatial;
 using namespace CesiumGltf;
+using namespace CesiumImage;
 using namespace CesiumUtility;
 using namespace DotNet;
 
@@ -284,7 +286,7 @@ void generateMipMaps(
         case CesiumGltf::Sampler::MinFilter::LINEAR_MIPMAP_NEAREST:
         case CesiumGltf::Sampler::MinFilter::NEAREST_MIPMAP_LINEAR:
         case CesiumGltf::Sampler::MinFilter::NEAREST_MIPMAP_NEAREST:
-          CesiumGltfReader::ImageDecoder::generateMipMaps(*pImage->pAsset);
+          CesiumImage::ImageDecoder::generateMipMaps(*pImage->pAsset);
         }
       }
     }
@@ -330,22 +332,24 @@ void loadPrimitive(
   using namespace DotNet::Unity::Collections::LowLevel::Unsafe;
 
   CESIUM_TRACE("Cesium::loadPrimitive<T>");
-  int32_t indexCount = 0;
+  int32_t indexCount = static_cast<int32_t>(indicesView.size());
   switch (primitive.mode) {
-  case MeshPrimitive::Mode::TRIANGLES:
   case MeshPrimitive::Mode::POINTS:
-    indexCount = static_cast<int32_t>(indicesView.size());
     break;
-  case MeshPrimitive::Mode::TRIANGLE_STRIP:
-  case MeshPrimitive::Mode::TRIANGLE_FAN:
-    indexCount = static_cast<int32_t>(3 * (indicesView.size() - 2));
+  case MeshPrimitive::Mode::LINES:
+    if (indexCount < 2) {
+      return;
+    }
+    break;
+  case MeshPrimitive::Mode::TRIANGLES:
+    if (indexCount < 3) {
+      return;
+    }
     break;
   default:
-    // TODO: add support for other primitive types.
-    return;
-  }
-
-  if (indexCount < 3 && primitive.mode != MeshPrimitive::Mode::POINTS) {
+    // The options set in Cesium3DTilesetImpl::LoadTileset should ensure we only
+    // receive supported primitive modes.
+    CESIUM_ASSERT(false);
     return;
   }
 
@@ -366,11 +370,12 @@ void loadPrimitive(
         AccessorView<UnityEngine::Vector3>(gltf, normalAccessorIt->second);
     hasNormals = normalView.status() == AccessorViewStatus::Valid;
   } else if (
-      !primitiveInfo.isUnlit && primitive.mode != MeshPrimitive::Mode::POINTS) {
+      !primitiveInfo.isUnlit &&
+      primitive.mode == MeshPrimitive::Mode::TRIANGLES) {
     computeFlatNormals = hasNormals = true;
   }
 
-  // Check if  we need to upgrade to a large index type to accommodate the
+  // Check if we need to upgrade to a large index type to accommodate the
   // larger number of vertices we need for flat normals.
   if (computeFlatNormals && indexFormat == IndexFormat::UInt16 &&
       indexCount >= std::numeric_limits<uint16_t>::max()) {
@@ -396,34 +401,8 @@ void loadPrimitive(
       Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
           GetUnsafeBufferPointerWithoutChecks(dest));
 
-  switch (primitive.mode) {
-  case MeshPrimitive::Mode::TRIANGLE_STRIP:
-    for (int64_t i = 0; i < indicesView.size() - 2; ++i) {
-      if (i % 2) {
-        indices[3 * i] = indicesView[i];
-        indices[3 * i + 1] = indicesView[i + 2];
-        indices[3 * i + 2] = indicesView[i + 1];
-      } else {
-        indices[3 * i] = indicesView[i];
-        indices[3 * i + 1] = indicesView[i + 1];
-        indices[3 * i + 2] = indicesView[i + 2];
-      }
-    }
-    break;
-  case MeshPrimitive::Mode::TRIANGLE_FAN:
-    for (int64_t i = 0; i < indicesView.size() - 2; ++i) {
-      indices[3 * i] = indicesView[0];
-      indices[3 * i + 1] = indicesView[i + 1];
-      indices[3 * i + 2] = indicesView[i + 2];
-    }
-    break;
-  case MeshPrimitive::Mode::TRIANGLES:
-  case MeshPrimitive::Mode::POINTS:
-  default:
-    for (int64_t i = 0; i < indicesView.size(); ++i) {
-      indices[i] = indicesView[i];
-    }
-    break;
+  for (int64_t i = 0; i < indicesView.size(); ++i) {
+    indices[i] = indicesView[i];
   }
 
   // Max attribute count supported by Unity, see VertexAttribute.
@@ -663,12 +642,19 @@ void loadPrimitive(
   // for each.
   SubMeshDescriptor subMeshDescriptor{};
 
-  if (primitive.mode == MeshPrimitive::Mode::POINTS) {
+  switch (primitive.mode) {
+  case MeshPrimitive::Mode::POINTS:
     subMeshDescriptor.topology = MeshTopology::Points;
-    primitiveInfo.containsPoints = true;
-  } else {
+    break;
+  case MeshPrimitive::Mode::LINES:
+    subMeshDescriptor.topology = MeshTopology::Lines;
+    break;
+  case MeshPrimitive::Mode::TRIANGLES:
+  default:
     subMeshDescriptor.topology = MeshTopology::Triangles;
+    break;
   }
+  primitiveInfo.mode = primitive.mode;
 
   subMeshDescriptor.indexStart = 0;
   subMeshDescriptor.indexCount = indexCount;
@@ -1009,11 +995,16 @@ UnityPrepareRendererResources::prepareInLoadThread(
               const std::int32_t len = meshes.Length();
               std::vector<std::int32_t> instanceIDs;
               for (int32_t i = 0; i < len; ++i) {
-                // Don't attempt to bake a physics mesh from a point cloud or
-                // from an invalid triangle mesh.
-                if (primitiveInfos[i].containsPoints ||
-                    isDegenerateTriangleMesh(meshes[i])) {
+                // Don't attempt to bake a physics mesh from points, lines, or
+                // an invalid triangle mesh.
+                switch (primitiveInfos[i].mode) {
+                case CesiumGltf::MeshPrimitive::Mode::POINTS:
+                case CesiumGltf::MeshPrimitive::Mode::LINES:
                   continue;
+                default:
+                  if (isDegenerateTriangleMesh(meshes[i])) {
+                    continue;
+                  }
                 }
 
                 instanceIDs.push_back(meshes[i].GetInstanceID());
@@ -1587,7 +1578,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
               materialProperties);
         }
 
-        if (primitiveInfo.containsPoints) {
+        if (primitiveInfo.mode == CesiumGltf::MeshPrimitive::Mode::POINTS) {
           CesiumForUnity::CesiumPointCloudRenderer pointCloudRenderer =
               primitiveGameObject
                   .AddComponent<CesiumForUnity::CesiumPointCloudRenderer>();
@@ -1618,13 +1609,19 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         }
 
         if (createPhysicsMeshes) {
-          if (!primitiveInfo.containsPoints &&
-              !isDegenerateTriangleMesh(unityMesh)) {
-            // This should not trigger mesh baking for physics, because the
-            // meshes were already baked in the worker thread.
-            UnityEngine::MeshCollider meshCollider =
-                primitiveGameObject.AddComponent<UnityEngine::MeshCollider>();
-            meshCollider.sharedMesh(unityMesh);
+          switch (primitiveInfo.mode) {
+          case CesiumGltf::MeshPrimitive::Mode::POINTS:
+          case CesiumGltf::MeshPrimitive::Mode::LINES:
+            break;
+          default:
+            if (!isDegenerateTriangleMesh(unityMesh)) {
+              // This should not trigger mesh baking for physics, because the
+              // meshes were already baked in the worker thread.
+              UnityEngine::MeshCollider meshCollider =
+                  primitiveGameObject.AddComponent<UnityEngine::MeshCollider>();
+              meshCollider.sharedMesh(unityMesh);
+            }
+            break;
           }
         }
 
@@ -1794,9 +1791,9 @@ void UnityPrepareRendererResources::free(
 }
 
 void* UnityPrepareRendererResources::prepareRasterInLoadThread(
-    CesiumGltf::ImageAsset& image,
+    CesiumImage::ImageAsset& image,
     const std::any& rendererOptions) {
-  CesiumGltfReader::ImageDecoder::generateMipMaps(image);
+  CesiumImage::ImageDecoder::generateMipMaps(image);
   return nullptr;
 }
 

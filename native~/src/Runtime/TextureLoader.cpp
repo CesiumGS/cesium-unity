@@ -15,13 +15,14 @@
 #include <cstring>
 
 using namespace CesiumGltf;
+using namespace CesiumImage;
 using namespace DotNet;
 
 namespace CesiumForUnityNative {
 
 namespace {
 UnityEngine::TextureFormat
-getCompressedPixelFormat(const CesiumGltf::ImageAsset& image) {
+getCompressedPixelFormat(const CesiumImage::ImageAsset& image) {
   switch (image.compressedPixelFormat) {
   case GpuCompressedPixelFormat::ETC1_RGB:
     return UnityEngine::TextureFormat::ETC_RGB4;
@@ -55,7 +56,7 @@ getCompressedPixelFormat(const CesiumGltf::ImageAsset& image) {
 }
 
 UnityEngine::TextureFormat
-getUncompressedPixelFormat(const CesiumGltf::ImageAsset& image) {
+getUncompressedPixelFormat(const CesiumImage::ImageAsset& image) {
   switch (image.channels) {
   case 1:
     return UnityEngine::TextureFormat::R8;
@@ -72,7 +73,7 @@ getUncompressedPixelFormat(const CesiumGltf::ImageAsset& image) {
 } // namespace
 
 UnityEngine::Texture
-TextureLoader::loadTexture(const CesiumGltf::ImageAsset& image, bool sRGB) {
+TextureLoader::loadTexture(const CesiumImage::ImageAsset& image, bool sRGB) {
   CESIUM_TRACE("TextureLoader::loadTexture");
   std::int32_t mipCount =
       image.mipPositions.empty() ? 1 : std::int32_t(image.mipPositions.size());
