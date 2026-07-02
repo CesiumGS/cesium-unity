@@ -906,15 +906,24 @@ namespace CesiumForUnity
             server.defaultIonAccessTokenId = "";
             server.serverUrlThatIsLoadingApiUrl = "";
 
-            CesiumCartographicPolygonBase polygon = go.GetComponent<CesiumCartographicPolygonBase>();
+            CesiumCartographicPolygon polygon = go.GetComponent<CesiumCartographicPolygon>();
             polygon.enabled = polygon.enabled;
 
             List<double2> points = polygon.GetCartographicPoints(m);
             len = points.Count;
             myDouble2 = points[0];
 
+            polygon.source = polygon.source;
+            polygon.url = polygon.url;
+            polygon.ionAssetID = polygon.ionAssetID;
+            polygon.ionAccessToken = polygon.ionAccessToken;
+            polygon.ionServer = polygon.ionServer;
+            CesiumGeoJsonDocument polygonDoc = polygon.document;
+            polygon.document = polygonDoc;
+            polygon.Refresh();
+
             CesiumPolygonRasterOverlay polygonRasterOverlay = go.GetComponent<CesiumPolygonRasterOverlay>();
-            List<CesiumCartographicPolygonBase> polygons = polygonRasterOverlay.polygons;
+            List<CesiumCartographicPolygon> polygons = polygonRasterOverlay.polygons;
             polygonRasterOverlay.excludeSelectedTiles = polygonRasterOverlay.excludeSelectedTiles;
             polygonRasterOverlay.invertSelection = polygonRasterOverlay.invertSelection;
             polygon = polygons[0];
@@ -931,6 +940,7 @@ namespace CesiumForUnity
             CesiumVectorStyle vectorStyle = geoJsonOverlay.defaultStyle;
             geoJsonOverlay.defaultStyle = vectorStyle;
             CesiumGeoJsonDocument overlayDoc = geoJsonOverlay.document;
+
 
             // CesiumGeoJsonDocument and CesiumGeoJsonObject
             CesiumGeoJsonDocument geoJsonDoc = new CesiumGeoJsonDocument();

@@ -190,10 +190,11 @@ namespace CesiumForUnity
             ShowWindow(new CesiumIonAsset(overlay), triggeredByError);
         }
 
-        public static void ShowWindow(CesiumGeoJsonPolygonOverlay overlay, bool triggeredByError)
+        public static void ShowWindow(CesiumCartographicPolygon polygon, bool triggeredByError)
         {
-            ShowWindow(new CesiumIonAsset(overlay), triggeredByError);
+            ShowWindow(new CesiumIonAsset(polygon), triggeredByError);
         }
+
 
         private static void ShowWindow(CesiumIonAsset ionAsset, bool triggeredByError)
         {
@@ -282,8 +283,9 @@ namespace CesiumForUnity
                     return this.ionAsset.overlay.ionServer;
                 else if (this.ionAsset.geoJsonOverlay != null)
                     return this.ionAsset.geoJsonOverlay.ionServer;
-                else if (this.ionAsset.geoJsonPolygonOverlay != null)
-                    return this.ionAsset.geoJsonPolygonOverlay.ionServer;
+                else if (this.ionAsset.cartographicPolygon != null)
+                    return this.ionAsset.cartographicPolygon.ionServer;
+
                 else
                     return null;
             }
@@ -532,10 +534,11 @@ namespace CesiumForUnity
             {
                 Undo.RecordObject(asset.geoJsonOverlay, "Use Default ion Access Token for Raster Overlay");
             }
-            else if (asset.geoJsonPolygonOverlay != null)
+            else if (asset.cartographicPolygon != null)
             {
-                Undo.RecordObject(asset.geoJsonPolygonOverlay, "Use Default ion Access Token for Raster Overlay");
+                Undo.RecordObject(asset.cartographicPolygon, "Use Default ion Access Token for Cartographic Polygon");
             }
+
 
             asset.ionAccessToken = "";
         }
