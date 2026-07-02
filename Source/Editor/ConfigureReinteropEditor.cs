@@ -220,8 +220,9 @@ namespace CesiumForUnity
 
             CesiumGeoJsonDocumentRasterOverlay geoJsonDocOverlay = asset.geoJsonOverlay;
             server = geoJsonDocOverlay.ionServer;
-            CesiumGeoJsonPolygonOverlay geoJsonPolygonOverlay = asset.geoJsonPolygonOverlay;
-            server = geoJsonPolygonOverlay.ionServer;
+            CesiumCartographicPolygon cartographicPolygonAsset = asset.cartographicPolygon;
+            server = cartographicPolygonAsset.ionServer;
+
 
             AssetTroubleshootingDetails assetDetails = troubleshootingWindow.assetDetails;
             assetDetails.assetExistsInUserAccount = true;
