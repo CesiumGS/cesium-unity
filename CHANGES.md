@@ -1,5 +1,11 @@
 # Change Log {#changes}
 
+## ? - ?
+
+##### Additions :tada:
+
+- Added support for the Linux platform (x86-64 only).
+
 ## v1.24.0 - 2026-07-01
 
 ##### Additions :tada:
@@ -9,10 +15,6 @@
 In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.61.0 to v0.62.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
 
 ## v1.23.3 - 2026-06-01
-
-##### Additions :tada:
-
-- Added support for the Linux platform (x86-64 only).
 
 ##### Fixes :wrench:
 
