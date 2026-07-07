@@ -289,6 +289,10 @@ namespace CesiumForUnity
                 this._source == CesiumCartographicPolygonSource.FromUrl)
             {
                 this._source = CesiumCartographicPolygonSource.Manual;
+                if ((modification & SplineModification.EndAction) != 0)
+                {
+                    this.Refresh();
+                }
             }
         }
 #endif
@@ -379,6 +383,11 @@ namespace CesiumForUnity
                         loaded = await CesiumGeoJsonDocument.LoadFromCesiumIonAsync(
                             this._ionAssetID, this._ionAccessToken, this.ionServer);
                     break;
+            }
+
+            if (loaded == null && this._source != CesiumCartographicPolygonSource.Manual)
+            {
+                Debug.LogWarning("CesiumCartographicPolygon: failed to load the GeoJSON. The spline was left unchanged.");
             }
 
             this.ApplyDocument(loaded);

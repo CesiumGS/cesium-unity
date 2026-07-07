@@ -7,6 +7,58 @@ namespace CesiumForUnity
     [CustomEditor(typeof(CesiumCartographicPolygon))]
     public class CesiumCartographicPolygonEditor : Editor
     {
+        private const string HelpSplinesMissingInProject =
+            "CesiumCartographicPolygon requires the Splines package, which is currently " +
+            "not installed in the project. Install the Splines package using the Package Manager.";
+
+        private const string HelpSplinesMissingInVersion =
+            "CesiumCartographicPolygon requires the Splines package, which is not available " +
+            "in this version of Unity.";
+
+        private const string HelpManualEditSaveGeoJson =
+            "The spline is being edited manually. Use 'Save as GeoJSON…' to " +
+            "write the current shape to a .geojson file on disk.";
+
+        private const string HelpKnotEditRevertsToManual =
+            "Changing any knot in the spline changes the source to manual, as it does " +
+            "not match anymore with the geojson file.";
+
+        private static readonly GUIContent RefreshContent = new GUIContent(
+            "Refresh",
+            "Reloads the polygon's spline from the configured source and " +
+            "rebuilds any CesiumPolygonRasterOverlay that uses this polygon, " +
+            "so the cutout in the tileset matches the latest data.");
+
+        private static readonly GUIContent TroubleshootTokenContent = new GUIContent(
+            "Troubleshoot Token",
+            "Check if the Cesium ion token used to access this polygon's GeoJSON is working " +
+            "correctly, and fix it if necessary.");
+
+        private static readonly GUIContent SourceContent = new GUIContent(
+            "Source",
+            "The source from which this polygon's shape is derived.");
+
+        private static readonly GUIContent SaveAsGeoJsonContent = new GUIContent(
+            "Save as GeoJSON…",
+            "Writes the polygon's current spline to a GeoJSON file on disk.");
+
+        private static readonly GUIContent UrlContent = new GUIContent(
+            "URL",
+            "The URL from which to load the GeoJSON document.");
+
+        private static readonly GUIContent IonAssetIdContent = new GUIContent(
+            "ion Asset ID",
+            "The ID of the Cesium ion asset to use.");
+
+        private static readonly GUIContent IonAccessTokenContent = new GUIContent(
+            "ion Access Token",
+            "The access token to use to access the Cesium ion resource. " +
+            "If empty, the default token from the ion server will be used.");
+
+        private static readonly GUIContent IonServerContent = new GUIContent(
+            "ion Server",
+            "The Cesium ion server to use.");
+
 #if SUPPORTS_SPLINES
         private CesiumCartographicPolygon _polygon;
 
@@ -32,11 +84,9 @@ namespace CesiumForUnity
         {
 #if !SUPPORTS_SPLINES
 #if UNITY_2022_2_OR_NEWER
-            EditorGUILayout.HelpBox("CesiumCartographicPolygon requires the Splines package, which is currently " +
-                "not installed in the project. Install the Splines package using the Package Manager.", MessageType.Error);
+            EditorGUILayout.HelpBox(HelpSplinesMissingInProject, MessageType.Error);
 #else
-            EditorGUILayout.HelpBox("CesiumCartographicPolygon requires the Splines package, which is not available " +
-                "in this version of Unity.", MessageType.Error);
+            EditorGUILayout.HelpBox(HelpSplinesMissingInVersion, MessageType.Error);
 #endif
 #else
             this.serializedObject.Update();
@@ -55,12 +105,7 @@ namespace CesiumForUnity
         private void DrawInspectorButtons()
         {
             GUILayout.BeginHorizontal();
-            var refreshContent = new GUIContent(
-                "Refresh",
-                "Reloads the polygon's spline from the configured source and " +
-                "rebuilds any CesiumPolygonRasterOverlay that uses this polygon, " +
-                "so the cutout in the tileset matches the latest data.");
-            if (GUILayout.Button(refreshContent))
+            if (GUILayout.Button(RefreshContent))
             {
                 Undo.RecordObject(this._polygon, "Refresh Cartographic Polygon");
                 this._polygon.Refresh();
@@ -71,11 +116,7 @@ namespace CesiumForUnity
                 (CesiumCartographicPolygonSource)this._source.enumValueIndex;
             if (source == CesiumCartographicPolygonSource.FromCesiumIon)
             {
-                var troubleshootTokenContent = new GUIContent(
-                    "Troubleshoot Token",
-                    "Check if the Cesium ion token used to access this polygon's GeoJSON is working " +
-                    "correctly, and fix it if necessary.");
-                if (GUILayout.Button(troubleshootTokenContent))
+                if (GUILayout.Button(TroubleshootTokenContent))
                 {
                     IonTokenTroubleshootingWindow.ShowWindow(this._polygon, false);
                 }
@@ -85,63 +126,33 @@ namespace CesiumForUnity
 
         private void DrawSourceProperties()
         {
-            GUIContent sourceContent = new GUIContent(
-                "Source",
-                "The source from which this polygon's shape is derived.");
-            EditorGUILayout.PropertyField(this._source, sourceContent);
+            EditorGUILayout.PropertyField(this._source, SourceContent);
 
             CesiumCartographicPolygonSource source =
                 (CesiumCartographicPolygonSource)this._source.enumValueIndex;
 
             if (source == CesiumCartographicPolygonSource.Manual)
             {
-                EditorGUILayout.HelpBox(
-                    "The spline is being edited manually. Use 'Save as GeoJSON…' to " +
-                    "write the current shape to a .geojson file on disk.",
-                    MessageType.Info);
+                EditorGUILayout.HelpBox(HelpManualEditSaveGeoJson, MessageType.Info);
 
-                var saveGeoJsonContent = new GUIContent(
-                    "Save as GeoJSON…",
-                    "Writes the polygon's current spline to a GeoJSON file on disk.");
-                if (GUILayout.Button(saveGeoJsonContent))
+                if (GUILayout.Button(SaveAsGeoJsonContent))
                 {
                     CesiumCartographicPolygonGeoJsonWriter.SaveAsGeoJsonWithDialog(this._polygon);
                 }
             }
             else if (source == CesiumCartographicPolygonSource.FromUrl)
             {
-                GUIContent urlContent = new GUIContent(
-                    "URL",
-                    "The URL from which to load the GeoJSON document.");
-                EditorGUILayout.DelayedTextField(this._url, urlContent);
+                EditorGUILayout.DelayedTextField(this._url, UrlContent);
 
-                EditorGUILayout.HelpBox(
-                    "Changing any knot in the spline changes the source to manual, as it does " +
-                    "not match anymore with the geojson file.",
-                    MessageType.Info);
+                EditorGUILayout.HelpBox(HelpKnotEditRevertsToManual, MessageType.Info);
             }
             else if (source == CesiumCartographicPolygonSource.FromCesiumIon)
             {
-                GUIContent ionAssetIDContent = new GUIContent(
-                    "ion Asset ID",
-                    "The ID of the Cesium ion asset to use.");
-                EditorGUILayout.DelayedIntField(this._ionAssetID, ionAssetIDContent);
+                EditorGUILayout.DelayedIntField(this._ionAssetID, IonAssetIdContent);
+                EditorGUILayout.DelayedTextField(this._ionAccessToken, IonAccessTokenContent);
+                EditorGUILayout.PropertyField(this._ionServer, IonServerContent);
 
-                GUIContent ionAccessTokenContent = new GUIContent(
-                    "ion Access Token",
-                    "The access token to use to access the Cesium ion resource. " +
-                    "If empty, the default token from the ion server will be used.");
-                EditorGUILayout.DelayedTextField(this._ionAccessToken, ionAccessTokenContent);
-
-                GUIContent ionServerContent = new GUIContent(
-                    "ion Server",
-                    "The Cesium ion server to use.");
-                EditorGUILayout.PropertyField(this._ionServer, ionServerContent);
-
-                EditorGUILayout.HelpBox(
-                    "Changing any knot in the spline changes the source to manual, as it does " +
-                    "not match anymore with the geojson file.",
-                    MessageType.Info);
+                EditorGUILayout.HelpBox(HelpKnotEditRevertsToManual, MessageType.Info);
             }
         }
 #endif
