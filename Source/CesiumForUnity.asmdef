@@ -10,6 +10,7 @@
         "Android",
         "Editor",
         "iOS",
+        "LinuxStandalone64",
         "macOSStandalone",
         "WSA",
         "WindowsStandalone64",
@@ -20,9 +21,7 @@
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": [
-        "!UNITY_EDITOR_LINUX"
-    ],
+    "defineConstraints": [],
     "versionDefines": [
         {
             "name": "com.unity.splines",

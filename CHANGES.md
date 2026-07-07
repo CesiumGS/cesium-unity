@@ -1,5 +1,11 @@
 # Change Log {#changes}
 
+## ? - ?
+
+##### Additions :tada:
+
+- Added support for the Linux platform (x86-64 only).
+
 ## v1.24.0 - 2026-07-01
 
 ##### Additions :tada:

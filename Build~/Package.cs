@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
+using CesiumForUnity;
 
 namespace Build
 {
@@ -181,8 +182,14 @@ namespace Build
                     else
                     {
                         // On other platforms, just build once.
-                        Utility.Run("cmake", configureArgs);
-                        Utility.Run("cmake", buildArgs);
+                        string? containerImage = Environment.GetEnvironmentVariable("CESIUM_NATIVE_BUILD_CONTAINER");
+                        if (OperatingSystem.IsLinux() && !string.IsNullOrEmpty(containerImage))
+                            RunCmakeInContainer(containerImage, configureArgs, buildArgs);
+                        else
+                        {
+                            Utility.Run("cmake", configureArgs);
+                            Utility.Run("cmake", buildArgs);
+                        }
                     }
                 }
 
@@ -279,6 +286,29 @@ namespace Build
                     Directory.CreateDirectory(generatedPath);
                 }
 
+                if (options.Platforms.Contains("Linux"))
+                {
+                    Console.WriteLine("**** Compiling for Linux Player");
+                    unity.Run(new[]
+                    {
+                        "-batchmode",
+                        "-nographics",
+                        "-projectPath",
+                        Utility.ProjectRoot,
+                        "-buildTarget",
+                        "Linux64",
+                        "-executeMethod",
+                        "CesiumForUnity.BuildCesiumForUnity.CompileForLinuxAndExit"
+                    });
+
+                    Console.WriteLine("**** Adding generated files (for the Linux Player) to the package");
+                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_STANDALONE_LINUX", generatedPath, outputGeneratedPath);
+
+                    // Clean the generated code directory.
+                    Directory.Delete(generatedPath, true);
+                    Directory.CreateDirectory(generatedPath);
+                }
+
                 if (options.Platforms.Contains("macOS"))
                 {
                     Console.WriteLine("**** Compiling for macOS Player");
@@ -365,6 +395,41 @@ namespace Build
             foreach (DirectoryInfo dir in directories)
             {
                 TraverseDirectoryRecursively(dir.FullName, Path.Combine(builtPath, dir.Name), fileCallback, directoryCallback);
+            }
+        }
+
+        private static void RunCmakeInContainer(
+            string containerImage,
+            IEnumerable<string> configureArgs,
+            IEnumerable<string> buildArgs)
+        {
+            string packageRoot = Utility.PackageRoot;
+            string ezvcpkgHostPath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".ezvcpkg");
+
+            // Write cmake commands to a script file to avoid shell quoting complexity.
+            string scriptPath = Path.Combine(Path.GetTempPath(), $"cesium-cmake-{Guid.NewGuid():N}.sh");
+            File.WriteAllText(scriptPath,
+                LinuxContainerBuild.CreateBuildScript(
+                    string.Join(' ', configureArgs), string.Join(' ', buildArgs)),
+                new UTF8Encoding(false));
+
+            try
+            {
+                ProcessStartInfo dockerInfo = new ProcessStartInfo("docker");
+                dockerInfo.WorkingDirectory = packageRoot;
+                dockerInfo.Arguments = LinuxContainerBuild.CreateDockerArguments(
+                    packageRoot,
+                    packageRoot,
+                    ezvcpkgHostPath,
+                    scriptPath,
+                    containerImage);
+
+                Utility.RunAndLog(dockerInfo);
+            }
+            finally
+            {
+                try { File.Delete(scriptPath); } catch (Exception) { }
             }
         }
 
