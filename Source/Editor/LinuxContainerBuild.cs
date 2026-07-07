@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 
 namespace CesiumForUnity
@@ -32,6 +33,40 @@ namespace CesiumForUnity
                 "curl -fsSL https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o /tmp/awscliv2.zip && unzip -q /tmp/awscliv2.zip -d /tmp && /tmp/aws/install && rm -rf /tmp/awscliv2.zip /tmp/aws\n" +
                 $"cmake {configureArgs}\n" +
                 $"cmake {buildArgs}\n";
+        }
+
+        /// <summary>
+        /// Creates the docker command-line arguments needed to run the build script in the container.
+        /// </summary>
+        internal static string CreateDockerArguments(
+            string workingDirectory,
+            string packageRoot,
+            string ezvcpkgHostPath,
+            string scriptPath,
+            string containerImage)
+        {
+            StringBuilder dockerArgsBuilder = new StringBuilder("run --rm");
+            dockerArgsBuilder.Append($" --workdir {QuoteArgument(workingDirectory)}");
+            dockerArgsBuilder.Append($" -v {QuoteArgument($"{packageRoot}:{packageRoot}")}");
+            dockerArgsBuilder.Append($" -v {QuoteArgument($"{ezvcpkgHostPath}:/root/.ezvcpkg")}");
+            dockerArgsBuilder.Append($" -v {QuoteArgument($"{scriptPath}:/tmp/cesium-build.sh:ro")}");
+            dockerArgsBuilder.Append(" -e CC=clang");
+            dockerArgsBuilder.Append(" -e CXX=clang++");
+
+            foreach (string envVarName in PassthroughEnvVars)
+            {
+                string? value = Environment.GetEnvironmentVariable(envVarName);
+                if (!string.IsNullOrEmpty(value))
+                    dockerArgsBuilder.Append($" -e {QuoteArgument($"{envVarName}={value}")}");
+            }
+
+            dockerArgsBuilder.Append($" {QuoteArgument(containerImage)} bash /tmp/cesium-build.sh");
+            return dockerArgsBuilder.ToString();
+        }
+
+        private static string QuoteArgument(string value)
+        {
+            return $"\"{value.Replace("\\", "\\\\").Replace("\"", "\\\"")}\"";
         }
     }
 }

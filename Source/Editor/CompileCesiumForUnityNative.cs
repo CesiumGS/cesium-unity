@@ -720,24 +720,12 @@ namespace CesiumForUnity
                 dockerInfo.WorkingDirectory = library.SourceDirectory;
                 dockerInfo.RedirectStandardError = true;
                 dockerInfo.RedirectStandardOutput = true;
-
-                StringBuilder dockerArgsBuilder = new StringBuilder("run --rm");
-                dockerArgsBuilder.Append($" --workdir \"{library.SourceDirectory}\"");
-                dockerArgsBuilder.Append($" -v \"{packageRoot}:{packageRoot}\"");
-                dockerArgsBuilder.Append($" -v \"{ezvcpkgHostPath}:/root/.ezvcpkg\"");
-                dockerArgsBuilder.Append($" -v \"{scriptPath}:/tmp/cesium-build.sh:ro\"");
-                dockerArgsBuilder.Append(" -e CC=clang");
-                dockerArgsBuilder.Append(" -e CXX=clang++");
-
-                foreach (string envVarName in LinuxContainerBuild.PassthroughEnvVars)
-                {
-                    string? value = Environment.GetEnvironmentVariable(envVarName);
-                    if (!string.IsNullOrEmpty(value))
-                        dockerArgsBuilder.Append($" -e \"{envVarName}={value}\"");
-                }
-
-                dockerArgsBuilder.Append($" {containerImage} bash /tmp/cesium-build.sh");
-                dockerInfo.Arguments = dockerArgsBuilder.ToString();
+                dockerInfo.Arguments = LinuxContainerBuild.CreateDockerArguments(
+                    library.SourceDirectory,
+                    packageRoot,
+                    ezvcpkgHostPath,
+                    scriptPath,
+                    containerImage);
 
                 RunAndLog(dockerInfo, log, logFilename);
             }

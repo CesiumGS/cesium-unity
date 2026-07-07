@@ -418,35 +418,12 @@ namespace Build
             {
                 ProcessStartInfo dockerInfo = new ProcessStartInfo("docker");
                 dockerInfo.WorkingDirectory = packageRoot;
-
-                dockerInfo.ArgumentList.Add("run");
-                dockerInfo.ArgumentList.Add("--rm");
-                dockerInfo.ArgumentList.Add("--workdir");
-                dockerInfo.ArgumentList.Add(packageRoot);
-                dockerInfo.ArgumentList.Add("-v");
-                dockerInfo.ArgumentList.Add($"{packageRoot}:{packageRoot}");
-                dockerInfo.ArgumentList.Add("-v");
-                dockerInfo.ArgumentList.Add($"{ezvcpkgHostPath}:/root/.ezvcpkg");
-                dockerInfo.ArgumentList.Add("-v");
-                dockerInfo.ArgumentList.Add($"{scriptPath}:/tmp/cesium-build.sh:ro");
-                dockerInfo.ArgumentList.Add("-e");
-                dockerInfo.ArgumentList.Add("CC=clang");
-                dockerInfo.ArgumentList.Add("-e");
-                dockerInfo.ArgumentList.Add("CXX=clang++");
-
-                foreach (string envVarName in LinuxContainerBuild.PassthroughEnvVars)
-                {
-                    string? value = Environment.GetEnvironmentVariable(envVarName);
-                    if (!string.IsNullOrEmpty(value))
-                    {
-                        dockerInfo.ArgumentList.Add("-e");
-                        dockerInfo.ArgumentList.Add($"{envVarName}={value}");
-                    }
-                }
-
-                dockerInfo.ArgumentList.Add(containerImage);
-                dockerInfo.ArgumentList.Add("bash");
-                dockerInfo.ArgumentList.Add("/tmp/cesium-build.sh");
+                dockerInfo.Arguments = LinuxContainerBuild.CreateDockerArguments(
+                    packageRoot,
+                    packageRoot,
+                    ezvcpkgHostPath,
+                    scriptPath,
+                    containerImage);
 
                 Utility.RunAndLog(dockerInfo);
             }
