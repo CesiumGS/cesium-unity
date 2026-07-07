@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
+using CesiumForUnity;
 
 namespace Build
 {
@@ -409,16 +410,8 @@ namespace Build
             // Write cmake commands to a script file to avoid shell quoting complexity.
             string scriptPath = Path.Combine(Path.GetTempPath(), $"cesium-cmake-{Guid.NewGuid():N}.sh");
             File.WriteAllText(scriptPath,
-                "#!/bin/bash\n" +
-                "set -e\n" +
-                "dnf install -q -y dnf-plugins-core\n" +
-                "dnf config-manager --set-enabled powertools\n" +
-                "dnf module enable -y llvm-toolset\n" +
-                "dnf install -q -y clang make nasm git curl zip unzip tar kernel-headers perl-core ninja-build python3 pkgconfig autoconf automake libtool patch\n" +
-                "curl -fsSL https://github.com/Kitware/CMake/releases/download/v3.31.12/cmake-3.31.12-linux-x86_64.tar.gz | tar -xz -C /usr/local --strip-components=1\n" +
-                "curl -fsSL https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o /tmp/awscliv2.zip && unzip -q /tmp/awscliv2.zip -d /tmp && /tmp/aws/install && rm -rf /tmp/awscliv2.zip /tmp/aws\n" +
-                $"cmake {string.Join(' ', configureArgs)}\n" +
-                $"cmake {string.Join(' ', buildArgs)}\n",
+                LinuxContainerBuild.CreateBuildScript(
+                    string.Join(' ', configureArgs), string.Join(' ', buildArgs)),
                 new UTF8Encoding(false));
 
             try
@@ -441,9 +434,7 @@ namespace Build
                 dockerInfo.ArgumentList.Add("-e");
                 dockerInfo.ArgumentList.Add("CXX=clang++");
 
-                foreach (string envVarName in new[] {
-                    "VCPKG_BINARY_SOURCES", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY",
-                    "AWS_REGION", "CESIUM_VCPKG_RELEASE_ONLY" })
+                foreach (string envVarName in LinuxContainerBuild.PassthroughEnvVars)
                 {
                     string? value = Environment.GetEnvironmentVariable(envVarName);
                     if (!string.IsNullOrEmpty(value))
