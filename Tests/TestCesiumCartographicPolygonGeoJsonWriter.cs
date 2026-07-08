@@ -3,6 +3,7 @@ using NUnit.Framework;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Text.RegularExpressions;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -18,7 +19,7 @@ public class TestCesiumCartographicPolygonGeoJsonWriter
         go.AddComponent<CesiumGeoreference>();
         
         GameObject poly = new GameObject("Polygon");
-        poly.transform.SetParent(go);
+        poly.transform.SetParent(go.transform);
         CesiumCartographicPolygon polygon = poly.AddComponent<CesiumCartographicPolygon>();
 
         SplineContainer splineContainer = poly.GetComponent<SplineContainer>(); // Must add automatically through RequireComponent
@@ -60,12 +61,12 @@ public class TestCesiumCartographicPolygonGeoJsonWriter
             CesiumGeoJsonObject geometry = features[0].GetGeometry();
             Assert.AreEqual(CesiumGeoJsonObjectType.Polygon, geometry.GetObjectType());
 
-            CesiumGeoJsonPolygon[] polygons = geometry.GetObjectAsPolygon();
-            Assert.IsNotNull(polygons);
-            Assert.IsNotNull(polygons.rings);
-            Assert.AreEqual(1, polygons.rings.Length);
-            Assert.AreEqual(5, polygons.rings[0].points.Length);
-            Assert.AreEqual(rings[0].points[0], rings[0].points[^1]); // First and Last element must match!
+            CesiumGeoJsonPolygon testPoly = geometry.GetObjectAsPolygon();
+            Assert.IsNotNull(testPoly);
+            Assert.IsNotNull(testPoly.rings);
+            Assert.AreEqual(1, testPoly.rings.Length);
+            Assert.AreEqual(5, testPoly.rings[0].points.Length);
+            Assert.AreEqual(testPoly.rings[0].points[0], testPoly.rings[0].points[^1]); // First and Last element must match!
         }
         finally
         {
@@ -78,6 +79,7 @@ public class TestCesiumCartographicPolygonGeoJsonWriter
     public void SaveAsGeoJsonNullPolygonReturnsFalse()
     {
         string path = Path.Combine(Path.GetTempPath(), "CesiumTestPolygon.geojson");
+        UnityEngine.TestTools.LogAssert.Expect(LogType.Error,"CesiumCartographicPolygonGeoJsonWriter: polygon is null.");
         Assert.IsFalse(CesiumCartographicPolygonGeoJsonWriter.SaveAsGeoJson(null, path));
     }
 
@@ -87,7 +89,12 @@ public class TestCesiumCartographicPolygonGeoJsonWriter
         GameObject go = new GameObject("MyPolygon");
         go.AddComponent<CesiumGeoreference>();
         CesiumCartographicPolygon polygon = go.AddComponent<CesiumCartographicPolygon>();
+
+        UnityEngine.TestTools.LogAssert.Expect(LogType.Error, "CesiumCartographicPolygonGeoJsonWriter: filePath is null or empty.");
         Assert.IsFalse(CesiumCartographicPolygonGeoJsonWriter.SaveAsGeoJson(polygon, ""));
+
+        UnityEngine.TestTools.LogAssert.Expect(LogType.Error, "CesiumCartographicPolygonGeoJsonWriter: filePath is null or empty.");
+        Assert.IsFalse(CesiumCartographicPolygonGeoJsonWriter.SaveAsGeoJson(polygon, null));
     }
 
     [Test]
@@ -100,7 +107,7 @@ public class TestCesiumCartographicPolygonGeoJsonWriter
         {
             System.Threading.Thread.CurrentThread.CurrentCulture = new CultureInfo("de-DE"); // de-DE locale uses ',' as decimal seperator.
 
-            GameObject go = new GameObject("MyPolygon");
+            GameObject go = new GameObject("TestPolygon");
             go.AddComponent<CesiumGeoreference>();
             CesiumCartographicPolygon polygon = go.AddComponent<CesiumCartographicPolygon>();
 
@@ -125,9 +132,11 @@ public class TestCesiumCartographicPolygonGeoJsonWriter
             {
                 Assert.IsTrue(CesiumCartographicPolygonGeoJsonWriter.SaveAsGeoJson(polygon, path));
                 string contents = File.ReadAllText(path);
-                Assert.IsFalse(contents.Contains(","));
-                Assert.IsTrue(contents.Contains("0.5"));
-                Assert.IsTrue(contents.Contains("1.25"));
+                Assert.IsTrue(contents.Contains("TestPolygon"));
+
+                // Matches GeoJSON coordinate pairs and verifies decimals use '.' as the separator.
+                const string validationPattern = @"\[-?\d+\.\d+,-?\d+\.\d+\]";
+                Assert.IsTrue(Regex.IsMatch(contents, validationPattern));
             }
             finally
             {

@@ -29,7 +29,6 @@ namespace CesiumForUnity
         /// The polygons to rasterize for this overlay.
         /// </summary>
         public List<CesiumCartographicPolygon> polygons
-
         {
             get => this._polygons;
             set
