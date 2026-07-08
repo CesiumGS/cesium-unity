@@ -102,9 +102,6 @@ void CesiumGeoJsonDocumentImpl::LoadFromCesiumIon(
   std::string accessToken = ionAccessToken.ToStlString();
   std::string apiUrl = ionApiUrl.ToStlString();
 
-  if (!apiUrl.empty() && *apiUrl.rbegin() != '/')
-    apiUrl += '/';
-
   const AsyncSystem& asyncSystem = getAsyncSystem();
   std::shared_ptr<IAssetAccessor> pAssetAccessor = getAssetAccessor();
 

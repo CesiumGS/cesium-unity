@@ -11,7 +11,6 @@
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/CesiumForUnity/CesiumCartographicPolygon.h>
 #include <DotNet/CesiumForUnity/CesiumPolygonRasterOverlay.h>
-
 #include <DotNet/CesiumForUnity/CesiumRasterOverlay.h>
 #include <DotNet/System/String.h>
 #include <DotNet/Unity/Mathematics/double2.h>
@@ -71,7 +70,6 @@ void CesiumPolygonRasterOverlayImpl::AddToTileset(
 
   List1<CesiumForUnity::CesiumCartographicPolygon> unityPolygons =
       overlay.polygons();
-
   if (unityPolygons == nullptr) {
     return;
   }
@@ -82,7 +80,6 @@ void CesiumPolygonRasterOverlayImpl::AddToTileset(
   const int32_t polygonCount = unityPolygons.Count();
   std::vector<CesiumGeospatial::CartographicPolygon> nativePolygons;
   nativePolygons.reserve(polygonCount);
-
   for (int32_t i = 0; i < polygonCount; i++) {
     CesiumForUnity::CesiumCartographicPolygon unityPolygon = unityPolygons[i];
 

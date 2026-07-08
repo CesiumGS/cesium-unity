@@ -2,6 +2,10 @@
 using UnityEditor;
 using UnityEngine;
 
+#if SUPPORTS_SPLINES
+using UnityEngine.Splines;
+#endif
+
 namespace CesiumForUnity
 {
     [CustomEditor(typeof(CesiumCartographicPolygon))]
@@ -77,7 +81,40 @@ namespace CesiumForUnity
             this._ionAssetID = this.serializedObject.FindProperty("_ionAssetID");
             this._ionAccessToken = this.serializedObject.FindProperty("_ionAccessToken");
             this._ionServer = this.serializedObject.FindProperty("_ionServer");
+
+            Spline.Changed += OnSplineChanged;
         }
+
+        private void OnDisable()
+        {
+            Spline.Changed -= OnSplineChanged;
+        }
+
+        private void OnSplineChanged(Spline spline, int i, SplineModification modification)
+        {
+            // Called once after editing has completed.
+            if (this._polygon._isUpdatingSplineInternally)
+            {
+                return;
+            }
+
+            if (!this._polygon.IsSplineOwned(spline))
+            {
+                return;
+            }
+
+            // If the spline was edited manually while it was sourced from Cesium ion or a URL,
+            // the spline no longer matches the source GeoJSON file, so fall back to Manual.
+            if (this._polygon.source == CesiumCartographicPolygonSource.FromCesiumIon ||
+                this._polygon.source == CesiumCartographicPolygonSource.FromUrl)
+            {
+                Undo.RecordObject(this._polygon, "Revert Cartographic Polygon source to Manual");
+                this._polygon.source = CesiumCartographicPolygonSource.Manual;
+                this._polygon.Refresh();
+                EditorUtility.SetDirty(this._polygon);
+            }
+        }
+
 #endif
 
         public override void OnInspectorGUI()

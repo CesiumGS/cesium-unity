@@ -210,7 +210,32 @@ namespace CesiumForUnity
 
         // Set to true while this component is writing to the spline itself, so that
         // the resulting Spline.Changed event isn't misinterpreted as a manual edit.
-        private bool _isUpdatingSplineInternally = false;
+        // Exposed as internal so the editor can skip its own spline-modified handling
+        // while a reload from the configured source is in progress.
+        internal bool _isUpdatingSplineInternally = false;
+
+#if SUPPORTS_SPLINES
+        // Exposed for the editor so it can verify a modified spline belongs to this
+        // polygon before reacting to the global AfterSplineWasModified callback.
+        internal bool IsSplineOwned(Spline spline)
+        {
+            if (this._splineContainer == null)
+            {
+                return false;
+            }
+
+            IReadOnlyList<Spline> splines = this._splineContainer.Splines;
+            for (int i = 0; i < splines.Count; i++)
+            {
+                if (splines[i] == spline)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+#endif
 
         void OnEnable()
         {
@@ -233,8 +258,6 @@ namespace CesiumForUnity
                 this._globeAnchor = this.gameObject.AddComponent<CesiumGlobeAnchor>();
             }
 
-            Spline.Changed += this.OnSplineChanged;
-
             if (this._source != CesiumCartographicPolygonSource.Manual)
             {
                 this.LoadFromSource();
@@ -248,54 +271,6 @@ namespace CesiumForUnity
                 "in this version of Unity.");
 #endif
         }
-
-#if SUPPORTS_SPLINES
-        void OnDisable()
-        {
-            Spline.Changed -= this.OnSplineChanged;
-        }
-
-        private void OnSplineChanged(Spline spline, int knotIndex, SplineModification modification)
-        {
-            if (this._isUpdatingSplineInternally)
-            {
-                return;
-            }
-
-            if (this._splineContainer == null)
-            {
-                return;
-            }
-
-            IReadOnlyList<Spline> splines = this._splineContainer.Splines;
-            bool isOurSpline = false;
-            for (int i = 0; i < splines.Count; i++)
-            {
-                if (splines[i] == spline)
-                {
-                    isOurSpline = true;
-                    break;
-                }
-            }
-
-            if (!isOurSpline)
-            {
-                return;
-            }
-
-            // If the spline was edited manually while it was sourced from Cesium ion or a URL,
-            // the spline no longer matches the source GeoJSON file, so fall back to Manual.
-            if (this._source == CesiumCartographicPolygonSource.FromCesiumIon ||
-                this._source == CesiumCartographicPolygonSource.FromUrl)
-            {
-                this._source = CesiumCartographicPolygonSource.Manual;
-                if ((modification & SplineModification.EndAction) != 0)
-                {
-                    this.Refresh();
-                }
-            }
-        }
-#endif
 
 #if SUPPORTS_SPLINES && UNITY_EDITOR
         void Reset()
