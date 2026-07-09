@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
@@ -188,7 +189,7 @@ namespace CesiumForUnity
             }
         }
 
-        private CesiumGeoJsonDocument _document = null;
+        [NonSerialized] private CesiumGeoJsonDocument _document = null;
 
         /// <summary>
         /// Gets or sets the GeoJSON document used by this polygon.
@@ -212,7 +213,7 @@ namespace CesiumForUnity
         // the resulting Spline.Changed event isn't misinterpreted as a manual edit.
         // Exposed as internal so the editor can skip its own spline-modified handling
         // while a reload from the configured source is in progress.
-        internal bool _isUpdatingSplineInternally = false;
+        [NonSerialized] internal bool _isUpdatingSplineInternally = false;
 
 #if SUPPORTS_SPLINES
         // Exposed for the editor so it can verify a modified spline belongs to this
@@ -365,6 +366,12 @@ namespace CesiumForUnity
                 Debug.LogWarning("CesiumCartographicPolygon: failed to load the GeoJSON. The spline was left unchanged.");
             }
 
+            // If this component was disabled or destroyed while the load was in flight, skip applying the result. 
+            if (!this.isActiveAndEnabled) 
+            {
+                return;
+            }
+
             this.ApplyDocument(loaded);
 #endif
         }
@@ -435,6 +442,8 @@ namespace CesiumForUnity
                     "parent hierarchy, so the GeoJSON source could not be applied.");
                 return;
             }
+
+            georeference.Initialize();
 
             // Remove the last point if it duplicates the first (GeoJson Spec.)
             if (points.Count > 3)
