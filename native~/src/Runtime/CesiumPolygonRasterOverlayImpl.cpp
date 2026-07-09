@@ -80,9 +80,9 @@ void CesiumPolygonRasterOverlayImpl::AddToTileset(
   const int32_t polygonCount = unityPolygons.Count();
   std::vector<CesiumGeospatial::CartographicPolygon> nativePolygons;
   nativePolygons.reserve(polygonCount);
+
   for (int32_t i = 0; i < polygonCount; i++) {
     CesiumForUnity::CesiumCartographicPolygon unityPolygon = unityPolygons[i];
-
     if (unityPolygon == nullptr) {
       continue;
     }
