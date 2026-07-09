@@ -312,8 +312,21 @@ namespace CesiumForUnity
         /// </remarks>
         public void Refresh()
         {
-            LoadFromSource();
+            
+            if (this._source == CesiumCartographicPolygonSource.Manual)
+            {
+                this.RefreshDependentOverlays();
+            }
+            else
+            {
+                // For non-Manual sources, "LoadFromSource" reloads the spline asynchronously
+                // and refreshes the dependent raster overlays itself once the load completes.
+                LoadFromSource();
+            }
+        }
 
+        private void RefreshDependentOverlays()
+        {
             CesiumPolygonRasterOverlay[] overlays = FindObjectsByType<CesiumPolygonRasterOverlay>(FindObjectsSortMode.None);
             for (int i = 0; i < overlays.Length; i++)
             {
@@ -373,6 +386,10 @@ namespace CesiumForUnity
             }
 
             this.ApplyDocument(loaded);
+
+            // The spline has now been updated from the source, so rebuild any dependent
+            // raster overlays to re-bake the cutout using the new shape.
+            this.RefreshDependentOverlays();
 #endif
         }
 

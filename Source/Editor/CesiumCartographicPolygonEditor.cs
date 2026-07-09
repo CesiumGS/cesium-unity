@@ -126,6 +126,8 @@ namespace CesiumForUnity
             EditorGUILayout.HelpBox(HelpSplinesMissingInVersion, MessageType.Error);
 #endif
 #else
+            CesiumCartographicPolygonSource oldSource = this._polygon.source;
+
             this.serializedObject.Update();
 
             EditorGUIUtility.labelWidth = CesiumEditorStyle.inspectorLabelWidth;
@@ -135,6 +137,15 @@ namespace CesiumForUnity
             EditorGUILayout.Space(5);
 
             this.serializedObject.ApplyModifiedProperties();
+
+            // When the Source is changed in the inspector, reload the polygon's spline and rebuild any dependent raster overlays to update the cutout.
+            CesiumCartographicPolygonSource newSource = this._polygon.source;
+            if (oldSource != newSource)
+            {
+                Undo.RecordObject(this._polygon, "Change Cartographic Polygon source");
+                this._polygon.Refresh();
+                EditorUtility.SetDirty(this._polygon);
+            }
 #endif
         }
 
