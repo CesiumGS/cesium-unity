@@ -5,6 +5,7 @@
 ##### Additions :tada:
 
 - Added `CesiumVectorPointStyle` and a `pointStyle` field on `CesiumVectorStyle`, enabling `CesiumGeoJsonDocumentRasterOverlay` to render GeoJSON `Point` and `MultiPoint` features.
+- Added support for loading `.geoJson` files to `CesiumCartographicPolygon`.
 
 ## v1.25.1 - 2026-09-01
 
