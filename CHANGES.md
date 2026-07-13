@@ -5,6 +5,7 @@
 ##### Additions :tada:
 
 - Added support for the Linux platform (x86-64 only).
+- Added `CesiumVectorPointStyle` and a `pointStyle` field on `CesiumVectorStyle`, enabling `CesiumGeoJsonDocumentRasterOverlay` to render GeoJSON `Point` and `MultiPoint` features.
 
 ## v1.24.0 - 2026-07-01
 

@@ -157,6 +157,61 @@ namespace CesiumForUnity
     }
 
     /// <summary>
+    /// The style used to draw points.
+    /// </summary>
+    [Serializable]
+    public struct CesiumVectorPointStyle
+    {
+        /// <summary>
+        /// The radius of the point in pixels.
+        /// </summary>
+        [Tooltip("The radius of the point in pixels.")]
+        [Min(0)]
+        public double radius;
+
+        /// <summary>
+        /// Whether the point should be filled.
+        /// </summary>
+        [Tooltip("Whether the point should be filled.")]
+        public bool fill;
+
+        /// <summary>
+        /// If fill is true, this style will be used when filling the point.
+        /// </summary>
+        [Tooltip("If fill is true, this style will be used when filling the point.")]
+        public CesiumVectorPolygonFillStyle fillStyle;
+
+        /// <summary>
+        /// Whether the point should be outlined.
+        /// </summary>
+        [Tooltip("Whether the point should be outlined.")]
+        public bool outline;
+
+        /// <summary>
+        /// If outline is true, this style will be used when outlining the point.
+        /// </summary>
+        [Tooltip("If outline is true, this style will be used when outlining the point.")]
+        public CesiumVectorLineStyle outlineStyle;
+
+        /// <summary>
+        /// Creates a default point style with a 5 pixel radius, fill enabled, and
+        /// outline disabled.
+        /// </summary>
+        /// <remarks>
+        /// Fill is enabled by default because the underlying native point style
+        /// renders nothing when neither fill nor outline is set.
+        /// </remarks>
+        public static CesiumVectorPointStyle Default => new CesiumVectorPointStyle
+        {
+            radius = 5.0,
+            fill = true,
+            fillStyle = CesiumVectorPolygonFillStyle.Default,
+            outline = false,
+            outlineStyle = CesiumVectorLineStyle.Default
+        };
+    }
+
+    /// <summary>
     /// Style information to use when drawing vector data.
     /// </summary>
     [Serializable]
@@ -175,12 +230,19 @@ namespace CesiumForUnity
         public CesiumVectorPolygonStyle polygonStyle;
 
         /// <summary>
+        /// Styles to use when drawing points.
+        /// </summary>
+        [Tooltip("Styles to use when drawing points.")]
+        public CesiumVectorPointStyle pointStyle;
+
+        /// <summary>
         /// Creates a default vector style.
         /// </summary>
         public static CesiumVectorStyle Default => new CesiumVectorStyle
         {
             lineStyle = CesiumVectorLineStyle.Default,
-            polygonStyle = CesiumVectorPolygonStyle.Default
+            polygonStyle = CesiumVectorPolygonStyle.Default,
+            pointStyle = CesiumVectorPointStyle.Default
         };
     }
 }

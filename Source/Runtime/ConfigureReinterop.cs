@@ -1013,6 +1013,18 @@ namespace CesiumForUnity
             polygonStyleV.outline = outlineEnabled;
             CesiumVectorLineStyle outlineStyle = polygonStyleV.outlineStyle;
             polygonStyleV.outlineStyle = outlineStyle;
+            CesiumVectorPointStyle pointStyleV = vectorStyle.pointStyle;
+            vectorStyle.pointStyle = pointStyleV;
+            double pointRadius = pointStyleV.radius;
+            pointStyleV.radius = pointRadius;
+            bool pointFillEnabled = pointStyleV.fill;
+            pointStyleV.fill = pointFillEnabled;
+            CesiumVectorPolygonFillStyle pointFillStyle = pointStyleV.fillStyle;
+            pointStyleV.fillStyle = pointFillStyle;
+            bool pointOutlineEnabled = pointStyleV.outline;
+            pointStyleV.outline = pointOutlineEnabled;
+            CesiumVectorLineStyle pointOutlineStyle = pointStyleV.outlineStyle;
+            pointStyleV.outlineStyle = pointOutlineStyle;
             baseOverlay = geoJsonOverlay;
 
             TestGltfModel testModel = new TestGltfModel();
