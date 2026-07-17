@@ -5,6 +5,7 @@
 ##### Additions :tada:
 
 - Added support for the Linux platform (x86-64 only).
+- Added support for Unity 6.5.
 
 ## v1.24.0 - 2026-07-01
 
