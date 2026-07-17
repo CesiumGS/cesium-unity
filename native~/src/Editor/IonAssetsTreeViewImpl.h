@@ -6,7 +6,6 @@
 
 #include <DotNet/CesiumForUnity/IonAssetsColumn.h>
 #include <DotNet/System/String.h>
-#include <DotNet/UnityEditor/IMGUI/Controls/TreeViewItem1.h>
 #include <DotNet/UnityEngine/Rect.h>
 
 #include <memory>

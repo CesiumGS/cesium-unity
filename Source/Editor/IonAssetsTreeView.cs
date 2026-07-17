@@ -5,6 +5,12 @@ using System.Collections.Generic;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 
+#if UNITY_6000_2_OR_NEWER
+using TreeView = UnityEditor.IMGUI.Controls.TreeView<int>;
+using TreeViewItem = UnityEditor.IMGUI.Controls.TreeViewItem<int>;
+using TreeViewState = UnityEditor.IMGUI.Controls.TreeViewState<int>;
+#endif
+
 namespace CesiumForUnity
 {
     public enum IonAssetsColumn
@@ -96,11 +102,11 @@ namespace CesiumForUnity
     }
 
     [ReinteropNativeImplementation("CesiumForUnityNative::IonAssetsTreeViewImpl", "IonAssetsTreeViewImpl.h")]
-    public partial class IonAssetsTreeView : TreeView<int>
+    public partial class IonAssetsTreeView : TreeView
     {
         private MultiColumnHeaderState _headerState;
 
-        public IonAssetsTreeView(TreeViewState<int> assetsTreeState)
+        public IonAssetsTreeView(TreeViewState assetsTreeState)
             : base(assetsTreeState)
         {
             BuildMultiColumnHeader();
@@ -135,19 +141,19 @@ namespace CesiumForUnity
             multiColumnHeader = new IonAssetsMultiColumnHeader(this._headerState, this);
         }
 
-        protected override TreeViewItem<int> BuildRoot()
+        protected override TreeViewItem BuildRoot()
         {
             int rootId = 0;
             int rootDepth = -1;
-            return new TreeViewItem<int>(rootId, rootDepth, "Root");
+            return new TreeViewItem(rootId, rootDepth, "Root");
         }
 
         public partial int GetAssetsCount();
 
-        protected override IList<TreeViewItem<int>> BuildRows(TreeViewItem<int> root)
+        protected override IList<TreeViewItem> BuildRows(TreeViewItem root)
         {
             int count = GetAssetsCount();
-            IList<TreeViewItem<int>> rows = new List<TreeViewItem<int>>();
+            IList<TreeViewItem> rows = new List<TreeViewItem>();
             // All items are counted as children of the root item, such that when displayed
             // they appear in a list.
             const int itemDepth = 0;
@@ -157,7 +163,7 @@ namespace CesiumForUnity
                 // The root of the tree is typically assigned as 0, so all of the ids
                 // have to be offset by 1. Otherwise, the selection behavior of the TreeView
                 // may be inaccurate.
-                TreeViewItem<int> assetItem = new TreeViewItem<int>(i + 1, itemDepth);
+                TreeViewItem assetItem = new TreeViewItem(i + 1, itemDepth);
                 rows.Add(assetItem);
                 root.AddChild(assetItem);
             }
@@ -202,7 +208,7 @@ namespace CesiumForUnity
             this.SetSelection(new List<int>());
         }
 
-        protected override bool CanMultiSelect(TreeViewItem<int> item)
+        protected override bool CanMultiSelect(TreeViewItem item)
         {
             return false;
         }

@@ -10,6 +10,10 @@ using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 using UnityEngine.Networking;
 
+#if UNITY_6000_2_OR_NEWER
+using TreeViewItem = UnityEditor.IMGUI.Controls.TreeViewItem<int>;
+using TreeViewState = UnityEditor.IMGUI.Controls.TreeViewState<int>;
+#endif
 
 namespace CesiumForUnity
 {
@@ -109,10 +113,10 @@ namespace CesiumForUnity
             string productName = Application.productName;
             string osVersion = System.Environment.OSVersion.VersionString;
 
-            TreeViewItem<int> root = new TreeViewItem<int>(0, -1, "root");
+            TreeViewItem root = new TreeViewItem(0, -1, "root");
             int id = root.id;
 
-            TreeViewState<int> treeState = new TreeViewState<int>();
+            TreeViewState treeState = new TreeViewState();
             IonAssetsTreeView treeView = new IonAssetsTreeView(treeState);
             treeView.Reload();
 
