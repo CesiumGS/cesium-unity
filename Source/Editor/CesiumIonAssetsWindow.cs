@@ -79,7 +79,7 @@ namespace CesiumForUnity
 
         void BuildTreeView()
         {
-            this._assetsTreeState = new TreeViewState<int>();
+            this._assetsTreeState = new TreeViewState();
             this._assetsTreeView = new IonAssetsTreeView(this._assetsTreeState);
             this._assetsTreeView.Reload();
         }
