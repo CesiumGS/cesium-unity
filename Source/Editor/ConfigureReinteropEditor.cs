@@ -109,10 +109,10 @@ namespace CesiumForUnity
             string productName = Application.productName;
             string osVersion = System.Environment.OSVersion.VersionString;
 
-            TreeViewItem root = new TreeViewItem(0, -1, "root");
+            TreeViewItem<int> root = new TreeViewItem<int>(0, -1, "root");
             int id = root.id;
 
-            TreeViewState treeState = new TreeViewState();
+            TreeViewState<int> treeState = new TreeViewState<int>();
             IonAssetsTreeView treeView = new IonAssetsTreeView(treeState);
             treeView.Reload();
 

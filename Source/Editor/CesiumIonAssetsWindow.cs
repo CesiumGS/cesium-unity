@@ -29,7 +29,7 @@ namespace CesiumForUnity
             currentWindow.Focus();
         }
 
-        private TreeViewState _assetsTreeState;
+        private TreeViewState<int> _assetsTreeState;
         private IonAssetsTreeView _assetsTreeView;
         private SearchField _searchField;
         private CesiumIonServerSelector _serverSelector;
@@ -74,7 +74,7 @@ namespace CesiumForUnity
 
         void BuildTreeView()
         {
-            this._assetsTreeState = new TreeViewState();
+            this._assetsTreeState = new TreeViewState<int>();
             this._assetsTreeView = new IonAssetsTreeView(this._assetsTreeState);
             this._assetsTreeView.Reload();
         }
