@@ -34,6 +34,7 @@
 #include <DotNet/CesiumForUnity/CesiumPointCloudRenderer.h>
 #include <DotNet/CesiumForUnity/CesiumPrimitiveFeatures.h>
 #include <DotNet/CesiumForUnity/CesiumPropertyTable.h>
+#include <DotNet/CesiumForUnity/Helpers.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/Collections/Generic/List1.h>
 #include <DotNet/System/Object.h>
@@ -55,7 +56,6 @@
 #include <DotNet/UnityEngine/MeshRenderer.h>
 #include <DotNet/UnityEngine/MeshTopology.h>
 #include <DotNet/UnityEngine/Object.h>
-#include <DotNet/UnityEngine/Physics.h>
 #include <DotNet/UnityEngine/Quaternion.h>
 #include <DotNet/UnityEngine/Rendering/CullMode.h>
 #include <DotNet/UnityEngine/Rendering/IndexFormat.h>
@@ -992,9 +992,9 @@ UnityPrepareRendererResources::prepareInLoadThread(
             if (shouldCreatePhysicsMeshes) {
               // Baking physics meshes takes awhile, so do that in a
               // worker thread.
-              const std::int32_t len = meshes.Length();
-              std::vector<std::int32_t> instanceIDs;
-              for (int32_t i = 0; i < len; ++i) {
+              const std::uint64_t len = meshes.Length();
+              std::vector<std::uint64_t> objectIds;
+              for (uint64_t i = 0; i < len; ++i) {
                 // Don't attempt to bake a physics mesh from points, lines, or
                 // an invalid triangle mesh.
                 switch (primitiveInfos[i].mode) {
@@ -1007,10 +1007,11 @@ UnityPrepareRendererResources::prepareInLoadThread(
                   }
                 }
 
-                instanceIDs.push_back(meshes[i].GetInstanceID());
+                objectIds.push_back(
+                    CesiumForUnity::Helpers::GetObjectId(meshes[i]));
               }
 
-              if (instanceIDs.size() > 0) {
+              if (objectIds.size() > 0) {
 #ifndef __EMSCRIPTEN__
                 return asyncSystem.runInWorkerThread(
 #else
@@ -1018,10 +1019,10 @@ UnityPrepareRendererResources::prepareInLoadThread(
                 return asyncSystem.runInMainThread(
 #endif
                     [workerResult = std::move(workerResult),
-                     instanceIDs = std::move(instanceIDs),
+                     objectIds = std::move(objectIds),
                      meshes = std::move(meshes)]() mutable {
-                      for (std::int32_t instanceID : instanceIDs) {
-                        UnityEngine::Physics::BakeMesh(instanceID, false);
+                      for (std::uint64_t objectID : objectIds) {
+                        CesiumForUnity::Helpers::BakeMeshFromId(objectID);
                       }
 
                       LoadThreadResult* pResult = new LoadThreadResult{
@@ -1628,7 +1629,8 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         // For backwards compatibility.
         if (metadataComponent != nullptr) {
           metadataComponent.NativeImplementation().addMetadata(
-              primitiveGameObject.transform().GetInstanceID(),
+              CesiumForUnity::Helpers::GetObjectId(
+                  primitiveGameObject.transform()),
               &gltf,
               &primitive);
         } else {
@@ -1680,7 +1682,7 @@ void freePrimitiveGameObject(
   // Kept for backwards compatibility.
   if (metadataComponent != nullptr) {
     metadataComponent.NativeImplementation().removeMetadata(
-        primitiveGameObject.transform().GetInstanceID());
+        CesiumForUnity::Helpers::GetObjectId(primitiveGameObject.transform()));
   } else {
     freePrimitiveFeatures(primitiveGameObject);
   }

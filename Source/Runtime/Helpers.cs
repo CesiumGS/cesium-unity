@@ -209,5 +209,23 @@ namespace CesiumForUnity
             }
             return ((m % n) + n) % n;
         }
+
+        public static ulong GetObjectId(UnityEngine.Object o)
+        {
+#if UNITY_6000_4_OR_NEWER
+            return EntityId.ToULong(o.GetEntityId());
+#else
+            return (ulong)o.GetInstanceID();
+#endif
+        }
+
+        public static void BakeMeshFromId(ulong id)
+        {
+#if UNITY_6000_4_OR_NEWER
+            Physics.BakeMesh(EntityId.FromULong(id), false);
+#else
+            Physics.BakeMesh((int)id, false);
+#endif
+        }
     }
 }

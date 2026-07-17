@@ -142,7 +142,6 @@ namespace CesiumForUnity
             mesh.SetIndices(new NativeArray<int>(), MeshTopology.Triangles, 0, true, 0);
             mesh.RecalculateBounds();
             int vertexCount = mesh.vertexCount;
-            int instanceID = mesh.GetInstanceID();
 
             Vector3[] vertices = mesh.vertices;
             Vector3 vertex = vertices[0];
@@ -521,7 +520,7 @@ namespace CesiumForUnity
 
             Mesh.ApplyAndDisposeWritableMeshData(meshDataArray, meshes, MeshUpdateFlags.Default);
 
-            Physics.BakeMesh(mesh.GetInstanceID(), false);
+            Helpers.BakeMeshFromId(Helpers.GetObjectId(mesh));
 
             CesiumCreditComponent creditComponent = new CesiumCreditComponent("text", "link", -1);
             List<CesiumCreditComponent> creditComponents = new List<CesiumCreditComponent>();
