@@ -6,6 +6,10 @@
 
 - Added support for the Linux platform (x86-64 only).
 
+##### Fixes :wrench:
+
+- Fixed a `NullReferenceException` thrown when opening the Cesium ion token troubleshooting window for a `CesiumGeoJsonDocumentRasterOverlay`.
+
 ## v1.24.0 - 2026-07-01
 
 ##### Additions :tada:
