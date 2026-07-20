@@ -6,6 +6,7 @@
 #include <DotNet/CesiumForUnity/CesiumVectorColorMode.h>
 #include <DotNet/CesiumForUnity/CesiumVectorLineStyle.h>
 #include <DotNet/CesiumForUnity/CesiumVectorLineWidthMode.h>
+#include <DotNet/CesiumForUnity/CesiumVectorPointStyle.h>
 #include <DotNet/CesiumForUnity/CesiumVectorPolygonFillStyle.h>
 #include <DotNet/CesiumForUnity/CesiumVectorPolygonStyle.h>
 #include <DotNet/CesiumForUnity/CesiumVectorStyle.h>
@@ -52,6 +53,22 @@ inline CesiumVectorData::ColorStyle fromUnityFillStyle(
   return native;
 }
 
+inline CesiumVectorData::PointStyle fromUnityPointStyle(
+    const DotNet::CesiumForUnity::CesiumVectorPointStyle& pointStyle) {
+  CesiumVectorData::PointStyle native;
+  native.radius = pointStyle.radius;
+
+  if (pointStyle.fill) {
+    native.fill = fromUnityFillStyle(pointStyle.fillStyle);
+  }
+
+  if (pointStyle.outline) {
+    native.outline = fromUnityLineStyle(pointStyle.outlineStyle);
+  }
+
+  return native;
+}
+
 inline CesiumVectorData::VectorStyle
 fromUnityStyle(const DotNet::CesiumForUnity::CesiumVectorStyle& style) {
   CesiumVectorData::VectorStyle native;
@@ -65,6 +82,8 @@ fromUnityStyle(const DotNet::CesiumForUnity::CesiumVectorStyle& style) {
     native.polygon.outline =
         fromUnityLineStyle(style.polygonStyle.outlineStyle);
   }
+
+  native.point = fromUnityPointStyle(style.pointStyle);
 
   return native;
 }
@@ -131,6 +150,27 @@ toUnityStyle(const CesiumVectorData::VectorStyle& style) {
     result.polygonStyle.outlineStyle.width = style.polygon.outline->width;
     result.polygonStyle.outlineStyle.widthMode =
         toUnityLineWidthMode(style.polygon.outline->widthMode);
+  }
+
+  // Point style
+  result.pointStyle.radius = style.point.radius;
+
+  result.pointStyle.fill = style.point.fill.has_value();
+  if (style.point.fill.has_value()) {
+    result.pointStyle.fillStyle.color = toUnityColor(style.point.fill->color);
+    result.pointStyle.fillStyle.colorMode =
+        toUnityColorMode(style.point.fill->colorMode);
+  }
+
+  result.pointStyle.outline = style.point.outline.has_value();
+  if (style.point.outline.has_value()) {
+    result.pointStyle.outlineStyle.color =
+        toUnityColor(style.point.outline->color);
+    result.pointStyle.outlineStyle.colorMode =
+        toUnityColorMode(style.point.outline->colorMode);
+    result.pointStyle.outlineStyle.width = style.point.outline->width;
+    result.pointStyle.outlineStyle.widthMode =
+        toUnityLineWidthMode(style.point.outline->widthMode);
   }
 
   return result;
