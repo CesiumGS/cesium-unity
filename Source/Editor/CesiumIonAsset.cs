@@ -16,6 +16,7 @@ namespace CesiumForUnity
             Tileset,
             Overlay,
             GeoJsonOverlay,
+            CartographicPolygon,
             Null
         }
 
@@ -23,6 +24,7 @@ namespace CesiumForUnity
         private Cesium3DTileset _tileset;
         private CesiumIonRasterOverlay _overlay;
         private CesiumGeoJsonDocumentRasterOverlay _geoJsonOverlay;
+        private CesiumCartographicPolygon _cartographicPolygon;
 
         public CesiumIonAsset()
         {
@@ -47,6 +49,12 @@ namespace CesiumForUnity
             this._geoJsonOverlay = overlay;
         }
 
+        public CesiumIonAsset(CesiumCartographicPolygon polygon)
+        {
+            this._type = AssetType.CartographicPolygon;
+            this._cartographicPolygon = polygon;
+        }
+
         public Cesium3DTileset tileset
         {
             get => this._type == AssetType.Tileset ? this._tileset : null;
@@ -60,6 +68,11 @@ namespace CesiumForUnity
         public CesiumGeoJsonDocumentRasterOverlay geoJsonOverlay
         {
             get => this._type == AssetType.GeoJsonOverlay ? this._geoJsonOverlay : null;
+        }
+
+        public CesiumCartographicPolygon cartographicPolygon
+        {
+            get => this._type == AssetType.CartographicPolygon ? this._cartographicPolygon : null;
         }
 
         public string objectName
@@ -81,6 +94,11 @@ namespace CesiumForUnity
                     return this._geoJsonOverlay.gameObject.name;
                 }
 
+                if (this._type == AssetType.CartographicPolygon && this._cartographicPolygon != null)
+                {
+                    return this._cartographicPolygon.gameObject.name;
+                }
+
                 return "";
             }
         }
@@ -97,6 +115,11 @@ namespace CesiumForUnity
                 if (this._type == AssetType.Overlay || this._type == AssetType.GeoJsonOverlay)
                 {
                     return "Raster Overlay";
+                }
+
+                if (this._type == AssetType.CartographicPolygon)
+                {
+                    return "Cartographic Polygon";
                 }
 
                 return "";
@@ -120,6 +143,11 @@ namespace CesiumForUnity
                 if (this._type == AssetType.GeoJsonOverlay && this._geoJsonOverlay != null)
                 {
                     return this._geoJsonOverlay.GetType().Name;
+                }
+
+                if (this._type == AssetType.CartographicPolygon && this._cartographicPolygon != null)
+                {
+                    return this._cartographicPolygon.GetType().Name;
                 }
 
                 return "";
@@ -148,6 +176,12 @@ namespace CesiumForUnity
                         ? this._geoJsonOverlay.ionAccessToken : "";
                 }
 
+                if (this._type == AssetType.CartographicPolygon && this._cartographicPolygon != null)
+                {
+                    return this._cartographicPolygon.source == CesiumCartographicPolygonSource.FromCesiumIon
+                        ? this._cartographicPolygon.ionAccessToken : "";
+                }
+
                 return "";
             }
             set
@@ -169,6 +203,11 @@ namespace CesiumForUnity
                 if (this._type == AssetType.GeoJsonOverlay && this._geoJsonOverlay != null)
                 {
                     this._geoJsonOverlay.ionAccessToken = value;
+                }
+
+                if (this._type == AssetType.CartographicPolygon && this._cartographicPolygon != null)
+                {
+                    this._cartographicPolygon.ionAccessToken = value;
                 }
             }
         }
@@ -195,6 +234,12 @@ namespace CesiumForUnity
                         ? this._geoJsonOverlay.ionAssetID : 0;
                 }
 
+                if (this._type == AssetType.CartographicPolygon && this._cartographicPolygon != null)
+                {
+                    return this._cartographicPolygon.source == CesiumCartographicPolygonSource.FromCesiumIon
+                        ? this._cartographicPolygon.ionAssetID : 0;
+                }
+
                 return 0;
             }
         }
@@ -216,6 +261,11 @@ namespace CesiumForUnity
                 return this._geoJsonOverlay == null;
             }
 
+            if (this._type == AssetType.CartographicPolygon)
+            {
+                return this._cartographicPolygon == null;
+            }
+
             return true;
         }
 
@@ -235,6 +285,11 @@ namespace CesiumForUnity
             if (this._type == AssetType.GeoJsonOverlay && this._geoJsonOverlay != null)
             {
                 return this._geoJsonOverlay.source == CesiumGeoJsonDocumentRasterOverlaySource.FromCesiumIon;
+            }
+
+            if (this._type == AssetType.CartographicPolygon && this._cartographicPolygon != null)
+            {
+                return this._cartographicPolygon.source == CesiumCartographicPolygonSource.FromCesiumIon;
             }
 
             return false;

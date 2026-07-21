@@ -5,6 +5,8 @@
 ##### Additions :tada:
 
 - Added support for the Linux platform (x86-64 only).
+- Added support for loading `.geoJson` files to `CesiumCartographicPolygon`.
+- Added `CesiumCartographicPolygonGeoJsonWriter` to allow writing `CesiumCartographicPolygon`'s defined via spline to disk.
 
 ##### Fixes :wrench:
 

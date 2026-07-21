@@ -913,6 +913,15 @@ namespace CesiumForUnity
             len = points.Count;
             myDouble2 = points[0];
 
+            polygon.source = polygon.source;
+            polygon.url = polygon.url;
+            polygon.ionAssetID = polygon.ionAssetID;
+            polygon.ionAccessToken = polygon.ionAccessToken;
+            polygon.ionServer = polygon.ionServer;
+            CesiumGeoJsonDocument polygonDoc = polygon.document;
+            polygon.document = polygonDoc;
+            polygon.Refresh();
+
             CesiumPolygonRasterOverlay polygonRasterOverlay = go.GetComponent<CesiumPolygonRasterOverlay>();
             List<CesiumCartographicPolygon> polygons = polygonRasterOverlay.polygons;
             polygonRasterOverlay.excludeSelectedTiles = polygonRasterOverlay.excludeSelectedTiles;
@@ -931,6 +940,7 @@ namespace CesiumForUnity
             CesiumVectorStyle vectorStyle = geoJsonOverlay.defaultStyle;
             geoJsonOverlay.defaultStyle = vectorStyle;
             CesiumGeoJsonDocument overlayDoc = geoJsonOverlay.document;
+
 
             // CesiumGeoJsonDocument and CesiumGeoJsonObject
             CesiumGeoJsonDocument geoJsonDoc = new CesiumGeoJsonDocument();
