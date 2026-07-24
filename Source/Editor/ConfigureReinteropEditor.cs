@@ -112,11 +112,7 @@ namespace CesiumForUnity
             IonAssetsTreeView treeView = new IonAssetsTreeView(treeState);
             treeView.Reload();
 
-            MultiColumnHeader header = treeView.multiColumnHeader;
-            int sorted = header.sortedColumnIndex;
-            bool ascending = header.IsSortedAscending(sorted);
-
-            string searchString = treeView.searchString;
+            string searchString = "searchString";
             int length = searchString.Length;
             searchString.Contains("string", StringComparison.CurrentCultureIgnoreCase);
             string.Equals("stringA", "stringB");

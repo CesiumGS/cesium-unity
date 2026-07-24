@@ -8,7 +8,6 @@ using UnityEngine;
 #if UNITY_6000_2_OR_NEWER
 using TreeView = UnityEditor.IMGUI.Controls.TreeView<int>;
 using TreeViewItem = UnityEditor.IMGUI.Controls.TreeViewItem<int>;
-using TreeViewState = UnityEditor.IMGUI.Controls.TreeViewState<int>;
 #endif
 
 namespace CesiumForUnity
@@ -106,7 +105,7 @@ namespace CesiumForUnity
     {
         private MultiColumnHeaderState _headerState;
 
-        public IonAssetsTreeView(TreeViewState assetsTreeState)
+        public IonAssetsTreeView(CesiumTreeViewState assetsTreeState)
             : base(assetsTreeState)
         {
             BuildMultiColumnHeader();
@@ -200,7 +199,18 @@ namespace CesiumForUnity
 
         private partial void CellGUI(Rect cellRect, int assetIndex, IonAssetsColumn column);
 
-        public partial void Refresh();
+        public void Refresh()
+        {
+            int sortedColumnIndex = this.multiColumnHeader.sortedColumnIndex;
+            bool ascending = false;
+            if (sortedColumnIndex >= 0)
+            {
+                ascending = this.multiColumnHeader.IsSortedAscending(sortedColumnIndex);
+            }
+            this.RefreshFiltered(this.searchString, sortedColumnIndex, ascending);
+        }
+
+        private partial void RefreshFiltered(String searchString, int sortedColumnIndex, bool ascending);
 
         protected override void SearchChanged(string newSearch)
         {
