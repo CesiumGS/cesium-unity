@@ -47,10 +47,10 @@ public:
       int index);
 
   void RefreshFiltered(
-    const DotNet::CesiumForUnity::IonAssetsTreeView& treeView,
-    DotNet::System::String  searchString,
-    int sortedColumnIndex,
-    bool isAscending);
+      const DotNet::CesiumForUnity::IonAssetsTreeView& treeView,
+      DotNet::System::String searchString,
+      int sortedColumnIndex,
+      bool isAscending);
 
   void AddAssetToLevel(
       const DotNet::CesiumForUnity::IonAssetsTreeView& treeView,
