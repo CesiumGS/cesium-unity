@@ -23,7 +23,6 @@
 #include <algorithm>
 
 using namespace DotNet;
-using namespace DotNet::UnityEditor::IMGUI::Controls;
 
 namespace {
 
@@ -138,7 +137,7 @@ void IonAssetsTreeViewImpl::RefreshFiltered(
     applySorting(column, isAscending);
   }
 
-  treeView.Reload();
+  treeView.ReloadTreeView();
 }
 
 void IonAssetsTreeViewImpl::applyFilter(

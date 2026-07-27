@@ -199,6 +199,12 @@ namespace CesiumForUnity
 
         private partial void CellGUI(Rect cellRect, int assetIndex, IonAssetsColumn column);
 
+        // Refresh(), RefreshFiltered(), and ReloadTreeView() are written to
+        // avoid calling any UnityEditor.IMGUI.Controls.TreeView
+        // methods in C++ code. In 6.4 non-generic versions of those
+        // classes cause deprecation errors, but it is very awkward
+        // for use to support older and newer versions with our
+        // Reinterop C++ bridge.
         public void Refresh()
         {
             int sortedColumnIndex = this.multiColumnHeader.sortedColumnIndex;
@@ -211,6 +217,11 @@ namespace CesiumForUnity
         }
 
         private partial void RefreshFiltered(String searchString, int sortedColumnIndex, bool ascending);
+
+        public void ReloadTreeView()
+        {
+            base.Reload();
+        }
 
         protected override void SearchChanged(string newSearch)
         {

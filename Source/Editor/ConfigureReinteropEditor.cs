@@ -110,7 +110,7 @@ namespace CesiumForUnity
 
             CesiumTreeViewState treeState = new CesiumTreeViewState();
             IonAssetsTreeView treeView = new IonAssetsTreeView(treeState);
-            treeView.Reload();
+            treeView.ReloadTreeView();
 
             string searchString = "searchString";
             int length = searchString.Length;
