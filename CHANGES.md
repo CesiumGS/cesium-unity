@@ -5,7 +5,7 @@
 ##### Additions :tada:
 
 - Added support for the Linux platform (x86-64 only).
-- Added support for building the package from source in Unity 6.5.
+- Added support for building and running the package in Unity 6.5.
 
 ## v1.24.0 - 2026-07-01
 
