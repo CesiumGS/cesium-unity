@@ -55,7 +55,7 @@ namespace CesiumForUnity
 #endif
         // Comma-separated types to treat as non-blittable, even if their fields would
         // otherwise cause Reinterop to treat them as blittable.
-        public const string NonBlittableTypes = "Unity.Collections.LowLevel.Unsafe.AtomicSafetyHandle,Unity.Collections.NativeArray,UnityEngine.MeshData,UnityEngine.MeshDataArray";
+        public const string NonBlittableTypes = "Unity.Collections.LowLevel.Unsafe.AtomicSafetyHandle,Unity.Collections.NativeArray,UnityEngine.MeshData,UnityEngine.MeshDataArray,UnityEngine.SceneManagement.Scene";
 
         public void ExposeToCPP()
         {
