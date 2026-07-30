@@ -371,7 +371,7 @@ jobs:
         # unityhub requires a virtual display even in headless mode.
         continue-on-error: true
         run: |
-          xvfb-run -a /opt/unityhub/unityhub --no-sandbox --headless install --version 2022.3.41f1 --changeset 0f988161febf
+          xvfb-run -a /usr/bin/unityhub --no-sandbox --headless install --version 2022.3.41f1 --changeset 0f988161febf
       - name: Configure Unity to Use the License Server
         run: |
           sudo mkdir -p /usr/share/unity3d/config
