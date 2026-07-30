@@ -9,9 +9,11 @@
 #include <CesiumGltf/PropertyTablePropertyView.h>
 #include <CesiumGltf/PropertyTableView.h>
 
+#include <DotNet/CesiumForUnity/Helpers.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/UnityEngine/GameObject.h>
 #include <DotNet/UnityEngine/Mesh.h>
+#include <DotNet/UnityEngine/Object.h>
 #include <DotNet/UnityEngine/Transform.h>
 
 using namespace DotNet;
@@ -58,14 +60,14 @@ CesiumMetadataImpl::CesiumMetadataImpl(
 CesiumMetadataImpl::~CesiumMetadataImpl() {}
 
 void CesiumMetadataImpl::addMetadata(
-    int32_t instanceID,
+    uint64_t objectId,
     const CesiumGltf::Model* pModel,
     const CesiumGltf::MeshPrimitive* pPrimitive) {
-  this->_pModels.insert({instanceID, {pModel, pPrimitive}});
+  this->_pModels.insert({objectId, {pModel, pPrimitive}});
 }
 
-void CesiumMetadataImpl::removeMetadata(int32_t instanceID) {
-  auto find = this->_pModels.find(instanceID);
+void CesiumMetadataImpl::removeMetadata(uint64_t objectId) {
+  auto find = this->_pModels.find(objectId);
   if (find != this->_pModels.end()) {
     this->_pModels.erase(find);
   }
@@ -78,7 +80,8 @@ CesiumForUnityNative::CesiumMetadataImpl::GetFeatures(
     const DotNet::CesiumForUnity::CesiumMetadata& metadata,
     const DotNet::UnityEngine::Transform& transform,
     int triangleIndex) {
-  auto find = this->_pModels.find(transform.GetInstanceID());
+  auto find =
+      this->_pModels.find(CesiumForUnity::Helpers::GetObjectId(transform));
   if (find == this->_pModels.end()) {
     return DotNet::System::Array1<DotNet::CesiumForUnity::CesiumFeature>(0);
   }

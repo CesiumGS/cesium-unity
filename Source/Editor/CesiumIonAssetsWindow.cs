@@ -5,6 +5,11 @@ using UnityEngine;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 
+#if UNITY_6000_2_OR_NEWER
+using TreeViewItem = UnityEditor.IMGUI.Controls.TreeViewItem<int>;
+using TreeViewState = UnityEditor.IMGUI.Controls.TreeViewState<int>;
+#endif
+
 namespace CesiumForUnity
 {
     public class CesiumIonAssetsWindow : EditorWindow
@@ -29,7 +34,7 @@ namespace CesiumForUnity
             currentWindow.Focus();
         }
 
-        private TreeViewState _assetsTreeState;
+        private CesiumTreeViewState _assetsTreeState;
         private IonAssetsTreeView _assetsTreeView;
         private SearchField _searchField;
         private CesiumIonServerSelector _serverSelector;
@@ -74,7 +79,7 @@ namespace CesiumForUnity
 
         void BuildTreeView()
         {
-            this._assetsTreeState = new TreeViewState();
+            this._assetsTreeState = new CesiumTreeViewState();
             this._assetsTreeView = new IonAssetsTreeView(this._assetsTreeState);
             this._assetsTreeView.Reload();
         }

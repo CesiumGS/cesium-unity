@@ -15,7 +15,6 @@
 #include <DotNet/System/Object.h>
 #include <DotNet/System/StringComparison.h>
 #include <DotNet/UnityEditor/EditorApplication.h>
-#include <DotNet/UnityEditor/IMGUI/Controls/MultiColumnHeader.h>
 #include <DotNet/UnityEditor/Selection.h>
 #include <DotNet/UnityEngine/Debug.h>
 #include <DotNet/UnityEngine/GUI.h>
@@ -24,7 +23,6 @@
 #include <algorithm>
 
 using namespace DotNet;
-using namespace DotNet::UnityEditor::IMGUI::Controls;
 
 namespace {
 
@@ -114,8 +112,11 @@ void IonAssetsTreeViewImpl::CellGUI(
   }
 }
 
-void IonAssetsTreeViewImpl::Refresh(
-    const DotNet::CesiumForUnity::IonAssetsTreeView& treeView) {
+void IonAssetsTreeViewImpl::RefreshFiltered(
+    const DotNet::CesiumForUnity::IonAssetsTreeView& treeView,
+    System::String searchString,
+    int sortedColumnIndex,
+    bool isAscending) {
   CesiumIonSessionImpl& session = getNativeSession();
   const CesiumIonClient::Assets& assets = session.getAssets(getSession());
 
@@ -126,21 +127,17 @@ void IonAssetsTreeViewImpl::Refresh(
         std::make_shared<CesiumIonClient::Asset>(assets.items[i]);
   }
 
-  System::String searchString = treeView.searchString();
   if (searchString != nullptr && searchString.Length() > 0) {
     applyFilter(searchString);
   }
 
-  int sortedColumnIndex = treeView.multiColumnHeader().sortedColumnIndex();
   if (sortedColumnIndex >= 0) {
     CesiumForUnity::IonAssetsColumn column =
         (CesiumForUnity::IonAssetsColumn)sortedColumnIndex;
-    bool sortAscending =
-        treeView.multiColumnHeader().IsSortedAscending(sortedColumnIndex);
-    applySorting(column, sortAscending);
+    applySorting(column, isAscending);
   }
 
-  treeView.Reload();
+  treeView.ReloadTreeView();
 }
 
 void IonAssetsTreeViewImpl::applyFilter(

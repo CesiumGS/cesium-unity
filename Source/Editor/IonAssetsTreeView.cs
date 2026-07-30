@@ -5,6 +5,11 @@ using System.Collections.Generic;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 
+#if UNITY_6000_2_OR_NEWER
+using TreeView = UnityEditor.IMGUI.Controls.TreeView<int>;
+using TreeViewItem = UnityEditor.IMGUI.Controls.TreeViewItem<int>;
+#endif
+
 namespace CesiumForUnity
 {
     public enum IonAssetsColumn
@@ -100,7 +105,7 @@ namespace CesiumForUnity
     {
         private MultiColumnHeaderState _headerState;
 
-        public IonAssetsTreeView(TreeViewState assetsTreeState)
+        public IonAssetsTreeView(CesiumTreeViewState assetsTreeState)
             : base(assetsTreeState)
         {
             BuildMultiColumnHeader();
@@ -194,7 +199,29 @@ namespace CesiumForUnity
 
         private partial void CellGUI(Rect cellRect, int assetIndex, IonAssetsColumn column);
 
-        public partial void Refresh();
+        // Refresh(), RefreshFiltered(), and ReloadTreeView() are written to
+        // avoid calling any UnityEditor.IMGUI.Controls.TreeView
+        // methods in C++ code. In 6.4 non-generic versions of those
+        // classes cause deprecation errors, but it is very awkward
+        // for use to support older and newer versions with our
+        // Reinterop C++ bridge.
+        public void Refresh()
+        {
+            int sortedColumnIndex = this.multiColumnHeader.sortedColumnIndex;
+            bool ascending = false;
+            if (sortedColumnIndex >= 0)
+            {
+                ascending = this.multiColumnHeader.IsSortedAscending(sortedColumnIndex);
+            }
+            this.RefreshFiltered(this.searchString, sortedColumnIndex, ascending);
+        }
+
+        private partial void RefreshFiltered(String searchString, int sortedColumnIndex, bool ascending);
+
+        public void ReloadTreeView()
+        {
+            base.Reload();
+        }
 
         protected override void SearchChanged(string newSearch)
         {

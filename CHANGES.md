@@ -5,6 +5,7 @@
 ##### Additions :tada:
 
 - Added support for the Linux platform (x86-64 only).
+- Added support for building and running the package in Unity 6.5.
 
 ##### Fixes :wrench:
 

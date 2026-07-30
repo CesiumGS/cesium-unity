@@ -10,7 +10,6 @@ using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 using UnityEngine.Networking;
 
-
 namespace CesiumForUnity
 {
     [Reinterop]
@@ -109,18 +108,11 @@ namespace CesiumForUnity
             string productName = Application.productName;
             string osVersion = System.Environment.OSVersion.VersionString;
 
-            TreeViewItem root = new TreeViewItem(0, -1, "root");
-            int id = root.id;
-
-            TreeViewState treeState = new TreeViewState();
+            CesiumTreeViewState treeState = new CesiumTreeViewState();
             IonAssetsTreeView treeView = new IonAssetsTreeView(treeState);
-            treeView.Reload();
+            treeView.ReloadTreeView();
 
-            MultiColumnHeader header = treeView.multiColumnHeader;
-            int sorted = header.sortedColumnIndex;
-            bool ascending = header.IsSortedAscending(sorted);
-
-            string searchString = treeView.searchString;
+            string searchString = "searchString";
             int length = searchString.Length;
             searchString.Contains("string", StringComparison.CurrentCultureIgnoreCase);
             string.Equals("stringA", "stringB");
