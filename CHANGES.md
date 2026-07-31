@@ -1,6 +1,6 @@
 # Change Log {#changes}
 
-## ? - ?
+## v1.25.0 - 2026-08-03
 
 ##### Additions :tada:
 
@@ -10,6 +10,8 @@
 ##### Fixes :wrench:
 
 - Fixed a `NullReferenceException` thrown when opening the Cesium ion token troubleshooting window for a `CesiumGeoJsonDocumentRasterOverlay`.
+
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.62.0 to v0.63.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
 
 ## v1.24.0 - 2026-07-01
 
