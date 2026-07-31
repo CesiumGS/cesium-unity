@@ -77,7 +77,7 @@ jobs:
       - name: Install Unity
         run: |
           Start-Process -FilePath "C:/Program Files/Unity Hub/Unity Hub.exe" -Args "-- --headless install --version 2022.3.41f1 --changeset 0f988161febf" -Wait
-          Start-Process -FilePath "C:/Program Files/Unity Hub/Unity Hub.exe" -Args "-- --headless install-modules --version 2022.3.41f1 --changeset 0f988161febf --module android android-sdk-ndk-tools android-open-jdk-11.0.14.1+1 universal-windows-platform" -Wait
+          Start-Process -FilePath "C:/Program Files/Unity Hub/Unity Hub.exe" -Args "-- --headless install-modules --version 2022.3.41f1 --changeset 0f988161febf --module universal-windows-platform" -Wait
       - name: Create SSH tunnel to Unity License Server
         env:
           UNITY_LICENSE_SERVER_SSH_KEY: ${{ secrets.UNITY_LICENSE_SERVER_SSH_KEY }}
@@ -136,12 +136,10 @@ jobs:
           $ENV:TEMP="d:\cesium\temp"
           # We only need a release build of vcpkg dependencies
           $ENV:CESIUM_VCPKG_RELEASE_ONLY="TRUE"
-          # Clear ANDROID_NDK_ROOT so that we use Unity's version
-          Remove-Item Env:ANDROID_NDK_ROOT
           # Explicitly set the ezvcpkg path. Otherwise it will be `/.ezvcpkg` and the drive letter is ambiguous.
           $ENV:EZVCPKG_BASEDIR="D:/.ezvcpkg"
           # Run the build
-          dotnet run --project Build~ package --platform Editor --platform Windows --platform UWP --platform Android
+          dotnet run --project Build~ package --platform Editor --platform Windows --platform UWP
       - name: Print disk space 2
         if: success() || failure()    # run this step even if previous step failed
         run: |
@@ -359,6 +357,8 @@ jobs:
           key: vcpkg-linux-alma-${{ hashFiles('native~/vcpkg/ports/**/vcpkg.json', 'native~/vcpkg/triplets/**/*', 'native~/extern/*toolchain.cmake') }}-${{ hashFiles('native~/extern/cesium-native/CMakeLists.txt', 'native~/CMakeLists.txt') }}
           restore-keys: |
             vcpkg-linux-alma-${{ hashFiles('native~/vcpkg/ports/**/vcpkg.json', 'native~/vcpkg/triplets/**/*', 'native~/extern/*toolchain.cmake') }}-
+      - name: Install nasm
+        uses: ilammy/setup-nasm@v1.5.1
       - name: Install Unity Hub
         run: |
           sudo apt-get install -y gnupg libgbm1 xvfb
@@ -372,6 +372,10 @@ jobs:
         continue-on-error: true
         run: |
           xvfb-run -a /usr/bin/unityhub --no-sandbox --headless install --version 2022.3.41f1 --changeset 0f988161febf
+      - name: Install Unity Android Support
+        run: |
+          # --childModules avoids an interactive prompt asking to confirm installing the NDK submodule
+          xvfb-run -a /usr/bin/unityhub --no-sandbox --headless install-modules --version 2022.3.41f1 --changeset 0f988161febf --module android android-sdk-ndk-tools android-open-jdk-11.0.14.1+1 --childModules
       - name: Configure Unity to Use the License Server
         run: |
           sudo mkdir -p /usr/share/unity3d/config
@@ -422,8 +426,10 @@ jobs:
         run: |
           # We only need a release build of vcpkg dependencies
           export CESIUM_VCPKG_RELEASE_ONLY="TRUE"
+          # Clear ANDROID_NDK_ROOT so that we use Unity's version
+          unset ANDROID_NDK_ROOT
           cd ~/cesium/CesiumForUnityBuildProject/Packages/com.cesium.unity
-          dotnet run --project Build~ package --platform Editor --platform Linux
+          dotnet run --project Build~ package --platform Editor --platform Linux --platform Android
           ls -l ~/cesium/CesiumForUnityBuildProject
       - name: Publish Logs
         if: success() || failure()    # run this step even if previous step failed
