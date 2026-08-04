@@ -97,9 +97,9 @@ namespace CesiumForUnity
     {
         private static CesiumCreditSystem _defaultCreditSystem;
 
-        private List<CesiumCredit> _onScreenCredits;
-        private List<CesiumCredit> _popupCredits;
-        private List<Texture2D> _images;
+        private List<CesiumCredit> _onScreenCredits = new List<CesiumCredit>();
+        private List<CesiumCredit> _popupCredits = new List<CesiumCredit>();
+        private List<Texture2D> _images = new List<Texture2D>();
         private int _numLoadingImages = 0;
 
         const string base64Prefix = "data:image/png;base64,";
@@ -155,9 +155,9 @@ namespace CesiumForUnity
 
         private void OnEnable()
         {
-            this._onScreenCredits = new List<CesiumCredit>();
-            this._popupCredits = new List<CesiumCredit>();
-            this._images = new List<Texture2D>();
+            this._onScreenCredits.Clear();
+            this._popupCredits.Clear();
+            this.ClearImages();
 
             Cesium3DTileset.OnSetShowCreditsOnScreen += this.ForceUpdateCredits;
         }
@@ -167,20 +167,17 @@ namespace CesiumForUnity
             this.UpdateCredits(false);
         }
 
+        private void OnDisable()
+        {
+            this._onScreenCredits.Clear();
+            this._popupCredits.Clear();
+            this.ClearImages();
+
+            Cesium3DTileset.OnSetShowCreditsOnScreen -= this.ForceUpdateCredits;
+        }
+
         private void OnDestroy()
         {
-            Cesium3DTileset.OnSetShowCreditsOnScreen -= this.ForceUpdateCredits;
-
-            for (int i = 0, count = this._images.Count; i < count; i++)
-            {
-                if (this._images != null)
-                {
-                    UnityLifetime.Destroy(this._images[i]);
-                }
-            }
-
-            this._images.Clear();
-
             if (this == _defaultCreditSystem)
             {
                 _defaultCreditSystem = null;
@@ -333,6 +330,16 @@ namespace CesiumForUnity
 
             texture.wrapMode = TextureWrapMode.Clamp;
             this._numLoadingImages--;
+        }
+
+        private void ClearImages()
+        {
+            for (int i = 0, count = this._images.Count; i < count; i++)
+            {
+                UnityLifetime.Destroy(this._images[i]);
+            }
+
+            this._images.Clear();
         }
     }
 }

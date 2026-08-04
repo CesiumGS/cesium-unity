@@ -1,5 +1,12 @@
 # Change Log {#changes}
 
+## ? - ?
+
+##### Fixes :wrench:
+
+- Fixed a `NullReferenceException` that could be thrown if a `CesiumCreditSystem` was destroyed before it was ever enabled.
+- Fixed a bug where `CesiumCreditSystem` would not unsubscribe from delegates on disable, causing duplicate subscriptions when re-enabled.
+
 ## v1.25.0 - 2026-08-03
 
 ##### Additions :tada:
