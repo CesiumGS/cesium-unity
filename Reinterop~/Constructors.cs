@@ -93,18 +93,21 @@ namespace Reinterop
                 ));
 
                 // Constructor definition
-                var parameterPassStrings = interopParameters.Select(parameter => parameter.Type.GetConversionToInteropType(context, parameter.CallSiteName));
+                IReadOnlyList<CppArgument> callArguments = interopParameters
+                    .Where(parameter => parameter.ParameterName != "reinteropException")
+                    .Select(parameter => parameter.ParameterName == "pReturnValue"
+                        ? CppArgument.OutParameter(definition.Type.Name, "result")
+                        : CppArgument.Value(parameter.Type.GetConversionToInteropType(context, parameter.CallSiteName)))
+                    .ToArray();
+                IReadOnlyList<CppStatement> body = CppInterop.CallManagedFunction(
+                    new CppIdentifier(interopFunctionName), callArguments,
+                    returnExpression: new CppRaw("result"));
                 definition.Elements.Add(new(
                     Content:
                         $$"""
                         {{definition.Type.Name}} {{definition.Type.Name}}{{templateSpecialization}}::Construct({{string.Join(", ", parameterStrings)}})
                         {
-                            void* reinteropException = nullptr;
-                            {{definition.Type.Name}} result;
-                            {{interopFunctionName}}({{string.Join(", ", parameterPassStrings)}});
-                            if (reinteropException != nullptr)
-                                throw Reinterop::ReinteropNativeException(::DotNet::System::Exception(::DotNet::Reinterop::ObjectHandle(reinteropException)));
-                            return result;
+                            {{new[] { CppPrinter.Print(body) }.JoinAndIndent("    ")}}
                         }
                         """,
                     TypeDefinitionsReferenced: new[]
@@ -126,17 +129,21 @@ namespace Reinterop
                 ));
 
                 // Constructor definition
-                var parameterPassStrings = interopParameters.Select(parameter => parameter.Type.GetConversionToInteropType(context, parameter.CallSiteName));
+                IReadOnlyList<CppArgument> callArguments = interopParameters
+                    .Where(parameter => parameter.ParameterName != "reinteropException")
+                    .Select(parameter => CppArgument.Value(parameter.Type.GetConversionToInteropType(context, parameter.CallSiteName)))
+                    .ToArray();
+                IReadOnlyList<CppStatement> body = CppInterop.CallManagedFunction(
+                    new CppIdentifier(interopFunctionName), callArguments,
+                    resultTypeName: "void*",
+                    returnExpression: new CppRaw("handle"),
+                    resultVariableName: "handle");
                 definition.Elements.Add(new(
                     Content:
                         $$"""
                         {{definition.Type.Name}}{{templateSpecialization}}::{{definition.Type.Name}}({{string.Join(", ", parameterStrings)}})
                             : _handle([&]() mutable {
-                                void* reinteropException = nullptr;
-                                void* handle = {{interopFunctionName}}({{string.Join(", ", parameterPassStrings)}});
-                                if (reinteropException != nullptr)
-                                    throw Reinterop::ReinteropNativeException(::DotNet::System::Exception(::DotNet::Reinterop::ObjectHandle(reinteropException)));
-                                return handle;
+                                {{new[] { CppPrinter.Print(body) }.JoinAndIndent("        ")}}
                             }())
                         {
                         }

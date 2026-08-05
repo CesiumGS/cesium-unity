@@ -8,42 +8,64 @@ namespace Reinterop
 
         /// <summary>
         /// Builds the statements that call a managed (C#) function pointer, check for an exception,
-        /// and (optionally) return the converted result.
+        /// and (optionally) return the converted result. The trailing "reinteropException" out-parameter
+        /// is added and checked automatically - callers should not include it in <paramref name="arguments"/>.
         /// </summary>
-        /// <param name="functionPointerName">The name of the function pointer field to call.</param>
-        /// <param name="callArguments">
-        /// The already fully-converted call arguments, including the trailing "&amp;reinteropException".
+        /// <param name="functionPointer">The function pointer field to call.</param>
+        /// <param name="arguments">
+        /// The call's own arguments (not including the exception out-parameter, which this method adds
+        /// automatically). Use <see cref="CppArgument.OutParameter"/> for any argument (e.g. a
+        /// struct-return rewrite) that's produced via an out-parameter instead of a plain value.
         /// </param>
         /// <param name="resultTypeName">
-        /// If the call produces a result that should be captured, the type to declare it as (typically
-        /// "auto"). Null if the call returns void.
+        /// If the call's own return value should be captured, the type to declare it as (typically
+        /// "auto"). Null if the call returns void, or if the result is instead produced via a
+        /// <see cref="CppArgument.OutParameter"/> in <paramref name="arguments"/>.
         /// </param>
         /// <param name="returnExpression">
         /// If a return statement should be generated, the (already converted) expression to return.
         /// </param>
+        /// <param name="resultVariableName">The name to declare the captured result variable as.</param>
         public static IReadOnlyList<CppStatement> CallManagedFunction(
-            string functionPointerName,
-            IEnumerable<string> callArguments,
+            CppExpression functionPointer,
+            IReadOnlyList<CppArgument> arguments,
             string? resultTypeName = null,
-            string? returnExpression = null)
+            CppExpression? returnExpression = null,
+            string resultVariableName = "result")
         {
-            CppExpression call = new CppCall(
-                new CppIdentifier(functionPointerName),
-                callArguments.Select(argument => (CppExpression)new CppRaw(argument)).ToArray());
-
             List<CppStatement> statements = new()
             {
-                new CppVariableDeclaration("void*", ExceptionVariableName, new CppRaw("nullptr")),
-                resultTypeName != null
-                    ? new CppVariableDeclaration(resultTypeName, "result", call)
-                    : new CppExpressionStatement(call),
-                new CppIf(
-                    new CppBinary("!=", new CppIdentifier(ExceptionVariableName), new CppRaw("nullptr")),
-                    new CppStatement[] { new CppThrow(TranslatedNativeException()) })
+                new CppVariableDeclaration("void*", ExceptionVariableName, new CppRaw("nullptr"))
             };
 
+            List<CppExpression> callArguments = new();
+            foreach (CppArgument argument in arguments)
+            {
+                switch (argument)
+                {
+                    case CppOutParameterArgument outParameter:
+                        statements.Add(new CppVariableDeclaration(outParameter.TypeName, outParameter.Name));
+                        callArguments.Add(new CppUnary("&", new CppIdentifier(outParameter.Name)));
+                        break;
+                    case CppValueArgument value:
+                        callArguments.Add(value.Expression);
+                        break;
+                }
+            }
+            callArguments.Add(new CppUnary("&", new CppIdentifier(ExceptionVariableName)));
+
+            CppExpression call = new CppCall(functionPointer, callArguments);
+
+            statements.Add(resultTypeName != null
+                ? new CppVariableDeclaration(resultTypeName, resultVariableName, call)
+                : new CppExpressionStatement(call));
+
+            statements.Add(new CppIf(
+                new CppBinary("!=", new CppIdentifier(ExceptionVariableName), new CppRaw("nullptr")),
+                new CppStatement[] { new CppThrow(TranslatedNativeException()) }));
+
             if (returnExpression != null)
-                statements.Add(new CppReturn(new CppRaw(returnExpression)));
+                statements.Add(new CppReturn(returnExpression));
 
             return statements;
         }

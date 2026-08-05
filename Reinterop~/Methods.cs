@@ -227,9 +227,15 @@ namespace Reinterop
             // Method definition
             var parameterPassStrings = interopParameters.Select(parameter => parameter.Type.GetConversionToInteropType(context, parameter.CallSiteName));
             parameterPassStrings = parameterPassStrings.Concat(new[] {"&reinteropException"}).Where(s => !string.IsNullOrEmpty(s));
+            IReadOnlyList<CppArgument> callArguments = interopParameters
+                .Where(parameter => parameter.ParameterName != "reinteropException")
+                .Select(parameter => parameter.ParameterName == "pReturnValue"
+                    ? CppArgument.OutParameter(returnType.GetFullyQualifiedName(), "result")
+                    : CppArgument.Value(parameter.Type.GetConversionToInteropType(context, parameter.CallSiteName)))
+                .ToArray();
             if (returnType.Name == "void" && !returnType.Flags.HasFlag(CppTypeFlags.Pointer))
             {
-                IReadOnlyList<CppStatement> body = CppInterop.CallManagedFunction(interopName, parameterPassStrings);
+                IReadOnlyList<CppStatement> body = CppInterop.CallManagedFunction(new CppIdentifier(interopName), callArguments);
                 definition.Elements.Add(new(
                     Content:
                         $$"""
@@ -249,7 +255,7 @@ namespace Reinterop
             else if (!hasStructRewrite)
             {
                 IReadOnlyList<CppStatement> body = CppInterop.CallManagedFunction(
-                    interopName, parameterPassStrings, "auto", returnType.GetConversionFromInteropType(context, "result"));
+                    new CppIdentifier(interopName), callArguments, "auto", new CppRaw(returnType.GetConversionFromInteropType(context, "result")));
                 definition.Elements.Add(new(
                     Content:
                         $$"""

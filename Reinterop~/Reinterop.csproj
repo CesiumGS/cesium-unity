@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <Compile Remove="RoslynIncrementalGenerator.cs" />
+    <Compile Remove="Reinterop.Tests/**" />
   </ItemGroup>
   
   <ItemGroup>

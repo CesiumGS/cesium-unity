@@ -99,18 +99,20 @@ namespace Reinterop
             }
 
             // Method definition
-            var parameterPassStrings = interopParameters.Select(parameter => parameter.Type.GetConversionToInteropType(context, parameter.CallSiteName));
-            parameterPassStrings = parameterPassStrings.Concat(new[] { "&reinteropException" }).Where(s => !string.IsNullOrEmpty(s));
+            IReadOnlyList<CppArgument> callArguments = interopParameters
+                .Where(parameter => parameter.ParameterName != "reinteropException")
+                .Select(parameter => parameter.ParameterName == "pReturnValue"
+                    ? CppArgument.OutParameter(returnType.GetFullyQualifiedName(), "result")
+                    : CppArgument.Value(parameter.Type.GetConversionToInteropType(context, parameter.CallSiteName)))
+                .ToArray();
             if (returnType.Name == "void" && !returnType.Flags.HasFlag(CppTypeFlags.Pointer))
             {
+                IReadOnlyList<CppStatement> body = CppInterop.CallManagedFunction(new CppIdentifier($"Property_{method.Name}"), callArguments);
                 definition.Elements.Add(new(
                     Content:
                         $$"""
                         {{returnType.GetFullyQualifiedName()}} {{definition.Type.Name}}{{typeTemplateSpecialization}}::{{propertyName}}({{string.Join(", ", parameterStrings)}}){{afterModifiers}} {
-                            void* reinteropException = nullptr;
-                            Property_{{method.Name}}({{string.Join(", ", parameterPassStrings)}});
-                            if (reinteropException != nullptr)
-                                throw Reinterop::ReinteropNativeException(::DotNet::System::Exception(::DotNet::Reinterop::ObjectHandle(reinteropException)));
+                            {{new[] { CppPrinter.Print(body) }.JoinAndIndent("    ")}}
                         }
                         """,
                     TypeDefinitionsReferenced: new[]
@@ -124,24 +126,15 @@ namespace Reinterop
             }
             else
             {
-                string[] invocation = new[] { $"auto result = Property_{method.Name}({string.Join(", ", parameterPassStrings)});" };
-                if (hasStructRewrite)
-                {
-                    invocation = new[]
-                    {
-                        $"{returnType.GetFullyQualifiedName()} result;",
-                        $"Property_{method.Name}({string.Join(", ", parameterPassStrings)});"
-                    };
-                }
+                IReadOnlyList<CppStatement> body = CppInterop.CallManagedFunction(
+                    new CppIdentifier($"Property_{method.Name}"), callArguments,
+                    resultTypeName: hasStructRewrite ? null : "auto",
+                    returnExpression: new CppRaw(returnType.GetConversionFromInteropType(context, "result")));
                 definition.Elements.Add(new(
                     Content:
                         $$"""
                         {{returnType.GetFullyQualifiedName()}} {{definition.Type.Name}}{{typeTemplateSpecialization}}::{{propertyName}}({{string.Join(", ", parameterStrings)}}){{afterModifiers}} {
-                            void* reinteropException = nullptr;
-                            {{GenerationUtility.JoinAndIndent(invocation, "    ")}}
-                            if (reinteropException != nullptr)
-                                throw Reinterop::ReinteropNativeException(::DotNet::System::Exception(::DotNet::Reinterop::ObjectHandle(reinteropException)));
-                            return {{returnType.GetConversionFromInteropType(context, "result")}};
+                            {{new[] { CppPrinter.Print(body) }.JoinAndIndent("    ")}}
                         }
                         """,
                     TypeDefinitionsReferenced: new[]

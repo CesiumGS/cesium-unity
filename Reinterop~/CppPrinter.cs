@@ -13,7 +13,8 @@ namespace Reinterop
         {
             return statement switch
             {
-                CppVariableDeclaration d => $"{d.TypeName} {d.Name} = {Print(d.Initializer)};",
+                CppVariableDeclaration { Initializer: null } d => $"{d.TypeName} {d.Name};",
+                CppVariableDeclaration d => $"{d.TypeName} {d.Name} = {Print(d.Initializer!)};",
                 CppExpressionStatement e => $"{Print(e.Expression)};",
                 CppIf i => PrintIf(i),
                 CppThrow t => $"throw {Print(t.Exception)};",
@@ -43,6 +44,7 @@ namespace Reinterop
                 CppRaw raw => raw.Text,
                 CppCall c => $"{Print(c.Callee)}({string.Join(", ", c.Arguments.Select(Print))})",
                 CppBinary b => $"{Print(b.Left)} {b.Op} {Print(b.Right)}",
+                CppUnary u => $"{u.Op}{Print(u.Operand)}",
                 _ => throw new NotSupportedException($"Unsupported {nameof(CppExpression)}: {expression.GetType().Name}")
             };
         }

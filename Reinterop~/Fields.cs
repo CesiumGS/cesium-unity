@@ -151,15 +151,20 @@ namespace Reinterop
                 TypeDeclarationsReferenced: new[] { setType }
             ));
 
-            string[] invocation = new[]
-            {
-                $"void* reinteropException = nullptr;",
-                $"auto result = Field_get_{field.Name}({string.Join(", ", interopGetParametersCall)});",
-                $"if (reinteropException != nullptr) {{",
-                $"  throw Reinterop::ReinteropNativeException(::DotNet::System::Exception(::DotNet::Reinterop::ObjectHandle(reinteropException)));",
-                $"}}",
-                $"return {getType.GetConversionFromInteropType(context, "result")};"
-            };
+            // The Nullable-with-struct-rewrite case (getter returns a bool "is valid" flag alongside an
+            // out-parameter) isn't modeled by CppInterop.CallManagedFunction yet, so it's still built
+            // as a plain string template - same deliberate scope exclusion as Methods.cs.
+            IReadOnlyList<CppArgument> getCallArguments = getParameters
+                .Where(parameter => parameter.ParameterName != "reinteropException")
+                .Select(parameter => parameter.ParameterName == "pReturnValue"
+                    ? CppArgument.OutParameter(getType.GetFullyQualifiedName(), "result")
+                    : CppArgument.Value(parameter.Type.GetConversionToInteropType(context, parameter.CallSiteName)))
+                .ToArray();
+            string[]? invocation = null;
+            IReadOnlyList<CppStatement>? body = CppInterop.CallManagedFunction(
+                new CppIdentifier($"Field_get_{field.Name}"), getCallArguments,
+                resultTypeName: "auto",
+                returnExpression: new CppRaw(getType.GetConversionFromInteropType(context, "result")));
             if (hasStructRewrite)
             {
                 if (fieldType.Kind == InteropTypeKind.Nullable)
@@ -174,29 +179,29 @@ namespace Reinterop
                         $"}}",
                         $"return resultIsValid ? std::make_optional(std::move({getType.GetConversionFromInteropType(context, "result")})) : std::nullopt;"
                     };
+                    body = null;
                 }
                 else
                 {
-                    invocation = new[]
-                    {
-                        $"void* reinteropException = nullptr;",
-                        $"{getType.GetFullyQualifiedName()} result;",
-                        $"Field_get_{field.Name}({string.Join(", ", interopGetParametersCall)});",
-                        $"if (reinteropException != nullptr) {{",
-                        $"  throw Reinterop::ReinteropNativeException(::DotNet::System::Exception(::DotNet::Reinterop::ObjectHandle(reinteropException)));",
-                        $"}}",
-                        $"return {getType.GetConversionFromInteropType(context, "result")};"
-                    };
+                    body = CppInterop.CallManagedFunction(
+                        new CppIdentifier($"Field_get_{field.Name}"), getCallArguments,
+                        returnExpression: new CppRaw(getType.GetConversionFromInteropType(context, "result")));
                 }
             }
 
             definition.Elements.Add(new(
                 Content:
-                    $$"""
-                    {{getType.GetFullyQualifiedName()}} {{definition.Type.Name}}::{{field.Name}}(){{(field.IsStatic ? "" : " const")}} {
-                        {{GenerationUtility.JoinAndIndent(invocation, "    ")}}
-                    }
-                    """,
+                    body != null
+                    ? $$"""
+                        {{getType.GetFullyQualifiedName()}} {{definition.Type.Name}}::{{field.Name}}(){{(field.IsStatic ? "" : " const")}} {
+                            {{new[] { CppPrinter.Print(body) }.JoinAndIndent("    ")}}
+                        }
+                        """
+                    : $$"""
+                        {{getType.GetFullyQualifiedName()}} {{definition.Type.Name}}::{{field.Name}}(){{(field.IsStatic ? "" : " const")}} {
+                            {{GenerationUtility.JoinAndIndent(invocation!, "    ")}}
+                        }
+                        """,
                 TypeDefinitionsReferenced: new[]
                 {
                     definition.Type,
@@ -206,15 +211,13 @@ namespace Reinterop
                 }
             ));
 
+            IReadOnlyList<CppStatement> setterBody = CppInterop.CallManagedFunction(
+                new CppIdentifier($"Field_set_{field.Name}"), new[] { CppArgument.Value(interopSetParametersCall) });
             definition.Elements.Add(new(
                 Content:
                     $$"""
                     void {{definition.Type.Name}}::{{field.Name}}({{setType.GetFullyQualifiedName()}} value){{(field.IsStatic ? "" : " const")}} {
-                        void* reinteropException = nullptr;
-                        Field_set_{{field.Name}}({{interopSetParametersCall}}, &reinteropException);
-                        if (reinteropException != nullptr) {
-                            throw Reinterop::ReinteropNativeException(::DotNet::System::Exception(::DotNet::Reinterop::ObjectHandle(reinteropException)));
-                        }
+                        {{new[] { CppPrinter.Print(setterBody) }.JoinAndIndent("    ")}}
                     }
                     """,
                 TypeDefinitionsReferenced: new[]
