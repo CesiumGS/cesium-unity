@@ -1,0 +1,137 @@
+namespace Reinterop
+{
+    /// <summary>
+    /// One parameter of a wrapped, interop-backed C++ function, as seen by the C++ caller (i.e. its
+    /// type has already been run through <see cref="CppType.AsParameterType"/>).
+    /// </summary>
+    internal record CppInteropParameter(string Name, CppType Type, CppExpression CallSite)
+    {
+        public CppInteropParameter(string name, CppType type) : this(name, type, new CppIdentifier(name))
+        {
+        }
+    }
+
+    /// <summary>
+    /// Describes an interop-backed C++ function - a wrapped method, property accessor, constructor, or
+    /// field accessor - purely in terms of its parameters and return type, and derives everything
+    /// needed to call across to the managed (C#) side and back: the interop parameter list (accounting
+    /// for the implicit "thiz" and "reinteropException" parameters and the struct-return rewrite), the
+    /// call arguments, and the call+return body.
+    /// </summary>
+    internal class CppInteropFunction
+    {
+        private readonly CppGenerationContext _context;
+
+        /// <summary>The function's own parameters, as seen by its C++ caller (excludes "thiz").</summary>
+        public IReadOnlyList<CppInteropParameter> Parameters { get; }
+
+        /// <summary>The function's own return type, as seen by its C++ caller.</summary>
+        public CppType ReturnType { get; }
+
+        /// <summary>The interop function pointer's return type, after any struct-return rewrite.</summary>
+        public CppType InteropReturnType { get; }
+
+        /// <summary>True if the result is produced via a "pReturnValue" out-parameter instead of being returned directly.</summary>
+        public bool HasStructRewrite { get; }
+
+        /// <summary>
+        /// The full interop parameter list, in call order: an implicit "thiz" (if this is an instance
+        /// function), then <see cref="Parameters"/>, then "pReturnValue" (if <see cref="HasStructRewrite"/>),
+        /// then "reinteropException".
+        /// </summary>
+        public IReadOnlyList<(string ParameterName, string CallSiteName, CppType Type, CppType InteropType)> InteropParameters { get; }
+
+        /// <param name="instanceType">
+        /// The type of "thiz", if this is an instance (non-static) function. Its call-site expression
+        /// is always "(*this)". Null for static functions and constructors.
+        /// </param>
+        public CppInteropFunction(
+            CppGenerationContext context,
+            IReadOnlyList<CppInteropParameter> parameters,
+            CppType returnType,
+            CppType? instanceType = null)
+        {
+            _context = context;
+            Parameters = parameters;
+            ReturnType = returnType;
+
+            IEnumerable<CppInteropParameter> allParameters = parameters;
+            if (instanceType != null)
+                allParameters = new[] { new CppInteropParameter("thiz", instanceType, new CppRaw("(*this)")) }.Concat(allParameters);
+
+            IEnumerable<(string ParameterName, string CallSiteName, CppType Type, CppType InteropType)> interopParameters =
+                allParameters.Select(parameter => (
+                    ParameterName: parameter.Name,
+                    CallSiteName: CppPrinter.Print(parameter.CallSite),
+                    Type: parameter.Type,
+                    InteropType: parameter.Type.AsInteropType()));
+
+            CppType interopReturnType = returnType.AsInteropType();
+            HasStructRewrite = Interop.RewriteStructReturn(ref interopParameters, ref returnType, ref interopReturnType);
+            InteropReturnType = interopReturnType;
+
+            InteropParameters = interopParameters
+                .Concat(new[] { (ParameterName: "reinteropException", CallSiteName: "", Type: CppType.VoidPointerPointer, InteropType: CppType.VoidPointerPointer) })
+                .ToArray();
+        }
+
+        /// <summary>The wrapped function's own parameter list, e.g. "int x, float y".</summary>
+        public string ParameterListDeclaration() =>
+            string.Join(", ", Parameters.Select(parameter => $"{parameter.Type.GetFullyQualifiedName()} {parameter.Name}"));
+
+        /// <summary>The interop function pointer's parameter list, e.g. "void* thiz, std::int32_t x, void** reinteropException".</summary>
+        public string InteropParameterListDeclaration() =>
+            string.Join(", ", InteropParameters.Select(parameter => $"{parameter.InteropType.GetFullyQualifiedName()} {parameter.ParameterName}"));
+
+        /// <summary>The interop function pointer's parameter *types* only (no names), e.g. for a function pointer type signature.</summary>
+        public string InteropParameterTypeList() =>
+            string.Join(", ", InteropParameters.Select(parameter => parameter.InteropType.GetFullyQualifiedName()));
+
+        /// <summary>The types referenced by <see cref="Parameters"/>, for TypeDeclarationsReferenced.</summary>
+        public IEnumerable<CppType> ParameterTypes => Parameters.Select(parameter => parameter.Type);
+
+        /// <summary>The interop types of <see cref="Parameters"/> (excluding "thiz"/"reinteropException"/"pReturnValue"), for TypeDeclarationsReferenced.</summary>
+        public IEnumerable<CppType> ParameterInteropTypes => Parameters.Select(parameter => parameter.Type.AsInteropType());
+
+        /// <summary>The types referenced by <see cref="InteropParameters"/>, for TypeDeclarationsReferenced.</summary>
+        public IEnumerable<CppType> InteropParameterTypes => InteropParameters.Select(parameter => parameter.InteropType);
+
+        /// <summary>
+        /// The call arguments to pass to <see cref="CppInterop.CallManagedFunction"/>: each parameter's
+        /// value converted to its interop type, or (for a struct-return rewrite) an out-parameter of
+        /// type <paramref name="outParameterTypeName"/>.
+        /// </summary>
+        public IReadOnlyList<CppArgument> CallArguments(string? outParameterTypeName = null) =>
+            InteropParameters
+                .Where(parameter => parameter.ParameterName != "reinteropException")
+                .Select(parameter => parameter.ParameterName == "pReturnValue"
+                    ? CppArgument.OutParameter(outParameterTypeName ?? ReturnType.GetFullyQualifiedName(), "result")
+                    : CppArgument.Value(parameter.Type.GetConversionToInteropType(_context, parameter.CallSiteName)))
+                .ToArray();
+
+        /// <summary>
+        /// Builds the call+return body, automatically choosing between a void call, a value-returning
+        /// call, and a struct-return-rewrite call (with the result produced via an out-parameter of type
+        /// <paramref name="outParameterTypeName"/>). Returns null for the one shape not modeled here: a
+        /// Nullable-wrapped struct-return rewrite, which returns a "resultIsValid" flag rather than using
+        /// an exception out-parameter alone - callers must still build that shape by hand.
+        /// </summary>
+        public IReadOnlyList<CppStatement>? Body(CppExpression functionPointer, string? outParameterTypeName = null, string resultVariableName = "result")
+        {
+            if (HasStructRewrite && ReturnType.Kind == InteropTypeKind.Nullable)
+                return null;
+
+            IReadOnlyList<CppArgument> arguments = CallArguments(outParameterTypeName);
+
+            bool isVoid = ReturnType.Name == "void" && !ReturnType.Flags.HasFlag(CppTypeFlags.Pointer);
+            if (isVoid)
+                return CppInterop.CallManagedFunction(functionPointer, arguments);
+
+            return CppInterop.CallManagedFunction(
+                functionPointer, arguments,
+                resultTypeName: HasStructRewrite ? null : "auto",
+                returnExpression: new CppRaw(ReturnType.GetConversionFromInteropType(_context, resultVariableName)),
+                resultVariableName: resultVariableName);
+        }
+    }
+}

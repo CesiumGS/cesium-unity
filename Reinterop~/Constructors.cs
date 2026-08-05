@@ -39,17 +39,10 @@ namespace Reinterop
             GeneratedCppDefinition definition = result.CppDefinition;
             GeneratedInit init = result.Init;
 
-            var parameters = constructor.Parameters.Select(parameter => (Name: parameter.Name, Type: CppType.FromCSharp(context, parameter.Type).AsParameterType()));
-            var returnType = declaration.Type;
-            var interopReturnType = returnType.AsInteropType();
-            var interopParameters = parameters.Select(parameter => (ParameterName: parameter.Name, CallSiteName: parameter.Name, Type: parameter.Type, InteropType: parameter.Type.AsInteropType()));
-
-            bool hasStructRewrite = Interop.RewriteStructReturn(ref interopParameters, ref returnType, ref interopReturnType);
-
-            // Add a parameter in which to return the exception, if there is one.
-            interopParameters = interopParameters.Concat(new[] { (ParameterName: "reinteropException", CallSiteName: "&reinteropException", Type: CppType.VoidPointerPointer, InteropType: CppType.VoidPointerPointer) });
-
-            var interopParameterStrings = interopParameters.Select(parameter => $"{parameter.InteropType.GetFullyQualifiedName()} {parameter.ParameterName}");
+            var parameters = constructor.Parameters
+                .Select(parameter => new CppInteropParameter(parameter.Name, CppType.FromCSharp(context, parameter.Type).AsParameterType()))
+                .ToArray();
+            CppInteropFunction recipe = new(context, parameters, declaration.Type);
 
             string interopFunctionName = $"Construct_{Interop.HashParameters(constructor.Parameters)}";
 
@@ -58,24 +51,24 @@ namespace Reinterop
             // A private, static field of function pointer type that will call
             // into a managed delegate for this constructor.
             declaration.Elements.Add(new(
-                Content: $"static {interopReturnType.GetFullyQualifiedName()} (*{interopFunctionName})({string.Join(", ", interopParameterStrings)});",
+                Content: $"static {recipe.InteropReturnType.GetFullyQualifiedName()} (*{interopFunctionName})({recipe.InteropParameterListDeclaration()});",
                 IsPrivate: true,
-                TypeDeclarationsReferenced: new[] { interopReturnType }.Concat(interopParameters.Select(parameter => parameter.InteropType))
+                TypeDeclarationsReferenced: new[] { recipe.InteropReturnType }.Concat(recipe.InteropParameterTypes)
 
             ));
 
             definition.Elements.Add(new(
-                Content: $"{interopReturnType.GetFullyQualifiedName()} (*{definition.Type.Name}{templateSpecialization}::{interopFunctionName})({string.Join(", ", interopParameterStrings)}) = nullptr;",
-                TypeDeclarationsReferenced: new[] { interopReturnType }.Concat(interopParameters.Select(parameter => parameter.InteropType))
+                Content: $"{recipe.InteropReturnType.GetFullyQualifiedName()} (*{definition.Type.Name}{templateSpecialization}::{interopFunctionName})({recipe.InteropParameterListDeclaration()}) = nullptr;",
+                TypeDeclarationsReferenced: new[] { recipe.InteropReturnType }.Concat(recipe.InteropParameterTypes)
             ));
 
             // The static field should be initialized at startup.
             var (csName, csContent) = Interop.CreateCSharpDelegateInit(context, item.Type, constructor, interopFunctionName);
             init.Functions.Add(new(
                 CppName: $"{definition.Type.GetFullyQualifiedName()}::{interopFunctionName}",
-                CppTypeSignature: $"{interopReturnType.GetFullyQualifiedName()} (*)({string.Join(", ", interopParameters.Select(parameter => parameter.InteropType.GetFullyQualifiedName()))})",
+                CppTypeSignature: $"{recipe.InteropReturnType.GetFullyQualifiedName()} (*)({recipe.InteropParameterTypeList()})",
                 CppTypeDefinitionsReferenced: new[] { definition.Type },
-                CppTypeDeclarationsReferenced: new[] { interopReturnType }.Concat(interopParameters.Select(parameter => parameter.Type)),
+                CppTypeDeclarationsReferenced: new[] { recipe.InteropReturnType }.Concat(recipe.InteropParameters.Select(parameter => parameter.Type)),
                 CSharpName: csName,
                 CSharpContent: csContent
             ));
@@ -86,26 +79,17 @@ namespace Reinterop
             if (declaration.Type.Kind == InteropTypeKind.BlittableStruct)
             {
                 // Constructor declaration
-                var parameterStrings = parameters.Select(parameter => $"{parameter.Type.GetFullyQualifiedName()} {parameter.Name}");
                 declaration.Elements.Add(new(
-                    Content: $"static {declaration.Type.Name} Construct({string.Join(", ", parameterStrings)});",
-                    TypeDeclarationsReferenced: parameters.Select(parameter => parameter.Type)
+                    Content: $"static {declaration.Type.Name} Construct({recipe.ParameterListDeclaration()});",
+                    TypeDeclarationsReferenced: recipe.ParameterTypes
                 ));
 
                 // Constructor definition
-                IReadOnlyList<CppArgument> callArguments = interopParameters
-                    .Where(parameter => parameter.ParameterName != "reinteropException")
-                    .Select(parameter => parameter.ParameterName == "pReturnValue"
-                        ? CppArgument.OutParameter(definition.Type.Name, "result")
-                        : CppArgument.Value(parameter.Type.GetConversionToInteropType(context, parameter.CallSiteName)))
-                    .ToArray();
-                IReadOnlyList<CppStatement> body = CppInterop.CallManagedFunction(
-                    new CppIdentifier(interopFunctionName), callArguments,
-                    returnExpression: new CppRaw("result"));
+                IReadOnlyList<CppStatement> body = recipe.Body(new CppIdentifier(interopFunctionName), outParameterTypeName: definition.Type.Name)!;
                 definition.Elements.Add(new(
                     Content:
                         $$"""
-                        {{definition.Type.Name}} {{definition.Type.Name}}{{templateSpecialization}}::Construct({{string.Join(", ", parameterStrings)}})
+                        {{definition.Type.Name}} {{definition.Type.Name}}{{templateSpecialization}}::Construct({{recipe.ParameterListDeclaration()}})
                         {
                             {{new[] { CppPrinter.Print(body) }.JoinAndIndent("    ")}}
                         }
@@ -113,26 +97,22 @@ namespace Reinterop
                     TypeDefinitionsReferenced: new[]
                     {
                         definition.Type,
-                        interopReturnType,
+                        recipe.InteropReturnType,
                         CppObjectHandle.GetCppType(context),
                         CppReinteropException.GetCppType(context)
-                    }.Concat(parameters.Select(parameter => parameter.Type))
+                    }.Concat(recipe.ParameterTypes)
                 ));
             }
             else
             {
                 // Constructor declaration
-                var parameterStrings = parameters.Select(parameter => $"{parameter.Type.GetFullyQualifiedName()} {parameter.Name}");
                 declaration.Elements.Add(new(
-                    Content: $"{declaration.Type.Name}({string.Join(", ", parameterStrings)});",
-                    TypeDeclarationsReferenced: parameters.Select(parameter => parameter.Type)
+                    Content: $"{declaration.Type.Name}({recipe.ParameterListDeclaration()});",
+                    TypeDeclarationsReferenced: recipe.ParameterTypes
                 ));
 
                 // Constructor definition
-                IReadOnlyList<CppArgument> callArguments = interopParameters
-                    .Where(parameter => parameter.ParameterName != "reinteropException")
-                    .Select(parameter => CppArgument.Value(parameter.Type.GetConversionToInteropType(context, parameter.CallSiteName)))
-                    .ToArray();
+                IReadOnlyList<CppArgument> callArguments = recipe.CallArguments();
                 IReadOnlyList<CppStatement> body = CppInterop.CallManagedFunction(
                     new CppIdentifier(interopFunctionName), callArguments,
                     resultTypeName: "void*",
@@ -141,7 +121,7 @@ namespace Reinterop
                 definition.Elements.Add(new(
                     Content:
                         $$"""
-                        {{definition.Type.Name}}{{templateSpecialization}}::{{definition.Type.Name}}({{string.Join(", ", parameterStrings)}})
+                        {{definition.Type.Name}}{{templateSpecialization}}::{{definition.Type.Name}}({{recipe.ParameterListDeclaration()}})
                             : _handle([&]() mutable {
                                 {{new[] { CppPrinter.Print(body) }.JoinAndIndent("        ")}}
                             }())
@@ -151,10 +131,10 @@ namespace Reinterop
                     TypeDefinitionsReferenced: new[]
                     {
                         definition.Type,
-                        interopReturnType,
+                        recipe.InteropReturnType,
                         CppObjectHandle.GetCppType(context),
                         CppReinteropException.GetCppType(context)
-                    }.Concat(parameters.Select(parameter => parameter.Type))
+                    }.Concat(recipe.ParameterTypes)
                 ));
             }
         }

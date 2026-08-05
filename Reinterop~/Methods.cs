@@ -37,13 +37,9 @@ namespace Reinterop
             GeneratedInit init = result.Init;
 
             CppType returnType = CppType.FromCSharp(context, method.ReturnType).AsReturnType();
-            CppType interopReturnType = returnType.AsInteropType();
-            var parameters = method.Parameters.Select(parameter =>
-            {
-                CppType type = CppType.FromCSharp(context, parameter.Type).AsParameterType();
-                return (ParameterName: parameter.Name, CallSiteName: parameter.Name, Type: type, InteropType: type.AsInteropType());
-            });
-            var interopParameters = parameters;
+            CppInteropParameter[] parameters = method.Parameters
+                .Select(parameter => new CppInteropParameter(parameter.Name, CppType.FromCSharp(context, parameter.Type).AsParameterType()))
+                .ToArray();
 
             string interopName = $"Call{method.Name}_{Interop.HashParameters(method.Parameters, method.TypeArguments)}";
 
@@ -94,69 +90,54 @@ namespace Reinterop
                 templateSpecialization = $"<{string.Join(", ", templateParameters)}>";
 
                 // Parameters of generic type are always passed as const references for maximum compatibility
-                var parameterArray = parameters.ToArray();
-                parameters = parameterArray;
-
-                Debug.Assert(parameterArray.Length == genericMethod.Parameters.Length);
-                for (int i = 0; i < parameterArray.Length && i < genericMethod.Parameters.Length; ++i)
+                Debug.Assert(parameters.Length == genericMethod.Parameters.Length);
+                for (int i = 0; i < parameters.Length && i < genericMethod.Parameters.Length; ++i)
                 {
                     IParameterSymbol genericParameter = genericMethod.Parameters[i];
-                    var parameter = parameterArray[i];
+                    CppInteropParameter parameter = parameters[i];
 
                     if (genericParameter.Type.TypeKind == TypeKind.TypeParameter && (!parameter.Type.Flags.HasFlag(CppTypeFlags.Reference) || !parameter.Type.Flags.HasFlag(CppTypeFlags.Const)))
                     {
-                        parameter.Type = parameter.Type.AsConstReference();
-                        parameterArray[i] = parameter;
+                        parameters[i] = parameter with { Type = parameter.Type.AsConstReference() };
                     }
                 }
             }
 
-            // If this is an instance method, pass the current object as the first parameter.
-            if (!method.IsStatic)
-            {
-                interopParameters = new[] { (ParameterName: "thiz", CallSiteName: "(*this)", Type: result.CppDefinition.Type.AsParameterType(), InteropType: result.CppDefinition.Type.AsParameterType().AsInteropType()) }.Concat(interopParameters);
-            }
-
-            bool hasStructRewrite = Interop.RewriteStructReturn(ref interopParameters, ref returnType, ref interopReturnType);
-
-            // Add a parameter in which to return the exception, if there is one.
-            interopParameters = interopParameters.Concat(new[] { (ParameterName: "reinteropException", CallSiteName: "", Type: CppType.VoidPointerPointer, InteropType: CppType.VoidPointerPointer) });
-
-            var interopParameterStrings = interopParameters.Select(parameter => $"{parameter.InteropType.GetFullyQualifiedName()} {parameter.ParameterName}");
+            // If this is an instance method, pass the current object as the first (implicit "thiz") parameter.
+            CppType? instanceType = method.IsStatic ? null : result.CppDefinition.Type.AsParameterType();
+            CppInteropFunction recipe = new(context, parameters, returnType, instanceType);
 
             // A private, static field of function pointer type that will call
             // into a managed delegate for this method.
             declaration.Elements.Add(new(
-                Content: $"static {interopReturnType.GetFullyQualifiedName()} (*{interopName})({string.Join(", ", interopParameterStrings)});",
+                Content: $"static {recipe.InteropReturnType.GetFullyQualifiedName()} (*{interopName})({recipe.InteropParameterListDeclaration()});",
                 IsPrivate: true,
-                TypeDeclarationsReferenced: new[] { interopReturnType }.Concat(parameters.Select(parameter => parameter.InteropType))
+                TypeDeclarationsReferenced: new[] { recipe.InteropReturnType }.Concat(recipe.ParameterInteropTypes)
             ));
 
             definition.Elements.Add(new(
-                Content: $"{interopReturnType.GetFullyQualifiedName()} (*{definition.Type.GetFullyQualifiedName(false)}::{interopName})({string.Join(", ", interopParameterStrings)}) = nullptr;",
-                TypeDeclarationsReferenced: new[] { interopReturnType }.Concat(parameters.Select(parameter => parameter.InteropType))
+                Content: $"{recipe.InteropReturnType.GetFullyQualifiedName()} (*{definition.Type.GetFullyQualifiedName(false)}::{interopName})({recipe.InteropParameterListDeclaration()}) = nullptr;",
+                TypeDeclarationsReferenced: new[] { recipe.InteropReturnType }.Concat(recipe.ParameterInteropTypes)
             ));
 
             // The static field should be initialized at startup.
             var (csName, csContent) = Interop.CreateCSharpDelegateInit(context, item.Type, method, interopName);
             init.Functions.Add(new(
                 CppName: $"{definition.Type.GetFullyQualifiedName()}::{interopName}",
-                CppTypeSignature: $"{interopReturnType.GetFullyQualifiedName()} (*)({string.Join(", ", interopParameters.Select(parameter => parameter.InteropType.GetFullyQualifiedName()))})",
+                CppTypeSignature: $"{recipe.InteropReturnType.GetFullyQualifiedName()} (*)({recipe.InteropParameterTypeList()})",
                 CppTypeDefinitionsReferenced: new[] { definition.Type },
-                CppTypeDeclarationsReferenced: new[] { interopReturnType }.Concat(parameters.Select(parameter => parameter.Type)),
+                CppTypeDeclarationsReferenced: new[] { recipe.InteropReturnType }.Concat(recipe.ParameterTypes),
                 CSharpName: csName,
                 CSharpContent: csContent
             ));
-
-            var parameterStrings = parameters.Select(parameter => $"{parameter.Type.GetFullyQualifiedName()} {parameter.ParameterName}");
 
             // Method declaration
             // Skip method declaration for generic methods, because we only need the generic version above.
             if (!method.IsGenericMethod)
             {
                 declaration.Elements.Add(new(
-                    Content: $"{templatePrefix}{modifiers}{returnType.GetFullyQualifiedName()} {method.Name}{templateSpecialization}({string.Join(", ", parameterStrings)}){afterModifiers};",
-                    TypeDeclarationsReferenced: new[] { returnType }.Concat(parameters.Select(parameter => parameter.Type)),
+                    Content: $"{templatePrefix}{modifiers}{returnType.GetFullyQualifiedName()} {method.Name}{templateSpecialization}({recipe.ParameterListDeclaration()}){afterModifiers};",
+                    TypeDeclarationsReferenced: new[] { returnType }.Concat(recipe.ParameterTypes),
                     IsPrivate: isPrivate
                 ));
             }
@@ -170,7 +151,7 @@ namespace Reinterop
             if (addOperator)
             {
                 string op = Interop.MethodNameToOperator(method.Name);
-                var rhs = parameters.ElementAt(1);
+                CppInteropParameter rhs = parameters[1];
                 declaration.Elements.Add(new(
                     Content: $"bool operator{op}({rhs.Type.GetFullyQualifiedName()} rhs) const;"
                 ));
@@ -181,7 +162,7 @@ namespace Reinterop
                           return {{method.Name}}(*this, rhs);
                         }
                         """,
-                    TypeDefinitionsReferenced: parameters.Select(parameter => parameter.Type)
+                    TypeDefinitionsReferenced: recipe.ParameterTypes
                 ));
 
                 // If this operator is on a base type and that base type is the right-hand side, also add a
@@ -225,21 +206,13 @@ namespace Reinterop
             }
 
             // Method definition
-            var parameterPassStrings = interopParameters.Select(parameter => parameter.Type.GetConversionToInteropType(context, parameter.CallSiteName));
-            parameterPassStrings = parameterPassStrings.Concat(new[] {"&reinteropException"}).Where(s => !string.IsNullOrEmpty(s));
-            IReadOnlyList<CppArgument> callArguments = interopParameters
-                .Where(parameter => parameter.ParameterName != "reinteropException")
-                .Select(parameter => parameter.ParameterName == "pReturnValue"
-                    ? CppArgument.OutParameter(returnType.GetFullyQualifiedName(), "result")
-                    : CppArgument.Value(parameter.Type.GetConversionToInteropType(context, parameter.CallSiteName)))
-                .ToArray();
-            if (returnType.Name == "void" && !returnType.Flags.HasFlag(CppTypeFlags.Pointer))
+            IReadOnlyList<CppStatement>? body = recipe.Body(new CppIdentifier(interopName), outParameterTypeName: returnType.GetFullyQualifiedName());
+            if (body != null)
             {
-                IReadOnlyList<CppStatement> body = CppInterop.CallManagedFunction(new CppIdentifier(interopName), callArguments);
                 definition.Elements.Add(new(
                     Content:
                         $$"""
-                        {{templatePrefix}}{{returnType.GetFullyQualifiedName()}} {{definition.Type.Name}}{{typeTemplateSpecialization}}::{{method.Name}}{{templateSpecialization}}({{string.Join(", ", parameterStrings)}}){{afterModifiers}} {
+                        {{templatePrefix}}{{returnType.GetFullyQualifiedName()}} {{definition.Type.Name}}{{typeTemplateSpecialization}}::{{method.Name}}{{templateSpecialization}}({{recipe.ParameterListDeclaration()}}){{afterModifiers}} {
                             {{new[] { CppPrinter.Print(body) }.JoinAndIndent("    ")}}
                         }
                         """,
@@ -249,56 +222,28 @@ namespace Reinterop
                         returnType,
                         CppObjectHandle.GetCppType(context),
                         CppReinteropException.GetCppType(context)
-                    }.Concat(parameters.Select(parameter => parameter.Type))
-                ));
-            }
-            else if (!hasStructRewrite)
-            {
-                IReadOnlyList<CppStatement> body = CppInterop.CallManagedFunction(
-                    new CppIdentifier(interopName), callArguments, "auto", new CppRaw(returnType.GetConversionFromInteropType(context, "result")));
-                definition.Elements.Add(new(
-                    Content:
-                        $$"""
-                        {{templatePrefix}}{{returnType.GetFullyQualifiedName()}} {{definition.Type.Name}}{{typeTemplateSpecialization}}::{{method.Name}}{{templateSpecialization}}({{string.Join(", ", parameterStrings)}}){{afterModifiers}} {
-                            {{new[] { CppPrinter.Print(body) }.JoinAndIndent("    ")}}
-                        }
-                        """,
-                    TypeDefinitionsReferenced: new[]
-                    {
-                        definition.Type,
-                        returnType,
-                        CppObjectHandle.GetCppType(context),
-                        CppReinteropException.GetCppType(context)
-                    }.Concat(parameters.Select(parameter => parameter.Type))
+                    }.Concat(recipe.ParameterTypes)
                 ));
             }
             else
             {
-                string[] invocation;
-                string returnStatement;
-                if (returnType.Kind == InteropTypeKind.Nullable)
+                // The Nullable-with-struct-rewrite case (returns a "resultIsValid" flag alongside an
+                // out-parameter) isn't modeled by CppInteropFunction.Body, so it's still built as a
+                // plain string template.
+                var parameterPassStrings = recipe.InteropParameters.Select(parameter => parameter.Type.GetConversionToInteropType(context, parameter.CallSiteName));
+                parameterPassStrings = parameterPassStrings.Concat(new[] { "&reinteropException" }).Where(s => !string.IsNullOrEmpty(s));
+
+                string[] invocation = new[]
                 {
-                    invocation = new[]
-                    {
-                        $"{returnType.GenericArguments.FirstOrDefault().GetFullyQualifiedName()} result;",
-                        $"std::uint8_t resultIsValid = {interopName}({string.Join(", ", parameterPassStrings)});"
-                    };
-                    returnStatement = $"return resultIsValid ? std::make_optional(std::move({returnType.GetConversionFromInteropType(context, "result")})) : std::nullopt;";
-                }
-                else
-                {
-                    invocation = new[]
-                    {
-                        $"{returnType.GetFullyQualifiedName()} result;",
-                        $"{interopName}({string.Join(", ", parameterPassStrings)});"
-                    };
-                    returnStatement = $"return {returnType.GetConversionFromInteropType(context, "result")};";
-                }
+                    $"{returnType.GenericArguments.FirstOrDefault().GetFullyQualifiedName()} result;",
+                    $"std::uint8_t resultIsValid = {interopName}({string.Join(", ", parameterPassStrings)});"
+                };
+                string returnStatement = $"return resultIsValid ? std::make_optional(std::move({returnType.GetConversionFromInteropType(context, "result")})) : std::nullopt;";
 
                 definition.Elements.Add(new(
                     Content:
                         $$"""
-                        {{templatePrefix}}{{returnType.GetFullyQualifiedName()}} {{definition.Type.Name}}{{typeTemplateSpecialization}}::{{method.Name}}{{templateSpecialization}}({{string.Join(", ", parameterStrings)}}){{afterModifiers}} {
+                        {{templatePrefix}}{{returnType.GetFullyQualifiedName()}} {{definition.Type.Name}}{{typeTemplateSpecialization}}::{{method.Name}}{{templateSpecialization}}({{recipe.ParameterListDeclaration()}}){{afterModifiers}} {
                             void* reinteropException = nullptr;
                             {{GenerationUtility.JoinAndIndent(invocation, "    ")}}
                             if (reinteropException != nullptr)
@@ -312,7 +257,7 @@ namespace Reinterop
                         returnType,
                         CppObjectHandle.GetCppType(context),
                         CppReinteropException.GetCppType(context)
-                    }.Concat(parameters.Select(parameter => parameter.Type))
+                    }.Concat(recipe.ParameterTypes)
                 ));
             }
         }

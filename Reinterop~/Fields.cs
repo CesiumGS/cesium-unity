@@ -75,58 +75,38 @@ namespace Reinterop
             CppType fieldType = CppType.FromCSharp(context, field.Type);
             CppType setType = fieldType.AsParameterType();
             CppType getType = fieldType.AsReturnType();
-            CppType setInteropType = setType.AsInteropType();
-            CppType getInteropType = getType.AsInteropType();
 
-            string interopSetParameters = $"{setInteropType.GetFullyQualifiedName()} value";
-            string interopSetParametersCall = $"{setType.GetConversionToInteropType(context, "value")}";
-            if (!field.IsStatic)
-            {
-                interopSetParameters = $"void* thiz, " + interopSetParameters;
-                interopSetParametersCall = $"{definition.Type.AsParameterType().GetConversionToInteropType(context, "(*this)")}, {interopSetParametersCall}";
-            }
+            CppType? instanceType = !field.IsStatic ? result.CppDefinition.Type.AsParameterType() : null;
 
-            IEnumerable<(string ParameterName, string CallSiteName, CppType Type, CppType InteropType)> getParameters = new List<(string ParameterName, string CallSiteName, CppType Type, CppType InteropType)>();
-            if (!field.IsStatic)
-            {
-                getParameters = new[] { (ParameterName: "thiz", CallSiteName: "(*this)", Type: result.CppDefinition.Type.AsParameterType(), InteropType: result.CppDefinition.Type.AsInteropType()) }.Concat(getParameters);
-            }
-
-            bool hasStructRewrite = Interop.RewriteStructReturn(ref getParameters, ref getType, ref getInteropType);
-
-            // Add a parameter in which to return the exception, if there is one.
-            getParameters = getParameters.Concat(new[] { (ParameterName: "reinteropException", CallSiteName: "&reinteropException", Type: CppType.VoidPointerPointer, InteropType: CppType.VoidPointerPointer) });
-            interopSetParameters = interopSetParameters + ", void** reinteropException";
-
-            var interopGetParameters = getParameters.Select(parameter => $"{parameter.InteropType.GetFullyQualifiedName()} {parameter.ParameterName}");
-            var interopGetParametersCall = getParameters.Select(parameter => parameter.Type.GetConversionToInteropType(context, parameter.CallSiteName));
+            CppInteropFunction getRecipe = new(context, Array.Empty<CppInteropParameter>(), getType, instanceType);
+            CppInteropFunction setRecipe = new(context, new[] { new CppInteropParameter("value", setType) }, CppType.Void, instanceType);
 
             // Add the static fields for the get/set functions
             declaration.Elements.Add(new(
-                Content: $"static {getInteropType.GetFullyQualifiedName()} (*Field_get_{field.Name})({string.Join(", ", interopGetParameters)});",
+                Content: $"static {getRecipe.InteropReturnType.GetFullyQualifiedName()} (*Field_get_{field.Name})({getRecipe.InteropParameterListDeclaration()});",
                 IsPrivate: true,
-                TypeDeclarationsReferenced: new[] { getInteropType }));
+                TypeDeclarationsReferenced: new[] { getRecipe.InteropReturnType }));
             definition.Elements.Add(new(
-                Content: $"{getInteropType.GetFullyQualifiedName()} (*{definition.Type.GetFullyQualifiedName(false)}::Field_get_{field.Name})({string.Join(", ", interopGetParameters)}) = nullptr;",
-                TypeDeclarationsReferenced: new[] { getInteropType }
+                Content: $"{getRecipe.InteropReturnType.GetFullyQualifiedName()} (*{definition.Type.GetFullyQualifiedName(false)}::Field_get_{field.Name})({getRecipe.InteropParameterListDeclaration()}) = nullptr;",
+                TypeDeclarationsReferenced: new[] { getRecipe.InteropReturnType }
             ));
 
             declaration.Elements.Add(new(
-                Content: $"static void (*Field_set_{field.Name})({interopSetParameters});",
+                Content: $"static {setRecipe.InteropReturnType.GetFullyQualifiedName()} (*Field_set_{field.Name})({setRecipe.InteropParameterListDeclaration()});",
                 IsPrivate: true,
-                TypeDeclarationsReferenced: new[] { setInteropType }));
+                TypeDeclarationsReferenced: new[] { setType.AsInteropType() }));
             definition.Elements.Add(new(
-                Content: $"void (*{definition.Type.GetFullyQualifiedName(false)}::Field_set_{field.Name})({interopSetParameters}) = nullptr;",
-                TypeDeclarationsReferenced: new[] { setInteropType }
+                Content: $"{setRecipe.InteropReturnType.GetFullyQualifiedName()} (*{definition.Type.GetFullyQualifiedName(false)}::Field_set_{field.Name})({setRecipe.InteropParameterListDeclaration()}) = nullptr;",
+                TypeDeclarationsReferenced: new[] { setType.AsInteropType() }
             ));
 
             // Initialize the fields at startup
             var (csName, csContent) = Interop.CreateCSharpDelegateInit(context, item.Type, field, isGet: true);
             init.Functions.Add(new(
                 CppName: $"{definition.Type.GetFullyQualifiedName()}::Field_get_{field.Name}",
-                CppTypeSignature: $"{getInteropType.GetFullyQualifiedName()} (*)({string.Join(", ", interopGetParameters)})",
+                CppTypeSignature: $"{getRecipe.InteropReturnType.GetFullyQualifiedName()} (*)({getRecipe.InteropParameterListDeclaration()})",
                 CppTypeDefinitionsReferenced: new[] { definition.Type },
-                CppTypeDeclarationsReferenced: new[] { getInteropType },
+                CppTypeDeclarationsReferenced: new[] { getRecipe.InteropReturnType },
                 CSharpName: csName,
                 CSharpContent: csContent
             ));
@@ -134,9 +114,9 @@ namespace Reinterop
             (csName, csContent) = Interop.CreateCSharpDelegateInit(context, item.Type, field, isGet: false);
             init.Functions.Add(new(
                 CppName: $"{definition.Type.GetFullyQualifiedName()}::Field_set_{field.Name}",
-                CppTypeSignature: $"void (*)({interopSetParameters})",
+                CppTypeSignature: $"{setRecipe.InteropReturnType.GetFullyQualifiedName()} (*)({setRecipe.InteropParameterListDeclaration()})",
                 CppTypeDefinitionsReferenced: new[] { definition.Type },
-                CppTypeDeclarationsReferenced: new[] { setInteropType },
+                CppTypeDeclarationsReferenced: new[] { setType.AsInteropType() },
                 CSharpName: csName,
                 CSharpContent: csContent
             ));
@@ -152,41 +132,25 @@ namespace Reinterop
             ));
 
             // The Nullable-with-struct-rewrite case (getter returns a bool "is valid" flag alongside an
-            // out-parameter) isn't modeled by CppInterop.CallManagedFunction yet, so it's still built
-            // as a plain string template - same deliberate scope exclusion as Methods.cs.
-            IReadOnlyList<CppArgument> getCallArguments = getParameters
-                .Where(parameter => parameter.ParameterName != "reinteropException")
-                .Select(parameter => parameter.ParameterName == "pReturnValue"
-                    ? CppArgument.OutParameter(getType.GetFullyQualifiedName(), "result")
-                    : CppArgument.Value(parameter.Type.GetConversionToInteropType(context, parameter.CallSiteName)))
-                .ToArray();
+            // out-parameter) isn't modeled by CppInteropFunction.Body, so it's still built as a plain
+            // string template - same deliberate scope exclusion as Methods.cs.
+            IReadOnlyList<CppStatement>? body = getRecipe.Body(new CppIdentifier($"Field_get_{field.Name}"));
             string[]? invocation = null;
-            IReadOnlyList<CppStatement>? body = CppInterop.CallManagedFunction(
-                new CppIdentifier($"Field_get_{field.Name}"), getCallArguments,
-                resultTypeName: "auto",
-                returnExpression: new CppRaw(getType.GetConversionFromInteropType(context, "result")));
-            if (hasStructRewrite)
+            if (body == null)
             {
-                if (fieldType.Kind == InteropTypeKind.Nullable)
+                var parameterPassStrings = getRecipe.InteropParameters.Select(parameter => parameter.Type.GetConversionToInteropType(context, parameter.CallSiteName));
+                parameterPassStrings = parameterPassStrings.Concat(new[] { "&reinteropException" }).Where(s => !string.IsNullOrEmpty(s));
+
+                invocation = new[]
                 {
-                    invocation = new[]
-                    {
-                        $"void* reinteropException = nullptr;",
-                        $"{getType.GenericArguments.FirstOrDefault().GetFullyQualifiedName()} result;",
-                        $"std::uint8_t resultIsValid = Field_get_{field.Name}({string.Join(", ", interopGetParametersCall)});",
-                        $"if (reinteropException != nullptr) {{",
-                        $"  throw Reinterop::ReinteropNativeException(::DotNet::System::Exception(::DotNet::Reinterop::ObjectHandle(reinteropException)));",
-                        $"}}",
-                        $"return resultIsValid ? std::make_optional(std::move({getType.GetConversionFromInteropType(context, "result")})) : std::nullopt;"
-                    };
-                    body = null;
-                }
-                else
-                {
-                    body = CppInterop.CallManagedFunction(
-                        new CppIdentifier($"Field_get_{field.Name}"), getCallArguments,
-                        returnExpression: new CppRaw(getType.GetConversionFromInteropType(context, "result")));
-                }
+                    $"void* reinteropException = nullptr;",
+                    $"{getType.GenericArguments.FirstOrDefault().GetFullyQualifiedName()} result;",
+                    $"std::uint8_t resultIsValid = Field_get_{field.Name}({string.Join(", ", parameterPassStrings)});",
+                    $"if (reinteropException != nullptr) {{",
+                    $"  throw Reinterop::ReinteropNativeException(::DotNet::System::Exception(::DotNet::Reinterop::ObjectHandle(reinteropException)));",
+                    $"}}",
+                    $"return resultIsValid ? std::make_optional(std::move({getType.GetConversionFromInteropType(context, "result")})) : std::nullopt;"
+                };
             }
 
             definition.Elements.Add(new(
@@ -212,7 +176,7 @@ namespace Reinterop
             ));
 
             IReadOnlyList<CppStatement> setterBody = CppInterop.CallManagedFunction(
-                new CppIdentifier($"Field_set_{field.Name}"), new[] { CppArgument.Value(interopSetParametersCall) });
+                new CppIdentifier($"Field_set_{field.Name}"), setRecipe.CallArguments());
             definition.Elements.Add(new(
                 Content:
                     $$"""
