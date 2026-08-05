@@ -92,14 +92,6 @@ namespace Reinterop
             var callInvokeInteropParameters = new[] { "_callbackFunction" }.Concat(callbackParameters.Select(p => p.CsType.GetConversionToInteropType(p.Name)));
             var csReturnType = CSharpType.FromSymbol(context, invokeMethod.ReturnType);
 
-            string csResultImplementation = "";
-            string csReturnImplementation = "return;";
-            if (invokeMethod.ReturnType.SpecialType != SpecialType.System_Void)
-            {
-                csResultImplementation = "var result = ";
-                csReturnImplementation = $"return {csReturnType.GetReturnValueConversionFromInteropType("result")}";
-            }
-
             result.Init.Functions.Add(new(
                 CppName: $"{itemType.GetFullyQualifiedName()}::CreateDelegate",
                 CppTypeSignature: $"void* (*)(void*)",
@@ -146,13 +138,12 @@ namespace Reinterop
 
                             unsafe
                             {
-                                System.IntPtr reinteropException = System.IntPtr.Zero;
-                                {{csResultImplementation}}{{invokeCallbackName}}({{string.Join(", ", callInvokeInteropParameters)}}, &reinteropException);
-                                if (reinteropException != System.IntPtr.Zero)
-                                {
-                                    throw (System.Exception)Reinterop.ObjectHandleUtility.GetObjectAndFreeHandle(reinteropException);
-                                }
-                                {{csReturnImplementation}};
+                                {{new[] { CSharpPrinter.Print(CSharpInterop.CallNativeFunction(
+                                    new CSharpIdentifier(invokeCallbackName),
+                                    callInvokeInteropParameters.Select(p => (CSharpExpression)new CSharpRaw(p)).ToArray(),
+                                    resultTypeName: invokeMethod.ReturnType.SpecialType != SpecialType.System_Void ? "var" : null,
+                                    returnExpression: invokeMethod.ReturnType.SpecialType != SpecialType.System_Void ? new CSharpRaw(csReturnType.GetReturnValueConversionFromInteropType("result")) : null,
+                                    alwaysReturn: true)) }.JoinAndIndent("                                ")}}
                             }
                         }
 

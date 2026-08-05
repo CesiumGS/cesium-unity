@@ -399,33 +399,37 @@ namespace Reinterop
             CSharpType exceptionPtr = CSharpType.FromSymbol(context, context.Compilation.GetSpecialType(SpecialType.System_IntPtr)).AsPointer();
             csParametersInterop = csParametersInterop.Concat(new[] { (Name: "reinteropException", CallName: "&reinteropException", Type: exceptionPtr, IsParams: false) });
 
-            List<string> csImplementationLines = new List<string>();
+            List<CSharpStatement> csCallStatements = new();
             if (hasStructRewrite)
             {
-                csImplementationLines.Add($"var returnValue = new {csOriginalInteropReturnType.AsInteropTypeReturn().GetFullyQualifiedName()}();");
+                csCallStatements.Add(new CSharpRawStatement($"var returnValue = new {csOriginalInteropReturnType.AsInteropTypeReturn().GetFullyQualifiedName()}();"));
             }
 
-            if (csInteropReturnType.SpecialType == SpecialType.System_Void)
-                csImplementationLines.Add($"{name}({string.Join(", ", csParametersInterop.Select(parameter => parameter.Type.GetConversionToInteropType(parameter.CallName)))});");
-            else
-                csImplementationLines.Add($"var result = {name}({string.Join(", ", csParametersInterop.Select(parameter => parameter.Type.GetConversionToInteropType(parameter.CallName)))});");
-
-            csImplementationLines.Add("if (reinteropException != IntPtr.Zero) throw (System.Exception)Reinterop.ObjectHandleUtility.GetObjectAndFreeHandle(reinteropException);");
-
+            CSharpExpression? csReturnExpression = null;
             if (csReturnType.SpecialType != SpecialType.System_Void)
             {
                 if (hasStructRewrite)
                 {
-                    if (csReturnType.Kind == InteropTypeKind.Nullable)
-                        csImplementationLines.Add("return result == 1 ? returnValue : null;");
-                    else
-                        csImplementationLines.Add("return returnValue;");
+                    csReturnExpression = csReturnType.Kind == InteropTypeKind.Nullable
+                        ? new CSharpRaw("result == 1 ? returnValue : null")
+                        : new CSharpRaw("returnValue");
                 }
                 else
                 {
-                    csImplementationLines.Add($"return {csReturnType.GetReturnValueConversionFromInteropType("result")};");
+                    csReturnExpression = new CSharpRaw(csReturnType.GetReturnValueConversionFromInteropType("result"));
                 }
             }
+
+            IReadOnlyList<CSharpExpression> csCallArguments = csParametersInterop
+                .Where(parameter => parameter.Name != "reinteropException")
+                .Select(parameter => (CSharpExpression)new CSharpRaw(parameter.Type.GetConversionToInteropType(parameter.CallName)))
+                .ToArray();
+
+            csCallStatements.AddRange(CSharpInterop.CallNativeFunction(
+                new CSharpIdentifier(name),
+                csCallArguments,
+                resultTypeName: csInteropReturnType.SpecialType != SpecialType.System_Void ? "var" : null,
+                returnExpression: csReturnExpression));
 
             string modifiers = CSharpTypeUtility.GetAccessString(method.DeclaredAccessibility);
             string implementationCheck = "";
@@ -460,8 +464,7 @@ namespace Reinterop
                         unsafe
                         {
                             {{GenerationUtility.JoinAndIndent(new[] { implementationCheck }, "        ")}}
-                            System.IntPtr reinteropException = System.IntPtr.Zero;
-                            {{csImplementationLines.JoinAndIndent("        ")}}
+                            {{new[] { CSharpPrinter.Print(csCallStatements) }.JoinAndIndent("        ")}}
                         }
                     }
                     """,
