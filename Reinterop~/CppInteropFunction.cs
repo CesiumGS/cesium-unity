@@ -149,24 +149,17 @@ namespace Reinterop
         /// The type name to qualify the out-of-line field pointer definition with, e.g.
         /// "MyNamespace::MyClass" or (for constructors of generic types) "MyClass&lt;T&gt;".
         /// </param>
-        /// <param name="initReferencesInteropTypes">
-        /// True if the init registration should reference the interop parameter types (e.g. "void*"
-        /// for a class-wrapper field) rather than the parameters' own types - Fields.cs's get/set
-        /// accessors do this; every other call site references the parameters' own types instead.
-        /// </param>
-        public void AddInteropFunctionPointer(
-            GeneratedCppDeclaration declaration,
-            GeneratedCppDefinition definition,
-            GeneratedInit init,
+        public void AddToGeneration(
+            GeneratedResult result,
             string qualifiedDefinitionName,
             string csharpName,
-            string csharpContent,
-            bool initReferencesInteropTypes = false)
+            string csharpContent)
         {
+            GeneratedCppDeclaration declaration = result.CppDeclaration;
+            GeneratedCppDefinition definition = result.CppDefinition;
+            GeneratedInit init = result.Init;
+
             IEnumerable<CppType> fieldPointerTypes = new[] { InteropReturnType }.Concat(ParameterInteropTypes);
-            IEnumerable<CppType> initTypes = initReferencesInteropTypes
-                ? fieldPointerTypes
-                : new[] { InteropReturnType }.Concat(ParameterTypes);
 
             declaration.Elements.Add(new(
                 Content: $"static {InteropReturnType.GetFullyQualifiedName()} (*{Name})({InteropParameterListDeclaration()});",
@@ -181,7 +174,7 @@ namespace Reinterop
                 CppName: $"{definition.Type.GetFullyQualifiedName()}::{Name}",
                 CppTypeSignature: $"{InteropReturnType.GetFullyQualifiedName()} (*)({InteropParameterTypeList()})",
                 CppTypeDefinitionsReferenced: new[] { definition.Type },
-                CppTypeDeclarationsReferenced: initTypes,
+                CppTypeDeclarationsReferenced: fieldPointerTypes,
                 CSharpName: csharpName,
                 CSharpContent: csharpContent
             ));

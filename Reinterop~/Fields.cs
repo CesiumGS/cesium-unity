@@ -84,14 +84,10 @@ namespace Reinterop
             // Add the static fields for the get/set functions, initialized at startup.
             string qualifiedDefinitionName = definition.Type.GetFullyQualifiedName(false);
             var (getCsName, getCsContent) = Interop.CreateCSharpDelegateInit(context, item.Type, field, isGet: true);
-            getRecipe.AddInteropFunctionPointer(
-                declaration, definition, init, qualifiedDefinitionName, getCsName, getCsContent,
-                initReferencesInteropTypes: true);
+            getRecipe.AddToGeneration(result, qualifiedDefinitionName, getCsName, getCsContent);
 
             var (setCsName, setCsContent) = Interop.CreateCSharpDelegateInit(context, item.Type, field, isGet: false);
-            setRecipe.AddInteropFunctionPointer(
-                declaration, definition, init, qualifiedDefinitionName, setCsName, setCsContent,
-                initReferencesInteropTypes: true);
+            setRecipe.AddToGeneration(result, qualifiedDefinitionName, setCsName, setCsContent);
 
             // Method declaration
             declaration.Elements.Add(new(

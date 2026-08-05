@@ -110,7 +110,7 @@ namespace Reinterop
             // A private, static field of function pointer type that will call
             // into a managed delegate for this method, initialized at startup.
             var (csName, csContent) = Interop.CreateCSharpDelegateInit(context, item.Type, method, interopName);
-            recipe.AddInteropFunctionPointer(declaration, definition, init, definition.Type.GetFullyQualifiedName(false), csName, csContent);
+            recipe.AddToGeneration(result, definition.Type.GetFullyQualifiedName(false), csName, csContent);
 
             // Method declaration
             // Skip method declaration for generic methods, because we only need the generic version above.
