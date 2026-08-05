@@ -332,6 +332,12 @@ namespace Reinterop
                     returnDefault = $$"""return {{interopReturnType.GetFullyQualifiedName()}}();""";
             }
 
+            IReadOnlyList<CppStatement> onException = interopReturnType != CppType.Void
+                ? new CppStatement[] { new CppRawStatement(returnDefault) }
+                : Array.Empty<CppStatement>();
+            IReadOnlyList<CppStatement> tryBody = new CppStatement[] { new CppRawStatement(getCallTarget), new CppRawStatement(implementation) };
+            IReadOnlyList<CppStatement> exceptionHandling = CppInterop.TranslateExceptionsToOutParameter(tryBody, onException);
+
             result.CppImplementationInvoker.Functions.Add(new(
                 Content:
                     $$"""
@@ -339,19 +345,7 @@ namespace Reinterop
                     __declspec(dllexport)
                     #endif
                     {{interopReturnType.GetFullyQualifiedName()}} {{name}}({{parameterListString}}) {
-                      try {
-                        {{GenerationUtility.JoinAndIndent(new[] { getCallTarget }, "    ")}}
-                        {{new[] { implementation }.JoinAndIndent("    ")}}
-                      } catch (::DotNet::Reinterop::ReinteropNativeException& e) {
-                        *reinteropException = ::DotNet::Reinterop::ObjectHandle(e.GetDotNetException().GetHandle()).Release();
-                        {{returnDefault}}
-                      } catch (std::exception& e) {
-                        *reinteropException = ::DotNet::Reinterop::ReinteropException(::DotNet::System::String(e.what())).GetHandle().Release();
-                        {{returnDefault}}
-                      } catch (...) {
-                        *reinteropException = ::DotNet::Reinterop::ReinteropException(::DotNet::System::String("An unknown native exception occurred.")).GetHandle().Release();
-                        {{returnDefault}}
-                      }                   
+                        {{new[] { CppPrinter.Print(exceptionHandling) }.JoinAndIndent("    ")}}
                     }
                     """,
                 TypeDefinitionsReferenced: new[]

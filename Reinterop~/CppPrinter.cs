@@ -16,10 +16,13 @@ namespace Reinterop
                 CppVariableDeclaration { Initializer: null } d => $"{d.TypeName} {d.Name};",
                 CppVariableDeclaration d => $"{d.TypeName} {d.Name} = {Print(d.Initializer!)};",
                 CppExpressionStatement e => $"{Print(e.Expression)};",
+                CppAssignment a => $"{Print(a.Target)} = {Print(a.Value)};",
                 CppIf i => PrintIf(i),
                 CppThrow t => $"throw {Print(t.Exception)};",
                 CppReturn { Value: null } => "return;",
                 CppReturn r => $"return {Print(r.Value!)};",
+                CppRawStatement r => r.Text,
+                CppTry t => PrintTry(t),
                 _ => throw new NotSupportedException($"Unsupported {nameof(CppStatement)}: {statement.GetType().Name}")
             };
         }
@@ -34,6 +37,19 @@ namespace Reinterop
 
             string body = i.Then.Select(Print).JoinAndIndent("    ");
             return condition + " {" + Environment.NewLine + "    " + body + Environment.NewLine + "}";
+        }
+
+        private static string PrintTry(CppTry t)
+        {
+            string result = "try {" + Environment.NewLine + "    " + t.Body.Select(Print).JoinAndIndent("    ");
+            foreach (CppCatch c in t.Catches)
+            {
+                string header = c.ExceptionType == null ? "catch (...)" : $"catch ({c.ExceptionType}& {c.VariableName})";
+                string catchBody = c.Body.Select(Print).JoinAndIndent("    ");
+                result += Environment.NewLine + "} " + header + " {" + Environment.NewLine + "    " + catchBody;
+            }
+            result += Environment.NewLine + "}";
+            return result;
         }
 
         public static string Print(CppExpression expression)

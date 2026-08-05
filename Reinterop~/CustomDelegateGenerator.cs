@@ -198,20 +198,10 @@ namespace Reinterop
                     __declspec(dllexport)
                     #endif
                     {{interopReturnType.GetFullyQualifiedName()}} {{invokeCallbackName}}({{string.Join(", ", interopParameters.Select(p => $"{p.InteropType.GetFullyQualifiedName()} {p.Name}").Concat(new[] { "void** reinteropException" }))}}) {
-                      auto pFunc = reinterpret_cast<std::function<{{itemType.GetFullyQualifiedName()}}::FunctionSignature>*>(pCallbackFunction);
-                      try {
-                        {{resultImplementation}}(*pFunc)({{string.Join(", ", callParameters)}});
-                        {{returnImplementation}}
-                      } catch (::DotNet::Reinterop::ReinteropNativeException& e) {
-                        *reinteropException = ::DotNet::Reinterop::ObjectHandle(e.GetDotNetException().GetHandle()).Release();
-                        {{returnDefault}}
-                      } catch (std::exception& e) {
-                        *reinteropException = ::DotNet::Reinterop::ReinteropException(::DotNet::System::String(e.what())).GetHandle().Release();
-                        {{returnDefault}}
-                      } catch (...) {
-                        *reinteropException = ::DotNet::Reinterop::ReinteropException(::DotNet::System::String("An unknown native exception occurred.")).GetHandle().Release();
-                        {{returnDefault}}
-                      }                   
+                        auto pFunc = reinterpret_cast<std::function<{{itemType.GetFullyQualifiedName()}}::FunctionSignature>*>(pCallbackFunction);
+                        {{new[] { CppPrinter.Print(CppInterop.TranslateExceptionsToOutParameter(
+                            new CppStatement[] { new CppRawStatement($"{resultImplementation}(*pFunc)({string.Join(", ", callParameters)});"), new CppRawStatement(returnImplementation) },
+                            new CppStatement[] { new CppRawStatement(returnDefault) })) }.JoinAndIndent("    ")}}
                     }
                     """,
                 TypeDefinitionsReferenced: new[]

@@ -47,9 +47,21 @@ namespace Reinterop
 
     internal record CppExpressionStatement(CppExpression Expression) : CppStatement;
 
+    internal record CppAssignment(CppExpression Target, CppExpression Value) : CppStatement;
+
     internal record CppIf(CppExpression Condition, IReadOnlyList<CppStatement> Then) : CppStatement;
 
     internal record CppThrow(CppExpression Exception) : CppStatement;
 
     internal record CppReturn(CppExpression? Value = null) : CppStatement;
+
+    // An already-rendered statement (or block of statements), used as an escape hatch for bodies
+    // (e.g. the call implementation preceding a catch block) that haven't been converted to this
+    // DSL yet. Printed as-is, with no added punctuation.
+    internal record CppRawStatement(string Text) : CppStatement;
+
+    // ExceptionType is null for a catch-all ("catch (...)"), in which case VariableName is unused.
+    internal record CppCatch(string? ExceptionType, string? VariableName, IReadOnlyList<CppStatement> Body);
+
+    internal record CppTry(IReadOnlyList<CppStatement> Body, IReadOnlyList<CppCatch> Catches) : CppStatement;
 }
