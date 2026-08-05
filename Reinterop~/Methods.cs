@@ -116,11 +116,7 @@ namespace Reinterop
             // Skip method declaration for generic methods, because we only need the generic version above.
             if (!method.IsGenericMethod)
             {
-                declaration.Elements.Add(new(
-                    Content: $"{templatePrefix}{modifiers}{returnType.GetFullyQualifiedName()} {method.Name}{templateSpecialization}({recipe.ParameterListDeclaration()}){afterModifiers};",
-                    TypeDeclarationsReferenced: new[] { returnType }.Concat(recipe.ParameterTypes),
-                    IsPrivate: isPrivate
-                ));
+                recipe.AddDeclaration(result, method.Name, method.IsStatic, isPrivate);
             }
 
             string typeTemplateSpecialization = "";
@@ -190,21 +186,7 @@ namespace Reinterop
             IReadOnlyList<CppStatement>? body = recipe.Body(new CppIdentifier(interopName), outParameterTypeName: returnType.GetFullyQualifiedName());
             if (body != null)
             {
-                definition.Elements.Add(new(
-                    Content:
-                        $$"""
-                        {{templatePrefix}}{{returnType.GetFullyQualifiedName()}} {{definition.Type.Name}}{{typeTemplateSpecialization}}::{{method.Name}}{{templateSpecialization}}({{recipe.ParameterListDeclaration()}}){{afterModifiers}} {
-                            {{new[] { CppPrinter.Print(body) }.JoinAndIndent("    ")}}
-                        }
-                        """,
-                    TypeDefinitionsReferenced: new[]
-                    {
-                        definition.Type,
-                        returnType,
-                        CppObjectHandle.GetCppType(context),
-                        CppReinteropException.GetCppType(context)
-                    }.Concat(recipe.ParameterTypes)
-                ));
+                recipe.AddDefinition(result, method.Name, body, method.IsStatic, typeTemplateSpecialization, templatePrefix, templateSpecialization);
             }
             else
             {

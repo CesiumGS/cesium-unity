@@ -24,9 +24,7 @@ namespace Reinterop
 
         private static void GenerateSingleMethod(CppGenerationContext context, TypeToGenerate item, GeneratedResult result, IPropertySymbol property, IMethodSymbol method)
         {
-            GeneratedCppDeclaration declaration = result.CppDeclaration;
             GeneratedCppDefinition definition = result.CppDefinition;
-            GeneratedInit init = result.Init;
 
             CppType returnType = CppType.FromCSharp(context, method.ReturnType).AsReturnType();
             CppInteropParameter[] parameters = method.Parameters
@@ -42,22 +40,9 @@ namespace Reinterop
             var (csName, csContent) = Interop.CreateCSharpDelegateInit(context, item.Type, method, $"Property_{method.Name}");
             recipe.AddToGeneration(result, definition.Type.GetFullyQualifiedName(false), csName, csContent);
 
-            string modifiers = "";
-            string afterModifiers = "";
-            if (method.IsStatic)
-                modifiers += "static ";
-            else
-                afterModifiers += " const";
-
             string propertyName = property.Name;
             if (property.IsIndexer)
                 propertyName = "operator[]";
-
-            // Method declaration
-            declaration.Elements.Add(new(
-                Content: $"{modifiers}{returnType.GetFullyQualifiedName()} {propertyName}({recipe.ParameterListDeclaration()}){afterModifiers};",
-                TypeDeclarationsReferenced: new[] { returnType }.Concat(recipe.ParameterTypes)
-            ));
 
             string typeTemplateSpecialization = "";
             if (definition.Type.GenericArguments != null && definition.Type.GenericArguments.Count > 0)
@@ -65,23 +50,8 @@ namespace Reinterop
                 typeTemplateSpecialization = "<" + string.Join(", ", definition.Type.GenericArguments.Select(t => t.GetFullyQualifiedName())) + ">";
             }
 
-            // Method definition
             IReadOnlyList<CppStatement> body = recipe.Body(new CppIdentifier($"Property_{method.Name}"))!;
-            definition.Elements.Add(new(
-                Content:
-                    $$"""
-                    {{returnType.GetFullyQualifiedName()}} {{definition.Type.Name}}{{typeTemplateSpecialization}}::{{propertyName}}({{recipe.ParameterListDeclaration()}}){{afterModifiers}} {
-                        {{new[] { CppPrinter.Print(body) }.JoinAndIndent("    ")}}
-                    }
-                    """,
-                TypeDefinitionsReferenced: new[]
-                {
-                    definition.Type,
-                    returnType,
-                    CppObjectHandle.GetCppType(context),
-                    CppReinteropException.GetCppType(context)
-                }.Concat(recipe.ParameterTypes)
-            ));
+            recipe.AddFunction(result, propertyName, body, method.IsStatic, typeTemplateSpecialization);
         }
     }
 }

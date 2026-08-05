@@ -68,9 +68,7 @@ namespace Reinterop
 
         private static void GenerateSingleFieldAccessors(CppGenerationContext context, TypeToGenerate item, IFieldSymbol field, GeneratedResult result)
         {
-            GeneratedCppDeclaration declaration = result.CppDeclaration;
             GeneratedCppDefinition definition = result.CppDefinition;
-            GeneratedInit init = result.Init;
 
             CppType fieldType = CppType.FromCSharp(context, field.Type);
             CppType setType = fieldType.AsParameterType();
@@ -90,14 +88,8 @@ namespace Reinterop
             setRecipe.AddToGeneration(result, qualifiedDefinitionName, setCsName, setCsContent);
 
             // Method declaration
-            declaration.Elements.Add(new(
-                Content: $"{(field.IsStatic ? "static " : "")}{getType.GetFullyQualifiedName()} {field.Name}(){(field.IsStatic ? "" : " const")};",
-                TypeDeclarationsReferenced: new[] { getType }
-            ));
-            declaration.Elements.Add(new(
-                Content: $"{(field.IsStatic ? "static " : "")}void {field.Name}({setType.GetFullyQualifiedName()} value){(field.IsStatic ? "" : " const")};",
-                TypeDeclarationsReferenced: new[] { setType }
-            ));
+            getRecipe.AddDeclaration(result, field.Name, field.IsStatic);
+            setRecipe.AddDeclaration(result, field.Name, field.IsStatic);
 
             // The Nullable-with-struct-rewrite case (getter returns a bool "is valid" flag alongside an
             // out-parameter) isn't modeled by CppInteropFunction.Body, so it's still built as a plain
@@ -121,45 +113,32 @@ namespace Reinterop
                 };
             }
 
-            definition.Elements.Add(new(
-                Content:
-                    body != null
-                    ? $$"""
-                        {{getType.GetFullyQualifiedName()}} {{definition.Type.Name}}::{{field.Name}}(){{(field.IsStatic ? "" : " const")}} {
-                            {{new[] { CppPrinter.Print(body) }.JoinAndIndent("    ")}}
-                        }
-                        """
-                    : $$"""
+            if (body != null)
+            {
+                getRecipe.AddDefinition(result, field.Name, body, field.IsStatic);
+            }
+            else
+            {
+                definition.Elements.Add(new(
+                    Content:
+                        $$"""
                         {{getType.GetFullyQualifiedName()}} {{definition.Type.Name}}::{{field.Name}}(){{(field.IsStatic ? "" : " const")}} {
                             {{GenerationUtility.JoinAndIndent(invocation!, "    ")}}
                         }
                         """,
-                TypeDefinitionsReferenced: new[]
-                {
-                    definition.Type,
-                    getType,
-                    CppObjectHandle.GetCppType(context),
-                    CppReinteropException.GetCppType(context)
-                }
-            ));
+                    TypeDefinitionsReferenced: new[]
+                    {
+                        definition.Type,
+                        getType,
+                        CppObjectHandle.GetCppType(context),
+                        CppReinteropException.GetCppType(context)
+                    }
+                ));
+            }
 
             IReadOnlyList<CppStatement> setterBody = CppInterop.CallManagedFunction(
                 new CppIdentifier($"Field_set_{field.Name}"), setRecipe.CallArguments());
-            definition.Elements.Add(new(
-                Content:
-                    $$"""
-                    void {{definition.Type.Name}}::{{field.Name}}({{setType.GetFullyQualifiedName()}} value){{(field.IsStatic ? "" : " const")}} {
-                        {{new[] { CppPrinter.Print(setterBody) }.JoinAndIndent("    ")}}
-                    }
-                    """,
-                TypeDefinitionsReferenced: new[]
-                {
-                    definition.Type,
-                    setType,
-                    CppObjectHandle.GetCppType(context),
-                    CppReinteropException.GetCppType(context)
-                }
-            ));
+            setRecipe.AddDefinition(result, field.Name, setterBody, field.IsStatic);
         }
     }
 }

@@ -179,5 +179,72 @@ namespace Reinterop
                 CSharpContent: csharpContent
             ));
         }
+
+        /// <summary>
+        /// Adds the wrapped function's own declaration - "[static] returnType name(params) [const];" -
+        /// the shape shared by ordinary methods, property accessors, and field accessors. Callers with
+        /// a differently-shaped declaration (operators, a generic method's template specialization,
+        /// non-blittable constructors) still build it by hand.
+        /// </summary>
+        public void AddDeclaration(GeneratedResult result, string name, bool isStatic = false, bool isPrivate = false)
+        {
+            string modifiers = isStatic ? "static " : "";
+            string afterModifiers = isStatic ? "" : " const";
+
+            result.CppDeclaration.Elements.Add(new(
+                Content: $"{modifiers}{ReturnType.GetFullyQualifiedName()} {name}({ParameterListDeclaration()}){afterModifiers};",
+                TypeDeclarationsReferenced: new[] { ReturnType }.Concat(ParameterTypes),
+                IsPrivate: isPrivate
+            ));
+        }
+
+        /// <summary>
+        /// Adds the wrapped function's own definition - "returnType Type::name(params) [const] { body }" -
+        /// the counterpart to <see cref="AddDeclaration"/>. <paramref name="templatePrefix"/> and
+        /// <paramref name="templateSpecialization"/> support a generic method's "template &lt;&gt; ...
+        /// name&lt;T&gt;(...)" specialization, which (unlike the common case) has no matching call to
+        /// <see cref="AddDeclaration"/> alongside it.
+        /// </summary>
+        public void AddDefinition(
+            GeneratedResult result,
+            string name,
+            IReadOnlyList<CppStatement> body,
+            bool isStatic = false,
+            string typeTemplateSpecialization = "",
+            string templatePrefix = "",
+            string templateSpecialization = "")
+        {
+            GeneratedCppDefinition definition = result.CppDefinition;
+            string afterModifiers = isStatic ? "" : " const";
+
+            definition.Elements.Add(new(
+                Content:
+                    $$"""
+                    {{templatePrefix}}{{ReturnType.GetFullyQualifiedName()}} {{definition.Type.Name}}{{typeTemplateSpecialization}}::{{name}}{{templateSpecialization}}({{ParameterListDeclaration()}}){{afterModifiers}} {
+                        {{new[] { CppPrinter.Print(body) }.JoinAndIndent("    ")}}
+                    }
+                    """,
+                TypeDefinitionsReferenced: new[]
+                {
+                    definition.Type,
+                    ReturnType,
+                    CppObjectHandle.GetCppType(_context),
+                    CppReinteropException.GetCppType(_context)
+                }.Concat(ParameterTypes)
+            ));
+        }
+
+        /// <summary>Adds both <see cref="AddDeclaration"/> and <see cref="AddDefinition"/> at once.</summary>
+        public void AddFunction(
+            GeneratedResult result,
+            string name,
+            IReadOnlyList<CppStatement> body,
+            bool isStatic = false,
+            string typeTemplateSpecialization = "",
+            bool isPrivate = false)
+        {
+            AddDeclaration(result, name, isStatic, isPrivate);
+            AddDefinition(result, name, body, isStatic, typeTemplateSpecialization);
+        }
     }
 }
