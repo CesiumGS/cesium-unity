@@ -105,31 +105,12 @@ namespace Reinterop
 
             // If this is an instance method, pass the current object as the first (implicit "thiz") parameter.
             CppType? instanceType = method.IsStatic ? null : result.CppDefinition.Type.AsParameterType();
-            CppInteropFunction recipe = new(context, parameters, returnType, instanceType);
+            CppInteropFunction recipe = new(context, interopName, parameters, returnType, instanceType);
 
             // A private, static field of function pointer type that will call
-            // into a managed delegate for this method.
-            declaration.Elements.Add(new(
-                Content: $"static {recipe.InteropReturnType.GetFullyQualifiedName()} (*{interopName})({recipe.InteropParameterListDeclaration()});",
-                IsPrivate: true,
-                TypeDeclarationsReferenced: new[] { recipe.InteropReturnType }.Concat(recipe.ParameterInteropTypes)
-            ));
-
-            definition.Elements.Add(new(
-                Content: $"{recipe.InteropReturnType.GetFullyQualifiedName()} (*{definition.Type.GetFullyQualifiedName(false)}::{interopName})({recipe.InteropParameterListDeclaration()}) = nullptr;",
-                TypeDeclarationsReferenced: new[] { recipe.InteropReturnType }.Concat(recipe.ParameterInteropTypes)
-            ));
-
-            // The static field should be initialized at startup.
+            // into a managed delegate for this method, initialized at startup.
             var (csName, csContent) = Interop.CreateCSharpDelegateInit(context, item.Type, method, interopName);
-            init.Functions.Add(new(
-                CppName: $"{definition.Type.GetFullyQualifiedName()}::{interopName}",
-                CppTypeSignature: $"{recipe.InteropReturnType.GetFullyQualifiedName()} (*)({recipe.InteropParameterTypeList()})",
-                CppTypeDefinitionsReferenced: new[] { definition.Type },
-                CppTypeDeclarationsReferenced: new[] { recipe.InteropReturnType }.Concat(recipe.ParameterTypes),
-                CSharpName: csName,
-                CSharpContent: csContent
-            ));
+            recipe.AddInteropFunctionPointer(declaration, definition, init, definition.Type.GetFullyQualifiedName(false), csName, csContent);
 
             // Method declaration
             // Skip method declaration for generic methods, because we only need the generic version above.

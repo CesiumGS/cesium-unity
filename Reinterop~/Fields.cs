@@ -78,48 +78,20 @@ namespace Reinterop
 
             CppType? instanceType = !field.IsStatic ? result.CppDefinition.Type.AsParameterType() : null;
 
-            CppInteropFunction getRecipe = new(context, Array.Empty<CppInteropParameter>(), getType, instanceType);
-            CppInteropFunction setRecipe = new(context, new[] { new CppInteropParameter("value", setType) }, CppType.Void, instanceType);
+            CppInteropFunction getRecipe = new(context, $"Field_get_{field.Name}", Array.Empty<CppInteropParameter>(), getType, instanceType);
+            CppInteropFunction setRecipe = new(context, $"Field_set_{field.Name}", new[] { new CppInteropParameter("value", setType) }, CppType.Void, instanceType);
 
-            // Add the static fields for the get/set functions
-            declaration.Elements.Add(new(
-                Content: $"static {getRecipe.InteropReturnType.GetFullyQualifiedName()} (*Field_get_{field.Name})({getRecipe.InteropParameterListDeclaration()});",
-                IsPrivate: true,
-                TypeDeclarationsReferenced: new[] { getRecipe.InteropReturnType }));
-            definition.Elements.Add(new(
-                Content: $"{getRecipe.InteropReturnType.GetFullyQualifiedName()} (*{definition.Type.GetFullyQualifiedName(false)}::Field_get_{field.Name})({getRecipe.InteropParameterListDeclaration()}) = nullptr;",
-                TypeDeclarationsReferenced: new[] { getRecipe.InteropReturnType }
-            ));
+            // Add the static fields for the get/set functions, initialized at startup.
+            string qualifiedDefinitionName = definition.Type.GetFullyQualifiedName(false);
+            var (getCsName, getCsContent) = Interop.CreateCSharpDelegateInit(context, item.Type, field, isGet: true);
+            getRecipe.AddInteropFunctionPointer(
+                declaration, definition, init, qualifiedDefinitionName, getCsName, getCsContent,
+                signatureIncludesParameterNames: true, initReferencesInteropTypes: true);
 
-            declaration.Elements.Add(new(
-                Content: $"static {setRecipe.InteropReturnType.GetFullyQualifiedName()} (*Field_set_{field.Name})({setRecipe.InteropParameterListDeclaration()});",
-                IsPrivate: true,
-                TypeDeclarationsReferenced: new[] { setType.AsInteropType() }));
-            definition.Elements.Add(new(
-                Content: $"{setRecipe.InteropReturnType.GetFullyQualifiedName()} (*{definition.Type.GetFullyQualifiedName(false)}::Field_set_{field.Name})({setRecipe.InteropParameterListDeclaration()}) = nullptr;",
-                TypeDeclarationsReferenced: new[] { setType.AsInteropType() }
-            ));
-
-            // Initialize the fields at startup
-            var (csName, csContent) = Interop.CreateCSharpDelegateInit(context, item.Type, field, isGet: true);
-            init.Functions.Add(new(
-                CppName: $"{definition.Type.GetFullyQualifiedName()}::Field_get_{field.Name}",
-                CppTypeSignature: $"{getRecipe.InteropReturnType.GetFullyQualifiedName()} (*)({getRecipe.InteropParameterListDeclaration()})",
-                CppTypeDefinitionsReferenced: new[] { definition.Type },
-                CppTypeDeclarationsReferenced: new[] { getRecipe.InteropReturnType },
-                CSharpName: csName,
-                CSharpContent: csContent
-            ));
-
-            (csName, csContent) = Interop.CreateCSharpDelegateInit(context, item.Type, field, isGet: false);
-            init.Functions.Add(new(
-                CppName: $"{definition.Type.GetFullyQualifiedName()}::Field_set_{field.Name}",
-                CppTypeSignature: $"{setRecipe.InteropReturnType.GetFullyQualifiedName()} (*)({setRecipe.InteropParameterListDeclaration()})",
-                CppTypeDefinitionsReferenced: new[] { definition.Type },
-                CppTypeDeclarationsReferenced: new[] { setType.AsInteropType() },
-                CSharpName: csName,
-                CSharpContent: csContent
-            ));
+            var (setCsName, setCsContent) = Interop.CreateCSharpDelegateInit(context, item.Type, field, isGet: false);
+            setRecipe.AddInteropFunctionPointer(
+                declaration, definition, init, qualifiedDefinitionName, setCsName, setCsContent,
+                signatureIncludesParameterNames: true, initReferencesInteropTypes: true);
 
             // Method declaration
             declaration.Elements.Add(new(

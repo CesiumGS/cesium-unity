@@ -42,36 +42,17 @@ namespace Reinterop
             var parameters = constructor.Parameters
                 .Select(parameter => new CppInteropParameter(parameter.Name, CppType.FromCSharp(context, parameter.Type).AsParameterType()))
                 .ToArray();
-            CppInteropFunction recipe = new(context, parameters, declaration.Type);
-
             string interopFunctionName = $"Construct_{Interop.HashParameters(constructor.Parameters)}";
+            CppInteropFunction recipe = new(context, interopFunctionName, parameters, declaration.Type);
 
             string templateSpecialization = Interop.GetTemplateSpecialization(declaration.Type);
 
             // A private, static field of function pointer type that will call
-            // into a managed delegate for this constructor.
-            declaration.Elements.Add(new(
-                Content: $"static {recipe.InteropReturnType.GetFullyQualifiedName()} (*{interopFunctionName})({recipe.InteropParameterListDeclaration()});",
-                IsPrivate: true,
-                TypeDeclarationsReferenced: new[] { recipe.InteropReturnType }.Concat(recipe.InteropParameterTypes)
-
-            ));
-
-            definition.Elements.Add(new(
-                Content: $"{recipe.InteropReturnType.GetFullyQualifiedName()} (*{definition.Type.Name}{templateSpecialization}::{interopFunctionName})({recipe.InteropParameterListDeclaration()}) = nullptr;",
-                TypeDeclarationsReferenced: new[] { recipe.InteropReturnType }.Concat(recipe.InteropParameterTypes)
-            ));
-
-            // The static field should be initialized at startup.
+            // into a managed delegate for this constructor, initialized at startup.
             var (csName, csContent) = Interop.CreateCSharpDelegateInit(context, item.Type, constructor, interopFunctionName);
-            init.Functions.Add(new(
-                CppName: $"{definition.Type.GetFullyQualifiedName()}::{interopFunctionName}",
-                CppTypeSignature: $"{recipe.InteropReturnType.GetFullyQualifiedName()} (*)({recipe.InteropParameterTypeList()})",
-                CppTypeDefinitionsReferenced: new[] { definition.Type },
-                CppTypeDeclarationsReferenced: new[] { recipe.InteropReturnType }.Concat(recipe.InteropParameters.Select(parameter => parameter.Type)),
-                CSharpName: csName,
-                CSharpContent: csContent
-            ));
+            recipe.AddInteropFunctionPointer(
+                declaration, definition, init, $"{definition.Type.Name}{templateSpecialization}", csName, csContent,
+                referenceFullInteropParameterList: true);
 
             // For blittable structs, add static "Construct" functions rather than C++ constructors.
             // This way we can use default construction and member initialization and avoid a call into C# to

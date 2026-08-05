@@ -22,6 +22,9 @@ namespace Reinterop
     {
         private readonly CppGenerationContext _context;
 
+        /// <summary>The name of the interop function pointer field, e.g. "CallFoo_1a2b3c" or "Field_get_Bar".</summary>
+        public string Name { get; }
+
         /// <summary>The function's own parameters, as seen by its C++ caller (excludes "thiz").</summary>
         public IReadOnlyList<CppInteropParameter> Parameters { get; }
 
@@ -47,11 +50,13 @@ namespace Reinterop
         /// </param>
         public CppInteropFunction(
             CppGenerationContext context,
+            string name,
             IReadOnlyList<CppInteropParameter> parameters,
             CppType returnType,
             CppType? instanceType = null)
         {
             _context = context;
+            Name = name;
             Parameters = parameters;
             ReturnType = returnType;
 
@@ -132,6 +137,67 @@ namespace Reinterop
                 resultTypeName: HasStructRewrite ? null : "auto",
                 returnExpression: new CppRaw(ReturnType.GetConversionFromInteropType(_context, resultVariableName)),
                 resultVariableName: resultVariableName);
+        }
+
+        /// <summary>
+        /// Declares the private static interop function pointer field, defines it (initialized to
+        /// nullptr), and registers it for initialization at startup - the boilerplate that's identical,
+        /// aside from a few per-call-site conventions, for every method, property accessor, constructor,
+        /// and field accessor.
+        /// </summary>
+        /// <param name="qualifiedDefinitionName">
+        /// The type name to qualify the out-of-line field pointer definition with, e.g.
+        /// "MyNamespace::MyClass" or (for constructors of generic types) "MyClass&lt;T&gt;".
+        /// </param>
+        /// <param name="signatureIncludesParameterNames">
+        /// True if the init registration's CppTypeSignature should list "Type name" pairs rather than
+        /// just types - Fields.cs's get/set accessors do this; every other call site does not.
+        /// </param>
+        /// <param name="referenceFullInteropParameterList">
+        /// True if the field pointer's declaration/definition/init-registration should reference the
+        /// types of the *entire* interop parameter list (including "thiz"/"pReturnValue"/"reinteropException")
+        /// rather than just <see cref="Parameters"/> - Constructors.cs does this so that, for a
+        /// blittable-struct-return rewrite, the returned struct type itself gets forward-declared.
+        /// </param>
+        /// <param name="initReferencesInteropTypes">
+        /// True if the init registration should reference the interop parameter types (e.g. "void*"
+        /// for a class-wrapper field) rather than the parameters' own types - Fields.cs's get/set
+        /// accessors do this; every other call site references the parameters' own types instead.
+        /// </param>
+        public void AddInteropFunctionPointer(
+            GeneratedCppDeclaration declaration,
+            GeneratedCppDefinition definition,
+            GeneratedInit init,
+            string qualifiedDefinitionName,
+            string csharpName,
+            string csharpContent,
+            bool signatureIncludesParameterNames = false,
+            bool referenceFullInteropParameterList = false,
+            bool initReferencesInteropTypes = false)
+        {
+            IEnumerable<CppType> fieldPointerTypes = new[] { InteropReturnType }
+                .Concat(referenceFullInteropParameterList ? InteropParameterTypes : ParameterInteropTypes);
+            IEnumerable<CppType> initTypes = initReferencesInteropTypes
+                ? fieldPointerTypes
+                : new[] { InteropReturnType }.Concat(referenceFullInteropParameterList ? InteropParameters.Select(parameter => parameter.Type) : ParameterTypes);
+
+            declaration.Elements.Add(new(
+                Content: $"static {InteropReturnType.GetFullyQualifiedName()} (*{Name})({InteropParameterListDeclaration()});",
+                IsPrivate: true,
+                TypeDeclarationsReferenced: fieldPointerTypes));
+
+            definition.Elements.Add(new(
+                Content: $"{InteropReturnType.GetFullyQualifiedName()} (*{qualifiedDefinitionName}::{Name})({InteropParameterListDeclaration()}) = nullptr;",
+                TypeDeclarationsReferenced: fieldPointerTypes));
+
+            init.Functions.Add(new(
+                CppName: $"{definition.Type.GetFullyQualifiedName()}::{Name}",
+                CppTypeSignature: $"{InteropReturnType.GetFullyQualifiedName()} (*)({(signatureIncludesParameterNames ? InteropParameterListDeclaration() : InteropParameterTypeList())})",
+                CppTypeDefinitionsReferenced: new[] { definition.Type },
+                CppTypeDeclarationsReferenced: initTypes,
+                CSharpName: csharpName,
+                CSharpContent: csharpContent
+            ));
         }
     }
 }
