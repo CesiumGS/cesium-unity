@@ -11,10 +11,8 @@ namespace Reinterop.Tests
     public class CSharpInteropTests
     {
         [Test]
-        public void CallNativeFunction_VoidReturn_NoAlwaysReturn_MatchesOriginalTemplate()
+        public void CallNativeFunction_VoidReturn_MatchesOriginalTemplate()
         {
-            // Mirrors the void-returning method shape in MethodsImplementedInCpp.cs, which does not
-            // add a trailing "return;" statement.
             IReadOnlyList<CSharpStatement> body = CSharpInterop.CallNativeFunction(
                 new CSharpIdentifier("CallFoo_1234"),
                 new CSharpExpression[] { new CSharpRaw("a"), new CSharpRaw("b") });
@@ -25,28 +23,6 @@ namespace Reinterop.Tests
                 "CallFoo_1234(a, b, &reinteropException);",
                 "if (reinteropException != System.IntPtr.Zero)",
                 "    throw (System.Exception)Reinterop.ObjectHandleUtility.GetObjectAndFreeHandle(reinteropException);"
-            });
-
-            Assert.That(CSharpPrinter.Print(body), Is.EqualTo(expected));
-        }
-
-        [Test]
-        public void CallNativeFunction_VoidReturn_AlwaysReturn_MatchesOriginalTemplate()
-        {
-            // Mirrors the void-returning delegate Invoke() shape in CustomDelegateGenerator.cs, which
-            // always ends with a "return;" statement even though the method is void.
-            IReadOnlyList<CSharpStatement> body = CSharpInterop.CallNativeFunction(
-                new CSharpIdentifier("CallFoo_1234"),
-                new CSharpExpression[] { new CSharpRaw("a"), new CSharpRaw("b") },
-                alwaysReturn: true);
-
-            string expected = string.Join(Environment.NewLine, new[]
-            {
-                "System.IntPtr reinteropException = System.IntPtr.Zero;",
-                "CallFoo_1234(a, b, &reinteropException);",
-                "if (reinteropException != System.IntPtr.Zero)",
-                "    throw (System.Exception)Reinterop.ObjectHandleUtility.GetObjectAndFreeHandle(reinteropException);",
-                "return;"
             });
 
             Assert.That(CSharpPrinter.Print(body), Is.EqualTo(expected));

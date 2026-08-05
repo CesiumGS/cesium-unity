@@ -24,10 +24,7 @@ namespace Reinterop
         /// </param>
         /// <param name="returnExpression">
         /// If a return statement should be generated, the (already converted) expression to return.
-        /// </param>
-        /// <param name="alwaysReturn">
-        /// True to add a bare "return;" statement even when <paramref name="returnExpression"/> is
-        /// null - for call sites whose method body always ends with a return, even when void.
+        /// Null if the call returns void.
         /// </param>
         /// <param name="resultVariableName">The name to declare the captured result variable as.</param>
         public static IReadOnlyList<CSharpStatement> CallNativeFunction(
@@ -35,7 +32,6 @@ namespace Reinterop
             IReadOnlyList<CSharpExpression> arguments,
             string? resultTypeName = null,
             CSharpExpression? returnExpression = null,
-            bool alwaysReturn = false,
             string resultVariableName = "result")
         {
             List<CSharpStatement> statements = new()
@@ -60,8 +56,6 @@ namespace Reinterop
 
             if (returnExpression != null)
                 statements.Add(new CSharpReturn(returnExpression));
-            else if (alwaysReturn)
-                statements.Add(new CSharpReturn());
 
             return statements;
         }

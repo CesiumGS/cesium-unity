@@ -142,8 +142,7 @@ namespace Reinterop
                                     new CSharpIdentifier(invokeCallbackName),
                                     callInvokeInteropParameters.Select(p => (CSharpExpression)new CSharpRaw(p)).ToArray(),
                                     resultTypeName: invokeMethod.ReturnType.SpecialType != SpecialType.System_Void ? "var" : null,
-                                    returnExpression: invokeMethod.ReturnType.SpecialType != SpecialType.System_Void ? new CSharpRaw(csReturnType.GetReturnValueConversionFromInteropType("result")) : null,
-                                    alwaysReturn: true)) }.JoinAndIndent("                                ")}}
+                                    returnExpression: invokeMethod.ReturnType.SpecialType != SpecialType.System_Void ? new CSharpRaw(csReturnType.GetReturnValueConversionFromInteropType("result")) : null)) }.JoinAndIndent("                                ")}}
                             }
                         }
 
