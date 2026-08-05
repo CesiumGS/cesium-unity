@@ -229,14 +229,32 @@ namespace Reinterop
             parameterPassStrings = parameterPassStrings.Concat(new[] {"&reinteropException"}).Where(s => !string.IsNullOrEmpty(s));
             if (returnType.Name == "void" && !returnType.Flags.HasFlag(CppTypeFlags.Pointer))
             {
+                IReadOnlyList<CppStatement> body = CppInterop.CallManagedFunction(interopName, parameterPassStrings);
                 definition.Elements.Add(new(
                     Content:
                         $$"""
                         {{templatePrefix}}{{returnType.GetFullyQualifiedName()}} {{definition.Type.Name}}{{typeTemplateSpecialization}}::{{method.Name}}{{templateSpecialization}}({{string.Join(", ", parameterStrings)}}){{afterModifiers}} {
-                            void* reinteropException = nullptr;
-                            {{interopName}}({{string.Join(", ", parameterPassStrings)}});
-                            if (reinteropException != nullptr)
-                                throw Reinterop::ReinteropNativeException(::DotNet::System::Exception(::DotNet::Reinterop::ObjectHandle(reinteropException)));
+                            {{new[] { CppPrinter.Print(body) }.JoinAndIndent("    ")}}
+                        }
+                        """,
+                    TypeDefinitionsReferenced: new[]
+                    {
+                        definition.Type,
+                        returnType,
+                        CppObjectHandle.GetCppType(context),
+                        CppReinteropException.GetCppType(context)
+                    }.Concat(parameters.Select(parameter => parameter.Type))
+                ));
+            }
+            else if (!hasStructRewrite)
+            {
+                IReadOnlyList<CppStatement> body = CppInterop.CallManagedFunction(
+                    interopName, parameterPassStrings, "auto", returnType.GetConversionFromInteropType(context, "result"));
+                definition.Elements.Add(new(
+                    Content:
+                        $$"""
+                        {{templatePrefix}}{{returnType.GetFullyQualifiedName()}} {{definition.Type.Name}}{{typeTemplateSpecialization}}::{{method.Name}}{{templateSpecialization}}({{string.Join(", ", parameterStrings)}}){{afterModifiers}} {
+                            {{new[] { CppPrinter.Print(body) }.JoinAndIndent("    ")}}
                         }
                         """,
                     TypeDefinitionsReferenced: new[]
@@ -250,27 +268,25 @@ namespace Reinterop
             }
             else
             {
-                string[] invocation = new[] { $"auto result = {interopName}({string.Join(", ", parameterPassStrings)});" };
-                string returnStatement = $"return {returnType.GetConversionFromInteropType(context, "result")};";
-                if (hasStructRewrite)
+                string[] invocation;
+                string returnStatement;
+                if (returnType.Kind == InteropTypeKind.Nullable)
                 {
-                    if (returnType.Kind == InteropTypeKind.Nullable)
+                    invocation = new[]
                     {
-                        invocation = new[]
-                        {
-                            $"{returnType.GenericArguments.FirstOrDefault().GetFullyQualifiedName()} result;",
-                            $"std::uint8_t resultIsValid = {interopName}({string.Join(", ", parameterPassStrings)});"
-                        };
-                        returnStatement = $"return resultIsValid ? std::make_optional(std::move({returnType.GetConversionFromInteropType(context, "result")})) : std::nullopt;";
-                    }
-                    else
+                        $"{returnType.GenericArguments.FirstOrDefault().GetFullyQualifiedName()} result;",
+                        $"std::uint8_t resultIsValid = {interopName}({string.Join(", ", parameterPassStrings)});"
+                    };
+                    returnStatement = $"return resultIsValid ? std::make_optional(std::move({returnType.GetConversionFromInteropType(context, "result")})) : std::nullopt;";
+                }
+                else
+                {
+                    invocation = new[]
                     {
-                        invocation = new[]
-                        {
-                            $"{returnType.GetFullyQualifiedName()} result;",
-                            $"{interopName}({string.Join(", ", parameterPassStrings)});"
-                        };
-                    }
+                        $"{returnType.GetFullyQualifiedName()} result;",
+                        $"{interopName}({string.Join(", ", parameterPassStrings)});"
+                    };
+                    returnStatement = $"return {returnType.GetConversionFromInteropType(context, "result")};";
                 }
 
                 definition.Elements.Add(new(
