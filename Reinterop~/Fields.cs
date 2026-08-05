@@ -86,12 +86,12 @@ namespace Reinterop
             var (getCsName, getCsContent) = Interop.CreateCSharpDelegateInit(context, item.Type, field, isGet: true);
             getRecipe.AddInteropFunctionPointer(
                 declaration, definition, init, qualifiedDefinitionName, getCsName, getCsContent,
-                signatureIncludesParameterNames: true, initReferencesInteropTypes: true);
+                initReferencesInteropTypes: true);
 
             var (setCsName, setCsContent) = Interop.CreateCSharpDelegateInit(context, item.Type, field, isGet: false);
             setRecipe.AddInteropFunctionPointer(
                 declaration, definition, init, qualifiedDefinitionName, setCsName, setCsContent,
-                signatureIncludesParameterNames: true, initReferencesInteropTypes: true);
+                initReferencesInteropTypes: true);
 
             // Method declaration
             declaration.Elements.Add(new(

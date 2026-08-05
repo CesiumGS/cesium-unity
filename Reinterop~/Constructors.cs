@@ -51,8 +51,7 @@ namespace Reinterop
             // into a managed delegate for this constructor, initialized at startup.
             var (csName, csContent) = Interop.CreateCSharpDelegateInit(context, item.Type, constructor, interopFunctionName);
             recipe.AddInteropFunctionPointer(
-                declaration, definition, init, $"{definition.Type.Name}{templateSpecialization}", csName, csContent,
-                referenceFullInteropParameterList: true);
+                declaration, definition, init, $"{definition.Type.Name}{templateSpecialization}", csName, csContent);
 
             // For blittable structs, add static "Construct" functions rather than C++ constructors.
             // This way we can use default construction and member initialization and avoid a call into C# to
