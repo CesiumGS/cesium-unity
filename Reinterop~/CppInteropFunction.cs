@@ -59,6 +59,7 @@ namespace Reinterop
             Name = name;
             Parameters = parameters;
             ReturnType = returnType;
+            _isInstance = instanceType != null;
 
             IEnumerable<CppInteropParameter> allParameters = parameters;
             if (instanceType != null)
@@ -78,6 +79,38 @@ namespace Reinterop
             InteropParameters = interopParameters
                 .Concat(new[] { (ParameterName: "reinteropException", CallSiteName: "", Type: CppType.VoidPointerPointer, InteropType: CppType.VoidPointerPointer) })
                 .ToArray();
+        }
+
+        private readonly bool _isInstance;
+        private bool _isPrivate;
+        private bool _skipDeclaration;
+        private string _templatePrefix = "";
+        private string _templateSpecialization = "";
+
+        /// <summary>Marks the wrapped function's own declaration (not the interop pointer field, which is always private) as private.</summary>
+        public CppInteropFunction AsPrivate()
+        {
+            _isPrivate = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Skips the wrapped function's own declaration in <see cref="AddToGeneration"/> - for a generic
+        /// method specialization, which reuses the template declaration added separately, once, for the
+        /// first specialization of that template.
+        /// </summary>
+        public CppInteropFunction WithoutDeclaration()
+        {
+            _skipDeclaration = true;
+            return this;
+        }
+
+        /// <summary>Marks the wrapped function's own definition as a generic method specialization, e.g. "template &lt;&gt; ... Method&lt;int&gt;(...)".</summary>
+        public CppInteropFunction AsTemplateSpecialization(IEnumerable<CppType> templateArguments)
+        {
+            _templatePrefix = "template <> ";
+            _templateSpecialization = $"<{string.Join(", ", templateArguments.Select(t => t.GetFullyQualifiedName()))}>";
+            return this;
         }
 
         /// <summary>The wrapped function's own parameter list, e.g. "int x, float y".</summary>
@@ -117,15 +150,17 @@ namespace Reinterop
         /// <summary>
         /// Builds the call+return body, automatically choosing between a void call, a value-returning
         /// call, and a struct-return-rewrite call (with the result produced via an out-parameter of type
-        /// <paramref name="outParameterTypeName"/>). Returns null for the one shape not modeled here: a
-        /// Nullable-wrapped struct-return rewrite, which returns a "resultIsValid" flag rather than using
-        /// an exception out-parameter alone - callers must still build that shape by hand.
+        /// <paramref name="outParameterTypeName"/>, which defaults to <see cref="ReturnType"/> itself).
+        /// Returns null for the one shape not modeled here: a Nullable-wrapped struct-return rewrite,
+        /// which returns a "resultIsValid" flag rather than using an exception out-parameter alone -
+        /// callers must still build that shape by hand (and pass a null body to <see cref="AddToGeneration"/>).
         /// </summary>
-        public IReadOnlyList<CppStatement>? Body(CppExpression functionPointer, string? outParameterTypeName = null, string resultVariableName = "result")
+        public IReadOnlyList<CppStatement>? Body(string? outParameterTypeName = null, string resultVariableName = "result")
         {
             if (HasStructRewrite && ReturnType.Kind == InteropTypeKind.Nullable)
                 return null;
 
+            CppExpression functionPointer = new CppIdentifier(Name);
             IReadOnlyList<CppArgument> arguments = CallArguments(outParameterTypeName);
 
             bool isVoid = ReturnType.Name == "void" && !ReturnType.Flags.HasFlag(CppTypeFlags.Pointer);
@@ -140,16 +175,41 @@ namespace Reinterop
         }
 
         /// <summary>
+        /// Adds everything needed to expose this interop function: the interop function pointer field
+        /// (declaration, out-of-line definition initialized to nullptr, and startup init registration),
+        /// the wrapped function's own declaration (unless <see cref="WithoutDeclaration"/> was used), and
+        /// (if <paramref name="body"/> is non-null) its definition. A null <paramref name="body"/> (see
+        /// <see cref="Body"/>) means the caller still needs to add a hand-built definition of its own.
+        /// </summary>
+        public void AddToGeneration(
+            GeneratedResult result,
+            string name,
+            string csharpName,
+            string csharpContent,
+            IReadOnlyList<CppStatement>? body)
+        {
+            AddInteropFunctionPointer(result, result.CppDefinition.Type.GetFullyQualifiedName(false), csharpName, csharpContent);
+
+            if (!_skipDeclaration)
+                AddDeclaration(result, name);
+
+            if (body != null)
+                AddDefinition(result, name, body);
+        }
+
+        /// <summary>
         /// Declares the private static interop function pointer field, defines it (initialized to
         /// nullptr), and registers it for initialization at startup - the boilerplate that's identical,
         /// aside from a per-call-site convention or two, for every method, property accessor,
-        /// constructor, and field accessor.
+        /// constructor, and field accessor. Exposed separately (rather than only through
+        /// <see cref="AddToGeneration"/>) for constructors, whose own declaration/definition don't fit
+        /// that method's shape (no return type, and an initializer-list body).
         /// </summary>
         /// <param name="qualifiedDefinitionName">
         /// The type name to qualify the out-of-line field pointer definition with, e.g.
         /// "MyNamespace::MyClass" or (for constructors of generic types) "MyClass&lt;T&gt;".
         /// </param>
-        public void AddToGeneration(
+        public void AddInteropFunctionPointer(
             GeneratedResult result,
             string qualifiedDefinitionName,
             string csharpName,
@@ -180,47 +240,28 @@ namespace Reinterop
             ));
         }
 
-        /// <summary>
-        /// Adds the wrapped function's own declaration - "[static] returnType name(params) [const];" -
-        /// the shape shared by ordinary methods, property accessors, and field accessors. Callers with
-        /// a differently-shaped declaration (operators, a generic method's template specialization,
-        /// non-blittable constructors) still build it by hand.
-        /// </summary>
-        public void AddDeclaration(GeneratedResult result, string name, bool isStatic = false, bool isPrivate = false)
+        private void AddDeclaration(GeneratedResult result, string name)
         {
-            string modifiers = isStatic ? "static " : "";
-            string afterModifiers = isStatic ? "" : " const";
+            string modifiers = _isInstance ? "" : "static ";
+            string afterModifiers = _isInstance ? " const" : "";
 
             result.CppDeclaration.Elements.Add(new(
                 Content: $"{modifiers}{ReturnType.GetFullyQualifiedName()} {name}({ParameterListDeclaration()}){afterModifiers};",
                 TypeDeclarationsReferenced: new[] { ReturnType }.Concat(ParameterTypes),
-                IsPrivate: isPrivate
+                IsPrivate: _isPrivate
             ));
         }
 
-        /// <summary>
-        /// Adds the wrapped function's own definition - "returnType Type::name(params) [const] { body }" -
-        /// the counterpart to <see cref="AddDeclaration"/>. <paramref name="templatePrefix"/> and
-        /// <paramref name="templateSpecialization"/> support a generic method's "template &lt;&gt; ...
-        /// name&lt;T&gt;(...)" specialization, which (unlike the common case) has no matching call to
-        /// <see cref="AddDeclaration"/> alongside it.
-        /// </summary>
-        public void AddDefinition(
-            GeneratedResult result,
-            string name,
-            IReadOnlyList<CppStatement> body,
-            bool isStatic = false,
-            string typeTemplateSpecialization = "",
-            string templatePrefix = "",
-            string templateSpecialization = "")
+        private void AddDefinition(GeneratedResult result, string name, IReadOnlyList<CppStatement> body)
         {
             GeneratedCppDefinition definition = result.CppDefinition;
-            string afterModifiers = isStatic ? "" : " const";
+            string afterModifiers = _isInstance ? " const" : "";
+            string typeTemplateSpecialization = GetTypeTemplateSpecialization(definition.Type);
 
             definition.Elements.Add(new(
                 Content:
                     $$"""
-                    {{templatePrefix}}{{ReturnType.GetFullyQualifiedName()}} {{definition.Type.Name}}{{typeTemplateSpecialization}}::{{name}}{{templateSpecialization}}({{ParameterListDeclaration()}}){{afterModifiers}} {
+                    {{_templatePrefix}}{{ReturnType.GetFullyQualifiedName()}} {{definition.Type.Name}}{{typeTemplateSpecialization}}::{{name}}{{_templateSpecialization}}({{ParameterListDeclaration()}}){{afterModifiers}} {
                         {{new[] { CppPrinter.Print(body) }.JoinAndIndent("    ")}}
                     }
                     """,
@@ -234,17 +275,13 @@ namespace Reinterop
             ));
         }
 
-        /// <summary>Adds both <see cref="AddDeclaration"/> and <see cref="AddDefinition"/> at once.</summary>
-        public void AddFunction(
-            GeneratedResult result,
-            string name,
-            IReadOnlyList<CppStatement> body,
-            bool isStatic = false,
-            string typeTemplateSpecialization = "",
-            bool isPrivate = false)
-        {
-            AddDeclaration(result, name, isStatic, isPrivate);
-            AddDefinition(result, name, body, isStatic, typeTemplateSpecialization);
-        }
+        /// <summary>
+        /// The "&lt;T, U&gt;" suffix needed to qualify a member of a generic type's out-of-line
+        /// definition, e.g. "MyClass&lt;T&gt;::Method(...)" - empty if the type isn't generic.
+        /// </summary>
+        public static string GetTypeTemplateSpecialization(CppType type) =>
+            type.GenericArguments != null && type.GenericArguments.Count > 0
+                ? "<" + string.Join(", ", type.GenericArguments.Select(t => t.GetFullyQualifiedName())) + ">"
+                : "";
     }
 }

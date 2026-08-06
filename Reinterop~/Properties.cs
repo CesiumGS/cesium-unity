@@ -24,8 +24,6 @@ namespace Reinterop
 
         private static void GenerateSingleMethod(CppGenerationContext context, TypeToGenerate item, GeneratedResult result, IPropertySymbol property, IMethodSymbol method)
         {
-            GeneratedCppDefinition definition = result.CppDefinition;
-
             CppType returnType = CppType.FromCSharp(context, method.ReturnType).AsReturnType();
             CppInteropParameter[] parameters = method.Parameters
                 .Select(parameter => new CppInteropParameter(parameter.Name, CppType.FromCSharp(context, parameter.Type).AsParameterType()))
@@ -33,25 +31,12 @@ namespace Reinterop
 
             // If this is an instance method, pass the current object as the first (implicit "thiz") parameter.
             CppType? instanceType = method.IsStatic ? null : result.CppDefinition.Type.AsParameterType();
-            CppInteropFunction recipe = new(context, $"Property_{method.Name}", parameters, returnType, instanceType);
+            CppInteropFunction recipe = new CppInteropFunction(context, $"Property_{method.Name}", parameters, returnType, instanceType);
 
-            // A private, static field of function pointer type that will call
-            // into a managed delegate for this method, initialized at startup.
+            string propertyName = property.IsIndexer ? "operator[]" : property.Name;
+
             var (csName, csContent) = Interop.CreateCSharpDelegateInit(context, item.Type, method, $"Property_{method.Name}");
-            recipe.AddToGeneration(result, definition.Type.GetFullyQualifiedName(false), csName, csContent);
-
-            string propertyName = property.Name;
-            if (property.IsIndexer)
-                propertyName = "operator[]";
-
-            string typeTemplateSpecialization = "";
-            if (definition.Type.GenericArguments != null && definition.Type.GenericArguments.Count > 0)
-            {
-                typeTemplateSpecialization = "<" + string.Join(", ", definition.Type.GenericArguments.Select(t => t.GetFullyQualifiedName())) + ">";
-            }
-
-            IReadOnlyList<CppStatement> body = recipe.Body(new CppIdentifier($"Property_{method.Name}"))!;
-            recipe.AddFunction(result, propertyName, body, method.IsStatic, typeTemplateSpecialization);
+            recipe.AddToGeneration(result, propertyName, csName, csContent, recipe.Body());
         }
     }
 }

@@ -50,7 +50,7 @@ namespace Reinterop
             // A private, static field of function pointer type that will call
             // into a managed delegate for this constructor, initialized at startup.
             var (csName, csContent) = Interop.CreateCSharpDelegateInit(context, item.Type, constructor, interopFunctionName);
-            recipe.AddToGeneration(result, $"{definition.Type.Name}{templateSpecialization}", csName, csContent);
+            recipe.AddInteropFunctionPointer(result, $"{definition.Type.Name}{templateSpecialization}", csName, csContent);
 
             // For blittable structs, add static "Construct" functions rather than C++ constructors.
             // This way we can use default construction and member initialization and avoid a call into C# to
@@ -64,7 +64,7 @@ namespace Reinterop
                 ));
 
                 // Constructor definition
-                IReadOnlyList<CppStatement> body = recipe.Body(new CppIdentifier(interopFunctionName), outParameterTypeName: definition.Type.Name)!;
+                IReadOnlyList<CppStatement> body = recipe.Body(outParameterTypeName: definition.Type.Name)!;
                 definition.Elements.Add(new(
                     Content:
                         $$"""
