@@ -42,8 +42,14 @@ namespace Reinterop
 
             string interopName = $"Call{method.Name}_{Interop.HashParameters(method.Parameters, method.TypeArguments)}";
 
+            // If this is an instance method, pass the current object as the first (implicit "thiz") parameter.
+            CppType? instanceType = method.IsStatic ? null : result.CppDefinition.Type.AsParameterType();
+            CppInteropFunction recipe = new CppInteropFunction(context, interopName, parameters, returnType, instanceType);
+
             // For op_Equality/op_Inequality, the interop function itself is private, and a public operator==/!= is added below to call it.
             bool addOperator = method.MethodKind == MethodKind.UserDefinedOperator && (method.Name == "op_Equality" || method.Name == "op_Inequality");
+            if (addOperator)
+                recipe.AsPrivate();
 
             if (method.IsGenericMethod)
             {
@@ -68,29 +74,6 @@ namespace Reinterop
                         ));
                 }
 
-                // Parameters of generic type are always passed as const references for maximum compatibility
-                Debug.Assert(parameters.Length == genericMethod.Parameters.Length);
-                for (int i = 0; i < parameters.Length && i < genericMethod.Parameters.Length; ++i)
-                {
-                    IParameterSymbol genericParameter = genericMethod.Parameters[i];
-                    CppInteropParameter parameter = parameters[i];
-
-                    if (genericParameter.Type.TypeKind == TypeKind.TypeParameter && (!parameter.Type.Flags.HasFlag(CppTypeFlags.Reference) || !parameter.Type.Flags.HasFlag(CppTypeFlags.Const)))
-                    {
-                        parameters[i] = parameter with { Type = parameter.Type.AsConstReference() };
-                    }
-                }
-            }
-
-            // If this is an instance method, pass the current object as the first (implicit "thiz") parameter.
-            CppType? instanceType = method.IsStatic ? null : result.CppDefinition.Type.AsParameterType();
-            CppInteropFunction recipe = new CppInteropFunction(context, interopName, parameters, returnType, instanceType);
-
-            if (addOperator)
-                recipe.AsPrivate();
-
-            if (method.IsGenericMethod)
-            {
                 // The generic template's own declaration was added above; only its specialization's definition is needed here.
                 recipe.WithoutDeclaration().AsTemplateSpecialization(method.TypeArguments.Select(t => CppType.FromCSharp(context, t)));
             }
@@ -98,52 +81,7 @@ namespace Reinterop
             // A private, static field of function pointer type that will call into a managed delegate
             // for this method, initialized at startup, plus the method's own declaration and definition.
             var (csName, csContent) = Interop.CreateCSharpDelegateInit(context, item.Type, method, interopName);
-            IReadOnlyList<CppStatement>? body = recipe.Body();
-            recipe.AddToGeneration(result, method.Name, csName, csContent, body);
-
-            if (body == null)
-            {
-                // The Nullable-with-struct-rewrite case (returns a "resultIsValid" flag alongside an
-                // out-parameter) isn't modeled by CppInteropFunction.Body, so it's still built as a
-                // plain string template.
-                var parameterPassStrings = recipe.InteropParameters.Select(parameter => parameter.Type.GetConversionToInteropType(context, parameter.CallSiteName));
-                parameterPassStrings = parameterPassStrings.Concat(new[] { "&reinteropException" }).Where(s => !string.IsNullOrEmpty(s));
-
-                string[] invocation = new[]
-                {
-                    $"{returnType.GenericArguments.FirstOrDefault().GetFullyQualifiedName()} result;",
-                    $"std::uint8_t resultIsValid = {interopName}({string.Join(", ", parameterPassStrings)});"
-                };
-                string returnStatement = $"return resultIsValid ? std::make_optional(std::move({returnType.GetConversionFromInteropType(context, "result")})) : std::nullopt;";
-
-                string modifiers = method.IsStatic ? "static " : "";
-                string afterModifiers = method.IsStatic ? "" : " const";
-                string templatePrefix = method.IsGenericMethod ? "template <> " : "";
-                string templateSpecialization = method.IsGenericMethod
-                    ? $"<{string.Join(", ", method.TypeArguments.Select(t => CppType.FromCSharp(context, t).GetFullyQualifiedName()))}>"
-                    : "";
-                string typeTemplateSpecialization = CppInteropFunction.GetTypeTemplateSpecialization(definition.Type);
-
-                definition.Elements.Add(new(
-                    Content:
-                        $$"""
-                        {{templatePrefix}}{{returnType.GetFullyQualifiedName()}} {{definition.Type.Name}}{{typeTemplateSpecialization}}::{{method.Name}}{{templateSpecialization}}({{recipe.ParameterListDeclaration()}}){{afterModifiers}} {
-                            void* reinteropException = nullptr;
-                            {{GenerationUtility.JoinAndIndent(invocation, "    ")}}
-                            if (reinteropException != nullptr)
-                                throw Reinterop::ReinteropNativeException(::DotNet::System::Exception(::DotNet::Reinterop::ObjectHandle(reinteropException)));
-                            {{returnStatement}}
-                        }
-                        """,
-                    TypeDefinitionsReferenced: new[]
-                    {
-                        definition.Type,
-                        returnType,
-                        CppObjectHandle.GetCppType(context),
-                        CppReinteropException.GetCppType(context)
-                    }.Concat(recipe.ParameterTypes)
-                ));
-            }
+            recipe.AddToGeneration(result, method.Name, csName, csContent, recipe.Body());
 
             if (addOperator)
             {

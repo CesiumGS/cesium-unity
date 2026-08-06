@@ -64,7 +64,7 @@ namespace Reinterop
                 ));
 
                 // Constructor definition
-                IReadOnlyList<CppStatement> body = recipe.Body(outParameterTypeName: definition.Type.Name)!;
+                IReadOnlyList<CppStatement> body = recipe.Body(outParameterTypeName: definition.Type.Name);
                 definition.Elements.Add(new(
                     Content:
                         $$"""

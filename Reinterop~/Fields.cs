@@ -68,8 +68,6 @@ namespace Reinterop
 
         private static void GenerateSingleFieldAccessors(CppGenerationContext context, TypeToGenerate item, IFieldSymbol field, GeneratedResult result)
         {
-            GeneratedCppDefinition definition = result.CppDefinition;
-
             CppType fieldType = CppType.FromCSharp(context, field.Type);
             CppType setType = fieldType.AsParameterType();
             CppType getType = fieldType.AsReturnType();
@@ -82,44 +80,7 @@ namespace Reinterop
             var (getCsName, getCsContent) = Interop.CreateCSharpDelegateInit(context, item.Type, field, isGet: true);
             var (setCsName, setCsContent) = Interop.CreateCSharpDelegateInit(context, item.Type, field, isGet: false);
 
-            // The Nullable-with-struct-rewrite case (getter returns a bool "is valid" flag alongside an
-            // out-parameter) isn't modeled by CppInteropFunction.Body, so it's still built as a plain
-            // string template - same deliberate scope exclusion as Methods.cs.
-            IReadOnlyList<CppStatement>? getBody = getRecipe.Body();
-            getRecipe.AddToGeneration(result, field.Name, getCsName, getCsContent, getBody);
-
-            if (getBody == null)
-            {
-                var parameterPassStrings = getRecipe.InteropParameters.Select(parameter => parameter.Type.GetConversionToInteropType(context, parameter.CallSiteName));
-                parameterPassStrings = parameterPassStrings.Concat(new[] { "&reinteropException" }).Where(s => !string.IsNullOrEmpty(s));
-
-                string[] invocation = new[]
-                {
-                    $"void* reinteropException = nullptr;",
-                    $"{getType.GenericArguments.FirstOrDefault().GetFullyQualifiedName()} result;",
-                    $"std::uint8_t resultIsValid = Field_get_{field.Name}({string.Join(", ", parameterPassStrings)});",
-                    $"if (reinteropException != nullptr) {{",
-                    $"  throw Reinterop::ReinteropNativeException(::DotNet::System::Exception(::DotNet::Reinterop::ObjectHandle(reinteropException)));",
-                    $"}}",
-                    $"return resultIsValid ? std::make_optional(std::move({getType.GetConversionFromInteropType(context, "result")})) : std::nullopt;"
-                };
-
-                definition.Elements.Add(new(
-                    Content:
-                        $$"""
-                        {{getType.GetFullyQualifiedName()}} {{definition.Type.Name}}::{{field.Name}}(){{(field.IsStatic ? "" : " const")}} {
-                            {{GenerationUtility.JoinAndIndent(invocation, "    ")}}
-                        }
-                        """,
-                    TypeDefinitionsReferenced: new[]
-                    {
-                        definition.Type,
-                        getType,
-                        CppObjectHandle.GetCppType(context),
-                        CppReinteropException.GetCppType(context)
-                    }
-                ));
-            }
+            getRecipe.AddToGeneration(result, field.Name, getCsName, getCsContent, getRecipe.Body());
 
             IReadOnlyList<CppStatement> setterBody = CppInterop.CallManagedFunction(
                 new CppIdentifier($"Field_set_{field.Name}"), setRecipe.CallArguments());

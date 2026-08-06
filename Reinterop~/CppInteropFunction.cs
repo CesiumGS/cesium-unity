@@ -149,18 +149,27 @@ namespace Reinterop
 
         /// <summary>
         /// Builds the call+return body, automatically choosing between a void call, a value-returning
-        /// call, and a struct-return-rewrite call (with the result produced via an out-parameter of type
-        /// <paramref name="outParameterTypeName"/>, which defaults to <see cref="ReturnType"/> itself).
-        /// Returns null for the one shape not modeled here: a Nullable-wrapped struct-return rewrite,
-        /// which returns a "resultIsValid" flag rather than using an exception out-parameter alone -
-        /// callers must still build that shape by hand (and pass a null body to <see cref="AddToGeneration"/>).
+        /// call, a struct-return-rewrite call (with the result produced via an out-parameter of type
+        /// <paramref name="outParameterTypeName"/>, which defaults to <see cref="ReturnType"/> itself),
+        /// and a Nullable-wrapped struct-return-rewrite call (which additionally returns a "resultIsValid"
+        /// flag, becoming "resultIsValid ? std::make_optional(...) : std::nullopt").
         /// </summary>
-        public IReadOnlyList<CppStatement>? Body(string? outParameterTypeName = null, string resultVariableName = "result")
+        public IReadOnlyList<CppStatement> Body(string? outParameterTypeName = null, string resultVariableName = "result")
         {
-            if (HasStructRewrite && ReturnType.Kind == InteropTypeKind.Nullable)
-                return null;
-
             CppExpression functionPointer = new CppIdentifier(Name);
+
+            if (HasStructRewrite && ReturnType.Kind == InteropTypeKind.Nullable)
+            {
+                CppType elementType = ReturnType.GenericArguments!.First();
+                IReadOnlyList<CppArgument> nullableArguments = CallArguments(outParameterTypeName ?? elementType.GetFullyQualifiedName());
+                string convertedResult = ReturnType.GetConversionFromInteropType(_context, resultVariableName);
+                return CppInterop.CallManagedFunction(
+                    functionPointer, nullableArguments,
+                    resultTypeName: "auto",
+                    returnExpression: new CppRaw($"resultIsValid ? std::make_optional(std::move({convertedResult})) : std::nullopt"),
+                    resultVariableName: "resultIsValid");
+            }
+
             IReadOnlyList<CppArgument> arguments = CallArguments(outParameterTypeName);
 
             bool isVoid = ReturnType.Name == "void" && !ReturnType.Flags.HasFlag(CppTypeFlags.Pointer);
@@ -178,23 +187,21 @@ namespace Reinterop
         /// Adds everything needed to expose this interop function: the interop function pointer field
         /// (declaration, out-of-line definition initialized to nullptr, and startup init registration),
         /// the wrapped function's own declaration (unless <see cref="WithoutDeclaration"/> was used), and
-        /// (if <paramref name="body"/> is non-null) its definition. A null <paramref name="body"/> (see
-        /// <see cref="Body"/>) means the caller still needs to add a hand-built definition of its own.
+        /// its definition.
         /// </summary>
         public void AddToGeneration(
             GeneratedResult result,
             string name,
             string csharpName,
             string csharpContent,
-            IReadOnlyList<CppStatement>? body)
+            IReadOnlyList<CppStatement> body)
         {
             AddInteropFunctionPointer(result, result.CppDefinition.Type.GetFullyQualifiedName(false), csharpName, csharpContent);
 
             if (!_skipDeclaration)
                 AddDeclaration(result, name);
 
-            if (body != null)
-                AddDefinition(result, name, body);
+            AddDefinition(result, name, body);
         }
 
         /// <summary>
