@@ -42,8 +42,7 @@ namespace Reinterop
             var parameters = constructor.Parameters
                 .Select(parameter => new CppInteropParameter(parameter.Name, CppType.FromCSharp(context, parameter.Type).AsParameterType()))
                 .ToArray();
-            string interopFunctionName = $"Construct_{Interop.HashParameters(constructor.Parameters)}";
-            CppInteropFunction recipe = new CppInteropFunction(context, declaration.Type, interopFunctionName)
+            CppInteropFunction recipe = new CppInteropFunction(context, declaration.Type, constructor.Name)
                 .Parameters(parameters)
                 .ReturnType(declaration.Type)
                 .Static(true);
@@ -52,7 +51,7 @@ namespace Reinterop
 
             // A private, static field of function pointer type that will call
             // into a managed delegate for this constructor, initialized at startup.
-            var (csName, csContent) = Interop.CreateCSharpDelegateInit(context, item.Type, constructor, interopFunctionName);
+            var (csName, csContent) = Interop.CreateCSharpDelegateInit(context, item.Type, constructor, recipe.FunctionPointerName);
             recipe.AddInteropFunctionPointer(result, $"{definition.Type.Name}{templateSpecialization}", csName, csContent);
 
             // For blittable structs, add static "Construct" functions rather than C++ constructors.
@@ -96,7 +95,7 @@ namespace Reinterop
                 // Constructor definition
                 IReadOnlyList<CppArgument> callArguments = recipe.CallArguments();
                 IReadOnlyList<CppStatement> body = CppInterop.CallManagedFunction(
-                    new CppIdentifier(interopFunctionName), callArguments,
+                    new CppIdentifier(recipe.FunctionPointerName), callArguments,
                     resultTypeName: "void*",
                     returnExpression: new CppRaw("handle"),
                     resultVariableName: "handle");

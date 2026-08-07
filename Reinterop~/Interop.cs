@@ -484,6 +484,31 @@ namespace Reinterop
             return hash.Replace("=", "").Replace("+", "_").Replace("/", "__");
         }
 
+        public static string HashParameters(IEnumerable<CppInteropParameter>? parameters = null, IEnumerable<CppType>? typeArguments = null)
+        {
+            IEnumerable<string>? formattedParameters = null;
+            IEnumerable<string>? formattedTypeArguments = null;
+
+            if (parameters != null)
+                formattedParameters = parameters.Select(parameter => $"{parameter.Type.GetFullyQualifiedName()} {parameter.Name}");
+            if (typeArguments != null)
+                formattedTypeArguments = typeArguments.Select(arg => $"<{arg.GetFullyQualifiedName()}>");
+
+            IEnumerable<string>? allFormattedInput = null;
+            if (formattedParameters != null && formattedTypeArguments != null)
+                allFormattedInput = formattedTypeArguments.Concat(formattedParameters);
+            else if (formattedParameters != null)
+                allFormattedInput = formattedParameters;
+            else if (formattedTypeArguments != null)
+                allFormattedInput = formattedTypeArguments;
+            else
+                allFormattedInput = new string[] { };
+
+            var allTogether = string.Join(", ", allFormattedInput);
+            string hash = InsecureHash(allTogether);
+            return hash.Replace("=", "").Replace("+", "_").Replace("/", "__");
+        }
+
         public static InteropTypeKind DetermineTypeKind(CppGenerationContext context, ITypeSymbol type)
         {
             if (type.Kind == SymbolKind.TypeParameter)
@@ -689,6 +714,22 @@ namespace Reinterop
             }
 
             return false;
+        }
+
+        public static string MakeSafeIdentifier(string s)
+        {
+            StringBuilder result = new StringBuilder();
+
+            for (int i = 0; i < s.Length; ++i)
+            {
+                char c = s[i];
+                if (char.IsLetterOrDigit(c) || c == '_')
+                    result.Append(c);
+                else
+                    result.Append(char.ConvertToUtf32(s, i).ToString());
+            }
+
+            return result.ToString();
         }
     }
 }

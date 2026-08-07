@@ -22,8 +22,17 @@ namespace Reinterop
     {
         public CppGenerationContext Context { get; }
 
-        /// <summary>The name of the interop function pointer field, e.g. "CallFoo_1a2b3c" or "Field_get_Bar".</summary>
         public string Name { get; }
+
+        /// <summary>The name of the interop function pointer field, e.g. "CallFoo_1a2b3c" or "Field_get_Bar".</summary>
+        public string FunctionPointerName
+        {
+            get
+            {
+                string safeName = Interop.MakeSafeIdentifier(Name);
+                return $"Call_{safeName}_{Interop.HashParameters(Parameters(), TypeArguments())}";
+            }
+        }
 
         /// <summary>
         /// The C++ type that owns this function.
@@ -270,7 +279,7 @@ namespace Reinterop
         /// </summary>
         public IReadOnlyList<CppStatement> Body(string? outParameterTypeName = null, string resultVariableName = "result")
         {
-            CppExpression functionPointer = new CppIdentifier(Name);
+            CppExpression functionPointer = new CppIdentifier(FunctionPointerName);
 
             if (NeedsStructReturnRewrite && ReturnType().Kind == InteropTypeKind.Nullable)
             {
@@ -313,7 +322,6 @@ namespace Reinterop
         /// </summary>
         public void AddToGeneration(
             GeneratedResult result,
-            string name,
             string? csharpName,
             string? csharpContent,
             IReadOnlyList<CppStatement>? body)
@@ -323,10 +331,10 @@ namespace Reinterop
 
             // Don't add a declaration for a specialization. Use the generic template declaration instead.
             if (Specializes() == null)
-                AddDeclaration(result, name);
+                AddDeclaration(result);
 
             if (!IsUnspecializedGeneric && body != null)
-                AddDefinition(result, name, body);
+                AddDefinition(result, body);
         }
 
         /// <summary>
@@ -354,16 +362,16 @@ namespace Reinterop
             IEnumerable<CppType> fieldPointerTypes = new[] { InteropReturnType }.Concat(ParameterInteropTypes);
 
             declaration.Elements.Add(new(
-                Content: $"static {InteropReturnType.GetFullyQualifiedName()} (*{Name})({InteropParameterListDeclaration()});",
+                Content: $"static {InteropReturnType.GetFullyQualifiedName()} (*{FunctionPointerName})({InteropParameterListDeclaration()});",
                 IsPrivate: true,
                 TypeDeclarationsReferenced: fieldPointerTypes));
 
             definition.Elements.Add(new(
-                Content: $"{InteropReturnType.GetFullyQualifiedName()} (*{qualifiedDefinitionName}::{Name})({InteropParameterListDeclaration()}) = nullptr;",
+                Content: $"{InteropReturnType.GetFullyQualifiedName()} (*{qualifiedDefinitionName}::{FunctionPointerName})({InteropParameterListDeclaration()}) = nullptr;",
                 TypeDeclarationsReferenced: fieldPointerTypes));
 
             init.Functions.Add(new(
-                CppName: $"{definition.Type.GetFullyQualifiedName()}::{Name}",
+                CppName: $"{definition.Type.GetFullyQualifiedName()}::{FunctionPointerName}",
                 CppTypeSignature: $"{InteropReturnType.GetFullyQualifiedName()} (*)({InteropParameterTypeList()})",
                 CppTypeDefinitionsReferenced: new[] { definition.Type },
                 CppTypeDeclarationsReferenced: fieldPointerTypes,
@@ -372,7 +380,7 @@ namespace Reinterop
             ));
         }
 
-        private void AddDeclaration(GeneratedResult result, string name)
+        private void AddDeclaration(GeneratedResult result)
         {
             string modifiers = Static() ? "static " : "";
             string afterModifiers = Static() ? "" : " const";
@@ -383,13 +391,13 @@ namespace Reinterop
             }
 
             result.CppDeclaration.Elements.Add(new(
-                Content: $"{modifiers}{ReturnType().GetFullyQualifiedName()} {name}({ParameterListDeclaration()}){afterModifiers};",
+                Content: $"{modifiers}{ReturnType().GetFullyQualifiedName()} {Name}({ParameterListDeclaration()}){afterModifiers};",
                 TypeDeclarationsReferenced: new[] { ReturnType() }.Concat(ParameterTypes),
                 IsPrivate: Private()
             ));
         }
 
-        private void AddDefinition(GeneratedResult result, string name, IReadOnlyList<CppStatement> body)
+        private void AddDefinition(GeneratedResult result, IReadOnlyList<CppStatement> body)
         {
             GeneratedCppDefinition definition = result.CppDefinition;
             string afterModifiers = Static() ? "" : " const";
@@ -424,7 +432,7 @@ namespace Reinterop
             definition.Elements.Add(new(
                 Content:
                     $$"""
-                    {{templatePrefix}}{{ReturnType().GetFullyQualifiedName()}} {{definition.Type.Name}}{{typeTemplateSpecialization}}::{{name}}{{templateSpecialization}}({{parameters}}){{afterModifiers}} {
+                    {{templatePrefix}}{{ReturnType().GetFullyQualifiedName()}} {{definition.Type.Name}}{{typeTemplateSpecialization}}::{{Name}}{{templateSpecialization}}({{parameters}}){{afterModifiers}} {
                         {{new[] { CppPrinter.Print(body) }.JoinAndIndent("    ")}}
                     }
                     """,

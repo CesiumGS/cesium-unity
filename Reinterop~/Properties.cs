@@ -29,15 +29,14 @@ namespace Reinterop
                 .Select(parameter => new CppInteropParameter(parameter.Name, CppType.FromCSharp(context, parameter.Type).AsParameterType()))
                 .ToArray();
 
-            CppInteropFunction recipe = new CppInteropFunction(context, result.CppDefinition.Type, $"Property_{method.Name}")
+            string propertyName = property.IsIndexer ? "operator[]" : property.Name;
+            CppInteropFunction recipe = new CppInteropFunction(context, result.CppDefinition.Type, propertyName)
                 .Parameters(parameters)
                 .ReturnType(returnType)
                 .Static(property.IsStatic);
 
-            string propertyName = property.IsIndexer ? "operator[]" : property.Name;
-
-            var (csName, csContent) = Interop.CreateCSharpDelegateInit(context, item.Type, method, $"Property_{method.Name}");
-            recipe.AddToGeneration(result, propertyName, csName, csContent, recipe.Body());
+            var (csName, csContent) = Interop.CreateCSharpDelegateInit(context, item.Type, method, recipe.FunctionPointerName);
+            recipe.AddToGeneration(result, csName, csContent, recipe.Body());
         }
     }
 }

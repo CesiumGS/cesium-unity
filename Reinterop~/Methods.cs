@@ -32,8 +32,7 @@ namespace Reinterop
 
         private static CppInteropFunction CreateCppInteropFunction(CppGenerationContext context, TypeToGenerate item, GeneratedResult result, IMethodSymbol method)
         {
-            string interopName = $"Call{method.Name}_{Interop.HashParameters(method.Parameters, method.TypeArguments)}";
-            return new CppInteropFunction(context, result.CppDefinition.Type, interopName)
+            return new CppInteropFunction(context, result.CppDefinition.Type, method.Name)
                 .TypeParameters(method.TypeParameters.Select(parameter => new CppInteropParameter(parameter.Name, CppType.FromCSharp(context, parameter))))
                 .TypeArguments(method.TypeArguments.Select(t => CppType.FromCSharp(context, t)))
                 .ReturnType(CppType.FromCSharp(context, method.ReturnType).AsReturnType())
@@ -59,14 +58,14 @@ namespace Reinterop
                 IMethodSymbol genericMethod = method.ConstructedFrom;
                 CppInteropFunction genericRecipe = CreateCppInteropFunction(context, item, result, genericMethod);
                 genericRecipe.Private(addOperator);
-                if (state.MethodCache.TryGetValue(genericRecipe.Name, out CppInteropFunction? cachedRecipe))
+                if (state.MethodCache.TryGetValue(genericRecipe.FunctionPointerName, out CppInteropFunction? cachedRecipe))
                 {
                     genericRecipe = cachedRecipe;
                 }
                 else
                 {
-                    state.MethodCache[genericRecipe.Name] = genericRecipe;
-                    genericRecipe.AddToGeneration(result, genericMethod.Name, null, null, null);
+                    state.MethodCache[genericRecipe.FunctionPointerName] = genericRecipe;
+                    genericRecipe.AddToGeneration(result, null, null, null);
                 }
 
                 // Declare that this recipe is a specialization.
@@ -75,8 +74,8 @@ namespace Reinterop
 
             // A private, static field of function pointer type that will call into a managed delegate
             // for this method, initialized at startup, plus the method's own declaration and definition.
-            var (csName, csContent) = Interop.CreateCSharpDelegateInit(context, item.Type, method, recipe.Name);
-            recipe.AddToGeneration(result, method.Name, csName, csContent, recipe.Body());
+            var (csName, csContent) = Interop.CreateCSharpDelegateInit(context, item.Type, method, recipe.FunctionPointerName);
+            recipe.AddToGeneration(result, csName, csContent, recipe.Body());
 
             if (addOperator)
             {
