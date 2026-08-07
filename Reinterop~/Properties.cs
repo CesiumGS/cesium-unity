@@ -26,8 +26,8 @@ namespace Reinterop
         {
             string propertyName = property.IsIndexer ? "operator[]" : property.Name;
             CppInteropFunction recipe = new CppInteropFunction(context, result.CppDefinition.Type, propertyName)
-                .Parameters(method.Parameters.Select(parameter => new CppInteropParameter(parameter.Name, CppType.FromCSharp(context, parameter.Type).AsParameterType())))
-                .ReturnType(CppType.FromCSharp(context, method.ReturnType).AsReturnType())
+                .Parameters(method.Parameters)
+                .ReturnType(method.ReturnType)
                 .Static(property.IsStatic);
 
             var (csName, csContent) = Interop.CreateCSharpDelegateInit(context, item.Type, method, recipe.FunctionPointerName);

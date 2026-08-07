@@ -36,7 +36,6 @@ namespace Reinterop
         private static void GenerateSingleNonStatic(CppGenerationContext context, TypeToGenerate item, GeneratedResult result, IMethodSymbol constructor)
         {
             GeneratedCppDeclaration declaration = result.CppDeclaration;
-            GeneratedCppDefinition definition = result.CppDefinition;
 
             // For blittable structs, add static "Construct" functions rather than C++ constructors.
             // This way we can use default construction and member initialization and avoid a call into C# to
