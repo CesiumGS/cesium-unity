@@ -37,86 +37,36 @@ namespace Reinterop
         {
             GeneratedCppDeclaration declaration = result.CppDeclaration;
             GeneratedCppDefinition definition = result.CppDefinition;
-            GeneratedInit init = result.Init;
-
-            var parameters = constructor.Parameters
-                .Select(parameter => new CppInteropParameter(parameter.Name, CppType.FromCSharp(context, parameter.Type).AsParameterType()))
-                .ToArray();
-            CppInteropFunction recipe = new CppInteropFunction(context, declaration.Type, constructor.Name)
-                .Parameters(parameters)
-                .ReturnType(declaration.Type)
-                .Static(true);
-
-            string templateSpecialization = Interop.GetTemplateSpecialization(declaration.Type);
-
-            // A private, static field of function pointer type that will call
-            // into a managed delegate for this constructor, initialized at startup.
-            var (csName, csContent) = Interop.CreateCSharpDelegateInit(context, item.Type, constructor, recipe.FunctionPointerName);
-            recipe.AddInteropFunctionPointer(result, $"{definition.Type.Name}{templateSpecialization}", csName, csContent);
 
             // For blittable structs, add static "Construct" functions rather than C++ constructors.
             // This way we can use default construction and member initialization and avoid a call into C# to
             // construct simple blittable types, but can still call explicit C# constructors when necessary.
+            string functionName = declaration.Type.Kind == InteropTypeKind.BlittableStruct ? "Construct" : declaration.Type.Name;
+
+            CppInteropFunction recipe = new CppInteropFunction(context, result.CppDefinition.Type, functionName)
+                .Parameters(constructor.Parameters)
+                .ReturnType(declaration.Type)
+                .Static(true);
+
+            var (csName, csContent) = Interop.CreateCSharpDelegateInit(context, item.Type, constructor, recipe.FunctionPointerName);
+
             if (declaration.Type.Kind == InteropTypeKind.BlittableStruct)
             {
-                // Constructor declaration
-                declaration.Elements.Add(new(
-                    Content: $"static {declaration.Type.Name} Construct({recipe.ParameterListDeclaration()});",
-                    TypeDeclarationsReferenced: recipe.ParameterTypes
-                ));
-
-                // Constructor definition
-                IReadOnlyList<CppStatement> body = recipe.Body(outParameterTypeName: definition.Type.Name);
-                definition.Elements.Add(new(
-                    Content:
-                        $$"""
-                        {{definition.Type.Name}} {{definition.Type.Name}}{{templateSpecialization}}::Construct({{recipe.ParameterListDeclaration()}})
-                        {
-                            {{new[] { CppPrinter.Print(body) }.JoinAndIndent("    ")}}
-                        }
-                        """,
-                    TypeDefinitionsReferenced: new[]
-                    {
-                        definition.Type,
-                        recipe.InteropReturnType,
-                        CppObjectHandle.GetCppType(context),
-                        CppReinteropException.GetCppType(context)
-                    }.Concat(recipe.ParameterTypes)
-                ));
+                recipe.AddToGeneration(result, csName, csContent, recipe.Body());
             }
             else
             {
-                // Constructor declaration
-                declaration.Elements.Add(new(
-                    Content: $"{declaration.Type.Name}({recipe.ParameterListDeclaration()});",
-                    TypeDeclarationsReferenced: recipe.ParameterTypes
-                ));
-
-                // Constructor definition
-                IReadOnlyList<CppArgument> callArguments = recipe.CallArguments();
-                IReadOnlyList<CppStatement> body = CppInterop.CallManagedFunction(
-                    new CppIdentifier(recipe.FunctionPointerName), callArguments,
+                IReadOnlyList<CppStatement> lambdaBody = CppInterop.CallManagedFunction(
+                    new CppIdentifier(recipe.FunctionPointerName), recipe.CallArguments(),
                     resultTypeName: "void*",
                     returnExpression: new CppRaw("handle"),
                     resultVariableName: "handle");
-                definition.Elements.Add(new(
-                    Content:
-                        $$"""
-                        {{definition.Type.Name}}{{templateSpecialization}}::{{definition.Type.Name}}({{recipe.ParameterListDeclaration()}})
-                            : _handle([&]() mutable {
-                                {{new[] { CppPrinter.Print(body) }.JoinAndIndent("        ")}}
-                            }())
-                        {
-                        }
-                        """,
-                    TypeDefinitionsReferenced: new[]
-                    {
-                        definition.Type,
-                        recipe.InteropReturnType,
-                        CppObjectHandle.GetCppType(context),
-                        CppReinteropException.GetCppType(context)
-                    }.Concat(recipe.ParameterTypes)
-                ));
+
+                recipe.MemberInitializers([
+                    new CppMemberInitializer("_handle", new CppRaw($"[&]() mutable {{ {CppPrinter.Print(lambdaBody)} }}()"))
+                ]);
+
+                recipe.AddToGeneration(result, csName, csContent, []);
             }
         }
     }

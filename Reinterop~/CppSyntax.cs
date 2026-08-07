@@ -66,4 +66,7 @@ namespace Reinterop
     internal record CppCatch(string? ExceptionType, string? VariableName, IReadOnlyList<CppStatement> Body);
 
     internal record CppTry(IReadOnlyList<CppStatement> Body, IReadOnlyList<CppCatch> Catches) : CppStatement;
+
+    // A constructor member initializer.
+    internal record CppMemberInitializer(string MemberName, CppExpression Value);
 }

@@ -1,3 +1,5 @@
+using Microsoft.CodeAnalysis;
+
 namespace Reinterop
 {
     /// <summary>
@@ -39,6 +41,11 @@ namespace Reinterop
         /// </summary>
         public CppType Owner { get; }
 
+        /// <summary>
+        /// Determines if this function is a C++ constructor, i.e., its name is the same as its owner type's name.
+        /// </summary>
+        public bool IsConstructor => Name == Owner.Name;
+
         private List<CppInteropParameter> _typeParameters = new List<CppInteropParameter>();
 
         /// <summary>
@@ -53,6 +60,15 @@ namespace Reinterop
         {
             _typeParameters = typeParameters.ToList();
             return this;
+        }
+
+        /// <summary>
+        /// Sets the generic type parameters to this function from a list of Roslyn type parameters. If this is not a generic
+        /// function, the list should be empty.
+        /// </summary>
+        public CppInteropFunction TypeParameters(IEnumerable<ITypeParameterSymbol> typeParameters)
+        {
+            return TypeParameters(typeParameters.Select(parameter => new CppInteropParameter(parameter.Name, CppType.FromCSharp(Context, parameter))));
         }
 
         private List<CppType> _typeArguments = new List<CppType>();
@@ -73,6 +89,15 @@ namespace Reinterop
             return this;
         }
 
+        /// <summary>
+        /// Sets the generic type arguments to this function from a list of Roslyn type arguments. These are the types
+        /// that fill in the <see cref="TypeParameters"/> in the instantiated generic.
+        /// </summary>
+        public CppInteropFunction TypeArguments(IEnumerable<ITypeSymbol> typeArguments)
+        {
+            return TypeArguments(typeArguments.Select(t => CppType.FromCSharp(Context, t)));
+        }
+
         private List<CppInteropParameter> _parameters = new List<CppInteropParameter>();
 
         /// <summary>
@@ -91,6 +116,15 @@ namespace Reinterop
             return this;
         }
 
+        /// <summary>
+        /// Sets the parameters to the function from a list of Roslyn parameters. The implicit "this" parameter should
+        /// _not_ be included.
+        /// </summary>
+        public CppInteropFunction Parameters(IEnumerable<IParameterSymbol> parameters)
+        {
+            return Parameters(parameters.Select(parameter => new CppInteropParameter(parameter.Name, CppType.FromCSharp(Context, parameter.Type).AsParameterType())));
+        }
+
         private CppType _returnType = CppType.Void;
 
         /// <summary>
@@ -107,6 +141,14 @@ namespace Reinterop
         {
             _returnType = returnType;
             return this;
+        }
+
+        /// <summary>
+        /// Sets the function's return type from a Roslyn type.
+        /// </summary>
+        public CppInteropFunction ReturnType(ITypeSymbol returnType)
+        {
+            return ReturnType(CppType.FromCSharp(Context, returnType).AsReturnType());
         }
 
         private bool _static = false;
@@ -162,6 +204,24 @@ namespace Reinterop
         public CppInteropFunction Specializes(CppInteropFunction? specializes)
         {
             _specializes = specializes;
+            return this;
+        }
+
+        private List<CppMemberInitializer>? _memberInitializers = null;
+
+        /// <summary>
+        /// Gets the constructor member initializers. This is only used for constructors, and it is ignored for non-constructors.
+        /// For constructors, this is the list of member initializers to use in the constructor's definition.
+        /// </summary>
+        public List<CppMemberInitializer>? MemberInitializers() { return _memberInitializers; }
+
+        /// <summary>
+        /// Sets the constructor member initializers. This is only used for constructors, and it is ignored for non-constructors.
+        /// For constructors, this is the list of member initializers to use in the constructor's definition.
+        /// </summary>
+        public CppInteropFunction MemberInitializers(List<CppMemberInitializer>? memberInitializers)
+        {
+            _memberInitializers = memberInitializers;
             return this;
         }
 
@@ -382,16 +442,21 @@ namespace Reinterop
 
         private void AddDeclaration(GeneratedResult result)
         {
-            string modifiers = Static() ? "static " : "";
-            string afterModifiers = Static() ? "" : " const";
+            // Constructors are neither static nor const.
+            // All other instance functions are const, because C# does not play by C++ const-correctness patterns.
+            string modifiers = Static() && !IsConstructor ? "static " : "";
+            string afterModifiers = Static() || IsConstructor ? "" : " const";
 
             if (IsUnspecializedGeneric)
             {
                 modifiers = "template <" + string.Join(", ", TypeParameters().Select(t => "typename " + t.Type.GetFullyQualifiedName())) + ">\n" + modifiers;
             }
 
+            // Constructors do not have return types.
+            string returnType = IsConstructor ? "" : $"{ReturnType().GetFullyQualifiedName()} ";
+
             result.CppDeclaration.Elements.Add(new(
-                Content: $"{modifiers}{ReturnType().GetFullyQualifiedName()} {Name}({ParameterListDeclaration()}){afterModifiers};",
+                Content: $"{modifiers}{returnType} {Name}({ParameterListDeclaration()}){afterModifiers};",
                 TypeDeclarationsReferenced: new[] { ReturnType() }.Concat(ParameterTypes),
                 IsPrivate: Private()
             ));
@@ -405,6 +470,9 @@ namespace Reinterop
             string templatePrefix = "";
             string templateSpecialization = "";
             string parameters;
+
+            // Constructors do not have return types.
+            string returnType = IsConstructor ? "" : $"{ReturnType().GetFullyQualifiedName()} ";
 
             CppInteropFunction? specializes = Specializes();
             if (specializes != null)
@@ -429,10 +497,15 @@ namespace Reinterop
                 parameters = ParameterListDeclaration();
             }
 
+            List<CppMemberInitializer>? memberInitializers = IsConstructor ? MemberInitializers() : null;
+            string memberInitialization = memberInitializers != null && memberInitializers.Count > 0
+                ? " : " + string.Join(", ", memberInitializers.Select(initializer => $"{initializer.MemberName}({CppPrinter.Print(initializer.Value)})"))
+                : "";
+
             definition.Elements.Add(new(
                 Content:
                     $$"""
-                    {{templatePrefix}}{{ReturnType().GetFullyQualifiedName()}} {{definition.Type.Name}}{{typeTemplateSpecialization}}::{{Name}}{{templateSpecialization}}({{parameters}}){{afterModifiers}} {
+                    {{templatePrefix}}{{returnType}} {{definition.Type.Name}}{{typeTemplateSpecialization}}::{{Name}}{{templateSpecialization}}({{parameters}}){{afterModifiers}}{{memberInitialization}} {
                         {{new[] { CppPrinter.Print(body) }.JoinAndIndent("    ")}}
                     }
                     """,
