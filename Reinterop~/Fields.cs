@@ -69,25 +69,16 @@ namespace Reinterop
         private static void GenerateSingleFieldAccessors(CppGenerationContext context, TypeToGenerate item, IFieldSymbol field, GeneratedResult result)
         {
             CppType fieldType = CppType.FromCSharp(context, field.Type);
-            CppType setType = fieldType.AsParameterType();
-            CppType getType = fieldType.AsReturnType();
 
-            CppInteropFunction getRecipe = new CppInteropFunction(context, result.CppDefinition.Type, field.Name)
-                .ReturnType(getType)
-                .Static(field.IsStatic);
-            CppInteropFunction setRecipe = new CppInteropFunction(context, result.CppDefinition.Type, field.Name)
-                .Parameters(new[] { new CppInteropParameter("value", setType) })
-                .ReturnType(CppType.Void)
-                .Static(field.IsStatic);
+            CppInteropFunction baseRecipe = new CppInteropFunction(context, result.CppDefinition.Type, field.Name).Static(field.IsStatic);
+            CppInteropFunction getRecipe = baseRecipe.Clone().ReturnType(fieldType.AsReturnType());
+            CppInteropFunction setRecipe = baseRecipe.Clone().Parameters([new CppInteropParameter("value", fieldType.AsParameterType())]);
 
             var (getCsName, getCsContent) = Interop.CreateCSharpDelegateInit(context, item.Type, field, isGet: true);
             var (setCsName, setCsContent) = Interop.CreateCSharpDelegateInit(context, item.Type, field, isGet: false);
 
             getRecipe.AddToGeneration(result, getCsName, getCsContent, getRecipe.Body());
-
-            IReadOnlyList<CppStatement> setterBody = CppInterop.CallManagedFunction(
-                new CppIdentifier(setRecipe.FunctionPointerName), setRecipe.CallArguments());
-            setRecipe.AddToGeneration(result, setCsName, setCsContent, setterBody);
+            setRecipe.AddToGeneration(result, setCsName, setCsContent, setRecipe.Body());
         }
     }
 }

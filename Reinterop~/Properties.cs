@@ -24,15 +24,10 @@ namespace Reinterop
 
         private static void GenerateSingleMethod(CppGenerationContext context, TypeToGenerate item, GeneratedResult result, IPropertySymbol property, IMethodSymbol method)
         {
-            CppType returnType = CppType.FromCSharp(context, method.ReturnType).AsReturnType();
-            CppInteropParameter[] parameters = method.Parameters
-                .Select(parameter => new CppInteropParameter(parameter.Name, CppType.FromCSharp(context, parameter.Type).AsParameterType()))
-                .ToArray();
-
             string propertyName = property.IsIndexer ? "operator[]" : property.Name;
             CppInteropFunction recipe = new CppInteropFunction(context, result.CppDefinition.Type, propertyName)
-                .Parameters(parameters)
-                .ReturnType(returnType)
+                .Parameters(method.Parameters.Select(parameter => new CppInteropParameter(parameter.Name, CppType.FromCSharp(context, parameter.Type).AsParameterType())))
+                .ReturnType(CppType.FromCSharp(context, method.ReturnType).AsReturnType())
                 .Static(property.IsStatic);
 
             var (csName, csContent) = Interop.CreateCSharpDelegateInit(context, item.Type, method, recipe.FunctionPointerName);
