@@ -455,5 +455,16 @@ namespace Reinterop
                 ? "<" + string.Join(", ", type.GenericArguments.Select(t => t.GetFullyQualifiedName())) + ">"
                 : "";
 
+        public CppInteropFunction Clone()
+        {
+            return new CppInteropFunction(Context, Owner, Name)
+                .TypeParameters(TypeParameters())
+                .TypeArguments(TypeArguments())
+                .ReturnType(ReturnType())
+                .Parameters(Parameters())
+                .Static(Static())
+                .Private(Private())
+                .Specializes(Specializes());
+        }
     }
 }

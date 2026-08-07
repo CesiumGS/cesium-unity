@@ -16,6 +16,8 @@ namespace Reinterop
 
     internal record CppCall(CppExpression Callee, IReadOnlyList<CppExpression> Arguments) : CppExpression;
 
+    internal record CppCast(CppType targetType, CppExpression Expression) : CppExpression;
+
     internal record CppBinary(string Op, CppExpression Left, CppExpression Right) : CppExpression;
 
     // A prefix unary operator, e.g. CppUnary("&", CppIdentifier("x")) renders as "&x".

@@ -61,6 +61,7 @@ namespace Reinterop
                 CppCall c => $"{Print(c.Callee)}({string.Join(", ", c.Arguments.Select(Print))})",
                 CppBinary b => $"{Print(b.Left)} {b.Op} {Print(b.Right)}",
                 CppUnary u => $"{u.Op}{Print(u.Operand)}",
+                CppCast c => $"{c.targetType.GetFullyQualifiedName()}({Print(c.Expression)})",
                 _ => throw new NotSupportedException($"Unsupported {nameof(CppExpression)}: {expression.GetType().Name}")
             };
         }

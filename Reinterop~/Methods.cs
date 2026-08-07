@@ -79,21 +79,19 @@ namespace Reinterop
 
             if (addOperator)
             {
-                string typeTemplateSpecialization = CppInteropFunction.GetTypeTemplateSpecialization(definition.Type);
                 string op = Interop.MethodNameToOperator(method.Name);
                 CppInteropParameter rhs = recipe.Parameters()[1];
-                declaration.Elements.Add(new(
-                    Content: $"bool operator{op}({rhs.Type.GetFullyQualifiedName()} rhs) const;"
-                ));
-                definition.Elements.Add(new(
-                    Content:
-                        $$"""
-                        bool {{definition.Type.Name}}{{typeTemplateSpecialization}}::operator{{op}}({{rhs.Type.GetFullyQualifiedName()}} rhs) const {
-                          return {{method.Name}}(*this, rhs);
-                        }
-                        """,
-                    TypeDefinitionsReferenced: recipe.ParameterTypes
-                ));
+                CppInteropFunction operatorRecipe = new CppInteropFunction(context, definition.Type, "operator" + op)
+                    .Parameters([rhs])
+                    .ReturnType(CppType.Boolean.AsReturnType());
+                operatorRecipe.AddToGeneration(result, null, null, [
+                    new CppReturn(
+                        new CppCall(
+                            new CppIdentifier(method.Name),
+                            [new CppRaw("*this"), new CppIdentifier(rhs.Name)]
+                        )
+                    )
+                ]);
 
                 // If this operator is on a base type and that base type is the right-hand side, also add a
                 // version that takes this type, and a version that takes nullptr. This is a nice convenience
@@ -104,34 +102,34 @@ namespace Reinterop
                     SymbolEqualityComparer.Default.Equals(method.ContainingType, method.Parameters[1].Type) &&
                     IsMostDerivedVersionOfOperator(item.Type, method))
                 {
-                    declaration.Elements.Add(new(
-                        Content: $"bool operator{op}(const {declaration.Type.Name}& rhs) const;"
-                    ));
-
                     CppType baseType = CppType.FromCSharp(context, method.ContainingType);
-                    definition.Elements.Add(new(
-                        Content:
-                            $$"""
-                            bool {{definition.Type.Name}}{{typeTemplateSpecialization}}::operator{{op}}(const {{declaration.Type.Name}}& rhs) const {
-                            return {{method.Name}}(*this, {{baseType.GetFullyQualifiedName()}}(rhs));
-                            }
-                            """,
-                        TypeDefinitionsReferenced: new[] { rhs.Type }
-                    ));
+                    CppInteropFunction baseTypeRecipe = operatorRecipe.Clone()
+                        .Parameters([new CppInteropParameter("rhs", declaration.Type.AsParameterType())]);
+                    baseTypeRecipe.AddToGeneration(result, null, null, [
+                        new CppReturn(
+                            new CppCall(
+                                new CppIdentifier(method.Name),
+                                [
+                                    new CppRaw("*this"),
+                                    new CppCast(baseType, new CppIdentifier("rhs"))
+                                ]
+                            )
+                        )
+                    ]);
 
-                    declaration.Elements.Add(new(
-                        Content: $"bool operator{op}(std::nullptr_t) const;"
-                    ));
-
-                    definition.Elements.Add(new(
-                        Content:
-                            $$"""
-                            bool {{definition.Type.Name}}{{typeTemplateSpecialization}}::operator{{op}}(std::nullptr_t) const {
-                            return {{method.Name}}(*this, {{baseType.GetFullyQualifiedName()}}(nullptr));
-                            }
-                            """,
-                        TypeDefinitionsReferenced: new[] { rhs.Type }
-                    ));
+                    CppInteropFunction nullPtrRecipe = operatorRecipe.Clone()
+                        .Parameters([new CppInteropParameter("", CppType.NullPointer.AsParameterType())]);
+                    nullPtrRecipe.AddToGeneration(result, null, null, [
+                        new CppReturn(
+                            new CppCall(
+                                new CppIdentifier(method.Name),
+                                [
+                                    new CppRaw("*this"),
+                                    new CppCast(baseType, new CppIdentifier("nullptr"))
+                                ]
+                            )
+                        )
+                    ]);
                 }
             }
         }
