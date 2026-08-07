@@ -72,10 +72,13 @@ namespace Reinterop
             CppType setType = fieldType.AsParameterType();
             CppType getType = fieldType.AsReturnType();
 
-            CppType? instanceType = !field.IsStatic ? result.CppDefinition.Type.AsParameterType() : null;
-
-            CppInteropFunction getRecipe = new(context, $"Field_get_{field.Name}", Array.Empty<CppInteropParameter>(), getType, instanceType);
-            CppInteropFunction setRecipe = new(context, $"Field_set_{field.Name}", new[] { new CppInteropParameter("value", setType) }, CppType.Void, instanceType);
+            CppInteropFunction getRecipe = new CppInteropFunction(context, result.CppDefinition.Type, $"Field_get_{field.Name}")
+                .ReturnType(getType)
+                .Static(field.IsStatic);
+            CppInteropFunction setRecipe = new CppInteropFunction(context, result.CppDefinition.Type, $"Field_set_{field.Name}")
+                .Parameters(new[] { new CppInteropParameter("value", setType) })
+                .ReturnType(CppType.Void)
+                .Static(field.IsStatic);
 
             var (getCsName, getCsContent) = Interop.CreateCSharpDelegateInit(context, item.Type, field, isGet: true);
             var (setCsName, setCsContent) = Interop.CreateCSharpDelegateInit(context, item.Type, field, isGet: false);

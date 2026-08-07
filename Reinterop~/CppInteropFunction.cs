@@ -20,119 +20,233 @@ namespace Reinterop
     /// </summary>
     internal class CppInteropFunction
     {
-        private readonly CppGenerationContext _context;
+        public CppGenerationContext Context { get; }
 
         /// <summary>The name of the interop function pointer field, e.g. "CallFoo_1a2b3c" or "Field_get_Bar".</summary>
         public string Name { get; }
 
-        /// <summary>The function's own parameters, as seen by its C++ caller (excludes "thiz").</summary>
-        public IReadOnlyList<CppInteropParameter> Parameters { get; }
+        /// <summary>
+        /// The C++ type that owns this function.
+        /// </summary>
+        public CppType Owner { get; }
 
-        /// <summary>The function's own return type, as seen by its C++ caller.</summary>
-        public CppType ReturnType { get; }
-
-        /// <summary>The interop function pointer's return type, after any struct-return rewrite.</summary>
-        public CppType InteropReturnType { get; }
-
-        /// <summary>True if the result is produced via a "pReturnValue" out-parameter instead of being returned directly.</summary>
-        public bool HasStructRewrite { get; }
+        private List<CppInteropParameter> _typeParameters = new List<CppInteropParameter>();
 
         /// <summary>
-        /// The full interop parameter list, in call order: an implicit "thiz" (if this is an instance
-        /// function), then <see cref="Parameters"/>, then "pReturnValue" (if <see cref="HasStructRewrite"/>),
-        /// then "reinteropException".
+        /// Gets or sets the generic type parameters to this function. If this is not a generic function, the list is empty.
         /// </summary>
-        public IReadOnlyList<(string ParameterName, string CallSiteName, CppType Type, CppType InteropType)> InteropParameters { get; }
+        public List<CppInteropParameter> TypeParameters() { return _typeParameters; }
 
-        /// <param name="instanceType">
-        /// The type of "thiz", if this is an instance (non-static) function. Its call-site expression
-        /// is always "(*this)". Null for static functions and constructors.
-        /// </param>
+        /// <summary>
+        /// Sets the generic type parameters to this function. If this is not a generic function, the list should be empty.
+        /// </summary>
+        public CppInteropFunction TypeParameters(IEnumerable<CppInteropParameter> typeParameters)
+        {
+            _typeParameters = typeParameters.ToList();
+            return this;
+        }
+
+        private List<CppType> _typeArguments = new List<CppType>();
+
+        /// <summary>
+        /// Gets or sets the generic type arguments to this function. These are the types that fill in the
+        /// <see cref="TypeParameters"/> in the instantiated generic.
+        /// </summary>
+        public List<CppType> TypeArguments() { return _typeArguments; }
+
+        /// <summary>
+        /// Sets the generic type arguments to this function. These are the types that fill in the
+        /// <see cref="TypeParameters"/> in the instantiated generic.
+        /// </summary>
+        public CppInteropFunction TypeArguments(IEnumerable<CppType> typeArguments)
+        {
+            _typeArguments = typeArguments.ToList();
+            return this;
+        }
+
+        private List<CppInteropParameter> _parameters = new List<CppInteropParameter>();
+
+        /// <summary>
+        /// Gets the parameters to the function.
+        /// </summary>
+        public List<CppInteropParameter> Parameters() { return _parameters; }
+        
+        /// <summary>
+        /// Sets the parameters to the function. The underlying <see cref="CppType"/> should almost always
+        /// by the result of calling <see cref="CppType.AsParameterType"/>. The implicit "this" parameter should
+        /// _not_ be included.
+        /// </summary>
+        public CppInteropFunction Parameters(IEnumerable<CppInteropParameter> parameters)
+        {
+            _parameters = parameters.ToList();
+            return this;
+        }
+
+        private CppType _returnType = CppType.Void;
+
+        /// <summary>
+        /// Gets the function's return type. This should almost always be the result of
+        /// calling <see cref="CppType.AsReturnType"/>.
+        /// </summary>
+        public CppType ReturnType() { return _returnType; }
+
+        /// <summary>
+        /// Sets the function's return type. This should almost always be the result of
+        /// calling <see cref="CppType.AsReturnType"/>.
+        /// </summary>
+        public CppInteropFunction ReturnType(CppType returnType)
+        {
+            _returnType = returnType;
+            return this;
+        }
+
+        private bool _static = false;
+
+        /// <summary>
+        /// Gets a value indicating whether this is a static member. `true` if it is static, `false` if it is an
+        /// instance member that must be called with a "this" pointer. Note that constructors are considered
+        /// static, since they don't have a "this" pointer yet.
+        /// </summary>
+        public bool Static() { return _static; }
+
+        /// <summary>
+        /// Sets a value indicating whether this is a static member. `true` if it is static, `false` if it is an
+        /// instance member that must be called with a "this" pointer. Note that constructors are considered
+        /// static, since they don't have a "this" pointer yet.
+        /// </summary>
+        public CppInteropFunction Static(bool isStatic = true)
+        {
+            _static = isStatic;
+            return this;
+        }
+
+        private bool _private = false;
+
+        /// <summary>
+        /// Gets a value indicating whether this function is private. This controls whether the function's own declaration (not the interop function pointer field,
+        /// which is always private) is marked as private in the generated C++ code.
+        /// </summary>
+        public bool Private() { return _private; }
+
+        /// <summary>
+        /// Sets a value indicating whether this function is private. This controls whether the function's own declaration (not the interop function pointer field,
+        /// which is always private) is marked as private in the generated C++ code.
+        /// </summary>
+        public CppInteropFunction Private(bool isPrivate = true)
+        {
+            _private = isPrivate;
+            return this;
+        }
+
+        private CppInteropFunction? _specializes = null;
+
+        /// <summary>
+        /// Gets the generic function that this function specializes, if any. Specializations don't get their own declaration, but instead
+        /// reuse the template declaration of the generic function.
+        /// </summary>
+        public CppInteropFunction? Specializes() { return _specializes; }
+
+        /// <summary>
+        /// Sets the generic function that this function specializes, if any. Specializations don't get their own declaration, but instead
+        /// reuse the template declaration of the generic function.
+        /// </summary>
+        public CppInteropFunction Specializes(CppInteropFunction? specializes)
+        {
+            _specializes = specializes;
+            return this;
+        }
+
+        /// <summary>
+        /// Determines if this function's return type necessitates rewriting the interop function to return via an out-parameter instead of directly.
+        /// </summary>
+        public bool NeedsStructReturnRewrite
+        {
+            get { return Interop.NeedsStructReturnRewrite(ReturnType()); }
+        }
+
+        /// <summary>
+        /// Gets the return type of the interop function pointer. Usually this is simply `ReturnType().AsInteropType()`, but
+        /// if `NeedsStructReturnRewrite` is true, this will instead be `CppType.Void` (for blittable structs) or `CppType.UInt8` (for nullable
+        /// blittable structs and primitives), and the interop function will return via an out-parameter of type `ReturnType()`.
+        /// </summary>
+        public CppType InteropReturnType
+        {
+            get
+            {
+                if (!NeedsStructReturnRewrite)
+                    return ReturnType().AsInteropType();
+
+                return ReturnType().Kind == InteropTypeKind.Nullable
+                    ? CppType.UInt8 // For the true/false indicating whether the nullable has a value.
+                    : CppType.Void;
+            }
+        }
+
+        /// <summary>
+        /// Gets the full interop parameter list, in call order. These are the parameters to the C++ function pointer created from the C#
+        /// delegate. It includes the implicit "thiz" (if this is a non-static function), then <see cref="Parameters"/> (as their
+        /// <see cref="CppType.AsInteropType"/>), then "pReturnValue" (if <see cref="NeedsStructReturnRewrite"/>), then "reinteropException".
+        /// </summary>
+        private IReadOnlyList<(string ParameterName, string CallSiteName, CppType Type, CppType InteropType)> InteropParameters
+        {
+            get
+            {
+                IEnumerable<CppInteropParameter> allParameters = Parameters();
+                if (!Static())
+                    allParameters = new[] { new CppInteropParameter("thiz", Owner.AsParameterType(), new CppRaw("(*this)")) }.Concat(allParameters);
+
+                IEnumerable<(string ParameterName, string CallSiteName, CppType Type, CppType InteropType)> interopParameters =
+                    allParameters.Select(parameter => (
+                        ParameterName: parameter.Name,
+                        CallSiteName: CppPrinter.Print(parameter.CallSite),
+                        Type: parameter.Type,
+                        InteropType: parameter.Type.AsInteropType()));
+
+                CppType returnType = ReturnType();
+                CppType interopReturnType = returnType.AsInteropType();
+                bool hasStructRewrite = Interop.RewriteStructReturn(ref interopParameters, ref returnType, ref interopReturnType);
+
+                return interopParameters
+                    .Concat(new[] { (ParameterName: "reinteropException", CallSiteName: "", Type: CppType.VoidPointerPointer, InteropType: CppType.VoidPointerPointer) })
+                    .ToArray();
+            }
+        }
+
+        /// <summary>
+        /// Gets the interop types of the <see cref="Parameters"/>. This is before implicit parameters such as "thiz" and "reinteropException" are added,
+        /// and before the struct return rewrite (if there is one).
+        /// </summary>
+        public IEnumerable<CppType> ParameterInteropTypes => Parameters().Select(parameter => parameter.Type.AsInteropType());
+
+        /// <summary>
+        /// The interop function pointer's parameter list, e.g. "void* thiz, std::int32_t x, void** reinteropException".
+        /// </summary>
+        private string InteropParameterListDeclaration() =>
+            string.Join(", ", InteropParameters.Select(parameter => $"{parameter.InteropType.GetFullyQualifiedName()} {parameter.ParameterName}"));
+
         public CppInteropFunction(
             CppGenerationContext context,
-            string name,
-            IReadOnlyList<CppInteropParameter> parameters,
-            CppType returnType,
-            CppType? instanceType = null)
+            CppType owner,
+            string name)
         {
-            _context = context;
-            Name = name;
-            Parameters = parameters;
-            ReturnType = returnType;
-            _isInstance = instanceType != null;
-
-            IEnumerable<CppInteropParameter> allParameters = parameters;
-            if (instanceType != null)
-                allParameters = new[] { new CppInteropParameter("thiz", instanceType, new CppRaw("(*this)")) }.Concat(allParameters);
-
-            IEnumerable<(string ParameterName, string CallSiteName, CppType Type, CppType InteropType)> interopParameters =
-                allParameters.Select(parameter => (
-                    ParameterName: parameter.Name,
-                    CallSiteName: CppPrinter.Print(parameter.CallSite),
-                    Type: parameter.Type,
-                    InteropType: parameter.Type.AsInteropType()));
-
-            CppType interopReturnType = returnType.AsInteropType();
-            HasStructRewrite = Interop.RewriteStructReturn(ref interopParameters, ref returnType, ref interopReturnType);
-            InteropReturnType = interopReturnType;
-
-            InteropParameters = interopParameters
-                .Concat(new[] { (ParameterName: "reinteropException", CallSiteName: "", Type: CppType.VoidPointerPointer, InteropType: CppType.VoidPointerPointer) })
-                .ToArray();
-        }
-
-        private readonly bool _isInstance;
-        private bool _isPrivate;
-        private bool _skipDeclaration;
-        private string _templatePrefix = "";
-        private string _templateSpecialization = "";
-
-        /// <summary>Marks the wrapped function's own declaration (not the interop pointer field, which is always private) as private.</summary>
-        public CppInteropFunction AsPrivate()
-        {
-            _isPrivate = true;
-            return this;
-        }
-
-        /// <summary>
-        /// Skips the wrapped function's own declaration in <see cref="AddToGeneration"/> - for a generic
-        /// method specialization, which reuses the template declaration added separately, once, for the
-        /// first specialization of that template.
-        /// </summary>
-        public CppInteropFunction WithoutDeclaration()
-        {
-            _skipDeclaration = true;
-            return this;
-        }
-
-        /// <summary>Marks the wrapped function's own definition as a generic method specialization, e.g. "template &lt;&gt; ... Method&lt;int&gt;(...)".</summary>
-        public CppInteropFunction AsTemplateSpecialization(IEnumerable<CppType> templateArguments)
-        {
-            _templatePrefix = "template <> ";
-            _templateSpecialization = $"<{string.Join(", ", templateArguments.Select(t => t.GetFullyQualifiedName()))}>";
-            return this;
+            this.Context = context;
+            this.Owner = owner;
+            this.Name = name;
         }
 
         /// <summary>The wrapped function's own parameter list, e.g. "int x, float y".</summary>
         public string ParameterListDeclaration() =>
-            string.Join(", ", Parameters.Select(parameter => $"{parameter.Type.GetFullyQualifiedName()} {parameter.Name}"));
-
-        /// <summary>The interop function pointer's parameter list, e.g. "void* thiz, std::int32_t x, void** reinteropException".</summary>
-        public string InteropParameterListDeclaration() =>
-            string.Join(", ", InteropParameters.Select(parameter => $"{parameter.InteropType.GetFullyQualifiedName()} {parameter.ParameterName}"));
+            string.Join(", ", Parameters().Select(parameter => $"{parameter.Type.GetFullyQualifiedName()} {parameter.Name}"));
 
         /// <summary>The interop function pointer's parameter *types* only (no names), e.g. for a function pointer type signature.</summary>
-        public string InteropParameterTypeList() =>
+        private string InteropParameterTypeList() =>
             string.Join(", ", InteropParameters.Select(parameter => parameter.InteropType.GetFullyQualifiedName()));
 
         /// <summary>The types referenced by <see cref="Parameters"/>, for TypeDeclarationsReferenced.</summary>
-        public IEnumerable<CppType> ParameterTypes => Parameters.Select(parameter => parameter.Type);
+        public IEnumerable<CppType> ParameterTypes => Parameters().Select(parameter => parameter.Type);
 
-        /// <summary>The interop types of <see cref="Parameters"/> (excluding "thiz"/"reinteropException"/"pReturnValue"), for TypeDeclarationsReferenced.</summary>
-        public IEnumerable<CppType> ParameterInteropTypes => Parameters.Select(parameter => parameter.Type.AsInteropType());
-
-        /// <summary>The types referenced by <see cref="InteropParameters"/>, for TypeDeclarationsReferenced.</summary>
-        public IEnumerable<CppType> InteropParameterTypes => InteropParameters.Select(parameter => parameter.InteropType);
+        // /// <summary>The types referenced by <see cref="InteropParameters"/>, for TypeDeclarationsReferenced.</summary>
+        // public IEnumerable<CppType> InteropParameterTypes => InteropParameters.Select(parameter => parameter.InteropType);
 
         /// <summary>
         /// The call arguments to pass to <see cref="CppInterop.CallManagedFunction"/>: each parameter's
@@ -143,8 +257,8 @@ namespace Reinterop
             InteropParameters
                 .Where(parameter => parameter.ParameterName != "reinteropException")
                 .Select(parameter => parameter.ParameterName == "pReturnValue"
-                    ? CppArgument.OutParameter(outParameterTypeName ?? ReturnType.GetFullyQualifiedName(), "result")
-                    : CppArgument.Value(parameter.Type.GetConversionToInteropType(_context, parameter.CallSiteName)))
+                    ? CppArgument.OutParameter(outParameterTypeName ?? ReturnType().GetFullyQualifiedName(), "result")
+                    : CppArgument.Value(parameter.Type.GetConversionToInteropType(Context, parameter.CallSiteName)))
                 .ToArray();
 
         /// <summary>
@@ -158,11 +272,11 @@ namespace Reinterop
         {
             CppExpression functionPointer = new CppIdentifier(Name);
 
-            if (HasStructRewrite && ReturnType.Kind == InteropTypeKind.Nullable)
+            if (NeedsStructReturnRewrite && ReturnType().Kind == InteropTypeKind.Nullable)
             {
-                CppType elementType = ReturnType.GenericArguments!.First();
+                CppType elementType = ReturnType().GenericArguments!.First();
                 IReadOnlyList<CppArgument> nullableArguments = CallArguments(outParameterTypeName ?? elementType.GetFullyQualifiedName());
-                string convertedResult = ReturnType.GetConversionFromInteropType(_context, resultVariableName);
+                string convertedResult = ReturnType().GetConversionFromInteropType(Context, resultVariableName);
                 return CppInterop.CallManagedFunction(
                     functionPointer, nullableArguments,
                     resultTypeName: "auto",
@@ -172,16 +286,24 @@ namespace Reinterop
 
             IReadOnlyList<CppArgument> arguments = CallArguments(outParameterTypeName);
 
-            bool isVoid = ReturnType.Name == "void" && !ReturnType.Flags.HasFlag(CppTypeFlags.Pointer);
+            bool isVoid = ReturnType().Name == "void" && !ReturnType().Flags.HasFlag(CppTypeFlags.Pointer);
             if (isVoid)
                 return CppInterop.CallManagedFunction(functionPointer, arguments);
 
             return CppInterop.CallManagedFunction(
                 functionPointer, arguments,
-                resultTypeName: HasStructRewrite ? null : "auto",
-                returnExpression: new CppRaw(ReturnType.GetConversionFromInteropType(_context, resultVariableName)),
+                resultTypeName: NeedsStructReturnRewrite ? null : "auto",
+                returnExpression: new CppRaw(ReturnType().GetConversionFromInteropType(Context, resultVariableName)),
                 resultVariableName: resultVariableName);
         }
+
+        /// <summary>
+        /// Gets whether this function is an unspecialized generic, i.e., it has generic <see cref="TypeParameters"/>
+        /// but any of the corresponding <see cref="TypeArguments"/> are just a
+        /// <see cref="InteropTypeKind.GenericParameter"/>. We can't generate interop for an unspecialized generic, but
+        /// we can still add its declaration to the generation and we can add interop for any specializations.
+        /// </summary>
+        public bool IsUnspecializedGeneric => TypeArguments().Any(t => t.Kind == InteropTypeKind.GenericParameter);
 
         /// <summary>
         /// Adds everything needed to expose this interop function: the interop function pointer field
@@ -192,16 +314,19 @@ namespace Reinterop
         public void AddToGeneration(
             GeneratedResult result,
             string name,
-            string csharpName,
-            string csharpContent,
-            IReadOnlyList<CppStatement> body)
+            string? csharpName,
+            string? csharpContent,
+            IReadOnlyList<CppStatement>? body)
         {
-            AddInteropFunctionPointer(result, result.CppDefinition.Type.GetFullyQualifiedName(false), csharpName, csharpContent);
+            if (!IsUnspecializedGeneric && csharpName != null && csharpContent != null)
+                AddInteropFunctionPointer(result, result.CppDefinition.Type.GetFullyQualifiedName(false), csharpName, csharpContent);
 
-            if (!_skipDeclaration)
+            // Don't add a declaration for a specialization. Use the generic template declaration instead.
+            if (Specializes() == null)
                 AddDeclaration(result, name);
 
-            AddDefinition(result, name, body);
+            if (!IsUnspecializedGeneric && body != null)
+                AddDefinition(result, name, body);
         }
 
         /// <summary>
@@ -249,35 +374,66 @@ namespace Reinterop
 
         private void AddDeclaration(GeneratedResult result, string name)
         {
-            string modifiers = _isInstance ? "" : "static ";
-            string afterModifiers = _isInstance ? " const" : "";
+            string modifiers = Static() ? "static " : "";
+            string afterModifiers = Static() ? "" : " const";
+
+            if (IsUnspecializedGeneric)
+            {
+                modifiers = "template <" + string.Join(", ", TypeParameters().Select(t => "typename " + t.Type.GetFullyQualifiedName())) + ">\n" + modifiers;
+            }
 
             result.CppDeclaration.Elements.Add(new(
-                Content: $"{modifiers}{ReturnType.GetFullyQualifiedName()} {name}({ParameterListDeclaration()}){afterModifiers};",
-                TypeDeclarationsReferenced: new[] { ReturnType }.Concat(ParameterTypes),
-                IsPrivate: _isPrivate
+                Content: $"{modifiers}{ReturnType().GetFullyQualifiedName()} {name}({ParameterListDeclaration()}){afterModifiers};",
+                TypeDeclarationsReferenced: new[] { ReturnType() }.Concat(ParameterTypes),
+                IsPrivate: Private()
             ));
         }
 
         private void AddDefinition(GeneratedResult result, string name, IReadOnlyList<CppStatement> body)
         {
             GeneratedCppDefinition definition = result.CppDefinition;
-            string afterModifiers = _isInstance ? " const" : "";
+            string afterModifiers = Static() ? "" : " const";
             string typeTemplateSpecialization = GetTypeTemplateSpecialization(definition.Type);
+            string templatePrefix = "";
+            string templateSpecialization = "";
+            string parameters;
+
+            CppInteropFunction? specializes = Specializes();
+            if (specializes != null)
+            {
+                // This is a specialization of a generic. We need to declare it as such.
+                templatePrefix = "template <> ";
+                templateSpecialization = $"<{string.Join(", ", TypeArguments().Select(t => t.GetFullyQualifiedName()))}>";
+
+                // We also need to pass every generic parameter as a const reference in order to match the unspecialized template.
+                // This isn't ideal (passing a parameter as `const int&`, for example, is a bit weird), but it works and
+                // isn't a big enough problem to bother fixing right now.
+                List<CppInteropParameter> genericFunctionParameters = specializes.Parameters();
+                parameters = string.Join(", ", Parameters().Select((parameter, index) => {
+                    if (genericFunctionParameters[index].Type.Kind == InteropTypeKind.GenericParameter)
+                        return $"{parameter.Type.AsConstReference().GetFullyQualifiedName()} {parameter.Name}";
+                    else
+                        return $"{parameter.Type.GetFullyQualifiedName()} {parameter.Name}";
+                }));
+            }
+            else
+            {
+                parameters = ParameterListDeclaration();
+            }
 
             definition.Elements.Add(new(
                 Content:
                     $$"""
-                    {{_templatePrefix}}{{ReturnType.GetFullyQualifiedName()}} {{definition.Type.Name}}{{typeTemplateSpecialization}}::{{name}}{{_templateSpecialization}}({{ParameterListDeclaration()}}){{afterModifiers}} {
+                    {{templatePrefix}}{{ReturnType().GetFullyQualifiedName()}} {{definition.Type.Name}}{{typeTemplateSpecialization}}::{{name}}{{templateSpecialization}}({{parameters}}){{afterModifiers}} {
                         {{new[] { CppPrinter.Print(body) }.JoinAndIndent("    ")}}
                     }
                     """,
                 TypeDefinitionsReferenced: new[]
                 {
                     definition.Type,
-                    ReturnType,
-                    CppObjectHandle.GetCppType(_context),
-                    CppReinteropException.GetCppType(_context)
+                    ReturnType(),
+                    CppObjectHandle.GetCppType(Context),
+                    CppReinteropException.GetCppType(Context)
                 }.Concat(ParameterTypes)
             ));
         }
@@ -290,5 +446,6 @@ namespace Reinterop
             type.GenericArguments != null && type.GenericArguments.Count > 0
                 ? "<" + string.Join(", ", type.GenericArguments.Select(t => t.GetFullyQualifiedName())) + ">"
                 : "";
+
     }
 }

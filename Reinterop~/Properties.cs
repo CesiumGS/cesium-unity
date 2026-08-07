@@ -29,9 +29,10 @@ namespace Reinterop
                 .Select(parameter => new CppInteropParameter(parameter.Name, CppType.FromCSharp(context, parameter.Type).AsParameterType()))
                 .ToArray();
 
-            // If this is an instance method, pass the current object as the first (implicit "thiz") parameter.
-            CppType? instanceType = method.IsStatic ? null : result.CppDefinition.Type.AsParameterType();
-            CppInteropFunction recipe = new CppInteropFunction(context, $"Property_{method.Name}", parameters, returnType, instanceType);
+            CppInteropFunction recipe = new CppInteropFunction(context, result.CppDefinition.Type, $"Property_{method.Name}")
+                .Parameters(parameters)
+                .ReturnType(returnType)
+                .Static(property.IsStatic);
 
             string propertyName = property.IsIndexer ? "operator[]" : property.Name;
 

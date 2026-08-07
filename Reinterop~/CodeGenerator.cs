@@ -15,13 +15,15 @@ namespace Reinterop
 
         public GeneratedResult? GenerateType(TypeToGenerate item)
         {
+            GenerateTypeState state = new();
+
             GeneratedResult? result = null;
 
             CppType itemType = CppType.FromCSharp(this.Options, item.Type);
             if (itemType.Kind == InteropTypeKind.Enum || itemType.Kind == InteropTypeKind.EnumFlags)
-                result = GenerateEnum(item, itemType);
+                result = GenerateEnum(state, item, itemType);
             else if (itemType.Kind == InteropTypeKind.ClassWrapper || itemType.Kind == InteropTypeKind.BlittableStruct || itemType.Kind == InteropTypeKind.NonBlittableStructWrapper || itemType.Kind == InteropTypeKind.Delegate)
-                result = GenerateClassOrStruct(item, itemType);
+                result = GenerateClassOrStruct(state, item, itemType);
             else
                 result = null;
 
@@ -33,7 +35,7 @@ namespace Reinterop
             return result;
         }
 
-        private GeneratedResult? GenerateClassOrStruct(TypeToGenerate item, CppType itemType)
+        private GeneratedResult? GenerateClassOrStruct(GenerateTypeState state, TypeToGenerate item, CppType itemType)
         {
             GeneratedResult result = new GeneratedResult(itemType);
 
@@ -47,8 +49,8 @@ namespace Reinterop
             while (current != null)
             {
                 Properties.Generate(this.Options, item, current, result);
-                Methods.Generate(this.Options, item, current, result);
-                Events.Generate(this.Options, item, current, result);
+                Methods.Generate(this.Options, state, item, current, result);
+                Events.Generate(this.Options, state, item, current, result);
                 Fields.Generate(this.Options, item, current, result);
                 current = current.BaseClass;
             }
@@ -68,7 +70,7 @@ namespace Reinterop
             return result;
         }
 
-        private GeneratedResult? GenerateEnum(TypeToGenerate item, CppType itemType)
+        private GeneratedResult? GenerateEnum(GenerateTypeState state, TypeToGenerate item, CppType itemType)
         {
             GeneratedResult result = new GeneratedResult(itemType);
 

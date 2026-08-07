@@ -631,6 +631,27 @@ namespace Reinterop
         }
 
         /// <summary>
+        /// Determines if a struct rewrite is required for a function with a given return type.
+        /// See <see cref="RewriteStructReturn"/>.
+        /// </summary>
+        public static bool NeedsStructReturnRewrite(CppType returnType)
+        {
+            // All blittable structs require rewrite.
+            if (returnType.Kind == InteropTypeKind.BlittableStruct)
+                return true;
+
+            // If it's not a blittable struct and not a nullable, it doesn't need rewrite.
+            if (returnType.Kind != InteropTypeKind.Nullable)
+                return false;
+            
+            // Only nullables of blittable structs and primitives require rewrite.
+            // Because a nullable reference type can be accomodated by our normal interop approach.
+            CppType interopReturnType = returnType.AsInteropType();
+            return interopReturnType.Kind == InteropTypeKind.BlittableStruct ||
+                   interopReturnType.Kind == InteropTypeKind.Primitive;
+        }
+
+        /// <summary>
         /// Mono has trouble return large structs from C# to C++. See https://github.com/CesiumGS/cesium-unity/issues/73.
         /// This rewrites the interop for such a method so that the C++ code instead passes a pointer to the
         /// struct which is filled in on the C# side.

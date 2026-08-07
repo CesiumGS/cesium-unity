@@ -5,7 +5,7 @@ namespace Reinterop
 {
     internal class Methods
     {
-        public static void Generate(CppGenerationContext context, TypeToGenerate mainItem, TypeToGenerate currentItem, GeneratedResult result)
+        public static void Generate(CppGenerationContext context, GenerateTypeState state, TypeToGenerate mainItem, TypeToGenerate currentItem, GeneratedResult result)
         {
             foreach (IMethodSymbol method in currentItem.Methods)
             {
@@ -14,7 +14,7 @@ namespace Reinterop
                 if (mainItem != currentItem && method.IsStatic && method.MethodKind != MethodKind.UserDefinedOperator)
                     continue;
 
-                GenerateSingleMethod(context, mainItem, result, method);
+                GenerateSingleMethod(context, state, mainItem, result, method);
             }
         }
 
@@ -30,64 +30,59 @@ namespace Reinterop
             return null;
         }
 
-        public static void GenerateSingleMethod(CppGenerationContext context, TypeToGenerate item, GeneratedResult result, IMethodSymbol method)
+        private static CppInteropFunction CreateCppInteropFunction(CppGenerationContext context, TypeToGenerate item, GeneratedResult result, IMethodSymbol method)
         {
+            string interopName = $"Call{method.Name}_{Interop.HashParameters(method.Parameters, method.TypeArguments)}";
+            return new CppInteropFunction(context, result.CppDefinition.Type, interopName)
+                .TypeParameters(method.TypeParameters.Select(parameter => new CppInteropParameter(parameter.Name, CppType.FromCSharp(context, parameter))))
+                .TypeArguments(method.TypeArguments.Select(t => CppType.FromCSharp(context, t)))
+                .ReturnType(CppType.FromCSharp(context, method.ReturnType).AsReturnType())
+                .Parameters(method.Parameters.Select(parameter => new CppInteropParameter(parameter.Name, CppType.FromCSharp(context, parameter.Type).AsParameterType())))
+                .Static(method.IsStatic);
+        }
+
+        public static void GenerateSingleMethod(CppGenerationContext context, GenerateTypeState state, TypeToGenerate item, GeneratedResult result, IMethodSymbol method)
+        {
+            CppInteropFunction recipe = CreateCppInteropFunction(context, item, result, method);
+
             GeneratedCppDeclaration declaration = result.CppDeclaration;
             GeneratedCppDefinition definition = result.CppDefinition;
 
-            CppType returnType = CppType.FromCSharp(context, method.ReturnType).AsReturnType();
-            CppInteropParameter[] parameters = method.Parameters
-                .Select(parameter => new CppInteropParameter(parameter.Name, CppType.FromCSharp(context, parameter.Type).AsParameterType()))
-                .ToArray();
-
-            string interopName = $"Call{method.Name}_{Interop.HashParameters(method.Parameters, method.TypeArguments)}";
-
-            // If this is an instance method, pass the current object as the first (implicit "thiz") parameter.
-            CppType? instanceType = method.IsStatic ? null : result.CppDefinition.Type.AsParameterType();
-            CppInteropFunction recipe = new CppInteropFunction(context, interopName, parameters, returnType, instanceType);
-
             // For op_Equality/op_Inequality, the interop function itself is private, and a public operator==/!= is added below to call it.
             bool addOperator = method.MethodKind == MethodKind.UserDefinedOperator && (method.Name == "op_Equality" || method.Name == "op_Inequality");
-            if (addOperator)
-                recipe.AsPrivate();
+            recipe.Private(addOperator);
 
             if (method.IsGenericMethod)
             {
                 // Add the template which will be specialized by this method.
+                // We only need to do this once for all specializations.
                 IMethodSymbol genericMethod = method.ConstructedFrom;
-
-                // Only add the template declaration if this is the first method constructed from this template.
-                IMethodSymbol? first = FindMethod(item, m => SymbolEqualityComparer.Default.Equals(m.ConstructedFrom, genericMethod));
-                if (SymbolEqualityComparer.Default.Equals(first, method))
+                CppInteropFunction genericRecipe = CreateCppInteropFunction(context, item, result, genericMethod);
+                genericRecipe.Private(addOperator);
+                if (state.MethodCache.TryGetValue(genericRecipe.Name, out CppInteropFunction? cachedRecipe))
                 {
-                    CppType genericReturn = CppType.FromCSharp(context, genericMethod.ReturnType).AsReturnType();
-                    var genericParameters = genericMethod.Parameters.Select(parameter => CppType.FromCSharp(context, parameter.Type).AsParameterType().GetFullyQualifiedName() + " " + parameter.Name);
-                    string genericParametersString = string.Join(", ", genericParameters);
-                    declaration.Elements.Add(new(
-                        Content:
-                            $$"""
-                            template <{{string.Join(", ", method.TypeParameters.Select(parameter => "typename " + parameter.Name))}}>
-                            {{(method.IsStatic ? "static " : "")}}{{genericReturn.GetFullyQualifiedName()}} {{method.Name}}({{genericParametersString}}){{(method.IsStatic ? "" : " const")}};
-                            """,
-                        TypeDeclarationsReferenced: new[] { genericReturn }.Concat(genericMethod.Parameters.Select(p => CppType.FromCSharp(context, p.Type).AsParameterType())),
-                        IsPrivate: addOperator
-                        ));
+                    genericRecipe = cachedRecipe;
+                }
+                else
+                {
+                    state.MethodCache[genericRecipe.Name] = genericRecipe;
+                    genericRecipe.AddToGeneration(result, genericMethod.Name, null, null, null);
                 }
 
-                // The generic template's own declaration was added above; only its specialization's definition is needed here.
-                recipe.WithoutDeclaration().AsTemplateSpecialization(method.TypeArguments.Select(t => CppType.FromCSharp(context, t)));
+                // Declare that this recipe is a specialization.
+                recipe.Specializes(genericRecipe);
             }
 
             // A private, static field of function pointer type that will call into a managed delegate
             // for this method, initialized at startup, plus the method's own declaration and definition.
-            var (csName, csContent) = Interop.CreateCSharpDelegateInit(context, item.Type, method, interopName);
+            var (csName, csContent) = Interop.CreateCSharpDelegateInit(context, item.Type, method, recipe.Name);
             recipe.AddToGeneration(result, method.Name, csName, csContent, recipe.Body());
 
             if (addOperator)
             {
                 string typeTemplateSpecialization = CppInteropFunction.GetTypeTemplateSpecialization(definition.Type);
                 string op = Interop.MethodNameToOperator(method.Name);
-                CppInteropParameter rhs = parameters[1];
+                CppInteropParameter rhs = recipe.Parameters()[1];
                 declaration.Elements.Add(new(
                     Content: $"bool operator{op}({rhs.Type.GetFullyQualifiedName()} rhs) const;"
                 ));

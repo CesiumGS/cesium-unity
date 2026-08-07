@@ -43,7 +43,10 @@ namespace Reinterop
                 .Select(parameter => new CppInteropParameter(parameter.Name, CppType.FromCSharp(context, parameter.Type).AsParameterType()))
                 .ToArray();
             string interopFunctionName = $"Construct_{Interop.HashParameters(constructor.Parameters)}";
-            CppInteropFunction recipe = new(context, interopFunctionName, parameters, declaration.Type);
+            CppInteropFunction recipe = new CppInteropFunction(context, declaration.Type, interopFunctionName)
+                .Parameters(parameters)
+                .ReturnType(declaration.Type)
+                .Static(true);
 
             string templateSpecialization = Interop.GetTemplateSpecialization(declaration.Type);
 
