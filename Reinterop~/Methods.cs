@@ -62,7 +62,7 @@ namespace Reinterop
                 else
                 {
                     state.MethodCache[genericRecipe.FunctionPointerName] = genericRecipe;
-                    genericRecipe.AddToGeneration(result);
+                    result.InteropFunctions.Add(genericRecipe);
                 }
 
                 // Declare that this recipe is a specialization.
@@ -72,7 +72,8 @@ namespace Reinterop
             // A private, static field of function pointer type that will call into a managed delegate
             // for this method, initialized at startup, plus the method's own declaration and definition.
             recipe.CSharpDelegateInit(Interop.CreateCSharpDelegateInit(context, item.Type, method, recipe.FunctionPointerName));
-            recipe.DefinitionBody(recipe.Body()).AddToGeneration(result);
+
+            result.InteropFunctions.Add(recipe);
 
             if (addOperator)
             {
@@ -80,15 +81,16 @@ namespace Reinterop
                 CppInteropParameter rhs = recipe.Parameters()[1];
                 CppInteropFunction operatorRecipe = new CppInteropFunction(context, result.CppDefinition.Type, "operator" + op)
                     .Parameters([rhs])
-                    .ReturnType(CppType.Boolean.AsReturnType());
-                operatorRecipe.DefinitionBody([
-                    new CppReturn(
-                        new CppCall(
-                            new CppIdentifier(method.Name),
-                            [new CppRaw("*this"), new CppIdentifier(rhs.Name)]
+                    .ReturnType(CppType.Boolean.AsReturnType())
+                    .DefinitionBody([
+                        new CppReturn(
+                            new CppCall(
+                                new CppIdentifier(method.Name),
+                                [new CppRaw("*this"), new CppIdentifier(rhs.Name)]
+                            )
                         )
-                    )
-                ]).AddToGeneration(result);
+                    ]);
+                result.InteropFunctions.Add(operatorRecipe);
 
                 // If this operator is on a base type and that base type is the right-hand side, also add a
                 // version that takes this type, and a version that takes nullptr. This is a nice convenience
@@ -101,32 +103,34 @@ namespace Reinterop
                 {
                     CppType baseType = CppType.FromCSharp(context, method.ContainingType);
                     CppInteropFunction baseTypeRecipe = operatorRecipe.Clone()
-                        .Parameters([new CppInteropParameter("rhs", result.CppDefinition.Type.AsParameterType())]);
-                    baseTypeRecipe.DefinitionBody([
-                        new CppReturn(
-                            new CppCall(
-                                new CppIdentifier(method.Name),
-                                [
-                                    new CppRaw("*this"),
-                                    new CppCast(baseType, new CppIdentifier("rhs"))
-                                ]
+                        .Parameters([new CppInteropParameter("rhs", result.CppDefinition.Type.AsParameterType())])
+                        .DefinitionBody([
+                            new CppReturn(
+                                new CppCall(
+                                    new CppIdentifier(method.Name),
+                                    [
+                                        new CppRaw("*this"),
+                                        new CppCast(baseType, new CppIdentifier("rhs"))
+                                    ]
+                                )
                             )
-                        )
-                    ]).AddToGeneration(result);
+                        ]);
+                    result.InteropFunctions.Add(baseTypeRecipe);
 
                     CppInteropFunction nullPtrRecipe = operatorRecipe.Clone()
-                        .Parameters([new CppInteropParameter("", CppType.NullPointer.AsParameterType())]);
-                    nullPtrRecipe.DefinitionBody([
-                        new CppReturn(
-                            new CppCall(
-                                new CppIdentifier(method.Name),
-                                [
-                                    new CppRaw("*this"),
-                                    new CppCast(baseType, new CppIdentifier("nullptr"))
-                                ]
+                        .Parameters([new CppInteropParameter("", CppType.NullPointer.AsParameterType())])
+                        .DefinitionBody([
+                            new CppReturn(
+                                new CppCall(
+                                    new CppIdentifier(method.Name),
+                                    [
+                                        new CppRaw("*this"),
+                                        new CppCast(baseType, new CppIdentifier("nullptr"))
+                                    ]
+                                )
                             )
-                        )
-                    ]).AddToGeneration(result);
+                        ]);
+                    result.InteropFunctions.Add(nullPtrRecipe);
                 }
             }
         }

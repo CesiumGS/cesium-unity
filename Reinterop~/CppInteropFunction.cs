@@ -376,7 +376,7 @@ namespace Reinterop
         /// and a Nullable-wrapped struct-return-rewrite call (which additionally returns a "resultIsValid"
         /// flag, becoming "resultIsValid ? std::make_optional(...) : std::nullopt").
         /// </summary>
-        public IReadOnlyList<CppStatement> Body()
+        private IReadOnlyList<CppStatement> DefaultDefinitionBody()
         {
             const string resultVariableName = "result";
 
@@ -431,8 +431,8 @@ namespace Reinterop
             if (Specializes() == null)
                 AddDeclaration(result);
 
-            if (!IsUnspecializedGeneric && _definitionBody != null)
-                AddDefinition(result, _definitionBody);
+            if (!IsUnspecializedGeneric)
+                AddDefinition(result, _definitionBody ?? DefaultDefinitionBody());
         }
 
         /// <summary>

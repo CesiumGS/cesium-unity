@@ -51,7 +51,7 @@ namespace Reinterop
 
             if (declaration.Type.Kind == InteropTypeKind.BlittableStruct)
             {
-                recipe.DefinitionBody(recipe.Body()).AddToGeneration(result);
+                result.InteropFunctions.Add(recipe);
             }
             else
             {
@@ -61,11 +61,13 @@ namespace Reinterop
                     returnExpression: new CppRaw("handle"),
                     resultVariableName: "handle");
 
-                recipe.MemberInitializers([
-                    new CppMemberInitializer("_handle", new CppRaw($"[&]() mutable {{ {CppPrinter.Print(lambdaBody)} }}()"))
-                ]);
+                recipe
+                    .MemberInitializers([
+                        new CppMemberInitializer("_handle", new CppRaw($"[&]() mutable {{ {CppPrinter.Print(lambdaBody)} }}()"))
+                    ])
+                    .DefinitionBody([]);
 
-                recipe.DefinitionBody([]).AddToGeneration(result);
+                result.InteropFunctions.Add(recipe);
             }
         }
     }

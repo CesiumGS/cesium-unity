@@ -71,14 +71,15 @@ namespace Reinterop
             CppType fieldType = CppType.FromCSharp(context, field.Type);
 
             CppInteropFunction baseRecipe = new CppInteropFunction(context, result.CppDefinition.Type, field.Name).Static(field.IsStatic);
-            CppInteropFunction getRecipe = baseRecipe.Clone().ReturnType(fieldType.AsReturnType());
-            CppInteropFunction setRecipe = baseRecipe.Clone().Parameters([new CppInteropParameter("value", fieldType.AsParameterType())]);
+            CppInteropFunction getRecipe = baseRecipe.Clone()
+                .ReturnType(fieldType.AsReturnType())
+                .CSharpDelegateInit(Interop.CreateCSharpDelegateInit(context, item.Type, field, isGet: true));
+            CppInteropFunction setRecipe = baseRecipe.Clone()
+                .Parameters([new CppInteropParameter("value", fieldType.AsParameterType())])
+                .CSharpDelegateInit(Interop.CreateCSharpDelegateInit(context, item.Type, field, isGet: false));
 
-            getRecipe.CSharpDelegateInit(Interop.CreateCSharpDelegateInit(context, item.Type, field, isGet: true));
-            setRecipe.CSharpDelegateInit(Interop.CreateCSharpDelegateInit(context, item.Type, field, isGet: false));
-
-            getRecipe.DefinitionBody(getRecipe.Body()).AddToGeneration(result);
-            setRecipe.DefinitionBody(setRecipe.Body()).AddToGeneration(result);
+            result.InteropFunctions.Add(getRecipe);
+            result.InteropFunctions.Add(setRecipe);
         }
     }
 }
