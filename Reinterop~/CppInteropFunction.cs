@@ -543,7 +543,7 @@ namespace Reinterop
             definition.Elements.Add(new(
                 Content:
                     $$"""
-                    {{templatePrefix}}{{returnType}} {{definition.Type.Name}}{{typeTemplateSpecialization}}::{{Name}}{{templateSpecialization}}({{parameters}}){{afterModifiers}}{{memberInitialization}} {
+                    {{templatePrefix}}{{returnType}}{{definition.Type.Name}}{{typeTemplateSpecialization}}::{{Name}}{{templateSpecialization}}({{parameters}}){{afterModifiers}}{{memberInitialization}} {
                         {{new[] { CppPrinter.Print(body) }.JoinAndIndent("    ")}}
                     }
                     """,
