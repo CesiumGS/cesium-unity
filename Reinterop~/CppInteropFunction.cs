@@ -46,6 +46,35 @@ namespace Reinterop
         /// </summary>
         public bool IsConstructor => Name == Owner.Name;
 
+        /// <summary>
+        /// Determines if this function is a C++ type conversion operator, i.e., its name is "operator X" where X is not one of the built-in C++ operators.
+        /// </summary>
+        public bool IsConversionOperator
+        {
+            get
+            {
+                if (!Name.StartsWith("operator "))
+                    return false;
+
+                string op = Name.Substring("operator ".Length).Replace(" ", "").Trim();
+
+                string[] operators = [
+                    "+", "-", "*", "/", "%", "^", "&", "|", "~", "!", "=", "<", ">",
+                    "+=", "-=", "*=", "/=", "%=", "^=", "&=", "|=", "<<", ">>",">>=", "<<=",
+                    "==", "!=", "<=", ">=", "<=>", "&&", "||", "++", "--", ",", "->*", "->", "()", "[]",
+                    "new", "new[]", "delete", "delete[]", "co_await"
+                ];
+
+                return !operators.Contains(op);
+            }
+        }
+
+        /// <summary>
+        /// Determines if this function has no declared return type, i.e., it is a constructor or a conversion operator. In C++, constructors and
+        /// conversion operators don't have a return type declaration, so this is used to avoid generating one for them.
+        /// </summary>
+        public bool HasNoReturnTypeDeclaration => IsConstructor || IsConversionOperator;
+
         private List<CppInteropParameter> _typeParameters = new List<CppInteropParameter>();
 
         /// <summary>
@@ -83,9 +112,12 @@ namespace Reinterop
         /// Sets the generic type arguments to this function. These are the types that fill in the
         /// <see cref="TypeParameters"/> in the instantiated generic.
         /// </summary>
-        public CppInteropFunction TypeArguments(IEnumerable<CppType> typeArguments)
+        public CppInteropFunction TypeArguments(IEnumerable<CppType>? typeArguments)
         {
-            _typeArguments = typeArguments.ToList();
+            if (typeArguments == null)
+                _typeArguments = new List<CppType>();
+            else
+                _typeArguments = typeArguments.ToList();
             return this;
         }
 
@@ -515,7 +547,7 @@ namespace Reinterop
             }
 
             // Constructors do not have return types.
-            string returnType = IsConstructor ? "" : $"{ReturnType().GetFullyQualifiedName()} ";
+            string returnType = HasNoReturnTypeDeclaration ? "" : $"{ReturnType().GetFullyQualifiedName()} ";
 
             result.CppDeclaration.Elements.Add(new(
                 Content: $"{modifiers}{returnType}{Name}({ParameterListDeclaration()}){afterModifiers};",
@@ -534,7 +566,7 @@ namespace Reinterop
             string parameters;
 
             // Constructors do not have return types.
-            string returnType = IsConstructor ? "" : $"{ReturnType().GetFullyQualifiedName()} ";
+            string returnType = HasNoReturnTypeDeclaration ? "" : $"{ReturnType().GetFullyQualifiedName()} ";
 
             CppInteropFunction? specializes = Specializes();
             if (specializes != null)

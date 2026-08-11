@@ -35,20 +35,22 @@
             {
                 CppType baseType = CppType.FromCSharp(context, baseClass.Type);
 
-                string baseTypeName = baseType.GetFullyQualifiedName();
+                CppInteropFunction recipe = new CppInteropFunction(context, result.Type, $"operator {baseType.GetFullyQualifiedName()}")
+                    .TypeArguments(declaration.Type.GenericArguments)
+                    .ReturnType(baseType)
+                    .Static(false)
+                    .DefinitionBody([
+                        new CppReturn(new CppCast(
+                            baseType,
+                            new CppCall(
+                                new CppIdentifier(objectHandleType.GetFullyQualifiedName()),
+                                [new CppRaw("this->_handle")]
+                            )
+                        ))
+                    ]);
 
-                result.CppDeclaration.Elements.Add(new(
-                    Content: $"operator {baseTypeName}() const;",
-                    TypeDeclarationsReferenced: new[] { baseType }));
+                result.InteropFunctions.Add(recipe);
 
-                result.CppDefinition.Elements.Add(new(
-                    Content:
-                        $$"""
-                        {{result.CppDefinition.Type.Name}}{{templateSpecialization}}::operator {{baseTypeName}}() const {
-                            return {{baseTypeName}}({{objectHandleType.GetFullyQualifiedName()}}(this->_handle));
-                        }
-                        """,
-                    TypeDefinitionsReferenced: new[] { baseType, objectHandleType }));
                 baseClass = baseClass.BaseClass;
             }
 
@@ -56,20 +58,22 @@
             foreach (TypeToGenerate anInterface in item.Interfaces)
             {
                 CppType interfaceType = CppType.FromCSharp(context, anInterface.Type);
-                string interfaceTypeName = interfaceType.GetFullyQualifiedName();
 
-                result.CppDeclaration.Elements.Add(new(
-                    Content: $"operator {interfaceTypeName}() const;",
-                    TypeDeclarationsReferenced: new[] { interfaceType }));
+                CppInteropFunction recipe = new CppInteropFunction(context, result.Type, $"operator {interfaceType.GetFullyQualifiedName()}")
+                    .TypeArguments(declaration.Type.GenericArguments)
+                    .ReturnType(interfaceType)
+                    .Static(false)
+                    .DefinitionBody([
+                        new CppReturn(new CppCast(
+                            interfaceType,
+                            new CppCall(
+                                new CppIdentifier(objectHandleType.GetFullyQualifiedName()),
+                                [new CppRaw("this->_handle")]
+                            )
+                        ))
+                    ]);
 
-                result.CppDefinition.Elements.Add(new(
-                    Content:
-                        $$"""
-                        {{result.CppDefinition.Type.Name}}{{templateSpecialization}}::operator {{interfaceTypeName}}() const {
-                            return {{interfaceTypeName}}({{objectHandleType.GetFullyQualifiedName()}}(this->_handle));
-                        }
-                        """,
-                    TypeDefinitionsReferenced: new[] { interfaceType, objectHandleType }));
+                result.InteropFunctions.Add(recipe);
             }
         }
     }
