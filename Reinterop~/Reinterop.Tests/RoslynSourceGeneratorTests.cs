@@ -142,20 +142,11 @@ namespace Reinterop.Tests
             string cppOutputPath = Path.Combine(Path.GetTempPath(), "ReinteropTests", Guid.NewGuid().ToString());
             try
             {
-                CSharpParseOptions parseOptions = new CSharpParseOptions(LanguageVersion.Preview);
-                CSharpCompilation compilation = CSharpCompilation.Create(
-                    "TestAssembly",
-                    new[]
-                    {
-                        CSharpSyntaxTree.ParseText(source, parseOptions),
-                        CSharpSyntaxTree.ParseText(MonoPInvokeCallbackAttributeStub, parseOptions)
-                    },
-                    References,
-                    new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true));
+                CSharpCompilation compilation = GenerationTestHelper.CreateCompilation(source);
 
                 GeneratorDriver driver = CSharpGeneratorDriver.Create(
                     new ISourceGenerator[] { new RoslynSourceGenerator() },
-                    parseOptions: parseOptions,
+                    parseOptions: GenerationTestHelper.ParseOptions,
                     optionsProvider: new TestAnalyzerConfigOptionsProvider(cppOutputPath));
                 driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out Compilation updatedCompilation, out ImmutableArray<Diagnostic> generatorDiagnostics);
 
@@ -172,25 +163,6 @@ namespace Reinterop.Tests
                     Directory.Delete(cppOutputPath, recursive: true);
             }
         }
-
-        // Reinterop's generated code assumes it's compiled into a Unity project, which supplies this
-        // attribute (normally in UnityEngine.CoreModule.dll) - stub it out so generated code compiles
-        // standalone here.
-        private const string MonoPInvokeCallbackAttributeStub =
-            """
-            namespace AOT
-            {
-                public class MonoPInvokeCallbackAttribute : System.Attribute
-                {
-                    public MonoPInvokeCallbackAttribute(System.Type type) { }
-                }
-            }
-            """;
-
-        private static readonly IReadOnlyList<MetadataReference> References = ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")!)
-            .Split(Path.PathSeparator)
-            .Select(path => (MetadataReference)MetadataReference.CreateFromFile(path))
-            .ToArray();
 
         private class TestAnalyzerConfigOptionsProvider : Microsoft.CodeAnalysis.Diagnostics.AnalyzerConfigOptionsProvider
         {
