@@ -34,22 +34,7 @@
             while (baseClass != null)
             {
                 CppType baseType = CppType.FromCSharp(context, baseClass.Type);
-
-                CppInteropFunction recipe = new CppInteropFunction(context, result.Type, $"operator {baseType.GetFullyQualifiedName()}")
-                    .TypeArguments(declaration.Type.GenericArguments)
-                    .ReturnType(baseType)
-                    .Static(false)
-                    .DefinitionBody([
-                        new CppReturn(new CppCast(
-                            baseType,
-                            new CppCall(
-                                new CppIdentifier(objectHandleType.GetFullyQualifiedName()),
-                                [new CppRaw("this->_handle")]
-                            )
-                        ))
-                    ]);
-
-                result.InteropFunctions.Add(recipe);
+                result.InteropFunctions.Add(CreateCast(context, result, baseType));
 
                 baseClass = baseClass.BaseClass;
             }
@@ -58,23 +43,25 @@
             foreach (TypeToGenerate anInterface in item.Interfaces)
             {
                 CppType interfaceType = CppType.FromCSharp(context, anInterface.Type);
-
-                CppInteropFunction recipe = new CppInteropFunction(context, result.Type, $"operator {interfaceType.GetFullyQualifiedName()}")
-                    .TypeArguments(declaration.Type.GenericArguments)
-                    .ReturnType(interfaceType)
-                    .Static(false)
-                    .DefinitionBody([
-                        new CppReturn(new CppCast(
-                            interfaceType,
-                            new CppCall(
-                                new CppIdentifier(objectHandleType.GetFullyQualifiedName()),
-                                [new CppRaw("this->_handle")]
-                            )
-                        ))
-                    ]);
-
-                result.InteropFunctions.Add(recipe);
+                result.InteropFunctions.Add(CreateCast(context, result, interfaceType));
             }
+        }
+
+        private static CppInteropFunction CreateCast(CppGenerationContext context, GeneratedResult result, CppType targetType)
+        {
+            CppType objectHandleType = CppObjectHandle.GetCppType(context);
+            return new CppInteropFunction(context, result.Type, $"operator {targetType.GetFullyQualifiedName()}")
+                .ReturnType(targetType)
+                .Static(false)
+                .DefinitionBody([
+                    new CppReturn(new CppCast(
+                        targetType,
+                        new CppCall(
+                            new CppIdentifier(objectHandleType.GetFullyQualifiedName()),
+                            [new CppRaw("this->_handle")]
+                        )
+                    ))
+                ]);
         }
     }
 }
