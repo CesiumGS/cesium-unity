@@ -478,25 +478,21 @@ namespace Reinterop
             string csharpName,
             string csharpContent)
         {
-            GeneratedCppDeclaration declaration = result.CppDeclaration;
-            GeneratedCppDefinition definition = result.CppDefinition;
-            GeneratedInit init = result.Init;
-
             IEnumerable<CppType> fieldPointerTypes = new[] { InteropReturnType }.Concat(ParameterInteropTypes);
 
-            declaration.Elements.Add(new(
+            result.CppDeclaration.Elements.Add(new(
                 Content: $"static {InteropReturnType.GetFullyQualifiedName()} (*{FunctionPointerName})({InteropParameterListDeclaration()});",
                 IsPrivate: true,
                 TypeDeclarationsReferenced: fieldPointerTypes));
 
-            definition.Elements.Add(new(
+            result.CppDefinition.Elements.Add(new(
                 Content: $"{InteropReturnType.GetFullyQualifiedName()} (*{qualifiedDefinitionName}::{FunctionPointerName})({InteropParameterListDeclaration()}) = nullptr;",
                 TypeDeclarationsReferenced: fieldPointerTypes));
 
-            init.Functions.Add(new(
-                CppName: $"{definition.Type.GetFullyQualifiedName()}::{FunctionPointerName}",
+            result.Init.Functions.Add(new(
+                CppName: $"{result.Type.GetFullyQualifiedName()}::{FunctionPointerName}",
                 CppTypeSignature: $"{InteropReturnType.GetFullyQualifiedName()} (*)({InteropParameterTypeList()})",
-                CppTypeDefinitionsReferenced: new[] { definition.Type },
+                CppTypeDefinitionsReferenced: new[] { result.Type },
                 CppTypeDeclarationsReferenced: fieldPointerTypes,
                 CSharpName: csharpName,
                 CSharpContent: csharpContent

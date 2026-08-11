@@ -4,12 +4,18 @@
     {
         public GeneratedResult(CppType type)
         {
+            this.Type = type;
             this.Init = new GeneratedInit();
             this.CppDeclaration = new GeneratedCppDeclaration(type);
             this.CppDefinition = new GeneratedCppDefinition(type);
             this.CppImplementationInvoker = null;
             this.CSharpPartialMethodDefinitions = null;
         }
+
+        /// <summary>
+        /// The C++ type that is being generated. This is the type that will be declared in the .h file and defined in the .cpp file.
+        /// </summary>
+        public CppType Type;
 
         /// <summary>
         /// The functions created as delegates on the C# side and passed to the C++

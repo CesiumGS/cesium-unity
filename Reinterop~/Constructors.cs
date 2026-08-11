@@ -36,12 +36,12 @@ namespace Reinterop
             // For other types, this will be private and the public C++ constructor will call it.
             // We don't add constructors to blittable types so that we can use the default constructor and
             // member initialization to construct them without calling into C#.
-            CppInteropFunction recipe = new CppInteropFunction(context, result.CppDefinition.Type, "Construct")
+            CppInteropFunction recipe = new CppInteropFunction(context, result.Type, "Construct")
                 .Parameters(constructor.Parameters)
                 .ReturnType(item.Type)
                 .Static(true)
                 .CSharp(item.Type, constructor)
-                .Private(result.CppDeclaration.Type.Kind != InteropTypeKind.BlittableStruct);
+                .Private(result.Type.Kind != InteropTypeKind.BlittableStruct);
 
             result.InteropFunctions.Add(recipe);
 
@@ -49,7 +49,7 @@ namespace Reinterop
             if (cppType.Kind != InteropTypeKind.BlittableStruct)
             {
                 // The actual C++ constructor, which calls the Construct method.
-                CppInteropFunction constructorRecipe = new CppInteropFunction(context, result.CppDefinition.Type, cppType.Name)
+                CppInteropFunction constructorRecipe = new CppInteropFunction(context, result.Type, cppType.Name)
                     .Parameters(constructor.Parameters)
                     .ReturnType(item.Type)
                     .Static(true)
