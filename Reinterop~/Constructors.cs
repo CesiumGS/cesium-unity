@@ -31,38 +31,37 @@ namespace Reinterop
 
         private static void GenerateSingleNonStatic(CppGenerationContext context, TypeToGenerate item, GeneratedResult result, IMethodSymbol constructor)
         {
-            GeneratedCppDeclaration declaration = result.CppDeclaration;
-
-            // For blittable structs, add static "Construct" functions rather than C++ constructors.
-            // This way we can use default construction and member initialization and avoid a call into C# to
-            // construct simple blittable types, but can still call explicit C# constructors when necessary.
-            string functionName = declaration.Type.Kind == InteropTypeKind.BlittableStruct ? "Construct" : declaration.Type.Name;
-
-            CppInteropFunction recipe = new CppInteropFunction(context, result.CppDefinition.Type, functionName)
+            // Create a static "Construct" function that calls this constructor.
+            // For blittable structs, this will be public and it will be the only way to invoke this constructor.
+            // For other types, this will be private and the public C++ constructor will call it.
+            // We don't add constructors to blittable types so that we can use the default constructor and
+            // member initialization to construct them without calling into C#.
+            CppInteropFunction recipe = new CppInteropFunction(context, result.CppDefinition.Type, "Construct")
                 .Parameters(constructor.Parameters)
-                .ReturnType(declaration.Type)
+                .ReturnType(item.Type)
                 .Static(true)
-                .CSharp(item.Type, constructor);
+                .CSharp(item.Type, constructor)
+                .Private(result.CppDeclaration.Type.Kind != InteropTypeKind.BlittableStruct);
 
-            if (declaration.Type.Kind == InteropTypeKind.BlittableStruct)
-            {
-                result.InteropFunctions.Add(recipe);
-            }
-            else
-            {
-                IReadOnlyList<CppStatement> lambdaBody = CppInterop.CallManagedFunction(
-                    new CppIdentifier(recipe.FunctionPointerName), recipe.CallArguments(),
-                    resultTypeName: "void*",
-                    returnExpression: new CppRaw("handle"),
-                    resultVariableName: "handle");
+            result.InteropFunctions.Add(recipe);
 
-                recipe
+            CppType cppType = result.CppDeclaration.Type;
+            if (cppType.Kind != InteropTypeKind.BlittableStruct)
+            {
+                // The actual C++ constructor, which calls the Construct method.
+                CppInteropFunction constructorRecipe = new CppInteropFunction(context, result.CppDefinition.Type, cppType.Name)
+                    .Parameters(constructor.Parameters)
+                    .ReturnType(item.Type)
+                    .Static(true)
+                    .DefinitionBody([])
                     .MemberInitializers([
-                        new CppMemberInitializer("_handle", new CppRaw($"[&]() mutable {{ {CppPrinter.Print(lambdaBody)} }}()"))
-                    ])
-                    .DefinitionBody([]);
-
-                result.InteropFunctions.Add(recipe);
+                        new CppMemberInitializer(
+                            cppType.Name,
+                            new CppCall(
+                                new CppIdentifier(recipe.Name),
+                                recipe.Parameters().Select(p => new CppIdentifier(p.Name)).ToList()))
+                    ]);
+                result.InteropFunctions.Add(constructorRecipe);
             }
         }
     }

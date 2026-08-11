@@ -41,15 +41,13 @@ namespace Reinterop.Tests
             Assert.That(recipe.Name, Is.EqualTo("Foo"));
             Assert.That(recipe.Static(), Is.True);
             Assert.That(recipe.MemberInitializers(), Has.Count.EqualTo(1));
-            Assert.That(recipe.MemberInitializers()![0].MemberName, Is.EqualTo("_handle"));
-
-            // The lambda-wrapped call+return body is hand-built in Constructors.cs, not derived from
-            // CppInteropFunction.DefaultDefinitionBody(), so it can only be verified in printed text.
-            // (CppHandleManagement.cs also emits other "Foo::Foo(...)" constructors - e.g. from an
-            // object handle, from nullptr - so match on the lambda wrapper itself, not the name.)
-            GeneratedCppDefinitionElement definitionElement = results["Foo"].CppDefinition.Elements
-                .Single(element => element.Content.Contains("[&]() mutable {"));
-            Assert.That(definitionElement.Content, Does.Contain(recipe.FunctionPointerName + "("));
+            Assert.That(recipe.MemberInitializers()![0].MemberName, Is.EqualTo("Foo"));
+            Assert.That(recipe.MemberInitializers()![0].Value, Is.InstanceOf<CppCall>());
+            CppCall call = (CppCall)recipe.MemberInitializers()![0].Value;
+            Assert.That(call.Callee, Is.EqualTo(new CppIdentifier("Construct")));
+            Assert.That(call.Arguments, Has.Count.EqualTo(1));
+            Assert.That(call.Arguments[0], Is.InstanceOf<CppIdentifier>());
+            Assert.That(((CppIdentifier)call.Arguments[0]).Name, Is.EqualTo("value"));
         }
 
         [Test]
