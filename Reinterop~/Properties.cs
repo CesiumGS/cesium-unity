@@ -28,10 +28,8 @@ namespace Reinterop
             CppInteropFunction recipe = new CppInteropFunction(context, result.CppDefinition.Type, propertyName)
                 .Parameters(method.Parameters)
                 .ReturnType(method.ReturnType)
-                .Static(property.IsStatic);
-
-            recipe
-                .CSharpDelegateInit(Interop.CreateCSharpDelegateInit(context, item.Type, method, recipe.FunctionPointerName));
+                .Static(property.IsStatic)
+                .CSharp(item.Type, method);
 
             result.InteropFunctions.Add(recipe);
         }

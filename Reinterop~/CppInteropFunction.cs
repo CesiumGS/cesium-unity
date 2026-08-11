@@ -165,7 +165,7 @@ namespace Reinterop
         /// instance member that must be called with a "this" pointer. Note that constructors are considered
         /// static, since they don't have a "this" pointer yet.
         /// </summary>
-        public CppInteropFunction Static(bool isStatic = true)
+        public CppInteropFunction Static(bool isStatic)
         {
             _static = isStatic;
             return this;
@@ -183,7 +183,7 @@ namespace Reinterop
         /// Sets a value indicating whether this function is private. This controls whether the function's own declaration (not the interop function pointer field,
         /// which is always private) is marked as private in the generated C++ code.
         /// </summary>
-        public CppInteropFunction Private(bool isPrivate = true)
+        public CppInteropFunction Private(bool isPrivate)
         {
             _private = isPrivate;
             return this;
@@ -217,7 +217,7 @@ namespace Reinterop
         /// won't add an interop function pointer at all - used for an unspecialized generic function, which
         /// isn't itself callable.
         /// </summary>
-        public CppInteropFunction CSharpDelegateInit(string? csharpName, string? csharpContent)
+        public CppInteropFunction CSharp(string? csharpName, string? csharpContent)
         {
             _csharpName = csharpName;
             _csharpContent = csharpContent;
@@ -225,12 +225,21 @@ namespace Reinterop
         }
 
         /// <summary>
-        /// Sets the C# delegate's name and initialization content from the tuple returned by
-        /// <see cref="Interop.CreateCSharpDelegateInit"/>.
+        /// Creates the C# interop code for the given method on the given type.
         /// </summary>
-        public CppInteropFunction CSharpDelegateInit((string Name, string Content) csharpDelegateInit)
+        public CppInteropFunction CSharp(ITypeSymbol ownerType, IMethodSymbol method)
         {
-            return CSharpDelegateInit(csharpDelegateInit.Name, csharpDelegateInit.Content);
+            var csharp = Interop.CreateCSharpDelegateInit(Context, ownerType, method, FunctionPointerName);
+            return CSharp(csharp.Name, csharp.Content);
+        }
+
+        /// <summary>
+        /// Creates the C# interop code for accessing the given field on the given type.
+        /// </summary>
+        public CppInteropFunction CSharp(ITypeSymbol ownerType, IFieldSymbol field, bool isGet)
+        {
+            var csharp = Interop.CreateCSharpDelegateInit(Context, ownerType, field, isGet);
+            return CSharp(csharp.Name, csharp.Content);
         }
 
         private IReadOnlyList<CppStatement>? _definitionBody = null;

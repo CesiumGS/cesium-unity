@@ -25,7 +25,7 @@ namespace Reinterop.Tests
             CppInteropFunction recipe = new CppInteropFunction(context, owner, "Add")
                 .Parameters(new[] { new CppInteropParameter("x", CppType.Int32.AsParameterType()) })
                 .ReturnType(CppType.Int32.AsReturnType())
-                .CSharpDelegateInit("CallAdd", "csharpContent");
+                .CSharp("CallAdd", "csharpContent");
 
             recipe.AddToGeneration(result);
 
@@ -81,7 +81,7 @@ namespace Reinterop.Tests
                 .Parameters(new[] { new CppInteropParameter("x", CppType.Int32.AsParameterType()) })
                 .ReturnType(CppType.Int32.AsReturnType())
                 .Static(true)
-                .CSharpDelegateInit("CallDoubleIt", "csharpContent");
+                .CSharp("CallDoubleIt", "csharpContent");
 
             recipe.AddToGeneration(result);
 
@@ -119,7 +119,7 @@ namespace Reinterop.Tests
                 .Parameters(new[] { new CppInteropParameter("other", owner.AsParameterType()) })
                 .ReturnType(CppType.Boolean.AsReturnType())
                 .Private(true)
-                .CSharpDelegateInit("CallOpEquality", "csharpContent");
+                .CSharp("CallOpEquality", "csharpContent");
 
             recipe.AddToGeneration(result);
 
@@ -194,7 +194,7 @@ namespace Reinterop.Tests
                 .Parameters(new[] { new CppInteropParameter("value", CppType.Int32.AsParameterType()) })
                 .ReturnType(CppType.Int32.AsReturnType())
                 .Specializes(template)
-                .CSharpDelegateInit("CallIdentity_Int32", "csharpContent");
+                .CSharp("CallIdentity_Int32", "csharpContent");
 
             specialization.AddToGeneration(result);
 

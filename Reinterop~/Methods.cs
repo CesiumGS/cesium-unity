@@ -37,7 +37,8 @@ namespace Reinterop
                 .TypeArguments(method.TypeArguments)
                 .ReturnType(method.ReturnType)
                 .Parameters(method.Parameters)
-                .Static(method.IsStatic);
+                .Static(method.IsStatic)
+                .CSharp(item.Type, method);
         }
 
         public static void GenerateSingleMethod(CppGenerationContext context, GenerateTypeState state, TypeToGenerate item, GeneratedResult result, IMethodSymbol method)
@@ -47,6 +48,8 @@ namespace Reinterop
             // For op_Equality/op_Inequality, the interop function itself is private, and a public operator==/!= is added below to call it.
             bool addOperator = method.MethodKind == MethodKind.UserDefinedOperator && (method.Name == "op_Equality" || method.Name == "op_Inequality");
             recipe.Private(addOperator);
+
+            result.InteropFunctions.Add(recipe);
 
             if (method.IsGenericMethod)
             {
@@ -68,12 +71,6 @@ namespace Reinterop
                 // Declare that this recipe is a specialization.
                 recipe.Specializes(genericRecipe);
             }
-
-            // A private, static field of function pointer type that will call into a managed delegate
-            // for this method, initialized at startup, plus the method's own declaration and definition.
-            recipe.CSharpDelegateInit(Interop.CreateCSharpDelegateInit(context, item.Type, method, recipe.FunctionPointerName));
-
-            result.InteropFunctions.Add(recipe);
 
             if (addOperator)
             {

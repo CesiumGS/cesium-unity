@@ -45,9 +45,8 @@ namespace Reinterop
             CppInteropFunction recipe = new CppInteropFunction(context, result.CppDefinition.Type, functionName)
                 .Parameters(constructor.Parameters)
                 .ReturnType(declaration.Type)
-                .Static(true);
-
-            recipe.CSharpDelegateInit(Interop.CreateCSharpDelegateInit(context, item.Type, constructor, recipe.FunctionPointerName));
+                .Static(true)
+                .CSharp(item.Type, constructor);
 
             if (declaration.Type.Kind == InteropTypeKind.BlittableStruct)
             {
