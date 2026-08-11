@@ -87,5 +87,37 @@ namespace Reinterop.Tests
             Assert.That(recipe.IsConstructor, Is.False);
             Assert.That(recipe.Static(), Is.True);
         }
+
+        [Test]
+        public void StaticClass_DeletesDefaultConstructor()
+        {
+            var results = GenerationTestHelper.GenerateResults(
+                """
+                using Reinterop;
+
+                namespace TestNamespace
+                {
+                    public static class MathHelpers
+                    {
+                        public static int Add(int a, int b) { return a + b; }
+                    }
+
+                    [Reinterop]
+                    internal class ConfigureReinterop
+                    {
+                        public void ExposeToCPP()
+                        {
+                            MathHelpers.Add(1, 2);
+                        }
+                    }
+                }
+                """);
+
+            GeneratedCppDeclarationElement deletedConstructor = results["MathHelpers"].CppDeclaration.Elements
+                .Single(element => element.Content.Contains("= delete"));
+
+            Assert.That(deletedConstructor.Content, Is.EqualTo("MathHelpers() = delete;"));
+            Assert.That(deletedConstructor.IsPrivate, Is.False);
+        }
     }
 }

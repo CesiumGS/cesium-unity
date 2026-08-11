@@ -16,13 +16,9 @@ namespace Reinterop
 
         private static void GenerateStatic(CppGenerationContext context, TypeToGenerate item, GeneratedResult result)
         {
-            GeneratedCppDeclaration declaration = result.CppDeclaration;
-
             // Delete the default constructor so this static class can't be constructed.
-            declaration.Elements.Add(new(
-                Content: $"{declaration.Type.Name}() = delete;",
-                IsPrivate: false
-            ));
+            result.InteropFunctions.Add(
+                new CppInteropFunction(context, result.CppDefinition.Type, item.Type.Name).Deleted(true));
         }
 
         private static void GenerateNonStatic(CppGenerationContext context, TypeToGenerate item, GeneratedResult result)

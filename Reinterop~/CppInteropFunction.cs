@@ -189,6 +189,22 @@ namespace Reinterop
             return this;
         }
 
+        private bool _deleted = false;
+
+        /// <summary>
+        /// Gets a value indicating whether this function is deleted (` = delete`) in the generated C++ code.
+        /// </summary>
+        public bool Deleted() { return _deleted; }
+
+        /// <summary>
+        /// Sets a value indicating whether this function is deleted (` = delete`) in the generated C++ code.
+        /// </summary>
+        public CppInteropFunction Deleted(bool isDeleted)
+        {
+            _deleted = isDeleted;
+            return this;
+        }
+
         private CppInteropFunction? _specializes = null;
 
         /// <summary>
@@ -433,14 +449,14 @@ namespace Reinterop
         /// </summary>
         public void AddToGeneration(GeneratedResult result)
         {
-            if (!IsUnspecializedGeneric && _csharpName != null && _csharpContent != null)
+            if (!Deleted() && !IsUnspecializedGeneric && _csharpName != null && _csharpContent != null)
                 AddInteropFunctionPointer(result, result.CppDefinition.Type.GetFullyQualifiedName(false), _csharpName, _csharpContent);
 
             // Don't add a declaration for a specialization. Use the generic template declaration instead.
             if (Specializes() == null)
                 AddDeclaration(result);
 
-            if (!IsUnspecializedGeneric)
+            if (!Deleted() && !IsUnspecializedGeneric)
                 AddDefinition(result, _definitionBody ?? DefaultDefinitionBody());
         }
 
@@ -494,6 +510,9 @@ namespace Reinterop
             string modifiers = Static() && !IsConstructor ? "static " : "";
             string afterModifiers = Static() || IsConstructor ? "" : " const";
 
+            if (Deleted())
+                afterModifiers = " = delete";
+
             if (IsUnspecializedGeneric)
             {
                 modifiers = "template <" + string.Join(", ", TypeParameters().Select(t => "typename " + t.Type.GetFullyQualifiedName())) + ">\n" + modifiers;
@@ -503,7 +522,7 @@ namespace Reinterop
             string returnType = IsConstructor ? "" : $"{ReturnType().GetFullyQualifiedName()} ";
 
             result.CppDeclaration.Elements.Add(new(
-                Content: $"{modifiers}{returnType} {Name}({ParameterListDeclaration()}){afterModifiers};",
+                Content: $"{modifiers}{returnType}{Name}({ParameterListDeclaration()}){afterModifiers};",
                 TypeDeclarationsReferenced: new[] { ReturnType() }.Concat(ParameterTypes),
                 IsPrivate: Private()
             ));

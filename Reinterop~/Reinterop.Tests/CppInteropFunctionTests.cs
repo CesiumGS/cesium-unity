@@ -40,7 +40,7 @@ namespace Reinterop.Tests
             Assert.That(pointerFieldDeclaration.IsPrivate, Is.True);
 
             GeneratedCppDeclarationElement methodDeclaration = result.CppDeclaration.Elements[1];
-            Assert.That(methodDeclaration.Content, Is.EqualTo("::std::int32_t  Add(::std::int32_t x) const;"));
+            Assert.That(methodDeclaration.Content, Is.EqualTo("::std::int32_t Add(::std::int32_t x) const;"));
             Assert.That(methodDeclaration.IsPrivate, Is.False);
 
             Assert.That(result.CppDefinition.Elements, Has.Count.EqualTo(2));
@@ -92,7 +92,7 @@ namespace Reinterop.Tests
                 $"static ::std::int32_t (*{functionPointerName})(::std::int32_t x, void** reinteropException);"));
 
             GeneratedCppDeclarationElement methodDeclaration = result.CppDeclaration.Elements[1];
-            Assert.That(methodDeclaration.Content, Is.EqualTo("static ::std::int32_t  DoubleIt(::std::int32_t x);"));
+            Assert.That(methodDeclaration.Content, Is.EqualTo("static ::std::int32_t DoubleIt(::std::int32_t x);"));
 
             GeneratedCppDefinitionElement methodDefinition = result.CppDefinition.Elements[1];
             string expectedDefinition = string.Join(Environment.NewLine, new[]
@@ -151,7 +151,7 @@ namespace Reinterop.Tests
 
             Assert.That(recipe.IsConstructor, Is.True);
             Assert.That(result.CppDeclaration.Elements, Has.Count.EqualTo(1));
-            Assert.That(result.CppDeclaration.Elements[0].Content, Is.EqualTo(" Foo(::std::int32_t value);"));
+            Assert.That(result.CppDeclaration.Elements[0].Content, Is.EqualTo("Foo(::std::int32_t value);"));
 
             Assert.That(result.CppDefinition.Elements, Has.Count.EqualTo(1));
             string expectedDefinition = string.Join(Environment.NewLine, new[]
@@ -185,7 +185,7 @@ namespace Reinterop.Tests
             template.AddToGeneration(result);
 
             Assert.That(result.CppDeclaration.Elements, Has.Count.EqualTo(1));
-            Assert.That(result.CppDeclaration.Elements[0].Content, Is.EqualTo("template <typename T>\nT  Identity(const T& value) const;"));
+            Assert.That(result.CppDeclaration.Elements[0].Content, Is.EqualTo("template <typename T>\nT Identity(const T& value) const;"));
             Assert.That(result.CppDefinition.Elements, Is.Empty);
             Assert.That(result.Init.Functions, Is.Empty);
 
