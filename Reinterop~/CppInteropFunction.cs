@@ -32,7 +32,7 @@ namespace Reinterop
             get
             {
                 string safeName = Interop.MakeSafeIdentifier(Name);
-                return $"Call_{safeName}_{Interop.HashParameters(Parameters(), TypeArguments())}";
+                return $"Reinterop_{safeName}_{Interop.HashParameters(Parameters(), TypeArguments())}";
             }
         }
 
@@ -207,6 +207,45 @@ namespace Reinterop
             return this;
         }
 
+        private string? _csharpName = null;
+        private string? _csharpContent = null;
+
+        /// <summary>
+        /// Sets the C# delegate's name and initialization content, used by <see cref="AddToGeneration"/>
+        /// to register this function's interop function pointer for initialization at startup (see
+        /// <see cref="AddInteropFunctionPointer"/>). If left unset (or set to null), <see cref="AddToGeneration"/>
+        /// won't add an interop function pointer at all - used for an unspecialized generic function, which
+        /// isn't itself callable.
+        /// </summary>
+        public CppInteropFunction CSharpDelegateInit(string? csharpName, string? csharpContent)
+        {
+            _csharpName = csharpName;
+            _csharpContent = csharpContent;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the C# delegate's name and initialization content from the tuple returned by
+        /// <see cref="Interop.CreateCSharpDelegateInit"/>.
+        /// </summary>
+        public CppInteropFunction CSharpDelegateInit((string Name, string Content) csharpDelegateInit)
+        {
+            return CSharpDelegateInit(csharpDelegateInit.Name, csharpDelegateInit.Content);
+        }
+
+        private IReadOnlyList<CppStatement>? _definitionBody = null;
+
+        /// <summary>
+        /// Sets the statements of this function's definition, used by <see cref="AddToGeneration"/>. If left
+        /// unset (or set to null), <see cref="AddToGeneration"/> won't add a definition at all - used for an
+        /// unspecialized generic function, which only needs its template declaration.
+        /// </summary>
+        public CppInteropFunction DefinitionBody(IReadOnlyList<CppStatement>? body)
+        {
+            _definitionBody = body;
+            return this;
+        }
+
         private List<CppMemberInitializer>? _memberInitializers = null;
 
         /// <summary>
@@ -337,14 +376,16 @@ namespace Reinterop
         /// and a Nullable-wrapped struct-return-rewrite call (which additionally returns a "resultIsValid"
         /// flag, becoming "resultIsValid ? std::make_optional(...) : std::nullopt").
         /// </summary>
-        public IReadOnlyList<CppStatement> Body(string? outParameterTypeName = null, string resultVariableName = "result")
+        public IReadOnlyList<CppStatement> Body()
         {
+            const string resultVariableName = "result";
+
             CppExpression functionPointer = new CppIdentifier(FunctionPointerName);
 
             if (NeedsStructReturnRewrite && ReturnType().Kind == InteropTypeKind.Nullable)
             {
                 CppType elementType = ReturnType().GenericArguments!.First();
-                IReadOnlyList<CppArgument> nullableArguments = CallArguments(outParameterTypeName ?? elementType.GetFullyQualifiedName());
+                IReadOnlyList<CppArgument> nullableArguments = CallArguments(elementType.GetFullyQualifiedName());
                 string convertedResult = ReturnType().GetConversionFromInteropType(Context, resultVariableName);
                 return CppInterop.CallManagedFunction(
                     functionPointer, nullableArguments,
@@ -353,7 +394,7 @@ namespace Reinterop
                     resultVariableName: "resultIsValid");
             }
 
-            IReadOnlyList<CppArgument> arguments = CallArguments(outParameterTypeName);
+            IReadOnlyList<CppArgument> arguments = CallArguments();
 
             bool isVoid = ReturnType().Name == "void" && !ReturnType().Flags.HasFlag(CppTypeFlags.Pointer);
             if (isVoid)
@@ -377,24 +418,21 @@ namespace Reinterop
         /// <summary>
         /// Adds everything needed to expose this interop function: the interop function pointer field
         /// (declaration, out-of-line definition initialized to nullptr, and startup init registration),
-        /// the wrapped function's own declaration (unless <see cref="WithoutDeclaration"/> was used), and
-        /// its definition.
+        /// the wrapped function's own declaration, and its definition. The interop function pointer is
+        /// only added if <see cref="CSharpDelegateInit(string?, string?)"/> was called, and the definition
+        /// is only added if <see cref="DefinitionBody"/> was called.
         /// </summary>
-        public void AddToGeneration(
-            GeneratedResult result,
-            string? csharpName,
-            string? csharpContent,
-            IReadOnlyList<CppStatement>? body)
+        public void AddToGeneration(GeneratedResult result)
         {
-            if (!IsUnspecializedGeneric && csharpName != null && csharpContent != null)
-                AddInteropFunctionPointer(result, result.CppDefinition.Type.GetFullyQualifiedName(false), csharpName, csharpContent);
+            if (!IsUnspecializedGeneric && _csharpName != null && _csharpContent != null)
+                AddInteropFunctionPointer(result, result.CppDefinition.Type.GetFullyQualifiedName(false), _csharpName, _csharpContent);
 
             // Don't add a declaration for a specialization. Use the generic template declaration instead.
             if (Specializes() == null)
                 AddDeclaration(result);
 
-            if (!IsUnspecializedGeneric && body != null)
-                AddDefinition(result, body);
+            if (!IsUnspecializedGeneric && _definitionBody != null)
+                AddDefinition(result, _definitionBody);
         }
 
         /// <summary>

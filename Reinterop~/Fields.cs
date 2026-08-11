@@ -74,11 +74,11 @@ namespace Reinterop
             CppInteropFunction getRecipe = baseRecipe.Clone().ReturnType(fieldType.AsReturnType());
             CppInteropFunction setRecipe = baseRecipe.Clone().Parameters([new CppInteropParameter("value", fieldType.AsParameterType())]);
 
-            var (getCsName, getCsContent) = Interop.CreateCSharpDelegateInit(context, item.Type, field, isGet: true);
-            var (setCsName, setCsContent) = Interop.CreateCSharpDelegateInit(context, item.Type, field, isGet: false);
+            getRecipe.CSharpDelegateInit(Interop.CreateCSharpDelegateInit(context, item.Type, field, isGet: true));
+            setRecipe.CSharpDelegateInit(Interop.CreateCSharpDelegateInit(context, item.Type, field, isGet: false));
 
-            getRecipe.AddToGeneration(result, getCsName, getCsContent, getRecipe.Body());
-            setRecipe.AddToGeneration(result, setCsName, setCsContent, setRecipe.Body());
+            getRecipe.DefinitionBody(getRecipe.Body()).AddToGeneration(result);
+            setRecipe.DefinitionBody(setRecipe.Body()).AddToGeneration(result);
         }
     }
 }

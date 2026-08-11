@@ -30,8 +30,8 @@ namespace Reinterop
                 .ReturnType(method.ReturnType)
                 .Static(property.IsStatic);
 
-            var (csName, csContent) = Interop.CreateCSharpDelegateInit(context, item.Type, method, recipe.FunctionPointerName);
-            recipe.AddToGeneration(result, csName, csContent, recipe.Body());
+            recipe.CSharpDelegateInit(Interop.CreateCSharpDelegateInit(context, item.Type, method, recipe.FunctionPointerName));
+            recipe.DefinitionBody(recipe.Body()).AddToGeneration(result);
         }
     }
 }

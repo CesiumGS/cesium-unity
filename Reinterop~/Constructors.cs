@@ -47,11 +47,11 @@ namespace Reinterop
                 .ReturnType(declaration.Type)
                 .Static(true);
 
-            var (csName, csContent) = Interop.CreateCSharpDelegateInit(context, item.Type, constructor, recipe.FunctionPointerName);
+            recipe.CSharpDelegateInit(Interop.CreateCSharpDelegateInit(context, item.Type, constructor, recipe.FunctionPointerName));
 
             if (declaration.Type.Kind == InteropTypeKind.BlittableStruct)
             {
-                recipe.AddToGeneration(result, csName, csContent, recipe.Body());
+                recipe.DefinitionBody(recipe.Body()).AddToGeneration(result);
             }
             else
             {
@@ -65,7 +65,7 @@ namespace Reinterop
                     new CppMemberInitializer("_handle", new CppRaw($"[&]() mutable {{ {CppPrinter.Print(lambdaBody)} }}()"))
                 ]);
 
-                recipe.AddToGeneration(result, csName, csContent, []);
+                recipe.DefinitionBody([]).AddToGeneration(result);
             }
         }
     }
