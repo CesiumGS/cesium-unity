@@ -32,6 +32,14 @@ namespace Reinterop
                 result = customGenerator.Generate(this.Options, item, result);
             }
 
+            // Now that every method/property/constructor/field accessor recipe for this type has been
+            // gathered, add each of them to the generation.
+            if (result != null)
+            {
+                foreach (CppInteropFunction function in result.InteropFunctions)
+                    function.AddToGeneration(result);
+            }
+
             return result;
         }
 
@@ -66,11 +74,6 @@ namespace Reinterop
 
                 MethodsImplementedInCpp.Generate(this.Options, item, result);
             }
-
-            // Now that every method/property/constructor/field accessor recipe for this type has been
-            // gathered, add each of them to the generation.
-            foreach (CppInteropFunction function in result.InteropFunctions)
-                function.AddToGeneration(result);
 
             return result;
         }
