@@ -8,7 +8,8 @@ namespace Reinterop
         Pointer = 1,
         Reference = 2,
         Const = 4,
-        DoublePointer = 9 // A double pointer is also a pointer
+        DoublePointer = 9, // A double pointer is also a pointer
+        RValueReference = 18, // An r-value reference is also a reference
     }
 
     /// <summary>
@@ -208,6 +209,8 @@ namespace Reinterop
                 suffix = "**";
             else if (Flags.HasFlag(CppTypeFlags.Pointer))
                 suffix = "*";
+            else if (Flags.HasFlag(CppTypeFlags.RValueReference))
+                suffix = "&&";
             else if (Flags.HasFlag(CppTypeFlags.Reference))
                 suffix = "&";
             string ns = GetFullyQualifiedNamespace(startWithGlobal);
@@ -337,6 +340,11 @@ namespace Reinterop
             return new CppType(Kind, Namespaces, Name, GenericArguments, Flags | CppTypeFlags.Const | CppTypeFlags.Reference & ~CppTypeFlags.Pointer, HeaderOverride);
         }
 
+        public CppType AsRValueReference()
+        {
+            return new CppType(Kind, Namespaces, Name, GenericArguments, Flags | CppTypeFlags.RValueReference & ~CppTypeFlags.Const, HeaderOverride);
+        }
+
         public CppType AsConstPointer()
         {
             return new CppType(Kind, Namespaces, Name, GenericArguments, Flags | CppTypeFlags.Const | CppTypeFlags.Pointer & ~CppTypeFlags.Reference, HeaderOverride);
@@ -379,6 +387,34 @@ namespace Reinterop
                     // we can't easily tell from the generic parameter. So just pass all parameters
                     // of generic type by const reference.
                     return this.AsConstReference();
+                case InteropTypeKind.EnumFlags:
+                    // Allows enums to be combined together as flags.
+                    return this.AsEnumFlags();
+            }
+
+            return this;
+        }
+
+        /// <summary>
+        /// Gets a version of this type suitable for use as a wrapped function
+        /// parameter that can be std::move'd. For classes and structs, this returns an
+        /// r-value reference (`&&`) to the type.
+        /// </summary>
+        public CppType AsMovableParameterType()
+        {
+            switch (this.Kind)
+            {
+                case InteropTypeKind.ClassWrapper:
+                case InteropTypeKind.BlittableStruct:
+                case InteropTypeKind.NonBlittableStructWrapper:
+                case InteropTypeKind.Delegate:
+                case InteropTypeKind.Nullable:
+                    return this.AsRValueReference();
+                case InteropTypeKind.GenericParameter:
+                    // TODO: ideally, we wouldn't pass primitives by reference, but
+                    // we can't easily tell from the generic parameter. So just pass all parameters
+                    // of generic type by reference.
+                    return this.AsRValueReference();
                 case InteropTypeKind.EnumFlags:
                     // Allows enums to be combined together as flags.
                     return this.AsEnumFlags();

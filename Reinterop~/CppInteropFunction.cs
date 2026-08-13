@@ -203,6 +203,26 @@ namespace Reinterop
             return this;
         }
 
+        private bool _const = true;
+
+        /// <summary>
+        /// Gets a value indicating whether this function is marked as `const` in the generated C++ code.
+        /// See <see cref="Const(bool)"/> for more information.
+        /// </summary>
+        public bool Const() { return _const; }
+
+        /// <summary>
+        /// Gets a value indicating whether this function is marked as `const` in the generated C++ code. This is ignored for static functions.
+        /// It defaults to true because almost all interop functions should be declared const because C# has no notion of const correctness.
+        /// In Reinterop, a wrapper instance represents a reference, and when the wrapper is const it only means that the wrapper cannot be
+        /// made to point to a new object. It doesn't affect whether the referenced object can be modified.
+        /// </summary>
+        public CppInteropFunction Const(bool isConst)
+        {
+            _const = isConst;
+            return this;
+        }
+
         private bool _private = false;
 
         /// <summary>
@@ -234,6 +254,40 @@ namespace Reinterop
         public CppInteropFunction Deleted(bool isDeleted)
         {
             _deleted = isDeleted;
+            return this;
+        }
+
+        private bool _explicit = false;
+
+        /// <summary>
+        /// Gets a value indicating whether this function is marked as `explicit` in the generated C++ code.
+        /// This is only used for constructors and conversion operators.
+        /// </summary>
+        public bool Explicit() { return _explicit; }
+
+        /// <summary>
+        /// Sets a value indicating whether this function is marked as `explicit` in the generated C++ code.
+        /// This is only used for constructors and conversion operators.
+        /// </summary>
+        public CppInteropFunction Explicit(bool isExplicit)
+        {
+            _explicit = isExplicit;
+            return this;
+        }
+
+        private bool _noExcept = false;
+
+        /// <summary>
+        /// Gets a value indicating whether this function is marked as `noexcept` in the generated C++ code.
+        /// </summary>
+        public bool NoExcept() { return _noExcept; }
+
+        /// <summary>
+        /// Sets a value indicating whether this function is marked as `noexcept` in the generated C++ code.
+        /// </summary>
+        public CppInteropFunction NoExcept(bool noExcept)
+        {
+            _noExcept = noExcept;
             return this;
         }
 
@@ -290,16 +344,25 @@ namespace Reinterop
             return CSharp(csharp.Name, csharp.Content);
         }
 
-        private IReadOnlyList<CppStatement>? _definitionBody = null;
+        private List<CppStatement>? _definitionBody = null;
+
+        /// <summary>
+        /// Gets the statements of this function's definition. See <see cref="DefinitionBody(IEnumerable{CppStatement}?)"/>
+        /// for details.
+        /// </summary>
+        public List<CppStatement>? DefinitionBody() { return _definitionBody; }
 
         /// <summary>
         /// Sets the statements of this function's definition, used by <see cref="AddToGeneration"/>. If left
         /// unset (or set to null), <see cref="AddToGeneration"/> won't add a definition at all - used for an
         /// unspecialized generic function, which only needs its template declaration.
         /// </summary>
-        public CppInteropFunction DefinitionBody(IReadOnlyList<CppStatement>? body)
+        public CppInteropFunction DefinitionBody(IEnumerable<CppStatement>? body)
         {
-            _definitionBody = body;
+            if (body != null)
+                _definitionBody = body.ToList();
+            else
+                _definitionBody = null;
             return this;
         }
 
@@ -536,15 +599,19 @@ namespace Reinterop
             // Constructors are neither static nor const.
             // All other instance functions are const, because C# does not play by C++ const-correctness patterns.
             string modifiers = Static() && !IsConstructor ? "static " : "";
-            string afterModifiers = Static() || IsConstructor ? "" : " const";
+            string afterModifiers = !Const() || Static() || IsConstructor ? "" : " const";
+
+            if (NoExcept())
+                afterModifiers += " noexcept";
 
             if (Deleted())
-                afterModifiers = " = delete";
+                afterModifiers += " = delete";
+
+            if (Explicit() && (IsConstructor || IsConversionOperator))
+                modifiers = "explicit " + modifiers;
 
             if (IsUnspecializedGeneric)
-            {
                 modifiers = "template <" + string.Join(", ", TypeParameters().Select(t => "typename " + t.Type.GetFullyQualifiedName())) + ">\n" + modifiers;
-            }
 
             // Constructors do not have return types.
             string returnType = HasNoReturnTypeDeclaration ? "" : $"{ReturnType().GetFullyQualifiedName()} ";
@@ -559,11 +626,14 @@ namespace Reinterop
         private void AddDefinition(GeneratedResult result, IReadOnlyList<CppStatement> body)
         {
             GeneratedCppDefinition definition = result.CppDefinition;
-            string afterModifiers = Static() ? "" : " const";
+            string afterModifiers = !Const() || Static() || IsConstructor ? "" : " const";
             string typeTemplateSpecialization = GetTypeTemplateSpecialization(definition.Type);
             string templatePrefix = "";
             string templateSpecialization = "";
             string parameters;
+
+            if (NoExcept())
+                afterModifiers += " noexcept";
 
             // Constructors do not have return types.
             string returnType = HasNoReturnTypeDeclaration ? "" : $"{ReturnType().GetFullyQualifiedName()} ";
@@ -596,6 +666,10 @@ namespace Reinterop
                 ? " : " + string.Join(", ", memberInitializers.Select(initializer => $"{initializer.MemberName}({CppPrinter.Print(initializer.Value)})"))
                 : "";
 
+            HashSet<string> requiredIncludes = CppPrinter.GetRequiredIncludes(body);
+            if (memberInitializers != null)
+                requiredIncludes.UnionWith(CppPrinter.GetRequiredIncludes(memberInitializers.Select(i => i.Value)));
+
             definition.Elements.Add(new(
                 Content:
                     $$"""
@@ -609,7 +683,8 @@ namespace Reinterop
                     ReturnType(),
                     CppObjectHandle.GetCppType(Context),
                     CppReinteropException.GetCppType(Context)
-                }.Concat(ParameterTypes)
+                }.Concat(ParameterTypes),
+                AdditionalIncludes: requiredIncludes
             ));
         }
 
@@ -631,7 +706,8 @@ namespace Reinterop
                 .Parameters(Parameters())
                 .Static(Static())
                 .Private(Private())
-                .Specializes(Specializes());
+                .Specializes(Specializes())
+                .DefinitionBody(DefinitionBody());
         }
     }
 }

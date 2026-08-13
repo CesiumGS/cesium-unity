@@ -5,7 +5,11 @@ namespace Reinterop
     // fixed set of shapes used by the "recipes" in CppInterop.cs, so that those bodies can be built
     // and tested structurally instead of via hand-written, easily-diverging string interpolation.
 
-    internal abstract record CppExpression;
+    internal abstract record CppExpression
+    {
+        // `#includes` that are required in order for this expression to be compilable.
+        public string[]? RequiredIncludes { get; init; } = null;
+    }
 
     // A bare name reference - a variable, or a (possibly qualified) function/type name used as a callee.
     internal record CppIdentifier(string Name) : CppExpression;
@@ -17,6 +21,9 @@ namespace Reinterop
     internal record CppCall(CppExpression Callee, IReadOnlyList<CppExpression> Arguments) : CppExpression;
 
     internal record CppCast(CppType targetType, CppExpression Expression) : CppExpression;
+
+    // A std::move() expression.
+    internal record CppMove(CppExpression Expression) : CppExpression;
 
     internal record CppBinary(string Op, CppExpression Left, CppExpression Right) : CppExpression;
 

@@ -13,20 +13,11 @@
             if (item.Type.IsValueType)
                 return;
 
-            GeneratedCppDeclaration declaration = result.CppDeclaration;
-            if (declaration.Type.Kind != InteropTypeKind.ClassWrapper &&
-                declaration.Type.Kind != InteropTypeKind.NonBlittableStructWrapper &&
-                declaration.Type.Kind != InteropTypeKind.Delegate)
+            if (result.Type.Kind != InteropTypeKind.ClassWrapper &&
+                result.Type.Kind != InteropTypeKind.NonBlittableStructWrapper &&
+                result.Type.Kind != InteropTypeKind.Delegate)
             {
                 return;
-            }
-
-            CppType objectHandleType = CppObjectHandle.GetCppType(context);
-
-            string templateSpecialization = "";
-            if (declaration.Type.GenericArguments != null && declaration.Type.GenericArguments.Count > 0)
-            {
-                templateSpecialization = $"<{string.Join(", ", declaration.Type.GenericArguments.Select(arg => arg.GetFullyQualifiedName()))}>";
             }
 
             // Generate implicit conversions to all base classes.
@@ -58,9 +49,9 @@
                         targetType,
                         new CppCall(
                             new CppIdentifier(objectHandleType.GetFullyQualifiedName()),
-                            [new CppRaw("this->_handle")]
+                            [new CppRaw("this->_handle")])
                         )
-                    ))
+                    )
                 ]);
         }
     }

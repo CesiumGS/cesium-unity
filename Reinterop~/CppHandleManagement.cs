@@ -38,44 +38,31 @@ namespace Reinterop
             ));
 
             // Construct from an object handle
-            declaration.Elements.Add(new(
-                Content: $"explicit {type.Name}({objectHandleType.GetFullyQualifiedName()}&& handle) noexcept;",
-                TypeDeclarationsReferenced: new[] { objectHandleType }
-            ));
+            CppInteropFunction objectHandleConstructorRecipe = new CppInteropFunction(context, result.Type, type.Name)
+                .Parameters([new CppInteropParameter("handle", objectHandleType.AsMovableParameterType())])
+                .Explicit(true)
+                .NoExcept(true)
+                .Static(true)
+                .MemberInitializers([ new CppMemberInitializer("_handle", new CppMove(new CppIdentifier("handle"))) ])
+                .DefinitionBody([]);
 
-            definition.Elements.Add(new(
-                Content:
-                    $$"""
-                    {{type.Name}}{{templateSpecialization}}::{{type.Name}}({{objectHandleType.GetFullyQualifiedName()}}&& handle) noexcept :
-                        _handle(std::move(handle)) {}
-                    """,
-                AdditionalIncludes: new[] { "<utility> " }, // for std::move
-                TypeDefinitionsReferenced: new[]
-                {
-                    objectHandleType,
-                    result.CppDefinition.Type
-                }
-            ));
+            result.InteropFunctions.Add(objectHandleConstructorRecipe);
 
-            // Construct from a null reference
-            declaration.Elements.Add(new(
-                Content: $"{type.Name}(std::nullptr_t) noexcept;",
-                TypeDeclarationsReferenced: new[] { CppType.NullPointer }
-            ));
+            CppInteropFunction nullConstructorRecipe = new CppInteropFunction(context, result.Type, type.Name)
+                .Parameters([new CppInteropParameter("handle", CppType.NullPointer)])
+                .NoExcept(true)
+                .Static(true)
+                .MemberInitializers([ new CppMemberInitializer("_handle", new CppIdentifier("handle")) ])
+                .DefinitionBody([]);
 
-            definition.Elements.Add(new(
-                Content:
-                    $$"""
-                    {{type.Name}}{{templateSpecialization}}::{{type.Name}}(std::nullptr_t) noexcept : _handle(nullptr) {
-                    }
-                    """,
-                TypeDefinitionsReferenced: new[]
-                {
-                    result.CppDefinition.Type,
-                    CppType.NullPointer,
-                }
-            ));
+            result.InteropFunctions.Add(nullConstructorRecipe);
 
+            // For simple types without an overloaded operator==, we can check
+            // to see if a wrapper represents a null reference without leaving
+            // C++ land.
+            //
+            // But if such an operator does exist, we have to use it, even if
+            // that means a call into C#.
             bool hasOverloadedOperatorEquals = CSharpTypeUtility
                 .FindMembers(item.Type, "op_Equality")
                 .Where(
@@ -86,71 +73,34 @@ namespace Reinterop
                     SymbolEqualityComparer.Default.Equals(method.Parameters[1].Type, method.ContainingType))
                 .Any();
 
-            // For simple types without an overloaded operator==, we can check
-            // to see if a wrapper represents a null reference without leaving
-            // C++ land.
-            //
-            // But if such an operator does exist, we have to use it, even if
-            // that means a call into C#.
             if (!hasOverloadedOperatorEquals)
             {
-                declaration.Elements.Add(new(
-                    Content: $"bool operator==(std::nullptr_t) const noexcept;",
-                    TypeDeclarationsReferenced: new[] { CppType.NullPointer }
-                ));
-                definition.Elements.Add(new(
-                    Content:
-                        $$"""
-                    bool {{type.Name}}{{templateSpecialization}}::operator==(std::nullptr_t) const noexcept {
-                        return this->_handle.GetRaw() == nullptr;
-                    }
-                    """,
-                    TypeDefinitionsReferenced: new[] { result.CppDefinition.Type, objectHandleType }
-                ));
+                CppInteropFunction equalityOperatorRecipe = new CppInteropFunction(context, result.Type, "operator==")
+                    .ReturnType(CppType.Boolean.AsReturnType())
+                    .Parameters([new CppInteropParameter("", CppType.NullPointer)])
+                    .NoExcept(true)
+                    .DefinitionBody([
+                        new CppReturn(new CppBinary("==", new CppCall(new CppRaw("_handle.GetRaw"), []), new CppIdentifier("nullptr")))
+                    ]);
+                result.InteropFunctions.Add(equalityOperatorRecipe);
 
-                declaration.Elements.Add(new(
-                    Content: $"bool operator!=(std::nullptr_t) const noexcept;",
-                    TypeDeclarationsReferenced: new[] { CppType.NullPointer }
-                ));
-                definition.Elements.Add(new(
-                    Content:
-                        $$"""
-                    bool {{type.Name}}{{templateSpecialization}}::operator!=(std::nullptr_t) const noexcept {
-                        return this->_handle.GetRaw() != nullptr;
-                    }
-                    """,
-                    TypeDefinitionsReferenced: new[] { result.CppDefinition.Type, objectHandleType }
-                ));
+                CppInteropFunction inequalityOperatorRecipe = new CppInteropFunction(context, result.Type, "operator!=")
+                    .ReturnType(CppType.Boolean.AsReturnType())
+                    .Parameters([new CppInteropParameter("", CppType.NullPointer)])
+                    .NoExcept(true)
+                    .DefinitionBody([
+                        new CppReturn(new CppBinary("!=", new CppCall(new CppRaw("_handle.GetRaw"), []), new CppIdentifier("nullptr")))
+                    ]);
+                result.InteropFunctions.Add(inequalityOperatorRecipe);
             }
 
             // Get handle
-            declaration.Elements.Add(new(
-                Content: $"const {objectHandleType.GetFullyQualifiedName()}& GetHandle() const;",
-                TypeDeclarationsReferenced: new[] { objectHandleType }
-            ));
-            declaration.Elements.Add(new(
-                Content: $"{objectHandleType.GetFullyQualifiedName()}& GetHandle();",
-                TypeDeclarationsReferenced: new[] { objectHandleType }
-            ));
-
-            definition.Elements.Add(new(
-                Content:
-                    $$"""
-                    const {{objectHandleType.GetFullyQualifiedName()}}& {{type.Name}}{{templateSpecialization}}::GetHandle() const {
-                        return this->_handle;
-                    }
-                    """,
-                TypeDefinitionsReferenced: new[] { result.CppDefinition.Type }
-            ));
-            definition.Elements.Add(new(
-                Content:
-                    $$"""
-                    {{objectHandleType.GetFullyQualifiedName()}}& {{type.Name}}{{templateSpecialization}}::GetHandle() {
-                        return this->_handle;
-                    }
-                    """,
-                TypeDefinitionsReferenced: new[] { result.CppDefinition.Type }
-            ));
+            CppInteropFunction getHandleRecipe = new CppInteropFunction(context, result.Type, "GetHandle")
+                .DefinitionBody([
+                    new CppReturn(new CppIdentifier("_handle"))
+                ]);
+            result.InteropFunctions.Add(getHandleRecipe.Clone().Const(true).ReturnType(objectHandleType.AsConstReference()));
+            result.InteropFunctions.Add(getHandleRecipe.Clone().Const(false).ReturnType(objectHandleType.AsReference()));
         }
     }
 }

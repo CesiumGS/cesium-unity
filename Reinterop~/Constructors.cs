@@ -45,7 +45,7 @@ namespace Reinterop
 
             result.InteropFunctions.Add(recipe);
 
-            CppType cppType = result.CppDeclaration.Type;
+            CppType cppType = result.Type;
             if (cppType.Kind != InteropTypeKind.BlittableStruct)
             {
                 // The actual C++ constructor, which calls the Construct method.
