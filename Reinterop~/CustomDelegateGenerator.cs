@@ -214,124 +214,89 @@ namespace Reinterop
                     """));
 
             // Add operator+ and operator- to combine and remove delegates, respectively.
-            result.CppDeclaration.Elements.Add(new(
-                Content: $"static void* (*CombineDelegates)(void* thiz, void* rhs);",
-                IsPrivate: true));
-            result.CppDeclaration.Elements.Add(new(
-                Content: $"static void* (*RemoveDelegate)(void* thiz, void* rhs);",
-                IsPrivate: true));
-
-            result.CppDefinition.Elements.Add(new(
-                Content: $"void* (*{itemType.GetFullyQualifiedName()}::CombineDelegates)(void* thiz, void* rhs) = nullptr;"));
-            result.CppDefinition.Elements.Add(new(
-                Content: $"void* (*{itemType.GetFullyQualifiedName()}::RemoveDelegate)(void* thiz, void* rhs) = nullptr;"));
-
-            result.CppDeclaration.Elements.Add(new(
-                Content: $"{itemType.GetFullyQualifiedName()} operator+(const {itemType.GetFullyQualifiedName()}& rhs) const;"));
-            result.CppDeclaration.Elements.Add(new(
-                Content: $"{itemType.GetFullyQualifiedName()} operator-(const {itemType.GetFullyQualifiedName()}& rhs) const;"));
-
-            CppType objectHandle = CppObjectHandle.GetCppType(context);
-
-            result.CppDefinition.Elements.Add(new(
-                Content:
-                    $$"""
-                    {{itemType.GetFullyQualifiedName()}} {{itemType.GetFullyQualifiedName(false)}}::operator+(const {{itemType.GetFullyQualifiedName()}}& rhs) const {
-                      return {{itemType.GetFullyQualifiedName()}}({{objectHandle.GetFullyQualifiedName()}}(CombineDelegates(this->GetHandle().GetRaw(), rhs.GetHandle().GetRaw())));
-                    }
-                    """,
-                TypeDefinitionsReferenced: new[] { objectHandle }));
-            result.CppDefinition.Elements.Add(new(
-                Content:
-                    $$"""
-                    {{itemType.GetFullyQualifiedName()}} {{itemType.GetFullyQualifiedName(false)}}::operator-(const {{itemType.GetFullyQualifiedName()}}& rhs) const {
-                      return {{itemType.GetFullyQualifiedName()}}({{objectHandle.GetFullyQualifiedName()}}(RemoveDelegate(this->GetHandle().GetRaw(), rhs.GetHandle().GetRaw())));
-                    }
-                    """));
-
             string csTypeName = Interop.GetUniqueNameForType(csType);
             string csCombineDelegatesName = csTypeName + "_CombineDelegates";
             string csRemoveDelegateName = csTypeName + "_RemoveDelegate";
 
-            result.Init.Functions.Add(new(
-                CppName: $"{itemType.GetFullyQualifiedName()}::CombineDelegates",
-                CppTypeSignature: $"void* (*)(void*, void*)",
-                CppTypeDefinitionsReferenced: new[] { itemType, objectHandle },
-                CSharpName: csCombineDelegatesName + "Delegate",
-                CSharpContent:
+            CppInteropFunction combineDelegatesRecipe = new CppInteropFunction(context, itemType, "operator+")
+                .Parameters([new CppInteropParameter("rhs", itemType.AsParameterType())])
+                .ReturnType(itemType.AsReturnType())
+                .CSharp(csCombineDelegatesName + "Delegate",
                     $$"""
                     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-                    private unsafe delegate System.IntPtr {{csCombineDelegatesName}}Type(System.IntPtr thiz, System.IntPtr rhs);
+                    private unsafe delegate System.IntPtr {{csCombineDelegatesName}}Type(System.IntPtr thiz, System.IntPtr rhs, System.IntPtr* reinteropException);
                     private static unsafe readonly {{csCombineDelegatesName}}Type {{csCombineDelegatesName}}Delegate = new {{csCombineDelegatesName}}Type({{csCombineDelegatesName}});
                     [AOT.MonoPInvokeCallback(typeof({{csCombineDelegatesName}}Type))]
-                    private static unsafe System.IntPtr {{csCombineDelegatesName}}(System.IntPtr thiz, System.IntPtr rhs)
+                    private static unsafe System.IntPtr {{csCombineDelegatesName}}(System.IntPtr thiz, System.IntPtr rhs, System.IntPtr* reinteropException)
                     {
-                        {{csType.GetFullyQualifiedName()}} left = ({{csType.GetFullyQualifiedName()}})ObjectHandleUtility.GetObjectFromHandle(thiz)!;
-                        {{csType.GetFullyQualifiedName()}} right = ({{csType.GetFullyQualifiedName()}})ObjectHandleUtility.GetObjectFromHandle(rhs)!;
-                        return ObjectHandleUtility.CreateHandle(left + right);
-                    }
-                    """
-            ));
-
-            result.Init.Functions.Add(new(
-                CppName: $"{itemType.GetFullyQualifiedName()}::RemoveDelegate",
-                CppTypeSignature: $"void* (*)(void*, void*)",
-                CppTypeDefinitionsReferenced: new[] { itemType, objectHandle },
-                CSharpName: csRemoveDelegateName + "Delegate",
-                CSharpContent:
-                    $$"""
-                    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-                    private unsafe delegate System.IntPtr {{csRemoveDelegateName}}Type(System.IntPtr thiz, System.IntPtr rhs);
-                    private static unsafe readonly {{csRemoveDelegateName}}Type {{csRemoveDelegateName}}Delegate = new {{csRemoveDelegateName}}Type({{csRemoveDelegateName}});
-                    [AOT.MonoPInvokeCallback(typeof({{csRemoveDelegateName}}Type))]
-                    private static unsafe System.IntPtr {{csRemoveDelegateName}}(System.IntPtr thiz, System.IntPtr rhs)
-                    {
-                        {{csType.GetFullyQualifiedName()}} left = ({{csType.GetFullyQualifiedName()}})ObjectHandleUtility.GetObjectFromHandle(thiz)!;
-                        {{csType.GetFullyQualifiedName()}} right = ({{csType.GetFullyQualifiedName()}})ObjectHandleUtility.GetObjectFromHandle(rhs)!;
-                        return ObjectHandleUtility.CreateHandle(left - right);
-                    }
-                    """
-            ));
-
-            // Add a Dispose method to free the native function without waiting for the finalizer.
-            result.CppDeclaration.Elements.Add(new(
-                Content: $"static void (*DisposeDelegate)(void* thiz);",
-                IsPrivate: true));
-            result.CppDefinition.Elements.Add(new(
-                Content: $"void (*{itemType.GetFullyQualifiedName()}::DisposeDelegate)(void* thiz) = nullptr;"));
-            result.CppDeclaration.Elements.Add(new(
-                Content: $"void Dispose();"));
-            result.CppDefinition.Elements.Add(new(
-                Content: 
-                    $$"""
-                    void {{itemType.GetFullyQualifiedName()}}::Dispose() {
-                        DisposeDelegate(this->GetHandle().GetRaw());
-                    }
-                    """
-            ));
-
-            result.Init.Functions.Add(new(
-                CppName: $"{itemType.GetFullyQualifiedName()}::DisposeDelegate",
-                CppTypeSignature: $"void (*)(void*)",
-                CppTypeDefinitionsReferenced: new[] { itemType, objectHandle },
-                CSharpName: csTypeName + "_DisposeDelegateDelegate",
-                CSharpContent:
-                    $$"""
-                    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-                    private unsafe delegate void {{csTypeName}}_DisposeDelegateType(System.IntPtr thiz);
-                    private static unsafe readonly {{csTypeName}}_DisposeDelegateType {{csTypeName}}_DisposeDelegateDelegate = new {{csTypeName}}_DisposeDelegateType({{csTypeName}}_DisposeDelegate);
-                    [AOT.MonoPInvokeCallback(typeof({{csTypeName}}_DisposeDelegateType))]
-                    private static unsafe void {{csTypeName}}_DisposeDelegate(System.IntPtr thiz)
-                    {
-                        var delegateObject = ({{csType.GetFullyQualifiedName()}})ObjectHandleUtility.GetObjectFromHandle(thiz)!;
-                        var nativeFunction = delegateObject.Target as {{csType.Name}}{{genericTypeHash}}NativeFunction;
-                        if (nativeFunction != null)
+                        try
                         {
-                            nativeFunction.Dispose();
+                            {{csType.GetFullyQualifiedName()}} left = ({{csType.GetFullyQualifiedName()}})ObjectHandleUtility.GetObjectFromHandle(thiz)!;
+                            {{csType.GetFullyQualifiedName()}} right = ({{csType.GetFullyQualifiedName()}})ObjectHandleUtility.GetObjectFromHandle(rhs)!;
+                            return ObjectHandleUtility.CreateHandle(left + right);
+                        }
+                        catch (Exception reinteropManagedException)
+                        {
+                            *reinteropException = Reinterop.ObjectHandleUtility.CreateHandle(reinteropManagedException);
+                            return System.IntPtr.Zero;
                         }
                     }
-                    """
-            ));
+                    """);
+            result.InteropFunctions.Add(combineDelegatesRecipe);
+
+            CppInteropFunction removeDelegateRecipe = new CppInteropFunction(context, itemType, "operator-")
+                .Parameters([new CppInteropParameter("rhs", itemType.AsParameterType())])
+                .ReturnType(itemType.AsReturnType())
+                .CSharp(csRemoveDelegateName + "Delegate",
+                    $$"""
+                    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+                    private unsafe delegate System.IntPtr {{csRemoveDelegateName}}Type(System.IntPtr thiz, System.IntPtr rhs, System.IntPtr* reinteropException);
+                    private static unsafe readonly {{csRemoveDelegateName}}Type {{csRemoveDelegateName}}Delegate = new {{csRemoveDelegateName}}Type({{csRemoveDelegateName}});
+                    [AOT.MonoPInvokeCallback(typeof({{csRemoveDelegateName}}Type))]
+                    private static unsafe System.IntPtr {{csRemoveDelegateName}}(System.IntPtr thiz, System.IntPtr rhs, System.IntPtr* reinteropException)
+                    {
+                        try
+                        {
+                            {{csType.GetFullyQualifiedName()}} left = ({{csType.GetFullyQualifiedName()}})ObjectHandleUtility.GetObjectFromHandle(thiz)!;
+                            {{csType.GetFullyQualifiedName()}} right = ({{csType.GetFullyQualifiedName()}})ObjectHandleUtility.GetObjectFromHandle(rhs)!;
+                            return ObjectHandleUtility.CreateHandle(left - right);
+                        }
+                        catch (Exception reinteropManagedException)
+                        {
+                            *reinteropException = Reinterop.ObjectHandleUtility.CreateHandle(reinteropManagedException);
+                            return System.IntPtr.Zero;
+                        }
+                    }
+                    """);
+            result.InteropFunctions.Add(removeDelegateRecipe);
+
+            // Add a Dispose method to free the native function without waiting for the finalizer.
+            CppInteropFunction disposeRecipe = new CppInteropFunction(context, itemType, "Dispose")
+                .ReturnType(CppType.Void)
+                .CSharp(csTypeName + "_DisposeDelegateDelegate",
+                    $$"""
+                    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+                    private unsafe delegate void {{csTypeName}}_DisposeDelegateType(System.IntPtr thiz, System.IntPtr* reinteropException);
+                    private static unsafe readonly {{csTypeName}}_DisposeDelegateType {{csTypeName}}_DisposeDelegateDelegate = new {{csTypeName}}_DisposeDelegateType({{csTypeName}}_DisposeDelegate);
+                    [AOT.MonoPInvokeCallback(typeof({{csTypeName}}_DisposeDelegateType))]
+                    private static unsafe void {{csTypeName}}_DisposeDelegate(System.IntPtr thiz, System.IntPtr* reinteropException)
+                    {
+                        try
+                        {
+                            var delegateObject = ({{csType.GetFullyQualifiedName()}})ObjectHandleUtility.GetObjectFromHandle(thiz)!;
+                            var nativeFunction = delegateObject.Target as {{csType.Name}}{{genericTypeHash}}NativeFunction;
+                            if (nativeFunction != null)
+                            {
+                                nativeFunction.Dispose();
+                            }
+                        }
+                        catch (Exception reinteropManagedException)
+                        {
+                            *reinteropException = Reinterop.ObjectHandleUtility.CreateHandle(reinteropManagedException);
+                        }
+                    }
+                    """);
+            result.InteropFunctions.Add(disposeRecipe);
         }
     }
 }

@@ -36,7 +36,7 @@ namespace Reinterop.Tests
                 }
                 """);
 
-            CppInteropFunction recipe = results["Foo"].InteropFunctions.Single(function => function.IsConstructor);
+            CppInteropFunction recipe = results["Foo"].InteropFunctions.Single(function => function.IsConstructor && function.Parameters().Count == 1 && function.Parameters()[0].Name == "value");
 
             Assert.That(recipe.Name, Is.EqualTo("Foo"));
             Assert.That(recipe.Static(), Is.True);
