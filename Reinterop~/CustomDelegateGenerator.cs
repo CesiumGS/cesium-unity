@@ -47,30 +47,18 @@ namespace Reinterop
                 templateSpecialization = $"<{string.Join(", ", itemType.GenericArguments.Select(arg => arg.GetFullyQualifiedName()))}>";
             }
 
-            result.CppDeclaration.Elements.Add(new(
-                Content: $"static void* (*CreateDelegate)(void* pCallbackFunction);",
-                IsPrivate: true));
-            result.CppDefinition.Elements.Add(new(
-                Content: $"void* (*{itemType.Name}{templateSpecialization}::CreateDelegate)(void* pCallbackFunction) = nullptr;"));
-
+            // Declare a function signature and then a CppType for std::function<FunctionSignature>.
+            // The FunctionSignature is InteropTypeKind.Primitive because it will never cross the interop boundary,
+            // and by declaring it a Primitive we avoid attempting to include a wrapper header file for it.
             result.CppDeclaration.Elements.Add(new(
                 Content: $"using FunctionSignature = {returnType.GetFullyQualifiedName()} ({string.Join(", ", callbackParameters.Select(p => p.Type.AsParameterType().GetFullyQualifiedName()))});"
             ));
-            result.CppDeclaration.Elements.Add(new(
-                Content: $"{itemType.Name}(std::function<FunctionSignature> callback);",
-                TypeDeclarationsReferenced: callbackParameters.Select(p => p.Type.AsParameterType()),
-                AdditionalIncludes: new[] { "<functional>" }
-            ));
 
-            result.CppDefinition.Elements.Add(new(
-                Content:
-                    $$"""
-                    {{itemType.Name}}{{templateSpecialization}}::{{itemType.Name}}(std::function<FunctionSignature> callback) :
-                        _handle(CreateDelegate(reinterpret_cast<void*>(new std::function<FunctionSignature>(std::move(callback)))))
-                    {
-                    }
-                    """
-                ));
+            CppType functionType = new CppType(
+                InteropTypeKind.Unknown,
+                [ "std" ], "function",
+                [ new CppType(InteropTypeKind.Primitive, [], "FunctionSignature", null, 0) ],
+                0, "<functional>");
 
             // A C# delegate type that wraps a std::function, and arranges for
             // the invoke and dispose to be implemented in C++.
@@ -92,12 +80,7 @@ namespace Reinterop
             var callInvokeInteropParameters = new[] { "_callbackFunction" }.Concat(callbackParameters.Select(p => p.CsType.GetConversionToInteropType(p.Name)));
             var csReturnType = CSharpType.FromSymbol(context, invokeMethod.ReturnType);
 
-            result.Init.Functions.Add(new(
-                CppName: $"{itemType.GetFullyQualifiedName()}::CreateDelegate",
-                CppTypeSignature: $"void* (*)(void*)",
-                CppTypeDefinitionsReferenced: new[] { itemType },
-                CSharpName: csBaseName + "Delegate",
-                CSharpContent:
+            string createDelegateCSharpContent =
                     $$"""
                     private class {{csType.Name}}{{genericTypeHash}}NativeFunction : System.IDisposable
                     {
@@ -152,16 +135,44 @@ namespace Reinterop
                         private static unsafe extern {{csReturnType.AsInteropTypeReturn().GetFullyQualifiedName()}} {{invokeCallbackName}}({{string.Join(", ", invokeInteropParameters)}}, IntPtr* reinteropException);
                     }
                     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-                    private unsafe delegate IntPtr {{csBaseName}}Type(IntPtr callbackFunction);
+                    private unsafe delegate IntPtr {{csBaseName}}Type(IntPtr callbackFunction, IntPtr* reinteropException);
                     private static unsafe readonly {{csBaseName}}Type {{csBaseName}}Delegate = new {{csBaseName}}Type({{csBaseName}});
                     [AOT.MonoPInvokeCallback(typeof({{csBaseName}}Type))]
-                    private static unsafe IntPtr {{csBaseName}}(IntPtr callbackFunction)
+                    private static unsafe IntPtr {{csBaseName}}(IntPtr callbackFunction, IntPtr* reinteropException)
                     {
-                        var receiver = new {{csType.Name}}{{genericTypeHash}}NativeFunction(callbackFunction);
-                        return Reinterop.ObjectHandleUtility.CreateHandle(new {{csType.GetFullyQualifiedName()}}(receiver.Invoke));
+                        try
+                        {
+                            var receiver = new {{csType.Name}}{{genericTypeHash}}NativeFunction(callbackFunction);
+                            return Reinterop.ObjectHandleUtility.CreateHandle(new {{csType.GetFullyQualifiedName()}}(receiver.Invoke));
+                        }
+                        catch (Exception reinteropManagedException)
+                        {
+                            *reinteropException = Reinterop.ObjectHandleUtility.CreateHandle(reinteropManagedException);
+                            return IntPtr.Zero;
+                        }
                     }
                     """
-            ));
+                ;
+
+            CppInteropFunction createDelegateRecipe = new CppInteropFunction(context, itemType, "CreateDelegate")
+                .Parameters([new CppInteropParameter("pCallbackFunction", CppType.VoidPointer)])
+                .ReturnType(itemType.AsReturnType())
+                .Static(true)
+                .Private(true)
+                .CSharp(csBaseName + "Delegate", createDelegateCSharpContent);
+            result.InteropFunctions.Add(createDelegateRecipe);
+
+            CppInteropFunction constructorRecipe = new CppInteropFunction(context, itemType, itemType.Name)
+                .Parameters([new CppInteropParameter("callback", functionType)])
+                .MemberInitializers([
+                    new CppMemberInitializer(
+                        itemType.Name,
+                        new CppCall(
+                            new CppIdentifier("CreateDelegate"),
+                            [new CppRaw("reinterpret_cast<void*>(new std::function<FunctionSignature>(std::move(callback)))")]))
+                ])
+                .DefinitionBody([]);
+            result.InteropFunctions.Add(constructorRecipe);
 
             var interopParameters = new[] { (Name: "pCallbackFunction", CsType: CSharpType.FromSymbol(context, context.Compilation.GetSpecialType(SpecialType.System_IntPtr)), Type: CppType.VoidPointer, InteropType: CppType.VoidPointer) }.Concat(callbackParameters);
             var callParameters = callbackParameters.Select(p => p.Type.GetConversionFromInteropType(context, p.Name));
