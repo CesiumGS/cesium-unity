@@ -186,13 +186,7 @@ namespace Reinterop
         public string GetFullyQualifiedNamespace(bool startWithGlobal = true)
         {
             string ns = string.Join("::", Namespaces);
-            if (!startWithGlobal)
-                return ns;
-
-            if (ns.Length > 0)
-                return "::" + ns;
-            else
-                return "";
+            return startWithGlobal ? "::" + ns : ns;
         }
 
         public string GetFullyQualifiedName(bool startWithGlobal = true)
@@ -213,11 +207,16 @@ namespace Reinterop
                 suffix = "&&";
             else if (Flags.HasFlag(CppTypeFlags.Reference))
                 suffix = "&";
-            string ns = GetFullyQualifiedNamespace(startWithGlobal);
-            if (ns.Length > 0)
-                return $"{modifier}{ns}::{Name}{template}{suffix}";
-            else
+            
+            // Template parameters and unqualified primitives (void, bool, float, etc.) cannot be globally qualified, i.e., `::void`, `::bool`, or `::T`.
+            if (Namespaces.Count == 0 && (Kind == InteropTypeKind.Primitive || Kind == InteropTypeKind.GenericParameter))
                 return $"{modifier}{Name}{template}{suffix}";
+
+            string ns = GetFullyQualifiedNamespace(startWithGlobal);
+            if (ns.EndsWith("::") || ns.Length == 0)
+                return $"{modifier}{ns}{Name}{template}{suffix}";
+            else
+                return $"{modifier}{ns}::{Name}{template}{suffix}";
         }
 
         public void AddForwardDeclarationsToSet(ISet<string> forwardDeclarations)
