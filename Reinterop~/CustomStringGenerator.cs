@@ -63,12 +63,13 @@ namespace Reinterop
             if (!this.GetDependencies(context).Any())
                 return generated;
 
-            // Add a constructor taking std::string.
-            generated.CppDeclaration.Elements.Add(new(
-                Content: $"String(const ::std::string& s);",
-                AdditionalIncludes: new[] { "<string>" }));
-
-            CppType stringWrapper = CppType.FromCSharp(context, context.Compilation.GetSpecialType(SpecialType.System_String));
+            CppType stdString = new CppType(
+                InteropTypeKind.Unknown,
+                [ "std" ],
+                "string",
+                null,
+                0,
+                "<string>");
 
             INamedTypeSymbol? encoding = context.Compilation.GetTypeByMetadataName("System.Text.Encoding");
             if (encoding == null)
@@ -81,44 +82,49 @@ namespace Reinterop
                 return generated;
 
             CppType marshalWrapper = CppType.FromCSharp(context, marshal);
+            string GetHeaderInclude(CppType cppType) => cppType.HeaderOverride ?? $"<{string.Join("/", cppType.Namespaces.Append(cppType.Name))}.h>";
 
-            generated.CppDefinition.Elements.Add(new(
-                Content:
-                    $$"""
-                    String::String(const ::std::string& s) : _handle() {
-                      String result = {{encodingWrapper.GetFullyQualifiedName()}}::UTF8().GetString(
-                        const_cast<std::uint8_t*>(reinterpret_cast<const std::uint8_t*>(s.data())),
-                        std::int32_t(s.size()));
-                      this->_handle = std::move(result._handle);
-                    }
-                    """,
-                TypeDefinitionsReferenced: new[] { encodingWrapper }));
+            CppInteropFunction stringConstructor = new CppInteropFunction(context, generated.Type, generated.Type.Name)
+                .Parameters([new CppInteropParameter("s", stdString.AsConstReference())])
+                .MemberInitializers([new CppMemberInitializer("_handle", new CppRaw(""))])
+                .DefinitionBody([
+                    new CppExpressionStatement(new CppRaw(
+                        $$"""
+                        String result = {{encodingWrapper.GetFullyQualifiedName()}}::UTF8().GetString(
+                          const_cast<std::uint8_t*>(reinterpret_cast<const std::uint8_t*>(s.data())),
+                          std::int32_t(s.size()));
+                        this->_handle = std::move(result._handle);
+                        """)
+                    {
+                        RequiredIncludes = [ "<string>", GetHeaderInclude(encodingWrapper) ]
+                    })
+                ]);
+            generated.InteropFunctions.Add(stringConstructor);
 
             // Add a ToStlString method
-            generated.CppDeclaration.Elements.Add(new(
-                Content: $"std::string ToStlString() const;",
-                AdditionalIncludes: new[] { "<string>" }));
+            CppInteropFunction toStlString = new CppInteropFunction(context, generated.Type, "ToStlString")
+                .ReturnType(stdString)
+                .DefinitionBody([
+                    new CppExpressionStatement(new CppRaw(
+                        $$"""
+                        if (*this == nullptr)
+                          return std::string();
 
-            generated.CppDefinition.Elements.Add(new(
-                Content:
-                    $$"""
-                    std::string String::ToStlString() const {
-                      if (*this == nullptr)
-                        return std::string();
-
-                      void* p = {{marshalWrapper.GetFullyQualifiedName()}}::StringToCoTaskMemUTF8(*this);
-                      try {
-                        std::string result = static_cast<char*>(p);
-                        {{marshalWrapper.GetFullyQualifiedName()}}::FreeCoTaskMem(p);
-                        return result;
-                      } catch (...) {
-                        {{marshalWrapper.GetFullyQualifiedName()}}::FreeCoTaskMem(p);
-                        throw;
-                      }
-                    }
-                    """,
-                TypeDefinitionsReferenced: new[] { marshalWrapper }
-            ));
+                        void* p = {{marshalWrapper.GetFullyQualifiedName()}}::StringToCoTaskMemUTF8(*this);
+                        try {
+                          std::string result = static_cast<char*>(p);
+                          {{marshalWrapper.GetFullyQualifiedName()}}::FreeCoTaskMem(p);
+                          return result;
+                        } catch (...) {
+                          {{marshalWrapper.GetFullyQualifiedName()}}::FreeCoTaskMem(p);
+                          throw;
+                        }
+                        """)
+                    {
+                        RequiredIncludes = new[] { "<string>", GetHeaderInclude(marshalWrapper) }
+                    })
+                ]);
+            generated.InteropFunctions.Add(toStlString);
 
             return generated;
         }
