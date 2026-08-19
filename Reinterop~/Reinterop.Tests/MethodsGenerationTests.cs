@@ -223,5 +223,41 @@ namespace Reinterop.Tests
             Assert.That(recipe.NeedsStructReturnRewrite, Is.True);
             Assert.That(recipe.InteropReturnType.Name, Is.EqualTo("uint8_t"));
         }
+
+        [Test]
+        public void MethodReturningNullableNonBlittableStruct_DoesNotRewriteReturn()
+        {
+            var results = GenerationTestHelper.GenerateResults(
+                """
+                using Reinterop;
+
+                namespace TestNamespace
+                {
+                    public struct NonBlittable
+                    {
+                        public string Value;
+                    }
+
+                    public class Foo
+                    {
+                        public NonBlittable? MaybeGetValue() { return null; }
+                    }
+
+                    [Reinterop]
+                    internal class ConfigureReinterop
+                    {
+                        public void ExposeToCPP()
+                        {
+                            Foo foo = new Foo();
+                            foo.MaybeGetValue();
+                        }
+                    }
+                }
+                """);
+
+            CppInteropFunction recipe = results["Foo"].Find("MaybeGetValue", 0);
+
+            Assert.That(recipe.NeedsStructReturnRewrite, Is.False);
+        }
     }
 }

@@ -86,7 +86,10 @@ namespace Reinterop
             // explanation of why it's needed.
             bool hasStructRewrite = false;
             CSharpType csOriginalInteropReturnType = csInteropReturnType;
-            if (csReturnType.Kind == InteropTypeKind.BlittableStruct || csReturnType.Kind == InteropTypeKind.Nullable)
+            if (csReturnType.Kind == InteropTypeKind.BlittableStruct ||
+                (csReturnType.Kind == InteropTypeKind.Nullable &&
+                 (csInteropReturnType.Kind == InteropTypeKind.BlittableStruct ||
+                  csInteropReturnType.Kind == InteropTypeKind.Primitive)))
             {
                 hasStructRewrite = true;
                 if (csReturnType.Kind == InteropTypeKind.Nullable)
@@ -294,11 +297,20 @@ namespace Reinterop
             var interopParameterDetails = callParameterDetails;
 
             string invocationTarget;
-            if (!field.IsStatic)
+            string beforeInvocation = "";
+            string afterInvocation = "";
+            if (!field.IsStatic && csType.Kind == InteropTypeKind.NonBlittableStructWrapper)
+            {
+                interopParameterDetails = new[] { (Name: "thiz", Type: csType, InteropType: csType.AsInteropTypeParameter()) }.Concat(interopParameterDetails);
+                beforeInvocation = $"var thizUnboxed = {csType.GetParameterConversionFromInteropType("thiz")};";
+                invocationTarget = $"thizUnboxed.{accessName}";
+                afterInvocation = "Reinterop.ObjectHandleUtility.ResetHandleObject(thiz, thizUnboxed);";
+            }
+            else if (!field.IsStatic)
             {
                 // Instance method or property
                 interopParameterDetails = new[] { (Name: "thiz", Type: csType, InteropType: csType.AsInteropTypeParameter()) }.Concat(interopParameterDetails);
-                invocationTarget = $"(({csType.GetFullyQualifiedName()})ObjectHandleUtility.GetObjectFromHandle(thiz)!).{accessName}";
+                invocationTarget = $"({csType.GetParameterConversionFromInteropType("thiz")}).{accessName}";
             }
             else
             {
@@ -314,7 +326,10 @@ namespace Reinterop
             // explanation of why it's needed.
             bool hasStructRewrite = false;
             CSharpType csOriginalInteropReturnType = csInteropReturnType;
-            if (csReturnType.Kind == InteropTypeKind.BlittableStruct || csReturnType.Kind == InteropTypeKind.Nullable)
+            if (csReturnType.Kind == InteropTypeKind.BlittableStruct ||
+                (csReturnType.Kind == InteropTypeKind.Nullable &&
+                 (csInteropReturnType.Kind == InteropTypeKind.BlittableStruct ||
+                  csInteropReturnType.Kind == InteropTypeKind.Primitive)))
             {
                 hasStructRewrite = true;
                 if (csReturnType.Kind == InteropTypeKind.Nullable)
@@ -338,7 +353,11 @@ namespace Reinterop
             string implementation;
             if (isGet)
             {
-                implementation = $"var result = {invocationTarget};";
+                implementation = $$"""
+                {{beforeInvocation}}
+                var result = {{invocationTarget}};
+                {{afterInvocation}}
+                """;
                 if (hasStructRewrite)
                 {
                     if (csReturnType.Kind == InteropTypeKind.Nullable)
@@ -356,7 +375,7 @@ namespace Reinterop
                 // A property setter.
                 implementation =
                     $$"""
-                    {{invocationTarget}} = {{callParameterList}};
+                    {{beforeInvocation}}{{invocationTarget}} = {{callParameterList}};{{afterInvocation}}
                     """;
             }
 

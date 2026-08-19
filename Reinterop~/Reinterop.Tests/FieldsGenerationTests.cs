@@ -89,5 +89,41 @@ namespace Reinterop.Tests
             Assert.That(getter.NeedsStructReturnRewrite, Is.True);
             Assert.That(getter.InteropReturnType.Name, Is.EqualTo("void"));
         }
+
+        [Test]
+        public void NonBlittableStructField_AccessorsReboxTheReceiver()
+        {
+            var results = GenerationTestHelper.GenerateResults(
+                """
+                using Reinterop;
+
+                namespace TestNamespace
+                {
+                    public struct Foo
+                    {
+                        public string Value;
+                    }
+
+                    [Reinterop]
+                    internal class ConfigureReinterop
+                    {
+                        public void ExposeToCPP()
+                        {
+                            Foo foo = new Foo();
+                            foo.Value = "value";
+                            string value = foo.Value;
+                        }
+                    }
+                }
+                """);
+
+            GeneratedInitFunction getter = results["Foo"].Init.Functions.Single(function => function.CSharpName.Contains("_get_Value"));
+            GeneratedInitFunction setter = results["Foo"].Init.Functions.Single(function => function.CSharpName.Contains("_set_Value"));
+
+            Assert.That(getter.CSharpContent, Does.Contain("var thizUnboxed ="));
+            Assert.That(getter.CSharpContent, Does.Contain("ResetHandleObject(thiz, thizUnboxed)"));
+            Assert.That(setter.CSharpContent, Does.Contain("var thizUnboxed ="));
+            Assert.That(setter.CSharpContent, Does.Contain("ResetHandleObject(thiz, thizUnboxed)"));
+        }
     }
 }
