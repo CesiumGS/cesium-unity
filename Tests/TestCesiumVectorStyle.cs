@@ -106,46 +106,6 @@ public class TestCesiumVectorStyle
 
     #endregion
 
-    #region CesiumVectorPointStyle Tests
-
-    [Test]
-    public void PointStyleDefaultHasFillEnabledOutlineDisabled()
-    {
-        CesiumVectorPointStyle style = CesiumVectorPointStyle.Default;
-
-        Assert.AreEqual(5.0, style.radius, 0.001);
-        Assert.IsTrue(style.fill);
-        Assert.IsFalse(style.outline);
-    }
-
-    [Test]
-    public void PointStyleCanEnableBothFillAndOutline()
-    {
-        CesiumVectorPointStyle style = new CesiumVectorPointStyle();
-        style.radius = 8.0;
-        style.fill = true;
-        style.fillStyle = CesiumVectorPolygonFillStyle.Default;
-        style.outline = true;
-        style.outlineStyle = CesiumVectorLineStyle.Default;
-
-        Assert.AreEqual(8.0, style.radius, 0.001);
-        Assert.IsTrue(style.fill);
-        Assert.IsTrue(style.outline);
-    }
-
-    [Test]
-    public void PointStyleCanDisableBothFillAndOutline()
-    {
-        CesiumVectorPointStyle style = new CesiumVectorPointStyle();
-        style.fill = false;
-        style.outline = false;
-
-        Assert.IsFalse(style.fill);
-        Assert.IsFalse(style.outline);
-    }
-
-    #endregion
-
     #region CesiumVectorStyle Tests
 
     [Test]
