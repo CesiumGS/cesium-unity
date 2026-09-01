@@ -120,6 +120,11 @@ public class TestCesiumVectorStyle
         // Polygon style defaults
         Assert.IsTrue(style.polygonStyle.fill);
         Assert.IsFalse(style.polygonStyle.outline);
+
+        // Point style defaults
+        Assert.AreEqual(5.0, style.pointStyle.radius, 0.001);
+        Assert.IsTrue(style.pointStyle.fill);
+        Assert.IsFalse(style.pointStyle.outline);
     }
 
     [Test]
