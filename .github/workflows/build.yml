@@ -350,10 +350,16 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "10.0.103"
+      - name: Debug build problem
+        run: |
+          ls -la /home/runner
+          df -h
+          echo "EZVCPKG_BASEDIR=/home/runner/ezvcpkg" >> $GITHUB_ENV
+          mkdir ~/ezvcpkg
       - name: Cache vcpkg artifacts
         uses: actions/cache@v4
         with:
-          path: "~/.ezvcpkg"
+          path: "~/ezvcpkg"
           key: vcpkg-linux-alma-${{ hashFiles('native~/vcpkg/ports/**/vcpkg.json', 'native~/vcpkg/triplets/**/*', 'native~/extern/*toolchain.cmake') }}-${{ hashFiles('native~/extern/cesium-native/CMakeLists.txt', 'native~/CMakeLists.txt') }}
           restore-keys: |
             vcpkg-linux-alma-${{ hashFiles('native~/vcpkg/ports/**/vcpkg.json', 'native~/vcpkg/triplets/**/*', 'native~/extern/*toolchain.cmake') }}-
