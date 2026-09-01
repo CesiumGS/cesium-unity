@@ -29,11 +29,11 @@ public:
   ~CesiumMetadataImpl();
 
   void addMetadata(
-      int32_t instanceID,
+      uint64_t objectId,
       const CesiumGltf::Model* pModel,
       const CesiumGltf::MeshPrimitive* pPrimitive);
 
-  void removeMetadata(int32_t instanceID);
+  void removeMetadata(uint64_t objectId);
 
   DotNet::System::Array1<DotNet::CesiumForUnity::CesiumFeature> GetFeatures(
       const DotNet::CesiumForUnity::CesiumMetadata& metadata,
@@ -42,7 +42,7 @@ public:
 
 private:
   std::unordered_map<
-      int32_t,
+      uint64_t,
       std::pair<const CesiumGltf::Model*, const CesiumGltf::MeshPrimitive*>>
       _pModels;
 };

@@ -4,8 +4,29 @@
 
 ##### Additions :tada:
 
-- Added support for the Linux platform (x86-64 only).
 - Added `CesiumVectorPointStyle` and a `pointStyle` field on `CesiumVectorStyle`, enabling `CesiumGeoJsonDocumentRasterOverlay` to render GeoJSON `Point` and `MultiPoint` features.
+
+## v1.25.1 - 2026-09-01
+
+##### Fixes :wrench:
+
+- Fixed a `NullReferenceException` that could be thrown if a `CesiumCreditSystem` was destroyed before it was ever enabled.
+- Fixed a bug where `CesiumCreditSystem` would not unsubscribe from delegates on disable, causing duplicate subscriptions when re-enabled.
+
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.63.0 to v0.64.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
+
+## v1.25.0 - 2026-08-03
+
+##### Additions :tada:
+
+- Added support for the Linux platform (x86-64 only).
+- Added support for building and running the package in Unity 6.5.
+
+##### Fixes :wrench:
+
+- Fixed a `NullReferenceException` thrown when opening the Cesium ion token troubleshooting window for a `CesiumGeoJsonDocumentRasterOverlay`.
+
+In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.62.0 to v0.63.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
 
 ## v1.24.0 - 2026-07-01
 

@@ -5,6 +5,7 @@
 
 #include <DotNet/CesiumForUnity/AssetTroubleshootingDetails.h>
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
+#include <DotNet/CesiumForUnity/CesiumGeoJsonDocumentRasterOverlay.h>
 #include <DotNet/CesiumForUnity/CesiumIonAsset.h>
 #include <DotNet/CesiumForUnity/CesiumIonRasterOverlay.h>
 #include <DotNet/CesiumForUnity/CesiumIonServer.h>
@@ -31,6 +32,8 @@ getServer(const DotNet::CesiumForUnity::IonTokenTroubleshootingWindow& window) {
     return asset.tileset().ionServer();
   } else if (asset.overlay() != nullptr) {
     return asset.overlay().ionServer();
+  } else if (asset.geoJsonOverlay() != nullptr) {
+    return asset.geoJsonOverlay().ionServer();
   } else {
     return CesiumForUnity::CesiumIonServer(nullptr);
   }
