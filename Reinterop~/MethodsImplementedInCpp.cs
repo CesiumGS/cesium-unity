@@ -224,11 +224,11 @@ namespace Reinterop
             CppType wrapperType = result.CppDefinition.Type;
             CppType implType = result.CppImplementationInvoker.ImplementationType;
 
-            CppType returnType = CppType.FromCSharp(context, method.ReturnType).AsReturnType();
+            CppType returnType = CppType.FromCSharp(context, CSharpType.FromSymbol(context, method.ReturnType)).AsReturnType();
             CppType interopReturnType = returnType.AsInteropType();
             var parameters = method.Parameters.Select(parameter =>
             {
-                CppType type = CppType.FromCSharp(context, parameter.Type).AsParameterType();
+                CppType type = CppType.FromCSharp(context, CSharpType.FromSymbol(context, parameter.Type)).AsParameterType();
                 return (ParameterName: parameter.Name, CallSiteName: parameter.Name, Type: type, InteropType: type.AsInteropType());
             });
 
@@ -352,7 +352,7 @@ namespace Reinterop
                     objectHandleType,
                     CppReinteropException.GetCppType(context),
                     CSharpReinteropException.GetCppWrapperType(context),
-                    CppType.FromCSharp(context, context.Compilation.GetSpecialType(SpecialType.System_String))
+                    CppType.FromCSharp(context, CSharpType.FromSymbol(context, context.Compilation.GetSpecialType(SpecialType.System_String)))
                 }.Concat(parameters.Select(parameter => parameter.Type))
                  .Concat(parameters.Select(parameter => parameter.InteropType)),
                 AdditionalIncludes: hasStructRewrite ? new[] { "<utility>" } : null // for std::move

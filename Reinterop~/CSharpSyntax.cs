@@ -15,12 +15,23 @@ namespace Reinterop
     // that haven't been converted to this DSL yet.
     internal record CSharpRaw(string Text) : CSharpExpression;
 
+    // A literal value, e.g. a number or string.
+    internal record CSharpLiteral(string Value) : CSharpExpression;
+
     internal record CSharpCall(CSharpExpression Callee, IReadOnlyList<CSharpExpression> Arguments) : CSharpExpression;
 
     internal record CSharpBinary(string Op, CSharpExpression Left, CSharpExpression Right) : CSharpExpression;
 
+    internal record CSharpTernary(CSharpExpression Condition, CSharpExpression Then, CSharpExpression Else) : CSharpExpression;
+
+    internal record CSharpIs(CSharpExpression Expression, string TypeName, string? castedVariableName = null) : CSharpExpression;
+
     // A prefix unary operator, e.g. CSharpUnary("&", CSharpIdentifier("x")) renders as "&x".
     internal record CSharpUnary(string Op, CSharpExpression Operand) : CSharpExpression;
+
+    internal record CSharpMemberAccess(CSharpExpression Target, string MemberName) : CSharpExpression;
+
+    internal record CSharpNew(string TypeName, IReadOnlyList<CSharpExpression> Arguments) : CSharpExpression;
 
     // A C-style cast, e.g. CSharpCast("System.Exception", ...) renders as "(System.Exception)...".
     internal record CSharpCast(string TypeName, CSharpExpression Expression) : CSharpExpression;
@@ -32,7 +43,7 @@ namespace Reinterop
 
     internal record CSharpExpressionStatement(CSharpExpression Expression) : CSharpStatement;
 
-    internal record CSharpIf(CSharpExpression Condition, IReadOnlyList<CSharpStatement> Then) : CSharpStatement;
+    internal record CSharpIf(CSharpExpression Condition, IReadOnlyList<CSharpStatement> Then, IReadOnlyList<CSharpStatement>? Else = null) : CSharpStatement;
 
     internal record CSharpThrow(CSharpExpression Exception) : CSharpStatement;
 
@@ -41,4 +52,6 @@ namespace Reinterop
     // An already-rendered statement, used as an escape hatch for statements that haven't been
     // converted to this DSL yet. Printed as-is, with no added punctuation.
     internal record CSharpRawStatement(string Text) : CSharpStatement;
+
+    internal record CSharpTryCatch(IReadOnlyList<CSharpStatement> TryBody, IReadOnlyList<CSharpStatement> CatchBody) : CSharpStatement;
 }

@@ -234,7 +234,11 @@ namespace Reinterop
             string baseName = GetUniqueNameForType(csType) + "_" + interopFunctionName;
 
             string returnDefaultInstance = "";
-            if (csInteropReturnType.SpecialType != SpecialType.System_Void)
+            if (csInteropReturnType.Flags.HasFlag(CSharpTypeFlags.Pointer))
+            {
+                returnDefaultInstance = "return null;";
+            }
+            else if (csInteropReturnType.SpecialType != SpecialType.System_Void)
             {
                 if (csInteropReturnType.Symbol != null &&
                     (csInteropReturnType.Symbol.TypeKind == TypeKind.Pointer || csInteropReturnType.Symbol.TypeKind == TypeKind.Class))
@@ -382,7 +386,11 @@ namespace Reinterop
             string baseName = $"{GetUniqueNameForType(csType)}_Field_{(isGet ? "get" : "set")}_{field.Name}";
 
             string returnDefaultInstance = "";
-            if (csInteropReturnType.SpecialType != SpecialType.System_Void)
+            if (csInteropReturnType.Flags.HasFlag(CSharpTypeFlags.Pointer))
+            {
+                returnDefaultInstance = "return null;";
+            }
+            else if (csInteropReturnType.SpecialType != SpecialType.System_Void)
             {
                 if (csInteropReturnType.Symbol != null &&
                     (csInteropReturnType.Symbol.TypeKind == TypeKind.Pointer || csInteropReturnType.Symbol.TypeKind == TypeKind.Class))
@@ -423,17 +431,14 @@ namespace Reinterop
         {
             string name = type.Name;
             string genericTypeHash = "";
-            INamedTypeSymbol? named = type.Symbol as INamedTypeSymbol;
-            if (named != null && named.IsGenericType)
-            {
-                genericTypeHash = HashParameters(null, named.TypeArguments);
-            }
 
-            IArrayTypeSymbol? arraySymbol = type.Symbol as IArrayTypeSymbol;
-            if (arraySymbol != null)
+            if (type.TypeArguments.Count > 0)
+                genericTypeHash = HashParameters(null, type.TypeArguments);
+
+            if (type.ArrayElementType != null)
             {
                 name = "Array1";
-                genericTypeHash = HashParameters(null, new[] { arraySymbol.ElementType });
+                genericTypeHash = HashParameters(null, new[] { type.ArrayElementType });
             }
 
             return $"{type.GetFullyQualifiedNamespace().Replace(".", "_")}_{name}{genericTypeHash}";
@@ -487,6 +492,31 @@ namespace Reinterop
                 formattedParameters = parameters.Select(parameter => $"{parameter.Type.ToDisplayString()} {parameter.Name}");
             if (typeArguments != null)
                 formattedTypeArguments = typeArguments.Select(arg => $"<{arg.ToDisplayString()}>");
+
+            IEnumerable<string>? allFormattedInput = null;
+            if (formattedParameters != null && formattedTypeArguments != null)
+                allFormattedInput = formattedTypeArguments.Concat(formattedParameters);
+            else if (formattedParameters != null)
+                allFormattedInput = formattedParameters;
+            else if (formattedTypeArguments != null)
+                allFormattedInput = formattedTypeArguments;
+            else
+                allFormattedInput = new string[] { };
+
+            var allTogether = string.Join(", ", allFormattedInput);
+            string hash = InsecureHash(allTogether);
+            return hash.Replace("=", "").Replace("+", "_").Replace("/", "__");
+        }
+
+        public static string HashParameters(IEnumerable<CSharpParameter>? parameters = null, IEnumerable<CSharpType>? typeArguments = null)
+        {
+            IEnumerable<string>? formattedParameters = null;
+            IEnumerable<string>? formattedTypeArguments = null;
+
+            if (parameters != null)
+                formattedParameters = parameters.Select(parameter => $"{parameter.Type.GetFullyQualifiedName()} {parameter.Name}");
+            if (typeArguments != null)
+                formattedTypeArguments = typeArguments.Select(arg => $"<{arg.GetFullyQualifiedName()}>");
 
             IEnumerable<string>? allFormattedInput = null;
             if (formattedParameters != null && formattedTypeArguments != null)
@@ -672,6 +702,27 @@ namespace Reinterop
                 default:
                     throw new Exception("Unsupported operator " + methodName);
             }
+        }
+
+        /// <summary>
+        /// Determines if a struct rewrite is required for a function with a given return type.
+        /// See <see cref="RewriteStructReturn"/>.
+        /// </summary>
+        public static bool NeedsStructReturnRewrite(CSharpType returnType)
+        {
+            // All blittable structs require rewrite.
+            if (returnType.Kind == InteropTypeKind.BlittableStruct)
+                return true;
+
+            // If it's not a blittable struct and not a nullable, it doesn't need rewrite.
+            if (returnType.Kind != InteropTypeKind.Nullable)
+                return false;
+            
+            // Only nullables of blittable structs and primitives require rewrite.
+            // Because a nullable reference type can be accomodated by our normal interop approach.
+            CSharpType interopReturnType = returnType.AsInteropTypeReturn();
+            return interopReturnType.Kind == InteropTypeKind.BlittableStruct ||
+                   interopReturnType.Kind == InteropTypeKind.Primitive;
         }
 
         /// <summary>

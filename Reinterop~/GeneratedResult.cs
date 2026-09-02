@@ -33,6 +33,8 @@
         /// </summary>
         public List<CppInteropFunction> InteropFunctions = new List<CppInteropFunction>();
 
+        public List<CSharpFunctionCallableFromCpp> InteropFunctions2 = new List<CSharpFunctionCallableFromCpp>();
+
         /// <summary>
         /// The C++ type declaration, i.e. the contents of the .h file.
         /// </summary>

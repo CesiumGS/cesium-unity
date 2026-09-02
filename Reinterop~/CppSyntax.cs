@@ -18,7 +18,12 @@ namespace Reinterop
     // that haven't been converted to this DSL yet.
     internal record CppRaw(string Text) : CppExpression;
 
+    // A literal value, e.g. a number or string.
+    internal record CppLiteral(string Value) : CppExpression;
+
     internal record CppCall(CppExpression Callee, IReadOnlyList<CppExpression> Arguments) : CppExpression;
+
+    internal record CppMemberAccess(CppExpression Target, string MemberName) : CppExpression;
 
     internal record CppCast(CppType targetType, CppExpression Expression) : CppExpression;
 
@@ -29,6 +34,8 @@ namespace Reinterop
 
     // A prefix unary operator, e.g. CppUnary("&", CppIdentifier("x")) renders as "&x".
     internal record CppUnary(string Op, CppExpression Operand) : CppExpression;
+
+    internal record CppTernary(CppExpression Condition, CppExpression Then, CppExpression Else) : CppExpression;
 
     // An argument to a call - see CppOutParameterArgument for the case that needs a supporting
     // declaration statement before the call, rather than being a plain value.

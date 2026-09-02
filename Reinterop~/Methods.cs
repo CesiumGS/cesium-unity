@@ -43,10 +43,20 @@ namespace Reinterop
 
         public static void GenerateSingleMethod(CppGenerationContext context, GenerateTypeState state, TypeToGenerate item, GeneratedResult result, IMethodSymbol method)
         {
-            CppInteropFunction recipe = CreateCppInteropFunction(context, item, result, method);
+            // CSharpFunctionCallableFromCpp interop = new CSharpFunctionCallableFromCpp(context, item.Type)
+            //     .Name(method.Name)
+            //     .TypeArguments(method.TypeArguments)
+            //     .ReturnType(method.ReturnType)
+            //     .Parameters(method.Parameters)
+            //     .Static(method.IsStatic);
 
             // For op_Equality/op_Inequality, the interop function itself is private, and a public operator==/!= is added below to call it.
             bool addOperator = method.MethodKind == MethodKind.UserDefinedOperator && (method.Name == "op_Equality" || method.Name == "op_Inequality");
+            // interop.Private(addOperator);
+
+            // result.InteropFunctions2.Add(interop);
+
+            CppInteropFunction recipe = CreateCppInteropFunction(context, item, result, method);
             recipe.Private(addOperator);
 
             result.InteropFunctions.Add(recipe);
@@ -98,7 +108,7 @@ namespace Reinterop
                     SymbolEqualityComparer.Default.Equals(method.ContainingType, method.Parameters[1].Type) &&
                     IsMostDerivedVersionOfOperator(item.Type, method))
                 {
-                    CppType baseType = CppType.FromCSharp(context, method.ContainingType);
+                    CppType baseType = CppType.FromCSharp(context, CSharpType.FromSymbol(context, method.ContainingType));
                     CppInteropFunction baseTypeRecipe = operatorRecipe.Clone()
                         .Parameters([new CppInteropParameter("rhs", result.CppDefinition.Type.AsParameterType())])
                         .DefinitionBody([

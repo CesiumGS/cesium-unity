@@ -75,13 +75,13 @@ namespace Reinterop
             if (encoding == null)
                 return generated;
 
-            CppType encodingWrapper = CppType.FromCSharp(context, encoding);
+            CppType encodingWrapper = CppType.FromCSharp(context, CSharpType.FromSymbol(context, encoding));
 
             INamedTypeSymbol? marshal = context.Compilation.GetTypeByMetadataName("System.Runtime.InteropServices.Marshal");
             if (marshal == null)
                 return generated;
 
-            CppType marshalWrapper = CppType.FromCSharp(context, marshal);
+            CppType marshalWrapper = CppType.FromCSharp(context, CSharpType.FromSymbol(context, marshal));
             string GetHeaderInclude(CppType cppType) => cppType.HeaderOverride ?? $"<{string.Join("/", cppType.Namespaces.Append(cppType.Name))}.h>";
 
             CppInteropFunction stringConstructor = new CppInteropFunction(context, generated.Type, generated.Type.Name)

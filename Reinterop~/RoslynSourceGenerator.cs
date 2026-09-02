@@ -12,10 +12,10 @@ namespace Reinterop
     {
         public void Initialize(GeneratorInitializationContext context)
         {
-            //if (!Debugger.IsAttached)
-            //{
+            // if (!Debugger.IsAttached)
+            // {
             //    Debugger.Launch();
-            //}
+            // }
 
             context.RegisterForSyntaxNotifications(() => new ReinteropSyntaxReceiver());
         }
@@ -27,6 +27,12 @@ namespace Reinterop
             // Don't generate any support code if there's nothing real to generate.
             if (receiver.ClassesImplementedInCpp.Count == 0 && receiver.ExposeToCppMethods.Count == 0)
                 return;
+
+            // Uncomment this to wait for a debugger to attach before generating code. This is useful for debugging the source generator itself.
+            // while (!Debugger.IsAttached)
+            // {
+            //     Thread.Sleep(100);
+            // }
 
             CSharpReinteropAttribute.Generate(context);
             CSharpReinteropNativeImplementationAttribute.Generate(context);

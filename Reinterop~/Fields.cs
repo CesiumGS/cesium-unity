@@ -50,7 +50,7 @@ namespace Reinterop
             string fieldName = CSharpTypeUtility.GetFieldName(field);
             bool isPrivate = CSharpTypeUtility.GetFieldIsPrivate(field);
 
-            CppType fieldType = CppType.FromCSharp(context, field.Type);
+            CppType fieldType = CppType.FromCSharp(context, CSharpType.FromSymbol(context, field.Type));
 
             result.CppDeclaration.Elements.Add(new(
                 Content: $"{fieldType.GetFullyQualifiedName()} {fieldName};",
@@ -68,7 +68,7 @@ namespace Reinterop
 
         private static void GenerateSingleFieldAccessors(CppGenerationContext context, TypeToGenerate item, IFieldSymbol field, GeneratedResult result)
         {
-            CppType fieldType = CppType.FromCSharp(context, field.Type);
+            CppType fieldType = CppType.FromCSharp(context, CSharpType.FromSymbol(context, field.Type));
 
             CppInteropFunction baseRecipe = new CppInteropFunction(context, result.CppDefinition.Type, field.Name).Static(field.IsStatic);
 

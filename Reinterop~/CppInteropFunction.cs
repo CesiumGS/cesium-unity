@@ -13,6 +13,8 @@ namespace Reinterop
         }
     }
 
+    internal record CppParameter(CppType Type, string Name);
+
     /// <summary>
     /// Describes an interop-backed C++ function - a wrapped method, property accessor, constructor, or
     /// field accessor - purely in terms of its parameters and return type, and derives everything
@@ -97,7 +99,7 @@ namespace Reinterop
         /// </summary>
         public CppInteropFunction TypeParameters(IEnumerable<ITypeParameterSymbol> typeParameters)
         {
-            return TypeParameters(typeParameters.Select(parameter => new CppInteropParameter(parameter.Name, CppType.FromCSharp(Context, parameter))));
+            return TypeParameters(typeParameters.Select(parameter => new CppInteropParameter(parameter.Name, CppType.FromCSharp(Context, CSharpType.FromSymbol(Context, parameter)))));
         }
 
         private List<CppType> _typeArguments = new List<CppType>();
@@ -127,7 +129,7 @@ namespace Reinterop
         /// </summary>
         public CppInteropFunction TypeArguments(IEnumerable<ITypeSymbol> typeArguments)
         {
-            return TypeArguments(typeArguments.Select(t => CppType.FromCSharp(Context, t)));
+            return TypeArguments(typeArguments.Select(t => CppType.FromCSharp(Context, CSharpType.FromSymbol(Context, t))));
         }
 
         private List<CppInteropParameter> _parameters = new List<CppInteropParameter>();
@@ -154,7 +156,7 @@ namespace Reinterop
         /// </summary>
         public CppInteropFunction Parameters(IEnumerable<IParameterSymbol> parameters)
         {
-            return Parameters(parameters.Select(parameter => new CppInteropParameter(parameter.Name, CppType.FromCSharp(Context, parameter.Type).AsParameterType())));
+            return Parameters(parameters.Select(parameter => new CppInteropParameter(parameter.Name, CppType.FromCSharp(Context, CSharpType.FromSymbol(Context, parameter.Type)).AsParameterType())));
         }
 
         private CppType _returnType = CppType.Void;
@@ -180,7 +182,7 @@ namespace Reinterop
         /// </summary>
         public CppInteropFunction ReturnType(ITypeSymbol returnType)
         {
-            return ReturnType(CppType.FromCSharp(Context, returnType).AsReturnType());
+            return ReturnType(CppType.FromCSharp(Context, CSharpType.FromSymbol(Context, returnType)).AsReturnType());
         }
 
         private bool _static = false;

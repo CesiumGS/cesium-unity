@@ -36,10 +36,10 @@ namespace Reinterop
 
             var callbackParameters = invokeMethod.Parameters.Select(p =>
             {
-                CppType type = CppType.FromCSharp(context, p.Type);
+                CppType type = CppType.FromCSharp(context, CSharpType.FromSymbol(context, p.Type));
                 return (Name: p.Name, CsType: CSharpType.FromSymbol(context, p.Type), Type: type, InteropType: type.AsInteropType());
             });
-            CppType returnType = CppType.FromCSharp(context, invokeMethod.ReturnType).AsReturnType();
+            CppType returnType = CppType.FromCSharp(context, CSharpType.FromSymbol(context, invokeMethod.ReturnType)).AsReturnType();
 
             string templateSpecialization = "";
             if (itemType.GenericArguments != null && itemType.GenericArguments.Count > 0)
@@ -209,7 +209,7 @@ namespace Reinterop
                 {
                     CppReinteropException.GetCppType(context),
                     CSharpReinteropException.GetCppWrapperType(context),
-                    CppType.FromCSharp(context, context.Compilation.GetSpecialType(SpecialType.System_String))
+                    CppType.FromCSharp(context, CSharpType.FromSymbol(context, context.Compilation.GetSpecialType(SpecialType.System_String)))
                 }));
 
             result.CppImplementationInvoker.Functions.Add(new(

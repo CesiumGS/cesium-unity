@@ -24,7 +24,8 @@
             TypeToGenerate? baseClass = item.BaseClass;
             while (baseClass != null)
             {
-                CppType baseType = CppType.FromCSharp(context, baseClass.Type);
+                CSharpType csBaseType = CSharpType.FromSymbol(context, baseClass.Type);
+                CppType baseType = CppType.FromCSharp(context, csBaseType);
                 result.InteropFunctions.Add(CreateCast(context, result, baseType));
 
                 baseClass = baseClass.BaseClass;
@@ -33,7 +34,8 @@
             // Generate implicit conversions to all interfaces.
             foreach (TypeToGenerate anInterface in item.Interfaces)
             {
-                CppType interfaceType = CppType.FromCSharp(context, anInterface.Type);
+                CSharpType csInterfaceType = CSharpType.FromSymbol(context, anInterface.Type);
+                CppType interfaceType = CppType.FromCSharp(context, csInterfaceType);
                 result.InteropFunctions.Add(CreateCast(context, result, interfaceType));
             }
         }

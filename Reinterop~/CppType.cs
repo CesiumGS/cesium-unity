@@ -48,83 +48,82 @@ namespace Reinterop
         public static readonly CppType Void = CreatePrimitiveType(NoNamespace, "void");
         public static readonly CppType NullPointer = CreatePrimitiveType(StandardNamespace, "nullptr_t", 0, IncludeCStdDef);
 
-        public static CppType FromCSharp(CppGenerationContext context, ITypeSymbol type)
+        public static CppType FromCSharp(CppGenerationContext context, CSharpType type)
         {
-            INamedTypeSymbol? named = type as INamedTypeSymbol;
-            if (named != null && named.Name == "Nullable" && named.TypeArguments.Length == 1)
+            if (type.Name == "Nullable" && type.TypeArguments.Count == 1)
             {
-                CppType nullabledType = CppType.FromCSharp(context, named.TypeArguments[0]);
+                CppType nullabledType = CppType.FromCSharp(context, type.TypeArguments[0]);
                 if (nullabledType.Kind == InteropTypeKind.BlittableStruct || nullabledType.Kind == InteropTypeKind.Primitive)
-                    return new CppType(InteropTypeKind.Nullable, new[] {"std"}, "optional", new[] { nullabledType }, 0, "<optional>");
-            }
-
-            IPointerTypeSymbol? pointer = type as IPointerTypeSymbol;
-            if (pointer != null)
-            {
-                CppType original = FromCSharp(context, pointer.PointedAtType);
-                return original.AsPointer();
+                    return new CppType(InteropTypeKind.Nullable, [ "std" ], "optional", [ nullabledType ], 0, "<optional>");
             }
 
             IArrayTypeSymbol? arrayType = type as IArrayTypeSymbol;
-            if (arrayType != null)
+            if (type.ArrayElementType != null)
             {
-                CppType original = FromCSharp(context, arrayType.ElementType);
-                return new CppType(InteropTypeKind.ClassWrapper, Interop.BuildNamespace(context.BaseNamespace, "System"), "Array1", new[] { original }, 0);
+                CppType original = FromCSharp(context, type.ArrayElementType);
+                return new CppType(InteropTypeKind.ClassWrapper, Interop.BuildNamespace(context.BaseNamespace, "System"), "Array1", [ original ], 0);
             }
 
-            InteropTypeKind kind = Interop.DetermineTypeKind(context, type);
-            if (kind == InteropTypeKind.GenericParameter)
+            if (type.Kind == InteropTypeKind.GenericParameter)
                 return new CppType(InteropTypeKind.GenericParameter, NoNamespace, type.Name, null, 0);
 
-            if (kind == InteropTypeKind.Primitive)
+            if (type.Kind == InteropTypeKind.Primitive)
             {
+                CppType? specialType = null;
                 switch (type.SpecialType)
                 {
                     case SpecialType.System_SByte:
-                        return Int8;
+                        specialType = Int8;
+                        break;
                     case SpecialType.System_Int16:
-                        return Int16;
+                        specialType = Int16;
+                        break;
                     case SpecialType.System_Int32:
-                        return Int32;
+                        specialType = Int32;
+                        break;
                     case SpecialType.System_Int64:
-                        return Int64;
+                        specialType = Int64;
+                        break;
                     case SpecialType.System_Single:
-                        return Single;
+                        specialType = Single;
+                        break;
                     case SpecialType.System_Double:
-                        return Double;
+                        specialType = Double;
+                        break;
                     case SpecialType.System_Byte:
-                        return UInt8;
+                        specialType = UInt8;
+                        break;
                     case SpecialType.System_UInt16:
-                        return UInt16;
+                        specialType = UInt16;
+                        break;
                     case SpecialType.System_UInt32:
-                        return UInt32;
+                        specialType = UInt32;
+                        break;
                     case SpecialType.System_UInt64:
-                        return UInt64;
+                        specialType = UInt64;
+                        break;
                     case SpecialType.System_Boolean:
-                        return Boolean;
+                        specialType = Boolean;
+                        break;
                     case SpecialType.System_IntPtr:
-                        return VoidPointer;
+                        specialType = VoidPointer;
+                        break;
                     case SpecialType.System_Void:
-                        return Void;
+                        specialType = Void;
+                        break;
+                }
+                if (specialType != null)
+                {
+                    if (type.Flags.HasFlag(CSharpTypeFlags.Pointer))
+                        specialType = specialType.AsPointer();
+                    return specialType;
                 }
             }
 
-            List<string> namespaces = new List<string>();
-
-            INamespaceSymbol ns = type.ContainingNamespace;
-            while (ns != null)
-            {
-                if (ns.Name.Length > 0)
-                    namespaces.Add(ns.Name);
-                ns = ns.ContainingNamespace;
-            }
+            List<string> namespaces = [.. type.Namespaces];
 
             if (context.BaseNamespace.Length > 0)
-            {
-                namespaces.Add(context.BaseNamespace);
-            }
-
-            namespaces.Reverse();
+                namespaces.Insert(0, context.BaseNamespace);
 
             // If the first two namespaces are identical, remove the duplication.
             // This is to avoid `Reinterop::Reinterop`.
@@ -135,16 +134,20 @@ namespace Reinterop
 
             string name = type.Name;
 
-            if (named != null && named.IsGenericType)
+            if (type.TypeArguments.Count > 0 || (type.ContainingType != null && type.ContainingType.TypeArguments.Count > 0))
             {
-                genericArguments = named.TypeArguments.Select(symbol => CppType.FromCSharp(context, symbol)).ToList();
+                genericArguments = type.TypeArguments.Select(t => CppType.FromCSharp(context, t)).ToList();
 
                 // Add the number of generic arguments as a suffix, because C++ (unlike C#) doesn't make it
                 // easy to overload based on the number.
-                name += named.Arity;
+                name += type.TypeArguments.Count;
             }
 
-            return new CppType(kind, namespaces, name, genericArguments, 0);
+            CppTypeFlags flags = 0;
+            if (type.Flags.HasFlag(CSharpTypeFlags.Pointer))
+                flags |= CppTypeFlags.Pointer;
+
+            return new CppType(type.Kind, namespaces, name, genericArguments, flags);
         }
 
         public CppType(
@@ -516,6 +519,69 @@ namespace Reinterop
                 case InteropTypeKind.Unknown:
                 default:
                     return variableName;
+            }
+        }
+
+        /// <summary>
+        /// Gets an expression that converts this type to the
+        /// {@link AsInteropType}.
+        /// </summary>
+        public CppExpression GetConversionToInteropTypeExpression(CppGenerationContext context, string variableName)
+        {
+            if (this == Boolean)
+            {
+                return new CppTernary(
+                    new CppIdentifier(variableName),
+                    new CppLiteral("1"),
+                    new CppLiteral("0")
+                );
+            }
+
+            switch (this.Kind)
+            {
+                case InteropTypeKind.ClassWrapper:
+                case InteropTypeKind.NonBlittableStructWrapper:
+                case InteropTypeKind.Delegate:
+                    // If this is a reference, we can count on it continuing to
+                    // exist for the duration of the relevant function call, so just
+                    // get the raw handle.
+                    //
+                    // But if it's not a reference, this is a temporary variable storing
+                    // a return value, and the handle value must outlive the ObjectHandle
+                    // instance. So, release it from this instance.
+                    CppExpression handleExpression = new CppCall(new CppMemberAccess(new CppIdentifier(variableName), "GetHandle"), []);
+                    if (this.Flags.HasFlag(CppTypeFlags.Reference))
+                    {
+                        CppExpression rawExpression = new CppMemberAccess(handleExpression, "GetRaw");
+                        return new CppCall(rawExpression, []);
+                    }
+                    else
+                    {
+                        CppExpression releaseExpression = new CppMemberAccess(handleExpression, "Release");
+                        return new CppCall(releaseExpression, []);
+                    }   
+                case InteropTypeKind.Enum:
+                    return new CppCast(CppType.UInt32, new CppIdentifier(variableName));
+                case InteropTypeKind.EnumFlags:
+                    return new CppCall(new CppMemberAccess(new CppIdentifier(variableName), "underlying_value"), []);
+                case InteropTypeKind.Primitive:
+                case InteropTypeKind.BlittableStruct:
+                    if (this.Flags.HasFlag(CppTypeFlags.Reference))
+                        return new CppUnary("&", new CppIdentifier(variableName));
+                    else
+                        return new CppIdentifier(variableName);
+                case InteropTypeKind.Nullable:
+                    if (this.Flags.HasFlag(CppTypeFlags.Reference))
+                        return new CppTernary(
+                            new CppCall(new CppMemberAccess(new CppIdentifier(variableName), "has_value"), []),
+                            new CppUnary("&", new CppCall(new CppMemberAccess(new CppIdentifier(variableName), "value"), [])),
+                            new CppIdentifier("nullptr")
+                        );
+                    else
+                        return new CppIdentifier(variableName);
+                case InteropTypeKind.Unknown:
+                default:
+                    return new CppIdentifier(variableName);
             }
         }
 

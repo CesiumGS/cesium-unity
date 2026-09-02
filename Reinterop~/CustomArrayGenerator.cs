@@ -82,9 +82,9 @@ namespace Reinterop
             //       to the element type and an overloaded operator= to set the value. Here we take the
             //       simpler approach of adding an Item method instead.
 
-            CppType elementType = CppType.FromCSharp(context, arrayType.ElementType);
-            CSharpType csType = CSharpType.FromSymbol(context, arrayType);
             CSharpType csElementType = CSharpType.FromSymbol(context, arrayType.ElementType);
+            CppType elementType = CppType.FromCSharp(context, csElementType);
+            CSharpType csType = CSharpType.FromSymbol(context, arrayType);
             CSharpType csElementInteropType = csElementType.AsInteropTypeParameter();
             string baseName = $"{Interop.GetUniqueNameForType(csType)}_SetItem";
 
