@@ -346,10 +346,12 @@ namespace Reinterop
 
             string baseName = "Reinterop_" + Interop.GetUniqueNameForType(csOwner) + "_" + Interop.MakeSafeIdentifier(_name) + "_" +Interop.HashParameters(_parameters, _typeArguments);
 
-            string interopParameterList = string.Join(", ", csInteropParameters.Select(parameter => parameter.Type.GetFullyQualifiedName() + " " + parameter.Name));
+            string interopParameterList = string.Join(", ", csInteropParameters.Select(p => p.Type.GetFullyQualifiedName() + " " + p.Name));
+            string cppInteropParameterTypeList = string.Join(", ", cppInteropParameters.Select(p => p.Type.GetFullyQualifiedName()));
+            IEnumerable<CppType> fieldPointerTypes = cppInteropParameters.Select(p => p.Type).Concat([ cppInteropReturnType ]);
             result.Init.Functions.Add(new GeneratedInitFunction(
-                _name,
-                "TODO CPP Type Signature",
+                $"{cppOwner.GetFullyQualifiedName()}::{baseName}",
+                $"{cppInteropReturnType.GetFullyQualifiedName()} (*)({cppInteropParameterTypeList})",
                 baseName + "_Delegate",
                 $$"""
                 [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -360,7 +362,9 @@ namespace Reinterop
                 {
                     {{CSharpPrinter.Print(bodyStatements, "    ")}}
                 }
-                """
+                """,
+                CppTypeDeclarationsReferenced: fieldPointerTypes,
+                CppTypeDefinitionsReferenced: [ cppOwner ]
             ));
         }
 

@@ -46,6 +46,10 @@ namespace Reinterop.Tests
                 }
             }
             """));
+            Assert.That(initFunction.CppName, Is.EqualTo("::DotNet::TestNamespace::TestClass::Reinterop_TestNamespace_TestClass_TestMethod_lfcalBi63SvXpt4W5a7zaw"));
+            Assert.That(initFunction.CppTypeSignature, Is.EqualTo("::std::uint8_t (*)(void*, ::std::uint8_t, void**)"));
+            Assert.That(initFunction.CppTypeDeclarationsReferenced, Contains.Item(CppType.UInt8));
+            Assert.That(initFunction.CppTypeDefinitionsReferenced, Has.Some.Matches<CppType>(t => t.GetFullyQualifiedName() == "::DotNet::TestNamespace::TestClass"));
         }
 
         [Test]
@@ -87,6 +91,10 @@ namespace Reinterop.Tests
                 }
             }
             """));
+            Assert.That(initFunction.CppName, Is.EqualTo("::DotNet::TestNamespace::TestClass::Reinterop_TestNamespace_TestClass_TestMethod_vRryr9W8bE8j46kr7PWzkw"));
+            Assert.That(initFunction.CppTypeSignature, Is.EqualTo("void (*)(void*, const ::DotNet::TestNamespace::MyStruct*, ::DotNet::TestNamespace::MyStruct*, void**)"));
+            Assert.That(initFunction.CppTypeDeclarationsReferenced, Has.Some.Matches<CppType>(t => t.GetFullyQualifiedName() == "::DotNet::TestNamespace::MyStruct*"));
+            Assert.That(initFunction.CppTypeDefinitionsReferenced, Has.Some.Matches<CppType>(t => t.GetFullyQualifiedName() == "::DotNet::TestNamespace::TestClass"));
         }
     }
 }
