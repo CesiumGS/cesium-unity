@@ -30,10 +30,10 @@ namespace Reinterop.Tests
             Assert.That(initFunction.CSharpContent, Is.EqualTo(
             $$"""
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            private unsafe delegate System.Byte TestNamespace_TestClass_Reinterop_TestMethod_lfcalBi63SvXpt4W5a7zawType(System.IntPtr thiz, System.Byte myBool, System.IntPtr* reinteropException);
-            private static unsafe readonly TestNamespace_TestClass_Reinterop_TestMethod_lfcalBi63SvXpt4W5a7zawType TestNamespace_TestClass_Reinterop_TestMethod_lfcalBi63SvXpt4W5a7zawDelegate = new TestNamespace_TestClass_Reinterop_TestMethod_lfcalBi63SvXpt4W5a7zawType(TestNamespace_TestClass_Reinterop_TestMethod_lfcalBi63SvXpt4W5a7zaw);
-            [AOT.MonoPInvokeCallback(typeof(TestNamespace_TestClass_Reinterop_TestMethod_lfcalBi63SvXpt4W5a7zawType))]
-            private static unsafe System.Byte TestNamespace_TestClass_Reinterop_TestMethod_lfcalBi63SvXpt4W5a7zaw(System.IntPtr thiz, System.Byte myBool, System.IntPtr* reinteropException)
+            private unsafe delegate System.Byte Reinterop_TestNamespace_TestClass_TestMethod_lfcalBi63SvXpt4W5a7zaw_Type(System.IntPtr thiz, System.Byte myBool, System.IntPtr* reinteropException);
+            private static unsafe readonly Reinterop_TestNamespace_TestClass_TestMethod_lfcalBi63SvXpt4W5a7zaw_Type Reinterop_TestNamespace_TestClass_TestMethod_lfcalBi63SvXpt4W5a7zaw_Delegate = new Reinterop_TestNamespace_TestClass_TestMethod_lfcalBi63SvXpt4W5a7zaw_Type(Reinterop_TestNamespace_TestClass_TestMethod_lfcalBi63SvXpt4W5a7zaw);
+            [AOT.MonoPInvokeCallback(typeof(Reinterop_TestNamespace_TestClass_TestMethod_lfcalBi63SvXpt4W5a7zaw_Type))]
+            private static unsafe System.Byte Reinterop_TestNamespace_TestClass_TestMethod_lfcalBi63SvXpt4W5a7zaw(System.IntPtr thiz, System.Byte myBool, System.IntPtr* reinteropException)
             {
                 try
                 {
@@ -70,10 +70,10 @@ namespace Reinterop.Tests
             Assert.That(initFunction.CSharpContent, Is.EqualTo(
             $$"""
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            private unsafe delegate void TestNamespace_TestClass_Reinterop_TestMethod_vRryr9W8bE8j46kr7PWzkwType(System.IntPtr thiz, TestNamespace.MyStruct* myStruct, TestNamespace.MyStruct* pReturnValue, System.IntPtr* reinteropException);
-            private static unsafe readonly TestNamespace_TestClass_Reinterop_TestMethod_vRryr9W8bE8j46kr7PWzkwType TestNamespace_TestClass_Reinterop_TestMethod_vRryr9W8bE8j46kr7PWzkwDelegate = new TestNamespace_TestClass_Reinterop_TestMethod_vRryr9W8bE8j46kr7PWzkwType(TestNamespace_TestClass_Reinterop_TestMethod_vRryr9W8bE8j46kr7PWzkw);
-            [AOT.MonoPInvokeCallback(typeof(TestNamespace_TestClass_Reinterop_TestMethod_vRryr9W8bE8j46kr7PWzkwType))]
-            private static unsafe void TestNamespace_TestClass_Reinterop_TestMethod_vRryr9W8bE8j46kr7PWzkw(System.IntPtr thiz, TestNamespace.MyStruct* myStruct, TestNamespace.MyStruct* pReturnValue, System.IntPtr* reinteropException)
+            private unsafe delegate void Reinterop_TestNamespace_TestClass_TestMethod_vRryr9W8bE8j46kr7PWzkw_Type(System.IntPtr thiz, TestNamespace.MyStruct* myStruct, TestNamespace.MyStruct* pReturnValue, System.IntPtr* reinteropException);
+            private static unsafe readonly Reinterop_TestNamespace_TestClass_TestMethod_vRryr9W8bE8j46kr7PWzkw_Type Reinterop_TestNamespace_TestClass_TestMethod_vRryr9W8bE8j46kr7PWzkw_Delegate = new Reinterop_TestNamespace_TestClass_TestMethod_vRryr9W8bE8j46kr7PWzkw_Type(Reinterop_TestNamespace_TestClass_TestMethod_vRryr9W8bE8j46kr7PWzkw);
+            [AOT.MonoPInvokeCallback(typeof(Reinterop_TestNamespace_TestClass_TestMethod_vRryr9W8bE8j46kr7PWzkw_Type))]
+            private static unsafe void Reinterop_TestNamespace_TestClass_TestMethod_vRryr9W8bE8j46kr7PWzkw(System.IntPtr thiz, TestNamespace.MyStruct* myStruct, TestNamespace.MyStruct* pReturnValue, System.IntPtr* reinteropException)
             {
                 try
                 {

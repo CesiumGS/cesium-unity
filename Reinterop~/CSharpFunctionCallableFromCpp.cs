@@ -344,18 +344,18 @@ namespace Reinterop
                 )
             ];
 
-            string baseName = Interop.GetUniqueNameForType(csOwner) + "_" + $"Reinterop_{Interop.MakeSafeIdentifier(_name)}_{Interop.HashParameters(_parameters, _typeArguments)}";;
+            string baseName = "Reinterop_" + Interop.GetUniqueNameForType(csOwner) + "_" + Interop.MakeSafeIdentifier(_name) + "_" +Interop.HashParameters(_parameters, _typeArguments);
 
             string interopParameterList = string.Join(", ", csInteropParameters.Select(parameter => parameter.Type.GetFullyQualifiedName() + " " + parameter.Name));
             result.Init.Functions.Add(new GeneratedInitFunction(
                 _name,
                 "TODO CPP Type Signature",
-                baseName + "Delegate",
+                baseName + "_Delegate",
                 $$"""
                 [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-                private unsafe delegate {{csInteropReturnType.GetFullyQualifiedName()}} {{baseName}}Type({{interopParameterList}});
-                private static unsafe readonly {{baseName}}Type {{baseName}}Delegate = new {{baseName}}Type({{baseName}});
-                [AOT.MonoPInvokeCallback(typeof({{baseName}}Type))]
+                private unsafe delegate {{csInteropReturnType.GetFullyQualifiedName()}} {{baseName}}_Type({{interopParameterList}});
+                private static unsafe readonly {{baseName}}_Type {{baseName}}_Delegate = new {{baseName}}_Type({{baseName}});
+                [AOT.MonoPInvokeCallback(typeof({{baseName}}_Type))]
                 private static unsafe {{csInteropReturnType.GetFullyQualifiedName()}} {{baseName}}({{interopParameterList}})
                 {
                     {{CSharpPrinter.Print(bodyStatements, "    ")}}

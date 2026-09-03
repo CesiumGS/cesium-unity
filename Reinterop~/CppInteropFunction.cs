@@ -124,6 +124,15 @@ namespace Reinterop
         }
 
         /// <summary>
+        /// Sets the generic type arguments to this function from a list of C# type arguments. These are the types
+        /// that fill in the <see cref="TypeParameters"/> in the instantiated generic.
+        /// </summary>
+        public CppInteropFunction TypeArguments(IEnumerable<CSharpType> typeArguments)
+        {
+            return TypeArguments(typeArguments.Select(t => CppType.FromCSharp(Context, t)));
+        }
+
+        /// <summary>
         /// Sets the generic type arguments to this function from a list of Roslyn type arguments. These are the types
         /// that fill in the <see cref="TypeParameters"/> in the instantiated generic.
         /// </summary>
@@ -151,12 +160,21 @@ namespace Reinterop
         }
 
         /// <summary>
+        /// Sets the parameters to the function from a list of C# parameters. The implicit "this" parameter should
+        /// _not_ be included.
+        /// </summary>
+        public CppInteropFunction Parameters(IEnumerable<CSharpParameter> parameters)
+        {
+            return Parameters(parameters.Select(parameter => new CppInteropParameter(parameter.Name, CppType.FromCSharp(Context, parameter.Type).AsParameterType())));
+        }
+
+        /// <summary>
         /// Sets the parameters to the function from a list of Roslyn parameters. The implicit "this" parameter should
         /// _not_ be included.
         /// </summary>
         public CppInteropFunction Parameters(IEnumerable<IParameterSymbol> parameters)
         {
-            return Parameters(parameters.Select(parameter => new CppInteropParameter(parameter.Name, CppType.FromCSharp(Context, CSharpType.FromSymbol(Context, parameter.Type)).AsParameterType())));
+            return Parameters(parameters.Select(parameter => new CSharpParameter(CSharpType.FromSymbol(Context, parameter.Type), parameter.Name)));
         }
 
         private CppType _returnType = CppType.Void;
@@ -178,11 +196,19 @@ namespace Reinterop
         }
 
         /// <summary>
+        /// Sets the function's return type from a C# type.
+        /// </summary>
+        public CppInteropFunction ReturnType(CSharpType returnType)
+        {
+            return ReturnType(CppType.FromCSharp(Context, returnType).AsReturnType());
+        }
+
+        /// <summary>
         /// Sets the function's return type from a Roslyn type.
         /// </summary>
         public CppInteropFunction ReturnType(ITypeSymbol returnType)
         {
-            return ReturnType(CppType.FromCSharp(Context, CSharpType.FromSymbol(Context, returnType)).AsReturnType());
+            return ReturnType(CSharpType.FromSymbol(Context, returnType));
         }
 
         private bool _static = false;
