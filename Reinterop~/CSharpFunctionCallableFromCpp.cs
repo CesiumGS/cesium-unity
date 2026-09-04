@@ -371,6 +371,12 @@ namespace Reinterop
             string interopParameterList = string.Join(", ", csInteropParameters.Select(p => p.Type.GetFullyQualifiedName() + " " + p.Name));
             string cppInteropParameterTypeList = string.Join(", ", cppInteropParameters.Select(p => p.Type.GetFullyQualifiedName()));
             IEnumerable<CppType> fieldPointerTypes = cppInteropParameters.Select(p => p.Type).Concat([ cppInteropReturnType ]);
+
+            result.CppDeclaration.Elements.Add(new(
+                Content: $"static {cppInteropReturnType.GetFullyQualifiedName()} (*{baseName})({cppInteropParameterTypeList});",
+                IsPrivate: true,
+                TypeDeclarationsReferenced: fieldPointerTypes));
+
             result.Init.Functions.Add(new GeneratedInitFunction(
                 $"{cppOwner.GetFullyQualifiedName()}::{baseName}",
                 $"{cppInteropReturnType.GetFullyQualifiedName()} (*)({cppInteropParameterTypeList})",

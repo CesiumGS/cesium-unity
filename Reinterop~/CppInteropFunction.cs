@@ -612,15 +612,20 @@ namespace Reinterop
                 Content: $"{InteropReturnType.GetFullyQualifiedName()} (*{qualifiedDefinitionName}::{FunctionPointerName})({InteropParameterListDeclaration()}) = nullptr;",
                 TypeDeclarationsReferenced: fieldPointerTypes));
 
-            result.Init.Functions.Add(new(
-                CppName: $"{result.Type.GetFullyQualifiedName()}::{FunctionPointerName}",
-                CppTypeSignature: $"{InteropReturnType.GetFullyQualifiedName()} (*)({InteropParameterTypeList()})",
-                CppTypeDefinitionsReferenced: new[] { result.Type },
-                CppTypeDeclarationsReferenced: fieldPointerTypes,
-                CSharpName: csharpName,
-                CSharpContent: csharpContent
-            ));
+            if (!NoInitFunctions)
+            {
+                result.Init.Functions.Add(new(
+                    CppName: $"{result.Type.GetFullyQualifiedName()}::{FunctionPointerName}",
+                    CppTypeSignature: $"{InteropReturnType.GetFullyQualifiedName()} (*)({InteropParameterTypeList()})",
+                    CppTypeDefinitionsReferenced: new[] { result.Type },
+                    CppTypeDeclarationsReferenced: fieldPointerTypes,
+                    CSharpName: csharpName,
+                    CSharpContent: csharpContent
+                ));
+            }
         }
+
+        public bool NoInitFunctions = false;
 
         private void AddDeclaration(GeneratedResult result)
         {

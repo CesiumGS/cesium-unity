@@ -63,6 +63,7 @@ namespace Reinterop
 
             CppInteropFunction recipe = CreateCppInteropFunction(context, item, result, method);
             recipe.Private(addOperator);
+            recipe.NoInitFunctions = true;
 
             result.InteropFunctions.Add(recipe);
 
