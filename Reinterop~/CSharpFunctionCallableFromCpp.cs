@@ -219,6 +219,35 @@ namespace Reinterop
         }
 
         /// <summary>
+        /// An implementation of a C# interop function that invokes a property accessor using
+        /// property or indexer syntax.
+        /// </summary>
+        public class CSharpBodyInvokePropertyAccessor : IGenerateCSharpBody
+        {
+            private readonly IPropertySymbol _property;
+            private readonly bool _isGetter;
+
+            public CSharpBodyInvokePropertyAccessor(IPropertySymbol property, bool isGetter)
+            {
+                _property = property;
+                _isGetter = isGetter;
+            }
+
+            public IEnumerable<CSharpStatement> GenerateBody(CppGenerationContext context, CSharpFunctionCallableFromCpp function)
+            {
+                CSharpExpression target = function.Static() ? new CSharpIdentifier(function.Owner().GetFullyQualifiedName()) : new CSharpIdentifier("thiz");
+                CSharpExpression accessor = _property.IsIndexer
+                    ? new CSharpElementAccess(target, function.Parameters().Take(_property.Parameters.Length).Select(p => new CSharpIdentifier(p.Name)).ToArray())
+                    : new CSharpMemberAccess(target, _property.Name);
+
+                if (_isGetter)
+                    yield return new CSharpReturn(accessor);
+                else
+                    yield return new CSharpExpressionStatement(new CSharpBinary("=", accessor, new CSharpIdentifier(function.Parameters().Last().Name)));
+            }
+        }
+
+        /// <summary>
         /// An implementation of a C# interop function that invokes the binary operator identified by <see cref="CSharpFunctionCallableFromCpp.Name"/>
         /// with the left and right operands provided by <see cref="CSharpFunctionCallableFromCpp.Parameters"/>. There must be exactly two parameters.
         /// The operator is expected to return <see cref="CSharpFunctionCallableFromCpp.ReturnType"/>.
@@ -599,6 +628,7 @@ namespace Reinterop
                 CSharpUnary u => new CSharpUnary(u.Op, RewriteExpressionToConvertFromInterop(u.Operand, parameterConversions)!),
                 CSharpIs i => new CSharpIs(RewriteExpressionToConvertFromInterop(i.Expression, parameterConversions)!, i.TypeName, i.castedVariableName),
                 CSharpMemberAccess m => new CSharpMemberAccess(RewriteExpressionToConvertFromInterop(m.Target, parameterConversions)!, m.MemberName),
+                CSharpElementAccess e => new CSharpElementAccess(RewriteExpressionToConvertFromInterop(e.Target, parameterConversions)!, e.Arguments.Select(a => RewriteExpressionToConvertFromInterop(a, parameterConversions)!).ToArray()),
                 CSharpNew n => new CSharpNew(n.TypeName, n.Arguments.Select(a => RewriteExpressionToConvertFromInterop(a, parameterConversions)!).ToArray()),
                 CSharpCast c => new CSharpCast(c.TypeName, RewriteExpressionToConvertFromInterop(c.Expression, parameterConversions)!),
                 _ => expression
@@ -638,37 +668,5 @@ namespace Reinterop
             }).ToList();
             return result;
         }
-
-        // Rewrites a C++ function body like this:
-        //   return CSharpDelegateFunctionPointer(whatever);
-        // into a body like this:
-        //   Vector3 returnValue_interop;
-        //   CSharpDelegateFunctionPointer(whatever, &returnValue_interop);
-        //   return returnValue_interop;
-    //     private List<CppStatement> RewriteStructReturn(IEnumerable<CppStatement> statements, string functionName)
-    //     {
-    //         CppExpression Transform(CppExpression expression)
-    //         {
-    //             return expression switch
-    //             {
-    //                 CppIdentifier i => i,
-    //                 CppRaw r => r,
-    //                 CppLiteral l => l,
-    //                 CppCall c => c.Callee is CppIdentifier id && id.Name == functionName
-    //                     ? new CppCall(id, c.Arguments.Select(Transform).Concat([ new CppIdentifier("&returnValue_interop") ]).ToArray())
-    //                     : new CppCall(Transform(c.Callee), c.Arguments.Select(Transform).ToArray()),
-    //                 CppMemberAccess m => new CppMemberAccess(Transform(m.Target), m.MemberName),
-    //                 CppCast c => new CppCast(c.TargetType, Transform(c.Expression)),
-    //                 CppMove m => new CppMove(Transform(m.Expression)),
-    //                 CppBinary b => new CppBinary(b.Op, Transform(b.Left), Transform(b.Right)),
-    //                 CppUnary u => new CppUnary(u.Op, Transform(u.Operand)),
-    //                 CppTernary t => new CppTernary(Transform(t.Condition), Transform(t.Then), Transform(t.Else)),
-    //                 _ => throw new NotImplementedException($"Unsupported {nameof(CppExpression)}: {expression.GetType().Name}")
-    //             };
-    //         }
-
-
-    //         return CppSyntax.TransformExpressionsInStatement(statement, Transform);
-    //    }
     }
 }

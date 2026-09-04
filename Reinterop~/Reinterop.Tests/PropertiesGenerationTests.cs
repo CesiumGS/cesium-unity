@@ -4,8 +4,7 @@ namespace Reinterop.Tests
 {
     /// <summary>
     /// Recipe-level tests for Properties.cs: run the generator directly and assert on the resulting
-    /// <see cref="CppInteropFunction"/> recipes in <see cref="GeneratedResult.InteropFunctions"/>,
-    /// rather than on the printed C++ text.
+    /// <see cref="CSharpFunctionCallableFromCpp"/> recipes.
     /// </summary>
     public class PropertiesGenerationTests
     {
@@ -35,11 +34,12 @@ namespace Reinterop.Tests
                 }
                 """);
 
-            List<CppInteropFunction> recipes = results["Foo"].InteropFunctions.Where(function => function.Name == "Value").ToList();
+            List<CSharpFunctionCallableFromCpp> recipes = results["Foo"].InteropFunctions2.Where(function => function.Name() == "Value").ToList();
 
             Assert.That(recipes, Has.Count.EqualTo(1));
             Assert.That(recipes[0].Parameters(), Is.Empty);
-            Assert.That(recipes[0].ReturnType().Name, Is.EqualTo("int32_t"));
+            Assert.That(recipes[0].ReturnType().Name, Is.EqualTo("Int32"));
+            Assert.That(recipes[0].Body(), Is.InstanceOf<CSharpFunctionCallableFromCpp.CSharpBodyInvokePropertyAccessor>());
         }
 
         [Test]
@@ -72,9 +72,9 @@ namespace Reinterop.Tests
             CSharpFunctionCallableFromCpp getter = results["Foo"].Find("Value", 0);
             CSharpFunctionCallableFromCpp setter = results["Foo"].Find("Value", 1);
 
-            Assert.That(getter.ReturnType().Name, Is.EqualTo("int32_t"));
-            Assert.That(setter.Parameters()[0].Type.Name, Is.EqualTo("int32_t"));
-            Assert.That(setter.ReturnType().Name, Is.EqualTo("void"));
+            Assert.That(getter.ReturnType().Name, Is.EqualTo("Int32"));
+            Assert.That(setter.Parameters()[0].Type.Name, Is.EqualTo("Int32"));
+            Assert.That(setter.ReturnType().Name, Is.EqualTo("Void"));
         }
 
         [Test]

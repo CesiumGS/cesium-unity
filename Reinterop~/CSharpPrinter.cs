@@ -60,6 +60,7 @@ namespace Reinterop
                 CSharpUnary u => $"{u.Op}{PrintParenthesized(u.Operand)}",
                 CSharpCast c => $"({c.TypeName}){PrintParenthesized(c.Expression)}",
                 CSharpMemberAccess m => $"{PrintParenthesized(m.Target)}.{m.MemberName}",
+                CSharpElementAccess e => $"{PrintParenthesized(e.Target)}[{string.Join(", ", e.Arguments.Select(Print))}]",
                 CSharpNew n => $"new {n.TypeName}({string.Join(", ", n.Arguments.Select(Print))})",
                 CSharpTernary t => $"{PrintParenthesized(t.Condition)} ? {PrintParenthesized(t.Then)} : {PrintParenthesized(t.Else)}",
                 CSharpIs i => $"{PrintParenthesized(i.Expression)} is {i.TypeName} {i.castedVariableName ?? ""}",
@@ -76,6 +77,7 @@ namespace Reinterop
                 CSharpLiteral literal => Print(literal),
                 CSharpRaw raw => Print(raw),
                 CSharpMemberAccess access => Print(access),
+                CSharpElementAccess access => Print(access),
                 CSharpCall call => Print(call),
                 _ => $"({Print(expression)})"
             };

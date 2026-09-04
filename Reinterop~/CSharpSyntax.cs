@@ -31,6 +31,8 @@ namespace Reinterop
 
     internal record CSharpMemberAccess(CSharpExpression Target, string MemberName) : CSharpExpression;
 
+    internal record CSharpElementAccess(CSharpExpression Target, IReadOnlyList<CSharpExpression> Arguments) : CSharpExpression;
+
     internal record CSharpNew(string TypeName, IReadOnlyList<CSharpExpression> Arguments) : CSharpExpression;
 
     // A C-style cast, e.g. CSharpCast("System.Exception", ...) renders as "(System.Exception)...".

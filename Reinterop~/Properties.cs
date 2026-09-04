@@ -25,13 +25,14 @@ namespace Reinterop
         private static void GenerateSingleMethod(CppGenerationContext context, TypeToGenerate item, GeneratedResult result, IPropertySymbol property, IMethodSymbol method)
         {
             string propertyName = property.IsIndexer ? "operator[]" : property.Name;
-            CppInteropFunction recipe = new CppInteropFunction(context, result.CppDefinition.Type, propertyName)
+            CSharpFunctionCallableFromCpp recipe = new CSharpFunctionCallableFromCpp(context, item.Type)
+                .Name(propertyName)
                 .Parameters(method.Parameters)
                 .ReturnType(method.ReturnType)
                 .Static(property.IsStatic)
-                .CSharp(item.Type, method);
+                .Body(new CSharpFunctionCallableFromCpp.CSharpBodyInvokePropertyAccessor(property, method.MethodKind == MethodKind.PropertyGet));
 
-            result.InteropFunctions.Add(recipe);
+            result.InteropFunctions2.Add(recipe);
         }
     }
 }
