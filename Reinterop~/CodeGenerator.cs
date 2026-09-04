@@ -39,6 +39,8 @@ namespace Reinterop
             {
                 foreach (CSharpFunctionCallableFromCpp function in result.InteropFunctions2)
                     function.GenerateCode(this.Options, result);
+                foreach (CppFunction function in result.InteropFunctions3)
+                    function.AddToGeneration(result);
                 foreach (CppInteropFunction function in result.InteropFunctions)
                     function.AddToGeneration(result);
             }

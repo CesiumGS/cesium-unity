@@ -61,12 +61,6 @@ namespace Reinterop
 
             result.InteropFunctions2.Add(interop);
 
-            CppInteropFunction recipe = CreateCppInteropFunction(context, item, result, method);
-            recipe.Private(addOperator);
-            recipe.NoInitFunctions = true;
-
-            result.InteropFunctions.Add(recipe);
-
             if (method.IsGenericMethod)
             {
                 // Add the template which will be specialized by this method.
@@ -85,14 +79,16 @@ namespace Reinterop
                 }
 
                 // Declare that this recipe is a specialization.
-                recipe.Specializes(genericRecipe);
+                // recipe.Specializes(genericRecipe);
             }
 
             if (addOperator)
             {
+                var functions = interop.CreatePairedInteropFunctions();
+
                 string op = Interop.MethodNameToOperator(method.Name);
-                CppInteropParameter rhs = recipe.Parameters()[1];
-                CppInteropFunction operatorRecipe = new CppInteropFunction(context, result.CppDefinition.Type, "operator" + op)
+                CppParameter rhs = functions.cpp.Parameters()[1];
+                CppFunction operatorRecipe = new CppFunction(context, result.CppDefinition.Type, "operator" + op)
                     .Parameters([rhs])
                     .ReturnType(CppType.Boolean.AsReturnType())
                     .DefinitionBody([
@@ -103,7 +99,7 @@ namespace Reinterop
                             )
                         )
                     ]);
-                result.InteropFunctions.Add(operatorRecipe);
+                result.InteropFunctions3.Add(operatorRecipe);
 
                 // If this operator is on a base type and that base type is the right-hand side, also add a
                 // version that takes this type, and a version that takes nullptr. This is a nice convenience
@@ -115,8 +111,8 @@ namespace Reinterop
                     IsMostDerivedVersionOfOperator(item.Type, method))
                 {
                     CppType baseType = CppType.FromCSharp(context, CSharpType.FromSymbol(context, method.ContainingType));
-                    CppInteropFunction baseTypeRecipe = operatorRecipe.Clone()
-                        .Parameters([new CppInteropParameter("rhs", result.CppDefinition.Type.AsParameterType())])
+                    CppFunction baseTypeRecipe = operatorRecipe.Clone()
+                        .Parameters([new CppParameter(result.CppDefinition.Type.AsParameterType(), "rhs")])
                         .DefinitionBody([
                             new CppReturn(
                                 new CppCall(
@@ -128,10 +124,10 @@ namespace Reinterop
                                 )
                             )
                         ]);
-                    result.InteropFunctions.Add(baseTypeRecipe);
+                    result.InteropFunctions3.Add(baseTypeRecipe);
 
-                    CppInteropFunction nullPtrRecipe = operatorRecipe.Clone()
-                        .Parameters([new CppInteropParameter("", CppType.NullPointer.AsParameterType())])
+                    CppFunction nullPtrRecipe = operatorRecipe.Clone()
+                        .Parameters([new CppParameter(CppType.NullPointer.AsParameterType(), "")])
                         .DefinitionBody([
                             new CppReturn(
                                 new CppCall(
@@ -143,7 +139,7 @@ namespace Reinterop
                                 )
                             )
                         ]);
-                    result.InteropFunctions.Add(nullPtrRecipe);
+                    result.InteropFunctions3.Add(nullPtrRecipe);
                 }
             }
         }

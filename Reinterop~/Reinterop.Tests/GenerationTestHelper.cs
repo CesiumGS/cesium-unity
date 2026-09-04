@@ -91,9 +91,9 @@ namespace Reinterop.Tests
         /// <paramref name="parameterCount"/> parameters - used to disambiguate overloads that share a
         /// name (e.g. a property's or field's getter vs. setter).
         /// </summary>
-        public static CppInteropFunction Find(this GeneratedResult result, string name, int parameterCount)
+        public static CSharpFunctionCallableFromCpp Find(this GeneratedResult result, string name, int parameterCount)
         {
-            return result.InteropFunctions.Single(function => function.Name == name && function.Parameters().Count == parameterCount);
+            return result.InteropFunctions2.Single(function => function.Name() == name && function.Parameters().Count == parameterCount);
         }
     }
 }

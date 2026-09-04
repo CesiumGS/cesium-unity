@@ -36,8 +36,8 @@ namespace Reinterop.Tests
                 }
                 """);
 
-            CppInteropFunction getter = results["Foo"].Find("Value", 0);
-            CppInteropFunction setter = results["Foo"].Find("Value", 1);
+            CSharpFunctionCallableFromCpp getter = results["Foo"].Find("Value", 0);
+            CSharpFunctionCallableFromCpp setter = results["Foo"].Find("Value", 1);
 
             Assert.That(getter.ReturnType().Name, Is.EqualTo("int32_t"));
             Assert.That(getter.NeedsStructReturnRewrite, Is.False);
@@ -84,10 +84,11 @@ namespace Reinterop.Tests
                 }
                 """);
 
-            CppInteropFunction getter = results["Foo"].Find("Position", 0);
+            CSharpFunctionCallableFromCpp getter = results["Foo"].Find("Position", 0);
+            var functions = getter.CreatePairedInteropFunctions();
 
             Assert.That(getter.NeedsStructReturnRewrite, Is.True);
-            Assert.That(getter.InteropReturnType.Name, Is.EqualTo("void"));
+            Assert.That(functions.cpp.ReturnType().Name, Is.EqualTo("void"));
         }
 
         [Test]

@@ -78,11 +78,12 @@ namespace Reinterop.Tests
                 }
                 """);
 
-            CppInteropFunction recipe = results["Vector2"].Find("Construct", 2);
+            CSharpFunctionCallableFromCpp recipe = results["Vector2"].Find("Construct", 2);
+            var functions = recipe.CreatePairedInteropFunctions();
 
             // Blittable-struct "constructors" are static factory functions, not C++ constructors -
             // IsConstructor (Name == Owner.Name) is therefore false for this recipe, by design.
-            Assert.That(recipe.IsConstructor, Is.False);
+            Assert.That(functions.cpp.IsConstructor, Is.False);
             Assert.That(recipe.Static(), Is.True);
         }
 

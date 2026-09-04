@@ -35,14 +35,26 @@ namespace Reinterop.Tests
                 }
                 """);
 
-            CppInteropFunction recipe = results["Foo"].Find("Add", 1);
-
-            Assert.That(recipe.Static(), Is.False);
-            Assert.That(recipe.Private(), Is.False);
-            Assert.That(recipe.Parameters()[0].Name, Is.EqualTo("x"));
-            Assert.That(recipe.Parameters()[0].Type.Name, Is.EqualTo("int32_t"));
-            Assert.That(recipe.ReturnType().Name, Is.EqualTo("int32_t"));
+            CSharpFunctionCallableFromCpp recipe = results["Foo"].Find("Add", 1);
             Assert.That(recipe.NeedsStructReturnRewrite, Is.False);
+
+            var functions = recipe.CreatePairedInteropFunctions();
+            
+            CppFunction cpp = functions.cpp;
+            Assert.That(cpp.Static(), Is.False);
+            Assert.That(cpp.Private(), Is.False);
+            Assert.That(cpp.Parameters()[0].Name, Is.EqualTo("x"));
+            Assert.That(cpp.Parameters()[0].Type.Name, Is.EqualTo("int32_t"));
+            Assert.That(cpp.ReturnType().Name, Is.EqualTo("int32_t"));
+
+            CSharpFunction csharp = functions.csharp;
+            Assert.That(csharp.Static(), Is.True);
+            Assert.That(csharp.Private(), Is.True);
+            Assert.That(csharp.Parameters()[0].Name, Is.EqualTo("thiz"));
+            Assert.That(csharp.Parameters()[0].Type.Name, Is.EqualTo("IntPtr"));
+            Assert.That(csharp.Parameters()[1].Name, Is.EqualTo("x"));
+            Assert.That(csharp.Parameters()[1].Type.Name, Is.EqualTo("Int32"));
+            Assert.That(csharp.ReturnType().Name, Is.EqualTo("Int32"));
         }
 
         [Test]
@@ -70,7 +82,7 @@ namespace Reinterop.Tests
                 }
                 """);
 
-            CppInteropFunction recipe = results["Foo"].Find("DoubleIt", 1);
+            CSharpFunctionCallableFromCpp recipe = results["Foo"].Find("DoubleIt", 1);
 
             Assert.That(recipe.Static(), Is.True);
         }
@@ -102,22 +114,25 @@ namespace Reinterop.Tests
                 }
                 """);
 
-            List<CppInteropFunction> identityRecipes = results["Foo"].InteropFunctions
-                .Where(function => function.Name == "Identity")
+            List<CSharpFunctionCallableFromCpp> identityRecipes = results["Foo"].InteropFunctions2
+                .Where(function => function.Name() == "Identity")
                 .ToList();
+
+            Assert.Fail("TODO");
+            // TODO
 
             // One unspecialized template recipe (added once, cached by GenerateTypeState.MethodCache
             // despite two calls) plus one specialization per instantiation.
-            Assert.That(identityRecipes, Has.Count.EqualTo(3));
+            /*Assert.That(identityRecipes, Has.Count.EqualTo(3));
 
-            CppInteropFunction template = identityRecipes.Single(function => function.Specializes() == null);
+            CSharpFunctionCallableFromCpp template = identityRecipes.Single(function => function.Specializes() == null);
             List<CppInteropFunction> specializations = identityRecipes.Where(function => function.Specializes() != null).ToList();
 
             Assert.That(specializations, Has.Count.EqualTo(2));
             Assert.That(specializations, Has.All.Matches<CppInteropFunction>(function => function.Specializes() == template));
             Assert.That(
                 specializations.Select(function => function.TypeArguments().Single().Name),
-                Is.EquivalentTo(new[] { "int32_t", "bool" }));
+                Is.EquivalentTo(new[] { "int32_t", "bool" }));*/
         }
 
         [Test]
@@ -146,8 +161,8 @@ namespace Reinterop.Tests
                 }
                 """);
 
-            CppInteropFunction interopRecipe = results["Foo"].Find("op_Equality", 2);
-            CppInteropFunction operatorRecipe = results["Foo"].InteropFunctions.Single(function => function.Name == "operator==");
+            CSharpFunctionCallableFromCpp interopRecipe = results["Foo"].Find("op_Equality", 2);
+            CppFunction operatorRecipe = results["Foo"].InteropFunctions3.Single(function => function.Name == "operator==");
 
             Assert.That(interopRecipe.Private(), Is.True);
             Assert.That(operatorRecipe.Private(), Is.False);
@@ -186,12 +201,14 @@ namespace Reinterop.Tests
                 }
                 """);
 
-            CppInteropFunction recipe = results["Foo"].Find("GetPosition", 0);
+            CSharpFunctionCallableFromCpp recipe = results["Foo"].Find("GetPosition", 0);
+            var functions = recipe.CreatePairedInteropFunctions();
 
             Assert.That(recipe.NeedsStructReturnRewrite, Is.True);
-            Assert.That(recipe.InteropReturnType.Name, Is.EqualTo("void"));
+            Assert.That(functions.csharp.ReturnType().Name, Is.EqualTo("Void"));
+            Assert.That(functions.cpp.ReturnType().Name, Is.EqualTo("Vector2"));
         }
-
+        
         [Test]
         public void MethodReturningNullablePrimitive_NeedsBoolFlagReturnRewrite()
         {
@@ -218,10 +235,12 @@ namespace Reinterop.Tests
                 }
                 """);
 
-            CppInteropFunction recipe = results["Foo"].Find("MaybeGetValue", 0);
+            CSharpFunctionCallableFromCpp recipe = results["Foo"].Find("MaybeGetValue", 0);
+            var functions = recipe.CreatePairedInteropFunctions();
 
             Assert.That(recipe.NeedsStructReturnRewrite, Is.True);
-            Assert.That(recipe.InteropReturnType.Name, Is.EqualTo("uint8_t"));
+            Assert.That(functions.csharp.ReturnType().Name, Is.EqualTo("Byte"));
+            Assert.That(functions.cpp.ReturnType().GetFullyQualifiedName(), Is.EqualTo("::std::optional<::std::int32_t>"));
         }
 
         [Test]
@@ -255,7 +274,7 @@ namespace Reinterop.Tests
                 }
                 """);
 
-            CppInteropFunction recipe = results["Foo"].Find("MaybeGetValue", 0);
+            CSharpFunctionCallableFromCpp recipe = results["Foo"].Find("MaybeGetValue", 0);
 
             Assert.That(recipe.NeedsStructReturnRewrite, Is.False);
         }

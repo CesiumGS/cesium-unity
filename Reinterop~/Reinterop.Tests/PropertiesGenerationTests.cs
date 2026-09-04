@@ -69,8 +69,8 @@ namespace Reinterop.Tests
                 }
                 """);
 
-            CppInteropFunction getter = results["Foo"].Find("Value", 0);
-            CppInteropFunction setter = results["Foo"].Find("Value", 1);
+            CSharpFunctionCallableFromCpp getter = results["Foo"].Find("Value", 0);
+            CSharpFunctionCallableFromCpp setter = results["Foo"].Find("Value", 1);
 
             Assert.That(getter.ReturnType().Name, Is.EqualTo("int32_t"));
             Assert.That(setter.Parameters()[0].Type.Name, Is.EqualTo("int32_t"));
@@ -103,8 +103,8 @@ namespace Reinterop.Tests
                 }
                 """);
 
-            CppInteropFunction getter = results["Foo"].Find("Value", 0);
-            CppInteropFunction setter = results["Foo"].Find("Value", 1);
+            CSharpFunctionCallableFromCpp getter = results["Foo"].Find("Value", 0);
+            CSharpFunctionCallableFromCpp setter = results["Foo"].Find("Value", 1);
 
             Assert.That(getter.Static(), Is.True);
             Assert.That(setter.Static(), Is.True);
@@ -138,7 +138,7 @@ namespace Reinterop.Tests
                 }
                 """);
 
-            List<CppInteropFunction> recipes = results["Foo"].InteropFunctions.Where(function => function.Name == "operator[]").ToList();
+            List<CSharpFunctionCallableFromCpp> recipes = results["Foo"].InteropFunctions2.Where(function => function.Name() == "operator[]").ToList();
 
             Assert.That(recipes, Has.Count.EqualTo(1));
             Assert.That(recipes[0].Parameters(), Has.Count.EqualTo(1));
