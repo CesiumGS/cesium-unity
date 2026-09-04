@@ -88,6 +88,39 @@ namespace Reinterop.Tests
         }
 
         [Test]
+        public void NonBlittableStructInstanceMethod_ReboxesReceiver()
+        {
+            var results = GenerationTestHelper.GenerateResults(
+                """
+                using Reinterop;
+
+                namespace TestNamespace
+                {
+                    public struct Foo
+                    {
+                        public string Value;
+                        public void Mutate() { Value = "mutated"; }
+                    }
+
+                    [Reinterop]
+                    internal class ConfigureReinterop
+                    {
+                        public void ExposeToCPP()
+                        {
+                            Foo foo = new Foo();
+                            foo.Mutate();
+                        }
+                    }
+                }
+                """);
+
+            GeneratedInitFunction method = results["Foo"].Init.Functions.Single(function => function.CSharpName.Contains("_Mutate_"));
+
+            Assert.That(method.CSharpContent, Does.Contain("thizUnboxed"));
+            Assert.That(method.CSharpContent, Does.Contain("ResetHandleObject(thiz, thizUnboxed)"));
+        }
+
+        [Test]
         public void GenericMethod_TwoInstantiations_ShareOneTemplateRecipe()
         {
             var results = GenerationTestHelper.GenerateResults(

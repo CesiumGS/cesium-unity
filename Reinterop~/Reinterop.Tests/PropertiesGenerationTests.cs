@@ -111,6 +111,40 @@ namespace Reinterop.Tests
         }
 
         [Test]
+        public void NonBlittableStructPropertyAccessors_ReboxReceiver()
+        {
+            var results = GenerationTestHelper.GenerateResults(
+                """
+                using Reinterop;
+
+                namespace TestNamespace
+                {
+                    public struct Foo
+                    {
+                        public string Value { get; set; }
+                    }
+
+                    [Reinterop]
+                    internal class ConfigureReinterop
+                    {
+                        public void ExposeToCPP()
+                        {
+                            Foo foo = new Foo();
+                            foo.Value = "value";
+                            string value = foo.Value;
+                        }
+                    }
+                }
+                """);
+
+            List<GeneratedInitFunction> accessors = results["Foo"].Init.Functions.Where(function => function.CSharpName.Contains("_Value_")).ToList();
+
+            Assert.That(accessors, Has.Count.EqualTo(2));
+            Assert.That(accessors, Has.All.Matches<GeneratedInitFunction>(function => function.CSharpContent.Contains("thizUnboxed")));
+            Assert.That(accessors, Has.All.Matches<GeneratedInitFunction>(function => function.CSharpContent.Contains("ResetHandleObject(thiz, thizUnboxed)")));
+        }
+
+        [Test]
         public void Indexer_GeneratesOnlyGetterAsOperatorSubscript()
         {
             // Properties.cs explicitly skips generating a setter for any indexer

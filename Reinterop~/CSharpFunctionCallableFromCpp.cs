@@ -248,8 +248,7 @@ namespace Reinterop
         }
 
         /// <summary>
-        /// An implementation of a C# interop function that reads or writes a field. Non-blittable
-        /// structs are unboxed before access and written back to their handle afterwards.
+        /// An implementation of a C# interop function that reads or writes a field.
         /// </summary>
         public class CSharpBodyInvokeFieldAccessor : IGenerateCSharpBody
         {
@@ -264,31 +263,8 @@ namespace Reinterop
 
             public IEnumerable<CSharpStatement> GenerateBody(CppGenerationContext context, CSharpFunctionCallableFromCpp function)
             {
-                CSharpExpression target;
-                if (!function.Static() && function.Owner().Kind == InteropTypeKind.NonBlittableStructWrapper)
-                {
-                    const string unboxedReceiverName = "thizUnboxed";
-                    yield return new CSharpVariableDeclaration(
-                        function.Owner().GetFullyQualifiedName(),
-                        unboxedReceiverName,
-                        function.Owner().GetParameterConversionFromInteropTypeExpression(new CSharpRaw("thiz")));
-                    target = new CSharpIdentifier(unboxedReceiverName);
-                }
-                else
-                {
-                    target = function.Static() ? new CSharpIdentifier(function.Owner().GetFullyQualifiedName()) : new CSharpIdentifier("thiz");
-                }
-
+                CSharpExpression target = function.Static() ? new CSharpIdentifier(function.Owner().GetFullyQualifiedName()) : new CSharpIdentifier("thiz");
                 CSharpExpression accessor = new CSharpMemberAccess(target, _field.Name);
-                if (_isGetter && function.Owner().Kind == InteropTypeKind.NonBlittableStructWrapper && !function.Static())
-                {
-                    const string returnValueName = "returnValue";
-                    CSharpType fieldType = CSharpType.FromSymbol(context, _field.Type);
-                    yield return new CSharpVariableDeclaration(fieldType.GetFullyQualifiedName(), returnValueName, accessor);
-                    yield return ResetUnboxedReceiver();
-                    yield return new CSharpReturn(new CSharpIdentifier(returnValueName));
-                    yield break;
-                }
 
                 if (_isGetter)
                 {
@@ -297,15 +273,6 @@ namespace Reinterop
                 }
 
                 yield return new CSharpExpressionStatement(new CSharpBinary("=", accessor, new CSharpIdentifier(function.Parameters().Single().Name)));
-                if (function.Owner().Kind == InteropTypeKind.NonBlittableStructWrapper && !function.Static())
-                    yield return ResetUnboxedReceiver();
-            }
-
-            private static CSharpExpressionStatement ResetUnboxedReceiver()
-            {
-                return new CSharpExpressionStatement(new CSharpCall(
-                    new CSharpMemberAccess(new CSharpIdentifier("Reinterop.ObjectHandleUtility"), "ResetHandleObject"),
-                    [new CSharpRaw("thiz"), new CSharpIdentifier("thizUnboxed")]));
             }
         }
 
@@ -396,6 +363,7 @@ namespace Reinterop
             // Collect the C# and C++ types visible to their respective languages.
             List<CSharpParameter> csParameters = Parameters().ToList();
             CSharpType csReturnType = ReturnType();
+            bool needsNonBlittableStructReboxing = !Static() && csOwner.Kind == InteropTypeKind.NonBlittableStructWrapper;
 
             List<CppParameter> cppParameters = Parameters().Select(parameter => new CppParameter(CppType.FromCSharp(_context, parameter.Type), parameter.Name)).ToList();
             CppType cppReturnType = CppType.FromCSharp(_context, csReturnType);
@@ -421,7 +389,9 @@ namespace Reinterop
             if (!Static())
             {
                 csInteropParameters.Insert(0, new CSharpParameter(csOwner.AsInteropTypeParameter(), "thiz"));
-                csInteropParameterConversions["thiz"] = csOwner.GetParameterConversionFromInteropTypeExpression(new CSharpIdentifier("thiz"));
+                csInteropParameterConversions["thiz"] = needsNonBlittableStructReboxing
+                    ? new CSharpIdentifier("thizUnboxed")
+                    : csOwner.GetParameterConversionFromInteropTypeExpression(new CSharpIdentifier("thiz"));
                 cppInteropParameters.Insert(0, new CppParameter(cppOwner.AsParameterType().AsInteropType(), "thiz"));
                 cppCallArguments.Insert(0, cppOwner.GetConversionToInteropTypeExpression(_context, "(*this)"));
             }
@@ -499,6 +469,17 @@ namespace Reinterop
                 bodyStatements = RewriteReturnStatementToConvertToInterop(bodyStatements, csReturnType, csInteropReturnType);
             if (csInteropParameterConversions.Count > 0)
                 bodyStatements = RewriteParametersToConvertFromInterop(bodyStatements, csInteropParameterConversions);
+
+            if (needsNonBlittableStructReboxing)
+            {
+                bodyStatements.Insert(0, new CSharpVariableDeclaration(
+                    csOwner.GetFullyQualifiedName(),
+                    "thizUnboxed",
+                    csOwner.GetParameterConversionFromInteropTypeExpression(new CSharpRaw("thiz"))));
+                bodyStatements = RewriteReturnsToReboxNonBlittableStruct(bodyStatements);
+                if (csReturnType.SpecialType == SpecialType.System_Void)
+                    bodyStatements.Add(CreateReboxNonBlittableStructReceiverStatement());
+            }
 
             // Always add an additional parameter for exception handling.
             CSharpType csInteropExceptionType = CSharpType.FromSymbol(_context, _context.Compilation.GetSpecialType(SpecialType.System_IntPtr)).AsPointer();
@@ -702,6 +683,24 @@ namespace Reinterop
             if (!parameterConversions.TryGetValue(identifier.Name, out CSharpExpression? conversion))
                 return identifier;
             return conversion;
+        }
+
+        private List<CSharpStatement> RewriteReturnsToReboxNonBlittableStruct(IEnumerable<CSharpStatement> statements)
+        {
+            return statements.SelectMany(statement => statement switch
+            {
+                CSharpReturn r => new CSharpStatement[] { CreateReboxNonBlittableStructReceiverStatement(), r },
+                CSharpIf i => new CSharpStatement[] { new CSharpIf(i.Condition, RewriteReturnsToReboxNonBlittableStruct(i.Then), i.Else == null ? null : RewriteReturnsToReboxNonBlittableStruct(i.Else)) },
+                CSharpTryCatch t => new CSharpStatement[] { new CSharpTryCatch(RewriteReturnsToReboxNonBlittableStruct(t.TryBody), RewriteReturnsToReboxNonBlittableStruct(t.CatchBody)) },
+                _ => new CSharpStatement[] { statement }
+            }).ToList();
+        }
+
+        private static CSharpExpressionStatement CreateReboxNonBlittableStructReceiverStatement()
+        {
+            return new CSharpExpressionStatement(new CSharpCall(
+                new CSharpMemberAccess(new CSharpIdentifier("Reinterop.ObjectHandleUtility"), "ResetHandleObject"),
+                [new CSharpRaw("thiz"), new CSharpIdentifier("thizUnboxed")]));
         }
 
         // Rewrites a C# function body like this:
