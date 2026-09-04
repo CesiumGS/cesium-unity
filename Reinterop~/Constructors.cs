@@ -36,20 +36,21 @@ namespace Reinterop
             // For other types, this will be private and the public C++ constructor will call it.
             // We don't add constructors to blittable types so that we can use the default constructor and
             // member initialization to construct them without calling into C#.
-            CppInteropFunction recipe = new CppInteropFunction(context, result.Type, "Construct")
+            CSharpFunctionCallableFromCpp recipe = new CSharpFunctionCallableFromCpp(context, item.Type)
+                .Name("Construct")
                 .Parameters(constructor.Parameters)
                 .ReturnType(item.Type)
                 .Static(true)
-                .CSharp(item.Type, constructor)
+                .Body(new CSharpFunctionCallableFromCpp.CSharpBodyInvokeConstructor())
                 .Private(result.Type.Kind != InteropTypeKind.BlittableStruct);
 
-            result.InteropFunctions.Add(recipe);
+            result.InteropFunctions2.Add(recipe);
 
             CppType cppType = result.Type;
             if (cppType.Kind != InteropTypeKind.BlittableStruct)
             {
                 // The actual C++ constructor, which calls the Construct method.
-                CppInteropFunction constructorRecipe = new CppInteropFunction(context, result.Type, cppType.Name)
+                CppFunction constructorRecipe = new CppFunction(context, result.Type, cppType.Name)
                     .Parameters(constructor.Parameters)
                     .ReturnType(item.Type)
                     .Static(true)
@@ -58,10 +59,10 @@ namespace Reinterop
                         new CppMemberInitializer(
                             cppType.Name,
                             new CppCall(
-                                new CppIdentifier(recipe.Name),
-                                recipe.Parameters().Select(p => new CppIdentifier(p.Name)).ToList()))
+                                new CppIdentifier(recipe.Name()!),
+                                recipe.Parameters().Select(p => new CppIdentifier(p.Name)).ToArray()))
                     ]);
-                result.InteropFunctions.Add(constructorRecipe);
+                result.InteropFunctions3.Add(constructorRecipe);
             }
         }
     }

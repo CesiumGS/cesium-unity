@@ -204,6 +204,21 @@ namespace Reinterop
         }
 
         /// <summary>
+        /// An implementation of a C# interop function that constructs and returns an instance of
+        /// <see cref="CSharpFunctionCallableFromCpp.Owner"/> using
+        /// <see cref="CSharpFunctionCallableFromCpp.Parameters"/>.
+        /// </summary>
+        public class CSharpBodyInvokeConstructor : IGenerateCSharpBody
+        {
+            public IEnumerable<CSharpStatement> GenerateBody(CppGenerationContext context, CSharpFunctionCallableFromCpp function)
+            {
+                yield return new CSharpReturn(new CSharpNew(
+                    function.Owner().GetFullyQualifiedName(),
+                    function.Parameters().Select(p => new CSharpIdentifier(p.Name)).ToArray()));
+            }
+        }
+
+        /// <summary>
         /// An implementation of a C# interop function that invokes the binary operator identified by <see cref="CSharpFunctionCallableFromCpp.Name"/>
         /// with the left and right operands provided by <see cref="CSharpFunctionCallableFromCpp.Parameters"/>. There must be exactly two parameters.
         /// The operator is expected to return <see cref="CSharpFunctionCallableFromCpp.ReturnType"/>.

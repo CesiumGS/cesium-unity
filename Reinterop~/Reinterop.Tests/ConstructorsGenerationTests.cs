@@ -3,15 +3,13 @@ using NUnit.Framework;
 namespace Reinterop.Tests
 {
     /// <summary>
-    /// Recipe-level tests for Constructors.cs: run the generator directly and assert on the resulting
-    /// <see cref="CppInteropFunction"/> recipes in <see cref="GeneratedResult.InteropFunctions"/>. The
-    /// non-blittable constructor's hand-wrapped lambda body isn't expressible via recipe properties
-    /// alone, so that one test also asserts on the printed definition text.
+    /// Recipe-level tests for Constructors.cs: run the generator directly and assert on the managed
+    /// constructor factory and C++ forwarding constructor recipes.
     /// </summary>
     public class ConstructorsGenerationTests
     {
         [Test]
-        public void NonBlittableConstructor_IsStaticWithHandleMemberInitializerAndLambdaBody()
+        public void NonBlittableConstructor_GeneratesFactoryAndForwardingConstructor()
         {
             var results = GenerationTestHelper.GenerateResults(
                 """
@@ -36,14 +34,18 @@ namespace Reinterop.Tests
                 }
                 """);
 
-            CppInteropFunction recipe = results["Foo"].InteropFunctions.Single(function => function.IsConstructor && function.Parameters().Count == 1 && function.Parameters()[0].Name == "value");
+            CSharpFunctionCallableFromCpp factory = results["Foo"].Find("Construct", 1);
+            CppFunction constructor = results["Foo"].InteropFunctions3.Single(function => function.IsConstructor && function.Parameters().Count == 1 && function.Parameters()[0].Name == "value");
 
-            Assert.That(recipe.Name, Is.EqualTo("Foo"));
-            Assert.That(recipe.Static(), Is.True);
-            Assert.That(recipe.MemberInitializers(), Has.Count.EqualTo(1));
-            Assert.That(recipe.MemberInitializers()![0].MemberName, Is.EqualTo("Foo"));
-            Assert.That(recipe.MemberInitializers()![0].Value, Is.InstanceOf<CppCall>());
-            CppCall call = (CppCall)recipe.MemberInitializers()![0].Value;
+            Assert.That(factory.Static(), Is.True);
+            Assert.That(factory.Private(), Is.True);
+            Assert.That(factory.Body(), Is.InstanceOf<CSharpFunctionCallableFromCpp.CSharpBodyInvokeConstructor>());
+            Assert.That(constructor.Name, Is.EqualTo("Foo"));
+            Assert.That(constructor.Static(), Is.True);
+            Assert.That(constructor.MemberInitializers(), Has.Count.EqualTo(1));
+            Assert.That(constructor.MemberInitializers()![0].MemberName, Is.EqualTo("Foo"));
+            Assert.That(constructor.MemberInitializers()![0].Value, Is.InstanceOf<CppCall>());
+            CppCall call = (CppCall)constructor.MemberInitializers()![0].Value;
             Assert.That(call.Callee, Is.EqualTo(new CppIdentifier("Construct")));
             Assert.That(call.Arguments, Has.Count.EqualTo(1));
             Assert.That(call.Arguments[0], Is.InstanceOf<CppIdentifier>());
