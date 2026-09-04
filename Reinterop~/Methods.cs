@@ -30,16 +30,6 @@ namespace Reinterop
             return null;
         }
 
-        private static CppFunction CreateGenericTemplateDeclaration(CppGenerationContext context, TypeToGenerate item, GeneratedResult result, IMethodSymbol method)
-        {
-            return new CppFunction(context, result.CppDefinition.Type, method.Name)
-                .TypeParameters(method.TypeParameters)
-                .TypeArguments(method.TypeArguments)
-                .ReturnType(method.ReturnType)
-                .Parameters(method.Parameters)
-                .Static(method.IsStatic);
-        }
-
         public static void GenerateSingleMethod(CppGenerationContext context, GenerateTypeState state, TypeToGenerate item, GeneratedResult result, IMethodSymbol method)
         {
             CSharpFunctionCallableFromCpp interop = new CSharpFunctionCallableFromCpp(context, item.Type)
@@ -67,7 +57,12 @@ namespace Reinterop
                 IMethodSymbol genericMethod = method.ConstructedFrom;
                 if (!state.MethodCache.TryGetValue(genericMethod, out CppFunction? genericDeclaration))
                 {
-                    genericDeclaration = CreateGenericTemplateDeclaration(context, item, result, genericMethod)
+                    genericDeclaration = new CppFunction(context, result.CppDefinition.Type, genericMethod.Name)
+                        .TypeParameters(genericMethod.TypeParameters)
+                        .TypeArguments(genericMethod.TypeArguments)
+                        .ReturnType(genericMethod.ReturnType)
+                        .Parameters(genericMethod.Parameters)
+                        .Static(genericMethod.IsStatic)
                         .Private(addOperator);
                     state.MethodCache[genericMethod] = genericDeclaration;
                     result.InteropFunctions3.Add(genericDeclaration);
