@@ -160,6 +160,22 @@ namespace Reinterop
         /// </summary>
         public CSharpFunctionCallableFromCpp Static(bool isStatic) { _static = isStatic; return this; }
 
+        private CppFunction? _specializes = null;
+        /// <summary>
+        /// Gets the generic template declaration that this function's C++ wrapper specializes, if any. A generic
+        /// method is exposed to C++ as a bare <see cref="CppFunction"/> template declaration (it has no body of its
+        /// own, since it can't be called without concrete type arguments), while each concrete instantiation is a
+        /// <see cref="CSharpFunctionCallableFromCpp"/> whose C++ wrapper specializes that declaration and therefore
+        /// doesn't get a declaration of its own - just a definition reusing the template's declaration. This is
+        /// unset for a non-generic function.
+        /// </summary>
+        public CppFunction? Specializes() { return _specializes; }
+        /// <summary>
+        /// Sets the generic template declaration that this function's C++ wrapper specializes. See
+        /// <see cref="Specializes()"/> for details.
+        /// </summary>
+        public CSharpFunctionCallableFromCpp Specializes(CppFunction? specializes) { _specializes = specializes; return this; }
+
         public interface IGenerateCSharpBody
         {
             IEnumerable<CSharpStatement> GenerateBody(CppGenerationContext context, CSharpFunctionCallableFromCpp function);
@@ -428,6 +444,7 @@ namespace Reinterop
                 .Parameters(cppParameters.Select(p => new CppParameter(p.Type.AsParameterType(), p.Name)))
                 .Private(Private())
                 .Static(Static())
+                .Specializes(Specializes())
                 .DefinitionBody(cppBody);
 
             CppFunction functionPointer = new CppFunction(_context, cppOwner, "(*" + csFunctionName + ")")

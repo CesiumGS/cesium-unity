@@ -118,21 +118,18 @@ namespace Reinterop.Tests
                 .Where(function => function.Name() == "Identity")
                 .ToList();
 
-            Assert.Fail("TODO");
-            // TODO
+            // One specialization per instantiation, each specializing the same shared template declaration
+            // (added once to InteropFunctions3, cached by GenerateTypeState.MethodCache despite two calls).
+            Assert.That(identityRecipes, Has.Count.EqualTo(2));
+            Assert.That(identityRecipes, Has.All.Matches<CSharpFunctionCallableFromCpp>(function => function.Specializes() != null));
 
-            // One unspecialized template recipe (added once, cached by GenerateTypeState.MethodCache
-            // despite two calls) plus one specialization per instantiation.
-            /*Assert.That(identityRecipes, Has.Count.EqualTo(3));
+            CppFunction template = identityRecipes[0].Specializes()!;
+            Assert.That(identityRecipes, Has.All.Matches<CSharpFunctionCallableFromCpp>(function => function.Specializes() == template));
+            Assert.That(results["Foo"].InteropFunctions3, Has.Member(template));
 
-            CSharpFunctionCallableFromCpp template = identityRecipes.Single(function => function.Specializes() == null);
-            List<CppInteropFunction> specializations = identityRecipes.Where(function => function.Specializes() != null).ToList();
-
-            Assert.That(specializations, Has.Count.EqualTo(2));
-            Assert.That(specializations, Has.All.Matches<CppInteropFunction>(function => function.Specializes() == template));
             Assert.That(
-                specializations.Select(function => function.TypeArguments().Single().Name),
-                Is.EquivalentTo(new[] { "int32_t", "bool" }));*/
+                identityRecipes.Select(function => function.TypeArguments().Single().Name),
+                Is.EquivalentTo(new[] { "Int32", "Boolean" }));
         }
 
         [Test]

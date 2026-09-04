@@ -30,15 +30,14 @@ namespace Reinterop
             return null;
         }
 
-        private static CppInteropFunction CreateCppInteropFunction(CppGenerationContext context, TypeToGenerate item, GeneratedResult result, IMethodSymbol method)
+        private static CppFunction CreateGenericTemplateDeclaration(CppGenerationContext context, TypeToGenerate item, GeneratedResult result, IMethodSymbol method)
         {
-            return new CppInteropFunction(context, result.CppDefinition.Type, method.Name)
+            return new CppFunction(context, result.CppDefinition.Type, method.Name)
                 .TypeParameters(method.TypeParameters)
                 .TypeArguments(method.TypeArguments)
                 .ReturnType(method.ReturnType)
                 .Parameters(method.Parameters)
-                .Static(method.IsStatic)
-                .CSharp(item.Type, method);
+                .Static(method.IsStatic);
         }
 
         public static void GenerateSingleMethod(CppGenerationContext context, GenerateTypeState state, TypeToGenerate item, GeneratedResult result, IMethodSymbol method)
@@ -63,23 +62,19 @@ namespace Reinterop
 
             if (method.IsGenericMethod)
             {
-                // Add the template which will be specialized by this method.
-                // We only need to do this once for all specializations.
+                // Add the template declaration which will be specialized by this method's C++ wrapper.
+                // We only need to do this once for all specializations of a given generic method.
                 IMethodSymbol genericMethod = method.ConstructedFrom;
-                CppInteropFunction genericRecipe = CreateCppInteropFunction(context, item, result, genericMethod);
-                genericRecipe.Private(addOperator);
-                if (state.MethodCache.TryGetValue(genericRecipe.FunctionPointerName, out CppInteropFunction? cachedRecipe))
+                if (!state.MethodCache.TryGetValue(genericMethod, out CppFunction? genericDeclaration))
                 {
-                    genericRecipe = cachedRecipe;
-                }
-                else
-                {
-                    state.MethodCache[genericRecipe.FunctionPointerName] = genericRecipe;
-                    result.InteropFunctions.Add(genericRecipe);
+                    genericDeclaration = CreateGenericTemplateDeclaration(context, item, result, genericMethod)
+                        .Private(addOperator);
+                    state.MethodCache[genericMethod] = genericDeclaration;
+                    result.InteropFunctions3.Add(genericDeclaration);
                 }
 
                 // Declare that this recipe is a specialization.
-                // recipe.Specializes(genericRecipe);
+                interop.Specializes(genericDeclaration);
             }
 
             if (addOperator)
