@@ -68,19 +68,21 @@ namespace Reinterop
 
         private static void GenerateSingleFieldAccessors(CppGenerationContext context, TypeToGenerate item, IFieldSymbol field, GeneratedResult result)
         {
-            CppType fieldType = CppType.FromCSharp(context, CSharpType.FromSymbol(context, field.Type));
+            CSharpType fieldType = CSharpType.FromSymbol(context, field.Type);
 
-            CppInteropFunction baseRecipe = new CppInteropFunction(context, result.CppDefinition.Type, field.Name).Static(field.IsStatic);
+            CSharpFunctionCallableFromCpp getRecipe = new CSharpFunctionCallableFromCpp(context, item.Type)
+                .Name(field.Name)
+                .ReturnType(fieldType)
+                .Static(field.IsStatic)
+                .Body(new CSharpFunctionCallableFromCpp.CSharpBodyInvokeFieldAccessor(field, isGetter: true));
+            result.InteropFunctions2.Add(getRecipe);
 
-            CppInteropFunction getRecipe = baseRecipe.Clone()
-                .ReturnType(fieldType.AsReturnType())
-                .CSharp(item.Type, field, isGet: true);
-            result.InteropFunctions.Add(getRecipe);
-
-            CppInteropFunction setRecipe = baseRecipe.Clone()
-                .Parameters([new CppInteropParameter("value", fieldType.AsParameterType())])
-                .CSharp(item.Type, field, isGet: false);
-            result.InteropFunctions.Add(setRecipe);
+            CSharpFunctionCallableFromCpp setRecipe = new CSharpFunctionCallableFromCpp(context, item.Type)
+                .Name(field.Name)
+                .Parameters([new CSharpParameter(fieldType, "value")])
+                .Static(field.IsStatic)
+                .Body(new CSharpFunctionCallableFromCpp.CSharpBodyInvokeFieldAccessor(field, isGetter: false));
+            result.InteropFunctions2.Add(setRecipe);
         }
     }
 }

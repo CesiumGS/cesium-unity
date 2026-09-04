@@ -4,8 +4,7 @@ namespace Reinterop.Tests
 {
     /// <summary>
     /// Recipe-level tests for Fields.cs: run the generator directly and assert on the resulting
-    /// <see cref="CppInteropFunction"/> recipes in <see cref="GeneratedResult.InteropFunctions"/>,
-    /// rather than on the printed C++ text.
+    /// <see cref="CSharpFunctionCallableFromCpp"/> recipes.
     /// </summary>
     public class FieldsGenerationTests
     {
@@ -39,10 +38,11 @@ namespace Reinterop.Tests
             CSharpFunctionCallableFromCpp getter = results["Foo"].Find("Value", 0);
             CSharpFunctionCallableFromCpp setter = results["Foo"].Find("Value", 1);
 
-            Assert.That(getter.ReturnType().Name, Is.EqualTo("int32_t"));
+            Assert.That(getter.ReturnType().Name, Is.EqualTo("Int32"));
             Assert.That(getter.NeedsStructReturnRewrite, Is.False);
             Assert.That(setter.Parameters()[0].Name, Is.EqualTo("value"));
-            Assert.That(setter.Parameters()[0].Type.Name, Is.EqualTo("int32_t"));
+            Assert.That(setter.Parameters()[0].Type.Name, Is.EqualTo("Int32"));
+            Assert.That(getter.Body(), Is.InstanceOf<CSharpFunctionCallableFromCpp.CSharpBodyInvokeFieldAccessor>());
 
             // Fields.cs never marks a field accessor recipe as Private() - unlike CSharpTypeUtility's
             // notion of field privacy (only used for the raw blittable-struct field declaration), an
@@ -88,7 +88,7 @@ namespace Reinterop.Tests
             var functions = getter.CreatePairedInteropFunctions();
 
             Assert.That(getter.NeedsStructReturnRewrite, Is.True);
-            Assert.That(functions.cpp.ReturnType().Name, Is.EqualTo("void"));
+            Assert.That(functions.functionPointer.ReturnType().Name, Is.EqualTo("void"));
         }
 
         [Test]
@@ -118,13 +118,11 @@ namespace Reinterop.Tests
                 }
                 """);
 
-            GeneratedInitFunction getter = results["Foo"].Init.Functions.Single(function => function.CSharpName.Contains("_get_Value"));
-            GeneratedInitFunction setter = results["Foo"].Init.Functions.Single(function => function.CSharpName.Contains("_set_Value"));
+            List<GeneratedInitFunction> accessors = results["Foo"].Init.Functions.Where(function => function.CSharpName.Contains("_Value_")).ToList();
 
-            Assert.That(getter.CSharpContent, Does.Contain("var thizUnboxed ="));
-            Assert.That(getter.CSharpContent, Does.Contain("ResetHandleObject(thiz, thizUnboxed)"));
-            Assert.That(setter.CSharpContent, Does.Contain("var thizUnboxed ="));
-            Assert.That(setter.CSharpContent, Does.Contain("ResetHandleObject(thiz, thizUnboxed)"));
+            Assert.That(accessors, Has.Count.EqualTo(2));
+            Assert.That(accessors, Has.All.Matches<GeneratedInitFunction>(function => function.CSharpContent.Contains("thizUnboxed")));
+            Assert.That(accessors, Has.All.Matches<GeneratedInitFunction>(function => function.CSharpContent.Contains("ResetHandleObject(thiz, thizUnboxed)")));
         }
     }
 }

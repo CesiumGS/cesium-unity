@@ -248,6 +248,68 @@ namespace Reinterop
         }
 
         /// <summary>
+        /// An implementation of a C# interop function that reads or writes a field. Non-blittable
+        /// structs are unboxed before access and written back to their handle afterwards.
+        /// </summary>
+        public class CSharpBodyInvokeFieldAccessor : IGenerateCSharpBody
+        {
+            private readonly IFieldSymbol _field;
+            private readonly bool _isGetter;
+
+            public CSharpBodyInvokeFieldAccessor(IFieldSymbol field, bool isGetter)
+            {
+                _field = field;
+                _isGetter = isGetter;
+            }
+
+            public IEnumerable<CSharpStatement> GenerateBody(CppGenerationContext context, CSharpFunctionCallableFromCpp function)
+            {
+                CSharpExpression target;
+                if (!function.Static() && function.Owner().Kind == InteropTypeKind.NonBlittableStructWrapper)
+                {
+                    const string unboxedReceiverName = "thizUnboxed";
+                    yield return new CSharpVariableDeclaration(
+                        function.Owner().GetFullyQualifiedName(),
+                        unboxedReceiverName,
+                        function.Owner().GetParameterConversionFromInteropTypeExpression(new CSharpRaw("thiz")));
+                    target = new CSharpIdentifier(unboxedReceiverName);
+                }
+                else
+                {
+                    target = function.Static() ? new CSharpIdentifier(function.Owner().GetFullyQualifiedName()) : new CSharpIdentifier("thiz");
+                }
+
+                CSharpExpression accessor = new CSharpMemberAccess(target, _field.Name);
+                if (_isGetter && function.Owner().Kind == InteropTypeKind.NonBlittableStructWrapper && !function.Static())
+                {
+                    const string returnValueName = "returnValue";
+                    CSharpType fieldType = CSharpType.FromSymbol(context, _field.Type);
+                    yield return new CSharpVariableDeclaration(fieldType.GetFullyQualifiedName(), returnValueName, accessor);
+                    yield return ResetUnboxedReceiver();
+                    yield return new CSharpReturn(new CSharpIdentifier(returnValueName));
+                    yield break;
+                }
+
+                if (_isGetter)
+                {
+                    yield return new CSharpReturn(accessor);
+                    yield break;
+                }
+
+                yield return new CSharpExpressionStatement(new CSharpBinary("=", accessor, new CSharpIdentifier(function.Parameters().Single().Name)));
+                if (function.Owner().Kind == InteropTypeKind.NonBlittableStructWrapper && !function.Static())
+                    yield return ResetUnboxedReceiver();
+            }
+
+            private static CSharpExpressionStatement ResetUnboxedReceiver()
+            {
+                return new CSharpExpressionStatement(new CSharpCall(
+                    new CSharpMemberAccess(new CSharpIdentifier("Reinterop.ObjectHandleUtility"), "ResetHandleObject"),
+                    [new CSharpRaw("thiz"), new CSharpIdentifier("thizUnboxed")]));
+            }
+        }
+
+        /// <summary>
         /// An implementation of a C# interop function that invokes the binary operator identified by <see cref="CSharpFunctionCallableFromCpp.Name"/>
         /// with the left and right operands provided by <see cref="CSharpFunctionCallableFromCpp.Parameters"/>. There must be exactly two parameters.
         /// The operator is expected to return <see cref="CSharpFunctionCallableFromCpp.ReturnType"/>.
