@@ -58,11 +58,14 @@ namespace Reinterop
             {
                 CppIdentifier id => id.Name,
                 CppRaw raw => raw.Text,
+                CppLiteral literal => literal.Value,
                 CppCall c => $"{Print(c.Callee)}({string.Join(", ", c.Arguments.Select(Print))})",
+                CppTernary t => $"{Print(t.Condition)} ? {Print(t.Then)} : {Print(t.Else)}",
                 CppBinary b => $"{Print(b.Left)} {b.Op} {Print(b.Right)}",
                 CppUnary u => $"{u.Op}{Print(u.Operand)}",
-                CppCast c => $"{c.targetType.GetFullyQualifiedName()}({Print(c.Expression)})",
+                CppCast c => $"{c.TargetType.GetFullyQualifiedName()}({Print(c.Expression)})",
                 CppMove m => $"std::move({Print(m.Expression)})",
+                CppMemberAccess m => $"{Print(m.Target)}.{m.MemberName}",
                 _ => throw new NotSupportedException($"Unsupported {nameof(CppExpression)}: {expression.GetType().Name}")
             };
         }
@@ -145,10 +148,17 @@ namespace Reinterop
                     break;
                 case CppRaw raw:
                     break;
+                case CppLiteral l:
+                    break;
                 case CppCall c:
                     GetRequiredIncludes(c.Callee, result);
                     foreach (CppExpression arg in c.Arguments)
                         GetRequiredIncludes(arg, result);
+                    break;
+                case CppTernary t:
+                    GetRequiredIncludes(t.Condition, result);
+                    GetRequiredIncludes(t.Then, result);
+                    GetRequiredIncludes(t.Else, result);
                     break;
                 case CppBinary b:
                     GetRequiredIncludes(b.Left, result);
@@ -163,6 +173,9 @@ namespace Reinterop
                 case CppMove m:
                     result.Add("<utility>"); // for std::move
                     GetRequiredIncludes(m.Expression, result);
+                    break;
+                case CppMemberAccess m:
+                    GetRequiredIncludes(m.Target, result);
                     break;
                 default:
                     throw new NotSupportedException($"Unsupported {nameof(CppExpression)}: {expression.GetType().Name}");

@@ -25,7 +25,7 @@ namespace Reinterop
 
     internal record CppMemberAccess(CppExpression Target, string MemberName) : CppExpression;
 
-    internal record CppCast(CppType targetType, CppExpression Expression) : CppExpression;
+    internal record CppCast(CppType TargetType, CppExpression Expression) : CppExpression;
 
     // A std::move() expression.
     internal record CppMove(CppExpression Expression) : CppExpression;
@@ -83,4 +83,23 @@ namespace Reinterop
 
     // A constructor member initializer.
     internal record CppMemberInitializer(string MemberName, CppExpression Value);
+
+    internal static class CppSyntax
+    {
+        public static CppStatement TransformExpressionsInStatement(CppStatement statement, Func<CppExpression, CppExpression> transform)
+        {
+            return statement switch
+            {
+                CppExpressionStatement e => new CppExpressionStatement(transform(e.Expression)),
+                CppAssignment a => new CppAssignment(transform(a.Target), transform(a.Value)),
+                CppIf i => new CppIf(transform(i.Condition), i.Then.Select(s => TransformExpressionsInStatement(s, transform)).ToList()),
+                CppThrow t => new CppThrow(transform(t.Exception)),
+                CppReturn r => new CppReturn(r.Value is null ? null : transform(r.Value)),
+                CppRawStatement r => r,
+                CppVariableDeclaration v => new CppVariableDeclaration(v.TypeName, v.Name, v.Initializer is null ? null : transform(v.Initializer)),
+                CppTry t => new CppTry(t.Body.Select(s => TransformExpressionsInStatement(s, transform)).ToList(), t.Catches),
+                _ => throw new InvalidOperationException($"Unhandled CppStatement type: {statement.GetType().Name}")
+            };
+        }
+    }
 }

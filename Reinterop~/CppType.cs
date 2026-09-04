@@ -623,6 +623,49 @@ namespace Reinterop
             }
         }
 
+        public CppExpression GetConversionFromInteropTypeExpression(CppGenerationContext context, CppExpression inputExpression)
+        {
+            if (this == Boolean)
+            {
+                return new CppUnary("!", new CppUnary("!", inputExpression));
+            }
+
+            switch (this.Kind)
+            {
+                case InteropTypeKind.ClassWrapper:
+                case InteropTypeKind.NonBlittableStructWrapper:
+                case InteropTypeKind.Delegate:
+                    CppCall constructHandle = new CppCall(new CppIdentifier(CppObjectHandle.GetCppType(context).GetFullyQualifiedName()), [inputExpression]);
+                    return new CppCall(new CppIdentifier(this.AsSimpleType().GetFullyQualifiedName()), [constructHandle]);
+                case InteropTypeKind.Enum:
+                    return new CppCall(new CppIdentifier(this.AsSimpleType().GetFullyQualifiedName()), [inputExpression]);
+                case InteropTypeKind.EnumFlags:
+                    return new CppCall(new CppIdentifier(this.GenericArguments.ElementAt(0).AsSimpleType().GetFullyQualifiedName()), [inputExpression]);
+                case InteropTypeKind.Nullable:
+                    if (this.Flags.HasFlag(CppTypeFlags.Reference))
+                        // parameter
+                        return new CppTernary(
+                            new CppBinary("==", inputExpression, new CppRaw("nullptr")),
+                            new CppRaw("std::nullopt"),
+                            new CppCall(new CppIdentifier("std::make_optional"), [new CppUnary("*", inputExpression)])
+                        );
+                    else
+                        // return value
+                        return inputExpression;
+                case InteropTypeKind.BlittableStruct:
+                    if (this.Flags.HasFlag(CppTypeFlags.Reference))
+                        // parameter
+                        return new CppUnary("*", inputExpression);
+                    else
+                        // return value
+                        return inputExpression;
+                case InteropTypeKind.Primitive:
+                case InteropTypeKind.Unknown:
+                default:
+                    return inputExpression;
+            }
+        }
+
         private static CppType CreatePrimitiveType(IReadOnlyCollection<string> cppNamespaces, string cppTypeName, CppTypeFlags flags = 0, string? headerOverride = null)
         {
             return new CppType(InteropTypeKind.Primitive, cppNamespaces, cppTypeName, null, flags, headerOverride);

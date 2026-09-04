@@ -339,9 +339,12 @@ namespace Reinterop
         /// Sets the constructor member initializers. This is only used for constructors, and it is ignored for non-constructors.
         /// For constructors, this is the list of member initializers to use in the constructor's definition.
         /// </summary>
-        public CppFunction MemberInitializers(List<CppMemberInitializer>? memberInitializers)
+        public CppFunction MemberInitializers(IEnumerable<CppMemberInitializer>? memberInitializers)
         {
-            _memberInitializers = memberInitializers;
+            if (memberInitializers != null)
+                _memberInitializers = memberInitializers.ToList();
+            else
+                _memberInitializers = null;
             return this;
         }
 
@@ -478,13 +481,13 @@ namespace Reinterop
         }
 
         /// <summary>
-        /// The "&lt;T, U&gt;" suffix needed to qualify a member of a generic type's out-of-line
-        /// definition, e.g. "MyClass&lt;T&gt;::Method(...)" - empty if the type isn't generic.
+        /// Gets the declaration of a function pointer that can point to this C++ function.
         /// </summary>
-        public static string GetTypeTemplateSpecialization(CppType type) =>
-            type.GenericArguments != null && type.GenericArguments.Count > 0
-                ? "<" + string.Join(", ", type.GenericArguments.Select(t => t.GetFullyQualifiedName())) + ">"
-                : "";
+        /// <param name="variableName">The name of the function pointer variable. This can be ommitted if a name isn't needed, such as when casting.</param>
+        public string GetFunctionPointerDeclaration(string variableName = "")
+        {
+            return $"{ReturnType().GetFullyQualifiedName()} (*{variableName})({string.Join(", ", ParameterTypes.Select(t => t.GetFullyQualifiedName()))})";
+        }
 
         public CppFunction Clone()
         {
@@ -496,7 +499,21 @@ namespace Reinterop
                 .Static(Static())
                 .Private(Private())
                 .Specializes(Specializes())
+                .Const(Const())
+                .NoExcept(NoExcept())
+                .Deleted(Deleted())
+                .Explicit(Explicit())
+                .MemberInitializers(MemberInitializers())
                 .DefinitionBody(DefinitionBody());
         }
+
+        /// <summary>
+        /// The "&lt;T, U&gt;" suffix needed to qualify a member of a generic type's out-of-line
+        /// definition, e.g. "MyClass&lt;T&gt;::Method(...)" - empty if the type isn't generic.
+        /// </summary>
+        public static string GetTypeTemplateSpecialization(CppType type) =>
+            type.GenericArguments != null && type.GenericArguments.Count > 0
+                ? "<" + string.Join(", ", type.GenericArguments.Select(t => t.GetFullyQualifiedName())) + ">"
+                : "";
     }
 }

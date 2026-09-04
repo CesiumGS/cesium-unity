@@ -223,7 +223,7 @@ namespace Reinterop
             get { return Interop.NeedsStructReturnRewrite(ReturnType()); }
         }
 
-        public string GetUniqueFunctionName()
+        public string GetDisplayName()
         {
             string name = Owner().GetFullyQualifiedName() + "." + Name();
             if (TypeArguments().Count > 0)
@@ -233,47 +233,50 @@ namespace Reinterop
             return name;
         }
 
-        // public CppFunction CreateCppWrapperFunction()
-        // {
-        //     CppType cppOwner = CppType.FromCSharp(_context, Owner());
-        //     return new CppFunction(_context, cppOwner, Name() ?? "NoName")
-        //         .TypeArguments(TypeArguments())
-        //         .ReturnType(CppType.FromCSharp(_context, ReturnType()).AsReturnType())
-        //         .Parameters(Parameters().Select(p => new CppParameter(CppType.FromCSharp(_context, p.Type).AsParameterType(), p.Name)))
-        //         .Private(Private())
-        //         .Static(Static())
-        //         .DefinitionBody(CreateCppWrapperImplementation(baseName,cppParameters, cppReturnType, cppInteropParameters, cppInteropReturnType));
-        // }
+        public struct InteropFunctions
+        {
+            public CSharpFunction csharp;
+            public CppFunction cpp;
+            public CppFunction functionPointer;
+        }
 
-        public void GenerateCode(CppGenerationContext context, GeneratedResult result)
+        /// <summary>
+        /// Creates a pair of functions - one in C# and one in C++ - that work together to enable interop between the two languages.
+        /// The C++ function takes the C++ equivalent of the <see cref="Parameters"/> and returns the C++ equivalent of the
+        /// <see cref="ReturnType"/>. It is implemented to transform the parameters as necessary for interop, call through a
+        /// function pointer into the paired C# function, and return the result back to the C++ caller. All of the interop details
+        /// are handled internally, including exception handling and parameter rewriting. The C# function is implemented as
+        /// specified in the <see cref="Body"/>.
+        /// </summary>
+        public InteropFunctions CreatePairedInteropFunctions()
         {
             if (_name == null) 
-                throw new InvalidOperationException("Cannot generate C# code for a CSharpFunctionCallableFromCpp because it has no Name.");
+                throw new InvalidOperationException("Cannot generate paired functions for a CSharpFunctionCallableFromCpp because it has no Name.");
 
             CSharpType csOwner = Owner();
-            CppType cppOwner = CppType.FromCSharp(context, csOwner);
+            CppType cppOwner = CppType.FromCSharp(_context, csOwner);
 
             if (_body == null)
-                throw new InvalidOperationException("Cannot generate C# code for a CSharpFunctionCallableFromCpp ${GetUniqueFunctionName()} because it has no body.");
-            List<CSharpStatement> bodyStatements = _body.GenerateBody(context, this).ToList();
+                throw new InvalidOperationException($"Cannot generate C# code for a CSharpFunctionCallableFromCpp ${GetDisplayName()} because it has no body.");
+            List<CSharpStatement> bodyStatements = _body.GenerateBody(_context, this).ToList();
             if (bodyStatements.Count == 0)
-                throw new InvalidOperationException("Cannot generate C# code for a CSharpFunctionCallableFromCpp ${GetUniqueFunctionName()} because it has an empty body.");
+                throw new InvalidOperationException($"Cannot generate C# code for a CSharpFunctionCallableFromCpp ${GetDisplayName()} because it has an empty body.");
 
             // If this function returns a value, make sure all return statements return a value.
             // If it doesn't return a value, any return statement must have a null value.
             IEnumerable<CSharpReturn> returnStatements = bodyStatements.Select(statement => statement as CSharpReturn).Where(statement => statement != null).Select(statement => statement!);
             bool isVoidReturn = ReturnType().SpecialType == SpecialType.System_Void;
             if (isVoidReturn && returnStatements.Any(statement => statement.Value != null))
-                throw new InvalidOperationException($"Cannot generate C# code for a CSharpFunctionCallableFromCpp ${GetUniqueFunctionName()} because it has a void return type but has a non-void return statement.");
+                throw new InvalidOperationException($"Cannot generate C# code for a CSharpFunctionCallableFromCpp ${GetDisplayName()} because it has a void return type but has a non-void return statement.");
             else if (!isVoidReturn && returnStatements.Any(statement => statement.Value == null))
-                throw new InvalidOperationException($"Cannot generate C# code for a CSharpFunctionCallableFromCpp ${GetUniqueFunctionName()} because it has a non-void return type but has a void return statement.");        
+                throw new InvalidOperationException($"Cannot generate C# code for a CSharpFunctionCallableFromCpp ${GetDisplayName()} because it has a non-void return type but has a void return statement.");        
 
             // Collect the C# and C++ types visible to their respective languages.
             List<CSharpParameter> csParameters = Parameters().ToList();
             CSharpType csReturnType = ReturnType();
 
-            List<CppParameter> cppParameters = Parameters().Select(parameter => new CppParameter(CppType.FromCSharp(context, parameter.Type), parameter.Name)).ToList();
-            CppType cppReturnType = CppType.FromCSharp(context, csReturnType);
+            List<CppParameter> cppParameters = Parameters().Select(parameter => new CppParameter(CppType.FromCSharp(_context, parameter.Type), parameter.Name)).ToList();
+            CppType cppReturnType = CppType.FromCSharp(_context, csReturnType);
 
             // Collect the C# and C++ types used at the interop boundary.
             List<CSharpParameter> csInteropParameters = csParameters.Select(parameter => new CSharpParameter(parameter.Type.AsInteropTypeParameter(), parameter.Name)).ToList();
@@ -288,12 +291,9 @@ namespace Reinterop
                 csInteropParameterConversions[parameter.Name] = parameter.Type.GetParameterConversionFromInteropTypeExpression(new CSharpIdentifier(parameter.Name));
             }
             
-            // The C++ statements that receive the interop parameters converted from the external function parameters.
-            List<CppVariableDeclaration> cppInteropParameterConversions = cppParameters.Select(parameter =>
-                new CppVariableDeclaration(
-                    parameter.Type.GetFullyQualifiedName(),
-                    parameter.Name,
-                    parameter.Type.GetConversionToInteropTypeExpression(context, parameter.Name + "_interop"))).ToList();
+            string csFunctionName = "Reinterop_" + Interop.GetUniqueNameForType(csOwner) + "_" + Interop.MakeSafeIdentifier(_name) + "_" +Interop.HashParameters(_parameters, _typeArguments);
+
+            List<CppExpression> cppCallArguments = cppParameters.Select(parameter => parameter.Type.GetConversionToInteropTypeExpression(_context, parameter.Name)).ToList();
 
             // If this is an instance method, add an explicit `thiz` to the interop function's parameters.
             if (!Static())
@@ -301,8 +301,10 @@ namespace Reinterop
                 csInteropParameters.Insert(0, new CSharpParameter(csOwner.AsInteropTypeParameter(), "thiz"));
                 csInteropParameterConversions["thiz"] = csOwner.GetParameterConversionFromInteropTypeExpression(new CSharpIdentifier("thiz"));
                 cppInteropParameters.Insert(0, new CppParameter(cppOwner.AsParameterType().AsInteropType(), "thiz"));
-                cppInteropParameterConversions.Insert(0, new CppVariableDeclaration(cppOwner.GetFullyQualifiedName(), "thiz", cppOwner.GetConversionToInteropTypeExpression(context, "(*this)")));
+                cppCallArguments.Insert(0, cppOwner.GetConversionToInteropTypeExpression(_context, "(*this)"));
             }
+
+            List<CppStatement> cppBody = new();
 
             // If this function requires a struct return rewrite, handle the necessary adjustments here.
             if (NeedsStructReturnRewrite)
@@ -310,10 +312,16 @@ namespace Reinterop
                 csInteropParameters.Add(new CSharpParameter(csInteropReturnType.AsPointer(), "pReturnValue"));
                 cppInteropParameters.Add(new CppParameter(cppInteropReturnType.AsPointer(), "pReturnValue"));
 
+                cppBody.Add(new CppVariableDeclaration(
+                    cppInteropReturnType.GetFullyQualifiedName(),
+                    "reinterop_returnValue"
+                ));
+                cppCallArguments.Add(new CppUnary("&", new CppIdentifier("reinterop_returnValue")));
+
                 CSharpStatement newReturnStatement;
                 if (csReturnType.Kind == InteropTypeKind.Nullable)
                 {
-                    csInteropReturnType = CSharpType.FromSymbol(context, context.Compilation.GetSpecialType(SpecialType.System_Byte));
+                    csInteropReturnType = CSharpType.FromSymbol(_context, _context.Compilation.GetSpecialType(SpecialType.System_Byte));
                     cppInteropReturnType = CppType.UInt8.AsReturnType();
                     newReturnStatement = new CSharpIf(
                         new CSharpBinary("!=", new CSharpIdentifier("returnValue_interop"), new CSharpLiteral("null")),
@@ -327,19 +335,40 @@ namespace Reinterop
                             new CSharpReturn(new CSharpLiteral("0"))
                         ]
                     );
+
+                    cppBody.Add(new CppVariableDeclaration(
+                        cppInteropReturnType.GetFullyQualifiedName(),
+                        "reinterop_returnValueIsValid",
+                        new CppCall(new CppIdentifier(csFunctionName), cppCallArguments.ToArray())
+                    ));
+                    // TODO: convert from interop type. Even though it's not necessary?
+                    cppBody.Add(new CppReturn(new CppRaw("reinterop_returnValueIsValid ? std::make_optional(reinterop_returnValue) : std::nullopt")));
                 }
                 else
                 {
-                    csInteropReturnType = CSharpType.FromSymbol(context, context.Compilation.GetSpecialType(SpecialType.System_Void));
+                    csInteropReturnType = CSharpType.FromSymbol(_context, _context.Compilation.GetSpecialType(SpecialType.System_Void));
                     cppInteropReturnType = CppType.Void.AsReturnType();
                     newReturnStatement = new CSharpExpressionStatement(new CSharpBinary(
                         "=",
                         new CSharpUnary("*", new CSharpIdentifier("pReturnValue")),
                         new CSharpIdentifier("returnValue_interop")
                     ));
+
+                    cppBody.Add(new CppExpressionStatement(new CppCall(new CppIdentifier(csFunctionName), cppCallArguments.ToArray())));
+                    cppBody.Add(new CppReturn(new CppIdentifier("reinterop_returnValue")));
                 }
 
                 bodyStatements = RewriteStructReturn(bodyStatements, csReturnType, "returnValue_interop", newReturnStatement);
+            }
+            else if (csReturnType.SpecialType != SpecialType.System_Void)
+            {
+                // Non-void return
+                cppBody.Add(new CppReturn(cppReturnType.GetConversionFromInteropTypeExpression(_context, new CppCall(new CppIdentifier(csFunctionName), cppCallArguments.ToArray()))));
+            }
+            else
+            {
+                // Void return
+                cppBody.Add(new CppExpressionStatement(new CppCall(new CppIdentifier(csFunctionName), cppCallArguments.ToArray())));
             }
 
             // Rewrite the body to convert from the interop parameter types to the C# parameter types, and
@@ -350,7 +379,7 @@ namespace Reinterop
                 bodyStatements = RewriteParametersToConvertFromInterop(bodyStatements, csInteropParameterConversions);
 
             // Always add an additional parameter for exception handling.
-            CSharpType csInteropExceptionType = CSharpType.FromSymbol(context, context.Compilation.GetSpecialType(SpecialType.System_IntPtr)).AsPointer();
+            CSharpType csInteropExceptionType = CSharpType.FromSymbol(_context, _context.Compilation.GetSpecialType(SpecialType.System_IntPtr)).AsPointer();
             CppType cppInteropExceptionType = CppType.VoidPointerPointer.AsParameterType();
             csInteropParameters.Add(new CSharpParameter(csInteropExceptionType, "reinteropException"));
             cppInteropParameters.Add(new CppParameter(cppInteropExceptionType, "reinteropException"));
@@ -378,44 +407,57 @@ namespace Reinterop
                 )
             ];
 
-            string baseName = "Reinterop_" + Interop.GetUniqueNameForType(csOwner) + "_" + Interop.MakeSafeIdentifier(_name) + "_" +Interop.HashParameters(_parameters, _typeArguments);
-
             string interopParameterList = string.Join(", ", csInteropParameters.Select(p => p.Type.GetFullyQualifiedName() + " " + p.Name));
             string cppInteropParameterTypeList = string.Join(", ", cppInteropParameters.Select(p => p.Type.GetFullyQualifiedName()));
             IEnumerable<CppType> fieldPointerTypes = cppInteropParameters.Select(p => p.Type).Concat([ cppInteropReturnType ]);
 
-            // The function pointer that calls through to the C# delegate
-            result.CppDeclaration.Elements.Add(new(
-                Content: $"static {cppInteropReturnType.GetFullyQualifiedName()} (*{baseName})({cppInteropParameterTypeList});",
-                IsPrivate: true,
-                TypeDeclarationsReferenced: fieldPointerTypes));
+            // The C# function that receives the call from C++.
+            CSharpFunction csharpFunction = new CSharpFunction(_context, csOwner, csFunctionName)
+                .ReturnType(csInteropReturnType)
+                .Parameters(csInteropParameters)
+                .Private(true)
+                .Static(true)
+                .Unsafe(true)
+                .Attributes([$"[AOT.MonoPInvokeCallback(typeof({csFunctionName}_Type))]"])
+                .Body(bodyStatements);
 
-            // The C++ function that calls through to the C# delegate via the function pointer.
-            CppFunction cppWrapper = new CppFunction(context, cppOwner, _name)
-                .TypeArguments(_typeArguments)
+            // The C++ function that calls through to the C# function via the function pointer / delegate.
+            CppFunction cppWrapper = new CppFunction(_context, cppOwner, _name)
+                .TypeArguments(TypeArguments())
                 .ReturnType(cppReturnType.AsReturnType())
                 .Parameters(cppParameters.Select(p => new CppParameter(p.Type.AsParameterType(), p.Name)))
                 .Private(Private())
                 .Static(Static())
-                .DefinitionBody(CreateCppWrapperImplementation(baseName,cppParameters, cppReturnType, cppInteropParameters, cppInteropReturnType));
-            cppWrapper.AddToGeneration(result);
+                .DefinitionBody(cppBody);
+
+            CppFunction functionPointer = new CppFunction(_context, cppOwner, "(*" + csFunctionName + ")")
+                .TypeArguments(TypeArguments())
+                .ReturnType(cppInteropReturnType)
+                .Parameters(cppInteropParameters)
+                .Private(true)
+                .Static(true);
+
+            return new InteropFunctions() { csharp = csharpFunction, cpp = cppWrapper, functionPointer = functionPointer };
+        }
+
+        public void GenerateCode(CppGenerationContext context, GeneratedResult result)
+        {
+            InteropFunctions functions = CreatePairedInteropFunctions();
+            functions.functionPointer.AddToGeneration(result);
+            functions.cpp.AddToGeneration(result);
 
             result.Init.Functions.Add(new GeneratedInitFunction(
-                $"{cppOwner.GetFullyQualifiedName()}::{baseName}",
-                $"{cppInteropReturnType.GetFullyQualifiedName()} (*)({cppInteropParameterTypeList})",
-                baseName + "_Delegate",
+                $"{result.Type.GetFullyQualifiedName()}::{functions.csharp.Name}",
+                functions.functionPointer.GetFunctionPointerDeclaration(),
+                functions.csharp.Name + "_Delegate",
                 $$"""
                 [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-                private unsafe delegate {{csInteropReturnType.GetFullyQualifiedName()}} {{baseName}}_Type({{interopParameterList}});
-                private static unsafe readonly {{baseName}}_Type {{baseName}}_Delegate = new {{baseName}}_Type({{baseName}});
-                [AOT.MonoPInvokeCallback(typeof({{baseName}}_Type))]
-                private static unsafe {{csInteropReturnType.GetFullyQualifiedName()}} {{baseName}}({{interopParameterList}})
-                {
-                    {{CSharpPrinter.Print(bodyStatements, "    ")}}
-                }
+                private {{functions.csharp.GetDelegateDeclaration(functions.csharp.Name + "_Type")}};
+                private static unsafe readonly {{functions.csharp.Name}}_Type {{functions.csharp.Name}}_Delegate = new {{functions.csharp.Name}}_Type({{functions.csharp.Name}});
+                {{functions.csharp.Print()}}
                 """,
-                CppTypeDeclarationsReferenced: fieldPointerTypes,
-                CppTypeDefinitionsReferenced: [ cppOwner ]
+                CppTypeDeclarationsReferenced: [ .. functions.functionPointer.Parameters().Select(p => p.Type), functions.functionPointer.ReturnType() ],
+                CppTypeDefinitionsReferenced: [ result.Type ]
             ));
         }
 
@@ -553,7 +595,7 @@ namespace Reinterop
             {
                 return statement switch
                 {
-                    CSharpReturn { Value: null } => throw new InvalidOperationException($"Cannot generate C# code for a CSharpFunctionCallableFromCpp ${GetUniqueFunctionName()} because it has a struct return type but has a void return statement."),
+                    CSharpReturn { Value: null } => throw new InvalidOperationException($"Cannot generate C# code for a CSharpFunctionCallableFromCpp ${GetDisplayName()} because it has a struct return type but has a void return statement."),
                     CSharpReturn r => new List<CSharpStatement> {
                         new CSharpVariableDeclaration(returnType.GetFullyQualifiedName(), returnValueName, r.Value),
                         newReturnStatement
@@ -564,5 +606,37 @@ namespace Reinterop
             }).ToList();
             return result;
         }
+
+        // Rewrites a C++ function body like this:
+        //   return CSharpDelegateFunctionPointer(whatever);
+        // into a body like this:
+        //   Vector3 returnValue_interop;
+        //   CSharpDelegateFunctionPointer(whatever, &returnValue_interop);
+        //   return returnValue_interop;
+    //     private List<CppStatement> RewriteStructReturn(IEnumerable<CppStatement> statements, string functionName)
+    //     {
+    //         CppExpression Transform(CppExpression expression)
+    //         {
+    //             return expression switch
+    //             {
+    //                 CppIdentifier i => i,
+    //                 CppRaw r => r,
+    //                 CppLiteral l => l,
+    //                 CppCall c => c.Callee is CppIdentifier id && id.Name == functionName
+    //                     ? new CppCall(id, c.Arguments.Select(Transform).Concat([ new CppIdentifier("&returnValue_interop") ]).ToArray())
+    //                     : new CppCall(Transform(c.Callee), c.Arguments.Select(Transform).ToArray()),
+    //                 CppMemberAccess m => new CppMemberAccess(Transform(m.Target), m.MemberName),
+    //                 CppCast c => new CppCast(c.TargetType, Transform(c.Expression)),
+    //                 CppMove m => new CppMove(Transform(m.Expression)),
+    //                 CppBinary b => new CppBinary(b.Op, Transform(b.Left), Transform(b.Right)),
+    //                 CppUnary u => new CppUnary(u.Op, Transform(u.Operand)),
+    //                 CppTernary t => new CppTernary(Transform(t.Condition), Transform(t.Then), Transform(t.Else)),
+    //                 _ => throw new NotImplementedException($"Unsupported {nameof(CppExpression)}: {expression.GetType().Name}")
+    //             };
+    //         }
+
+
+    //         return CppSyntax.TransformExpressionsInStatement(statement, Transform);
+    //    }
     }
 }
