@@ -11,6 +11,10 @@ namespace Reinterop
         public CppInteropParameter(string name, CppType type) : this(name, type, new CppIdentifier(name))
         {
         }
+
+        public CppInteropParameter(CppParameter parameter) : this(parameter.Name, parameter.Type)
+        {
+        }
     }
 
     internal record CppParameter(CppType Type, string Name);
@@ -603,10 +607,13 @@ namespace Reinterop
         {
             IEnumerable<CppType> fieldPointerTypes = new[] { InteropReturnType }.Concat(ParameterInteropTypes);
 
-            result.CppDeclaration.Elements.Add(new(
-                Content: $"static {InteropReturnType.GetFullyQualifiedName()} (*{FunctionPointerName})({InteropParameterListDeclaration()});",
-                IsPrivate: true,
-                TypeDeclarationsReferenced: fieldPointerTypes));
+            if (!NoInitFunctions)
+            {
+                result.CppDeclaration.Elements.Add(new(
+                    Content: $"static {InteropReturnType.GetFullyQualifiedName()} (*{FunctionPointerName})({InteropParameterListDeclaration()});",
+                    IsPrivate: true,
+                    TypeDeclarationsReferenced: fieldPointerTypes));
+            }
 
             result.CppDefinition.Elements.Add(new(
                 Content: $"{InteropReturnType.GetFullyQualifiedName()} (*{qualifiedDefinitionName}::{FunctionPointerName})({InteropParameterListDeclaration()}) = nullptr;",
