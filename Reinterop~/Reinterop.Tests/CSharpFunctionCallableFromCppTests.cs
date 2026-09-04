@@ -37,11 +37,11 @@ namespace Reinterop.Tests
             {
                 try
                 {
-                    return (byte)((((TestNamespace.TestClass)(Reinterop.ObjectHandleUtility.GetObjectFromHandle(thiz))).TestMethod(myBool != 0)) ? (1) : (0));
+                    return (byte)(((TestNamespace.TestClass)Reinterop.ObjectHandleUtility.GetObjectFromHandle(thiz)).TestMethod(myBool != 0) ? 1 : 0);
                 }
                 catch (System.Exception reinteropManagedException)
                 {
-                    *reinteropException = (Reinterop.ObjectHandleUtility).CreateHandle(reinteropManagedException);
+                    (*reinteropException) = Reinterop.ObjectHandleUtility.CreateHandle(reinteropManagedException);
                     return new System.Byte();
                 }
             }
@@ -81,12 +81,12 @@ namespace Reinterop.Tests
             {
                 try
                 {
-                    TestNamespace.MyStruct returnValue_interop = ((TestNamespace.TestClass)(Reinterop.ObjectHandleUtility.GetObjectFromHandle(thiz))).TestMethod(*myStruct);
-                    *pReturnValue = returnValue_interop;
+                    TestNamespace.MyStruct returnValue_interop = ((TestNamespace.TestClass)Reinterop.ObjectHandleUtility.GetObjectFromHandle(thiz)).TestMethod(*myStruct);
+                    (*pReturnValue) = returnValue_interop;
                 }
                 catch (System.Exception reinteropManagedException)
                 {
-                    *reinteropException = (Reinterop.ObjectHandleUtility).CreateHandle(reinteropManagedException);
+                    (*reinteropException) = Reinterop.ObjectHandleUtility.CreateHandle(reinteropManagedException);
                     return;
                 }
             }

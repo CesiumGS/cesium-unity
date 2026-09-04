@@ -43,18 +43,23 @@ namespace Reinterop
 
         public static void GenerateSingleMethod(CppGenerationContext context, GenerateTypeState state, TypeToGenerate item, GeneratedResult result, IMethodSymbol method)
         {
-            // CSharpFunctionCallableFromCpp interop = new CSharpFunctionCallableFromCpp(context, item.Type)
-            //     .Name(method.Name)
-            //     .TypeArguments(method.TypeArguments)
-            //     .ReturnType(method.ReturnType)
-            //     .Parameters(method.Parameters)
-            //     .Static(method.IsStatic);
+            CSharpFunctionCallableFromCpp interop = new CSharpFunctionCallableFromCpp(context, item.Type)
+                .Name(method.Name)
+                .TypeArguments(method.TypeArguments)
+                .ReturnType(method.ReturnType)
+                .Parameters(method.Parameters)
+                .Static(method.IsStatic);
+
+            if (method.MethodKind == MethodKind.UserDefinedOperator && method.Parameters.Length == 2)
+                interop.Body(new CSharpFunctionCallableFromCpp.CSharpBodyInvokeBinaryOperator());
+            else
+                interop.Body(new CSharpFunctionCallableFromCpp.CSharpBodyInvokeMethod());
 
             // For op_Equality/op_Inequality, the interop function itself is private, and a public operator==/!= is added below to call it.
             bool addOperator = method.MethodKind == MethodKind.UserDefinedOperator && (method.Name == "op_Equality" || method.Name == "op_Inequality");
-            // interop.Private(addOperator);
+            interop.Private(addOperator);
 
-            // result.InteropFunctions2.Add(interop);
+            result.InteropFunctions2.Add(interop);
 
             CppInteropFunction recipe = CreateCppInteropFunction(context, item, result, method);
             recipe.Private(addOperator);

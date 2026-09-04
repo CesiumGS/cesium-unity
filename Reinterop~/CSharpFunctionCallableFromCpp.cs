@@ -179,7 +179,29 @@ namespace Reinterop
             public IEnumerable<CSharpStatement> GenerateBody(CppGenerationContext context, CSharpFunctionCallableFromCpp function)
             {
                 CSharpExpression target = function.Static() ? new CSharpIdentifier(function.Owner().GetFullyQualifiedName()) : new CSharpIdentifier("thiz");
-                yield return new CSharpReturn(new CSharpCall(new CSharpMemberAccess(target, function.Name()!), function.Parameters().Select(p => new CSharpIdentifier(p.Name)).ToArray()));
+                CSharpCall callExpression = new CSharpCall(new CSharpMemberAccess(target, function.Name()!), function.Parameters().Select(p => new CSharpIdentifier(p.Name)).ToArray());
+                if (function.ReturnType().SpecialType == SpecialType.System_Void)
+                    yield return new CSharpExpressionStatement(callExpression);
+                else
+                    yield return new CSharpReturn(callExpression);
+            }
+        }
+
+        /// <summary>
+        /// An implementation of a C# interop function that invokes the binary operator identified by <see cref="CSharpFunctionCallableFromCpp.Name"/>
+        /// with the left and right operands provided by <see cref="CSharpFunctionCallableFromCpp.Parameters"/>. There must be exactly two parameters.
+        /// The operator is expected to return <see cref="CSharpFunctionCallableFromCpp.ReturnType"/>.
+        /// </summary>
+        public class CSharpBodyInvokeBinaryOperator : IGenerateCSharpBody
+        {
+            public IEnumerable<CSharpStatement> GenerateBody(CppGenerationContext context, CSharpFunctionCallableFromCpp function)
+            {
+                if (function.Parameters().Count != 2)
+                    throw new InvalidOperationException("CSharpBodyInvokeBinaryOperator requires exactly two parameters.");
+
+                CSharpExpression leftExpr = new CSharpIdentifier(function.Parameters()[0].Name);
+                CSharpExpression rightExpr = new CSharpIdentifier(function.Parameters()[1].Name);
+                yield return new CSharpReturn(new CSharpBinary(Interop.MethodNameToOperator(function.Name()!), leftExpr, rightExpr));
             }
         }
 
@@ -312,7 +334,7 @@ namespace Reinterop
             // from the C# return type to the interop return type.
             if (csReturnType.SpecialType != SpecialType.System_Void)
                 bodyStatements = RewriteReturnStatementToConvertToInterop(bodyStatements, csReturnType, csInteropReturnType);
-            if (csParameters.Count > 0)
+            if (csInteropParameterConversions.Count > 0)
                 bodyStatements = RewriteParametersToConvertFromInterop(bodyStatements, csInteropParameterConversions);
 
             // Always add an additional parameter for exception handling.

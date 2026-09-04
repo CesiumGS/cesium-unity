@@ -55,14 +55,29 @@ namespace Reinterop
                 CSharpIdentifier id => id.Name,
                 CSharpRaw raw => raw.Text,
                 CSharpLiteral literal => literal.Value,
-                CSharpCall c => $"{Print(c.Callee)}({string.Join(", ", c.Arguments.Select(Print))})",
-                CSharpBinary b => $"{Print(b.Left)} {b.Op} {Print(b.Right)}",
-                CSharpUnary u => $"{u.Op}{Print(u.Operand)}",
-                CSharpCast c => $"({c.TypeName})({Print(c.Expression)})",
-                CSharpMemberAccess m => $"({Print(m.Target)}).{m.MemberName}",
+                CSharpCall c => $"{PrintParenthesized(c.Callee)}({string.Join(", ", c.Arguments.Select(Print))})",
+                CSharpBinary b => $"{PrintParenthesized(b.Left)} {b.Op} {PrintParenthesized(b.Right)}",
+                CSharpUnary u => $"{u.Op}{PrintParenthesized(u.Operand)}",
+                CSharpCast c => $"({c.TypeName}){PrintParenthesized(c.Expression)}",
+                CSharpMemberAccess m => $"{PrintParenthesized(m.Target)}.{m.MemberName}",
                 CSharpNew n => $"new {n.TypeName}({string.Join(", ", n.Arguments.Select(Print))})",
-                CSharpTernary t => $"({Print(t.Condition)}) ? ({Print(t.Then)}) : ({Print(t.Else)})",
+                CSharpTernary t => $"{PrintParenthesized(t.Condition)} ? {PrintParenthesized(t.Then)} : {PrintParenthesized(t.Else)}",
+                CSharpIs i => $"{PrintParenthesized(i.Expression)} is {i.TypeName} {i.castedVariableName ?? ""}",
                 _ => throw new NotSupportedException($"Unsupported {nameof(CSharpExpression)}: {expression.GetType().Name}")
+            };
+        }
+
+        public static string PrintParenthesized(CSharpExpression expression)
+        {
+            // Only parenthesize complex expressions
+            return expression switch
+            {
+                CSharpIdentifier id => Print(id),
+                CSharpLiteral literal => Print(literal),
+                CSharpRaw raw => Print(raw),
+                CSharpMemberAccess access => Print(access),
+                CSharpCall call => Print(call),
+                _ => $"({Print(expression)})"
             };
         }
     }

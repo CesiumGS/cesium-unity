@@ -140,6 +140,10 @@ namespace Reinterop.Tests
             // throwaway temp directory instead of wherever the test process happens to be running
             // from, and clean it up afterward regardless of outcome.
             string cppOutputPath = Path.Combine(Path.GetTempPath(), "ReinteropTests", Guid.NewGuid().ToString());
+            // Mirrors the `-generatedfilesout` csc.exe switch: dump the generated C# (from
+            // GeneratorDriverRunResult, the API equivalent of that switch) to disk so it can be
+            // inspected - e.g. by breakpointing before the `finally` block below deletes it.
+            string csOutputPath = Path.Combine(Path.GetTempPath(), "ReinteropTests", Guid.NewGuid().ToString());
             try
             {
                 CSharpCompilation compilation = GenerationTestHelper.CreateCompilation(source);
@@ -149,6 +153,11 @@ namespace Reinterop.Tests
                     parseOptions: GenerationTestHelper.ParseOptions,
                     optionsProvider: new TestAnalyzerConfigOptionsProvider(cppOutputPath));
                 driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out Compilation updatedCompilation, out ImmutableArray<Diagnostic> generatorDiagnostics);
+
+                GeneratorDriverRunResult runResult = driver.GetRunResult();
+                Directory.CreateDirectory(csOutputPath);
+                foreach (GeneratedSourceResult generatedSource in runResult.Results.SelectMany(r => r.GeneratedSources))
+                    File.WriteAllText(Path.Combine(csOutputPath, generatedSource.HintName), generatedSource.SourceText.ToString());
 
                 Diagnostic[] errors = generatorDiagnostics
                     .Concat(updatedCompilation.GetDiagnostics())
@@ -161,6 +170,8 @@ namespace Reinterop.Tests
             {
                 if (Directory.Exists(cppOutputPath))
                     Directory.Delete(cppOutputPath, recursive: true);
+                if (Directory.Exists(csOutputPath))
+                    Directory.Delete(csOutputPath, recursive: true);
             }
         }
 

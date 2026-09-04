@@ -22,7 +22,7 @@ namespace Reinterop.Tests
                 "System.IntPtr reinteropException = System.IntPtr.Zero;",
                 "CallFoo_1234(a, b, &reinteropException);",
                 "if (reinteropException != System.IntPtr.Zero)",
-                "    throw (System.Exception)(Reinterop.ObjectHandleUtility.GetObjectAndFreeHandle(reinteropException));"
+                "    throw (System.Exception)Reinterop.ObjectHandleUtility.GetObjectAndFreeHandle(reinteropException);"
             });
 
             Assert.That(CSharpPrinter.Print(body), Is.EqualTo(expected));
@@ -42,7 +42,7 @@ namespace Reinterop.Tests
                 "System.IntPtr reinteropException = System.IntPtr.Zero;",
                 "var result = CallFoo_1234(a, b, &reinteropException);",
                 "if (reinteropException != System.IntPtr.Zero)",
-                "    throw (System.Exception)(Reinterop.ObjectHandleUtility.GetObjectAndFreeHandle(reinteropException));",
+                "    throw (System.Exception)Reinterop.ObjectHandleUtility.GetObjectAndFreeHandle(reinteropException);",
                 "return result != 0;"
             });
 
