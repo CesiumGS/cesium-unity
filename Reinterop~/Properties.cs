@@ -30,7 +30,7 @@ namespace Reinterop
                 .Parameters(method.Parameters)
                 .ReturnType(method.ReturnType)
                 .Static(property.IsStatic)
-                .Body(new CSharpFunctionCallableFromCpp.CSharpBodyInvokePropertyAccessor(property, method.MethodKind == MethodKind.PropertyGet));
+                .Body(new CSharpBodyAccessProperty(property, method.MethodKind == MethodKind.PropertyGet));
 
             result.InteropFunctions2.Add(recipe);
         }

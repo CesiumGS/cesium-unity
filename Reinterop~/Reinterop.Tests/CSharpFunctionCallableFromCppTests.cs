@@ -18,7 +18,7 @@ namespace Reinterop.Tests
                 .Name("TestMethod")
                 .ReturnType(CSharpType.FromSymbol(context, context.Compilation.GetSpecialType(SpecialType.System_Boolean)))
                 .Parameters([new CSharpParameter(CSharpType.FromSymbol(context, context.Compilation.GetSpecialType(SpecialType.System_Boolean)), "myBool")])
-                .Body(new CSharpFunctionCallableFromCpp.CSharpBodyInvokeMethod());
+                .Body(new CSharpBodyInvokeMethod());
             GeneratedResult result = new GeneratedResult(CppType.FromCSharp(context, owner));
             interop.GenerateCode(context, result);
 
@@ -62,7 +62,7 @@ namespace Reinterop.Tests
                 .Name("TestMethod")
                 .ReturnType(blittableStruct)
                 .Parameters([new CSharpParameter(blittableStruct, "myStruct")])
-                .Body(new CSharpFunctionCallableFromCpp.CSharpBodyInvokeMethod());
+                .Body(new CSharpBodyInvokeMethod());
             GeneratedResult result = new GeneratedResult(CppType.FromCSharp(context, owner));
             interop.GenerateCode(context, result);
 
@@ -95,6 +95,28 @@ namespace Reinterop.Tests
             Assert.That(initFunction.CppTypeSignature, Is.EqualTo("void (*)(void*, const ::DotNet::TestNamespace::MyStruct*, ::DotNet::TestNamespace::MyStruct*, void**)"));
             Assert.That(initFunction.CppTypeDeclarationsReferenced, Has.Some.Matches<CppType>(t => t.GetFullyQualifiedName() == "::DotNet::TestNamespace::MyStruct*"));
             Assert.That(initFunction.CppTypeDefinitionsReferenced, Has.Some.Matches<CppType>(t => t.GetFullyQualifiedName() == "::DotNet::TestNamespace::TestClass"));
+        }
+
+        [Test]
+        public void GenericMethodInvocationIncludesTypeArguments()
+        {
+            CppGenerationContext context = CreateContext();
+            CSharpType owner = new CSharpType(context, InteropTypeKind.ClassWrapper, ["TestNamespace"], "TestClass", SpecialType.None);
+            CSharpType intType = CSharpType.FromSymbol(context, context.Compilation.GetSpecialType(SpecialType.System_Int32));
+            CSharpFunctionCallableFromCpp interop = new CSharpFunctionCallableFromCpp(context, owner)
+                .Name("TestMethod")
+                .TypeArguments([intType])
+                .ReturnType(CSharpType.FromSymbol(context, context.Compilation.GetSpecialType(SpecialType.System_Void)))
+                .Body(new CSharpBodyInvokeMethod());
+            GeneratedResult result = new GeneratedResult(CppType.FromCSharp(context, owner));
+            interop.GenerateCode(context, result);
+
+            GeneratedInitFunction? initFunction = result.Init.Functions.FirstOrDefault();
+            Assert.That(initFunction, Is.Not.Null);
+            if (initFunction == null)
+                return;
+
+            Assert.That(initFunction.CSharpContent, Does.Contain(".TestMethod<System.Int32>()"));
         }
     }
 }

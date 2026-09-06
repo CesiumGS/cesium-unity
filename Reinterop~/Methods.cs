@@ -40,9 +40,9 @@ namespace Reinterop
                 .Static(method.IsStatic);
 
             if (method.MethodKind == MethodKind.UserDefinedOperator && method.Parameters.Length == 2)
-                interop.Body(new CSharpFunctionCallableFromCpp.CSharpBodyInvokeBinaryOperator());
+                interop.Body(new CSharpBodyInvokeBinaryOperator());
             else
-                interop.Body(new CSharpFunctionCallableFromCpp.CSharpBodyInvokeMethod());
+                interop.Body(new CSharpBodyInvokeMethod());
 
             // For op_Equality/op_Inequality, the interop function itself is private, and a public operator==/!= is added below to call it.
             bool addOperator = method.MethodKind == MethodKind.UserDefinedOperator && (method.Name == "op_Equality" || method.Name == "op_Inequality");

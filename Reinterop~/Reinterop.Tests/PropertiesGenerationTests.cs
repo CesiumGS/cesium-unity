@@ -39,7 +39,7 @@ namespace Reinterop.Tests
             Assert.That(recipes, Has.Count.EqualTo(1));
             Assert.That(recipes[0].Parameters(), Is.Empty);
             Assert.That(recipes[0].ReturnType().Name, Is.EqualTo("Int32"));
-            Assert.That(recipes[0].Body(), Is.InstanceOf<CSharpFunctionCallableFromCpp.CSharpBodyInvokePropertyAccessor>());
+            Assert.That(recipes[0].Body(), Is.InstanceOf<CSharpBodyAccessProperty>());
         }
 
         [Test]

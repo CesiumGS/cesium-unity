@@ -42,7 +42,7 @@ namespace Reinterop.Tests
             Assert.That(getter.NeedsStructReturnRewrite, Is.False);
             Assert.That(setter.Parameters()[0].Name, Is.EqualTo("value"));
             Assert.That(setter.Parameters()[0].Type.Name, Is.EqualTo("Int32"));
-            Assert.That(getter.Body(), Is.InstanceOf<CSharpFunctionCallableFromCpp.CSharpBodyInvokeFieldAccessor>());
+            Assert.That(getter.Body(), Is.InstanceOf<CSharpBodyAccessField>());
 
             // Fields.cs never marks a field accessor recipe as Private() - unlike CSharpTypeUtility's
             // notion of field privacy (only used for the raw blittable-struct field declaration), an

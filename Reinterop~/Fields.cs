@@ -74,14 +74,14 @@ namespace Reinterop
                 .Name(field.Name)
                 .ReturnType(fieldType)
                 .Static(field.IsStatic)
-                .Body(new CSharpFunctionCallableFromCpp.CSharpBodyInvokeFieldAccessor(field, isGetter: true));
+                .Body(new CSharpBodyAccessField(field, isGetter: true));
             result.InteropFunctions2.Add(getRecipe);
 
             CSharpFunctionCallableFromCpp setRecipe = new CSharpFunctionCallableFromCpp(context, item.Type)
                 .Name(field.Name)
                 .Parameters([new CSharpParameter(fieldType, "value")])
                 .Static(field.IsStatic)
-                .Body(new CSharpFunctionCallableFromCpp.CSharpBodyInvokeFieldAccessor(field, isGetter: false));
+                .Body(new CSharpBodyAccessField(field, isGetter: false));
             result.InteropFunctions2.Add(setRecipe);
         }
     }

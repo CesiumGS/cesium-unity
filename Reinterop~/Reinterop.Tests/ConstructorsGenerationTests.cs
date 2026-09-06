@@ -39,7 +39,7 @@ namespace Reinterop.Tests
 
             Assert.That(factory.Static(), Is.True);
             Assert.That(factory.Private(), Is.True);
-            Assert.That(factory.Body(), Is.InstanceOf<CSharpFunctionCallableFromCpp.CSharpBodyInvokeConstructor>());
+            Assert.That(factory.Body(), Is.InstanceOf<CSharpBodyConstructInstance>());
             Assert.That(constructor.Name, Is.EqualTo("Foo"));
             Assert.That(constructor.Static(), Is.True);
             Assert.That(constructor.MemberInitializers(), Has.Count.EqualTo(1));

@@ -41,7 +41,7 @@ namespace Reinterop
                 .Parameters(constructor.Parameters)
                 .ReturnType(item.Type)
                 .Static(true)
-                .Body(new CSharpFunctionCallableFromCpp.CSharpBodyInvokeConstructor())
+                .Body(new CSharpBodyConstructInstance())
                 .Private(result.Type.Kind != InteropTypeKind.BlittableStruct);
 
             result.InteropFunctions2.Add(recipe);
