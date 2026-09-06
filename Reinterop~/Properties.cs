@@ -24,6 +24,7 @@ namespace Reinterop
 
         private static void GenerateSingleMethod(CppGenerationContext context, TypeToGenerate item, GeneratedResult result, IPropertySymbol property, IMethodSymbol method)
         {
+            // Convert the C# indexer name, `this[]`, to the C++ one, `operator[]`.
             string propertyName = property.IsIndexer ? "operator[]" : property.Name;
             CSharpFunctionCallableFromCpp recipe = new CSharpFunctionCallableFromCpp(context, item.Type)
                 .Name(propertyName)

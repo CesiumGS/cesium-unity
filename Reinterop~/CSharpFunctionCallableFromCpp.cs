@@ -59,7 +59,19 @@ namespace Reinterop
         public CSharpType Owner() { return _owner; }
 
         private string? _name;
-        public CSharpFunctionCallableFromCpp Name(string name) { _name = name; return this; }
+        /// <summary>
+        /// Sets the name of the function. This is the name of the C++ function that calls
+        /// through to the C# one. It may also be the name of the C# function that is
+        /// invoked, depending on which <see cref="IGenerateCSharpBody" /> implementation is
+        /// used for the <see cref="Body"/>.
+        /// </summary>
+        public CSharpFunctionCallableFromCpp Name(string? name) { _name = name; return this; }
+        /// <summary>
+        /// Gets the name of the function. This is the name of the C++ function that calls
+        /// through to the C# one. It may also be the name of the C# function that is
+        /// invoked, depending on which <see cref="IGenerateCSharpBody" /> implementation is
+        /// used for the <see cref="Body"/>.
+        /// </summary>
         public string? Name() { return _name; }
 
         private CSharpType _returnType;
@@ -178,7 +190,7 @@ namespace Reinterop
 
         private IGenerateCSharpBody? _body = null;
 
-        public CSharpFunctionCallableFromCpp Body(IGenerateCSharpBody body)
+        public CSharpFunctionCallableFromCpp Body(IGenerateCSharpBody? body)
         {
             _body = body;
             return this;
@@ -610,6 +622,19 @@ namespace Reinterop
                 };
             }).ToList();
             return result;
+        }
+
+        public CSharpFunctionCallableFromCpp Clone()
+        {
+            return new CSharpFunctionCallableFromCpp(Context(), Owner())
+                .Name(Name())
+                .ReturnType(ReturnType())
+                .Parameters(Parameters())
+                .TypeArguments(TypeArguments())
+                .Private(Private())
+                .Static(Static())
+                .Specializes(Specializes())
+                .Body(Body());
         }
     }
 }

@@ -70,17 +70,17 @@ namespace Reinterop
         {
             CSharpType fieldType = CSharpType.FromSymbol(context, field.Type);
 
-            CSharpFunctionCallableFromCpp getRecipe = new CSharpFunctionCallableFromCpp(context, item.Type)
+            CSharpFunctionCallableFromCpp commonRecipe = new CSharpFunctionCallableFromCpp(context, item.Type)
                 .Name(field.Name)
+                .Static(field.IsStatic);
+
+            CSharpFunctionCallableFromCpp getRecipe = commonRecipe.Clone()
                 .ReturnType(fieldType)
-                .Static(field.IsStatic)
                 .Body(new CSharpBodyAccessField(field, isGetter: true));
             result.InteropFunctions2.Add(getRecipe);
 
-            CSharpFunctionCallableFromCpp setRecipe = new CSharpFunctionCallableFromCpp(context, item.Type)
-                .Name(field.Name)
+            CSharpFunctionCallableFromCpp setRecipe = commonRecipe.Clone()
                 .Parameters([new CSharpParameter(fieldType, "value")])
-                .Static(field.IsStatic)
                 .Body(new CSharpBodyAccessField(field, isGetter: false));
             result.InteropFunctions2.Add(setRecipe);
         }
