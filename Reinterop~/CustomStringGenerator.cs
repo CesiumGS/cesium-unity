@@ -11,17 +11,17 @@ namespace Reinterop
             if (encoding == null)
                 yield break;
 
-            IPropertySymbol? utf8 = CSharpTypeUtility.FindMembers(encoding, "UTF8").Where(
+            IPropertySymbol? utf8 = CSharpTypeUtility.FindMembers(encoding, "UTF8").FirstOrDefault(
                 member => member is IPropertySymbol
-            ).FirstOrDefault() as IPropertySymbol;
-            IMethodSymbol? getString = CSharpTypeUtility.FindMembers(encoding, "GetString").Where(
+            ) as IPropertySymbol;
+            IMethodSymbol? getString = CSharpTypeUtility.FindMembers(encoding, "GetString").FirstOrDefault(
                 member => member is IMethodSymbol method &&
                 method.Parameters.Length == 2 &&
                 method.Parameters[0].Type.TypeKind == TypeKind.Pointer &&
                 method.Parameters[0].Type is IPointerTypeSymbol pointer &&
                 pointer.PointedAtType.SpecialType == SpecialType.System_Byte &&
                 method.Parameters[1].Type.SpecialType == SpecialType.System_Int32
-            ).FirstOrDefault() as IMethodSymbol;
+            ) as IMethodSymbol;
             if (utf8 == null || getString == null)
                 yield break;
 
@@ -29,16 +29,16 @@ namespace Reinterop
             if (marshal == null)
                 yield break;
 
-            IMethodSymbol? stringToCoTaskMemUTF8 = CSharpTypeUtility.FindMembers(marshal, "StringToCoTaskMemUTF8").Where(
+            IMethodSymbol? stringToCoTaskMemUTF8 = CSharpTypeUtility.FindMembers(marshal, "StringToCoTaskMemUTF8").FirstOrDefault(
                 member => member is IMethodSymbol method &&
                 method.Parameters.Length == 1 &&
                 method.Parameters[0].Type.SpecialType == SpecialType.System_String
-            ).FirstOrDefault() as IMethodSymbol;
-            IMethodSymbol? freeCoTaskMem = CSharpTypeUtility.FindMembers(marshal, "FreeCoTaskMem").Where(
+            ) as IMethodSymbol;
+            IMethodSymbol? freeCoTaskMem = CSharpTypeUtility.FindMembers(marshal, "FreeCoTaskMem").FirstOrDefault(
                 member => member is IMethodSymbol method &&
                 method.Parameters.Length == 1 &&
                 method.Parameters[0].Type.SpecialType == SpecialType.System_IntPtr
-            ).FirstOrDefault() as IMethodSymbol;
+            ) as IMethodSymbol;
             if (stringToCoTaskMemUTF8 == null || freeCoTaskMem == null)
                 yield break;
 
@@ -82,10 +82,10 @@ namespace Reinterop
                 return generated;
 
             CppType marshalWrapper = CppType.FromCSharp(context, CSharpType.FromSymbol(context, marshal));
-            string GetHeaderInclude(CppType cppType) => cppType.HeaderOverride ?? $"<{string.Join("/", cppType.Namespaces.Append(cppType.Name))}.h>";
+            static string GetHeaderInclude(CppType cppType) => cppType.HeaderOverride ?? $"<{string.Join("/", cppType.Namespaces.Append(cppType.Name))}.h>";
 
-            CppInteropFunction stringConstructor = new CppInteropFunction(context, generated.Type, generated.Type.Name)
-                .Parameters([new CppInteropParameter("s", stdString.AsConstReference())])
+            CppFunction stringConstructorWrapper = new CppFunction(context, generated.Type, generated.Type.Name)
+                .Parameters([new CppParameter(stdString.AsConstReference(), "s")])
                 .MemberInitializers([new CppMemberInitializer("_handle", new CppRaw(""))])
                 .DefinitionBody([
                     new CppExpressionStatement(new CppRaw(
@@ -94,15 +94,16 @@ namespace Reinterop
                           const_cast<std::uint8_t*>(reinterpret_cast<const std::uint8_t*>(s.data())),
                           std::int32_t(s.size()));
                         this->_handle = std::move(result._handle);
-                        """)
+                        """
+                    )
                     {
                         RequiredIncludes = [ "<string>", GetHeaderInclude(encodingWrapper) ]
                     })
                 ]);
-            generated.InteropFunctions.Add(stringConstructor);
+            generated.InteropFunctions3.Add(stringConstructorWrapper);
 
             // Add a ToStlString method
-            CppInteropFunction toStlString = new CppInteropFunction(context, generated.Type, "ToStlString")
+            CppFunction toStlString = new CppFunction(context, generated.Type, "ToStlString")
                 .ReturnType(stdString)
                 .DefinitionBody([
                     new CppExpressionStatement(new CppRaw(
@@ -124,7 +125,7 @@ namespace Reinterop
                         RequiredIncludes = new[] { "<string>", GetHeaderInclude(marshalWrapper) }
                     })
                 ]);
-            generated.InteropFunctions.Add(toStlString);
+            generated.InteropFunctions3.Add(toStlString);
 
             return generated;
         }

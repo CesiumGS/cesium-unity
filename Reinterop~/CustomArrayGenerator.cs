@@ -52,6 +52,7 @@ namespace Reinterop
  
         /// <summary>
         /// Add a method that can be used to assign a new value to an element of the array.
+        /// The element getter is generated in <see cref="Properties"/>.
         /// </summary>
         private void GenerateItemMethod(CppGenerationContext context, TypeToGenerate item, GeneratedResult result, IArrayTypeSymbol arrayType)
         {
