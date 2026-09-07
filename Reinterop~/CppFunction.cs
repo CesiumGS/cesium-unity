@@ -2,7 +2,16 @@ using Microsoft.CodeAnalysis;
 
 namespace Reinterop
 {
+    /// <summary>
+    /// A parameter to a function.
+    /// </summary>
     internal record CppParameter(CppType Type, string Name);
+
+    /// <summary>
+    /// A constructor member initializer, <c>MemberName(Value)</c>. <see cref="Value"/> is null to
+    /// value-initialize the member with an empty argument list, <c>MemberName()</c>.
+    /// </summary>
+    internal record CppMemberInitializer(string MemberName, CppExpression? Value = null);
 
     /// <summary>
     /// Describes a plain C++ function - a method, property accessor, constructor, or field
@@ -459,12 +468,12 @@ namespace Reinterop
 
             List<CppMemberInitializer>? memberInitializers = IsConstructor ? MemberInitializers() : null;
             string memberInitialization = memberInitializers != null && memberInitializers.Count > 0
-                ? " : " + string.Join(", ", memberInitializers.Select(initializer => $"{initializer.MemberName}({CppPrinter.Print(initializer.Value)})"))
+                ? " : " + string.Join(", ", memberInitializers.Select(initializer => $"{initializer.MemberName}({(initializer.Value == null ? "" : CppPrinter.Print(initializer.Value))})"))
                 : "";
 
             HashSet<string> requiredIncludes = CppPrinter.GetRequiredIncludes(body);
             if (memberInitializers != null)
-                requiredIncludes.UnionWith(CppPrinter.GetRequiredIncludes(memberInitializers.Select(i => i.Value)));
+                requiredIncludes.UnionWith(CppPrinter.GetRequiredIncludes(memberInitializers.Where(i => i.Value != null).Select(i => i.Value!)));
 
             definition.Elements.Add(new(
                 Content:

@@ -68,7 +68,7 @@ namespace Reinterop
                     .Parameters([new CppParameter(CppType.NullPointer, "")])
                     .NoExcept(true)
                     .DefinitionBody([
-                        new CppReturn(new CppBinary("==", new CppCall(new CppRaw("_handle.GetRaw"), []), new CppIdentifier("nullptr")))
+                        new CppReturn(new CppBinary("==", new CppCall(new CppMemberAccess(new CppIdentifier("_handle"), "GetRaw"), []), CppLiteral.Nullptr))
                     ]);
                 result.ExtraCppFunctions.Add(equalityOperatorRecipe);
 
@@ -77,7 +77,7 @@ namespace Reinterop
                     .Parameters([new CppParameter(CppType.NullPointer, "")])
                     .NoExcept(true)
                     .DefinitionBody([
-                        new CppReturn(new CppBinary("!=", new CppCall(new CppRaw("_handle.GetRaw"), []), new CppIdentifier("nullptr")))
+                        new CppReturn(new CppBinary("!=", new CppCall(new CppMemberAccess(new CppIdentifier("_handle"), "GetRaw"), []), CppLiteral.Nullptr))
                     ]);
                 result.ExtraCppFunctions.Add(inequalityOperatorRecipe);
             }

@@ -51,7 +51,7 @@
                         new CppIdentifier(targetType),
                         [new CppCall(
                             new CppIdentifier(objectHandleType),
-                            [new CppRaw("this->_handle")]
+                            [new CppPointerMemberAccess(CppIdentifier.This, "_handle")]
                         )]
                     ))
                 ]);

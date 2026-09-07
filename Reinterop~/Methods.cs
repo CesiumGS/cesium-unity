@@ -85,7 +85,7 @@ namespace Reinterop
                         new CppReturn(
                             new CppCall(
                                 new CppIdentifier(method.Name),
-                                [new CppRaw("*this"), new CppIdentifier(rhs.Name)]
+                                [new CppUnary("*", CppIdentifier.This), new CppIdentifier(rhs.Name)]
                             )
                         )
                     ]);
@@ -108,8 +108,8 @@ namespace Reinterop
                                 new CppCall(
                                     new CppIdentifier(method.Name),
                                     [
-                                        new CppRaw("*this"),
-                                        new CppCast(baseType, new CppIdentifier("rhs"))
+                                        new CppUnary("*", CppIdentifier.This),
+                                        CppCast.Static(baseType, new CppIdentifier("rhs"))
                                     ]
                                 )
                             )
@@ -123,8 +123,8 @@ namespace Reinterop
                                 new CppCall(
                                     new CppIdentifier(method.Name),
                                     [
-                                        new CppRaw("*this"),
-                                        new CppCast(baseType, new CppIdentifier("nullptr"))
+                                        new CppUnary("*", CppIdentifier.This),
+                                        CppCast.Static(baseType, CppLiteral.Nullptr)
                                     ]
                                 )
                             )

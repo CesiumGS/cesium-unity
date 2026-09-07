@@ -63,14 +63,6 @@ namespace Reinterop
             if (!this.GetDependencies(context).Any())
                 return generated;
 
-            CppType stdString = new CppType(
-                InteropTypeKind.Unknown,
-                [ "std" ],
-                "string",
-                null,
-                0,
-                "<string>");
-
             INamedTypeSymbol? encoding = context.Compilation.GetTypeByMetadataName("System.Text.Encoding");
             if (encoding == null)
                 return generated;
@@ -84,46 +76,77 @@ namespace Reinterop
             CppType marshalWrapper = CppType.FromCSharp(context, CSharpType.FromSymbol(context, marshal));
             static string GetHeaderInclude(CppType cppType) => cppType.HeaderOverride ?? $"<{string.Join("/", cppType.Namespaces.Append(cppType.Name))}.h>";
 
+            // String result = Encoding::UTF8().GetString(
+            //     const_cast<std::uint8_t*>(reinterpret_cast<const std::uint8_t*>(s.data())),
+            //     std::int32_t(s.size()));
+            CppExpression getString = new CppCall(
+                new CppMemberAccess(
+                    new CppCall(new CppIdentifier(encodingWrapper.GetFullyQualifiedName() + "::UTF8"), []),
+                    "GetString"),
+                [
+                    CppCast.Const(
+                        CppType.UInt8.AsPointer(),
+                        CppCast.Reinterpret(
+                            CppType.UInt8.AsConstPointer(),
+                            new CppCall(new CppMemberAccess(new CppIdentifier("s"), "data"), []))),
+                    new CppCall(
+                        new CppIdentifier("std::int32_t"),
+                        [new CppCall(new CppMemberAccess(new CppIdentifier("s"), "size"), [])])
+                ])
+            {
+                RequiredIncludes = ["<string>", "<cstdint>", GetHeaderInclude(encodingWrapper)]
+            };
+
             CppFunction stringConstructorWrapper = new CppFunction(context, generated.Type, generated.Type.Name)
-                .Parameters([new CppParameter(stdString.AsConstReference(), "s")])
-                .MemberInitializers([new CppMemberInitializer("_handle", new CppRaw(""))])
+                .Parameters([new CppParameter(CppType.StlString.AsConstReference(), "s")])
+                .MemberInitializers([new CppMemberInitializer("_handle")])
                 .DefinitionBody([
-                    new CppExpressionStatement(new CppRaw(
-                        $$"""
-                        String result = {{encodingWrapper.GetFullyQualifiedName()}}::UTF8().GetString(
-                          const_cast<std::uint8_t*>(reinterpret_cast<const std::uint8_t*>(s.data())),
-                          std::int32_t(s.size()));
-                        this->_handle = std::move(result._handle);
-                        """
-                    )
-                    {
-                        RequiredIncludes = [ "<string>", GetHeaderInclude(encodingWrapper) ]
-                    })
+                    new CppVariableDeclaration(generated.Type, "result", getString),
+                    new CppAssignment(
+                        new CppPointerMemberAccess(CppIdentifier.This, "_handle"),
+                        new CppMove(new CppMemberAccess(new CppIdentifier("result"), "_handle")))
                 ]);
             generated.ExtraCppFunctions.Add(stringConstructorWrapper);
 
             // Add a ToStlString method
-            CppFunction toStlString = new CppFunction(context, generated.Type, "ToStlString")
-                .ReturnType(stdString)
-                .DefinitionBody([
-                    new CppExpressionStatement(new CppRaw(
-                        $$"""
-                        if (*this == nullptr)
-                          return std::string();
+            CppExpression emptyStdString = new CppCall(new CppIdentifier("std::string"), [])
+            {
+                RequiredIncludes = ["<string>"]
+            };
+            CppExpression freeCoTaskMemCall = new CppCall(
+                new CppIdentifier($"{marshalWrapper.GetFullyQualifiedName()}::FreeCoTaskMem"),
+                [new CppIdentifier("p")])
+            {
+                RequiredIncludes = [GetHeaderInclude(marshalWrapper)]
+            };
 
-                        void* p = {{marshalWrapper.GetFullyQualifiedName()}}::StringToCoTaskMemUTF8(*this);
-                        try {
-                          std::string result = static_cast<char*>(p);
-                          {{marshalWrapper.GetFullyQualifiedName()}}::FreeCoTaskMem(p);
-                          return result;
-                        } catch (...) {
-                          {{marshalWrapper.GetFullyQualifiedName()}}::FreeCoTaskMem(p);
-                          throw;
-                        }
-                        """)
-                    {
-                        RequiredIncludes = new[] { "<string>", GetHeaderInclude(marshalWrapper) }
-                    })
+            CppFunction toStlString = new CppFunction(context, generated.Type, "ToStlString")
+                .ReturnType(CppType.StlString)
+                .DefinitionBody([
+                    new CppIf(
+                        new CppBinary("==", new CppUnary("*", CppIdentifier.This), CppLiteral.Nullptr),
+                        [new CppReturn(emptyStdString)]),
+                    new CppVariableDeclaration(
+                        CppType.VoidPointer,
+                        "p",
+                        new CppCall(
+                            new CppIdentifier($"{marshalWrapper.GetFullyQualifiedName()}::StringToCoTaskMemUTF8"),
+                            [new CppUnary("*", CppIdentifier.This)])
+                        {
+                            RequiredIncludes = [GetHeaderInclude(marshalWrapper)]
+                        }),
+                    new CppTry(
+                        [
+                            new CppVariableDeclaration(CppType.StlString, "result", CppCast.Static(CppType.Char.AsPointer(), new CppIdentifier("p"))),
+                            new CppExpressionStatement(freeCoTaskMemCall),
+                            new CppReturn(new CppIdentifier("result"))
+                        ],
+                        [
+                            new CppCatch(null, null, [
+                                new CppExpressionStatement(freeCoTaskMemCall),
+                                new CppThrow()
+                            ])
+                        ])
                 ]);
             generated.ExtraCppFunctions.Add(toStlString);
 

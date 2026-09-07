@@ -13,12 +13,13 @@ namespace Reinterop
         {
             return statement switch
             {
-                CppVariableDeclaration { Initializer: null } d => $"{d.TypeName} {d.Name};",
-                CppVariableDeclaration d => $"{d.TypeName} {d.Name} = {Print(d.Initializer!)};",
+                CppVariableDeclaration { Initializer: null } d => $"{d.Type.GetFullyQualifiedName()} {d.Name};",
+                CppVariableDeclaration d => $"{d.Type.GetFullyQualifiedName()} {d.Name} = {Print(d.Initializer!)};",
                 CppExpressionStatement e => $"{Print(e.Expression)};",
                 CppAssignment a => $"{Print(a.Target)} = {Print(a.Value)};",
                 CppIf i => PrintIf(i),
-                CppThrow t => $"throw {Print(t.Exception)};",
+                CppThrow { Exception: null } => "throw;",
+                CppThrow t => $"throw {Print(t.Exception!)};",
                 CppReturn { Value: null } => "return;",
                 CppReturn r => $"return {Print(r.Value!)};",
                 CppRawStatement r => r.Text,
@@ -57,15 +58,23 @@ namespace Reinterop
             return expression switch
             {
                 CppIdentifier id => id.Name,
-                CppRaw raw => raw.Text,
                 CppLiteral literal => literal.Value,
                 CppCall c => $"{Print(c.Callee)}({string.Join(", ", c.Arguments.Select(Print))})",
+                CppNew n => $"new {n.Type.GetFullyQualifiedName()}({string.Join(", ", n.Arguments.Select(Print))})",
                 CppTernary t => $"{Print(t.Condition)} ? {Print(t.Then)} : {Print(t.Else)}",
                 CppBinary b => $"{Print(b.Left)} {b.Op} {Print(b.Right)}",
                 CppUnary u => $"{u.Op}{Print(u.Operand)}",
-                CppCast c => $"({c.TargetType.GetFullyQualifiedName()})({Print(c.Expression)})",
+                CppCast c => c.Kind switch
+                {
+                    CppCastKind.CStyle => $"({c.TargetType.GetFullyQualifiedName()})({Print(c.Expression)})",
+                    CppCastKind.Static => $"static_cast<{c.TargetType.GetFullyQualifiedName()}>({Print(c.Expression)})",
+                    CppCastKind.Const => $"const_cast<{c.TargetType.GetFullyQualifiedName()}>({Print(c.Expression)})",
+                    CppCastKind.Reinterpret => $"reinterpret_cast<{c.TargetType.GetFullyQualifiedName()}>({Print(c.Expression)})",
+                    _ => throw new NotSupportedException($"Unsupported {nameof(CppCastKind)}: {c.Kind}")
+                },
                 CppMove m => $"std::move({Print(m.Expression)})",
                 CppMemberAccess m => $"{Print(m.Target)}.{m.MemberName}",
+                CppPointerMemberAccess m => $"{Print(m.Target)}->{m.MemberName}",
                 _ => throw new NotSupportedException($"Unsupported {nameof(CppExpression)}: {expression.GetType().Name}")
             };
         }
@@ -98,6 +107,7 @@ namespace Reinterop
             switch(statement)
             {
                 case CppVariableDeclaration d:
+                    d.Type.AddSourceIncludesToSet(result);
                     if (d.Initializer != null)
                         GetRequiredIncludes(d.Initializer, result);
                     break;
@@ -114,7 +124,8 @@ namespace Reinterop
                         GetRequiredIncludes(s, result);
                     break;
                 case CppThrow t:
-                    GetRequiredIncludes(t.Exception, result);
+                    if (t.Exception != null)
+                        GetRequiredIncludes(t.Exception, result);
                     break;
                 case CppReturn r:
                     if (r.Value != null)
@@ -146,13 +157,16 @@ namespace Reinterop
             {
                 case CppIdentifier id:
                     break;
-                case CppRaw raw:
-                    break;
                 case CppLiteral l:
                     break;
                 case CppCall c:
                     GetRequiredIncludes(c.Callee, result);
                     foreach (CppExpression arg in c.Arguments)
+                        GetRequiredIncludes(arg, result);
+                    break;
+                case CppNew n:
+                    n.Type.AddSourceIncludesToSet(result);
+                    foreach (CppExpression arg in n.Arguments)
                         GetRequiredIncludes(arg, result);
                     break;
                 case CppTernary t:
@@ -168,6 +182,7 @@ namespace Reinterop
                     GetRequiredIncludes(u.Operand, result);
                     break;
                 case CppCast c:
+                    c.TargetType.AddSourceIncludesToSet(result);
                     GetRequiredIncludes(c.Expression, result);
                     break;
                 case CppMove m:
@@ -175,6 +190,9 @@ namespace Reinterop
                     GetRequiredIncludes(m.Expression, result);
                     break;
                 case CppMemberAccess m:
+                    GetRequiredIncludes(m.Target, result);
+                    break;
+                case CppPointerMemberAccess m:
                     GetRequiredIncludes(m.Target, result);
                     break;
                 default:

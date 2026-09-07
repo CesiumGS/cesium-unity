@@ -31,6 +31,7 @@ namespace Reinterop
         private const string IncludeCStdInt = "<cstdint>";
         private const string IncludeCStdDef = "<cstddef>";
         private const string IncludeEnumFlags = "<flags/flags.hpp>";
+        private const string IncludeString = "<string>";
 
         public static readonly CppType Int8 = CreatePrimitiveType(StandardNamespace, "int8_t", 0, IncludeCStdInt);
         public static readonly CppType Int16 = CreatePrimitiveType(StandardNamespace, "int16_t", 0, IncludeCStdInt);
@@ -43,10 +44,12 @@ namespace Reinterop
         public static readonly CppType Boolean = CreatePrimitiveType(NoNamespace, "bool");
         public static readonly CppType Single = CreatePrimitiveType(NoNamespace, "float");
         public static readonly CppType Double = CreatePrimitiveType(NoNamespace, "double");
+        public static readonly CppType Char = CreatePrimitiveType(NoNamespace, "char");
         public static readonly CppType VoidPointer = CreatePrimitiveType(NoNamespace, "void", CppTypeFlags.Pointer);
         public static readonly CppType VoidPointerPointer = CreatePrimitiveType(NoNamespace, "void", CppTypeFlags.DoublePointer);
         public static readonly CppType Void = CreatePrimitiveType(NoNamespace, "void");
         public static readonly CppType NullPointer = CreatePrimitiveType(StandardNamespace, "nullptr_t", 0, IncludeCStdDef);
+        public static readonly CppType StlString = new CppType(InteropTypeKind.Unknown, StandardNamespace, "string", null, 0, IncludeString);
 
         public static CppType FromCSharp(CppGenerationContext context, CSharpType type)
         {
@@ -561,7 +564,7 @@ namespace Reinterop
                         return new CppCall(releaseExpression, []);
                     }   
                 case InteropTypeKind.Enum:
-                    return new CppCast(CppType.UInt32, new CppIdentifier(variableName));
+                    return CppCast.Static(CppType.UInt32, new CppIdentifier(variableName));
                 case InteropTypeKind.EnumFlags:
                     return new CppCall(new CppMemberAccess(new CppIdentifier(variableName), "underlying_value"), []);
                 case InteropTypeKind.Primitive:
@@ -645,8 +648,8 @@ namespace Reinterop
                     if (this.Flags.HasFlag(CppTypeFlags.Reference))
                         // parameter
                         return new CppTernary(
-                            new CppBinary("==", inputExpression, new CppRaw("nullptr")),
-                            new CppRaw("std::nullopt"),
+                            new CppBinary("==", inputExpression, CppLiteral.Nullptr),
+                            new CppIdentifier("std::nullopt"),
                             new CppCall(new CppIdentifier("std::make_optional"), [new CppUnary("*", inputExpression)])
                         );
                     else

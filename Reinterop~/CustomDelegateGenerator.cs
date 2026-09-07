@@ -150,7 +150,9 @@ namespace Reinterop
                         itemType.Name,
                         new CppCall(
                             new CppIdentifier("CreateDelegate"),
-                            [new CppRaw("reinterpret_cast<void*>(new std::function<FunctionSignature>(std::move(callback)))")]))
+                            [CppCast.Reinterpret(
+                                CppType.VoidPointer,
+                                new CppNew(functionType, [new CppMove(new CppIdentifier("callback"))]))]))
                 ])
                 .DefinitionBody([]);
             result.ExtraCppFunctions.Add(constructorRecipe);

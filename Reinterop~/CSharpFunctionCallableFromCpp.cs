@@ -303,7 +303,7 @@ namespace Reinterop
             }
 
             List<CppStatement> cppBody = new() {
-                new CppVariableDeclaration("void*", ExceptionVariableName, new CppLiteral("nullptr"))
+                new CppVariableDeclaration(CppType.VoidPointer, ExceptionVariableName, new CppLiteral("nullptr"))
             };
 
             // If this function requires a struct return rewrite, handle the necessary adjustments here.
@@ -314,7 +314,7 @@ namespace Reinterop
                 cppInteropParameters.Add(new CppParameter(cppInteropReturnType.AsPointer(), "pReturnValue"));
 
                 cppBody.Add(new CppVariableDeclaration(
-                    cppInteropReturnType.GetFullyQualifiedName(),
+                    cppInteropReturnType,
                     "reinterop_returnValue"
                 ));
                 cppCallArguments.Add(new CppUnary("&", new CppIdentifier("reinterop_returnValue")));
@@ -341,7 +341,7 @@ namespace Reinterop
                     cppCallArguments.Add(new CppUnary("&", new CppIdentifier(ExceptionVariableName)));
 
                     cppBody.Add(new CppVariableDeclaration(
-                        cppInteropReturnType.GetFullyQualifiedName(),
+                        cppInteropReturnType,
                         "reinterop_returnValueIsValid",
                         new CppCall(new CppIdentifier(csFunctionName), cppCallArguments)
                     ));
@@ -372,7 +372,7 @@ namespace Reinterop
                 // Non-void return
                 cppCallArguments.Add(new CppUnary("&", new CppIdentifier(ExceptionVariableName)));
                 cppBody.Add(new CppVariableDeclaration(
-                    cppReturnType.GetFullyQualifiedName(),
+                    cppReturnType,
                     "reinterop_returnValue",
                     cppReturnType.GetConversionFromInteropTypeExpression(_context, new CppCall(new CppIdentifier(csFunctionName), cppCallArguments))));
             }
@@ -388,7 +388,7 @@ namespace Reinterop
             CppType systemException = CppType.FromCSharp(_context, CSharpType.FromSymbol(_context, _context.Compilation.GetTypeByMetadataName("System.Exception")!));
             CppType objectHandleType = CppObjectHandle.GetCppType(_context);
             cppBody.Add(new CppIf(
-                new CppBinary("!=", new CppIdentifier(ExceptionVariableName), new CppRaw("nullptr")),
+                new CppBinary("!=", new CppIdentifier(ExceptionVariableName), CppLiteral.Nullptr),
                 [
                     new CppThrow(new CppCall(new CppIdentifier(reinteropNativeExceptionType),
                     [

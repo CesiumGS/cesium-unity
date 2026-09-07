@@ -179,7 +179,7 @@ namespace Reinterop
                 CppFunction nativeImplementationRecipe = new CppFunction(context, result.Type, "NativeImplementation")
                     .ReturnType(implType.AsReference())
                     .DefinitionBody([
-                        new CppReturn(new CppUnary("*", new CppCast(
+                        new CppReturn(new CppUnary("*", CppCast.Static(
                             implType.AsPointer(),
                             new CppCall(
                                 new CppIdentifier(getPointer.Name()!),

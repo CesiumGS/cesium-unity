@@ -45,7 +45,7 @@ namespace Reinterop.Tests
             Assert.That(constructor.MemberInitializers(), Has.Count.EqualTo(1));
             Assert.That(constructor.MemberInitializers()![0].MemberName, Is.EqualTo("Foo"));
             Assert.That(constructor.MemberInitializers()![0].Value, Is.InstanceOf<CppCall>());
-            CppCall call = (CppCall)constructor.MemberInitializers()![0].Value;
+            CppCall call = (CppCall)constructor.MemberInitializers()![0].Value!;
             Assert.That(call.Callee, Is.EqualTo(new CppIdentifier("Construct")));
             Assert.That(call.Arguments, Has.Count.EqualTo(1));
             Assert.That(call.Arguments[0], Is.InstanceOf<CppIdentifier>());

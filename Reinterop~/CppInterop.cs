@@ -40,12 +40,36 @@ namespace Reinterop
             CppStatement setException(CppExpression value) =>
                 new CppAssignment(new CppUnary("*", new CppIdentifier(ExceptionVariableName)), value);
 
-            CppExpression reinteropNativeExceptionValue = new CppRaw(
-                "::DotNet::Reinterop::ObjectHandle(e.GetDotNetException().GetHandle()).Release()");
-            CppExpression stdExceptionValue = new CppRaw(
-                "::DotNet::Reinterop::ReinteropException(::DotNet::System::String(e.what())).GetHandle().Release()");
-            CppExpression unknownExceptionValue = new CppRaw(
-                "::DotNet::Reinterop::ReinteropException(::DotNet::System::String(\"An unknown native exception occurred.\")).GetHandle().Release()");
+            // ::DotNet::Reinterop::ObjectHandle(e.GetDotNetException().GetHandle()).Release()
+            CppExpression reinteropNativeExceptionValue = new CppCall(
+                new CppMemberAccess(
+                    new CppCall(
+                        new CppIdentifier("::DotNet::Reinterop::ObjectHandle"),
+                        [new CppCall(
+                            new CppMemberAccess(
+                                new CppCall(new CppMemberAccess(new CppIdentifier("e"), "GetDotNetException"), []),
+                                "GetHandle"),
+                            [])]),
+                    "Release"),
+                []);
+
+            // ::DotNet::Reinterop::ReinteropException(<message>).GetHandle().Release()
+            CppExpression managedExceptionFromMessage(CppExpression message) => new CppCall(
+                new CppMemberAccess(
+                    new CppCall(
+                        new CppMemberAccess(
+                            new CppCall(
+                                new CppIdentifier("::DotNet::Reinterop::ReinteropException"),
+                                [new CppCall(new CppIdentifier("::DotNet::System::String"), [message])]),
+                            "GetHandle"),
+                        []),
+                    "Release"),
+                []);
+
+            CppExpression stdExceptionValue = managedExceptionFromMessage(
+                new CppCall(new CppMemberAccess(new CppIdentifier("e"), "what"), []));
+            CppExpression unknownExceptionValue = managedExceptionFromMessage(
+                CppLiteral.String("An unknown native exception occurred."));
 
             return new CppStatement[]
             {
