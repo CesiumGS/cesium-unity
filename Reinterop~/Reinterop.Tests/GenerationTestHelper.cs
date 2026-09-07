@@ -56,10 +56,12 @@ namespace Reinterop.Tests
         /// <see cref="CodeGenerator.DistributeToSourceFiles"/>/<see cref="CppSourceFile.Write"/> (not
         /// called here) do that.
         /// </summary>
-        public static Dictionary<string, GeneratedResult> GenerateResults(string source)
+        public static Dictionary<string, GeneratedResult> GenerateResults(string source, IEnumerable<ICustomGenerator>? customGenerators = null)
         {
             CSharpCompilation compilation = CreateCompilation(source);
             CppGenerationContext context = new CppGenerationContext(compilation);
+            if (customGenerators != null)
+                context.CustomGenerators.AddRange(customGenerators);
 
             MethodDeclarationSyntax exposeMethod = compilation.SyntaxTrees
                 .SelectMany(tree => tree.GetRoot().DescendantNodes().OfType<MethodDeclarationSyntax>())

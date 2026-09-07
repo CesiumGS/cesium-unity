@@ -26,7 +26,7 @@
             {
                 CSharpType csBaseType = CSharpType.FromSymbol(context, baseClass.Type);
                 CppType baseType = CppType.FromCSharp(context, csBaseType);
-                result.InteropFunctions.Add(CreateCast(context, result, baseType));
+                result.InteropFunctions3.Add(CreateCast(context, result, baseType));
 
                 baseClass = baseClass.BaseClass;
             }
@@ -36,21 +36,21 @@
             {
                 CSharpType csInterfaceType = CSharpType.FromSymbol(context, anInterface.Type);
                 CppType interfaceType = CppType.FromCSharp(context, csInterfaceType);
-                result.InteropFunctions.Add(CreateCast(context, result, interfaceType));
+                result.InteropFunctions3.Add(CreateCast(context, result, interfaceType));
             }
         }
 
-        private static CppInteropFunction CreateCast(CppGenerationContext context, GeneratedResult result, CppType targetType)
+        private static CppFunction CreateCast(CppGenerationContext context, GeneratedResult result, CppType targetType)
         {
             CppType objectHandleType = CppObjectHandle.GetCppType(context);
-            return new CppInteropFunction(context, result.Type, $"operator {targetType.GetFullyQualifiedName()}")
+            return new CppFunction(context, result.Type, $"operator {targetType.GetFullyQualifiedName()}")
                 .ReturnType(targetType)
                 .Static(false)
                 .DefinitionBody([
                     new CppReturn(new CppCast(
                         targetType,
                         new CppCall(
-                            new CppIdentifier(objectHandleType.GetFullyQualifiedName()),
+                            new CppIdentifier(objectHandleType),
                             [new CppRaw("this->_handle")])
                         )
                     )

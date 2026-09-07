@@ -28,23 +28,23 @@ namespace Reinterop
             ));
 
             // Construct from an object handle
-            CppInteropFunction objectHandleConstructorRecipe = new CppInteropFunction(context, result.Type, result.Type.Name)
-                .Parameters([new CppInteropParameter("handle", objectHandleType.AsMovableParameterType())])
+            CppFunction objectHandleConstructorRecipe = new CppFunction(context, result.Type, result.Type.Name)
+                .Parameters([new CppParameter(objectHandleType.AsMovableParameterType(), "handle")])
                 .Explicit(true)
                 .NoExcept(true)
                 .Static(true)
                 .MemberInitializers([ new CppMemberInitializer("_handle", new CppMove(new CppIdentifier("handle"))) ])
                 .DefinitionBody([]);
-            result.InteropFunctions.Add(objectHandleConstructorRecipe);
+            result.InteropFunctions3.Add(objectHandleConstructorRecipe);
 
             // Construct from a null pointer
-            CppInteropFunction nullConstructorRecipe = new CppInteropFunction(context, result.Type, result.Type.Name)
-                .Parameters([new CppInteropParameter("handle", CppType.NullPointer)])
+            CppFunction nullConstructorRecipe = new CppFunction(context, result.Type, result.Type.Name)
+                .Parameters([new CppParameter(CppType.NullPointer, "handle")])
                 .NoExcept(true)
                 .Static(true)
                 .MemberInitializers([ new CppMemberInitializer("_handle", new CppIdentifier("handle")) ])
                 .DefinitionBody([]);
-            result.InteropFunctions.Add(nullConstructorRecipe);
+            result.InteropFunctions3.Add(nullConstructorRecipe);
 
             // For simple types without an overloaded operator==, we can check
             // to see if a wrapper represents a null reference without leaving
@@ -63,32 +63,32 @@ namespace Reinterop
 
             if (!hasOverloadedOperatorEquals)
             {
-                CppInteropFunction equalityOperatorRecipe = new CppInteropFunction(context, result.Type, "operator==")
+                CppFunction equalityOperatorRecipe = new CppFunction(context, result.Type, "operator==")
                     .ReturnType(CppType.Boolean.AsReturnType())
-                    .Parameters([new CppInteropParameter("", CppType.NullPointer)])
+                    .Parameters([new CppParameter(CppType.NullPointer, "")])
                     .NoExcept(true)
                     .DefinitionBody([
                         new CppReturn(new CppBinary("==", new CppCall(new CppRaw("_handle.GetRaw"), []), new CppIdentifier("nullptr")))
                     ]);
-                result.InteropFunctions.Add(equalityOperatorRecipe);
+                result.InteropFunctions3.Add(equalityOperatorRecipe);
 
-                CppInteropFunction inequalityOperatorRecipe = new CppInteropFunction(context, result.Type, "operator!=")
+                CppFunction inequalityOperatorRecipe = new CppFunction(context, result.Type, "operator!=")
                     .ReturnType(CppType.Boolean.AsReturnType())
-                    .Parameters([new CppInteropParameter("", CppType.NullPointer)])
+                    .Parameters([new CppParameter(CppType.NullPointer, "")])
                     .NoExcept(true)
                     .DefinitionBody([
                         new CppReturn(new CppBinary("!=", new CppCall(new CppRaw("_handle.GetRaw"), []), new CppIdentifier("nullptr")))
                     ]);
-                result.InteropFunctions.Add(inequalityOperatorRecipe);
+                result.InteropFunctions3.Add(inequalityOperatorRecipe);
             }
 
             // Get handle
-            CppInteropFunction getHandleRecipe = new CppInteropFunction(context, result.Type, "GetHandle")
+            CppFunction getHandleRecipe = new CppFunction(context, result.Type, "GetHandle")
                 .DefinitionBody([
                     new CppReturn(new CppIdentifier("_handle"))
                 ]);
-            result.InteropFunctions.Add(getHandleRecipe.Clone().Const(true).ReturnType(objectHandleType.AsConstReference()));
-            result.InteropFunctions.Add(getHandleRecipe.Clone().Const(false).ReturnType(objectHandleType.AsReference()));
+            result.InteropFunctions3.Add(getHandleRecipe.Clone().Const(true).ReturnType(objectHandleType.AsConstReference()));
+            result.InteropFunctions3.Add(getHandleRecipe.Clone().Const(false).ReturnType(objectHandleType.AsReference()));
         }
     }
 }

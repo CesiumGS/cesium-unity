@@ -565,6 +565,7 @@ namespace Reinterop
                 CSharpMemberAccess m => new CSharpMemberAccess(RewriteExpressionToConvertFromInterop(m.Target, parameterConversions)!, m.MemberName),
                 CSharpElementAccess e => new CSharpElementAccess(RewriteExpressionToConvertFromInterop(e.Target, parameterConversions)!, e.Arguments.Select(a => RewriteExpressionToConvertFromInterop(a, parameterConversions)!).ToArray()),
                 CSharpNew n => new CSharpNew(n.TypeName, n.Arguments.Select(a => RewriteExpressionToConvertFromInterop(a, parameterConversions)!).ToArray()),
+                CSharpArrayNew n => new CSharpArrayNew(n.ElementTypeName, n.Dimensions.Select(d => RewriteExpressionToConvertFromInterop(d, parameterConversions)!).ToArray()),
                 CSharpCast c => new CSharpCast(c.TypeName, RewriteExpressionToConvertFromInterop(c.Expression, parameterConversions)!),
                 _ => expression
             };
