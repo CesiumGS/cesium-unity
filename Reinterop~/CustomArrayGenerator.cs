@@ -32,7 +32,7 @@ namespace Reinterop
                 .Static(true)
                 .Parameters([new CSharpParameter(CSharpType.FromSymbol(context, context.Compilation.GetSpecialType(SpecialType.System_Int32)), "size")])
                 .ReturnType(item.Type)
-                .Body(new ConstructArrayBody());
+                .Body(new CSharpBodyConstructArray());
             result.InteropFunctions2.Add(functionRecipe);
 
             CppFunction constructorRecipe = new CppFunction(context, result.Type, result.Type.Name)
@@ -67,11 +67,11 @@ namespace Reinterop
                     new CSharpParameter(CSharpType.FromSymbol(context, arrayType.ElementType), "value")
                 ])
                 .ReturnType(context.Compilation.GetSpecialType(SpecialType.System_Void))
-                .Body(new SetArrayItemBody());
+                .Body(new CSharpBodySetArrayItem());
             result.InteropFunctions2.Add(setItemRecipe);
         }
 
-        private class ConstructArrayBody : IGenerateCSharpBody
+        private class CSharpBodyConstructArray : IGenerateCSharpBody
         {
             public IEnumerable<CSharpStatement> GenerateBody(CppGenerationContext context, CSharpFunctionCallableFromCpp function)
             {
@@ -82,7 +82,7 @@ namespace Reinterop
             }
         }
 
-        private class SetArrayItemBody : IGenerateCSharpBody
+        private class CSharpBodySetArrayItem : IGenerateCSharpBody
         {
             public IEnumerable<CSharpStatement> GenerateBody(CppGenerationContext context, CSharpFunctionCallableFromCpp function)
             {
