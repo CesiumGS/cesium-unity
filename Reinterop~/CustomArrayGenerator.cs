@@ -70,27 +70,5 @@ namespace Reinterop
                 .Body(new CSharpBodySetArrayItem());
             result.InteropFunctions2.Add(setItemRecipe);
         }
-
-        private class CSharpBodyConstructArray : IGenerateCSharpBody
-        {
-            public IEnumerable<CSharpStatement> GenerateBody(CppGenerationContext context, CSharpFunctionCallableFromCpp function)
-            {
-                CSharpType? arrayElementType = function.Owner().ArrayElementType;
-                if (arrayElementType == null)
-                    throw new InvalidOperationException($"Owner {function.Owner().GetFullyQualifiedName()} does not have an ArrayElementType.");
-                yield return new CSharpReturn(new CSharpArrayNew(arrayElementType.GetFullyQualifiedName(), [new CSharpIdentifier("size")]));
-            }
-        }
-
-        private class CSharpBodySetArrayItem : IGenerateCSharpBody
-        {
-            public IEnumerable<CSharpStatement> GenerateBody(CppGenerationContext context, CSharpFunctionCallableFromCpp function)
-            {
-                yield return new CSharpExpressionStatement(new CSharpBinary(
-                    "=",
-                    new CSharpElementAccess(new CSharpIdentifier("thiz"), [new CSharpIdentifier("index")]),
-                    new CSharpIdentifier("value")));
-            }
-        }
     }
 }
