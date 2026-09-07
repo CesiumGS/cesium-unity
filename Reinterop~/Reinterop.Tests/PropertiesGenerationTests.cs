@@ -34,7 +34,7 @@ namespace Reinterop.Tests
                 }
                 """);
 
-            List<CSharpFunctionCallableFromCpp> recipes = results["Foo"].InteropFunctions2.Where(function => function.Name() == "Value").ToList();
+            List<CSharpFunctionCallableFromCpp> recipes = results["Foo"].InteropFunctions.Where(function => function.Name() == "Value").ToList();
 
             Assert.That(recipes, Has.Count.EqualTo(1));
             Assert.That(recipes[0].Parameters(), Is.Empty);
@@ -172,7 +172,7 @@ namespace Reinterop.Tests
                 }
                 """);
 
-            List<CSharpFunctionCallableFromCpp> recipes = results["Foo"].InteropFunctions2.Where(function => function.Name() == "operator[]").ToList();
+            List<CSharpFunctionCallableFromCpp> recipes = results["Foo"].InteropFunctions.Where(function => function.Name() == "operator[]").ToList();
 
             Assert.That(recipes, Has.Count.EqualTo(1));
             Assert.That(recipes[0].Parameters(), Has.Count.EqualTo(1));

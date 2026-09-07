@@ -33,7 +33,7 @@ namespace Reinterop
                 .Parameters([new CSharpParameter(CSharpType.FromSymbol(context, context.Compilation.GetSpecialType(SpecialType.System_Int32)), "size")])
                 .ReturnType(item.Type)
                 .Body(new CSharpBodyConstructArray());
-            result.InteropFunctions2.Add(functionRecipe);
+            result.InteropFunctions.Add(functionRecipe);
 
             CppFunction constructorRecipe = new CppFunction(context, result.Type, result.Type.Name)
                 .Static(true)
@@ -47,7 +47,7 @@ namespace Reinterop
                                 new CppIdentifier(functionRecipe.Name()!),
                                 functionRecipe.Parameters().Select(p => new CppIdentifier(p.Name)).ToList()))
                 ]);
-            result.InteropFunctions3.Add(constructorRecipe);
+            result.ExtraCppFunctions.Add(constructorRecipe);
         }
  
         /// <summary>
@@ -69,7 +69,7 @@ namespace Reinterop
                 ])
                 .ReturnType(context.Compilation.GetSpecialType(SpecialType.System_Void))
                 .Body(new CSharpBodySetArrayItem());
-            result.InteropFunctions2.Add(setItemRecipe);
+            result.InteropFunctions.Add(setItemRecipe);
         }
     }
 }

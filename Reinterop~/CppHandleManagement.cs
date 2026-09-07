@@ -35,7 +35,7 @@ namespace Reinterop
                 .Static(true)
                 .MemberInitializers([ new CppMemberInitializer("_handle", new CppMove(new CppIdentifier("handle"))) ])
                 .DefinitionBody([]);
-            result.InteropFunctions3.Add(objectHandleConstructorRecipe);
+            result.ExtraCppFunctions.Add(objectHandleConstructorRecipe);
 
             // Construct from a null pointer
             CppFunction nullConstructorRecipe = new CppFunction(context, result.Type, result.Type.Name)
@@ -44,7 +44,7 @@ namespace Reinterop
                 .Static(true)
                 .MemberInitializers([ new CppMemberInitializer("_handle", new CppIdentifier("handle")) ])
                 .DefinitionBody([]);
-            result.InteropFunctions3.Add(nullConstructorRecipe);
+            result.ExtraCppFunctions.Add(nullConstructorRecipe);
 
             // For simple types without an overloaded operator==, we can check
             // to see if a wrapper represents a null reference without leaving
@@ -70,7 +70,7 @@ namespace Reinterop
                     .DefinitionBody([
                         new CppReturn(new CppBinary("==", new CppCall(new CppRaw("_handle.GetRaw"), []), new CppIdentifier("nullptr")))
                     ]);
-                result.InteropFunctions3.Add(equalityOperatorRecipe);
+                result.ExtraCppFunctions.Add(equalityOperatorRecipe);
 
                 CppFunction inequalityOperatorRecipe = new CppFunction(context, result.Type, "operator!=")
                     .ReturnType(CppType.Boolean.AsReturnType())
@@ -79,7 +79,7 @@ namespace Reinterop
                     .DefinitionBody([
                         new CppReturn(new CppBinary("!=", new CppCall(new CppRaw("_handle.GetRaw"), []), new CppIdentifier("nullptr")))
                     ]);
-                result.InteropFunctions3.Add(inequalityOperatorRecipe);
+                result.ExtraCppFunctions.Add(inequalityOperatorRecipe);
             }
 
             // Get handle
@@ -87,8 +87,8 @@ namespace Reinterop
                 .DefinitionBody([
                     new CppReturn(new CppIdentifier("_handle"))
                 ]);
-            result.InteropFunctions3.Add(getHandleRecipe.Clone().Const(true).ReturnType(objectHandleType.AsConstReference()));
-            result.InteropFunctions3.Add(getHandleRecipe.Clone().Const(false).ReturnType(objectHandleType.AsReference()));
+            result.ExtraCppFunctions.Add(getHandleRecipe.Clone().Const(true).ReturnType(objectHandleType.AsConstReference()));
+            result.ExtraCppFunctions.Add(getHandleRecipe.Clone().Const(false).ReturnType(objectHandleType.AsReference()));
         }
     }
 }

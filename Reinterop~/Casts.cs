@@ -26,7 +26,7 @@
             {
                 CSharpType csBaseType = CSharpType.FromSymbol(context, baseClass.Type);
                 CppType baseType = CppType.FromCSharp(context, csBaseType);
-                result.InteropFunctions3.Add(CreateCast(context, result, baseType));
+                result.ExtraCppFunctions.Add(CreateCast(context, result, baseType));
 
                 baseClass = baseClass.BaseClass;
             }
@@ -36,7 +36,7 @@
             {
                 CSharpType csInterfaceType = CSharpType.FromSymbol(context, anInterface.Type);
                 CppType interfaceType = CppType.FromCSharp(context, csInterfaceType);
-                result.InteropFunctions3.Add(CreateCast(context, result, interfaceType));
+                result.ExtraCppFunctions.Add(CreateCast(context, result, interfaceType));
             }
         }
 

@@ -48,7 +48,7 @@ namespace Reinterop
             bool addOperator = method.MethodKind == MethodKind.UserDefinedOperator && (method.Name == "op_Equality" || method.Name == "op_Inequality");
             interop.Private(addOperator);
 
-            result.InteropFunctions2.Add(interop);
+            result.InteropFunctions.Add(interop);
 
             if (method.IsGenericMethod)
             {
@@ -65,7 +65,7 @@ namespace Reinterop
                         .Static(genericMethod.IsStatic)
                         .Private(addOperator);
                     state.MethodCache[genericMethod] = genericDeclaration;
-                    result.InteropFunctions3.Add(genericDeclaration);
+                    result.ExtraCppFunctions.Add(genericDeclaration);
                 }
 
                 // Declare that this recipe is a specialization.
@@ -89,7 +89,7 @@ namespace Reinterop
                             )
                         )
                     ]);
-                result.InteropFunctions3.Add(operatorRecipe);
+                result.ExtraCppFunctions.Add(operatorRecipe);
 
                 // If this operator is on a base type and that base type is the right-hand side, also add a
                 // version that takes this type, and a version that takes nullptr. This is a nice convenience
@@ -114,7 +114,7 @@ namespace Reinterop
                                 )
                             )
                         ]);
-                    result.InteropFunctions3.Add(baseTypeRecipe);
+                    result.ExtraCppFunctions.Add(baseTypeRecipe);
 
                     CppFunction nullPtrRecipe = operatorRecipe.Clone()
                         .Parameters([new CppParameter(CppType.NullPointer.AsParameterType(), "")])
@@ -129,7 +129,7 @@ namespace Reinterop
                                 )
                             )
                         ]);
-                    result.InteropFunctions3.Add(nullPtrRecipe);
+                    result.ExtraCppFunctions.Add(nullPtrRecipe);
                 }
             }
         }

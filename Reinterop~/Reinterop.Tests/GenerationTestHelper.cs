@@ -95,7 +95,7 @@ namespace Reinterop.Tests
         /// </summary>
         public static CSharpFunctionCallableFromCpp Find(this GeneratedResult result, string name, int parameterCount)
         {
-            return result.InteropFunctions2.Single(function => function.Name() == name && function.Parameters().Count == parameterCount);
+            return result.InteropFunctions.Single(function => function.Name() == name && function.Parameters().Count == parameterCount);
         }
     }
 }

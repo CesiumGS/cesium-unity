@@ -37,9 +37,9 @@ namespace Reinterop
             // gathered, add each of them to the generation.
             if (result != null)
             {
-                foreach (CSharpFunctionCallableFromCpp function in result.InteropFunctions2)
+                foreach (CSharpFunctionCallableFromCpp function in result.InteropFunctions)
                     function.GenerateCode(this.Options, result);
-                foreach (CppFunction function in result.InteropFunctions3)
+                foreach (CppFunction function in result.ExtraCppFunctions)
                     function.AddToGeneration(result);
             }
 

@@ -77,12 +77,12 @@ namespace Reinterop
             CSharpFunctionCallableFromCpp getRecipe = commonRecipe.Clone()
                 .ReturnType(fieldType)
                 .Body(new CSharpBodyAccessField(field, isGetter: true));
-            result.InteropFunctions2.Add(getRecipe);
+            result.InteropFunctions.Add(getRecipe);
 
             CSharpFunctionCallableFromCpp setRecipe = commonRecipe.Clone()
                 .Parameters([new CSharpParameter(fieldType, "value")])
                 .Body(new CSharpBodyAccessField(field, isGetter: false));
-            result.InteropFunctions2.Add(setRecipe);
+            result.InteropFunctions.Add(setRecipe);
         }
     }
 }

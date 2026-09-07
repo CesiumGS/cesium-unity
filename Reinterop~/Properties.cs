@@ -33,7 +33,7 @@ namespace Reinterop
                 .Static(property.IsStatic)
                 .Body(new CSharpBodyAccessProperty(property, method.MethodKind == MethodKind.PropertyGet));
 
-            result.InteropFunctions2.Add(recipe);
+            result.InteropFunctions.Add(recipe);
         }
     }
 }

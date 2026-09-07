@@ -30,7 +30,7 @@ namespace Reinterop
                 .Static(method.IsStatic)
                 .Body(new CSharpBodyAddRemoveEventDelegate(evt, isAdd));
 
-            result.InteropFunctions2.Add(interop);
+            result.InteropFunctions.Add(interop);
         }
     }
 }

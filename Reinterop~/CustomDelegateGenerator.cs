@@ -147,7 +147,7 @@ namespace Reinterop
                 .Private(true)
                 .AdditionalCSharpContent(nativeFunctionCSharpContent)
                 .Body(new CSharpBodyCreateDelegate(csType, nativeFunctionTypeName));
-            result.InteropFunctions2.Add(createDelegateRecipe);
+            result.InteropFunctions.Add(createDelegateRecipe);
 
             CppFunction constructorRecipe = new CppFunction(context, itemType, itemType.Name)
                 .Parameters([new CppParameter(functionType, "callback")])
@@ -159,7 +159,7 @@ namespace Reinterop
                             [new CppRaw("reinterpret_cast<void*>(new std::function<FunctionSignature>(std::move(callback)))")]))
                 ])
                 .DefinitionBody([]);
-            result.InteropFunctions3.Add(constructorRecipe);
+            result.ExtraCppFunctions.Add(constructorRecipe);
 
             var interopParameters = new[] { (Name: "pCallbackFunction", CsType: CSharpType.FromSymbol(context, context.Compilation.GetSpecialType(SpecialType.System_IntPtr)), Type: CppType.VoidPointer, InteropType: CppType.VoidPointer) }.Concat(callbackParameters);
             var callParameters = callbackParameters.Select(p => p.Type.GetConversionFromInteropType(context, p.Name));
@@ -217,20 +217,20 @@ namespace Reinterop
                 .Parameters([new CSharpParameter(csType, "rhs")])
                 .ReturnType(csType)
                 .Body(new CSharpBodyAddRemoveDelegate("+"));
-            result.InteropFunctions2.Add(combineDelegatesRecipe);
+            result.InteropFunctions.Add(combineDelegatesRecipe);
 
             CSharpFunctionCallableFromCpp removeDelegateRecipe = new CSharpFunctionCallableFromCpp(context, item.Type)
                 .Name("operator-")
                 .Parameters([new CSharpParameter(csType, "rhs")])
                 .ReturnType(csType)
                 .Body(new CSharpBodyAddRemoveDelegate("-"));
-            result.InteropFunctions2.Add(removeDelegateRecipe);
+            result.InteropFunctions.Add(removeDelegateRecipe);
 
             // Add a Dispose method to free the native function without waiting for the finalizer.
             CSharpFunctionCallableFromCpp disposeRecipe = new CSharpFunctionCallableFromCpp(context, item.Type)
                 .Name("Dispose")
                 .Body(new CSharpBodyDisposeDelegate(nativeFunctionTypeName));
-            result.InteropFunctions2.Add(disposeRecipe);
+            result.InteropFunctions.Add(disposeRecipe);
         }
     }
 }

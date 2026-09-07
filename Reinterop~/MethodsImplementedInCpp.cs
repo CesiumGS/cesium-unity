@@ -188,8 +188,8 @@ namespace Reinterop
                         )))
                     ]);
 
-                result.InteropFunctions2.Add(getPointer);
-                result.InteropFunctions3.Add(nativeImplementationRecipe);
+                result.InteropFunctions.Add(getPointer);
+                result.ExtraCppFunctions.Add(nativeImplementationRecipe);
             }
         }
 

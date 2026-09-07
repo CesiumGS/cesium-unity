@@ -17,7 +17,7 @@ namespace Reinterop
         private static void GenerateStatic(CppGenerationContext context, TypeToGenerate item, GeneratedResult result)
         {
             // Delete the default constructor so this static class can't be constructed.
-            result.InteropFunctions3.Add(
+            result.ExtraCppFunctions.Add(
                 new CppFunction(context, result.CppDefinition.Type, item.Type.Name).Deleted(true));
         }
 
@@ -44,7 +44,7 @@ namespace Reinterop
                 .Body(new CSharpBodyConstructInstance())
                 .Private(result.Type.Kind != InteropTypeKind.BlittableStruct);
 
-            result.InteropFunctions2.Add(recipe);
+            result.InteropFunctions.Add(recipe);
 
             CppType cppType = result.Type;
             if (cppType.Kind != InteropTypeKind.BlittableStruct)
@@ -62,7 +62,7 @@ namespace Reinterop
                                 new CppIdentifier(recipe.Name()!),
                                 recipe.Parameters().Select(p => new CppIdentifier(p.Name)).ToArray()))
                     ]);
-                result.InteropFunctions3.Add(constructorRecipe);
+                result.ExtraCppFunctions.Add(constructorRecipe);
             }
         }
     }

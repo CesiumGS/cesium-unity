@@ -147,7 +147,7 @@ namespace Reinterop.Tests
                 }
                 """);
 
-            List<CSharpFunctionCallableFromCpp> identityRecipes = results["Foo"].InteropFunctions2
+            List<CSharpFunctionCallableFromCpp> identityRecipes = results["Foo"].InteropFunctions
                 .Where(function => function.Name() == "Identity")
                 .ToList();
 
@@ -158,7 +158,7 @@ namespace Reinterop.Tests
 
             CppFunction template = identityRecipes[0].Specializes()!;
             Assert.That(identityRecipes, Has.All.Matches<CSharpFunctionCallableFromCpp>(function => function.Specializes() == template));
-            Assert.That(results["Foo"].InteropFunctions3, Has.Member(template));
+            Assert.That(results["Foo"].ExtraCppFunctions, Has.Member(template));
 
             Assert.That(
                 identityRecipes.Select(function => function.TypeArguments().Single().Name),
@@ -192,7 +192,7 @@ namespace Reinterop.Tests
                 """);
 
             CSharpFunctionCallableFromCpp interopRecipe = results["Foo"].Find("op_Equality", 2);
-            CppFunction operatorRecipe = results["Foo"].InteropFunctions3.Single(function => function.Name == "operator==");
+            CppFunction operatorRecipe = results["Foo"].ExtraCppFunctions.Single(function => function.Name == "operator==");
 
             Assert.That(interopRecipe.Private(), Is.True);
             Assert.That(operatorRecipe.Private(), Is.False);

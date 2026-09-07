@@ -100,7 +100,7 @@ namespace Reinterop
                         RequiredIncludes = [ "<string>", GetHeaderInclude(encodingWrapper) ]
                     })
                 ]);
-            generated.InteropFunctions3.Add(stringConstructorWrapper);
+            generated.ExtraCppFunctions.Add(stringConstructorWrapper);
 
             // Add a ToStlString method
             CppFunction toStlString = new CppFunction(context, generated.Type, "ToStlString")
@@ -125,7 +125,7 @@ namespace Reinterop
                         RequiredIncludes = new[] { "<string>", GetHeaderInclude(marshalWrapper) }
                     })
                 ]);
-            generated.InteropFunctions3.Add(toStlString);
+            generated.ExtraCppFunctions.Add(toStlString);
 
             return generated;
         }

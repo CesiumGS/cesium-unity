@@ -35,7 +35,7 @@ namespace Reinterop.Tests
                 """);
 
             CSharpFunctionCallableFromCpp factory = results["Foo"].Find("Construct", 1);
-            CppFunction constructor = results["Foo"].InteropFunctions3.Single(function => function.IsConstructor && function.Parameters().Count == 1 && function.Parameters()[0].Name == "value");
+            CppFunction constructor = results["Foo"].ExtraCppFunctions.Single(function => function.IsConstructor && function.Parameters().Count == 1 && function.Parameters()[0].Name == "value");
 
             Assert.That(factory.Static(), Is.True);
             Assert.That(factory.Private(), Is.True);

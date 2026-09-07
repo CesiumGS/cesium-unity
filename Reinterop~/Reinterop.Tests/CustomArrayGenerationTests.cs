@@ -26,7 +26,7 @@ namespace Reinterop.Tests
                 """,
                 [new CustomArrayGenerator()]);
 
-            GeneratedResult arrayResult = results.Values.Single(result => result.InteropFunctions2.Any(function => function.Name() == "Construct_Size"));
+            GeneratedResult arrayResult = results.Values.Single(result => result.InteropFunctions.Any(function => function.Name() == "Construct_Size"));
             GeneratedInitFunction constructor = arrayResult.Init.Functions.Single(function => function.CSharpName.Contains("_Construct_Size_"));
             GeneratedInitFunction setItem = arrayResult.Init.Functions.Single(function => function.CSharpName.Contains("_Item_"));
 
