@@ -2,6 +2,8 @@ using Microsoft.CodeAnalysis;
 
 namespace Reinterop
 {
+    internal record CppParameter(CppType Type, string Name);
+
     /// <summary>
     /// Describes a plain C++ function - a method, property accessor, constructor, or field
     /// accessor - purely in terms of its parameters and return type, and generates its

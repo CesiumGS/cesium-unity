@@ -41,8 +41,6 @@ namespace Reinterop
                     function.GenerateCode(this.Options, result);
                 foreach (CppFunction function in result.InteropFunctions3)
                     function.AddToGeneration(result);
-                foreach (CppInteropFunction function in result.InteropFunctions)
-                    function.AddToGeneration(result);
             }
 
             return result;
