@@ -64,13 +64,7 @@ namespace Reinterop
             // the invoke and dispose to be implemented in C++.
             CSharpType csType = CSharpType.FromSymbol(context, item.Type);
 
-            string genericTypeHash = "";
-            INamedTypeSymbol? named = item.Type as INamedTypeSymbol;
-            if (named != null && named.IsGenericType)
-            {
-                genericTypeHash = Interop.HashParameters(null, named.TypeArguments);
-            }
-
+            string genericTypeHash = csType.TypeArguments.Count > 0 ? Interop.HashParameters(null, csType.TypeArguments) : "";
             string csBaseName = $"{csType.GetFullyQualifiedNamespace().Replace(".", "_")}_{csType.Name}{genericTypeHash}_CreateDelegate";
             string invokeCallbackName = $"{csType.GetFullyQualifiedNamespace().Replace(".", "_")}_{item.Type.Name}{genericTypeHash}_InvokeCallback";
             string disposeCallbackName = $"{csType.GetFullyQualifiedNamespace().Replace(".", "_")}_{item.Type.Name}{genericTypeHash}_DisposeCallback";
