@@ -63,31 +63,6 @@ namespace Reinterop
             }
         }
 
-        public static string HashParameters(IEnumerable<IParameterSymbol>? parameters = null, IEnumerable<ITypeSymbol>? typeArguments = null)
-        {
-            IEnumerable<string>? formattedParameters = null;
-            IEnumerable<string>? formattedTypeArguments = null;
-
-            if (parameters != null)
-                formattedParameters = parameters.Select(parameter => $"{parameter.Type.ToDisplayString()} {parameter.Name}");
-            if (typeArguments != null)
-                formattedTypeArguments = typeArguments.Select(arg => $"<{arg.ToDisplayString()}>");
-
-            IEnumerable<string>? allFormattedInput = null;
-            if (formattedParameters != null && formattedTypeArguments != null)
-                allFormattedInput = formattedTypeArguments.Concat(formattedParameters);
-            else if (formattedParameters != null)
-                allFormattedInput = formattedParameters;
-            else if (formattedTypeArguments != null)
-                allFormattedInput = formattedTypeArguments;
-            else
-                allFormattedInput = new string[] { };
-
-            var allTogether = string.Join(", ", allFormattedInput);
-            string hash = InsecureHash(allTogether);
-            return hash.Replace("=", "").Replace("+", "_").Replace("/", "__");
-        }
-
         public static string HashParameters(IEnumerable<CSharpParameter>? parameters = null, IEnumerable<CSharpType>? typeArguments = null)
         {
             IEnumerable<string>? formattedParameters = null;
@@ -235,17 +210,6 @@ namespace Reinterop
             return result;
         }
 
-        public static string GetTemplateSpecialization(CppType type)
-        {
-            string templateSpecialization = "";
-            if (type.GenericArguments != null && type.GenericArguments.Count > 0)
-            {
-                templateSpecialization = $"<{string.Join(", ", type.GenericArguments.Select(arg => arg.GetFullyQualifiedName()))}>";
-            }
-
-            return templateSpecialization;
-        }
-
         public static string MethodNameToOperator(string methodName)
         {
             switch (methodName)
@@ -278,67 +242,6 @@ namespace Reinterop
             CSharpType interopReturnType = returnType.AsInteropTypeReturn();
             return interopReturnType.Kind == InteropTypeKind.BlittableStruct ||
                    interopReturnType.Kind == InteropTypeKind.Primitive;
-        }
-
-        /// <summary>
-        /// Determines if a struct rewrite is required for a function with a given return type.
-        /// See <see cref="RewriteStructReturn"/>.
-        /// </summary>
-        public static bool NeedsStructReturnRewrite(CppType returnType)
-        {
-            // All blittable structs require rewrite.
-            if (returnType.Kind == InteropTypeKind.BlittableStruct)
-                return true;
-
-            // If it's not a blittable struct and not a nullable, it doesn't need rewrite.
-            if (returnType.Kind != InteropTypeKind.Nullable)
-                return false;
-            
-            // Only nullables of blittable structs and primitives require rewrite.
-            // Because a nullable reference type can be accomodated by our normal interop approach.
-            CppType interopReturnType = returnType.AsInteropType();
-            return interopReturnType.Kind == InteropTypeKind.BlittableStruct ||
-                   interopReturnType.Kind == InteropTypeKind.Primitive;
-        }
-
-        /// <summary>
-        /// Mono has trouble return large structs from C# to C++. See https://github.com/CesiumGS/cesium-unity/issues/73.
-        /// This rewrites the interop for such a method so that the C++ code instead passes a pointer to the
-        /// struct which is filled in on the C# side.
-        /// </summary>
-        /// <param name="interopParameters">The parameters to the interop method.</param>
-        /// <param name="interopReturnType">The return type of the interop method.</param>
-        /// <returns>True if the method has been rewritten, otherwise false.</returns>
-        public static bool RewriteStructReturn(ref IEnumerable<(string ParameterName, string CallSiteName, CppType Type, CppType InteropType)> interopParameters, ref CppType returnType, ref CppType interopReturnType)
-        {
-            if (returnType.Kind == InteropTypeKind.BlittableStruct)
-            {
-                CppType originalInteropReturnType = interopReturnType;
-                interopReturnType = CppType.Void;
-
-                interopParameters = interopParameters.Concat(new[]
-                {
-                    (ParameterName: "pReturnValue", CallSiteName: "result", Type: returnType.AsReference(), InteropType: originalInteropReturnType.AsPointer())
-                });
-
-                return true;
-            }
-            else if (returnType.Kind == InteropTypeKind.Nullable &&
-                     (interopReturnType.Kind == InteropTypeKind.BlittableStruct ||
-                      interopReturnType.Kind == InteropTypeKind.Primitive))
-            {
-                CppType originalInteropReturnType = interopReturnType;
-                interopReturnType = CppType.UInt8;
-
-                interopParameters = interopParameters.Concat(new[]
-                {
-                    (ParameterName: "pReturnValue", CallSiteName: "result", Type: originalInteropReturnType.AsReference(), InteropType: originalInteropReturnType.AsPointer())
-                });
-
-                return true;
-            }
-
-            return false;
         }
 
         public static string MakeSafeIdentifier(string s)
