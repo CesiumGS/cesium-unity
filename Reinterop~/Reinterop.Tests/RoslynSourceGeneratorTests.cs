@@ -169,6 +169,40 @@ namespace Reinterop.Tests
                 """);
         }
 
+        [Test]
+        public void NullableBlittableStructField()
+        {
+            AssertGeneratesWithoutErrors(
+                """
+                using Reinterop;
+
+                namespace TestNamespace
+                {
+                    public struct Vector2
+                    {
+                        public float X;
+                        public float Y;
+                    }
+
+                    public class Foo
+                    {
+                        public Vector2? Position;
+                    }
+
+                    [Reinterop]
+                    internal class ConfigureReinterop
+                    {
+                        public void ExposeToCPP()
+                        {
+                            Foo foo = new Foo();
+                            foo.Position = new Vector2();
+                            Vector2? p = foo.Position;
+                        }
+                    }
+                }
+                """);
+        }
+
         private static void AssertGeneratesWithoutErrors(string source)
         {
             // Reinterop writes generated C++ files as a side effect of running - redirect them to a

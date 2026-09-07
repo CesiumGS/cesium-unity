@@ -32,11 +32,18 @@ namespace Reinterop
             string condition = $"if ({Print(i.Condition)})";
 
             // Match the codebase's existing convention of omitting braces around a single-statement body.
-            if (i.Then.Count == 1)
-                return condition + Environment.NewLine + "    " + Print(i.Then[0]);
+            string thenClause = i.Then.Count == 1
+                ? condition + Environment.NewLine + "    " + Print(i.Then[0])
+                : condition + Environment.NewLine + "{" + Environment.NewLine + "    " + i.Then.Select(Print).JoinAndIndent("    ") + Environment.NewLine + "}";
 
-            string body = i.Then.Select(Print).JoinAndIndent("    ");
-            return condition + Environment.NewLine + "{" + Environment.NewLine + "    " + body + Environment.NewLine + "}";
+            if (i.Else == null)
+                return thenClause;
+
+            string elseClause = i.Else.Count == 1
+                ? "else" + Environment.NewLine + "    " + Print(i.Else[0])
+                : "else" + Environment.NewLine + "{" + Environment.NewLine + "    " + i.Else.Select(Print).JoinAndIndent("    ") + Environment.NewLine + "}";
+
+            return thenClause + Environment.NewLine + elseClause;
         }
 
         private static string PrintTryCatch(CSharpTryCatch t)

@@ -313,7 +313,7 @@ namespace Reinterop
                         new CSharpBinary("!=", new CSharpIdentifier("returnValue_interop"), new CSharpLiteral("null")),
                         [
                             // Nullable has a value
-                            new CSharpExpressionStatement(new CSharpBinary("=", new CSharpIdentifier("(*pReturnValue)"), new CSharpUnary("*", new CSharpIdentifier("returnValue_interop")))),
+                            new CSharpExpressionStatement(new CSharpBinary("=", new CSharpIdentifier("(*pReturnValue)"), new CSharpMemberAccess(new CSharpIdentifier("returnValue_interop"), "Value"))),
                             new CSharpReturn(new CSharpLiteral("1"))
                         ],
                         [
@@ -358,8 +358,11 @@ namespace Reinterop
             }
 
             // Rewrite the body to convert from the interop parameter types to the C# parameter types, and
-            // from the C# return type to the interop return type.
-            if (csReturnType.SpecialType != SpecialType.System_Void)
+            // from the C# return type to the interop return type. Skip this for functions that underwent a
+            // struct return rewrite above - their return statements already produce the final interop value
+            // (e.g. the 1/0 success byte), so re-converting them as if they were the original return type
+            // would corrupt them.
+            if (!NeedsStructReturnRewrite && csReturnType.SpecialType != SpecialType.System_Void)
                 bodyStatements = RewriteReturnStatementToConvertToInterop(bodyStatements, csReturnType, csInteropReturnType);
             if (csInteropParameterConversions.Count > 0)
                 bodyStatements = RewriteParametersToConvertFromInterop(bodyStatements, csInteropParameterConversions);
@@ -467,7 +470,11 @@ namespace Reinterop
                 return statement switch
                 {
                     CSharpReturn r => new CSharpReturn(returnType.GetConversionToInteropTypeExpression(r.Value!)),
-                    CSharpIf i => new CSharpIf(i.Condition, RewriteReturnStatementToConvertToInterop(i.Then, returnType, interopReturnType)),
+                    CSharpIf i => new CSharpIf(
+                        i.Condition,
+                        RewriteReturnStatementToConvertToInterop(i.Then, returnType, interopReturnType),
+                        i.Else == null ? null : RewriteReturnStatementToConvertToInterop(i.Else, returnType, interopReturnType)
+                    ),
                     CSharpStatement s => s
                 };
             }).ToList();
@@ -482,7 +489,11 @@ namespace Reinterop
                 {
                     CSharpVariableDeclaration d => new CSharpVariableDeclaration(d.TypeName, d.Name, RewriteExpressionToConvertFromInterop(d.Initializer, parameterConversions)),
                     CSharpExpressionStatement s => new CSharpExpressionStatement(RewriteExpressionToConvertFromInterop(s.Expression, parameterConversions)!),
-                    CSharpIf i => new CSharpIf(i.Condition, RewriteParametersToConvertFromInterop(i.Then, parameterConversions)),
+                    CSharpIf i => new CSharpIf(
+                        i.Condition,
+                        RewriteParametersToConvertFromInterop(i.Then, parameterConversions),
+                        i.Else == null ? null : RewriteParametersToConvertFromInterop(i.Else, parameterConversions)
+                    ),
                     CSharpThrow t => new CSharpThrow(RewriteExpressionToConvertFromInterop(t.Exception, parameterConversions)!),
                     CSharpReturn r => new CSharpReturn(RewriteExpressionToConvertFromInterop(r.Value, parameterConversions)),
                     CSharpTryCatch t => new CSharpTryCatch(RewriteParametersToConvertFromInterop(t.TryBody, parameterConversions), RewriteParametersToConvertFromInterop(t.CatchBody, parameterConversions)),
@@ -558,7 +569,11 @@ namespace Reinterop
                         new CSharpVariableDeclaration(returnType.GetFullyQualifiedName(), returnValueName, r.Value),
                         newReturnStatement
                     },
-                    CSharpIf i => [new CSharpIf(i.Condition, RewriteStructReturn(i.Then, returnType, returnValueName, newReturnStatement))],
+                    CSharpIf i => [new CSharpIf(
+                        i.Condition,
+                        RewriteStructReturn(i.Then, returnType, returnValueName, newReturnStatement),
+                        i.Else == null ? null : RewriteStructReturn(i.Else, returnType, returnValueName, newReturnStatement)
+                    )],
                     CSharpStatement s => [s]
                 };
             }).ToList();
