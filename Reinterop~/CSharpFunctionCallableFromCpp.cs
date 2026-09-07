@@ -198,6 +198,16 @@ namespace Reinterop
 
         public IGenerateCSharpBody? Body() { return _body; }
 
+        private string? _additionalCSharpContent = null;
+
+        public CSharpFunctionCallableFromCpp AdditionalCSharpContent(string? content)
+        {
+            _additionalCSharpContent = content;
+            return this;
+        }
+
+        public string? AdditionalCSharpContent() { return _additionalCSharpContent; }
+
         /// <summary>
         /// Determines if this function's return type necessitates rewriting the interop function to return via an out-parameter instead of directly.
         /// </summary>
@@ -493,16 +503,24 @@ namespace Reinterop
             functions.cpp.AddToGeneration(result);
 
             // Add the C# side of the interop.
-            result.Init.Functions.Add(new GeneratedInitFunction(
-                $"{result.Type.GetFullyQualifiedName()}::{functions.csharp.Name}",
-                functions.functionPointer.GetFunctionPointerDeclaration(),
-                functions.csharp.Name + "_Delegate",
-                $$"""
+            string csharpContent = $$"""
                 [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
                 private {{functions.csharp.GetDelegateDeclaration(functions.csharp.Name + "_Type")}};
                 private static unsafe readonly {{functions.csharp.Name}}_Type {{functions.csharp.Name}}_Delegate = new {{functions.csharp.Name}}_Type({{functions.csharp.Name}});
                 {{functions.csharp.Print()}}
-                """,
+                """;
+            if (_additionalCSharpContent != null)
+                csharpContent = $$"""
+                    {{_additionalCSharpContent}}
+
+                    {{csharpContent}}
+                    """;
+
+            result.Init.Functions.Add(new GeneratedInitFunction(
+                $"{result.Type.GetFullyQualifiedName()}::{functions.csharp.Name}",
+                functions.functionPointer.GetFunctionPointerDeclaration(),
+                functions.csharp.Name + "_Delegate",
+                csharpContent,
                 CppTypeDeclarationsReferenced: [ .. functions.functionPointer.Parameters().Select(p => p.Type), functions.functionPointer.ReturnType() ],
                 CppTypeDefinitionsReferenced: [ result.Type ]
             ));
@@ -641,7 +659,8 @@ namespace Reinterop
                 .Private(Private())
                 .Static(Static())
                 .Specializes(Specializes())
-                .Body(Body());
+                .Body(Body())
+                .AdditionalCSharpContent(AdditionalCSharpContent());
         }
     }
 }
