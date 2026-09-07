@@ -20,7 +20,7 @@ namespace Reinterop
             if (function.TypeArguments().Count > 0)
                 methodName += "<" + string.Join(",", function.TypeArguments().Select(t => t.GetFullyQualifiedName())) + ">";
             CSharpCall callExpression = new CSharpCall(new CSharpMemberAccess(target, methodName), function.Parameters().Select(p => new CSharpIdentifier(p.Name)).ToArray());
-            if (function.ReturnType().SpecialType == SpecialType.System_Void)
+            if (function.ReturnType().IsVoid)
                 yield return new CSharpExpressionStatement(callExpression);
             else
                 yield return new CSharpReturn(callExpression);

@@ -135,6 +135,65 @@ namespace Reinterop.Tests
         }
 
         [Test]
+        public void NonVoidMethod()
+        {
+            AssertGeneratesWithoutErrors(
+                """
+                using Reinterop;
+
+                namespace TestNamespace
+                {
+                    public class Foo
+                    {
+                        public int GetValue()
+                        {
+                            return 42;
+                        }
+                    }
+
+                    [Reinterop]
+                    internal class ConfigureReinterop
+                    {
+                        public void ExposeToCPP()
+                        {
+                            Foo foo = new Foo();
+                            int value = foo.GetValue();
+                        }
+                    }
+                }
+                """);
+        }
+
+        [Test]
+        public void VoidPointerReturn()
+        {
+            AssertGeneratesWithoutErrors(
+                """
+                using Reinterop;
+
+                namespace TestNamespace
+                {
+                    public static unsafe class Foo
+                    {
+                        public static void* GetPointer()
+                        {
+                            return null;
+                        }
+                    }
+
+                    [Reinterop]
+                    internal class ConfigureReinterop
+                    {
+                        public unsafe void ExposeToCPP()
+                        {
+                            void* pointer = Foo.GetPointer();
+                        }
+                    }
+                }
+                """);
+        }
+
+        [Test]
         public void EventAddRemove()
         {
             AssertGeneratesWithoutErrors(

@@ -124,8 +124,8 @@ namespace Reinterop
                                 {{new[] { CSharpPrinter.Print(CSharpInterop.CallNativeFunction(
                                     new CSharpIdentifier(invokeCallbackName),
                                     callInvokeInteropParameters.Select(p => (CSharpExpression)new CSharpRaw(p)).ToArray(),
-                                    resultTypeName: invokeMethod.ReturnType.SpecialType != SpecialType.System_Void ? "var" : null,
-                                    returnExpression: invokeMethod.ReturnType.SpecialType != SpecialType.System_Void ? new CSharpRaw(csReturnType.GetReturnValueConversionFromInteropType("result")) : null)) }.JoinAndIndent("                                ")}}
+                                    resultTypeName: !csReturnType.IsVoid ? "var" : null,
+                                    returnExpression: !csReturnType.IsVoid ? new CSharpRaw(csReturnType.GetReturnValueConversionFromInteropType("result")) : null)) }.JoinAndIndent("                                ")}}
                             }
                         }
 
@@ -182,7 +182,7 @@ namespace Reinterop
             string resultImplementation = "";
             string returnImplementation = "return;";
             string returnDefault = "return;";
-            if (invokeMethod.ReturnType.SpecialType != SpecialType.System_Void)
+            if (!csReturnType.IsVoid)
             {
                 resultImplementation = "auto result = ";
                 returnImplementation = $"return {returnType.GetConversionToInteropType(context, "result")};";

@@ -402,7 +402,7 @@ namespace Reinterop
             }
 
             CSharpExpression? csReturnExpression = null;
-            if (csReturnType.SpecialType != SpecialType.System_Void)
+            if (!csReturnType.IsVoid)
             {
                 if (hasStructRewrite)
                 {
@@ -424,7 +424,7 @@ namespace Reinterop
             csCallStatements.AddRange(CSharpInterop.CallNativeFunction(
                 new CSharpIdentifier(name),
                 csCallArguments,
-                resultTypeName: csInteropReturnType.SpecialType != SpecialType.System_Void ? "var" : null,
+                resultTypeName: !csInteropReturnType.IsVoid ? "var" : null,
                 returnExpression: csReturnExpression));
 
             string modifiers = CSharpTypeUtility.GetAccessString(method.DeclaredAccessibility);

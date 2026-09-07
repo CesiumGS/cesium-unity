@@ -7,7 +7,7 @@ namespace Reinterop.Tests
     [TestFixture]
     public class CSharpFunctionCallableFromCppTests
     {
-        private static CppGenerationContext CreateContext() => new CppGenerationContext(CSharpCompilation.Create("Test"));
+        private static CppGenerationContext CreateContext() => new CppGenerationContext(CSharpCompilation.Create("Test", references: GenerationTestHelper.References));
 
         [Test]
         public void BoolsInteropAsBytes()
@@ -81,8 +81,8 @@ namespace Reinterop.Tests
             {
                 try
                 {
-                    TestNamespace.MyStruct returnValue_interop = ((TestNamespace.TestClass)Reinterop.ObjectHandleUtility.GetObjectFromHandle(thiz)).TestMethod(*myStruct);
-                    (*pReturnValue) = returnValue_interop;
+                    TestNamespace.MyStruct reinterop_returnValue = ((TestNamespace.TestClass)Reinterop.ObjectHandleUtility.GetObjectFromHandle(thiz)).TestMethod(*myStruct);
+                    (*pReturnValue) = reinterop_returnValue;
                 }
                 catch (System.Exception reinteropManagedException)
                 {

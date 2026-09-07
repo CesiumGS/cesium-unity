@@ -12,7 +12,16 @@ namespace Reinterop
     }
 
     // A bare name reference - a variable, or a (possibly qualified) function/type name used as a callee.
-    internal record CppIdentifier(string Name) : CppExpression;
+    internal record CppIdentifier(string Name) : CppExpression
+    {
+        public CppIdentifier(CppType type) : this(type.GetFullyQualifiedName())
+        {
+            HashSet<string> includes = new();
+            type.AddSourceIncludesToSet(includes);
+            if (includes.Count > 0)
+                RequiredIncludes = includes.ToArray();
+        }
+    }
 
     // An already-rendered expression, used as an escape hatch for pieces (e.g. argument conversions)
     // that haven't been converted to this DSL yet.

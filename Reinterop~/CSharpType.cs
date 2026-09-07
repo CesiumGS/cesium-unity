@@ -22,6 +22,8 @@ namespace Reinterop
         public readonly ITypeSymbol? Symbol;
         public readonly CSharpType? ContainingType;
 
+        public bool IsVoid => this.SpecialType == SpecialType.System_Void && !this.Flags.HasFlag(CSharpTypeFlags.Pointer);
+
         public Compilation Compilation
         {
             get { return Context.Compilation; }

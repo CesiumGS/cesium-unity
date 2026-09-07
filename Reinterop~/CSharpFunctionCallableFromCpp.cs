@@ -223,6 +223,8 @@ namespace Reinterop
             public CppFunction functionPointer;
         }
 
+        private const string ExceptionVariableName = "reinteropException";
+
         /// <summary>
         /// Creates a pair of functions - one in C# and one in C++ - that work together to enable interop between the two languages.
         /// The C++ function takes the C++ equivalent of the <see cref="Parameters"/> and returns the C++ equivalent of the
@@ -248,7 +250,7 @@ namespace Reinterop
             // If this function returns a value, make sure all return statements return a value.
             // If it doesn't return a value, any return statement must have a null value.
             IEnumerable<CSharpReturn> returnStatements = bodyStatements.Select(statement => statement as CSharpReturn).Where(statement => statement != null).Select(statement => statement!);
-            bool isVoidReturn = ReturnType().SpecialType == SpecialType.System_Void;
+            bool isVoidReturn = ReturnType().IsVoid;
             if (isVoidReturn && returnStatements.Any(statement => statement.Value != null))
                 throw new InvalidOperationException($"Cannot generate C# code for a CSharpFunctionCallableFromCpp ${GetDisplayName()} because it has a void return type but has a non-void return statement.");
             else if (!isVoidReturn && returnStatements.Any(statement => statement.Value == null))
@@ -287,12 +289,15 @@ namespace Reinterop
                     ? new CSharpIdentifier("thizUnboxed")
                     : csOwner.GetParameterConversionFromInteropTypeExpression(new CSharpIdentifier("thiz"));
                 cppInteropParameters.Insert(0, new CppParameter(cppOwner.AsParameterType().AsInteropType(), "thiz"));
-                cppCallArguments.Insert(0, cppOwner.GetConversionToInteropTypeExpression(_context, "(*this)"));
+                cppCallArguments.Insert(0, cppOwner.AsParameterType().GetConversionToInteropTypeExpression(_context, "(*this)"));
             }
 
-            List<CppStatement> cppBody = new();
+            List<CppStatement> cppBody = new() {
+                new CppVariableDeclaration("void*", ExceptionVariableName, new CppLiteral("nullptr"))
+            };
 
             // If this function requires a struct return rewrite, handle the necessary adjustments here.
+            CppExpression cppReturnExpression = new CppIdentifier("reinterop_returnValue");
             if (NeedsStructReturnRewrite)
             {
                 csInteropParameters.Add(new CSharpParameter(csInteropReturnType.AsPointer(), "pReturnValue"));
@@ -308,12 +313,13 @@ namespace Reinterop
                 if (csReturnType.Kind == InteropTypeKind.Nullable)
                 {
                     csInteropReturnType = CSharpType.FromSymbol(_context, _context.Compilation.GetSpecialType(SpecialType.System_Byte));
+                    CppType cppOriginalInteropReturnType = cppInteropReturnType;
                     cppInteropReturnType = CppType.UInt8.AsReturnType();
                     newReturnStatement = new CSharpIf(
-                        new CSharpBinary("!=", new CSharpIdentifier("returnValue_interop"), new CSharpLiteral("null")),
+                        new CSharpBinary("!=", new CSharpIdentifier("reinterop_returnValue"), new CSharpLiteral("null")),
                         [
                             // Nullable has a value
-                            new CSharpExpressionStatement(new CSharpBinary("=", new CSharpIdentifier("(*pReturnValue)"), new CSharpMemberAccess(new CSharpIdentifier("returnValue_interop"), "Value"))),
+                            new CSharpExpressionStatement(new CSharpBinary("=", new CSharpIdentifier("(*pReturnValue)"), new CSharpMemberAccess(new CSharpIdentifier("reinterop_returnValue"), "Value"))),
                             new CSharpReturn(new CSharpLiteral("1"))
                         ],
                         [
@@ -322,13 +328,18 @@ namespace Reinterop
                         ]
                     );
 
+                    cppCallArguments.Add(new CppUnary("&", new CppIdentifier(ExceptionVariableName)));
+
                     cppBody.Add(new CppVariableDeclaration(
                         cppInteropReturnType.GetFullyQualifiedName(),
                         "reinterop_returnValueIsValid",
-                        new CppCall(new CppIdentifier(csFunctionName), cppCallArguments.ToArray())
+                        new CppCall(new CppIdentifier(csFunctionName), cppCallArguments)
                     ));
-                    // TODO: convert from interop type. Even though it's not necessary?
-                    cppBody.Add(new CppReturn(new CppRaw("reinterop_returnValueIsValid ? std::make_optional(reinterop_returnValue) : std::nullopt")));
+                    cppReturnExpression = new CppTernary(
+                        new CppIdentifier("reinterop_returnValueIsValid"),
+                        new CppCall(new CppIdentifier("std::make_optional"), [new CppIdentifier("reinterop_returnValue")]),
+                        new CppIdentifier("std::nullopt")
+                    );
                 }
                 else
                 {
@@ -337,32 +348,59 @@ namespace Reinterop
                     newReturnStatement = new CSharpExpressionStatement(new CSharpBinary(
                         "=",
                         new CSharpUnary("*", new CSharpIdentifier("pReturnValue")),
-                        new CSharpIdentifier("returnValue_interop")
+                        new CSharpIdentifier("reinterop_returnValue")
                     ));
 
-                    cppBody.Add(new CppExpressionStatement(new CppCall(new CppIdentifier(csFunctionName), cppCallArguments.ToArray())));
-                    cppBody.Add(new CppReturn(new CppIdentifier("reinterop_returnValue")));
+                    cppCallArguments.Add(new CppUnary("&", new CppIdentifier(ExceptionVariableName)));
+                    cppBody.Add(new CppExpressionStatement(new CppCall(new CppIdentifier(csFunctionName), cppCallArguments)));
                 }
 
-                bodyStatements = RewriteStructReturn(bodyStatements, csReturnType, "returnValue_interop", newReturnStatement);
+                bodyStatements = RewriteStructReturn(bodyStatements, csReturnType, "reinterop_returnValue", newReturnStatement);
             }
-            else if (csReturnType.SpecialType != SpecialType.System_Void)
+            else if (!csReturnType.IsVoid)
             {
                 // Non-void return
-                cppBody.Add(new CppReturn(cppReturnType.GetConversionFromInteropTypeExpression(_context, new CppCall(new CppIdentifier(csFunctionName), cppCallArguments.ToArray()))));
+                cppCallArguments.Add(new CppUnary("&", new CppIdentifier(ExceptionVariableName)));
+                cppBody.Add(new CppVariableDeclaration(
+                    cppReturnType.GetFullyQualifiedName(),
+                    "reinterop_returnValue",
+                    cppReturnType.GetConversionFromInteropTypeExpression(_context, new CppCall(new CppIdentifier(csFunctionName), cppCallArguments))));
             }
             else
             {
                 // Void return
-                cppBody.Add(new CppExpressionStatement(new CppCall(new CppIdentifier(csFunctionName), cppCallArguments.ToArray())));
+                cppCallArguments.Add(new CppUnary("&", new CppIdentifier(ExceptionVariableName)));
+                cppBody.Add(new CppExpressionStatement(new CppCall(new CppIdentifier(csFunctionName), cppCallArguments)));
             }
+
+            // Check for a C# exception and rethrow it as a C++ one.
+            CppType reinteropNativeExceptionType = CppReinteropException.GetCppType(_context);
+            CppType systemException = CppType.FromCSharp(_context, CSharpType.FromSymbol(_context, _context.Compilation.GetTypeByMetadataName("System.Exception")!));
+            CppType objectHandleType = CppObjectHandle.GetCppType(_context);
+            cppBody.Add(new CppIf(
+                new CppBinary("!=", new CppIdentifier(ExceptionVariableName), new CppRaw("nullptr")),
+                [
+                    new CppThrow(new CppCall(new CppIdentifier(reinteropNativeExceptionType),
+                    [
+                        new CppCall(new CppIdentifier(systemException),
+                        [
+                            new CppCall(new CppIdentifier(objectHandleType), 
+                            [
+                                new CppIdentifier(ExceptionVariableName)
+                            ])
+                        ])
+                    ]))
+                ]));
+
+            if (!csReturnType.IsVoid)
+                cppBody.Add(new CppReturn(cppReturnExpression));
 
             // Rewrite the body to convert from the interop parameter types to the C# parameter types, and
             // from the C# return type to the interop return type. Skip this for functions that underwent a
             // struct return rewrite above - their return statements already produce the final interop value
             // (e.g. the 1/0 success byte), so re-converting them as if they were the original return type
             // would corrupt them.
-            if (!NeedsStructReturnRewrite && csReturnType.SpecialType != SpecialType.System_Void)
+            if (!NeedsStructReturnRewrite && !csReturnType.IsVoid)
                 bodyStatements = RewriteReturnStatementToConvertToInterop(bodyStatements, csReturnType, csInteropReturnType);
             if (csInteropParameterConversions.Count > 0)
                 bodyStatements = RewriteParametersToConvertFromInterop(bodyStatements, csInteropParameterConversions);
@@ -374,7 +412,7 @@ namespace Reinterop
                     "thizUnboxed",
                     csOwner.GetParameterConversionFromInteropTypeExpression(new CSharpRaw("thiz"))));
                 bodyStatements = RewriteReturnsToReboxNonBlittableStruct(bodyStatements);
-                if (csReturnType.SpecialType == SpecialType.System_Void)
+                if (csReturnType.IsVoid)
                     bodyStatements.Add(CreateReboxNonBlittableStructReceiverStatement());
             }
 
@@ -386,7 +424,7 @@ namespace Reinterop
             
             // Wrap the entire body in an exception handler
             CSharpReturn csReturnOnException;
-            if (csInteropReturnType.SpecialType == SpecialType.System_Void)
+            if (csInteropReturnType.IsVoid)
                 csReturnOnException = new CSharpReturn(null);
             else if (csInteropReturnType.Flags.HasFlag(CSharpTypeFlags.Pointer) || csInteropReturnType.Kind == InteropTypeKind.ClassWrapper)
                 csReturnOnException = new CSharpReturn(new CSharpLiteral("null"));
@@ -444,9 +482,17 @@ namespace Reinterop
         public void GenerateCode(CppGenerationContext context, GeneratedResult result)
         {
             InteropFunctions functions = CreatePairedInteropFunctions();
+
+            // Add function pointer declaration and definition to the C++ code.
             functions.functionPointer.AddToGeneration(result);
+            result.CppDefinition.Elements.Add(
+                new GeneratedCppDefinitionElement(
+                    functions.functionPointer.GetFunctionPointerDeclaration($"{result.Type.GetFullyQualifiedName()}::{functions.csharp.Name}") + " = nullptr;"));
+
+            // Add the actual C++ wrapper function declaration and definition.
             functions.cpp.AddToGeneration(result);
 
+            // Add the C# side of the interop.
             result.Init.Functions.Add(new GeneratedInitFunction(
                 $"{result.Type.GetFullyQualifiedName()}::{functions.csharp.Name}",
                 functions.functionPointer.GetFunctionPointerDeclaration(),
@@ -535,7 +581,11 @@ namespace Reinterop
         {
             return statements.SelectMany(statement => statement switch
             {
-                CSharpReturn r => new CSharpStatement[] { CreateReboxNonBlittableStructReceiverStatement(), r },
+                CSharpReturn r => [
+                    new CSharpVariableDeclaration("var", "reinterop_returnValue", r.Value),
+                    CreateReboxNonBlittableStructReceiverStatement(),
+                    new CSharpReturn(new CSharpIdentifier("reinterop_returnValue"))
+                ],
                 CSharpIf i => new CSharpStatement[] { new CSharpIf(i.Condition, RewriteReturnsToReboxNonBlittableStruct(i.Then), i.Else == null ? null : RewriteReturnsToReboxNonBlittableStruct(i.Else)) },
                 CSharpTryCatch t => new CSharpStatement[] { new CSharpTryCatch(RewriteReturnsToReboxNonBlittableStruct(t.TryBody), RewriteReturnsToReboxNonBlittableStruct(t.CatchBody)) },
                 _ => new CSharpStatement[] { statement }
@@ -552,9 +602,9 @@ namespace Reinterop
         // Rewrites a C# function body like this:
         //   return thiz.SomeFunction(whatever);
         // into a body like this:
-        //   SomeType returnValue_interop = thiz.SomeFunction(whatever);
-        //   *pReturnValue = returnValue;
-        // Where "returnValue_interop" is the string passed to the `returnValueName parameter, and "*pReturnValue = returnValue" is the statement passed
+        //   SomeType reinterop_returnValue = thiz.SomeFunction(whatever);
+        //   *pReturnValue = reinterop_returnValue;
+        // Where "reinterop_returnValue" is the string passed to the `returnValueName parameter, and "*pReturnValue = reinterop_returnValue" is the statement passed
         // to the `newReturnStatement` parameter.
         // This function handles more complicated bodies with multiple return statements (e.g., if statements), and will throw an exception if it
         // encounters a return statement that doesn't return a value when the function has a non-void return type.

@@ -197,7 +197,7 @@ namespace Reinterop
                     return {{csReturnType.GetConversionToInteropType("result")}};
                     """;
             }
-            else if (returnType.SpecialType == SpecialType.System_Void)
+            else if (csReturnType.IsVoid)
             {
                 // Regular method returning void.
                 implementation =
@@ -238,7 +238,7 @@ namespace Reinterop
             {
                 returnDefaultInstance = "return null;";
             }
-            else if (csInteropReturnType.SpecialType != SpecialType.System_Void)
+            else if (!csInteropReturnType.IsVoid)
             {
                 if (csInteropReturnType.Symbol != null &&
                     (csInteropReturnType.Symbol.TypeKind == TypeKind.Pointer || csInteropReturnType.Symbol.TypeKind == TypeKind.Class))
@@ -390,7 +390,7 @@ namespace Reinterop
             {
                 returnDefaultInstance = "return null;";
             }
-            else if (csInteropReturnType.SpecialType != SpecialType.System_Void)
+            else if (!csInteropReturnType.IsVoid)
             {
                 if (csInteropReturnType.Symbol != null &&
                     (csInteropReturnType.Symbol.TypeKind == TypeKind.Pointer || csInteropReturnType.Symbol.TypeKind == TypeKind.Class))
