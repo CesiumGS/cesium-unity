@@ -165,52 +165,46 @@ namespace Reinterop
             {
                 CSharpType csWrapperType = CSharpType.FromSymbol(context, item.Type);
 
-                string genericTypeHash = "";
-                INamedTypeSymbol? named = csWrapperType.Symbol as INamedTypeSymbol;
-                if (named != null && named.IsGenericType)
-                {
-                    genericTypeHash = Interop.HashParameters(null, named.TypeArguments);
-                }
-
-                string baseName = $"{csWrapperType.GetFullyQualifiedNamespace().Replace(".", "_")}_{csWrapperType.Name}{genericTypeHash}_Property_get_NativeImplementation";
-
-                CppInteropFunction nativeImplementationRecipe = new CppInteropFunction(context, wrapperType, "NativeImplementation")
-                    .ReturnType(implType.AsReference())
+                CSharpType intPtrType = CSharpType.FromSymbol(context, context.Compilation.GetSpecialType(SpecialType.System_IntPtr));
+                CSharpFunctionCallableFromCpp getPointer = new CSharpFunctionCallableFromCpp(context, item.Type)
+                    .Name("GetNativeImplementationPointer")
+                    .Private(true)
                     // Ideally the wrapper for NativeImplementation would return an ImplementationHandle.
                     // But Mono explodes, saying a managed function returning a SafeHandle is not implemented.
                     // So just use an IntPtr here instead.
-                    .CSharp($"{baseName}Delegate",
-                        $$"""
-                        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-                        private unsafe delegate System.IntPtr {{baseName}}Type(IntPtr thiz, IntPtr* reinteropException);
-                        private static unsafe readonly {{baseName}}Type {{baseName}}Delegate = new {{baseName}}Type({{baseName}});
-                        [AOT.MonoPInvokeCallback(typeof({{baseName}}Type))]
-                        private static unsafe System.IntPtr {{baseName}}(IntPtr thiz, IntPtr* reinteropException)
-                        {
-                            try
-                            {
-                                var o = {{csWrapperType.GetParameterConversionFromInteropType("thiz")}};
-                                if (o == null)
-                                    return System.IntPtr.Zero;
-                                return o.NativeImplementation.DangerousGetHandle();
-                            }
-                            catch (Exception reinteropManagedException)
-                            {
-                                *reinteropException = Reinterop.ObjectHandleUtility.CreateHandle(reinteropManagedException);
-                                return System.IntPtr.Zero;
-                            }
-                        }
-                        """);
+                    .ReturnType(intPtrType)
+                    .Body(new NativeImplementationBody());
 
                 // The interop call returns a raw pointer to the C++ implementation object, not a wrapped handle.
-                nativeImplementationRecipe.DefinitionBody(CppInterop.CallManagedFunction(
-                    new CppIdentifier(nativeImplementationRecipe.FunctionPointerName),
-                    nativeImplementationRecipe.CallArguments(),
-                    resultTypeName: "auto",
-                    returnExpression: new CppRaw($"*reinterpret_cast<{implType.GetFullyQualifiedName()}*>(result)"),
-                    resultVariableName: "result"));
+                CppFunction nativeImplementationRecipe = new CppFunction(context, result.Type, "NativeImplementation")
+                    .ReturnType(implType.AsReference())
+                    .DefinitionBody([
+                        new CppReturn(new CppUnary("*", new CppCast(
+                            implType.AsPointer(),
+                            new CppCall(
+                                new CppIdentifier(getPointer.Name()!),
+                                []
+                            )
+                        )))
+                    ]);
 
-                result.InteropFunctions.Add(nativeImplementationRecipe);
+                result.InteropFunctions2.Add(getPointer);
+                result.InteropFunctions3.Add(nativeImplementationRecipe);
+            }
+        }
+
+        private sealed class NativeImplementationBody : IGenerateCSharpBody
+        {
+            public IEnumerable<CSharpStatement> GenerateBody(CppGenerationContext context, CSharpFunctionCallableFromCpp function)
+            {
+                yield return new CSharpIf(
+                    new CSharpBinary("==", new CSharpIdentifier("thiz"), new CSharpLiteral("null")),
+                    [new CSharpReturn(new CSharpLiteral("System.IntPtr.Zero"))]);
+                yield return new CSharpReturn(new CSharpCall(
+                    new CSharpMemberAccess(
+                        new CSharpMemberAccess(new CSharpIdentifier("thiz"), "NativeImplementation"),
+                        "DangerousGetHandle"),
+                    []));
             }
         }
 

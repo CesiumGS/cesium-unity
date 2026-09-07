@@ -63,7 +63,7 @@ namespace Reinterop
                 CppTernary t => $"{Print(t.Condition)} ? {Print(t.Then)} : {Print(t.Else)}",
                 CppBinary b => $"{Print(b.Left)} {b.Op} {Print(b.Right)}",
                 CppUnary u => $"{u.Op}{Print(u.Operand)}",
-                CppCast c => $"{c.TargetType.GetFullyQualifiedName()}({Print(c.Expression)})",
+                CppCast c => $"({c.TargetType.GetFullyQualifiedName()})({Print(c.Expression)})",
                 CppMove m => $"std::move({Print(m.Expression)})",
                 CppMemberAccess m => $"{Print(m.Target)}.{m.MemberName}",
                 _ => throw new NotSupportedException($"Unsupported {nameof(CppExpression)}: {expression.GetType().Name}")

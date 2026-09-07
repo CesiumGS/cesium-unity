@@ -47,13 +47,13 @@
                 .ReturnType(targetType)
                 .Static(false)
                 .DefinitionBody([
-                    new CppReturn(new CppCast(
-                        targetType,
-                        new CppCall(
+                    new CppReturn(new CppCall(
+                        new CppIdentifier(targetType),
+                        [new CppCall(
                             new CppIdentifier(objectHandleType),
-                            [new CppRaw("this->_handle")])
-                        )
-                    )
+                            [new CppRaw("this->_handle")]
+                        )]
+                    ))
                 ]);
         }
     }
