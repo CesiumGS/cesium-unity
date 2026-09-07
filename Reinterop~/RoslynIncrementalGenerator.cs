@@ -21,33 +21,46 @@ public class RoslynIncrementalGenerator : IIncrementalGenerator
                 predicate: IsReinteropType,
                 transform: (GeneratorSyntaxContext ctx, CancellationToken token) => (SemanticModel: ctx.SemanticModel, Node: ctx.Node));
 
-        var cppGenerator = context.CompilationProvider.Combine(context.AnalyzerConfigOptionsProvider).Select((pair, _) => CreateCppGenerator(pair.Left, pair.Right));
-        IncrementalValuesProvider<IEnumerable<TypeToGenerate>> perMethodGenerationItems = selectedNodes.Combine(cppGenerator).Select((pair, _) => GetReinteropClass(pair.Right.Options, pair.Left.SemanticModel, pair.Left.Node));
+        var cppGenerator = context.CompilationProvider.Combine(context.AnalyzerConfigOptionsProvider).Select((pair, _) =>
+            GeneratorDiagnostics.Try(() => CreateCppGenerator(pair.Left, pair.Right)));
+        IncrementalValuesProvider<IEnumerable<TypeToGenerate>> perMethodGenerationItems = selectedNodes.Combine(cppGenerator).Select((pair, _) =>
+            GeneratorDiagnostics.Try(() => GetReinteropClass(pair.Right!.Options, pair.Left.SemanticModel, pair.Left.Node)) ?? Array.Empty<TypeToGenerate>());
 
         // Consolidate the GenerationItems from the different methods into a single dictionary.
         IncrementalValueProvider<Dictionary<ITypeSymbol, TypeToGenerate>> generationItems =
             perMethodGenerationItems
                 .Collect()
-                .Select(CombineGenerationItems);
+                .Select((items, token) =>
+                    GeneratorDiagnostics.Try(() => CombineGenerationItems(items, token)) ?? new Dictionary<ITypeSymbol, TypeToGenerate>(SymbolEqualityComparer.Default));
 
         // Process the generation items, for example, linking them together.
-        IncrementalValuesProvider<TypeToGenerate> processedGenerationItems = generationItems.SelectMany(Process);
+        IncrementalValuesProvider<TypeToGenerate> processedGenerationItems = generationItems.SelectMany((items, token) =>
+            GeneratorDiagnostics.Try(() => Process(items, token)) ?? Enumerable.Empty<TypeToGenerate>());
 
         //var cppGenerator = context.CompilationProvider.Select(CreateCppGenerator);
         var withCppGenerator = processedGenerationItems.Combine(cppGenerator);
 
         // Generate C++ code.
-        var typeDefinitions = withCppGenerator.Select((pair, _) => pair.Right.GenerateType(pair.Left));
+        var typeDefinitions = withCppGenerator.Select((pair, _) => GeneratorDiagnostics.Try(() => pair.Right!.GenerateType(pair.Left)));
         var typesAndGenerator = typeDefinitions.Collect().Combine(cppGenerator);
-        var sourceFiles = typesAndGenerator.SelectMany((pair, _) => pair.Right.DistributeToSourceFiles(pair.Left)).Combine(cppGenerator);
-        context.RegisterImplementationSourceOutput(sourceFiles, (context, pair) => pair.Left.Write(pair.Right.Options));
+        var sourceFiles = typesAndGenerator.SelectMany((pair, _) =>
+            GeneratorDiagnostics.Try(() => pair.Right!.DistributeToSourceFiles(pair.Left)) ?? Enumerable.Empty<CppSourceFile>()).Combine(cppGenerator);
+        context.RegisterImplementationSourceOutput(sourceFiles, (context, pair) =>
+        {
+            GeneratorDiagnostics.Try(() => pair.Left.Write(pair.Right!.Options));
+            GeneratorDiagnostics.ReportCaughtExceptions(context.ReportDiagnostic);
+        });
 
         // Generate C++ initialization function
         //context.RegisterImplementationSourceOutput(typesAndGenerator, (context, pair) => pair.Right.WriteInitializeFunction(pair.Left));
         //context.RegisterImplementationSourceOutput(typesAndGenerator, (context, pair) => CppObjectHandle.Generate(pair.Right.Options));
 
         // Generate the required items
-        context.RegisterSourceOutput(typesAndGenerator, (context, pair) => CodeGenerator.WriteCSharpCode(context, pair.Right.Options, pair.Left));
+        context.RegisterSourceOutput(typesAndGenerator, (context, pair) =>
+        {
+            GeneratorDiagnostics.Try(() => CodeGenerator.WriteCSharpCode(context, pair.Right!.Options, pair.Left));
+            GeneratorDiagnostics.ReportCaughtExceptions(context.ReportDiagnostic);
+        });
     }
 
     private static Dictionary<ITypeSymbol, TypeToGenerate> CombineGenerationItems(ImmutableArray<IEnumerable<TypeToGenerate>> listOfItems, CancellationToken token)

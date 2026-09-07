@@ -134,6 +134,41 @@ namespace Reinterop.Tests
                 """);
         }
 
+        [Test]
+        public void EventAddRemove()
+        {
+            AssertGeneratesWithoutErrors(
+                """
+                using Reinterop;
+                using System;
+
+                namespace TestNamespace
+                {
+                    public class Foo
+                    {
+                        public event Action? Changed;
+
+                        public void RaiseChanged()
+                        {
+                            Changed?.Invoke();
+                        }
+                    }
+
+                    [Reinterop]
+                    internal class ConfigureReinterop
+                    {
+                        public void ExposeToCPP()
+                        {
+                            Foo foo = new Foo();
+                            Action handler = () => { };
+                            foo.Changed += handler;
+                            foo.Changed -= handler;
+                        }
+                    }
+                }
+                """);
+        }
+
         private static void AssertGeneratesWithoutErrors(string source)
         {
             // Reinterop writes generated C++ files as a side effect of running - redirect them to a

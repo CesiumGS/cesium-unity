@@ -17,8 +17,20 @@ namespace Reinterop
             if (evt.AddMethod == null || evt.RemoveMethod == null)
                 return;
 
-            Methods.GenerateSingleMethod(context, state, mainItem, result, evt.AddMethod);
-            Methods.GenerateSingleMethod(context, state, mainItem, result, evt.RemoveMethod);
+            GenerateSingleAccessor(context, mainItem, result, evt, evt.AddMethod, isAdd: true);
+            GenerateSingleAccessor(context, mainItem, result, evt, evt.RemoveMethod, isAdd: false);
+        }
+
+        private static void GenerateSingleAccessor(CppGenerationContext context, TypeToGenerate item, GeneratedResult result, IEventSymbol evt, IMethodSymbol method, bool isAdd)
+        {
+            CSharpFunctionCallableFromCpp interop = new CSharpFunctionCallableFromCpp(context, item.Type)
+                .Name(method.Name)
+                .ReturnType(method.ReturnType)
+                .Parameters(method.Parameters)
+                .Static(method.IsStatic)
+                .Body(new CSharpBodyAddRemoveEventDelegate(evt, isAdd));
+
+            result.InteropFunctions2.Add(interop);
         }
     }
 }

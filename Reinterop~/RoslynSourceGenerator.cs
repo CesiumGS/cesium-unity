@@ -24,6 +24,13 @@ namespace Reinterop
         {
             ReinteropSyntaxReceiver receiver = (ReinteropSyntaxReceiver)context.SyntaxReceiver!;
 
+            if (receiver.CrashException != null)
+            {
+                Location location = receiver.CrashLocation ?? GeneratorDiagnostics.GetFallbackLocation(context.Compilation);
+                context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.GeneratorCrashed, location, GeneratorDiagnostics.FormatException(receiver.CrashException)));
+                return;
+            }
+
             // Don't generate any support code if there's nothing real to generate.
             if (receiver.ClassesImplementedInCpp.Count == 0 && receiver.ExposeToCppMethods.Count == 0)
                 return;
@@ -34,6 +41,19 @@ namespace Reinterop
             //     Thread.Sleep(100);
             // }
 
+            try
+            {
+                ExecuteCore(context, receiver);
+            }
+            catch (Exception ex)
+            {
+                Location location = GeneratorDiagnostics.GetFallbackLocation(context.Compilation);
+                context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.GeneratorCrashed, location, GeneratorDiagnostics.FormatException(ex)));
+            }
+        }
+
+        private void ExecuteCore(GeneratorExecutionContext context, ReinteropSyntaxReceiver receiver)
+        {
             CSharpReinteropAttribute.Generate(context);
             CSharpReinteropNativeImplementationAttribute.Generate(context);
             CSharpObjectHandleUtility.Generate(context);
@@ -299,7 +319,25 @@ namespace Reinterop
             public readonly Dictionary<string, ExpressionSyntax> Properties = new Dictionary<string, ExpressionSyntax>();
             public string? PropertiesPath = null;
 
+            // Roslyn calls OnVisitSyntaxNode directly, outside of Execute's try/catch, so an
+            // exception here would otherwise be lost. Capture it and let Execute report it instead.
+            public Exception? CrashException = null;
+            public Location? CrashLocation = null;
+
             public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
+            {
+                try
+                {
+                    OnVisitSyntaxNodeCore(syntaxNode);
+                }
+                catch (Exception ex) when (CrashException == null)
+                {
+                    CrashException = ex;
+                    CrashLocation = syntaxNode.GetLocation();
+                }
+            }
+
+            private void OnVisitSyntaxNodeCore(SyntaxNode syntaxNode)
             {
                 var attributeNode = syntaxNode as AttributeSyntax;
                 if (attributeNode == null)
