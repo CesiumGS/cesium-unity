@@ -1,3 +1,5 @@
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using NUnit.Framework;
 
 namespace Reinterop.Tests
@@ -6,6 +8,9 @@ namespace Reinterop.Tests
     public class CSharpSyntaxPrintingTests
     {
         private static string Lines(params string[] lines) => string.Join(Environment.NewLine, lines);
+        private static CSharpCompilation compilation = GenerationTestHelper.CreateCompilation("");
+        private static CppGenerationContext context = new CppGenerationContext(compilation);
+
 
         [Test]
         public void Expressions_PrintAllNodeKinds()
@@ -19,7 +24,8 @@ namespace Reinterop.Tests
             Assert.That(CSharpPrinter.Print(new CSharpUnary("&", new CSharpIdentifier("value"))), Is.EqualTo("&value"));
             Assert.That(CSharpPrinter.Print(new CSharpMemberAccess(new CSharpIdentifier("value"), "Length")), Is.EqualTo("value.Length"));
             Assert.That(CSharpPrinter.Print(new CSharpElementAccess(new CSharpIdentifier("values"), [new CSharpIdentifier("index")])), Is.EqualTo("values[index]"));
-            Assert.That(CSharpPrinter.Print(new CSharpNew("Widget", [new CSharpIdentifier("value")])), Is.EqualTo("new Widget(value)"));
+            CSharpType widgetType = new CSharpType(context, InteropTypeKind.ClassWrapper, [], "Widget", SpecialType.None);
+            Assert.That(CSharpPrinter.Print(new CSharpNew(widgetType, [new CSharpIdentifier("value")])), Is.EqualTo("new Widget(value)"));
             Assert.That(CSharpPrinter.Print(new CSharpArrayNew("int", [new CSharpLiteral("3")])), Is.EqualTo("new int[3]"));
             Assert.That(CSharpPrinter.Print(new CSharpCast("string", new CSharpIdentifier("value"))), Is.EqualTo("(string)value"));
         }
@@ -39,7 +45,8 @@ namespace Reinterop.Tests
             Assert.That(CSharpPrinter.Print(new CSharpVariableDeclaration("var", "value", new CSharpLiteral("null"))), Is.EqualTo("var value = null;"));
             Assert.That(CSharpPrinter.Print(new CSharpVariableDeclaration("int", "value")), Is.EqualTo("int value;"));
             Assert.That(CSharpPrinter.Print(new CSharpExpressionStatement(new CSharpCall(new CSharpIdentifier("Use"), [new CSharpIdentifier("value")]))), Is.EqualTo("Use(value);"));
-            Assert.That(CSharpPrinter.Print(new CSharpThrow(new CSharpNew("Exception", []))), Is.EqualTo("throw new Exception();"));
+            CSharpType exceptionType = new CSharpType(context, InteropTypeKind.ClassWrapper, [], "Exception", SpecialType.None);
+            Assert.That(CSharpPrinter.Print(new CSharpThrow(new CSharpNew(exceptionType, []))), Is.EqualTo("throw new Exception();"));
             Assert.That(CSharpPrinter.Print(new CSharpReturn()), Is.EqualTo("return;"));
             Assert.That(CSharpPrinter.Print(new CSharpReturn(new CSharpIdentifier("value"))), Is.EqualTo("return value;"));
         }

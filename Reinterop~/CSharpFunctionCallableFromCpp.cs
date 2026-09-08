@@ -439,7 +439,7 @@ namespace Reinterop
             else if (csInteropReturnType.Flags.HasFlag(CSharpTypeFlags.Pointer) || csInteropReturnType.Kind == InteropTypeKind.ClassWrapper)
                 csReturnOnException = new CSharpReturn(new CSharpLiteral("null"));
             else
-                csReturnOnException = new CSharpReturn(new CSharpNew(csInteropReturnType.GetFullyQualifiedName(), []));
+                csReturnOnException = new CSharpReturn(new CSharpNew(csInteropReturnType, []));
 
             bodyStatements = [
                 new CSharpTryCatch(
@@ -582,7 +582,7 @@ namespace Reinterop
                 CSharpIs i => new CSharpIs(RewriteExpressionToConvertFromInterop(i.Expression, parameterConversions)!, i.TypeName, i.CastedVariableName),
                 CSharpMemberAccess m => new CSharpMemberAccess(RewriteExpressionToConvertFromInterop(m.Target, parameterConversions)!, m.MemberName),
                 CSharpElementAccess e => new CSharpElementAccess(RewriteExpressionToConvertFromInterop(e.Target, parameterConversions)!, e.Arguments.Select(a => RewriteExpressionToConvertFromInterop(a, parameterConversions)!).ToArray()),
-                CSharpNew n => new CSharpNew(n.TypeName, n.Arguments.Select(a => RewriteExpressionToConvertFromInterop(a, parameterConversions)!).ToArray()),
+                CSharpNew n => new CSharpNew(n.Type, n.Arguments.Select(a => RewriteExpressionToConvertFromInterop(a, parameterConversions)!).ToArray()),
                 CSharpArrayNew n => new CSharpArrayNew(n.ElementTypeName, n.Dimensions.Select(d => RewriteExpressionToConvertFromInterop(d, parameterConversions)!).ToArray()),
                 CSharpCast c => new CSharpCast(c.TypeName, RewriteExpressionToConvertFromInterop(c.Expression, parameterConversions)!),
                 _ => expression

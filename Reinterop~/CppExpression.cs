@@ -2,10 +2,9 @@ namespace Reinterop
 {
     /// <summary>
     /// Base class for the small, restricted representation of C++ expressions needed to express
-    /// Reinterop's interop bodies. This is not a general-purpose C++ AST - it only models the fixed
-    /// set of shapes used by the "recipes" in CppInterop.cs and the generators, so that those bodies
-    /// can be built and tested structurally instead of via hand-written, easily-diverging string
-    /// interpolation. Rendered to source text by <see cref="CppPrinter"/>.
+    /// Reinterop's generated interop bodies. This is not a general-purpose C++ AST - it models the
+    /// fixed set of expression shapes used by the generator and is rendered by
+    /// <see cref="CppPrinter"/>.
     /// </summary>
     internal abstract record CppExpression
     {

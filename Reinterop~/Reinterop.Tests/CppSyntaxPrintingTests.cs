@@ -8,14 +8,6 @@ namespace Reinterop.Tests
     /// </summary>
     public class CppSyntaxPrintingTests
     {
-        private static readonly CppType StdString = new CppType(
-            InteropTypeKind.Unknown,
-            ["std"],
-            "string",
-            null,
-            0,
-            "<string>");
-
         private static string NL => Environment.NewLine;
 
         private static string Lines(params string[] lines) => string.Join(NL, lines);
@@ -32,7 +24,7 @@ namespace Reinterop.Tests
         [Test]
         public void Identifier_FromType_PrintsFullyQualifiedNameAndRequiresItsIncludes()
         {
-            CppIdentifier identifier = new CppIdentifier(StdString);
+            CppIdentifier identifier = new CppIdentifier(CppType.StlString);
             Assert.That(CppPrinter.Print(identifier), Is.EqualTo("::std::string"));
             Assert.That(CppPrinter.GetRequiredIncludes(identifier), Is.EquivalentTo(new[] { "<string>" }));
         }
@@ -115,7 +107,7 @@ namespace Reinterop.Tests
         public void Cast_PrintsCStyleCast()
         {
             Assert.That(
-                CppPrinter.Print(CppCast.CStyle(StdString, new CppIdentifier("x"))),
+                CppPrinter.Print(CppCast.CStyle(CppType.StlString, new CppIdentifier("x"))),
                 Is.EqualTo("(::std::string)(x)"));
         }
 

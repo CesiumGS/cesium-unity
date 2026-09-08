@@ -408,7 +408,7 @@ namespace Reinterop
                 csCallStatements.Add(new CSharpVariableDeclaration(
                     "var",
                     "returnValue",
-                    new CSharpNew(csOriginalInteropReturnType.AsInteropTypeReturn().GetFullyQualifiedName(), [])));
+                    new CSharpNew(csOriginalInteropReturnType.AsInteropTypeReturn(), [])));
             }
 
             CSharpExpression? csReturnExpression = null;

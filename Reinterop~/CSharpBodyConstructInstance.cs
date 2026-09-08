@@ -10,7 +10,7 @@ namespace Reinterop
         public IEnumerable<CSharpStatement> GenerateBody(CppGenerationContext context, CSharpFunctionCallableFromCpp function)
         {
             yield return new CSharpReturn(new CSharpNew(
-                function.Owner().GetFullyQualifiedName(),
+                function.Owner(),
                 function.Parameters().Select(p => new CSharpIdentifier(p.Name)).ToArray()));
         }
     }

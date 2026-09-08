@@ -75,64 +75,64 @@ namespace Reinterop
                 callbackParameters.Select(p => p.CsType.GetConversionToInteropTypeExpression(new CSharpIdentifier(p.Name))));
             var csReturnType = CSharpType.FromSymbol(context, invokeMethod.ReturnType);
 
-                string nativeFunctionCSharpContent =
-                    $$"""
-                    private class {{csType.Name}}{{genericTypeHash}}NativeFunction : System.IDisposable
-                    {
-                        internal class ImplementationHandle : Microsoft.Win32.SafeHandles.SafeHandleZeroOrMinusOneIsInvalid
-                        {
-                            public ImplementationHandle(IntPtr nativeImplementation) : base(true)
-                            {
-                                SetHandle(nativeImplementation);
-                            }
-
-                            [System.Runtime.ConstrainedExecution.ReliabilityContract(System.Runtime.ConstrainedExecution.Consistency.WillNotCorruptState, System.Runtime.ConstrainedExecution.Cer.Success)]
-                            protected override bool ReleaseHandle()
-                            {
-                                {{disposeCallbackName}}(this.handle);
-                                return true;
-                            }
-                        }
-
-                        [System.NonSerialized]
-                        private ImplementationHandle _callbackFunction;
-
-                        public {{csType.Name}}{{genericTypeHash}}NativeFunction(IntPtr callbackFunction)
-                        {
-                            _callbackFunction = new ImplementationHandle(callbackFunction);
-                        }
-
-                        public void Dispose()
-                        {
-                            if (this._callbackFunction != null && !this._callbackFunction.IsInvalid)
-                                this._callbackFunction.Dispose();
-                            this._callbackFunction = null;
-                        }
-
-                        public unsafe {{csReturnType.GetFullyQualifiedName()}} Invoke({{string.Join(", ", invokeParameters)}})
-                        {
-                            if (_callbackFunction == null)
-                                throw new System.ObjectDisposedException("{{csType.Name}}");
-
-                            unsafe
-                            {
-                                {{new[] { CSharpPrinter.Print(CSharpInterop.CallNativeFunction(
-                                    new CSharpIdentifier(invokeCallbackName),
-                                    callInvokeInteropParameters.ToArray(),
-                                    resultTypeName: !csReturnType.IsVoid ? "var" : null,
-                                    returnExpression: !csReturnType.IsVoid ? csReturnType.GetReturnValueConversionFromInteropTypeExpression("result") : null)) }.JoinAndIndent("                                ")}}
-                            }
-                        }
-
-                        [System.Runtime.InteropServices.DllImport("{{context.NativeLibraryName}}", CallingConvention=System.Runtime.InteropServices.CallingConvention.Cdecl)]
-                        private static extern void {{disposeCallbackName}}(IntPtr callbackFunction);
-                        [System.Runtime.InteropServices.DllImport("{{context.NativeLibraryName}}", CallingConvention=System.Runtime.InteropServices.CallingConvention.Cdecl)]
-                        private static unsafe extern {{csReturnType.AsInteropTypeReturn().GetFullyQualifiedName()}} {{invokeCallbackName}}({{string.Join(", ", invokeInteropParameters)}}, IntPtr* reinteropException);
-                    }
-                    """
-                ;
-
             string nativeFunctionTypeName = $"{csType.Name}{genericTypeHash}NativeFunction";
+            string nativeFunctionCSharpContent =
+                $$"""
+                private class {{nativeFunctionTypeName}} : System.IDisposable
+                {
+                    internal class ImplementationHandle : Microsoft.Win32.SafeHandles.SafeHandleZeroOrMinusOneIsInvalid
+                    {
+                        public ImplementationHandle(IntPtr nativeImplementation) : base(true)
+                        {
+                            SetHandle(nativeImplementation);
+                        }
+
+                        [System.Runtime.ConstrainedExecution.ReliabilityContract(System.Runtime.ConstrainedExecution.Consistency.WillNotCorruptState, System.Runtime.ConstrainedExecution.Cer.Success)]
+                        protected override bool ReleaseHandle()
+                        {
+                            {{disposeCallbackName}}(this.handle);
+                            return true;
+                        }
+                    }
+
+                    [System.NonSerialized]
+                    private ImplementationHandle _callbackFunction;
+
+                    public {{nativeFunctionTypeName}}(IntPtr callbackFunction)
+                    {
+                        _callbackFunction = new ImplementationHandle(callbackFunction);
+                    }
+
+                    public void Dispose()
+                    {
+                        if (this._callbackFunction != null && !this._callbackFunction.IsInvalid)
+                            this._callbackFunction.Dispose();
+                        this._callbackFunction = null;
+                    }
+
+                    public unsafe {{csReturnType.GetFullyQualifiedName()}} Invoke({{string.Join(", ", invokeParameters)}})
+                    {
+                        if (_callbackFunction == null)
+                            throw new System.ObjectDisposedException("{{csType.Name}}");
+
+                        unsafe
+                        {
+                            {{new[] { CSharpPrinter.Print(CSharpInterop.CallNativeFunction(
+                                new CSharpIdentifier(invokeCallbackName),
+                                callInvokeInteropParameters.ToArray(),
+                                resultTypeName: !csReturnType.IsVoid ? "var" : null,
+                                returnExpression: !csReturnType.IsVoid ? csReturnType.GetReturnValueConversionFromInteropTypeExpression("result") : null)) }.JoinAndIndent("                                ")}}
+                        }
+                    }
+
+                    [System.Runtime.InteropServices.DllImport("{{context.NativeLibraryName}}", CallingConvention=System.Runtime.InteropServices.CallingConvention.Cdecl)]
+                    private static extern void {{disposeCallbackName}}(IntPtr callbackFunction);
+                    [System.Runtime.InteropServices.DllImport("{{context.NativeLibraryName}}", CallingConvention=System.Runtime.InteropServices.CallingConvention.Cdecl)]
+                    private static unsafe extern {{csReturnType.AsInteropTypeReturn().GetFullyQualifiedName()}} {{invokeCallbackName}}({{string.Join(", ", invokeInteropParameters)}}, IntPtr* reinteropException);
+                }
+                """;
+
+            CSharpType nativeFunctionType = new CSharpType(context, InteropTypeKind.ClassWrapper, [], nativeFunctionTypeName, 0);
 
             CSharpFunctionCallableFromCpp createDelegateRecipe = new CSharpFunctionCallableFromCpp(context, item.Type)
                 .Name("CreateDelegate")
@@ -141,7 +141,7 @@ namespace Reinterop
                 .Static(true)
                 .Private(true)
                 .AdditionalCSharpContent(nativeFunctionCSharpContent)
-                .Body(new CSharpBodyCreateDelegate(csType, nativeFunctionTypeName));
+                .Body(new CSharpBodyCreateDelegate(nativeFunctionType));
             result.InteropFunctions.Add(createDelegateRecipe);
 
             CppFunction constructorRecipe = new CppFunction(context, itemType, itemType.Name)

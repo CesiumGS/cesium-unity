@@ -128,8 +128,10 @@ namespace Reinterop
                     }
                     if (this.ContainingType != null)
                         return this.ContainingType.GetFullyQualifiedName() + "." + this.Name + generics + suffix;
-                    else
-                        return this.GetFullyQualifiedNamespace() + "." + this.Name + generics + suffix;
+                    
+                    string ns = this.GetFullyQualifiedNamespace();
+                    if (ns.Length > 0) ns += ".";
+                    return ns + this.Name + generics + suffix;
             }            
         }
 
