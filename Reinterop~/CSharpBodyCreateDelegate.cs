@@ -1,12 +1,16 @@
 namespace Reinterop
 {
     /// <summary>
-    /// A C# interop function body that creates a delegate instance from a C++ std::function pointer.
+    /// A C# interop function body that creates a delegate instance from a C++ `std::function` pointer.
     /// </summary>
     internal class CSharpBodyCreateDelegate : IGenerateCSharpBody
     {
         private readonly CSharpType _nativeFunctionType;
 
+        /// <summary>
+        /// Initializes a new instance.
+        /// </summary>
+        /// <param name="nativeFunctionType">The C# type that holds the `std::function` pointer and invokes the function when its `Invoke` method is called.</param>
         public CSharpBodyCreateDelegate(CSharpType nativeFunctionType)
         {
             _nativeFunctionType = nativeFunctionType;

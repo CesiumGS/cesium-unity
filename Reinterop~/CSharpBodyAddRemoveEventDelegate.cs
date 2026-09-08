@@ -4,14 +4,18 @@ namespace Reinterop
 {
     /// <summary>
     /// An implementation of a C# interop function that adds or removes a handler from an event
-    /// using += / -= syntax. Events cannot have their add/remove accessors called directly as
-    /// methods (that produces CS0571), so this must be used instead of <see cref="CSharpBodyInvokeMethod"/>.
+    /// using += / -= syntax.
     /// </summary>
     internal class CSharpBodyAddRemoveEventDelegate : IGenerateCSharpBody
     {
         private readonly IEventSymbol _event;
         private readonly bool _isAdd;
 
+        /// <summary>
+        /// Initializes a new instance.
+        /// </summary>
+        /// <param name="evt">The event to add or remove a handler from.</param>
+        /// <param name="isAdd">True to add a handler, false to remove it.</param>
         public CSharpBodyAddRemoveEventDelegate(IEventSymbol evt, bool isAdd)
         {
             _event = evt;

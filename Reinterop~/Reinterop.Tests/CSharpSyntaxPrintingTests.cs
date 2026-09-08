@@ -20,7 +20,8 @@ namespace Reinterop.Tests
             Assert.That(CSharpPrinter.Print(new CSharpCall(new CSharpIdentifier("f"), [new CSharpIdentifier("a"), new CSharpLiteral("1")])), Is.EqualTo("f(a, 1)"));
             Assert.That(CSharpPrinter.Print(new CSharpBinary("!=", new CSharpIdentifier("a"), new CSharpLiteral("0"))), Is.EqualTo("a != 0"));
             Assert.That(CSharpPrinter.Print(new CSharpTernary(new CSharpIdentifier("ok"), new CSharpIdentifier("a"), new CSharpIdentifier("b"))), Is.EqualTo("ok ? a : b"));
-            Assert.That(CSharpPrinter.Print(new CSharpIs(new CSharpIdentifier("value"), "string", "text")), Is.EqualTo("value is string text"));
+            CSharpType stringType = CSharpType.FromSymbol(context, compilation.GetSpecialType(SpecialType.System_String));
+            Assert.That(CSharpPrinter.Print(new CSharpIs(new CSharpIdentifier("value"), stringType, "text")), Is.EqualTo("value is System.String text"));
             Assert.That(CSharpPrinter.Print(new CSharpUnary("&", new CSharpIdentifier("value"))), Is.EqualTo("&value"));
             Assert.That(CSharpPrinter.Print(new CSharpMemberAccess(new CSharpIdentifier("value"), "Length")), Is.EqualTo("value.Length"));
             Assert.That(CSharpPrinter.Print(new CSharpElementAccess(new CSharpIdentifier("values"), [new CSharpIdentifier("index")])), Is.EqualTo("values[index]"));
@@ -28,7 +29,6 @@ namespace Reinterop.Tests
             Assert.That(CSharpPrinter.Print(new CSharpNew(widgetType, [new CSharpIdentifier("value")])), Is.EqualTo("new Widget(value)"));
             CSharpType intType = CSharpType.FromSymbol(context, compilation.GetSpecialType(SpecialType.System_Int32));
             Assert.That(CSharpPrinter.Print(new CSharpArrayNew(intType, [new CSharpLiteral("3")])), Is.EqualTo("new System.Int32[3]"));
-            CSharpType stringType = CSharpType.FromSymbol(context, compilation.GetSpecialType(SpecialType.System_String));
             Assert.That(CSharpPrinter.Print(new CSharpCast(stringType, new CSharpIdentifier("value"))), Is.EqualTo("(System.String)value"));
         }
 

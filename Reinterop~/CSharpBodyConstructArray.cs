@@ -1,5 +1,8 @@
 namespace Reinterop
 {
+    /// <summary>
+    /// An implementation of a C# interop function that constructs a new array of the owner type.
+    /// </summary>
     internal class CSharpBodyConstructArray : IGenerateCSharpBody
     {
         public IEnumerable<CSharpStatement> GenerateBody(CppGenerationContext context, CSharpFunctionCallableFromCpp function)

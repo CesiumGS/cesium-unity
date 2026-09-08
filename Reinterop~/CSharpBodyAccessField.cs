@@ -10,6 +10,11 @@ namespace Reinterop
         private readonly IFieldSymbol _field;
         private readonly bool _isGetter;
 
+        /// <summary>
+        /// Initializes a new instance.
+        /// </summary>
+        /// <param name="field">The field to read or write.</param>
+        /// <param name="isGetter">True to read the field, false to write it.</param>
         public CSharpBodyAccessField(IFieldSymbol field, bool isGetter)
         {
             _field = field;
@@ -22,12 +27,9 @@ namespace Reinterop
             CSharpExpression accessor = new CSharpMemberAccess(target, _field.Name);
 
             if (_isGetter)
-            {
                 yield return new CSharpReturn(accessor);
-                yield break;
-            }
-
-            yield return new CSharpExpressionStatement(new CSharpBinary("=", accessor, new CSharpIdentifier(function.Parameters().Single().Name)));
+            else
+                yield return new CSharpExpressionStatement(new CSharpBinary("=", accessor, new CSharpIdentifier(function.Parameters().Single().Name)));
         }
     }
 }

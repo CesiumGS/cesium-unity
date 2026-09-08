@@ -233,7 +233,7 @@ namespace Reinterop
             // Add a Dispose method to free the native function without waiting for the finalizer.
             CSharpFunctionCallableFromCpp disposeRecipe = new CSharpFunctionCallableFromCpp(context, item.Type)
                 .Name("Dispose")
-                .Body(new CSharpBodyDisposeDelegate(nativeFunctionTypeName));
+                .Body(new CSharpBodyDisposeDelegate(nativeFunctionType));
             result.InteropFunctions.Add(disposeRecipe);
         }
     }

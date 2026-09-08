@@ -579,7 +579,7 @@ namespace Reinterop
                 CSharpTernary t => new CSharpTernary(RewriteExpressionToConvertFromInterop(t.Condition, parameterConversions)!, RewriteExpressionToConvertFromInterop(t.Then, parameterConversions)!, RewriteExpressionToConvertFromInterop(t.Else, parameterConversions)!),
                 CSharpBinary b => new CSharpBinary(b.Op, RewriteExpressionToConvertFromInterop(b.Left, parameterConversions)!, RewriteExpressionToConvertFromInterop(b.Right, parameterConversions)!),
                 CSharpUnary u => new CSharpUnary(u.Op, RewriteExpressionToConvertFromInterop(u.Operand, parameterConversions)!),
-                CSharpIs i => new CSharpIs(RewriteExpressionToConvertFromInterop(i.Expression, parameterConversions)!, i.TypeName, i.CastedVariableName),
+                CSharpIs i => new CSharpIs(RewriteExpressionToConvertFromInterop(i.Expression, parameterConversions)!, i.Type, i.CastedVariableName),
                 CSharpMemberAccess m => new CSharpMemberAccess(RewriteExpressionToConvertFromInterop(m.Target, parameterConversions)!, m.MemberName),
                 CSharpElementAccess e => new CSharpElementAccess(RewriteExpressionToConvertFromInterop(e.Target, parameterConversions)!, e.Arguments.Select(a => RewriteExpressionToConvertFromInterop(a, parameterConversions)!).ToArray()),
                 CSharpNew n => new CSharpNew(n.Type, n.Arguments.Select(a => RewriteExpressionToConvertFromInterop(a, parameterConversions)!).ToArray()),

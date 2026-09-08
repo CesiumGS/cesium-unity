@@ -7,11 +7,17 @@ using System.Diagnostics;
 
 namespace Reinterop
 {
+    /// <summary>
+    /// The main entry point for the Roslyn (C# compiler) source generator. This class is instantiated by the compiler,
+    /// and its Initialize and Execute methods are called to generate code.
+    /// </summary>
     [Generator]
     internal class RoslynSourceGenerator : ISourceGenerator
     {
         public void Initialize(GeneratorInitializationContext context)
         {
+            // Uncomment the following to launch the debugger at the start of code generation.
+            // This is useful for debugging the source generator itself, but unfortunately it only works on Windows.
             // if (!Debugger.IsAttached)
             // {
             //    Debugger.Launch();
@@ -54,61 +60,27 @@ namespace Reinterop
 
         private void ExecuteCore(GeneratorExecutionContext context, ReinteropSyntaxReceiver receiver)
         {
+            // Generate the support code that is always needed, regardless of what the user has written.
             CSharpReinteropAttribute.Generate(context);
             CSharpReinteropNativeImplementationAttribute.Generate(context);
             CSharpObjectHandleUtility.Generate(context);
             CSharpReinteropException.Generate(context);
 
-            // Create a new Compilation with the CSharpObjectHandleUtility created above.
-            // Newer versions of Roslyn make this easy, but not the one in Unity.
+            // Create a new Compilation with the ObjectHandleUtility and ReinteropException created above.
             CSharpParseOptions options = (CSharpParseOptions)((CSharpCompilation)context.Compilation).SyntaxTrees[0].Options;
             Compilation compilation = context.Compilation.AddSyntaxTrees(
                 CSharpSyntaxTree.ParseText(SourceText.From(CSharpObjectHandleUtility.Source), options),
                 CSharpSyntaxTree.ParseText(SourceText.From(CSharpReinteropException.Source), options)
             );
 
-            // Add ObjectHandleUtility's ExposeToCPP to the receiver.
-            INamedTypeSymbol? objectHandleUtilityType = compilation.GetTypeByMetadataName("Reinterop.ObjectHandleUtility");
-            if (objectHandleUtilityType != null)
-            {
-                var exposeToCpp = CSharpTypeUtility.FindMembers(objectHandleUtilityType, "ExposeToCPP");
-                foreach (ISymbol symbol in exposeToCpp)
-                {
-                    IMethodSymbol? method = symbol as IMethodSymbol;
-                    if (method == null)
-                        continue;
+            // Add ExposeToCPP methods from the types we just generated to the receiver.
+            // These didn't exist yet when the receiver explored the code.
+            receiver.AddExposeToCppMethodsFromType(compilation, "Reinterop.ObjectHandleUtility");
+            receiver.AddExposeToCppMethodsFromType(compilation, "Reinterop.ReinteropException");
 
-                    foreach (var reference in method.DeclaringSyntaxReferences)
-                    {
-                        if (reference.GetSyntax() is MethodDeclarationSyntax methodDeclaration)
-                        {
-                            receiver.ExposeToCppMethods.Add(methodDeclaration);
-                        }
-                    }
-                }
-            }
-
-            // Add ReinteropExceptions's ExposeToCPP to the receiver.
-            INamedTypeSymbol? reinteropExceptionType = compilation.GetTypeByMetadataName("Reinterop.ReinteropException");
-            if (reinteropExceptionType != null)
-            {
-                var exposeToCpp = CSharpTypeUtility.FindMembers(reinteropExceptionType, "ExposeToCPP");
-                foreach (ISymbol symbol in exposeToCpp)
-                {
-                    IMethodSymbol? method = symbol as IMethodSymbol;
-                    if (method == null)
-                        continue;
-
-                    foreach (var reference in method.DeclaringSyntaxReferences)
-                    {
-                        if (reference.GetSyntax() is MethodDeclarationSyntax methodDeclaration)
-                        {
-                            receiver.ExposeToCppMethods.Add(methodDeclaration);
-                        }
-                    }
-                }
-            }
-
+            // Resolve the configuration properties from the receiver's Properties dictionary.
+            // This is what allows Reinterop to be configured with fields like `CppOutputPath` and `NativeLibraryName`
+            // defined alongside the main ExposeToCPP method.
             Dictionary<string, object> properties = new Dictionary<string, object>();
             foreach (var property in receiver.Properties)
             {
@@ -312,6 +284,35 @@ namespace Reinterop
             return null;
         }
 
+        /// <summary>
+        /// A Roslyn syntax receiver, registered with `RegisterForSyntaxNotifications` in <see cref="Initialize"/>.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Roslyn invokes this class's <see cref="OnVisitSyntaxNode"/> for _every_ syntax node that it compiles.
+        /// At this stage in the process, we (and Roslyn) don't have semantic information. We might see
+        /// an identifier, for example, but we don't know what it refers to.
+        /// </para>
+        /// <para>
+        /// Our approach here is to look for syntax nodes which are C# attributes named `[Reinterop]` or
+        /// `[ReinteropNativeImplementation]`. We ignore everything else. When we find an attribute we care about,
+        /// we walk up the syntax tree to find the class it's attached to.
+        /// </para>
+        /// <para>
+        /// Classes decorated with `[ReinteropNativeImplementation]` are added to <see cref="ClassesImplementedInCpp"/>.
+        /// </para>
+        /// <para>
+        /// Classes decorated with `[Reinterop]` are scanned for methods named "ExposeToCPP", which are added to
+        /// <see cref="ExposeToCppMethods"/>. We also look for fields with a name found in
+        /// <see cref="ConfigurationPropertyNames"/> and add them to <see cref="Properties"/>. These properties
+        /// are used to configure the behavior of Reinterop. Finally, we note the path of the file containing the
+        /// properties, so that we can resolve property paths relative to the file that contains them.
+        /// </para>
+        /// <para>
+        /// That is all we do at this stage. The actual code generation happens later, after the semantic meaning
+        /// of the code has been resolved.
+        /// </para>
+        /// </remarks>
         private class ReinteropSyntaxReceiver : ISyntaxReceiver
         {
             public readonly List<MethodDeclarationSyntax> ExposeToCppMethods = new List<MethodDeclarationSyntax>();
@@ -396,6 +397,35 @@ namespace Reinterop
                 {
                     // A class with partial methods intended to be implemented in C++.
                     ClassesImplementedInCpp.Add(attributeNode);
+                }
+            }
+
+            /// <summary>
+            /// Checks the given type for a method named "ExposeToCPP" and adds it to <see cref="ExposeToCppMethods"/>
+            /// if found.
+            /// </summary>
+            /// <param name="compilation">The compilation in which to resolve the type name.</param>
+            /// <param name="typeName">The fully qualified name of the type to check for the "ExposeToCPP" method.</param>
+            public void AddExposeToCppMethodsFromType(Compilation compilation, string typeName)
+            {
+                INamedTypeSymbol? objectHandleUtilityType = compilation.GetTypeByMetadataName(typeName);
+                if (objectHandleUtilityType != null)
+                {
+                    var exposeToCpp = CSharpTypeUtility.FindMembers(objectHandleUtilityType, "ExposeToCPP");
+                    foreach (ISymbol symbol in exposeToCpp)
+                    {
+                        IMethodSymbol? method = symbol as IMethodSymbol;
+                        if (method == null)
+                            continue;
+
+                        foreach (var reference in method.DeclaringSyntaxReferences)
+                        {
+                            if (reference.GetSyntax() is MethodDeclarationSyntax methodDeclaration)
+                            {
+                                this.ExposeToCppMethods.Add(methodDeclaration);
+                            }
+                        }
+                    }
                 }
             }
         }

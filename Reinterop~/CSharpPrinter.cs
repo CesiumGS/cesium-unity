@@ -70,7 +70,7 @@ namespace Reinterop
                 CSharpNew n => $"new {n.Type.GetFullyQualifiedName()}({string.Join(", ", n.Arguments.Select(Print))})",
                 CSharpArrayNew n => $"new {n.ElementType.GetFullyQualifiedName()}[{string.Join(", ", n.Dimensions.Select(Print))}]",
                 CSharpTernary t => $"{PrintParenthesized(t.Condition)} ? {PrintParenthesized(t.Then)} : {PrintParenthesized(t.Else)}",
-                CSharpIs i => $"{PrintParenthesized(i.Expression)} is {i.TypeName} {i.CastedVariableName ?? ""}",
+                CSharpIs i => $"{PrintParenthesized(i.Expression)} is {i.Type.GetFullyQualifiedName()} {i.CastedVariableName ?? ""}",
                 _ => throw new NotSupportedException($"Unsupported {nameof(CSharpExpression)}: {expression.GetType().Name}")
             };
         }

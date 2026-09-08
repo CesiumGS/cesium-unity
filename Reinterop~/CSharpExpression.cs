@@ -53,7 +53,7 @@ namespace Reinterop
     /// this is a type pattern that both tests the value and declares a variable, for example
     /// <c>value is SomeType ValueNonNull</c>.
     /// </summary>
-    internal record CSharpIs(CSharpExpression Expression, string TypeName, string? CastedVariableName = null) : CSharpExpression;
+    internal record CSharpIs(CSharpExpression Expression, CSharpType Type, string? CastedVariableName = null) : CSharpExpression;
 
     /// <summary>
     /// A prefix unary operator, for example <c>CSharpUnary("&amp;", CSharpIdentifier("value"))</c>

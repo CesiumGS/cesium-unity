@@ -6,15 +6,6 @@ namespace Reinterop
 {
     internal class CSharpTypeUtility
     {
-        public static string GetNameForDelegate(CSharpType type, IMethodSymbol method)
-        {
-            // TODO: include parameters in name to avoid conflicts on overloads.
-            string name = method.Name;
-            if (name == ".ctor")
-                name = "Constructor";
-            return $"{type.GetFullyQualifiedName().Replace(".", "_")}_{name}";
-        }
-
         public static string GetAccessString(Accessibility access)
         {
             if (access == Accessibility.Public)

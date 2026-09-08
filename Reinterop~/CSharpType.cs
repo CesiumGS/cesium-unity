@@ -198,7 +198,7 @@ namespace Reinterop
                 return new CSharpUnary("&", originalExpression);
             else if (this.Kind == InteropTypeKind.Nullable)
                 return new CSharpTernary(
-                    new CSharpIs(originalExpression, this.AsInteropTypeReturn().GetFullyQualifiedName(), "ValueNonNull"),
+                    new CSharpIs(originalExpression, this.AsInteropTypeReturn(), "ValueNonNull"),
                     new CSharpUnary("&", new CSharpIdentifier("ValueNonNull")),
                     new CSharpLiteral("null")
                 );

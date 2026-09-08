@@ -1,12 +1,19 @@
 namespace Reinterop
 {
+    /// <summary>
+    /// A C# interop function body that disposes of a delegate instance created from a C++ `std::function` pointer.
+    /// </summary>
     internal class CSharpBodyDisposeDelegate : IGenerateCSharpBody
     {
-        private readonly string _nativeFunctionTypeName;
+        private readonly CSharpType _nativeFunctionType;
 
-        public CSharpBodyDisposeDelegate(string nativeFunctionTypeName)
+        /// <summary>
+        /// Initializes a new instance.
+        /// </summary>
+        /// <param name="nativeFunctionType">The C# type that holds the `std::function` pointer and invokes the function when its `Invoke` method is called.</param>
+        public CSharpBodyDisposeDelegate(CSharpType nativeFunctionType)
         {
-            _nativeFunctionTypeName = nativeFunctionTypeName;
+            _nativeFunctionType = nativeFunctionType;
         }
 
         public IEnumerable<CSharpStatement> GenerateBody(CppGenerationContext context, CSharpFunctionCallableFromCpp function)
@@ -18,7 +25,7 @@ namespace Reinterop
             yield return new CSharpIf(
                 new CSharpIs(
                     new CSharpMemberAccess(new CSharpIdentifier("delegateObject"), "Target"),
-                    _nativeFunctionTypeName,
+                    _nativeFunctionType,
                     "nativeFunction"),
                 [new CSharpExpressionStatement(new CSharpCall(
                     new CSharpMemberAccess(new CSharpIdentifier("nativeFunction"), "Dispose"),
