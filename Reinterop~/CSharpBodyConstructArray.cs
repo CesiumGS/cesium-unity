@@ -7,7 +7,7 @@ namespace Reinterop
             CSharpType? arrayElementType = function.Owner().ArrayElementType;
             if (arrayElementType == null)
                 throw new InvalidOperationException($"Owner {function.Owner().GetFullyQualifiedName()} does not have an ArrayElementType.");
-            yield return new CSharpReturn(new CSharpArrayNew(arrayElementType.GetFullyQualifiedName(), [new CSharpIdentifier("size")]));
+            yield return new CSharpReturn(new CSharpArrayNew(arrayElementType, [new CSharpIdentifier("size")]));
         }
     }
 }

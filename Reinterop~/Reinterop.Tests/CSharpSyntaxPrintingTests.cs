@@ -26,7 +26,8 @@ namespace Reinterop.Tests
             Assert.That(CSharpPrinter.Print(new CSharpElementAccess(new CSharpIdentifier("values"), [new CSharpIdentifier("index")])), Is.EqualTo("values[index]"));
             CSharpType widgetType = new CSharpType(context, InteropTypeKind.ClassWrapper, [], "Widget", SpecialType.None);
             Assert.That(CSharpPrinter.Print(new CSharpNew(widgetType, [new CSharpIdentifier("value")])), Is.EqualTo("new Widget(value)"));
-            Assert.That(CSharpPrinter.Print(new CSharpArrayNew("int", [new CSharpLiteral("3")])), Is.EqualTo("new int[3]"));
+            CSharpType intType = CSharpType.FromSymbol(context, compilation.GetSpecialType(SpecialType.System_Int32));
+            Assert.That(CSharpPrinter.Print(new CSharpArrayNew(intType, [new CSharpLiteral("3")])), Is.EqualTo("new System.Int32[3]"));
             Assert.That(CSharpPrinter.Print(new CSharpCast("string", new CSharpIdentifier("value"))), Is.EqualTo("(string)value"));
         }
 

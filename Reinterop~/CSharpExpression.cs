@@ -72,7 +72,7 @@ namespace Reinterop
     /// <summary>
     /// Array construction with one or more dimensions, <c>new ElementTypeName[Dimensions...]</c>.
     /// </summary>
-    internal record CSharpArrayNew(string ElementTypeName, IReadOnlyList<CSharpExpression> Dimensions) : CSharpExpression;
+    internal record CSharpArrayNew(CSharpType ElementType, IReadOnlyList<CSharpExpression> Dimensions) : CSharpExpression;
 
     /// <summary>
     /// A C-style cast, <c>(TypeName)Expression</c>. This is used for generated interop conversions
