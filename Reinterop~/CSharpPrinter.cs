@@ -14,8 +14,9 @@ namespace Reinterop
         {
             return statement switch
             {
-                CSharpVariableDeclaration { Initializer: null } d => $"{d.TypeName} {d.Name};",
-                CSharpVariableDeclaration d => $"{d.TypeName} {d.Name} = {Print(d.Initializer!)};",
+                CSharpVariableDeclaration { Type: null, Initializer: null } d => throw new InvalidOperationException($"Cannot print a {nameof(CSharpVariableDeclaration)} with both {nameof(d.Type)} and {nameof(d.Initializer)} null"),
+                CSharpVariableDeclaration { Initializer: null } d => $"{d.Type.GetFullyQualifiedName()} {d.Name};",
+                CSharpVariableDeclaration d => $"{d.Type?.GetFullyQualifiedName() ?? "var"} {d.Name} = {Print(d.Initializer!)};",
                 CSharpExpressionStatement e => $"{Print(e.Expression)};",
                 CSharpIf i => PrintIf(i),
                 CSharpThrow t => $"throw {Print(t.Exception)};",
@@ -63,7 +64,7 @@ namespace Reinterop
                 CSharpCall c => $"{PrintParenthesized(c.Callee)}({string.Join(", ", c.Arguments.Select(Print))})",
                 CSharpBinary b => $"{PrintParenthesized(b.Left)} {b.Op} {PrintParenthesized(b.Right)}",
                 CSharpUnary u => $"{u.Op}{PrintParenthesized(u.Operand)}",
-                CSharpCast c => $"({c.TypeName}){PrintParenthesized(c.Expression)}",
+                CSharpCast c => $"({c.Type.GetFullyQualifiedName()}){PrintParenthesized(c.Expression)}",
                 CSharpMemberAccess m => $"{PrintParenthesized(m.Target)}.{m.MemberName}",
                 CSharpElementAccess e => $"{PrintParenthesized(e.Target)}[{string.Join(", ", e.Arguments.Select(Print))}]",
                 CSharpNew n => $"new {n.Type.GetFullyQualifiedName()}({string.Join(", ", n.Arguments.Select(Print))})",

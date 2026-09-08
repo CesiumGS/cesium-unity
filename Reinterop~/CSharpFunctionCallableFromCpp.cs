@@ -297,7 +297,7 @@ namespace Reinterop
                 csInteropParameters.Insert(0, new CSharpParameter(csOwner.AsInteropTypeParameter(), "thiz"));
                 csInteropParameterConversions["thiz"] = needsNonBlittableStructReboxing
                     ? new CSharpIdentifier("thizUnboxed")
-                    : csOwner.GetParameterConversionFromInteropTypeExpression(new CSharpIdentifier("thiz"));
+                    : csOwner.GetParameterConversionFromInteropTypeExpression(CSharpIdentifier.Thiz);
                 cppInteropParameters.Insert(0, new CppParameter(cppOwner.AsParameterType().AsInteropType(), "thiz"));
                 cppCallArguments.Insert(0, cppOwner.AsParameterType().GetConversionToInteropTypeExpression(_context, "(*this)"));
             }
@@ -418,9 +418,9 @@ namespace Reinterop
             if (needsNonBlittableStructReboxing)
             {
                 bodyStatements.Insert(0, new CSharpVariableDeclaration(
-                    csOwner.GetFullyQualifiedName(),
+                    csOwner,
                     "thizUnboxed",
-                    csOwner.GetParameterConversionFromInteropTypeExpression(new CSharpIdentifier("thiz"))));
+                    csOwner.GetParameterConversionFromInteropTypeExpression(CSharpIdentifier.Thiz)));
                 bodyStatements = RewriteReturnsToReboxNonBlittableStruct(bodyStatements);
                 if (csReturnType.IsVoid)
                     bodyStatements.Add(CreateReboxNonBlittableStructReceiverStatement());
@@ -551,7 +551,7 @@ namespace Reinterop
             {
                 return statement switch
                 {
-                    CSharpVariableDeclaration d => new CSharpVariableDeclaration(d.TypeName, d.Name, RewriteExpressionToConvertFromInterop(d.Initializer, parameterConversions)),
+                    CSharpVariableDeclaration d => new CSharpVariableDeclaration(d.Type, d.Name, RewriteExpressionToConvertFromInterop(d.Initializer, parameterConversions)),
                     CSharpExpressionStatement s => new CSharpExpressionStatement(RewriteExpressionToConvertFromInterop(s.Expression, parameterConversions)!),
                     CSharpIf i => new CSharpIf(
                         i.Condition,
@@ -584,7 +584,7 @@ namespace Reinterop
                 CSharpElementAccess e => new CSharpElementAccess(RewriteExpressionToConvertFromInterop(e.Target, parameterConversions)!, e.Arguments.Select(a => RewriteExpressionToConvertFromInterop(a, parameterConversions)!).ToArray()),
                 CSharpNew n => new CSharpNew(n.Type, n.Arguments.Select(a => RewriteExpressionToConvertFromInterop(a, parameterConversions)!).ToArray()),
                 CSharpArrayNew n => new CSharpArrayNew(n.ElementType, n.Dimensions.Select(d => RewriteExpressionToConvertFromInterop(d, parameterConversions)!).ToArray()),
-                CSharpCast c => new CSharpCast(c.TypeName, RewriteExpressionToConvertFromInterop(c.Expression, parameterConversions)!),
+                CSharpCast c => new CSharpCast(c.Type, RewriteExpressionToConvertFromInterop(c.Expression, parameterConversions)!),
                 _ => expression
             };
         }
@@ -601,7 +601,7 @@ namespace Reinterop
             return statements.SelectMany(statement => statement switch
             {
                 CSharpReturn r => [
-                    new CSharpVariableDeclaration("var", "reinterop_returnValue", r.Value),
+                    new CSharpVariableDeclaration(null, "reinterop_returnValue", r.Value),
                     CreateReboxNonBlittableStructReceiverStatement(),
                     new CSharpReturn(new CSharpIdentifier("reinterop_returnValue"))
                 ],
@@ -615,7 +615,7 @@ namespace Reinterop
         {
             return new CSharpExpressionStatement(new CSharpCall(
                 new CSharpMemberAccess(new CSharpIdentifier("Reinterop.ObjectHandleUtility"), "ResetHandleObject"),
-                [new CSharpIdentifier("thiz"), new CSharpIdentifier("thizUnboxed")]));
+                [CSharpIdentifier.Thiz, new CSharpIdentifier("thizUnboxed")]));
         }
 
         // Rewrites a C# function body like this:
@@ -635,7 +635,7 @@ namespace Reinterop
                 {
                     CSharpReturn { Value: null } => throw new InvalidOperationException($"Cannot generate C# code for a CSharpFunctionCallableFromCpp ${GetDisplayName()} because it has a struct return type but has a void return statement."),
                     CSharpReturn r => new List<CSharpStatement> {
-                        new CSharpVariableDeclaration(returnType.GetFullyQualifiedName(), returnValueName, r.Value),
+                        new CSharpVariableDeclaration(returnType, returnValueName, r.Value),
                         newReturnStatement
                     },
                     CSharpIf i => [new CSharpIf(

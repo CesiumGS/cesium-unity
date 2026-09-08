@@ -15,7 +15,7 @@ namespace Reinterop
     {
         public IEnumerable<CSharpStatement> GenerateBody(CppGenerationContext context, CSharpFunctionCallableFromCpp function)
         {
-            CSharpExpression target = function.Static() ? new CSharpIdentifier(function.Owner().GetFullyQualifiedName()) : new CSharpIdentifier("thiz");
+            CSharpExpression target = function.Static() ? new CSharpIdentifier(function.Owner()) : CSharpIdentifier.Thiz;
             string methodName = function.Name()!;
             if (function.TypeArguments().Count > 0)
                 methodName += "<" + string.Join(",", function.TypeArguments().Select(t => t.GetFullyQualifiedName())) + ">";

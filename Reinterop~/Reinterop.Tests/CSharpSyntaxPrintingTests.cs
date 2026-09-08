@@ -28,7 +28,8 @@ namespace Reinterop.Tests
             Assert.That(CSharpPrinter.Print(new CSharpNew(widgetType, [new CSharpIdentifier("value")])), Is.EqualTo("new Widget(value)"));
             CSharpType intType = CSharpType.FromSymbol(context, compilation.GetSpecialType(SpecialType.System_Int32));
             Assert.That(CSharpPrinter.Print(new CSharpArrayNew(intType, [new CSharpLiteral("3")])), Is.EqualTo("new System.Int32[3]"));
-            Assert.That(CSharpPrinter.Print(new CSharpCast("string", new CSharpIdentifier("value"))), Is.EqualTo("(string)value"));
+            CSharpType stringType = CSharpType.FromSymbol(context, compilation.GetSpecialType(SpecialType.System_String));
+            Assert.That(CSharpPrinter.Print(new CSharpCast(stringType, new CSharpIdentifier("value"))), Is.EqualTo("(System.String)value"));
         }
 
         [Test]
@@ -43,8 +44,8 @@ namespace Reinterop.Tests
         [Test]
         public void Statements_PrintAllNodeKinds()
         {
-            Assert.That(CSharpPrinter.Print(new CSharpVariableDeclaration("var", "value", new CSharpLiteral("null"))), Is.EqualTo("var value = null;"));
-            Assert.That(CSharpPrinter.Print(new CSharpVariableDeclaration("int", "value")), Is.EqualTo("int value;"));
+            Assert.That(CSharpPrinter.Print(new CSharpVariableDeclaration(null, "value", new CSharpLiteral("1"))), Is.EqualTo("var value = 1;"));
+            Assert.That(CSharpPrinter.Print(new CSharpVariableDeclaration(CSharpType.FromSymbol(context, compilation.GetSpecialType(SpecialType.System_Int32)), "value")), Is.EqualTo("System.Int32 value;"));
             Assert.That(CSharpPrinter.Print(new CSharpExpressionStatement(new CSharpCall(new CSharpIdentifier("Use"), [new CSharpIdentifier("value")]))), Is.EqualTo("Use(value);"));
             CSharpType exceptionType = new CSharpType(context, InteropTypeKind.ClassWrapper, [], "Exception", SpecialType.None);
             Assert.That(CSharpPrinter.Print(new CSharpThrow(new CSharpNew(exceptionType, []))), Is.EqualTo("throw new Exception();"));

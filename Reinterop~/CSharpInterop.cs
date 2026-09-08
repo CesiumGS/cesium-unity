@@ -1,3 +1,5 @@
+using Microsoft.CodeAnalysis;
+
 namespace Reinterop
 {
     // The C# mirror of CppInterop.cs - recipes that expand to the fixed interop patterns used
@@ -18,9 +20,8 @@ namespace Reinterop
         /// The call's own arguments (not including the exception out-parameter, which this method
         /// adds automatically).
         /// </param>
-        /// <param name="resultTypeName">
-        /// If the call's own return value should be captured, the type to declare it as (typically
-        /// "var"). Null if the call returns void.
+        /// <param name="resultType">
+        /// If the call's own return value should be captured, the type to declare it as. Null if the call returns void.
         /// </param>
         /// <param name="returnExpression">
         /// If a return statement should be generated, the (already converted) expression to return.
@@ -28,15 +29,19 @@ namespace Reinterop
         /// </param>
         /// <param name="resultVariableName">The name to declare the captured result variable as.</param>
         public static IReadOnlyList<CSharpStatement> CallNativeFunction(
+            CppGenerationContext context,
             CSharpExpression functionName,
             IReadOnlyList<CSharpExpression> arguments,
-            string? resultTypeName = null,
+            CSharpType? resultType = null,
             CSharpExpression? returnExpression = null,
             string resultVariableName = "result")
         {
             List<CSharpStatement> statements = new()
             {
-                new CSharpVariableDeclaration("System.IntPtr", ExceptionVariableName, new CSharpIdentifier("System.IntPtr.Zero"))
+                new CSharpVariableDeclaration(
+                    CSharpType.FromSymbol(context, context.Compilation.GetSpecialType(SpecialType.System_IntPtr)),
+                    ExceptionVariableName,
+                    new CSharpIdentifier("System.IntPtr.Zero"))
             };
 
             List<CSharpExpression> callArguments = new(arguments)
@@ -46,13 +51,13 @@ namespace Reinterop
 
             CSharpExpression call = new CSharpCall(functionName, callArguments);
 
-            statements.Add(resultTypeName != null
-                ? new CSharpVariableDeclaration(resultTypeName, resultVariableName, call)
+            statements.Add(resultType != null
+                ? new CSharpVariableDeclaration(resultType, resultVariableName, call)
                 : new CSharpExpressionStatement(call));
 
             statements.Add(new CSharpIf(
                 new CSharpBinary("!=", new CSharpIdentifier(ExceptionVariableName), new CSharpIdentifier("System.IntPtr.Zero")),
-                new CSharpStatement[] { new CSharpThrow(TranslatedManagedException()) }));
+                new CSharpStatement[] { new CSharpThrow(TranslatedManagedException(context)) }));
 
             if (returnExpression != null)
                 statements.Add(new CSharpReturn(returnExpression));
@@ -60,9 +65,9 @@ namespace Reinterop
             return statements;
         }
 
-        private static CSharpExpression TranslatedManagedException()
+        private static CSharpExpression TranslatedManagedException(CppGenerationContext context)
         {
-            return new CSharpCast("System.Exception",
+            return new CSharpCast(CSharpType.FromSymbol(context, context.Compilation.GetTypeByMetadataName("System.Exception")!),
                 new CSharpCall(new CSharpIdentifier("Reinterop.ObjectHandleUtility.GetObjectAndFreeHandle"),
                     new CSharpExpression[] { new CSharpIdentifier(ExceptionVariableName) }));
         }

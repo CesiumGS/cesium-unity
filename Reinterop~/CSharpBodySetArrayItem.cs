@@ -6,7 +6,7 @@ namespace Reinterop
         {
             yield return new CSharpExpressionStatement(new CSharpBinary(
                 "=",
-                new CSharpElementAccess(new CSharpIdentifier("thiz"), [new CSharpIdentifier("index")]),
+                new CSharpElementAccess(CSharpIdentifier.Thiz, [new CSharpIdentifier("index")]),
                 new CSharpIdentifier("value")));
         }
     }

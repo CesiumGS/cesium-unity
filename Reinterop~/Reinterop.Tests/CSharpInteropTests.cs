@@ -1,3 +1,5 @@
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using NUnit.Framework;
 
 namespace Reinterop.Tests
@@ -10,10 +12,14 @@ namespace Reinterop.Tests
     /// </summary>
     public class CSharpInteropTests
     {
+        private static CSharpCompilation compilation = GenerationTestHelper.CreateCompilation("");
+        private static CppGenerationContext context = new CppGenerationContext(compilation);
+
         [Test]
         public void CallNativeFunction_VoidReturn_MatchesOriginalTemplate()
         {
             IReadOnlyList<CSharpStatement> body = CSharpInterop.CallNativeFunction(
+                context,
                 new CSharpIdentifier("CallFoo_1234"),
                 new CSharpExpression[] { new CSharpIdentifier("a"), new CSharpIdentifier("b") });
 
@@ -32,15 +38,16 @@ namespace Reinterop.Tests
         public void CallNativeFunction_ValueReturn_MatchesOriginalTemplate()
         {
             IReadOnlyList<CSharpStatement> body = CSharpInterop.CallNativeFunction(
+                context,
                 new CSharpIdentifier("CallFoo_1234"),
                 new CSharpExpression[] { new CSharpIdentifier("a"), new CSharpIdentifier("b") },
-                resultTypeName: "var",
+                resultType: CSharpType.FromSymbol(context, compilation.GetSpecialType(SpecialType.System_Int32)),
                 returnExpression: new CSharpBinary("!=", new CSharpIdentifier("result"), new CSharpLiteral("0")));
 
             string expected = string.Join(Environment.NewLine, new[]
             {
                 "System.IntPtr reinteropException = System.IntPtr.Zero;",
-                "var result = CallFoo_1234(a, b, &reinteropException);",
+                "System.Int32 result = CallFoo_1234(a, b, &reinteropException);",
                 "if (reinteropException != System.IntPtr.Zero)",
                 "    throw (System.Exception)Reinterop.ObjectHandleUtility.GetObjectAndFreeHandle(reinteropException);",
                 "return result != 0;"

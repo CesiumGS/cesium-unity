@@ -13,7 +13,7 @@ namespace Reinterop
         {
             yield return new CSharpReturn(new CSharpBinary(
                 _operator,
-                new CSharpIdentifier("thiz"),
+                CSharpIdentifier.Thiz,
                 new CSharpIdentifier("rhs")));
         }
     }

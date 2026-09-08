@@ -12,9 +12,9 @@ namespace Reinterop
         public IEnumerable<CSharpStatement> GenerateBody(CppGenerationContext context, CSharpFunctionCallableFromCpp function)
         {
             yield return new CSharpVariableDeclaration(
-                function.Owner().GetFullyQualifiedName(),
+                function.Owner(),
                 "delegateObject",
-                new CSharpIdentifier("thiz"));
+                CSharpIdentifier.Thiz);
             yield return new CSharpIf(
                 new CSharpIs(
                     new CSharpMemberAccess(new CSharpIdentifier("delegateObject"), "Target"),

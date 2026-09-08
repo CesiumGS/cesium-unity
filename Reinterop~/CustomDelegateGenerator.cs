@@ -118,9 +118,10 @@ namespace Reinterop
                         unsafe
                         {
                             {{new[] { CSharpPrinter.Print(CSharpInterop.CallNativeFunction(
+                                context,
                                 new CSharpIdentifier(invokeCallbackName),
                                 callInvokeInteropParameters.ToArray(),
-                                resultTypeName: !csReturnType.IsVoid ? "var" : null,
+                                resultType: !csReturnType.IsVoid ? csReturnType.AsInteropTypeReturn() : null,
                                 returnExpression: !csReturnType.IsVoid ? csReturnType.GetReturnValueConversionFromInteropTypeExpression("result") : null)) }.JoinAndIndent("                                ")}}
                         }
                     }

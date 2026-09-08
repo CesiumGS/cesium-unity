@@ -37,7 +37,7 @@ namespace Reinterop.Tests
             {
                 try
                 {
-                    return (byte)(((TestNamespace.TestClass)Reinterop.ObjectHandleUtility.GetObjectFromHandle(thiz)).TestMethod(myBool != 0) ? 1 : 0);
+                    return (System.Byte)(((TestNamespace.TestClass)Reinterop.ObjectHandleUtility.GetObjectFromHandle(thiz)).TestMethod(myBool != 0) ? 1 : 0);
                 }
                 catch (System.Exception reinteropManagedException)
                 {

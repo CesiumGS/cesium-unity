@@ -198,11 +198,11 @@ namespace Reinterop
             public IEnumerable<CSharpStatement> GenerateBody(CppGenerationContext context, CSharpFunctionCallableFromCpp function)
             {
                 yield return new CSharpIf(
-                    new CSharpBinary("==", new CSharpIdentifier("thiz"), new CSharpLiteral("null")),
+                    new CSharpBinary("==", CSharpIdentifier.Thiz, new CSharpLiteral("null")),
                     [new CSharpReturn(new CSharpLiteral("System.IntPtr.Zero"))]);
                 yield return new CSharpReturn(new CSharpCall(
                     new CSharpMemberAccess(
-                        new CSharpMemberAccess(new CSharpIdentifier("thiz"), "NativeImplementation"),
+                        new CSharpMemberAccess(CSharpIdentifier.Thiz, "NativeImplementation"),
                         "DangerousGetHandle"),
                     []));
             }
@@ -406,7 +406,7 @@ namespace Reinterop
             if (hasStructRewrite)
             {
                 csCallStatements.Add(new CSharpVariableDeclaration(
-                    "var",
+                    null,
                     "returnValue",
                     new CSharpNew(csOriginalInteropReturnType.AsInteropTypeReturn(), [])));
             }
@@ -435,9 +435,10 @@ namespace Reinterop
                 .ToArray();
 
             csCallStatements.AddRange(CSharpInterop.CallNativeFunction(
+                context,
                 new CSharpIdentifier(name),
                 csCallArguments,
-                resultTypeName: !csInteropReturnType.IsVoid ? "var" : null,
+                resultType: !csInteropReturnType.IsVoid ? csInteropReturnType : null,
                 returnExpression: csReturnExpression));
 
             string modifiers = CSharpTypeUtility.GetAccessString(method.DeclaredAccessibility);

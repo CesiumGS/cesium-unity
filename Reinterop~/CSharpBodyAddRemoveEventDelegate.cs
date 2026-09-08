@@ -20,7 +20,7 @@ namespace Reinterop
 
         public IEnumerable<CSharpStatement> GenerateBody(CppGenerationContext context, CSharpFunctionCallableFromCpp function)
         {
-            CSharpExpression target = function.Static() ? new CSharpIdentifier(function.Owner().GetFullyQualifiedName()) : new CSharpIdentifier("thiz");
+            CSharpExpression target = function.Static() ? new CSharpIdentifier(function.Owner()) : CSharpIdentifier.Thiz;
             CSharpExpression accessor = new CSharpMemberAccess(target, _event.Name);
             yield return new CSharpExpressionStatement(new CSharpBinary(_isAdd ? "+=" : "-=", accessor, new CSharpIdentifier(function.Parameters().Last().Name)));
         }

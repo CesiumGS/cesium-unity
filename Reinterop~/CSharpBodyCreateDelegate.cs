@@ -15,7 +15,7 @@ namespace Reinterop
         public IEnumerable<CSharpStatement> GenerateBody(CppGenerationContext context, CSharpFunctionCallableFromCpp function)
         {
             yield return new CSharpVariableDeclaration(
-                _nativeFunctionType.GetFullyQualifiedName(),
+                _nativeFunctionType,
                 "receiver",
                 new CSharpNew(_nativeFunctionType, [new CSharpIdentifier("pCallbackFunction")]));
             yield return new CSharpReturn(new CSharpNew(

@@ -8,11 +8,12 @@ namespace Reinterop
     internal abstract record CSharpStatement;
 
     /// <summary>
-    /// A local variable declaration, either <c>TypeName Name;</c> or
-    /// <c>TypeName Name = Initializer;</c>. <see cref="Initializer"/> is null for a bare
-    /// declaration whose value is assigned later.
+    /// A local variable declaration, either <c>Type Name;</c> or
+    /// <c>Type Name = Initializer;</c>. <see cref="Initializer"/> is null for a bare
+    /// declaration whose value is assigned later. <paramref name="Type"/> may be null
+    /// for a declaration of an implicitly-typed variable, e.g. <c>var x = 3;</c>.
     /// </summary>
-    internal record CSharpVariableDeclaration(string TypeName, string Name, CSharpExpression? Initializer = null) : CSharpStatement;
+    internal record CSharpVariableDeclaration(CSharpType? Type, string Name, CSharpExpression? Initializer = null) : CSharpStatement;
 
     /// <summary>
     /// An expression evaluated for its side effects and terminated with a semicolon, such as a

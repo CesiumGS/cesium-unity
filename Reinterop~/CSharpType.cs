@@ -189,7 +189,7 @@ namespace Reinterop
         public CSharpExpression GetConversionToInteropTypeExpression(CSharpExpression originalExpression)
         {
             if (this.SpecialType == SpecialType.System_Boolean)
-                return new CSharpCast("byte", new CSharpTernary(originalExpression, new CSharpLiteral("1"), new CSharpLiteral("0")));
+                return new CSharpCast(FromSymbol(Context, Context.Compilation.GetSpecialType(SpecialType.System_Byte)), new CSharpTernary(originalExpression, new CSharpLiteral("1"), new CSharpLiteral("0")));
             else if (this.Kind == InteropTypeKind.ClassWrapper || this.Kind == InteropTypeKind.NonBlittableStructWrapper || this.Kind == InteropTypeKind.Delegate)
                 return new CSharpCall(
                     new CSharpMemberAccess(new CSharpIdentifier("Reinterop.ObjectHandleUtility"), "CreateHandle"),
@@ -225,7 +225,7 @@ namespace Reinterop
             if (this.SpecialType == SpecialType.System_Boolean)
                 return new CSharpBinary("!=", interopExpression, new CSharpLiteral("0"));
             else if (this.Kind == InteropTypeKind.ClassWrapper || this.Kind == InteropTypeKind.NonBlittableStructWrapper || this.Kind == InteropTypeKind.Delegate)
-                return new CSharpCast(this.GetFullyQualifiedName(), new CSharpCall(new CSharpIdentifier("Reinterop.ObjectHandleUtility.GetObjectFromHandle"), [ interopExpression ]));
+                return new CSharpCast(this, new CSharpCall(new CSharpIdentifier("Reinterop.ObjectHandleUtility.GetObjectFromHandle"), [ interopExpression ]));
             else if (this.Kind == InteropTypeKind.BlittableStruct)
                 return new CSharpUnary("*", interopExpression);
             else if (this.Kind == InteropTypeKind.Nullable)
@@ -254,7 +254,7 @@ namespace Reinterop
                 return new CSharpBinary("!=", new CSharpIdentifier(variableName), new CSharpLiteral("0"));
             else if (this.Kind == InteropTypeKind.ClassWrapper || this.Kind == InteropTypeKind.NonBlittableStructWrapper || this.Kind == InteropTypeKind.Delegate)
                 return new CSharpCast(
-                    this.GetFullyQualifiedName(),
+                    this,
                     new CSharpCall(
                         new CSharpMemberAccess(new CSharpIdentifier("Reinterop.ObjectHandleUtility"), "GetObjectAndFreeHandle"),
                         [new CSharpIdentifier(variableName)]));

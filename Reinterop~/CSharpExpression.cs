@@ -12,7 +12,16 @@ namespace Reinterop
     /// A bare name reference: a variable, or a possibly qualified method or type name used as a
     /// callee, such as <c>result</c> or <c>Reinterop.ObjectHandleUtility</c>.
     /// </summary>
-    internal record CSharpIdentifier(string Name) : CSharpExpression;
+    internal record CSharpIdentifier(string Name) : CSharpExpression
+    {
+        /// <summary>The <c>thiz</c> pointer representing `this` in an interop function.</summary>
+        public static CSharpIdentifier Thiz { get; } = new CSharpIdentifier("thiz");
+
+        /// <summary>
+        /// Creates an identifier naming <paramref name="type"/>.
+        /// </summary>
+        public CSharpIdentifier(CSharpType type) : this(type.GetFullyQualifiedName()) {}
+    }
 
     /// <summary>
     /// A literal value written exactly as it should appear in C# source, such as <c>null</c>,
@@ -70,13 +79,12 @@ namespace Reinterop
     internal record CSharpNew(CSharpType Type, IReadOnlyList<CSharpExpression> Arguments) : CSharpExpression;
 
     /// <summary>
-    /// Array construction with one or more dimensions, <c>new ElementTypeName[Dimensions...]</c>.
+    /// Array construction with one or more dimensions, <c>new ElementType[Dimensions...]</c>.
     /// </summary>
     internal record CSharpArrayNew(CSharpType ElementType, IReadOnlyList<CSharpExpression> Dimensions) : CSharpExpression;
 
     /// <summary>
-    /// A C-style cast, <c>(TypeName)Expression</c>. This is used for generated interop conversions
-    /// where the target type is known as source text rather than represented by a C# type object.
+    /// A C-style cast, <c>(Type)Expression</c>.
     /// </summary>
-    internal record CSharpCast(string TypeName, CSharpExpression Expression) : CSharpExpression;
+    internal record CSharpCast(CSharpType Type, CSharpExpression Expression) : CSharpExpression;
 }
