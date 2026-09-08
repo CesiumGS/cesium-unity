@@ -43,13 +43,13 @@ void CesiumGeoJsonObjectImpl::setNativeObjectInDocument(
   _pObject = pObject;
 }
 
-std::int32_t CesiumGeoJsonObjectImpl::GetObjectType(
+DotNet::CesiumForUnity::CesiumGeoJsonObjectType CesiumGeoJsonObjectImpl::GetObjectType(
     const CesiumForUnity::CesiumGeoJsonObject& object) {
   if (!_pObject) {
-    return 0;
+    return CesiumForUnity::CesiumGeoJsonObjectType::Point;
   }
 
-  return static_cast<std::int32_t>(_pObject->getType());
+  return static_cast<DotNet::CesiumForUnity::CesiumGeoJsonObjectType>(_pObject->getType());
 }
 
 bool CesiumGeoJsonObjectImpl::IsValid(

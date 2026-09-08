@@ -24,7 +24,7 @@ namespace Reinterop.Tests
                 .ReturnType(CppType.Int32.AsReturnType())
                 .DefinitionBody(new CppStatement[]
                 {
-                    new CppRawStatement("return x;")
+                    new CppReturn(new CppIdentifier("x"))
                 });
 
             function.AddToGeneration(result);
@@ -54,7 +54,7 @@ namespace Reinterop.Tests
                 .Static(true)
                 .DefinitionBody(new CppStatement[]
                 {
-                    new CppRawStatement("return x * 2;")
+                    new CppReturn(new CppBinary("*", new CppIdentifier("x"), new CppLiteral("2")))
                 });
 
             function.AddToGeneration(result);
@@ -97,7 +97,7 @@ namespace Reinterop.Tests
                 .Parameters(new[] { new CppParameter(CppType.Int32.AsParameterType(), "value") })
                 .Static(true)
                 .MemberInitializers(new[] { new CppMemberInitializer("_value", new CppIdentifier("value")) })
-                .DefinitionBody(new CppStatement[] { new CppRawStatement("DoSomething();") });
+                .DefinitionBody(new CppStatement[] { new CppExpressionStatement(new CppCall(new CppIdentifier("DoSomething"), [])) });
 
             function.AddToGeneration(result);
 
@@ -136,7 +136,7 @@ namespace Reinterop.Tests
                 .Parameters(new[] { new CppParameter(CppType.Int32.AsParameterType(), "value") })
                 .ReturnType(CppType.Int32.AsReturnType())
                 .Specializes(template)
-                .DefinitionBody(new CppStatement[] { new CppRawStatement("return value;") });
+                .DefinitionBody(new CppStatement[] { new CppReturn(new CppIdentifier("value")) });
 
             specialization.AddToGeneration(result);
 

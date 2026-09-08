@@ -8,11 +8,16 @@ namespace Reinterop
     internal abstract record CppStatement;
 
     /// <summary>
-    /// A local variable declaration, <c>TypeName Name = Initializer;</c>. <see cref="Initializer"/>
-    /// is null for a bare declaration (e.g. <c>MyStruct result;</c>) that's filled in by a later
-    /// statement, such as a call with an out parameter.
+    /// A local variable declaration, either <c>TypeName Name = Initializer;</c> or
+    /// <c>TypeName Name{Initializer};</c>. <see cref="Initializer"/> is null for a bare declaration
+    /// (e.g. <c>MyStruct result;</c>) that's filled in by a later statement, such as a call with an
+    /// out parameter.
     /// </summary>
-    internal record CppVariableDeclaration(CppType Type, string Name, CppExpression? Initializer = null) : CppStatement;
+    internal record CppVariableDeclaration(
+        CppType Type,
+        string Name,
+        CppExpression? Initializer = null,
+        bool UseBracedInitialization = false) : CppStatement;
 
     /// <summary>
     /// An expression evaluated for its side effects, <c>Expression;</c>.
@@ -28,7 +33,7 @@ namespace Reinterop
     /// An <c>if</c> statement with no <c>else</c> clause. A single-statement body is printed without
     /// braces, matching the convention of the surrounding generated code.
     /// </summary>
-    internal record CppIf(CppExpression Condition, IReadOnlyList<CppStatement> Then) : CppStatement;
+    internal record CppIf(CppExpression Condition, IReadOnlyList<CppStatement> Then, IReadOnlyList<CppStatement>? Else = null) : CppStatement;
 
     /// <summary>
     /// A <c>throw</c> statement. <see cref="Exception"/> is null for a rethrow (<c>throw;</c>) of the
@@ -40,13 +45,6 @@ namespace Reinterop
     /// A <c>return</c> statement. <see cref="Value"/> is null for a return from a void function.
     /// </summary>
     internal record CppReturn(CppExpression? Value = null) : CppStatement;
-
-    /// <summary>
-    /// An already-rendered statement (or block of statements), used as an escape hatch for bodies
-    /// that haven't been converted to this DSL yet. Printed as-is, with no added punctuation, and it
-    /// contributes no required includes of its own.
-    /// </summary>
-    internal record CppRawStatement(string Text) : CppStatement;
 
     /// <summary>
     /// A single <c>catch</c> clause of a <see cref="CppTry"/>. The exception is always caught by

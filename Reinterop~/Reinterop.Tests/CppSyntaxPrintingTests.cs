@@ -86,6 +86,16 @@ namespace Reinterop.Tests
         }
 
         [Test]
+        public void Call_ParenthesizesDereferencedCallee()
+        {
+            CppExpression expression = new CppCall(
+                new CppUnary("*", new CppIdentifier("pFunc")),
+                []);
+
+            Assert.That(CppPrinter.Print(expression), Is.EqualTo("(*pFunc)()"));
+        }
+
+        [Test]
         public void MemberAccess_UsesDot()
         {
             Assert.That(
@@ -177,7 +187,7 @@ namespace Reinterop.Tests
             Assert.That(CppPrinter.Print(new CppUnary("&", new CppIdentifier("x"))), Is.EqualTo("&x"));
             Assert.That(
                 CppPrinter.Print(new CppUnary("!", new CppUnary("!", new CppIdentifier("x")))),
-                Is.EqualTo("!!x"));
+                Is.EqualTo("!(!x)"));
         }
 
         [Test]
@@ -188,7 +198,7 @@ namespace Reinterop.Tests
                     new CppBinary("==", new CppIdentifier("p"), CppLiteral.Nullptr),
                     new CppIdentifier("std::nullopt"),
                     new CppCall(new CppIdentifier("std::make_optional"), [new CppUnary("*", new CppIdentifier("p"))]))),
-                Is.EqualTo("p == nullptr ? std::nullopt : std::make_optional(*p)"));
+                Is.EqualTo("(p == nullptr) ? std::nullopt : std::make_optional(*p)"));
         }
 
         [Test]
@@ -233,6 +243,21 @@ namespace Reinterop.Tests
         }
 
         [Test]
+        public void VariableDeclaration_CanUseBracedInitializationWithoutBracingInitializerExpression()
+        {
+            CppType wrapperType = new CppType(InteropTypeKind.ClassWrapper, ["Example"], "Wrapper", null, 0).AsConst();
+            CppType objectHandleType = new CppType(InteropTypeKind.ClassWrapper, ["Example"], "ObjectHandle", null, 0);
+
+            Assert.That(
+                CppPrinter.Print(new CppVariableDeclaration(
+                    wrapperType,
+                    "wrapper",
+                    new CppCall(new CppIdentifier(objectHandleType), [new CppIdentifier("handle")]),
+                    UseBracedInitialization: true)),
+                Is.EqualTo("const ::Example::Wrapper wrapper{::Example::ObjectHandle(handle)};"));
+        }
+
+        [Test]
         public void ExpressionStatement_AppendsSemicolon()
         {
             Assert.That(
@@ -258,7 +283,7 @@ namespace Reinterop.Tests
                     new CppBinary("==", new CppUnary("*", CppIdentifier.This), CppLiteral.Nullptr),
                     [new CppReturn(new CppCall(new CppIdentifier("std::string"), []))])),
                 Is.EqualTo(Lines(
-                    "if (*this == nullptr)",
+                    "if ((*this) == nullptr)",
                     "    return std::string();")));
         }
 
@@ -298,15 +323,6 @@ namespace Reinterop.Tests
         {
             Assert.That(CppPrinter.Print(new CppReturn()), Is.EqualTo("return;"));
             Assert.That(CppPrinter.Print(new CppReturn(new CppIdentifier("result"))), Is.EqualTo("return result;"));
-        }
-
-        [Test]
-        public void RawStatement_PrintsTextVerbatim()
-        {
-            Assert.That(
-                CppPrinter.Print(new CppRawStatement("DoTheThing();")),
-                Is.EqualTo("DoTheThing();"));
-            Assert.That(CppPrinter.GetRequiredIncludes(new[] { (CppStatement)new CppRawStatement("x") }), Is.Empty);
         }
 
         [Test]

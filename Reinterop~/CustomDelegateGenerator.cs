@@ -158,22 +158,30 @@ namespace Reinterop
             result.ExtraCppFunctions.Add(constructorRecipe);
 
             var interopParameters = new[] { (Name: "pCallbackFunction", CsType: CSharpType.FromSymbol(context, context.Compilation.GetSpecialType(SpecialType.System_IntPtr)), Type: CppType.VoidPointer, InteropType: CppType.VoidPointer) }.Concat(callbackParameters);
-            var callParameters = callbackParameters.Select(p => p.Type.GetConversionFromInteropType(context, p.Name));
+            var callParameters = callbackParameters.Select(p => p.Type.GetConversionFromInteropTypeExpression(context, new CppIdentifier(p.Name)));
 
             CppType interopReturnType = returnType.AsInteropType();
 
-            string resultImplementation = "";
-            string returnImplementation = "return;";
-            string returnDefault = "return;";
+            CppExpression callbackCall = new CppCall(
+                new CppUnary("*", new CppIdentifier("pFunc")),
+                callParameters.ToList());
+            List<CppStatement> callbackBody = [];
+            List<CppStatement> onException = [];
             if (!csReturnType.IsVoid)
             {
-                resultImplementation = "auto result = ";
-                returnImplementation = $"return {returnType.GetConversionToInteropType(context, "result")};";
+                callbackBody.Add(new CppVariableDeclaration(returnType, "result", callbackCall));
+                callbackBody.Add(new CppReturn(returnType.GetConversionToInteropTypeExpression(context, "result")));
                 if (interopReturnType.Flags.HasFlag(CppTypeFlags.Pointer))
-                    returnDefault = "return nullptr;";
+                    onException.Add(new CppReturn(CppLiteral.Nullptr));
                 else
-                    returnDefault = $$"""return {{interopReturnType.GetFullyQualifiedName()}}();""";
+                    onException.Add(new CppReturn(new CppCall(new CppIdentifier(interopReturnType), [])));
             }
+            else
+            {
+                callbackBody.Add(new CppExpressionStatement(callbackCall));
+            }
+
+            IReadOnlyList<CppStatement> exceptionHandling = CppInterop.TranslateExceptionsToOutParameter(callbackBody, onException);
 
             result.CppImplementationInvoker.Functions.Add(new(
                 Content:
@@ -183,9 +191,7 @@ namespace Reinterop
                     #endif
                     {{interopReturnType.GetFullyQualifiedName()}} {{invokeCallbackName}}({{string.Join(", ", interopParameters.Select(p => $"{p.InteropType.GetFullyQualifiedName()} {p.Name}").Concat(new[] { "void** reinteropException" }))}}) {
                         auto pFunc = reinterpret_cast<std::function<{{itemType.GetFullyQualifiedName()}}::FunctionSignature>*>(pCallbackFunction);
-                        {{new[] { CppPrinter.Print(CppInterop.TranslateExceptionsToOutParameter(
-                            new CppStatement[] { new CppRawStatement($"{resultImplementation}(*pFunc)({string.Join(", ", callParameters)});"), new CppRawStatement(returnImplementation) },
-                            new CppStatement[] { new CppRawStatement(returnDefault) })) }.JoinAndIndent("    ")}}
+                        {{new[] { CppPrinter.Print(exceptionHandling) }.JoinAndIndent("    ")}}
                     }
                     """,
                 TypeDefinitionsReferenced: new[]

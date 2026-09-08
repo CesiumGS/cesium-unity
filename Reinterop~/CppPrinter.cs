@@ -14,6 +14,7 @@ namespace Reinterop
             return statement switch
             {
                 CppVariableDeclaration { Initializer: null } d => $"{d.Type.GetFullyQualifiedName()} {d.Name};",
+                CppVariableDeclaration { UseBracedInitialization: true } d => $"{d.Type.GetFullyQualifiedName()} {d.Name}{{{Print(d.Initializer!)}}};",
                 CppVariableDeclaration d => $"{d.Type.GetFullyQualifiedName()} {d.Name} = {Print(d.Initializer!)};",
                 CppExpressionStatement e => $"{Print(e.Expression)};",
                 CppAssignment a => $"{Print(a.Target)} = {Print(a.Value)};",
@@ -22,7 +23,6 @@ namespace Reinterop
                 CppThrow t => $"throw {Print(t.Exception!)};",
                 CppReturn { Value: null } => "return;",
                 CppReturn r => $"return {Print(r.Value!)};",
-                CppRawStatement r => r.Text,
                 CppTry t => PrintTry(t),
                 _ => throw new NotSupportedException($"Unsupported {nameof(CppStatement)}: {statement.GetType().Name}")
             };
@@ -33,11 +33,17 @@ namespace Reinterop
             string condition = $"if ({Print(i.Condition)})";
 
             // Match the codebase's existing convention of omitting braces around a single-statement body.
-            if (i.Then.Count == 1)
-                return condition + Environment.NewLine + "    " + Print(i.Then[0]);
+            if (i.Else != null)
+            {
+                string thenBody = i.Then.Select(Print).JoinAndIndent("    ");
+                string elseBody = i.Else.Select(Print).JoinAndIndent("    ");
+                return condition + " {" + Environment.NewLine + "    " + thenBody + Environment.NewLine + "} else {" + Environment.NewLine + "    " + elseBody + Environment.NewLine + "}";
+            }
 
-            string body = i.Then.Select(Print).JoinAndIndent("    ");
-            return condition + " {" + Environment.NewLine + "    " + body + Environment.NewLine + "}";
+            string result = i.Then.Count == 1
+                ? condition + Environment.NewLine + "    " + Print(i.Then[0])
+                : condition + " {" + Environment.NewLine + "    " + i.Then.Select(Print).JoinAndIndent("    ") + Environment.NewLine + "}";
+            return result;
         }
 
         private static string PrintTry(CppTry t)
@@ -59,11 +65,11 @@ namespace Reinterop
             {
                 CppIdentifier id => id.Name,
                 CppLiteral literal => literal.Value,
-                CppCall c => $"{Print(c.Callee)}({string.Join(", ", c.Arguments.Select(Print))})",
+                CppCall c => $"{PrintParenthesized(c.Callee)}({string.Join(", ", c.Arguments.Select(Print))})",
                 CppNew n => $"new {n.Type.GetFullyQualifiedName()}({string.Join(", ", n.Arguments.Select(Print))})",
-                CppTernary t => $"{Print(t.Condition)} ? {Print(t.Then)} : {Print(t.Else)}",
-                CppBinary b => $"{Print(b.Left)} {b.Op} {Print(b.Right)}",
-                CppUnary u => $"{u.Op}{Print(u.Operand)}",
+                CppTernary t => $"{PrintParenthesized(t.Condition)} ? {PrintParenthesized(t.Then)} : {PrintParenthesized(t.Else)}",
+                CppBinary b => $"{PrintParenthesized(b.Left)} {b.Op} {PrintParenthesized(b.Right)}",
+                CppUnary u => $"{u.Op}{PrintParenthesized(u.Operand)}",
                 CppCast c => c.Kind switch
                 {
                     CppCastKind.CStyle => $"({c.TargetType.GetFullyQualifiedName()})({Print(c.Expression)})",
@@ -73,9 +79,18 @@ namespace Reinterop
                     _ => throw new NotSupportedException($"Unsupported {nameof(CppCastKind)}: {c.Kind}")
                 },
                 CppMove m => $"std::move({Print(m.Expression)})",
-                CppMemberAccess m => $"{Print(m.Target)}.{m.MemberName}",
-                CppPointerMemberAccess m => $"{Print(m.Target)}->{m.MemberName}",
+                CppMemberAccess m => $"{PrintParenthesized(m.Target)}.{m.MemberName}",
+                CppPointerMemberAccess m => $"{PrintParenthesized(m.Target)}->{m.MemberName}",
                 _ => throw new NotSupportedException($"Unsupported {nameof(CppExpression)}: {expression.GetType().Name}")
+            };
+        }
+
+        private static string PrintParenthesized(CppExpression expression)
+        {
+            return expression switch
+            {
+                CppIdentifier or CppLiteral or CppCall or CppNew or CppCast or CppMove or CppMemberAccess or CppPointerMemberAccess => Print(expression),
+                _ => $"({Print(expression)})"
             };
         }
 
@@ -122,6 +137,9 @@ namespace Reinterop
                     GetRequiredIncludes(i.Condition, result);
                     foreach (CppStatement s in i.Then)
                         GetRequiredIncludes(s, result);
+                    if (i.Else != null)
+                        foreach (CppStatement s in i.Else)
+                            GetRequiredIncludes(s, result);
                     break;
                 case CppThrow t:
                     if (t.Exception != null)
@@ -130,8 +148,6 @@ namespace Reinterop
                 case CppReturn r:
                     if (r.Value != null)
                         GetRequiredIncludes(r.Value, result);
-                    break;
-                case CppRawStatement r:
                     break;
                 case CppTry t:
                     foreach (CppStatement s in t.Body)

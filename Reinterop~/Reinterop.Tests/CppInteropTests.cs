@@ -11,7 +11,7 @@ namespace Reinterop.Tests
         public void TranslateExceptionsToOutParameter_VoidReturn_MatchesOriginalTemplate()
         {
             IReadOnlyList<CppStatement> body = CppInterop.TranslateExceptionsToOutParameter(
-                new CppStatement[] { new CppRawStatement("DoTheThing();") },
+                new CppStatement[] { new CppExpressionStatement(new CppCall(new CppIdentifier("DoTheThing"), [])) },
                 Array.Empty<CppStatement>());
 
             string expected = string.Join(Environment.NewLine, new[]
@@ -34,13 +34,17 @@ namespace Reinterop.Tests
         public void TranslateExceptionsToOutParameter_ValueReturn_MatchesOriginalTemplate()
         {
             IReadOnlyList<CppStatement> body = CppInterop.TranslateExceptionsToOutParameter(
-                new CppStatement[] { new CppRawStatement("auto result = DoTheThing();"), new CppRawStatement("return result;") },
-                new CppStatement[] { new CppRawStatement("return nullptr;") });
+                new CppStatement[]
+                {
+                    new CppVariableDeclaration(CppType.Int32, "result", new CppCall(new CppIdentifier("DoTheThing"), [])),
+                    new CppReturn(new CppIdentifier("result"))
+                },
+                new CppStatement[] { new CppReturn(CppLiteral.Nullptr) });
 
             string expected = string.Join(Environment.NewLine, new[]
             {
                 "try {",
-                "    auto result = DoTheThing();",
+                "    ::std::int32_t result = DoTheThing();",
                 "    return result;",
                 "} catch (::DotNet::Reinterop::ReinteropNativeException& e) {",
                 "    *reinteropException = ::DotNet::Reinterop::ObjectHandle(e.GetDotNetException().GetHandle()).Release();",

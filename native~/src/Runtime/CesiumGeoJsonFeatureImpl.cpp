@@ -76,30 +76,25 @@ void CesiumGeoJsonFeatureImpl::setNativeFeatureInDocument(
   _pFeature = pFeature;
 }
 
-std::int32_t CesiumGeoJsonFeatureImpl::GetIdType(
+DotNet::CesiumForUnity::CesiumGeoJsonFeatureIdType CesiumGeoJsonFeatureImpl::GetIdType(
     const CesiumForUnity::CesiumGeoJsonFeature& feature) {
   if (!_pFeature) {
-    return static_cast<std::int32_t>(
-        CesiumForUnity::CesiumGeoJsonFeatureIdType::None);
+    return CesiumForUnity::CesiumGeoJsonFeatureIdType::None;
   }
 
   if (std::holds_alternative<std::monostate>(_pFeature->id)) {
-    return static_cast<std::int32_t>(
-        CesiumForUnity::CesiumGeoJsonFeatureIdType::None);
+    return CesiumForUnity::CesiumGeoJsonFeatureIdType::None;
   }
 
   if (std::holds_alternative<std::string>(_pFeature->id)) {
-    return static_cast<std::int32_t>(
-        CesiumForUnity::CesiumGeoJsonFeatureIdType::String);
+    return CesiumForUnity::CesiumGeoJsonFeatureIdType::String;
   }
 
   if (std::holds_alternative<std::int64_t>(_pFeature->id)) {
-    return static_cast<std::int32_t>(
-        CesiumForUnity::CesiumGeoJsonFeatureIdType::Integer);
+    return CesiumForUnity::CesiumGeoJsonFeatureIdType::Integer;
   }
 
-  return static_cast<std::int32_t>(
-      CesiumForUnity::CesiumGeoJsonFeatureIdType::None);
+  return CesiumForUnity::CesiumGeoJsonFeatureIdType::None;
 }
 
 System::String CesiumGeoJsonFeatureImpl::GetIdAsString(

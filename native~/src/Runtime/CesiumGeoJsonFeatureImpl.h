@@ -5,6 +5,7 @@
 #include <CesiumVectorData/GeoJsonDocument.h>
 #include <CesiumVectorData/GeoJsonObject.h>
 
+#include <DotNet/CesiumForUnity/CesiumGeoJsonFeatureIdType.h>
 #include <DotNet/System/String.h>
 
 #include <memory>
@@ -26,7 +27,7 @@ public:
       std::shared_ptr<CesiumVectorData::GeoJsonDocument> pDocument,
       CesiumVectorData::GeoJsonFeature* pFeature);
 
-  std::int32_t
+  DotNet::CesiumForUnity::CesiumGeoJsonFeatureIdType
   GetIdType(const DotNet::CesiumForUnity::CesiumGeoJsonFeature& feature);
 
   DotNet::System::String

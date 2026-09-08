@@ -230,9 +230,9 @@ namespace Reinterop
 
             CppType objectHandleType = CppObjectHandle.GetCppType(context);
 
-            // Start off assuming a static method
-            string callTarget = $"{implType.GetFullyQualifiedName()}::";
-            string getCallTarget = "";
+            // Start off assuming a static method.
+            CppExpression callTarget = new CppIdentifier($"{implType.GetFullyQualifiedName()}::{method.Name}");
+            List<CppStatement> setupStatements = [];
 
             // If it's an instance method, we need some extra parameters.
             if (!method.IsStatic)
@@ -244,25 +244,26 @@ namespace Reinterop
                     {
                         (ParameterName: "pImpl", CallSiteName: "", Type: CppType.VoidPointer, InteropType: CppType.VoidPointer.AsInteropType())
                     }.Concat(parameters);
-                    callTarget = "pImplTyped->";
-                    getCallTarget =
-                        $$"""
-                        auto pImplTyped = reinterpret_cast<{{implType.GetFullyQualifiedName()}}*>(pImpl);
-                        """;
+                    setupStatements.Add(new CppVariableDeclaration(
+                        implType.AsPointer(),
+                        "pImplTyped",
+                        CppCast.Reinterpret(implType.AsPointer(), new CppIdentifier("pImpl"))));
+                    callTarget = new CppPointerMemberAccess(new CppIdentifier("pImplTyped"), method.Name);
                 }
 
                 parameters = new[]
                 {
                     (ParameterName: "handle", CallSiteName: "wrapper", Type: CppType.VoidPointer, InteropType: CppType.VoidPointer.AsInteropType()),
                 }.Concat(parameters);
-                getCallTarget +=
-                    $$"""
-                    const {{wrapperType.GetFullyQualifiedName()}} wrapper{{{objectHandleType.GetFullyQualifiedName()}}(handle)};
-                    """;
+                setupStatements.Add(new CppVariableDeclaration(
+                    wrapperType.AsConst(),
+                    "wrapper",
+                    new CppCall(new CppIdentifier(objectHandleType), [new CppIdentifier("handle")]),
+                    UseBracedInitialization: true));
             }
 
             bool hasStructRewrite = false;
-            string returnResult = $"return {returnType.GetConversionToInteropType(context, "result")};";
+            bool hasNullableStructReturnRewrite = false;
             if (returnType.Kind == InteropTypeKind.BlittableStruct)
             {
                 CppType originalInteropReturnType = interopReturnType;
@@ -273,7 +274,6 @@ namespace Reinterop
                     (ParameterName: "pReturnValue", CallSiteName: "", Type: returnType.AsReference(), InteropType: originalInteropReturnType.AsPointer())
                 });
 
-                returnResult = "*pReturnValue = std::move(result);";
                 hasStructRewrite = true;
             }
             else if (returnType.Kind == InteropTypeKind.Nullable && interopReturnType.Kind == InteropTypeKind.BlittableStruct)
@@ -286,46 +286,59 @@ namespace Reinterop
                     (ParameterName: "pReturnValue", CallSiteName: "", Type: originalInteropReturnType.AsReference(), InteropType: originalInteropReturnType.AsPointer())
                 });
 
-                returnResult = "if (result.has_value()) { *pReturnValue = std::move(result.value()); return true; } else { return false; }";
                 hasStructRewrite = true;
+                hasNullableStructReturnRewrite = true;
             }
 
             var parameterList = parameters.Select(parameter => $"{parameter.InteropType.GetFullyQualifiedName()} {parameter.ParameterName}");
-            var callParameterList = parameters.Where(parameter => parameter.CallSiteName.Length > 0).Select(parameter => parameter.Type.GetConversionFromInteropType(context, parameter.CallSiteName));
+            var callParameterList = parameters
+                .Where(parameter => parameter.CallSiteName.Length > 0)
+                .Select(parameter => parameter.Type.GetConversionFromInteropTypeExpression(context, new CppIdentifier(parameter.CallSiteName)));
 
             string parameterListString = string.Join(", ", parameterList.Concat(new[] {"void** reinteropException"}));
-            string callParameterListString = string.Join(", ", callParameterList);
-
-            string implementation;
+            CppExpression call = new CppCall(callTarget, callParameterList.ToList());
+            List<CppStatement> implementationStatements = [];
             if (returnType == CppType.Void)
             {
-                implementation =
-                    $$"""
-                    {{callTarget}}{{method.Name}}({{callParameterListString}});
-                    """;
+                implementationStatements.Add(new CppExpressionStatement(call));
             }
             else
             {
-                implementation =
-                    $$"""
-                    auto result = {{callTarget}}{{method.Name}}({{callParameterListString}});
-                    {{returnResult}}
-                    """;
+                implementationStatements.Add(new CppVariableDeclaration(returnType, "result", call));
+                if (returnType.Kind == InteropTypeKind.BlittableStruct)
+                {
+                    implementationStatements.Add(new CppAssignment(
+                        new CppUnary("*", new CppIdentifier("pReturnValue")),
+                        new CppMove(new CppIdentifier("result"))));
+                }
+                else if (hasNullableStructReturnRewrite)
+                {
+                    implementationStatements.Add(new CppIf(
+                        new CppCall(new CppMemberAccess(new CppIdentifier("result"), "has_value"), []),
+                        [
+                            new CppAssignment(
+                                new CppUnary("*", new CppIdentifier("pReturnValue")),
+                                new CppMove(new CppCall(new CppMemberAccess(new CppIdentifier("result"), "value"), []))),
+                            new CppReturn(CppLiteral.True)
+                        ],
+                        [new CppReturn(CppLiteral.False)]));
+                }
+                else
+                {
+                    implementationStatements.Add(new CppReturn(returnType.GetConversionToInteropTypeExpression(context, "result")));
+                }
             }
 
-            string returnDefault = "";
+            List<CppStatement> onException = [];
             if (interopReturnType != CppType.Void)
             {
                 if (interopReturnType.Flags.HasFlag(CppTypeFlags.Pointer))
-                    returnDefault = "return nullptr;";
+                    onException.Add(new CppReturn(CppLiteral.Nullptr));
                 else
-                    returnDefault = $$"""return {{interopReturnType.GetFullyQualifiedName()}}();""";
+                    onException.Add(new CppReturn(new CppCall(new CppIdentifier(interopReturnType), [])));
             }
 
-            IReadOnlyList<CppStatement> onException = interopReturnType != CppType.Void
-                ? new CppStatement[] { new CppRawStatement(returnDefault) }
-                : Array.Empty<CppStatement>();
-            IReadOnlyList<CppStatement> tryBody = new CppStatement[] { new CppRawStatement(getCallTarget), new CppRawStatement(implementation) };
+            IReadOnlyList<CppStatement> tryBody = setupStatements.Concat(implementationStatements).ToList();
             IReadOnlyList<CppStatement> exceptionHandling = CppInterop.TranslateExceptionsToOutParameter(tryBody, onException);
 
             result.CppImplementationInvoker.Functions.Add(new(

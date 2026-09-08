@@ -355,6 +355,11 @@ namespace Reinterop
             return new CppType(Kind, Namespaces, Name, GenericArguments, Flags | CppTypeFlags.Const | CppTypeFlags.Pointer & ~CppTypeFlags.Reference, HeaderOverride);
         }
 
+        public CppType AsConst()
+        {
+            return new CppType(Kind, Namespaces, Name, GenericArguments, Flags | CppTypeFlags.Const, HeaderOverride);
+        }
+
         public CppType AsEnumFlags() {
           return new CppType(InteropTypeKind.EnumFlags, FlagsNamespace, "flags", new CppType[]{ this }, 0, IncludeEnumFlags);
         }

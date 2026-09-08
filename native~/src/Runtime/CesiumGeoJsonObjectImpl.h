@@ -5,6 +5,7 @@
 #include <CesiumVectorData/GeoJsonDocument.h>
 #include <CesiumVectorData/GeoJsonObject.h>
 
+#include <DotNet/CesiumForUnity/CesiumGeoJsonObjectType.h>
 #include <DotNet/System/String.h>
 
 #include <memory>
@@ -39,7 +40,7 @@ public:
       std::shared_ptr<CesiumVectorData::GeoJsonDocument> pDocument,
       CesiumVectorData::GeoJsonObject* pObject);
 
-  std::int32_t
+  DotNet::CesiumForUnity::CesiumGeoJsonObjectType
   GetObjectType(const DotNet::CesiumForUnity::CesiumGeoJsonObject& object);
 
   bool IsValid(const DotNet::CesiumForUnity::CesiumGeoJsonObject& object);
