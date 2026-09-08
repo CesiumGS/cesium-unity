@@ -1,7 +1,7 @@
 namespace Reinterop
 {
     // The C# mirror of CppPrinter.cs - mechanically renders CSharpStatement/CSharpExpression trees
-    // (see CSharpSyntax.cs) to C# source text. This is the only place that formatting decisions for
+    // (see CSharpExpression.cs and CSharpStatement.cs) to C# source text. This is the only place that formatting decisions for
     // these nodes are made.
     internal static class CSharpPrinter
     {
@@ -21,7 +21,6 @@ namespace Reinterop
                 CSharpThrow t => $"throw {Print(t.Exception)};",
                 CSharpReturn { Value: null } => "return;",
                 CSharpReturn r => $"return {Print(r.Value!)};",
-                CSharpRawStatement r => r.Text,
                 CSharpTryCatch t => PrintTryCatch(t),
                 _ => throw new NotSupportedException($"Unsupported {nameof(CSharpStatement)}: {statement.GetType().Name}")
             };
@@ -60,7 +59,6 @@ namespace Reinterop
             return expression switch
             {
                 CSharpIdentifier id => id.Name,
-                CSharpRaw raw => raw.Text,
                 CSharpLiteral literal => literal.Value,
                 CSharpCall c => $"{PrintParenthesized(c.Callee)}({string.Join(", ", c.Arguments.Select(Print))})",
                 CSharpBinary b => $"{PrintParenthesized(b.Left)} {b.Op} {PrintParenthesized(b.Right)}",
@@ -71,7 +69,7 @@ namespace Reinterop
                 CSharpNew n => $"new {n.TypeName}({string.Join(", ", n.Arguments.Select(Print))})",
                 CSharpArrayNew n => $"new {n.ElementTypeName}[{string.Join(", ", n.Dimensions.Select(Print))}]",
                 CSharpTernary t => $"{PrintParenthesized(t.Condition)} ? {PrintParenthesized(t.Then)} : {PrintParenthesized(t.Else)}",
-                CSharpIs i => $"{PrintParenthesized(i.Expression)} is {i.TypeName} {i.castedVariableName ?? ""}",
+                CSharpIs i => $"{PrintParenthesized(i.Expression)} is {i.TypeName} {i.CastedVariableName ?? ""}",
                 _ => throw new NotSupportedException($"Unsupported {nameof(CSharpExpression)}: {expression.GetType().Name}")
             };
         }
@@ -83,7 +81,6 @@ namespace Reinterop
             {
                 CSharpIdentifier id => Print(id),
                 CSharpLiteral literal => Print(literal),
-                CSharpRaw raw => Print(raw),
                 CSharpMemberAccess access => Print(access),
                 CSharpElementAccess access => Print(access),
                 CSharpCall call => Print(call),

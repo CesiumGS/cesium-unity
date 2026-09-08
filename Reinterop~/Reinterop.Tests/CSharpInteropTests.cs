@@ -15,7 +15,7 @@ namespace Reinterop.Tests
         {
             IReadOnlyList<CSharpStatement> body = CSharpInterop.CallNativeFunction(
                 new CSharpIdentifier("CallFoo_1234"),
-                new CSharpExpression[] { new CSharpRaw("a"), new CSharpRaw("b") });
+                new CSharpExpression[] { new CSharpIdentifier("a"), new CSharpIdentifier("b") });
 
             string expected = string.Join(Environment.NewLine, new[]
             {
@@ -33,9 +33,9 @@ namespace Reinterop.Tests
         {
             IReadOnlyList<CSharpStatement> body = CSharpInterop.CallNativeFunction(
                 new CSharpIdentifier("CallFoo_1234"),
-                new CSharpExpression[] { new CSharpRaw("a"), new CSharpRaw("b") },
+                new CSharpExpression[] { new CSharpIdentifier("a"), new CSharpIdentifier("b") },
                 resultTypeName: "var",
-                returnExpression: new CSharpRaw("result != 0"));
+                returnExpression: new CSharpBinary("!=", new CSharpIdentifier("result"), new CSharpLiteral("0")));
 
             string expected = string.Join(Environment.NewLine, new[]
             {

@@ -36,7 +36,7 @@ namespace Reinterop
         {
             List<CSharpStatement> statements = new()
             {
-                new CSharpVariableDeclaration("System.IntPtr", ExceptionVariableName, new CSharpRaw("System.IntPtr.Zero"))
+                new CSharpVariableDeclaration("System.IntPtr", ExceptionVariableName, new CSharpIdentifier("System.IntPtr.Zero"))
             };
 
             List<CSharpExpression> callArguments = new(arguments)
@@ -51,7 +51,7 @@ namespace Reinterop
                 : new CSharpExpressionStatement(call));
 
             statements.Add(new CSharpIf(
-                new CSharpBinary("!=", new CSharpIdentifier(ExceptionVariableName), new CSharpRaw("System.IntPtr.Zero")),
+                new CSharpBinary("!=", new CSharpIdentifier(ExceptionVariableName), new CSharpIdentifier("System.IntPtr.Zero")),
                 new CSharpStatement[] { new CSharpThrow(TranslatedManagedException()) }));
 
             if (returnExpression != null)

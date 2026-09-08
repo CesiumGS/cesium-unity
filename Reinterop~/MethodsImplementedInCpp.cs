@@ -405,7 +405,10 @@ namespace Reinterop
             List<CSharpStatement> csCallStatements = new();
             if (hasStructRewrite)
             {
-                csCallStatements.Add(new CSharpRawStatement($"var returnValue = new {csOriginalInteropReturnType.AsInteropTypeReturn().GetFullyQualifiedName()}();"));
+                csCallStatements.Add(new CSharpVariableDeclaration(
+                    "var",
+                    "returnValue",
+                    new CSharpNew(csOriginalInteropReturnType.AsInteropTypeReturn().GetFullyQualifiedName(), [])));
             }
 
             CSharpExpression? csReturnExpression = null;
@@ -414,18 +417,21 @@ namespace Reinterop
                 if (hasStructRewrite)
                 {
                     csReturnExpression = csReturnType.Kind == InteropTypeKind.Nullable
-                        ? new CSharpRaw("result == 1 ? returnValue : null")
-                        : new CSharpRaw("returnValue");
+                        ? new CSharpTernary(
+                            new CSharpBinary("==", new CSharpIdentifier("result"), new CSharpLiteral("1")),
+                            new CSharpIdentifier("returnValue"),
+                            new CSharpLiteral("null"))
+                        : new CSharpIdentifier("returnValue");
                 }
                 else
                 {
-                    csReturnExpression = new CSharpRaw(csReturnType.GetReturnValueConversionFromInteropType("result"));
+                    csReturnExpression = csReturnType.GetReturnValueConversionFromInteropTypeExpression("result");
                 }
             }
 
             IReadOnlyList<CSharpExpression> csCallArguments = csParametersInterop
                 .Where(parameter => parameter.Name != "reinteropException")
-                .Select(parameter => (CSharpExpression)new CSharpRaw(parameter.Type.GetConversionToInteropType(parameter.CallName)))
+                .Select(parameter => parameter.Type.GetConversionToInteropTypeExpression(new CSharpIdentifier(parameter.CallName)))
                 .ToArray();
 
             csCallStatements.AddRange(CSharpInterop.CallNativeFunction(

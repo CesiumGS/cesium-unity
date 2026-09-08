@@ -71,7 +71,8 @@ namespace Reinterop
 
             var invokeParameters = callbackParameters.Select(p => $"{p.CsType.GetFullyQualifiedName()} {p.Name}");
             var invokeInteropParameters = new[] { "ImplementationHandle callbackFunction" }.Concat(callbackParameters.Select(p => $"{p.CsType.AsInteropTypeParameter().GetFullyQualifiedName()} {p.Name}"));
-            var callInvokeInteropParameters = new[] { "_callbackFunction" }.Concat(callbackParameters.Select(p => p.CsType.GetConversionToInteropType(p.Name)));
+            var callInvokeInteropParameters = new[] { (CSharpExpression)new CSharpIdentifier("_callbackFunction") }.Concat(
+                callbackParameters.Select(p => p.CsType.GetConversionToInteropTypeExpression(new CSharpIdentifier(p.Name))));
             var csReturnType = CSharpType.FromSymbol(context, invokeMethod.ReturnType);
 
                 string nativeFunctionCSharpContent =
@@ -117,9 +118,9 @@ namespace Reinterop
                             {
                                 {{new[] { CSharpPrinter.Print(CSharpInterop.CallNativeFunction(
                                     new CSharpIdentifier(invokeCallbackName),
-                                    callInvokeInteropParameters.Select(p => (CSharpExpression)new CSharpRaw(p)).ToArray(),
+                                    callInvokeInteropParameters.ToArray(),
                                     resultTypeName: !csReturnType.IsVoid ? "var" : null,
-                                    returnExpression: !csReturnType.IsVoid ? new CSharpRaw(csReturnType.GetReturnValueConversionFromInteropType("result")) : null)) }.JoinAndIndent("                                ")}}
+                                    returnExpression: !csReturnType.IsVoid ? csReturnType.GetReturnValueConversionFromInteropTypeExpression("result") : null)) }.JoinAndIndent("                                ")}}
                             }
                         }
 

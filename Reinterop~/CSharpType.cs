@@ -246,6 +246,20 @@ namespace Reinterop
                 return variableName;
         }
 
+        public CSharpExpression GetReturnValueConversionFromInteropTypeExpression(string variableName)
+        {
+            if (this.SpecialType == SpecialType.System_Boolean)
+                return new CSharpBinary("!=", new CSharpIdentifier(variableName), new CSharpLiteral("0"));
+            else if (this.Kind == InteropTypeKind.ClassWrapper || this.Kind == InteropTypeKind.NonBlittableStructWrapper || this.Kind == InteropTypeKind.Delegate)
+                return new CSharpCast(
+                    this.GetFullyQualifiedName(),
+                    new CSharpCall(
+                        new CSharpMemberAccess(new CSharpIdentifier("Reinterop.ObjectHandleUtility"), "GetObjectAndFreeHandle"),
+                        [new CSharpIdentifier(variableName)]));
+            else
+                return new CSharpIdentifier(variableName);
+        }
+
         public static bool IsFirstDerivedFromSecond(ITypeSymbol first, ITypeSymbol second)
         {
             INamedTypeSymbol? namedSecond = second as INamedTypeSymbol;

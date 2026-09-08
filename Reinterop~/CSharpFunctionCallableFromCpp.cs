@@ -420,7 +420,7 @@ namespace Reinterop
                 bodyStatements.Insert(0, new CSharpVariableDeclaration(
                     csOwner.GetFullyQualifiedName(),
                     "thizUnboxed",
-                    csOwner.GetParameterConversionFromInteropTypeExpression(new CSharpRaw("thiz"))));
+                    csOwner.GetParameterConversionFromInteropTypeExpression(new CSharpIdentifier("thiz"))));
                 bodyStatements = RewriteReturnsToReboxNonBlittableStruct(bodyStatements);
                 if (csReturnType.IsVoid)
                     bodyStatements.Add(CreateReboxNonBlittableStructReceiverStatement());
@@ -579,7 +579,7 @@ namespace Reinterop
                 CSharpTernary t => new CSharpTernary(RewriteExpressionToConvertFromInterop(t.Condition, parameterConversions)!, RewriteExpressionToConvertFromInterop(t.Then, parameterConversions)!, RewriteExpressionToConvertFromInterop(t.Else, parameterConversions)!),
                 CSharpBinary b => new CSharpBinary(b.Op, RewriteExpressionToConvertFromInterop(b.Left, parameterConversions)!, RewriteExpressionToConvertFromInterop(b.Right, parameterConversions)!),
                 CSharpUnary u => new CSharpUnary(u.Op, RewriteExpressionToConvertFromInterop(u.Operand, parameterConversions)!),
-                CSharpIs i => new CSharpIs(RewriteExpressionToConvertFromInterop(i.Expression, parameterConversions)!, i.TypeName, i.castedVariableName),
+                CSharpIs i => new CSharpIs(RewriteExpressionToConvertFromInterop(i.Expression, parameterConversions)!, i.TypeName, i.CastedVariableName),
                 CSharpMemberAccess m => new CSharpMemberAccess(RewriteExpressionToConvertFromInterop(m.Target, parameterConversions)!, m.MemberName),
                 CSharpElementAccess e => new CSharpElementAccess(RewriteExpressionToConvertFromInterop(e.Target, parameterConversions)!, e.Arguments.Select(a => RewriteExpressionToConvertFromInterop(a, parameterConversions)!).ToArray()),
                 CSharpNew n => new CSharpNew(n.TypeName, n.Arguments.Select(a => RewriteExpressionToConvertFromInterop(a, parameterConversions)!).ToArray()),
@@ -615,7 +615,7 @@ namespace Reinterop
         {
             return new CSharpExpressionStatement(new CSharpCall(
                 new CSharpMemberAccess(new CSharpIdentifier("Reinterop.ObjectHandleUtility"), "ResetHandleObject"),
-                [new CSharpRaw("thiz"), new CSharpIdentifier("thizUnboxed")]));
+                [new CSharpIdentifier("thiz"), new CSharpIdentifier("thizUnboxed")]));
         }
 
         // Rewrites a C# function body like this:
