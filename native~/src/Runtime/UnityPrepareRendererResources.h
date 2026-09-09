@@ -5,8 +5,8 @@
 #include <Cesium3DTilesSelection/IPrepareRendererResources.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
-#include <DotNet/UnityEngine/GameObject.h>
 #include <DotNet/Gsplat/GsplatAssetUncompressed.h>
+#include <DotNet/UnityEngine/GameObject.h>
 
 namespace CesiumForUnityNative {
 

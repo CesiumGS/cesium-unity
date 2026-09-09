@@ -12,9 +12,9 @@
 #include <CesiumGeospatial/Ellipsoid.h>
 #include <CesiumGltf/AccessorView.h>
 #include <CesiumGltf/ExtensionExtMeshFeatures.h>
+#include <CesiumGltf/ExtensionKhrGaussianSplatting.h>
 #include <CesiumGltf/ExtensionKhrMaterialsUnlit.h>
 #include <CesiumGltf/ExtensionKhrTextureTransform.h>
-#include <CesiumGltf/ExtensionKhrGaussianSplatting.h>
 #include <CesiumGltf/ExtensionModelExtStructuralMetadata.h>
 #include <CesiumGltf/KhrTextureTransform.h>
 #include <CesiumGltfContent/GltfUtilities.h>
@@ -36,6 +36,8 @@
 #include <DotNet/CesiumForUnity/CesiumPrimitiveFeatures.h>
 #include <DotNet/CesiumForUnity/CesiumPropertyTable.h>
 #include <DotNet/CesiumForUnity/Helpers.h>
+#include <DotNet/Gsplat/GsplatAsset.h>
+#include <DotNet/Gsplat/GsplatRenderer.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/Collections/Generic/List1.h>
 #include <DotNet/System/Object.h>
@@ -49,7 +51,6 @@
 #include <DotNet/UnityEngine/HideFlags.h>
 #include <DotNet/UnityEngine/Material.h>
 #include <DotNet/UnityEngine/Matrix4x4.h>
-#include <DotNet/UnityEngine/ScriptableObject.h>
 #include <DotNet/UnityEngine/Mesh.h>
 #include <DotNet/UnityEngine/MeshCollider.h>
 #include <DotNet/UnityEngine/MeshData.h>
@@ -65,17 +66,16 @@
 #include <DotNet/UnityEngine/Rendering/SubMeshDescriptor.h>
 #include <DotNet/UnityEngine/Rendering/VertexAttributeDescriptor.h>
 #include <DotNet/UnityEngine/Resources.h>
+#include <DotNet/UnityEngine/ScriptableObject.h>
 #include <DotNet/UnityEngine/Texture.h>
 #include <DotNet/UnityEngine/TextureWrapMode.h>
 #include <DotNet/UnityEngine/Transform.h>
 #include <DotNet/UnityEngine/Vector2.h>
 #include <DotNet/UnityEngine/Vector3.h>
 #include <DotNet/UnityEngine/Vector4.h>
-#include <DotNet/Gsplat/GsplatAsset.h>
-#include <DotNet/Gsplat/GsplatRenderer.h>
+#include <fmt/format.h>
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <fmt/format.h>
 
 #include <algorithm>
 #include <array>
@@ -715,17 +715,14 @@ bool writeShCoeffs(
   const int32_t numCoeffs = 3 + 2 * (degree - 1);
   for (int32_t i = 0; i < numCoeffs; i++) {
     std::unordered_map<std::string, int32_t>::const_iterator accessorIt =
-        meshPrimitive.attributes.find(
-            fmt::format(
-                "KHR_gaussian_splatting:SH_DEGREE_{}_COEF_{}",
-                degree,
-                i));
+        meshPrimitive.attributes.find(fmt::format(
+            "KHR_gaussian_splatting:SH_DEGREE_{}_COEF_{}",
+            degree,
+            i));
     if (accessorIt == meshPrimitive.attributes.end()) {
-      UnityEngine::Debug::LogError(
-          System::String(
-              fmt::format(
-              "Could not find spherical harmonic attribute for degree {} index "
-              "{} on mesh primitive",
+      UnityEngine::Debug::LogError(System::String(fmt::format(
+          "Could not find spherical harmonic attribute for degree {} index "
+          "{} on mesh primitive",
           degree,
           i)));
       return false;
@@ -733,11 +730,9 @@ bool writeShCoeffs(
 
     CesiumGltf::AccessorView<glm::vec3> accessorView(model, accessorIt->second);
     if (accessorView.status() != CesiumGltf::AccessorViewStatus::Valid) {
-      UnityEngine::Debug::LogError(
-          System::String(
-              fmt::format(
-              "Accessor view for spherical harmonic attribute degree {} index "
-              "{} on mesh primitive returned invalid status: {}",
+      UnityEngine::Debug::LogError(System::String(fmt::format(
+          "Accessor view for spherical harmonic attribute degree {} index "
+          "{} on mesh primitive returned invalid status: {}",
           degree,
           i,
           (int32_t)accessorView.status())));
@@ -762,8 +757,11 @@ void writeConvertedAccessor(
     const CesiumGltf::AccessorView<T>& accessorView,
     System::Array1<UnityEngine::Vector4>& data) {
   for (int32_t i = 0; i < accessorView.size(); i++) {
-    data.Item(i, UnityEngine::Vector4(
-        accessorView[i].x / static_cast<float>(std::numeric_limits<ComponentT>::max()),
+    data.Item(
+        i,
+        UnityEngine::Vector4(
+            accessorView[i].x /
+                static_cast<float>(std::numeric_limits<ComponentT>::max()),
             accessorView[i].y /
                 static_cast<float>(std::numeric_limits<ComponentT>::max()),
             accessorView[i].z /
@@ -774,9 +772,9 @@ void writeConvertedAccessor(
 }
 
 void populateGsplatAsset(
-  const CesiumGltf::Model& model,
-  const CesiumGltf::MeshPrimitive& meshPrimitive,
-  DotNet::Gsplat::GsplatAssetUncompressed& asset) {
+    const CesiumGltf::Model& model,
+    const CesiumGltf::MeshPrimitive& meshPrimitive,
+    DotNet::Gsplat::GsplatAssetUncompressed& asset) {
 
   const int32_t numShCoeffs = countShCoeffsOnPrimitive(meshPrimitive);
   asset.SHBands(numShCoeffs);
@@ -791,10 +789,10 @@ void populateGsplatAsset(
 
   CesiumGltf::AccessorView<glm::vec3> positionView(model, positionIt->second);
   if (positionView.status() != CesiumGltf::AccessorViewStatus::Valid) {
-    UnityEngine::Debug::LogError(
-        System::String(
-            fmt::format(
-            "'POSITION' accessor view on mesh primitive returned invalid status: {}", (int32_t)positionView.status())));
+    UnityEngine::Debug::LogError(System::String(fmt::format(
+        "'POSITION' accessor view on mesh primitive returned invalid status: "
+        "{}",
+        (int32_t)positionView.status())));
     return;
   }
 
@@ -811,14 +809,15 @@ void populateGsplatAsset(
 
     // Take this opportunity to update the bounds.
     if (bounds) {
-      bounds = {UnityEngine::Vector3(
-          std::min(std::get<0>(*bounds).x, position.x),
-          std::min(std::get<0>(*bounds).y, position.y),
-          std::min(std::get<0>(*bounds).z, position.z)),
-        UnityEngine::Vector3(
-          std::max(std::get<1>(*bounds).x, position.x),
-          std::max(std::get<1>(*bounds).y, position.y),
-          std::max(std::get<1>(*bounds).z, position.z))};
+      bounds = {
+          UnityEngine::Vector3(
+              std::min(std::get<0>(*bounds).x, position.x),
+              std::min(std::get<0>(*bounds).y, position.y),
+              std::min(std::get<0>(*bounds).z, position.z)),
+          UnityEngine::Vector3(
+              std::max(std::get<1>(*bounds).x, position.x),
+              std::max(std::get<1>(*bounds).y, position.y),
+              std::max(std::get<1>(*bounds).z, position.z))};
     } else {
       bounds = {position, position};
     }
@@ -830,27 +829,28 @@ void populateGsplatAsset(
     UnityEngine::Vector3 min = std::get<0>(*bounds);
     UnityEngine::Vector3 max = std::get<1>(*bounds);
     UnityEngine::Bounds finalBounds = UnityEngine::Bounds::Construct(
-      UnityEngine::Vector3((min.x + max.x) * 0.5f, (min.y + max.y) * 0.5f, (min.z + max.z) * 0.5f),
-      UnityEngine::Vector3(max.x - min.x, max.y - min.y, max.z - min.z));
+        UnityEngine::Vector3(
+            (min.x + max.x) * 0.5f,
+            (min.y + max.y) * 0.5f,
+            (min.z + max.z) * 0.5f),
+        UnityEngine::Vector3(max.x - min.x, max.y - min.y, max.z - min.z));
     asset.Bounds(finalBounds);
   }
 
   const std::unordered_map<std::string, int32_t>::const_iterator scaleIt =
       meshPrimitive.attributes.find("KHR_gaussian_splatting:SCALE");
   if (scaleIt == meshPrimitive.attributes.end()) {
-    UnityEngine::Debug::LogError(
-        System::String("Mesh primitive has no 'KHR_gaussian_splatting:SCALE' attribute"));
+    UnityEngine::Debug::LogError(System::String(
+        "Mesh primitive has no 'KHR_gaussian_splatting:SCALE' attribute"));
     return;
   }
 
   CesiumGltf::AccessorView<glm::vec3> scaleView(model, scaleIt->second);
   if (scaleView.status() != CesiumGltf::AccessorViewStatus::Valid) {
-    UnityEngine::Debug::LogError(
-        System::String(
-            fmt::format(
-                "'KHR_gaussian_splatting:SCALE' accessor view on mesh "
-                "primitive returned invalid status: {}",
-                (int32_t)scaleView.status())));
+    UnityEngine::Debug::LogError(System::String(fmt::format(
+        "'KHR_gaussian_splatting:SCALE' accessor view on mesh "
+        "primitive returned invalid status: {}",
+        (int32_t)scaleView.status())));
     return;
   }
 
@@ -859,10 +859,7 @@ void populateGsplatAsset(
   for (int32_t i = 0; i < scaleView.size(); i++) {
     scales.Item(
         i,
-        UnityEngine::Vector3(
-            scaleView[i].x,
-            scaleView[i].y,
-            scaleView[i].z));
+        UnityEngine::Vector3(scaleView[i].x, scaleView[i].y, scaleView[i].z));
   }
 
   asset.Scales(scales);
@@ -870,19 +867,17 @@ void populateGsplatAsset(
   const std::unordered_map<std::string, int32_t>::const_iterator rotationIt =
       meshPrimitive.attributes.find("KHR_gaussian_splatting:ROTATION");
   if (rotationIt == meshPrimitive.attributes.end()) {
-    UnityEngine::Debug::LogError(
-        System::String("Mesh primitive has no 'KHR_gaussian_splatting:ROTATION' attribute"));
+    UnityEngine::Debug::LogError(System::String(
+        "Mesh primitive has no 'KHR_gaussian_splatting:ROTATION' attribute"));
     return;
   }
 
   CesiumGltf::AccessorView<glm::vec4> rotationView(model, rotationIt->second);
   if (rotationView.status() != CesiumGltf::AccessorViewStatus::Valid) {
-    UnityEngine::Debug::LogError(
-        System::String(
-            fmt::format(
-                "'KHR_gaussian_splatting:ROTATION' accessor view on mesh "
-                "primitive returned invalid status: {}",
-                (int32_t)rotationView.status())));
+    UnityEngine::Debug::LogError(System::String(fmt::format(
+        "'KHR_gaussian_splatting:ROTATION' accessor view on mesh "
+        "primitive returned invalid status: {}",
+        (int32_t)rotationView.status())));
     return;
   }
 
@@ -907,8 +902,9 @@ void populateGsplatAsset(
   }
 
   if (colorIt->second < 0 || colorIt->second >= model.accessors.size()) {
-    UnityEngine::Debug::LogError(
-        System::String(fmt::format("Mesh primitive has invalid 'COLOR_0' accessor index {}", colorIt->second)));
+    UnityEngine::Debug::LogError(System::String(fmt::format(
+        "Mesh primitive has invalid 'COLOR_0' accessor index {}",
+        colorIt->second)));
     return;
   }
 
@@ -917,12 +913,10 @@ void populateGsplatAsset(
       CesiumGltf::AccessorSpec::ComponentType::UNSIGNED_BYTE) {
     CesiumGltf::AccessorView<glm::u8vec4> accessorView(model, colorIt->second);
     if (accessorView.status() != CesiumGltf::AccessorViewStatus::Valid) {
-      UnityEngine::Debug::LogError(
-          System::String(
-              fmt::format(
-                  "'COLOR_0' accessor view on mesh primitive returned invalid "
-                  "status: {}",
-                  (int32_t)accessorView.status())));
+      UnityEngine::Debug::LogError(System::String(fmt::format(
+          "'COLOR_0' accessor view on mesh primitive returned invalid "
+          "status: {}",
+          (int32_t)accessorView.status())));
       return;
     }
 
@@ -934,68 +928,56 @@ void populateGsplatAsset(
       CesiumGltf::AccessorSpec::ComponentType::UNSIGNED_SHORT) {
     CesiumGltf::AccessorView<glm::u16vec4> accessorView(model, colorIt->second);
     if (accessorView.status() != CesiumGltf::AccessorViewStatus::Valid) {
-      UnityEngine::Debug::LogError(
-          System::String(
-              fmt::format(
-                  "'COLOR_0' accessor view on mesh primitive returned invalid "
-                  "status: {}",
-                  (int32_t)accessorView.status())));
+      UnityEngine::Debug::LogError(System::String(fmt::format(
+          "'COLOR_0' accessor view on mesh primitive returned invalid "
+          "status: {}",
+          (int32_t)accessorView.status())));
       return;
     }
 
     System::Array1<UnityEngine::Vector4> colors(accessorView.size());
-    writeConvertedAccessor<glm::u16vec4, uint16_t>(
-        accessorView, colors);
+    writeConvertedAccessor<glm::u16vec4, uint16_t>(accessorView, colors);
     asset.Colors(colors);
   } else if (
       colorAccessor.componentType ==
       CesiumGltf::AccessorSpec::ComponentType::FLOAT) {
     CesiumGltf::AccessorView<glm::vec4> accessorView(model, colorIt->second);
     if (accessorView.status() != CesiumGltf::AccessorViewStatus::Valid) {
-      UnityEngine::Debug::LogError(
-          System::String(
-              fmt::format(
-                  "'COLOR_0' accessor view on mesh primitive returned invalid "
-                  "status: {}",
-                  (int32_t)accessorView.status())));
+      UnityEngine::Debug::LogError(System::String(fmt::format(
+          "'COLOR_0' accessor view on mesh primitive returned invalid "
+          "status: {}",
+          (int32_t)accessorView.status())));
       return;
     }
 
     System::Array1<UnityEngine::Vector4> colors(accessorView.size());
     for (int32_t i = 0; i < accessorView.size(); i++) {
-      colors.Item(i, UnityEngine::Vector4(
-          accessorView[i].x,
-          accessorView[i].y,
-          accessorView[i].z,
-          accessorView[i].w));
+      colors.Item(
+          i,
+          UnityEngine::Vector4(
+              accessorView[i].x,
+              accessorView[i].y,
+              accessorView[i].z,
+              accessorView[i].w));
     }
     asset.Colors(colors);
   } else {
     UnityEngine::Debug::LogError(
-        System::String("Invalid 'COLOR_0' componentType. Allowed values are UNSIGNED_BYTE, UNSIGNED_SHORT, and FLOAT."));
+        System::String("Invalid 'COLOR_0' componentType. Allowed values are "
+                       "UNSIGNED_BYTE, UNSIGNED_SHORT, and FLOAT."));
     return;
   }
 
-  System::Array1<UnityEngine::Vector3> harmonics(numShCoeffs * asset.SplatCount());
+  System::Array1<UnityEngine::Vector3> harmonics(
+      numShCoeffs * asset.SplatCount());
   if (numShCoeffs >= 3) {
-    if (!writeShCoeffs(
-            model,
-            meshPrimitive,
-            harmonics,
-            numShCoeffs,
-            0,
-            1)) {
+    if (!writeShCoeffs(model, meshPrimitive, harmonics, numShCoeffs, 0, 1)) {
       return;
     }
   }
 
   if (numShCoeffs >= 8) {
-    if (!writeShCoeffs(
-            model,
-            meshPrimitive, harmonics,
-            numShCoeffs,
-            3,
-            2)) {
+    if (!writeShCoeffs(model, meshPrimitive, harmonics, numShCoeffs, 3, 2)) {
       return;
     }
   }
@@ -1888,8 +1870,11 @@ void* UnityPrepareRendererResources::prepareInMainThread(
             UnityTransforms::toUnityMathematics(modelToEcef));
 
         if (primitiveInfo.gsplatAsset.has_value()) {
-          DotNet::Gsplat::GsplatRenderer renderer = primitiveGameObject.AddComponent<DotNet::Gsplat::GsplatRenderer>();
-          renderer.GsplatAsset((DotNet::Gsplat::GsplatAsset)(*primitiveInfo.gsplatAsset));
+          DotNet::Gsplat::GsplatRenderer renderer =
+              primitiveGameObject
+                  .AddComponent<DotNet::Gsplat::GsplatRenderer>();
+          renderer.GsplatAsset(
+              (DotNet::Gsplat::GsplatAsset)(*primitiveInfo.gsplatAsset));
           return;
         }
 
