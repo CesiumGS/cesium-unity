@@ -13,7 +13,7 @@ namespace Reinterop.Tests
     public class CSharpInteropTests
     {
         private static CSharpCompilation compilation = GenerationTestHelper.CreateCompilation("");
-        private static CppGenerationContext context = new CppGenerationContext(compilation);
+        private static ReinteropGenerationContext context = new ReinteropGenerationContext(compilation);
 
         [Test]
         public void CallNativeFunction_VoidReturn_MatchesOriginalTemplate()

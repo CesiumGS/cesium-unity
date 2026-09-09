@@ -13,7 +13,7 @@ namespace Reinterop
     {
         public readonly Dictionary<ITypeSymbol, TypeToGenerate> GenerationItems = new Dictionary<ITypeSymbol, TypeToGenerate>(SymbolEqualityComparer.Default);
 
-        public ExposeToCppSyntaxWalker(CppGenerationContext context, SemanticModel semanticModel)
+        public ExposeToCppSyntaxWalker(ReinteropGenerationContext context, SemanticModel semanticModel)
         {
             this._context = context;
             this._semanticModel = semanticModel;
@@ -293,7 +293,7 @@ namespace Reinterop
             return item;
         }
 
-        private CppGenerationContext _context;
+        private ReinteropGenerationContext _context;
         private SemanticModel _semanticModel;
     }
 }

@@ -5,7 +5,7 @@ namespace Reinterop
 {
     internal class MethodsImplementedInCpp
     {
-        public static void Generate(CppGenerationContext context, TypeToGenerate item, GeneratedResult result)
+        public static void Generate(ReinteropGenerationContext context, TypeToGenerate item, GeneratedResult result)
         {
             Debug.Assert(result.CppImplementationInvoker != null);
             if (result.CppImplementationInvoker == null)
@@ -195,7 +195,7 @@ namespace Reinterop
 
         private sealed class NativeImplementationBody : IGenerateCSharpBody
         {
-            public IEnumerable<CSharpStatement> GenerateBody(CppGenerationContext context, CSharpFunctionCallableFromCpp function)
+            public IEnumerable<CSharpStatement> GenerateBody(ReinteropGenerationContext context, CSharpFunctionCallableFromCpp function)
             {
                 yield return new CSharpIf(
                     new CSharpBinary("==", CSharpIdentifier.Thiz, new CSharpLiteral("null")),
@@ -208,7 +208,7 @@ namespace Reinterop
             }
         }
 
-        private static void GenerateMethod(CppGenerationContext context, TypeToGenerate item, GeneratedResult result, IMethodSymbol method)
+        private static void GenerateMethod(ReinteropGenerationContext context, TypeToGenerate item, GeneratedResult result, IMethodSymbol method)
         {
             if (result.CppImplementationInvoker == null)
                 return;

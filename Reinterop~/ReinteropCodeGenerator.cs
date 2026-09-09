@@ -4,11 +4,11 @@ using System.Text;
 
 namespace Reinterop
 {
-    internal class CodeGenerator
+    internal class ReinteropCodeGenerator
     {
-        public readonly CppGenerationContext Options;
+        public readonly ReinteropGenerationContext Options;
 
-        public CodeGenerator(CppGenerationContext options)
+        public ReinteropCodeGenerator(ReinteropGenerationContext options)
         {
             this.Options = options;
         }
@@ -93,7 +93,7 @@ namespace Reinterop
             return result;
         }
 
-        public static void WriteCSharpCode(GeneratorExecutionContext context, CppGenerationContext cppContext, IEnumerable<GeneratedResult?> results)
+        public static void WriteCSharpCode(GeneratorExecutionContext context, ReinteropGenerationContext cppContext, IEnumerable<GeneratedResult?> results)
         {
             GeneratedInit combinedInit = GeneratedInit.Merge(results.Select(result => result == null ? new GeneratedInit() : result.Init));
             context.AddSource("ReinteropInitializer", combinedInit.ToCSharpSourceFileString(cppContext));

@@ -5,7 +5,7 @@ namespace Reinterop
 {
     internal class CustomStringGenerator : ICustomGenerator
     {
-        public IEnumerable<TypeToGenerate> GetDependencies(CppGenerationContext context)
+        public IEnumerable<TypeToGenerate> GetDependencies(ReinteropGenerationContext context)
         {
             INamedTypeSymbol? encoding = context.Compilation.GetTypeByMetadataName("System.Text.Encoding");
             if (encoding == null)
@@ -53,7 +53,7 @@ namespace Reinterop
             yield return generateMarshal;
         }
 
-        public GeneratedResult? Generate(CppGenerationContext context, TypeToGenerate type, GeneratedResult? generated)
+        public GeneratedResult? Generate(ReinteropGenerationContext context, TypeToGenerate type, GeneratedResult? generated)
         {
             // This generator only operates on strings.
             if (generated == null || type.Type.SpecialType != SpecialType.System_String)

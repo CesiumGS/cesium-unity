@@ -4,7 +4,7 @@ namespace Reinterop
 {
     internal class CppHandleManagement
     {
-        internal static void Generate(CppGenerationContext context, TypeToGenerate item, GeneratedResult result)
+        internal static void Generate(ReinteropGenerationContext context, TypeToGenerate item, GeneratedResult result)
         {
             // We only need handle management for non-static classes.
             if (item.Type.IsStatic)

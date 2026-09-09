@@ -4,12 +4,12 @@ namespace Reinterop
 {
     internal class CustomArrayGenerator : ICustomGenerator
     {
-        public IEnumerable<TypeToGenerate> GetDependencies(CppGenerationContext context)
+        public IEnumerable<TypeToGenerate> GetDependencies(ReinteropGenerationContext context)
         {
             yield break;
         }
 
-        public GeneratedResult? Generate(CppGenerationContext context, TypeToGenerate type, GeneratedResult? generated)
+        public GeneratedResult? Generate(ReinteropGenerationContext context, TypeToGenerate type, GeneratedResult? generated)
         {
             // This generator only operates on arrays.
             if (generated == null || !(type.Type is IArrayTypeSymbol arrayType))
@@ -24,7 +24,7 @@ namespace Reinterop
         /// <summary>
         /// Add a constructor that can be used to create an array of a given size.
         /// </summary>
-        private void GenerateSizeConstructor(CppGenerationContext context, TypeToGenerate item, GeneratedResult result, IArrayTypeSymbol arrayType)
+        private void GenerateSizeConstructor(ReinteropGenerationContext context, TypeToGenerate item, GeneratedResult result, IArrayTypeSymbol arrayType)
         {
             CSharpFunctionCallableFromCpp functionRecipe = new CSharpFunctionCallableFromCpp(context, item.Type)
                 .Name("Construct_Size")
@@ -54,7 +54,7 @@ namespace Reinterop
         /// Add a method that can be used to assign a new value to an element of the array.
         /// The element getter is generated in <see cref="Properties"/>.
         /// </summary>
-        private void GenerateItemMethod(CppGenerationContext context, TypeToGenerate item, GeneratedResult result, IArrayTypeSymbol arrayType)
+        private void GenerateItemMethod(ReinteropGenerationContext context, TypeToGenerate item, GeneratedResult result, IArrayTypeSymbol arrayType)
         {
             // TODO: It would be nice to allow the user to use operator[] to assign a value to an array element.
             //       But to do that, we would need operator[] to return an object with an implicit conversion

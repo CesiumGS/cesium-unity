@@ -7,12 +7,12 @@ namespace Reinterop.Tests
     [TestFixture]
     public class CSharpFunctionCallableFromCppTests
     {
-        private static CppGenerationContext CreateContext() => new CppGenerationContext(CSharpCompilation.Create("Test", references: GenerationTestHelper.References));
+        private static ReinteropGenerationContext CreateContext() => new ReinteropGenerationContext(CSharpCompilation.Create("Test", references: GenerationTestHelper.References));
 
         [Test]
         public void BoolsInteropAsBytes()
         {
-            CppGenerationContext context = CreateContext();
+            ReinteropGenerationContext context = CreateContext();
             CSharpType owner = new CSharpType(context, InteropTypeKind.ClassWrapper, ["TestNamespace"], "TestClass", SpecialType.None);
             CSharpFunctionCallableFromCpp interop = new CSharpFunctionCallableFromCpp(context, owner)
                 .Name("TestMethod")
@@ -55,7 +55,7 @@ namespace Reinterop.Tests
         [Test]
         public void StructReturnRewrite()
         {
-            CppGenerationContext context = CreateContext();
+            ReinteropGenerationContext context = CreateContext();
             CSharpType owner = new CSharpType(context, InteropTypeKind.ClassWrapper, ["TestNamespace"], "TestClass", SpecialType.None);
             CSharpType blittableStruct = new CSharpType(context, InteropTypeKind.BlittableStruct, ["TestNamespace"], "MyStruct", SpecialType.None);
             CSharpFunctionCallableFromCpp interop = new CSharpFunctionCallableFromCpp(context, owner)
@@ -100,7 +100,7 @@ namespace Reinterop.Tests
         [Test]
         public void GenericMethodInvocationIncludesTypeArguments()
         {
-            CppGenerationContext context = CreateContext();
+            ReinteropGenerationContext context = CreateContext();
             CSharpType owner = new CSharpType(context, InteropTypeKind.ClassWrapper, ["TestNamespace"], "TestClass", SpecialType.None);
             CSharpType intType = CSharpType.FromSymbol(context, context.Compilation.GetSpecialType(SpecialType.System_Int32));
             CSharpFunctionCallableFromCpp interop = new CSharpFunctionCallableFromCpp(context, owner)
@@ -122,7 +122,7 @@ namespace Reinterop.Tests
         [Test]
         public void CloneCopiesConfiguration()
         {
-            CppGenerationContext context = CreateContext();
+            ReinteropGenerationContext context = CreateContext();
             CSharpType owner = new CSharpType(context, InteropTypeKind.ClassWrapper, ["TestNamespace"], "TestClass", SpecialType.None);
             CSharpType intType = CSharpType.FromSymbol(context, context.Compilation.GetSpecialType(SpecialType.System_Int32));
             CSharpBodyInvokeMethod body = new CSharpBodyInvokeMethod();

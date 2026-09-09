@@ -4,7 +4,7 @@ namespace Reinterop
 {
     internal class Properties
     {
-        public static void Generate(CppGenerationContext context, TypeToGenerate mainItem, TypeToGenerate currentItem, GeneratedResult result)
+        public static void Generate(ReinteropGenerationContext context, TypeToGenerate mainItem, TypeToGenerate currentItem, GeneratedResult result)
         {
             foreach (IPropertySymbol property in currentItem.Properties)
             {
@@ -12,7 +12,7 @@ namespace Reinterop
             }
         }
 
-        private static void GenerateSingleProperty(CppGenerationContext context, TypeToGenerate item, GeneratedResult result, IPropertySymbol property)
+        private static void GenerateSingleProperty(ReinteropGenerationContext context, TypeToGenerate item, GeneratedResult result, IPropertySymbol property)
         {
             if (property.GetMethod != null)
                 GenerateSingleMethod(context, item, result, property, property.GetMethod);
@@ -22,7 +22,7 @@ namespace Reinterop
                 GenerateSingleMethod(context, item, result, property, property.SetMethod);
         }
 
-        private static void GenerateSingleMethod(CppGenerationContext context, TypeToGenerate item, GeneratedResult result, IPropertySymbol property, IMethodSymbol method)
+        private static void GenerateSingleMethod(ReinteropGenerationContext context, TypeToGenerate item, GeneratedResult result, IPropertySymbol property, IMethodSymbol method)
         {
             // Convert the C# indexer name, `this[]`, to the C++ one, `operator[]`.
             string propertyName = property.IsIndexer ? "operator[]" : property.Name;

@@ -40,20 +40,20 @@ namespace Reinterop
     /// </remarks>
     internal class CSharpFunctionCallableFromCpp
     {
-        public CSharpFunctionCallableFromCpp(CppGenerationContext context, CSharpType owner)
+        public CSharpFunctionCallableFromCpp(ReinteropGenerationContext context, CSharpType owner)
         {
             _context = context;
             _owner = owner;
             _returnType = new CSharpType(context, InteropTypeKind.Primitive, [], "void", SpecialType.System_Void);
         }
 
-        public CSharpFunctionCallableFromCpp(CppGenerationContext context, ITypeSymbol owner)
+        public CSharpFunctionCallableFromCpp(ReinteropGenerationContext context, ITypeSymbol owner)
             : this(context, CSharpType.FromSymbol(context, owner))
         {
         }
 
-        private readonly CppGenerationContext _context;
-        public CppGenerationContext Context() { return _context; }
+        private readonly ReinteropGenerationContext _context;
+        public ReinteropGenerationContext Context() { return _context; }
 
         private CSharpType _owner;
         public CSharpType Owner() { return _owner; }
@@ -489,7 +489,7 @@ namespace Reinterop
             return new InteropFunctions() { csharp = csharpFunction, cpp = cppWrapper, functionPointer = functionPointer };
         }
 
-        public void GenerateCode(CppGenerationContext context, GeneratedResult result)
+        public void GenerateCode(ReinteropGenerationContext context, GeneratedResult result)
         {
             InteropFunctions functions = CreatePairedInteropFunctions();
 

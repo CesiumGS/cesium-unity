@@ -15,7 +15,7 @@ namespace Reinterop
     /// </remarks>
     internal class CSharpFunction
     {
-        public CppGenerationContext Context { get; }
+        public ReinteropGenerationContext Context { get; }
 
         /// <summary>
         /// The C# type that owns this function.
@@ -181,7 +181,7 @@ namespace Reinterop
             return this;
         }
 
-        public CSharpFunction(CppGenerationContext context, CSharpType owner, string name)
+        public CSharpFunction(ReinteropGenerationContext context, CSharpType owner, string name)
         {
             this.Context = context;
             this.Owner = owner;

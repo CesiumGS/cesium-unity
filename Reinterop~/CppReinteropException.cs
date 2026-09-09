@@ -2,7 +2,7 @@
 {
     internal class CppReinteropException
     {
-        public static CppType GetCppType(CppGenerationContext context)
+        public static CppType GetCppType(ReinteropGenerationContext context)
         {
             List<string> ns = new List<string>();
             if (context.BaseNamespace.Length > 0)
@@ -17,7 +17,7 @@
             return new CppType(InteropTypeKind.ClassWrapper, ns, "ReinteropNativeException", null, 0);
         }
 
-        public static void Generate(CppGenerationContext context, IDictionary<string, CppSourceFile> sourceFiles)
+        public static void Generate(ReinteropGenerationContext context, IDictionary<string, CppSourceFile> sourceFiles)
         {
             CppType type = GetCppType(context);
 

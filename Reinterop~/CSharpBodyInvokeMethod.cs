@@ -13,7 +13,7 @@ namespace Reinterop
     /// </summary>
     internal class CSharpBodyInvokeMethod : IGenerateCSharpBody
     {
-        public IEnumerable<CSharpStatement> GenerateBody(CppGenerationContext context, CSharpFunctionCallableFromCpp function)
+        public IEnumerable<CSharpStatement> GenerateBody(ReinteropGenerationContext context, CSharpFunctionCallableFromCpp function)
         {
             CSharpExpression target = function.Static() ? new CSharpIdentifier(function.Owner()) : CSharpIdentifier.Thiz;
             string methodName = function.Name()!;

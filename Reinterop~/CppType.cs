@@ -51,7 +51,7 @@ namespace Reinterop
         public static readonly CppType NullPointer = CreatePrimitiveType(StandardNamespace, "nullptr_t", 0, IncludeCStdDef);
         public static readonly CppType StlString = new CppType(InteropTypeKind.Unknown, StandardNamespace, "string", null, 0, IncludeString);
 
-        public static CppType FromCSharp(CppGenerationContext context, CSharpType type)
+        public static CppType FromCSharp(ReinteropGenerationContext context, CSharpType type)
         {
             if (type.Name == "Nullable" && type.TypeArguments.Count == 1)
             {
@@ -486,7 +486,7 @@ namespace Reinterop
         /// Gets an expression that converts this type to the
         /// {@link AsInteropType}.
         /// </summary>
-        public string GetConversionToInteropType(CppGenerationContext context, string variableName)
+        public string GetConversionToInteropType(ReinteropGenerationContext context, string variableName)
         {
             if (this == Boolean)
             {
@@ -534,7 +534,7 @@ namespace Reinterop
         /// Gets an expression that converts this type to the
         /// {@link AsInteropType}.
         /// </summary>
-        public CppExpression GetConversionToInteropTypeExpression(CppGenerationContext context, string variableName)
+        public CppExpression GetConversionToInteropTypeExpression(ReinteropGenerationContext context, string variableName)
         {
             if (this == Boolean)
             {
@@ -593,7 +593,7 @@ namespace Reinterop
             }
         }
 
-        public string GetConversionFromInteropType(CppGenerationContext context, string variableName)
+        public string GetConversionFromInteropType(ReinteropGenerationContext context, string variableName)
         {
             if (this == Boolean)
             {
@@ -631,7 +631,7 @@ namespace Reinterop
             }
         }
 
-        public CppExpression GetConversionFromInteropTypeExpression(CppGenerationContext context, CppExpression inputExpression)
+        public CppExpression GetConversionFromInteropTypeExpression(ReinteropGenerationContext context, CppExpression inputExpression)
         {
             if (this == Boolean)
             {

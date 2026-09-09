@@ -3,11 +3,11 @@
 namespace Reinterop
 {
     /// <summary>
-    /// Options to the C++ code generation.
+    /// Options to the Reinterop code generation.
     /// </summary>
-    internal class CppGenerationContext
+    internal class ReinteropGenerationContext
     {
-        public CppGenerationContext(Compilation compilation)
+        public ReinteropGenerationContext(Compilation compilation)
         {
             this.Compilation = compilation;
         }
@@ -27,7 +27,7 @@ namespace Reinterop
         public string OutputDirectory = "generated";
 
         /// <summary>
-        /// The compilation for which we're generating C++ code.
+        /// The Roslyn compilation for which we're generating code.
         /// </summary>
         public Compilation Compilation;
 
@@ -41,6 +41,11 @@ namespace Reinterop
         /// </summary>
         public HashSet<string> NonBlittableTypes = new HashSet<string>();
 
+        /// <summary>
+        /// The custom generators to use for generating code for specific types. Each custom generator
+        /// is invoked on each type. It can add additional dependencies to generate, and can modify
+        /// the generated code for a type.
+        /// </summary>
         public List<ICustomGenerator> CustomGenerators = new List<ICustomGenerator>();
     }
 }

@@ -95,7 +95,7 @@ namespace Reinterop
                 }
             }
 
-            CodeGenerator codeGenerator = CreateCodeGenerator(context.AnalyzerConfigOptions, receiver.PropertiesPath, properties, compilation);
+            ReinteropCodeGenerator codeGenerator = CreateCodeGenerator(context.AnalyzerConfigOptions, receiver.PropertiesPath, properties, compilation);
 
             List<IEnumerable<TypeToGenerate>> typesToGenerate = new List<IEnumerable<TypeToGenerate>>();
 
@@ -199,16 +199,16 @@ namespace Reinterop
                 sourceFile.Write(codeGenerator.Options);
             }
 
-            CodeGenerator.WriteCSharpCode(context, codeGenerator.Options, generatedResults);
+            ReinteropCodeGenerator.WriteCSharpCode(context, codeGenerator.Options, generatedResults);
         }
 
         private static readonly string[] ConfigurationPropertyNames = { "CppOutputPath", "BaseNamespace", "NativeLibraryName", "NonBlittableTypes" };
 
-        private CodeGenerator CreateCodeGenerator(AnalyzerConfigOptionsProvider options, string? propertiesPath, IDictionary<string, object> properties, Compilation compilation)
+        private ReinteropCodeGenerator CreateCodeGenerator(AnalyzerConfigOptionsProvider options, string? propertiesPath, IDictionary<string, object> properties, Compilation compilation)
         {
             Dictionary<string, object> mergedProperties = new Dictionary<string, object>(properties);
 
-            CppGenerationContext cppContext = new CppGenerationContext(compilation);
+            ReinteropGenerationContext cppContext = new ReinteropGenerationContext(compilation);
 
             string? baseDir;
             if (!options.GlobalOptions.TryGetValue("build_property.projectdir", out baseDir))
@@ -267,7 +267,7 @@ namespace Reinterop
             cppContext.CustomGenerators.Add(new CustomDelegateGenerator());
             cppContext.CustomGenerators.Add(new CustomArrayGenerator());
 
-            return new CodeGenerator(cppContext);
+            return new ReinteropCodeGenerator(cppContext);
         }
 
         private static string? GetAttributeName(AttributeSyntax attribute)

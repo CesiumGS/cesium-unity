@@ -14,7 +14,7 @@ namespace Reinterop
             context.AddSource("ReinteropException", Source);
         }
 
-        public static CppType GetCppWrapperType(CppGenerationContext context)
+        public static CppType GetCppWrapperType(ReinteropGenerationContext context)
         {
             List<string> ns = new List<string>();
             if (context.BaseNamespace.Length > 0)

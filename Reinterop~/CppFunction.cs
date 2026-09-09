@@ -20,7 +20,7 @@ namespace Reinterop
     /// </summary>
     internal class CppFunction
     {
-        public CppGenerationContext Context { get; }
+        public ReinteropGenerationContext Context { get; }
 
         public string Name { get; }
 
@@ -376,7 +376,7 @@ namespace Reinterop
         public bool IsUnspecializedGeneric => TypeArguments().Any(t => t.Kind == InteropTypeKind.GenericParameter);
 
         public CppFunction(
-            CppGenerationContext context,
+            ReinteropGenerationContext context,
             CppType owner,
             string name)
         {

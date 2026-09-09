@@ -7,7 +7,7 @@ namespace Reinterop
     /// </summary>
     internal class CSharpBodyConstructInstance : IGenerateCSharpBody
     {
-        public IEnumerable<CSharpStatement> GenerateBody(CppGenerationContext context, CSharpFunctionCallableFromCpp function)
+        public IEnumerable<CSharpStatement> GenerateBody(ReinteropGenerationContext context, CSharpFunctionCallableFromCpp function)
         {
             yield return new CSharpReturn(new CSharpNew(
                 function.Owner(),

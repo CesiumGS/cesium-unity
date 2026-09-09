@@ -28,7 +28,7 @@ namespace Reinterop
             return new GeneratedInit() { Functions = functions };
         }
 
-        public void GenerateCpp(CppGenerationContext options, Dictionary<string, CppSourceFile> sourceFiles)
+        public void GenerateCpp(ReinteropGenerationContext options, Dictionary<string, CppSourceFile> sourceFiles)
         {
             Sort();
             
@@ -104,7 +104,7 @@ namespace Reinterop
                 """);
         }
 
-        public string ToCSharpSourceFileString(CppGenerationContext cppContext)
+        public string ToCSharpSourceFileString(ReinteropGenerationContext cppContext)
         {
             Sort();
 

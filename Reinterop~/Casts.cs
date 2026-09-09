@@ -2,7 +2,7 @@
 {
     internal class Casts
     {
-        public static void Generate(CppGenerationContext context, TypeToGenerate item, GeneratedResult result)
+        public static void Generate(ReinteropGenerationContext context, TypeToGenerate item, GeneratedResult result)
         {
             // It only makes sense to cast instances, so static class need not apply.
             if (item.Type.IsStatic)
@@ -40,7 +40,7 @@
             }
         }
 
-        private static CppFunction CreateCast(CppGenerationContext context, GeneratedResult result, CppType targetType)
+        private static CppFunction CreateCast(ReinteropGenerationContext context, GeneratedResult result, CppType targetType)
         {
             CppType objectHandleType = CppObjectHandle.GetCppType(context);
             return new CppFunction(context, result.Type, $"operator {targetType.GetFullyQualifiedName()}")

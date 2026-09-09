@@ -7,7 +7,7 @@ namespace Reinterop
 {
     internal class Fields
     {
-        public static void Generate(CppGenerationContext context, TypeToGenerate mainItem, TypeToGenerate currentItem, GeneratedResult result)
+        public static void Generate(ReinteropGenerationContext context, TypeToGenerate mainItem, TypeToGenerate currentItem, GeneratedResult result)
         {
             if (result.CppDeclaration.Type.Kind == InteropTypeKind.BlittableStruct)
             {
@@ -23,7 +23,7 @@ namespace Reinterop
             }
         }
 
-        private static void GenerateEveryField(CppGenerationContext context, TypeToGenerate item, GeneratedResult result)
+        private static void GenerateEveryField(ReinteropGenerationContext context, TypeToGenerate item, GeneratedResult result)
         {
             ImmutableArray<ISymbol> members = item.Type.GetMembers();
             foreach (ISymbol member in members)
@@ -36,7 +36,7 @@ namespace Reinterop
             }
         }
 
-        private static void GenerateField(CppGenerationContext context, TypeToGenerate item, IFieldSymbol field, GeneratedResult result)
+        private static void GenerateField(ReinteropGenerationContext context, TypeToGenerate item, IFieldSymbol field, GeneratedResult result)
         {
             // Skip static fields
             // TODO: Implement these as functions that call into the C#?
@@ -58,7 +58,7 @@ namespace Reinterop
                 TypeDefinitionsReferenced: new[] { fieldType }));
         }
 
-        private static void GenerateFieldAccessors(CppGenerationContext context, TypeToGenerate mainItem, TypeToGenerate currentItem, GeneratedResult result)
+        private static void GenerateFieldAccessors(ReinteropGenerationContext context, TypeToGenerate mainItem, TypeToGenerate currentItem, GeneratedResult result)
         {
             foreach (IFieldSymbol field in currentItem.Fields)
             {
@@ -66,7 +66,7 @@ namespace Reinterop
             }
         }
 
-        private static void GenerateSingleFieldAccessors(CppGenerationContext context, TypeToGenerate item, IFieldSymbol field, GeneratedResult result)
+        private static void GenerateSingleFieldAccessors(ReinteropGenerationContext context, TypeToGenerate item, IFieldSymbol field, GeneratedResult result)
         {
             CSharpType fieldType = CSharpType.FromSymbol(context, field.Type);
 

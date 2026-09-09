@@ -2,12 +2,12 @@
 {
     /// <summary>
     /// Allows for custom code generation for a particular type. Register
-    /// with <see cref="CppGenerationContext.CustomGenerators"/>.
+    /// with <see cref="ReinteropGenerationContext.CustomGenerators"/>.
     /// </summary>
     internal interface ICustomGenerator
     {
-        IEnumerable<TypeToGenerate> GetDependencies(CppGenerationContext context);
+        IEnumerable<TypeToGenerate> GetDependencies(ReinteropGenerationContext context);
 
-        GeneratedResult? Generate(CppGenerationContext context, TypeToGenerate type, GeneratedResult? generated);
+        GeneratedResult? Generate(ReinteropGenerationContext context, TypeToGenerate type, GeneratedResult? generated);
     }
 }

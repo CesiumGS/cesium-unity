@@ -29,7 +29,7 @@ namespace Reinterop
         /// </param>
         /// <param name="resultVariableName">The name to declare the captured result variable as.</param>
         public static IReadOnlyList<CSharpStatement> CallNativeFunction(
-            CppGenerationContext context,
+            ReinteropGenerationContext context,
             CSharpExpression functionName,
             IReadOnlyList<CSharpExpression> arguments,
             CSharpType? resultType = null,
@@ -65,7 +65,7 @@ namespace Reinterop
             return statements;
         }
 
-        private static CSharpExpression TranslatedManagedException(CppGenerationContext context)
+        private static CSharpExpression TranslatedManagedException(ReinteropGenerationContext context)
         {
             return new CSharpCast(CSharpType.FromSymbol(context, context.Compilation.GetTypeByMetadataName("System.Exception")!),
                 new CSharpCall(new CSharpIdentifier("Reinterop.ObjectHandleUtility.GetObjectAndFreeHandle"),

@@ -5,7 +5,7 @@ namespace Reinterop
 {
     internal class Methods
     {
-        public static void Generate(CppGenerationContext context, GenerateTypeState state, TypeToGenerate mainItem, TypeToGenerate currentItem, GeneratedResult result)
+        public static void Generate(ReinteropGenerationContext context, GenerateTypeState state, TypeToGenerate mainItem, TypeToGenerate currentItem, GeneratedResult result)
         {
             foreach (IMethodSymbol method in currentItem.Methods)
             {
@@ -30,7 +30,7 @@ namespace Reinterop
             return null;
         }
 
-        public static void GenerateSingleMethod(CppGenerationContext context, GenerateTypeState state, TypeToGenerate item, GeneratedResult result, IMethodSymbol method)
+        public static void GenerateSingleMethod(ReinteropGenerationContext context, GenerateTypeState state, TypeToGenerate item, GeneratedResult result, IMethodSymbol method)
         {
             CSharpFunctionCallableFromCpp interop = new CSharpFunctionCallableFromCpp(context, item.Type)
                 .Name(method.Name)

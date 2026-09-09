@@ -17,7 +17,7 @@ namespace Reinterop
             _operator = op;
         }
 
-        public IEnumerable<CSharpStatement> GenerateBody(CppGenerationContext context, CSharpFunctionCallableFromCpp function)
+        public IEnumerable<CSharpStatement> GenerateBody(ReinteropGenerationContext context, CSharpFunctionCallableFromCpp function)
         {
             yield return new CSharpReturn(new CSharpBinary(
                 _operator,

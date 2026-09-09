@@ -11,7 +11,7 @@ namespace Reinterop
 
     internal class CSharpType
     {
-        public readonly CppGenerationContext Context;
+        public readonly ReinteropGenerationContext Context;
         public readonly InteropTypeKind Kind;
         public readonly IReadOnlyList<string> Namespaces;
         public readonly string Name;
@@ -30,7 +30,7 @@ namespace Reinterop
         }
 
         public CSharpType(
-            CppGenerationContext context,
+            ReinteropGenerationContext context,
             InteropTypeKind kind,
             IReadOnlyCollection<string> namespaces,
             string name,
@@ -53,14 +53,14 @@ namespace Reinterop
             this.ContainingType = containingType;
         }
 
-        public static CSharpType? FromSymbolOrNull(CppGenerationContext context, ITypeSymbol? symbol)
+        public static CSharpType? FromSymbolOrNull(ReinteropGenerationContext context, ITypeSymbol? symbol)
         {
             if (symbol == null)
                 return null;
             return FromSymbol(context, symbol!)!;
         }
 
-        public static CSharpType FromSymbol(CppGenerationContext context, ITypeSymbol symbol)
+        public static CSharpType FromSymbol(ReinteropGenerationContext context, ITypeSymbol symbol)
         {
             if (symbol is IPointerTypeSymbol pointer)
             {

@@ -52,7 +52,7 @@ namespace Reinterop
                 return content;
         }
 
-        public void Write(CppGenerationContext options)
+        public void Write(ReinteropGenerationContext options)
         {
             string path = Path.Combine(options.OutputDirectory, Filename);
             string directory = Path.GetDirectoryName(path);

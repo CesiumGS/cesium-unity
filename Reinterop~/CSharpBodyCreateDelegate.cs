@@ -16,7 +16,7 @@ namespace Reinterop
             _nativeFunctionType = nativeFunctionType;
         }
 
-        public IEnumerable<CSharpStatement> GenerateBody(CppGenerationContext context, CSharpFunctionCallableFromCpp function)
+        public IEnumerable<CSharpStatement> GenerateBody(ReinteropGenerationContext context, CSharpFunctionCallableFromCpp function)
         {
             yield return new CSharpVariableDeclaration(
                 _nativeFunctionType,

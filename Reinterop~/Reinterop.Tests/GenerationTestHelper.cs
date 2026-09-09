@@ -53,13 +53,13 @@ namespace Reinterop.Tests
         /// test project), and returns each generated type's <see cref="GeneratedResult"/>, keyed by its
         /// simple C# type name. Unlike going through <see cref="RoslynSourceGenerator"/>'s
         /// <see cref="ISourceGenerator"/> entry point, this never writes any files to disk - only
-        /// <see cref="CodeGenerator.DistributeToSourceFiles"/>/<see cref="CppSourceFile.Write"/> (not
+        /// <see cref="ReinteropCodeGenerator.DistributeToSourceFiles"/>/<see cref="CppSourceFile.Write"/> (not
         /// called here) do that.
         /// </summary>
         public static Dictionary<string, GeneratedResult> GenerateResults(string source, IEnumerable<ICustomGenerator>? customGenerators = null)
         {
             CSharpCompilation compilation = CreateCompilation(source);
-            CppGenerationContext context = new CppGenerationContext(compilation);
+            ReinteropGenerationContext context = new ReinteropGenerationContext(compilation);
             if (customGenerators != null)
                 context.CustomGenerators.AddRange(customGenerators);
 
@@ -75,7 +75,7 @@ namespace Reinterop.Tests
             foreach (TypeToGenerate item in typeDictionary.Values)
                 InheritanceChainer.Chain(item, typeDictionary);
 
-            CodeGenerator codeGenerator = new CodeGenerator(context);
+            ReinteropCodeGenerator codeGenerator = new ReinteropCodeGenerator(context);
 
             Dictionary<string, GeneratedResult> results = new Dictionary<string, GeneratedResult>();
             foreach (TypeToGenerate item in typeDictionary.Values)

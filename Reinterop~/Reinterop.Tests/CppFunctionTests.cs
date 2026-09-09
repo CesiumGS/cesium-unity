@@ -10,12 +10,12 @@ namespace Reinterop.Tests
     /// </summary>
     public class CppFunctionTests
     {
-        private static CppGenerationContext CreateContext() => new CppGenerationContext(CSharpCompilation.Create("Test"));
+        private static ReinteropGenerationContext CreateContext() => new ReinteropGenerationContext(CSharpCompilation.Create("Test"));
 
         [Test]
         public void InstanceMethod_GeneratesDeclarationAndDefinition()
         {
-            CppGenerationContext context = CreateContext();
+            ReinteropGenerationContext context = CreateContext();
             CppType owner = new CppType(InteropTypeKind.ClassWrapper, new[] { "MyNamespace" }, "Foo", null, 0);
             GeneratedResult result = new GeneratedResult(owner);
 
@@ -44,7 +44,7 @@ namespace Reinterop.Tests
         [Test]
         public void StaticMethod_OmitsConstQualifier()
         {
-            CppGenerationContext context = CreateContext();
+            ReinteropGenerationContext context = CreateContext();
             CppType owner = new CppType(InteropTypeKind.ClassWrapper, new[] { "MyNamespace" }, "Foo", null, 0);
             GeneratedResult result = new GeneratedResult(owner);
 
@@ -71,7 +71,7 @@ namespace Reinterop.Tests
         [Test]
         public void PrivateMethod_OwnDeclarationIsPrivate()
         {
-            CppGenerationContext context = CreateContext();
+            ReinteropGenerationContext context = CreateContext();
             CppType owner = new CppType(InteropTypeKind.ClassWrapper, new[] { "MyNamespace" }, "Foo", null, 0);
             GeneratedResult result = new GeneratedResult(owner);
 
@@ -89,7 +89,7 @@ namespace Reinterop.Tests
         [Test]
         public void Constructor_OmitsReturnTypeAndUsesMemberInitializers()
         {
-            CppGenerationContext context = CreateContext();
+            ReinteropGenerationContext context = CreateContext();
             CppType owner = new CppType(InteropTypeKind.ClassWrapper, new[] { "MyNamespace" }, "Foo", null, 0);
             GeneratedResult result = new GeneratedResult(owner);
 
@@ -114,7 +114,7 @@ namespace Reinterop.Tests
         [Test]
         public void GenericSpecialization_DefinitionIsTemplateQualifiedWithConstReferenceParameters()
         {
-            CppGenerationContext context = CreateContext();
+            ReinteropGenerationContext context = CreateContext();
             CppType owner = new CppType(InteropTypeKind.ClassWrapper, new[] { "MyNamespace" }, "Foo", null, 0);
             GeneratedResult result = new GeneratedResult(owner);
             CppType genericParameterType = new CppType(InteropTypeKind.GenericParameter, Array.Empty<string>(), "T", null, 0);

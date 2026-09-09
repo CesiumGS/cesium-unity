@@ -24,7 +24,7 @@ namespace Reinterop
             return $"{type.GetFullyQualifiedNamespace().Replace(".", "_")}_{name}{genericTypeHash}";
         }
 
-        public static void GenerateForType(CppGenerationContext context, TypeToGenerate item, GeneratedResult result)
+        public static void GenerateForType(ReinteropGenerationContext context, TypeToGenerate item, GeneratedResult result)
         {
             string initializeReinteropHeader = context.BaseNamespace == null ? "<initializeReinterop.h>" : $"<{context.BaseNamespace.Replace("::", "/")}/initializeReinterop.h>";
             result.CppDeclaration.Elements.Add(new(
@@ -88,7 +88,7 @@ namespace Reinterop
             return hash.Replace("=", "").Replace("+", "_").Replace("/", "__");
         }
 
-        public static InteropTypeKind DetermineTypeKind(CppGenerationContext context, ITypeSymbol type)
+        public static InteropTypeKind DetermineTypeKind(ReinteropGenerationContext context, ITypeSymbol type)
         {
             if (type.Kind == SymbolKind.TypeParameter)
                 return InteropTypeKind.GenericParameter;
@@ -139,7 +139,7 @@ namespace Reinterop
         /// <param name="compilation"></param>
         /// <param name="type"></param>
         /// <returns>True if the struct is blittable.</returns>
-        public static bool IsBlittableStruct(CppGenerationContext context, ITypeSymbol type, int depth = 0)
+        public static bool IsBlittableStruct(ReinteropGenerationContext context, ITypeSymbol type, int depth = 0)
         {
             // Sanity test to avoid a stack overflow
             if (depth > 10)

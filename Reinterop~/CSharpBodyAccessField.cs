@@ -21,7 +21,7 @@ namespace Reinterop
             _isGetter = isGetter;
         }
 
-        public IEnumerable<CSharpStatement> GenerateBody(CppGenerationContext context, CSharpFunctionCallableFromCpp function)
+        public IEnumerable<CSharpStatement> GenerateBody(ReinteropGenerationContext context, CSharpFunctionCallableFromCpp function)
         {
             CSharpExpression target = function.Static() ? new CSharpIdentifier(function.Owner()) : CSharpIdentifier.Thiz;
             CSharpExpression accessor = new CSharpMemberAccess(target, _field.Name);

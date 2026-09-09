@@ -9,7 +9,7 @@ namespace Reinterop.Tests
     {
         private static string Lines(params string[] lines) => string.Join(Environment.NewLine, lines);
         private static CSharpCompilation compilation = GenerationTestHelper.CreateCompilation("");
-        private static CppGenerationContext context = new CppGenerationContext(compilation);
+        private static ReinteropGenerationContext context = new ReinteropGenerationContext(compilation);
 
 
         [Test]

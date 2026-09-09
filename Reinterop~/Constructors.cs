@@ -6,7 +6,7 @@ namespace Reinterop
 {
     internal class Constructors
     {
-        public static void Generate(CppGenerationContext context, TypeToGenerate item, GeneratedResult result)
+        public static void Generate(ReinteropGenerationContext context, TypeToGenerate item, GeneratedResult result)
         {
             if (item.Type.IsStatic)
                 GenerateStatic(context, item, result);
@@ -14,14 +14,14 @@ namespace Reinterop
                 GenerateNonStatic(context, item, result);
         }
 
-        private static void GenerateStatic(CppGenerationContext context, TypeToGenerate item, GeneratedResult result)
+        private static void GenerateStatic(ReinteropGenerationContext context, TypeToGenerate item, GeneratedResult result)
         {
             // Delete the default constructor so this static class can't be constructed.
             result.ExtraCppFunctions.Add(
                 new CppFunction(context, result.CppDefinition.Type, item.Type.Name).Deleted(true));
         }
 
-        private static void GenerateNonStatic(CppGenerationContext context, TypeToGenerate item, GeneratedResult result)
+        private static void GenerateNonStatic(ReinteropGenerationContext context, TypeToGenerate item, GeneratedResult result)
         {
             foreach (IMethodSymbol constructor in item.Constructors)
             {
@@ -29,7 +29,7 @@ namespace Reinterop
             }
         }
 
-        private static void GenerateSingleNonStatic(CppGenerationContext context, TypeToGenerate item, GeneratedResult result, IMethodSymbol constructor)
+        private static void GenerateSingleNonStatic(ReinteropGenerationContext context, TypeToGenerate item, GeneratedResult result, IMethodSymbol constructor)
         {
             // Create a static "Construct" function that calls this constructor.
             // For blittable structs, this will be public and it will be the only way to invoke this constructor.

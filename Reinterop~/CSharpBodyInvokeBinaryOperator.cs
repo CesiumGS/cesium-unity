@@ -8,7 +8,7 @@ namespace Reinterop
     /// </summary>
     internal class CSharpBodyInvokeBinaryOperator : IGenerateCSharpBody
     {
-        public IEnumerable<CSharpStatement> GenerateBody(CppGenerationContext context, CSharpFunctionCallableFromCpp function)
+        public IEnumerable<CSharpStatement> GenerateBody(ReinteropGenerationContext context, CSharpFunctionCallableFromCpp function)
         {
             if (function.Parameters().Count != 2)
                 throw new InvalidOperationException("CSharpBodyInvokeBinaryOperator requires exactly two parameters.");

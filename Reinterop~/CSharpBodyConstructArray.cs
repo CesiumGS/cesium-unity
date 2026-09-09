@@ -5,7 +5,7 @@ namespace Reinterop
     /// </summary>
     internal class CSharpBodyConstructArray : IGenerateCSharpBody
     {
-        public IEnumerable<CSharpStatement> GenerateBody(CppGenerationContext context, CSharpFunctionCallableFromCpp function)
+        public IEnumerable<CSharpStatement> GenerateBody(ReinteropGenerationContext context, CSharpFunctionCallableFromCpp function)
         {
             CSharpType? arrayElementType = function.Owner().ArrayElementType;
             if (arrayElementType == null)
