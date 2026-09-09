@@ -4,7 +4,8 @@
     "references": [
         "Unity.InputSystem",
         "Unity.Mathematics",
-        "Unity.Splines"
+        "Unity.Splines",
+        "Gsplat"
     ],
     "includePlatforms": [
         "Android",
@@ -13,8 +14,8 @@
         "LinuxStandalone64",
         "macOSStandalone",
         "WSA",
-        "WindowsStandalone64",
-        "WebGL"
+        "WebGL",
+        "WindowsStandalone64"
     ],
     "excludePlatforms": [],
     "allowUnsafeCode": true,

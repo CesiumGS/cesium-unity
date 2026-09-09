@@ -14,6 +14,8 @@ using Unity.Mathematics;
 using UnityEngine.Pool;
 using UnityEngine.UIElements;
 using UnityEngine.SceneManagement;
+using Gsplat;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -1112,6 +1114,20 @@ namespace CesiumForUnity
 
             Scene scene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
             scene.GetRootGameObjects();
+
+            var splat = ScriptableObject.CreateInstance<GsplatAssetUncompressed>();
+            splat.SplatCount = 0;
+            splat.SHBands = 0;
+            splat.SHs = new Vector3[] { };
+            splat.Colors = new Vector4[] { };
+            splat.Bounds = new Bounds();
+            splat.Positions = new Vector3[] { };
+            splat.PrunedSplatCount = 0;
+            splat.Rotations = new Vector4[] { };
+            splat.Scales = new Vector3[] { };
+
+            var splatRenderer = go.AddComponent<GsplatRenderer>();
+            splatRenderer.GsplatAsset = splat;
         }
     }
 }
