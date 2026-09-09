@@ -95,22 +95,22 @@ namespace Reinterop
                 }
             }
 
-            ReinteropCodeGenerator codeGenerator = CreateCodeGenerator(context.AnalyzerConfigOptions, receiver.PropertiesPath, properties, compilation);
+            ReinteropGenerationContext reinteropContext = CreateReinteropContext(context.AnalyzerConfigOptions, receiver.PropertiesPath, properties, compilation);
 
             List<IEnumerable<TypeToGenerate>> typesToGenerate = new List<IEnumerable<TypeToGenerate>>();
 
             foreach (MethodDeclarationSyntax exposeMethod in receiver.ExposeToCppMethods)
             {
                 SemanticModel semanticModel = compilation.GetSemanticModel(exposeMethod.SyntaxTree);
-                ExposeToCppSyntaxWalker walker = new ExposeToCppSyntaxWalker(codeGenerator.Options, semanticModel);
+                ExposeToCppSyntaxWalker walker = new ExposeToCppSyntaxWalker(reinteropContext, semanticModel);
                 walker.Visit(exposeMethod);
                 typesToGenerate.Add(walker.GenerationItems.Values);
             }
 
             // Give custom generators a chance to add dependencies.
-            foreach (ICustomGenerator customGenerator in codeGenerator.Options.CustomGenerators)
+            foreach (ICustomGenerator customGenerator in reinteropContext.CustomGenerators)
             {
-                IEnumerable<TypeToGenerate> dependencies = customGenerator.GetDependencies(codeGenerator.Options);
+                IEnumerable<TypeToGenerate> dependencies = customGenerator.GetDependencies(reinteropContext);
                 typesToGenerate.Add(dependencies);
             }
 
@@ -133,7 +133,7 @@ namespace Reinterop
                 SemanticModel semanticModel = compilation.GetSemanticModel(attributeSyntax.SyntaxTree);
                 ITypeSymbol? type = semanticModel.GetDeclaredSymbol(classSyntax) as ITypeSymbol;
 
-                ExposeToCppSyntaxWalker walker = new ExposeToCppSyntaxWalker(codeGenerator.Options, semanticModel);
+                ExposeToCppSyntaxWalker walker = new ExposeToCppSyntaxWalker(reinteropContext, semanticModel);
 
                 if (type != null)
                 {
@@ -188,27 +188,27 @@ namespace Reinterop
             List<GeneratedResult> generatedResults = new List<GeneratedResult>();
             foreach (TypeToGenerate item in typeDictionary.Values)
             {
-                GeneratedResult? result = codeGenerator.GenerateType(item);
+                GeneratedResult? result = ReinteropCodeGenerator.GenerateType(reinteropContext, item);
                 if (result != null)
                     generatedResults.Add(result);
             }
 
-            IEnumerable<CppSourceFile> sourceFiles = codeGenerator.DistributeToSourceFiles(generatedResults);
+            IEnumerable<CppSourceFile> sourceFiles = ReinteropCodeGenerator.DistributeToSourceFiles(reinteropContext, generatedResults);
             foreach (CppSourceFile sourceFile in sourceFiles)
             {
-                sourceFile.Write(codeGenerator.Options);
+                sourceFile.Write(reinteropContext);
             }
 
-            ReinteropCodeGenerator.WriteCSharpCode(context, codeGenerator.Options, generatedResults);
+            ReinteropCodeGenerator.WriteCSharpCode(context, reinteropContext, generatedResults);
         }
 
         private static readonly string[] ConfigurationPropertyNames = { "CppOutputPath", "BaseNamespace", "NativeLibraryName", "NonBlittableTypes" };
 
-        private ReinteropCodeGenerator CreateCodeGenerator(AnalyzerConfigOptionsProvider options, string? propertiesPath, IDictionary<string, object> properties, Compilation compilation)
+        private ReinteropGenerationContext CreateReinteropContext(AnalyzerConfigOptionsProvider options, string? propertiesPath, IDictionary<string, object> properties, Compilation compilation)
         {
             Dictionary<string, object> mergedProperties = new Dictionary<string, object>(properties);
 
-            ReinteropGenerationContext cppContext = new ReinteropGenerationContext(compilation);
+            ReinteropGenerationContext context = new ReinteropGenerationContext(compilation);
 
             string? baseDir;
             if (!options.GlobalOptions.TryGetValue("build_property.projectdir", out baseDir))
@@ -258,16 +258,16 @@ namespace Reinterop
             else
                 nonBlittableTypes = "";
 
-            cppContext.OutputDirectory = Path.GetFullPath(Path.Combine(baseDir, cppOutputPath));
-            cppContext.BaseNamespace = baseNamespace;
-            cppContext.NativeLibraryName = nativeLibraryName;
-            cppContext.NonBlittableTypes.UnionWith(nonBlittableTypes.Split(',').Select(t => t.Trim()));
+            context.OutputDirectory = Path.GetFullPath(Path.Combine(baseDir, cppOutputPath));
+            context.BaseNamespace = baseNamespace;
+            context.NativeLibraryName = nativeLibraryName;
+            context.NonBlittableTypes.UnionWith(nonBlittableTypes.Split(',').Select(t => t.Trim()));
 
-            cppContext.CustomGenerators.Add(new CustomStringGenerator());
-            cppContext.CustomGenerators.Add(new CustomDelegateGenerator());
-            cppContext.CustomGenerators.Add(new CustomArrayGenerator());
-
-            return new ReinteropCodeGenerator(cppContext);
+            context.CustomGenerators.Add(new CustomStringGenerator());
+            context.CustomGenerators.Add(new CustomDelegateGenerator());
+            context.CustomGenerators.Add(new CustomArrayGenerator());
+            
+            return context;
         }
 
         private static string? GetAttributeName(AttributeSyntax attribute)

@@ -75,12 +75,10 @@ namespace Reinterop.Tests
             foreach (TypeToGenerate item in typeDictionary.Values)
                 InheritanceChainer.Chain(item, typeDictionary);
 
-            ReinteropCodeGenerator codeGenerator = new ReinteropCodeGenerator(context);
-
             Dictionary<string, GeneratedResult> results = new Dictionary<string, GeneratedResult>();
             foreach (TypeToGenerate item in typeDictionary.Values)
             {
-                GeneratedResult? result = codeGenerator.GenerateType(item);
+                GeneratedResult? result = ReinteropCodeGenerator.GenerateType(context, item);
                 if (result != null)
                     results[item.Type.Name] = result;
             }
