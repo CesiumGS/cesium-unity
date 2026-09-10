@@ -19,10 +19,6 @@ namespace CesiumForUnity
             "CesiumCartographicPolygon requires the Splines package, which is not available " +
             "in this version of Unity.";
 
-        private const string HelpManualEditSaveGeoJson =
-            "The spline is being edited manually. Use 'Save as GeoJSON…' to " +
-            "write the current shape to a .geojson file on disk.";
-
         private const string HelpKnotEditRevertsToManual =
             "Changing any knot in the spline changes the source to manual, as it does " +
             "not match anymore with the geojson file.";
@@ -41,10 +37,6 @@ namespace CesiumForUnity
         private static readonly GUIContent SourceContent = new GUIContent(
             "Source",
             "The source from which this polygon's shape is derived.");
-
-        private static readonly GUIContent SaveAsGeoJsonContent = new GUIContent(
-            "Save as GeoJSON…",
-            "Writes the polygon's current spline to a GeoJSON file on disk.");
 
         private static readonly GUIContent UrlContent = new GUIContent(
             "URL",
@@ -179,15 +171,6 @@ namespace CesiumForUnity
             CesiumCartographicPolygonSource source =
                 (CesiumCartographicPolygonSource)this._source.enumValueIndex;
 
-            if (source == CesiumCartographicPolygonSource.Manual)
-            {
-                EditorGUILayout.HelpBox(HelpManualEditSaveGeoJson, MessageType.Info);
-
-                if (GUILayout.Button(SaveAsGeoJsonContent))
-                {
-                    CesiumCartographicPolygonGeoJsonWriter.SaveAsGeoJsonWithDialog(this._polygon);
-                }
-            }
             else if (source == CesiumCartographicPolygonSource.FromUrl)
             {
                 EditorGUILayout.DelayedTextField(this._url, UrlContent);
