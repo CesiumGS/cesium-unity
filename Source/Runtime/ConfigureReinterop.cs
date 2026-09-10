@@ -1115,7 +1115,9 @@ namespace CesiumForUnity
             Scene scene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
             scene.GetRootGameObjects();
 
+            var splats = new GsplatAssetUncompressed[1];
             var splat = ScriptableObject.CreateInstance<GsplatAssetUncompressed>();
+            splats[0] = splat;
             splat.SplatCount = 0;
             splat.SHBands = 0;
             splat.SHs = new Vector3[] { };

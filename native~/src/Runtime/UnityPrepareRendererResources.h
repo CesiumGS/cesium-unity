@@ -60,7 +60,7 @@ struct CesiumPrimitiveInfo {
    */
   std::unordered_map<uint32_t, uint32_t> rasterOverlayUvIndexMap{};
 
-  std::optional<DotNet::Gsplat::GsplatAssetUncompressed> gsplatAsset;
+  int32_t gsplatIndex = -1;
 };
 
 /**
