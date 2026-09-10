@@ -114,6 +114,50 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
+        private int _polygonIndex = 0;
+
+        /// <summary>
+        /// The zero-based index of the polygon to use when the source geometry is a MultiPolygon.
+        /// </summary>
+        /// <remarks>
+        /// If the source geometry is a simple Polygon, this value is ignored.
+        /// If the index is out of range (negative or >= the number of polygons in a MultiPolygon),
+        /// the cutout will not be applied and any previous cutout will be cleared.
+        /// Setting this property triggers a reload when a non-Manual source is active.
+        /// </remarks>
+        public int polygonIndex
+        {
+            get => this._polygonIndex;
+            set
+            {
+                this._polygonIndex = value;
+                this.LoadFromSource();
+            }
+        }
+
+        [SerializeField]
+        private int _featureIndex = 0;
+
+        /// <summary>
+        /// The zero-based index of the feature to use when the GeoJSON root is a FeatureCollection.
+        /// </summary>
+        /// <remarks>
+        /// If the root object is a single Feature, this value is ignored.
+        /// If the index is out of range (negative or >= the number of features),
+        /// the cutout will not be applied and any previous cutout will be cleared.
+        /// Setting this property triggers a reload when a non-Manual source is active.
+        /// </remarks>
+        public int featureIndex
+        {
+            get => this._featureIndex;
+            set
+            {
+                this._featureIndex = value;
+                this.LoadFromSource();
+            }
+        }
+
+        [SerializeField]
         private long _ionAssetID = 0;
 
         /// <summary>
@@ -340,18 +384,6 @@ namespace CesiumForUnity
             }
         }
 
-#if UNITY_EDITOR
-        /// <summary>
-        /// Writes this polygon's current spline to a GeoJSON file at the given path.
-        /// </summary>
-        /// <param name="filePath">Absolute or relative path to the output .geojson file.</param>
-        /// <returns>True on success, false on any validation or I/O failure.</returns>
-        public bool SaveAsGeoJson(string filePath)
-        {
-            return CesiumCartographicPolygonGeoJsonWriter.SaveAsGeoJson(this, filePath);
-        }
-#endif
-
         private async void LoadFromSource()
         {
 #if SUPPORTS_SPLINES
@@ -394,7 +426,25 @@ namespace CesiumForUnity
         }
 
 #if SUPPORTS_SPLINES
-        private static List<double2> GetPolygonRingPoints(CesiumGeoJsonDocument geoJsonDocument)
+        /// <summary>
+        /// Extracts the outer ring of cartographic (longitude, latitude) points from the first
+        /// polygon geometry found in the given GeoJSON document.
+        /// </summary>
+        /// <param name="geoJsonDocument">The parsed GeoJSON document to extract points from.</param>
+        /// <param name="featureIndex">
+        /// Zero-based index of the feature to select when the document root is a
+        /// <c>FeatureCollection</c>. Ignored for a single <c>Feature</c>.
+        /// </param>
+        /// <param name="polygonIndex">
+        /// Zero-based index of the polygon to select when the selected feature's geometry
+        /// is a <c>MultiPolygon</c>. Ignored for a simple <c>Polygon</c>.
+        /// </param>
+        /// <returns>
+        /// A list of <c>double2</c> (longitude, latitude) points, or <c>null</c> if the
+        /// document is invalid, the indices are out of range, or the geometry cannot be
+        /// used as a polygon.
+        /// </returns>
+        private static List<double2> GetPolygonRingPoints(CesiumGeoJsonDocument geoJsonDocument, int featureIndex, int polygonIndex)
         {
             if (geoJsonDocument == null)
                 return null;
@@ -414,9 +464,12 @@ namespace CesiumForUnity
             else if (objType == CesiumGeoJsonObjectType.FeatureCollection)
             {
                 CesiumGeoJsonFeature[] features = obj.GetObjectAsFeatureCollection();
-                if (features == null || features.Length == 0)
+
+                // Bounds check: if featureIndex is out of range, return null (no cutout).
+                if (features == null || features.Length == 0 || featureIndex < 0 || featureIndex >= features.Length)
                     return null;
-                geometry = features[0].GetGeometry();
+
+                geometry = features[featureIndex].GetGeometry();
             }
 
             if (geometry == null)
@@ -432,7 +485,12 @@ namespace CesiumForUnity
             else if (geometryType == CesiumGeoJsonObjectType.MultiPolygon)
             {
                 CesiumGeoJsonPolygon[] polys = geometry.GetObjectAsMultiPolygon();
-                rings = polys?[0]?.rings;
+
+                // Bounds check: if polygonIndex is out of range, return null (no cutout).
+                if (polys == null || polys.Length == 0 || polygonIndex < 0 || polygonIndex >= polys.Length)
+                    return null;
+
+                rings = polys[polygonIndex]?.rings;
             }
 
             if (rings == null || rings.Length == 0 || rings[0] == null || rings[0].points.Length < 3)
@@ -446,9 +504,24 @@ namespace CesiumForUnity
 
         private void ApplyDocument(CesiumGeoJsonDocument geoJsonDocument)
         {
-            List<double2> points = GetPolygonRingPoints(geoJsonDocument);
+            List<double2> points = GetPolygonRingPoints(geoJsonDocument, this._featureIndex, this._polygonIndex);
             if (points == null || points.Count < 3)
             {
+                // Clear any existing spline so that no cutout is applied.
+                this._isUpdatingSplineInternally = true;
+                try
+                {
+                    IReadOnlyList<Spline> splines = this._splineContainer.Splines;
+                    for (int i = splines.Count - 1; i >= 0; i--)
+                    {
+                        this._splineContainer.RemoveSpline(splines[i]);
+                    }
+                }
+                finally
+                {
+                    this._isUpdatingSplineInternally = false;
+                }
+
                 return;
             }
 

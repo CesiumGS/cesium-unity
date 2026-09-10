@@ -55,6 +55,18 @@ namespace CesiumForUnity
             "ion Server",
             "The Cesium ion server to use.");
 
+        private static readonly GUIContent PolygonIndexContent = new GUIContent(
+            "Polygon Index",
+            "The zero-based index of the polygon to use when the source geometry is a " +
+            "MultiPolygon. If the source geometry is a simple Polygon, this value is " +
+            "ignored. If the index is out of range, any previous cutout will be cleared.");
+
+        private static readonly GUIContent FeatureIndexContent = new GUIContent(
+            "Feature Index",
+            "The zero-based index of the feature to use when the GeoJSON root object is a " +
+            "FeatureCollection. If the root is a single Feature, this value is ignored. " +
+            "If the index is out of range, any previous cutout will be cleared.");
+
 #if SUPPORTS_SPLINES
         private CesiumCartographicPolygon _polygon;
 
@@ -63,6 +75,8 @@ namespace CesiumForUnity
         private SerializedProperty _ionAssetID;
         private SerializedProperty _ionAccessToken;
         private SerializedProperty _ionServer;
+        private SerializedProperty _featureIndex;
+        private SerializedProperty _polygonIndex;
 
         private void OnEnable()
         {
@@ -73,6 +87,8 @@ namespace CesiumForUnity
             this._ionAssetID = this.serializedObject.FindProperty("_ionAssetID");
             this._ionAccessToken = this.serializedObject.FindProperty("_ionAccessToken");
             this._ionServer = this.serializedObject.FindProperty("_ionServer");
+            this._featureIndex = this.serializedObject.FindProperty("_featureIndex");
+            this._polygonIndex = this.serializedObject.FindProperty("_polygonIndex");
 
             Spline.Changed += OnSplineChanged;
         }
@@ -119,6 +135,8 @@ namespace CesiumForUnity
 #endif
 #else
             CesiumCartographicPolygonSource oldSource = this._polygon.source;
+            int oldFeatureIndex = this._polygon.featureIndex;
+            int oldPolygonIndex = this._polygon.polygonIndex;
 
             this.serializedObject.Update();
 
@@ -130,9 +148,12 @@ namespace CesiumForUnity
 
             this.serializedObject.ApplyModifiedProperties();
 
-            // When the Source is changed in the inspector, reload the polygon's spline and rebuild any dependent raster overlays to update the cutout.
+            // When the Source, Feature Index, or Polygon Index is changed in the inspector,
+            // reload the polygon's spline and rebuild any dependent raster overlays to update the cutout.
             CesiumCartographicPolygonSource newSource = this._polygon.source;
-            if (oldSource != newSource)
+            int newFeatureIndex = this._polygon.featureIndex;
+            int newPolygonIndex = this._polygon.polygonIndex;
+            if (oldSource != newSource || oldFeatureIndex != newFeatureIndex || oldPolygonIndex != newPolygonIndex)
             {
                 Undo.RecordObject(this._polygon, "Change Cartographic Polygon source");
                 this._polygon.Refresh();
@@ -171,9 +192,18 @@ namespace CesiumForUnity
             CesiumCartographicPolygonSource source =
                 (CesiumCartographicPolygonSource)this._source.enumValueIndex;
 
+            if (source == CesiumCartographicPolygonSource.FromDocument)
+            {
+                EditorGUILayout.DelayedIntField(this._featureIndex, FeatureIndexContent);
+                EditorGUILayout.DelayedIntField(this._polygonIndex, PolygonIndexContent);
+
+                EditorGUILayout.HelpBox(HelpKnotEditRevertsToManual, MessageType.Info);
+            }
             else if (source == CesiumCartographicPolygonSource.FromUrl)
             {
                 EditorGUILayout.DelayedTextField(this._url, UrlContent);
+                EditorGUILayout.DelayedIntField(this._featureIndex, FeatureIndexContent);
+                EditorGUILayout.DelayedIntField(this._polygonIndex, PolygonIndexContent);
 
                 EditorGUILayout.HelpBox(HelpKnotEditRevertsToManual, MessageType.Info);
             }
@@ -182,6 +212,8 @@ namespace CesiumForUnity
                 EditorGUILayout.DelayedIntField(this._ionAssetID, IonAssetIdContent);
                 EditorGUILayout.DelayedTextField(this._ionAccessToken, IonAccessTokenContent);
                 EditorGUILayout.PropertyField(this._ionServer, IonServerContent);
+                EditorGUILayout.DelayedIntField(this._featureIndex, FeatureIndexContent);
+                EditorGUILayout.DelayedIntField(this._polygonIndex, PolygonIndexContent);
 
                 EditorGUILayout.HelpBox(HelpKnotEditRevertsToManual, MessageType.Info);
             }
