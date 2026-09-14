@@ -46,6 +46,7 @@
 #include <DotNet/Unity/Collections/NativeArray1.h>
 #include <DotNet/Unity/Collections/NativeArrayOptions.h>
 #include <DotNet/UnityEngine/Application.h>
+#include <DotNet/UnityEngine/ColorSpace.h>
 #include <DotNet/UnityEngine/Debug.h>
 #include <DotNet/UnityEngine/FilterMode.h>
 #include <DotNet/UnityEngine/HideFlags.h>
@@ -59,6 +60,7 @@
 #include <DotNet/UnityEngine/MeshRenderer.h>
 #include <DotNet/UnityEngine/MeshTopology.h>
 #include <DotNet/UnityEngine/Object.h>
+#include <DotNet/UnityEngine/QualitySettings.h>
 #include <DotNet/UnityEngine/Quaternion.h>
 #include <DotNet/UnityEngine/Rendering/CullMode.h>
 #include <DotNet/UnityEngine/Rendering/IndexFormat.h>
@@ -685,7 +687,8 @@ std::tuple<int32_t, int32_t> countPrimitives(const CesiumGltf::Model& model) {
           const Mesh& mesh,
           const MeshPrimitive& primitive,
           const glm::dmat4& transform) {
-        if (primitive.hasExtension<ExtensionKhrGaussianSplatting>()) {
+        if (primitive.hasExtension<ExtensionKhrGaussianSplatting>() &&
+            primitive.mode == MeshPrimitive::Mode::POINTS) {
           ++numberOfSplatPrimitives;
         } else {
           ++numberOfMeshPrimitives;
@@ -723,34 +726,29 @@ bool writeShCoeffs(
   const int32_t numCoeffs = 3 + 2 * (degree - 1);
   for (int32_t i = 0; i < numCoeffs; i++) {
     std::unordered_map<std::string, int32_t>::const_iterator accessorIt =
-        meshPrimitive.attributes.find(
-            fmt::format(
-                "KHR_gaussian_splatting:SH_DEGREE_{}_COEF_{}",
-                degree,
-                i));
+        meshPrimitive.attributes.find(fmt::format(
+            "KHR_gaussian_splatting:SH_DEGREE_{}_COEF_{}",
+            degree,
+            i));
     if (accessorIt == meshPrimitive.attributes.end()) {
-      UnityEngine::Debug::LogError(
-          System::String(
-              fmt::format(
-                  "Could not find spherical harmonic attribute for degree {} "
-                  "index "
-                  "{} on mesh primitive",
-                  degree,
-                  i)));
+      UnityEngine::Debug::LogError(System::String(fmt::format(
+          "Could not find spherical harmonic attribute for degree {} "
+          "index "
+          "{} on mesh primitive",
+          degree,
+          i)));
       return false;
     }
 
     CesiumGltf::AccessorView<glm::vec3> accessorView(model, accessorIt->second);
     if (accessorView.status() != CesiumGltf::AccessorViewStatus::Valid) {
-      UnityEngine::Debug::LogError(
-          System::String(
-              fmt::format(
-                  "Accessor view for spherical harmonic attribute degree {} "
-                  "index "
-                  "{} on mesh primitive returned invalid status: {}",
-                  degree,
-                  i,
-                  (int32_t)accessorView.status())));
+      UnityEngine::Debug::LogError(System::String(fmt::format(
+          "Accessor view for spherical harmonic attribute degree {} "
+          "index "
+          "{} on mesh primitive returned invalid status: {}",
+          degree,
+          i,
+          (int32_t)accessorView.status())));
       return false;
     }
 
@@ -792,7 +790,7 @@ void populateGsplatAsset(
     DotNet::Gsplat::GsplatAssetUncompressed& asset) {
 
   const int32_t numShCoeffs = countShCoeffsOnPrimitive(meshPrimitive);
-  asset.SHBands(numShCoeffs);
+  asset.SHBands(/*floor(numShCoeffs / 3.0)*/ 0);
 
   const std::unordered_map<std::string, int32_t>::const_iterator positionIt =
       meshPrimitive.attributes.find("POSITION");
@@ -804,13 +802,11 @@ void populateGsplatAsset(
 
   CesiumGltf::AccessorView<glm::vec3> positionView(model, positionIt->second);
   if (positionView.status() != CesiumGltf::AccessorViewStatus::Valid) {
-    UnityEngine::Debug::LogError(
-        System::String(
-            fmt::format(
-                "'POSITION' accessor view on mesh primitive returned invalid "
-                "status: "
-                "{}",
-                (int32_t)positionView.status())));
+    UnityEngine::Debug::LogError(System::String(fmt::format(
+        "'POSITION' accessor view on mesh primitive returned invalid "
+        "status: "
+        "{}",
+        (int32_t)positionView.status())));
     return;
   }
 
@@ -858,20 +854,17 @@ void populateGsplatAsset(
   const std::unordered_map<std::string, int32_t>::const_iterator scaleIt =
       meshPrimitive.attributes.find("KHR_gaussian_splatting:SCALE");
   if (scaleIt == meshPrimitive.attributes.end()) {
-    UnityEngine::Debug::LogError(
-        System::String(
-            "Mesh primitive has no 'KHR_gaussian_splatting:SCALE' attribute"));
+    UnityEngine::Debug::LogError(System::String(
+        "Mesh primitive has no 'KHR_gaussian_splatting:SCALE' attribute"));
     return;
   }
 
   CesiumGltf::AccessorView<glm::vec3> scaleView(model, scaleIt->second);
   if (scaleView.status() != CesiumGltf::AccessorViewStatus::Valid) {
-    UnityEngine::Debug::LogError(
-        System::String(
-            fmt::format(
-                "'KHR_gaussian_splatting:SCALE' accessor view on mesh "
-                "primitive returned invalid status: {}",
-                (int32_t)scaleView.status())));
+    UnityEngine::Debug::LogError(System::String(fmt::format(
+        "'KHR_gaussian_splatting:SCALE' accessor view on mesh "
+        "primitive returned invalid status: {}",
+        (int32_t)scaleView.status())));
     return;
   }
 
@@ -888,21 +881,18 @@ void populateGsplatAsset(
   const std::unordered_map<std::string, int32_t>::const_iterator rotationIt =
       meshPrimitive.attributes.find("KHR_gaussian_splatting:ROTATION");
   if (rotationIt == meshPrimitive.attributes.end()) {
-    UnityEngine::Debug::LogError(
-        System::String(
-            "Mesh primitive has no 'KHR_gaussian_splatting:ROTATION' "
-            "attribute"));
+    UnityEngine::Debug::LogError(System::String(
+        "Mesh primitive has no 'KHR_gaussian_splatting:ROTATION' "
+        "attribute"));
     return;
   }
 
   CesiumGltf::AccessorView<glm::vec4> rotationView(model, rotationIt->second);
   if (rotationView.status() != CesiumGltf::AccessorViewStatus::Valid) {
-    UnityEngine::Debug::LogError(
-        System::String(
-            fmt::format(
-                "'KHR_gaussian_splatting:ROTATION' accessor view on mesh "
-                "primitive returned invalid status: {}",
-                (int32_t)rotationView.status())));
+    UnityEngine::Debug::LogError(System::String(fmt::format(
+        "'KHR_gaussian_splatting:ROTATION' accessor view on mesh "
+        "primitive returned invalid status: {}",
+        (int32_t)rotationView.status())));
     return;
   }
 
@@ -929,11 +919,9 @@ void populateGsplatAsset(
   }
 
   if (colorIt->second < 0 || colorIt->second >= model.accessors.size()) {
-    UnityEngine::Debug::LogError(
-        System::String(
-            fmt::format(
-                "Mesh primitive has invalid 'COLOR_0' accessor index {}",
-                colorIt->second)));
+    UnityEngine::Debug::LogError(System::String(fmt::format(
+        "Mesh primitive has invalid 'COLOR_0' accessor index {}",
+        colorIt->second)));
     return;
   }
 
@@ -942,12 +930,10 @@ void populateGsplatAsset(
       CesiumGltf::AccessorSpec::ComponentType::UNSIGNED_BYTE) {
     CesiumGltf::AccessorView<glm::u8vec4> accessorView(model, colorIt->second);
     if (accessorView.status() != CesiumGltf::AccessorViewStatus::Valid) {
-      UnityEngine::Debug::LogError(
-          System::String(
-              fmt::format(
-                  "'COLOR_0' accessor view on mesh primitive returned invalid "
-                  "status: {}",
-                  (int32_t)accessorView.status())));
+      UnityEngine::Debug::LogError(System::String(fmt::format(
+          "'COLOR_0' accessor view on mesh primitive returned invalid "
+          "status: {}",
+          (int32_t)accessorView.status())));
       return;
     }
 
@@ -959,12 +945,10 @@ void populateGsplatAsset(
       CesiumGltf::AccessorSpec::ComponentType::UNSIGNED_SHORT) {
     CesiumGltf::AccessorView<glm::u16vec4> accessorView(model, colorIt->second);
     if (accessorView.status() != CesiumGltf::AccessorViewStatus::Valid) {
-      UnityEngine::Debug::LogError(
-          System::String(
-              fmt::format(
-                  "'COLOR_0' accessor view on mesh primitive returned invalid "
-                  "status: {}",
-                  (int32_t)accessorView.status())));
+      UnityEngine::Debug::LogError(System::String(fmt::format(
+          "'COLOR_0' accessor view on mesh primitive returned invalid "
+          "status: {}",
+          (int32_t)accessorView.status())));
       return;
     }
 
@@ -976,12 +960,10 @@ void populateGsplatAsset(
       CesiumGltf::AccessorSpec::ComponentType::FLOAT) {
     CesiumGltf::AccessorView<glm::vec4> accessorView(model, colorIt->second);
     if (accessorView.status() != CesiumGltf::AccessorViewStatus::Valid) {
-      UnityEngine::Debug::LogError(
-          System::String(
-              fmt::format(
-                  "'COLOR_0' accessor view on mesh primitive returned invalid "
-                  "status: {}",
-                  (int32_t)accessorView.status())));
+      UnityEngine::Debug::LogError(System::String(fmt::format(
+          "'COLOR_0' accessor view on mesh primitive returned invalid "
+          "status: {}",
+          (int32_t)accessorView.status())));
       return;
     }
 
@@ -998,9 +980,8 @@ void populateGsplatAsset(
     asset.Colors(colors);
   } else {
     UnityEngine::Debug::LogError(
-        System::String(
-            "Invalid 'COLOR_0' componentType. Allowed values are "
-            "UNSIGNED_BYTE, UNSIGNED_SHORT, and FLOAT."));
+        System::String("Invalid 'COLOR_0' componentType. Allowed values are "
+                       "UNSIGNED_BYTE, UNSIGNED_SHORT, and FLOAT."));
     return;
   }
 
@@ -1075,10 +1056,12 @@ void populateMeshDataArray(
 
           DotNet::Gsplat::GsplatAssetUncompressed splatAsset =
               meshDataResult.splatDataArray[splatDataInstance];
-          populateGsplatAsset(
-              *pModel,
-              primitive, splatAsset);
+          populateGsplatAsset(*pModel, primitive, splatAsset);
           primitiveInfo.gsplatIndex = splatDataInstance++;
+          primitiveInfo.gsplatIsLinear =
+              pGaussianSplattingExtension->colorSpace ==
+              CesiumGltf::ExtensionKhrGaussianSplatting::ColorSpace::
+                  lin_rec709_display;
           return;
         }
 
@@ -1921,10 +1904,9 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         }
 
         int64_t primitiveIndex = &primitive - &mesh.primitives[0];
-        UnityEngine::GameObject primitiveGameObject(
-            System::String(
-                "Mesh " + std::to_string(meshIndex - 1) + " Primitive " +
-                std::to_string(primitiveIndex)));
+        UnityEngine::GameObject primitiveGameObject(System::String(
+            "Mesh " + std::to_string(meshIndex - 1) + " Primitive " +
+            std::to_string(primitiveIndex)));
         if (showTilesInHierarchy) {
           primitiveGameObject.hideFlags(UnityEngine::HideFlags::DontSave);
         } else {
@@ -1949,9 +1931,14 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           DotNet::Gsplat::GsplatRenderer renderer =
               primitiveGameObject
                   .AddComponent<DotNet::Gsplat::GsplatRenderer>();
-          renderer.GsplatAsset((
-              DotNet::Gsplat::
-                  GsplatAsset)(splatAssets[primitiveInfo.gsplatIndex]));
+          renderer.GsplatAsset((DotNet::Gsplat::GsplatAsset)(
+              splatAssets[primitiveInfo.gsplatIndex]));
+          renderer.GammaToLinear(
+              !primitiveInfo.gsplatIsLinear &&
+              DotNet::UnityEngine::QualitySettings::activeColorSpace() ==
+                  DotNet::UnityEngine::ColorSpace::Linear);
+          renderer.AsyncUpload(true);
+          renderer.RenderBeforeUploadComplete(true);
           return;
         }
 
@@ -2207,9 +2194,8 @@ void UnityPrepareRendererResources::free(
   } catch (...) {
     // This function is a hotspot for crashes caused by AppDomain reloads.
     UnityEngine::Debug::Log(
-        System::String(
-            "A tile was not cleaned up properly, probably due to an "
-            "AppDomain reload."));
+        System::String("A tile was not cleaned up properly, probably due to an "
+                       "AppDomain reload."));
   }
 }
 

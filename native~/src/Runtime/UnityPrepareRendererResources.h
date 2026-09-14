@@ -61,6 +61,8 @@ struct CesiumPrimitiveInfo {
   std::unordered_map<uint32_t, uint32_t> rasterOverlayUvIndexMap{};
 
   int32_t gsplatIndex = -1;
+
+  bool gsplatIsLinear = false;
 };
 
 /**

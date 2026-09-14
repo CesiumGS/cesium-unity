@@ -1130,6 +1130,9 @@ namespace CesiumForUnity
 
             var splatRenderer = go.AddComponent<GsplatRenderer>();
             splatRenderer.GsplatAsset = splat;
+            splatRenderer.GammaToLinear = QualitySettings.activeColorSpace == ColorSpace.Linear;
+            splatRenderer.AsyncUpload = true;
+            splatRenderer.RenderBeforeUploadComplete = true;
         }
     }
 }
