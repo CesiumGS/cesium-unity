@@ -137,6 +137,8 @@ namespace CesiumForUnity
             CesiumCartographicPolygonSource oldSource = this._polygon.source;
             int oldFeatureIndex = this._polygon.featureIndex;
             int oldPolygonIndex = this._polygon.polygonIndex;
+            long oldIonAssetID = this._polygon.ionAssetID;
+            string oldUrl = this._polygon.url;
 
             this.serializedObject.Update();
 
@@ -148,12 +150,17 @@ namespace CesiumForUnity
 
             this.serializedObject.ApplyModifiedProperties();
 
-            // When the Source, Feature Index, or Polygon Index is changed in the inspector,
-            // reload the polygon's spline and rebuild any dependent raster overlays to update the cutout.
+            // When the Source, Feature Index, Polygon Index, ion Asset ID, or URL
+            // is changed in the inspector, reload the polygon's spline and rebuild
+            // any dependent raster overlays to update the cutout.
             CesiumCartographicPolygonSource newSource = this._polygon.source;
             int newFeatureIndex = this._polygon.featureIndex;
             int newPolygonIndex = this._polygon.polygonIndex;
-            if (oldSource != newSource || oldFeatureIndex != newFeatureIndex || oldPolygonIndex != newPolygonIndex)
+            long newIonAssetID = this._polygon.ionAssetID;
+            string newUrl = this._polygon.url;
+
+            if (oldSource != newSource || oldFeatureIndex != newFeatureIndex || oldPolygonIndex != newPolygonIndex
+                || oldIonAssetID != newIonAssetID || oldUrl != newUrl)
             {
                 Undo.RecordObject(this._polygon, "Change Cartographic Polygon source");
                 this._polygon.Refresh();
@@ -192,7 +199,7 @@ namespace CesiumForUnity
             CesiumCartographicPolygonSource source =
                 (CesiumCartographicPolygonSource)this._source.enumValueIndex;
 
-            if (source == CesiumCartographicPolygonSource.FromDocument)
+            if (source == CesiumCartographicPolygonSource.FromGeoJsonDocument)
             {
                 EditorGUILayout.DelayedIntField(this._featureIndex, FeatureIndexContent);
                 EditorGUILayout.DelayedIntField(this._polygonIndex, PolygonIndexContent);

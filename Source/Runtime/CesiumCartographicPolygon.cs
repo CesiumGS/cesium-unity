@@ -22,13 +22,13 @@ namespace CesiumForUnity
         Manual = 0,
 
         /// <summary>
-        /// The polygon's shape is loaded from a GeoJSON document hosted on Cesium ion.
-        /// </summary>
-        FromDocument = 1,
-
-        /// <summary>
         /// The polygon's shape is loaded from a GeoJSON document that has been parsed
         /// and assigned in code using <see cref="CesiumCartographicPolygon.document"/>.
+        /// </summary>
+        FromGeoJsonDocument = 1,
+
+        /// <summary>
+        /// The polygon's shape is loaded from a GeoJSON document hosted on Cesium ion.
         /// </summary>
         FromCesiumIon = 2,
 
@@ -59,6 +59,32 @@ namespace CesiumForUnity
     [IconAttribute("Packages/com.cesium.unity/Editor/Resources/Cesium-24x24.png")]
     public partial class CesiumCartographicPolygon : MonoBehaviour
     {
+        #region Events and Delegates
+
+        /// <summary>
+        /// Encapsulates a method that receives details of a cartographic polygon load failure.
+        /// </summary>
+        /// <param name="details">The details of the load failure.</param>
+        public delegate void CartographicPolygonLoadFailureDelegate(
+            CesiumCartographicPolygonLoadFailureDetails details);
+
+        /// <summary>
+        /// An event that is raised when the polygon encounters an error that prevents it from loading.
+        /// </summary>
+        public static event CartographicPolygonLoadFailureDelegate
+            OnCesiumCartographicPolygonLoadFailure;
+
+        internal static void BroadcastCesiumCartographicPolygonLoadFailure(
+            CesiumCartographicPolygonLoadFailureDetails details)
+        {
+            if (OnCesiumCartographicPolygonLoadFailure != null)
+            {
+                OnCesiumCartographicPolygonLoadFailure(details);
+            }
+        }
+
+        #endregion
+
         internal static readonly List<double2> emptyList = new List<double2>();
 
 #if SUPPORTS_SPLINES
@@ -248,7 +274,7 @@ namespace CesiumForUnity
             set
             {
                 this._document = value;
-                this._source = CesiumCartographicPolygonSource.FromDocument;
+                this._source = CesiumCartographicPolygonSource.FromGeoJsonDocument;
                 this.ApplyDocument(value);
             }
         }
@@ -392,7 +418,7 @@ namespace CesiumForUnity
             {
                 case CesiumCartographicPolygonSource.Manual:
                     return;
-                case CesiumCartographicPolygonSource.FromDocument:
+                case CesiumCartographicPolygonSource.FromGeoJsonDocument:
                     loaded = this._document;
                     break;
                 case CesiumCartographicPolygonSource.FromUrl:
@@ -408,7 +434,16 @@ namespace CesiumForUnity
 
             if (loaded == null && this._source != CesiumCartographicPolygonSource.Manual)
             {
-                Debug.LogWarning("CesiumCartographicPolygon: failed to load the GeoJSON. The spline was left unchanged.");
+                CesiumCartographicPolygonLoadType loadType =
+                    this._source == CesiumCartographicPolygonSource.FromCesiumIon
+                        ? CesiumCartographicPolygonLoadType.CesiumIon
+                        : CesiumCartographicPolygonLoadType.Url;
+
+                BroadcastCesiumCartographicPolygonLoadFailure(
+                    new CesiumCartographicPolygonLoadFailureDetails(
+                        this,
+                        loadType,
+                        "CesiumCartographicPolygon: failed to load the GeoJSON."));
             }
 
             // If this component was disabled or destroyed while the load was in flight, skip applying the result. 
