@@ -510,11 +510,13 @@ namespace Reinterop
                 {{functions.csharp.Print()}}
                 """;
             if (_additionalCSharpContent != null)
+            {
                 csharpContent = $$"""
                     {{_additionalCSharpContent}}
 
                     {{csharpContent}}
                     """;
+            }
 
             result.Init.Functions.Add(new GeneratedInitFunction(
                 $"{result.Type.GetFullyQualifiedName()}::{functions.csharp.Name}",

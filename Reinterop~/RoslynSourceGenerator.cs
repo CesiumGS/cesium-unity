@@ -99,6 +99,7 @@ namespace Reinterop
 
             List<IEnumerable<TypeToGenerate>> typesToGenerate = new List<IEnumerable<TypeToGenerate>>();
 
+            // Determine what the ExposeToCpp methods tell us about which types and members need to be generated.
             foreach (MethodDeclarationSyntax exposeMethod in receiver.ExposeToCppMethods)
             {
                 SemanticModel semanticModel = compilation.GetSemanticModel(exposeMethod.SyntaxTree);
@@ -114,6 +115,8 @@ namespace Reinterop
                 typesToGenerate.Add(dependencies);
             }
 
+            // Determine which classes are marked as being implemented in C++ and gather their implementation details.
+            // Also add these to the list of types to generate.
             foreach (AttributeSyntax attributeSyntax in receiver.ClassesImplementedInCpp)
             {
                 var args = attributeSyntax.ArgumentList!.Arguments;
@@ -179,12 +182,14 @@ namespace Reinterop
             // Create a unique entry for each type
             var typeDictionary = TypeToGenerate.Combine(typesToGenerate);
 
-            // Process the generation items, for example, linking them together.
+            // Link the types together by setting their <see cref="TypeToGenerate.BaseClass"/>
+            // and <see cref="TypeToGenerate.Interfaces"/> properties.
             foreach (TypeToGenerate item in typeDictionary.Values)
             {
                 InheritanceChainer.Chain(item, typeDictionary);
             }
 
+            // Generate code (in memory) for each type.
             List<GeneratedResult> generatedResults = new List<GeneratedResult>();
             foreach (TypeToGenerate item in typeDictionary.Values)
             {
@@ -193,12 +198,14 @@ namespace Reinterop
                     generatedResults.Add(result);
             }
 
+            // Write the C++ source files to disk.
             IEnumerable<CppSourceFile> sourceFiles = ReinteropCodeGenerator.DistributeToSourceFiles(reinteropContext, generatedResults);
             foreach (CppSourceFile sourceFile in sourceFiles)
             {
                 sourceFile.Write(reinteropContext);
             }
 
+            // Add the C# code to the current Roslyn compilation.
             ReinteropCodeGenerator.WriteCSharpCode(context, reinteropContext, generatedResults);
         }
 

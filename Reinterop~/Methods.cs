@@ -18,18 +18,6 @@ namespace Reinterop
             }
         }
 
-        private static IMethodSymbol? FindMethod(TypeToGenerate item, Func<IMethodSymbol, bool> predicate)
-        {
-            IMethodSymbol? result = item.Methods.FirstOrDefault(predicate);
-            if (result != null)
-                return result;
-
-            if (item.BaseClass != null)
-                return FindMethod(item.BaseClass, predicate);
-
-            return null;
-        }
-
         public static void GenerateSingleMethod(ReinteropGenerationContext context, GenerateTypeState state, TypeToGenerate item, GeneratedResult result, IMethodSymbol method)
         {
             CSharpFunctionCallableFromCpp interop = new CSharpFunctionCallableFromCpp(context, item.Type)
@@ -68,7 +56,7 @@ namespace Reinterop
                     result.ExtraCppFunctions.Add(genericDeclaration);
                 }
 
-                // Declare that this recipe is a specialization.
+                // Declare that this function is a specialization.
                 interop.Specializes(genericDeclaration);
             }
 
