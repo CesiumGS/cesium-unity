@@ -382,7 +382,7 @@ namespace CesiumForUnity
         /// </remarks>
         public void Refresh()
         {
-            
+
             if (this._source == CesiumCartographicPolygonSource.Manual)
             {
                 this.RefreshDependentOverlays();
@@ -467,8 +467,6 @@ namespace CesiumForUnity
             this.RefreshDependentOverlays();
         }
 #endif
-        
-
 
         /// <summary>
         /// Extracts the outer ring of cartographic (longitude, latitude) points from the first
@@ -490,6 +488,7 @@ namespace CesiumForUnity
         /// </returns>
         private static List<double2> GetPolygonRingPoints(CesiumGeoJsonDocument geoJsonDocument, int featureIndex, int polygonIndex)
         {
+#if SUPPORTS_SPLINES
             if (geoJsonDocument == null)
                 return null;
 
@@ -544,12 +543,14 @@ namespace CesiumForUnity
             foreach (double3 p in rings[0].points)
                 result.Add(new double2(p.x, p.y));
             return result;
+#else
+            return null;
+#endif
         }
 
         private void ApplyDocument(CesiumGeoJsonDocument geoJsonDocument)
         {
 #if SUPPORTS_SPLINES
-
             List<double2> points = GetPolygonRingPoints(geoJsonDocument, this._featureIndex, this._polygonIndex);
             if (points == null || points.Count < 3)
             {

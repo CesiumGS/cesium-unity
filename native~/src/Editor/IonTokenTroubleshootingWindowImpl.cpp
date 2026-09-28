@@ -33,10 +33,11 @@ getServer(const DotNet::CesiumForUnity::IonTokenTroubleshootingWindow& window) {
     return asset.tileset().ionServer();
   } else if (asset.overlay() != nullptr) {
     return asset.overlay().ionServer();
+  } else if (asset.geoJsonOverlay() != nullptr) {
+    return asset.geoJsonOverlay().ionServer();
   } else if (asset.cartographicPolygon() != nullptr) {
     return asset.cartographicPolygon().ionServer();
   } else {
-
     return CesiumForUnity::CesiumIonServer(nullptr);
   }
 }
