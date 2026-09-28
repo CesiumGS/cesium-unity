@@ -410,9 +410,12 @@ namespace CesiumForUnity
             }
         }
 
+#if !SUPPORTS_SPLINES
+        private void LoadFromSource(){} // Defined as no-op to supress CS1998, since Splines Package is not available during build.
+#else
         private async void LoadFromSource()
         {
-#if SUPPORTS_SPLINES
+
             CesiumGeoJsonDocument loaded = null;
             bool hasEmptySource = false;
             switch (this._source)
@@ -462,10 +465,11 @@ namespace CesiumForUnity
             // The spline has now been updated from the source, so rebuild any dependent
             // raster overlays to re-bake the cutout using the new shape.
             this.RefreshDependentOverlays();
-#endif
         }
+#endif
+        
 
-#if SUPPORTS_SPLINES
+
         /// <summary>
         /// Extracts the outer ring of cartographic (longitude, latitude) points from the first
         /// polygon geometry found in the given GeoJSON document.
@@ -544,6 +548,8 @@ namespace CesiumForUnity
 
         private void ApplyDocument(CesiumGeoJsonDocument geoJsonDocument)
         {
+#if SUPPORTS_SPLINES
+
             List<double2> points = GetPolygonRingPoints(geoJsonDocument, this._featureIndex, this._polygonIndex);
             if (points == null || points.Count < 3)
             {
@@ -619,8 +625,8 @@ namespace CesiumForUnity
             {
                 this._isUpdatingSplineInternally = false;
             }
-        }
 #endif
+        }
 
         internal List<double2> GetCartographicPoints(Matrix4x4 worldToTileset)
         {
