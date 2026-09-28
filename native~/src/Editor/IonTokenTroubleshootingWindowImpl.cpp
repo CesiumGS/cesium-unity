@@ -7,7 +7,6 @@
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
 #include <DotNet/CesiumForUnity/CesiumCartographicPolygon.h>
 #include <DotNet/CesiumForUnity/CesiumGeoJsonDocumentRasterOverlay.h>
-
 #include <DotNet/CesiumForUnity/CesiumIonAsset.h>
 #include <DotNet/CesiumForUnity/CesiumIonRasterOverlay.h>
 #include <DotNet/CesiumForUnity/CesiumIonServer.h>
