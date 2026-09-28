@@ -414,6 +414,7 @@ namespace CesiumForUnity
         {
 #if SUPPORTS_SPLINES
             CesiumGeoJsonDocument loaded = null;
+            bool hasEmptySource = false;
             switch (this._source)
             {
                 case CesiumCartographicPolygonSource.Manual:
@@ -424,15 +425,19 @@ namespace CesiumForUnity
                 case CesiumCartographicPolygonSource.FromUrl:
                     if (!string.IsNullOrEmpty(this._url))
                         loaded = await CesiumGeoJsonDocument.LoadFromUrlAsync(this._url);
+                    else
+                        hasEmptySource = true;
                     break;
                 case CesiumCartographicPolygonSource.FromCesiumIon:
                     if (this._ionAssetID > 0)
                         loaded = await CesiumGeoJsonDocument.LoadFromCesiumIonAsync(
                             this._ionAssetID, this._ionAccessToken, this.ionServer);
+                    else
+                        hasEmptySource = true;
                     break;
             }
 
-            if (loaded == null && this._source != CesiumCartographicPolygonSource.Manual)
+            if (loaded == null && this._source != CesiumCartographicPolygonSource.Manual && !hasEmptySource)
             {
                 CesiumCartographicPolygonLoadType loadType =
                     this._source == CesiumCartographicPolygonSource.FromCesiumIon
