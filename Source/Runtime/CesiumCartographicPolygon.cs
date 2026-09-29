@@ -382,7 +382,6 @@ namespace CesiumForUnity
         /// </remarks>
         public void Refresh()
         {
-
             if (this._source == CesiumCartographicPolygonSource.Manual)
             {
                 this.RefreshDependentOverlays();
@@ -415,7 +414,6 @@ namespace CesiumForUnity
 #else
         private async void LoadFromSource()
         {
-
             CesiumGeoJsonDocument loaded = null;
             bool hasEmptySource = false;
             switch (this._source)
