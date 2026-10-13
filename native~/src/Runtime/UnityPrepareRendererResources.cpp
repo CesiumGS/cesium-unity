@@ -729,34 +729,29 @@ bool writeShCoeffs(
   const int32_t numCoeffs = 3 + 2 * (degree - 1);
   for (int32_t i = 0; i < numCoeffs; i++) {
     std::unordered_map<std::string, int32_t>::const_iterator accessorIt =
-        meshPrimitive.attributes.find(
-            fmt::format(
-                "KHR_gaussian_splatting:SH_DEGREE_{}_COEF_{}",
-                degree,
-                i));
+        meshPrimitive.attributes.find(fmt::format(
+            "KHR_gaussian_splatting:SH_DEGREE_{}_COEF_{}",
+            degree,
+            i));
     if (accessorIt == meshPrimitive.attributes.end()) {
-      UnityEngine::Debug::LogError(
-          System::String(
-              fmt::format(
-                  "Could not find spherical harmonic attribute for degree {} "
-                  "index "
-                  "{} on mesh primitive",
-                  degree,
-                  i)));
+      UnityEngine::Debug::LogError(System::String(fmt::format(
+          "Could not find spherical harmonic attribute for degree {} "
+          "index "
+          "{} on mesh primitive",
+          degree,
+          i)));
       return false;
     }
 
     CesiumGltf::AccessorView<glm::vec3> accessorView(model, accessorIt->second);
     if (accessorView.status() != CesiumGltf::AccessorViewStatus::Valid) {
-      UnityEngine::Debug::LogError(
-          System::String(
-              fmt::format(
-                  "Accessor view for spherical harmonic attribute degree {} "
-                  "index "
-                  "{} on mesh primitive returned invalid status: {}",
-                  degree,
-                  i,
-                  (int32_t)accessorView.status())));
+      UnityEngine::Debug::LogError(System::String(fmt::format(
+          "Accessor view for spherical harmonic attribute degree {} "
+          "index "
+          "{} on mesh primitive returned invalid status: {}",
+          degree,
+          i,
+          (int32_t)accessorView.status())));
       return false;
     }
 
@@ -821,7 +816,7 @@ void populateGsplatAsset(
 
   const auto [numShBands, numShCoeffs] =
       countShCoeffsOnPrimitive(meshPrimitive);
-  // asset.SHBands(numShBands);
+  asset.SHBands(numShBands);
 
   const std::unordered_map<std::string, int32_t>::const_iterator positionIt =
       meshPrimitive.attributes.find("POSITION");
@@ -833,54 +828,46 @@ void populateGsplatAsset(
 
   CesiumGltf::AccessorView<glm::vec3> positionView(model, positionIt->second);
   if (positionView.status() != CesiumGltf::AccessorViewStatus::Valid) {
-    UnityEngine::Debug::LogError(
-        System::String(
-            fmt::format(
-                "'POSITION' accessor view on mesh primitive returned invalid "
-                "status: "
-                "{}",
-                (int32_t)positionView.status())));
+    UnityEngine::Debug::LogError(System::String(fmt::format(
+        "'POSITION' accessor view on mesh primitive returned invalid "
+        "status: "
+        "{}",
+        (int32_t)positionView.status())));
     return;
   }
 
   const std::unordered_map<std::string, int32_t>::const_iterator scaleIt =
       meshPrimitive.attributes.find("KHR_gaussian_splatting:SCALE");
   if (scaleIt == meshPrimitive.attributes.end()) {
-    UnityEngine::Debug::LogError(
-        System::String(
-            "Mesh primitive has no 'KHR_gaussian_splatting:SCALE' attribute"));
+    UnityEngine::Debug::LogError(System::String(
+        "Mesh primitive has no 'KHR_gaussian_splatting:SCALE' attribute"));
     return;
   }
 
   CesiumGltf::AccessorView<glm::vec3> scaleView(model, scaleIt->second);
   if (scaleView.status() != CesiumGltf::AccessorViewStatus::Valid) {
-    UnityEngine::Debug::LogError(
-        System::String(
-            fmt::format(
-                "'KHR_gaussian_splatting:SCALE' accessor view on mesh "
-                "primitive returned invalid status: {}",
-                (int32_t)scaleView.status())));
+    UnityEngine::Debug::LogError(System::String(fmt::format(
+        "'KHR_gaussian_splatting:SCALE' accessor view on mesh "
+        "primitive returned invalid status: {}",
+        (int32_t)scaleView.status())));
     return;
   }
 
   const std::unordered_map<std::string, int32_t>::const_iterator rotationIt =
       meshPrimitive.attributes.find("KHR_gaussian_splatting:ROTATION");
   if (rotationIt == meshPrimitive.attributes.end()) {
-    UnityEngine::Debug::LogError(
-        System::String(
-            "Mesh primitive has no 'KHR_gaussian_splatting:ROTATION' "
-            "attribute"));
+    UnityEngine::Debug::LogError(System::String(
+        "Mesh primitive has no 'KHR_gaussian_splatting:ROTATION' "
+        "attribute"));
     return;
   }
 
   CesiumGltf::AccessorView<glm::vec4> rotationView(model, rotationIt->second);
   if (rotationView.status() != CesiumGltf::AccessorViewStatus::Valid) {
-    UnityEngine::Debug::LogError(
-        System::String(
-            fmt::format(
-                "'KHR_gaussian_splatting:ROTATION' accessor view on mesh "
-                "primitive returned invalid status: {}",
-                (int32_t)rotationView.status())));
+    UnityEngine::Debug::LogError(System::String(fmt::format(
+        "'KHR_gaussian_splatting:ROTATION' accessor view on mesh "
+        "primitive returned invalid status: {}",
+        (int32_t)rotationView.status())));
     return;
   }
 
@@ -893,21 +880,17 @@ void populateGsplatAsset(
   }
 
   if (colorIt->second < 0 || colorIt->second >= model.accessors.size()) {
-    UnityEngine::Debug::LogError(
-        System::String(
-            fmt::format(
-                "Mesh primitive has invalid 'COLOR_0' accessor index {}",
-                colorIt->second)));
+    UnityEngine::Debug::LogError(System::String(fmt::format(
+        "Mesh primitive has invalid 'COLOR_0' accessor index {}",
+        colorIt->second)));
     return;
   }
   CesiumGltf::AccessorView<glm::vec4> colorView(model, colorIt->second);
   if (colorView.status() != CesiumGltf::AccessorViewStatus::Valid) {
-    UnityEngine::Debug::LogError(
-        System::String(
-            fmt::format(
-                "'COLOR_0' accessor view on mesh primitive returned invalid "
-                "status: {}",
-                (int32_t)colorView.status())));
+    UnityEngine::Debug::LogError(System::String(fmt::format(
+        "'COLOR_0' accessor view on mesh primitive returned invalid "
+        "status: {}",
+        (int32_t)colorView.status())));
     return;
   }
 
@@ -1066,22 +1049,31 @@ void populateGsplatAsset(
     // pack SH1
     System::Array1<uint32_t> sh1(asset.SplatCount() * 2);
     for (int32_t i = 0; i < asset.SplatCount(); i++) {
-      uint32_t a = 0, b = 0;
+      uint32_t out[2] = {0, 0};
       for (int32_t j = 0; j < 3; j++) {
         for (int32_t k = 0; k < 3; k++) {
           const int32_t baseIndex = (i * numShCoeffs + j) * 3 + k;
-          float shScaled = harmonics[baseIndex] * 7.0f;
-          int shBounded = (int)std::round(std::clamp(shScaled, -7.0f, 7.0f));
-          int sint4SH = shBounded & 0x0f;
-          int bitStart = (j * 3 + k) * 4;
-          int wordStart = bitStart / 32;
+          float shScaled = harmonics[baseIndex] * 63.0f;
+          int shBounded = (int)std::round(std::clamp(shScaled, -63.0f, 63.0f));
+          int sint7SH = shBounded & 0x7f;
+
+          int bitStart = (j * 3 + k) * 7;
+          int bitEnd = bitStart + 7;
+
+          int wordStart = (int)std::floor((double)(bitStart / 32));
           int bitOffset = bitStart - wordStart * 32;
-          uint32_t& out = wordStart == 0 ? a : b;
-          out |= (uint32_t)(sint4SH << bitOffset);
+          uint32_t firstWord = (uint32_t)((sint7SH << bitOffset) & 0xffffffff);
+          out[wordStart] |= firstWord;
+
+          if (bitEnd > wordStart * 32 + 32) {
+            uint32_t secondWord =
+                ((uint32_t)sint7SH >> (32 - bitOffset)) & 0xffffffff;
+            out[wordStart + 1] |= secondWord;
+          }
         }
       }
-      sh1.Item(i * 2, a);
-      sh1.Item(i * 2 + 1, b);
+      sh1.Item(i * 2, out[0]);
+      sh1.Item(i * 2 + 1, out[1]);
     }
     asset.PackedSH1(sh1);
   }
@@ -1138,7 +1130,8 @@ void populateGsplatAsset(
 
           out[wordStart] |= firstWord;
           if (bitEnd > wordStart * 32 + 32) {
-            uint32_t secondWord = ((uint32_t)sint6SH >> (32 - bitOffset)) & 0xffffffff;
+            uint32_t secondWord =
+                ((uint32_t)sint6SH >> (32 - bitOffset)) & 0xffffffff;
             out[wordStart + 1] |= secondWord;
           }
         }
@@ -1422,11 +1415,11 @@ UnityPrepareRendererResources::prepareInLoadThread(
       // Unity Wasm can only access managed code from the main thread.
       .thenInMainThread(
 #endif
-          [tileLoadResult = std::move(tileLoadResult), rendererOptions](
-              std::tuple<
-                  UnityEngine::MeshDataArray,
-                  System::Array1<DotNet::Gsplat::GsplatAssetSpark>>&&
-                  result) mutable {
+          [tileLoadResult = std::move(tileLoadResult),
+           rendererOptions](std::tuple<
+                            UnityEngine::MeshDataArray,
+                            System::Array1<DotNet::Gsplat::GsplatAssetSpark>>&&
+                                result) mutable {
             MeshDataResult meshDataResult{
                 std::move(std::get<0>(result)),
                 std::move(std::get<1>(result)),
@@ -2042,10 +2035,9 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         }
 
         int64_t primitiveIndex = &primitive - &mesh.primitives[0];
-        UnityEngine::GameObject primitiveGameObject(
-            System::String(
-                "Mesh " + std::to_string(meshIndex - 1) + " Primitive " +
-                std::to_string(primitiveIndex)));
+        UnityEngine::GameObject primitiveGameObject(System::String(
+            "Mesh " + std::to_string(meshIndex - 1) + " Primitive " +
+            std::to_string(primitiveIndex)));
         if (showTilesInHierarchy) {
           primitiveGameObject.hideFlags(UnityEngine::HideFlags::DontSave);
         } else {
@@ -2070,9 +2062,8 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           DotNet::Gsplat::GsplatRenderer renderer =
               primitiveGameObject
                   .AddComponent<DotNet::Gsplat::GsplatRenderer>();
-          renderer.GsplatAsset(
-              (DotNet::Gsplat::GsplatAsset)(splatAssets[primitiveInfo
-                                                            .gsplatIndex]));
+          renderer.GsplatAsset((DotNet::Gsplat::GsplatAsset)(
+              splatAssets[primitiveInfo.gsplatIndex]));
           renderer.GammaToLinear(
               !primitiveInfo.gsplatIsLinear &&
               DotNet::UnityEngine::QualitySettings::activeColorSpace() ==
@@ -2334,9 +2325,8 @@ void UnityPrepareRendererResources::free(
   } catch (...) {
     // This function is a hotspot for crashes caused by AppDomain reloads.
     UnityEngine::Debug::Log(
-        System::String(
-            "A tile was not cleaned up properly, probably due to an "
-            "AppDomain reload."));
+        System::String("A tile was not cleaned up properly, probably due to an "
+                       "AppDomain reload."));
   }
 }
 
