@@ -68,6 +68,7 @@ namespace CesiumForUnity
             Vector3 f = t.forward;
 
             Vector4 v = new Vector4(1.0f, 0.0f, 1.0f, 0.0f);
+            v = v.normalized;
 
             t.position = new Vector3();
             Vector3 p = t.position;
@@ -1127,6 +1128,18 @@ namespace CesiumForUnity
             splat.PrunedSplatCount = 0;
             splat.Rotations = new Vector4[] { };
             splat.Scales = new Vector3[] { };
+
+            var splats2 = new GsplatAssetSpark[1];
+
+            GsplatAssetSpark.PackSplat(Vector4.zero, Vector3.zero, Vector3.zero, Quaternion.identity);
+            var splatSpark = ScriptableObject.CreateInstance<GsplatAssetSpark>();
+            splatSpark.PackedSplats = new uint4[0];
+            splatSpark.PackedSH1 = new uint[0];
+            splatSpark.PackedSH2 = new uint[0];
+            splatSpark.PackedSH3 = new uint[0];
+            splatSpark.PackedSH4 = new uint[0];
+            
+            splats2[0] = splatSpark;
 
             var splatRenderer = go.AddComponent<GsplatRenderer>();
             splatRenderer.GsplatAsset = splat;
