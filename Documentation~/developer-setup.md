@@ -8,18 +8,20 @@ This is a summary of the setup and workflows for developers who want to modify t
 ### Prerequisites
 
 * CMake v3.18 or later (the latest version is recommended)
-* [.NET SDK v6.0 or later](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
+* [.NET SDK v9.0](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
 * If you're using Visual Studio, you need Visual Studio 2022.
 * No matter what compiler you're using, it needs to have solid support for C++20.
 * Unity 2022.3+ (the latest version of the Unity 2022.3 LTS release is recommended)
 * On Windows, support for long file paths must be enabled, or you are likely to see build errors. See [Maximum Path Length Limitation](https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=registry#enable-long-paths-in-windows-10-version-1607-and-later).
 * For best JPEG-decoding performance, you must have [nasm](https://www.nasm.us/) installed so that CMake can find it. Everything will work fine without it, just slower.
 
-The built Cesium for Unity Assembly will run on much older versions of .NET, including the version of Mono included in Unity. However, these very recent versions are required for the C#<->C++ interop code generator (Reinterop).
+The built Cesium for Unity Assembly will run on much older versions of .NET, including the version of Mono included in Unity. However, these very recent versions are required for the C#<->C++ interop code generator (Reinterop). 
+
+**DO NOT** download .NET SDK v10.0 or later, or else Reinterop will not successfully build.
 
 To make sure things are set up correctly, open a command-prompt (PowerShell is a good choice on Windows) and run:
 
-* `dotnet --version` and verify that it reports 6.0 or later
+* `dotnet --version` and verify that it reports 9.0
 * `cmake --version` and verify that it reports 3.18 or later
 
 ### Setting up the development environment
