@@ -18,6 +18,8 @@ namespace CesiumForUnity
                 HandleCesium3DTilesetLoadFailure;
             CesiumRasterOverlay.OnCesiumRasterOverlayLoadFailure +=
                 HandleCesiumRasterOverlayLoadFailure;
+            CesiumCartographicPolygon.OnCesiumCartographicPolygonLoadFailure +=
+                HandleCesiumCartographicPolygonLoadFailure;
         }
 
         static void UpdateIonSession()
@@ -98,6 +100,31 @@ namespace CesiumForUnity
                 && details.overlay is CesiumIonRasterOverlay ionOverlay)
             {
                 IonTokenTroubleshootingWindow.ShowWindow(ionOverlay, true);
+            }
+            else
+            {
+                Debug.Log(details.message);
+            }
+        }
+
+        static void
+        HandleCesiumCartographicPolygonLoadFailure(CesiumCartographicPolygonLoadFailureDetails details)
+        {
+            if (details.polygon == null)
+            {
+                return;
+            }
+
+            // Don't open a troubleshooting panel during play mode.
+            if (EditorApplication.isPlaying)
+            {
+                return;
+            }
+
+            // Not yet filtering for 404/401 status code since it is not exposed to C# yet.
+            if (details.type == CesiumCartographicPolygonLoadType.CesiumIon)
+            {
+                IonTokenTroubleshootingWindow.ShowWindow(details.polygon, true);
             }
             else
             {
