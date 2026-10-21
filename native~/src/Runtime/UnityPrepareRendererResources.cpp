@@ -78,6 +78,7 @@
 #include <cstring>
 #include <optional>
 #include <unordered_map>
+#include <unordered_set>
 #include <variant>
 
 using namespace CesiumRasterOverlays;
@@ -1104,6 +1105,17 @@ CesiumAsync::Future<TileLoadResultAndRenderResources> createMeshes(
     meshes[i].RecalculateBounds();
   }
 
+#ifdef __EMSCRIPTEN__
+  if (!shouldCreatePhysicsMeshes) {
+    // Free Unity's CPU copy of the mesh data. Point clouds still need it.
+    for (int32_t i = 0, len = meshes.Length(); i < len; ++i) {
+      if (primitiveInfos[i].mode != CesiumGltf::MeshPrimitive::Mode::POINTS) {
+        meshes[i].UploadMeshData(true);
+      }
+    }
+  }
+#endif
+
   if (shouldCreatePhysicsMeshes) {
     // Baking physics meshes takes awhile, so do that in a
     // worker thread.
@@ -1602,6 +1614,64 @@ void setGltfMaterialParameterValues(
 }
 } // namespace
 
+namespace {
+
+void addTextureSource(
+    const Model& model,
+    int32_t textureIndex,
+    std::unordered_set<int32_t>& images) {
+  const CesiumGltf::Texture* pTexture =
+      Model::getSafe(&model.textures, textureIndex);
+  if (pTexture) {
+    images.insert(pTexture->source);
+  }
+}
+
+/**
+ * @brief Frees the decoded pixels of images that have been uploaded to the
+ * GPU. Images read on the CPU by feature ID and property textures are kept.
+ */
+void releaseUploadedImagePixels(Model& model) {
+  std::unordered_set<int32_t> imagesToKeep;
+  for (const Mesh& mesh : model.meshes) {
+    for (const MeshPrimitive& primitive : mesh.primitives) {
+      const ExtensionExtMeshFeatures* pFeatures =
+          primitive.getExtension<ExtensionExtMeshFeatures>();
+      if (!pFeatures) {
+        continue;
+      }
+      for (const FeatureId& featureId : pFeatures->featureIds) {
+        if (featureId.texture) {
+          addTextureSource(model, featureId.texture->index, imagesToKeep);
+        }
+      }
+    }
+  }
+
+  const ExtensionModelExtStructuralMetadata* pMetadata =
+      model.getExtension<ExtensionModelExtStructuralMetadata>();
+  if (pMetadata) {
+    for (const PropertyTexture& propertyTexture : pMetadata->propertyTextures) {
+      for (const auto& property : propertyTexture.properties) {
+        addTextureSource(model, property.second.index, imagesToKeep);
+      }
+    }
+  }
+
+  for (size_t i = 0; i < model.images.size(); ++i) {
+    CesiumGltf::Image& image = model.images[i];
+    // Shared images may still be needed by tiles that haven't loaded yet.
+    if (!image.pAsset || image.pAsset->getDepot() ||
+        imagesToKeep.count(int32_t(i))) {
+      continue;
+    }
+    std::vector<std::byte>().swap(image.pAsset->pixelData);
+    image.pAsset->mipPositions.clear();
+  }
+}
+
+} // namespace
+
 void* UnityPrepareRendererResources::prepareInMainThread(
     Cesium3DTilesSelection::Tile& tile,
     void* pLoadThreadResult_) {
@@ -1866,6 +1936,12 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         }
       });
 
+  // Raster overlay upsampling copies the model, images included, so the
+  // pixels must be kept when overlays are present.
+  if (currentOverlayCount == 0) {
+    releaseUploadedImagePixels(tile.getContent().getRenderContent()->getModel());
+  }
+
   tilesetComponent.BroadcastNewGameObjectCreated(*pModelGameObject);
 
   CesiumGltfGameObject* pCesiumGameObject = new CesiumGltfGameObject{
@@ -1876,6 +1952,15 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 }
 
 namespace {
+
+void releaseMesh(const UnityEngine::Mesh& mesh) {
+  // Meshes without a CPU copy can't be rewritten, so don't reuse them.
+  if (mesh != nullptr && !mesh.isReadable()) {
+    UnityLifetime::Destroy(mesh);
+  } else {
+    CesiumForUnity::CesiumObjectPools::MeshPool().Release(mesh);
+  }
+}
 
 void freePrimitiveFeatures(
     const DotNet::UnityEngine::GameObject& primitiveGameObject) {
@@ -1930,8 +2015,7 @@ void freePrimitiveGameObject(
   UnityEngine::MeshFilter meshFilter =
       primitiveGameObject.GetComponent<UnityEngine::MeshFilter>();
   if (meshFilter != nullptr) {
-    CesiumForUnity::CesiumObjectPools::MeshPool().Release(
-        meshFilter.sharedMesh());
+    releaseMesh(meshFilter.sharedMesh());
   }
 
   // The MeshCollider shares a mesh with the MeshFilter, so no need to
@@ -1967,8 +2051,7 @@ void UnityPrepareRendererResources::free(
       LoadThreadResult* pTyped =
           static_cast<LoadThreadResult*>(pLoadThreadResult);
       for (int32_t i = 0, len = pTyped->meshes.Length(); i < len; ++i) {
-        CesiumForUnity::CesiumObjectPools::MeshPool().Release(
-            pTyped->meshes[i]);
+        releaseMesh(pTyped->meshes[i]);
       }
       delete pTyped;
     }
@@ -2022,8 +2105,17 @@ void* UnityPrepareRendererResources::prepareRasterInLoadThread(
 void* UnityPrepareRendererResources::prepareRasterInMainThread(
     CesiumRasterOverlays::RasterOverlayTile& rasterTile,
     void* pLoadThreadResult) {
+  CesiumUtility::IntrusivePointer<CesiumImage::ImageAsset> pImage =
+      rasterTile.getImage();
   auto pTexture = std::make_unique<UnityEngine::Texture>(
-      TextureLoader::loadTexture(*rasterTile.getImage(), true));
+      TextureLoader::loadTexture(*pImage, true));
+
+  // The pixels are no longer needed once uploaded.
+  if (!pImage->getDepot()) {
+    std::vector<std::byte>().swap(pImage->pixelData);
+    pImage->mipPositions.clear();
+  }
+
   pTexture->wrapMode(UnityEngine::TextureWrapMode::Clamp);
   pTexture->filterMode(UnityEngine::FilterMode::Trilinear);
   pTexture->anisoLevel(16);

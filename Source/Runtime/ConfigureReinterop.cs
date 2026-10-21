@@ -142,6 +142,8 @@ namespace CesiumForUnity
             mesh.SetIndices(new NativeArray<int>(), MeshTopology.Triangles, 0, true, 0);
             mesh.RecalculateBounds();
             int vertexCount = mesh.vertexCount;
+            mesh.UploadMeshData(true);
+            bool isMeshReadable = mesh.isReadable;
 
             Vector3[] vertices = mesh.vertices;
             Vector3 vertex = vertices[0];
