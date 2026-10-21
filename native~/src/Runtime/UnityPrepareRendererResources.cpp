@@ -1035,6 +1035,29 @@ struct LoadThreadResult {
 
 namespace {
 
+/**
+ * @brief Removes encoded image and compressed mesh bytes from the model's
+ * buffers once they have been decoded.
+ */
+void compactModelBuffers(Model& model) {
+  for (CesiumGltf::Image& image : model.images) {
+    if (image.pAsset) {
+      image.bufferView = -1;
+    }
+  }
+
+  GltfUtilities::removeUnusedBufferViews(model);
+  GltfUtilities::removeUnusedBuffers(model);
+
+  for (size_t i = 0; i < model.buffers.size(); ++i) {
+    CesiumGltf::Buffer& buffer = model.buffers[i];
+    if (size_t(buffer.byteLength) == buffer.cesium.data.size()) {
+      GltfUtilities::compactBuffer(model, int32_t(i));
+      buffer.cesium.data.shrink_to_fit();
+    }
+  }
+}
+
 struct IntermediateLoadThreadResult {
   MeshDataResult meshDataResult;
   TileLoadResult tileLoadResult;
@@ -1187,6 +1210,8 @@ UnityPrepareRendererResources::prepareInLoadThread(
   if (!pModel)
     return asyncSystem.createResolvedFuture(
         TileLoadResultAndRenderResources{std::move(tileLoadResult), nullptr});
+
+  compactModelBuffers(*pModel);
 
   int32_t numberOfPrimitives = countPrimitives(*pModel);
 
