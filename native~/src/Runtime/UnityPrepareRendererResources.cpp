@@ -75,6 +75,8 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
+#include <cstring>
+#include <optional>
 #include <unordered_map>
 #include <variant>
 
@@ -313,9 +315,181 @@ void generateMipMapsForPrimitive(
   }
 }
 
+/**
+ * @brief Receives the index and vertex data for a single primitive.
+ */
+class MeshDataWriter {
+public:
+  virtual ~MeshDataWriter() = default;
+  virtual void* setIndexBuffer(
+      int32_t indexCount,
+      UnityEngine::Rendering::IndexFormat indexFormat) = 0;
+  virtual uint8_t* setVertexBuffer(
+      int32_t vertexCount,
+      const UnityEngine::Rendering::VertexAttributeDescriptor* pAttributes,
+      int32_t attributeCount) = 0;
+  virtual void
+  setSubMesh(const UnityEngine::Rendering::SubMeshDescriptor& subMesh) = 0;
+};
+
+/**
+ * @brief Writes primitive data directly into a Unity MeshData.
+ */
+class UnityMeshDataWriter : public MeshDataWriter {
+public:
+  explicit UnityMeshDataWriter(const UnityEngine::MeshData& meshData)
+      : _meshData(meshData) {}
+
+  void* setIndexBuffer(
+      int32_t indexCount,
+      UnityEngine::Rendering::IndexFormat indexFormat) override {
+    using namespace DotNet::Unity::Collections::LowLevel::Unsafe;
+    this->_meshData.SetIndexBufferParams(indexCount, indexFormat);
+    if (indexFormat == UnityEngine::Rendering::IndexFormat::UInt16) {
+      return NativeArrayUnsafeUtility::GetUnsafeBufferPointerWithoutChecks(
+          this->_meshData.GetIndexData<uint16_t>());
+    }
+    return NativeArrayUnsafeUtility::GetUnsafeBufferPointerWithoutChecks(
+        this->_meshData.GetIndexData<uint32_t>());
+  }
+
+  uint8_t* setVertexBuffer(
+      int32_t vertexCount,
+      const UnityEngine::Rendering::VertexAttributeDescriptor* pAttributes,
+      int32_t attributeCount) override {
+    using namespace DotNet::Unity::Collections::LowLevel::Unsafe;
+    System::Array1<UnityEngine::Rendering::VertexAttributeDescriptor>
+        attributes(attributeCount);
+    for (int32_t i = 0; i < attributeCount; ++i) {
+      attributes.Item(i, pAttributes[i]);
+    }
+    this->_meshData.SetVertexBufferParams(vertexCount, attributes);
+    return static_cast<uint8_t*>(
+        NativeArrayUnsafeUtility::GetUnsafeBufferPointerWithoutChecks(
+            this->_meshData.GetVertexData<uint8_t>(0)));
+  }
+
+  void
+  setSubMesh(const UnityEngine::Rendering::SubMeshDescriptor& subMesh) override {
+    this->_meshData.subMeshCount(1);
+    this->_meshData.SetSubMesh(
+        0,
+        subMesh,
+        UnityEngine::Rendering::MeshUpdateFlags::Default);
+  }
+
+private:
+  UnityEngine::MeshData _meshData;
+};
+
+#ifdef __EMSCRIPTEN__
+/**
+ * @brief Primitive data held in native memory until it can be copied into a
+ * Unity MeshData on the main thread.
+ */
+struct BufferedMeshData {
+  int32_t indexCount = 0;
+  UnityEngine::Rendering::IndexFormat indexFormat =
+      UnityEngine::Rendering::IndexFormat::UInt16;
+  std::vector<std::byte> indices;
+  int32_t vertexCount = 0;
+  std::vector<UnityEngine::Rendering::VertexAttributeDescriptor> attributes;
+  std::vector<std::byte> vertices;
+  std::optional<UnityEngine::Rendering::SubMeshDescriptor> subMesh;
+};
+
+/**
+ * @brief Writes primitive data into a BufferedMeshData. Safe to use from any
+ * thread.
+ */
+class BufferedMeshDataWriter : public MeshDataWriter {
+public:
+  explicit BufferedMeshDataWriter(BufferedMeshData& data) : _data(data) {}
+
+  void* setIndexBuffer(
+      int32_t indexCount,
+      UnityEngine::Rendering::IndexFormat indexFormat) override {
+    size_t indexSize =
+        indexFormat == UnityEngine::Rendering::IndexFormat::UInt16 ? 2 : 4;
+    this->_data.indexCount = indexCount;
+    this->_data.indexFormat = indexFormat;
+    this->_data.indices.resize(size_t(indexCount) * indexSize);
+    return this->_data.indices.data();
+  }
+
+  uint8_t* setVertexBuffer(
+      int32_t vertexCount,
+      const UnityEngine::Rendering::VertexAttributeDescriptor* pAttributes,
+      int32_t attributeCount) override {
+    this->_data.vertexCount = vertexCount;
+    this->_data.attributes.assign(pAttributes, pAttributes + attributeCount);
+    this->_data.vertices.resize(
+        size_t(vertexCount) * getVertexStride(pAttributes, attributeCount));
+    return reinterpret_cast<uint8_t*>(this->_data.vertices.data());
+  }
+
+  void
+  setSubMesh(const UnityEngine::Rendering::SubMeshDescriptor& subMesh) override {
+    this->_data.subMesh = subMesh;
+  }
+
+private:
+  static size_t getVertexStride(
+      const UnityEngine::Rendering::VertexAttributeDescriptor* pAttributes,
+      int32_t attributeCount) {
+    using namespace DotNet::UnityEngine::Rendering;
+    size_t stride = 0;
+    for (int32_t i = 0; i < attributeCount; ++i) {
+      size_t componentSize = 4;
+      switch (pAttributes[i].format) {
+      case VertexAttributeFormat::UNorm8:
+      case VertexAttributeFormat::SNorm8:
+      case VertexAttributeFormat::UInt8:
+      case VertexAttributeFormat::SInt8:
+        componentSize = 1;
+        break;
+      case VertexAttributeFormat::Float16:
+      case VertexAttributeFormat::UNorm16:
+      case VertexAttributeFormat::SNorm16:
+      case VertexAttributeFormat::UInt16:
+      case VertexAttributeFormat::SInt16:
+        componentSize = 2;
+        break;
+      default:
+        break;
+      }
+      stride += componentSize * size_t(pAttributes[i].dimension);
+    }
+    return stride;
+  }
+
+  BufferedMeshData& _data;
+};
+
+void applyBufferedMeshData(
+    const BufferedMeshData& data,
+    const UnityEngine::MeshData& meshData) {
+  if (!data.subMesh) {
+    return;
+  }
+
+  UnityMeshDataWriter writer(meshData);
+  void* pIndices = writer.setIndexBuffer(data.indexCount, data.indexFormat);
+  std::memcpy(pIndices, data.indices.data(), data.indices.size());
+
+  uint8_t* pVertices = writer.setVertexBuffer(
+      data.vertexCount,
+      data.attributes.data(),
+      int32_t(data.attributes.size()));
+  std::memcpy(pVertices, data.vertices.data(), data.vertices.size());
+
+  writer.setSubMesh(*data.subMesh);
+}
+#endif // __EMSCRIPTEN__
+
 template <typename TIndex, class TIndexAccessor>
 void loadPrimitive(
-    UnityEngine::MeshData meshData,
+    MeshDataWriter& writer,
     CesiumPrimitiveInfo& primitiveInfo,
     const CreateModelOptions& options,
     const Model& gltf,
@@ -380,7 +554,7 @@ void loadPrimitive(
   if (computeFlatNormals && indexFormat == IndexFormat::UInt16 &&
       indexCount >= std::numeric_limits<uint16_t>::max()) {
     loadPrimitive<uint32_t>(
-        meshData,
+        writer,
         primitiveInfo,
         options,
         gltf,
@@ -394,12 +568,8 @@ void loadPrimitive(
     return;
   }
 
-  meshData.SetIndexBufferParams(indexCount, indexFormat);
-  const Unity::Collections::NativeArray1<TIndex>& dest =
-      meshData.GetIndexData<TIndex>();
-  TIndex* indices = static_cast<TIndex*>(
-      Unity::Collections::LowLevel::Unsafe::NativeArrayUnsafeUtility::
-          GetUnsafeBufferPointerWithoutChecks(dest));
+  TIndex* indices =
+      static_cast<TIndex*>(writer.setIndexBuffer(indexCount, indexFormat));
 
   for (int64_t i = 0; i < indicesView.size(); ++i) {
     indices[i] = indicesView[i];
@@ -529,21 +699,11 @@ void loadPrimitive(
     ++numberOfAttributes;
   }
 
-  System::Array1<VertexAttributeDescriptor> attributes(numberOfAttributes);
-  for (int32_t i = 0; i < numberOfAttributes; ++i) {
-    attributes.Item(i, descriptor[i]);
-  }
-
   int32_t vertexCount = computeFlatNormals
                             ? indexCount
                             : static_cast<int32_t>(positionView.size());
-  meshData.SetVertexBufferParams(vertexCount, attributes);
-
-  NativeArray1<uint8_t> nativeVertexBuffer =
-      meshData.GetVertexData<uint8_t>(streamIndex);
-  uint8_t* pBufferStart = static_cast<uint8_t*>(
-      NativeArrayUnsafeUtility::GetUnsafeBufferPointerWithoutChecks(
-          nativeVertexBuffer));
+  uint8_t* pBufferStart =
+      writer.setVertexBuffer(vertexCount, descriptor, numberOfAttributes);
   uint8_t* pWritePos = pBufferStart;
 
   // Since the vertex buffer is dynamically interleaved, we don't have a
@@ -636,8 +796,6 @@ void loadPrimitive(
     }
   }
 
-  meshData.subMeshCount(1);
-
   // TODO: use sub-meshes for glTF primitives, instead of a separate mesh
   // for each.
   SubMeshDescriptor subMeshDescriptor{};
@@ -664,7 +822,7 @@ void loadPrimitive(
   subMeshDescriptor.firstVertex = 0;
   subMeshDescriptor.vertexCount = 0;
 
-  meshData.SetSubMesh(0, subMeshDescriptor, MeshUpdateFlags::Default);
+  writer.setSubMesh(subMeshDescriptor);
 }
 } // namespace
 
@@ -681,10 +839,16 @@ int32_t countPrimitives(const CesiumGltf::Model& model) {
   return numberOfPrimitives;
 }
 
-void populateMeshDataArray(
-    MeshDataResult& meshDataResult,
+/**
+ * @brief Converts each primitive of the model into Unity mesh data, written
+ * through the MeshDataWriter returned by `makeWriter(primitiveIndex)`.
+ */
+template <typename TMakeWriter>
+void populateMeshData(
+    std::vector<CesiumPrimitiveInfo>& primitiveInfos,
     TileLoadResult& tileLoadResult,
-    const CreateModelOptions& options) {
+    const CreateModelOptions& options,
+    TMakeWriter&& makeWriter) {
   CesiumGltf::Model* pModel =
       std::get_if<CesiumGltf::Model>(&tileLoadResult.contentKind);
   if (!pModel)
@@ -692,20 +856,18 @@ void populateMeshDataArray(
 
   int32_t meshDataInstance = 0;
 
-  meshDataResult.primitiveInfos.reserve(countPrimitives(*pModel));
+  primitiveInfos.reserve(countPrimitives(*pModel));
 
   pModel->forEachPrimitiveInScene(
       -1,
-      [&meshDataResult, &meshDataInstance, pModel, &options](
+      [&primitiveInfos, &meshDataInstance, &makeWriter, pModel, &options](
           const Model& gltf,
           const Node& node,
           const Mesh& mesh,
           const MeshPrimitive& primitive,
           const glm::dmat4& transform) {
-        UnityEngine::MeshData meshData =
-            meshDataResult.meshDataArray[meshDataInstance++];
-        CesiumPrimitiveInfo& primitiveInfo =
-            meshDataResult.primitiveInfos.emplace_back();
+        auto writer = makeWriter(meshDataInstance++);
+        CesiumPrimitiveInfo& primitiveInfo = primitiveInfos.emplace_back();
 
         auto positionAccessorIt = primitive.attributes.find("POSITION");
         if (positionAccessorIt == primitive.attributes.end()) {
@@ -729,7 +891,7 @@ void populateMeshDataArray(
           int32_t indexCount = static_cast<int32_t>(positionView.size());
           if (indexCount > std::numeric_limits<std::uint16_t>::max()) {
             loadPrimitive<std::uint32_t>(
-                meshData,
+                writer,
                 primitiveInfo,
                 options,
                 gltf,
@@ -742,7 +904,7 @@ void populateMeshDataArray(
                 positionView);
           } else {
             loadPrimitive<std::uint16_t>(
-                meshData,
+                writer,
                 primitiveInfo,
                 options,
                 gltf,
@@ -760,7 +922,7 @@ void populateMeshDataArray(
           case Accessor::ComponentType::BYTE: {
             AccessorView<int8_t> indexAccessor(gltf, primitive.indices);
             loadPrimitive<std::uint16_t>(
-                meshData,
+                writer,
                 primitiveInfo,
                 options,
                 gltf,
@@ -776,7 +938,7 @@ void populateMeshDataArray(
           case Accessor::ComponentType::UNSIGNED_BYTE: {
             AccessorView<uint8_t> indexAccessor(gltf, primitive.indices);
             loadPrimitive<std::uint16_t>(
-                meshData,
+                writer,
                 primitiveInfo,
                 options,
                 gltf,
@@ -792,7 +954,7 @@ void populateMeshDataArray(
           case Accessor::ComponentType::SHORT: {
             AccessorView<int16_t> indexAccessor(gltf, primitive.indices);
             loadPrimitive<std::uint16_t>(
-                meshData,
+                writer,
                 primitiveInfo,
                 options,
                 gltf,
@@ -808,7 +970,7 @@ void populateMeshDataArray(
           case Accessor::ComponentType::UNSIGNED_SHORT: {
             AccessorView<uint16_t> indexAccessor(gltf, primitive.indices);
             loadPrimitive<std::uint16_t>(
-                meshData,
+                writer,
                 primitiveInfo,
                 options,
                 gltf,
@@ -824,7 +986,7 @@ void populateMeshDataArray(
           case Accessor::ComponentType::UNSIGNED_INT: {
             AccessorView<uint32_t> indexAccessor(gltf, primitive.indices);
             loadPrimitive<std::uint32_t>(
-                meshData,
+                writer,
                 primitiveInfo,
                 options,
                 gltf,
@@ -870,6 +1032,133 @@ struct LoadThreadResult {
   std::vector<CesiumPrimitiveInfo> primitiveInfos{};
 };
 
+namespace {
+
+struct IntermediateLoadThreadResult {
+  MeshDataResult meshDataResult;
+  TileLoadResult tileLoadResult;
+};
+
+/**
+ * @brief Creates Unity meshes from populated MeshData. Must be called from
+ * the main thread.
+ */
+CesiumAsync::Future<TileLoadResultAndRenderResources> createMeshes(
+    const CesiumAsync::AsyncSystem& asyncSystem,
+    const UnityEngine::GameObject& tileset,
+    IntermediateLoadThreadResult&& workerResult) {
+  if (tileset == nullptr) {
+    // Tileset GameObject was deleted while we were loading a tile
+    // (possibly play mode was exited or another cause).
+    workerResult.meshDataResult.meshDataArray.Dispose();
+    return asyncSystem.createResolvedFuture(TileLoadResultAndRenderResources{
+        std::move(workerResult.tileLoadResult),
+        nullptr});
+  }
+  bool shouldCreatePhysicsMeshes = false;
+  bool shouldShowTilesInHierarchy = false;
+
+  auto tilesetComponent =
+      tileset.GetComponent<DotNet::CesiumForUnity::Cesium3DTileset>();
+  if (tilesetComponent != nullptr) {
+    shouldCreatePhysicsMeshes = tilesetComponent.createPhysicsMeshes();
+    shouldShowTilesInHierarchy = tilesetComponent.showTilesInHierarchy();
+  }
+
+  const UnityEngine::MeshDataArray& meshDataArray =
+      workerResult.meshDataResult.meshDataArray;
+  const std::vector<CesiumPrimitiveInfo>& primitiveInfos =
+      workerResult.meshDataResult.primitiveInfos;
+
+  // Create meshes and populate them from the MeshData created in
+  // the worker thread. Sadly, this must be done in the main
+  // thread, too.
+  System::Array1<UnityEngine::Mesh> meshes(meshDataArray.Length());
+  for (int32_t i = 0, len = meshes.Length(); i < len; ++i) {
+    UnityEngine::Mesh unityMesh =
+        CesiumForUnity::CesiumObjectPools::MeshPool().Get();
+    // Don't let Unity unload this mesh during the time in between
+    // when we create it and when we attach it to a GameObject.
+    if (shouldShowTilesInHierarchy) {
+      unityMesh.hideFlags(UnityEngine::HideFlags::HideAndDontSave);
+    } else {
+      unityMesh.hideFlags(
+          UnityEngine::HideFlags::HideAndDontSave |
+          UnityEngine::HideFlags::HideInHierarchy);
+    }
+
+    meshes.Item(i, unityMesh);
+  }
+
+  // TODO: Validate indices in the worker thread, and then ask Unity
+  // not to do it here by setting
+  // MeshUpdateFlags::DontValidateIndices.
+  UnityEngine::Mesh::ApplyAndDisposeWritableMeshData(
+      meshDataArray,
+      meshes,
+      UnityEngine::Rendering::MeshUpdateFlags::Default);
+
+  // TODO: we should be able to do this in the worker thread, even if
+  // we have to do it manually.
+  for (int32_t i = 0, len = meshes.Length(); i < len; ++i) {
+    meshes[i].RecalculateBounds();
+  }
+
+  if (shouldCreatePhysicsMeshes) {
+    // Baking physics meshes takes awhile, so do that in a
+    // worker thread.
+    const std::uint64_t len = meshes.Length();
+    std::vector<std::uint64_t> objectIds;
+    for (uint64_t i = 0; i < len; ++i) {
+      // Don't attempt to bake a physics mesh from points, lines, or
+      // an invalid triangle mesh.
+      switch (primitiveInfos[i].mode) {
+      case CesiumGltf::MeshPrimitive::Mode::POINTS:
+      case CesiumGltf::MeshPrimitive::Mode::LINES:
+        continue;
+      default:
+        if (isDegenerateTriangleMesh(meshes[i])) {
+          continue;
+        }
+      }
+
+      objectIds.push_back(CesiumForUnity::Helpers::GetObjectId(meshes[i]));
+    }
+
+    if (objectIds.size() > 0) {
+#ifndef __EMSCRIPTEN__
+      return asyncSystem.runInWorkerThread(
+#else
+      // Unity Wasm can only access managed code from the main thread.
+      return asyncSystem.runInMainThread(
+#endif
+          [workerResult = std::move(workerResult),
+           objectIds = std::move(objectIds),
+           meshes = std::move(meshes)]() mutable {
+            for (std::uint64_t objectID : objectIds) {
+              CesiumForUnity::Helpers::BakeMeshFromId(objectID);
+            }
+
+            LoadThreadResult* pResult = new LoadThreadResult{
+                std::move(meshes),
+                std::move(workerResult.meshDataResult.primitiveInfos)};
+            return TileLoadResultAndRenderResources{
+                std::move(workerResult.tileLoadResult),
+                pResult};
+          });
+    }
+  }
+
+  LoadThreadResult* pResult = new LoadThreadResult{
+      std::move(meshes),
+      std::move(workerResult.meshDataResult.primitiveInfos)};
+  return asyncSystem.createResolvedFuture(TileLoadResultAndRenderResources{
+      std::move(workerResult.tileLoadResult),
+      pResult});
+}
+
+} // namespace
+
 UnityPrepareRendererResources::UnityPrepareRendererResources(
     const UnityEngine::GameObject& tilesetGameObject)
     : _tilesetGameObject(tilesetGameObject), _materialProperties() {}
@@ -889,37 +1178,79 @@ UnityPrepareRendererResources::prepareInLoadThread(
 
   int32_t numberOfPrimitives = countPrimitives(*pModel);
 
-  struct IntermediateLoadThreadResult {
-    MeshDataResult meshDataResult;
-    TileLoadResult tileLoadResult;
-  };
+  const auto* pOptions = std::any_cast<CreateModelOptions>(&rendererOptions);
+  const CreateModelOptions options =
+      pOptions ? *pOptions : CreateModelOptions{};
 
+#ifdef __EMSCRIPTEN__
+  // Managed code can only be called from the main thread, so build the mesh
+  // data in native memory here and only copy it into Unity there.
+  std::vector<BufferedMeshData> bufferedMeshes(
+      static_cast<size_t>(numberOfPrimitives));
+  std::vector<CesiumPrimitiveInfo> primitiveInfos;
+  populateMeshData(
+      primitiveInfos,
+      tileLoadResult,
+      options,
+      [&bufferedMeshes](int32_t i) {
+        return BufferedMeshDataWriter(bufferedMeshes[size_t(i)]);
+      });
+
+  return asyncSystem.runInMainThread(
+      [asyncSystem,
+       tileset = this->_tilesetGameObject,
+       tileLoadResult = std::move(tileLoadResult),
+       bufferedMeshes = std::move(bufferedMeshes),
+       primitiveInfos = std::move(primitiveInfos)]() mutable {
+        if (tileset == nullptr) {
+          return asyncSystem.createResolvedFuture(
+              TileLoadResultAndRenderResources{
+                  std::move(tileLoadResult),
+                  nullptr});
+        }
+
+        UnityEngine::MeshDataArray meshDataArray =
+            UnityEngine::Mesh::AllocateWritableMeshData(
+                int32_t(bufferedMeshes.size()));
+        ScopeGuard sg([&meshDataArray]() { meshDataArray.Dispose(); });
+        for (size_t i = 0; i < bufferedMeshes.size(); ++i) {
+          applyBufferedMeshData(bufferedMeshes[i], meshDataArray[int32_t(i)]);
+        }
+        sg.release();
+        bufferedMeshes.clear();
+
+        return createMeshes(
+            asyncSystem,
+            tileset,
+            IntermediateLoadThreadResult{
+                MeshDataResult{
+                    std::move(meshDataArray),
+                    std::move(primitiveInfos)},
+                std::move(tileLoadResult)});
+      });
+#else
   return asyncSystem
       .runInMainThread([numberOfPrimitives]() {
         // Allocate a MeshDataArray for the primitives.
         // Unfortunately, this must be done on the main thread.
         return UnityEngine::Mesh::AllocateWritableMeshData(numberOfPrimitives);
       })
-#ifndef __EMSCRIPTEN__
       .thenInWorkerThread(
-#else
-      // Unity Wasm can only access managed code from the main thread.
-      .thenInMainThread(
-#endif
-          [tileLoadResult = std::move(tileLoadResult), rendererOptions](
-              UnityEngine::MeshDataArray&& meshDataArray) mutable {
+          [tileLoadResult = std::move(tileLoadResult),
+           options](UnityEngine::MeshDataArray&& meshDataArray) mutable {
             MeshDataResult meshDataResult{std::move(meshDataArray), {}};
             // Free the MeshDataArray if something goes wrong.
             ScopeGuard sg([&meshDataResult]() {
               meshDataResult.meshDataArray.Dispose();
             });
 
-            const auto* pOptions =
-                std::any_cast<CreateModelOptions>(&rendererOptions);
-            if (pOptions)
-              populateMeshDataArray(meshDataResult, tileLoadResult, *pOptions);
-            else
-              populateMeshDataArray(meshDataResult, tileLoadResult, {});
+            populateMeshData(
+                meshDataResult.primitiveInfos,
+                tileLoadResult,
+                options,
+                [&array = meshDataResult.meshDataArray](int32_t i) {
+                  return UnityMeshDataWriter(array[i]);
+                });
 
             // We're returning the MeshDataArray, so don't free it.
             sg.release();
@@ -930,120 +1261,9 @@ UnityPrepareRendererResources::prepareInLoadThread(
       .thenInMainThread(
           [asyncSystem, tileset = this->_tilesetGameObject](
               IntermediateLoadThreadResult&& workerResult) mutable {
-            if (tileset == nullptr) {
-              // Tileset GameObject was deleted while we were loading a tile
-              // (possibly play mode was exited or another cause).
-              return asyncSystem.createResolvedFuture(
-                  TileLoadResultAndRenderResources{
-                      std::move(workerResult.tileLoadResult),
-                      nullptr});
-            }
-            bool shouldCreatePhysicsMeshes = false;
-            bool shouldShowTilesInHierarchy = false;
-
-            auto tilesetComponent =
-                tileset.GetComponent<DotNet::CesiumForUnity::Cesium3DTileset>();
-            if (tilesetComponent != nullptr) {
-              shouldCreatePhysicsMeshes =
-                  tilesetComponent.createPhysicsMeshes();
-              shouldShowTilesInHierarchy =
-                  tilesetComponent.showTilesInHierarchy();
-            }
-
-            const UnityEngine::MeshDataArray& meshDataArray =
-                workerResult.meshDataResult.meshDataArray;
-            const std::vector<CesiumPrimitiveInfo>& primitiveInfos =
-                workerResult.meshDataResult.primitiveInfos;
-
-            // Create meshes and populate them from the MeshData created in
-            // the worker thread. Sadly, this must be done in the main
-            // thread, too.
-            System::Array1<UnityEngine::Mesh> meshes(meshDataArray.Length());
-            for (int32_t i = 0, len = meshes.Length(); i < len; ++i) {
-              UnityEngine::Mesh unityMesh =
-                  CesiumForUnity::CesiumObjectPools::MeshPool().Get();
-              // Don't let Unity unload this mesh during the time in between
-              // when we create it and when we attach it to a GameObject.
-              if (shouldShowTilesInHierarchy) {
-                unityMesh.hideFlags(UnityEngine::HideFlags::HideAndDontSave);
-              } else {
-                unityMesh.hideFlags(
-                    UnityEngine::HideFlags::HideAndDontSave |
-                    UnityEngine::HideFlags::HideInHierarchy);
-              }
-
-              meshes.Item(i, unityMesh);
-            }
-
-            // TODO: Validate indices in the worker thread, and then ask Unity
-            // not to do it here by setting
-            // MeshUpdateFlags::DontValidateIndices.
-            UnityEngine::Mesh::ApplyAndDisposeWritableMeshData(
-                meshDataArray,
-                meshes,
-                UnityEngine::Rendering::MeshUpdateFlags::Default);
-
-            // TODO: we should be able to do this in the worker thread, even if
-            // we have to do it manually.
-            for (int32_t i = 0, len = meshes.Length(); i < len; ++i) {
-              meshes[i].RecalculateBounds();
-            }
-
-            if (shouldCreatePhysicsMeshes) {
-              // Baking physics meshes takes awhile, so do that in a
-              // worker thread.
-              const std::uint64_t len = meshes.Length();
-              std::vector<std::uint64_t> objectIds;
-              for (uint64_t i = 0; i < len; ++i) {
-                // Don't attempt to bake a physics mesh from points, lines, or
-                // an invalid triangle mesh.
-                switch (primitiveInfos[i].mode) {
-                case CesiumGltf::MeshPrimitive::Mode::POINTS:
-                case CesiumGltf::MeshPrimitive::Mode::LINES:
-                  continue;
-                default:
-                  if (isDegenerateTriangleMesh(meshes[i])) {
-                    continue;
-                  }
-                }
-
-                objectIds.push_back(
-                    CesiumForUnity::Helpers::GetObjectId(meshes[i]));
-              }
-
-              if (objectIds.size() > 0) {
-#ifndef __EMSCRIPTEN__
-                return asyncSystem.runInWorkerThread(
-#else
-                // Unity Wasm can only access managed code from the main thread.
-                return asyncSystem.runInMainThread(
-#endif
-                    [workerResult = std::move(workerResult),
-                     objectIds = std::move(objectIds),
-                     meshes = std::move(meshes)]() mutable {
-                      for (std::uint64_t objectID : objectIds) {
-                        CesiumForUnity::Helpers::BakeMeshFromId(objectID);
-                      }
-
-                      LoadThreadResult* pResult = new LoadThreadResult{
-                          std::move(meshes),
-                          std::move(
-                              workerResult.meshDataResult.primitiveInfos)};
-                      return TileLoadResultAndRenderResources{
-                          std::move(workerResult.tileLoadResult),
-                          pResult};
-                    });
-              }
-            }
-
-            LoadThreadResult* pResult = new LoadThreadResult{
-                std::move(meshes),
-                std::move(workerResult.meshDataResult.primitiveInfos)};
-            return asyncSystem.createResolvedFuture(
-                TileLoadResultAndRenderResources{
-                    std::move(workerResult.tileLoadResult),
-                    pResult});
+            return createMeshes(asyncSystem, tileset, std::move(workerResult));
           });
+#endif
 }
 
 namespace {
