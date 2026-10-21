@@ -74,6 +74,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <cstddef>
 #include <cstring>
 #include <optional>
@@ -106,10 +107,50 @@ std::vector<TIndex> generateIndices(const int32_t count) {
   return syntheticIndexBuffer;
 }
 
+void writeNormal(
+    uint8_t* pWritePos,
+    const UnityEngine::Vector3& normal,
+    bool packed) {
+  if (packed) {
+    int8_t* pPacked = reinterpret_cast<int8_t*>(pWritePos);
+    pPacked[0] = int8_t(std::round(std::clamp(normal.x, -1.0f, 1.0f) * 127.0f));
+    pPacked[1] = int8_t(std::round(std::clamp(normal.y, -1.0f, 1.0f) * 127.0f));
+    pPacked[2] = int8_t(std::round(std::clamp(normal.z, -1.0f, 1.0f) * 127.0f));
+    pPacked[3] = 0;
+  } else {
+    *reinterpret_cast<UnityEngine::Vector3*>(pWritePos) = normal;
+  }
+}
+
+void writeTexCoord(
+    uint8_t* pWritePos,
+    const UnityEngine::Vector2& texCoord,
+    bool packed) {
+  if (packed) {
+    uint16_t* pPacked = reinterpret_cast<uint16_t*>(pWritePos);
+    pPacked[0] = uint16_t(std::round(texCoord.x * 65535.0f));
+    pPacked[1] = uint16_t(std::round(texCoord.y * 65535.0f));
+  } else {
+    *reinterpret_cast<UnityEngine::Vector2*>(pWritePos) = texCoord;
+  }
+}
+
+bool isInUnitRange(const AccessorView<UnityEngine::Vector2>& view) {
+  for (int64_t i = 0; i < view.size(); ++i) {
+    const UnityEngine::Vector2& value = view[i];
+    if (!(value.x >= 0.0f && value.x <= 1.0f && value.y >= 0.0f &&
+          value.y <= 1.0f)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 template <typename TIndex>
 void computeFlatNormals(
     uint8_t* pWritePos,
     size_t stride,
+    bool packed,
     TIndex* indices,
     int32_t indexCount,
     const AccessorView<UnityEngine::Vector3>& positionView) {
@@ -129,7 +170,7 @@ void computeFlatNormals(
 
     glm::vec3 normal = glm::normalize(glm::cross(v1 - v0, v2 - v0));
     for (int j = 0; j < 3; j++) {
-      *reinterpret_cast<glm::vec3*>(pWritePos) = normal;
+      writeNormal(pWritePos, {normal.x, normal.y, normal.z}, packed);
       pWritePos += stride;
     }
   }
@@ -584,6 +625,10 @@ void loadPrimitive(
   std::int32_t numberOfAttributes = 0;
   std::int32_t streamIndex = 0;
 
+  // Use compact normals and texture coordinates, except for point clouds,
+  // whose shader reads float normals directly from the vertex buffer.
+  const bool packAttributes = primitive.mode != MeshPrimitive::Mode::POINTS;
+
   assert(numberOfAttributes < MAX_ATTRIBUTES);
   descriptor[numberOfAttributes].attribute = VertexAttribute::Position;
   descriptor[numberOfAttributes].format = VertexAttributeFormat::Float32;
@@ -595,8 +640,10 @@ void loadPrimitive(
   if (hasNormals) {
     assert(numberOfAttributes < MAX_ATTRIBUTES);
     descriptor[numberOfAttributes].attribute = VertexAttribute::Normal;
-    descriptor[numberOfAttributes].format = VertexAttributeFormat::Float32;
-    descriptor[numberOfAttributes].dimension = 3;
+    descriptor[numberOfAttributes].format =
+        packAttributes ? VertexAttributeFormat::SNorm8
+                       : VertexAttributeFormat::Float32;
+    descriptor[numberOfAttributes].dimension = packAttributes ? 4 : 3;
     descriptor[numberOfAttributes].stream = streamIndex;
     ++numberOfAttributes;
   }
@@ -628,6 +675,7 @@ void loadPrimitive(
   constexpr int MAX_TEX_COORDS = 8;
   int numTexCoords = 0;
   AccessorView<UnityEngine::Vector2> texCoordViews[MAX_TEX_COORDS];
+  bool texCoordPacked[MAX_TEX_COORDS] = {};
 
   // Add all texture coordinate sets TEXCOORD_i
   for (int i = 0; i < 8 && numTexCoords < MAX_TEX_COORDS; ++i) {
@@ -651,6 +699,7 @@ void loadPrimitive(
     }
 
     texCoordViews[numTexCoords] = texCoordView;
+    texCoordPacked[numTexCoords] = packAttributes && isInUnitRange(texCoordView);
     primitiveInfo.uvIndexMap[i] = numTexCoords;
 
     // Build Unity descriptor for this attribute.
@@ -658,7 +707,9 @@ void loadPrimitive(
 
     descriptor[numberOfAttributes].attribute =
         (VertexAttribute)((int)VertexAttribute::TexCoord0 + numTexCoords);
-    descriptor[numberOfAttributes].format = VertexAttributeFormat::Float32;
+    descriptor[numberOfAttributes].format =
+        texCoordPacked[numTexCoords] ? VertexAttributeFormat::UNorm16
+                                     : VertexAttributeFormat::Float32;
     descriptor[numberOfAttributes].dimension = 2;
     descriptor[numberOfAttributes].stream = streamIndex;
 
@@ -685,6 +736,8 @@ void loadPrimitive(
     }
 
     texCoordViews[numTexCoords] = overlayTexCoordView;
+    texCoordPacked[numTexCoords] =
+        packAttributes && isInUnitRange(overlayTexCoordView);
     primitiveInfo.rasterOverlayUvIndexMap[i] = numTexCoords;
 
     // Build Unity descriptor for this attribute.
@@ -692,7 +745,9 @@ void loadPrimitive(
 
     descriptor[numberOfAttributes].attribute =
         (VertexAttribute)((int)VertexAttribute::TexCoord0 + numTexCoords);
-    descriptor[numberOfAttributes].format = VertexAttributeFormat::Float32;
+    descriptor[numberOfAttributes].format =
+        texCoordPacked[numTexCoords] ? VertexAttributeFormat::UNorm16
+                                     : VertexAttributeFormat::Float32;
     descriptor[numberOfAttributes].dimension = 2;
     descriptor[numberOfAttributes].stream = streamIndex;
 
@@ -715,22 +770,31 @@ void loadPrimitive(
   // 3. vertex colors (skip if N/A)
   // 4. texcoords (first all TEXCOORD_i, then all _CESIUMOVERLAY_i)
 
+  const size_t normalSize = packAttributes ? 4 : sizeof(Vector3);
+  size_t texCoordSizes[MAX_TEX_COORDS];
+  for (int i = 0; i < numTexCoords; ++i) {
+    texCoordSizes[i] = texCoordPacked[i] ? 4 : sizeof(Vector2);
+  }
+
   size_t stride = sizeof(Vector3);
   size_t normalByteOffset, colorByteOffset;
   if (hasNormals) {
     normalByteOffset = stride;
-    stride += sizeof(Vector3);
+    stride += normalSize;
   }
   if (hasVertexColors) {
     colorByteOffset = stride;
     stride += sizeof(uint32_t);
   }
-  stride += numTexCoords * sizeof(Vector2);
+  for (int i = 0; i < numTexCoords; ++i) {
+    stride += texCoordSizes[i];
+  }
 
   if (computeFlatNormals) {
     ::computeFlatNormals(
         pWritePos + normalByteOffset,
         stride,
+        packAttributes,
         indices,
         indexCount,
         positionView);
@@ -738,7 +802,7 @@ void loadPrimitive(
       TIndex vertexIndex = indices[i];
       *reinterpret_cast<Vector3*>(pWritePos) = positionView[vertexIndex];
       // skip position and normal
-      pWritePos += 2 * sizeof(Vector3);
+      pWritePos += sizeof(Vector3) + normalSize;
       // Skip the slot allocated for vertex colors, we will fill them in
       // bulk later.
       if (hasVertexColors) {
@@ -746,9 +810,11 @@ void loadPrimitive(
       }
       for (uint32_t texCoordIndex = 0; texCoordIndex < numTexCoords;
            ++texCoordIndex) {
-        *reinterpret_cast<Vector2*>(pWritePos) =
-            texCoordViews[texCoordIndex][vertexIndex];
-        pWritePos += sizeof(Vector2);
+        writeTexCoord(
+            pWritePos,
+            texCoordViews[texCoordIndex][vertexIndex],
+            texCoordPacked[texCoordIndex]);
+        pWritePos += texCoordSizes[texCoordIndex];
       }
     }
   } else {
@@ -757,8 +823,8 @@ void loadPrimitive(
       pWritePos += sizeof(Vector3);
 
       if (hasNormals) {
-        *reinterpret_cast<Vector3*>(pWritePos) = normalView[i];
-        pWritePos += sizeof(Vector3);
+        writeNormal(pWritePos, normalView[i], packAttributes);
+        pWritePos += normalSize;
       }
 
       // Skip the slot allocated for vertex colors, we will fill them in
@@ -769,9 +835,11 @@ void loadPrimitive(
 
       for (uint32_t texCoordIndex = 0; texCoordIndex < numTexCoords;
            ++texCoordIndex) {
-        *reinterpret_cast<Vector2*>(pWritePos) =
-            texCoordViews[texCoordIndex][i];
-        pWritePos += sizeof(Vector2);
+        writeTexCoord(
+            pWritePos,
+            texCoordViews[texCoordIndex][i],
+            texCoordPacked[texCoordIndex]);
+        pWritePos += texCoordSizes[texCoordIndex];
       }
     }
   }
