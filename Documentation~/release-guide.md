@@ -9,17 +9,10 @@ This is the process we follow when releasing a new version of Cesium for Unity o
 
 ## Prepare Cesium for Unity for Release
 
-1. Update the cesium-native submodule reference to point to the latest commit that you pushed above.
-   - Enter the `native~/extern/cesium-native` directory and pull the latest changes and checkout the main branch as normal.
-   - To update the submodule reference, from the cesium-unity root, run: `git add native~/extern/cesium-native`
-2. Verify that `CHANGES.md` is complete and accurate.
-   - Give the header of the section containing the latest changes an appropriate version number and date.
-   - Diff main against the previous released version. This helps catch changes that are missing from the changelog, as well as changelog entries that were accidentally added to the wrong section.
-   - Use [Semantic Versioning](https://semver.org/) to pick the version number.
-   - Don't forget to add a note to the end of the version section indicating the cesium-native version number change. Use a previous version as the template for this and update the "from" and "to" version numbers accordingly.
-3. Change the version in `package.json`.
-4. Commit these changes. You can push them directly to `main`.
-5. Before continuing, verify that CI passes for all platforms.
+1. Call the `/prepare-release` GitHub Copilot skill using the next version number (`../.github/skills/prepare-release/SKILL.md`). 
+2. Review the resulting diff. In particular, confirm that the "from" and "to" version numbers in the cesium-native note match the cesium-native release you're actually shipping, since that release may not be tagged yet.
+3. Commit these changes. You can push them directly to `main`.
+4. Before continuing, verify that CI passes for all platforms.
 
 ## Optimistically upload the release packages to the GitHub releases page
 
