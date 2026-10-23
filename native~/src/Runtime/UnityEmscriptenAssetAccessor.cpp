@@ -184,6 +184,13 @@ void onProgress(
     uint32_t size) {
   if (size > 0) {
     ResponseData* pResponseData = static_cast<ResponseData*>(_instance);
+    // Reserve the expected size up front so that appending chunks doesn't
+    // repeatedly reallocate and copy the body. `total` comes from the
+    // Content-Length header when present (which may be the compressed size),
+    // so it is only a hint; the vector still grows if more data arrives.
+    if (pResponseData->data.capacity() == 0 && total > size) {
+      pResponseData->data.reserve(total);
+    }
     size_t endPosition = pResponseData->data.size();
     pResponseData->data.resize(pResponseData->data.size() + size);
     memcpy(pResponseData->data.data() + endPosition, data, size);
@@ -199,6 +206,12 @@ void onResponse(
     int webError) {
   std::unique_ptr<ResponseData> pResponseData =
       std::unique_ptr<ResponseData>(static_cast<ResponseData*>(_instance));
+
+  // Release the JS-side request once we're done with it. Otherwise Unity's
+  // WebRequest.js keeps the fetch Response (including the entire downloaded
+  // body in `response.parsedBody`) alive in `wr.responses` forever.
+  ScopeGuard releaseRequest(
+      [request = pResponseData->request]() { JS_WebRequest_Release(request); });
 
   RequestMetaDataLengths lengths;
   JS_WebRequest_GetResponseMetaDataLengths(pResponseData->request, &lengths);
