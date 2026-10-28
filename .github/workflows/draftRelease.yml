@@ -88,7 +88,6 @@ jobs:
           echo "Combined Package -> ${name}-${VERSION}.tgz"
 
       - name: Download and verify the release package
-        if: ${{ !inputs.dry_run }}
         run: |
           mkdir -p out
           gh run download "$RUN_ID" --name "Combined Package" --dir out
