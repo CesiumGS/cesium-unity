@@ -1,5 +1,9 @@
 # Change Log {#changes}
 
+## v1.26.1 - 2026-11-02
+
+This release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.65.0 to v0.66.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
+
 ## v1.26.0 - 2026-10-01
 
 ##### Additions :tada:
