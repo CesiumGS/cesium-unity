@@ -970,11 +970,11 @@ UnityPrepareRendererResources::prepareInLoadThread(
       // Unity Wasm can only access managed code from the main thread.
       .thenInMainThread(
 #endif
-          [tileLoadResult = std::move(tileLoadResult), rendererOptions](
-              std::tuple<
-                  UnityEngine::MeshDataArray,
-                  System::Array1<DotNet::Gsplat::GsplatAssetSpark>>&&
-                  result) mutable {
+          [tileLoadResult = std::move(tileLoadResult),
+           rendererOptions](std::tuple<
+                            UnityEngine::MeshDataArray,
+                            System::Array1<DotNet::Gsplat::GsplatAssetSpark>>&&
+                                result) mutable {
             MeshDataResult meshDataResult{
                 std::move(std::get<0>(result)),
                 std::move(std::get<1>(result)),
@@ -1590,10 +1590,9 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         }
 
         int64_t primitiveIndex = &primitive - &mesh.primitives[0];
-        UnityEngine::GameObject primitiveGameObject(
-            System::String(
-                "Mesh " + std::to_string(meshIndex - 1) + " Primitive " +
-                std::to_string(primitiveIndex)));
+        UnityEngine::GameObject primitiveGameObject(System::String(
+            "Mesh " + std::to_string(meshIndex - 1) + " Primitive " +
+            std::to_string(primitiveIndex)));
         if (showTilesInHierarchy) {
           primitiveGameObject.hideFlags(UnityEngine::HideFlags::DontSave);
         } else {
@@ -1618,15 +1617,14 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           DotNet::Gsplat::GsplatRenderer renderer =
               primitiveGameObject
                   .AddComponent<DotNet::Gsplat::GsplatRenderer>();
-          renderer.GsplatAsset(
-              (DotNet::Gsplat::GsplatAsset)(splatAssets[primitiveInfo
-                                                            .gsplatIndex]));
+          renderer.GsplatAsset((DotNet::Gsplat::GsplatAsset)(
+              splatAssets[primitiveInfo.gsplatIndex]));
           renderer.GammaToLinear(
               !primitiveInfo.gsplatIsLinear &&
               DotNet::UnityEngine::QualitySettings::activeColorSpace() ==
                   DotNet::UnityEngine::ColorSpace::Linear);
-          renderer.AsyncUpload(true);
-          renderer.RenderBeforeUploadComplete(true);
+          renderer.AsyncUpload(false);
+          renderer.RenderBeforeUploadComplete(false);
           return;
         }
 
@@ -1882,9 +1880,8 @@ void UnityPrepareRendererResources::free(
   } catch (...) {
     // This function is a hotspot for crashes caused by AppDomain reloads.
     UnityEngine::Debug::Log(
-        System::String(
-            "A tile was not cleaned up properly, probably due to an "
-            "AppDomain reload."));
+        System::String("A tile was not cleaned up properly, probably due to an "
+                       "AppDomain reload."));
   }
 }
 

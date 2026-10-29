@@ -65,34 +65,29 @@ bool writeShCoeffs(
   const int32_t numCoeffs = 3 + 2 * (degree - 1);
   for (int32_t i = 0; i < numCoeffs; i++) {
     std::unordered_map<std::string, int32_t>::const_iterator accessorIt =
-        meshPrimitive.attributes.find(
-            fmt::format(
-                "KHR_gaussian_splatting:SH_DEGREE_{}_COEF_{}",
-                degree,
-                i));
+        meshPrimitive.attributes.find(fmt::format(
+            "KHR_gaussian_splatting:SH_DEGREE_{}_COEF_{}",
+            degree,
+            i));
     if (accessorIt == meshPrimitive.attributes.end()) {
-      UnityEngine::Debug::LogError(
-          System::String(
-              fmt::format(
-                  "Could not find spherical harmonic attribute for degree {} "
-                  "index "
-                  "{} on mesh primitive",
-                  degree,
-                  i)));
+      UnityEngine::Debug::LogError(System::String(fmt::format(
+          "Could not find spherical harmonic attribute for degree {} "
+          "index "
+          "{} on mesh primitive",
+          degree,
+          i)));
       return false;
     }
 
     CesiumGltf::AccessorView<glm::vec3> accessorView(model, accessorIt->second);
     if (accessorView.status() != CesiumGltf::AccessorViewStatus::Valid) {
-      UnityEngine::Debug::LogError(
-          System::String(
-              fmt::format(
-                  "Accessor view for spherical harmonic attribute degree {} "
-                  "index "
-                  "{} on mesh primitive returned invalid status: {}",
-                  degree,
-                  i,
-                  (int32_t)accessorView.status())));
+      UnityEngine::Debug::LogError(System::String(fmt::format(
+          "Accessor view for spherical harmonic attribute degree {} "
+          "index "
+          "{} on mesh primitive returned invalid status: {}",
+          degree,
+          i,
+          (int32_t)accessorView.status())));
       return false;
     }
 
@@ -155,23 +150,19 @@ bool writeColors(
   const CesiumGltf::AccessorView<VectorT> colorView(model, colorAccessor);
 
   if (colorView.status() != CesiumGltf::AccessorViewStatus::Valid) {
-    UnityEngine::Debug::LogError(
-        System::String(
-            fmt::format(
-                "'COLOR_0' accessor view on mesh primitive returned invalid "
-                "status: {}",
-                (int32_t)colorView.status())));
+    UnityEngine::Debug::LogError(System::String(fmt::format(
+        "'COLOR_0' accessor view on mesh primitive returned invalid "
+        "status: {}",
+        (int32_t)colorView.status())));
     return false;
   }
 
   if (colorView.size() != splatData.size()) {
-    UnityEngine::Debug::LogError(
-        System::String(
-            fmt::format(
-                "'COLOR_0' accessor view on mesh primitive has size {} but "
-                "expected {}",
-                colorView.size(),
-                splatData.size())));
+    UnityEngine::Debug::LogError(System::String(fmt::format(
+        "'COLOR_0' accessor view on mesh primitive has size {} but "
+        "expected {}",
+        colorView.size(),
+        splatData.size())));
     return false;
   }
 
@@ -207,35 +198,30 @@ bool writeRotations(
   const CesiumGltf::AccessorView<VectorT> rotationView(model, rotationAccessor);
 
   if (rotationView.status() != CesiumGltf::AccessorViewStatus::Valid) {
-    UnityEngine::Debug::LogError(
-        System::String(
-            fmt::format(
-                "'KHR_gaussian_splatting:ROTATION' accessor view on mesh "
-                "primitive returned invalid status: {}",
-                (int32_t)rotationView.status())));
+    UnityEngine::Debug::LogError(System::String(fmt::format(
+        "'KHR_gaussian_splatting:ROTATION' accessor view on mesh "
+        "primitive returned invalid status: {}",
+        (int32_t)rotationView.status())));
     return false;
   }
 
   if (rotationView.size() != splatData.size()) {
-    UnityEngine::Debug::LogError(
-        System::String(
-            fmt::format(
-                "'KHR_gaussian_splatting:ROTATION' accessor view on mesh "
-                "primitive has size {} but expected {}",
-                rotationView.size(),
-                splatData.size())));
+    UnityEngine::Debug::LogError(System::String(fmt::format(
+        "'KHR_gaussian_splatting:ROTATION' accessor view on mesh "
+        "primitive has size {} but expected {}",
+        rotationView.size(),
+        splatData.size())));
     return false;
   }
 
   for (int32_t i = 0; i < rotationView.size(); i++) {
     // Adaptation of the EncodeQuatOctXy88R8 method from gsplat-unity's
     // GsplatAssetSpark class (used under MIT license).
-    glm::fquat q = glm::normalize(
-        glm::fquat(
-            fromNormalizedAccessor(rotationView[i].z),
-            fromNormalizedAccessor(rotationView[i].w),
-            fromNormalizedAccessor(rotationView[i].x),
-            fromNormalizedAccessor(rotationView[i].y)));
+    glm::fquat q = glm::normalize(glm::fquat(
+        fromNormalizedAccessor(rotationView[i].z),
+        fromNormalizedAccessor(rotationView[i].w),
+        fromNormalizedAccessor(rotationView[i].x),
+        fromNormalizedAccessor(rotationView[i].y)));
     if (q.w < 0.0f) {
       q = -q;
     }
@@ -298,23 +284,19 @@ bool writeScales(
   const CesiumGltf::AccessorView<VectorT> scaleView(model, scaleAccessor);
 
   if (scaleView.status() != CesiumGltf::AccessorViewStatus::Valid) {
-    UnityEngine::Debug::LogError(
-        System::String(
-            fmt::format(
-                "'KHR_gaussian_splatting:SCALE' accessor view on mesh "
-                "primitive returned invalid status: {}",
-                (int32_t)scaleView.status())));
+    UnityEngine::Debug::LogError(System::String(fmt::format(
+        "'KHR_gaussian_splatting:SCALE' accessor view on mesh "
+        "primitive returned invalid status: {}",
+        (int32_t)scaleView.status())));
     return false;
   }
 
   if (scaleView.size() != splatData.size()) {
-    UnityEngine::Debug::LogError(
-        System::String(
-            fmt::format(
-                "'KHR_gaussian_splatting:SCALE' accessor view on mesh "
-                "primitive has size {} but expected {}",
-                scaleView.size(),
-                splatData.size())));
+    UnityEngine::Debug::LogError(System::String(fmt::format(
+        "'KHR_gaussian_splatting:SCALE' accessor view on mesh "
+        "primitive has size {} but expected {}",
+        scaleView.size(),
+        splatData.size())));
     return false;
   }
 
@@ -361,13 +343,10 @@ void populateGsplatAsset(
 
   CesiumGltf::AccessorView<glm::vec3> positionView(model, positionIt->second);
   if (positionView.status() != CesiumGltf::AccessorViewStatus::Valid) {
-    UnityEngine::Debug::LogError(
-        System::String(
-            fmt::format(
-                "'POSITION' accessor view on mesh primitive returned invalid "
-                "status: "
-                "{}",
-                (int32_t)positionView.status())));
+    UnityEngine::Debug::LogError(System::String(fmt::format(
+        "'POSITION' accessor view on mesh primitive returned invalid "
+        "status: {}",
+        (int32_t)positionView.status())));
     return;
   }
 
@@ -462,25 +441,21 @@ void populateGsplatAsset(
       return;
     }
   } else {
-    UnityEngine::Debug::LogError(
-        System::String(
-            fmt::format(
-                "'COLOR_0' accessor on mesh primitive has unsupported "
-                "component type: {}",
-                CesiumGltf::convertPropertyComponentTypeToString(
-                    CesiumGltf::
-                        convertAccessorComponentTypeToPropertyComponentType(
-                            colorAccessor.componentType)))));
+    UnityEngine::Debug::LogError(System::String(fmt::format(
+        "'COLOR_0' accessor on mesh primitive has unsupported "
+        "component type: {}",
+        CesiumGltf::convertPropertyComponentTypeToString(
+            CesiumGltf::convertAccessorComponentTypeToPropertyComponentType(
+                colorAccessor.componentType)))));
     return;
   }
 
   const std::unordered_map<std::string, int32_t>::const_iterator rotationIt =
       meshPrimitive.attributes.find("KHR_gaussian_splatting:ROTATION");
   if (rotationIt == meshPrimitive.attributes.end()) {
-    UnityEngine::Debug::LogError(
-        System::String(
-            "Mesh primitive has no 'KHR_gaussian_splatting:ROTATION' "
-            "attribute"));
+    UnityEngine::Debug::LogError(System::String(
+        "Mesh primitive has no 'KHR_gaussian_splatting:ROTATION' "
+        "attribute"));
     return;
   }
 
@@ -516,25 +491,21 @@ void populateGsplatAsset(
       return;
     }
   } else {
-    UnityEngine::Debug::LogError(
-        System::String(
-            fmt::format(
-                "'KHR_gaussian_splatting:ROTATION' accessor on mesh primitive "
-                "has unsupported "
-                "component type: {}",
-                CesiumGltf::convertPropertyComponentTypeToString(
-                    CesiumGltf::
-                        convertAccessorComponentTypeToPropertyComponentType(
-                            rotationAccessor.componentType)))));
+    UnityEngine::Debug::LogError(System::String(fmt::format(
+        "'KHR_gaussian_splatting:ROTATION' accessor on mesh primitive "
+        "has unsupported "
+        "component type: {}",
+        CesiumGltf::convertPropertyComponentTypeToString(
+            CesiumGltf::convertAccessorComponentTypeToPropertyComponentType(
+                rotationAccessor.componentType)))));
     return;
   }
 
   const std::unordered_map<std::string, int32_t>::const_iterator scaleIt =
       meshPrimitive.attributes.find("KHR_gaussian_splatting:SCALE");
   if (scaleIt == meshPrimitive.attributes.end()) {
-    UnityEngine::Debug::LogError(
-        System::String(
-            "Mesh primitive has no 'KHR_gaussian_splatting:SCALE' attribute"));
+    UnityEngine::Debug::LogError(System::String(
+        "Mesh primitive has no 'KHR_gaussian_splatting:SCALE' attribute"));
     return;
   }
 
@@ -570,16 +541,13 @@ void populateGsplatAsset(
       return;
     }
   } else {
-    UnityEngine::Debug::LogError(
-        System::String(
-            fmt::format(
-                "'KHR_gaussian_splatting:SCALE' accessor on mesh primitive has "
-                "unsupported "
-                "component type: {}",
-                CesiumGltf::convertPropertyComponentTypeToString(
-                    CesiumGltf::
-                        convertAccessorComponentTypeToPropertyComponentType(
-                            scaleAccessor.componentType)))));
+    UnityEngine::Debug::LogError(System::String(fmt::format(
+        "'KHR_gaussian_splatting:SCALE' accessor on mesh primitive has "
+        "unsupported "
+        "component type: {}",
+        CesiumGltf::convertPropertyComponentTypeToString(
+            CesiumGltf::convertAccessorComponentTypeToPropertyComponentType(
+                scaleAccessor.componentType)))));
     return;
   }
 
