@@ -1133,7 +1133,9 @@ namespace CesiumForUnity
 
             GsplatAssetSpark.PackSplat(Vector4.zero, Vector3.zero, Vector3.zero, Quaternion.identity);
             var splatSpark = ScriptableObject.CreateInstance<GsplatAssetSpark>();
-            splatSpark.PackedSplats = new uint4[0];
+            splatSpark.PackedSplats = new uint4[1];
+            splatSpark.PackedSplats[0] = new uint4(0, 0, 0, 0);
+            splatSpark.PackedSplats[0].x = splatSpark.PackedSplats[0].y = splatSpark.PackedSplats[0].z = splatSpark.PackedSplats[0].w = 0;
             splatSpark.PackedSH1 = new uint[0];
             splatSpark.PackedSH2 = new uint[0];
             splatSpark.PackedSH3 = new uint[0];
