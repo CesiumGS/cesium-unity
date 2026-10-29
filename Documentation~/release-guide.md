@@ -37,12 +37,9 @@ We used to download the package, extract it by hand, and then compare the SHA256
 
 ## Update the "Cesium for Unity Samples" Project
 
-1. Clone a fresh copy of [cesium-unity-samples](https://github.com/CesiumGS/cesium-unity-samples) to a new directory.
-2. Before opening the project, go to the Packages folder and open `Packages/manifest.json` in a text editor. Find the `com.cesium.unity` dependency under the `"dependencies"` object and change the version to the version number of the in-progress release.
-3. Open `ProjectSettings/ProjectSettings.asset` and find the `bundleVersion` key (under `PlayerSettings`). Set this to the version number of the in-progress release.
-4. Create a new Cesium ion token for this release under the "CesiumJS" account:
+1. Create a new Cesium ion token for this release under the "CesiumJS" account:
    - Visit https://ion.cesium.com.
-   - Log in using your own `@cesium.com` email address.
+   - Log in using your own Bentley email address.
    - Click your name in the top-right corner and choose "Switch to CesiumJS". If you don't see this option, ask someone on the ion team to add you to the CesiumJS account.
    - Click "Access Tokens".
    - Create a new token named "Cesium for Unity Samples vX.Y.Z - Delete on MONTH DAY, YEAR", using real values for the version number and date. The date should be the date of the release two months out, using the month's name rather than its number.
@@ -50,8 +47,18 @@ We used to download the package, extract it by hand, and then compare the SHA256
    - Set the other properties as follows (these should be the defaults):
      - `Allow URLs`: "All Urls"
      - `Resources`: "All assets"
-5. Open `Assets/CesiumSettings/Resources/CesiumIonServers/ion.cesium.com.asset` in a text editor and change the `defaultIonAccessToken` property to the new token you created above.
-6. Commit the above changes but do _not_ push it yet. If you do, anyone trying to use cesium-unity-samples will be broken until the new version is published.
+2. Run the `update-unity-samples` script. The ion token is only ever read from the `CESIUM_ION_TOKEN` environment variable, never accepted as a command-line argument, so it doesn't end up in your shell history or process list:
+   ```
+   CESIUM_ION_TOKEN=<the token you just created> npm run update-unity-samples -- --version 1.26.0 --samples-dir /path/to/cesium-unity-samples
+   ```
+   If `--samples-dir` doesn't exist yet, the script clones a fresh copy of [cesium-unity-samples](https://github.com/CesiumGS/cesium-unity-samples) there. If it's an existing checkout, the script updates it with `git checkout main && git pull --ff-only`, and refuses to touch it if it has uncommitted changes.
+
+   It then updates, in the samples checkout:
+   - `Packages/manifest.json`: the `com.cesium.unity` dependency version.
+   - `ProjectSettings/ProjectSettings.asset`: `PlayerSettings.bundleVersion`.
+   - `Assets/CesiumSettings/Resources/CesiumIonServers/ion.cesium.com.asset`: `defaultIonAccessToken`.
+
+   Use `--dry-run` first to preview the planned changes (the token value itself is never printed). The script commits the changes locally but does _not_ push them. Do not push until the new package version is published, or anyone trying to use cesium-unity-samples will be broken in the meantime.
 
 ## Test the release candidate
 
