@@ -1,6 +1,6 @@
 # Change Log {#changes}
 
-## ? - ?
+## 1.27.0 - ?
 
 ##### Fixes :wrench:
 
@@ -15,6 +15,10 @@
 - Tile normals and texture coordinates now use compact vertex formats where possible.
 - Reduced per-frame overhead of activating and deactivating tile game objects.
 - The default `maximumCachedBytes` for new tilesets is 256 MB when targeting the Web.
+
+## v1.26.1 - 2026-11-02
+
+This release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.65.0 to v0.66.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
 
 ## v1.26.0 - 2026-10-01
 
