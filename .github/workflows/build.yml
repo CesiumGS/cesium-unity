@@ -338,7 +338,7 @@ jobs:
           reporter: dotnet-nunit
   Linux:
     needs: [QuickChecks]
-    runs-on: ubuntu-24
+    runs-on: ubuntu-24.04
     # Only allow a single Linux build at a time, for Unity licensing reasons
     concurrency: linux
     steps:
