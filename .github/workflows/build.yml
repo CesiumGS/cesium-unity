@@ -338,7 +338,7 @@ jobs:
           reporter: dotnet-nunit
   Linux:
     needs: [QuickChecks]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-24
     # Only allow a single Linux build at a time, for Unity licensing reasons
     concurrency: linux
     steps:
@@ -367,8 +367,7 @@ jobs:
         uses: ilammy/setup-nasm@v1.5.1
       - name: Install Unity Hub
         run: |
-          sudo apt-get update
-          sudo apt-get install -y gnupg libgbm1 libxml2 xvfb
+          sudo apt-get install -y gnupg libgbm1 xvfb
           wget -qO - https://hub.unity3d.com/linux/keys/public | gpg --dearmor | sudo tee /usr/share/keyrings/Unity_Technologies_ApS.gpg > /dev/null
           sudo sh -c 'echo "deb [signed-by=/usr/share/keyrings/Unity_Technologies_ApS.gpg] https://hub.unity3d.com/linux/repos/deb stable main" > /etc/apt/sources.list.d/unityhub.list'
           sudo apt-get update
