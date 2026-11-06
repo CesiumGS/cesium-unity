@@ -72,8 +72,7 @@ bool writeShCoeffs(
     if (accessorIt == meshPrimitive.attributes.end()) {
       UnityEngine::Debug::LogError(System::String(fmt::format(
           "Could not find spherical harmonic attribute for degree {} "
-          "index "
-          "{} on mesh primitive",
+          "index {} on mesh primitive",
           degree,
           i)));
       return false;
@@ -83,8 +82,7 @@ bool writeShCoeffs(
     if (accessorView.status() != CesiumGltf::AccessorViewStatus::Valid) {
       UnityEngine::Debug::LogError(System::String(fmt::format(
           "Accessor view for spherical harmonic attribute degree {} "
-          "index "
-          "{} on mesh primitive returned invalid status: {}",
+          "index {} on mesh primitive returned invalid status: {}",
           degree,
           i,
           (int32_t)accessorView.status())));
@@ -543,8 +541,7 @@ void populateGsplatAsset(
   } else {
     UnityEngine::Debug::LogError(System::String(fmt::format(
         "'KHR_gaussian_splatting:SCALE' accessor on mesh primitive has "
-        "unsupported "
-        "component type: {}",
+        "unsupported component type: {}",
         CesiumGltf::convertPropertyComponentTypeToString(
             CesiumGltf::convertAccessorComponentTypeToPropertyComponentType(
                 scaleAccessor.componentType)))));

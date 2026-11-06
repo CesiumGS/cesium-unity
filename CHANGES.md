@@ -5,6 +5,7 @@
 ##### Additions :tada:
 
 - Added `CesiumVectorPointStyle` and a `pointStyle` field on `CesiumVectorStyle`, enabling `CesiumGeoJsonDocumentRasterOverlay` to render GeoJSON `Point` and `MultiPoint` features.
+- Added support for gaussian splat tilesets. Currently only D3D12, Metal, and Vulkan graphics APIs are supported, and a warning will show in the Cesium window if other graphics APIs are enabled. You will be prompted to perform the setup automatically on HDRP and URP to support gaussian splats.
 
 ## v1.25.1 - 2026-09-01
 
