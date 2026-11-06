@@ -171,7 +171,7 @@ jobs:
           reporter: dotnet-nunit
   MacOS:
     needs: [QuickChecks]
-    runs-on: macos-14
+    runs-on: macos-15
     # Only allow a single macOS build at a time, for Unity licensing reasons
     concurrency: mac
     steps:
@@ -202,7 +202,7 @@ jobs:
       - name: Set XCode version
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: "15.4"
+          xcode-version: "16.4"
       - name: Print XCode version
         run: |
           xcode-select --print-path
@@ -338,7 +338,7 @@ jobs:
           reporter: dotnet-nunit
   Linux:
     needs: [QuickChecks]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # Only allow a single Linux build at a time, for Unity licensing reasons
     concurrency: linux
     steps:
