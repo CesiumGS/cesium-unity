@@ -9,9 +9,6 @@
 #endif
 #endif
 
-//#define _HAS_POINT_NORMALS
-#define _HAS_POINT_COLORS
-
 struct Point
 {
     float3 position;
@@ -39,8 +36,12 @@ float computeDepthMultiplier()
     return _ScreenParams.y / sseDenominator;
 }
 
-void CesiumReadPointCloudData_float(float vertexIndex, out float3 position, out float3 normal, out float4 color)
+void CesiumReadPointCloudData_float(float vertexIndex, out float3 position, out float4 color)
 {
+    #pragma multi_compile _HAS_POINT_COLORS
+    #pragma multi_compile _HAS_POINT_NORMALS
+    #pragma multi_compile _BUILT_IN_RP
+    
     uint pointIndex = vertexIndex / 6;
     uint subVertex = vertexIndex - (pointIndex * 6); // Modulo
 
@@ -75,8 +76,6 @@ void CesiumReadPointCloudData_float(float vertexIndex, out float3 position, out 
             break;
     }
 
-	//position += float3(offset * 0.1, 0.0);
-
     float4 positionWC = mul(UNITY_MATRIX_M, float4(position, 1.0));
     float4 positionEC = mul(UNITY_MATRIX_V, positionWC);
     float4 positionClip = mul(UNITY_MATRIX_VP, positionWC);
@@ -96,25 +95,18 @@ void CesiumReadPointCloudData_float(float vertexIndex, out float3 position, out 
 	// The clip space position xy in Unity is in [-w, w] where w is the w-coordinate.
 	// Perspective divide with w is done between the vertex and fragment shaders.
     positionClip.xy += screenOffset * positionClip.w;
-
-
-#ifdef _BUILT_IN_RP
-	// For some reason UNITY_MATRIX_I_VP is not available in the built-in render pipeline, so we have to compute it manually.
-	float4x4 I_VP = mul(UNITY_MATRIX_I_V, UNITY_MATRIX_I_P);
-#else
-    float4x4 I_VP = UNITY_MATRIX_I_VP;
-#endif
-	
+    
  	// Transform the clip space position back to object space.
 	// It's unfortunate we need to do this, but shader graph exclusively outputs object space positions.
-    positionWC = mul(I_VP, positionClip);
-    position = mul(UNITY_MATRIX_I_M, positionWC);
-
-#ifdef _HAS_POINT_NORMALS
-	normal = inPoint.normal;
+#ifdef _BUILT_IN_RP
+	// For some reason UNITY_MATRIX_I_VP is not available in the built-in render pipeline, but unity_WorldToObject is.
+    float4x4 I_MVP = mul(unity_CameraInvProjection, unity_WorldToObject);
+	position = mul(I_MVP, positionClip).xyz;
 #else
-    normal = float3(0.0, 0.0, 1.0);
+    positionWC = mul(UNITY_MATRIX_I_VP, positionClip);
+    position = mul(UNITY_MATRIX_I_M, positionWC).xyz;
 #endif
+	
 
 #ifdef _HAS_POINT_COLORS
     uint packedColor = inPoint.packedColor;
@@ -125,6 +117,22 @@ void CesiumReadPointCloudData_float(float vertexIndex, out float3 position, out 
     color = float4(r, g, b, a) / 255;
 #else
 	color = float4(1.0, 1.0, 1.0, 1.0);
+#endif
+    
+#ifdef _HAS_POINT_NORMALS
+#ifdef _BUILT_IN_RP
+    float3 lightWC = _WorldSpaceLightPos0.xyz;
+    float3 lightColor = _LightColor0.rgb;
+#else 
+    float3 lightWC = _MainLightPosition.xyz;
+    float3 lightColor = _MainLightColor.rgb;
+#endif
+
+    // The shader is unlit, so fake the normal lighting here.
+    float3 normalWC = inPoint.normal;
+    float NdotL = clamp(dot(normalWC, lightWC), 0.01, 1);
+
+    color.xyz *= lightColor * NdotL;
 #endif
 }
 

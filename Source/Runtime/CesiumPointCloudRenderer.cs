@@ -46,7 +46,7 @@ namespace CesiumForUnity
 
         private Mesh _emptyMesh;
 
-        void SetShaderKeywords()
+        void SetShaderParameters()
         {
             if (GraphicsSettings.currentRenderPipeline == null)
             {
@@ -55,7 +55,7 @@ namespace CesiumForUnity
 
             if (this._mesh.HasVertexAttribute(VertexAttribute.Color))
             {
-                this._pointMaterial.EnableKeyword("_HAS_POINT_COLORS");
+                this._pointMaterial.EnableKeyword(new LocalKeyword(this._pointMaterial.shader, "_HAS_POINT_COLORS"));
             }
             else
             {
@@ -76,7 +76,7 @@ namespace CesiumForUnity
             }
 
             if (this._mesh.HasVertexAttribute(VertexAttribute.Normal))
-            {
+            {   
                 this._pointMaterial.EnableKeyword("_HAS_POINT_NORMALS");
             }
 
@@ -140,7 +140,7 @@ namespace CesiumForUnity
             this._emptyMesh.SetIndices(indices, MeshTopology.Triangles, 0, false);
             this._emptyMesh.bounds = this._mesh.bounds;
 
-            SetShaderKeywords();
+            SetShaderParameters();
         }
 
         private float GetGeometricError(CesiumPointCloudShading pointCloudShading)
