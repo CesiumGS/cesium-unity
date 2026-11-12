@@ -1,5 +1,11 @@
 # Change Log {#changes}
 
+## ? - ?
+
+##### Fixes :wrench:
+
+- Fixed a crash that occurred when attenuation was enabled on a point cloud and `Camera.main` was null.
+
 ## v1.26.1 - 2026-11-02
 
 This release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.65.0 to v0.66.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
