@@ -35,7 +35,7 @@ namespace CesiumForUnity
 
         private Bounds _bounds;
 
-        private Vector4 _attenuationParameters;
+        private Vector2 _attenuationParameters;
         private Vector4 _constantColor;
 
         private Cesium3DTileInfo _tileInfo;
@@ -152,13 +152,7 @@ namespace CesiumForUnity
             float geometricError = this.GetGeometricError(pointCloudShading);
             geometricError *= pointCloudShading.geometricErrorScale;
 
-            // Depth multiplier
-            Camera camera = Camera.main;
-            float sseDenominator = 2.0f * Mathf.Tan(0.5f * Mathf.Deg2Rad * camera.fieldOfView);
-            float depthMultplier = camera.scaledPixelHeight / sseDenominator;
-
-            this._attenuationParameters =
-                new Vector4(maximumPointSize, geometricError, depthMultplier, 0);
+            this._attenuationParameters = new Vector2(maximumPointSize, geometricError);
         }
 
         private Vector3[] positionsScratch = new Vector3[3];
