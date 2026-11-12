@@ -26,7 +26,6 @@ namespace CesiumForUnity
         private Cesium3DTileset _tileset;
 
         private Mesh _mesh;
-        private MeshFilter _meshFilter;
         private MeshRenderer _meshRenderer;
         private GraphicsBuffer _meshVertexBuffer;
 
@@ -35,7 +34,7 @@ namespace CesiumForUnity
 
         private Bounds _bounds;
 
-        private Vector4 _attenuationParameters;
+        private Vector2 _attenuationParameters;
         private Vector4 _constantColor;
 
         private Cesium3DTileInfo _tileInfo;
@@ -45,38 +44,18 @@ namespace CesiumForUnity
             set => this._tileInfo = value;
         }
 
-        void OnEnable()
+        private Mesh _emptyMesh;
+
+        void SetShaderKeywords()
         {
-            this._tileset = this.gameObject.GetComponentInParent<Cesium3DTileset>();
-
-            this._meshFilter = this.gameObject.GetComponent<MeshFilter>();
-            this._mesh = this._meshFilter.sharedMesh;
-            this._meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
-
-            this._pointCount = this._mesh.vertexCount;
-            this._pointMaterial = UnityEngine.Object.Instantiate(
-                        Resources.Load<Material>("CesiumPointCloudShadingMaterial"));
-
-            GraphicsBuffer sourceBuffer = this._mesh.GetVertexBuffer(0);
-
-            bool usingDirect11 = SystemInfo.graphicsDeviceType == GraphicsDeviceType.Direct3D11;
-            if (usingDirect11)
+            if (GraphicsSettings.currentRenderPipeline == null)
             {
-                this._meshVertexBuffer = new GraphicsBuffer(
-                    GraphicsBuffer.Target.Structured | GraphicsBuffer.Target.CopyDestination, 
-                    sourceBuffer.count, 
-                    sourceBuffer.stride);
-                Graphics.CopyBuffer(sourceBuffer, this._meshVertexBuffer);
-                sourceBuffer.Release();
-            } else
-            {
-                this._mesh.vertexBufferTarget |= GraphicsBuffer.Target.Structured;
-                this._meshVertexBuffer = sourceBuffer;
+                this._pointMaterial.EnableKeyword("_BUILT_IN_RP");
             }
 
             if (this._mesh.HasVertexAttribute(VertexAttribute.Color))
             {
-                this._pointMaterial.EnableKeyword("HAS_POINT_COLORS");
+                this._pointMaterial.EnableKeyword("_HAS_POINT_COLORS");
             }
             else
             {
@@ -98,7 +77,7 @@ namespace CesiumForUnity
 
             if (this._mesh.HasVertexAttribute(VertexAttribute.Normal))
             {
-                this._pointMaterial.EnableKeyword("HAS_POINT_NORMALS");
+                this._pointMaterial.EnableKeyword("_HAS_POINT_NORMALS");
             }
 
 #if ENABLE_XR_MODULE
@@ -108,6 +87,60 @@ namespace CesiumForUnity
                 this._pointMaterial.EnableKeyword("INSTANCING_ON");
             }
 #endif
+        }
+
+        void OnEnable()
+        {
+            this._tileset = this.gameObject.GetComponentInParent<Cesium3DTileset>();
+
+            MeshFilter meshFilter = this.gameObject.GetComponent<MeshFilter>();
+            this._mesh = meshFilter?.sharedMesh;
+            this._meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
+
+            this._pointCount = this._mesh.vertexCount;
+            if (this._tileset.opaqueMaterial != null)
+            {
+                this._pointMaterial = UnityEngine.Object.Instantiate(this._tileset.opaqueMaterial);
+            }
+            else
+            {
+                this._pointMaterial = UnityEngine.Object.Instantiate(
+                    Resources.Load<Material>("CesiumPointCloudTilesetMaterial"));
+            }
+
+            GraphicsBuffer sourceBuffer = this._mesh.GetVertexBuffer(0);
+
+            bool usingDirect11 = SystemInfo.graphicsDeviceType == GraphicsDeviceType.Direct3D11;
+            if (usingDirect11)
+            {
+                this._meshVertexBuffer = new GraphicsBuffer(
+                    GraphicsBuffer.Target.Structured | GraphicsBuffer.Target.CopyDestination,
+                    sourceBuffer.count,
+                    sourceBuffer.stride);
+                Graphics.CopyBuffer(sourceBuffer, this._meshVertexBuffer);
+                sourceBuffer.Release();
+            }
+            else
+            {
+                this._mesh.vertexBufferTarget |= GraphicsBuffer.Target.Structured;
+                this._meshVertexBuffer = sourceBuffer;
+            }
+
+            var layout = new VertexAttributeDescriptor[0];
+            this._emptyMesh = CesiumObjectPools.MeshPool.Get();
+
+            int[] indices = new int[this._pointCount * 6];
+            for (int i = 0; i < indices.Length; ++i)
+            {
+                indices[i] = i;
+            }
+
+            this._emptyMesh.SetVertexBufferParams(this._pointCount * 6, layout);
+            this._emptyMesh.indexFormat = IndexFormat.UInt32;
+            this._emptyMesh.SetIndices(indices, MeshTopology.Triangles, 0, false);
+            this._emptyMesh.bounds = this._mesh.bounds;
+
+            SetShaderKeywords();
         }
 
         private float GetGeometricError(CesiumPointCloudShading pointCloudShading)
@@ -152,31 +185,22 @@ namespace CesiumForUnity
             float geometricError = this.GetGeometricError(pointCloudShading);
             geometricError *= pointCloudShading.geometricErrorScale;
 
-            // Depth multiplier
-            Camera camera = Camera.main;
-            float sseDenominator = 2.0f * Mathf.Tan(0.5f * Mathf.Deg2Rad * camera.fieldOfView);
-            float depthMultplier = camera.scaledPixelHeight / sseDenominator;
-
+            // Since depth multiplier relies on the camera parameters,
+            // it is computed in the shader itself.
             this._attenuationParameters =
-                new Vector4(maximumPointSize, geometricError, depthMultplier, 0);
+                new Vector2(maximumPointSize, geometricError);
         }
 
         private Vector3[] positionsScratch = new Vector3[3];
 
-        private void UpdateBounds()
-        {
-            Matrix4x4 transformMatrix = this.gameObject.transform.localToWorldMatrix;
-
-            Bounds localBounds = this._mesh.bounds;
-            positionsScratch[0] = localBounds.center;
-            positionsScratch[1] = localBounds.min;
-            positionsScratch[2] = localBounds.max;
-
-            this._bounds = GeometryUtility.CalculateBounds(positionsScratch, transformMatrix);
-        }
-
         private void DestroyResources()
         {
+            if (this._emptyMesh != null)
+            {
+                CesiumObjectPools.MeshPool.Release(this._emptyMesh);
+                this._emptyMesh = null;
+            }
+
             if (this._meshVertexBuffer != null)
             {
                 this._meshVertexBuffer.Release();
@@ -202,14 +226,14 @@ namespace CesiumForUnity
             this._pointMaterial.SetVector("_attenuationParameters", this._attenuationParameters);
             this._pointMaterial.SetVector("_constantColor", this._constantColor);
 
-            if (this._tileInfo.isTranslucent || this._constantColor.w < 1.0f)
-            {
-                this._pointMaterial.SetOverrideTag("RenderType", "Transparent");
-                this._pointMaterial.renderQueue = (int)RenderQueue.Transparent;
-                this._pointMaterial.SetInt("_SrcBlend", (int)BlendMode.SrcAlpha);
-                this._pointMaterial.SetInt("_DstBlend", (int)BlendMode.OneMinusSrcAlpha);
-            }
-            else
+            //if (this._tileInfo.isTranslucent || this._constantColor.w < 1.0f)
+            //{
+            //    this._pointMaterial.SetOverrideTag("RenderType", "Transparent");
+            //    this._pointMaterial.renderQueue = (int)RenderQueue.Transparent;
+            //    this._pointMaterial.SetInt("_SrcBlend", (int)BlendMode.SrcAlpha);
+            //    this._pointMaterial.SetInt("_DstBlend", (int)BlendMode.OneMinusSrcAlpha);
+            //}
+            //else
             {
                 this._pointMaterial.SetInt("_SrcBlend", (int)BlendMode.One);
                 this._pointMaterial.SetInt("_DstBlend", (int)BlendMode.Zero);
@@ -218,16 +242,10 @@ namespace CesiumForUnity
 
         private void DrawPointsWithAttenuation()
         {
-            this.UpdateBounds();
             this.UpdateAttenuationParameters();
             this.UpdateMaterial();
 
-            Graphics.DrawProcedural(
-                this._pointMaterial,
-                this._bounds,
-                MeshTopology.Triangles,
-                this._pointCount * 6,
-                1);
+            Graphics.DrawMesh(this._emptyMesh, this.gameObject.transform.localToWorldMatrix, this._pointMaterial, 0);
         }
 
         void Update()
