@@ -19,8 +19,20 @@ struct Point
 StructuredBuffer<Point> _inPoints;
 
 float4x4 _worldTransform;
-float4 _attenuationParameters;
+float2 _attenuationParameters;
 float4 _constantColor;
+
+float computeDepthMultiplier()
+{
+#if UNITY_UV_STARTS_AT_TOP
+    float t = -1.0f * UNITY_MATRIX_P._m11;
+#else
+    float t = UNITY_MATRIX_P._m11;
+#endif
+    float fovRadians = atan(1.0F / t) * 2.0F;
+    float sseDenominator = 2.0f * tan(0.5f * fovRadians);
+    return _ScreenParams.y / sseDenominator;
+}
 
 struct VertexInput
 {
@@ -93,7 +105,7 @@ VertexOutput Vertex(VertexInput input) {
 	float4 positionClip = mul(unity_MatrixVP, positionWC);
 	float maximumPointSize = _attenuationParameters.x;
 	float geometricError = _attenuationParameters.y;
-	float depthMultiplier = _attenuationParameters.z;
+	float depthMultiplier = computeDepthMultiplier();
 	float depth = -positionEC.z;
 
 	float pointSize = min((geometricError / depth) * depthMultiplier, maximumPointSize);
