@@ -18,31 +18,28 @@ This is the process we follow when releasing a new version of Cesium for Unity o
 
 Cesium for Unity's release package is fairly large, so it can take awhile to upload it to the GitHub Releases page. For that reason, it is helpful to start the process now, even though we haven't tested the release yet.
 
-1. Go to https://github.com/CesiumGS/cesium-unity/actions.
-2. Click the most recent build of the `main` branch (it should be near the top). This should be the build for the commit you pushed in the previous section. If it's still running, wait. If it failed, you'll need to fix it.
-3. Scroll down to **Artifacts**.
-4. Download the artifact named "Combined Package".
-5. Extract the `com.cesium.unity-1.21.0.tgz` (or similar) from the `Combined Package.zip` file. On macOS this is a pain to do, because Finder's unzip insists on also extracting the contents of the .tgz file. The best approach is probably to use `unzip` from the command-line.
-6. Create a new release by visiting https://github.com/CesiumGS/cesium-unity/releases/new.
-7. Leave the release tag blank for now, as we haven't created it yet.
-8. Set `Release Title` to "Cesium for Unity v1.21.0", updating the version number as appropriate.
-9. Copy the "release notes" section from a previous release, which you can find by visiting https://github.com/CesiumGS/cesium-unity/releases/latest and clicking the Edit button. Be careful not to change or save the previous release!
-10. Update the version numbers as appropriate in the top section. Replace the changelog section with the actual changelog entries from this release. Copy it from `CHANGES.md`.
-11. Upload the .tgz file by dragging it into the "Attach binaries" box.
-12. Click Save Draft. Be careful not to publish it yet.
-13. Visit the [releases page](https://github.com/CesiumGS/cesium-unity/releases) and you'll see the new draft release at the top. Expand the "Assets" section you should see the file you uploaded above.
-14. Take a moment to verify that the SHA256 listed for each file is identical to the SHA256 for the same file that was printed at the end of the build by the "Print SHA256 of combined package" job. If they are, this proves the release package hasn't been inadvertently modified while you had a copy of it on your local machine. If they're different, stop the release process immediately!
+The `Draft Release` GitHub Actions workflow does this for you. It copies the package directly from the build artifacts to a draft release, so it never passes through your local machine.
 
-If the uploaded package is later found to have problems during testing, this step will need to be repeated.
+1. Go to the [Draft Release workflow](https://github.com/CesiumGS/cesium-unity/actions/workflows/draftRelease.yml) and click "Run workflow".
+2. Enter the release version, for example `1.26.0`, leave the other inputs at their defaults, and click "Run workflow".
+   - The workflow publishes the most recent _successful_ build of `main`, so it will fail if CI hasn't passed yet.
+   - To publish a different build, enter its run ID in the `run_id` input.
+3. Wait for the workflow to finish. It will:
+   - Download the combined package from that build, for example `com.cesium.unity-1.26.0.tgz`, and verify its name matches the requested release version.
+   - Build the release notes from the `CHANGES.md` section for this version.
+   - Create a draft release named "Cesium for Unity v1.26.0" with the package attached, tagged `v1.26.0` against the exact commit that was built. The tag itself is not created until you publish the release.
+4. Visit the [releases page](https://github.com/CesiumGS/cesium-unity/releases), expand the "Assets" section of the new draft, and confirm that the package is attached and that the release notes look correct.
+   - To preview the notes before running the workflow, use `npm run release-notes -- --version 1.26.0`.
+
+If the uploaded package is later found to have problems during testing, re-run the workflow. It updates the existing draft in place, and refuses to modify the release once it has been published.
+
+We used to download the package, extract it by hand, and then compare the SHA256 of the uploaded asset against the build artifact, to prove that it hadn't been modified while it was on a local machine. The workflow copies the package straight from the build artifact to the release, so there is no longer a local copy to verify.
 
 ## Update the "Cesium for Unity Samples" Project
 
-1. Clone a fresh copy of [cesium-unity-samples](https://github.com/CesiumGS/cesium-unity-samples) to a new directory.
-2. Before opening the project, go to the Packages folder and open `Packages/manifest.json` in a text editor. Find the `com.cesium.unity` dependency under the `"dependencies"` object and change the version to the version number of the in-progress release.
-3. Open `ProjectSettings/ProjectSettings.asset` and find the `bundleVersion` key (under `PlayerSettings`). Set this to the version number of the in-progress release.
-4. Create a new Cesium ion token for this release under the "CesiumJS" account:
+1. Create a new Cesium ion token for this release under the "CesiumJS" account:
    - Visit https://ion.cesium.com.
-   - Log in using your own `@cesium.com` email address.
+   - Log in using your own Bentley email address.
    - Click your name in the top-right corner and choose "Switch to CesiumJS". If you don't see this option, ask someone on the ion team to add you to the CesiumJS account.
    - Click "Access Tokens".
    - Create a new token named "Cesium for Unity Samples vX.Y.Z - Delete on MONTH DAY, YEAR", using real values for the version number and date. The date should be the date of the release two months out, using the month's name rather than its number.
@@ -50,8 +47,18 @@ If the uploaded package is later found to have problems during testing, this ste
    - Set the other properties as follows (these should be the defaults):
      - `Allow URLs`: "All Urls"
      - `Resources`: "All assets"
-5. Open `Assets/CesiumSettings/Resources/CesiumIonServers/ion.cesium.com.asset` in a text editor and change the `defaultIonAccessToken` property to the new token you created above.
-6. Commit the above changes but do _not_ push it yet. If you do, anyone trying to use cesium-unity-samples will be broken until the new version is published.
+2. Run the `update-unity-samples` script. The ion token is only ever read from the `CESIUM_ION_TOKEN` environment variable, never accepted as a command-line argument, so it doesn't end up in your shell history or process list:
+   ```
+   CESIUM_ION_TOKEN=<the token you just created> npm run update-unity-samples -- --version 1.26.0 --samples-dir /path/to/cesium-unity-samples
+   ```
+   If `--samples-dir` doesn't exist yet, the script clones a fresh copy of [cesium-unity-samples](https://github.com/CesiumGS/cesium-unity-samples) there. If it's an existing checkout, the script updates it with `git checkout main && git pull --ff-only`, and refuses to touch it if it has uncommitted changes.
+
+   It then updates, in the samples checkout:
+   - `Packages/manifest.json`: the `com.cesium.unity` dependency version.
+   - `ProjectSettings/ProjectSettings.asset`: `PlayerSettings.bundleVersion`.
+   - `Assets/CesiumSettings/Resources/CesiumIonServers/ion.cesium.com.asset`: `defaultIonAccessToken`.
+
+   Use `--dry-run` first to preview the planned changes (the token value itself is never printed). The script commits the changes locally but does _not_ push them. Do not push until the new package version is published, or anyone trying to use cesium-unity-samples will be broken in the meantime.
 
 ## Test the release candidate
 
