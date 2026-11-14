@@ -74,6 +74,12 @@ struct CesiumGltfGameObject {
    * meshes.
    */
   std::vector<CesiumPrimitiveInfo> primitiveInfos{};
+
+  /**
+   * @brief Whether the game object is currently active, to avoid redundant
+   * SetActive calls.
+   */
+  bool isActive = false;
 };
 
 class UnityPrepareRendererResources
