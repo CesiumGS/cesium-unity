@@ -107,21 +107,6 @@ std::vector<TIndex> generateIndices(const int32_t count) {
   return syntheticIndexBuffer;
 }
 
-void writeNormal(
-    uint8_t* pWritePos,
-    const UnityEngine::Vector3& normal,
-    bool packed) {
-  if (packed) {
-    int8_t* pPacked = reinterpret_cast<int8_t*>(pWritePos);
-    pPacked[0] = int8_t(std::round(std::clamp(normal.x, -1.0f, 1.0f) * 127.0f));
-    pPacked[1] = int8_t(std::round(std::clamp(normal.y, -1.0f, 1.0f) * 127.0f));
-    pPacked[2] = int8_t(std::round(std::clamp(normal.z, -1.0f, 1.0f) * 127.0f));
-    pPacked[3] = 0;
-  } else {
-    *reinterpret_cast<UnityEngine::Vector3*>(pWritePos) = normal;
-  }
-}
-
 void writeTexCoord(
     uint8_t* pWritePos,
     const UnityEngine::Vector2& texCoord,
@@ -150,7 +135,6 @@ template <typename TIndex>
 void computeFlatNormals(
     uint8_t* pWritePos,
     size_t stride,
-    bool packed,
     TIndex* indices,
     int32_t indexCount,
     const AccessorView<UnityEngine::Vector3>& positionView) {
@@ -170,7 +154,7 @@ void computeFlatNormals(
 
     glm::vec3 normal = glm::normalize(glm::cross(v1 - v0, v2 - v0));
     for (int j = 0; j < 3; j++) {
-      writeNormal(pWritePos, {normal.x, normal.y, normal.z}, packed);
+      *reinterpret_cast<glm::vec3*>(pWritePos) = normal;
       pWritePos += stride;
     }
   }
@@ -625,9 +609,9 @@ void loadPrimitive(
   std::int32_t numberOfAttributes = 0;
   std::int32_t streamIndex = 0;
 
-  // Use compact normals and texture coordinates, except for point clouds,
-  // whose shader reads float normals directly from the vertex buffer.
-  const bool packAttributes = primitive.mode != MeshPrimitive::Mode::POINTS;
+  // Use compact texture coordinates, except for point clouds, whose shader
+  // reads vertex attributes directly from the vertex buffer as floats.
+  const bool packTexCoords = primitive.mode != MeshPrimitive::Mode::POINTS;
 
   assert(numberOfAttributes < MAX_ATTRIBUTES);
   descriptor[numberOfAttributes].attribute = VertexAttribute::Position;
@@ -640,10 +624,8 @@ void loadPrimitive(
   if (hasNormals) {
     assert(numberOfAttributes < MAX_ATTRIBUTES);
     descriptor[numberOfAttributes].attribute = VertexAttribute::Normal;
-    descriptor[numberOfAttributes].format =
-        packAttributes ? VertexAttributeFormat::SNorm8
-                       : VertexAttributeFormat::Float32;
-    descriptor[numberOfAttributes].dimension = packAttributes ? 4 : 3;
+    descriptor[numberOfAttributes].format = VertexAttributeFormat::Float32;
+    descriptor[numberOfAttributes].dimension = 3;
     descriptor[numberOfAttributes].stream = streamIndex;
     ++numberOfAttributes;
   }
@@ -699,7 +681,7 @@ void loadPrimitive(
     }
 
     texCoordViews[numTexCoords] = texCoordView;
-    texCoordPacked[numTexCoords] = packAttributes && isInUnitRange(texCoordView);
+    texCoordPacked[numTexCoords] = packTexCoords && isInUnitRange(texCoordView);
     primitiveInfo.uvIndexMap[i] = numTexCoords;
 
     // Build Unity descriptor for this attribute.
@@ -737,7 +719,7 @@ void loadPrimitive(
 
     texCoordViews[numTexCoords] = overlayTexCoordView;
     texCoordPacked[numTexCoords] =
-        packAttributes && isInUnitRange(overlayTexCoordView);
+        packTexCoords && isInUnitRange(overlayTexCoordView);
     primitiveInfo.rasterOverlayUvIndexMap[i] = numTexCoords;
 
     // Build Unity descriptor for this attribute.
@@ -770,9 +752,10 @@ void loadPrimitive(
   // 3. vertex colors (skip if N/A)
   // 4. texcoords (first all TEXCOORD_i, then all _CESIUMOVERLAY_i)
 
-  const size_t normalSize = packAttributes ? 4 : sizeof(Vector3);
+  const size_t normalSize = sizeof(Vector3);
   size_t texCoordSizes[MAX_TEX_COORDS];
   for (int i = 0; i < numTexCoords; ++i) {
+    // When packed, texcoords are UNorm16 * 2 components
     texCoordSizes[i] = texCoordPacked[i] ? 4 : sizeof(Vector2);
   }
 
@@ -794,7 +777,6 @@ void loadPrimitive(
     ::computeFlatNormals(
         pWritePos + normalByteOffset,
         stride,
-        packAttributes,
         indices,
         indexCount,
         positionView);
@@ -823,7 +805,7 @@ void loadPrimitive(
       pWritePos += sizeof(Vector3);
 
       if (hasNormals) {
-        writeNormal(pWritePos, normalView[i], packAttributes);
+        *reinterpret_cast<Vector3*>(pWritePos) = normalView[i];
         pWritePos += normalSize;
       }
 
