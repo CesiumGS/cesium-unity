@@ -2,19 +2,20 @@
 
 ## 1.27.0 - ?
 
+##### Additions :tada:
+
+- Introduced performance improvements, especially with respect to web builds:
+  - Tile meshes in Web builds are now built on worker threads instead of the main thread.
+  - Decoded image pixels and encoded glTF buffer data are freed once they are no longer needed.
+  - In Web builds, tile meshes no longer keep a CPU copy of their vertex data unless physics meshes are enabled.
+  - Tile texture coordinates now use a compact vertex format where possible.
+  - Reduced per-frame overhead of activating and deactivating tile game objects.
+  - The default `maximumCachedBytes` for new tilesets is 256 MB when targeting the Web.
+
 ##### Fixes :wrench:
 
 - Fixed a memory leak in Web builds where every downloaded tile was retained by the browser.
 - Fixed a leak of `MeshDataArray` memory when a tileset was destroyed while tiles were loading.
-
-##### Improvements
-
-- Tile meshes in Web builds are now built on worker threads instead of the main thread.
-- Decoded image pixels and encoded glTF buffer data are freed once they are no longer needed.
-- In Web builds, tile meshes no longer keep a CPU copy of their vertex data unless physics meshes are enabled.
-- Tile normals and texture coordinates now use compact vertex formats where possible.
-- Reduced per-frame overhead of activating and deactivating tile game objects.
-- The default `maximumCachedBytes` for new tilesets is 256 MB when targeting the Web.
 
 ## v1.26.1 - 2026-11-02
 
