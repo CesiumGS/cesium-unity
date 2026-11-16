@@ -555,7 +555,9 @@ namespace Build
                 "Source/Runtime/ConfigureReinterop.cs",
                 "Source/Runtime/ConfigureReinterop.cs.meta",
                 "Source/csc.rsp",
-                "Source/csc.rsp.meta"
+                "Source/csc.rsp.meta",
+                "Source/gsplat-unity/.git",
+                "Source/gsplat-unity/.gitignore"
             };
 
             foreach (string fileToDelete in filesToDelete)
