@@ -225,14 +225,8 @@ jobs:
             vcpkg-mac-${{ hashFiles('native~/vcpkg/ports/**/vcpkg.json', 'native~/vcpkg/triplets/**/*', 'native~/extern/*toolchain.cmake') }}-
       - name: Install nasm
         uses: ilammy/setup-nasm@v1.5.1
-      - name: Install Unity Hub & Unity CLI
+      - name: Install Unity CLI
         run: |
-          wget --quiet https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-arm64.dmg
-          mkdir UnityHubSetup
-          hdiutil attach UnityHubSetup-arm64.dmg -mountpoint ./UnityHubSetup
-          sudo cp -R "./UnityHubSetup/Unity Hub.app" /Applications
-          hdiutil detach ./UnityHubSetup
-          rm ./UnityHubSetup-arm64.dmg
           curl -fsSL https://unity.com/install.sh | bash
       - name: Install Unity 2022.3.41f1
         # This command sometimes returns exit code 130, despite actually succeeding.
@@ -368,13 +362,10 @@ jobs:
             vcpkg-linux-alma-${{ hashFiles('native~/vcpkg/ports/**/vcpkg.json', 'native~/vcpkg/triplets/**/*', 'native~/extern/*toolchain.cmake') }}-
       - name: Install nasm
         uses: ilammy/setup-nasm@v1.5.1
-      - name: Install Unity Hub & Unity CLI
+      - name: Install Unity CLI
         run: |
-          sudo apt-get install -y gnupg libgbm1 xvfb
-          wget -qO - https://hub.unity3d.com/linux/keys/public | gpg --dearmor | sudo tee /usr/share/keyrings/Unity_Technologies_ApS.gpg > /dev/null
-          sudo sh -c 'echo "deb [signed-by=/usr/share/keyrings/Unity_Technologies_ApS.gpg] https://hub.unity3d.com/linux/repos/deb stable main" > /etc/apt/sources.list.d/unityhub.list'
-          sudo apt-get update
-          sudo apt-get install -y unityhub
+          sudo apt-get install -y libxml2
+          sudo apt-get clean
           curl -fsSL https://unity.com/install.sh | bash
       - name: Install Unity 2022.3.41f1
         # This command sometimes returns exit code 130, despite actually succeeding.
