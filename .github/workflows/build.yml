@@ -230,8 +230,7 @@ jobs:
         run: |
           curl -fsSL https://unity.com/install.sh | bash
           source ~/.bashrc
-          which unity
-          which unity >> $GITHUB_PATH
+          dirname $(which unity) >> $GITHUB_PATH
       - name: Install Unity 2022.3.41f1
         # This command sometimes returns exit code 130, despite actually succeeding.
         continue-on-error: true
