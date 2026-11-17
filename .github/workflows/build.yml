@@ -71,13 +71,10 @@ jobs:
           choco install -y wget
       - name: Install Unity Hub & Unity CLI
         run: |
-          wget https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-x64.exe
-          Start-Process "./UnityHubSetup-x64.exe" -Args "/S" -Wait
-          del ./UnityHubSetup-x64.exe
-          irm https://unity.com/install.ps1 | iex
-          # The Unity CLI powershell script doesn't update the current terminal's path, so we have to do it ourselves.
+          # Add the Unity CLI to the GITHUB_PATH so it persists for the rest of the workflow steps
           $unityCliPath = Get-Content $env:AppData/UnityHub/cli-install.json | ConvertFrom-Json | select -expand path
-          $env:PATH = "$unityCliPath;$env:PATH"
+          echo $unityCliPath
+          Add-Content -Path $env:GITHUB_PATH -Value "$unityCliPath"
       - name: Install Unity
         run: |
           unity install 2022.3.41f1 --changeset 0f988161febf --accept-eula
@@ -497,15 +494,13 @@ jobs:
       - name: Install wget
         run: |
           choco install -y wget
-      - name: Install Unity Hub & Unity CLI
+      - name: Install Unity CLI
         run: |
-          wget https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-x64.exe
-          Start-Process "./UnityHubSetup-x64.exe" -Args "/S" -Wait
-          del ./UnityHubSetup-x64.exe
           irm https://unity.com/install.ps1 | iex
-          # The Unity CLI powershell script doesn't update the current terminal's path, so we have to do it ourselves.
+          # Add the Unity CLI to the GITHUB_PATH so it persists for the rest of the workflow steps
           $unityCliPath = Get-Content $env:AppData/UnityHub/cli-install.json | ConvertFrom-Json | select -expand path
-          $env:PATH = "$unityCliPath;$env:PATH"
+          echo $unityCliPath
+          Add-Content -Path $env:GITHUB_PATH -Value "$unityCliPath"
       - name: Install Unity
         run: |
           # We must use Unity 6+ because the Emscripten version in older releases is too old.
