@@ -58,5 +58,38 @@ public class TestCesiumCartographicPolygon
         Assert.AreEqual(cartographicPoints[3].x, 12.0, 0.01);
         Assert.AreEqual(cartographicPoints[3].y, 23.0, 0.01);
     }
+
+    [Test]
+    public void DocumentBuildsSplineFromGeoJsonRing()
+    {
+        GameObject go = new GameObject("Game Object");
+
+        go.AddComponent<CesiumGeoreference>();
+        CesiumCartographicPolygon polygon = go.AddComponent<CesiumCartographicPolygon>();
+        SplineContainer splineContainer = go.GetComponent<SplineContainer>(); // Must add automatically through RequireComponent
+
+        // A Polygon with 6 distinct outer-ring vertices (closed, duplicate last point).
+        const string json = @"{
+            ""type"": ""Feature"",
+            ""geometry"": {
+                ""type"": ""Polygon"",
+                ""coordinates"": [[[0, 0], [1, 0], [1, 1], [0.5, 2], [0, 1], [0, 0]]]
+            }
+        }";
+
+        CesiumGeoJsonDocument document = CesiumGeoJsonDocument.Parse(json);
+        Assert.IsNotNull(document);
+
+        polygon.document = document;
+
+        IReadOnlyList<Spline> splines = splineContainer.Splines;
+        Assert.AreEqual(1, splines.Count);
+        Assert.AreEqual(5, splines[0].Count); // Last point should not be part of the unity spline (Start = End as per geoJson Spec.)
+        Assert.IsTrue(splines[0].Closed);
+
+        // The resulting spline must rasterize to the same number of cartographic points.
+        List<double2> cartographicPoints = polygon.GetCartographicPoints(Matrix4x4.identity);
+        Assert.AreEqual(5, cartographicPoints.Count);
+    }
 #endif
 }
