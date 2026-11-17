@@ -75,6 +75,9 @@ jobs:
           Start-Process "./UnityHubSetup-x64.exe" -Args "/S" -Wait
           del ./UnityHubSetup-x64.exe
           irm https://unity.com/install.ps1 | iex
+          # The Unity CLI powershell script doesn't update the current terminal's path, so we have to do it ourselves.
+          $unityCliPath = Get-Content $env:AppData/UnityHub/cli-install.json | ConvertFrom-Json | select -expand path
+          $env:PATH = "$unityCliPath;$env:PATH"
       - name: Install Unity
         run: |
           unity install 2022.3.41f1 --changeset 0f988161febf --accept-eula
@@ -104,7 +107,6 @@ jobs:
           $filename="$ENV:PROGRAMDATA/Unity/config/services-config.json"
           $text='{"licensingServiceBaseUrl":"http://localhost:12331","enableEntitlementLicensing":true,"clientConnectTimeoutSec":120,"clientHandshakeTimeoutSec":60,"toolset":"UnityLicenseServer_16768262570522_9"}'
           [IO.File]::WriteAllLines($filename,$text)
-          unity auth status
       - name: Update the version in Cesium.cpp
         run: |
           $VERSION = (Get-Content -path package.json | ConvertFrom-Json).version
@@ -268,7 +270,6 @@ jobs:
           wget http://127.0.0.1:12331/v1/admin/status
           cat status
           rm status
-          unity auth status
       - name: Update the version in Cesium.cpp
         run: |
           export VERSION=$(jq -r ".version" package.json)
@@ -410,7 +411,6 @@ jobs:
           wget http://127.0.0.1:12331/v1/admin/status
           cat status
           rm status
-          unity auth status
       - name: Update the version in Cesium.cpp
         run: |
           export VERSION=$(jq -r ".version" package.json)
@@ -503,6 +503,9 @@ jobs:
           Start-Process "./UnityHubSetup-x64.exe" -Args "/S" -Wait
           del ./UnityHubSetup-x64.exe
           irm https://unity.com/install.ps1 | iex
+          # The Unity CLI powershell script doesn't update the current terminal's path, so we have to do it ourselves.
+          $unityCliPath = Get-Content $env:AppData/UnityHub/cli-install.json | ConvertFrom-Json | select -expand path
+          $env:PATH = "$unityCliPath;$env:PATH"
       - name: Install Unity
         run: |
           # We must use Unity 6+ because the Emscripten version in older releases is too old.
@@ -533,7 +536,6 @@ jobs:
           $filename="$ENV:PROGRAMDATA/Unity/config/services-config.json"
           $text='{"licensingServiceBaseUrl":"http://localhost:12331","enableEntitlementLicensing":true,"clientConnectTimeoutSec":120,"clientHandshakeTimeoutSec":60,"toolset":"UnityLicenseServer_16768335856821_1"}'
           [IO.File]::WriteAllLines($filename,$text)
-          unity auth status
       - name: Update the version in Cesium.cpp
         run: |
           $VERSION = (Get-Content -path package.json | ConvertFrom-Json).version
