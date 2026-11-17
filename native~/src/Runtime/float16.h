@@ -92,7 +92,8 @@ constexpr inline std::uint16_t float_to_half(std::uint32_t f) noexcept {
   const std::uint32_t is_e_overflow_msb = (h_e_mask_value - f_e_half_bias);
   const std::uint32_t is_h_inf_msb = (is_e_overflow_msb | is_f_inf_msb);
   const std::uint32_t is_f_nsnan_msb = (f_snan - f_snan_mask);
-  const std::uint32_t is_m_norm_overflow_msb = (std::uint32_t(0) - f_m_rounded_overflow);
+  const std::uint32_t is_m_norm_overflow_msb =
+      (std::uint32_t(0) - f_m_rounded_overflow);
   const std::uint32_t is_f_snan_msb = (~is_f_nsnan_msb);
   const std::uint32_t h_em_overflow_result =
       _uint32_sels(is_m_norm_overflow_msb, h_e_norm_overflow, h_em_norm);
