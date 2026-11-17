@@ -74,11 +74,11 @@ jobs:
           wget https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-x64.exe
           Start-Process "./UnityHubSetup-x64.exe" -Args "/S" -Wait
           del ./UnityHubSetup-x64.exe
-          winget install Unity.CLI
+          irm https://unity.com/install.ps1 | iex
       - name: Install Unity
         run: |
-          unity install 2022.3.41f1 --changeset 0f988161febf
-          unity install-modules -e 2022.3.41f1 -m universal-windows-platform
+          unity install 2022.3.41f1 --changeset 0f988161febf --accept-eula
+          unity install-modules -e 2022.3.41f1 -m universal-windows-platform --accept-eula
       - name: Create SSH tunnel to Unity License Server
         env:
           UNITY_LICENSE_SERVER_SSH_KEY: ${{ secrets.UNITY_LICENSE_SERVER_SSH_KEY }}
@@ -104,6 +104,7 @@ jobs:
           $filename="$ENV:PROGRAMDATA/Unity/config/services-config.json"
           $text='{"licensingServiceBaseUrl":"http://localhost:12331","enableEntitlementLicensing":true,"clientConnectTimeoutSec":120,"clientHandshakeTimeoutSec":60,"toolset":"UnityLicenseServer_16768262570522_9"}'
           [IO.File]::WriteAllLines($filename,$text)
+          unity auth status
       - name: Update the version in Cesium.cpp
         run: |
           $VERSION = (Get-Content -path package.json | ConvertFrom-Json).version
@@ -237,10 +238,10 @@ jobs:
         # This command sometimes returns exit code 130, despite actually succeeding.
         continue-on-error: true
         run: |
-          unity install 2022.3.41f1 --changeset 0f988161febf
+          unity install 2022.3.41f1 --changeset 0f988161febf --accept-eula
       - name: Install Unity iOS Support 
         run: |
-          unity install-modules -e 2022.3.41f1 -m ios
+          unity install-modules -e 2022.3.41f1 -m ios --accept-eula
       - name: Configure Unity to Use the License Server
         run: |
           sudo mkdir -p "/Library/Application Support/Unity/config"
@@ -267,6 +268,7 @@ jobs:
           wget http://127.0.0.1:12331/v1/admin/status
           cat status
           rm status
+          unity auth status
       - name: Update the version in Cesium.cpp
         run: |
           export VERSION=$(jq -r ".version" package.json)
@@ -379,11 +381,11 @@ jobs:
         # This command sometimes returns exit code 130, despite actually succeeding.
         continue-on-error: true
         run: |
-          unity install 2022.3.41f1 --changeset 0f988161febf
+          unity install 2022.3.41f1 --changeset 0f988161febf --accept-eula
       - name: Install Unity Android Support
         run: |
           # --child-modules avoids an interactive prompt asking to confirm installing the NDK submodule
-          unity install-modules -e 2022.3.41f1 -m android android-sdk-ndk-tools android-open-jdk-11.0.14.1+1 --child-modules
+          unity install-modules -e 2022.3.41f1 -m android android-sdk-ndk-tools android-open-jdk-11.0.14.1+1 --child-modules --accept-eula
       - name: Configure Unity to Use the License Server
         run: |
           sudo mkdir -p /usr/share/unity3d/config
@@ -408,6 +410,7 @@ jobs:
           wget http://127.0.0.1:12331/v1/admin/status
           cat status
           rm status
+          unity auth status
       - name: Update the version in Cesium.cpp
         run: |
           export VERSION=$(jq -r ".version" package.json)
@@ -494,16 +497,17 @@ jobs:
       - name: Install wget
         run: |
           choco install -y wget
-      - name: Install Unity Hub
+      - name: Install Unity Hub & Unity CLI
         run: |
           wget https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-x64.exe
           Start-Process "./UnityHubSetup-x64.exe" -Args "/S" -Wait
           del ./UnityHubSetup-x64.exe
+          irm https://unity.com/install.ps1 | iex
       - name: Install Unity
         run: |
           # We must use Unity 6+ because the Emscripten version in older releases is too old.
-          Start-Process -FilePath "C:/Program Files/Unity Hub/Unity Hub.exe" -Args "-- --headless install --version 6000.0.62f1 --changeset f99f05b3e950" -Wait
-          Start-Process -FilePath "C:/Program Files/Unity Hub/Unity Hub.exe" -Args "-- --headless install-modules --version 6000.0.62f1 --changeset f99f05b3e950 --module webgl" -Wait
+          unity install 6000.0.62f1 --changeset f99f05b3e950 --accept-eula
+          unity install-modules -e 6000.0.62f1 -m webgl --accept-eula
       - name: Create SSH tunnel to Unity License Server
         env:
           UNITY_LICENSE_SERVER_SSH_KEY: ${{ secrets.UNITY_LICENSE_SERVER_SSH_KEY }}
@@ -529,6 +533,7 @@ jobs:
           $filename="$ENV:PROGRAMDATA/Unity/config/services-config.json"
           $text='{"licensingServiceBaseUrl":"http://localhost:12331","enableEntitlementLicensing":true,"clientConnectTimeoutSec":120,"clientHandshakeTimeoutSec":60,"toolset":"UnityLicenseServer_16768335856821_1"}'
           [IO.File]::WriteAllLines($filename,$text)
+          unity auth status
       - name: Update the version in Cesium.cpp
         run: |
           $VERSION = (Get-Content -path package.json | ConvertFrom-Json).version
