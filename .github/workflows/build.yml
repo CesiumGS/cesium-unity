@@ -226,9 +226,11 @@ jobs:
       - name: Install nasm
         uses: ilammy/setup-nasm@v1.5.1
       - name: Install Unity CLI
+        shell: bash
         run: |
           curl -fsSL https://unity.com/install.sh | bash
           source ~/.bashrc
+          which unity
           which unity >> $GITHUB_PATH
       - name: Install Unity 2022.3.41f1
         # This command sometimes returns exit code 130, despite actually succeeding.
