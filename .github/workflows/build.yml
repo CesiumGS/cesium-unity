@@ -73,7 +73,7 @@ jobs:
         run: |
           irm https://unity.com/install.ps1 | iex
           # Add the Unity CLI to the GITHUB_PATH so it persists for the rest of the workflow steps
-          $unityCliPath = Get-Content $env:AppData/UnityHub/cli-install.json | ConvertFrom-Json | select -expand path
+          $unityCliPath = Get-Content $env:AppData/UnityHub/cli-install.json | ConvertFrom-Json | select -expand path | Split-Path
           echo $unityCliPath
           Add-Content -Path $env:GITHUB_PATH -Value "$unityCliPath"
       - name: Install Unity
@@ -499,7 +499,7 @@ jobs:
         run: |
           irm https://unity.com/install.ps1 | iex
           # Add the Unity CLI to the GITHUB_PATH so it persists for the rest of the workflow steps
-          $unityCliPath = Get-Content $env:AppData/UnityHub/cli-install.json | ConvertFrom-Json | select -expand path
+          $unityCliPath = Get-Content $env:AppData/UnityHub/cli-install.json | ConvertFrom-Json | select -expand path | Split-Path
           echo $unityCliPath
           Add-Content -Path $env:GITHUB_PATH -Value "$unityCliPath"
       - name: Install Unity
