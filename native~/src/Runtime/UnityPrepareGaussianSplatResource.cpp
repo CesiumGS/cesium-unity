@@ -389,11 +389,11 @@ void populateGsplatAsset(
   }
 
   UnityEngine::Bounds finalBounds = UnityEngine::Bounds::Construct(
-      UnityEngine::Vector3(
+      UnityEngine::Vector3{
           (min.x + max.x) * 0.5f,
           (min.y + max.y) * 0.5f,
-          (min.z + max.z) * 0.5f),
-      UnityEngine::Vector3(max.x - min.x, max.y - min.y, max.z - min.z));
+          (min.z + max.z) * 0.5f},
+      UnityEngine::Vector3{max.x - min.x, max.y - min.y, max.z - min.z});
   asset.Bounds(finalBounds);
 
   // Now handle colors.
@@ -552,11 +552,11 @@ void populateGsplatAsset(
   for (int32_t i = 0; i < splats.Length(); i++) {
     splats.Item(
         i,
-        Unity::Mathematics::uint4(
+        Unity::Mathematics::uint4{
             splatData[i].x,
             splatData[i].y,
             splatData[i].z,
-            splatData[i].w));
+            splatData[i].w});
   }
 
   asset.PackedSplats(splats);
