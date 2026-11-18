@@ -29,9 +29,12 @@ float computeDepthMultiplier()
 #else
     float t = UNITY_MATRIX_P._m11;
 #endif
-    float fovRadians = atan(1.0F / t) * 2.0F;
-    float sseDenominator = 2.0f * tan(0.5f * fovRadians);
-    return _ScreenParams.y / sseDenominator;
+	// The original computation in CesiumJS is ScreenHeight / sseDenominator,
+    // where sseDenominator = 2.0 * Math.tan(0.5 * fovRadians). However, the
+    // FOV in radians is computed as atan(1.0 / t) * 2.0. The math cancels out
+    // such that sseDenominator = 2.0 / t, and the final computation is more
+    // efficiently computed ScreenHeight * t * 0.5.
+    return _ScreenParams.y * t * 0.5;
 }
 
 struct VertexInput
