@@ -4,6 +4,7 @@
 
 #include <CesiumGltf/AccessorView.h>
 #include <CesiumGltf/PropertyType.h>
+#include <CesiumUtility/Math.h>
 
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/Object.h>
@@ -24,7 +25,6 @@
 #include <cmath>
 #include <cstdint>
 #include <limits>
-#include <numbers>
 #include <tuple>
 #include <unordered_map>
 #include <utility>
@@ -247,7 +247,8 @@ bool writeRotations(
     uint8_t quantV = static_cast<uint8_t>(
         std::clamp(std::roundf(v_f * 255.0f), 0.0f, 255.0f));
     uint8_t angleInt = static_cast<uint8_t>(std::clamp(
-        std::roundf((theta / std::numbers::pi_v<float>)*255.0f),
+        std::roundf(
+            (theta / static_cast<float>(CesiumUtility::Math::OnePi)) * 255.0f),
         0.0f,
         255.0f));
 

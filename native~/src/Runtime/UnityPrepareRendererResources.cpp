@@ -935,8 +935,10 @@ UnityPrepareRendererResources::prepareInLoadThread(
     return asyncSystem.createResolvedFuture(
         TileLoadResultAndRenderResources{std::move(tileLoadResult), nullptr});
 
-  auto [numberOfMeshPrimitives, numberOfSplatPrimitives] =
-      countPrimitives(*pModel);
+  // Android build doesn't like structured bindings, so we use std::get instead.
+  const std::tuple<int32_t, int32_t> counts = countPrimitives(*pModel);
+  const int32_t numberOfMeshPrimitives = std::get<0>(counts);
+  const int32_t numberOfSplatPrimitives = std::get<1>(counts);
 
   struct IntermediateLoadThreadResult {
     MeshDataResult meshDataResult;
