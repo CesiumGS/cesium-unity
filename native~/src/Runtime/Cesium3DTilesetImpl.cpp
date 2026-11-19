@@ -7,6 +7,7 @@
 #include "UnityTileExcluderAdaptor.h"
 #include "UnityTilesetExternals.h"
 
+#include <Cesium3DTiles/BoundingVolume.h>
 #include <Cesium3DTilesSelection/EllipsoidTilesetLoader.h>
 #include <Cesium3DTilesSelection/Tileset.h>
 #include <CesiumGeospatial/GlobeTransforms.h>
@@ -55,6 +56,7 @@
 #include <DotNet/UnityEditor/SceneView.h>
 #endif
 
+using namespace Cesium3DTiles;
 using namespace Cesium3DTilesSelection;
 using namespace DotNet;
 
@@ -375,8 +377,7 @@ void Cesium3DTilesetImpl::FocusTileset(
   glm::dvec3 unityCameraPosition =
       glm::dvec3(ecefToUnityWorld * glm::dvec4(ecefCameraPosition, 1.0));
 
-  glm::dvec3 ecefCenter =
-      Cesium3DTilesSelection::getBoundingVolumeCenter(boundingVolume);
+  glm::dvec3 ecefCenter = getBoundingVolumeCenter(boundingVolume);
   glm::dvec3 unityCenter =
       glm::dvec3(ecefToUnityWorld * glm::dvec4(ecefCenter, 1.0));
   glm::dvec3 unityCameraFront =

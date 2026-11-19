@@ -1,7 +1,7 @@
 #include "CesiumUtility/Tracing.h"
 #include "UnityLoggerSink.h"
 
-#include <Cesium3DTilesContent/registerAllTileContentTypes.h>
+#include <CesiumGltfConverters/registerAllConverterTypes.h>
 
 #include <spdlog/spdlog.h>
 
@@ -9,11 +9,10 @@
 #include <chrono>
 #endif
 
-using namespace Cesium3DTilesContent;
 using namespace CesiumForUnity;
 
 void start() {
-  registerAllTileContentTypes();
+  CesiumGltfConverters::registerAllConverterTypes();
   spdlog::default_logger()->sinks() = {std::make_shared<UnityLoggerSink>()};
 
   CESIUM_TRACE_INIT(

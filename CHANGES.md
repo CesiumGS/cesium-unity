@@ -1,5 +1,11 @@
 # Change Log {#changes}
 
+## ? - ?
+
+##### Additions :tada:
+
+- Added basic support for loading 3D Tiles 2.0 tilesets (i.e., glTF 2.1 models) through `Cesium3DTileset`.
+
 ## v1.26.1 - 2026-11-02
 
 This release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.65.0 to v0.66.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.

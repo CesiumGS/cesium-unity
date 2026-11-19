@@ -2,12 +2,14 @@
 
 #include "UnityTransforms.h"
 
+#include <Cesium3DTiles/BoundingVolume.h>
 #include <Cesium3DTilesSelection/Tile.h>
 #include <CesiumGeospatial/Ellipsoid.h>
 
 #include <DotNet/Unity/Mathematics/double4x4.h>
 #include <DotNet/UnityEngine/Bounds.h>
 
+using namespace Cesium3DTiles;
 using namespace Cesium3DTilesSelection;
 using namespace CesiumGeometry;
 using namespace CesiumGeospatial;
