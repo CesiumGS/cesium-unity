@@ -16,4 +16,4 @@
 	url = https://github.com/jothepro/doxygen-awesome-css.git
 [submodule "Source/gsplat-unity"]
 	path = Source/gsplat-unity
-	url = https://github.com/wuyize25/gsplat-unity.git
+	url = git@github.com:CesiumGS/gsplat-unity.git
