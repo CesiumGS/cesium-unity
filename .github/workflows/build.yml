@@ -69,15 +69,17 @@ jobs:
       - name: Install wget
         run: |
           choco install -y wget
-      - name: Install Unity Hub
+      - name: Install Unity CLI
         run: |
-          wget https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-x64.exe
-          Start-Process "./UnityHubSetup-x64.exe" -Args "/S" -Wait
-          del ./UnityHubSetup-x64.exe
+          irm https://unity.com/install.ps1 | iex
+          # Add the Unity CLI to the GITHUB_PATH so it persists for the rest of the workflow steps
+          $unityCliPath = Get-Content $env:AppData/UnityHub/cli-install.json | ConvertFrom-Json | select -expand path | Split-Path
+          echo $unityCliPath
+          Add-Content -Path $env:GITHUB_PATH -Value "$unityCliPath"
       - name: Install Unity
         run: |
-          Start-Process -FilePath "C:/Program Files/Unity Hub/Unity Hub.exe" -Args "-- --headless install --version 2022.3.41f1 --changeset 0f988161febf" -Wait
-          Start-Process -FilePath "C:/Program Files/Unity Hub/Unity Hub.exe" -Args "-- --headless install-modules --version 2022.3.41f1 --changeset 0f988161febf --module universal-windows-platform" -Wait
+          unity install 2022.3.41f1 --changeset 0f988161febf --accept-eula
+          unity install-modules -e 2022.3.41f1 -m universal-windows-platform --accept-eula
       - name: Create SSH tunnel to Unity License Server
         env:
           UNITY_LICENSE_SERVER_SSH_KEY: ${{ secrets.UNITY_LICENSE_SERVER_SSH_KEY }}
@@ -223,22 +225,20 @@ jobs:
             vcpkg-mac-${{ hashFiles('native~/vcpkg/ports/**/vcpkg.json', 'native~/vcpkg/triplets/**/*', 'native~/extern/*toolchain.cmake') }}-
       - name: Install nasm
         uses: ilammy/setup-nasm@v1.5.1
-      - name: Install Unity Hub
+      - name: Install Unity CLI
+        shell: bash
         run: |
-          wget --quiet https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-arm64.dmg
-          mkdir UnityHubSetup
-          hdiutil attach UnityHubSetup-arm64.dmg -mountpoint ./UnityHubSetup
-          sudo cp -R "./UnityHubSetup/Unity Hub.app" /Applications
-          hdiutil detach ./UnityHubSetup
-          rm ./UnityHubSetup-arm64.dmg
+          curl -fsSL https://unity.com/install.sh | bash
+          source ~/.bashrc
+          dirname $(which unity) >> $GITHUB_PATH
       - name: Install Unity 2022.3.41f1
         # This command sometimes returns exit code 130, despite actually succeeding.
         continue-on-error: true
         run: |
-          /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub -- --headless install --version 2022.3.41f1 --changeset 0f988161febf --architecture arm64
+          unity install 2022.3.41f1 --changeset 0f988161febf --accept-eula
       - name: Install Unity iOS Support 
         run: |
-          /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub -- --headless install-modules --version 2022.3.41f1 --changeset 0f988161febf --module ios --architecture arm64
+          unity install-modules -e 2022.3.41f1 -m ios --accept-eula
       - name: Configure Unity to Use the License Server
         run: |
           sudo mkdir -p "/Library/Application Support/Unity/config"
@@ -365,23 +365,18 @@ jobs:
             vcpkg-linux-alma-${{ hashFiles('native~/vcpkg/ports/**/vcpkg.json', 'native~/vcpkg/triplets/**/*', 'native~/extern/*toolchain.cmake') }}-
       - name: Install nasm
         uses: ilammy/setup-nasm@v1.5.1
-      - name: Install Unity Hub
+      - name: Install Unity CLI
         run: |
-          sudo apt-get install -y gnupg libgbm1 xvfb
-          wget -qO - https://hub.unity3d.com/linux/keys/public | gpg --dearmor | sudo tee /usr/share/keyrings/Unity_Technologies_ApS.gpg > /dev/null
-          sudo sh -c 'echo "deb [signed-by=/usr/share/keyrings/Unity_Technologies_ApS.gpg] https://hub.unity3d.com/linux/repos/deb stable main" > /etc/apt/sources.list.d/unityhub.list'
-          sudo apt-get update
-          sudo apt-get install -y unityhub
+          curl -fsSL https://unity.com/install.sh | bash
       - name: Install Unity 2022.3.41f1
         # This command sometimes returns exit code 130, despite actually succeeding.
-        # unityhub requires a virtual display even in headless mode.
         continue-on-error: true
         run: |
-          xvfb-run -a /usr/bin/unityhub --no-sandbox --headless install --version 2022.3.41f1 --changeset 0f988161febf
+          unity install 2022.3.41f1 --changeset 0f988161febf --accept-eula
       - name: Install Unity Android Support
         run: |
-          # --childModules avoids an interactive prompt asking to confirm installing the NDK submodule
-          xvfb-run -a /usr/bin/unityhub --no-sandbox --headless install-modules --version 2022.3.41f1 --changeset 0f988161febf --module android android-sdk-ndk-tools android-open-jdk-11.0.14.1+1 --childModules
+          # --child-modules avoids an interactive prompt asking to confirm installing the NDK submodule
+          unity install-modules -e 2022.3.41f1 -m android android-sdk-ndk-tools android-open-jdk-11.0.14.1+1 --child-modules --accept-eula
       - name: Configure Unity to Use the License Server
         run: |
           sudo mkdir -p /usr/share/unity3d/config
@@ -492,16 +487,18 @@ jobs:
       - name: Install wget
         run: |
           choco install -y wget
-      - name: Install Unity Hub
+      - name: Install Unity CLI
         run: |
-          wget https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup-x64.exe
-          Start-Process "./UnityHubSetup-x64.exe" -Args "/S" -Wait
-          del ./UnityHubSetup-x64.exe
+          irm https://unity.com/install.ps1 | iex
+          # Add the Unity CLI to the GITHUB_PATH so it persists for the rest of the workflow steps
+          $unityCliPath = Get-Content $env:AppData/UnityHub/cli-install.json | ConvertFrom-Json | select -expand path | Split-Path
+          echo $unityCliPath
+          Add-Content -Path $env:GITHUB_PATH -Value "$unityCliPath"
       - name: Install Unity
         run: |
           # We must use Unity 6+ because the Emscripten version in older releases is too old.
-          Start-Process -FilePath "C:/Program Files/Unity Hub/Unity Hub.exe" -Args "-- --headless install --version 6000.0.62f1 --changeset f99f05b3e950" -Wait
-          Start-Process -FilePath "C:/Program Files/Unity Hub/Unity Hub.exe" -Args "-- --headless install-modules --version 6000.0.62f1 --changeset f99f05b3e950 --module webgl" -Wait
+          unity install 6000.0.62f1 --changeset f99f05b3e950 --accept-eula
+          unity install-modules -e 6000.0.62f1 -m webgl --accept-eula
       - name: Create SSH tunnel to Unity License Server
         env:
           UNITY_LICENSE_SERVER_SSH_KEY: ${{ secrets.UNITY_LICENSE_SERVER_SSH_KEY }}
