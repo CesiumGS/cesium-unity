@@ -5,6 +5,7 @@
 #include <Cesium3DTilesSelection/IPrepareRendererResources.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
+#include <DotNet/Gsplat/GsplatAssetUncompressed.h>
 #include <DotNet/UnityEngine/GameObject.h>
 
 namespace CesiumForUnityNative {
@@ -58,6 +59,10 @@ struct CesiumPrimitiveInfo {
    * the corresponding Unity texture coordinate index.
    */
   std::unordered_map<uint32_t, uint32_t> rasterOverlayUvIndexMap{};
+
+  int32_t gsplatIndex = -1;
+
+  bool gsplatIsLinear = false;
 };
 
 /**

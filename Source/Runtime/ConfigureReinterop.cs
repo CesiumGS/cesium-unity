@@ -14,6 +14,8 @@ using Unity.Mathematics;
 using UnityEngine.Pool;
 using UnityEngine.UIElements;
 using UnityEngine.SceneManagement;
+using Gsplat;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -66,6 +68,7 @@ namespace CesiumForUnity
             Vector3 f = t.forward;
 
             Vector4 v = new Vector4(1.0f, 0.0f, 1.0f, 0.0f);
+            v = v.normalized;
 
             t.position = new Vector3();
             Vector3 p = t.position;
@@ -1122,6 +1125,39 @@ namespace CesiumForUnity
 
             Scene scene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
             scene.GetRootGameObjects();
+
+            var splats = new GsplatAssetUncompressed[1];
+            var splat = ScriptableObject.CreateInstance<GsplatAssetUncompressed>();
+            splats[0] = splat;
+            splat.SplatCount = 0;
+            splat.SHBands = 0;
+            splat.SHs = new Vector3[] { };
+            splat.Colors = new Vector4[] { };
+            splat.Bounds = new Bounds();
+            splat.Positions = new Vector3[] { };
+            splat.PrunedSplatCount = 0;
+            splat.Rotations = new Vector4[] { };
+            splat.Scales = new Vector3[] { };
+
+            var splats2 = new GsplatAssetSpark[1];
+
+            GsplatAssetSpark.PackSplat(Vector4.zero, Vector3.zero, Vector3.zero, Quaternion.identity);
+            var splatSpark = ScriptableObject.CreateInstance<GsplatAssetSpark>();
+            splatSpark.PackedSplats = new uint4[1];
+            splatSpark.PackedSplats[0] = new uint4(0, 0, 0, 0);
+            splatSpark.PackedSplats[0].x = splatSpark.PackedSplats[0].y = splatSpark.PackedSplats[0].z = splatSpark.PackedSplats[0].w = 0;
+            splatSpark.PackedSH1 = new uint[0];
+            splatSpark.PackedSH2 = new uint[0];
+            splatSpark.PackedSH3 = new uint[0];
+            splatSpark.PackedSH4 = new uint[0];
+            
+            splats2[0] = splatSpark;
+
+            var splatRenderer = go.AddComponent<GsplatRenderer>();
+            splatRenderer.GsplatAsset = splat;
+            splatRenderer.GammaToLinear = QualitySettings.activeColorSpace == ColorSpace.Linear;
+            splatRenderer.AsyncUpload = true;
+            splatRenderer.RenderBeforeUploadComplete = true;
         }
     }
 }

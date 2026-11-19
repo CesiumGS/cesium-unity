@@ -1,5 +1,11 @@
 # Change Log {#changes}
 
+## ? - ?
+
+##### Additions :tada:
+
+- Added support for gaussian splat tilesets. Currently only D3D12, Metal, and Vulkan graphics APIs are supported, and a warning will show in the Cesium window if other graphics APIs are enabled. You will be prompted to perform the setup automatically on HDRP and URP to support gaussian splats.
+
 ## v1.26.1 - 2026-11-02
 
 This release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.65.0 to v0.66.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
