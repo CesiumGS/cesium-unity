@@ -1,9 +1,10 @@
 # Change Log {#changes}
-
+ 
 ## 1.27.0 - ?
 
 ##### Additions :tada:
 
+- Added basic support for loading 3D Tiles 2.0 tilesets (i.e., glTF 2.1 models) through `Cesium3DTileset`.
 - Introduced performance improvements, especially with respect to web builds:
   - Tile meshes in Web builds are now built on worker threads instead of the main thread.
   - Decoded image pixels and encoded glTF buffer data are freed once they are no longer needed.
