@@ -19,8 +19,24 @@ struct Point
 StructuredBuffer<Point> _inPoints;
 
 float4x4 _worldTransform;
-float4 _attenuationParameters;
+float2 _attenuationParameters;
 float4 _constantColor;
+
+float computeDepthMultiplier()
+{
+#if UNITY_UV_STARTS_AT_TOP
+    float t = -1.0f * UNITY_MATRIX_P._m11;
+#else
+    float t = UNITY_MATRIX_P._m11;
+#endif
+	// The original computation was `_ScreenParams.y / sseDenominator`,
+    // where `sseDenominator = 2.0 * tan(0.5 * FOV)`. However, the FOV
+    // in Unity is not passed through a uniform, so it would have to be
+    // computed as `atan(1.0 / t) * 2.0`. This cancels out such that
+    // `sseDenominator = 2.0 / t`, and the final computation is more
+    // efficiently written as `_ScreenParams.y * t * 0.5`.
+    return _ScreenParams.y * t * 0.5;
+}
 
 struct VertexInput
 {
@@ -93,7 +109,7 @@ VertexOutput Vertex(VertexInput input) {
 	float4 positionClip = mul(unity_MatrixVP, positionWC);
 	float maximumPointSize = _attenuationParameters.x;
 	float geometricError = _attenuationParameters.y;
-	float depthMultiplier = _attenuationParameters.z;
+	float depthMultiplier = computeDepthMultiplier();
 	float depth = -positionEC.z;
 
 	float pointSize = min((geometricError / depth) * depthMultiplier, maximumPointSize);
