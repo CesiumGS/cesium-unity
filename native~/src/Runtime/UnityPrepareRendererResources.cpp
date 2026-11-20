@@ -395,8 +395,8 @@ public:
             this->_meshData.GetVertexData<uint8_t>(0)));
   }
 
-  void
-  setSubMesh(const UnityEngine::Rendering::SubMeshDescriptor& subMesh) override {
+  void setSubMesh(
+      const UnityEngine::Rendering::SubMeshDescriptor& subMesh) override {
     this->_meshData.subMeshCount(1);
     this->_meshData.SetSubMesh(
         0,
@@ -454,8 +454,8 @@ public:
     return reinterpret_cast<uint8_t*>(this->_data.vertices.data());
   }
 
-  void
-  setSubMesh(const UnityEngine::Rendering::SubMeshDescriptor& subMesh) override {
+  void setSubMesh(
+      const UnityEngine::Rendering::SubMeshDescriptor& subMesh) override {
     this->_data.subMesh = subMesh;
   }
 
@@ -1283,38 +1283,36 @@ UnityPrepareRendererResources::prepareInLoadThread(
         return BufferedMeshDataWriter(bufferedMeshes[size_t(i)]);
       });
 
-  return asyncSystem.runInMainThread(
-      [asyncSystem,
-       tileset = this->_tilesetGameObject,
-       tileLoadResult = std::move(tileLoadResult),
-       bufferedMeshes = std::move(bufferedMeshes),
-       primitiveInfos = std::move(primitiveInfos)]() mutable {
-        if (tileset == nullptr) {
-          return asyncSystem.createResolvedFuture(
-              TileLoadResultAndRenderResources{
-                  std::move(tileLoadResult),
-                  nullptr});
-        }
+  return asyncSystem.runInMainThread([asyncSystem,
+                                      tileset = this->_tilesetGameObject,
+                                      tileLoadResult =
+                                          std::move(tileLoadResult),
+                                      bufferedMeshes =
+                                          std::move(bufferedMeshes),
+                                      primitiveInfos =
+                                          std::move(primitiveInfos)]() mutable {
+    if (tileset == nullptr) {
+      return asyncSystem.createResolvedFuture(
+          TileLoadResultAndRenderResources{std::move(tileLoadResult), nullptr});
+    }
 
-        UnityEngine::MeshDataArray meshDataArray =
-            UnityEngine::Mesh::AllocateWritableMeshData(
-                int32_t(bufferedMeshes.size()));
-        ScopeGuard sg([&meshDataArray]() { meshDataArray.Dispose(); });
-        for (size_t i = 0; i < bufferedMeshes.size(); ++i) {
-          applyBufferedMeshData(bufferedMeshes[i], meshDataArray[int32_t(i)]);
-        }
-        sg.release();
-        bufferedMeshes.clear();
+    UnityEngine::MeshDataArray meshDataArray =
+        UnityEngine::Mesh::AllocateWritableMeshData(
+            int32_t(bufferedMeshes.size()));
+    ScopeGuard sg([&meshDataArray]() { meshDataArray.Dispose(); });
+    for (size_t i = 0; i < bufferedMeshes.size(); ++i) {
+      applyBufferedMeshData(bufferedMeshes[i], meshDataArray[int32_t(i)]);
+    }
+    sg.release();
+    bufferedMeshes.clear();
 
-        return createMeshes(
-            asyncSystem,
-            tileset,
-            IntermediateLoadThreadResult{
-                MeshDataResult{
-                    std::move(meshDataArray),
-                    std::move(primitiveInfos)},
-                std::move(tileLoadResult)});
-      });
+    return createMeshes(
+        asyncSystem,
+        tileset,
+        IntermediateLoadThreadResult{
+            MeshDataResult{std::move(meshDataArray), std::move(primitiveInfos)},
+            std::move(tileLoadResult)});
+  });
 #else
   return asyncSystem
       .runInMainThread([numberOfPrimitives]() {
@@ -2014,7 +2012,8 @@ void* UnityPrepareRendererResources::prepareInMainThread(
   // Raster overlay upsampling copies the model, images included, so the
   // pixels must be kept when overlays are present.
   if (currentOverlayCount == 0) {
-    releaseUploadedImagePixels(tile.getContent().getRenderContent()->getModel());
+    releaseUploadedImagePixels(
+        tile.getContent().getRenderContent()->getModel());
   }
 
   tilesetComponent.BroadcastNewGameObjectCreated(*pModelGameObject);
