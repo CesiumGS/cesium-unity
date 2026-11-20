@@ -345,7 +345,12 @@ namespace CesiumForUnity
         }
 
         [SerializeField]
+#if UNITY_WEBGL
+        // Web builds have a single, smaller heap.
+        private long _maximumCachedBytes = 256 * 1024 * 1024;
+#else
         private long _maximumCachedBytes = 512 * 1024 * 1024;
+#endif
 
         /// <summary>
         /// The maximum number of bytes that may be cached for this tileset.

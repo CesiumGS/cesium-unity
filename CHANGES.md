@@ -1,5 +1,22 @@
 # Change Log {#changes}
 
+## 1.27.0 - ?
+
+##### Additions :tada:
+
+- Introduced performance improvements, especially with respect to web builds:
+  - Tile meshes in Web builds are now built on worker threads instead of the main thread.
+  - Decoded image pixels and encoded glTF buffer data are freed once they are no longer needed.
+  - In Web builds, tile meshes no longer keep a CPU copy of their vertex data unless physics meshes are enabled.
+  - Tile texture coordinates now use a compact vertex format where possible.
+  - Reduced per-frame overhead of activating and deactivating tile game objects.
+  - The default `maximumCachedBytes` for new tilesets is 256 MB when targeting the Web.
+
+##### Fixes :wrench:
+
+- Fixed a memory leak in Web builds where every downloaded tile was retained by the browser.
+- Fixed a leak of `MeshDataArray` memory when a tileset was destroyed while tiles were loading.
+
 ## v1.26.1 - 2026-11-02
 
 This release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.65.0 to v0.66.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
