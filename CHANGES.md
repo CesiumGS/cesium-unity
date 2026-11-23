@@ -17,6 +17,7 @@
 
 - Fixed a memory leak in Web builds where every downloaded tile was retained by the browser.
 - Fixed a leak of `MeshDataArray` memory when a tileset was destroyed while tiles were loading.
+- Fixed a crash that occurred when attenuation was enabled on a point cloud and `Camera.main` was null.
 
 ## v1.26.1 - 2026-11-02
 
