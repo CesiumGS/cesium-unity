@@ -304,9 +304,11 @@ bool writeScales(
     const float sX = fromNormalizedAccessor(scale.x);
     const float sY = fromNormalizedAccessor(scale.y);
     const float sZ = fromNormalizedAccessor(scale.z);
-    const uint8_t uSx = encodeScale(std::exp(sX));
-    const uint8_t uSy = encodeScale(std::exp(sY));
-    const uint8_t uSz = encodeScale(std::exp(sZ));
+    // KHR_gaussian_splatting:SCALE is linear; cesium-native's SPZ decoder
+    // converts SPZ's log-space scales to linear before we see them.
+    const uint8_t uSx = encodeScale(sX);
+    const uint8_t uSy = encodeScale(sY);
+    const uint8_t uSz = encodeScale(sZ);
     splatData[i].w |= static_cast<uint32_t>(uSx) |
                       (static_cast<uint32_t>(uSy) << 8) |
                       (static_cast<uint32_t>(uSz) << 16);
