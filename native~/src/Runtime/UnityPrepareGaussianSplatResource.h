@@ -3,7 +3,11 @@
 #include <CesiumGltf/MeshPrimitive.h>
 #include <CesiumGltf/Model.h>
 
-#include <DotNet/Gsplat/GsplatAssetSpark.h>
+namespace DotNet {
+namespace Gsplat {
+class GsplatAssetSpark;
+}
+} // namespace DotNet
 
 namespace CesiumForUnityNative {
 /**

@@ -6,6 +6,7 @@
 #include <CesiumGltf/PropertyType.h>
 #include <CesiumUtility/Math.h>
 
+#include <DotNet/Gsplat/GsplatAssetSpark.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/Object.h>
 #include <DotNet/System/String.h>
@@ -412,8 +413,8 @@ void populateGsplatAsset(
 
   CesiumGltf::Accessor colorAccessor =
       CesiumGltf::Model::getSafe(model.accessors, colorIt->second);
-  if (colorAccessor.componentType ==
-      CesiumGltf::Accessor::ComponentType::FLOAT) {
+  switch (colorAccessor.componentType) {
+  case CesiumGltf::Accessor::ComponentType::FLOAT:
     if (!writeColors<glm::vec4, float>(
             model,
             meshPrimitive,
@@ -421,9 +422,8 @@ void populateGsplatAsset(
             splatData)) {
       return;
     }
-  } else if (
-      colorAccessor.componentType ==
-      CesiumGltf::Accessor::ComponentType::UNSIGNED_BYTE) {
+    break;
+  case CesiumGltf::Accessor::ComponentType::UNSIGNED_BYTE:
     if (!writeColors<glm::u8vec4, uint8_t>(
             model,
             meshPrimitive,
@@ -431,9 +431,8 @@ void populateGsplatAsset(
             splatData)) {
       return;
     }
-  } else if (
-      colorAccessor.componentType ==
-      CesiumGltf::Accessor::ComponentType::UNSIGNED_SHORT) {
+    break;
+  case CesiumGltf::Accessor::ComponentType::UNSIGNED_SHORT:
     if (!writeColors<glm::u16vec4, uint16_t>(
             model,
             meshPrimitive,
@@ -441,7 +440,8 @@ void populateGsplatAsset(
             splatData)) {
       return;
     }
-  } else {
+    break;
+  default:
     UnityEngine::Debug::LogError(System::String(fmt::format(
         "'COLOR_0' accessor on mesh primitive has unsupported "
         "component type: {}",
@@ -462,8 +462,8 @@ void populateGsplatAsset(
 
   CesiumGltf::Accessor rotationAccessor =
       CesiumGltf::Model::getSafe(model.accessors, rotationIt->second);
-  if (rotationAccessor.componentType ==
-      CesiumGltf::Accessor::ComponentType::FLOAT) {
+  switch (rotationAccessor.componentType) {
+  case CesiumGltf::Accessor::ComponentType::FLOAT:
     if (!writeRotations<glm::vec4, float>(
             model,
             meshPrimitive,
@@ -471,9 +471,8 @@ void populateGsplatAsset(
             splatData)) {
       return;
     }
-  } else if (
-      rotationAccessor.componentType ==
-      CesiumGltf::Accessor::ComponentType::BYTE) {
+    break;
+  case CesiumGltf::Accessor::ComponentType::BYTE:
     if (!writeRotations<glm::i8vec4, int8_t>(
             model,
             meshPrimitive,
@@ -481,9 +480,8 @@ void populateGsplatAsset(
             splatData)) {
       return;
     }
-  } else if (
-      rotationAccessor.componentType ==
-      CesiumGltf::Accessor::ComponentType::SHORT) {
+    break;
+  case CesiumGltf::Accessor::ComponentType::SHORT:
     if (!writeRotations<glm::i16vec4, int16_t>(
             model,
             meshPrimitive,
@@ -491,7 +489,8 @@ void populateGsplatAsset(
             splatData)) {
       return;
     }
-  } else {
+    break;
+  default:
     UnityEngine::Debug::LogError(System::String(fmt::format(
         "'KHR_gaussian_splatting:ROTATION' accessor on mesh primitive "
         "has unsupported "
@@ -512,8 +511,8 @@ void populateGsplatAsset(
 
   CesiumGltf::Accessor scaleAccessor =
       CesiumGltf::Model::getSafe(model.accessors, scaleIt->second);
-  if (scaleAccessor.componentType ==
-      CesiumGltf::Accessor::ComponentType::FLOAT) {
+  switch (scaleAccessor.componentType) {
+  case CesiumGltf::Accessor::ComponentType::FLOAT:
     if (!writeScales<glm::vec3, float>(
             model,
             meshPrimitive,
@@ -521,9 +520,8 @@ void populateGsplatAsset(
             splatData)) {
       return;
     }
-  } else if (
-      scaleAccessor.componentType ==
-      CesiumGltf::Accessor::ComponentType::UNSIGNED_BYTE) {
+    break;
+  case CesiumGltf::Accessor::ComponentType::UNSIGNED_BYTE:
     if (!writeScales<glm::u8vec3, uint8_t>(
             model,
             meshPrimitive,
@@ -531,9 +529,8 @@ void populateGsplatAsset(
             splatData)) {
       return;
     }
-  } else if (
-      scaleAccessor.componentType ==
-      CesiumGltf::Accessor::ComponentType::UNSIGNED_SHORT) {
+    break;
+  case CesiumGltf::Accessor::ComponentType::UNSIGNED_SHORT:
     if (!writeScales<glm::u16vec3, uint16_t>(
             model,
             meshPrimitive,
@@ -541,7 +538,8 @@ void populateGsplatAsset(
             splatData)) {
       return;
     }
-  } else {
+    break;
+  default:
     UnityEngine::Debug::LogError(System::String(fmt::format(
         "'KHR_gaussian_splatting:SCALE' accessor on mesh primitive has "
         "unsupported component type: {}",

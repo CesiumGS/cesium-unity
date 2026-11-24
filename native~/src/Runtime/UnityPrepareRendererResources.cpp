@@ -888,6 +888,10 @@ void loadPrimitive(
 }
 } // namespace
 
+/**
+ * @brief Counts the primitives of each type in the given glTF model.
+ * @return A tuple of {numMeshPrimitives, numSplatPrimitives}.
+ */
 std::tuple<int32_t, int32_t> countPrimitives(const CesiumGltf::Model& model) {
   int32_t numberOfMeshPrimitives = 0;
   int32_t numberOfSplatPrimitives = 0;

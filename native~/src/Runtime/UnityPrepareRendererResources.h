@@ -60,8 +60,15 @@ struct CesiumPrimitiveInfo {
    */
   std::unordered_map<uint32_t, uint32_t> rasterOverlayUvIndexMap{};
 
+  /**
+   * @brief The index of the Gaussian splat in the `splatDataArray` associated
+   * with this primitive. -1 if no Gaussian splat is associated.
+   */
   int32_t gsplatIndex = -1;
 
+  /**
+   * @brief Whether the Gaussian splat uses linear color space.
+   */
   bool gsplatIsLinear = false;
 };
 
