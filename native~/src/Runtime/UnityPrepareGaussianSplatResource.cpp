@@ -36,34 +36,34 @@ using namespace DotNet;
 namespace CesiumForUnityNative {
 
 namespace {
-std::tuple<int32_t, int32_t>
-countShCoeffsOnPrimitive(const CesiumGltf::MeshPrimitive& primitive) {
+int32_t countShBandsOnPrimitive(const CesiumGltf::MeshPrimitive& primitive) {
   if (primitive.attributes.contains(
           "KHR_gaussian_splatting:SH_DEGREE_3_COEF_6")) {
-    return {3, 15};
+    return 3;
   }
 
   if (primitive.attributes.contains(
           "KHR_gaussian_splatting:SH_DEGREE_2_COEF_4")) {
-    return {2, 8};
+    return 2;
   }
 
   if (primitive.attributes.contains(
           "KHR_gaussian_splatting:SH_DEGREE_1_COEF_2")) {
-    return {1, 3};
+    return 1;
   }
 
-  return {0, 0};
+  return 0;
 }
 
-bool writeShCoeffs(
+bool getShCoeffViews(
     const CesiumGltf::Model& model,
     const CesiumGltf::MeshPrimitive& meshPrimitive,
-    std::vector<float>& data,
-    int32_t stride,
-    int32_t offset,
-    int32_t degree) {
-  const int32_t numCoeffs = 3 + 2 * (degree - 1);
+    int32_t degree,
+    int64_t splatCount,
+    std::vector<CesiumGltf::AccessorView<glm::vec3>>& views) {
+  const int32_t numCoeffs = 2 * degree + 1;
+  views.clear();
+  views.reserve(numCoeffs);
   for (int32_t i = 0; i < numCoeffs; i++) {
     std::unordered_map<std::string, int32_t>::const_iterator accessorIt =
         meshPrimitive.attributes.find(fmt::format(
@@ -90,12 +90,18 @@ bool writeShCoeffs(
       return false;
     }
 
-    for (int32_t j = 0; j < accessorView.size(); j++) {
-      int32_t base = (j * stride + offset + i) * 3;
-      data[base] = accessorView[j].x;
-      data[base + 1] = accessorView[j].y;
-      data[base + 2] = accessorView[j].z;
+    if (accessorView.size() != splatCount) {
+      UnityEngine::Debug::LogError(System::String(fmt::format(
+          "Accessor view for spherical harmonic attribute degree {} "
+          "index {} on mesh primitive has size {} but expected {}",
+          degree,
+          i,
+          accessorView.size(),
+          splatCount)));
+      return false;
     }
+
+    views.emplace_back(std::move(accessorView));
   }
 
   return true;
@@ -183,6 +189,81 @@ bool writeColors(
     splatData[i].x =
         static_cast<uint32_t>(uR) | (static_cast<uint32_t>(uG) << 8) |
         (static_cast<uint32_t>(uB) << 16) | (static_cast<uint32_t>(uA) << 24);
+  }
+
+  return true;
+}
+
+uint8_t unitFloatToByte(float value) {
+  return static_cast<uint8_t>(
+      std::clamp(std::round(value * 255.0f), 0.0f, 255.0f));
+}
+
+bool writeShDegree0Colors(
+    const CesiumGltf::Model& model,
+    int32_t accessorIndex,
+    std::vector<Uint4>& splatData) {
+  const CesiumGltf::AccessorView<glm::vec3> shView(model, accessorIndex);
+
+  if (shView.status() != CesiumGltf::AccessorViewStatus::Valid) {
+    UnityEngine::Debug::LogError(System::String(fmt::format(
+        "'KHR_gaussian_splatting:SH_DEGREE_0_COEF_0' accessor view on mesh "
+        "primitive returned invalid status: {}",
+        (int32_t)shView.status())));
+    return false;
+  }
+
+  if (shView.size() != splatData.size()) {
+    UnityEngine::Debug::LogError(System::String(fmt::format(
+        "'KHR_gaussian_splatting:SH_DEGREE_0_COEF_0' accessor view on mesh "
+        "primitive has size {} but expected {}",
+        shView.size(),
+        splatData.size())));
+    return false;
+  }
+
+  constexpr float SH_C0 = 0.2820947917738781f;
+  for (int32_t i = 0; i < shView.size(); i++) {
+    const glm::vec3& sh = shView[i];
+    const uint8_t uR = unitFloatToByte(sh.x * SH_C0 + 0.5f);
+    const uint8_t uG = unitFloatToByte(sh.y * SH_C0 + 0.5f);
+    const uint8_t uB = unitFloatToByte(sh.z * SH_C0 + 0.5f);
+    splatData[i].x =
+        (splatData[i].x & 0xff000000u) | static_cast<uint32_t>(uR) |
+        (static_cast<uint32_t>(uG) << 8) | (static_cast<uint32_t>(uB) << 16);
+  }
+
+  return true;
+}
+
+template <typename T>
+bool writeOpacities(
+    const CesiumGltf::Model& model,
+    const CesiumGltf::Accessor& opacityAccessor,
+    std::vector<Uint4>& splatData) {
+  const CesiumGltf::AccessorView<T> opacityView(model, opacityAccessor);
+
+  if (opacityView.status() != CesiumGltf::AccessorViewStatus::Valid) {
+    UnityEngine::Debug::LogError(System::String(fmt::format(
+        "'KHR_gaussian_splatting:OPACITY' accessor view on mesh primitive "
+        "returned invalid status: {}",
+        (int32_t)opacityView.status())));
+    return false;
+  }
+
+  if (opacityView.size() != splatData.size()) {
+    UnityEngine::Debug::LogError(System::String(fmt::format(
+        "'KHR_gaussian_splatting:OPACITY' accessor view on mesh primitive "
+        "has size {} but expected {}",
+        opacityView.size(),
+        splatData.size())));
+    return false;
+  }
+
+  for (int32_t i = 0; i < opacityView.size(); i++) {
+    const uint8_t uA = unitFloatToByte(fromNormalizedAccessor(opacityView[i]));
+    splatData[i].x =
+        (splatData[i].x & 0x00ffffffu) | (static_cast<uint32_t>(uA) << 24);
   }
 
   return true;
@@ -325,8 +406,7 @@ void populateGsplatAsset(
     const CesiumGltf::MeshPrimitive& meshPrimitive,
     DotNet::Gsplat::GsplatAssetSpark& asset) {
 
-  const auto [numShBands, numShCoeffs] =
-      countShCoeffsOnPrimitive(meshPrimitive);
+  const int32_t numShBands = countShBandsOnPrimitive(meshPrimitive);
   asset.SHBands(numShBands);
 
   // We need to get:
@@ -399,56 +479,101 @@ void populateGsplatAsset(
       UnityEngine::Vector3{max.x - min.x, max.y - min.y, max.z - min.z});
   asset.Bounds(finalBounds);
 
-  // Now handle colors.
-  // TODO: handle SH_DEGREE_0_COEF_0 and OPACITY if present - these should take
-  // priority over COLOR_0 if present.
+  // Now handle colors. Per the KHR_gaussian_splatting spec, SH_DEGREE_0_COEF_0
+  // (RGB) and OPACITY (alpha) take priority, with COLOR_0 as a fallback for
+  // whichever of them is missing.
+  const std::unordered_map<std::string, int32_t>::const_iterator sh0It =
+      meshPrimitive.attributes.find(
+          "KHR_gaussian_splatting:SH_DEGREE_0_COEF_0");
+  const std::unordered_map<std::string, int32_t>::const_iterator opacityIt =
+      meshPrimitive.attributes.find("KHR_gaussian_splatting:OPACITY");
+  const bool hasSh0 = sh0It != meshPrimitive.attributes.end();
+  const bool hasOpacity = opacityIt != meshPrimitive.attributes.end();
 
-  const std::unordered_map<std::string, int32_t>::const_iterator colorIt =
-      meshPrimitive.attributes.find("COLOR_0");
-  if (colorIt == meshPrimitive.attributes.end()) {
-    UnityEngine::Debug::LogError(
-        System::String("Mesh primitive has no 'COLOR_0' attribute"));
+  if (!hasSh0 || !hasOpacity) {
+    const std::unordered_map<std::string, int32_t>::const_iterator colorIt =
+        meshPrimitive.attributes.find("COLOR_0");
+    if (colorIt == meshPrimitive.attributes.end()) {
+      UnityEngine::Debug::LogError(System::String(fmt::format(
+          "Mesh primitive has no '{}' attribute and no 'COLOR_0' fallback",
+          !hasSh0 ? "KHR_gaussian_splatting:SH_DEGREE_0_COEF_0"
+                  : "KHR_gaussian_splatting:OPACITY")));
+      return;
+    }
+
+    CesiumGltf::Accessor colorAccessor =
+        CesiumGltf::Model::getSafe(model.accessors, colorIt->second);
+    switch (colorAccessor.componentType) {
+    case CesiumGltf::Accessor::ComponentType::FLOAT:
+      if (!writeColors<glm::vec4, float>(
+              model,
+              meshPrimitive,
+              colorAccessor,
+              splatData)) {
+        return;
+      }
+      break;
+    case CesiumGltf::Accessor::ComponentType::UNSIGNED_BYTE:
+      if (!writeColors<glm::u8vec4, uint8_t>(
+              model,
+              meshPrimitive,
+              colorAccessor,
+              splatData)) {
+        return;
+      }
+      break;
+    case CesiumGltf::Accessor::ComponentType::UNSIGNED_SHORT:
+      if (!writeColors<glm::u16vec4, uint16_t>(
+              model,
+              meshPrimitive,
+              colorAccessor,
+              splatData)) {
+        return;
+      }
+      break;
+    default:
+      UnityEngine::Debug::LogError(System::String(fmt::format(
+          "'COLOR_0' accessor on mesh primitive has unsupported "
+          "component type: {}",
+          CesiumGltf::convertPropertyComponentTypeToString(
+              CesiumGltf::convertAccessorComponentTypeToPropertyComponentType(
+                  colorAccessor.componentType)))));
+      return;
+    }
+  }
+
+  if (hasSh0 && !writeShDegree0Colors(model, sh0It->second, splatData)) {
     return;
   }
 
-  CesiumGltf::Accessor colorAccessor =
-      CesiumGltf::Model::getSafe(model.accessors, colorIt->second);
-  switch (colorAccessor.componentType) {
-  case CesiumGltf::Accessor::ComponentType::FLOAT:
-    if (!writeColors<glm::vec4, float>(
-            model,
-            meshPrimitive,
-            colorAccessor,
-            splatData)) {
+  if (hasOpacity) {
+    const CesiumGltf::Accessor& opacityAccessor =
+        CesiumGltf::Model::getSafe(model.accessors, opacityIt->second);
+    switch (opacityAccessor.componentType) {
+    case CesiumGltf::Accessor::ComponentType::FLOAT:
+      if (!writeOpacities<float>(model, opacityAccessor, splatData)) {
+        return;
+      }
+      break;
+    case CesiumGltf::Accessor::ComponentType::UNSIGNED_BYTE:
+      if (!writeOpacities<uint8_t>(model, opacityAccessor, splatData)) {
+        return;
+      }
+      break;
+    case CesiumGltf::Accessor::ComponentType::UNSIGNED_SHORT:
+      if (!writeOpacities<uint16_t>(model, opacityAccessor, splatData)) {
+        return;
+      }
+      break;
+    default:
+      UnityEngine::Debug::LogError(System::String(fmt::format(
+          "'KHR_gaussian_splatting:OPACITY' accessor on mesh primitive has "
+          "unsupported component type: {}",
+          CesiumGltf::convertPropertyComponentTypeToString(
+              CesiumGltf::convertAccessorComponentTypeToPropertyComponentType(
+                  opacityAccessor.componentType)))));
       return;
     }
-    break;
-  case CesiumGltf::Accessor::ComponentType::UNSIGNED_BYTE:
-    if (!writeColors<glm::u8vec4, uint8_t>(
-            model,
-            meshPrimitive,
-            colorAccessor,
-            splatData)) {
-      return;
-    }
-    break;
-  case CesiumGltf::Accessor::ComponentType::UNSIGNED_SHORT:
-    if (!writeColors<glm::u16vec4, uint16_t>(
-            model,
-            meshPrimitive,
-            colorAccessor,
-            splatData)) {
-      return;
-    }
-    break;
-  default:
-    UnityEngine::Debug::LogError(System::String(fmt::format(
-        "'COLOR_0' accessor on mesh primitive has unsupported "
-        "component type: {}",
-        CesiumGltf::convertPropertyComponentTypeToString(
-            CesiumGltf::convertAccessorComponentTypeToPropertyComponentType(
-                colorAccessor.componentType)))));
-    return;
   }
 
   const std::unordered_map<std::string, int32_t>::const_iterator rotationIt =
@@ -561,41 +686,36 @@ void populateGsplatAsset(
 
   asset.PackedSplats(splats);
 
-  // TODO: avoid copy
-  std::vector<float> harmonics(numShCoeffs * asset.SplatCount() * 3);
-  if (numShCoeffs >= 3) {
-    if (!writeShCoeffs(model, meshPrimitive, harmonics, numShCoeffs, 0, 1)) {
-      return;
-    }
+  // Validate all SH accessors before writing any packed SH data, so that a
+  // failure in a higher band doesn't leave the asset partially populated.
+  const int64_t splatCount = asset.SplatCount();
+  std::vector<CesiumGltf::AccessorView<glm::vec3>> sh1Views;
+  std::vector<CesiumGltf::AccessorView<glm::vec3>> sh2Views;
+  std::vector<CesiumGltf::AccessorView<glm::vec3>> sh3Views;
+  if (numShBands >= 1 &&
+      !getShCoeffViews(model, meshPrimitive, 1, splatCount, sh1Views)) {
+    return;
   }
 
-  if (numShCoeffs >= 8) {
-    if (!writeShCoeffs(model, meshPrimitive, harmonics, numShCoeffs, 3, 2)) {
-      return;
-    }
+  if (numShBands >= 2 &&
+      !getShCoeffViews(model, meshPrimitive, 2, splatCount, sh2Views)) {
+    return;
   }
 
-  if (numShCoeffs >= 15) {
-    if (!writeShCoeffs(
-            model,
-            meshPrimitive,
-            harmonics,
-            numShCoeffs,
-            5 + 3,
-            3)) {
-      return;
-    }
+  if (numShBands >= 3 &&
+      !getShCoeffViews(model, meshPrimitive, 3, splatCount, sh3Views)) {
+    return;
   }
 
-  if (numShCoeffs >= 3) {
+  if (numShBands >= 1) {
     // pack SH1
     System::Array1<uint32_t> sh1(asset.SplatCount() * 2);
     for (int32_t i = 0; i < asset.SplatCount(); i++) {
       uint32_t out[2] = {0, 0};
       for (int32_t j = 0; j < 3; j++) {
+        const glm::vec3& coeff = sh1Views[j][i];
         for (int32_t k = 0; k < 3; k++) {
-          const int32_t baseIndex = (i * numShCoeffs + j) * 3 + k;
-          float shScaled = harmonics[baseIndex] * 63.0f;
+          float shScaled = coeff[k] * 63.0f;
           int shBounded = (int)std::round(std::clamp(shScaled, -63.0f, 63.0f));
           int sint7SH = shBounded & 0x7f;
 
@@ -620,30 +740,18 @@ void populateGsplatAsset(
     asset.PackedSH1(sh1);
   }
 
-  if (numShCoeffs >= 8) {
+  if (numShBands >= 2) {
     System::Array1<uint32_t> sh2(asset.SplatCount() * 4);
     for (int32_t i = 0; i < asset.SplatCount(); i++) {
-      const int32_t baseIndex = (i * numShCoeffs + 3) * 3;
-      uint32_t a = PackSint8Bytes(
-          harmonics[baseIndex + 0],
-          harmonics[baseIndex + 1],
-          harmonics[baseIndex + 2],
-          harmonics[baseIndex + 3]);
-      uint32_t b = PackSint8Bytes(
-          harmonics[baseIndex + 4],
-          harmonics[baseIndex + 5],
-          harmonics[baseIndex + 6],
-          harmonics[baseIndex + 7]);
-      uint32_t c = PackSint8Bytes(
-          harmonics[baseIndex + 8],
-          harmonics[baseIndex + 9],
-          harmonics[baseIndex + 10],
-          harmonics[baseIndex + 11]);
-      uint32_t d = PackSint8Bytes(
-          harmonics[baseIndex + 12],
-          harmonics[baseIndex + 13],
-          harmonics[baseIndex + 14],
-          0);
+      const glm::vec3& c0 = sh2Views[0][i];
+      const glm::vec3& c1 = sh2Views[1][i];
+      const glm::vec3& c2 = sh2Views[2][i];
+      const glm::vec3& c3 = sh2Views[3][i];
+      const glm::vec3& c4 = sh2Views[4][i];
+      uint32_t a = PackSint8Bytes(c0.x, c0.y, c0.z, c1.x);
+      uint32_t b = PackSint8Bytes(c1.y, c1.z, c2.x, c2.y);
+      uint32_t c = PackSint8Bytes(c2.z, c3.x, c3.y, c3.z);
+      uint32_t d = PackSint8Bytes(c4.x, c4.y, c4.z, 0);
 
       sh2.Item(i * 4, a);
       sh2.Item(i * 4 + 1, b);
@@ -653,14 +761,14 @@ void populateGsplatAsset(
     asset.PackedSH2(sh2);
   }
 
-  if (numShCoeffs >= 15) {
+  if (numShBands >= 3) {
     System::Array1<uint32_t> sh3(asset.SplatCount() * 4);
     for (int32_t i = 0; i < asset.SplatCount(); i++) {
       uint32_t out[4] = {0, 0, 0, 0};
       for (int32_t j = 0; j < 7; j++) {
+        const glm::vec3& coeff = sh3Views[j][i];
         for (int32_t k = 0; k < 3; k++) {
-          const int32_t baseIndex = (i * numShCoeffs + j + 8) * 3 + k;
-          float shScaled = harmonics[baseIndex] * 31.0f;
+          float shScaled = coeff[k] * 31.0f;
           int shBounded = (int)std::round(std::clamp(shScaled, -31.0f, 31.0f));
           int sint6SH = shBounded & 0x3f;
           int bitStart = (j * 3 + k) * 6;

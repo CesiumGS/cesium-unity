@@ -1145,12 +1145,26 @@ createGsplatAssets(int32_t numberOfSplatPrimitives) {
   System::Array1<DotNet::Gsplat::GsplatAssetSpark> gsplatAssets(
       numberOfSplatPrimitives);
   for (int32_t i = 0; i < numberOfSplatPrimitives; i++) {
-    gsplatAssets.Item(
-        i,
+    DotNet::Gsplat::GsplatAssetSpark asset =
         UnityEngine::ScriptableObject::CreateInstance<
-            DotNet::Gsplat::GsplatAssetSpark>());
+            DotNet::Gsplat::GsplatAssetSpark>();
+    asset.hideFlags(UnityEngine::HideFlags::HideAndDontSave);
+    gsplatAssets.Item(i, asset);
   }
   return gsplatAssets;
+}
+
+void destroyGsplatAssets(
+    const System::Array1<DotNet::Gsplat::GsplatAssetSpark>& splatAssets) {
+  if (splatAssets == nullptr) {
+    return;
+  }
+  for (int32_t i = 0, len = splatAssets.Length(); i < len; ++i) {
+    DotNet::Gsplat::GsplatAssetSpark asset = splatAssets[i];
+    if (asset != nullptr) {
+      UnityLifetime::Destroy(asset);
+    }
+  }
 }
 
 bool isDegenerateTriangleMesh(const UnityEngine::Mesh& mesh) {
@@ -1222,6 +1236,7 @@ CesiumAsync::Future<TileLoadResultAndRenderResources> createMeshes(
     // Tileset GameObject was deleted while we were loading a tile
     // (possibly play mode was exited or another cause).
     workerResult.meshDataResult.meshDataArray.Dispose();
+    destroyGsplatAssets(workerResult.meshDataResult.splatDataArray);
     return asyncSystem.createResolvedFuture(TileLoadResultAndRenderResources{
         std::move(workerResult.tileLoadResult),
         nullptr});
@@ -1902,6 +1917,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
   const Cesium3DTilesSelection::TileRenderContent* pRenderContent =
       content.getRenderContent();
   if (!pRenderContent) {
+    destroyGsplatAssets(splatAssets);
     return nullptr;
   }
 
@@ -1963,6 +1979,12 @@ void* UnityPrepareRendererResources::prepareInMainThread(
   int32_t meshIndex = 0;
   int32_t primitiveInfoIndex = 0;
 
+  // Splat assets that end up owned by a GsplatRenderer. Any others are
+  // destroyed once all primitives have been processed.
+  std::vector<bool> isSplatAssetAttached(
+      splatAssets == nullptr ? 0 : size_t(splatAssets.Length()),
+      false);
+
   // For backwards compatibility.
   CesiumForUnity::CesiumMetadata metadataComponent =
       pModelGameObject
@@ -1985,6 +2007,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
       -1,
       [&meshes,
        &splatAssets,
+       &isSplatAssetAttached,
        &primitiveInfos,
        &pModelGameObject,
        &tileTransform,
@@ -2073,6 +2096,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
                   .AddComponent<DotNet::Gsplat::GsplatRenderer>();
           renderer.GsplatAsset((DotNet::Gsplat::GsplatAsset)(
               splatAssets[primitiveInfo.gsplatIndex]));
+          isSplatAssetAttached[size_t(primitiveInfo.gsplatIndex)] = true;
           renderer.GammaToLinear(
               !primitiveInfo.gsplatIsLinear &&
               DotNet::UnityEngine::QualitySettings::activeColorSpace() ==
@@ -2188,6 +2212,12 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         }
       });
 
+  for (size_t i = 0; i < isSplatAssetAttached.size(); ++i) {
+    if (!isSplatAssetAttached[i]) {
+      UnityLifetime::Destroy(splatAssets[int32_t(i)]);
+    }
+  }
+
   // Raster overlay upsampling copies the model, images included, so the
   // pixels must be kept when overlays are present.
   if (currentOverlayCount == 0) {
@@ -2271,6 +2301,15 @@ void freePrimitiveGameObject(
     releaseMesh(meshFilter.sharedMesh());
   }
 
+  DotNet::Gsplat::GsplatRenderer splatRenderer =
+      primitiveGameObject.GetComponent<DotNet::Gsplat::GsplatRenderer>();
+  if (splatRenderer != nullptr) {
+    DotNet::Gsplat::GsplatAsset splatAsset = splatRenderer.GsplatAsset();
+    if (splatAsset != nullptr) {
+      UnityLifetime::Destroy(splatAsset);
+    }
+  }
+
   // The MeshCollider shares a mesh with the MeshFilter, so no need to
   // destroy it explicitly.
 }
@@ -2306,6 +2345,7 @@ void UnityPrepareRendererResources::free(
       for (int32_t i = 0, len = pTyped->meshes.Length(); i < len; ++i) {
         releaseMesh(pTyped->meshes[i]);
       }
+      destroyGsplatAssets(pTyped->splatAssets);
       delete pTyped;
     }
 
