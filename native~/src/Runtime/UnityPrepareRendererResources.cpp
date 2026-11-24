@@ -962,8 +962,8 @@ void populateMeshData(
 
         auto writer = makeWriter(meshDataInstance++);
 
-        if (primitive.hasExtension<
-                CesiumGltf::ExtensionKhrGaussianSplatting>()) {
+        if (primitive
+                .hasExtension<CesiumGltf::ExtensionKhrGaussianSplatting>()) {
           // Gaussian splatting extension requires the primitive to be of type
           // POINTS. If it's not, we ignore this primitive.
           return;
@@ -1957,7 +1957,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
   const bool createPhysicsMeshes = tilesetComponent.createPhysicsMeshes();
 
   int32_t meshIndex = 0;
-  int32_t primitiveIndex = 0;
+  int32_t primitiveInfoIndex = 0;
 
   // For backwards compatibility.
   CesiumForUnity::CesiumMetadata metadataComponent =
@@ -1985,7 +1985,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
        &pModelGameObject,
        &tileTransform,
        &meshIndex,
-       &primitiveIndex,
+       &primitiveInfoIndex,
        &tilesetComponent,
        pCoordinateSystem,
        createPhysicsMeshes,
@@ -1999,8 +1999,30 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           const Mesh& mesh,
           const MeshPrimitive& primitive,
           const glm::dmat4& transform) {
+        const int32_t currentPrimitiveInfoIndex = primitiveInfoIndex++;
         const CesiumPrimitiveInfo& primitiveInfo =
-            primitiveInfos[primitiveIndex++];
+            primitiveInfos[currentPrimitiveInfoIndex];
+
+        // Every non-splat primitive was given a mesh in the load thread, even
+        // if it is skipped below, so claim its mesh slot before any early
+        // return to keep later primitives paired with their own meshes.
+        int32_t currentMeshIndex = -1;
+        if (primitiveInfo.gsplatIndex == -1) {
+          currentMeshIndex = meshIndex++;
+          if (meshes[currentMeshIndex] == nullptr) {
+            // This indicates Unity destroyed the mesh already, which really
+            // shouldn't happen.
+            return;
+          }
+        }
+
+        if (primitiveInfo.gsplatIndex == -1 &&
+            primitive
+                .hasExtension<CesiumGltf::ExtensionKhrGaussianSplatting>()) {
+          // An invalid (non-POINTS) splat primitive was given an empty mesh
+          // in the load thread; there is nothing to show.
+          return;
+        }
 
         auto positionAccessorIt = primitive.attributes.find("POSITION");
         if (positionAccessorIt == primitive.attributes.end()) {
@@ -2019,8 +2041,8 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
         int64_t primitiveIndex = &primitive - &mesh.primitives[0];
         UnityEngine::GameObject primitiveGameObject(System::String(
-            "Mesh " + std::to_string(meshIndex - 1) + " Primitive " +
-            std::to_string(primitiveIndex)));
+            "Mesh " + std::to_string(currentPrimitiveInfoIndex) +
+            " Primitive " + std::to_string(primitiveIndex)));
         if (showTilesInHierarchy) {
           primitiveGameObject.hideFlags(UnityEngine::HideFlags::DontSave);
         } else {
@@ -2056,12 +2078,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           return;
         }
 
-        UnityEngine::Mesh unityMesh = meshes[meshIndex++];
-        if (unityMesh == nullptr) {
-          // This indicates Unity destroyed the mesh already, which really
-          // shouldn't happen.
-          return;
-        }
+        UnityEngine::Mesh unityMesh = meshes[currentMeshIndex];
         UnityEngine::MeshFilter meshFilter =
             primitiveGameObject.AddComponent<UnityEngine::MeshFilter>();
         meshFilter.sharedMesh(unityMesh);
