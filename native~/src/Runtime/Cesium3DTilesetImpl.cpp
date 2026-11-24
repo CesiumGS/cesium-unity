@@ -170,8 +170,10 @@ void Cesium3DTilesetImpl::UpdateInternal(
       CesiumGltfGameObject* pCesiumGameObject =
           static_cast<CesiumGltfGameObject*>(
               pRenderContent->getRenderResources());
-      if (pCesiumGameObject && pCesiumGameObject->pGameObject) {
+      if (pCesiumGameObject && pCesiumGameObject->pGameObject &&
+          pCesiumGameObject->isActive) {
         pCesiumGameObject->pGameObject->SetActive(false);
+        pCesiumGameObject->isActive = false;
       }
     }
   }
@@ -188,8 +190,10 @@ void Cesium3DTilesetImpl::UpdateInternal(
       CesiumGltfGameObject* pCesiumGameObject =
           static_cast<CesiumGltfGameObject*>(
               pRenderContent->getRenderResources());
-      if (pCesiumGameObject && pCesiumGameObject->pGameObject) {
+      if (pCesiumGameObject && pCesiumGameObject->pGameObject &&
+          !pCesiumGameObject->isActive) {
         pCesiumGameObject->pGameObject->SetActive(true);
+        pCesiumGameObject->isActive = true;
       }
     }
   }
