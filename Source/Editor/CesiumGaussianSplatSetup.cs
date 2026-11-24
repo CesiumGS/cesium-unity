@@ -320,9 +320,24 @@ namespace CesiumForUnity
             EditorApplication.delayCall += PromptIfRequired;
         }
 
+        private static void EnsureGlobalSortEnabled()
+        {
+            Gsplat.GsplatSettings settings = Gsplat.GsplatSettings.Instance;
+            if (settings == null || settings.EnableGlobalSort)
+            {
+                return;
+            }
+
+            settings.EnableGlobalSort = true;
+            EditorUtility.SetDirty(settings);
+            AssetDatabase.SaveAssetIfDirty(settings);
+        }
+
         private static void PromptIfRequired()
         {
             _isPromptQueued = false;
+
+            EnsureGlobalSortEnabled();
 
             if (EditorApplication.isPlayingOrWillChangePlaymode ||
                 EditorPrefs.GetBool(_neverAskPrefKey, false))
@@ -352,9 +367,9 @@ namespace CesiumForUnity
                 _dialogTitle,
                 GetRenderPipelineSetupDescription() +
                 "\n\nWould you like Cesium for Unity to make this change automatically?",
-                "Apply",
+                "Yes",
                 "No",
-                "Don't Ask Me Again");
+                "No, and don't ask me again");
 
             switch (choice)
             {
