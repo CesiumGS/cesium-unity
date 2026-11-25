@@ -4,6 +4,7 @@
 #include "TextureLoader.h"
 #include "TilesetMaterialProperties.h"
 #include "UnityLifetime.h"
+#include "UnityPrepareGaussianSplatResource.h"
 #include "UnityTransforms.h"
 
 #include <Cesium3DTilesSelection/Tile.h>
@@ -12,6 +13,7 @@
 #include <CesiumGeospatial/Ellipsoid.h>
 #include <CesiumGltf/AccessorView.h>
 #include <CesiumGltf/ExtensionExtMeshFeatures.h>
+#include <CesiumGltf/ExtensionKhrGaussianSplatting.h>
 #include <CesiumGltf/ExtensionKhrMaterialsUnlit.h>
 #include <CesiumGltf/ExtensionKhrTextureTransform.h>
 #include <CesiumGltf/ExtensionModelExtStructuralMetadata.h>
@@ -35,6 +37,9 @@
 #include <DotNet/CesiumForUnity/CesiumPrimitiveFeatures.h>
 #include <DotNet/CesiumForUnity/CesiumPropertyTable.h>
 #include <DotNet/CesiumForUnity/Helpers.h>
+#include <DotNet/Gsplat/GsplatAsset.h>
+#include <DotNet/Gsplat/GsplatAssetSpark.h>
+#include <DotNet/Gsplat/GsplatRenderer.h>
 #include <DotNet/System/Array1.h>
 #include <DotNet/System/Collections/Generic/List1.h>
 #include <DotNet/System/Object.h>
@@ -42,7 +47,9 @@
 #include <DotNet/Unity/Collections/LowLevel/Unsafe/NativeArrayUnsafeUtility.h>
 #include <DotNet/Unity/Collections/NativeArray1.h>
 #include <DotNet/Unity/Collections/NativeArrayOptions.h>
+#include <DotNet/Unity/Mathematics/uint4.h>
 #include <DotNet/UnityEngine/Application.h>
+#include <DotNet/UnityEngine/ColorSpace.h>
 #include <DotNet/UnityEngine/Debug.h>
 #include <DotNet/UnityEngine/FilterMode.h>
 #include <DotNet/UnityEngine/HideFlags.h>
@@ -56,6 +63,7 @@
 #include <DotNet/UnityEngine/MeshRenderer.h>
 #include <DotNet/UnityEngine/MeshTopology.h>
 #include <DotNet/UnityEngine/Object.h>
+#include <DotNet/UnityEngine/QualitySettings.h>
 #include <DotNet/UnityEngine/Quaternion.h>
 #include <DotNet/UnityEngine/Rendering/CullMode.h>
 #include <DotNet/UnityEngine/Rendering/IndexFormat.h>
@@ -63,12 +71,14 @@
 #include <DotNet/UnityEngine/Rendering/SubMeshDescriptor.h>
 #include <DotNet/UnityEngine/Rendering/VertexAttributeDescriptor.h>
 #include <DotNet/UnityEngine/Resources.h>
+#include <DotNet/UnityEngine/ScriptableObject.h>
 #include <DotNet/UnityEngine/Texture.h>
 #include <DotNet/UnityEngine/TextureWrapMode.h>
 #include <DotNet/UnityEngine/Transform.h>
 #include <DotNet/UnityEngine/Vector2.h>
 #include <DotNet/UnityEngine/Vector3.h>
 #include <DotNet/UnityEngine/Vector4.h>
+#include <fmt/format.h>
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/quaternion.hpp>
 
@@ -165,6 +175,7 @@ void computeFlatNormals(
  */
 struct MeshDataResult {
   UnityEngine::MeshDataArray meshDataArray;
+  System::Array1<DotNet::Gsplat::GsplatAssetSpark> splatDataArray;
   std::vector<CesiumPrimitiveInfo> primitiveInfos;
 };
 
@@ -877,17 +888,29 @@ void loadPrimitive(
 }
 } // namespace
 
-int32_t countPrimitives(const CesiumGltf::Model& model) {
-  int32_t numberOfPrimitives = 0;
+/**
+ * @brief Counts the primitives of each type in the given glTF model.
+ * @return A tuple of {numMeshPrimitives, numSplatPrimitives}.
+ */
+std::tuple<int32_t, int32_t> countPrimitives(const CesiumGltf::Model& model) {
+  int32_t numberOfMeshPrimitives = 0;
+  int32_t numberOfSplatPrimitives = 0;
   model.forEachPrimitiveInScene(
       -1,
-      [&numberOfPrimitives](
+      [&numberOfMeshPrimitives, &numberOfSplatPrimitives](
           const Model& gltf,
           const Node& node,
           const Mesh& mesh,
           const MeshPrimitive& primitive,
-          const glm::dmat4& transform) { ++numberOfPrimitives; });
-  return numberOfPrimitives;
+          const glm::dmat4& transform) {
+        if (primitive.hasExtension<ExtensionKhrGaussianSplatting>() &&
+            primitive.mode == MeshPrimitive::Mode::POINTS) {
+          ++numberOfSplatPrimitives;
+        } else {
+          ++numberOfMeshPrimitives;
+        }
+      });
+  return {numberOfMeshPrimitives, numberOfSplatPrimitives};
 }
 
 /**
@@ -906,19 +929,49 @@ void populateMeshData(
     return;
 
   int32_t meshDataInstance = 0;
+  int32_t splatDataInstance = 0;
 
-  primitiveInfos.reserve(countPrimitives(*pModel));
+  // Android build doesn't like structured bindings, so we use std::get instead.
+  const std::tuple<int32_t, int32_t> counts = countPrimitives(*pModel);
+  primitiveInfos.reserve(size_t(std::get<0>(counts) + std::get<1>(counts)));
 
   pModel->forEachPrimitiveInScene(
       -1,
-      [&primitiveInfos, &meshDataInstance, &makeWriter, pModel, &options](
+      [&primitiveInfos,
+       &splatDataInstance,
+       &meshDataInstance,
+       &makeWriter,
+       pModel,
+       &options](
           const Model& gltf,
           const Node& node,
           const Mesh& mesh,
           const MeshPrimitive& primitive,
           const glm::dmat4& transform) {
-        auto writer = makeWriter(meshDataInstance++);
         CesiumPrimitiveInfo& primitiveInfo = primitiveInfos.emplace_back();
+
+        if (const auto* pGaussianSplattingExtension =
+                primitive.getExtension<
+                    CesiumGltf::ExtensionKhrGaussianSplatting>()) {
+          if (primitive.mode == MeshPrimitive::Mode::POINTS) {
+            // The splat asset itself is populated by populateGsplatAssets.
+            primitiveInfo.gsplatIndex = splatDataInstance++;
+            primitiveInfo.gsplatIsLinear =
+                pGaussianSplattingExtension->colorSpace ==
+                CesiumGltf::ExtensionKhrGaussianSplatting::ColorSpace::
+                    lin_rec709_display;
+            return;
+          }
+        }
+
+        auto writer = makeWriter(meshDataInstance++);
+
+        if (primitive
+                .hasExtension<CesiumGltf::ExtensionKhrGaussianSplatting>()) {
+          // Gaussian splatting extension requires the primitive to be of type
+          // POINTS. If it's not, we ignore this primitive.
+          return;
+        }
 
         auto positionAccessorIt = primitive.attributes.find("POSITION");
         if (positionAccessorIt == primitive.attributes.end()) {
@@ -1057,6 +1110,63 @@ void populateMeshData(
       });
 }
 
+/**
+ * @brief Populates the splat assets for each Gaussian splat primitive of the
+ * model, in the same order in which `populateMeshData` assigns their
+ * `gsplatIndex`.
+ */
+void populateGsplatAssets(
+    const CesiumGltf::Model& model,
+    const System::Array1<DotNet::Gsplat::GsplatAssetSpark>& splatAssets) {
+  int32_t splatDataInstance = 0;
+  model.forEachPrimitiveInScene(
+      -1,
+      [&splatAssets, &splatDataInstance](
+          const Model& gltf,
+          const Node& /*node*/,
+          const Mesh& /*mesh*/,
+          const MeshPrimitive& primitive,
+          const glm::dmat4& /*transform*/) {
+        if (primitive.hasExtension<ExtensionKhrGaussianSplatting>() &&
+            primitive.mode == MeshPrimitive::Mode::POINTS) {
+          DotNet::Gsplat::GsplatAssetSpark splatAsset =
+              splatAssets[splatDataInstance++];
+          populateGsplatAsset(gltf, primitive, splatAsset);
+        }
+      });
+}
+
+/**
+ * @brief Creates an empty splat asset for each Gaussian splat primitive. Must
+ * be called from the main thread.
+ */
+System::Array1<DotNet::Gsplat::GsplatAssetSpark>
+createGsplatAssets(int32_t numberOfSplatPrimitives) {
+  System::Array1<DotNet::Gsplat::GsplatAssetSpark> gsplatAssets(
+      numberOfSplatPrimitives);
+  for (int32_t i = 0; i < numberOfSplatPrimitives; i++) {
+    DotNet::Gsplat::GsplatAssetSpark asset =
+        UnityEngine::ScriptableObject::CreateInstance<
+            DotNet::Gsplat::GsplatAssetSpark>();
+    asset.hideFlags(UnityEngine::HideFlags::HideAndDontSave);
+    gsplatAssets.Item(i, asset);
+  }
+  return gsplatAssets;
+}
+
+void destroyGsplatAssets(
+    const System::Array1<DotNet::Gsplat::GsplatAssetSpark>& splatAssets) {
+  if (splatAssets == nullptr) {
+    return;
+  }
+  for (int32_t i = 0, len = splatAssets.Length(); i < len; ++i) {
+    DotNet::Gsplat::GsplatAssetSpark asset = splatAssets[i];
+    if (asset != nullptr) {
+      UnityLifetime::Destroy(asset);
+    }
+  }
+}
+
 bool isDegenerateTriangleMesh(const UnityEngine::Mesh& mesh) {
   int32_t vertexCount = mesh.vertexCount();
   if (vertexCount < 3) {
@@ -1080,6 +1190,7 @@ bool isDegenerateTriangleMesh(const UnityEngine::Mesh& mesh) {
  */
 struct LoadThreadResult {
   System::Array1<UnityEngine::Mesh> meshes;
+  System::Array1<DotNet::Gsplat::GsplatAssetSpark> splatAssets;
   std::vector<CesiumPrimitiveInfo> primitiveInfos{};
 };
 
@@ -1125,6 +1236,7 @@ CesiumAsync::Future<TileLoadResultAndRenderResources> createMeshes(
     // Tileset GameObject was deleted while we were loading a tile
     // (possibly play mode was exited or another cause).
     workerResult.meshDataResult.meshDataArray.Dispose();
+    destroyGsplatAssets(workerResult.meshDataResult.splatDataArray);
     return asyncSystem.createResolvedFuture(TileLoadResultAndRenderResources{
         std::move(workerResult.tileLoadResult),
         nullptr});
@@ -1141,8 +1253,16 @@ CesiumAsync::Future<TileLoadResultAndRenderResources> createMeshes(
 
   const UnityEngine::MeshDataArray& meshDataArray =
       workerResult.meshDataResult.meshDataArray;
-  const std::vector<CesiumPrimitiveInfo>& primitiveInfos =
-      workerResult.meshDataResult.primitiveInfos;
+  // Gaussian splat primitives don't have a mesh, so collect the primitive
+  // mode of each mesh in mesh order.
+  std::vector<int32_t> meshModes;
+  meshModes.reserve(size_t(meshDataArray.Length()));
+  for (const CesiumPrimitiveInfo& primitiveInfo :
+       workerResult.meshDataResult.primitiveInfos) {
+    if (primitiveInfo.gsplatIndex == -1) {
+      meshModes.push_back(primitiveInfo.mode);
+    }
+  }
 
   // Create meshes and populate them from the MeshData created in
   // the worker thread. Sadly, this must be done in the main
@@ -1182,7 +1302,7 @@ CesiumAsync::Future<TileLoadResultAndRenderResources> createMeshes(
   if (!shouldCreatePhysicsMeshes) {
     // Free Unity's CPU copy of the mesh data. Point clouds still need it.
     for (int32_t i = 0, len = meshes.Length(); i < len; ++i) {
-      if (primitiveInfos[i].mode != CesiumGltf::MeshPrimitive::Mode::POINTS) {
+      if (meshModes[size_t(i)] != CesiumGltf::MeshPrimitive::Mode::POINTS) {
         meshes[i].UploadMeshData(true);
       }
     }
@@ -1197,7 +1317,7 @@ CesiumAsync::Future<TileLoadResultAndRenderResources> createMeshes(
     for (uint64_t i = 0; i < len; ++i) {
       // Don't attempt to bake a physics mesh from points, lines, or
       // an invalid triangle mesh.
-      switch (primitiveInfos[i].mode) {
+      switch (meshModes[i]) {
       case CesiumGltf::MeshPrimitive::Mode::POINTS:
       case CesiumGltf::MeshPrimitive::Mode::LINES:
         continue;
@@ -1226,6 +1346,7 @@ CesiumAsync::Future<TileLoadResultAndRenderResources> createMeshes(
 
             LoadThreadResult* pResult = new LoadThreadResult{
                 std::move(meshes),
+                std::move(workerResult.meshDataResult.splatDataArray),
                 std::move(workerResult.meshDataResult.primitiveInfos)};
             return TileLoadResultAndRenderResources{
                 std::move(workerResult.tileLoadResult),
@@ -1236,6 +1357,7 @@ CesiumAsync::Future<TileLoadResultAndRenderResources> createMeshes(
 
   LoadThreadResult* pResult = new LoadThreadResult{
       std::move(meshes),
+      std::move(workerResult.meshDataResult.splatDataArray),
       std::move(workerResult.meshDataResult.primitiveInfos)};
   return asyncSystem.createResolvedFuture(TileLoadResultAndRenderResources{
       std::move(workerResult.tileLoadResult),
@@ -1263,7 +1385,10 @@ UnityPrepareRendererResources::prepareInLoadThread(
 
   compactModelBuffers(*pModel);
 
-  int32_t numberOfPrimitives = countPrimitives(*pModel);
+  // Android build doesn't like structured bindings, so we use std::get instead.
+  const std::tuple<int32_t, int32_t> counts = countPrimitives(*pModel);
+  const int32_t numberOfMeshPrimitives = std::get<0>(counts);
+  const int32_t numberOfSplatPrimitives = std::get<1>(counts);
 
   const auto* pOptions = std::any_cast<CreateModelOptions>(&rendererOptions);
   const CreateModelOptions options =
@@ -1273,7 +1398,7 @@ UnityPrepareRendererResources::prepareInLoadThread(
   // Managed code can only be called from the main thread, so build the mesh
   // data in native memory here and only copy it into Unity there.
   std::vector<BufferedMeshData> bufferedMeshes(
-      static_cast<size_t>(numberOfPrimitives));
+      static_cast<size_t>(numberOfMeshPrimitives));
   std::vector<CesiumPrimitiveInfo> primitiveInfos;
   populateMeshData(
       primitiveInfos,
@@ -1284,6 +1409,7 @@ UnityPrepareRendererResources::prepareInLoadThread(
       });
 
   return asyncSystem.runInMainThread([asyncSystem,
+                                      numberOfSplatPrimitives,
                                       tileset = this->_tilesetGameObject,
                                       tileLoadResult =
                                           std::move(tileLoadResult),
@@ -1306,24 +1432,49 @@ UnityPrepareRendererResources::prepareInLoadThread(
     sg.release();
     bufferedMeshes.clear();
 
+    // Unity Wasm can only access managed code from the main thread, so the
+    // splat assets are populated here.
+    System::Array1<DotNet::Gsplat::GsplatAssetSpark> splatAssets =
+        createGsplatAssets(numberOfSplatPrimitives);
+    if (const CesiumGltf::Model* pModel =
+            std::get_if<CesiumGltf::Model>(&tileLoadResult.contentKind)) {
+      populateGsplatAssets(*pModel, splatAssets);
+    }
+
     return createMeshes(
         asyncSystem,
         tileset,
         IntermediateLoadThreadResult{
-            MeshDataResult{std::move(meshDataArray), std::move(primitiveInfos)},
+            MeshDataResult{
+                std::move(meshDataArray),
+                std::move(splatAssets),
+                std::move(primitiveInfos)},
             std::move(tileLoadResult)});
   });
 #else
   return asyncSystem
-      .runInMainThread([numberOfPrimitives]() {
-        // Allocate a MeshDataArray for the primitives.
-        // Unfortunately, this must be done on the main thread.
-        return UnityEngine::Mesh::AllocateWritableMeshData(numberOfPrimitives);
-      })
+      .runInMainThread(
+          [numberOfMeshPrimitives, numberOfSplatPrimitives]()
+              -> std::tuple<
+                  UnityEngine::MeshDataArray,
+                  System::Array1<DotNet::Gsplat::GsplatAssetSpark>> {
+            // Allocate a MeshDataArray for the primitives.
+            // Unfortunately, this must be done on the main thread.
+            return {
+                UnityEngine::Mesh::AllocateWritableMeshData(
+                    numberOfMeshPrimitives),
+                createGsplatAssets(numberOfSplatPrimitives)};
+          })
       .thenInWorkerThread(
           [tileLoadResult = std::move(tileLoadResult),
-           options](UnityEngine::MeshDataArray&& meshDataArray) mutable {
-            MeshDataResult meshDataResult{std::move(meshDataArray), {}};
+           options](std::tuple<
+                    UnityEngine::MeshDataArray,
+                    System::Array1<DotNet::Gsplat::GsplatAssetSpark>>&&
+                        result) mutable {
+            MeshDataResult meshDataResult{
+                std::move(std::get<0>(result)),
+                std::move(std::get<1>(result)),
+                {}};
             // Free the MeshDataArray if something goes wrong.
             ScopeGuard sg([&meshDataResult]() {
               meshDataResult.meshDataArray.Dispose();
@@ -1336,6 +1487,11 @@ UnityPrepareRendererResources::prepareInLoadThread(
                 [&array = meshDataResult.meshDataArray](int32_t i) {
                   return UnityMeshDataWriter(array[i]);
                 });
+            if (const CesiumGltf::Model* pModel =
+                    std::get_if<CesiumGltf::Model>(
+                        &tileLoadResult.contentKind)) {
+              populateGsplatAssets(*pModel, meshDataResult.splatDataArray);
+            }
 
             // We're returning the MeshDataArray, so don't free it.
             sg.release();
@@ -1752,6 +1908,8 @@ void* UnityPrepareRendererResources::prepareInMainThread(
       static_cast<LoadThreadResult*>(pLoadThreadResult_));
 
   const System::Array1<UnityEngine::Mesh>& meshes = pLoadThreadResult->meshes;
+  const System::Array1<DotNet::Gsplat::GsplatAssetSpark>& splatAssets =
+      pLoadThreadResult->splatAssets;
   const std::vector<CesiumPrimitiveInfo>& primitiveInfos =
       pLoadThreadResult->primitiveInfos;
 
@@ -1759,6 +1917,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
   const Cesium3DTilesSelection::TileRenderContent* pRenderContent =
       content.getRenderContent();
   if (!pRenderContent) {
+    destroyGsplatAssets(splatAssets);
     return nullptr;
   }
 
@@ -1818,6 +1977,13 @@ void* UnityPrepareRendererResources::prepareInMainThread(
   const bool createPhysicsMeshes = tilesetComponent.createPhysicsMeshes();
 
   int32_t meshIndex = 0;
+  int32_t primitiveInfoIndex = 0;
+
+  // Splat assets that end up owned by a GsplatRenderer. Any others are
+  // destroyed once all primitives have been processed.
+  std::vector<bool> isSplatAssetAttached(
+      splatAssets == nullptr ? 0 : size_t(splatAssets.Length()),
+      false);
 
   // For backwards compatibility.
   CesiumForUnity::CesiumMetadata metadataComponent =
@@ -1840,10 +2006,13 @@ void* UnityPrepareRendererResources::prepareInMainThread(
   model.forEachPrimitiveInScene(
       -1,
       [&meshes,
+       &splatAssets,
+       &isSplatAssetAttached,
        &primitiveInfos,
        &pModelGameObject,
        &tileTransform,
        &meshIndex,
+       &primitiveInfoIndex,
        &tilesetComponent,
        pCoordinateSystem,
        createPhysicsMeshes,
@@ -1857,11 +2026,28 @@ void* UnityPrepareRendererResources::prepareInMainThread(
           const Mesh& mesh,
           const MeshPrimitive& primitive,
           const glm::dmat4& transform) {
-        const CesiumPrimitiveInfo& primitiveInfo = primitiveInfos[meshIndex];
-        UnityEngine::Mesh unityMesh = meshes[meshIndex++];
-        if (unityMesh == nullptr) {
-          // This indicates Unity destroyed the mesh already, which really
-          // shouldn't happen.
+        const int32_t currentPrimitiveInfoIndex = primitiveInfoIndex++;
+        const CesiumPrimitiveInfo& primitiveInfo =
+            primitiveInfos[currentPrimitiveInfoIndex];
+
+        // Every non-splat primitive was given a mesh in the load thread, even
+        // if it is skipped below, so claim its mesh slot before any early
+        // return to keep later primitives paired with their own meshes.
+        int32_t currentMeshIndex = -1;
+        if (primitiveInfo.gsplatIndex == -1) {
+          currentMeshIndex = meshIndex++;
+          if (meshes[currentMeshIndex] == nullptr) {
+            // This indicates Unity destroyed the mesh already, which really
+            // shouldn't happen.
+            return;
+          }
+        }
+
+        if (primitiveInfo.gsplatIndex == -1 &&
+            primitive
+                .hasExtension<CesiumGltf::ExtensionKhrGaussianSplatting>()) {
+          // An invalid (non-POINTS) splat primitive was given an empty mesh
+          // in the load thread; there is nothing to show.
           return;
         }
 
@@ -1882,8 +2068,8 @@ void* UnityPrepareRendererResources::prepareInMainThread(
 
         int64_t primitiveIndex = &primitive - &mesh.primitives[0];
         UnityEngine::GameObject primitiveGameObject(System::String(
-            "Mesh " + std::to_string(meshIndex - 1) + " Primitive " +
-            std::to_string(primitiveIndex)));
+            "Mesh " + std::to_string(currentPrimitiveInfoIndex) +
+            " Primitive " + std::to_string(primitiveIndex)));
         if (showTilesInHierarchy) {
           primitiveGameObject.hideFlags(UnityEngine::HideFlags::DontSave);
         } else {
@@ -1904,6 +2090,23 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         anchor.localToGlobeFixedMatrix(
             UnityTransforms::toUnityMathematics(modelToEcef));
 
+        if (primitiveInfo.gsplatIndex != -1) {
+          DotNet::Gsplat::GsplatRenderer renderer =
+              primitiveGameObject
+                  .AddComponent<DotNet::Gsplat::GsplatRenderer>();
+          renderer.GsplatAsset((DotNet::Gsplat::GsplatAsset)(
+              splatAssets[primitiveInfo.gsplatIndex]));
+          isSplatAssetAttached[size_t(primitiveInfo.gsplatIndex)] = true;
+          renderer.GammaToLinear(
+              !primitiveInfo.gsplatIsLinear &&
+              DotNet::UnityEngine::QualitySettings::activeColorSpace() ==
+                  DotNet::UnityEngine::ColorSpace::Linear);
+          renderer.AsyncUpload(false);
+          renderer.RenderBeforeUploadComplete(false);
+          return;
+        }
+
+        UnityEngine::Mesh unityMesh = meshes[currentMeshIndex];
         UnityEngine::MeshFilter meshFilter =
             primitiveGameObject.AddComponent<UnityEngine::MeshFilter>();
         meshFilter.sharedMesh(unityMesh);
@@ -2009,6 +2212,12 @@ void* UnityPrepareRendererResources::prepareInMainThread(
         }
       });
 
+  for (size_t i = 0; i < isSplatAssetAttached.size(); ++i) {
+    if (!isSplatAssetAttached[i]) {
+      UnityLifetime::Destroy(splatAssets[int32_t(i)]);
+    }
+  }
+
   // Raster overlay upsampling copies the model, images included, so the
   // pixels must be kept when overlays are present.
   if (currentOverlayCount == 0) {
@@ -2092,6 +2301,15 @@ void freePrimitiveGameObject(
     releaseMesh(meshFilter.sharedMesh());
   }
 
+  DotNet::Gsplat::GsplatRenderer splatRenderer =
+      primitiveGameObject.GetComponent<DotNet::Gsplat::GsplatRenderer>();
+  if (splatRenderer != nullptr) {
+    DotNet::Gsplat::GsplatAsset splatAsset = splatRenderer.GsplatAsset();
+    if (splatAsset != nullptr) {
+      UnityLifetime::Destroy(splatAsset);
+    }
+  }
+
   // The MeshCollider shares a mesh with the MeshFilter, so no need to
   // destroy it explicitly.
 }
@@ -2127,6 +2345,7 @@ void UnityPrepareRendererResources::free(
       for (int32_t i = 0, len = pTyped->meshes.Length(); i < len; ++i) {
         releaseMesh(pTyped->meshes[i]);
       }
+      destroyGsplatAssets(pTyped->splatAssets);
       delete pTyped;
     }
 

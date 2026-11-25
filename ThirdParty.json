@@ -19,6 +19,13 @@
     "license": ["MIT"]
   },
   {
+    "name": "gsplat-unity",
+    "url": "https://github.com/wuyize25/gsplat-unity",
+    "version": "a2bf458d6b16395e6570e9345f9f4408f92684b8",
+    "license": ["MIT"],
+    "notes": "See Source/gsplat-unity/Third Party Notices.md for its bundled dependencies"
+  },
+  {
     "name": "HTML Tidy",
     "url": "https://github.com/htacg/tidy-html5",
     "version": "5.9.14-next",

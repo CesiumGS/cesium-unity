@@ -5,6 +5,7 @@
 #include <Cesium3DTilesSelection/IPrepareRendererResources.h>
 
 #include <DotNet/CesiumForUnity/Cesium3DTileset.h>
+#include <DotNet/Gsplat/GsplatAssetUncompressed.h>
 #include <DotNet/UnityEngine/GameObject.h>
 
 namespace CesiumForUnityNative {
@@ -58,6 +59,17 @@ struct CesiumPrimitiveInfo {
    * the corresponding Unity texture coordinate index.
    */
   std::unordered_map<uint32_t, uint32_t> rasterOverlayUvIndexMap{};
+
+  /**
+   * @brief The index of the Gaussian splat in the `splatDataArray` associated
+   * with this primitive. -1 if no Gaussian splat is associated.
+   */
+  int32_t gsplatIndex = -1;
+
+  /**
+   * @brief Whether the Gaussian splat uses linear color space.
+   */
+  bool gsplatIsLinear = false;
 };
 
 /**
