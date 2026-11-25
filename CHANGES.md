@@ -4,7 +4,8 @@
 
 ##### Additions :tada:
 
-- Added support for gaussian splat tilesets. Currently only D3D12, Metal, and Vulkan graphics APIs are supported, and a warning will show in the Cesium window if other graphics APIs are enabled. You will be prompted to perform the setup automatically on HDRP and URP to support gaussian splats.
+- Added basic support for loading 3D Tiles 2.0 tilesets (i.e., glTF 2.1 models) via URL in `Cesium3DTileset`.
+- Added support for gaussian splat tilesets. Currently only D3D12, Metal, and Vulkan graphics APIs are supported, and a warning will show in the Cesium window if other graphics APIs are enabled. A prompt will appear to perform automatic setup on HDRP and URP to support gaussian splats.
 - Introduced performance improvements, especially with respect to web builds:
   - Tile meshes in Web builds are now built on worker threads instead of the main thread.
   - Decoded image pixels and encoded glTF buffer data are freed once they are no longer needed.

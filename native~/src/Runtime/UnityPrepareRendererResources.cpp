@@ -7,6 +7,7 @@
 #include "UnityPrepareGaussianSplatResource.h"
 #include "UnityTransforms.h"
 
+#include <Cesium3DTiles/TileRefine.h>
 #include <Cesium3DTilesSelection/Tile.h>
 #include <Cesium3DTilesSelection/Tileset.h>
 #include <CesiumGeometry/Transforms.h>
@@ -92,14 +93,15 @@
 #include <unordered_set>
 #include <variant>
 
-using namespace CesiumRasterOverlays;
-using namespace CesiumGltfContent;
+using namespace Cesium3DTiles;
 using namespace Cesium3DTilesSelection;
 using namespace CesiumForUnityNative;
 using namespace CesiumGeometry;
 using namespace CesiumGeospatial;
 using namespace CesiumGltf;
+using namespace CesiumGltfContent;
 using namespace CesiumImage;
+using namespace CesiumRasterOverlays;
 using namespace CesiumUtility;
 using namespace DotNet;
 
@@ -2151,8 +2153,7 @@ void* UnityPrepareRendererResources::prepareInMainThread(
                   .AddComponent<CesiumForUnity::CesiumPointCloudRenderer>();
 
           CesiumForUnity::Cesium3DTileInfo tileInfo;
-          tileInfo.usesAdditiveRefinement =
-              tile.getRefine() == Cesium3DTilesSelection::TileRefine::Add;
+          tileInfo.usesAdditiveRefinement = tile.getRefine() == TileRefine::Add;
           tileInfo.geometricError =
               static_cast<float>(tile.getGeometricError());
 
