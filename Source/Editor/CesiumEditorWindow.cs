@@ -52,6 +52,14 @@ namespace CesiumForUnity
         private bool _isAuthenticationRequired = true;
         private CesiumIonServerSelector _serverSelector;
 
+        private bool _isGaussianSplatSetupRequired = false;
+        private string _gaussianSplatSetupDescription = "";
+        private bool _isGraphicsDeviceSupported = true;
+        private string _buildGraphicsApiWarning = null;
+        private bool _isBuildGraphicsApiWarningError = false;
+        private double _lastGaussianSplatCheckTime = double.NegativeInfinity;
+        private const double _gaussianSplatCheckInterval = 1.0;
+
         private Vector2 _scrollPosition = Vector2.zero;
 
         void OnGUI()
@@ -70,11 +78,14 @@ namespace CesiumForUnity
                 this._isIonProfileLoaded = ion.IsProfileLoaded();
                 this._isIonLoadingProfile = ion.IsLoadingProfile();
                 this._isAuthenticationRequired = ion.IsAuthenticationRequired();
+
+                this.UpdateGaussianSplatStatus();
             }
 
             GUILayout.Space(5);
             this._serverSelector.OnGUI();
             this.DrawCesiumToolbar();
+            this.DrawGaussianSplatWarnings();
 
             this._scrollPosition = EditorGUILayout.BeginScrollView(this._scrollPosition);
             this.DrawQuickAddBasicAssetsPanel();
@@ -178,6 +189,69 @@ namespace CesiumForUnity
                 true,
                 this.SignOutOfIon);
             GUILayout.EndHorizontal();
+        }
+
+        private void UpdateGaussianSplatStatus()
+        {
+            // These checks inspect assets and the scene, so don't run them on every repaint.
+            double now = EditorApplication.timeSinceStartup;
+            if (now - this._lastGaussianSplatCheckTime < _gaussianSplatCheckInterval)
+            {
+                return;
+            }
+            this._lastGaussianSplatCheckTime = now;
+
+            this._isGraphicsDeviceSupported = CesiumGaussianSplatSetup.IsCurrentGraphicsDeviceSupported();
+            this._buildGraphicsApiWarning =
+                CesiumGaussianSplatSetup.GetBuildTargetGraphicsApiWarning(out this._isBuildGraphicsApiWarningError);
+            this._isGaussianSplatSetupRequired = CesiumGaussianSplatSetup.IsRenderPipelineSetupRequired();
+            this._gaussianSplatSetupDescription = this._isGaussianSplatSetupRequired
+                ? CesiumGaussianSplatSetup.GetRenderPipelineSetupDescription()
+                : string.Empty;
+        }
+
+        void DrawGaussianSplatWarnings()
+        {
+            if (!this._isGraphicsDeviceSupported)
+            {
+                string supportedApis = string.Join(", ", CesiumGaussianSplatSetup.supportedGraphicsDeviceTypes);
+                EditorGUILayout.HelpBox(
+                    $"Gaussian splats are not supported on the current graphics API ({SystemInfo.graphicsDeviceType}) and will not be rendered. " +
+                    $"Supported graphics APIs are: {supportedApis}.",
+                    MessageType.Warning);
+            }
+
+            if (!string.IsNullOrEmpty(this._buildGraphicsApiWarning))
+            {
+                EditorGUILayout.HelpBox(
+                    this._buildGraphicsApiWarning,
+                    this._isBuildGraphicsApiWarningError ? MessageType.Warning : MessageType.Info);
+
+                GUILayout.BeginHorizontal();
+                GUILayout.FlexibleSpace();
+                if (GUILayout.Button("Open Player Settings", GUILayout.ExpandWidth(false)))
+                {
+                    SettingsService.OpenProjectSettings("Project/Player");
+                }
+                GUILayout.EndHorizontal();
+            }
+
+            if (this._isGaussianSplatSetupRequired)
+            {
+                EditorGUILayout.HelpBox(
+                    "Your render pipeline is not set up to render Gaussian splats. " +
+                    this._gaussianSplatSetupDescription,
+                    MessageType.Warning);
+
+                GUILayout.BeginHorizontal();
+                GUILayout.FlexibleSpace();
+                if (GUILayout.Button("Apply Gaussian Splat Setup", GUILayout.ExpandWidth(false)))
+                {
+                    CesiumGaussianSplatSetup.ApplyRenderPipelineSetup();
+                    this._lastGaussianSplatCheckTime = double.NegativeInfinity;
+                }
+                GUILayout.EndHorizontal();
+            }
         }
 
         private readonly QuickAddItem[] _basicAssets = new[]
